@@ -192,7 +192,7 @@ def test_delivery_clears_the_saved_trip():
 def test_abandoning_clears_the_saved_trip():
     from freight_fate.app import App
     from freight_fate.states.city import CityMenuState
-    from freight_fate.states.driving import PauseMenuState
+    from freight_fate.states.driving import AbandonJobConfirmationState, PauseMenuState
 
     app = App()
     try:
@@ -205,6 +205,9 @@ def test_abandoning_clears_the_saved_trip():
         while pause.items[pause.index].text != "Abandon job":
             pause.handle_event(key_event(pygame.K_DOWN))
         pause.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, AbandonJobConfirmationState)
+        app.state.handle_event(key_event(pygame.K_DOWN))  # arrow to Yes
+        app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, CityMenuState)
         assert app.ctx.profile.active_trip is None
     finally:
@@ -217,7 +220,7 @@ def test_abandoning_keeps_the_hours_spent_driving():
     departure time, while HOS and fatigue kept the accrued hours."""
     from freight_fate.app import App
     from freight_fate.states.city import CityMenuState
-    from freight_fate.states.driving import PauseMenuState
+    from freight_fate.states.driving import AbandonJobConfirmationState, PauseMenuState
 
     app = App()
     try:
@@ -232,6 +235,9 @@ def test_abandoning_keeps_the_hours_spent_driving():
         while pause.items[pause.index].text != "Abandon job":
             pause.handle_event(key_event(pygame.K_DOWN))
         pause.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, AbandonJobConfirmationState)
+        app.state.handle_event(key_event(pygame.K_DOWN))  # arrow to Yes
+        app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, CityMenuState)
         assert app.ctx.profile.game_hours == pytest.approx(before + spent)
     finally:

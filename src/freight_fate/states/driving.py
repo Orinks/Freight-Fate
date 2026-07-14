@@ -6,7 +6,7 @@ from __future__ import annotations
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from .driving_events import DrivingEventMixin
-from .driving_updates import DrivingUpdateMixin
+from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 
 
 class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, State):
@@ -181,8 +181,11 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # saves are never pulled back onto the streets.
         self._departure_chain = False
         self._departure_checked = False
+        # (position when computed, scan result) -- see _destination_exit_details
+        self._destination_exit_cache: tuple[float, tuple[float, str, str] | None] | None = None
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
+        self._cruise_applied = 0.0
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
@@ -195,6 +198,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._spring_brake_said = self.truck.spring_brakes_active
         self._brake_lockout_cue_timer = 0.0
         self._brake_air_hissed = False  # rising-edge guard for the brake-apply hiss
+        self._overrev_s = 0.0  # continuous seconds at damaging RPM
+        self._overrev_warn_due = OVERREV_GRACE_S  # repeats push it out further
         self._lane_rumble_timer = 0.0
         # Discrete lanes: tap-change progress (assist off), closed-lane
         # policing, hazard-dodge context, and keep-right pressure.
@@ -210,6 +215,11 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._pending_ambient_event: tuple[str, str | None] | None = None
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
+        self._shift_recover_t = 1.0  # 0->1 recovery progress after an automatic shift ends
+        # Prev-frame accel/brake state, so a forward<->reverse shift needs a
+        # fresh press (release then press) rather than a held control.
+        self._reverse_brake_held = False
+        self._reverse_accel_held = False
         self._status_text = f"Press {self.ctx.control_hint('engine')} to start the engine."
 
     def _terse_speech(self) -> bool:
@@ -452,7 +462,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 self.ctx.say(
                     f"Resuming {drive_name}: {destination}. {progress} "
                     f"{hours_used:.1f} of {self.job.deadline_game_h:.0f} hours used. "
-                    f"{now}. {mode}. {self.weather.describe()}. "
+                    f"{now}. {mode}. {self.weather.describe(self.ctx.settings.imperial_units)}. "
                     f"{self._parked_entry_status()}",
                     interrupt=False,
                 )
@@ -463,7 +473,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                     f"{progress} "
                     f"{hours_used:.1f} hours used of {self.job.deadline_game_h:.0f}. "
                     f"It is {now}. Transmission is {mode}. "
-                    f"Weather: {self.weather.describe()}. "
+                    f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}. "
                     f"You are parked. {self._engine_entry_instruction()} "
                     "When air pressure is ready, press "
                     f"{self.ctx.control_hint('parking_brake')} to release the parking brake.",
@@ -488,7 +498,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 )
             if self._terse_speech():
                 self.ctx.say(
-                    f"{objective}{now}. {mode}. {self.weather.describe()}. "
+                    f"{objective}{now}. {mode}. {self.weather.describe(self.ctx.settings.imperial_units)}. "
                     f"{self._parked_entry_status()}",
                     interrupt=False,
                 )
@@ -496,7 +506,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 self.ctx.say(
                     f"You are at the wheel. {objective}It is {now}. "
                     f"Transmission is {mode}. "
-                    f"Weather: {self.weather.describe()}. "
+                    f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}. "
                     f"{self._engine_entry_instruction()} "
                     f"{self.ctx.control_hint('help')} lists the controls.",
                     interrupt=False,
@@ -554,6 +564,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
 
 
 from .driving_menu_states import (  # noqa: E402,F401
+    AbandonJobConfirmationState,
     ArrivalState,
     DriverAppsState,
     DriverAppScreenState,

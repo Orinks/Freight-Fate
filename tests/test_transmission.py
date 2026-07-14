@@ -82,9 +82,28 @@ def test_manual_rejected_in_automatic_mode():
 
 
 def test_auto_upshifts_at_high_rpm():
+    # The upshift point now comes from the caller (the vehicle passes its
+    # progressive per-gear schedule); at exactly the threshold the box holds,
+    # one RPM over it shifts.
     tr = Transmission(automatic=True, gear=3)
-    assert tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM, throttle=0.8, moving=True) is None
-    assert tr.auto_update(AUTO_LOW_GEAR_UPSHIFT_RPM + 1, throttle=0.8, moving=True) == 4
+    assert (
+        tr.auto_update(
+            AUTO_LOW_GEAR_UPSHIFT_RPM,
+            throttle=0.8,
+            moving=True,
+            upshift_rpm=AUTO_LOW_GEAR_UPSHIFT_RPM,
+        )
+        is None
+    )
+    assert (
+        tr.auto_update(
+            AUTO_LOW_GEAR_UPSHIFT_RPM + 1,
+            throttle=0.8,
+            moving=True,
+            upshift_rpm=AUTO_LOW_GEAR_UPSHIFT_RPM,
+        )
+        == 4
+    )
 
 
 def test_auto_downshifts_at_low_rpm():
@@ -150,6 +169,16 @@ def test_auto_waits_for_shift_to_finish():
     assert tr.shifting
     tr.update(0.3)
     assert not tr.shifting
+
+
+def test_auto_respects_minimum_interval_between_shifts():
+    tr = Transmission(automatic=True, gear=2)
+    assert tr.auto_update(1800, 0.8, True, minimum_shift_interval_s=3.5) == 3
+    tr.update(1.0)
+    assert not tr.shifting
+    assert tr.auto_update(1800, 0.8, True, minimum_shift_interval_s=3.5) is None
+    tr.update(2.5)
+    assert tr.auto_update(1800, 0.8, True, minimum_shift_interval_s=3.5) == 4
 
 
 def test_auto_does_not_shift_out_of_reverse():

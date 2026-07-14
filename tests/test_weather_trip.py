@@ -1063,14 +1063,12 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     trip, _truck = make_trip(world)
     trip.traffic_manager.vehicles = []
 
-    trip.position_mi = 23.0
+    trip.position_mi = 28.0
     advance = trip.update(0.0)
     repeat = trip.update(0.0)
 
-    assert _gps_messages(advance) == [
-        "In 10 miles, crossing from Illinois into Indiana near "
-        "the I-65 state line south of Hammond."
-    ]
+    assert not _gps_events(advance)
+    assert not [event for event in advance if event.kind == TripEventKind.STATE_CROSSING]
     assert not _gps_events(repeat)
 
     trip.position_mi = 31.5
@@ -1085,15 +1083,7 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
 
     trip.position_mi = 120.3
     rest = trip.update(0.0)
-    assert any(
-        event.kind == TripEventKind.GPS_CUE
-        and event.message
-        == (
-            "Travel center at exit 175 ahead in 1 mile; confirmed truck parking; "
-            "press X to signal for the exit."
-        )
-        for event in rest
-    )
+    assert not _gps_events(rest)
 
 
 def test_likely_parking_is_not_announced_as_truck_parking():
@@ -1107,10 +1097,7 @@ def test_likely_parking_route_cue_just_announces_stop(world):
     likely_stop = next(stop for stop in leg.stops if stop.parking == "likely")
     cue = next(cue for cue in trip.navigation_cues if cue.key.endswith(f":{likely_stop.name}"))
 
-    assert "likely truck parking" not in cue.near_text
-    assert cue.near_text.startswith(likely_stop.label.capitalize())
-    assert cue.near_text.endswith("ahead in 1 mile; press X to signal for the exit.")
-    assert ";;" not in cue.near_text
+    assert cue.near_text == ""
 
 
 def test_gps_traffic_cue_deduplicates(world):

@@ -344,7 +344,7 @@ def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
         toggles: list[bool] = []
         monkeypatch.setattr(app.presence, "set_enabled", toggles.append)
 
-        app.push_state(SettingsCategoryState(app.ctx, "gameplay"))
+        app.push_state(SettingsCategoryState(app.ctx, "online"))
         menu = app.state
         idx = next(
             i for i, item in enumerate(menu.items) if item.text.startswith("Discord presence")
@@ -510,7 +510,11 @@ def test_upgrade_f1_help_explains_player_benefits():
 def test_pause_and_abandon_returns_to_city():
     from freight_fate.app import App
     from freight_fate.states.city import CityMenuState, PickupFacilityState
-    from freight_fate.states.driving import DrivingState, PauseMenuState
+    from freight_fate.states.driving import (
+        AbandonJobConfirmationState,
+        DrivingState,
+        PauseMenuState,
+    )
     from freight_fate.states.main_menu import CareerStartState, MainMenuState, NameEntryState
 
     app = App()
@@ -551,8 +555,59 @@ def test_pause_and_abandon_returns_to_city():
         while pause.items[pause.index].text != "Abandon job":
             pause.handle_event(key_event(pygame.K_DOWN))
         pause.handle_event(key_event(pygame.K_RETURN))
+        # The abandon now needs a Yes/No confirmation that lands on No.
+        assert isinstance(app.state, AbandonJobConfirmationState)
+        confirm = app.state
+        assert confirm.items[confirm.index].text == "No, keep driving"
+        confirm.handle_event(key_event(pygame.K_DOWN))  # arrow to Yes
+        confirm.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, CityMenuState)
         assert app.ctx.profile.money == money - 500.0
         assert app.ctx.profile.current_city == origin
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_abandon_prompt_no_returns_to_pause_menu():
+    from freight_fate.app import App
+    from freight_fate.states.driving import (
+        AbandonJobConfirmationState,
+        DrivingState,
+        PauseMenuState,
+    )
+    from freight_fate.states.main_menu import CareerStartState, MainMenuState, NameEntryState
+
+    app = App()
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        while app.state.items[app.state.index].text != "New career":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, NameEntryState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        assert isinstance(app.state, CareerStartState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default start
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default region
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
+        app.state.handle_event(key_event(pygame.K_RETURN))  # job board
+        assert app.state.assigned_mode
+        app.state.handle_event(key_event(pygame.K_RETURN))  # accept assigned job
+        assert isinstance(app.state, DrivingState)
+
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, PauseMenuState)
+        pause = app.state
+        money = app.ctx.profile.money
+        active_trip = app.ctx.profile.active_trip
+        while pause.items[pause.index].text != "Abandon job":
+            pause.handle_event(key_event(pygame.K_DOWN))
+        pause.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, AbandonJobConfirmationState)
+        # Enter on the default "No" cancels and returns to the pause menu.
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert app.state is pause
+        assert app.ctx.profile.money == money
+        assert app.ctx.profile.active_trip is active_trip
     finally:
         app.shutdown()

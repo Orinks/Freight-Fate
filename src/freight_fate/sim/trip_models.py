@@ -146,6 +146,10 @@ NIGHT_HAZARD_BONUS = 0.10  # extra hazard risk after dark
 # crossing the driver should reset a watch for.
 TIMEZONE_DWELL_MI = 10.0
 NIGHT_TRAFFIC_KEEP = 0.4  # chance a traffic zone still forms at night
+# Open road guaranteed between generated slow zones: without it, independent
+# placement could drop one construction zone inside another, or chain them
+# back to back with no gap (player-reported on the 2026-07-09 snapshot).
+ZONE_MIN_GAP_MI = 8.0
 RUSH_HOUR_WINDOWS = ((6.5, 9.0), (16.0, 18.5))
 # -- Grounded congestion -------------------------------------------------------------
 # Congestion comes from traffic volume against capacity, not a dice roll.
@@ -273,7 +277,6 @@ FULL_COMPRESSION_MPH = 50.0  # road speed where full pacing resumes
 # pacing setting keeps its relative feel (relaxed 20x, standard 40x, realistic
 # 80x). Releasing the brake returns to the speed ramp instantly.
 PARKED_TIME_SCALE_MULT = 2.0
-STATE_CROSSING_WARNING_LOOKAHEAD_MI = 10.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.5
 # Chain-law areas sit over sustained steep grade -- the real trigger for
 # CDOT/Caltrans chain controls. The areas are fixed in space at trip build;

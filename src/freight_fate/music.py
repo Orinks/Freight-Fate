@@ -19,28 +19,32 @@ class MusicTrack:
 MENU_TRACKS: tuple[MusicTrack, ...] = (
     MusicTrack("menu_theme", "Headlights West", "Warm Americana for new careers", 128.4),
     MusicTrack("menu_first_rig", "Keys To The Rig", "Easy country-rock milestone bed", 143.2),
-    MusicTrack("menu_regional_carrier", "Regional Lines", "Confident heartland rock bed", 75.0),
-    MusicTrack("menu_fleet_owner", "Yard Lights", "Steady fleet-owner menu bed", 75.0),
-    MusicTrack("menu_coast_to_coast", "Coast To Coast Ledger", "Broad road-trip menu bed", 75.0),
-    MusicTrack("menu_legendary_haul", "Million Mile Morning", "Late-career Americana bed", 75.0),
+    MusicTrack("menu_regional_carrier", "Regional Lines", "Confident heartland rock bed", 133.7),
+    MusicTrack("menu_fleet_owner", "Yard Lights", "Steady fleet-owner menu bed", 94.6),
+    MusicTrack("menu_coast_to_coast", "Coast To Coast Ledger", "Broad road-trip menu bed", 104.7),
+    MusicTrack("menu_legendary_haul", "Million Mile Morning", "Late-career Americana bed", 117.5),
+)
+
+MENU_ROTATION_TRACKS: tuple[MusicTrack, ...] = (
+    MusicTrack("menu_urban_roll", "Urban Roll", "Easy city-groove menu bed", 114.5),
 )
 
 DAY_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
     MusicTrack("open_road", "Open Road", "Easy mid-tempo groove for long hauls", 131.6),
-    MusicTrack("drive_desert_two_lane", "Desert Two-Lane", "Dry, spacious daytime road bed", 75.0),
-    MusicTrack("drive_mountain_grade", "Mountain Grade", "Measured climb-focused road bed", 75.0),
-    MusicTrack("drive_rain_day_cruise", "Rain-Day Cruise", "Gentle rainy daytime drive bed", 75.0),
-    MusicTrack("drive_urban_roll", "Urban Roll", "Light city traffic drive bed", 75.0),
-    MusicTrack("drive_dawn_push", "Dawn Push", "Soft early-morning drive bed", 75.0),
+    MusicTrack("drive_desert_two_lane", "Desert Two-Lane", "Dry, spacious daytime road bed", 234.7),
+    MusicTrack("drive_mountain_grade", "Mountain Grade", "Measured climb-focused road bed", 154.8),
+    MusicTrack("drive_rain_day_cruise", "Rain-Day Cruise", "Gentle rainy daytime drive bed", 173.0),
+    MusicTrack("drive_urban_roll", "Urban Roll", "Light city traffic drive bed", 144.8),
+    MusicTrack("drive_dawn_push", "Dawn Push", "Soft early-morning drive bed", 114.0),
 )
 
 NIGHT_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
     MusicTrack("night_haul", "Night Haul", "Slow ambient pads for night driving", 204.76),
-    MusicTrack("night_midnight_interstate", "Midnight Interstate", "Low night highway bed", 75.0),
-    MusicTrack("night_neon_truck_stop", "Neon Truck Stop", "Soft truck-stop approach bed", 75.0),
-    MusicTrack("night_rainy_miles", "Rainy Night Miles", "Sparse rainy night bed", 75.0),
-    MusicTrack("night_lonely_plains", "Lonely Plains", "Open nighttime plains bed", 75.0),
-    MusicTrack("night_mountain_pass", "Mountain Night Pass", "Quiet mountain night bed", 75.0),
+    MusicTrack("night_midnight_interstate", "Midnight Interstate", "Low night highway bed", 208.4),
+    MusicTrack("night_neon_truck_stop", "Neon Truck Stop", "Soft truck-stop approach bed", 153.6),
+    MusicTrack("night_rainy_miles", "Rainy Night Miles", "Sparse rainy night bed", 222.4),
+    MusicTrack("night_lonely_plains", "Lonely Plains", "Open nighttime plains bed", 239.9),
+    MusicTrack("night_mountain_pass", "Mountain Night Pass", "Quiet mountain night bed", 158.4),
     MusicTrack("night_small_hours", "Small Hours", "Slow piano ballad for late-night hauls", 159.6),
 )
 
@@ -48,6 +52,10 @@ NIGHT_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
 # clock reads night, in place of the daytime milestone bed.
 MENU_NIGHT_TRACK = MusicTrack(
     "menu_theme_night", "Midnight Keys", "Quiet piano ballad for night menus", 169.9
+)
+
+ALL_MUSIC_TRACKS: tuple[MusicTrack, ...] = (
+    MENU_TRACKS + MENU_ROTATION_TRACKS + (MENU_NIGHT_TRACK,) + DAY_DRIVE_TRACKS + NIGHT_DRIVE_TRACKS
 )
 
 # Format pools for the fictional regional radio stations. ElevenLabs-composed
@@ -177,7 +185,7 @@ def select_menu_music_sequence(profile) -> tuple[str, ...]:
     """
     primary_index = _menu_milestone_index(profile)
     unlocked_count = max(2, primary_index + 1)
-    options = MENU_TRACKS[:unlocked_count]
+    options = MENU_TRACKS[:unlocked_count] + MENU_ROTATION_TRACKS
     milestone_primary = MENU_TRACKS[primary_index].key
     if _profile_is_night(profile):
         primary = MENU_NIGHT_TRACK.key

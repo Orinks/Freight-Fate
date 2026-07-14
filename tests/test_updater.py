@@ -733,3 +733,169 @@ def test_startup_update_prompt_respects_skipped_version():
         MainMenuState._update_prompted = False
 
     assert pushed == []
+
+
+def test_terminal_exit_arms_fresh_packaged_update_check(monkeypatch):
+    from freight_fate.states.city import CityMenuState
+    from freight_fate.states.main_menu import MainMenuState
+
+    created = []
+    reset = []
+    spoken = []
+    settings = SimpleNamespace(update_channel="", skipped_update="")
+    checker = SimpleNamespace(done=threading.Event(), result=None)
+    ctx = SimpleNamespace(
+        settings=settings,
+        save_profile=lambda: spoken.append(("saved", {})),
+        say=lambda text, **kwargs: spoken.append((text, kwargs)),
+        reset_to=lambda state: reset.append(state),
+    )
+
+    monkeypatch.setattr(updater, "is_frozen", lambda: True)
+    monkeypatch.setattr(
+        "freight_fate.states.main_menu.UpdateChecker",
+        lambda received_settings: created.append(received_settings) or checker,
+    )
+
+    try:
+        MainMenuState._update_checker = SimpleNamespace(done=threading.Event(), result=None)
+        MainMenuState._update_prompted = True
+        state = CityMenuState.__new__(CityMenuState)
+        state.ctx = ctx
+        state._to_main_menu()
+
+        assert created == [settings]
+        assert MainMenuState._update_checker is checker
+        assert not MainMenuState._update_prompted
+        assert len(reset) == 1
+        assert isinstance(reset[0], MainMenuState)
+        assert spoken[:2] == [("saved", {}), ("Progress saved.", {})]
+    finally:
+        MainMenuState._update_checker = None
+        MainMenuState._update_prompted = False
+
+
+def test_terminal_exit_does_not_check_for_updates_from_source(monkeypatch):
+    from freight_fate.states.city import CityMenuState
+    from freight_fate.states.main_menu import MainMenuState
+
+    created = []
+    reset = []
+    settings = SimpleNamespace(update_channel="", skipped_update="")
+    ctx = SimpleNamespace(
+        settings=settings,
+        save_profile=lambda: None,
+        say=lambda *args, **kwargs: None,
+        reset_to=lambda state: reset.append(state),
+    )
+
+    monkeypatch.setattr(updater, "is_frozen", lambda: False)
+    monkeypatch.setattr(
+        "freight_fate.states.main_menu.UpdateChecker",
+        lambda received_settings: created.append(received_settings),
+    )
+
+    try:
+        MainMenuState._update_checker = None
+        MainMenuState._update_prompted = True
+        state = CityMenuState.__new__(CityMenuState)
+        state.ctx = ctx
+        state._to_main_menu()
+
+        assert created == []
+        assert MainMenuState._update_checker is None
+        assert MainMenuState._update_prompted
+        assert len(reset) == 1
+        assert isinstance(reset[0], MainMenuState)
+    finally:
+        MainMenuState._update_checker = None
+        MainMenuState._update_prompted = False
+
+
+def test_pickup_facility_exit_arms_fresh_packaged_update_check(monkeypatch):
+    from freight_fate.states.city import PickupFacilityState
+    from freight_fate.states.main_menu import MainMenuState
+
+    order = []
+    settings = SimpleNamespace(update_channel="", skipped_update="")
+    checker = SimpleNamespace(done=threading.Event(), result=None)
+    ctx = SimpleNamespace(
+        settings=settings,
+        say=lambda *args, **kwargs: order.append("announced"),
+        reset_to=lambda state: order.append("reset"),
+    )
+    state = PickupFacilityState.__new__(PickupFacilityState)
+    state.ctx = ctx
+    state._save_state = lambda: order.append("saved")
+
+    monkeypatch.setattr(updater, "is_frozen", lambda: True)
+    monkeypatch.setattr(
+        "freight_fate.states.main_menu.UpdateChecker",
+        lambda received_settings: order.append("checker") or checker,
+    )
+
+    try:
+        MainMenuState._update_checker = None
+        MainMenuState._update_prompted = True
+        state._save_and_quit()
+
+        assert order == ["saved", "announced", "checker", "reset"]
+        assert MainMenuState._update_checker is checker
+        assert not MainMenuState._update_prompted
+    finally:
+        MainMenuState._update_checker = None
+        MainMenuState._update_prompted = False
+
+
+def test_drive_exit_does_not_arm_fresh_update_check(monkeypatch):
+    from freight_fate.states.driving import PauseMenuState
+    from freight_fate.states.main_menu import MainMenuState
+
+    created = []
+    reset = []
+    settings = SimpleNamespace(update_channel="", skipped_update="")
+    ctx = SimpleNamespace(
+        settings=settings,
+        say=lambda *args, **kwargs: None,
+        reset_to=lambda state: reset.append(state),
+    )
+    driving = SimpleNamespace(phase="delivery")
+
+    monkeypatch.setattr(updater, "is_frozen", lambda: True)
+    monkeypatch.setattr(
+        "freight_fate.states.main_menu.UpdateChecker",
+        lambda received_settings: created.append(received_settings),
+    )
+
+    try:
+        existing = SimpleNamespace(done=threading.Event(), result=None)
+        MainMenuState._update_checker = existing
+        MainMenuState._update_prompted = True
+        PauseMenuState(ctx, driving)._quit_to_menu()
+
+        assert created == []
+        assert MainMenuState._update_checker is existing
+        assert MainMenuState._update_prompted
+        assert len(reset) == 1
+        assert isinstance(reset[0], MainMenuState)
+    finally:
+        MainMenuState._update_checker = None
+        MainMenuState._update_prompted = False
+
+
+def test_remind_later_help_describes_terminal_exit_check():
+    from freight_fate.states.update import UpdatePromptState
+
+    info = updater.UpdateInfo(
+        tag="v1.6.1",
+        title="Freight Fate version 1.6.1",
+        notes=[],
+        asset_name="FreightFate-1.6.1-windows-portable.zip",
+        asset_url="https://example.test/FreightFate.zip",
+        asset_size=1,
+    )
+    state = UpdatePromptState(SimpleNamespace(), info)
+    remind = next(item for item in state.build_items() if item.text == "Remind me later")
+
+    assert "from a terminal or pickup facility" in remind.help
+    assert "next time the game starts" in remind.help

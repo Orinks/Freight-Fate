@@ -49,14 +49,6 @@ def _cue_direction(text: str) -> str:
     return ""
 
 
-def _rest_stop_cue_text(prefix: str, parking_label: str) -> str:
-    parts = [prefix]
-    if parking_label:
-        parts.append(parking_label)
-    parts.append("press X to signal for the exit.")
-    return "; ".join(parts)
-
-
 class Trip(TripRoadEventMixin, TripTrafficMixin):
     """One delivery run along a chosen route."""
 
@@ -482,11 +474,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         "rest_stop",
                         start + offset,
                         f"{stop.label} ahead{at_part}",
-                        _rest_stop_cue_text(
-                            f"{stop.label.capitalize()}{at_part} ahead in "
-                            f"{self._distance_text(1.0)}",
-                            stop.parking_label,
-                        ),
+                        "",
                     )
                 )
         cues.sort(key=lambda cue: cue.at_mi)
@@ -582,9 +570,21 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         zones: list[Zone] = []
         total = self.route.miles
         n = max(0, int(total / 150))
+        # Spans already claimed by placed zones. Real work zones are signed
+        # well apart; without this, independent draws could nest one zone
+        # inside another or butt two together with no open road between.
+        spans: list[tuple[float, float]] = []
         for _ in range(n):
-            at = self._rng.uniform(15, max(16, total - 20))
-            length = self._rng.uniform(3, 9)
+            for _attempt in range(8):
+                at = self._rng.uniform(15, max(16, total - 20))
+                end = at + self._rng.uniform(3, 9)
+                if all(
+                    at > s_end + ZONE_MIN_GAP_MI or end < s_start - ZONE_MIN_GAP_MI
+                    for s_start, s_end in spans
+                ):
+                    break
+            else:
+                continue  # the route is crowded; place fewer zones instead
             if self._rng.random() < 0.6:
                 closed = (
                     self._rng.choice((0, 1))
@@ -601,7 +601,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         closed_lane=closed,
                     )
                 )
-                zones.append(Zone(at, at + length, 45, "construction", closed_lane=closed))
+                zones.append(Zone(at, end, 45, "construction", closed_lane=closed))
+                # Claim the whole signed footprint, taper included, so the
+                # next draw cannot land a second work zone inside this one.
+                spans.append((taper_start, end))
         # Congestion is no longer a dice roll: traffic-prone stretches come
         # from HPMS volume against capacity and turn on with the clock.
         zones.extend(self._place_congestion_zones())
@@ -1209,7 +1212,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         if changed is not None:
             self._emit(
                 TripEventKind.WEATHER_CHANGE,
-                f"Weather changing: {self.weather.describe()}",
+                f"Weather changing: {self.weather.describe(self.imperial)}",
                 weather=changed,
             )
         self.truck.grip = self.weather.effects.grip
@@ -1449,10 +1452,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                     self._emit(TripEventKind.GPS_CUE, cue.near_text or cue.text, cue=cue)
                 continue
             if cue.kind == "rest_stop":
-                key = f"{cue.key}:near"
-                if 0 < ahead <= 1.2 and key not in self._announced_navigation:
-                    self._announced_navigation.add(key)
-                    self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
+                # Road stops already receive one actionable announcement from
+                # _check_stops at five miles.  A second one-mile reminder made
+                # busy routes needlessly repetitive.
                 continue
             if cue.kind == "traffic":
                 key = f"{cue.key}:advance"
@@ -1478,7 +1480,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 continue
             advance_key = f"{cue.key}:advance"
             near_key = f"{cue.key}:near"
-            lookahead = STATE_CROSSING_WARNING_LOOKAHEAD_MI if cue.kind == "state_crossing" else 2.0
+            if cue.kind == "state_crossing":
+                if ahead <= 0 and near_key not in self._announced_navigation:
+                    self._announced_navigation.add(near_key)
+                    self._emit(TripEventKind.STATE_CROSSING, cue.near_text, cue=cue)
+                continue
+            lookahead = 2.0
             if 0 < ahead <= lookahead and advance_key not in self._announced_navigation:
                 self._announced_navigation.add(advance_key)
                 distance = self._distance_text(ahead)
@@ -1489,9 +1496,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                     self._emit(TripEventKind.GPS_CUE, message, cue=cue)
             if -0.1 <= ahead <= 0.1 and near_key not in self._announced_navigation:
                 self._announced_navigation.add(near_key)
-                if cue.kind == "state_crossing":
-                    self._emit(TripEventKind.STATE_CROSSING, cue.near_text, cue=cue)
-                elif cue.kind == "checkpoint":
+                if cue.kind == "checkpoint":
                     self._emit(TripEventKind.CHECKPOINT, cue.near_text, cue=cue)
                 else:
                     self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)

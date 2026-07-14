@@ -360,7 +360,7 @@ Driving controls are active while the road view is focused:
 | Key | Action |
 | --- | --- |
 | Up arrow, hold | Throttle. |
-| Down arrow, hold | Brake. In automatic mode, holding it while stopped reverses slowly. |
+| Down arrow, hold | Brake. With simple automatic direction changes, keep holding it after stopping to select reverse and back slowly. With deliberate direction changes, release it and press again. |
 | B, hold | Emergency brake. |
 | E | Start the engine. Stop the engine only below 5 miles per hour. |
 | P | Release or set the parking brake. |
@@ -683,10 +683,10 @@ Gameplay settings include:
 | --- | --- |
 | Units | Switch speed and distance between miles and kilometers. |
 | Transmission | Switch between automatic and manual transmission. |
+| Automatic direction changes | In an automatic, Simple changes between forward and reverse when you keep holding the control after stopping. Deliberate requires releasing and pressing it again. |
 | Driving mode | Choose Relaxed, Standard, or Realistic pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most real time to respond. Standard keeps balanced timing and consequences. Realistic moves distance and time fastest, so decisions arrive sooner without extra forgiveness. At low speed the clock still eases toward real time, and deliberate parked waiting runs at double the selected pace. |
 | Hours of service | Choose realistic or relaxed legal limits. Relaxed hours rules lengthen the limits and further reduce random hazard frequency; real violations keep their normal consequences. |
 | Lane drift | Choose whether lane drift is off, light, or realistic. When on, a short beep comes from the side you drift toward, so steer away from the beep. A dedicated centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. |
-| Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. |
 
 Audio settings include:
 
@@ -714,6 +714,19 @@ Speech and weather settings include:
 | Speech volume | Appears only when the current voice source supports volume changes. |
 | Speech voice | Appears only when selectable voices are available. |
 | Weather source | Switches between simulated weather and live city conditions when available. |
+
+Online settings include:
+
+| Setting | Purpose |
+| --- | --- |
+| Profile sharing | One optional public setting covers the drivers board, eligible profile details, official achievements, automatic road-journal posts, and the updates feed. It is off until you connect your orinks.net driver and turn it on. The game never publishes the full save, money, coordinates, active cargo details, real name, or precise live location. Detailed career statistics appear only after orinks.net accepts a validated private cloud backup; without one, the public profile remains available but omits those statistics. Turning Profile sharing off stops local posting immediately and hides the public profile independently of Cloud backup. |
+| Back up saves to your orinks.net account | After each game save, upload that career to your own orinks.net account so you can restore it on another computer or after losing this one. Off until you turn it on, and separate from Profile sharing: backups are private to your account and never become public downloads. orinks.net validates each revision before accepting and signing it. It uses the same one-time sign-in as your driver profile, so set that up first. The last ten accepted backups of each career are kept. |
+| Restore a cloud backup | Lists the careers backed up to your account, newest first, and brings one onto this computer. Freight Fate verifies the server signature before replacing anything. A missing, altered, or unsupported signature leaves the local save untouched. A successful restore keeps the replaced save beside it as a fallback file and signs the restored copy for this computer. If the same career was played on two computers, this menu is also where you choose which accepted copy wins. |
+| Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. Works without a driver profile. |
+
+The main menu also has a Drivers online item that reads the same public board:
+each driver's name, what they are doing, and how fresh the report is. Viewing
+the board shares nothing about you and does not require sharing to be on.
 
 ## Audio, Speech, And Accessibility
 

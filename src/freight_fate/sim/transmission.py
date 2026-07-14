@@ -27,6 +27,7 @@ SHIFT_TIME = 1.0  # seconds of torque interruption
 # that would spin the engine past the ceiling.
 JAKE_PRESELECT_RPM = 1700
 JAKE_MAX_RPM = 2150
+PROGRESSIVE_UPSHIFT_RPM = (1000, 1300, 1400, 1500, 1600, 1700, 1700, 1700, 1700, 1800)
 
 
 @dataclass
@@ -42,6 +43,7 @@ class Transmission:
     gear: int = NEUTRAL  # -1 = reverse, 0 = neutral, 1..10
     clutch: float = 0.0  # 0 engaged .. 1 fully pressed
     _shift_timer: float = field(default=0.0, repr=False)
+    _gear_hold_timer: float = field(default=999.0, repr=False)
 
     @property
     def num_gears(self) -> int:
@@ -103,6 +105,12 @@ class Transmission:
         throttle: float,
         moving: bool,
         braking: bool = False,
+        can_upshift: bool = True,
+        minimum_shift_interval_s: float = 0.0,
+        upshift_rpm: float = AUTO_UPSHIFT_RPM,
+        start_gear: int = 1,
+        upshift_steps: int = 1,
+        downshift_target: int | None = None,
         engine_braking: bool = False,
     ) -> int | None:
         """Pick a gear in automatic mode. Returns the new gear when it changes.
@@ -118,8 +126,9 @@ class Transmission:
             return None
         if self.gear == NEUTRAL:
             if throttle > 0.05:
-                self.gear = 1
+                self.gear = max(1, min(self.num_gears, start_gear))
                 self._shift_timer = SHIFT_TIME
+                self._gear_hold_timer = 0.0
                 return self.gear
             return None
         if not moving and self.gear > 1:
@@ -128,17 +137,26 @@ class Transmission:
             # engine dies on every restart.
             self.gear = 1
             self._shift_timer = SHIFT_TIME
+            self._gear_hold_timer = 0.0
             return self.gear
-        upshift_rpm = AUTO_LOW_GEAR_UPSHIFT_RPM if self.gear <= 4 else AUTO_UPSHIFT_RPM
+        # The comfort hold between shifts never delays engine protection:
+        # with the road driving the engine past the jake ceiling, the box
+        # upshifts NOW, timer or no timer. Under power the governor caps RPM,
+        # so the hold stays in charge and anti-hunting keeps its teeth.
+        if self._gear_hold_timer < minimum_shift_interval_s and not (
+            engine_braking and rpm > JAKE_MAX_RPM
+        ):
+            return None
         # Braking or engine-braking holds the gear -- except that a real
         # automatic protects its engine: once the road spins it past the
         # ceiling, the box upshifts anyway. On a downgrade that trades
         # engine safety for a taller gear and a weaker jake, which is
         # exactly the runaway spiral a mismanaged descent earns.
         hold_gear = (braking or engine_braking) and rpm < JAKE_MAX_RPM
-        if rpm > upshift_rpm and self.gear < self.num_gears and not hold_gear:
-            self.gear += 1
+        if rpm > upshift_rpm and self.gear < self.num_gears and not hold_gear and can_upshift:
+            self.gear = min(self.num_gears, self.gear + max(1, upshift_steps))
             self._shift_timer = SHIFT_TIME
+            self._gear_hold_timer = 0.0
             return self.gear
         if engine_braking and moving and self.gear > 1 and rpm < JAKE_PRESELECT_RPM:
             lower = GEAR_RATIOS[self.gear - 2]
@@ -146,10 +164,13 @@ class Transmission:
             if rpm * lower / current <= JAKE_MAX_RPM:
                 self.gear -= 1
                 self._shift_timer = SHIFT_TIME
+                self._gear_hold_timer = 0.0
                 return self.gear
         if rpm < AUTO_DOWNSHIFT_RPM and self.gear > 1 and moving:
-            self.gear -= 1
+            target = self.gear - 1 if downshift_target is None else downshift_target
+            self.gear = max(1, min(self.gear - 1, target))
             self._shift_timer = SHIFT_TIME
+            self._gear_hold_timer = 0.0
             return self.gear
         return None
 
@@ -162,9 +183,11 @@ class Transmission:
             return None
         self.gear -= 1
         self._shift_timer = SHIFT_TIME
+        self._gear_hold_timer = 0.0
         return self.gear
 
     def update(self, dt: float) -> None:
+        self._gear_hold_timer += max(0.0, dt)
         if self._shift_timer > 0.0:
             self._shift_timer = max(0.0, self._shift_timer - dt)
 

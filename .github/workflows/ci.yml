@@ -1,5 +1,9 @@
 name: CI
 
+permissions:
+  contents: read
+  actions: write
+
 on:
   push:
     branches: [main, dev]
@@ -18,6 +22,10 @@ jobs:
       SDL_VIDEODRIVER: dummy
       SDL_AUDIODRIVER: dummy
       FREIGHT_FATE_NO_SPEECH: "1"
+      # sys.monitoring coverage core (Python 3.12+): the default tracer makes
+      # the CPU-bound network sweeps ~5x slower, and that multiplier grows CI
+      # time with every map expansion. sysmon measured ~1.15x on the same test.
+      COVERAGE_CORE: sysmon
     steps:
       - uses: actions/checkout@v6
 
@@ -33,7 +41,7 @@ jobs:
         run: uv run ruff check src tests tools
 
       - name: Run tests
-        run: uv run pytest tests/ -v --cov=src/freight_fate --cov-report=xml
+        run: uv run pytest tests/ -n auto --durations=15 --cov=src/freight_fate --cov-report=xml
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
@@ -85,3 +93,52 @@ jobs:
         with:
           name: dist
           path: dist/
+
+  recover-nightly:
+    name: Recover failed nightly
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    needs: [test, changelog]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Retry today's failed snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="nightly-$(date -u +%Y%m%d)"
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "$TAG already exists; no recovery build needed."
+            exit 0
+          fi
+
+          ACTIVE=$(gh run list --repo "$GITHUB_REPOSITORY" \
+            --workflow Build --branch dev --limit 20 \
+            --json status --jq '[.[] | select(.status == "queued" or .status == "in_progress")] | length')
+          if [ "$ACTIVE" -gt 0 ]; then
+            echo "A dev Build is already queued or running; no duplicate recovery needed."
+            exit 0
+          fi
+
+          RUN=$(gh run list --repo "$GITHUB_REPOSITORY" \
+            --workflow Build --event schedule --limit 1 \
+            --json conclusion,createdAt --jq '.[0] // empty | "\(.conclusion) \(.createdAt)"')
+          CONCLUSION=${RUN%% *}
+          CREATED=${RUN#* }
+
+          if [ "$CONCLUSION" != "failure" ]; then
+            echo "Latest scheduled Build conclusion is '$CONCLUSION'; not retrying."
+            exit 0
+          fi
+
+          # Only recover TODAY's failed snapshot. Before the daily cron has
+          # fired, the newest scheduled run is yesterday's -- and a stale
+          # failure there must not make a pre-cron push build today's
+          # snapshot hours early.
+          if [ "${CREATED%%T*}" != "$(date -u +%Y-%m-%d)" ]; then
+            echo "The failed scheduled Build is from ${CREATED%%T*}; today's snapshot has not run yet."
+            exit 0
+          fi
+
+          echo "Today's scheduled snapshot failed and $TAG is missing; dispatching recovery."
+          gh workflow run Build --repo "$GITHUB_REPOSITORY" --ref dev -f dry_run=false

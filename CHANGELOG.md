@@ -125,6 +125,247 @@
   routes where you had better watch your fuel and get it when you can. Thanks
   to nromey.
 
+### Fixed
+
+- **Cloud backup now tells you when this computer needs to reconnect.** If
+  orinks.net stops accepting this computer's sign-in, the cloud backup menu
+  now says so and explains the fix, instead of wrongly reporting that your
+  backups could not be reached.
+- **Long deliveries are easier on the game while you drive.** The destination
+  exit is now worked out once and remembered instead of being recalculated
+  every moment of the drive, removing a heavy background load tied to a
+  reported crash on coast-to-coast routes.
+
+### Changed
+
+- **Playing on more than one computer no longer signs the other one out.**
+  orinks.net now gives each of your computers its own token: add a computer
+  from the driver setup page and your other machines keep working. If the
+  game says your sign-in is no longer accepted, it now points you to the
+  computer list on the setup page to get a fresh token for that computer.
+
+## 1.8.1 - 2026-07-13
+
+### Fixed
+
+- **The Mountain Grade driving track sounds right again.** The daytime
+  mountain music bed has been replaced with a corrected recording, normalized
+  to sit at the same volume as the rest of the soundtrack.
+
+- **Controllers are left alone when controller support is off.** With the setting disabled, the game no longer starts up the controller system or grabs a connected pad; turning support on in Settings, Gameplay activates it, and turning it back off releases the controller again.
+
+- **Engine sound now stays present through automatic gear changes.** Shifts still ease the engine tone briefly, without the repeated volume pumping that could sound like the engine was dropping out.
+
+- **Starting the engine no longer dips in volume.** The running engine sound now
+  meets the tail of the ignition sound at the same level, then settles smoothly
+  down to idle instead of briefly dropping out.
+
+- **Manual and automatic transmissions behave reliably on steep grades.** The
+  diesel governor now holds a safe low-gear road speed without quietly damaging
+  the engine, and automatic trucks avoid shifts that cannot pull the hill.
+- **Transmission changes now apply when you return to an active drive.** The
+  game announces the new automatic or manual mode instead of waiting until the
+  next trip.
+- **Destination signs no longer send you down an early exit.** Navigation now
+  favors the interchange nearest the destination over an earlier sign that
+  happens to mention the same city.
+- **Speeding fines now follow you on bobtail runs.** Empty repositioning trips
+  charge accumulated speeding-strike fines and announce the cost in the arrival
+  summary instead of silently letting the fines disappear.
+
+### Changed
+
+- **The engine no longer jumps in volume the instant an automatic shift
+  finishes.** It now eases back up to full pull over a brief moment, so completed
+  shifts sound smooth instead of abruptly snapping back under load.
+- **Route alerts no longer repeat at one mile.** Fuel stops, rest stops, and
+  other actionable exits now speak once at five miles. State lines speak once
+  as you cross them.
+- **The soundtrack now uses the finished music throughout the game.** Menu,
+  daytime driving, and nighttime driving tracks have been replaced with their
+  full-quality versions, normalized to match the existing music. Urban Roll
+  also joins the menu rotation as a separate track from its driving version.
+- **Automatic shifting now follows real heavy-truck strategy.** Lower gears use
+  progressive shift points, the starting gear responds to load and grade,
+  light trucks can skip unneeded gears, and braking selects a useful lower gear
+  instead of stepping through every ratio. Engine audio now unloads between
+  gears instead of sweeping upward as one continuous high-pitched tone.
+- **Freight Fate checks for updates again when you leave a terminal.** Returning
+  to the main menu from a city terminal or pickup facility now starts a quiet
+  background check, so an available update can be installed before you finish
+  the session.
+
+### Added
+
+- **Online sharing now tells orinks.net which game version you are running.**
+  When Profile sharing or cloud backup is on, each post carries the release the
+  game was built from, such as a stable version or a nightly date. It is used
+  only for moderation and troubleshooting, is never shown publicly, and the
+  spoken "Hear what gets shared" disclosure now mentions it.
+
+- **The major toll turnpikes now charge realistic tolls.** Running the Kansas
+  Turnpike, the Oklahoma turnpikes, the New York Thruway, the Pennsylvania and
+  Ohio turnpikes, the Indiana Toll Road, the Illinois Tollway, the Mass Pike, the
+  Maine and West Virginia turnpikes now adds an estimated commercial toll to the
+  run -- so a toll route is a real cost to weigh against the free way around.
+
+- **The map explodes from 249 cities to 623, coast to coast.** Since the last
+  stable release the drivable network has more than doubled: 623 cities to
+  pick up and deliver in, joined by about 139,000 miles of real truck routes.
+  Dead zones that used to have nothing drivable for hundreds of miles -- the
+  mountain West, the northern plains, the Nevada Great Basin, Appalachia, the
+  Gulf coast -- now connect city to city on the real roads, town by town.
+  The entries below tour the new country region by region; each nightly
+  snapshot's notes carried the town-by-town detail. Special thanks to nromey
+  for the mapping work behind it. And watch your fuel out there -- some of
+  the new country is a long way between diesel pumps.
+
+- **New England and the Northeast fill in.** Rutland, Keene, Lewiston, and
+  Barnstable bring Vermont, New Hampshire, Maine, and Cape Cod onto the map;
+  Watertown and Jamestown open New York's north country and Southern Tier;
+  Williamsport, Altoona, State College, and Meadville put the Pennsylvania
+  mountains on real routes; and fourteen short-haul runs stitch the corridor
+  from Boston and Manchester down through Providence, Hartford, and
+  Philadelphia to the Chesapeake, including the Bay Bridge run to Dover and
+  Salisbury and the New York Thruway up the Hudson Valley.
+
+- **The Mid-Atlantic and Appalachia connect through the mountains.** The whole
+  Interstate 81 freight run is drivable -- Staunton, Wytheville, Marion,
+  Abingdon, Bristol, and Kingsport -- with Interstate 64 east over Afton
+  Mountain into Richmond. The Kentucky parkways and the coalfields open
+  thirteen storied mountain runs, from Pound Gap and the Cumberland Gap to the
+  New River Gorge road to Beckley, with Paducah and Owensboro on the western
+  parkways; Cumberland lands on the Interstate 68 climb over the Alleghenies;
+  Lynchburg anchors US-460; and Jackson and Cookeville break the long
+  Interstate 40 haul clear across Tennessee into real stops.
+
+- **The Carolinas and the Southeast coast come together.** Durham and
+  Spartanburg finish Interstate 85 through the Piedmont; Petersburg, Florence,
+  and Lumberton close the Interstate 95 gap, so the East Coast's busiest
+  freight run finally drives city to city; eastern North Carolina adds
+  Greenville, Jacksonville, New Bern, and Rocky Mount; and Myrtle Beach brings
+  the Grand Strand onto coastal US-17.
+
+- **Georgia, Alabama, and Mississippi fill in from the mountains to the
+  Gulf.** Interstates 75 and 85 stop in real towns the whole way -- Dalton,
+  Cartersville, Valdosta, Tifton, Cordele, Opelika, and LaGrange -- Columbus
+  and Albany open the wiregrass, and Dothan, the Peanut Capital, ties three
+  states together. The Delta and the Blues Highway open at Greenville,
+  Clarksdale, Oxford, Tupelo, Grenada, and Hattiesburg, while Gadsden,
+  Cullman, Selma, Natchez, and Panama City round out the Deep South. Louisiana
+  fills in too, from Ruston and Natchitoches to Hammond and bayou-country
+  Houma, with Alexandria anchoring the middle of Interstate 49.
+
+- **Florida runs border to border.** Pensacola and Crestview break up the
+  Panhandle, Ocala and Palm Coast fill the peninsula's spine, and Daytona
+  Beach, Sarasota, North Port, Fort Myers, and Naples line both coasts -- with
+  the run from Naples to Miami crossing the Everglades on Interstate 75's
+  Alligator Alley, no services for eighty miles.
+
+- **Arkansas and the Ozarks open up.** Fayetteville and Bentonville climb the
+  real Boston Mountains, Jonesboro reaches the rice-country Delta, Harrison
+  and Mountain Home carry the winding Ozark truck routes, Hot Springs crosses
+  the Ouachita ridges, the Interstate 49 line finishes across the state from
+  Fort Smith to Texarkana, and Pine Bluff, El Dorado, Stuttgart, and
+  Russellville tie the farm and timber country into Texas, Louisiana, and
+  Tennessee.
+
+- **Texas and Oklahoma become town-by-town country.** The US-287
+  Ports-to-Plains spine runs from San Antonio clear to Denver through Vernon,
+  Childress, Dumas, and the Oklahoma panhandle; US-281 and US-75 open
+  north-south routes beside the crowded interstates; Temple completes the
+  Interstate 35 spine; Uvalde and Eagle Pass open the border country; the
+  plains add Plainview, Big Spring, Brownwood, and Pampa; Longview takes its
+  place on Interstate 20 toward Shreveport; and Oklahoma links up through
+  Stillwater, McAlester, Muskogee, Durant, Ardmore, Bartlesville, and Ada.
+
+- **The Great Plains ladder is complete.** Interstate 80 across Nebraska is
+  now continuous past the hundredth-meridian marker, Kansas adds Lawrence,
+  Emporia, Hutchinson, Great Bend, and Liberal, the Dakotas add Jamestown,
+  Pierre, and Aberdeen, a Black Hills freight run links Cheyenne through
+  Scottsbluff country to Rapid City, and the Missouri and Iowa heartland
+  fills in from Sedalia and Saint Joseph up through Ames, Fort Dodge, and
+  Mason City, with Cape Girardeau and Poplar Bluff anchoring southeast
+  Missouri.
+
+- **The Midwest and Great Lakes lattice comes together.** Twenty-nine new
+  cities across five states -- from Springfield, Flint, and Kalamazoo to the
+  Upper Peninsula's Marquette and Sault Ste. Marie and the Iron Range's
+  Hibbing -- plus central Indiana around Indianapolis, Ohio's Zanesville,
+  Mansfield, and Youngstown, Wisconsin's Fox Valley, and nineteen short runs
+  lacing Detroit, Toledo, Fort Wayne, and Milwaukee together. Terre Haute and
+  Effingham break the long Indianapolis-to-St. Louis drive, Dubuque anchors
+  the US-20 Mississippi crossing, and every city comes with real, named
+  freight facilities: haul taconite pellets from the Hibbing mine, steel out
+  of Gary Works, and new Subarus from Lafayette.
+
+- **The Rockies and the Great Basin connect end to end.** Wolf Creek Pass and
+  the Million Dollar Highway open Colorado's steepest crossings, with grades
+  past eleven percent over the San Juans; Durango and Farmington meet at the
+  Four Corners; fifteen runs link the northern Rockies from Missoula to Miles
+  City; the Silver Valley opens Interstate 90 over Lookout Pass; Rawlins
+  lands on Interstate 80 across Wyoming, with Logan and Moab opening Utah;
+  New Mexico adds Hobbs, Alamogordo, Roswell, Carlsbad, and Socorro; and
+  Nevada's US-93 and US-50 -- the Loneliest Road in America -- cross the
+  Great Basin through Ely, Austin, and Fallon.
+
+- **Arizona and the desert Southwest fill in.** The Verde Valley, the Beeline
+  Highway, and Route 66 country open Camp Verde, Sedona, Payson, Winslow, and
+  Holbrook, with Prescott in the highlands; copper country climbs US-60
+  through Globe and the Salt River Canyon to Show Low; the border adds
+  Nogales, Sierra Vista, and Douglas; the Colorado River runs from Lake
+  Havasu City down to Yuma; and US-89 reaches Page and Lake Powell across
+  the Navajo Nation.
+
+- **California and the Pacific Northwest round out the coast.** San Luis
+  Obispo and Santa Barbara complete the US-101 coast run, Modesto and Merced
+  fill Highway 99 through the Central Valley, the Redwood Highway reaches
+  Eureka, the eastern Sierra opens the long US-395 run beneath Mount
+  Whitney, the Cajon Pass climb connects Riverside to Victorville, and
+  fourteen Cascade-pass runs -- Stevens, White, and Santiam, real grades with
+  brake checks -- tie Seattle, Tacoma, and Salem to the Columbia Basin, with
+  The Dalles seating the Columbia Gorge.
+
+- **Drive the Overseas Highway to Key West.** Key West joins the map at the very
+  end of the road, reached from Miami down US-1 through the Florida Keys -- Key
+  Largo, Islamorada, Marathon, Big Pine Key -- across the Seven Mile Bridge, all the
+  way to the southernmost point in the continental United States.
+
+- **You can now cross the Chesapeake Bay Bridge-Tunnel.** Cape Charles joins the
+  map on Virginia's Eastern Shore, and the run north from Norfolk takes you out
+  across the seventeen-mile Bridge-Tunnel -- diving into two tunnels beneath the
+  shipping channels, past Sea Gull Island, out to where no land is visible in any
+  direction, and up the Delmarva peninsula to Salisbury. It carries a hefty truck
+  toll, because of course it does.
+- **Cloud backups now prove they were accepted by orinks.net before restore.**
+  orinks.net validates and signs each private revision, and Freight Fate verifies
+  that signature before touching a local career. Public Profile sharing stays
+  separate: detailed career statistics come only from an accepted backup and
+  are omitted when no verified revision exists.
+
+- **Optional Profile sharing stays quiet during driving.** With Profile sharing on,
+  Freight Fate can queue automatic road-journal posts,
+  achievements, and updates for the public driver profile. Detailed career
+  statistics come only from the latest private Cloud Backup accepted by
+  orinks.net. Offline posting retries in the background and never adds a spoken
+  interruption while driving.
+
+- **Exits now come straight from real-world maps -- with the correct exit names
+  and numbers.** On the Interstates, your stops and your destination exit are
+  announced with their actual exit number and name and the places they point to --
+  "Exit 33, Yemassee," "toward Beaufort and Port Royal," "Durham" -- taken directly
+  from real map data, so you always know the right exit to take. This now covers
+  the whole Interstate network.
+
+- **Routes now carry the real posted speed limits.** Instead of estimating a
+  limit from the road type, every leg on the map now carries the actual posted
+  speed limits from map data (interstates, US highways, and more), so your truck
+  runs the real limit on the road it is driving. Rural roads without published
+  limits still fall back to a sensible estimate.
+
+- **Truck-stop names read cleanly now.** Spoken stop names across the map no
+  longer include bare initials like "T A" or leftover store numbers.
+
 - **Every run now names the real towns and country you pass.** Those are
   checkpoints -- the actual places along a route, spoken as you reach them -- and
   the map went from about 550 of them to over 2,500. Instead of empty miles, a
@@ -197,6 +438,33 @@
   Is it winter, and you'd rather take a southern route than a mountainous
   northern one? We've got you covered. Thanks to nromey.
 
+- **See who else is hauling right now with the new drivers board.** A new
+  Drivers online item in the main menu reads the live board from orinks.net:
+  each driver's name, what they are doing, their route and cargo, and how
+  fresh the report is. If you want to appear there yourself, set up sharing
+  under Settings, Online. Drivers are Orinks accounts now: the game opens
+  the orinks.net setup page where you sign in, pick your driver name and
+  whether the public board lists you at all, and copy a Driver ID and a
+  one-time posting token; back in the game you paste each from the
+  clipboard and choose Connect and save. Nothing is ever shared before
+  that, the game speaks exactly what gets shared, and only broad in-game
+  activity goes out, like "Driving: Chicago to Dallas, steel coils", never
+  your save files, real name, or location. You leave the board within
+  minutes of going off duty or turning sharing off.
+
+- **Your careers can now back up to the cloud.** Turn on Back up saves to
+  your Orinks account under Settings, Online, and after each game save your
+  career quietly uploads to your own orinks.net account -- so a dead hard
+  drive no longer means a dead career, and you can pick up the same driver
+  on another computer. It uses the same one-time sign-in as the drivers
+  board, nothing extra to set up, and backups are private to your account:
+  they never appear on the drivers board or anywhere public. The new
+  Restore a cloud backup menu reads your backups aloud, newest first, and
+  brings one onto this computer -- keeping the save it replaces beside it
+  as a fallback. Played the same career on two computers? The game notices
+  and asks which copy should win instead of silently overwriting either.
+  Cloud backup is off until you turn it on.
+
 - **The map now has real time zones, and your clock changes as you cross
   them.** Drive west out of Tennessee on I-40 and you will hear "Crossing
   into Central Time. It is now 2:15 PM." With terse speech on, it is just
@@ -212,6 +480,43 @@
 
 ### Changed
 
+- **Pausing now takes you off the live drivers board.** The pause menu used to
+  keep you listed as "Paused"; now it counts as going off duty, so the public
+  board only shows drivers who are actively hauling. A quick pause and resume
+  will not bounce you off the board, and Discord presence still shows
+  "Paused" to your friends while the menu is open.
+
+- **Dispatches and route planning now always name the state with each
+  city.** A job reads as "to McCall, Idaho" even when no other McCall
+  exists, so an unfamiliar town still tells you roughly where you are
+  headed. And each route option now says which cities it passes through
+  right in the option itself -- "through Boise, Idaho, then McCall" --
+  instead of only in the F1 help, so you can weigh routes the same way
+  the end-of-trip summary describes them. Thanks to a player suggestion.
+
+- **Automatic direction changes can now be simple or deliberate.** Simple is the
+  casual default: keep holding the control after the truck stops to change
+  between forward and reverse. Deliberate keeps the safer two-step behavior from
+  the previous snapshot: stop, release the control, then press it again. Choose
+  the style you prefer under Settings, Gameplay. Manual shifting is unchanged.
+
+- **Online settings are now gathered in one place.** The Discord presence
+  toggle moved from Settings, Gameplay to Settings, Online, alongside the
+  drivers board and the new cloud backup options. And before you have set
+  up your Orinks sign-in, the first Online item now says "Driver profile:
+  not set up" -- setting it up is one step that unlocks both the drivers
+  board and cloud backup.
+
+- **The horn sounds like a real horn held down.** Instead of restarting the
+  same short honk over and over, holding the horn now sustains one steady blast
+  for as long as you press it, and when you let go the horn rings out and fades
+  the way a real one does rather than cutting off abruptly. Pressing the horn
+  again while it is still sounding no longer layers a second horn on top.
+
+- **Abandoning a job now asks you to confirm.** Choosing Abandon job from the
+  pause menu opens a Yes or No prompt that starts on No, so you have to arrow
+  down to Yes to actually give up the load and pay the penalty. Choosing No
+  takes you straight back to the pause menu with the job intact.
 - **Cities that share a name now always say their state.** With two Jacksons,
   two Portlands, and three Springfields on the map, dispatch offers, route
   planning, GPS announcements, and delivery summaries now say "Jackson,
@@ -227,22 +532,6 @@
   Louisiana", even for cities with a unique name. Board offers stay short.
 
 ### Added
-
-- **The upper Midwest and Great Lakes fill in with twenty-nine new cities
-  across five states.** Illinois gains Springfield, Bloomington, Champaign,
-  and Decatur. Michigan gains Flint, Saginaw, Kalamazoo, Port Huron, Muskegon,
-  Jackson, and Traverse City, plus the Upper Peninsula iron and shipping towns
-  of Marquette, Escanaba, Sault Ste. Marie, Iron Mountain, and Houghton.
-  Wisconsin gains Kenosha, Eau Claire, Wausau, and La Crosse. Minnesota gains
-  St. Cloud, Rochester, Mankato, Winona, Willmar, Albert Lea, and Hibbing on
-  the Iron Range. Indiana gains Gary and Lafayette. Every city comes with
-  real, named freight facilities -- haul taconite pellets from the Hibbing
-  mine, steel out of Gary Works, new Subarus from Lafayette, and turkeys from
-  Willmar -- with truck-routed corridors, real truck stops, and labeled
-  highway exits along the way. Long slogs like Minneapolis to Fargo and
-  Chicago to Indianapolis now have proper stops in between, and Fort Wayne,
-  South Bend, and Evansville trade their generic docks for real ones like
-  the GM pickup plant and the Mead Johnson formula works.
 
 - **The Great Lakes split into three regions that each feel like
   themselves.** The Upper Midwest covers Minnesota, Wisconsin, and Michigan's
@@ -511,6 +800,100 @@
   can review that chatter alongside stops, speed zones, and exits.
 
 ### Fixed
+
+- **A few routes now name the right highway.** On the runs from Denver to Salt
+  Lake City, Santa Rosa to Stockton, and Clarksville to Huntsville, the game
+  announced a highway the route never actually takes; it now names the road you
+  are really driving.
+- **The truck now warns you while the engine is over-revving, instead of
+  surprising you with damage at delivery.** Holding the engine at redline --
+  easiest to do by backing up fast for a long stretch -- quietly ground the
+  truck down, and the first you heard of it was a big damage number on the
+  end screen. Now a warning sounds and the game tells you the engine is
+  taking damage and the current total, repeating while it goes on, so you
+  can ease off and slow down before the repair bill grows. Thanks to a
+  player report.
+
+- **Online setup now tells you when orinks.net refuses your pasted
+  credentials, instead of blaming your connection.** If the server answered
+  but did not accept the Driver ID and token, the game said "could not reach
+  orinks.net, check your connection," sending you off to troubleshoot a
+  network that was fine. It now says the credentials were not accepted and
+  asks you to re-copy them from the setup page. The token paste item also
+  checks that the pasted text looks like a real driver token -- they always
+  start with the letters F F D and an underscore -- and says so when it does
+  not, catching a wrong copy before anything is sent. Thanks to a player
+  report.
+
+- **Music keeps playing while the game is paused.** If a music track ended
+  while you sat on the pause menu -- or in settings, help, or any other menu
+  over a drive -- the music went silent until you resumed driving. The next
+  track now starts on its own, so a long pause no longer means a quiet cab.
+
+- **Pasting your Driver ID and token now works on Mac.** Setting up the
+  online drivers board no longer crashes the game, or silently does
+  nothing in the downloadable app, when you paste your Driver ID or
+  driver token from the clipboard on a Mac. Thanks to a player report.
+
+- **No more "brake now" ambushes on the way to a pickup.** The short
+  facility access road you deadhead down to reach a shipper no longer
+  springs road hazards or emergency-braking events; those belong on the
+  open road, not on a two-minute crawl at yard speeds. Thanks to a player
+  report.
+
+- **Reconnecting a controller no longer crashes the game or leaves it
+  half-working.** Unplugging a pad -- or having it change to another device and
+  come back over Bluetooth -- could crash the game outright, or bring the
+  controller back with the triggers and bumpers dead so you could steer but not
+  brake. The game now recovers from the hot-plug instead of crashing, and
+  fully re-acquires the controller when it returns -- even when the system hands
+  it back under a new identity -- so braking, throttle, and the bumpers work
+  again right away.
+
+- **Controller toggle actions no longer fire twice.** On some controllers --
+  notably the Xbox Elite -- setting or releasing the parking brake, or starting
+  or shutting down the engine, could trigger twice from a single press, so the
+  action immediately undid itself. Each button press now counts once, even when
+  the controller reports itself to the system more than once.
+
+- **Construction zones no longer stack or chain together.** Slow zones were
+  placed independently, so a construction zone could land inside another
+  one, or two could start back to back with no open road between. Zones now
+  keep at least eight miles apart, so "end of construction" always means
+  open road ahead. Thanks to a player report.
+
+- **Metric mode now covers the whole weather report.** With units set to
+  kilometers, pressing V mid-drive still read the temperature in Fahrenheit
+  and low visibility in miles. Temperatures now speak in Celsius and
+  visibility in kilometers everywhere weather is described: the V report,
+  weather-change announcements while driving, trip resume summaries, and
+  the terminal weather check. Thanks to a player report.
+
+- **The engine sound now stops when you shut down to sleep.** Going to sleep
+  at a rest stop, motel, or on the shoulder shuts the engine down, but the
+  engine sound kept playing over the night and after you woke, as if the
+  truck were still idling with the engine off. The shutdown is now heard
+  when it happens, and the idle goes quiet with it. Thanks to Darren Duff
+  for the report.
+
+- **Using the accelerator to brake in reverse no longer speeds you up.** In an
+  automatic, pressing the accelerator while rolling backward is meant to slow
+  and stop the truck, but at higher reverse speeds it could push you faster
+  instead. It now brakes reliably all the way to a stop.
+
+- **Adaptive cruise no longer revs the engine when you press the clutch to
+  shift.** With a manual gearbox, holding the clutch under cruise control used
+  to send the engine screaming toward the redline. Now cruise eases off the
+  moment the clutch goes in, the engine settles back toward idle, and the speed
+  is picked back up smoothly once you let the clutch out.
+
+- **The engine no longer re-cranks when you pick a trip back up.** Resuming a
+  saved haul with the engine already running -- or coming back from a menu
+  mid-drive -- used to replay the ignition sound as if you had just turned the
+  key. Now the running engine simply fades back in, and the starter is heard
+  only when you actually start the engine yourself. When you do start it, the
+  crank now blends smoothly into the running engine instead of being drowned
+  out the instant it catches.
 
 - **Your truck no longer idles all night while you sleep.** Bedding down for
   the night -- at a rest stop, in the sleeper berth, in a cramped lot, or on

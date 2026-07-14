@@ -125,14 +125,12 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     trip, _truck = make_trip(world)
     trip.traffic_manager.vehicles = []
 
+    # State crossings speak once, at the line -- the old 10-mile advance
+    # warning was cut in the reduce-repeated-alerts player-feedback round.
     trip.position_mi = 23.0
     advance = trip.update(0.0)
     repeat = trip.update(0.0)
-
-    assert _gps_messages(advance) == [
-        "In 10 miles, crossing from Illinois into Indiana near "
-        "the I-65 state line south of Hammond."
-    ]
+    assert not _gps_events(advance)
     assert not _gps_events(repeat)
 
     trip.position_mi = 31.5
@@ -144,18 +142,14 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     assert [event.message for event in crossing if event.kind == TripEventKind.STATE_CROSSING] == [
         "Crossing into Indiana near the I-65 state line south of Hammond."
     ]
+    again = trip.update(0.0)
+    assert not [e for e in again if e.kind == TripEventKind.STATE_CROSSING]
 
+    # Road stops keep their single actionable announcement from _check_stops
+    # at five miles; the extra one-mile reminder is gone for the same reason.
     trip.position_mi = 120.3
     rest = trip.update(0.0)
-    assert any(
-        event.kind == TripEventKind.GPS_CUE
-        and event.message
-        == (
-            "Travel center at exit 175 ahead in 1 mile; confirmed truck parking; "
-            "press X to signal for the exit."
-        )
-        for event in rest
-    )
+    assert not _gps_events(rest)
 
 
 def test_gps_traffic_cue_deduplicates(world):
@@ -183,12 +177,11 @@ def test_gps_traffic_cue_deduplicates(world):
 def test_toll_cues_and_charges_deduplicate(world):
     trip, _truck = make_trip(world, "New York", "Philadelphia")
 
+    # No advance state-crossing chatter -- the line itself will speak when
+    # the truck reaches it.
     trip.position_mi = 6.1
     crossing = trip.update(0.0)
-
-    assert _gps_messages(crossing) == [
-        "In 1 mile, crossing from New York into New Jersey near New York-New Jersey line on I-95.",
-    ]
+    assert not _gps_events(crossing)
 
     trip.position_mi = 7.2
     advance = trip.update(0.0)

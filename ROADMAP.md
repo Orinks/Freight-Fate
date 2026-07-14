@@ -317,6 +317,29 @@ From a batch of player reports:
 
 ### Driving feel
 
+- [x] **Over-rev damage is now audible while it happens.** Sustained redline
+  (easiest by backing up fast for a long stretch: the road-coupled RPM pins at
+  `max_rpm`) silently ground the truck down 0.8%/s and only surfaced on the
+  end screen (issue #62). The driving loop now plays the warning cue and
+  speaks the rising damage total, repeating while it persists, with a short
+  grace so shift flares stay quiet. Follow-up if wanted: a governor that cuts
+  throttle at redline, and a reverse-speed cap, so sustained redline damage
+  is hard to reach at all.
+- [x] **Don't bind a controller when the controller setting is off.**
+  `ControllerManager.__init__` opens the first pad unconditionally; with the
+  setting disabled the game still enumerates and binds (issue #61: a fight
+  stick got picked up despite controller-off). Gate `_open_first()` and the
+  device-added hot-plug path on `enabled`, and open on `set_enabled(True)`.
+- [x] **Verify the controller off/on toggle does not double button events.**
+  Disabling now quits the SDL controller subsystem and re-enabling calls
+  `init()` again mid-session, which the `_reopen()` docstring warns
+  re-registers SDL's controller event watch so every event arrives twice
+  (PR #67 review). Play-verified with a real pad (2026-07-12): several
+  off/on toggle cycles in Settings, then button presses in menus -- no
+  doubled events on current pygame, so no follow-up needed. If duplicates
+  ever appear after a pygame upgrade, the fix is to make disable only close
+  the pad and keep the initialized subsystem alive, reserving `_sdl.quit()`
+  for `shutdown()`.
 - [x] **Gear / launch realism.** Shipped: gross mass is now
   cargo-weight-aware (tare + payload), so a heavy load accelerates slower,
   lugs on grades, and burns more fuel, and an empty deadhead is light and
@@ -459,6 +482,11 @@ Net-new realism candidates, roughly by area:
 - **Business realism.** The grounded 30-level company-driver to independent
   owner-operator arc is shipped; true-authority depth, trailer polish,
   operating-cost tuning, and market pricing are tracked under Business.
+- [x] **National hub network fill (407 → 623 cities).** Audit-driven map
+  expansion on the 1.8.x nightly line (community PR #68): every >10,000-pop
+  independent city without a bigger neighbor within ~30 miles was built with
+  the full enrichment recipe -- 1,287 legs, ~139,000 network miles, real toll
+  events on the major turnpikes, and posted speed limits on every leg.
 
 ## Local city service drives (built for 1.8, releases with 1.9)
 
@@ -976,3 +1004,7 @@ fit for an audio-first game.
 - [ ] Steam/itch.io distribution
 - [ ] Localization of all speech strings
 - [ ] Optional online leaderboards
+- [x] Opt-in Profile sharing for fictional road journals, achievements, and last-saved profile summaries
+- [x] Online posts carry the game's build identity (release tag or source checkout) so moderation can tell which version a driver runs
+- [x] Validated and server-signed private cloud revisions with verified public profile summaries
+- [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)

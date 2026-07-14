@@ -306,7 +306,8 @@ def test_rest_stop_cue_names_exit_when_linked(world):
     route.legs[0] = dataclasses.replace(leg, interchanges=(ix,))
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
     cue = next(c for c in trip.navigation_cues if c.kind == "rest_stop" and target.name in c.key)
-    assert "at exit 21" in cue.near_text
+    assert "at exit 21" in cue.text
+    assert cue.near_text == ""
 
 
 def test_rest_stop_cue_generic_without_linked_exit(world):
@@ -315,8 +316,8 @@ def test_rest_stop_cue_generic_without_linked_exit(world):
     route.legs[0] = dataclasses.replace(leg, interchanges=())
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
     cue = next(c for c in trip.navigation_cues if c.kind == "rest_stop" and target.name in c.key)
-    assert "exit" in cue.near_text  # "press X to take the exit"
-    assert "at exit" not in cue.near_text  # no fabricated exit number
+    assert "at exit" not in cue.text  # no fabricated exit number
+    assert cue.near_text == ""
 
 
 def test_first_leg_has_onramp_cue(world):
