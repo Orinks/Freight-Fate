@@ -93,6 +93,11 @@ def test_x_without_route_exit_reports_no_signal_target(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         driving.trip.position_mi = 0.0
+        # The randomly assigned route may open with a truck stop inside the
+        # signal window (a real Ubuntu CI draw had one at mile 1.0); clear
+        # the en-route stops so "no exit target" is a property of the test,
+        # not of the draw. The destination exit stays far beyond the window.
+        driving.trip.stops = []
         assert driving._upcoming_exit_stop() is None
 
         driving.handle_event(key_event(pygame.K_x))
