@@ -11,6 +11,34 @@ from .driving_rest_states import ShoulderSleepConfirmationState
 DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH = 55.0
 ROAD_GRIME_PER_MILE = 0.004
 
+# Plain "deliver into this city" badges (titles claim nothing extra). Mostly
+# cities the jukebox got to first; each badge's song lives in the catalog.
+SIMPLE_ARRIVAL_BADGES = {
+    "phoenix_az_us": "phoenix_arrival",
+    "wichita_ks_us": "wichita_arrival",
+    "bakersfield_ca_us": "bakersfield_arrival",
+    "las_vegas_nv_us": "vegas_arrival",
+    "nashville_tn_us": "nashville_delivery",
+    "el_paso_tx_us": "el_paso_arrival",
+    "laredo_tx_us": "laredo_arrival",
+    "baton_rouge_la_us": "baton_rouge_arrival",
+    "sacramento_ca_us": "sacramento_arrival",
+    "muskogee_ok_us": "muskogee_arrival",
+    "kansas_city_mo_us": "kansas_city_arrival",
+    "memphis_tn_us": "memphis_arrival",
+    "saginaw_mi_us": "saginaw_arrival",
+    "fort_worth_tx_us": "fort_worth_arrival",
+    "san_antonio_tx_us": "san_antonio_arrival",
+    "new_orleans_la_us": "new_orleans_arrival",
+    "houston_tx_us": "houston_arrival",
+    "winslow_az_us": "winslow_arrival",
+    "chattanooga_tn_us": "chattanooga_arrival",
+    # The song never settles which Jackson it means, so either one counts.
+    "jackson_tn_us": "jackson_arrival",
+    "jackson_ms_us": "jackson_arrival",
+    "abilene_tx_us": "abilene_arrival",
+}
+
 
 def _settlement_hours(driving: DrivingState) -> float:
     driven_hours = driving.trip.game_minutes / 60.0
@@ -1082,6 +1110,7 @@ class ArrivalState(MenuState):
             trip_damage,
             cargo_class_mult=xp_class_multiplier(job.cargo),
         )
+        announcements.extend(self._handle_fleet_promotion(previous_level))
         xp_bonus_notes = []
         if xp_class_multiplier(job.cargo) > 1.0:
             xp_bonus_notes.append("demanding freight")
@@ -1230,6 +1259,38 @@ class ArrivalState(MenuState):
         ]
         self._announcements = announcements
 
+    def _handle_fleet_promotion(self, previous_level: int) -> list[str]:
+        """Swap the carrier tractor when a level-up crosses a fleet tier.
+
+        The carrier hands the new unit over road-ready, so the profile's
+        equipment condition resets with it -- company repairs are carrier
+        billed anyway, this just skips the paperwork.
+        """
+        from ..models.carrier_fleet import (
+            assigned_truck_key,
+            fleet_tier_for_level,
+            fleet_upgrade_announcement,
+        )
+        from ..models.trucks import TRUCK_CATALOG
+
+        p = self.ctx.profile
+        if p.owns_equipment() or p.career.level <= previous_level:
+            return []
+        if fleet_tier_for_level(previous_level).key == fleet_tier_for_level(p.career.level).key:
+            return []
+        model = TRUCK_CATALOG[assigned_truck_key(p)]
+        p.truck_fuel_gal = model.specs.fuel_tank_gal
+        p.truck_damage_pct = 0.0
+        p.tire_wear_pct = 0.0
+        p.road_grime_pct = 0.0
+        for badge in ("fleet_upgrade",) + (
+            ("fleet_flagship",) if fleet_tier_for_level(p.career.level).key == "first_pick" else ()
+        ):
+            result = self.ctx.award_achievement(badge, announce=False)
+            if result is not None:
+                self._achievement_messages.append(result.message)
+        return [fleet_upgrade_announcement(p)]
+
     def _award_arrival_achievements(
         self,
         *,
@@ -1304,20 +1365,8 @@ class ArrivalState(MenuState):
         # Wall-clock badge conditions ("by Daybreak", "Midnight Freight") read
         # the destination's local clock, matching what the player just heard.
         arrival_hour = self.driving.trip.local_hour
-        # Plain "deliver into this city" badges (titles claim nothing extra).
-        simple_arrival = {
-            "phoenix_az_us": "phoenix_arrival",
-            "wichita_ks_us": "wichita_arrival",
-            "bakersfield_ca_us": "bakersfield_arrival",
-            "las_vegas_nv_us": "vegas_arrival",
-            "nashville_tn_us": "nashville_delivery",
-            "el_paso_tx_us": "el_paso_arrival",
-            "laredo_tx_us": "laredo_arrival",
-            "baton_rouge_la_us": "baton_rouge_arrival",
-            "sacramento_ca_us": "sacramento_arrival",
-        }
-        if dest in simple_arrival:
-            ids.append(simple_arrival[dest])
+        if dest in SIMPLE_ARRIVAL_BADGES:
+            ids.append(SIMPLE_ARRIVAL_BADGES[dest])
         # Badges whose title names a condition, so the condition is enforced:
         if dest == "amarillo_tx_us" and 5.0 <= arrival_hour < 12.0:  # "by Daybreak"
             ids.append("amarillo_arrival")
@@ -1344,8 +1393,20 @@ class ArrivalState(MenuState):
             ids.append("fifty_thousand_miles")
         if p.money >= 100_000.0:
             ids.append("hundred_grand")
-        if p.career.level >= 10:
-            ids.append("max_level")
+        # Ladder milestones for the 30-level arc. "max_level" is the level-20
+        # veteran badge (its copy has said "level twenty" since the ladder
+        # grew past the old cap).
+        level_badges = {
+            5: "level_five",
+            10: "level_ten",
+            15: "level_fifteen",
+            20: "max_level",
+            25: "level_twenty_five",
+            30: "level_thirty",
+        }
+        for milestone, badge in level_badges.items():
+            if p.career.level >= milestone:
+                ids.append(badge)
         if p.career.reputation >= 100.0:
             ids.append("top_reputation")
         if gross_pay >= 4_000.0:
@@ -1376,9 +1437,28 @@ class ArrivalState(MenuState):
             "Kentucky": "kentucky_delivery",
             "New Jersey": "jersey_delivery",
             "Wyoming": "wyoming_delivery",
+            "North Dakota": "dakota_delivery",
+            "South Dakota": "dakota_delivery",
+            "Montana": "montana_delivery",
+            "Maine": "new_england_delivery",
+            "Vermont": "new_england_delivery",
+            "New Hampshire": "new_england_delivery",
         }
         if dest_state in state_badges:
             ids.append(state_badges[dest_state])
+        # Map coverage milestones across the 623-city network.
+        city_count = add_unique_stat(p, "cities_delivered", dest)
+        if city_count >= 25:
+            ids.append("twenty_five_cities")
+        if city_count >= 75:
+            ids.append("seventy_five_cities")
+        if city_count >= 150:
+            ids.append("hundred_fifty_cities")
+        state_count = add_unique_stat(p, "states_delivered", dest_state)
+        if state_count >= 15:
+            ids.append("fifteen_states")
+        if state_count >= 30:
+            ids.append("thirty_states")
         region_badges = {
             "appalachia": "appalachia_delivery",
             "pacific_northwest": "pnw_delivery",

@@ -26,8 +26,9 @@ class AchievementAward:
 
 # Copy note: each badge has a specific inspiration, but player-facing text uses
 # song-title-level allusions and broad themes only. Do not quote lyrics or
-# recognizable lines, never reuse the exact artist or song title in the name or
-# description, and do not show the source field in the in-game menu.
+# recognizable lines, and never put the artist's name in the name or
+# description. A song title may appear when it is simply a place or plain
+# phrase (Jackson, Abilene); do not show the source field in the in-game menu.
 ACHIEVEMENTS: tuple[Achievement, ...] = (
     Achievement(
         "first_dispatch",
@@ -836,6 +837,228 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
         "Broke down bad enough to call for roadside help, waited out the mechanic, and finished the run anyway. Every touring act has a night like this; yours had freight.",
         "Truck care",
         "Dale Watson & Ray Benson - Bus' Breakdown",
+    ),
+    # -- Career ladder milestones: the 30-level arc pays out --------------------
+    Achievement(
+        "level_five",
+        "Regular on the Regional Board",
+        "Career level five. Dispatch stopped double-checking your paperwork, the lanes run a little wider, and you can even turn a load down without getting a lecture.",
+        "Career",
+        "Merle Haggard - Workin' Man Blues",
+    ),
+    Achievement(
+        "level_ten",
+        "Lead Driver, Says So on the Vest",
+        "Career level ten and senior status at the carrier. Premium freight, a deeper board, and new hires who assume you know where every dock in the country hides.",
+        "Career",
+        "Alabama - Forty Hour Week (For a Livin')",
+    ),
+    Achievement(
+        "level_fifteen",
+        "Halfway Up the Ladder",
+        "Career level fifteen. The working-capital target is taped to the sun visor now, and the owner-operator checklist reads less like a dream and more like a plan.",
+        "Career",
+        "Dolly Parton - 9 to 5",
+    ),
+    Achievement(
+        "level_twenty_five",
+        "Qualified for Your Own Numbers",
+        "Career level twenty-five. Whether or not you ever file the paperwork, this career now qualifies for its own operating authority. In freight, that counts as arriving.",
+        "Career",
+        "Waylon Jennings - Are You Sure Hank Done It This Way",
+    ),
+    Achievement(
+        "level_thirty",
+        "All the Way to the Top Rung",
+        "Career level thirty, the top of the ladder. Every rank, every gate, every unlock -- the whole climb is behind you, and the road ahead is simply yours to choose.",
+        "Career",
+        "Roger Miller - King of the Road",
+    ),
+    # -- The company fleet: better iron follows seniority ----------------------
+    Achievement(
+        "fleet_upgrade",
+        "Newer Iron from the Yard",
+        "Dispatch swapped your assigned tractor for a newer fleet unit, handed over fueled, serviced, and washed. Seniority has a smell, and it is fresh upholstery.",
+        "Truck care",
+        "Dale Watson - Truckin' Man",
+    ),
+    Achievement(
+        "fleet_flagship",
+        "First Pick of the Yard",
+        "You reached the top of the company fleet: the flagship tractor with the big bunk and the long legs. The yard hands you the keys before anyone else gets asked.",
+        "Truck care",
+        "Red Sovine - Phantom 309",
+    ),
+    Achievement(
+        "three_trucks",
+        "A Yard of Your Own",
+        "Three tractors with your name on the titles. Call it a fleet if you like; the insurance folder certainly does. Somebody still has to drive them all, though.",
+        "Truck care",
+        "Kathy Mattea - Eighteen Wheels and a Dozen Roses",
+    ),
+    # -- Business milestones: the arc's biggest doors ---------------------------
+    Achievement(
+        "owner_operator_buyin",
+        "Your Name on the Title",
+        "You bought into your first tractor position as a leased-on owner-operator. The revenue is bigger, the bills are yours, and so is every decision from here on.",
+        "Career",
+        "Red Simpson - I'm a Truck",
+    ),
+    Achievement(
+        "authority_active",
+        "Running Under Your Own Numbers",
+        "Own authority is active: your freight, your rates, your compliance folder. Nobody left to lease the risk to, and nobody to hand the upside to either.",
+        "Career",
+        "Hank Williams Jr. - A Country Boy Can Survive",
+    ),
+    Achievement(
+        "self_paid_course",
+        "Paid for the Classroom Yourself",
+        "You bought an endorsement course with your own money instead of waiting on carrier sponsorship. Ambition has tuition, and you covered it in cash at the counter.",
+        "Career",
+        "Aaron Tippin - Working Man's Ph.D.",
+    ),
+    # -- The 623-city map: pins, plates, and far corners ------------------------
+    Achievement(
+        "twenty_five_cities",
+        "Twenty-Five Pins in the Map",
+        "Deliveries settled in twenty-five different cities. The atlas in the door pocket is starting to fall open to the right page all on its own.",
+        "Landmarks",
+        "Hank Snow - I've Been Everywhere",
+    ),
+    Achievement(
+        "seventy_five_cities",
+        "Seventy-Five Docks Deep",
+        "Seventy-five different cities have signed for your freight. Receivers you have never met already know the truck, and somehow the coffee is bad in every one.",
+        "Landmarks",
+        "Willie Nelson - Still Is Still Moving to Me",
+    ),
+    Achievement(
+        "hundred_fifty_cities",
+        "Half the Map, Signed For",
+        "One hundred fifty cities delivered. On a map of six hundred some towns that is a serious dent, and the far side of the country is starting to feel left out.",
+        "Landmarks",
+        "Alan Jackson - Drive (For Daddy Gene)",
+    ),
+    Achievement(
+        "fifteen_states",
+        "Fifteen State Lines Behind You",
+        "You have delivered freight in fifteen different states. The trailer plate is a conversation starter now, and the glovebox is mostly toll receipts.",
+        "Landmarks",
+        "Bobby Bare - 500 Miles Away from Home",
+    ),
+    Achievement(
+        "thirty_states",
+        "Thirty States and Counting",
+        "Thirty states have taken freight off your trailer. Most folks need a lifetime and a camper to see that much country; you did it hauling other people's furniture.",
+        "Landmarks",
+        "Johnny Cash - Ride This Train",
+    ),
+    Achievement(
+        "dakota_delivery",
+        "Freight for the High Plains",
+        "A load delivered into the Dakotas, where the horizon does most of the talking and the wind files a counterclaim. Somebody has to keep the prairie stocked.",
+        "Landmarks",
+        "Corb Lund - Long Gone to Saskatchewan",
+    ),
+    Achievement(
+        "montana_delivery",
+        "Under the Biggest Sky",
+        "Freight settled in Montana, where the interstate runs long, the radio runs out, and the sky goes on far past the windshield. Worth the mileage every single time.",
+        "Landmarks",
+        "Merle Haggard - Big City",
+    ),
+    Achievement(
+        "new_england_delivery",
+        "Down East with a Dry Van",
+        "A delivery into northern New England: narrow bridges, frost heaves, and town names that pick fights with the GPS. The chowder alone justifies the deadhead home.",
+        "Landmarks",
+        "Dick Curless - A Tombstone Every Mile",
+    ),
+    # -- Song cities: places the jukebox got to first ---------------------------
+    Achievement(
+        "muskogee_arrival",
+        "Still Proud in Muskogee",
+        "A load delivered into Muskogee, Oklahoma, where folks still take pride in living right and shaking your hand. Clean paperwork counts as manners out here.",
+        "Landmarks",
+        "Merle Haggard - Okie From Muskogee",
+    ),
+    Achievement(
+        "kansas_city_arrival",
+        "Brighter Than the Local TV Star",
+        "Freight delivered into Kansas City, home of burnt ends, wide boulevards, and local celebrities who will not help you back into a dock. You managed anyway.",
+        "Landmarks",
+        "Roger Miller - Kansas City Star",
+    ),
+    Achievement(
+        "memphis_arrival",
+        "However You Got to Memphis",
+        "Freight put down in Memphis, at the top of the Delta where the river hauls nearly as much as the highway. Whatever brought you here, the dock only asked for the bills.",
+        "Landmarks",
+        "Tom T. Hall - That's How I Got to Memphis",
+    ),
+    Achievement(
+        "saginaw_arrival",
+        "Cold Bay, Warm Welcome",
+        "A delivery into Saginaw, up where the bay wind finds every gap in the cab insulation. Half the town works the water; the freight still comes in by road.",
+        "Landmarks",
+        "Lefty Frizzell - Saginaw, Michigan",
+    ),
+    Achievement(
+        "fort_worth_arrival",
+        "Cowtown Crossed Your Mind",
+        "A load delivered into Fort Worth, where the stockyards went showbiz but the freight stayed honest. Dallas sits close enough to wave at and far enough to ignore.",
+        "Landmarks",
+        "George Strait - Does Fort Worth Ever Cross Your Mind",
+    ),
+    Achievement(
+        "san_antonio_arrival",
+        "Backing Down to San Antone",
+        "Freight settled in San Antonio, down where the missions keep their bells and the breakfast tacos outrank the barbecue. The river walks; your trailer rolled.",
+        "Landmarks",
+        "Bob Wills & His Texas Playboys - New San Antonio Rose",
+    ),
+    Achievement(
+        "new_orleans_arrival",
+        "Good Morning, Crescent City",
+        "A load brought into New Orleans, past the wards and the water, where even the freight moves a little behind the beat. Nobody minded, and the coffee fixed it.",
+        "Landmarks",
+        "Willie Nelson - City of New Orleans",
+    ),
+    Achievement(
+        "houston_arrival",
+        "One Day Closer, Says the Odometer",
+        "Freight delivered into Houston, a city sprawling far enough to have its own weather and at least four rush hours. Every mile of it counted toward somewhere that matters.",
+        "Landmarks",
+        "Larry Gatlin & The Gatlin Brothers - Houston (Means I'm One Day Closer to You)",
+    ),
+    Achievement(
+        "winslow_arrival",
+        "A Corner Worth Standing On",
+        "A load delivered into Winslow, a small Arizona town with one world-famous corner. Park the rig, stretch your legs, and enjoy being the second-most photographed thing downtown.",
+        "Landmarks",
+        "Eagles - Take It Easy",
+    ),
+    Achievement(
+        "chattanooga_arrival",
+        "Quicker Than the Old Express",
+        "Freight rolled into Chattanooga ahead of anything on rails, through the ridge cuts where the river bends twice to look around. The old trains would have needed a schedule.",
+        "Landmarks",
+        "Glenn Miller - Chattanooga Choo Choo",
+    ),
+    Achievement(
+        "jackson_arrival",
+        "The Jackson Everybody Sings About",
+        "A load delivered into Jackson. Folks have argued for sixty years over which Jackson the song means, Tennessee or Mississippi, so this badge takes either. Your bill of lading, at least, is specific.",
+        "Landmarks",
+        "Johnny Cash & June Carter - Jackson",
+    ),
+    Achievement(
+        "abilene_arrival",
+        "Prettiest Town on the Manifest",
+        "Freight delivered into Abilene, out where the West begins in earnest and nobody honks at a slow dock turn. The song got there first, but the load still needed a truck.",
+        "Landmarks",
+        "George Hamilton IV - Abilene",
     ),
 )
 

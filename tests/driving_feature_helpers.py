@@ -65,6 +65,10 @@ def start_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # depart on assigned route
     assert isinstance(app.state, DrivingState)
     assert app.state.phase == "delivery"
+    # The origin yard may carry a turn-level street chain; these feature
+    # tests exercise highway machinery, so skip the departure chain (the
+    # chain has its own coverage in the surface/departure-chain suites).
+    app.state._departure_checked = True
     release_air_brakes(app.state)
     return app.state
 
@@ -98,6 +102,13 @@ def take_destination_exit(driving):
     driving.truck.velocity_mps = 0.0
     driving._update_exit(0.0)
     driving._update_exit(driving._ramp_mi)
+    if driving._surface_chain:
+        # Chain-capable destinations flow off the ramp onto city streets;
+        # fast-forward the street chain to the facility gate.
+        driving.trip.position_mi = driving.trip.total_miles
+        driving.trip.finished = True
+        driving.truck.velocity_mps = 0.0
+        driving._handle_arrival_gate()
     finish_timed_state(driving.ctx._app)
 
 

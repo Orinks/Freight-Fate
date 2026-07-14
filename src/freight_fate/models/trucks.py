@@ -50,6 +50,158 @@ TRUCK_CATALOG: dict[str, TruckModel] = {
             mass_kg=37_500.0,
         ),
     ),
+    # -- Carrier fleet and used-market tractors --------------------------------
+    # Company drivers meet these as dispatch-assigned equipment (see
+    # carrier_fleet); after the owner-operator buy-in the same models sell
+    # here as used fleet units or retail trucks.
+    "sunset_day_cab": TruckModel(
+        "sunset_day_cab",
+        "sunset day cab",
+        38_000.0,
+        "A tidy regional day cab: light, easy on diesel, and happy on "
+        "short lanes. No bunk, no long-haul pretensions.",
+        TruckSpecs(
+            max_torque_nm=2_300.0,
+            fuel_tank_gal=150.0,
+            drag_coefficient=0.62,
+            fuel_burn_factor=0.95,
+            mass_kg=35_500.0,
+        ),
+    ),
+    "ridgeline_sleeper": TruckModel(
+        "ridgeline_sleeper",
+        "ridgeline sleeper",
+        58_000.0,
+        "A mid-roof regional sleeper with a little more pull and a "
+        "bigger tank: the workhorse most fleets hand a proven regional "
+        "driver.",
+        TruckSpecs(
+            max_torque_nm=2_500.0,
+            fuel_tank_gal=165.0,
+            drag_coefficient=0.64,
+            mass_kg=36_200.0,
+        ),
+    ),
+    "old_longnose": TruckModel(
+        "old_longnose",
+        "old longnose",
+        49_000.0,
+        "A classic long-hood conventional: strong pull and a proud "
+        "profile, but it fights the wind and drinks for the privilege.",
+        TruckSpecs(
+            max_torque_nm=2_700.0,
+            fuel_tank_gal=165.0,
+            drag_coefficient=0.72,
+            fuel_burn_factor=1.12,
+            mass_kg=36_800.0,
+        ),
+    ),
+    "highline_sleeper": TruckModel(
+        "highline_sleeper",
+        "highline sleeper",
+        82_000.0,
+        "A raised-roof long-haul sleeper with a two hundred gallon tank "
+        "and honest aerodynamics: built to live on the interstate for "
+        "days at a time.",
+        TruckSpecs(
+            max_torque_nm=2_600.0,
+            fuel_tank_gal=200.0,
+            drag_coefficient=0.60,
+            fuel_burn_factor=0.97,
+            mass_kg=36_400.0,
+        ),
+    ),
+    "big_bunk_conventional": TruckModel(
+        "big_bunk_conventional",
+        "big bunk conventional",
+        89_000.0,
+        "A big-bunk conventional with serious torque for mountain "
+        "corridors and heavy long-haul freight. Comfortable, capable, "
+        "and a little thirsty.",
+        TruckSpecs(
+            max_torque_nm=2_800.0,
+            fuel_tank_gal=210.0,
+            drag_coefficient=0.66,
+            fuel_burn_factor=1.05,
+            mass_kg=37_000.0,
+        ),
+    ),
+    "aero_cruiser": TruckModel(
+        "aero_cruiser",
+        "aero cruiser",
+        95_000.0,
+        "A slippery fleet aero tractor tuned for fuel economy: modest "
+        "torque, long legs, and the best mileage of the long-haul pool.",
+        TruckSpecs(
+            max_torque_nm=2_500.0,
+            fuel_tank_gal=190.0,
+            drag_coefficient=0.55,
+            fuel_burn_factor=0.90,
+            mass_kg=35_800.0,
+        ),
+    ),
+    "summit_flagship": TruckModel(
+        "summit_flagship",
+        "summit flagship",
+        128_000.0,
+        "A premium flagship sleeper: big power, a two hundred twenty "
+        "gallon tank, and clean aerodynamics. The truck senior drivers "
+        "ask the shop about.",
+        TruckSpecs(
+            max_torque_nm=2_900.0,
+            fuel_tank_gal=220.0,
+            drag_coefficient=0.57,
+            fuel_burn_factor=0.95,
+            mass_kg=36_600.0,
+        ),
+    ),
+    "silver_aero": TruckModel(
+        "silver_aero",
+        "silver aero",
+        142_000.0,
+        "A polished premium aero tractor: the slipperiest shape in the "
+        "catalog with plenty of pull, sipping diesel at cruise like a "
+        "truck half its size.",
+        TruckSpecs(
+            max_torque_nm=2_750.0,
+            fuel_tank_gal=220.0,
+            drag_coefficient=0.52,
+            fuel_burn_factor=0.88,
+            mass_kg=36_000.0,
+        ),
+    ),
+    "presidential_sleeper": TruckModel(
+        "presidential_sleeper",
+        "presidential sleeper",
+        185_000.0,
+        "The top of the yard: huge torque, a two hundred forty gallon "
+        "tank, and brakes that shrug off long mountain descents. First "
+        "pick goes to the carrier's best.",
+        TruckSpecs(
+            max_torque_nm=3_100.0,
+            fuel_tank_gal=240.0,
+            drag_coefficient=0.58,
+            fuel_burn_factor=0.98,
+            mass_kg=37_200.0,
+            brake_fade_temp_c=450.0,
+        ),
+    ),
+    "night_flag_aero": TruckModel(
+        "night_flag_aero",
+        "night flag aero",
+        198_000.0,
+        "A flagship aero sleeper for drivers who live out west: enormous "
+        "range, upgraded brakes, and the lowest drag on the road. It "
+        "turns fuel islands into scenery.",
+        TruckSpecs(
+            max_torque_nm=2_950.0,
+            fuel_tank_gal=240.0,
+            drag_coefficient=0.50,
+            fuel_burn_factor=0.85,
+            mass_kg=36_200.0,
+            brake_fade_temp_c=450.0,
+        ),
+    ),
 }
 
 

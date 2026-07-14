@@ -188,6 +188,7 @@ class BusinessStatusState(MenuState):
             "maintenance reserve, insurance, trailer program, truck payment "
             "reserve, and settlement fees."
         )
+        self.ctx.award_achievement("owner_operator_buyin")
         self.refresh()
 
     def _set_authority_readiness(self) -> None:
@@ -232,6 +233,7 @@ class BusinessStatusState(MenuState):
             "Settlement includes insurance, compliance, trailer, truck, and "
             "factoring costs."
         )
+        self.ctx.award_achievement("authority_active")
         self.refresh()
 
 
@@ -423,6 +425,8 @@ class TruckShopState(MenuState):
             )
             if model.key == "heavy_hauler":
                 self.ctx.award_achievement("heavy_hauler")
+            if len(p.owned_trucks) >= 3:
+                self.ctx.award_achievement("three_trucks")
             return
         self.ctx.audio.play("vehicle/truck_door")
         self._switch_to(model)
@@ -636,4 +640,5 @@ class EndorsementCourseState(MenuState):
             f"{label} endorsement. Matching freight is unlocked on the "
             f"dispatch board. You have {p.money:,.0f} dollars left."
         )
+        self.ctx.award_achievement("self_paid_course")
         self.refresh()

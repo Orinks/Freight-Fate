@@ -34,6 +34,7 @@ from ..models.jobs import (
     CARGO_CATALOG,
     Job,
     JobBoard,
+    board_offer_count,
     facility_text,
     job_from_payload,
     job_payload,
@@ -568,7 +569,7 @@ def dispatch_cache_key(p) -> dict:
         "trailer_programs": sorted(getattr(p, "trailer_programs", ())),
         "level": p.career.level,
         "endorsements": sorted(p.career.endorsements),
-        "count": 5,
+        "count": board_offer_count(p.career.level),
     }
 
 
@@ -589,6 +590,7 @@ def open_freight_market(ctx) -> list[Job]:
         jobs = board.offers(
             p.current_city,
             p.career.endorsements,
+            count=board_offer_count(p.career.level),
             level=p.career.level,
             market=p.market,
             carrier_key=getattr(p, "carrier_key", ""),

@@ -11,6 +11,7 @@
 ## 1.9 in flight (`feat/career-1.9`)
 
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
+- [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
 - [x] **Physics test bench** (`tools/physics_bench.py`): deterministic scripted-driver scenarios over the real truck model -- descents, runaway coasts, stop tests -- printing plain-text, screen-reader-friendly, diffable reports (peak brake temp, fade onset, wear added, the cues the game would have played). The tuning loop for every physics change; `tests/test_physics_bench.py` keeps its orderings honest. Now also a tuning instrument: `--sweep` re-runs a scenario across one knob (speed, cargo, grade, wear) one line per value, and `--solve` bisects for an edge ("the fastest drag speed that stays under fade"), both plain-text and deterministic.
 - [x] **Per-truck condition.** Wear, damage, and fuel moved off the profile into `truck_conditions`, keyed by truck, so each owned tractor keeps its own state and swapping trucks no longer teleports condition. Legacy saves migrate (all owned trucks inherit current wear; no pristine spare), per-truck wear is under the save signature, and the field is scoped by truck *model* key -- true per-instance trucks are still the rental feature's job.
@@ -79,6 +80,21 @@ city service drives below.)
       direction flipped -- then merges up the on-ramp onto the highway trip
       with clock and toll continuity and a `departure_chain` save marker.
       Facilities without turn-level data keep the scripted highway start.
+- [ ] **Tier-1 surface coverage expansion.** The "Data Expansion" pass of
+      `docs/surface-roads-plan.md`: re-run the endpoint and local-approach
+      sweeps over the post-expansion 623-city map (the checked-in files
+      predate the slug migration and stop at the 2026-06-27 facility set),
+      and revisit the excluded facility types (grain elevators, ports, cold
+      storage) that already have high source-backed endpoint rates. A July
+      playtest found the default Evansville starter yard had no turn-level
+      chain -- starter cities must never regress below turn-level coverage.
+- [ ] **Surface intersections.** Phase 4 of `docs/surface-roads-plan.md`:
+      stop signs and traffic signals at surface-street junctions, junction
+      decision prompts, and traffic pressure at intersections -- extending
+      the ramp-terminal signal mechanics (red/green cycle, grace distance,
+      cross-traffic consequences) onto the tier-1 street chains. Deferred
+      until local-drive pacing was proven in playtests; the per-system
+      harness sweep now passes clean across all 38 corridors.
 
 ### Maneuvers, enforcement, and the working day
 
@@ -127,6 +143,22 @@ section below and the Unreleased changelog; the release-line view:
       level-25 own authority, and independent ranks through 30 -- with
       distinct guidance voices per level band and haul-length caps that
       grow through the whole arc instead of maxing out by level 12.
+- [x] **A months-long grind where every level pays out.** Rebalanced XP
+      (flat completion lesson, deeper on-time streaks, clean-cargo bonus,
+      stronger specialty multipliers) and re-paced level 21-30 thresholds
+      put level 30 at roughly 300+ real hours with no single-level walls,
+      verified by a deterministic pacing model (`tools/career_pacing.py` +
+      `tests/test_career_pacing.py`). Every rank now names a concrete
+      unlock: extra decline at 5, board depth at 6/10/12, specialized
+      freight weighting at 11, premium long-haul lanes at 12, the
+      owner-operator checklist read from 14, and fleet tractors below.
+- [x] **Dispatch-assigned company tractors.** A carrier fleet
+      (`models/carrier_fleet.py`) assigns every company driver a tractor by
+      level band -- yard standard, regional at 4, long-haul at 9, premium at
+      13, first pick of the yard at 17 -- deterministically per driver and
+      carrier. Tier promotions hand over a fresh unit at settlement with
+      spoken hand-over text. Ten new tractor models fill the fleet and the
+      owner-operator dealer catalog.
 - [x] **Dispatch freedom is earned.** New hires run the load and lane
       dispatch assigns -- accept or decline against a small budget that
       refills on promotion, no route menu -- with load choice from the full
@@ -143,9 +175,19 @@ section below and the Unreleased changelog; the release-line view:
       first dispatch is accepted, a Career plan terminal item naming the
       next practical step, and a rewritten How to play that teaches earned
       dispatch freedom.
-- [x] **114 achievements.** The badge wall nearly doubles: state, region,
-      and city arrivals, cargo firsts, close calls, mishaps, and career
-      milestones, each nodding to a country or trucking song.
+- [x] **145 achievements.** The badge wall nearly doubles and keeps
+      growing: state, region, and city arrivals, cargo firsts, close calls,
+      mishaps, and career milestones, each nodding to a country or trucking
+      song. The 1.9 arc adds level milestones through 30, business-gate
+      badges (buy-in, own authority, self-paid courses), fleet-tractor
+      badges, map-coverage milestones (cities, states, the Dakotas,
+      Montana, northern New England) sized for the 623-city map, and twelve
+      song-city arrivals (Muskogee, Memphis, Kansas City, Saginaw, Fort
+      Worth, San Antonio, New Orleans, Houston, Winslow, Chattanooga,
+      Abilene, and Jackson -- Tennessee or Mississippi both count) via the
+      shared `SIMPLE_ARRIVAL_BADGES` mapping. The copy rule now allows a
+      song title in badge text when it is simply a place name; artist names
+      and lyrics stay out.
 - [x] **Save compatibility.** Careers back through the version-4 schema
       load with sensible defaults, and newer-snapshot saves no longer crash
       older-schema loads.

@@ -88,11 +88,18 @@ def test_carrier_paid_charges_do_not_increase_player_progression():
         assert f"Carrier-paid or reimbursed charges {carrier_charges:,.0f} dollars" in summary
         assert app.ctx.profile.money == pytest.approx(1000.0 + expected.net_before_advance)
         assert app.ctx.profile.career.total_earnings == pytest.approx(expected.net_before_advance)
-        from freight_fate.models.career import xp_class_multiplier
-
-        assert app.ctx.profile.career.xp == pytest.approx(
-            job.distance_mi * 1.2 * xp_class_multiplier(job.cargo)
+        from freight_fate.models.career import (
+            DELIVERY_COMPLETION_XP,
+            XP_CLEAN_BONUS,
+            XP_PER_MILE_ON_TIME,
+            xp_class_multiplier,
         )
+
+        expected_xp = (
+            DELIVERY_COMPLETION_XP
+            + job.distance_mi * XP_PER_MILE_ON_TIME * xp_class_multiplier(job.cargo)
+        ) * (1.0 + XP_CLEAN_BONUS)
+        assert app.ctx.profile.career.xp == pytest.approx(expected_xp)
         assert app.ctx.profile.career.reputation == pytest.approx(52.0)
     finally:
         app.shutdown()

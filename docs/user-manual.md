@@ -248,15 +248,27 @@ rest stops, drawn against the load you are hauling). The advance is offered
 only while cash is low, is capped, and is repaid automatically out of your
 next delivery settlement, so a negative balance is never a dead end.
 
-After the owner-operator buy-in, the garage sells:
+As a company driver, dispatch assigns your tractor, and better equipment
+follows seniority: every new hire starts in the same trainer-spec rig, then
+the carrier upgrades your assignment at level 4 (a newer regional unit),
+level 9 (a long-haul sleeper), level 13 (a premium tractor), and level 17
+(first pick of the yard). Each hand-over is announced at settlement and
+arrives fueled, serviced, and washed. Which model you get is the carrier's
+call -- two drivers at the same level can be handed different iron.
 
-| Upgrade, Truck, Program, Or Trailer | Effect |
+After the owner-operator buy-in you take over the tractor you were assigned,
+and the garage sells the rest of the catalog: day cabs, regional and
+long-haul sleepers, long-nose classics, big-bunk conventionals, aero
+flagships, and the heavy hauler. Each entry speaks its practical tradeoff --
+pulling power, tank size, aerodynamics, and fuel appetite. The garage also
+sells:
+
+| Upgrade, Program, Or Trailer | Effect |
 | --- | --- |
 | Engine tune | Adds pulling power. |
 | Aerodynamic kit | Improves highway fuel economy. |
 | Long-range tank | Adds 50 gallons of capacity. |
 | Reinforced brakes | Helps the brakes resist fade longer. |
-| Heavy hauler | Adds more torque and a 200-gallon tank, with worse aerodynamics and higher fuel use. |
 | Reefer trailer program | Opens refrigerated and fresh food cargo for owner-operators. |
 | Flatbed trailer program | Opens steel, machinery, construction, lumber, and paper cargo for owner-operators. |
 | Bulk trailer program | Opens grain, farm inputs, and loose bulk cargo for owner-operators. |
@@ -316,10 +328,19 @@ direct freight gross, and the row includes a short take-home estimate before
 any pay advance. If you own a matching trailer, the job row says so and
 settlement uses the owned trailer reserve instead of a trailer-program charge.
 
-Deliveries earn money, experience, reputation, and career stats. Leveling up can
-unlock longer dispatch distances, better early-career minimum pay, more cargo
-variety, refrigerated freight at level 2, heavy-haul freight at level 3,
-high-value freight at level 4, and business-path ranks through level 30.
+Deliveries earn money, experience, reputation, and career stats. Every settled
+load teaches a base amount of experience on top of its miles, on-time streaks
+compound the lesson, delivering the cargo undamaged adds a bonus, and specialty
+endorsement freight teaches half again as much per mile. Every level up hands
+you something concrete: longer dispatch distances every level, refrigerated
+freight at level 2, heavy-haul at 3, high-value and a newer assigned tractor at
+4, an extra assigned-load decline at 5, a deeper dispatch board at 6, 10, and
+12, load choice at 8, a long-haul sleeper at 9, specialty freight favored on
+your board at 11, premium long-haul lanes at 12, a premium tractor at 13, the
+owner-operator checklist from 14, first pick of the yard at 17, and
+business-path ranks through level 30. The full ladder is a months-long career:
+early levels land within your first sessions, and the top rank is a long-haul
+project measured in real months of driving.
 
 ## Pickup, Loading, And Route Planning
 

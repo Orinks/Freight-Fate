@@ -2,7 +2,51 @@
 
 ## Unreleased
 
+### Added
+
+- **Hundreds more facilities now start and end on real city streets.**
+  Short yard-to-facility drives used to skip their street route and fall
+  back to one straight access road; now any facility whose real path has
+  actual turns keeps them, even close to the yard. Deadheads and final
+  approaches at hundreds more warehouses, cross-docks, and company yards --
+  including the Evansville starter yard every new company driver leaves
+  first -- speak real turn-by-turn directions on named local streets.
+
+- **Dispatch assigns your tractor now, and better equipment follows
+  seniority.** Like a real fleet, the carrier hands every new hire the same
+  trainer-spec rig, then upgrades your assigned tractor as you climb: a
+  newer regional unit at level 4, a long-haul sleeper at 9, a premium
+  tractor at 13, and first pick of the yard at 17. Each hand-over is spoken
+  at settlement and arrives fueled, serviced, and washed. Ten new tractor
+  models -- day cabs, long-nose classics, big-bunk conventionals, and
+  slippery aero flagships -- fill the fleet, and after the owner-operator
+  buy-in the same models are yours to buy at the dealer.
+
+- **Thirty-one new achievements for the bigger map and the longer
+  career.** Badges now mark career levels 5 through 30, the owner-operator
+  buy-in, activating your own authority, paying for your own endorsement
+  course, owning three tractors, and fleet tractor upgrades -- plus
+  map-wide progress: twenty-five, seventy-five, and one hundred fifty
+  different cities, fifteen and thirty states, and first deliveries into
+  the Dakotas, Montana, and northern New England. Twelve more celebrate
+  deliveries into cities the jukebox got to first: Muskogee, Memphis,
+  Kansas City, Saginaw, Fort Worth, San Antonio, New Orleans, Houston,
+  Chattanooga, Abilene, either Jackson the famous duet might mean, and a
+  small Arizona town with one very famous corner. Each still nods to a
+  country or trucking song.
+
 ### Changed
+
+- **The career is a months-long arc now, and every level up hands you
+  something real.** Experience pays out more honestly -- every settled load
+  teaches a flat lesson, on-time streaks compound up to forty-five percent,
+  undamaged cargo adds a bonus, and specialty freight teaches half again as
+  much -- so early levels land within your first sessions while the road to
+  level 30 still takes months of real evenings. Along the way every rank
+  unlocks something concrete: an extra load refusal at level 5, a deeper
+  dispatch board at 6, 10, and 12, specialty freight favored on your board
+  at 11, premium long-haul lanes at 12, the full owner-operator checklist
+  read out from level 14, and the fleet tractor upgrades above.
 
 - **The engine brake now works like a real three-stage jake.** It slows the
   truck through the gears, so it pulls hardest in a low gear with the engine
@@ -25,7 +69,7 @@
   off the lot rolls out fresh with a full tank. Careers from earlier versions
   load unchanged: your current wear settles onto every truck you own.
 
-- **Career 1.9 playtests now follow more of a driver's real journey.** Reusable transcript checks cover career stages, driving modes, keyboard-operated controls, speech ordering, and deterministic road events so regressions are caught before they reach players.
+- **Career 1.9 playtests now follow more of a driver's real journey.** Reusable transcript checks cover career stages, driving modes, keyboard-operated controls, speech ordering, and deterministic road events so regressions are caught before they reach players. A new pacing model also verifies the months-long level curve stays honest as the balance changes.
 
 - **Relaxed driving now leaves real breathing room without removing the truck.**
   Relaxed pacing keeps weather, traffic, air brakes, fatigue, hazards, and

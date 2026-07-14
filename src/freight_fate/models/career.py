@@ -7,7 +7,10 @@ from dataclasses import dataclass, field
 from .career_ladder import MAX_CAREER_LEVEL, next_rank_for_level, rank_for_level
 
 # XP needed for each level in the 30-level career ladder. The first 20
-# thresholds stay fixed so existing saves keep their current level.
+# thresholds stay fixed so existing saves keep their current level. Levels
+# 21 through 30 are new on the 1.9 line and are paced so each late rank
+# lands after a solid evening or two of freight instead of a lost weekend:
+# the whole arc is a months-long career, but every level keeps paying out.
 LEVEL_XP = [
     0,
     1000,
@@ -29,16 +32,16 @@ LEVEL_XP = [
     152_000,
     176_000,
     202_000,
-    230_000,
-    260_000,
-    292_000,
-    326_000,
-    362_000,
-    400_000,
-    440_000,
-    482_000,
-    526_000,
-    572_000,
+    216_000,
+    231_000,
+    247_000,
+    264_000,
+    282_000,
+    301_000,
+    321_000,
+    342_000,
+    364_000,
+    387_000,
 ]
 
 # Endorsements unlock automatically at these levels: the carrier sponsors
@@ -65,11 +68,18 @@ ENDORSEMENT_LABELS_SPOKEN = {
 
 # Experience scales with what the freight demands, not just its miles:
 # specialty (endorsement) cargo and premium mid-level cargo teach more per
-# mile, and a run of consecutive on-time deliveries compounds the lesson.
-XP_SPECIALTY_MULT = 1.4
-XP_PREMIUM_MULT = 1.15
+# mile, a run of consecutive on-time deliveries compounds the lesson, and
+# bringing the cargo in undamaged proves the lesson stuck. Every settled
+# load also teaches a flat slice of the trade -- docks, paperwork, people --
+# so short early hauls still move the career.
+XP_SPECIALTY_MULT = 1.5
+XP_PREMIUM_MULT = 1.25
 XP_STREAK_STEP = 0.05  # extra share per consecutive on-time delivery
-XP_STREAK_MAX_BONUS = 0.25
+XP_STREAK_MAX_BONUS = 0.45
+XP_CLEAN_BONUS = 0.15  # bonus share for delivering with no real damage
+DELIVERY_COMPLETION_XP = 150.0  # flat lesson per settled load (halved late)
+XP_PER_MILE_ON_TIME = 1.6
+XP_PER_MILE_LATE = 0.9
 
 
 def xp_class_multiplier(cargo) -> float:
@@ -151,9 +161,13 @@ class Career:
             self.on_time_streak += 1
         else:
             self.on_time_streak = 0
-        gained = miles * (1.2 if on_time else 0.8) * max(1.0, cargo_class_mult)
+        completion = DELIVERY_COMPLETION_XP * (1.0 if on_time else 0.5)
+        per_mile = XP_PER_MILE_ON_TIME if on_time else XP_PER_MILE_LATE
+        gained = completion + miles * per_mile * max(1.0, cargo_class_mult)
         if on_time:
             gained *= 1.0 + xp_streak_bonus(self.on_time_streak)
+        if damage_pct <= 1.0:
+            gained *= 1.0 + XP_CLEAN_BONUS
         self.xp += gained
         if on_time:
             self.on_time_deliveries += 1

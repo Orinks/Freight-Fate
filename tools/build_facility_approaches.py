@@ -29,7 +29,11 @@ DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 ACCESSED_DATE = "2026-06-27"
 DEFAULT_STATES = ("Illinois", "Indiana", "Ohio")
 MAX_ROUTE_MI = 18.0
+# A single-segment path shorter than this adds nothing over the fallback leg,
+# but a genuine multi-turn chain stays playable well below it now that the
+# runtime drives surface segments (Phases 2-3 of docs/surface-roads-plan.md).
 MIN_PLAYABLE_ROUTE_MI = 2.0
+MIN_CHAIN_ROUTE_MI = 0.5
 RAW_MARKERS = ("osm_id", "amenity=", "highway=", "operator=", "node/", "way/", "relation/")
 HIGH_CONFIDENCE_TYPES = {
     "company_yard",
@@ -132,15 +136,19 @@ def build_facility_approaches(
 
 
 def collect_targets() -> list[FacilityTarget]:
+    # Read endpoints and local approaches through the world so their keys are
+    # remapped onto current slug facility ids (the checked-in files may still
+    # carry pre-slug keys); facilities the data files miss are skipped rather
+    # than crashing the batch.
     world = get_world()
-    endpoints = json.loads(FACILITY_ENDPOINTS_PATH.read_text(encoding="utf-8-sig"))["endpoints"]
-    local_approaches = json.loads(LOCAL_APPROACHES_PATH.read_text(encoding="utf-8"))["approaches"]
     targets: list[FacilityTarget] = []
     for city_name in world.city_names():
         city = world.city(city_name)
         for location in city.locations:
-            endpoint = endpoints[location.id]
-            approach = local_approaches[f"facility:{location.id}"]
+            endpoint = world.facility_endpoint(city_name, location.name)
+            approach = world.facility_approach(city_name, location.name)
+            if endpoint is None or approach is None:
+                continue
             targets.append(
                 FacilityTarget(
                     facility_id=location.id,
@@ -148,16 +156,16 @@ def collect_targets() -> list[FacilityTarget]:
                     state=city.state,
                     facility_name=location.name,
                     facility_type=location.type,
-                    endpoint_name=str(endpoint["endpoint_name"]),
-                    lat=float(endpoint["lat"]),
-                    lon=float(endpoint["lon"]),
+                    endpoint_name=endpoint.endpoint_name,
+                    lat=endpoint.lat,
+                    lon=endpoint.lon,
                     start_lat=city.lat,
                     start_lon=city.lon,
-                    endpoint_source_backed=bool(endpoint["source_backed"]),
-                    endpoint_fallback=bool(endpoint["fallback"]),
-                    endpoint_source_note=str(endpoint["source_note"]),
-                    local_approach_miles=float(approach["approach_miles"]),
-                    local_approach_road=str(approach["road"]),
+                    endpoint_source_backed=endpoint.source_backed,
+                    endpoint_fallback=endpoint.fallback,
+                    endpoint_source_note=endpoint.source_note,
+                    local_approach_miles=approach.approach_miles,
+                    local_approach_road=approach.road,
                 )
             )
     return targets
@@ -188,7 +196,10 @@ def approach_record(
     geometry,
     state_set: set[str],
 ) -> dict[str, Any]:
-    too_short = geometry is not None and geometry.miles <= MIN_PLAYABLE_ROUTE_MI
+    too_short = geometry is not None and (
+        geometry.miles <= MIN_CHAIN_ROUTE_MI
+        or (geometry.miles <= MIN_PLAYABLE_ROUTE_MI and len(geometry.segments) < 2)
+    )
     turn_level = geometry is not None and not too_short
     reason = fallback_reason(target, state_set, turn_level)
     if too_short:

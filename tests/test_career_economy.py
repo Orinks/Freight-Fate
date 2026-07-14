@@ -30,37 +30,82 @@ def _job(cargo="general", miles=200.0, pay=900.0) -> Job:
 
 
 def test_specialty_and_premium_cargo_teach_more_per_mile():
-    assert xp_class_multiplier(CARGO_CATALOG["refrigerated"]) == pytest.approx(1.4)
-    assert xp_class_multiplier(CARGO_CATALOG["electronics"]) == pytest.approx(1.4)
-    assert xp_class_multiplier(CARGO_CATALOG["automotive"]) == pytest.approx(1.15)
+    assert xp_class_multiplier(CARGO_CATALOG["refrigerated"]) == pytest.approx(1.5)
+    assert xp_class_multiplier(CARGO_CATALOG["electronics"]) == pytest.approx(1.5)
+    assert xp_class_multiplier(CARGO_CATALOG["automotive"]) == pytest.approx(1.25)
     assert xp_class_multiplier(CARGO_CATALOG["general"]) == pytest.approx(1.0)
 
 
 def test_on_time_streak_compounds_and_late_resets_it():
     career = Career()
-    career.record_delivery(100.0, 500.0, on_time=True, damage_pct=0.0)
+    career.record_delivery(100.0, 500.0, on_time=True, damage_pct=50.0)
     assert career.on_time_streak == 1
     first = career.xp
-    assert first == pytest.approx(120.0)  # no bonus on the first run
+    # completion XP plus per-mile XP, no streak bonus on the first run
+    assert first == pytest.approx(150.0 + 100.0 * 1.6)
 
-    career.record_delivery(100.0, 500.0, on_time=True, damage_pct=0.0)
-    assert career.xp - first == pytest.approx(120.0 * 1.05)  # streak of 2: +5%
+    career.record_delivery(100.0, 500.0, on_time=True, damage_pct=50.0)
+    assert career.xp - first == pytest.approx((150.0 + 100.0 * 1.6) * 1.05)  # streak of 2
 
-    career.record_delivery(100.0, 500.0, on_time=False, damage_pct=0.0)
+    career.record_delivery(100.0, 500.0, on_time=False, damage_pct=50.0)
     assert career.on_time_streak == 0
 
 
-def test_streak_bonus_caps_at_a_quarter():
+def test_late_deliveries_still_teach_a_reduced_lesson():
+    career = Career()
+    career.record_delivery(100.0, 500.0, on_time=False, damage_pct=50.0)
+    assert career.xp == pytest.approx(75.0 + 100.0 * 0.9)
+
+
+def test_clean_cargo_pays_a_bonus_lesson():
+    career = Career()
+    career.record_delivery(100.0, 500.0, on_time=True, damage_pct=0.0)
+    assert career.xp == pytest.approx((150.0 + 100.0 * 1.6) * 1.15)
+
+
+def test_streak_bonus_caps_near_half():
     assert xp_streak_bonus(1) == pytest.approx(0.0)
     assert xp_streak_bonus(3) == pytest.approx(0.10)
     assert xp_streak_bonus(6) == pytest.approx(0.25)
-    assert xp_streak_bonus(40) == pytest.approx(0.25)
+    assert xp_streak_bonus(10) == pytest.approx(0.45)
+    assert xp_streak_bonus(40) == pytest.approx(0.45)
 
 
 def test_specialty_multiplier_applies_through_record_delivery():
     career = Career()
-    career.record_delivery(100.0, 500.0, on_time=True, damage_pct=0.0, cargo_class_mult=1.4)
-    assert career.xp == pytest.approx(100.0 * 1.2 * 1.4)
+    career.record_delivery(100.0, 500.0, on_time=True, damage_pct=50.0, cargo_class_mult=1.5)
+    assert career.xp == pytest.approx(150.0 + 100.0 * 1.6 * 1.5)
+
+
+def test_first_twenty_thresholds_stay_save_compatible():
+    from freight_fate.models.career import LEVEL_XP
+
+    # Shipped 1.8 careers were leveled against these numbers; changing them
+    # would silently re-level existing saves.
+    assert LEVEL_XP[:20] == [
+        0,
+        1000,
+        2500,
+        4500,
+        7000,
+        10_000,
+        14_000,
+        19_000,
+        25_000,
+        32_000,
+        40_000,
+        50_000,
+        62_000,
+        76_000,
+        92_000,
+        110_000,
+        130_000,
+        152_000,
+        176_000,
+        202_000,
+    ]
+    assert len(LEVEL_XP) == 30
+    assert sorted(LEVEL_XP) == LEVEL_XP
 
 
 def test_streak_survives_the_save_round_trip():
@@ -136,7 +181,9 @@ def test_paid_course_unlocks_endorsement_before_its_level(monkeypatch):
 
         assert "refrigerated" in p.career.endorsements
         assert p.money == pytest.approx(5_000.0 - ENDORSEMENT_COURSE_COSTS["refrigerated"])
-        assert "Course complete" in spoken[-1]
+        assert any("Course complete" in text for text in spoken)
+        # Paying your own tuition earns its badge, spoken after the course.
+        assert "self_paid_course" in p.achievements
         # the purchase persists through a save round-trip
         reloaded = Profile.from_dict(p.to_dict())
         assert "refrigerated" in reloaded.career.endorsements

@@ -25,19 +25,18 @@ def test_facility_approach_data_covers_full_facility_set(world):
     )
     coverage = data["coverage"]
 
-    assert coverage["facilities"] == 2405
-    assert coverage["source_backed_endpoints"] == 1842
-    assert coverage["road_snapped"] == 919
-    assert coverage["turn_level"] == 120
-    assert coverage["nearest_road_fallback"] == 923
+    assert coverage["facilities"] == 2401
+    assert coverage["source_backed_endpoints"] == 1838
+    assert coverage["road_snapped"] == 916
+    assert coverage["turn_level"] == 821
+    assert coverage["nearest_road_fallback"] == 922
     assert coverage["representative_fallback"] == 563
     assert coverage["gate_yard_dock_hints"] == 0
 
-    # The sweep predates the slug migration and the map expansion: its
-    # records must keep resolving onto today's facilities (legacy-id
-    # translation), while facilities added since the sweep are simply not
-    # covered yet. A few records retire when map growth replaces a template
-    # facility with a real one (Gulfport/Mobile), never more than a handful.
+    # The 2026-07-14 regen keys records by current slug facility ids and
+    # covers every facility the endpoint/local-approach sweeps know about;
+    # facilities added by map growth since those sweeps are simply absent
+    # until the next data expansion pass (see ROADMAP).
     facilities = {
         location.id for city in world.city_names() for location in world.cities[city].locations
     }
@@ -48,7 +47,8 @@ def test_facility_approach_data_covers_full_facility_set(world):
         except KeyError:
             missing.append(facility_id)
     assert resolved <= facilities
-    assert len(resolved) >= coverage["facilities"] - 8, missing[:10]
+    assert not missing, missing[:10]
+    assert len(resolved) == coverage["facilities"]
 
 
 def test_facility_approach_records_are_clean_and_honest(world):
