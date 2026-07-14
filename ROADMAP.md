@@ -193,7 +193,21 @@ section below and the Unreleased changelog; the release-line view:
 
 ### World and narration
 
-- [x] **Highway-spider map expansion.** Corridor-inventory tooling plus
+- [ ] **Overlong city-service routes from a bad geometry bake (proven
+      in-engine 2026-07-14).** local_geometry.json carries 91 city-service
+      chains over 10 miles (max 35.0), all single-segment with
+      turn_level=false -- and the local_approaches fallback bakes the same
+      broken distance, so the game really builds a 35-mile route at a
+      blanket 25 mph to, e.g., the Tyler TX freight market, the Beckley WV
+      freight market, and the Mankato MN garage (~80 game-minutes to run
+      an errand). Yard/facility approaches are healthy (max 4.0 mi). Root
+      cause is the dev-side build_local_geometry.py POI match picking a
+      distant candidate and collapsing the failed turn-level route into
+      one giant segment. Plan per the working split: Fable root-causes the
+      match rule and adds the invariant to the enrichment recipe (a city
+      service approach over ~6 miles is a wrong match, not a long street),
+      Opus re-sweeps the 91 entries in a worktree, and the tool fix notes
+      go to Josh with the data PR.
       dozens of spider batches grow the map to 375 cities and 626 enriched
       legs -- real corridors across the Great Basin, the Hi-Line, the
       Dakotas, Appalachia, West Texas, and more, each with real roads,
