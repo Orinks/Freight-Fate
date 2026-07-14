@@ -178,6 +178,10 @@ class TripRoadEventMixin:
 
     def _check_hazards(self, moved_mi: float) -> None:
         """Occasional road hazards that demand braking."""
+        if self._is_facility_approach_route():
+            # A deadhead crawl down a facility access road is minutes long at
+            # yard speeds; a "brake now" ambush there is noise, not driving.
+            return
         context = self.traffic_context()
         if (
             context is not None

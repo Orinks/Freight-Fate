@@ -125,37 +125,26 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     trip, _truck = make_trip(world)
     trip.traffic_manager.vehicles = []
 
+    # State lines no longer warn miles in advance: one spoken crossing at
+    # the boundary, then silence (route alerts stopped repeating in 1.8.1).
     trip.position_mi = 23.0
     advance = trip.update(0.0)
-    repeat = trip.update(0.0)
+    assert not _gps_events(advance)
 
-    assert _gps_messages(advance) == [
-        "In 10 miles, crossing from Illinois into Indiana near "
-        "the I-65 state line south of Hammond."
-    ]
-    assert not _gps_events(repeat)
-
-    trip.position_mi = 31.5
-    near = trip.update(0.0)
-    assert not _gps_events(near)
-
-    trip.position_mi = 32.8
+    line = next(cue for cue in trip.navigation_cues if cue.kind == "state_crossing")
+    trip.position_mi = line.at_mi + 0.1
     crossing = trip.update(0.0)
+    repeat = trip.update(0.0)
     assert [event.message for event in crossing if event.kind == TripEventKind.STATE_CROSSING] == [
         "Crossing into Indiana near the I-65 state line south of Hammond."
     ]
+    assert not [event for event in repeat if event.kind == TripEventKind.STATE_CROSSING]
 
+    # Rest stops get their one actionable announcement from the five-mile
+    # stop check; the old one-mile reminder is gone.
     trip.position_mi = 120.3
     rest = trip.update(0.0)
-    assert any(
-        event.kind == TripEventKind.GPS_CUE
-        and event.message
-        == (
-            "Travel center at exit 175 ahead in 1 mile; confirmed truck parking; "
-            "press X to signal for the exit."
-        )
-        for event in rest
-    )
+    assert not _gps_events(rest)
 
 
 def test_gps_traffic_cue_deduplicates(world):
@@ -186,9 +175,8 @@ def test_toll_cues_and_charges_deduplicate(world):
     trip.position_mi = 6.1
     crossing = trip.update(0.0)
 
-    assert _gps_messages(crossing) == [
-        "In 1 mile, crossing from New York into New Jersey near New York-New Jersey line on I-95.",
-    ]
+    # State lines speak at the boundary now, not a mile out.
+    assert not _gps_events(crossing)
 
     trip.position_mi = 7.2
     advance = trip.update(0.0)

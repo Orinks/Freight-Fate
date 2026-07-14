@@ -582,15 +582,24 @@ def test_drive_music_advances_to_next_track_while_paused(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
 
+        # Make sure the radio rotation is rolling before the pause.
+        driving._update_radio_playback(driving._music_night, 0.0)
+        assert driving._radio_playlist
+
         driving.handle_event(key_event(pygame.K_ESCAPE))
         assert isinstance(app.state, PauseMenuState)
-        first = driving._current_music_track()
+
+        def now_playing():
+            playlist = driving._radio_playlist
+            return playlist[driving._radio_track_index % len(playlist)]
+
+        first = now_playing()
         played.clear()
 
-        # Sit on the pause menu until the current bed's one-shot playback ends.
+        # Sit on the pause menu until the current song's one-shot playback ends.
         app.state.update(music_track_duration_s(first) + 1.0)
 
-        following = driving._current_music_track()
+        following = now_playing()
         assert following != first
         assert played == [following]
     finally:
@@ -2471,10 +2480,9 @@ def test_route_planning_labels_name_through_cities_with_states():
     in the spoken label itself -- not only in the F1 help (player request:
     'I have no idea where McCall is, but knowing the state gives me a
     general idea of, oh, that's the way we're going')."""
-    from freight_fate.states.city_dispatch import RouteSelectState
-
     from freight_fate.app import App
     from freight_fate.models import JobBoard
+    from freight_fate.states.city_pickup import RouteSelectState
 
     app = App()
     try:

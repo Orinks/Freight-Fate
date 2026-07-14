@@ -61,11 +61,13 @@ def test_tab_repeats_only_the_market_watch(monkeypatch):
         spoken = []
         monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
 
+        # The board may open on a recommended dispatch; Tab must not move it.
+        selected = board.index
         board.handle_event(key_event(pygame.K_TAB))
 
         # Exactly the market summary is spoken -- no job line, no HOS note.
         assert spoken == [app.ctx.profile.market.summary()]
-        assert board.index == 0  # Tab does not move the selection
+        assert board.index == selected  # Tab does not move the selection
     finally:
         app.shutdown()
 

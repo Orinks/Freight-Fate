@@ -31,6 +31,7 @@ REFERENCE_CARGO_KG = 21_500.0
 LAUNCH_TRACTION_LOW_SPEED_MPH = 25.0
 LAUNCH_TRACTION_START_G = 0.12
 LAUNCH_TRACTION_ROLLING_G = 0.33
+LAUNCH_TRACTION_FULL_GRADE = 0.03  # climbs this steep get the full cap at any speed
 
 
 @dataclass(frozen=True)
@@ -201,8 +202,10 @@ class TruckState:
                 * self.specs.driveline_efficiency
                 / self.specs.wheel_radius_m
             )
-            traction_limit = self.gross_mass_kg * G * 0.33 * self.grip
-            next_force = min(next_force, traction_limit)
+            # Same launch-aware traction as drive_force: predicting with the
+            # full rolling cap at low speed overestimates the post-shift pull
+            # and sets up an upshift/downshift hunt.
+            next_force = min(next_force, self.traction_limit_n())
             # Do not grab a taller gear that cannot pull the current road load.
             # This predicts the post-shift tractive force instead of repeatedly
             # shifting up, losing speed, and kicking straight back down.
@@ -232,6 +235,28 @@ class TruckState:
 
     # -- forces -----------------------------------------------------------------
 
+    def traction_limit_n(self) -> float:
+        """Usable drive-wheel force at the current road speed.
+
+        Drive wheels can use roughly a third of gross weight once rolling,
+        but a loaded tractor-trailer eases into that force instead of
+        launching at the full traction cap from a dead stop. The easing is
+        a launch feel, not a physical ceiling: an empty deadhead stays
+        brisk, and a steep climb gets the full cap at any speed -- capping
+        a grade crawl below its resistance would trap the truck and churn
+        the automatic through pointless shifts.
+        """
+        load_fraction = min(1.0, max(0.0, self.cargo_kg / REFERENCE_CARGO_KG))
+        start_g = (
+            LAUNCH_TRACTION_ROLLING_G
+            - (LAUNCH_TRACTION_ROLLING_G - LAUNCH_TRACTION_START_G) * load_fraction
+        )
+        launch = min(1.0, self.speed_mph / LAUNCH_TRACTION_LOW_SPEED_MPH)
+        traction_g = start_g + (LAUNCH_TRACTION_ROLLING_G - start_g) * launch
+        climb = min(1.0, max(0.0, self.grade) / LAUNCH_TRACTION_FULL_GRADE)
+        traction_g += (LAUNCH_TRACTION_ROLLING_G - traction_g) * climb
+        return self.gross_mass_kg * G * traction_g * self.grip
+
     def drive_force(self) -> float:
         if not self.engine_on or self.stalled or self.air_brakes_holding:
             return 0.0
@@ -245,15 +270,7 @@ class TruckState:
         torque = self.torque_at(self.rpm) * self.throttle * self.health_factor
         direction = -1.0 if ratio < 0 else 1.0
         force = torque * abs(ratio) * self.specs.driveline_efficiency / self.specs.wheel_radius_m
-        # Drive wheels can use roughly a third of gross weight once rolling,
-        # but a loaded tractor-trailer eases into that force instead of
-        # launching at the full traction cap from a dead stop.
-        launch = min(1.0, self.speed_mph / LAUNCH_TRACTION_LOW_SPEED_MPH)
-        traction_g = (
-            LAUNCH_TRACTION_START_G + (LAUNCH_TRACTION_ROLLING_G - LAUNCH_TRACTION_START_G) * launch
-        )
-        traction_limit = self.gross_mass_kg * G * traction_g * self.grip
-        return direction * min(force, traction_limit)
+        return direction * min(force, self.traction_limit_n())
 
     def resistance_force(self) -> float:
         s = self.specs

@@ -813,8 +813,7 @@ def test_terminal_exit_does_not_check_for_updates_from_source(monkeypatch):
 
 
 def test_pickup_facility_exit_arms_fresh_packaged_update_check(monkeypatch):
-    from freight_fate.states.city_dispatch import PickupFacilityState
-
+    from freight_fate.states.city_pickup import PickupFacilityState
     from freight_fate.states.main_menu import MainMenuState
 
     order = []

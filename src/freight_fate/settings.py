@@ -26,6 +26,9 @@ CHATTER_CATEGORY_FIELDS = {
     "highway_marker": "chatter_passes",
     "museum": "chatter_museums",
     "billboard": "chatter_billboards",
+    # Real roadside signs baked into the map data (dev's 623-city sweep);
+    # they ride the same switch as the parody billboards.
+    "billboard_sign": "chatter_billboards",
 }
 
 # The player-facing chatter switches, in menu order.

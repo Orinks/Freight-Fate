@@ -140,20 +140,29 @@ section below and the Unreleased changelog; the release-line view:
       static at the fringe of their range and handing back to the Roadhouse
       when the signal drops.
 - [x] **Real local stations across the whole map.** The catalog now carries
-      40 real public and community streams (up from 14), filling Portland,
-      Boise, Spokane, Salt Lake City, Las Vegas, Minneapolis, Milwaukee,
-      Detroit, the Ohio Valley, the Northeast corridor, the South, Florida,
-      and the southern plains, each geo-ranged like FM and verified with a
-      live BASS smoke test. The game now bundles and loads the BASSHLS
-      addon (`src/freight_fate/lib/`), so HLS-only streams play too (first
-      user: KMHD Portland).
+      57 real public and community streams (up from 14), filling Portland,
+      Boise, Spokane, Salt Lake City, Las Vegas, Reno, Minneapolis,
+      Milwaukee, Detroit, St. Louis, Houston, the Ohio Valley, the Northeast
+      corridor, the South, Florida, and the southern plains, plus wide
+      public-radio networks over the 623-city map's empty country (Prairie
+      Public, SDPB, Montana Public Radio, Yellowstone Public Radio, High
+      Plains Public Radio, Jefferson Public Radio, Interlochen, Maine
+      Public, Vermont Public, WV Public Broadcasting). Each is geo-ranged
+      like FM and verified with a live BASS smoke test; a coverage script
+      shows 162 of 623 cities still outside every contour, mostly realistic
+      radio darkness. The game now bundles and loads the BASSHLS addon
+      (`src/freight_fate/lib/`), so HLS-only streams play too (first user:
+      KMHD Portland).
 - [ ] **AFN 360 Global channels stay unsupported.** StreamTheWorld
       geo-blocks those mounts outside overseas military regions (HTTP 403
       from US IPs on every URL form, HLS included); revisit only if AFN
       opens access.
-- [ ] **Regional stream gaps to re-sweep.** St. Louis (KDHX) and Houston
-      (KPFT) had no working public stream endpoint on 2026-07-13; try again
-      in a later sweep.
+- [ ] **Regional stream gaps to re-sweep.** Community stations KDHX
+      (St. Louis) and KPFT (Houston) had no working stream endpoint (the
+      markets are covered by KWMU and KUHF instead); the Rio Grande Valley
+      (Brownsville, McAllen, Laredo), Savannah (GPB not listed on Radio
+      Browser), and Amarillo still have no receivable real station -- try
+      again in a later sweep.
 
 ### World and narration
 

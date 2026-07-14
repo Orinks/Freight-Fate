@@ -474,6 +474,9 @@ LANDMARK_CATEGORIES = frozenset(
         "museum",
         "protected_area",
         "highway_marker",
+        # Real roadside signs baked by the 623-city map sweep; spoken under
+        # the billboards chatter switch.
+        "billboard_sign",
     }
 )
 

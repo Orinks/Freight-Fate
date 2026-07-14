@@ -513,13 +513,13 @@ def test_pause_and_abandon_returns_to_city():
 @pytest.mark.smoke
 def test_abandon_prompt_no_returns_to_pause_menu():
     from freight_fate.app import App
-    from freight_fate.states.city import PickupFacilityState, RouteSelectState
+    from freight_fate.states.city import PickupFacilityState
     from freight_fate.states.driving import (
         AbandonJobConfirmationState,
         DrivingState,
         PauseMenuState,
     )
-    from freight_fate.states.main_menu import MainMenuState, NameEntryState
+    from freight_fate.states.main_menu import CareerStartState, MainMenuState, NameEntryState
 
     app = App()
     try:
@@ -529,24 +529,24 @@ def test_abandon_prompt_no_returns_to_pause_menu():
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, NameEntryState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
+        assert isinstance(app.state, CareerStartState)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # default start
         app.state.handle_event(key_event(pygame.K_RETURN))  # default region
         app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
         app.state.handle_event(key_event(pygame.K_RETURN))  # job board
-        board = app.state
-        while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
-            board.handle_event(key_event(pygame.K_DOWN))
-        app.state.handle_event(key_event(pygame.K_RETURN))  # accept job
+        assert app.state.assigned_mode
+        app.state.handle_event(key_event(pygame.K_RETURN))  # accept assigned job
         assert isinstance(app.state, DrivingState)
         app.state.trip.position_mi = app.state.trip.total_miles
         app.state.trip.finished = True
         app.state.truck.velocity_mps = 0.0
         app.state.update(1 / 60)
+        finish_timed_state(app)
         assert isinstance(app.state, PickupFacilityState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
         app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
-        app.state.handle_event(key_event(pygame.K_RETURN))  # depart for destination
-        assert isinstance(app.state, RouteSelectState)
-        app.state.handle_event(key_event(pygame.K_RETURN))  # accept planned route
+        finish_timed_state(app)
+        app.state.handle_event(key_event(pygame.K_RETURN))  # depart on assigned route
         assert isinstance(app.state, DrivingState)
 
         app.state.handle_event(key_event(pygame.K_ESCAPE))

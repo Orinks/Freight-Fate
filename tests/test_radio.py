@@ -149,10 +149,12 @@ def test_tuning_uses_receivable_stations_not_global_catalog():
 
 
 def test_no_regional_signal_still_has_safe_and_afn_fallback_choices():
+    # Interior Nevada on US-50: real radio darkness even after the
+    # 623-city coverage fill (central South Dakota is SDPB country now).
     radio = RadioState(
         real_streams_enabled=True,
         streamer_safe=False,
-        position=(44.0, -101.0),
+        position=(38.9, -116.6),
     )
     stations = radio.available_stations()
 

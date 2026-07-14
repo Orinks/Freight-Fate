@@ -23,12 +23,15 @@
 
 ### Added
 
-- **The in-cab radio picks up twenty-six more real stations.** With real
+- **The in-cab radio picks up forty-three more real stations.** With real
   streams allowed in settings, live local radio now reaches Portland, Boise,
-  Spokane, Salt Lake City, Las Vegas, Minneapolis, Milwaukee, Detroit,
-  Pittsburgh, Philadelphia, Baltimore, Washington, Nashville, Memphis,
-  Birmingham, Tampa, Miami, and more. Real jazz, news, roots, and independent
-  music fades in and out as you drive through each market, just like FM.
+  Spokane, Salt Lake City, Las Vegas, Reno, Minneapolis, Milwaukee, Detroit,
+  St. Louis, Houston, Pittsburgh, Philadelphia, Baltimore, Washington,
+  Nashville, Memphis, Birmingham, Tampa, Miami, and more -- plus the wide
+  public radio networks that carry the empty country: the Dakotas, Montana,
+  the Texas plains, the Upper Peninsula, northern New England, and West
+  Virginia. Real jazz, news, roots, and independent music fades in and out
+  as you drive through each market, just like FM.
 
 - **New: real roadside landmarks as you drive.** Routes now call out the world
   going by -- entering a national forest, crossing a named river, approaching a
