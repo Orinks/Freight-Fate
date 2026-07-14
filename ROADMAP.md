@@ -26,6 +26,7 @@
 - [ ] Chain-up areas as physical pullouts: today chaining works anywhere stopped and the pullout is spoken flavor; a real chain-up area stop (safe, lit, maybe a helper service that installs for money) rides the stoppable-stop spine with Big Buck's.
 - [ ] Road-stop tire service sells wear repair only; swapping compound (and pricing winter rubber) stays a terminal-garage act. Revisit if field tire swaps earn their menu weight.
 - [ ] Chain controls by state personality: CO/CA tier wording shipped as the generic shape; later, region-flavored signs and the CA R1/R2/R3 phrasing on Donner-corridor legs once the western passes carry curated grades.
+- [ ] Curated grade segments on at least one mountain corridor, so chain law goes live in-game: placement needs a real 5-percent-for-a-mile grade, and every shipped leg's `grade_segments` list is empty today -- the synthetic terrain fallback tops out at 3.5 percent, so no route can place a chain-law area yet (bench and `tests/test_chain_law.py` carry the feature meanwhile). Donner (I-80 Sacramento-Reno) or Eisenhower (I-70) first; map-side elevation work, pairs with the finer-grade-fidelity thread. See `docs/physics-playtest-checklists.md` section 8.
 
 Four threads: make the drive *between* the exits real, give every maneuver
 and working hour weight, make the career read like real employment, and
