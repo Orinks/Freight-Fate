@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Hundreds more facilities now start and end on real city streets.**
+  Short yard-to-facility drives used to skip their street route and fall
+  back to one straight access road; now any facility whose real path has
+  actual turns keeps them, even close to the yard. Deadheads and final
+  approaches at hundreds more warehouses, cross-docks, and company yards --
+  including the Evansville starter yard every new company driver leaves
+  first -- speak real turn-by-turn directions on named local streets.
+
 - **Dispatch assigns your tractor now, and better equipment follows
   seniority.** Like a real fleet, the carrier hands every new hire the same
   trainer-spec rig, then upgrades your assigned tractor as you climb: a

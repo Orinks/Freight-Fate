@@ -58,6 +58,14 @@ city service drives below.)
       direction flipped -- then merges up the on-ramp onto the highway trip
       with clock and toll continuity and a `departure_chain` save marker.
       Facilities without turn-level data keep the scripted highway start.
+- [ ] **Tier-1 surface coverage expansion.** The "Data Expansion" pass of
+      `docs/surface-roads-plan.md`: re-run the endpoint and local-approach
+      sweeps over the post-expansion 623-city map (the checked-in files
+      predate the slug migration and stop at the 2026-06-27 facility set),
+      and revisit the excluded facility types (grain elevators, ports, cold
+      storage) that already have high source-backed endpoint rates. A July
+      playtest found the default Evansville starter yard had no turn-level
+      chain -- starter cities must never regress below turn-level coverage.
 - [ ] **Surface intersections.** Phase 4 of `docs/surface-roads-plan.md`:
       stop signs and traffic signals at surface-street junctions, junction
       decision prompts, and traffic pressure at intersections -- extending
