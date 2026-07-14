@@ -160,6 +160,10 @@
 
 ### Fixed
 
+- **Touching the brake now switches cruise control off, like a real
+  truck.** Any press of the service brake or the emergency brake drops
+  cruise immediately and announces it, instead of cruise quietly pulling
+  the truck back up to speed after you slowed down on purpose.
 - **Restoring a cloud backup works again.** Every new server-verified backup
   was wrongly refused with "failed its integrity check" the moment you tried
   to restore it. The refusal was the game's mistake, not a problem with your

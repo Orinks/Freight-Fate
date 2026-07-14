@@ -95,6 +95,12 @@ class DrivingUpdateMixin:
             t.brake = max(t.brake, pad_brake)
         braking = braking_ramp or (pad_brake > 0.05 and not backing)
         emergency = keys[pygame.K_b]
+        # A real truck drops cruise at the first tap of the service brake.
+        # Only the player's own pedal cancels here; the sim's automatic brake
+        # ramps (reverse arrest, hazard events) go through their own cancels.
+        if self._cruise_mph is not None and (braking_key or emergency) and not backing:
+            self._cancel_cruise()
+            self.ctx.say_event("Cruise off.", interrupt=False)
         if emergency:
             # no ramp: slams to full application instantly, plus spring brakes
             if not t.emergency_brake and abs(t.velocity_mps) > 1:

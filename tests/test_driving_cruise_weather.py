@@ -49,6 +49,48 @@ def test_cruise_control_holds_the_set_speed(monkeypatch):
         app.shutdown()
 
 
+def test_players_brake_press_cancels_cruise(monkeypatch):
+    from freight_fate.app import App
+
+    class Keys:
+        pressed = set()
+
+        def __getitem__(self, key):
+            return key in self.pressed
+
+    keys = Keys()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: keys)
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        open_limits(driving)
+        t = driving.truck
+        driving.handle_event(key_event(pygame.K_e))  # engine on
+        t.cargo_kg = 0.0
+        t.grade = 0.0
+        t.transmission.gear = 10
+        t.velocity_mps = 26.8  # ~60 mph
+        t.throttle = 0.35
+        driving.handle_event(key_event(pygame.K_k))  # engage cruise
+        assert driving._cruise_mph is not None
+
+        # The first tap of the service brake drops cruise, like a real truck.
+        keys.pressed = {pygame.K_DOWN}
+        driving.update(1 / 60)
+        assert driving._cruise_mph is None
+
+        # Releasing the brake must not bring it back.
+        keys.pressed = set()
+        for _ in range(30):
+            driving.update(1 / 60)
+        assert driving._cruise_mph is None
+    finally:
+        app.shutdown()
+
+
 def test_cruise_does_not_rev_engine_when_clutch_is_depressed(monkeypatch):
     from freight_fate.app import App
 
