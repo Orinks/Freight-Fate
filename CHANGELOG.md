@@ -160,6 +160,14 @@
 
 ### Fixed
 
+- **Ramp-end traffic lights now have a yellow phase, speak every change,
+  and no longer punish you for a light that changed behind your back.**
+  The light used to announce only its first change: it could say green
+  while you were still rolling up, silently flip back to red, and then
+  blame you for running it -- with real trailer damage. Now every green,
+  yellow, and red is spoken as it happens, greens run long enough to
+  cross from a stop, and entering on yellow is legal, exactly like the
+  real law. Yellow means stop if you are not already at the light.
 - **Interstate speed limits no longer drop to city speeds at the ends of a
   leg.** Leaving or approaching a city, the spoken limit could fall to a
   25 or 30 from a nearby city street and stay there for miles of open

@@ -790,66 +790,80 @@ class DrivingEventMixin:
             control = "signal" if roll < signal_w else "stop" if roll < stop_w else "none"
         self._ramp_control = control
         self._ramp_light_timer = 0.0
-        self._ramp_light_offset_s = rng.random() * (RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S)
+        self._ramp_light_offset_s = rng.random() * (
+            RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
+        )
         self._ramp_light_announced = False
-        self._ramp_light_was_red = False
-        self._ramp_light_flip_said = False
+        self._ramp_light_last_phase = ""
         self._ramp_terminal_done = control == "none"
         self._ramp_waiting_at_light = False
 
+    def _ramp_light_phase(self) -> str:
+        cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
+        into = (self._ramp_light_offset_s + self._ramp_light_timer) % cycle
+        if into < RAMP_LIGHT_RED_S:
+            return "red"
+        if into < RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S:
+            return "green"
+        return "yellow"
+
     def _ramp_light_is_red(self) -> bool:
-        cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S
-        return (self._ramp_light_offset_s + self._ramp_light_timer) % cycle < RAMP_LIGHT_RED_S
+        # Only true red punishes a crossing: entering on yellow is legal,
+        # exactly like the real law.
+        return self._ramp_light_phase() == "red"
 
     def _update_ramp_light(self, dt: float) -> None:
         """Advance the terminal light in real time and speak state changes."""
         if self._ramp_mi is None or self._ramp_control != "signal" or self._ramp_terminal_done:
             return
         self._ramp_light_timer += dt
-        red = self._ramp_light_is_red()
-        if not self._ramp_light_announced or red == self._ramp_light_was_red:
+        phase = self._ramp_light_phase()
+        if not self._ramp_light_announced or phase == self._ramp_light_last_phase:
             return
-        self._ramp_light_was_red = red
-        if self._ramp_waiting_at_light and not red:
+        self._ramp_light_last_phase = phase
+        if self._ramp_waiting_at_light and phase == "green":
             # The wait at the stop bar ends; the driveway is just ahead.
             self._ramp_waiting_at_light = False
             self._ramp_terminal_done = True
             self.ctx.audio.play("events/ramp_light_green", volume=0.8)
             self.ctx.say_event("Green light. Pull ahead to the entrance.", interrupt=False)
             return
-        # Speak at most one flip after the first callout: a slow descent can
-        # span several signal cycles in real time, and the stop-bar exchange
-        # announces the state that finally matters. One update is
-        # information; a play-by-play of every cycle is chatter.
-        if not self._ramp_light_flip_said:
-            self._ramp_light_flip_said = True
-            self.ctx.audio.play(
-                "events/ramp_light_red" if red else "events/ramp_light_green",
-                volume=0.7,
-            )
+        # Every phase change speaks. The light is an instruction, not
+        # ambiance: a silent flip back to red between the spoken green and
+        # the stop bar cost real playtesters real trailer damage.
+        if phase == "red":
+            self.ctx.audio.play("events/ramp_light_red", volume=0.7)
+            self.ctx.say_event("The light ahead turns red. Be ready to stop.", interrupt=False)
+        elif phase == "yellow":
+            self.ctx.audio.play("ui/notify", volume=0.7)
             self.ctx.say_event(
-                "The light ahead turns red. Be ready to stop."
-                if red
-                else "The light ahead turns green.",
+                "The light ahead turns yellow. Stop if you are not at it yet.",
                 interrupt=False,
             )
+        else:
+            self.ctx.audio.play("events/ramp_light_green", volume=0.7)
+            self.ctx.say_event("The light ahead turns green.", interrupt=False)
 
     def _announce_ramp_terminal(self) -> None:
         """Mid-ramp callout naming the control at the terminal."""
         self._ramp_light_announced = True
         if self._ramp_control == "signal":
-            red = self._ramp_light_is_red()
-            self._ramp_light_was_red = red
+            phase = self._ramp_light_phase()
+            self._ramp_light_last_phase = phase
             self.ctx.audio.play(
-                "events/ramp_light_red" if red else "events/ramp_light_green",
+                "events/ramp_light_red" if phase == "red" else "events/ramp_light_green",
                 volume=0.8,
             )
-            self.ctx.say_event(
-                "Traffic light at the end of the ramp, currently red. Brake to a stop."
-                if red
-                else "Traffic light at the end of the ramp, currently green.",
-                interrupt=False,
-            )
+            if phase == "red":
+                message = "Traffic light at the end of the ramp, currently red. Brake to a stop."
+            elif phase == "yellow":
+                message = (
+                    "Traffic light at the end of the ramp, currently yellow -- "
+                    "it will be red when you reach it. Brake to a stop."
+                )
+            else:
+                message = "Traffic light at the end of the ramp, currently green."
+            self.ctx.say_event(message, interrupt=False)
         elif self._ramp_control == "stop":
             self.ctx.audio.play("ui/notify", volume=0.7)
             self.ctx.say_event(
@@ -901,12 +915,14 @@ class DrivingEventMixin:
             self._ramp_terminal_done = True
             self._ramp_waiting_at_light = False
             self.ctx.audio.play("events/ramp_light_green", volume=0.7)
-            self.ctx.say_event(
-                "Green light. Through the intersection; brake for the entrance."
-                if speed <= GREEN_ROLL_MPH
-                else "Through the green light, but far too fast. Brake hard for the entrance.",
-                interrupt=False,
-            )
+            on_yellow = self._ramp_light_phase() == "yellow"
+            if speed > GREEN_ROLL_MPH:
+                message = "Through the light, but far too fast. Brake hard for the entrance."
+            elif on_yellow:
+                message = "Through on the yellow; brake for the entrance."
+            else:
+                message = "Green light. Through the intersection; brake for the entrance."
+            self.ctx.say_event(message, interrupt=False)
             return
         if self._ramp_control == "stop":
             if speed > RED_STOP_MPH and not past_bar:

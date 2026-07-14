@@ -162,8 +162,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._ramp_light_offset_s = 0.0  # seeded phase into the light cycle
         self._ramp_light_timer = 0.0  # real seconds since the ramp was taken
         self._ramp_light_announced = False
-        self._ramp_light_was_red = False
-        self._ramp_light_flip_said = False
+        self._ramp_light_last_phase = ""  # "red" | "yellow" | "green", once announced
         self._ramp_terminal_done = False
         self._ramp_waiting_at_light = False
         self._destination_exit_taken = False

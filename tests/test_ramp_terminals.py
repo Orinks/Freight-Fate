@@ -8,6 +8,7 @@ from freight_fate.states.driving import (
     RAMP_ACCESS_MI,
     RAMP_LIGHT_GREEN_S,
     RAMP_LIGHT_RED_S,
+    RAMP_LIGHT_YELLOW_S,
     RED_STOP_MPH,
 )
 
@@ -51,7 +52,7 @@ def _on_ramp(d, control: str, *, red: bool, mph: float) -> None:
     d._ramp_light_offset_s = 0.0 if red else RAMP_LIGHT_RED_S  # phase start
     d._ramp_light_timer = 0.0
     d._ramp_light_announced = True
-    d._ramp_light_was_red = red
+    d._ramp_light_last_phase = "red" if red else "green"
     d._ramp_terminal_done = False
     d._ramp_waiting_at_light = False
 
@@ -245,10 +246,57 @@ def test_light_cycle_alternates():
         d._ramp_light_offset_s = 0.0
         d._ramp_light_timer = 0.0
         assert d._ramp_light_is_red()
+        assert d._ramp_light_phase() == "red"
         d._ramp_light_timer = RAMP_LIGHT_RED_S + 0.1
         assert not d._ramp_light_is_red()
+        assert d._ramp_light_phase() == "green"
+        # Green ends in yellow, not a hard cut to red -- and yellow is legal.
         d._ramp_light_timer = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + 0.1
+        assert d._ramp_light_phase() == "yellow"
+        assert not d._ramp_light_is_red()
+        d._ramp_light_timer = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S + 0.1
         assert d._ramp_light_is_red()
+    finally:
+        app.shutdown()
+
+
+def test_crossing_on_yellow_is_legal():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _on_ramp(d, "signal", red=False, mph=GREEN_ROLL_MPH - 5.0)
+        # Put the cycle just into the yellow phase at the stop bar.
+        d._ramp_light_offset_s = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + 0.5
+        assert d._ramp_light_phase() == "yellow"
+        d._update_ramp_terminal()
+        assert d._ramp_terminal_done
+        assert d.truck.damage_pct == 0.0
+    finally:
+        app.shutdown()
+
+
+def test_every_light_change_is_spoken_on_the_approach(monkeypatch):
+    """The silent flip back to red between a spoken green and the stop bar
+    cost a real playtester trailer damage; every phase change must speak."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(
+            d.ctx, "say_event", lambda text, interrupt=True: spoken.append(text)
+        )
+        _on_ramp(d, "signal", red=True, mph=10.0)
+        d._ramp_mi = RAMP_ACCESS_MI + 0.3  # still descending the ramp
+        cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
+        for _ in range(int(cycle * 10) + 5):  # one full cycle at 0.1 s steps
+            d._update_ramp_light(0.1)
+        assert any("turns green" in text for text in spoken)
+        assert any("turns yellow" in text for text in spoken)
+        assert any("turns red" in text for text in spoken)
     finally:
         app.shutdown()
 
