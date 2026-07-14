@@ -128,6 +128,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # strikes accrue, earned only while actually slowing.
         self._enforced_limit_prev: float | None = None
         self._limit_drop_grace_s = 0.0
+        # Dash overspeed alert: armed while over the limit, chiming on an
+        # interval until the truck settles back under.
+        self._overspeed_active = False
+        self._overspeed_chime_timer = 0.0
         # Congestion badges: both kinds of slow inside one trip earns a nod.
         self.construction_seen = False
         self.traffic_seen = False

@@ -721,10 +721,17 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Automatic direction changes: {s.automatic_direction_changes}",
                     lambda: self._cycle_automatic_direction_changes(1),
-                    help="Simple changes between forward and reverse when you keep "
-                    "holding the control after the truck stops. Deliberate waits "
-                    "for you to release the control and press it again. This only "
-                    "affects automatic transmission.",
+                    help="Both styles change direction with a fresh press at a "
+                    "standstill; a brake held through a stop just holds the "
+                    "truck. Deliberate requires the release-and-press gesture "
+                    "everywhere. This only affects automatic transmission.",
+                ),
+                MenuItem(
+                    lambda: f"Overspeed warning: {'on' if s.overspeed_warning else 'off'}",
+                    lambda: self._toggle_overspeed_warning(1),
+                    help="A dash chime and a spoken heads-up when you run over "
+                    "the posted limit, repeating gently until you slow, like a "
+                    "carrier-set overspeed alert in a real company truck.",
                 ),
                 MenuItem(
                     lambda: f"Driving mode: {self._pace_label()}",
@@ -921,6 +928,7 @@ class SettingsCategoryState(MenuState):
                     self._toggle_units,
                     self._toggle_transmission,
                     self._cycle_automatic_direction_changes,
+                    self._toggle_overspeed_warning,
                     self._cycle_pace,
                     self._cycle_hos,
                     self._cycle_steering,
@@ -1097,6 +1105,10 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_transmission(self, _d: int) -> None:
         self.ctx.settings.automatic_transmission = not self.ctx.settings.automatic_transmission
+        self._announce()
+
+    def _toggle_overspeed_warning(self, _d: int) -> None:
+        self.ctx.settings.overspeed_warning = not self.ctx.settings.overspeed_warning
         self._announce()
 
     def _cycle_automatic_direction_changes(self, d: int) -> None:

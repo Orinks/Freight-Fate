@@ -359,6 +359,17 @@ class _DrivingRadioBackend:
 # against the leg's real OSM maxspeed rather than a flat number.
 SPEEDING_LEEWAY_MPH = 9.0
 SPEEDING_HOLD_S = 6.0
+# The dash overspeed alert speaks up before enforcement does: it arms a few
+# mph over the limit (under the strike leeway), then chimes on an interval
+# until the truck settles back under. Real carrier trucks nag exactly like
+# this, which is why nobody in one is surprised by their own speed.
+OVERSPEED_WARN_MPH = 4.0  # over the limit where the warning arms
+OVERSPEED_RESET_MPH = 1.0  # back within this of the limit disarms it
+# The cadence carries the magnitude: slightly over dings politely, far over
+# dings urgently. Interval slides between these ends as the overage grows.
+OVERSPEED_CHIME_REPEAT_S = 5.0  # cadence just past the warn threshold
+OVERSPEED_CHIME_FAST_S = 1.5  # cadence at OVERSPEED_URGENT_MPH over and beyond
+OVERSPEED_URGENT_MPH = 20.0
 # On-the-spot speeding tickets, escalating per ticket within a trip. Paid
 # immediately when a trooper pulls you over (unlike the silent at-delivery
 # strikes, which stand in for the cost of speeding nobody caught).

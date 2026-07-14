@@ -48,6 +48,9 @@ class Settings:
     # Simple keeps the familiar hold-through-stop behavior. Deliberate requires
     # a release and second press before an automatic changes direction.
     automatic_direction_changes: str = "simple"  # simple/deliberate
+    # Dash chime plus a spoken heads-up while over the posted limit, like a
+    # carrier-set overspeed alert; on by default, a company truck would have it.
+    overspeed_warning: bool = True
     # Distance compression while driving. Relaxed (10x) by default: new players
     # get the most real time to hear and react to spoken events; veterans can
     # step up to standard or realistic in Settings, Gameplay.

@@ -1097,6 +1097,7 @@ class DrivingUpdateMixin:
         if self._pull_over is not None:
             return  # already being pulled over; don't pile on strikes
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        self._update_overspeed_warning(dt, limit)
         # A dropped limit earns braking time before strikes accrue: real
         # enforcement tickets sustained disregard, not the transition, and a
         # loaded truck cannot shed 15 mph the instant a sign changes. About
@@ -1155,6 +1156,48 @@ class DrivingUpdateMixin:
                     )
         else:
             self._speeding_timer = 0.0
+
+    def _update_overspeed_warning(self, dt: float, limit: float) -> None:
+        """The dash overspeed alert: speak once, then chime until compliant.
+
+        Arms a few mph over the limit -- inside the enforcement leeway, so an
+        attentive driver hears the dash before any strike clock matters. The
+        first trigger speaks the limit; while the truck stays over, the chime
+        repeats on its interval. Actively braking down quiets the nag (the
+        driver is already complying), and settling back under the limit
+        disarms it for the next episode.
+        """
+        if not getattr(self.ctx.settings, "overspeed_warning", True):
+            self._overspeed_active = False
+            return
+        speed = self.truck.speed_mph
+        if self._overspeed_active:
+            if speed <= limit + OVERSPEED_RESET_MPH:
+                self._overspeed_active = False
+                return
+            braking_down = self.truck.brake > 0.0 and self.truck.throttle <= 0.05
+            # The further over, the faster the ding: cadence slides from
+            # polite to urgent as the overage approaches OVERSPEED_URGENT_MPH.
+            urgency = (speed - limit - OVERSPEED_WARN_MPH) / (
+                OVERSPEED_URGENT_MPH - OVERSPEED_WARN_MPH
+            )
+            urgency = max(0.0, min(1.0, urgency))
+            interval = OVERSPEED_CHIME_REPEAT_S - urgency * (
+                OVERSPEED_CHIME_REPEAT_S - OVERSPEED_CHIME_FAST_S
+            )
+            self._overspeed_chime_timer += dt
+            if self._overspeed_chime_timer >= interval and not braking_down:
+                self._overspeed_chime_timer = 0.0
+                self.ctx.audio.play("vehicle/overspeed_chime", volume=0.55)
+            return
+        if speed > limit + OVERSPEED_WARN_MPH:
+            self._overspeed_active = True
+            self._overspeed_chime_timer = 0.0
+            self.ctx.audio.play("vehicle/overspeed_chime", volume=0.65)
+            self.ctx.say_event(
+                f"Watch your speed. The limit is {self.ctx.settings.speed_text(limit)}.",
+                interrupt=False,
+            )
 
     def _trooper_catches_speeder(self, limit: float) -> bool:
         """Whether a patrol clocks this speeding strike, by patrol intensity."""

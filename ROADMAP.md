@@ -238,6 +238,14 @@ section below and the Unreleased changelog; the release-line view:
       2026-07-14).** Slope, how far it runs, and whether the truck is
       holding it -- straight from the sim's net-force balance, including
       jake-holding and jake-slipping states.
+- [x] **Overspeed dash warning (forum ask via JaceK's I-70 story, owner
+      go 2026-07-14).** A few mph over the posted limit arms a spoken
+      heads-up and a soft repeating dash chime -- carrier-style, exactly
+      what a real company truck does -- quiet while actively braking
+      down, disarmed by compliance, Gameplay settings toggle (default
+      on). Chime is a deterministic procedurally-synthesized bell strike
+      (vehicle/overspeed_chime.ogg, recipe in CREDITS.md). Answers "no
+      clue I was speeding until I hit space."
 - [ ] **Physics bench: add climb scenarios.** The bench covers descents
       and stops but nothing uphill; the 2026-07-14 climb audit (0-60
       loaded 66-69 s, 6 percent balance 29.8 mph, 3 percent balance

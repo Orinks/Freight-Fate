@@ -800,3 +800,65 @@ def test_limit_drop_earns_braking_grace(monkeypatch):
         assert driving.speeding_strikes == strikes + 1
     finally:
         app.shutdown()
+
+
+def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
+    """The dash overspeed alert: spoken once when armed, chiming on an
+    interval while over, disarmed by settling back under the limit -- and
+    a fresh episode speaks again. Off means silent."""
+    from freight_fate.app import App
+
+    app = App()
+    events, played = [], []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, **k: played.append(key))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True: events.append(text)
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        driving.trip.patrols = []
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (50.0, None))
+        t = driving.truck
+        t.throttle = 0.3
+        # 56 in a 50: over the warn threshold, inside the strike leeway.
+        t.velocity_mps = 56.0 / 2.23694
+
+        driving._update_speeding(0.1)
+        assert any("Watch your speed" in e for e in events)
+        assert played.count("vehicle/overspeed_chime") == 1
+
+        for _ in range(52):  # past one 5 s repeat interval
+            driving._update_speeding(0.1)
+        assert played.count("vehicle/overspeed_chime") == 2
+        assert sum("Watch your speed" in e for e in events) == 1  # spoken once
+
+        # Settling under the limit disarms; the next episode speaks again.
+        t.velocity_mps = 50.0 / 2.23694
+        driving._update_speeding(0.1)
+        t.velocity_mps = 56.0 / 2.23694
+        driving._update_speeding(0.1)
+        assert sum("Watch your speed" in e for e in events) == 2
+
+        # Way over, the cadence escalates: at 25 over the ding runs about
+        # every 1.5 seconds instead of every 5.
+        t.velocity_mps = 75.0 / 2.23694
+        played.clear()
+        for _ in range(40):  # 4 seconds
+            driving._update_speeding(0.1)
+        assert played.count("vehicle/overspeed_chime") >= 2
+
+        # The setting turns the whole alert off.
+        app.ctx.settings.overspeed_warning = False
+        t.velocity_mps = 50.0 / 2.23694
+        driving._update_speeding(0.1)
+        t.velocity_mps = 56.0 / 2.23694
+        chimes = played.count("vehicle/overspeed_chime")
+        spoken = sum("Watch your speed" in e for e in events)
+        for _ in range(60):
+            driving._update_speeding(0.1)
+        assert played.count("vehicle/overspeed_chime") == chimes
+        assert sum("Watch your speed" in e for e in events) == spoken
+    finally:
+        app.shutdown()
