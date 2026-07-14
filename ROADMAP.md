@@ -58,14 +58,28 @@ city service drives below.)
       direction flipped -- then merges up the on-ramp onto the highway trip
       with clock and toll continuity and a `departure_chain` save marker.
       Facilities without turn-level data keep the scripted highway start.
-- [ ] **Tier-1 surface coverage expansion.** The "Data Expansion" pass of
-      `docs/surface-roads-plan.md`: re-run the endpoint and local-approach
-      sweeps over the post-expansion 623-city map (the checked-in files
-      predate the slug migration and stop at the 2026-06-27 facility set),
-      and revisit the excluded facility types (grain elevators, ports, cold
-      storage) that already have high source-backed endpoint rates. A July
-      playtest found the default Evansville starter yard had no turn-level
-      chain -- starter cities must never regress below turn-level coverage.
+- [x] **Tier-1 surface coverage expansion.** The "Data Expansion" pass of
+      `docs/surface-roads-plan.md` shipped: the endpoint, local-approach,
+      city-service-geometry, and facility-approach sweeps re-ran over the
+      full 623-city map (5,486 facilities, 3,636 source-backed endpoints,
+      6,223 of 6,233 approaches on named roads, 1,541 turn-level facility
+      chains; 372 of 623 home-terminal yards start loads with turn-by-turn
+      streets). The builders survived the slug migration and now print
+      per-state progress. Still open below: widening the high-confidence
+      facility-type set for turn geometry (grain elevators, cold storage).
+- [ ] **Turn geometry for more facility types.** The turn-level route pass
+      still limits itself to the original high-confidence type set (yards,
+      cross-docks, warehouses, plants, ramps, parcel hubs). Grain
+      elevators, cold storage, and food processors now have source-backed
+      endpoints at scale -- extend `HIGH_CONFIDENCE_TYPES` in
+      `tools/build_facility_approaches.py` after judging spoken-name
+      quality on a sample.
+- [ ] **Template facility realism pass.** The facility template deck stamps
+      every city with the full set regardless of geography: 282 template
+      port terminals exist world-wide, including landlocked towns (Lampasas,
+      Atlanta, Dallas). Gate water-dependent types on real port presence
+      (MARAD/BTS lists, which the source notes already cite) and review
+      intermodal ramps against actual rail service the same way.
 - [ ] **Surface intersections.** Phase 4 of `docs/surface-roads-plan.md`:
       stop signs and traffic signals at surface-street junctions, junction
       decision prompts, and traffic pressure at intersections -- extending

@@ -98,12 +98,16 @@ def build_facility_approaches(
     ]
     routed: dict[str, Any] = {}
     sources: list[dict[str, Any]] = []
-    for state in states:
+    for state_index, state in enumerate(states, start=1):
         extract = local_geometry.state_extract_path(cache_dir, state)
         sources.append(local_geometry.source_record(state, extract))
         state_targets = [
             _geometry_target(local_geometry, target) for target in routable if target.state == state
         ]
+        print(
+            f"[{state_index}/{len(states)}] {state}: {len(state_targets)} routable targets",
+            flush=True,
+        )
         if extract.exists() and state_targets:
             routed.update(local_geometry.route_state_targets(extract, state_targets))
 

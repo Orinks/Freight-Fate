@@ -72,7 +72,12 @@ def build_local_approaches(cache_dir: Path) -> dict[str, Any]:
         by_state[target.state].append(target)
 
     sources: list[dict[str, Any]] = []
-    for state, state_targets in sorted(by_state.items()):
+    state_count = len(by_state)
+    for state_index, (state, state_targets) in enumerate(sorted(by_state.items()), start=1):
+        print(
+            f"[{state_index}/{state_count}] {state}: {len(state_targets)} targets",
+            flush=True,
+        )
         extract = state_extract_path(cache_dir, state)
         sources.append(source_record(state, extract))
         if extract.exists():
@@ -97,18 +102,36 @@ def build_local_approaches(cache_dir: Path) -> dict[str, Any]:
     return payload
 
 
+def services_by_city_key(world, raw_cities: dict) -> dict[str, list]:
+    """Remap city_services.json onto current city keys.
+
+    The checked-in file predates the slug migration and the map expansion:
+    keys are old display names and newer cities are absent. Cities without
+    an entry simply have no sourced services yet and are skipped."""
+    by_key: dict[str, list] = {}
+    for name, entries in raw_cities.items():
+        key = world.resolve_city_key(name)
+        if key in world.cities:
+            by_key[key] = entries
+    return by_key
+
+
 def collect_targets() -> list[Target]:
     world = get_world()
     city_services = json.loads(CITY_SERVICES_PATH.read_text(encoding="utf-8"))
+    services = services_by_city_key(world, city_services["cities"])
     targets: list[Target] = []
 
     for city_name in world.city_names():
         city = world.city(city_name)
-        for entry in city_services["cities"][city_name]:
+        for entry in services.get(city_name, ()):
             fallback = bool(entry.get("fallback"))
             targets.append(
                 Target(
-                    target_id=f"city_service:{slug(city_name)}:{entry['key']}",
+                    # Keyed by the current world city key: the runtime's
+                    # canonicalizer passes it through and its lookups build
+                    # the same string, so no legacy-name slug is needed.
+                    target_id=f"city_service:{city_name}:{entry['key']}",
                     target_type="city_service",
                     city=city_name,
                     state=city.state,

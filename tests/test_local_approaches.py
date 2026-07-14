@@ -18,14 +18,14 @@ def test_local_approach_data_covers_supported_map(world):
     data = json.loads(path.read_text(encoding="utf-8"))
     coverage = data["coverage"]
 
-    assert coverage["approaches"] == 3152
-    assert coverage["osm_road"] == 3146
-    # Every road-snapped target carries a real road name: the snap prefers the
-    # nearest *named* road, so "unnamed public road" only survives where OSM
-    # truly has no named street inside the search radius (currently nowhere).
-    assert coverage["named_road"] == 3146
-    assert coverage["fallback"] == 6
-    assert coverage["estimated"] == 2404
+    assert coverage["approaches"] == 6233
+    assert coverage["osm_road"] == 6224
+    # Every road-snapped target carries a real road name where OSM has one:
+    # the snap prefers the nearest *named* road, so "unnamed public road"
+    # only survives where OSM truly has no named street inside the radius.
+    assert coverage["named_road"] == 6223
+    assert coverage["fallback"] == 9
+    assert coverage["estimated"] == 5481
     assert coverage["by_type"]["city_service"] == {
         "estimated": 129,
         "fallback": 0,
@@ -34,11 +34,11 @@ def test_local_approach_data_covers_supported_map(world):
         "total": 747,
     }
     assert coverage["by_type"]["facility"] == {
-        "estimated": 2275,
-        "fallback": 6,
-        "named_road": 2399,
-        "osm_road": 2399,
-        "total": 2405,
+        "estimated": 5352,
+        "fallback": 9,
+        "named_road": 5476,
+        "osm_road": 5477,
+        "total": 5486,
     }
 
     # The coverage block records the sweep's own inventory. The map has grown

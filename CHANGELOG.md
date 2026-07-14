@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Real streets reach the whole map now.** The street and facility data
+  sweep re-ran over all six hundred twenty-three cities: sixty percent of
+  home-terminal yards now start every load with spoken turn-by-turn
+  directions on named local streets, up from a small Midwest batch, and
+  nearly every local approach in the country names its real road.
+
 - **Hundreds more facilities now start and end on real city streets.**
   Short yard-to-facility drives used to skip their street route and fall
   back to one straight access road; now any facility whose real path has
