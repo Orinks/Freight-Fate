@@ -902,6 +902,16 @@ Deliver -> Earn and level up -> Repeat
       load cancellation shipped; future repeat-offender dispatch hooks remain)
 - [ ] Special event jobs (oversize loads, urgent medical freight)
 - [ ] Trailer types with handling differences
+- [ ] **In-game driving school (owner-approved 2026-07-14).** A CDL-style
+      spoken tutorial mode: guided lessons for air brakes, shifting and the
+      jake, exits and lanes, chain-up, and hours of service, each teaching
+      by doing in a consequence-free practice drive. Solves cold-start
+      onboarding for alpha and new players -- today the game teaches via
+      How to play, F1 key help, and the test book; every system learned by
+      book there is a candidate lesson here. Curriculum effectively drafted
+      by the 2026-07-14 learn-by-test-book session (test book Chapter 4
+      leads). Pairs naturally with the lease-to-start onramp: school first,
+      then the working career.
 
 ### World
 - [x] More cities and regional highways (1.4.0)
