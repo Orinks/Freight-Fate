@@ -193,6 +193,31 @@ section below and the Unreleased changelog; the release-line view:
 
 ### World and narration
 
+- [ ] **Interstate speed limits polluted by city-street samples at leg
+      endpoints (found live by the owner on I-10, 2026-07-14).** The
+      Overpass maxspeed sweep sampled at mile 0 / end-of-leg anchors,
+      which sit on city arterials, and the step function holds that
+      street value onto the interstate: Buckeye-Phoenix enforces 30 mph
+      on I-10 for the first ten miles. Scan says 305 of 727 interstate
+      legs have a polluted start (<45 mph held 3+ miles; worst is 25 mph
+      for 73 miles on I-84 Baker City-Ontario) and 28 have a polluted
+      end. Touches spoken limits, speeding enforcement, and ETA math
+      network-wide. Fix per the working split: Fable writes the recipe
+      rule (an interstate corridor sample under ~45 mph at a leg anchor
+      is a wrong-road match -- resample past the anchor approach or drop
+      to the neighboring sample), Opus runs the re-bake sweep in a
+      worktree, world_data regenerated and verified.
+- [ ] **Cruise control does not cancel on the player's own service
+      brake (owner report, 2026-07-14).** Hazard auto-braking cancels
+      cruise ("hands back on the wheel"), but a deliberate brake press
+      never does -- a real truck kicks cruise off at the first tap of
+      the pedal. Cancel on player braking input over a small threshold
+      and speak it terse ("Cruise off").
+- [ ] **Phoenix-metro interchange density is thin.** The interchange
+      bake took (12 baked on the 40-mile Buckeye-Phoenix leg, speaking
+      under the exits verbosity setting) but real I-10 there has 25-plus
+      exits; metro legs deserve a densifying pass when the interchange
+      bake next runs.
 - [ ] **Overlong city-service routes from a bad geometry bake (proven
       in-engine 2026-07-14).** local_geometry.json carries 91 city-service
       chains over 10 miles (max 35.0), all single-segment with
