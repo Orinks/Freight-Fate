@@ -57,3 +57,5 @@ data/spider/signsheets/*.zip
 
 # local scratch status (not for commit)
 STATUS.md
+
+logs/
