@@ -58,6 +58,13 @@ city service drives below.)
       direction flipped -- then merges up the on-ramp onto the highway trip
       with clock and toll continuity and a `departure_chain` save marker.
       Facilities without turn-level data keep the scripted highway start.
+- [ ] **Surface intersections.** Phase 4 of `docs/surface-roads-plan.md`:
+      stop signs and traffic signals at surface-street junctions, junction
+      decision prompts, and traffic pressure at intersections -- extending
+      the ramp-terminal signal mechanics (red/green cycle, grace distance,
+      cross-traffic consequences) onto the tier-1 street chains. Deferred
+      until local-drive pacing was proven in playtests; the per-system
+      harness sweep now passes clean across all 38 corridors.
 
 ### Maneuvers, enforcement, and the working day
 
