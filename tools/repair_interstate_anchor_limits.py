@@ -46,6 +46,7 @@ def is_interstate(highway: str) -> bool:
 SURFACE_ANCHOR_MAX_MPH = 45.0
 SURFACE_NEXT_MIN_MPH = 55.0
 SURFACE_MIN_SPAN_MI = 5.0
+SURFACE_SOLE_SAMPLE_MIN_LEG_MI = 15.0
 
 
 def repair(data: dict) -> list[dict]:
@@ -67,6 +68,17 @@ def repair(data: dict) -> list[dict]:
             and samples[0]["mph"] < SURFACE_ANCHOR_MAX_MPH
             and samples[1]["mph"] >= SURFACE_NEXT_MIN_MPH
             and samples[1]["at_mi"] >= SURFACE_MIN_SPAN_MI
+        ) or (
+            # A lone sub-45 anchor sample owning a long leg: the sweep found
+            # maxspeed only at the city anchor (Globe's 35 ruled all 88 miles
+            # to Show Low), so the whole profile is street pollution. Dropping
+            # it hands the leg back to the highway/region heuristic, which is
+            # honest where a town street value is not. Short town-to-town hops
+            # keep their limits -- 35 the whole way is real on those.
+            len(samples) == 1
+            and leg.get("miles", 0.0) >= SURFACE_SOLE_SAMPLE_MIN_LEG_MI
+            and samples[0]["mph"] < SURFACE_ANCHOR_MAX_MPH
+            and samples[0]["at_mi"] in (0.0, leg.get("miles"))
         ):
             dropped.append(samples.pop(0))
         if not dropped:

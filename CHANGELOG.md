@@ -217,7 +217,10 @@
   out of Phoenix held a baked 25 for twenty-two miles of the
   Superstition Freeway. Two hundred twenty-seven more legs now start at
   their real highway speed, while honest small-town limits -- like
-  US-60's real 35 through Globe -- stay exactly as posted.
+  US-60's real 35 through Globe -- stay exactly as posted. And where a
+  town's street speed was the only reading a long route had -- Globe's
+  35 used to rule all eighty-eight miles to Show Low -- the route now
+  uses honest open-highway speeds instead, on twenty-three more legs.
 - **A dropped speed limit now gives you braking time before a strike.**
   When the posted limit steps down, enforcement waits while you actually
   slow -- about the seconds a loaded truck honestly needs -- instead of
