@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+
+- **Cloud restores now get a second integrity check.** Beyond the server's
+  signature, a restored profile has to pass the game's own sanity rules --
+  wear between zero and one hundred, honest delivery counts, a fuel tank
+  that fits in a truck. A file that fails is refused with a plainly spoken
+  reason instead of being loaded, and saves from newer versions of the
+  game still restore fine.
+
 ### Fixed
 
 - **Restoring a cloud backup works again.** Every new server-verified backup
