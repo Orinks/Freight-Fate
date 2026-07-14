@@ -78,8 +78,14 @@ def test_song_city_badges_map_to_real_cities_and_real_badges():
         "houston_arrival",
         "winslow_arrival",
         "chattanooga_arrival",
+        "jackson_arrival",
+        "abilene_arrival",
     ):
         assert badge_id in SIMPLE_ARRIVAL_BADGES.values(), badge_id
+    # Either disputed Jackson earns the badge; Michigan's Jackson does not.
+    assert SIMPLE_ARRIVAL_BADGES["jackson_tn_us"] == "jackson_arrival"
+    assert SIMPLE_ARRIVAL_BADGES["jackson_ms_us"] == "jackson_arrival"
+    assert "jackson_mi_us" not in SIMPLE_ARRIVAL_BADGES
 
     app = App()
     try:

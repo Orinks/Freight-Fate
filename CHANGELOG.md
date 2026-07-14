@@ -14,17 +14,18 @@
   slippery aero flagships -- fill the fleet, and after the owner-operator
   buy-in the same models are yours to buy at the dealer.
 
-- **Twenty-nine new achievements for the bigger map and the longer
+- **Thirty-one new achievements for the bigger map and the longer
   career.** Badges now mark career levels 5 through 30, the owner-operator
   buy-in, activating your own authority, paying for your own endorsement
   course, owning three tractors, and fleet tractor upgrades -- plus
   map-wide progress: twenty-five, seventy-five, and one hundred fifty
   different cities, fifteen and thirty states, and first deliveries into
-  the Dakotas, Montana, and northern New England. Ten more celebrate
+  the Dakotas, Montana, and northern New England. Twelve more celebrate
   deliveries into cities the jukebox got to first: Muskogee, Memphis,
   Kansas City, Saginaw, Fort Worth, San Antonio, New Orleans, Houston,
-  Chattanooga, and a small Arizona town with one very famous corner. Each
-  still nods to a country or trucking song.
+  Chattanooga, Abilene, either Jackson the famous duet might mean, and a
+  small Arizona town with one very famous corner. Each still nods to a
+  country or trucking song.
 
 ### Changed
 

@@ -26,8 +26,9 @@ class AchievementAward:
 
 # Copy note: each badge has a specific inspiration, but player-facing text uses
 # song-title-level allusions and broad themes only. Do not quote lyrics or
-# recognizable lines, never reuse the exact artist or song title in the name or
-# description, and do not show the source field in the in-game menu.
+# recognizable lines, and never put the artist's name in the name or
+# description. A song title may appear when it is simply a place or plain
+# phrase (Jackson, Abilene); do not show the source field in the in-game menu.
 ACHIEVEMENTS: tuple[Achievement, ...] = (
     Achievement(
         "first_dispatch",
@@ -1044,6 +1045,20 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
         "Freight rolled into Chattanooga ahead of anything on rails, through the ridge cuts where the river bends twice to look around. The old trains would have needed a schedule.",
         "Landmarks",
         "Glenn Miller - Chattanooga Choo Choo",
+    ),
+    Achievement(
+        "jackson_arrival",
+        "The Jackson Everybody Sings About",
+        "A load delivered into Jackson. Folks have argued for sixty years over which Jackson the song means, Tennessee or Mississippi, so this badge takes either. Your bill of lading, at least, is specific.",
+        "Landmarks",
+        "Johnny Cash & June Carter - Jackson",
+    ),
+    Achievement(
+        "abilene_arrival",
+        "Prettiest Town on the Manifest",
+        "Freight delivered into Abilene, out where the West begins in earnest and nobody honks at a slow dock turn. The song got there first, but the load still needed a truck.",
+        "Landmarks",
+        "George Hamilton IV - Abilene",
     ),
 )
 

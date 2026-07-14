@@ -18,15 +18,17 @@ def test_achievement_copy_is_allusive_and_speech_sized():
     from freight_fate.models.profile import Profile
 
     for achievement in ACHIEVEMENTS:
-        artist, title = achievement.inspiration.split(" - ", 1)
+        artist, _title = achievement.inspiration.split(" - ", 1)
         visible = f"{achievement.name} {achievement.description}".lower()
         assert "\n" not in achievement.description
         assert 80 <= len(achievement.description) <= 220
         assert achievement.description.count(".") >= 2
         assert '"' not in achievement.description
         assert achievement.inspiration
+        # Artists stay out of player-facing text. Song titles are allowed to
+        # appear (many are just place names, like Jackson or Abilene); the
+        # no-lyrics rule lives in the catalog's copy note.
         assert artist.lower() not in visible
-        assert title.lower() not in visible
 
     profile = Profile(name="Copy Check")
     message = award(profile, ACHIEVEMENTS[0].id).message

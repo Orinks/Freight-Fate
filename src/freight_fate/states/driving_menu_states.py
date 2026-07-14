@@ -34,6 +34,10 @@ SIMPLE_ARRIVAL_BADGES = {
     "houston_tx_us": "houston_arrival",
     "winslow_az_us": "winslow_arrival",
     "chattanooga_tn_us": "chattanooga_arrival",
+    # The song never settles which Jackson it means, so either one counts.
+    "jackson_tn_us": "jackson_arrival",
+    "jackson_ms_us": "jackson_arrival",
+    "abilene_tx_us": "abilene_arrival",
 }
 
 
