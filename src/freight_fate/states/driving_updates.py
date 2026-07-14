@@ -1097,6 +1097,23 @@ class DrivingUpdateMixin:
         if self._pull_over is not None:
             return  # already being pulled over; don't pile on strikes
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        # A dropped limit earns braking time before strikes accrue: real
+        # enforcement tickets sustained disregard, not the transition, and a
+        # loaded truck cannot shed 15 mph the instant a sign changes. About
+        # 2 mph per second of comfortable braking sets the window.
+        if self._enforced_limit_prev is not None and limit < self._enforced_limit_prev:
+            grace = (self.truck.speed_mph - limit) / 2.0
+            self._limit_drop_grace_s = max(self._limit_drop_grace_s, min(15.0, grace))
+        self._enforced_limit_prev = limit
+        if self._limit_drop_grace_s > 0.0:
+            self._limit_drop_grace_s = max(0.0, self._limit_drop_grace_s - dt)
+            if self.truck.throttle > 0.05:
+                # Staying on the throttle through the drop is disregard, not
+                # compliance: the grace collapses and the clock runs.
+                self._limit_drop_grace_s = 0.0
+            else:
+                self._speeding_timer = 0.0
+                return
         if self.truck.speed_mph > limit + SPEEDING_LEEWAY_MPH:
             if (
                 self._cruise_mph is not None

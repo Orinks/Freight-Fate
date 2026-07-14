@@ -343,6 +343,29 @@ def test_simple_automatic_fresh_press_at_standstill_changes_direction(monkeypatc
         app.shutdown()
 
 
+def test_delivery_trip_carries_no_silent_arrival_zones(monkeypatch):
+    """The legacy last-miles arrival zones (destination approach 35, gate 15)
+    were silenced as freeway chatter but still enforced -- a speeding strike
+    citing 'the limit is 35' on open interstate with 65 spoken (owner-hit on
+    I-10). The exit, ramp terminal, and street chain own arrival speeds; the
+    delivery trip must not carry the silent zones at all."""
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        assert driving.phase == "delivery"
+        reasons = {zone.reason for zone in driving.trip.zones}
+        assert "destination approach" not in reasons
+        assert "facility gate" not in reasons
+        _, reason = driving.trip.speed_limit_at(driving.trip.total_miles - 0.5)
+        assert reason not in ("destination approach", "facility gate")
+    finally:
+        app.shutdown()
+
+
 def test_brake_hold_through_a_stop_never_selects_reverse(monkeypatch):
     """A held-brake stop must end held, in forward gear. The old behavior
     dropped the truck into reverse the moment a held-brake stop finished --

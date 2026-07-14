@@ -69,6 +69,17 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             ),
             career_hours=profile.game_hours,
         )
+        if phase == DRIVE_PHASE_DELIVERY:
+            # The destination exit, ramp terminal, and street chain own the
+            # arrival speeds now. The trip's legacy last-miles arrival zones
+            # were already silenced as freeway chatter, but they stayed
+            # enforceable -- a silent 35 under a spoken 65, writing real
+            # speeding fines on the final highway miles (owner-hit on I-10).
+            self.trip.zones = [
+                zone
+                for zone in self.trip.zones
+                if zone.reason not in ("destination approach", "facility gate")
+            ]
         self.lane = LaneKeeping(seed=self.trip_seed)
         self._day_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 12.0, self.weather.current
@@ -113,6 +124,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._last_announced_mph = 0.0
         self._speeding_timer = 0.0
         self.speeding_strikes = 0
+        # Compliance grace after a posted-limit drop: braking time before
+        # strikes accrue, earned only while actually slowing.
+        self._enforced_limit_prev: float | None = None
+        self._limit_drop_grace_s = 0.0
         # Congestion badges: both kinds of slow inside one trip earns a nod.
         self.construction_seen = False
         self.traffic_seen = False
