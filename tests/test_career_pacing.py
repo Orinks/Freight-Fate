@@ -61,6 +61,32 @@ def test_the_early_arc_moves_and_the_whole_arc_takes_months():
     assert 220.0 <= by_level[30].real_hours <= 400.0
 
 
+def test_the_arc_takes_real_life_months_at_any_schedule():
+    """The design contract, in calendar terms.
+
+    The model's ``real_hours`` are wall-clock hours at the keyboard (driving
+    under the default 10x clock compression, plus dock and menu time), so
+    dividing by a daily schedule gives real-life calendar time. Level 30
+    must cost months of a player's actual life -- even for a dedicated
+    player -- while a casual hour-a-night player still finishes within
+    about a year instead of never.
+    """
+    timeline = _timeline()
+    hours = {checkpoint.level: checkpoint.real_hours for checkpoint in timeline}
+    days_per_month = 30.4
+
+    dedicated_months = hours[30] / (2.5 * days_per_month)  # 2.5 h every day
+    assert dedicated_months >= 3.0
+    assert dedicated_months <= 8.0
+
+    casual_months = hours[30] / (1.0 * days_per_month)  # an hour per evening
+    assert 9.0 <= casual_months <= 14.0
+
+    # The mid-arc pivot (owner-operator at 18) is itself a real-life
+    # commitment measured in months for an evening player.
+    assert hours[18] / (1.0 * days_per_month) >= 3.0
+
+
 def test_no_late_level_becomes_a_wall():
     timeline = _timeline()
     by_level = {checkpoint.level: checkpoint for checkpoint in timeline}

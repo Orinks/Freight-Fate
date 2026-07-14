@@ -117,8 +117,9 @@ def main() -> None:
             f"(+{gap:5.1f} h)  {checkpoint.xp:>9,.0f} xp"
         )
     total = timeline[-1].real_hours
-    print(f"Total to level {timeline[-1].level}: {total:.0f} real hours")
-    print(f"At one hour per evening: about {total / 30.4:.1f} months")
+    print(f"Total to level {timeline[-1].level}: {total:.0f} real wall-clock hours")
+    print(f"At one hour per evening: about {total / 30.4:.1f} real-life months")
+    print(f"At two and a half hours every day: about {total / (2.5 * 30.4):.1f} months")
 
 
 if __name__ == "__main__":
