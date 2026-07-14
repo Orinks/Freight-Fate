@@ -50,6 +50,12 @@ city service drives below.)
       (heuristic elsewhere): a red/green cycle at the stop bar, grace
       distance, cross-traffic clips for running it -- now with dedicated
       red and green light earcons alongside the spoken callouts.
+      Reworked 2026-07-14 after a log-proven playtest crash: lights now
+      run a real green-yellow-red cycle (15 s green crossable from a
+      stop, 4 s yellow, entering on yellow legal like the law), and
+      every phase change on the approach is spoken -- the old one-flip
+      announce cap could say green, silently flip red, and punish the
+      driver for obeying the last thing they heard.
 - [x] **Congestion grounded in FHWA HPMS volume.** Real AADT baked per leg
       drives clock-gated jams on a commuter curve: metro stretches jam at
       rush hour and flow free at midnight; entering a live jam injects slow
