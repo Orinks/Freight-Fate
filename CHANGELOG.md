@@ -48,6 +48,16 @@
   Virginia. Real jazz, news, roots, and independent music fades in and out
   as you drive through each market, just like FM.
 
+- **The desert Southwest gets its real radio dial.** Six more live
+  stations light up the border-to-canyon country: KTNN out of Window
+  Rock, the Voice of the Navajo Nation, whose 50,000-watt AM signal
+  carries news and country across most of the Four Corners; Arizona
+  Public Radio from Flagstaff; Tucson's KXCI community radio; New Mexico
+  music on KANW alongside Albuquerque's KUNM; public radio from Las
+  Cruces; and community radio in Yuma on the Colorado River. Turn on
+  real public streams in Settings and drive Route 66 with the real
+  Navajo Nation blowtorch on the dial.
+
 - **The alpha ships with a test book.** A new guide in the docs folder
   walks through everything this version changes and how to hear each
   change for yourself: what to set up, what to do, what to listen for,

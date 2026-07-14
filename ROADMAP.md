@@ -179,16 +179,17 @@ section below and the Unreleased changelog; the release-line view:
       (Brownsville, McAllen, Laredo), Savannah (GPB not listed on Radio
       Browser), and Amarillo still have no receivable real station -- try
       again in a later sweep.
-- [ ] **The desert Southwest is nearly dark and should not be.** Only four
-      real stations cover the whole box (KJZZ Phoenix, KUNM Albuquerque,
-      KTEP El Paso, KUNV Las Vegas): nothing in Tucson, Flagstaff, Yuma,
-      Santa Fe, or Las Cruces, and nothing from the Navajo Nation. Sweep
-      candidates, each needing the live BASS smoke test: KNAU (Arizona
-      Public Radio network, Flagstaff to Page), KXCI and KUAZ (Tucson),
-      KAWC (Yuma), KRWG (Las Cruces), KANW (Albuquerque), and KTNN 660 AM,
-      the Voice of the Navajo Nation out of Window Rock, whose 50 kW
-      real-world contour covers most of the Four Corners -- a natural
-      companion to the tribal-nation crossing callouts.
+- [x] **The desert Southwest sweep landed: six stations, ten total.** KTNN
+      660 AM (Window Rock, the Voice of the Navajo Nation, 175-mile AM
+      groundwave contour -- widest in the catalog, honestly), KNAU
+      (Flagstaff), KXCI (Tucson), KRWG (Las Cruces), KANW (Albuquerque
+      beside KUNM, like the real dial), and KAWC (Yuma), each BASS
+      smoke-verified 2026-07-14. StreamTheWorld stations use the stable
+      livestream-redirect URLs -- the numbered edge hosts Radio Browser
+      caches rotate and die (that is what killed the first KNAU/KRWG/KANW
+      attempts). Still dark: Santa Fe and KUAZ Tucson (skipped, KXCI
+      covers the market); KTNN pairs naturally with the future
+      tribal-nation crossing callouts.
 
 ### World and narration
 
