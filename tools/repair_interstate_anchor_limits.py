@@ -37,20 +37,38 @@ def is_interstate(highway: str) -> bool:
     return str(highway).strip().upper().startswith("I-")
 
 
+# On US highways and state routes a 25-40 sample is often honest -- the
+# corridor really does run down a town's main street -- so only the mile-0
+# anchor sample is suspect, and only when the corridor's own character
+# contradicts it: the next sample fast (55+) and far enough out that the
+# street value would own miles of highway (US-60 out of Phoenix held a baked
+# 25 for 22 miles of the Superstition Freeway).
+SURFACE_ANCHOR_MAX_MPH = 45.0
+SURFACE_NEXT_MIN_MPH = 55.0
+SURFACE_MIN_SPAN_MI = 5.0
+
+
 def repair(data: dict) -> list[dict]:
     repaired: list[dict] = []
     for leg in data["legs"]:
-        if not is_interstate(leg.get("highway", "")):
-            continue
         corridor = leg.get("corridor") or {}
         samples = corridor.get("speed_limits")
         if not samples:
             continue
         dropped: list[dict] = []
-        while samples and samples[0]["mph"] < INTERSTATE_MIN_PLAUSIBLE_MPH:
+        if is_interstate(leg.get("highway", "")):
+            while samples and samples[0]["mph"] < INTERSTATE_MIN_PLAUSIBLE_MPH:
+                dropped.append(samples.pop(0))
+            while samples and samples[-1]["mph"] < INTERSTATE_MIN_PLAUSIBLE_MPH:
+                dropped.append(samples.pop())
+        elif (
+            len(samples) >= 2
+            and samples[0]["at_mi"] == 0.0
+            and samples[0]["mph"] < SURFACE_ANCHOR_MAX_MPH
+            and samples[1]["mph"] >= SURFACE_NEXT_MIN_MPH
+            and samples[1]["at_mi"] >= SURFACE_MIN_SPAN_MI
+        ):
             dropped.append(samples.pop(0))
-        while samples and samples[-1]["mph"] < INTERSTATE_MIN_PLAUSIBLE_MPH:
-            dropped.append(samples.pop())
         if not dropped:
             continue
         if samples:
