@@ -18,7 +18,6 @@ REVERSE = -1
 NEUTRAL = 0
 
 AUTO_UPSHIFT_RPM = 1750
-AUTO_LOW_GEAR_UPSHIFT_RPM = 1800
 AUTO_DOWNSHIFT_RPM = 1050
 SHIFT_TIME = 1.0  # seconds of torque interruption
 # With the engine brake working, a real automatic pre-selects a lower range

@@ -99,9 +99,7 @@ def format_stats(s: dict[str, Any]) -> str:
 def _load_ref(ref: str) -> dict[str, Any] | None:
     """Load world.json from a git ref (e.g. 'dev'), or None if unavailable."""
     rel = WORLD_PATH.relative_to(ROOT).as_posix()
-    out = subprocess.run(
-        ["git", "show", f"{ref}:{rel}"], cwd=ROOT, capture_output=True
-    )
+    out = subprocess.run(["git", "show", f"{ref}:{rel}"], cwd=ROOT, capture_output=True)
     if out.returncode != 0:
         return None
     return json.loads(out.stdout.decode("utf-8"))
@@ -119,7 +117,7 @@ def format_delta(cur: dict[str, Any], base: dict[str, Any], ref: str) -> str:
             f"  Legs added:             {dl:+}  (now {cur['legs']})",
             "",
             "Changelog line:",
-            f'  This drop adds {dm:,} drivable miles -- the map now has '
+            f"  This drop adds {dm:,} drivable miles -- the map now has "
             f"{cur['total_miles']:,} miles of road across {cur['cities']} cities "
             f"and {cur['legs']} routes.",
         ]

@@ -150,10 +150,7 @@ class DrivingControlsMixin:
                 f"Your current objective is {self._city_service_text()}: "
                 "drive there, stop, then press Enter to go inside. "
             )
-        return (
-            "Pickup and loading are complete. At your destination, stop, "
-            "then dock and deliver. "
-        )
+        return "Pickup and loading are complete. At your destination, stop, then dock and deliver. "
 
     def _speak_driving_help(self) -> None:
         """F1 help: keyboard or controller layout, following the device in use."""

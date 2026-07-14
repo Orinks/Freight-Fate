@@ -791,6 +791,7 @@ def test_traffic_pressure_gps_cue_deduplicates(world):
     from freight_fate.sim.trip_models import TRAFFIC_PRESSURE_LOOKAHEAD_MI
 
     trip, _truck = make_trip(world)
+
     # Only one pressure cue fires per update, so pick an exit pressure with
     # no neighbor inside the lookahead window; a denser map otherwise hands
     # the first cue to whichever pressure sorts earlier.
@@ -801,9 +802,7 @@ def test_traffic_pressure_gps_cue_deduplicates(world):
         )
 
     pressure = next(
-        p
-        for p in trip.traffic_pressures
-        if p.kind == "exit" and p.start_mi > 1.0 and _isolated(p)
+        p for p in trip.traffic_pressures if p.kind == "exit" and p.start_mi > 1.0 and _isolated(p)
     )
     trip.position_mi = pressure.start_mi - 1.0
 

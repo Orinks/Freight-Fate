@@ -7,6 +7,7 @@ Given city slugs, lists all real world legs whose endpoints are BOTH in the
 set (the corridor's internal legs) plus, optionally, legs reaching one hop
 out. Output is ready to paste as a "Built legs" block in a Ready_*.md sheet.
 """
+
 import json
 import sys
 from pathlib import Path

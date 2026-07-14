@@ -65,7 +65,8 @@ def test_return_trip_badge_needs_the_reverse_of_the_last_route(monkeypatch):
         p = app.ctx.profile
         p.current_city = "Chicago"
         job = next(
-            job for job in JobBoard(app.ctx.world).offers(
+            job
+            for job in JobBoard(app.ctx.world).offers(
                 p.current_city,
                 p.career.endorsements,
                 level=p.career.level,

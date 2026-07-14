@@ -224,6 +224,8 @@ def test_loaded_launch_uses_lower_low_speed_traction():
     t.rpm = t.specs.peak_torque_rpm
     t.throttle = 1.0
 
+    # From a dead stop the loaded rig eases in: drive force sits at the
+    # launch cap, well below the rolling traction cap.
     start_force = abs(t.drive_force())
     # At 25 mph in first gear the governor has already cut fuel, so the
     # rolling end of the ramp is probed through the shared traction cap the
@@ -234,6 +236,26 @@ def test_loaded_launch_uses_lower_low_speed_traction():
     assert start_force / t.gross_mass_kg == pytest.approx(G * LAUNCH_TRACTION_START_G)
     assert rolling_limit / t.gross_mass_kg == pytest.approx(G * LAUNCH_TRACTION_ROLLING_G)
     assert start_force < rolling_limit
+
+
+def test_empty_deadhead_launches_at_full_traction():
+    from freight_fate.sim.vehicle import LAUNCH_TRACTION_ROLLING_G, G
+
+    t = make_auto_truck()
+    t.cargo_kg = 0.0
+    assert t.drive_traction_limit() / t.gross_mass_kg == pytest.approx(
+        G * LAUNCH_TRACTION_ROLLING_G
+    )
+
+
+def test_steep_climb_gets_the_full_traction_cap_at_crawl_speed():
+    from freight_fate.sim.vehicle import LAUNCH_TRACTION_ROLLING_G, G
+
+    t = make_auto_truck()
+    t.grade = 0.06
+    assert t.drive_traction_limit() / t.gross_mass_kg == pytest.approx(
+        G * LAUNCH_TRACTION_ROLLING_G
+    )
 
 
 def test_automatic_does_not_rush_through_low_gears_on_launch():

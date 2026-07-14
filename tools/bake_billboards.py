@@ -24,6 +24,7 @@ an existing curated category, until a dedicated monument category is added.
 
 Idempotent + additive; without --write it is a dry run.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -88,7 +89,11 @@ def sign_record(sign: dict) -> tuple[str, str, dict] | None:
 def merge_into_leg(leg: dict, rec: dict) -> None:
     """Add rec to leg.corridor.landmarks, replacing a prior same-name curated one."""
     lms = leg.setdefault("corridor", {}).setdefault("landmarks", [])
-    lms[:] = [lm for lm in lms if not (lm.get("name") == rec["name"] and lm.get("category") == rec["category"])]
+    lms[:] = [
+        lm
+        for lm in lms
+        if not (lm.get("name") == rec["name"] and lm.get("category") == rec["category"])
+    ]
     lms.append(rec)
     lms.sort(key=lambda r: r["at_mi"])
 

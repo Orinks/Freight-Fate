@@ -25,6 +25,7 @@ import contextlib
 import io
 import logging
 import os
+import sys
 from pathlib import Path
 
 import pygame
@@ -36,6 +37,20 @@ from .audio_loops import SustainLoop, to_seconds
 log = logging.getLogger(__name__)
 
 ASSETS = Path(__file__).parent / "assets" / "sounds"
+
+# BASS addon plugins shipped with the game. BASSHLS teaches BASS to open
+# HTTP Live Streaming radio URLs (the AFN 360 Global channels); core BASS
+# already handles plain Shoutcast/Icecast streams on its own.
+PLUGIN_LIB = Path(__file__).parent / "lib"
+
+
+def _bass_plugin_names() -> tuple[str, ...]:
+    if sys.platform == "win32":
+        return ("basshls.dll",)
+    if sys.platform == "darwin":
+        return ("libbasshls.dylib",)
+    return ("libbasshls.so",)
+
 
 # Reserved loop slots. The pygame backend maps them onto mixer channels;
 # the BASS backend uses them as keys for its stream table.
@@ -710,7 +725,37 @@ class _BassBackend:
             except BassError:
                 log.warning("No audio device; using the BASS no-sound device")
                 self._output = Output(device=BASS_NO_SOUND_DEVICE)
+        self._load_plugins()
         self.enabled = True
+
+    def _load_plugins(self) -> None:
+        """Load optional BASS addon plugins (currently BASSHLS).
+
+        A missing or refused plugin is not an error: stations that need it
+        simply fail to open and the radio falls back with a spoken note.
+        """
+        import sound_lib
+        from sound_lib.external.pybass import BASS_UNICODE, BASS_PluginLoad
+
+        lib_dirs = (PLUGIN_LIB, Path(sound_lib.__file__).parent / "lib")
+        for name in _bass_plugin_names():
+            for lib_dir in lib_dirs:
+                path = lib_dir / name
+                if not path.is_file():
+                    continue
+                # UTF-16 + BASS_UNICODE sidesteps ANSI-codepage install paths.
+                if sys.platform == "win32":
+                    handle = BASS_PluginLoad(
+                        str(path).encode("utf-16-le") + b"\x00\x00", BASS_UNICODE
+                    )
+                else:
+                    handle = BASS_PluginLoad(str(path), 0)
+                if handle:
+                    log.info("Loaded BASS plugin: %s", path)
+                    break
+                log.warning("BASS could not load plugin: %s", path)
+            else:
+                log.info("BASS plugin not present: %s", name)
 
     # -- assets -------------------------------------------------------------
 

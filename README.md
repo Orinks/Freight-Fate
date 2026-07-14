@@ -370,4 +370,7 @@ package), which is proprietary and **free for non-commercial use only**. If
 Freight Fate is ever sold commercially (Steam, itch.io paid downloads, and
 so on), a paid license must be purchased from
 [un4seen developments](https://www.un4seen.com/bass.html#license) first.
+The same terms cover the bundled BASSHLS addon
+(`src/freight_fate/lib/basshls.dll`), which lets the radio play HLS
+streams; its license text ships alongside it.
 The game falls back to pygame.mixer automatically when BASS is unavailable.

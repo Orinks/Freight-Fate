@@ -59,11 +59,9 @@ def _overpass_mirrors() -> tuple[str, ...]:
     call time -- not frozen at import -- so the env is always honored. A local
     instance turns the junction sweep from hours (public throttling) into minutes.
     """
-    return tuple(
-        url
-        for url in (os.environ.get("OVERPASS_URL"), *PUBLIC_OVERPASS_MIRRORS)
-        if url
-    )
+    return tuple(url for url in (os.environ.get("OVERPASS_URL"), *PUBLIC_OVERPASS_MIRRORS) if url)
+
+
 OSRM_ROUTE_URL = "https://router.project-osrm.org/route/v1/driving/{coords}"
 USER_AGENT = "FreightFate interchange curation (https://github.com/Orinks/Freight-Fate)"
 ACCESSED_DATE = "2026-06-23"
@@ -189,9 +187,7 @@ def _ors_geometry(
         if tools_dir not in sys.path:
             sys.path.insert(0, tools_dir)
         _ENRICH_MODULE = importlib.import_module("enrich_routes")
-    parsed = _ENRICH_MODULE._cached_ors_route(
-        data, leg, ROOT / ".route-cache", rate_limit, api_key
-    )
+    parsed = _ENRICH_MODULE._cached_ors_route(data, leg, ROOT / ".route-cache", rate_limit, api_key)
     coords = parsed.get("coordinates") or []  # dense [[lon, lat], ...]
     if len(coords) < 2:
         return None

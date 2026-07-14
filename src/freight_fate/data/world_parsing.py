@@ -446,9 +446,7 @@ def _parse_speed_limits(
 def _parse_traffic_volume(raw, leg_miles: float, from_city: str, to_city: str):
     if not isinstance(raw, dict):
         raise ValueError(f"{from_city} to {to_city} traffic volume must be an object")
-    at_mi = _parse_at_mi(
-        raw, leg_miles, from_city, to_city, "traffic volume", allow_endpoints=True
-    )
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "traffic volume", allow_endpoints=True)
     aadt = float(raw.get("aadt", 0.0))
     if aadt <= 0:
         raise ValueError(f"{from_city} to {to_city} traffic volume at {at_mi} has no AADT")
@@ -505,9 +503,7 @@ def _parse_landmark(raw, leg_miles: float, from_city: str, to_city: str) -> Land
         raise ValueError(f"{from_city} to {to_city} landmark {name!r} has no spoken line")
     blob = f"{name} {spoken}".lower()
     if any(marker in blob for marker in RAW_POI_TEXT_MARKERS):
-        raise ValueError(
-            f"{from_city} to {to_city} landmark {name!r} exposes raw OSM/source text"
-        )
+        raise ValueError(f"{from_city} to {to_city} landmark {name!r} exposes raw OSM/source text")
     return Landmark(name, at_mi, category, kind, spoken)
 
 

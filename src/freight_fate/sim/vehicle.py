@@ -31,6 +31,7 @@ REFERENCE_CARGO_KG = 21_500.0
 LAUNCH_TRACTION_LOW_SPEED_MPH = 25.0
 LAUNCH_TRACTION_START_G = 0.12
 LAUNCH_TRACTION_ROLLING_G = 0.33
+LAUNCH_TRACTION_FULL_GRADE = 0.03  # climbs this steep get the full cap at any speed
 
 # -- rig wear -------------------------------------------------------------------
 # Tires, brakes, and the engine wear from how the truck is driven, not just
@@ -464,9 +465,12 @@ class TruckState:
         but a loaded tractor-trailer eases into that force instead of
         launching at the full traction cap from a dead stop. The easing
         belongs to the load: a bobtail or empty rig jumps off the line while
-        a grossed-out one creeps into its traction. The automatic's
-        post-shift force prediction shares this cap so it never promises a
-        gear more force than the tires will deliver."""
+        a grossed-out one creeps into its traction. It is a launch feel,
+        not a physical ceiling: a steep climb gets the full cap at any
+        speed, because capping a grade crawl below its resistance would
+        trap the truck and churn the automatic through pointless shifts.
+        The automatic's post-shift force prediction shares this cap so it
+        never promises a gear more force than the tires will deliver."""
         launch = min(1.0, self.speed_mph / LAUNCH_TRACTION_LOW_SPEED_MPH)
         load_fraction = min(1.0, max(0.0, self.cargo_kg / REFERENCE_CARGO_KG))
         start_g = (
@@ -474,6 +478,8 @@ class TruckState:
             - (LAUNCH_TRACTION_ROLLING_G - LAUNCH_TRACTION_START_G) * load_fraction
         )
         traction_g = start_g + (LAUNCH_TRACTION_ROLLING_G - start_g) * launch
+        climb = min(1.0, max(0.0, self.grade) / LAUNCH_TRACTION_FULL_GRADE)
+        traction_g += (LAUNCH_TRACTION_ROLLING_G - traction_g) * climb
         return self.gross_mass_kg * G * traction_g * self.effective_grip
 
     def resistance_force(self) -> float:

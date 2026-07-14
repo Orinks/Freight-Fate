@@ -55,8 +55,7 @@ FIRST_OFFENSE_HINT = (
 # Indexed by how many times you have already been turned away since the hint;
 # the last line is the final warning before the ban.
 MENACE_LINES = (
-    "Still hauling a trailer. The greeter's smile is getting thin. You know the "
-    "rule by now.",
+    "Still hauling a trailer. The greeter's smile is getting thin. You know the rule by now.",
     "That is three strikes' worth of trailer. A manager in a beaver cap is "
     "watching you idle at the entrance.",
     "Last warning: keep blocking the entrance with that rig and Big Buck's will "
@@ -80,14 +79,12 @@ STILL_BANNED = (
 CROWD_REFUSALS = (
     "Five buses of middle-school thrill-seekers are raiding the fudge counter. "
     "Maybe give it a pass for now.",
-    "A tour bus just unloaded forty road-trippers into the brisket line. Give "
-    "it an hour.",
+    "A tour bus just unloaded forty road-trippers into the brisket line. Give it an hour.",
     "It is a summer Saturday and the lot is packed to the beaver's whiskers. "
     "Come back when it is calmer.",
     "Three motor homes, a car club, and a wedding party in the parking lot. No "
     "room even for a bobtail today.",
-    "They are restocking the jerky wall and half the pumps are coned off. Swing "
-    "back later.",
+    "They are restocking the jerky wall and half the pumps are coned off. Swing back later.",
     "The famous restrooms have a line out the door. Trust us -- come back.",
 )
 

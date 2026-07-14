@@ -65,9 +65,7 @@ def bake(world_data_root: Path = WORLD_DATA_PATH, output: Path = DEFAULT_OUTPUT)
     data = _load_world_loader().load_world_data(world_data_root)
     raw = json.dumps(data, separators=(",", ":"), sort_keys=True).encode("utf-8")
     encoded = base64.b85encode(zlib.compress(raw, 9)).decode("ascii")
-    chunks = "".join(
-        f'    "{encoded[i : i + _CHUNK]}"\n' for i in range(0, len(encoded), _CHUNK)
-    )
+    chunks = "".join(f'    "{encoded[i : i + _CHUNK]}"\n' for i in range(0, len(encoded), _CHUNK))
     output.write_text(_HEADER + chunks + _FOOTER, encoding="utf-8")
     return output
 

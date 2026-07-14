@@ -813,8 +813,7 @@ class FacilityArrivalState(MenuState):
     def announce_entry(self) -> None:
         from ..audio import facility_ambient_key
 
-        self.ctx.audio.set_ambient(
-            facility_ambient_key(self.driving.job.destination_type))
+        self.ctx.audio.set_ambient(facility_ambient_key(self.driving.job.destination_type))
         self.ctx.say(f"At {self.facility}. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:

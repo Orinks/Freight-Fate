@@ -38,6 +38,16 @@
 
 ### Added
 
+- **The in-cab radio picks up forty-three more real stations.** With real
+  streams allowed in settings, live local radio now reaches Portland, Boise,
+  Spokane, Salt Lake City, Las Vegas, Reno, Minneapolis, Milwaukee, Detroit,
+  St. Louis, Houston, Pittsburgh, Philadelphia, Baltimore, Washington,
+  Nashville, Memphis, Birmingham, Tampa, Miami, and more -- plus the wide
+  public radio networks that carry the empty country: the Dakotas, Montana,
+  the Texas plains, the Upper Peninsula, northern New England, and West
+  Virginia. Real jazz, news, roots, and independent music fades in and out
+  as you drive through each market, just like FM.
+
 - **The alpha ships with a test book.** A new guide in the docs folder
   walks through everything this version changes and how to hear each
   change for yourself: what to set up, what to do, what to listen for,
@@ -140,6 +150,10 @@
 
 ### Fixed
 
+- **Restoring a cloud backup works again.** Every new server-verified backup
+  was wrongly refused with "failed its integrity check" the moment you tried
+  to restore it. The refusal was the game's mistake, not a problem with your
+  save. Restores of verified backups now complete normally.
 - **Cloud backup now tells you when this computer needs to reconnect.** If
   orinks.net stops accepting this computer's sign-in, the cloud backup menu
   now says so and explains the fix, instead of wrongly reporting that your

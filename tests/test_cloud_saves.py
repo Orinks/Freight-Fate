@@ -597,3 +597,42 @@ def test_upload_with_retired_token_pauses_backups_with_reconnect_status():
     # Not transient: the snapshot is dropped instead of retried forever.
     drain(service, clock)
     assert len(transport.posts) == 1
+
+
+# -- cross-language canonicalization (the byte form both sides sign) -------------
+
+
+def test_canonical_profile_matches_the_server_byte_for_byte():
+    # Expected string produced by the server's own canonicalization
+    # (JSON.stringify over sorted keys, then the non-ASCII escape pass) run
+    # in Node. The signature only verifies when Python lays out numbers the
+    # same way: whole floats lose their ".0", decimals hold down to 1e-6,
+    # exponents are unpadded, and negative zero prints as "0".
+    payload = {
+        "b": [1.5, 2.0, 1e-7, 0.00001],
+        "a": {"x": -0.0, "y": 129881.73999999999, "z": 29571.0},
+        "n": None,
+        "s": "café — truck",
+        "t": True,
+        "big": 1e21,
+        "tiny": 8.673617379884035e-19,
+        "whole": 6.0,
+    }
+    expected = (
+        '{"a":{"x":0,"y":129881.73999999999,"z":29571},'
+        '"b":[1.5,2,1e-7,0.00001],"big":1e+21,"n":null,'
+        '"s":"caf\\u00e9 \\u2014 truck","t":true,'
+        '"tiny":8.673617379884035e-19,"whole":6}'
+    )
+    assert canonical_profile(payload) == expected.encode("utf-8")
+
+
+def test_whole_float_profile_signature_round_trips():
+    # The exact shape that broke every real restore: ordinary careers carry
+    # whole floats (total_miles, reputation), which the old canonical form
+    # rendered as "29571.0" while the server had signed "29571".
+    profile = Profile(name="Road Star", money=77_000.0)
+    reply = make_cloud_reply(profile.to_dict())
+    payload = download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
+    assert payload is not None
+    assert payload["profile"]["money"] == 77_000.0

@@ -41,6 +41,9 @@ SRC_DIR = ROOT / "src"
 PACKAGE_DIR = SRC_DIR / "freight_fate"
 SOUND_LIB_NATIVE_EXTS = {".dll", ".dylib", ".so"}
 SOUND_LIB_ARCH_DIR = "x64"
+# Game-shipped BASS addon plugins (e.g. basshls for HLS radio streams);
+# staged next to sound_lib's own libraries so one directory holds all of BASS.
+ADDON_LIB_DIR = PACKAGE_DIR / "lib"
 PRISM_NATIVE_EXTS = {".dll", ".dylib", ".so"}
 PRISM_DEPENDENCY_DIR = "prismatoid.libs"
 
@@ -142,6 +145,10 @@ def stage_sound_lib_runtime_files(build_dir: Path) -> None:
         shutil.rmtree(target_dir)
     target_dir.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(source_dir, target_dir)
+    if ADDON_LIB_DIR.exists():
+        for path in ADDON_LIB_DIR.iterdir():
+            if path.is_file() and path.suffix.lower() in SOUND_LIB_NATIVE_EXTS:
+                shutil.copy2(path, target_dir / path.name)
     mirror_sound_lib_flat_files_to_arch_dir(target_dir)
     add_macos_dylib_aliases(target_dir)
 

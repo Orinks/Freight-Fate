@@ -13,6 +13,7 @@ enforcement semantics). Additive + idempotent (overwrites the leg's landmarks).
 
     python bake_landmarks.py [--only "a_b_us:c_d_us;..."] [--per-leg 8] [--write]
 """
+
 from __future__ import annotations
 
 import argparse
@@ -41,9 +42,9 @@ R_MI = 3958.8
 # OSM-derived features, so it must PRESERVE these when it overwrites a leg (else a
 # re-bake silently wipes the Loneliest Road marker and every placed billboard).
 CURATED_CATEGORIES = {"highway_marker", "billboard_sign"}
-POINT_OFF_MI = 4.0      # keep a pass/museum/river crossing within this of the route
-SAMPLE_STEP_MI = 20.0   # bbox sample spacing along the corridor
-BBOX_RADIUS_M = 14000   # ~14 km half-box at each sample
+POINT_OFF_MI = 4.0  # keep a pass/museum/river crossing within this of the route
+SAMPLE_STEP_MI = 20.0  # bbox sample spacing along the corridor
+BBOX_RADIUS_M = 14000  # ~14 km half-box at each sample
 
 
 def hav(lat1, lon1, lat2, lon2):
@@ -115,7 +116,9 @@ def _point_in_ring(lat, lon, ring):
     for i in range(n):
         yi, xi = ring[i]
         yj, xj = ring[j]
-        if ((yi > lat) != (yj > lat)) and (lon < (xj - xi) * (lat - yi) / ((yj - yi) or 1e-12) + xi):
+        if ((yi > lat) != (yj > lat)) and (
+            lon < (xj - xi) * (lat - yi) / ((yj - yi) or 1e-12) + xi
+        ):
             inside = not inside
         j = i
     return inside

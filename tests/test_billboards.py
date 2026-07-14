@@ -54,9 +54,6 @@ def test_big_bucks_billboards_accessor_returns_pool():
 def test_random_billboard_is_deterministic_and_in_pool():
     pick = bb.random_billboard(random.Random(3))
     assert pick in (
-        bb.GENERIC_BILLBOARDS
-        + bb.ATTORNEY_BILLBOARDS
-        + bb.FAITH_BILLBOARDS
-        + bb.ROADSIDE_ODDITIES
+        bb.GENERIC_BILLBOARDS + bb.ATTORNEY_BILLBOARDS + bb.FAITH_BILLBOARDS + bb.ROADSIDE_ODDITIES
     )
     assert bb.random_billboard(random.Random(3)) == pick

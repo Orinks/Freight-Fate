@@ -43,9 +43,7 @@ def test_position_on_route_matches_midpoint_town():
 def test_position_on_route_rescales_to_adopted_leg_miles():
     # Curated leg mileage differs from the raw polyline length; positions
     # must land on the leg's own mile scale (it drives cues and HOS).
-    at_mi, _ = place_checkpoints.position_on_route(
-        LINE, LINE_MILES, 100.0, lat=35.5, lon=-110.0
-    )
+    at_mi, _ = place_checkpoints.position_on_route(LINE, LINE_MILES, 100.0, lat=35.5, lon=-110.0)
     assert at_mi == pytest.approx(50.0, abs=0.5)
 
 

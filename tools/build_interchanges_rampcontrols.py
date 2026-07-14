@@ -165,9 +165,7 @@ def load_or_build_ramp_control_index(
             and payload.get("pbfs") == _pbf_set_metadata(pbf_paths)
             and payload.get("bounds_digest") == _bounds_digest(bounds)
         ):
-            points = [
-                (float(p[0]), float(p[1]), str(p[2])) for p in payload.get("points", ())
-            ]
+            points = [(float(p[0]), float(p[1]), str(p[2])) for p in payload.get("points", ())]
             print(
                 f"Loaded ramp-control index cache: {cache_path} ({len(points)} nodes)",
                 flush=True,
@@ -308,9 +306,7 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
         corridor = leg.get("corridor", {})
         if not corridor.get("interchanges") or len(corridor.get("route_points", ())) < 2:
             continue
-        if not args.force and all(
-            ix.get("ramp_control") for ix in corridor["interchanges"]
-        ):
+        if not args.force and all(ix.get("ramp_control") for ix in corridor["interchanges"]):
             continue
         if not args.max_legs or len(target_legs) < args.max_legs:
             target_legs.append(leg)
