@@ -308,11 +308,14 @@ section below and the Unreleased changelog; the release-line view:
       an errand). Yard/facility approaches are healthy (max 4.0 mi). Root
       cause is the dev-side build_local_geometry.py POI match picking a
       distant candidate and collapsing the failed turn-level route into
-      one giant segment. Plan per the working split: Fable root-causes the
-      match rule and adds the invariant to the enrichment recipe (a city
-      service approach over ~6 miles is a wrong match, not a long street),
-      Opus re-sweeps the 91 entries in a worktree, and the tool fix notes
-      go to Josh with the data PR.
+      one giant segment. ROOT-CAUSED 2026-07-14: two radii never
+      reconciled -- build_city_services matches POIs within 28 crow-flies
+      miles while build_local_geometry only routes within 18, so every
+      sourced service in the 18-28 band is guaranteed to bake its full
+      distance as one 25-mph fallback segment. Full execution spec for
+      the re-bake (offline, local PBFs, no Overpass needed) lives in
+      docs/rebake-briefs-2026-07-14.md alongside the dense maxspeed
+      sweep brief; Opus executes both in a worktree.
       dozens of spider batches grow the map to 375 cities and 626 enriched
       legs -- real corridors across the Great Basin, the Hi-Line, the
       Dakotas, Appalachia, West Texas, and more, each with real roads,
