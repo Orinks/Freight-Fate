@@ -5,14 +5,22 @@
 ### Fixed
 
 - **Cloud backup now tells you when this computer needs to reconnect.** If
-  orinks.net stops accepting this computer's sign-in, which can happen after
-  you connect a second computer with a new driver token, the cloud backup menu
-  now says so and walks you to Settings, Online to reconnect, instead of
-  wrongly reporting that your backups could not be reached.
+  orinks.net stops accepting this computer's sign-in, the cloud backup menu
+  now says so and explains the fix, instead of wrongly reporting that your
+  backups could not be reached.
 - **Long deliveries are easier on the game while you drive.** The destination
   exit is now worked out once and remembered instead of being recalculated
   every moment of the drive, removing a heavy background load tied to a
   reported crash on coast-to-coast routes.
+
+### Changed
+
+- **Playing on more than one computer no longer signs the other one out.**
+  orinks.net now gives each of your computers its own token: add a computer
+  from the driver setup page and your other machines keep working. If the
+  game says your sign-in is no longer accepted, it now points you to the
+  computer list on the setup page to get a fresh token for that computer.
+
 ## 1.8.1 - 2026-07-13
 
 ### Fixed

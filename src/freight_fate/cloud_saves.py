@@ -128,12 +128,15 @@ class CloudAuthError(Exception):
 
 
 # The spoken guidance for CloudAuthError, shared by every cloud menu so the
-# player always hears the same recovery path.
+# player always hears the same recovery path. orinks.net issues one token
+# per computer, so a refusal means this computer's token was signed out
+# from the account's computer list (or replaced by a sign-out-everywhere).
 AUTH_HELP = (
-    "orinks.net no longer accepts this computer's sign-in. This can happen "
-    "after you connect another computer with a new driver token. Choose Set "
-    "up orinks.net account under Settings, Online, and paste a fresh Driver "
-    "ID and driver token to reconnect."
+    "orinks.net no longer accepts this computer's sign-in. This usually "
+    "means this computer was signed out from the computer list on your "
+    "orinks.net driver setup page. On that page, choose Add computer to get "
+    "a fresh token, then paste it under Set up orinks.net account in "
+    "Settings, Online."
 )
 
 
