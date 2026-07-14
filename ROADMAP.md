@@ -228,6 +228,18 @@ section below and the Unreleased changelog; the release-line view:
       Browser), and Amarillo still have no receivable real station -- try
       again in a later sweep. WABE Atlanta joined the dark list
       2026-07-14 (every known mount refused; supported:false with notes).
+- [x] **Map-refresh utility shipped (v1, report-only) --
+      tools/refresh_map_data.py, 2026-07-14.** The owner-run drift
+      checker: --radio plays every supported real stream through the
+      game's BASS stack and reports the dead; --limits-lint runs the
+      anchor-repair judgment rules as a linter (fresh bakes must report
+      zero); --stops re-queries OSM per leg (honors OVERPASS_URL) and
+      diffs live named truck POIs against baked stops, with a direct
+      existence check around each baked stop's own corridor point so a
+      sampled miss never reads as a closure. Never writes; exit code 1
+      when anything needs attention, so a scheduled run can alert.
+      Curation stays with the recipes. Future: fold in landmark and
+      interchange drift.
 - [ ] **Stream URLs rot fast -- fold a dial health check into the
       map-refresh tool.** One day after the 57-station sweep, seven
       streams were already dead (KJZZ, KCRW, KUNM, KUTX, KERA, KCUR,
