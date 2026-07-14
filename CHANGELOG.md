@@ -160,6 +160,19 @@
 
 ### Fixed
 
+- **Braking to a stop no longer drops the truck into reverse.** With
+  simple direction changes, holding the brake through a stop used to
+  select reverse the moment the truck stopped -- including when the game
+  itself said to hold the brakes at a red light -- and reverse then swaps
+  the pedals, so your next press moved you the wrong way. A brake held
+  through a stop now just holds the truck. To back up, stop, release the
+  brake, then press and hold it again; the spoken key help teaches the
+  new gesture. This is a changed habit if you were used to hold-through
+  reversing.
+- **KJZZ Phoenix plays again.** The station's stream moved to a new
+  address and the radio was falling back to satellite with "KJZZ,
+  Phoenix is unavailable." The dial now carries the station's current
+  stream.
 - **Ramp-end traffic lights now have a yellow phase, speak every change,
   and no longer punish you for a light that changed behind your back.**
   The light used to announce only its first change: it could say green

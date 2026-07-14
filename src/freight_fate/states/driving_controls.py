@@ -170,10 +170,11 @@ class DrivingControlsMixin:
             )
         else:
             automatic_help = (
-                "In automatic with simple direction changes, keep holding the Down "
-                "arrow after you stop to shift into reverse and back slowly. While "
-                "reversing, keep holding the Up arrow after you stop to shift back "
-                "into forward. "
+                "In automatic with simple direction changes, brake to a stop, "
+                "release the Down arrow, then press and hold it again to shift into "
+                "reverse and back slowly. While reversing, brake with the Up arrow, "
+                "and once stopped, release and hold it again to shift back into "
+                "forward. Holding a brake through a stop just holds the truck. "
             )
         self.ctx.say(
             "Hold Up arrow to accelerate, Down arrow to brake. "
@@ -249,10 +250,12 @@ class DrivingControlsMixin:
             )
         else:
             gears = (
-                "In automatic with simple direction changes, keep holding the left "
-                "trigger after you stop to shift into reverse and back slowly. While "
-                "reversing, keep holding the right trigger after you stop to shift "
-                "back into forward. "
+                "In automatic with simple direction changes, brake to a stop, let "
+                "the left trigger return to neutral, then press and hold it again to "
+                "shift into reverse and back slowly. While reversing, brake with the "
+                "right trigger, and once stopped, release and press it again to "
+                "shift back into forward. Holding a brake through a stop just holds "
+                "the truck. "
             )
         self.ctx.say(
             "Right trigger is the gas, left trigger the brake; press the left "

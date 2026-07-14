@@ -319,7 +319,7 @@ def test_sustained_redline_speaks_a_damage_warning(monkeypatch):
         app.shutdown()
 
 
-def test_simple_automatic_holds_through_stop_to_change_direction(monkeypatch):
+def test_simple_automatic_fresh_press_at_standstill_changes_direction(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.transmission import REVERSE
 
@@ -332,14 +332,64 @@ def test_simple_automatic_holds_through_stop_to_change_direction(monkeypatch):
         assert app.ctx.settings.automatic_direction_changes == "simple"
 
         driving.truck.velocity_mps = 0.0
-        driving._reverse_brake_held = True
         assert driving._update_reverse_controls(accelerating=False, braking_key=True)
         assert driving.truck.transmission.in_reverse
 
         driving.truck.velocity_mps = 0.0
-        driving._reverse_accel_held = True
+        driving._update_reverse_controls(accelerating=False, braking_key=False)
         driving._update_reverse_controls(accelerating=True, braking_key=False)
         assert driving.truck.transmission.gear != REVERSE
+    finally:
+        app.shutdown()
+
+
+def test_brake_hold_through_a_stop_never_selects_reverse(monkeypatch):
+    """A held-brake stop must end held, in forward gear. The old behavior
+    dropped the truck into reverse the moment a held-brake stop finished --
+    including at the ramp light's own 'hold the brakes for green' -- and the
+    flipped reverse controls then ate the driver's next input (owner-hit on
+    I-10, 2026-07-14)."""
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        assert app.ctx.settings.automatic_direction_changes == "simple"
+        t = driving.truck
+
+        # Brake pressed while rolling: a stop in progress.
+        t.velocity_mps = 20.0
+        assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
+        # Still holding as the truck reaches a standstill: stay in forward.
+        t.velocity_mps = 0.0
+        assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert not t.transmission.in_reverse
+        # Holding for a light: still no reverse, however long the hold.
+        for _ in range(120):
+            assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert not t.transmission.in_reverse
+
+        # Release, then a fresh press at the standstill: that is the gesture.
+        driving._update_reverse_controls(accelerating=False, braking_key=False)
+        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert t.transmission.in_reverse
+
+        # Mirror: brake the reverse roll with the accelerator and hold it
+        # through the stop -- the truck must not lurch into forward gear.
+        t.velocity_mps = -2.5
+        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        driving._update_reverse_controls(accelerating=False, braking_key=False)
+        assert not driving._update_reverse_controls(accelerating=True, braking_key=False)
+        t.velocity_mps = 0.0
+        driving._update_reverse_controls(accelerating=True, braking_key=False)
+        assert t.transmission.in_reverse  # still reverse: the hold began moving
+        # Release and press again: now it is a deliberate forward selection.
+        driving._update_reverse_controls(accelerating=False, braking_key=False)
+        driving._update_reverse_controls(accelerating=True, braking_key=False)
+        assert not t.transmission.in_reverse
     finally:
         app.shutdown()
 
@@ -496,7 +546,8 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         app.ctx.settings.automatic_direction_changes = "simple"
         driving._speak_keyboard_help()
         assert "simple direction changes" in spoken[-1]
-        assert "keep holding the Down arrow" in spoken[-1]
+        assert "press and hold it again" in spoken[-1]
+        assert "holds the truck" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_keyboard_help()
@@ -506,7 +557,7 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         app.ctx.settings.automatic_direction_changes = "simple"
         driving._speak_controller_help()
         assert "simple direction changes" in spoken[-1]
-        assert "keep holding the left trigger" in spoken[-1]
+        assert "press and hold it again" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_controller_help()

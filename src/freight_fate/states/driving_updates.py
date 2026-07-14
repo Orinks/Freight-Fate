@@ -363,11 +363,35 @@ class DrivingUpdateMixin:
         accel_edge = accel_held and not self._reverse_accel_held
         self._reverse_brake_held = brake_held
         self._reverse_accel_held = accel_held
+        # A brake hold that began while moving is a stopping action, never a
+        # reverse request: without this, every held-brake stop -- including
+        # the ramp light's own "hold the brakes for green" -- dropped the
+        # truck into reverse the moment it stopped. Backing up takes a fresh
+        # press at a standstill in either direction-change mode.
+        if brake_edge:
+            self._reverse_brake_press_was_stopping = t.speed_mph > 2.0
+        elif not brake_held:
+            self._reverse_brake_press_was_stopping = False
+        # Mirror image while backing: holding the accelerator to brake the
+        # reverse roll must end in a held stop, not a forward lurch under
+        # throttle.
+        if accel_edge:
+            self._reverse_accel_press_was_stopping = tr.in_reverse and t.speed_mph > 2.0
+        elif not accel_held:
+            self._reverse_accel_press_was_stopping = False
         if not tr.automatic:
             return tr.in_reverse and braking_key and not accelerating
         deliberate = self.ctx.settings.automatic_direction_changes == "deliberate"
-        forward_requested = accel_edge if deliberate else accelerating
-        reverse_requested = brake_edge if deliberate else braking_key
+        forward_requested = (
+            accel_edge
+            if deliberate
+            else accelerating and not self._reverse_accel_press_was_stopping
+        )
+        reverse_requested = (
+            brake_edge
+            if deliberate
+            else braking_key and not self._reverse_brake_press_was_stopping
+        )
         if tr.in_reverse:
             if forward_requested and abs(t.velocity_mps) < 0.3:
                 tr.gear = 1
