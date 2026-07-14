@@ -38,6 +38,12 @@
 
 ### Added
 
+- **The alpha ships with a test book.** A new guide in the docs folder
+  walks through everything this version changes and how to hear each
+  change for yourself: what to set up, what to do, what to listen for,
+  and when to call it working. Written for screen-reader playtesting from
+  the first line, with the winter driving tests in a companion volume.
+
 - **Cloud restores now get a second integrity check.** Beyond the server's
   signature, a restored profile has to pass the game's own sanity rules --
   wear between zero and one hundred, honest delivery counts, a fuel tank

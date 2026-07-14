@@ -178,10 +178,25 @@ section below and the Unreleased changelog; the release-line view:
 - [x] **Real US time zones.** The compressed career clock now crosses real
       zone boundaries with spoken zone changes; deadlines read in the
       destination's local time.
-- [ ] **Service-stop buffs and the Big Buck's catalog.** The amenities and
-      `big_bucks` modules ship content and tiers; the gameplay layer --
-      purchase menus and buff effects on rest quality, fatigue, or morale --
-      is not wired yet.
+- [x] **Service-stop buffs shipped.** Truck stops sell meals, showers, and
+      rig care as spoken, clocked buffs: food eases fatigue and slows its
+      build, lube bays and tire rotations slow engine and tread wear for
+      the trip, brands behave by their real reputations (free shower with
+      fuel at Pilot/Flying J, the Iron Skillet at Petro, tire bays at
+      Love's/Speedco, road brake jobs at TA/Petro, Big Buck's fixes
+      nothing), one buff per group with replacement, and none of it ever
+      adds legal driving hours. The Big Buck's purchase-catalog gameplay
+      still rides the drive-and-enter stop above.
+- [x] **The 1.9 alpha test book.** `docs/alpha-test-book.md`: an
+      exhaustive spoken-first delta chapter (everything the alpha changes
+      versus the nightly line, system by system) plus setup / do / listen
+      for / pass checklists for every non-physics 1.9 system -- wear and
+      per-truck condition, truck-stop buffs and brand repairs, lanes and
+      exits and ramp lights, congestion, surface streets and city
+      services, enforcement and the logbook, pressure modes, the career
+      arc, radio, world narration switches, saves and the integrity gate.
+      The winter/physics suite stays in
+      `docs/physics-playtest-checklists.md` as the companion volume.
 - [ ] **Overlay re-sweep on the slug world.** The local-approach /
       city-service / turn-level geometry sweeps predate the slug migration
       and the newest cities; the runtime canonicalizes old ids and new
