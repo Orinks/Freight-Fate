@@ -49,8 +49,9 @@ class Settings:
     # a release and second press before an automatic changes direction.
     automatic_direction_changes: str = "simple"  # simple/deliberate
     # Dash chime plus a spoken heads-up while over the posted limit, like a
-    # carrier-set overspeed alert; on by default, a company truck would have it.
-    overspeed_warning: bool = True
+    # carrier-set overspeed alert; on by default, a company truck would have
+    # it. "urgent only" keeps just the runaway alarm for deliberate speeders.
+    overspeed_warning: str = "on"  # on / urgent only / off
     # Distance compression while driving. Relaxed (10x) by default: new players
     # get the most real time to hear and react to spoken events; veterans can
     # step up to standard or realistic in Settings, Gameplay.
@@ -148,6 +149,13 @@ class Settings:
             s.steering_assist = "off"
         if s.automatic_direction_changes not in ("simple", "deliberate"):
             s.automatic_direction_changes = "simple"
+        # The overspeed alert briefly shipped as a bool; map old saves over.
+        if s.overspeed_warning is True:
+            s.overspeed_warning = "on"
+        elif s.overspeed_warning is False:
+            s.overspeed_warning = "off"
+        if s.overspeed_warning not in ("on", "urgent only", "off"):
+            s.overspeed_warning = "on"
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""
         if not isinstance(s.event_backend, str) or not s.event_backend:

@@ -849,8 +849,25 @@ def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
             driving._update_speeding(0.1)
         assert played.count("vehicle/overspeed_chime") >= 2
 
+        # Urgent-only mode: deliberate fast cruising stays unjudged, but a
+        # runaway past the urgent line still rings, at the fast cadence.
+        app.ctx.settings.overspeed_warning = "urgent only"
+        t.velocity_mps = 50.0 / 2.23694
+        driving._update_speeding(0.1)  # disarm
+        played.clear()
+        events.clear()
+        t.velocity_mps = 60.0 / 2.23694  # 10 over: quiet in urgent-only
+        for _ in range(60):
+            driving._update_speeding(0.1)
+        assert played.count("vehicle/overspeed_chime") == 0
+        t.velocity_mps = 75.0 / 2.23694  # 25 over: the runaway alarm rings
+        for _ in range(30):  # 3 seconds at the 0.5 s cadence
+            driving._update_speeding(0.1)
+        assert any("Watch your speed" in e for e in events)
+        assert played.count("vehicle/overspeed_chime") >= 4
+
         # The setting turns the whole alert off.
-        app.ctx.settings.overspeed_warning = False
+        app.ctx.settings.overspeed_warning = "off"
         t.velocity_mps = 50.0 / 2.23694
         driving._update_speeding(0.1)
         t.velocity_mps = 56.0 / 2.23694

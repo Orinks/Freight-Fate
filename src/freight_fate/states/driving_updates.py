@@ -1167,12 +1167,19 @@ class DrivingUpdateMixin:
         driver is already complying), and settling back under the limit
         disarms it for the next episode.
         """
-        if not getattr(self.ctx.settings, "overspeed_warning", True):
+        mode = getattr(self.ctx.settings, "overspeed_warning", "on")
+        if mode == "off" or mode is False:
             self._overspeed_active = False
             return
+        urgent_only = mode == "urgent only"
         speed = self.truck.speed_mph
+        # In urgent-only mode the alert arms only at runaway overspeed, and
+        # disarms once the runaway is contained -- deliberate fast cruising
+        # below the urgent line stays unjudged, exactly as requested.
+        arm_over = OVERSPEED_URGENT_MPH if urgent_only else OVERSPEED_WARN_MPH
+        reset_over = (OVERSPEED_URGENT_MPH - 2.0) if urgent_only else OVERSPEED_RESET_MPH
         if self._overspeed_active:
-            if speed <= limit + OVERSPEED_RESET_MPH:
+            if speed <= limit + reset_over:
                 self._overspeed_active = False
                 return
             braking_down = self.truck.brake > 0.0 and self.truck.throttle <= 0.05
@@ -1190,7 +1197,7 @@ class DrivingUpdateMixin:
                 self._overspeed_chime_timer = 0.0
                 self.ctx.audio.play("vehicle/overspeed_chime", volume=0.55)
             return
-        if speed > limit + OVERSPEED_WARN_MPH:
+        if speed > limit + arm_over:
             self._overspeed_active = True
             self._overspeed_chime_timer = 0.0
             self.ctx.audio.play("vehicle/overspeed_chime", volume=0.65)

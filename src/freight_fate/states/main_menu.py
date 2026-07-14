@@ -727,11 +727,14 @@ class SettingsCategoryState(MenuState):
                     "everywhere. This only affects automatic transmission.",
                 ),
                 MenuItem(
-                    lambda: f"Overspeed warning: {'on' if s.overspeed_warning else 'off'}",
+                    lambda: f"Overspeed warning: {s.overspeed_warning}",
                     lambda: self._toggle_overspeed_warning(1),
                     help="A dash chime and a spoken heads-up when you run over "
-                    "the posted limit, repeating gently until you slow, like a "
-                    "carrier-set overspeed alert in a real company truck.",
+                    "the posted limit, dinging faster the further over you go, "
+                    "like a carrier-set overspeed alert in a real company "
+                    "truck. Urgent only stays quiet until you are far past "
+                    "the limit, for drivers who speed on purpose but still "
+                    "want the runaway alarm.",
                 ),
                 MenuItem(
                     lambda: f"Driving mode: {self._pace_label()}",
@@ -1107,8 +1110,13 @@ class SettingsCategoryState(MenuState):
         self.ctx.settings.automatic_transmission = not self.ctx.settings.automatic_transmission
         self._announce()
 
-    def _toggle_overspeed_warning(self, _d: int) -> None:
-        self.ctx.settings.overspeed_warning = not self.ctx.settings.overspeed_warning
+    def _toggle_overspeed_warning(self, d: int) -> None:
+        modes = ["on", "urgent only", "off"]
+        try:
+            i = modes.index(self.ctx.settings.overspeed_warning)
+        except ValueError:
+            i = 0
+        self.ctx.settings.overspeed_warning = modes[(i + d) % len(modes)]
         self._announce()
 
     def _cycle_automatic_direction_changes(self, d: int) -> None:

@@ -363,12 +363,14 @@ SPEEDING_HOLD_S = 6.0
 # mph over the limit (under the strike leeway), then chimes on an interval
 # until the truck settles back under. Real carrier trucks nag exactly like
 # this, which is why nobody in one is surprised by their own speed.
-OVERSPEED_WARN_MPH = 4.0  # over the limit where the warning arms
+OVERSPEED_WARN_MPH = 5.0  # over the limit where the warning arms
 OVERSPEED_RESET_MPH = 1.0  # back within this of the limit disarms it
-# The cadence carries the magnitude: slightly over dings politely, far over
-# dings urgently. Interval slides between these ends as the overage grows.
+# The cadence carries the magnitude: slightly over dings politely, a real
+# runaway dings twice a second. Interval slides between these ends as the
+# overage grows. "Urgent only" mode arms nothing below the urgent line --
+# the speed demon's compromise: haul as you like, but a runaway still rings.
 OVERSPEED_CHIME_REPEAT_S = 5.0  # cadence just past the warn threshold
-OVERSPEED_CHIME_FAST_S = 1.5  # cadence at OVERSPEED_URGENT_MPH over and beyond
+OVERSPEED_CHIME_FAST_S = 0.5  # cadence at OVERSPEED_URGENT_MPH over and beyond
 OVERSPEED_URGENT_MPH = 20.0
 # On-the-spot speeding tickets, escalating per ticket within a trip. Paid
 # immediately when a trooper pulls you over (unlike the silent at-delivery

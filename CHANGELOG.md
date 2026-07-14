@@ -42,9 +42,11 @@
   truck.** Run a few miles per hour over the posted limit and a soft
   chime sounds with a spoken heads-up -- "Watch your speed. The limit is
   65" -- then the chime repeats until you settle back under, politely at
-  a few over and faster the further past the limit you push. It stays
-  quiet while you are actively braking down, and a new Gameplay setting
-  turns the whole alert off. No more finding out from the fine.
+  a few over and escalating to twice a second when a descent is truly
+  running away. It stays quiet while you are actively braking down. The
+  new Gameplay setting has three positions: on, urgent only -- which
+  keeps just the runaway alarm, for drivers who speed on purpose -- and
+  off. No more finding out from the fine.
 
 - **G speaks the grade under the wheels and what it is doing to the
   truck.** Press G while driving to hear the slope, how far it runs, and
