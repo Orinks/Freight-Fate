@@ -6,9 +6,8 @@
 
 - **Restoring a cloud backup works again.** Every new server-verified backup
   was wrongly refused with "failed its integrity check" the moment you tried
-  to restore it, because the game checked the server's signature against a
-  slightly different written form of the save than the server had signed.
-  Restores of verified backups now complete normally.
+  to restore it. The refusal was the game's mistake, not a problem with your
+  save. Restores of verified backups now complete normally.
 - **Cloud backup now tells you when this computer needs to reconnect.** If
   orinks.net stops accepting this computer's sign-in, the cloud backup menu
   now says so and explains the fix, instead of wrongly reporting that your
