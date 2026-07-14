@@ -8,6 +8,30 @@
 > follows at release. Keep this file current: when a feature lands on the 1.9
 > line, check it off here in the same change.
 
+## 1.10 planned -- the working week and home
+
+Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily
+countdown into the system that shapes a driver's week, and the home
+terminal becomes the anchor of that week instead of a spawn point.
+
+- [ ] **70-hour/8-day cycle with the 34-hour restart.** A rolling on-duty
+      ledger on `HosClock`, spoken through the existing ELD status line;
+      restarts at the home terminal are free and full, road restarts cost
+      motel money and comfort. The 1.10 centerpiece.
+- [ ] **Home terminal persisted and consequential.** `home_terminal_city`
+      on the profile (old saves default to the current city with a
+      one-time spoken note), ELD readouts in home-terminal time,
+      discounted garage work at your terminal, dispatch "gets you home"
+      lane notes, and paid domicile relocation for owner-operators.
+- [ ] **Local board (short-haul identity).** A second dispatch surface at
+      the home terminal: short home-region runs, home every night, no
+      cycle pressure, lower pay -- weighted toward new hires in the
+      assigned-dispatch levels.
+- [ ] **ELD character events.** Daily log certification, carrier edit
+      approve/reject prompts, personal conveyance and yard-move duty
+      statuses, a rare ELD-malfunction paper-log day, and the
+      adverse-conditions +2-hour exception wired to live weather.
+
 ## 1.9 in flight (`feat/career-1.9`)
 
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
@@ -74,12 +98,18 @@ city service drives below.)
       endpoints at scale -- extend `HIGH_CONFIDENCE_TYPES` in
       `tools/build_facility_approaches.py` after judging spoken-name
       quality on a sample.
-- [ ] **Template facility realism pass.** The facility template deck stamps
-      every city with the full set regardless of geography: 282 template
-      port terminals exist world-wide, including landlocked towns (Lampasas,
-      Atlanta, Dallas). Gate water-dependent types on real port presence
-      (MARAD/BTS lists, which the source notes already cite) and review
-      intermodal ramps against actual rail service the same way.
+- [x] **Template facility realism pass.** Template port terminals are now
+      gated on a MARAD/USACE-derived allowlist of real deep-water, Great
+      Lakes, and navigable-river port cities (282 -> 78), and template
+      intermodal ramps are suppressed in ~250 towns with no rail intermodal
+      service in dray reach (402 -> 157). Curated facilities are never
+      gated, and accepting a stale cached board offer for a retired
+      facility pulls the offer instead of crashing.
+- [ ] **Grant ports to the Great Lakes cities missing one.** Toledo,
+      Detroit, Chicago, and Green Bay are real Great Lakes ports but get no
+      port facility at all (the great_lakes region carries no port market
+      tag). Give them one via city tags, and consider deduping the ~40
+      cities that carry both a curated port and a template port terminal.
 - [ ] **Surface intersections.** Phase 4 of `docs/surface-roads-plan.md`:
       stop signs and traffic signals at surface-street junctions, junction
       decision prompts, and traffic pressure at intersections -- extending
