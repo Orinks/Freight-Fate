@@ -106,7 +106,11 @@ def test_business_path_reports_starter_company_rank_and_next_unlock():
 
     assert STARTER_CARRIER_NAME in business_path_label(p)
     assert "Owner-Operator Candidate" in business_path_label(p)
-    assert "Leased-On Applicant" in next_business_unlock(p)
+    # From the level-14 prep rank onward, Business status reads the real
+    # owner-operator checklist instead of pointing at the next rank title.
+    unlock = next_business_unlock(p)
+    assert "Owner-operator gate locked" in unlock
+    assert "Reach level 18" in unlock
 
 
 def test_business_status_menu_unlocks_owner_operator_when_qualified():
@@ -251,8 +255,13 @@ def test_owner_operator_buy_in_records_first_owned_tractor():
         app.state.handle_event(key_event(pygame.K_RETURN))
 
         assert p.business_status == LEASED_OWNER_OPERATOR
-        assert p.truck == "rig"
-        assert p.visible_owned_trucks() == ("rig",)
+        # The buy-in takes over the tractor dispatch had you in: at the
+        # level-18 gate that is a first-pick fleet unit, not the starter rig.
+        from freight_fate.models.carrier_fleet import assigned_truck_key
+
+        assigned = assigned_truck_key(p)
+        assert p.truck == assigned
+        assert p.visible_owned_trucks() == (assigned,)
         assert p.active_trailer_programs() == DEFAULT_TRAILER_PROGRAMS
     finally:
         app.shutdown()

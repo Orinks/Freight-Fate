@@ -45,13 +45,31 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--job-rank", type=int, default=0, help="New-career job pick.")
     parser.add_argument("--route-rank", type=int, default=0, help="New-career route pick.")
     parser.add_argument(
+        "--stage",
+        help="Start from a career-stage preset (e.g. regional_fleet_driver, "
+        "premium_fleet_driver, owner_operator) instead of a fresh new hire.",
+    )
+    parser.add_argument(
+        "--settle-fast",
+        action="store_true",
+        help="Skip the road: jump to settlement and read every settlement "
+        "line, to review level-ups, tractor assignments, and badges.",
+    )
+    parser.add_argument(
         "--events-only",
         action="store_true",
         help="Print only the GPS/event cues, not every spoken line.",
     )
     args = parser.parse_args(argv)
 
+    from career_1_9_scenarios import CAREER_STAGES, career_stage
     from playtest_harness import PlaytestHarness
+
+    configure = None
+    if args.stage:
+        if args.stage not in CAREER_STAGES:
+            raise SystemExit(f"--stage must be one of: {', '.join(sorted(CAREER_STAGES))}")
+        configure = career_stage(args.stage)
 
     with PlaytestHarness(_Monkeypatch()) as harness:
         if args.route:
@@ -60,7 +78,11 @@ def main(argv: list[str] | None = None) -> int:
                 raise SystemExit("--route must be 'From->To'")
             result = harness.start_route(origin.strip(), destination.strip())
         else:
-            result = harness.start_delivery(job_rank=args.job_rank, route_rank=args.route_rank)
+            result = harness.start_delivery(
+                job_rank=args.job_rank,
+                route_rank=args.route_rank,
+                configure_profile=configure,
+            )
         driving = harness.driving
         assert driving is not None
         header = (
@@ -68,7 +90,11 @@ def main(argv: list[str] | None = None) -> int:
             f"via {', '.join(driving.trip.route.highways)} "
             f"({driving.trip.total_miles:.0f} mi)"
         )
-        harness.drive_delivery_to_completion()
+        if args.settle_fast:
+            harness.settle_current_delivery()
+            harness.read_settlement_lines()
+        else:
+            harness.drive_delivery_to_completion()
 
     print("=" * 70)
     print(f"PLAYTEST: {header}")

@@ -25,6 +25,8 @@ from .business import COMPANY_DRIVER, is_owner_operator
 SENIOR_LOAD_CHOICE_LEVEL = 8
 # Assigned-load refusals a company driver can spend before the next level-up.
 NEW_HIRE_DECLINE_BUDGET = 3
+# Regional Regulars (level 5+) have earned one more refusal per level band.
+REGIONAL_REGULAR_LEVEL = 5
 # Declining an assigned load is remembered: one on-time delivery wins it back.
 DECLINE_REPUTATION_PENALTY = 2.0
 
@@ -42,10 +44,11 @@ def dispatch_policy(profile) -> DispatchPolicy:
     if is_owner_operator(status):
         return DispatchPolicy(assigns_load=False, assigns_route=False, decline_budget=0)
     level = int(getattr(profile.career, "level", 1))
+    budget = NEW_HIRE_DECLINE_BUDGET + (1 if level >= REGIONAL_REGULAR_LEVEL else 0)
     return DispatchPolicy(
         assigns_load=level < SENIOR_LOAD_CHOICE_LEVEL,
         assigns_route=True,
-        decline_budget=NEW_HIRE_DECLINE_BUDGET,
+        decline_budget=budget,
     )
 
 

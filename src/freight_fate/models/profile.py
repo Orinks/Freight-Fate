@@ -376,12 +376,16 @@ class Profile:
     def active_truck_key(self) -> str:
         """Truck model currently used for simulation.
 
-        Company drivers operate the carrier-assigned standard tractor. The
-        profile still carries ``truck`` for save compatibility and for the
-        owner-operator path, but company-driver play should not treat it as
-        player-owned equipment.
+        Company drivers operate whatever tractor the carrier fleet has
+        assigned for their level band. The profile still carries ``truck``
+        for save compatibility and for the owner-operator path, but
+        company-driver play should not treat it as player-owned equipment.
         """
-        return self.truck if self.owns_equipment() else "rig"
+        if self.owns_equipment():
+            return self.truck
+        from .carrier_fleet import assigned_truck_key
+
+        return assigned_truck_key(self)
 
     def visible_owned_trucks(self) -> tuple[str, ...]:
         """Player-owned tractors to show in menus."""

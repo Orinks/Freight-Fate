@@ -25,6 +25,7 @@ INDEPENDENT_AUTHORITY = "independent_authority"
 
 OWNER_OPERATOR_PREP_LEVEL = 5
 OWNER_OPERATOR_CANDIDATE_LEVEL = 11
+OWNER_OPERATOR_PREP_CHECKLIST_LEVEL = 14
 OWNER_OPERATOR_LEVEL = 18
 OWNER_OPERATOR_REPUTATION = 80.0
 OWNER_OPERATOR_DELIVERIES = 35
@@ -239,7 +240,9 @@ def next_business_unlock(profile) -> str:
     ok, reasons = owner_operator_eligibility(profile)
     if ok:
         return "Next: buy into a leased-on owner-operator tractor position from Business status."
-    if profile.career.level < OWNER_OPERATOR_LEVEL - 1:
+    # The Business Prep Driver rank (14) starts reading the real checklist,
+    # matching the ladder's "owner-operator checklist starts to matter."
+    if profile.career.level < OWNER_OPERATOR_PREP_CHECKLIST_LEVEL:
         next_rank = next_rank_for_level(profile.career.level)
         if next_rank is None:
             return "You are at the top career rank."

@@ -265,6 +265,50 @@ class PlaytestHarness:
         self.result.remaining_miles = driving.trip.remaining_miles
         return self.result
 
+    def settle_current_delivery(self) -> PlaytestResult:
+        """Fast-forward the active delivery to its settlement screen.
+
+        The career-arc playtests care about what settlement *says* --
+        level-ups, tractor assignments, badges -- not the road in between,
+        so this teleports to the destination gate instead of driving it.
+        Pair with :meth:`read_settlement_lines` to walk the arrival menu
+        the way a screen-reader player would.
+        """
+        from freight_fate.states.driving import ArrivalState, FacilityArrivalState
+
+        assert self.app is not None
+        assert self.driving is not None
+        driving = self.driving
+        self.prepare_for_driving()
+        driving.trip.position_mi = driving.trip.total_miles
+        driving.trip.finished = True
+        driving.truck.velocity_mps = 0.0
+        driving._handle_arrival_gate()
+        _finish_timed_state(self.app)
+        assert isinstance(self.app.state, FacilityArrivalState)
+        self.app.state.handle_event(key_event(pygame.K_RETURN))
+        _finish_timed_state(self.app)
+        assert isinstance(self.app.state, ArrivalState)
+
+        profile = self.app.ctx.profile
+        assert profile is not None
+        self.result.deliveries = profile.career.deliveries
+        self.result.destination = driving.job.destination
+        self.result.current_city = profile.current_city
+        self.result.remaining_miles = driving.trip.remaining_miles
+        return self.result
+
+    def read_settlement_lines(self) -> PlaytestResult:
+        """Arrow through every settlement line so each is spoken in order."""
+        from freight_fate.states.driving import ArrivalState
+
+        assert self.app is not None
+        state = self.app.state
+        assert isinstance(state, ArrivalState)
+        for _ in range(len(state.items) - 1):
+            state.handle_event(key_event(pygame.K_DOWN))
+        return self.result
+
     def continue_to_next_delivery(self, *, job_rank: int = 0, route_rank: int = 0) -> None:
         """Leave settlement and dispatch another load on the same career."""
         from freight_fate.states.city import CityMenuState, JobBoardState, PickupFacilityState

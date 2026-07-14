@@ -2,9 +2,41 @@
 
 ## Unreleased
 
+### Added
+
+- **Dispatch assigns your tractor now, and better equipment follows
+  seniority.** Like a real fleet, the carrier hands every new hire the same
+  trainer-spec rig, then upgrades your assigned tractor as you climb: a
+  newer regional unit at level 4, a long-haul sleeper at 9, a premium
+  tractor at 13, and first pick of the yard at 17. Each hand-over is spoken
+  at settlement and arrives fueled, serviced, and washed. Ten new tractor
+  models -- day cabs, long-nose classics, big-bunk conventionals, and
+  slippery aero flagships -- fill the fleet, and after the owner-operator
+  buy-in the same models are yours to buy at the dealer.
+
+- **Nineteen new achievements for the bigger map and the longer career.**
+  Badges now mark career levels 5 through 30, the owner-operator buy-in,
+  activating your own authority, paying for your own endorsement course,
+  owning three tractors, and fleet tractor upgrades -- plus map-wide
+  progress: twenty-five, seventy-five, and one hundred fifty different
+  cities, fifteen and thirty states, and first deliveries into the Dakotas,
+  Montana, and northern New England. Each still nods to a country or
+  trucking song.
+
 ### Changed
 
-- **Career 1.9 playtests now follow more of a driver's real journey.** Reusable transcript checks cover career stages, driving modes, keyboard-operated controls, speech ordering, and deterministic road events so regressions are caught before they reach players.
+- **The career is a months-long arc now, and every level up hands you
+  something real.** Experience pays out more honestly -- every settled load
+  teaches a flat lesson, on-time streaks compound up to forty-five percent,
+  undamaged cargo adds a bonus, and specialty freight teaches half again as
+  much -- so early levels land within your first sessions while the road to
+  level 30 still takes months of real evenings. Along the way every rank
+  unlocks something concrete: an extra load refusal at level 5, a deeper
+  dispatch board at 6, 10, and 12, specialty freight favored on your board
+  at 11, premium long-haul lanes at 12, the full owner-operator checklist
+  read out from level 14, and the fleet tractor upgrades above.
+
+- **Career 1.9 playtests now follow more of a driver's real journey.** Reusable transcript checks cover career stages, driving modes, keyboard-operated controls, speech ordering, and deterministic road events so regressions are caught before they reach players. A new pacing model also verifies the months-long level curve stays honest as the balance changes.
 
 - **Relaxed driving now leaves real breathing room without removing the truck.**
   Relaxed pacing keeps weather, traffic, air brakes, fatigue, hazards, and

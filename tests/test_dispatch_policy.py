@@ -65,6 +65,14 @@ def test_independent_authority_chooses_load_and_route():
     assert policy.decline_budget == 0
 
 
+def test_regional_regulars_earn_an_extra_decline():
+    # Level 5 is the "Regional Regular" rank: dispatch tolerates one more
+    # assigned-load refusal from a proven driver.
+    assert dispatch_policy(_company_profile(level=4)).decline_budget == NEW_HIRE_DECLINE_BUDGET
+    assert dispatch_policy(_company_profile(level=5)).decline_budget == NEW_HIRE_DECLINE_BUDGET + 1
+    assert dispatch_policy(_company_profile(level=7)).decline_budget == NEW_HIRE_DECLINE_BUDGET + 1
+
+
 def test_decline_budget_counts_down_and_clamps_at_zero():
     profile = _company_profile(level=1)
     assert declines_remaining(profile) == NEW_HIRE_DECLINE_BUDGET

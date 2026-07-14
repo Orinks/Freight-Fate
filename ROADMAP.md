@@ -11,6 +11,7 @@
 ## 1.9 in flight (`feat/career-1.9`)
 
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
+- [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
 
 Four threads: make the drive *between* the exits real, give every maneuver
@@ -105,6 +106,22 @@ section below and the Unreleased changelog; the release-line view:
       level-25 own authority, and independent ranks through 30 -- with
       distinct guidance voices per level band and haul-length caps that
       grow through the whole arc instead of maxing out by level 12.
+- [x] **A months-long grind where every level pays out.** Rebalanced XP
+      (flat completion lesson, deeper on-time streaks, clean-cargo bonus,
+      stronger specialty multipliers) and re-paced level 21-30 thresholds
+      put level 30 at roughly 300+ real hours with no single-level walls,
+      verified by a deterministic pacing model (`tools/career_pacing.py` +
+      `tests/test_career_pacing.py`). Every rank now names a concrete
+      unlock: extra decline at 5, board depth at 6/10/12, specialized
+      freight weighting at 11, premium long-haul lanes at 12, the
+      owner-operator checklist read from 14, and fleet tractors below.
+- [x] **Dispatch-assigned company tractors.** A carrier fleet
+      (`models/carrier_fleet.py`) assigns every company driver a tractor by
+      level band -- yard standard, regional at 4, long-haul at 9, premium at
+      13, first pick of the yard at 17 -- deterministically per driver and
+      carrier. Tier promotions hand over a fresh unit at settlement with
+      spoken hand-over text. Ten new tractor models fill the fleet and the
+      owner-operator dealer catalog.
 - [x] **Dispatch freedom is earned.** New hires run the load and lane
       dispatch assigns -- accept or decline against a small budget that
       refills on promotion, no route menu -- with load choice from the full
@@ -121,9 +138,13 @@ section below and the Unreleased changelog; the release-line view:
       first dispatch is accepted, a Career plan terminal item naming the
       next practical step, and a rewritten How to play that teaches earned
       dispatch freedom.
-- [x] **114 achievements.** The badge wall nearly doubles: state, region,
-      and city arrivals, cargo firsts, close calls, mishaps, and career
-      milestones, each nodding to a country or trucking song.
+- [x] **133 achievements.** The badge wall nearly doubles and keeps
+      growing: state, region, and city arrivals, cargo firsts, close calls,
+      mishaps, and career milestones, each nodding to a country or trucking
+      song. The 1.9 arc adds level milestones through 30, business-gate
+      badges (buy-in, own authority, self-paid courses), fleet-tractor
+      badges, and map-coverage milestones (cities, states, the Dakotas,
+      Montana, northern New England) sized for the 623-city map.
 - [x] **Save compatibility.** Careers back through the version-4 schema
       load with sensible defaults, and newer-snapshot saves no longer crash
       older-schema loads.

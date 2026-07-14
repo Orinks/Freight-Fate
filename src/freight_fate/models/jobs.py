@@ -417,6 +417,30 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
 # Newark at 11 miles) rather than a real dispatch.
 MIN_JOB_DISTANCE_MI = 25.0
 
+# The dispatch board itself grows with seniority: proven drivers get shown
+# more freight per visit. These are career-ladder unlocks, spoken at the
+# matching level-up.
+BOARD_OFFER_LEVELS = {6: 6, 10: 7, 12: 8}
+BASE_BOARD_OFFERS = 5
+
+# Specialized company drivers (level 11+) see endorsement freight weighted
+# up instead of down, and premium-lane drivers (level 12+) see long freight
+# favored on the board.
+SPECIALIZED_FREIGHT_LEVEL = 11
+SPECIALIZED_FREIGHT_WEIGHT = 1.25
+PREMIUM_LANE_LEVEL = 12
+PREMIUM_LANE_LONG_HAUL_BIAS = 0.5
+
+
+def board_offer_count(level: int) -> int:
+    """How many offers the dispatch board shows at this career level."""
+    count = BASE_BOARD_OFFERS
+    for min_level, offers in BOARD_OFFER_LEVELS.items():
+        if level >= min_level:
+            count = max(count, offers)
+    return count
+
+
 # Career-arc distance caps: short regional hops while learning the ropes,
 # cross-country hauls unlocking as a progression reward around level 4-5.
 LEVEL_DISTANCE_CAPS = {1: 300.0, 2: 450.0, 3: 650.0, 4: 850.0, 5: 1200.0}
@@ -827,6 +851,9 @@ class JobBoard:
         if option.dispatch.long_haul_bias:
             long_factor = min(1.0, miles / cap)
             weight *= 1.0 + option.dispatch.long_haul_bias * long_factor
+        if level >= PREMIUM_LANE_LEVEL:
+            # Premium-lane seniority: dispatch shows the long freight first.
+            weight *= 1.0 + PREMIUM_LANE_LONG_HAUL_BIAS * min(1.0, miles / cap)
         if option.dispatch.regional_bias:
             origin_region = self.world.cities[origin].region
             if self.world.cities[destination].region == origin_region:
@@ -893,7 +920,7 @@ class JobBoard:
             cargo_keys = tuple(
                 cargo.key for cargo in CARGO_CATALOG.values() if cargo.min_level <= level
             )
-        weights = [self._cargo_weight(city, key, carrier_key) for key in cargo_keys]
+        weights = [self._cargo_weight(city, key, carrier_key, level=level) for key in cargo_keys]
         return self._rng.choices(cargo_keys, weights)[0]
 
     def _cargo_for_location(
@@ -958,6 +985,7 @@ class JobBoard:
         city,
         cargo_key: str,
         carrier_key: str = DEFAULT_START_KEY,
+        level: int = 1,
     ) -> float:
         weight = 1.0
         for tag in city.market_tags:
@@ -965,7 +993,9 @@ class JobBoard:
                 weight += 0.65
         cargo = CARGO_CATALOG[cargo_key]
         if cargo.endorsement:
-            weight *= 0.8
+            # Specialized company drivers see endorsement freight favored
+            # instead of rationed; junior boards keep it occasional.
+            weight *= SPECIALIZED_FREIGHT_WEIGHT if level >= SPECIALIZED_FREIGHT_LEVEL else 0.8
         weight += start_option(carrier_key).cargo_weight_bonus.get(cargo_key, 0.0)
         return weight
 

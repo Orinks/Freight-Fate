@@ -41,7 +41,11 @@ CAREER_STAGES = {
     preset.key: preset
     for preset in (
         CareerStagePreset("new_hire", 1, 0, 50),
+        # Company fleet bands: dispatch assigns better tractors with seniority.
+        CareerStagePreset("regional_fleet_driver", 6, 12, 70),
         CareerStagePreset("trusted_company_driver", 10, 20, 86),
+        CareerStagePreset("premium_fleet_driver", 13, 30, 90),
+        CareerStagePreset("first_pick_driver", 17, 45, 95),
         CareerStagePreset(
             "owner_operator", 18, 35, 80, LEASED_OWNER_OPERATOR, owned_trucks=("rig",)
         ),
