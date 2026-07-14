@@ -1532,6 +1532,18 @@ def test_destination_exit_announces_and_disables_cruise(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        # Pin the exit signage: the random job assignment picks the route,
+        # and not every destination exit carries a "toward" phrase in its
+        # sign data, so scanning the real interchanges here is a coin flip.
+        monkeypatch.setattr(
+            driving,
+            "_destination_exit_details",
+            lambda *, include_past=False: (
+                24.0,
+                "exit 20",
+                "exit 20 for US-64 East toward Memphis",
+            ),
+        )
         destination = driving._destination_exit_stop()
         driving.trip.position_mi = destination.at_mi - 4.0
         driving._cruise_mph = 60.0
