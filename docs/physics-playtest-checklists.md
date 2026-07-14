@@ -31,13 +31,19 @@ Press V any time while driving to confirm what the sky is doing.
 
 ## Good routes for these tests
 
-Mountain terrain gives the game's steepest grades today -- rolling synthetic
-climbs and descents up to about 3.5 percent on roughly an 8-mile rhythm.
-Short mountain picks:
+Every leg carries real OpenRouteService elevation data, so the grades you
+descend are the real ones. The picks below are chosen for short drives to
+serious steel:
 
-- Sacramento to Reno on I-80, 132 miles (the shortest mountain leg).
-- Flagstaff to Phoenix on I-17, 148 miles.
-- Knoxville to Nashville on I-40, 180 miles.
+- Denver to Silverthorne on I-70, 67 miles: the crown jewel. Three
+  chain-law areas -- the first near mile 14, and the last a 9.5-mile run
+  from mile 55 up the Eisenhower approach. The
+  lonely-snowy-night-out-of-Denver fantasy, on its real road.
+- Yreka to Medford on I-5 (Siskiyou Summit), 51 miles: three areas, the
+  first at mile 9 -- the fastest way to a chain-law sign.
+- Valencia to Bakersfield on I-5 (the Grapevine), 75 miles: two areas, the
+  first at mile 5.
+- Boise to Portland on I-84 crosses Cabbage Hill if you want the long haul.
 
 For the straight-line stop tests, terrain does not matter; any flat
 heartland leg works.
@@ -136,10 +142,12 @@ together, and night is plainly the worse deal.
 
 The bench anchor: on an icy 4 percent descent, the unchained jake slips for
 15 minutes; chained, it holds with about 2 minutes of low-gear protest.
-In-game grades top out near 3.5 percent, so expect the same lesson, gentler.
+The real descents on the routes above run 5 to 6 percent, so expect the
+lesson with interest.
 
-Set up: force `ice`. Mountain leg (Sacramento to Reno is ideal). Chains
-aboard. Run the descent once unchained, once chained.
+Set up: force `ice`. A steep route from the list above (Yreka to Medford
+gets you there fastest). Chains aboard. Run the descent once unchained,
+once chained.
 
 Do:
 
@@ -197,24 +205,46 @@ complete absence while chained.
 Pass when: worn tires warn and recover; chains never warn but chew
 themselves up doing it.
 
-## 8. Chain-law signs and citations -- bench only, for now
+## 8. Chain-law signs and citations
 
-Not reachable in-game yet, on purpose honest: chain-law areas require a
-real sustained 5 percent grade and the shipped map's synthetic terrain
-grades top out near 3.5 percent. No route today places an area, so the
-flashing sign, the compliance warning, and the 500 dollar checkpoint
-citation cannot be heard at the wheel until a mountain corridor carries
-curated grade data (Donner and Eisenhower are the natural firsts -- see
-ROADMAP).
+The full law, on its real road. 158 legs place chain-law areas from their
+real grade data; Denver to Silverthorne on I-70 is the flagship (three
+areas -- mile 14, mile 44, and the long Eisenhower run from mile 55).
 
-Verify it at the bench instead:
+Set up: force `snow` for Level 1, or `ice` for Level 2. Take a load from
+Denver to Silverthorne. Run it once compliant, once dirty.
+
+Do, the dirty run first (all-season, no chains on):
+
+1. Approaching the first area, listen for the flashing-sign callout about
+   a mile out -- the level, what satisfies it, and the chain-up area on
+   the right shoulder.
+2. Roll into the area anyway. One spoken warning tells you you are not
+   compliant.
+3. Keep rolling past the middle of the area. Six times in ten there is a
+   checkpoint: a 500 dollar citation, spoken, off your money. (It is one
+   seeded roll per area and level -- reloading the save does not re-roll
+   it, so do not bother.)
+
+Then the compliant run:
+
+4. In snow (Level 1), winter tires alone satisfy the law -- the sign still
+   speaks, the warning and citation never come.
+5. In freezing rain (Level 2), winter tires are NOT enough -- chains on
+   all commercial vehicles. Stop at the pullout, chain up from the pause
+   menu, and roll through clean.
+6. If a snow session turns to forced ice on a later run, the same area
+   re-announces at the higher level -- escalation is spoken, not silent.
+
+Pass when: sign, warning, citation, and escalation each speak once and
+only once per area and level, the citation shows up in your money, and a
+compliant rig hears the sign but never the citation.
+
+Bench cross-checks for the same physics, if you want the numbers:
 
     uv run python tools/physics_bench.py --list
     uv run python tools/physics_bench.py stop-ice stop-ice-winter stop-ice-chains
     uv run python tools/physics_bench.py grade-jake-ice grade-jake-ice-chains chains-bare
-
-The law logic itself is covered by `tests/test_chain_law.py` (placement,
-levels, sign escalation, seeded citation).
 
 ## 9. Grade and brake-heat regression sweep
 
