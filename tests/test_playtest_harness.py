@@ -293,7 +293,18 @@ def test_playtest_harness_drives_a_specific_route(monkeypatch):
 
 
 def test_playtest_transcript_covers_both_automatic_direction_styles(monkeypatch):
+    """Both styles share the one safe gesture now: a fresh press at a
+    standstill, held through the engage beat. A hold that predates the stop
+    never engages, in either style."""
     from freight_fate.sim.transmission import REVERSE
+
+    def hold(driving, *, accelerating=False, braking_key=False, seconds=0.75):
+        result = False
+        for _ in range(int(seconds * 60) + 2):
+            result = driving._update_reverse_controls(
+                accelerating=accelerating, braking_key=braking_key, dt=1 / 60
+            )
+        return result
 
     with PlaytestHarness(monkeypatch) as harness:
         result = harness.start_route("Newark", "New York")
@@ -302,7 +313,10 @@ def test_playtest_transcript_covers_both_automatic_direction_styles(monkeypatch)
 
         harness.app.ctx.settings.automatic_direction_changes = "simple"
         driving._reverse_brake_held = True
-        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert driving.truck.transmission.gear != REVERSE
+        driving._update_reverse_controls(accelerating=False, braking_key=False)
+        assert hold(driving, braking_key=True)
         assert "[event] Reverse selected. Backing slowly." in result.transcript
 
         driving.truck.transmission.gear = 1
@@ -314,7 +328,7 @@ def test_playtest_transcript_covers_both_automatic_direction_styles(monkeypatch)
         assert result.transcript == []
 
         driving._update_reverse_controls(accelerating=False, braking_key=False)
-        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert hold(driving, braking_key=True)
         assert "[event] Reverse selected. Backing slowly." in result.transcript
 
 

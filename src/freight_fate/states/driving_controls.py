@@ -166,9 +166,10 @@ class DrivingControlsMixin:
         if self.ctx.settings.automatic_direction_changes == "deliberate":
             automatic_help = (
                 "In automatic with deliberate direction changes, brake to a stop, "
-                "then release the Down arrow and press it again to shift into reverse "
-                "and back slowly. While reversing, hold the Up arrow to brake to a "
-                "stop, then release it and press again to shift back into forward. "
+                "then release the Down arrow and press and hold it again to shift "
+                "into reverse and back slowly. While reversing, hold the Up arrow "
+                "to brake to a stop, then release it and press and hold again to "
+                "shift back into forward. A quick tap just brakes. "
             )
         else:
             automatic_help = (
@@ -247,10 +248,11 @@ class DrivingControlsMixin:
         elif self.ctx.settings.automatic_direction_changes == "deliberate":
             gears = (
                 "In automatic with deliberate direction changes, brake to a stop, "
-                "then let the left trigger return to neutral and press it again to "
-                "shift into reverse and back slowly. While reversing, hold the right "
-                "trigger to brake to a stop, then let it return to neutral and press "
-                "again to shift back into forward. "
+                "then let the left trigger return to neutral and press and hold it "
+                "again to shift into reverse and back slowly. While reversing, hold "
+                "the right trigger to brake to a stop, then let it return to "
+                "neutral and press and hold again to shift back into forward. A "
+                "quick tap just brakes. "
             )
         else:
             gears = (

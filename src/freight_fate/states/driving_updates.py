@@ -67,7 +67,9 @@ class DrivingUpdateMixin:
         # the release-then-press never registers as neutral in between.
         accel_held = key_up or (pad.throttle_target if pad_on else 0.0) > 0.05
         brake_held = key_down or (pad.brake_target if pad_on else 0.0) > 0.05
-        backing = self._update_reverse_controls(accelerating, braking_key, accel_held, brake_held)
+        backing = self._update_reverse_controls(
+            accelerating, braking_key, accel_held, brake_held, dt
+        )
         if accelerating and not backing and t.air_brakes_holding:
             self._maybe_say_air_brake_lockout()
         if key_up and not backing and not t.transmission.in_reverse:
@@ -341,6 +343,7 @@ class DrivingUpdateMixin:
         braking_key: bool,
         accel_held: bool | None = None,
         brake_held: bool | None = None,
+        dt: float = 1 / 60.0,
     ) -> bool:
         """Return True when the current key state means backing up.
 
@@ -363,52 +366,48 @@ class DrivingUpdateMixin:
         accel_edge = accel_held and not self._reverse_accel_held
         self._reverse_brake_held = brake_held
         self._reverse_accel_held = accel_held
-        # A brake hold that began while moving is a stopping action, never a
-        # reverse request: without this, every held-brake stop -- including
-        # the ramp light's own "hold the brakes for green" -- dropped the
-        # truck into reverse the moment it stopped. Backing up takes a fresh
-        # press at a standstill in either direction-change mode.
-        if brake_edge:
-            self._reverse_brake_press_was_stopping = t.speed_mph > 2.0
-        elif not brake_held:
-            self._reverse_brake_press_was_stopping = False
-        # Mirror image while backing: holding the accelerator to brake the
-        # reverse roll must end in a held stop, not a forward lurch under
-        # throttle.
-        if accel_edge:
-            self._reverse_accel_press_was_stopping = tr.in_reverse and t.speed_mph > 2.0
-        elif not accel_held:
-            self._reverse_accel_press_was_stopping = False
         if not tr.automatic:
+            self._direction_armed = ""
+            self._direction_hold_s = 0.0
             return tr.in_reverse and braking_key and not accelerating
-        deliberate = self.ctx.settings.automatic_direction_changes == "deliberate"
-        forward_requested = (
-            accel_edge
-            if deliberate
-            else accelerating and not self._reverse_accel_press_was_stopping
-        )
-        reverse_requested = (
-            brake_edge
-            if deliberate
-            else braking_key and not self._reverse_brake_press_was_stopping
-        )
-        if tr.in_reverse:
-            if forward_requested and abs(t.velocity_mps) < 0.3:
-                tr.gear = 1
+        # One safe gesture for every direction change: a FRESH press observed
+        # at a standstill arms it, and the gear engages only after the
+        # control is held through a short beat. A press that lands while
+        # still rolling is part of a stop and never arms; a hold that
+        # predates the stop never arms; a quick confirm-tap at a stop -- how
+        # a screen-reader driver checks the truck is holding -- just brakes.
+        # (Owner-hit three ways on 2026-07-14: held through the stop,
+        # feathered to a stop, and confirm-tapped at the yard.)
+        stopped = abs(t.velocity_mps) < 0.3
+        want = "forward" if tr.in_reverse else "reverse"
+        control_edge = accel_edge if tr.in_reverse else brake_edge
+        control_held = accel_held if tr.in_reverse else brake_held
+        other_held = brake_held if tr.in_reverse else accel_held
+        if control_edge and stopped and not other_held:
+            self._direction_armed = want
+            self._direction_hold_s = 0.0
+        if self._direction_armed == want and control_held and stopped and not other_held:
+            self._direction_hold_s += dt
+            if self._direction_hold_s >= DIRECTION_CHANGE_HOLD_S:
+                self._direction_armed = ""
+                self._direction_hold_s = 0.0
                 tr._shift_timer = 0.0
                 self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
-                self._set_status("Forward gear selected.")
-                self.ctx.say_event("Forward gear selected.", interrupt=False)
-                return False
+                if want == "forward":
+                    tr.gear = 1
+                    self._set_status("Forward gear selected.")
+                    self.ctx.say_event("Forward gear selected.", interrupt=False)
+                    return False
+                tr.gear = REVERSE
+                self._cancel_cruise()
+                self._set_status("Reverse selected. Backing slowly.")
+                self.ctx.say_event("Reverse selected. Backing slowly.", interrupt=False)
+                return True
+        else:
+            self._direction_armed = ""
+            self._direction_hold_s = 0.0
+        if tr.in_reverse:
             return braking_key and not accelerating
-        if reverse_requested and not accel_held and t.speed_mph < 0.5:
-            tr.gear = REVERSE
-            tr._shift_timer = 0.0
-            self._cancel_cruise()
-            self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
-            self._set_status("Reverse selected. Backing slowly.")
-            self.ctx.say_event("Reverse selected. Backing slowly.", interrupt=False)
-            return True
         return False
 
     def _update_hours_and_fatigue(self, dt: float) -> None:

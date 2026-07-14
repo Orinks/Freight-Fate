@@ -246,6 +246,18 @@ def test_shift_key_does_not_press_clutch_in_automatic(monkeypatch):
         app.shutdown()
 
 
+def _hold_direction_control(
+    driving, *, accelerating=False, braking_key=False, seconds=0.75
+) -> bool:
+    """Hold the direction control for the engage beat; return the last result."""
+    result = False
+    for _ in range(int(seconds * 60) + 2):
+        result = driving._update_reverse_controls(
+            accelerating=accelerating, braking_key=braking_key, dt=1 / 60
+        )
+    return result
+
+
 def test_automatic_reverse_selection_is_spoken(monkeypatch):
     from freight_fate.app import App
 
@@ -261,7 +273,7 @@ def test_automatic_reverse_selection_is_spoken(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
 
-        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert _hold_direction_control(driving, braking_key=True)
 
         assert events[-1] == ("Reverse selected. Backing slowly.", False)
     finally:
@@ -332,12 +344,16 @@ def test_simple_automatic_fresh_press_at_standstill_changes_direction(monkeypatc
         assert app.ctx.settings.automatic_direction_changes == "simple"
 
         driving.truck.velocity_mps = 0.0
-        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        # A tap arms but does not engage; the deliberate hold does.
+        driving._update_reverse_controls(accelerating=False, braking_key=True)
+        driving._update_reverse_controls(accelerating=False, braking_key=False)
+        assert not driving.truck.transmission.in_reverse
+        assert _hold_direction_control(driving, braking_key=True)
         assert driving.truck.transmission.in_reverse
 
         driving.truck.velocity_mps = 0.0
         driving._update_reverse_controls(accelerating=False, braking_key=False)
-        driving._update_reverse_controls(accelerating=True, braking_key=False)
+        _hold_direction_control(driving, accelerating=True)
         assert driving.truck.transmission.gear != REVERSE
     finally:
         app.shutdown()
@@ -386,18 +402,22 @@ def test_brake_hold_through_a_stop_never_selects_reverse(monkeypatch):
         # Brake pressed while rolling: a stop in progress.
         t.velocity_mps = 20.0
         assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
-        # Still holding as the truck reaches a standstill: stay in forward.
+        # Still holding as the truck reaches a standstill: stay in forward,
+        # however long the hold -- the press never landed at a standstill.
         t.velocity_mps = 0.0
-        assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
-        assert not t.transmission.in_reverse
-        # Holding for a light: still no reverse, however long the hold.
         for _ in range(120):
             assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
         assert not t.transmission.in_reverse
 
-        # Release, then a fresh press at the standstill: that is the gesture.
+        # A confirm-tap at the stop (screen-reader habit, owner-hit at the
+        # Holbrook yard): arms, but a tap is not a hold -- still forward.
         driving._update_reverse_controls(accelerating=False, braking_key=False)
-        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        driving._update_reverse_controls(accelerating=False, braking_key=True)
+        driving._update_reverse_controls(accelerating=False, braking_key=False)
+        assert not t.transmission.in_reverse
+
+        # A fresh press at the standstill HELD through the beat: the gesture.
+        assert _hold_direction_control(driving, braking_key=True)
         assert t.transmission.in_reverse
 
         # Mirror: brake the reverse roll with the accelerator and hold it
@@ -407,19 +427,21 @@ def test_brake_hold_through_a_stop_never_selects_reverse(monkeypatch):
         driving._update_reverse_controls(accelerating=False, braking_key=False)
         assert not driving._update_reverse_controls(accelerating=True, braking_key=False)
         t.velocity_mps = 0.0
-        driving._update_reverse_controls(accelerating=True, braking_key=False)
+        for _ in range(120):
+            driving._update_reverse_controls(accelerating=True, braking_key=False)
         assert t.transmission.in_reverse  # still reverse: the hold began moving
-        # Release and press again: now it is a deliberate forward selection.
+        # Release, then press and hold: a deliberate forward selection.
         driving._update_reverse_controls(accelerating=False, braking_key=False)
-        driving._update_reverse_controls(accelerating=True, braking_key=False)
+        _hold_direction_control(driving, accelerating=True)
         assert not t.transmission.in_reverse
     finally:
         app.shutdown()
 
 
-def test_controller_trigger_edges_follow_automatic_direction_style(monkeypatch):
-    """The deliberate controller path reads the unsmoothed trigger target so
-    a full release is observable even while the smoothed brake value lingers."""
+def test_controller_trigger_edges_gate_direction_changes(monkeypatch):
+    """The controller path reads the unsmoothed trigger target, so a full
+    release is observable even while the smoothed brake value lingers -- and
+    only a fresh target press at a standstill, held through the beat, shifts."""
     from freight_fate.app import App
 
     app = App()
@@ -430,24 +452,16 @@ def test_controller_trigger_edges_follow_automatic_direction_style(monkeypatch):
         quiet_trip(driving)
         driving.truck.velocity_mps = 0.0
 
-        app.ctx.settings.automatic_direction_changes = "simple"
+        # Trigger held coming into the stop: no edge, never engages.
         driving._reverse_brake_held = True
-        assert driving._update_reverse_controls(
-            accelerating=False,
-            braking_key=True,
-            accel_held=False,
-            brake_held=True,
-        )
-
-        driving.truck.transmission.gear = 1
-        app.ctx.settings.automatic_direction_changes = "deliberate"
-        driving._reverse_brake_held = True
-        assert not driving._update_reverse_controls(
-            accelerating=False,
-            braking_key=True,
-            accel_held=False,
-            brake_held=True,
-        )
+        for _ in range(60):
+            assert not driving._update_reverse_controls(
+                accelerating=False,
+                braking_key=True,
+                accel_held=False,
+                brake_held=True,
+                dt=1 / 60,
+            )
         assert not driving.truck.transmission.in_reverse
 
         # The instantaneous target reaches neutral before the smoothed brake.
@@ -457,12 +471,17 @@ def test_controller_trigger_edges_follow_automatic_direction_style(monkeypatch):
             accel_held=False,
             brake_held=False,
         )
-        assert driving._update_reverse_controls(
-            accelerating=False,
-            braking_key=True,
-            accel_held=False,
-            brake_held=True,
-        )
+        # Fresh target press, held through the beat: reverse engages.
+        result = False
+        for _ in range(50):
+            result = driving._update_reverse_controls(
+                accelerating=False,
+                braking_key=True,
+                accel_held=False,
+                brake_held=True,
+                dt=1 / 60,
+            )
+        assert result
         assert driving.truck.transmission.in_reverse
     finally:
         app.shutdown()
@@ -482,13 +501,16 @@ def test_automatic_held_brake_does_not_engage_reverse(monkeypatch):
         quiet_trip(driving)
         driving.truck.velocity_mps = 0.0
         # Brake was already held coming into this frame, as after braking to
-        # a stop -- no rising edge, so reverse must not engage.
+        # a stop -- no rising edge, so reverse must not engage, ever.
         driving._reverse_brake_held = True
-        assert not driving._update_reverse_controls(accelerating=False, braking_key=True)
+        for _ in range(120):
+            assert not driving._update_reverse_controls(
+                accelerating=False, braking_key=True, dt=1 / 60
+            )
         assert not driving.truck.transmission.in_reverse
-        # Release the brake, then a fresh press engages reverse.
+        # Release the brake, then a fresh press held through the beat.
         assert not driving._update_reverse_controls(accelerating=False, braking_key=False)
-        assert driving._update_reverse_controls(accelerating=False, braking_key=True)
+        assert _hold_direction_control(driving, braking_key=True)
         assert driving.truck.transmission.in_reverse
     finally:
         app.shutdown()
@@ -512,11 +534,14 @@ def test_automatic_held_accelerator_does_not_flip_out_of_reverse(monkeypatch):
         driving.truck.velocity_mps = 0.0
         # Accelerator was held while it braked the reverse roll to a stop.
         driving._reverse_accel_held = True
-        assert not driving._update_reverse_controls(accelerating=True, braking_key=False)
+        for _ in range(120):
+            assert not driving._update_reverse_controls(
+                accelerating=True, braking_key=False, dt=1 / 60
+            )
         assert tr.in_reverse
-        # Release, then a fresh press flips to forward.
+        # Release, then a fresh press held through the beat flips to forward.
         driving._update_reverse_controls(accelerating=False, braking_key=False)
-        driving._update_reverse_controls(accelerating=True, braking_key=False)
+        _hold_direction_control(driving, accelerating=True)
         assert not tr.in_reverse
     finally:
         app.shutdown()
@@ -575,7 +600,8 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_keyboard_help()
         assert "deliberate direction changes" in spoken[-1]
-        assert "release the Down arrow and press it again" in spoken[-1]
+        assert "press and hold it again" in spoken[-1]
+        assert "A quick tap just brakes" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "simple"
         driving._speak_controller_help()

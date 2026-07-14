@@ -140,6 +140,9 @@ RAMP_LIGHT_RED_S = 12.0  # red phase of the terminal light, real seconds
 RAMP_LIGHT_GREEN_S = 15.0  # green phase: a real minor-leg minimum, crossable from a stop
 RAMP_LIGHT_YELLOW_S = 4.0  # yellow phase; entering on yellow is legal, like the real law
 RED_STOP_MPH = 3.0  # at or under this you have honored a red or a stop sign
+# A direction change engages only after the control is held this long at a
+# standstill: a confirm-tap on the brake must never grab reverse.
+DIRECTION_CHANGE_HOLD_S = 0.6
 RAMP_TERMINAL_GRACE_MI = 0.02  # rolling this far past the bar commits the violation
 GREEN_ROLL_MPH = 25.0  # green lets you roll the terminal up to this
 STOP_ROLL_CLIP_MPH = 15.0  # blowing a stop sign this fast clips cross traffic

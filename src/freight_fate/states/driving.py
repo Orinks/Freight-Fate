@@ -238,11 +238,11 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # fresh press (release then press) rather than a held control.
         self._reverse_brake_held = False
         self._reverse_accel_held = False
-        # True while the current brake/accel hold began above walking speed:
-        # that hold is a stop in progress and must never turn into a
-        # direction change.
-        self._reverse_brake_press_was_stopping = False
-        self._reverse_accel_press_was_stopping = False
+        # Direction-change gesture state: which change a fresh standstill
+        # press has armed, and how long the control has been held since.
+        # The gear engages only past DIRECTION_CHANGE_HOLD_S.
+        self._direction_armed = ""
+        self._direction_hold_s = 0.0
         self._status_text = f"Press {self.ctx.control_hint('engine')} to start the engine."
 
     def _terse_speech(self) -> bool:

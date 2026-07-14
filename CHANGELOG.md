@@ -225,15 +225,18 @@
 
 ### Fixed
 
-- **Braking to a stop no longer drops the truck into reverse.** With
-  simple direction changes, holding the brake through a stop used to
-  select reverse the moment the truck stopped -- including when the game
-  itself said to hold the brakes at a red light -- and reverse then swaps
-  the pedals, so your next press moved you the wrong way. A brake held
-  through a stop now just holds the truck. To back up, stop, release the
-  brake, then press and hold it again; the spoken key help teaches the
-  new gesture. This is a changed habit if you were used to hold-through
-  reversing.
+- **Braking to a stop no longer drops the truck into reverse -- and
+  neither does tapping the brake to check you are stopped.** Holding
+  the brake through a stop used to select reverse the moment the truck
+  stopped -- including when the game itself said to hold the brakes at
+  a red light -- and reverse then swaps the pedals, so your next press
+  moved you the wrong way. Now every direction change takes one
+  deliberate gesture in both direction-change styles: come to a stop,
+  release the control, then press and HOLD it for a moment. A press
+  that lands while still rolling is part of the stop, and a quick tap
+  at a standstill just brakes -- so confirming the truck is holding
+  never grabs a gear. The spoken key help teaches the gesture. This is
+  a changed habit if you were used to hold-through reversing.
 - **Seven real radio streams play again after a full dial checkup.** KJZZ
   Phoenix, KCRW Los Angeles, KUNM Albuquerque, KUTX Austin, KERA Dallas,
   KCUR Kansas City, and WBUR Boston had all moved or retired their old
