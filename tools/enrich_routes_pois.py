@@ -259,12 +259,14 @@ def _maxspeed_at_point(
     point: dict[str, float],
     cache_dir: Path,
     rate_limit_s: float,
-) -> tuple[float, bool] | None:
+) -> tuple[float, bool, bool] | None:
     """Best posted limit on the corridor's highway near one route point.
 
     Queries OSM ways carrying a ``maxspeed`` within a short radius and prefers
     the way whose ``ref`` matches the leg's highway shield (e.g. ``I 95``), so a
-    parallel frontage road's 45 mph doesn't override the interstate."""
+    parallel frontage road's 45 mph doesn't override the interstate. Returns
+    ``(mph, is_hgv, on_shield)`` -- callers use ``on_shield`` to judge whether
+    an implausible reading came from the mainline or a nearby city street."""
     box = _bbox(point["lat"], point["lon"], 400)
     classes = "|".join(_MAXSPEED_HIGHWAY_CLASSES)
     query = f"""
@@ -297,7 +299,9 @@ def _maxspeed_at_point(
             best, best_on_shield = (mph, is_hgv), True
         elif on_shield == best_on_shield and (best is None or mph > best[0]):
             best = (mph, is_hgv)
-    return best
+    if best is None:
+        return None
+    return best[0], best[1], best_on_shield
 
 
 def _highway_digits(highway: str) -> str:
@@ -331,12 +335,20 @@ def bake_maxspeed(
         if len(points) < 2:
             skipped.append(f"{leg['from']}-{leg['to']}")
             continue
+        interstate = str(leg.get("highway", "")).strip().upper().startswith("I-")
         samples: list[dict[str, Any]] = []
         for point in points:
             result = _maxspeed_at_point(leg, point, cache_dir, rate_limit_s)
             if result is None:
                 continue
-            mph, is_hgv = result
+            mph, is_hgv, on_shield = result
+            # No US interstate mainline posts below 45; a shield-less sub-45
+            # reading near an interstate corridor is a city street inside the
+            # sample box (typical at the mile-0/end city anchors), not the
+            # highway. Baking it would hold a street limit for miles of
+            # interstate, so skip the point instead.
+            if interstate and not on_shield and mph < 45.0:
+                continue
             at_mi = round(float(point["at_mi"]), 1)
             # Collapse a repeated limit into the step function it represents.
             if samples and samples[-1]["mph"] == mph and samples[-1]["hgv"] == is_hgv:

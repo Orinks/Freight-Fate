@@ -193,26 +193,24 @@ section below and the Unreleased changelog; the release-line view:
 
 ### World and narration
 
-- [ ] **Interstate speed limits polluted by city-street samples at leg
-      endpoints (found live by the owner on I-10, 2026-07-14).** The
-      Overpass maxspeed sweep sampled at mile 0 / end-of-leg anchors,
-      which sit on city arterials, and the step function holds that
-      street value onto the interstate: Buckeye-Phoenix enforces 30 mph
-      on I-10 for the first ten miles. Scan says 305 of 727 interstate
-      legs have a polluted start (<45 mph held 3+ miles; worst is 25 mph
-      for 73 miles on I-84 Baker City-Ontario) and 28 have a polluted
-      end. Touches spoken limits, speeding enforcement, and ETA math
-      network-wide. Fix per the working split: Fable writes the recipe
-      rule (an interstate corridor sample under ~45 mph at a leg anchor
-      is a wrong-road match -- resample past the anchor approach or drop
-      to the neighboring sample), Opus runs the re-bake sweep in a
-      worktree, world_data regenerated and verified.
-- [ ] **Cruise control does not cancel on the player's own service
-      brake (owner report, 2026-07-14).** Hazard auto-braking cancels
-      cruise ("hands back on the wheel"), but a deliberate brake press
-      never does -- a real truck kicks cruise off at the first tap of
-      the pedal. Cancel on player braking input over a small threshold
-      and speak it terse ("Cruise off").
+- [x] **Interstate speed limits polluted by city-street samples at leg
+      endpoints -- FIXED 2026-07-14 (found live by the owner on I-10).**
+      The maxspeed bake's shield-match guard cannot fire when the
+      interstate is outside the 400 m sample box at the mile-0/end city
+      anchors, so a city arterial's 25-40 was baked onto the corridor
+      and the step function held it for miles (I-10 out of Buckeye
+      enforced 30 for ten miles; worst case 25 mph for 73 miles on
+      I-84). Repaired offline, no Overpass needed:
+      tools/repair_interstate_anchor_limits.py dropped every leading and
+      trailing sub-45 sample on interstate legs (430 legs repaired, the
+      step function heals back to mile 0), and the bake tool now skips
+      shield-less sub-45 readings on interstate corridors so a re-sweep
+      cannot reintroduce them. No re-bake needed unless we want denser
+      urban 55/65 sampling later.
+- [x] **Cruise control now cancels on the player's own service brake
+      (owner report, FIXED 2026-07-14).** Any service or emergency brake
+      input drops cruise immediately and announces "Cruise off" -- the
+      first tap of the pedal, like a real truck.
 - [ ] **Phoenix-metro interchange density is thin.** The interchange
       bake took (12 baked on the 40-mile Buckeye-Phoenix leg, speaking
       under the exits verbosity setting) but real I-10 there has 25-plus

@@ -1,0 +1,168 @@
+2026-07-14 09:18:35,257 INFO freight_fate.speech: Speech backend: NVDA
+2026-07-14 09:18:35,394 INFO freight_fate.speech: Event speech backend: SAPI
+2026-07-14 09:18:35,491 INFO freight_fate.audio: Loaded BASS plugin: C:\dev\Freight-Fate\src\freight_fate\lib\basshls.dll
+2026-07-14 09:18:35,491 INFO freight_fate.audio: Audio backend: bass
+2026-07-14 09:18:36,208 INFO freight_fate.transcript: Welcome to Freight Fate, version 1.9.0. An audio trucking adventure across America. Continue latest career: Stormin Norman: level 1, Great Lakes Training Transport company driver, 5,567 dollars, at Phoenix Company Yard in Phoenix, 2 deliveries. 1 of 10.
+2026-07-14 09:18:36,928 INFO freight_fate.transcript: Choose career. 2 of 10.
+2026-07-14 09:18:37,176 INFO freight_fate.transcript: Manage careers. 3 of 10.
+2026-07-14 09:18:37,510 INFO freight_fate.transcript: New career. 4 of 10.
+2026-07-14 09:18:37,860 INFO freight_fate.transcript: Achievements. 5 of 10.
+2026-07-14 09:18:38,306 INFO freight_fate.transcript: Drivers online. 6 of 10.
+2026-07-14 09:18:38,774 INFO freight_fate.transcript: How to play. 7 of 10.
+2026-07-14 09:18:39,219 INFO freight_fate.transcript: Drivers online. 6 of 10.
+2026-07-14 09:18:40,700 INFO freight_fate.transcript: How to play. 7 of 10.
+2026-07-14 09:18:41,360 INFO freight_fate.transcript: How to play. Left and Right arrows change pages. Up and Down arrows read line by line. Enter reads the whole page. Left or Right Control stops the current speech. Escape goes back. Page 1 of 12: The goal. 17 lines.
+2026-07-14 09:18:50,841 INFO freight_fate.transcript: A new career starts with a choice: company driver carrier or owner-operator start.
+2026-07-14 09:18:54,229 INFO freight_fate.transcript: Page 2 of 12: Menus. 7 lines.
+2026-07-14 09:18:56,159 INFO freight_fate.transcript: Page 3 of 12: Settings. 45 lines.
+2026-07-14 09:18:57,689 INFO freight_fate.transcript: Page 4 of 12: Driving basics. 31 lines.
+2026-07-14 09:18:59,678 INFO freight_fate.transcript: E starts the engine. To shut it down, slow below 5 miles per hour first.
+2026-07-14 09:19:00,607 INFO freight_fate.transcript: Air brakes need pressure before the truck can move.
+2026-07-14 09:19:01,125 INFO freight_fate.transcript: Start the engine and wait for air pressure to reach 100 psi.
+2026-07-14 09:19:01,951 INFO freight_fate.transcript: Press P to release or set the parking brake.
+2026-07-14 09:19:03,026 INFO freight_fate.transcript: If you hear low air, keep the parking brake set and let pressure build.
+2026-07-14 09:19:03,359 INFO freight_fate.transcript: Hard repeated braking can use air faster than gentle normal driving.
+2026-07-14 09:19:06,454 INFO freight_fate.transcript: Hold the Up arrow to accelerate, the Down arrow to brake.
+2026-07-14 09:19:08,962 INFO freight_fate.transcript: In automatic, once stopped, keep holding the Down arrow to back up slowly.
+2026-07-14 09:19:12,284 INFO freight_fate.transcript: Touch the Up arrow to brake and return to forward drive.
+2026-07-14 09:19:14,982 INFO freight_fate.transcript: Hold B for the emergency brake: the hardest possible stop,
+2026-07-14 09:19:17,896 INFO freight_fate.transcript: for hazards and rest stops you would otherwise overshoot.
+2026-07-14 09:19:20,394 INFO freight_fate.transcript: K sets adaptive cruise at your current speed with a three second clear-weather gap.
+2026-07-14 09:19:23,345 INFO freight_fate.transcript: Rain, snow, fog, or low visibility increase the following gap.
+2026-07-14 09:19:23,980 INFO freight_fate.transcript: It can slow for traffic ahead, but it does not steer for you.
+2026-07-14 09:19:24,655 INFO freight_fate.transcript: Plus and minus, including the keypad keys, raise and lower the set cruise speed by five miles per hour,
+2026-07-14 09:19:24,932 INFO freight_fate.transcript: so you can dial it up to the speed you want once cruise is engaged.
+2026-07-14 09:19:25,677 INFO freight_fate.transcript: Space includes the cruise set speed in the speed readout when cruise is on.
+2026-07-14 09:19:27,067 INFO freight_fate.transcript: Cruise looks ahead for sharp posted-limit drops and will not hold more than five over the posted limit.
+2026-07-14 09:19:28,422 INFO freight_fate.transcript: Cruise will not engage on low-speed local roads, like facility access
+2026-07-14 09:19:30,329 INFO freight_fate.transcript: roads, construction, or heavy traffic; take those manually.
+2026-07-14 09:19:30,610 INFO freight_fate.transcript: Press K again or touch the brakes to cancel it.
+2026-07-14 09:19:31,432 INFO freight_fate.transcript: The in-cab radio is optional and stays secondary to safety cues.
+2026-07-14 09:19:31,863 INFO freight_fate.transcript: M toggles it, brackets tune, and Y reads status;
+2026-07-14 09:19:32,686 INFO freight_fate.transcript: The in-cab radio is optional and stays secondary to safety cues.
+2026-07-14 09:19:35,872 INFO freight_fate.transcript: M toggles it, brackets tune, and Y reads status;
+2026-07-14 09:19:38,566 INFO freight_fate.transcript: the radio has its own help page with stations, hosts, and signal ranges.
+2026-07-14 09:19:41,960 INFO freight_fate.transcript: In automatic mode the truck shifts for itself.
+2026-07-14 09:19:44,281 INFO freight_fate.transcript: In manual mode, hold Left Shift for the clutch,
+2026-07-14 09:19:46,597 INFO freight_fate.transcript: then press W to shift up a gear or Q to shift down, or N for neutral.
+2026-07-14 09:19:50,386 INFO freight_fate.transcript: From neutral or reverse, W selects first gear.
+2026-07-14 09:19:52,767 INFO freight_fate.transcript: Manual transmission uses Backspace for reverse after pressing the clutch.
+2026-07-14 09:19:56,040 INFO freight_fate.transcript: J toggles the engine brake for long downhill grades.
+2026-07-14 09:19:58,767 INFO freight_fate.transcript: Manual transmission uses Backspace for reverse after pressing the clutch.
+2026-07-14 09:19:58,865 INFO freight_fate.transcript: J toggles the engine brake for long downhill grades.
+2026-07-14 09:20:01,539 INFO freight_fate.transcript: Hold H to sound the horn; release H to stop it.
+2026-07-14 09:20:04,123 INFO freight_fate.transcript: Hold H to sound the horn; release H to stop it.
+2026-07-14 09:20:05,072 INFO freight_fate.transcript: Hold H to sound the horn; release H to stop it.
+2026-07-14 09:20:06,000 INFO freight_fate.transcript: Page 5 of 12: Driving information keys. 18 lines.
+2026-07-14 09:20:08,352 INFO freight_fate.transcript: Space speaks your speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state.
+2026-07-14 09:20:09,127 INFO freight_fate.transcript: Page 6 of 12: Controller. 21 lines.
+2026-07-14 09:20:11,401 INFO freight_fate.transcript: Page 7 of 12: On the road. 81 lines.
+2026-07-14 09:20:13,101 INFO freight_fate.transcript: Loaded trips follow a route made from real highway corridors.
+2026-07-14 09:20:15,599 INFO freight_fate.transcript: Progress is not just city to city: GPS announces state lines,
+2026-07-14 09:20:18,749 INFO freight_fate.transcript: intermediate places, traffic, highway changes, and rest-stop exits.
+2026-07-14 09:20:21,984 INFO freight_fate.transcript: Grades and terrain come from the route you are driving.
+2026-07-14 09:20:24,188 INFO freight_fate.transcript: Weather, traffic, and construction still vary by time, place, and seed.
+2026-07-14 09:20:27,473 INFO freight_fate.transcript: Rush hours can make metro corridors busier.
+2026-07-14 09:20:29,336 INFO freight_fate.transcript: Weather is not just flavor. Driving well over the safe speed for the
+2026-07-14 09:20:32,019 INFO freight_fate.transcript: conditions on a slick road risks losing traction; high winds and storms
+2026-07-14 09:20:32,301 INFO freight_fate.transcript: Page 8 of 12: Hours and rest. 28 lines.
+2026-07-14 09:20:34,548 INFO freight_fate.transcript: The ELD tracks driving, on-duty-not-driving, off-duty, and sleeper time.
+2026-07-14 09:20:37,724 INFO freight_fate.transcript: You may drive eleven hours after ten consecutive hours off duty,
+2026-07-14 09:20:40,779 INFO freight_fate.transcript: within a fourteen hour duty window after coming on duty.
+2026-07-14 09:20:43,275 INFO freight_fate.transcript: A thirty minute break is required after eight cumulative hours of driving.
+2026-07-14 09:20:45,880 INFO freight_fate.transcript: Any thirty consecutive non-driving minutes satisfy that break rule,
+2026-07-14 09:20:49,310 INFO freight_fate.transcript: A thirty minute break is required after eight cumulative hours of driving.
+2026-07-14 09:20:49,440 INFO freight_fate.transcript: Any thirty consecutive non-driving minutes satisfy that break rule,
+2026-07-14 09:20:49,770 INFO freight_fate.transcript: including loading, fueling, inspection, or explicit rest-stop breaks.
+2026-07-14 09:20:51,398 INFO freight_fate.transcript: Spoken warnings come at two hours, one hour, and thirty minutes left.
+2026-07-14 09:20:51,680 INFO freight_fate.transcript: Sleeping ten hours at a rest stop, or at a terminal, starts a fresh shift.
+2026-07-14 09:20:52,780 INFO freight_fate.transcript: At sleep-capable truck parking, the sleeper berth is your cab bunk.
+2026-07-14 09:20:55,761 INFO freight_fate.transcript: You can choose two, three, seven, or eight hours in the sleeper berth
+2026-07-14 09:20:58,644 INFO freight_fate.transcript: to build a legal split, or sleep ten hours for the simple full reset.
+2026-07-14 09:21:01,803 INFO freight_fate.transcript: Driving past a limit risks inspections, fines, and out-of-service orders.
+2026-07-14 09:21:04,044 INFO freight_fate.transcript: Fatigue builds as you drive, faster at night. A drowsy driver
+2026-07-14 09:21:04,257 INFO freight_fate.transcript: yawns, drifts onto the rumble strip, and reacts late to hazards.
+2026-07-14 09:21:04,980 INFO freight_fate.transcript: Late at night, truck parking may be full. Drive on, or risk
+2026-07-14 09:21:05,289 INFO freight_fate.transcript: a ticket and poor sleep on the shoulder.
+2026-07-14 09:21:06,563 INFO freight_fate.transcript: You can always find somewhere to sleep. Stopped on the open road with no
+2026-07-14 09:21:09,554 INFO freight_fate.transcript: stop nearby, the pause menu offers an emergency shoulder sleep: a legal
+2026-07-14 09:21:12,901 INFO freight_fate.transcript: ten-hour reset, but poor rest, with a possible parking ticket or minor
+2026-07-14 09:21:15,997 INFO freight_fate.transcript: damage, and the deadline keeps running.
+2026-07-14 09:21:17,742 INFO freight_fate.transcript: A basic break or fuel stop with no overnight parking offers
+2026-07-14 09:21:18,486 INFO freight_fate.transcript: Page 9 of 12: The in-cab radio. 18 lines.
+2026-07-14 09:21:20,637 INFO freight_fate.transcript: The radio is optional comfort: speech and safety cues always come first.
+2026-07-14 09:21:23,469 INFO freight_fate.transcript: M toggles the radio, bracket keys tune up and down the dial,
+2026-07-14 09:21:26,383 INFO freight_fate.transcript: and Y speaks the station, signal, volume, and streamer-safe status.
+2026-07-14 09:21:30,064 INFO freight_fate.transcript: Welcome to Freight Fate, version 1.9.0. An audio trucking adventure across America. How to play. 7 of 10.
+2026-07-14 09:21:30,996 INFO freight_fate.transcript: Manage careers. 3 of 10.
+2026-07-14 09:21:32,052 INFO freight_fate.transcript: Choose career. 2 of 10.
+2026-07-14 09:21:32,427 INFO freight_fate.transcript: Continue latest career: Stormin Norman: level 1, Great Lakes Training Transport company driver, 5,567 dollars, at Phoenix Company Yard in Phoenix, 2 deliveries. 1 of 10.
+2026-07-14 09:21:33,646 INFO freight_fate.transcript: Welcome back, Stormin Norman. You are parked at Phoenix Company Yard in Phoenix with 5,567 dollars.
+2026-07-14 09:21:33,663 INFO freight_fate.transcript: Parked at company yard: Phoenix Company Yard in the Phoenix service area, Arizona. Company driver with level 1, Yard Trainee. You have 5,567 dollars.  Career objective: Great Lakes Training Transport is looking for steady service, not perfection, with trainer notes still close by. Dispatch board. 1 of 15.
+2026-07-14 09:21:37,065 INFO freight_fate.transcript: Quit to main menu. 15 of 15.
+2026-07-14 09:21:37,691 INFO freight_fate.transcript: Dispatch board. 1 of 15.
+2026-07-14 09:21:39,240 INFO freight_fate.transcript: Dispatch board. Dispatch assigns your load and route while you are a new company hire; load choice opens at level 8. Listed amounts are carrier gross; your settlement pays driver wages. Career objective: First-week service record. You can decline 3 more assigned loads before your next promotion, but refusals cost standing with dispatch. Market watch: food tight, general tight, retail loose, steel loose. Accept assigned dispatch: 14 tons of shipping containers from Phoenix Cross-Dock in Phoenix, Arizona to Buckeye Cross-Dock in Buckeye, Arizona. 40 miles. Carrier gross 836 dollars. Deadline 2 hours. Equipment: dry van trailer, or flatbed trailer. Carrier trailer provided. Estimated driver pay before advances: 297 dollars. Lane note: Market is tight. 1 of 3.
+2026-07-14 09:21:42,322 INFO freight_fate.transcript: Decline and request another load: 3 declines left. 2 of 3.
+2026-07-14 09:21:43,225 INFO freight_fate.transcript: Accept assigned dispatch: 14 tons of shipping containers from Phoenix Cross-Dock in Phoenix, Arizona to Buckeye Cross-Dock in Buckeye, Arizona. 40 miles. Carrier gross 836 dollars. Deadline 2 hours. Equipment: dry van trailer, or flatbed trailer. Carrier trailer provided. Estimated driver pay before advances: 297 dollars. Lane note: Market is tight. 1 of 3.
+2026-07-14 09:21:43,853 INFO freight_fate.transcript: Back to terminal. 3 of 3.
+2026-07-14 09:21:44,534 INFO freight_fate.transcript: Accept assigned dispatch: 14 tons of shipping containers from Phoenix Cross-Dock in Phoenix, Arizona to Buckeye Cross-Dock in Buckeye, Arizona. 40 miles. Carrier gross 836 dollars. Deadline 2 hours. Equipment: dry van trailer, or flatbed trailer. Carrier trailer provided. Estimated driver pay before advances: 297 dollars. Lane note: Market is tight. 1 of 3.
+2026-07-14 09:22:02,430 INFO freight_fate.transcript: Dispatch accepted from Phoenix Company Yard. Deadhead 3.0 miles on North 5th Avenue to pickup at cross-dock Phoenix Cross-Dock in Phoenix, Arizona. Check in with the shipper when you arrive.
+2026-07-14 09:22:02,431 INFO freight_fate.transcript: You are at the wheel. Pickup dispatch: deadhead from the terminal to cross-dock Phoenix Cross-Dock in Phoenix, Arizona. It is 10:53 AM. Transmission is automatic. Weather: clear, 79 degrees. Press E to start the engine and build air pressure. F1 lists the controls.
+2026-07-14 09:22:02,432 INFO freight_fate.transcript: [event] facility access road ahead. Speed limit 25.
+2026-07-14 09:22:02,439 INFO freight_fate.transcript: [event] Start on North 5th Avenue; 3 miles.
+2026-07-14 09:22:06,254 INFO freight_fate.transcript: Engine running. Air pressure 55 psi. Wait for 100 psi, then press P to release the parking brake.
+2026-07-14 09:22:13,247 INFO freight_fate.transcript: [event] Air pressure 79 psi. Wait for 100 psi, then press P to release the parking brake.
+2026-07-14 09:22:19,473 INFO freight_fate.transcript: [event] Air pressure ready at 100 psi. Press P to release the parking brake.
+2026-07-14 09:22:20,523 INFO freight_fate.transcript: Parking brake released. Air pressure 102 psi.
+2026-07-14 09:22:35,056 INFO freight_fate.transcript: 29 miles per hour, gear 8, 1224 RPM, air 125 psi, air ready, parking brake released, compressor idle.
+2026-07-14 09:22:37,058 INFO freight_fate.transcript: [event] In 2 miles, facility gate ahead. Speed limit 15.
+2026-07-14 09:22:38,413 INFO freight_fate.transcript: [event] 28 miles per hour
+2026-07-14 09:22:40,080 INFO freight_fate.transcript: Paused. Resume driving. 1 of 7.
+2026-07-14 09:23:41,326 INFO freight_fate.transcript: Resumed.
+2026-07-14 09:23:43,983 INFO freight_fate.transcript: Speed limit 25 miles per hour, in a facility access road zone. You are about 1 miles per hour over.
+2026-07-14 09:23:45,697 INFO freight_fate.transcript: 26 miles per hour, gear 8, 1069 RPM, air 117 psi, air ready, parking brake released, compressor idle.
+2026-07-14 09:23:50,347 INFO freight_fate.transcript: Speed limit 25 miles per hour, in a facility access road zone.
+2026-07-14 09:23:51,691 INFO freight_fate.transcript: 24 miles per hour, gear 7, 1396 RPM, air 117 psi, air ready, parking brake released, compressor idle.
+2026-07-14 09:23:57,674 INFO freight_fate.transcript: [event] 23 miles per hour
+2026-07-14 09:24:02,967 INFO freight_fate.transcript: 1 mile remaining of 3. On North 5th Avenue toward Phoenix, Arizona. Current grade 0.0 percent, level. Destination Phoenix ahead.
+2026-07-14 09:24:17,050 INFO freight_fate.transcript: Speed limit 25 miles per hour, in a facility access road zone.
+2026-07-14 09:24:21,563 INFO freight_fate.transcript: 18 miles per hour, gear 7, 1055 RPM, air 117 psi, air ready, parking brake released, compressor idle.
+2026-07-14 09:24:25,861 INFO freight_fate.transcript: [event] facility gate ahead. Speed limit 15.
+2026-07-14 09:24:32,787 INFO freight_fate.transcript: 15 miles per hour, gear 6, 1197 RPM, air 106 psi, air ready, parking brake released, compressor idle.
+2026-07-14 09:24:33,690 INFO freight_fate.transcript: [event] 14 miles per hour
+2026-07-14 09:24:37,869 INFO freight_fate.transcript: No route exit to signal for yet. Exits are announced as you approach them.
+2026-07-14 09:24:38,859 INFO freight_fate.transcript: Speed limit 15 miles per hour, in a facility gate zone.
+2026-07-14 09:24:40,813 INFO freight_fate.transcript: 11 miles per hour, gear 5, 1208 RPM, air 124 psi, air ready, parking brake released, compressor idle.
+2026-07-14 09:24:43,519 INFO freight_fate.transcript: 5 miles per hour, gear 3, 712 RPM, air 119 psi, air ready, parking brake released, compressor idle.
+2026-07-14 09:24:45,199 INFO freight_fate.transcript: 4 miles per hour, gear 2, 944 RPM, air 117 psi, air ready, parking brake released, compressor idle.
+2026-07-14 09:24:46,435 INFO freight_fate.transcript: [event] Reverse selected. Backing slowly.
+2026-07-14 09:24:47,067 INFO freight_fate.transcript: [event] Forward gear selected.
+2026-07-14 09:25:01,410 INFO freight_fate.transcript: Speed limit 15 miles per hour, in a facility gate zone.
+2026-07-14 09:25:02,542 INFO freight_fate.transcript: 0 miles per hour, gear 1, 600 RPM, air 113 psi, air ready, parking brake released, compressor idle.
+2026-07-14 09:25:06,897 INFO freight_fate.transcript: Paused. Resume driving. 1 of 8.
+2026-07-14 09:26:28,312 INFO freight_fate.transcript: Resumed.
+2026-07-14 09:26:29,386 INFO freight_fate.transcript: Paused. Resume driving. 1 of 8.
+2026-07-14 09:26:29,925 INFO freight_fate.transcript: Quit to main menu. 8 of 8.
+2026-07-14 09:26:30,794 INFO freight_fate.transcript: Returning to the title. You can only save at a stop, so this pickup drive will resume from your last stop, not from here.
+2026-07-14 09:26:30,799 INFO freight_fate.transcript: Welcome to Freight Fate, version 1.9.0. An audio trucking adventure across America. Continue latest career: Stormin Norman: level 1, Great Lakes Training Transport company driver, 5,567 dollars, driving to pickup at cross-dock Phoenix Cross-Dock in Phoenix, Arizona, 2 deliveries. 1 of 10.
+2026-07-14 09:26:32,233 INFO freight_fate.transcript: Press Enter on Quit to exit the game.
+2026-07-14 09:26:33,720 INFO freight_fate.transcript: Welcome back, Stormin Norman.
+2026-07-14 09:26:33,722 INFO freight_fate.transcript: Resuming your pickup drive: 14 tons of shipping containers to cross-dock Phoenix Cross-Dock in Phoenix, Arizona. 3.0 miles remaining of 3.0 to pickup at cross-dock Phoenix Cross-Dock in Phoenix, Arizona. 0.0 hours used of 2. It is 10:53 AM. Transmission is automatic. Weather: clear, 79 degrees. You are parked. Press E to start the engine and build air pressure. When air pressure is ready, press P to release the parking brake.
+2026-07-14 09:26:33,723 INFO freight_fate.transcript: [event] Start on North 5th Avenue; 3 miles.
+2026-07-14 09:26:35,700 INFO freight_fate.transcript: [event] Start the engine first; air pressure cannot build with the engine off.
+2026-07-14 09:26:36,029 INFO freight_fate.transcript: [event] Reverse selected. Backing slowly.
+2026-07-14 09:26:36,585 INFO freight_fate.transcript: Paused. Resume driving. 1 of 8.
+2026-07-14 09:26:37,935 INFO freight_fate.transcript: Resumed.
+2026-07-14 09:26:39,377 INFO freight_fate.transcript: Paused. Resume driving. 1 of 8.
+2026-07-14 09:26:40,304 INFO freight_fate.transcript: Resumed.
+2026-07-14 09:26:40,679 INFO freight_fate.transcript: Paused. Resume driving. 1 of 8.
+2026-07-14 09:26:40,909 INFO freight_fate.transcript: Quit to main menu. 8 of 8.
+2026-07-14 09:26:41,651 INFO freight_fate.transcript: Resume driving. 1 of 8.
+2026-07-14 09:26:42,000 INFO freight_fate.transcript: Quit to main menu. 8 of 8.
+2026-07-14 09:26:42,294 INFO freight_fate.transcript: Returning to the title. You can only save at a stop, so this pickup drive will resume from your last stop, not from here.
+2026-07-14 09:26:42,300 INFO freight_fate.transcript: Welcome to Freight Fate, version 1.9.0. An audio trucking adventure across America. Continue latest career: Stormin Norman: level 1, Great Lakes Training Transport company driver, 5,567 dollars, driving to pickup at cross-dock Phoenix Cross-Dock in Phoenix, Arizona, 2 deliveries. 1 of 10.
+2026-07-14 09:26:42,963 INFO freight_fate.transcript: Choose career. 2 of 10.
+2026-07-14 09:26:42,980 INFO freight_fate.transcript: Continue latest career: Stormin Norman: level 1, Great Lakes Training Transport company driver, 5,567 dollars, driving to pickup at cross-dock Phoenix Cross-Dock in Phoenix, Arizona, 2 deliveries. 1 of 10.
+2026-07-14 09:26:43,621 INFO freight_fate.transcript: Choose career. 2 of 10.
+2026-07-14 09:26:44,014 INFO freight_fate.transcript: Continue latest career: Stormin Norman: level 1, Great Lakes Training Transport company driver, 5,567 dollars, driving to pickup at cross-dock Phoenix Cross-Dock in Phoenix, Arizona, 2 deliveries. 1 of 10.
+2026-07-14 09:26:44,754 INFO freight_fate.transcript: Quit. 10 of 10.

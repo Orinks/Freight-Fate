@@ -160,6 +160,13 @@
 
 ### Fixed
 
+- **Interstate speed limits no longer drop to city speeds at the ends of a
+  leg.** Leaving or approaching a city, the spoken limit could fall to a
+  25 or 30 from a nearby city street and stay there for miles of open
+  interstate -- Interstate 10 out of Buckeye held 30 for ten miles. Four
+  hundred thirty legs across the interstate network now carry their real
+  highway limits the whole way, so the limit you hear is the limit the
+  road actually posts, and speeding enforcement matches it.
 - **Touching the brake now switches cruise control off, like a real
   truck.** Any press of the service brake or the emergency brake drops
   cruise immediately and announces it, instead of cruise quietly pulling
