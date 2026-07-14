@@ -179,6 +179,16 @@ section below and the Unreleased changelog; the release-line view:
       (Brownsville, McAllen, Laredo), Savannah (GPB not listed on Radio
       Browser), and Amarillo still have no receivable real station -- try
       again in a later sweep.
+- [ ] **The desert Southwest is nearly dark and should not be.** Only four
+      real stations cover the whole box (KJZZ Phoenix, KUNM Albuquerque,
+      KTEP El Paso, KUNV Las Vegas): nothing in Tucson, Flagstaff, Yuma,
+      Santa Fe, or Las Cruces, and nothing from the Navajo Nation. Sweep
+      candidates, each needing the live BASS smoke test: KNAU (Arizona
+      Public Radio network, Flagstaff to Page), KXCI and KUAZ (Tucson),
+      KAWC (Yuma), KRWG (Las Cruces), KANW (Albuquerque), and KTNN 660 AM,
+      the Voice of the Navajo Nation out of Window Rock, whose 50 kW
+      real-world contour covers most of the Four Corners -- a natural
+      companion to the tribal-nation crossing callouts.
 
 ### World and narration
 
