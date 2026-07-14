@@ -89,6 +89,8 @@ class DrivingControlsMixin:
             self._speak_speed_limit()
         elif key == pygame.K_a:
             self._speak_last_announcement()
+        elif key == pygame.K_g:
+            self._speak_grade()
         elif key == pygame.K_u:
             self._speak_upcoming()
         elif key == pygame.K_m:
@@ -207,11 +209,13 @@ class DrivingControlsMixin:
             "below 100 psi, wait with the engine running. "
             f"{objective_help}"
             "Space speed, and cruise set speed when cruise is on. "
-            "S posted speed limit. Tab status menu. F fuel. "
+            "S posted speed limit. G the grade under the wheels and whether "
+            "the truck is holding it. Tab status menu. F fuel. "
             "C clock, deadline, and hours of service. "
             "R route. Shift R next listed highway exit. V weather. L lane position. "
-            "A repeats the last announcement. U reads what is coming up: "
-            "imposed limits, stops, and exits ahead. "
+            "A repeats the last announcement. Comma re-reads the last spoken "
+            "line of any kind, here and in every menu. U reads what is "
+            "coming up: imposed limits, stops, and exits ahead. "
             "The Tab status menu includes a Driver apps tablet menu for "
             "navigation, weather, traffic, truck stops, road chatter, and ELD. "
             "Left or Right Control stops the driving event voice. "
@@ -492,6 +496,67 @@ class DrivingControlsMixin:
             self.ctx.say(self._last_event_message)
         else:
             self.ctx.say("No recent announcement to repeat.")
+
+    def _speak_grade(self) -> None:
+        """G: the grade under the wheels and what it is doing to the truck.
+
+        The verdict comes from the sim's own net-force balance, so the spoken
+        answer to "why am I slowing down" is the same physics the wheels feel
+        -- including whether the jake has the descent or is about to lose it.
+        """
+        t = self.truck
+        grade = t.grade
+        if abs(grade) < 0.005:
+            parts = ["Level road."]
+        else:
+            direction = "uphill" if grade > 0 else "downhill"
+            lead = f"Grade {abs(grade) * 100:.1f} percent {direction}"
+            # How far the slope keeps its character, sampled the way the
+            # chain-law scan does; flat or reversed counts as the end.
+            sign = 1.0 if grade > 0 else -1.0
+            run_mi = None
+            probe = 0.25
+            while probe <= 15.0:
+                at = self.trip.position_mi + probe
+                if at >= self.trip.total_miles:
+                    break
+                if self.trip.grade_at(at) * sign <= 0.002:
+                    run_mi = probe
+                    break
+                probe += 0.25
+            if run_mi is not None and run_mi >= 1.0:
+                lead += f" for another {self.trip._distance_text(run_mi)}"
+            parts = [lead + "."]
+        moving = t.velocity_mps > 0.5
+        if moving:
+            net = t.drive_force() - t.resistance_force() - t.brake_force()
+            accel_mph_s = net / t.gross_mass_kg * 2.23694
+            stage = t.engine_brake_stage
+            if grade > 0.005:
+                if accel_mph_s < -0.2:
+                    parts.append("The hill has the load; expect to lose speed.")
+                elif accel_mph_s > 0.2:
+                    parts.append("Pulling it with speed to spare.")
+                else:
+                    parts.append("Holding speed.")
+            elif grade < -0.005:
+                if t.jake_slipping:
+                    parts.append(
+                        "The jake is sliding the drive wheels; back it off a stage."
+                    )
+                elif accel_mph_s > 0.2:
+                    if stage > 0:
+                        parts.append(
+                            f"Jake stage {stage} is not holding it; "
+                            "gear down or snub the brakes."
+                        )
+                    elif t.throttle <= 0.05:
+                        parts.append("Speed is building; set the jake before it runs.")
+                elif stage > 0:
+                    parts.append(f"Jake stage {stage} has it.")
+                else:
+                    parts.append("Speed in hand.")
+        self.ctx.say(" ".join(parts))
 
     def _speak_upcoming(self, within_mi: float = 15.0) -> None:
         """U: what is coming up -- imposed limits, stops, and exits ahead."""

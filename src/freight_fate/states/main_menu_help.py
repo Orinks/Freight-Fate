@@ -34,6 +34,7 @@ HELP_PAGES = [
             "Home and End jump to the first and last option.",
             "Type a letter to jump to options starting with that letter.",
             "Press F1 in any menu for contextual help.",
+            "Comma re-reads the last spoken line, anywhere in the game.",
             "Manage careers on the main menu lets you reset or delete saved careers,",
             "with a confirmation screen before anything destructive happens.",
             "Edited or corrupted career saves may be moved aside at the main menu.",

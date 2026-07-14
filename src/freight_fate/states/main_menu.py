@@ -574,6 +574,7 @@ class NameEntryState(State):
     """Accessible text entry: characters are echoed as you type."""
 
     MAX_LEN = 24
+    captures_text_input = True  # keep typed commas; the global repeat key yields
 
     def __init__(self, ctx) -> None:
         super().__init__(ctx)

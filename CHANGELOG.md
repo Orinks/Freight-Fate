@@ -38,6 +38,17 @@
 
 ### Added
 
+- **G speaks the grade under the wheels and what it is doing to the
+  truck.** Press G while driving to hear the slope, how far it runs, and
+  the sim's own verdict: whether the hill has the load, whether the jake
+  is holding the descent, or whether speed is building and it is time to
+  set the jake -- the spoken answer to "why am I slowing down."
+
+- **Comma re-reads the last spoken line, anywhere in the game.** Missed a
+  menu item, a status readout, or a road callout under other noise? Press
+  Comma and the game says it again -- in menus, in the truck, everywhere.
+  The A key still replays the last route announcement while driving.
+
 - **The in-cab radio picks up forty-three more real stations.** With real
   streams allowed in settings, live local radio now reaches Portland, Boise,
   Spokane, Salt Lake City, Las Vegas, Reno, Minneapolis, Milwaukee, Detroit,
@@ -169,10 +180,14 @@
   brake, then press and hold it again; the spoken key help teaches the
   new gesture. This is a changed habit if you were used to hold-through
   reversing.
-- **KJZZ Phoenix plays again.** The station's stream moved to a new
-  address and the radio was falling back to satellite with "KJZZ,
-  Phoenix is unavailable." The dial now carries the station's current
-  stream.
+- **Seven real radio streams play again after a full dial checkup.** KJZZ
+  Phoenix, KCRW Los Angeles, KUNM Albuquerque, KUTX Austin, KERA Dallas,
+  KCUR Kansas City, and WBUR Boston had all moved or retired their old
+  stream addresses, so tuning them fell back to satellite with "station
+  unavailable." Every real stream in the catalog was live-tested and the
+  dead ones repointed to each station's current stream. WABE Atlanta has
+  no working public stream right now and leaves the dial until one
+  returns.
 - **Ramp-end traffic lights now have a yellow phase, speak every change,
   and no longer punish you for a light that changed behind your back.**
   The light used to announce only its first change: it could say green
@@ -188,6 +203,17 @@
   hundred thirty legs across the interstate network now carry their real
   highway limits the whole way, so the limit you hear is the limit the
   road actually posts, and speeding enforcement matches it.
+- **US highways and parkways got the same speed-limit cleanup.** US-60
+  out of Phoenix held a baked 25 for twenty-two miles of the
+  Superstition Freeway. Two hundred twenty-seven more legs now start at
+  their real highway speed, while honest small-town limits -- like
+  US-60's real 35 through Globe -- stay exactly as posted.
+- **A dropped speed limit now gives you braking time before a strike.**
+  When the posted limit steps down, enforcement waits while you actually
+  slow -- about the seconds a loaded truck honestly needs -- instead of
+  writing a strike the moment the sign changes. Staying on the throttle
+  through the drop forfeits the grace, so it rewards compliance, not
+  coasting past signs.
 - **Touching the brake now switches cruise control off, like a real
   truck.** Any press of the service brake or the emergency brake drops
   cruise immediately and announces it, instead of cruise quietly pulling

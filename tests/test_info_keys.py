@@ -218,3 +218,76 @@ def test_driving_help_describes_x_as_signal_not_take_exit(monkeypatch):
         assert "X takes the next announced exit" not in help_text
     finally:
         app.shutdown()
+
+
+def test_comma_repeats_the_last_spoken_line():
+    """The global repeat key: whatever spoke last -- menu item, status
+    readout, or event -- comes back on demand, anywhere in the game."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        spoken = []
+        app.ctx.speech.say = lambda text, interrupt=True: spoken.append(text)
+
+        app.ctx.say("Fuel 62 gallons.")
+        assert app.ctx.last_spoken == "Fuel 62 gallons."
+        app.ctx.repeat_last_spoken()
+        assert spoken[-1] == "Fuel 62 gallons."
+
+        # Event speech is repeatable too, through the main channel.
+        app.ctx.settings.sapi_events = False
+        app.ctx.say_event("Crossing the Agua Fria River.")
+        app.ctx.repeat_last_spoken()
+        assert spoken[-1] == "Crossing the Agua Fria River."
+
+        # An empty history stays silent instead of erroring.
+        app.ctx.last_spoken = ""
+        before = len(spoken)
+        app.ctx.repeat_last_spoken()
+        assert len(spoken) == before
+    finally:
+        app.shutdown()
+
+
+def test_name_entry_keeps_its_commas():
+    from freight_fate.states.main_menu import NameEntryState
+
+    assert NameEntryState.captures_text_input is True
+
+
+def test_grade_key_reads_slope_and_verdict(monkeypatch):
+    """G speaks the grade under the wheels and the sim's own force verdict."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = _capture(app, monkeypatch)
+        t = d.truck
+
+        t.grade = 0.0
+        d.handle_event(key_event(pygame.K_g))
+        assert "Level road" in spoken[-1]
+
+        # A loaded climb the engine cannot hold: uphill plus losing speed.
+        t.start_engine()
+        t.set_air_ready(parking_brake=False)
+        t.grade = 0.06
+        t.cargo_kg = 21_500.0
+        t.transmission.gear = 10
+        t.velocity_mps = 26.8
+        t.throttle = 1.0
+        d.handle_event(key_event(pygame.K_g))
+        assert "percent uphill" in spoken[-1]
+        assert "lose speed" in spoken[-1]
+
+        # Downhill with no jake and speed building: the warning speaks.
+        t.grade = -0.05
+        t.throttle = 0.0
+        t.engine_brake_stage = 0
+        d.handle_event(key_event(pygame.K_g))
+        assert "percent downhill" in spoken[-1]
+        assert "set the jake" in spoken[-1]
+    finally:
+        app.shutdown()

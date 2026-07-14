@@ -184,7 +184,15 @@ section below and the Unreleased changelog; the release-line view:
       markets are covered by KWMU and KUHF instead); the Rio Grande Valley
       (Brownsville, McAllen, Laredo), Savannah (GPB not listed on Radio
       Browser), and Amarillo still have no receivable real station -- try
-      again in a later sweep.
+      again in a later sweep. WABE Atlanta joined the dark list
+      2026-07-14 (every known mount refused; supported:false with notes).
+- [ ] **Stream URLs rot fast -- fold a dial health check into the
+      map-refresh tool.** One day after the 57-station sweep, seven
+      streams were already dead (KJZZ, KCRW, KUNM, KUTX, KERA, KCUR,
+      WBUR -- all repointed 2026-07-14 after a full BASS live sweep of
+      the catalog). The owner-run map-refresh tool should re-test every
+      real stream the same way and report movers, so the dial stays
+      honest between releases.
 - [x] **The desert Southwest sweep landed: six stations, ten total.** KTNN
       660 AM (Window Rock, the Voice of the Navajo Nation, 175-mile AM
       groundwave contour -- widest in the catalog, honestly), KNAU
@@ -212,11 +220,29 @@ section below and the Unreleased changelog; the release-line view:
       step function heals back to mile 0), and the bake tool now skips
       shield-less sub-45 readings on interstate corridors so a re-sweep
       cannot reintroduce them. No re-bake needed unless we want denser
-      urban 55/65 sampling later.
+      urban 55/65 sampling later. Extended same day to surface highways:
+      227 more legs dropped a city-street mile-0 anchor sample owning a
+      fast corridor (US-60 out of Phoenix: 25 mph baked for 22 miles of
+      the Superstition Freeway), honest small-town limits kept, and
+      speeding enforcement gained a braking-grace window after any
+      posted-limit drop.
 - [x] **Cruise control now cancels on the player's own service brake
       (owner report, FIXED 2026-07-14).** Any service or emergency brake
       input drops cruise immediately and announces "Cruise off" -- the
       first tap of the pedal, like a real truck.
+- [x] **Comma repeats the last spoken line, anywhere (owner ask,
+      2026-07-14).** One global key re-speaks whatever said last -- menu
+      item, readout, or road event -- complementing the driving-only A
+      key. Text entry keeps its commas.
+- [x] **G speaks the grade and the force verdict (owner ask,
+      2026-07-14).** Slope, how far it runs, and whether the truck is
+      holding it -- straight from the sim's net-force balance, including
+      jake-holding and jake-slipping states.
+- [ ] **Physics bench: add climb scenarios.** The bench covers descents
+      and stops but nothing uphill; the 2026-07-14 climb audit (0-60
+      loaded 66-69 s, 6 percent balance 29.8 mph, 3 percent balance
+      44.9 -- all inside real envelopes) lived in a scratch script and
+      deserves scenario status so regressions get caught.
 - [ ] **Phoenix-metro interchange density is thin.** The interchange
       bake took (12 baked on the 40-mile Buckeye-Phoenix leg, speaking
       under the exits verbosity setting) but real I-10 there has 25-plus

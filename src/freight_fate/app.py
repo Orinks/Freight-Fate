@@ -82,6 +82,8 @@ class GameContext:
         self._music_rotation_elapsed_s = 0.0
         self.achievement_notice = ""
         self.achievement_notice_timer = 0.0
+        # The most recent spoken line, for the global repeat key (comma).
+        self.last_spoken = ""
 
     def real_weather_provider(self):
         """Shared NWS provider when real weather is enabled, else None.
@@ -98,7 +100,20 @@ class GameContext:
 
     def say(self, text: str, interrupt: bool = True) -> None:
         transcript.info("%s", text)
+        self.last_spoken = text
         self.speech.say(text, interrupt)
+
+    def repeat_last_spoken(self) -> None:
+        """Re-speak the most recent line (the comma key, from anywhere).
+
+        Speech is the whole interface, and a line lost to a cough or an
+        overlapping announcement should never be gone for good. Repeats on
+        the main channel and stays out of the transcript's way beyond a
+        marker, so a replay never reads as a fresh game event."""
+        if not self.last_spoken:
+            return
+        transcript.info("[repeat] %s", self.last_spoken)
+        self.speech.say(self.last_spoken, interrupt=True)
 
     def say_event(self, text: str, interrupt: bool = True) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
@@ -113,6 +128,7 @@ class GameContext:
         as a fresh queued utterance so old messages do not bury the warning.
         """
         transcript.info("[event] %s", text)
+        self.last_spoken = text
         if self.settings.sapi_events:
             self.speech.say_event(text, interrupt)
         else:
@@ -453,6 +469,14 @@ class App:
                     elif self.state is not None:
                         if event.type == pygame.KEYDOWN:
                             self.controller.note_keyboard()
+                            # Global repeat-last-spoken. Text entry keeps its
+                            # commas; menus are safe (first-letter jump is
+                            # alphanumeric only).
+                            if event.key == pygame.K_COMMA and not getattr(
+                                self.state, "captures_text_input", False
+                            ):
+                                self.ctx.repeat_last_spoken()
+                                continue
                         self.state.handle_event(event)
                 # Auto-repeat (held D-pad left/right) and analog smoothing.
                 # Synthetic repeats go straight to the state (bypassing the
