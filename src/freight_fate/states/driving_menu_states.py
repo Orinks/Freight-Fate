@@ -12,6 +12,30 @@ DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH = 55.0
 TIRE_WEAR_PER_MILE = 0.003
 ROAD_GRIME_PER_MILE = 0.004
 
+# Plain "deliver into this city" badges (titles claim nothing extra). Mostly
+# cities the jukebox got to first; each badge's song lives in the catalog.
+SIMPLE_ARRIVAL_BADGES = {
+    "phoenix_az_us": "phoenix_arrival",
+    "wichita_ks_us": "wichita_arrival",
+    "bakersfield_ca_us": "bakersfield_arrival",
+    "las_vegas_nv_us": "vegas_arrival",
+    "nashville_tn_us": "nashville_delivery",
+    "el_paso_tx_us": "el_paso_arrival",
+    "laredo_tx_us": "laredo_arrival",
+    "baton_rouge_la_us": "baton_rouge_arrival",
+    "sacramento_ca_us": "sacramento_arrival",
+    "muskogee_ok_us": "muskogee_arrival",
+    "kansas_city_mo_us": "kansas_city_arrival",
+    "memphis_tn_us": "memphis_arrival",
+    "saginaw_mi_us": "saginaw_arrival",
+    "fort_worth_tx_us": "fort_worth_arrival",
+    "san_antonio_tx_us": "san_antonio_arrival",
+    "new_orleans_la_us": "new_orleans_arrival",
+    "houston_tx_us": "houston_arrival",
+    "winslow_az_us": "winslow_arrival",
+    "chattanooga_tn_us": "chattanooga_arrival",
+}
+
 
 def _settlement_hours(driving: DrivingState) -> float:
     driven_hours = driving.trip.game_minutes / 60.0
@@ -1236,20 +1260,8 @@ class ArrivalState(MenuState):
         # Wall-clock badge conditions ("by Daybreak", "Midnight Freight") read
         # the destination's local clock, matching what the player just heard.
         arrival_hour = self.driving.trip.local_hour
-        # Plain "deliver into this city" badges (titles claim nothing extra).
-        simple_arrival = {
-            "phoenix_az_us": "phoenix_arrival",
-            "wichita_ks_us": "wichita_arrival",
-            "bakersfield_ca_us": "bakersfield_arrival",
-            "las_vegas_nv_us": "vegas_arrival",
-            "nashville_tn_us": "nashville_delivery",
-            "el_paso_tx_us": "el_paso_arrival",
-            "laredo_tx_us": "laredo_arrival",
-            "baton_rouge_la_us": "baton_rouge_arrival",
-            "sacramento_ca_us": "sacramento_arrival",
-        }
-        if dest in simple_arrival:
-            ids.append(simple_arrival[dest])
+        if dest in SIMPLE_ARRIVAL_BADGES:
+            ids.append(SIMPLE_ARRIVAL_BADGES[dest])
         # Badges whose title names a condition, so the condition is enforced:
         if dest == "amarillo_tx_us" and 5.0 <= arrival_hour < 12.0:  # "by Daybreak"
             ids.append("amarillo_arrival")

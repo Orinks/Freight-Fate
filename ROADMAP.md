@@ -138,13 +138,16 @@ section below and the Unreleased changelog; the release-line view:
       first dispatch is accepted, a Career plan terminal item naming the
       next practical step, and a rewritten How to play that teaches earned
       dispatch freedom.
-- [x] **133 achievements.** The badge wall nearly doubles and keeps
+- [x] **143 achievements.** The badge wall nearly doubles and keeps
       growing: state, region, and city arrivals, cargo firsts, close calls,
       mishaps, and career milestones, each nodding to a country or trucking
       song. The 1.9 arc adds level milestones through 30, business-gate
       badges (buy-in, own authority, self-paid courses), fleet-tractor
-      badges, and map-coverage milestones (cities, states, the Dakotas,
-      Montana, northern New England) sized for the 623-city map.
+      badges, map-coverage milestones (cities, states, the Dakotas,
+      Montana, northern New England) sized for the 623-city map, and ten
+      song-city arrivals (Muskogee, Memphis, Kansas City, Saginaw, Fort
+      Worth, San Antonio, New Orleans, Houston, Winslow, Chattanooga) via
+      the shared `SIMPLE_ARRIVAL_BADGES` mapping.
 - [x] **Save compatibility.** Careers back through the version-4 schema
       load with sensible defaults, and newer-snapshot saves no longer crash
       older-schema loads.

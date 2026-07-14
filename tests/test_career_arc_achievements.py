@@ -61,6 +61,74 @@ def test_new_arc_badges_exist_with_song_inspirations():
     assert len(ACHIEVEMENTS) >= 130
 
 
+def test_song_city_badges_map_to_real_cities_and_real_badges():
+    from freight_fate.achievements import ACHIEVEMENT_BY_ID
+    from freight_fate.app import App
+    from freight_fate.states.driving_menu_states import SIMPLE_ARRIVAL_BADGES
+
+    # The new song-city arrivals ride the same mapping as the shipped ones.
+    for badge_id in (
+        "muskogee_arrival",
+        "kansas_city_arrival",
+        "memphis_arrival",
+        "saginaw_arrival",
+        "fort_worth_arrival",
+        "san_antonio_arrival",
+        "new_orleans_arrival",
+        "houston_arrival",
+        "winslow_arrival",
+        "chattanooga_arrival",
+    ):
+        assert badge_id in SIMPLE_ARRIVAL_BADGES.values(), badge_id
+
+    app = App()
+    try:
+        for city, badge_id in SIMPLE_ARRIVAL_BADGES.items():
+            assert badge_id in ACHIEVEMENT_BY_ID, badge_id
+            assert city in app.ctx.world.cities, city
+    finally:
+        app.shutdown()
+
+
+def test_muskogee_delivery_awards_its_badge(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.states.driving import ArrivalState, DrivingState
+
+    app = App()
+    try:
+        world = app.ctx.world
+        destination = "muskogee_ok_us"
+        origin = next(
+            city
+            for city in world.city_names()
+            if city != destination and world.supported_route(city, destination) is not None
+        )
+        app.ctx.profile = Profile(name="Muskogee Run", current_city=origin)
+        route = world.supported_route(origin, destination)
+        miles = round(route.miles)
+        job = Job(
+            CARGO_CATALOG["general"],
+            15,
+            origin,
+            f"{origin} yard",
+            destination,
+            miles,
+            max(500, miles * 10),
+            max(4.0, miles / 20.0),
+            destination_location=f"{destination} dock",
+        )
+        driving = DrivingState(app.ctx, job, route, phase="delivery")
+        driving.trip.game_minutes = job.deadline_game_h * 30.0
+        monkeypatch.setattr(app.ctx, "say", lambda *_a, **_k: None)
+
+        ArrivalState(app.ctx, driving)
+
+        assert "muskogee_arrival" in app.ctx.profile.achievements
+    finally:
+        app.shutdown()
+
+
 def test_level_milestones_award_at_their_levels(monkeypatch):
     from freight_fate.app import App
 

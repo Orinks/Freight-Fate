@@ -974,6 +974,77 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
         "Landmarks",
         "Dick Curless - A Tombstone Every Mile",
     ),
+    # -- Song cities: places the jukebox got to first ---------------------------
+    Achievement(
+        "muskogee_arrival",
+        "Still Proud in Muskogee",
+        "A load delivered into Muskogee, Oklahoma, where folks still take pride in living right and shaking your hand. Clean paperwork counts as manners out here.",
+        "Landmarks",
+        "Merle Haggard - Okie From Muskogee",
+    ),
+    Achievement(
+        "kansas_city_arrival",
+        "Brighter Than the Local TV Star",
+        "Freight delivered into Kansas City, home of burnt ends, wide boulevards, and local celebrities who will not help you back into a dock. You managed anyway.",
+        "Landmarks",
+        "Roger Miller - Kansas City Star",
+    ),
+    Achievement(
+        "memphis_arrival",
+        "However You Got to Memphis",
+        "Freight put down in Memphis, at the top of the Delta where the river hauls nearly as much as the highway. Whatever brought you here, the dock only asked for the bills.",
+        "Landmarks",
+        "Tom T. Hall - That's How I Got to Memphis",
+    ),
+    Achievement(
+        "saginaw_arrival",
+        "Cold Bay, Warm Welcome",
+        "A delivery into Saginaw, up where the bay wind finds every gap in the cab insulation. Half the town works the water; the freight still comes in by road.",
+        "Landmarks",
+        "Lefty Frizzell - Saginaw, Michigan",
+    ),
+    Achievement(
+        "fort_worth_arrival",
+        "Cowtown Crossed Your Mind",
+        "A load delivered into Fort Worth, where the stockyards went showbiz but the freight stayed honest. Dallas sits close enough to wave at and far enough to ignore.",
+        "Landmarks",
+        "George Strait - Does Fort Worth Ever Cross Your Mind",
+    ),
+    Achievement(
+        "san_antonio_arrival",
+        "Backing Down to San Antone",
+        "Freight settled in San Antonio, down where the missions keep their bells and the breakfast tacos outrank the barbecue. The river walks; your trailer rolled.",
+        "Landmarks",
+        "Bob Wills & His Texas Playboys - New San Antonio Rose",
+    ),
+    Achievement(
+        "new_orleans_arrival",
+        "Good Morning, Crescent City",
+        "A load brought into New Orleans, past the wards and the water, where even the freight moves a little behind the beat. Nobody minded, and the coffee fixed it.",
+        "Landmarks",
+        "Willie Nelson - City of New Orleans",
+    ),
+    Achievement(
+        "houston_arrival",
+        "One Day Closer, Says the Odometer",
+        "Freight delivered into Houston, a city sprawling far enough to have its own weather and at least four rush hours. Every mile of it counted toward somewhere that matters.",
+        "Landmarks",
+        "Larry Gatlin & The Gatlin Brothers - Houston (Means I'm One Day Closer to You)",
+    ),
+    Achievement(
+        "winslow_arrival",
+        "A Corner Worth Standing On",
+        "A load delivered into Winslow, a small Arizona town with one world-famous corner. Park the rig, stretch your legs, and enjoy being the second-most photographed thing downtown.",
+        "Landmarks",
+        "Eagles - Take It Easy",
+    ),
+    Achievement(
+        "chattanooga_arrival",
+        "Quicker Than the Old Express",
+        "Freight rolled into Chattanooga ahead of anything on rails, through the ridge cuts where the river bends twice to look around. The old trains would have needed a schedule.",
+        "Landmarks",
+        "Glenn Miller - Chattanooga Choo Choo",
+    ),
 )
 
 ACHIEVEMENT_BY_ID = {achievement.id: achievement for achievement in ACHIEVEMENTS}
