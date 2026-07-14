@@ -140,7 +140,9 @@ def corridor_candidates(
         if best_off > buffer_mi:
             continue
         at_mi = round(max(0.0, min(leg_miles, cumulative[best_i] / total * leg_miles)), 1)
-        if any(pn._haversine_miles(lat, lon, nlat, nlon) <= dedupe_mi for nlat, nlon in node_coords):
+        if any(
+            pn._haversine_miles(lat, lon, nlat, nlon) <= dedupe_mi for nlat, nlon in node_coords
+        ):
             continue  # already a city node -- not a checkpoint candidate
         near.append({**place, "at_mi": at_mi, "off_mi": round(best_off, 2)})
 
@@ -243,7 +245,7 @@ def main(argv: list[str] | None = None) -> int:
         pop = f"pop {c['population']:,}" if c["population"] else "pop n/a"
         print(
             f'  --candidate "{c["name"]}|{c["lat"]:.4f}|{c["lon"]:.4f}|{code}"'
-            f'   # mi {c["at_mi"]}, {c["off_mi"]}mi off, {pop}'
+            f"   # mi {c['at_mi']}, {c['off_mi']}mi off, {pop}"
         )
     return 0
 

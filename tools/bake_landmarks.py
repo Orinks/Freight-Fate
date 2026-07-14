@@ -13,6 +13,7 @@ enforcement semantics). Additive + idempotent (overwrites the leg's landmarks).
 
     python bake_landmarks.py [--only "a_b_us:c_d_us;..."] [--per-leg 8] [--write]
 """
+
 from __future__ import annotations
 
 import argparse
@@ -35,9 +36,15 @@ from enrich_routes_landmarks import (  # noqa: E402
 
 OVERPASS_URL = os.environ.get("OVERPASS_URL", "http://localhost:12347/api/interpreter")
 R_MI = 3958.8
-POINT_OFF_MI = 4.0      # keep a pass/museum/river crossing within this of the route
-SAMPLE_STEP_MI = 20.0   # bbox sample spacing along the corridor
-BBOX_RADIUS_M = 14000   # ~14 km half-box at each sample
+
+# Curated landmark categories owned elsewhere -- hand-placed heritage markers and
+# the authored billboards from bake_billboards.py. This tool regenerates only the
+# OSM-derived features, so it must PRESERVE these when it overwrites a leg (else a
+# re-bake silently wipes the Loneliest Road marker and every placed billboard).
+CURATED_CATEGORIES = {"highway_marker", "billboard_sign"}
+POINT_OFF_MI = 4.0  # keep a pass/museum/river crossing within this of the route
+SAMPLE_STEP_MI = 20.0  # bbox sample spacing along the corridor
+BBOX_RADIUS_M = 14000  # ~14 km half-box at each sample
 
 
 def hav(lat1, lon1, lat2, lon2):
@@ -109,7 +116,9 @@ def _point_in_ring(lat, lon, ring):
     for i in range(n):
         yi, xi = ring[i]
         yj, xj = ring[j]
-        if ((yi > lat) != (yj > lat)) and (lon < (xj - xi) * (lat - yi) / ((yj - yi) or 1e-12) + xi):
+        if ((yi > lat) != (yj > lat)) and (
+            lon < (xj - xi) * (lat - yi) / ((yj - yi) or 1e-12) + xi
+        ):
             inside = not inside
         j = i
     return inside
@@ -301,7 +310,13 @@ def main():
         if a.only and len(only) <= 4:  # verbose for small runs
             print(f"{leg['from']}->{leg['to']}: {[(r['spoken'], r['at_mi']) for r in lms]}")
         if lms:
-            leg.setdefault("corridor", {})["landmarks"] = lms
+            # Regenerate only the OSM-derived features; keep any curated ones
+            # (billboards, hand-placed heritage markers) that other tools own.
+            existing = leg.get("corridor", {}).get("landmarks", [])
+            curated = [lm for lm in existing if lm.get("category") in CURATED_CATEGORIES]
+            leg.setdefault("corridor", {})["landmarks"] = sorted(
+                curated + lms, key=lambda r: r["at_mi"]
+            )
             total_lm += len(lms)
             updated += 1
     print(f"landmarks: {total_lm} across {updated} legs")

@@ -90,6 +90,39 @@ def test_bobtail_relocates_to_a_nearby_city_without_pay():
         app.shutdown()
 
 
+def test_bobtail_speeding_strikes_charge_the_driver():
+    from freight_fate.app import App
+    from freight_fate.models.jobs import make_reposition_job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import (
+        ArrivalState,
+        DrivingState,
+        _speeding_settlement_fine,
+    )
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Fast Bobtail")
+        p = app.ctx.profile
+        job = make_reposition_job(app.ctx.world, "Denver", "Cheyenne")
+        assert job is not None
+        route = app.ctx.world.supported_route("Denver", "Cheyenne")
+        driving = DrivingState(app.ctx, job, route)
+        driving.speeding_strikes = 2
+        money_before = p.money
+
+        arrival = ArrivalState(app.ctx, driving)
+
+        fine = _speeding_settlement_fine(2)
+        assert p.money == money_before - fine
+        assert any(
+            f"{fine:,.0f} dollars" in line and "speeding fines" in line
+            for line in arrival.summary_lines
+        )
+    finally:
+        app.shutdown()
+
+
 def test_bobtail_personal_conveyance_records_off_duty_hos_time():
     from freight_fate.app import App
     from freight_fate.models.jobs import make_reposition_job
@@ -379,8 +412,10 @@ def test_new_dispatches_only_use_metadata_supported_routes(world):
 
 # Sweeping every city's board grows with the map and, under coverage tracing
 # on the slower Windows CI runner, straddles the default 120-second hang
-# timeout. It is long, not hung, so give it real headroom.
-@pytest.mark.timeout(300)
+# timeout. It is long, not hung, so give it real headroom; 300 seconds proved
+# marginal once the suite grew, and the thread timeout kills the whole xdist
+# worker.
+@pytest.mark.timeout(600)
 def test_whole_board_never_offers_unsupported_route_legs(world):
     # Spot-check board generation across a bounded, deterministic sample of origin
     # cities (x4 seeds) rather than every city. The full scan grew with the map

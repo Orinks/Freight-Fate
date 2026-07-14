@@ -88,6 +88,9 @@ class TrafficStopState(MenuState):
         detail = base.detail if base is not None else ""
         return PresenceState("Pulled over", detail)
 
+    def online_presence(self):
+        return self.presence()
+
     def _resolve(self) -> None:
         """Decide the outcome and apply any ticket immediately."""
         p = self.ctx.profile
@@ -314,9 +317,11 @@ class RestStopState(MenuState):
         detail = base.detail if base is not None else ""
         return PresenceState("Resting at a stop", detail)
 
+    def online_presence(self):
+        return self.presence()
+
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient(
-            _poi_ambient_key(self.stop, self.driving.trip.local_hour))
+        self.ctx.audio.set_ambient(_poi_ambient_key(self.stop, self.driving.trip.local_hour))
         parts = [f"{self.stop.spoken_name}."]
         if self.stop.parking_text:
             parts.append(f"{self.stop.parking_text}.")
@@ -800,8 +805,7 @@ class ParkingFullState(MenuState):
         self.stop = stop
 
     def announce_entry(self) -> None:
-        self.ctx.audio.set_ambient(
-            _poi_ambient_key(self.stop, self.driving.trip.current_hour))
+        self.ctx.audio.set_ambient(_poi_ambient_key(self.stop, self.driving.trip.current_hour))
         self.ctx.say(
             f"The truck parking at {self.stop.spoken_name} is full tonight. "
             f"It is {clock_text(self.driving.trip.local_hour)}. "

@@ -177,12 +177,8 @@ def approach_record(target: Target) -> dict[str, Any]:
     # Prefer the nearest *named* road inside the radius over a closer unnamed
     # way: the road name is what the player hears, and "unnamed public road"
     # right next to a named street is a worse answer than the street itself.
-    has_named = (
-        bool(target.best_named_road) and target.best_named_distance_mi <= SEARCH_RADIUS_MI
-    )
-    has_road = has_named or (
-        bool(target.best_road) and target.best_distance_mi <= SEARCH_RADIUS_MI
-    )
+    has_named = bool(target.best_named_road) and target.best_named_distance_mi <= SEARCH_RADIUS_MI
+    has_road = has_named or (bool(target.best_road) and target.best_distance_mi <= SEARCH_RADIUS_MI)
     if has_named:
         road = target.best_named_road
         road_distance_mi = target.best_named_distance_mi

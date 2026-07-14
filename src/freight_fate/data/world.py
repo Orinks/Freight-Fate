@@ -122,9 +122,7 @@ class World(WorldServiceMixin):
         # and approaches, surface-street geometry) predates the slug migration
         # and is keyed by old display names and pre-slug facility ids; remap it
         # onto canonical keys once at load so every runtime lookup stays direct.
-        self._service_city_keys = _build_service_city_keys(
-            self.cities, self._legacy_names_by_key
-        )
+        self._service_city_keys = _build_service_city_keys(self.cities, self._legacy_names_by_key)
         self._city_service_data = {
             self.resolve_city_key(name): services
             for name, services in load_city_service_data().items()
@@ -141,9 +139,7 @@ class World(WorldServiceMixin):
             leg_from = self.resolve_city_key(leg["from"])
             leg_to = self.resolve_city_key(leg["to"])
             miles = float(leg["miles"])
-            stops = tuple(
-                _parse_stop(s, miles, leg_from, leg_to) for s in leg.get("stops", ())
-            )
+            stops = tuple(_parse_stop(s, miles, leg_from, leg_to) for s in leg.get("stops", ()))
             corridor = leg.get("corridor", {})
             route_points = tuple(
                 _parse_route_point(p, miles, leg_from, leg_to)
@@ -166,8 +162,7 @@ class World(WorldServiceMixin):
                 for c in corridor.get("checkpoints", ())
             )
             state_miles = tuple(
-                _parse_state_mileage(m, leg_from, leg_to)
-                for m in corridor.get("state_miles", ())
+                _parse_state_mileage(m, leg_from, leg_to) for m in corridor.get("state_miles", ())
             )
             toll_events = tuple(
                 _parse_toll_event(e, miles, leg_from, leg_to, leg["highway"])

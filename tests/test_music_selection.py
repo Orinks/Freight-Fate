@@ -67,6 +67,7 @@ def test_menu_music_sequence_is_milestone_pool():
     assert rookie_pool[0] == "menu_theme"
     assert len(rookie_pool) > 1
     assert "menu_theme" in rookie_pool
+    assert "menu_urban_roll" in rookie_pool
 
     coast = Profile(name="Coast")
     coast.career.total_miles = 10_000

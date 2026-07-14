@@ -127,7 +127,7 @@ jobs:
           SDL_VIDEODRIVER: dummy
           SDL_AUDIODRIVER: dummy
           FREIGHT_FATE_NO_SPEECH: "1"
-        run: uv run pytest -q
+        run: uv run pytest -q -n auto
 
       - name: Check release dependencies
         run: uv run python tools/build_release.py --check-dependencies

@@ -11,6 +11,7 @@ from .models.profile import data_dir
 log = logging.getLogger(__name__)
 
 TIME_SCALES = (10.0, 20.0, 40.0)
+PROFILE_SHARING_CONSENT_VERSION = 3
 
 # Which chatter switch governs each roadside-callout category. Zone entries
 # (parks, forests, wilderness) share one switch; the lone highway heritage
@@ -41,6 +42,9 @@ CHATTER_FIELDS = (
 class Settings:
     imperial_units: bool = True
     automatic_transmission: bool = True  # friendlier default for new players
+    # Simple keeps the familiar hold-through-stop behavior. Deliberate requires
+    # a release and second press before an automatic changes direction.
+    automatic_direction_changes: str = "simple"  # simple/deliberate
     # Distance compression while driving. Relaxed (10x) by default: new players
     # get the most real time to hear and react to spoken events; veterans can
     # step up to standard or realistic in Settings, Gameplay.
@@ -81,6 +85,21 @@ class Settings:
     update_channel: str = ""  # "stable"/"dev"; "" follows this build's channel
     skipped_update: str = ""  # release tag the player chose to skip
     discord_presence: bool = True  # show broad activity in Discord (privacy-safe)
+    # Share on-duty status on the public orinks.net drivers board. On by
+    # default like Discord presence, but inert until the player completes the
+    # browser setup: nothing is ever sent without a confirmed driver identity
+    # (see online_presence.py), and board listing further requires choosing
+    # the public visibility on the site.
+    online_presence: bool = False
+    profile_sharing_consent_version: int = 0
+    # A failed server revocation keeps public state uncertain, but stops all
+    # local publication immediately and retries when the player activates the
+    # stable Profile sharing item again.
+    profile_sharing_pending_off: bool = False
+    # Back up saves to the player's own Orinks account after each local save.
+    # Off by default and separate from public Profile sharing. It needs its
+    # own explicit yes even though it reuses the same account credentials.
+    cloud_saves: bool = False
     controller_enabled: bool = True  # accept game-controller input alongside the keyboard
     haptics_enabled: bool = True  # rumble/vibration feedback on the controller
 
@@ -104,6 +123,10 @@ class Settings:
             for k, v in data.items():
                 if hasattr(s, k):
                     setattr(s, k, v)
+            # The former board-only opt-in covered less information. Never
+            # silently expand it into public Profile sharing.
+            if data.get("profile_sharing_consent_version") != PROFILE_SHARING_CONSENT_VERSION:
+                s.online_presence = False
         except FileNotFoundError:
             pass
         except (json.JSONDecodeError, OSError):
@@ -117,6 +140,8 @@ class Settings:
             s.hos_mode = "realistic"
         if s.steering_assist not in ("off", "light", "realistic"):
             s.steering_assist = "off"
+        if s.automatic_direction_changes not in ("simple", "deliberate"):
+            s.automatic_direction_changes = "simple"
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""
         if not isinstance(s.event_backend, str) or not s.event_backend:
@@ -128,6 +153,8 @@ class Settings:
         for attr in CHATTER_FIELDS:
             if not isinstance(getattr(s, attr), bool):
                 setattr(s, attr, True)
+        if not isinstance(s.cloud_saves, bool):
+            s.cloud_saves = False
         for attr in (
             "master_volume",
             "sfx_volume",

@@ -7,6 +7,7 @@ import faulthandler
 import logging
 import os
 import sys
+import time
 from pathlib import Path
 
 import pygame
@@ -14,12 +15,15 @@ import pygame
 from . import __version__
 from .achievements import AchievementAward, award
 from .audio import AudioEngine
+from .cloud_saves import CloudSaves
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
+from .online_journal import JournalOutbox, queue_achievement
+from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
 from .speech import Speech
 from .states.base import State
@@ -164,6 +168,27 @@ class GameContext:
         """Reflect the Discord presence setting (e.g. after a settings change)."""
         self._app.presence.set_enabled(self.settings.discord_presence)
 
+    def apply_online_presence(self) -> None:
+        """Reflect the drivers-board setting (e.g. after a settings change)."""
+        enabled = self.settings.online_presence and not self.settings.profile_sharing_pending_off
+        self._app.online.set_enabled(enabled)
+        self._app.journal.set_enabled(enabled)
+
+    def apply_cloud_saves(self) -> None:
+        """Reflect the cloud backup setting (e.g. after a settings change)."""
+        self._app.cloud.set_enabled(self.settings.cloud_saves)
+
+    def cloud_saves_service(self) -> CloudSaves:
+        """The backup service, for the Cloud backup menu."""
+        return self._app.cloud
+
+    def adopt_online_identity(self, identity) -> None:
+        """Adopt freshly confirmed account credentials (setup flow). The
+        drivers board and cloud backup share them."""
+        self._app.online.set_identity(identity)
+        self._app.cloud.set_identity(identity)
+        self._app.journal.set_identity(identity)
+
     def apply_controller(self) -> None:
         """Reflect the controller setting (e.g. after a settings change)."""
         self.controller.set_enabled(self.settings.controller_enabled)
@@ -241,6 +266,14 @@ class GameContext:
     def update_music_rotation(self, dt: float) -> None:
         """Advance music beds when their one-shot playback ends."""
         if self._music_rotation_pool is None or self._music_rotation_track is None:
+            # No menu bed is rotating. A drive sitting under this menu (pause,
+            # settings, a traffic stop...) keeps its own playlist turning over,
+            # so the music does not fall silent when the current track ends.
+            for state in reversed(self._app.states[:-1]):
+                tick = getattr(state, "tick_covered_music", None)
+                if tick is not None:
+                    tick(dt)
+                    break
             return
         self._music_rotation_elapsed_s += max(0.0, dt)
         if self._music_rotation_elapsed_s < music_track_duration_s(self._music_rotation_track):
@@ -267,6 +300,10 @@ class GameContext:
         if result is None:
             return None
         self.profile.save()
+        if queue_achievement(
+            self._app.journal, result.achievement, earned_at_ms=int(time.time() * 1000)
+        ):
+            self._app.journal.flush_async()
         self.achievement_notice = result.message
         self.achievement_notice_timer = 12.0
         if not announce:
@@ -299,6 +336,28 @@ class App:
         self.world = get_world()
         self.economy = Economy()
         self.presence = DiscordPresence(enabled=self.settings.discord_presence)
+        identity = OnlineIdentity.load()
+        self.online = OnlinePresence(
+            enabled=self.settings.online_presence,
+            identity=identity,
+        )
+        self.cloud = CloudSaves(
+            enabled=self.settings.cloud_saves,
+            identity=identity,
+        )
+        self.journal = JournalOutbox(
+            identity=identity,
+            enabled=self.settings.online_presence,
+            path=OnlineIdentity.path().with_name("online-outbox.json"),
+        )
+        # Every profile save, wherever it happens, queues a cloud backup.
+        from .models import profile as profile_module
+
+        def saved_profile(profile) -> None:
+            self.cloud.queue_backup(profile)
+
+        self._profile_save_listener = saved_profile
+        profile_module.save_listener = saved_profile
         self.controller = ControllerManager(
             enabled=self.settings.controller_enabled,
             haptics=self.settings.haptics_enabled,
@@ -341,13 +400,13 @@ class App:
     def _dispatch_controller(self, event: pygame.event.Event) -> None:
         """Feed a controller event to the manager, then to the active state.
 
-        The manager updates its cached axis/modifier/hot-plug state first;
-        only button presses are then handed to the state, which routes them
-        to the same methods keyboard events already call.
+        The manager updates its cached axis/modifier/hot-plug state first and
+        reports whether the event is an accepted button press for the bound
+        controller; only those reach the state, so a duplicate from a pad that
+        enumerates twice can never fire an action a second time.
         """
-        self.controller.process_event(event)
-        button_event = event.type in (pygame.CONTROLLERBUTTONDOWN, pygame.CONTROLLERBUTTONUP)
-        if button_event and self.controller.active and self.state is not None:
+        forward = self.controller.process_event(event)
+        if forward and self.controller.active and self.state is not None:
             self.state.handle_controller(event, self.controller)
 
     # -- main loop ------------------------------------------------------------
@@ -360,11 +419,29 @@ class App:
         self.running = True
         self.push_state(MainMenuState(self.ctx))
         self.presence.start()  # after init; never blocks if Discord is absent
+        self.online.start()  # opt-in drivers board; dormant unless confirmed
+        self.cloud.start()  # opt-in save backup; dormant unless confirmed
         frames = 0
         try:
             while self.running:
                 dt = self.clock.tick(FPS) / 1000.0
-                for event in pygame.event.get():
+                try:
+                    events = pygame.event.get()
+                except Exception:
+                    # A controller hot-plug (notably a Bluetooth resume) can make
+                    # SDL's internal instance-id map inconsistent, and pygame's
+                    # controller layer then raises out of the C event pump
+                    # (KeyError surfacing as SystemError). Losing this batch of
+                    # events is survivable; crashing the game is not.
+                    log.exception(
+                        "pygame.event.get() failed (frame %d; controller %s); skipping this batch",
+                        frames,
+                        "connected" if self.controller.connected else "disconnected",
+                    )
+                    with contextlib.suppress(Exception):
+                        pygame.event.pump()
+                    continue
+                for event in events:
                     if event.type == pygame.WINDOWFOCUSGAINED:
                         # Switching screen readers happens outside the game;
                         # re-check speech the moment the player comes back.
@@ -395,9 +472,11 @@ class App:
                     )
                     if self.state is not None:
                         self.state.on_controller_disconnect()
+                self.ctx.audio.update(dt)  # advance time-based audio fades
                 if self.state is not None:
                     self.state.update(dt)
                     self.presence.update(self.state.presence())
+                    self.online.update(self.state.online_presence())
                 if self.ctx.achievement_notice_timer > 0:
                     self.ctx.achievement_notice_timer = max(
                         0.0,
@@ -435,6 +514,12 @@ class App:
             self.ctx.profile.save()
         self.settings.save()
         self.presence.shutdown()
+        self.online.shutdown()
+        self.cloud.shutdown()  # flushes the final save's backup, bounded
+        from .models import profile as profile_module
+
+        if profile_module.save_listener == self._profile_save_listener:
+            profile_module.save_listener = None
         self.controller.shutdown()
         self.audio.shutdown()
         self.speech.shutdown()

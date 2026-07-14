@@ -404,8 +404,11 @@ def make_reposition_job(world: World, origin: str, destination: str) -> Job | No
         destination_location=dest_loc.name if dest_loc else f"{dest.name} yard",
         destination_type=dest_loc.type if dest_loc else "company_yard",
         bobtail=True,
-        origin_spoken=world.spoken_city(origin),
-        destination_spoken=world.spoken_city(destination),
+        # Always state-qualified: a dispatch names places the player may
+        # never have heard of, and "McCall, Idaho" orients where "McCall"
+        # cannot (player request).
+        origin_spoken=world.spoken_city(origin, qualified=True),
+        destination_spoken=world.spoken_city(destination, qualified=True),
     )
 
 
@@ -1011,6 +1014,6 @@ class JobBoard:
             destination_facility_id=destination_facility.id,
             origin_locality=origin_facility.locality,
             destination_locality=destination_facility.locality,
-            origin_spoken=self.world.spoken_city(origin),
-            destination_spoken=self.world.spoken_city(destination),
+            origin_spoken=self.world.spoken_city(origin, qualified=True),
+            destination_spoken=self.world.spoken_city(destination, qualified=True),
         )

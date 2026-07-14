@@ -21,7 +21,11 @@ map_inventory = _load("map_inventory")
 def test_inventory_lists_cities_and_real_checkpoints_only():
     data = {
         "cities": {
-            "atlanta_ga_us": {"spoken_city": "Atlanta", "state": "GA", "region": "atlantic_southeast"},
+            "atlanta_ga_us": {
+                "spoken_city": "Atlanta",
+                "state": "GA",
+                "region": "atlantic_southeast",
+            },
             "dallas_tx_us": {"spoken_city": "Dallas", "state": "TX", "region": "southern_plains"},
         },
         "legs": [

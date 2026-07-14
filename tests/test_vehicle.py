@@ -4,6 +4,7 @@ import pytest
 
 from freight_fate.sim import TruckState
 from freight_fate.sim.transmission import REVERSE
+from freight_fate.sim.vehicle import REFERENCE_CARGO_KG
 
 
 def drive(truck: TruckState, seconds: float, dt: float = 1 / 60) -> None:
@@ -45,6 +46,133 @@ def make_auto_truck() -> TruckState:
     t.transmission.automatic = True
     t.start_engine()
     return t
+
+
+def test_manual_governor_holds_low_gear_without_engine_damage():
+    truck = TruckState()
+    truck.start_engine()
+    truck.set_air_ready(parking_brake=False)
+    truck.transmission.gear = 1
+    truck.throttle = 1.0
+
+    drive(truck, 20.0)
+    speed_at_governor = truck.speed_mph
+    damage_at_governor = truck.damage_pct
+    drive(truck, 10.0)
+
+    assert truck.rpm == pytest.approx(truck.specs.max_rpm)
+    assert truck.speed_mph == pytest.approx(speed_at_governor, abs=0.5)
+    assert truck.damage_pct == pytest.approx(damage_at_governor)
+
+
+@pytest.mark.parametrize("grade", [0.04, 0.06, 0.08])
+def test_loaded_automatic_avoids_steep_grade_shift_hunting(grade):
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    truck = make_auto_truck()
+    truck.set_air_ready(parking_brake=False)
+    truck.cargo_kg = 25 * KG_PER_TON
+    truck.grade = grade
+    truck.throttle = 1.0
+    shifts = 0
+    previous_gear = truck.transmission.gear
+    for _ in range(90 * 60):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        if truck.transmission.gear != previous_gear:
+            shifts += 1
+            previous_gear = truck.transmission.gear
+
+    assert shifts <= 12
+    assert truck.speed_mph > 3.0
+
+
+def test_loaded_automatic_uses_progressive_early_upshifts():
+    truck = make_auto_truck()
+    truck.set_air_ready(parking_brake=False)
+    truck.throttle = 1.0
+    shifts = []
+    previous_gear = truck.transmission.gear
+    for step in range(90 * 60):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        if truck.transmission.gear != previous_gear:
+            shifts.append(((step + 1) / 60, truck.transmission.gear))
+            previous_gear = truck.transmission.gear
+        if truck.transmission.gear >= 5:
+            break
+
+    early_times = [when for when, gear in shifts if 2 <= gear <= 5]
+    assert len(early_times) == 4
+    assert all(b - a >= 1.5 for a, b in zip(early_times, early_times[1:], strict=False))
+
+
+def test_empty_automatic_shifts_low_range_faster_than_loaded():
+    def time_to_fifth(cargo_kg):
+        truck = make_auto_truck()
+        truck.set_air_ready(parking_brake=False)
+        truck.cargo_kg = cargo_kg
+        truck.throttle = 1.0
+        for step in range(90 * 60):
+            truck.auto_shift()
+            truck.update(1 / 60)
+            if truck.transmission.gear >= 5:
+                return (step + 1) / 60
+        return None
+
+    loaded_time = time_to_fifth(REFERENCE_CARGO_KG)
+    empty_time = time_to_fifth(0.0)
+    assert loaded_time is not None and empty_time is not None
+    assert empty_time < loaded_time
+
+
+def test_automatic_spaces_downshifts_while_stopping():
+    truck = make_auto_truck()
+    truck.set_air_ready(parking_brake=False)
+    truck.transmission.gear = 10
+    truck.velocity_mps = 26.8
+    truck.brake = 0.65
+    shifts = []
+    previous_gear = 10
+    for step in range(30 * 60):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        if truck.transmission.gear != previous_gear:
+            if truck.speed_mph >= 1.0:
+                shifts.append((step + 1) / 60)
+            previous_gear = truck.transmission.gear
+        if truck.speed_mph < 1.0:
+            break
+
+    assert all(b - a >= 1.65 for a, b in zip(shifts, shifts[1:], strict=False))
+
+
+def test_empty_automatic_selects_third_as_starting_gear():
+    truck = make_auto_truck()
+    truck.set_air_ready(parking_brake=False)
+    truck.cargo_kg = 0.0
+    truck.throttle = 1.0
+
+    assert truck.auto_shift() == 3
+
+
+def test_loaded_automatic_selects_first_as_starting_gear():
+    truck = make_auto_truck()
+    truck.set_air_ready(parking_brake=False)
+    truck.throttle = 1.0
+
+    assert truck.auto_shift() == 1
+
+
+def test_empty_automatic_can_skip_an_unneeded_gear():
+    truck = make_auto_truck()
+    truck.set_air_ready(parking_brake=False)
+    truck.cargo_kg = 0.0
+    truck.transmission.gear = 3
+    truck.velocity_mps = 8.0
+    truck.throttle = 1.0
+
+    assert truck.auto_shift() == 5
 
 
 def test_gross_mass_includes_cargo_payload():

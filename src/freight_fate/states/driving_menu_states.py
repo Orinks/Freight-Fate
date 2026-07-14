@@ -1,6 +1,8 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+import time
+
 from ..sim.timezones import to_local
 from .base import TimedMessageState
 from .driving_core import *
@@ -119,8 +121,7 @@ class DrivingStatusScreenState(MenuState):
         hours_used = d.trip.game_minutes / 60.0
         deadline = d.job.deadline_game_h - hours_used
         deadline_text = (
-            f"{deadline:.1f} hours before the deadline, "
-            f"due {_deadline_appointment(d)}"
+            f"{deadline:.1f} hours before the deadline, due {_deadline_appointment(d)}"
             if deadline >= 0
             else f"{-deadline:.1f} hours past the deadline"
         )
@@ -435,6 +436,13 @@ class PauseMenuState(MenuState):
         detail = base.detail if base is not None else ""
         return PresenceState("Paused", detail)
 
+    def online_presence(self):
+        # A paused player is not actively hauling, so they leave the public
+        # drivers board as though they went off duty; the service's off-duty
+        # grace absorbs a quick pause-and-resume without bouncing the row.
+        # Discord presence (above) still shows "Paused" while the menu is up.
+        return None
+
     def build_items(self) -> list[MenuItem]:
         drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"
         items = [
@@ -601,27 +609,8 @@ class PauseMenuState(MenuState):
         self.ctx.push_state(SettingsState(self.ctx))
 
     def _abandon(self) -> None:
-        from .city import CityMenuState
-
-        p = self.ctx.profile
-        p.money -= 500.0
-        p.career.reputation = max(0.0, p.career.reputation - 5.0)
-        p.truck_fuel_gal = self.driving.truck.fuel_gal
-        p.truck_damage_pct = self.driving.truck.damage_pct
-        # the hours spent on the failed run still happened: keep the world
-        # clock consistent with the HOS and fatigue already accrued
-        p.game_hours += self.driving.trip.game_minutes / 60.0
-        p.market.advance_to(p.market_day())
-        p.active_trip = None
-        p.pay_advance_used_for_load = False
-        self.ctx.save_profile()
-        self.ctx.say(
-            f"Job abandoned. You paid a five hundred dollar penalty and "
-            f"returned to {self.ctx.world.spoken_city(p.current_city)}.",
-            interrupt=True,
-        )
-        self.ctx.pop_state()  # close pause menu
-        self.ctx.replace_state(CityMenuState(self.ctx))
+        # Abandoning is destructive and one keystroke away, so confirm first.
+        self.ctx.push_state(AbandonJobConfirmationState(self.ctx, self.driving))
 
     def _quit_to_menu(self) -> None:
         from .main_menu import MainMenuState
@@ -636,6 +625,69 @@ class PauseMenuState(MenuState):
             interrupt=True,
         )
         self.ctx.reset_to(MainMenuState(self.ctx))
+
+
+class AbandonJobConfirmationState(MenuState):
+    """Yes/No guard in front of abandoning a job. Lands on "No" so giving up
+    the load takes a deliberate arrow to "Yes"."""
+
+    title = "Abandon job?"
+    intro_help = (
+        "Use up and down arrows to navigate, Enter to select. "
+        "Escape cancels and returns to the pause menu."
+    )
+
+    def __init__(self, ctx, driving: DrivingState) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            f"{self.title} Abandoning gives up this load. You will pay a five "
+            "hundred dollar penalty, take a reputation hit, and return to "
+            f"{self.ctx.world.spoken_city(self.ctx.profile.current_city)}. "
+            f"{self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem(
+                "No, keep driving",
+                self.go_back,
+                help="Return to the pause menu and keep this job.",
+            ),
+            MenuItem(
+                "Yes, abandon the job",
+                self._confirm,
+                help="Give up this job. Costs five hundred dollars and "
+                "reputation, and returns you to the origin city.",
+            ),
+        ]
+
+    def _confirm(self) -> None:
+        from .city import CityMenuState
+
+        p = self.ctx.profile
+        p.money -= 500.0
+        p.career.reputation = max(0.0, p.career.reputation - 5.0)
+        p.truck_fuel_gal = self.driving.truck.fuel_gal
+        p.truck_damage_pct = self.driving.truck.damage_pct
+        # the hours spent on the failed run still happened: keep the world
+        # clock consistent with the HOS and fatigue already accrued
+        p.game_hours += self.driving.trip.game_minutes / 60.0
+        p.market.advance_to(p.market_day())
+        p.active_trip = None
+        p.pay_advance_used_for_load = False
+        self.ctx.save_profile()
+        self.ctx.pop_state()  # close this confirmation
+        self.ctx.pop_state()  # close the pause menu
+        self.ctx.replace_state(CityMenuState(self.ctx))
+        # interrupt=True so this overrides any menu re-announcement during unwind
+        self.ctx.say(
+            f"Job abandoned. You paid a five hundred dollar penalty and "
+            f"returned to {self.ctx.world.spoken_city(p.current_city)}.",
+            interrupt=True,
+        )
 
 
 class FacilityArrivalState(MenuState):
@@ -659,6 +711,9 @@ class FacilityArrivalState(MenuState):
             f"{self.driving.job.cargo.label} to {self.driving.job.spoken_destination}",
         )
 
+    def online_presence(self):
+        return self.presence()
+
     def enter(self) -> None:
         sequence = select_menu_music_sequence(self.ctx.profile)
         self.ctx.play_music_sequence("menu", sequence)
@@ -667,8 +722,7 @@ class FacilityArrivalState(MenuState):
     def announce_entry(self) -> None:
         from ..audio import facility_ambient_key
 
-        self.ctx.audio.set_ambient(
-            facility_ambient_key(self.driving.job.destination_type))
+        self.ctx.audio.set_ambient(facility_ambient_key(self.driving.job.destination_type))
         self.ctx.say(f"At {self.facility}. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
@@ -815,6 +869,13 @@ class ArrivalState(MenuState):
         job = d.job
         self.title = "Repositioned"
         p.current_city = job.destination
+        driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        if driver_charges:
+            p.money -= driver_charges
+            self.summary_parts.append(
+                f"Driver-responsibility charges: speeding fines cost you "
+                f"{driver_charges:,.0f} dollars."
+            )
         p.truck_fuel_gal = d.truck.fuel_gal
         p.truck_damage_pct = d.truck.damage_pct
         p.game_hours += hours
@@ -923,6 +984,7 @@ class ArrivalState(MenuState):
         road_grime_added = min(100.0, job.distance_mi * ROAD_GRIME_PER_MILE)
         p.tire_wear_pct = min(100.0, p.tire_wear_pct + tire_wear_added)
         p.road_grime_pct = min(100.0, p.road_grime_pct + road_grime_added)
+        previous_level = p.career.level
         announcements = p.career.record_delivery(
             job.distance_mi,
             net_pay,
@@ -950,6 +1012,27 @@ class ArrivalState(MenuState):
         p.active_trip = None
         p.pay_advance_used_for_load = False
         self.ctx.save_profile()
+        from ..online_journal import queue_career_milestones, queue_delivery
+
+        occurred_at_ms = int(time.time() * 1000)
+        if queue_delivery(
+            self.ctx._app.journal,
+            p,
+            job,
+            origin=self.ctx.world.spoken_city(job.origin),
+            destination=self.ctx.world.spoken_city(job.destination),
+            on_time=on_time,
+            occurred_at_ms=occurred_at_ms,
+            undamaged=trip_damage <= 1,
+        ):
+            self.ctx._app.journal.flush_async()
+        if queue_career_milestones(
+            self.ctx._app.journal,
+            p,
+            previous_level=previous_level,
+            occurred_at_ms=occurred_at_ms,
+        ):
+            self.ctx._app.journal.flush_async()
 
         self.summary_parts.insert(
             0,

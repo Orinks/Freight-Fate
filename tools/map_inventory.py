@@ -28,20 +28,57 @@ PLACEHOLDER_MARK = "corridor between"
 # Compact offline map of postal code -> full state name, so the inventory reads
 # naturally aloud ("Atlanta, Georgia"). Checkpoints already carry full names.
 STATE_NAMES = {
-    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
-    "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
-    "DC": "District of Columbia", "FL": "Florida", "GA": "Georgia",
-    "HI": "Hawaii", "ID": "Idaho", "IL": "Illinois", "IN": "Indiana",
-    "IA": "Iowa", "KS": "Kansas", "KY": "Kentucky", "LA": "Louisiana",
-    "ME": "Maine", "MD": "Maryland", "MA": "Massachusetts", "MI": "Michigan",
-    "MN": "Minnesota", "MS": "Mississippi", "MO": "Missouri", "MT": "Montana",
-    "NE": "Nebraska", "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey",
-    "NM": "New Mexico", "NY": "New York", "NC": "North Carolina",
-    "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma", "OR": "Oregon",
-    "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
-    "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah",
-    "VT": "Vermont", "VA": "Virginia", "WA": "Washington",
-    "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
+    "AL": "Alabama",
+    "AK": "Alaska",
+    "AZ": "Arizona",
+    "AR": "Arkansas",
+    "CA": "California",
+    "CO": "Colorado",
+    "CT": "Connecticut",
+    "DE": "Delaware",
+    "DC": "District of Columbia",
+    "FL": "Florida",
+    "GA": "Georgia",
+    "HI": "Hawaii",
+    "ID": "Idaho",
+    "IL": "Illinois",
+    "IN": "Indiana",
+    "IA": "Iowa",
+    "KS": "Kansas",
+    "KY": "Kentucky",
+    "LA": "Louisiana",
+    "ME": "Maine",
+    "MD": "Maryland",
+    "MA": "Massachusetts",
+    "MI": "Michigan",
+    "MN": "Minnesota",
+    "MS": "Mississippi",
+    "MO": "Missouri",
+    "MT": "Montana",
+    "NE": "Nebraska",
+    "NV": "Nevada",
+    "NH": "New Hampshire",
+    "NJ": "New Jersey",
+    "NM": "New Mexico",
+    "NY": "New York",
+    "NC": "North Carolina",
+    "ND": "North Dakota",
+    "OH": "Ohio",
+    "OK": "Oklahoma",
+    "OR": "Oregon",
+    "PA": "Pennsylvania",
+    "RI": "Rhode Island",
+    "SC": "South Carolina",
+    "SD": "South Dakota",
+    "TN": "Tennessee",
+    "TX": "Texas",
+    "UT": "Utah",
+    "VT": "Vermont",
+    "VA": "Virginia",
+    "WA": "Washington",
+    "WV": "West Virginia",
+    "WI": "Wisconsin",
+    "WY": "Wyoming",
 }
 
 
@@ -85,12 +122,14 @@ def build_inventory(data: dict[str, Any]) -> str:
     cp_blocks: list[tuple[str, list[str]]] = []
     total_cps = 0
     for leg in legs:
-        reals = [c for c in leg.get("corridor", {}).get("checkpoints", []) if _is_real_checkpoint(c)]
+        reals = [
+            c for c in leg.get("corridor", {}).get("checkpoints", []) if _is_real_checkpoint(c)
+        ]
         if not reals:
             continue
         reals.sort(key=lambda c: float(c.get("at_mi", 0) or 0))
         total_cps += len(reals)
-        header = f"{endpoint(leg.get('from',''))} -> {endpoint(leg.get('to',''))}"
+        header = f"{endpoint(leg.get('from', ''))} -> {endpoint(leg.get('to', ''))}"
         highway = leg.get("highway")
         if highway:
             header += f" ({highway})"
@@ -100,7 +139,7 @@ def build_inventory(data: dict[str, Any]) -> str:
             where = f"at {float(at):.0f} mi: " if at is not None else ""
             state = c.get("state")
             tail = f" ({state})" if state else ""
-            rows.append(f"  {where}{c.get('name','')}{tail}")
+            rows.append(f"  {where}{c.get('name', '')}{tail}")
         cp_blocks.append((header, rows))
     cp_blocks.sort(key=lambda b: b[0])
 
@@ -138,7 +177,9 @@ def build_inventory(data: dict[str, Any]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Write a list of every city and checkpoint on the map.")
+    parser = argparse.ArgumentParser(
+        description="Write a list of every city and checkpoint on the map."
+    )
     parser.add_argument("--out", default=str(ROOT / "map_inventory.txt"), help="Output file path.")
     parser.add_argument("--print", action="store_true", dest="echo", help="Also echo to stdout.")
     args = parser.parse_args(argv)

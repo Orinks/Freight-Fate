@@ -39,8 +39,15 @@ def test_lists_on_route_places_ordered_by_mile():
         _place("Mid Town", 35.5, -110.005, 5000),
     ]
     out = cp.corridor_candidates(
-        LINE, LINE_MILES, LINE_MILES, places, [],
-        buffer_mi=2.0, dedupe_mi=6.0, min_pop=0, min_spacing_mi=8.0,
+        LINE,
+        LINE_MILES,
+        LINE_MILES,
+        places,
+        [],
+        buffer_mi=2.0,
+        dedupe_mi=6.0,
+        min_pop=0,
+        min_spacing_mi=8.0,
     )
     assert [p["name"] for p in out] == ["South Town", "Mid Town", "North Town"]
     assert all(p["off_mi"] < 0.5 for p in out)  # ~0.005deg lon off the line
@@ -49,8 +56,15 @@ def test_lists_on_route_places_ordered_by_mile():
 def test_off_route_place_is_excluded_by_buffer():
     places = [_place("Far Town", 35.5, -110.5, 9000)]  # ~28 mi off
     out = cp.corridor_candidates(
-        LINE, LINE_MILES, LINE_MILES, places, [],
-        buffer_mi=2.0, dedupe_mi=6.0, min_pop=0, min_spacing_mi=8.0,
+        LINE,
+        LINE_MILES,
+        LINE_MILES,
+        places,
+        [],
+        buffer_mi=2.0,
+        dedupe_mi=6.0,
+        min_pop=0,
+        min_spacing_mi=8.0,
     )
     assert out == []
 
@@ -58,8 +72,15 @@ def test_off_route_place_is_excluded_by_buffer():
 def test_existing_node_is_deduped_out():
     places = [_place("Is A Node", 35.5, -110.005, 20000)]
     out = cp.corridor_candidates(
-        LINE, LINE_MILES, LINE_MILES, places, [(35.5, -110.0)],  # a node right there
-        buffer_mi=2.0, dedupe_mi=6.0, min_pop=0, min_spacing_mi=8.0,
+        LINE,
+        LINE_MILES,
+        LINE_MILES,
+        places,
+        [(35.5, -110.0)],  # a node right there
+        buffer_mi=2.0,
+        dedupe_mi=6.0,
+        min_pop=0,
+        min_spacing_mi=8.0,
     )
     assert out == []
 
@@ -72,8 +93,15 @@ def test_cluster_thins_to_largest_within_spacing():
         _place("Small", 35.52, -110.004, 600),
     ]
     out = cp.corridor_candidates(
-        LINE, LINE_MILES, LINE_MILES, places, [],
-        buffer_mi=2.0, dedupe_mi=6.0, min_pop=0, min_spacing_mi=8.0,
+        LINE,
+        LINE_MILES,
+        LINE_MILES,
+        places,
+        [],
+        buffer_mi=2.0,
+        dedupe_mi=6.0,
+        min_pop=0,
+        min_spacing_mi=8.0,
     )
     assert [p["name"] for p in out] == ["Big"]
 
@@ -84,8 +112,15 @@ def test_min_pop_floor_filters_small_places():
         _place("City", 35.7, -110.004, 9000),
     ]
     out = cp.corridor_candidates(
-        LINE, LINE_MILES, LINE_MILES, places, [],
-        buffer_mi=2.0, dedupe_mi=6.0, min_pop=3000, min_spacing_mi=8.0,
+        LINE,
+        LINE_MILES,
+        LINE_MILES,
+        places,
+        [],
+        buffer_mi=2.0,
+        dedupe_mi=6.0,
+        min_pop=3000,
+        min_spacing_mi=8.0,
     )
     assert [p["name"] for p in out] == ["City"]
 
@@ -93,7 +128,14 @@ def test_min_pop_floor_filters_small_places():
 def test_positions_rescale_to_adopted_leg_miles():
     places = [_place("Mid", 35.5, -110.004, 5000)]
     out = cp.corridor_candidates(
-        LINE, LINE_MILES, 100.0, places, [],  # leg curated to 100 mi
-        buffer_mi=2.0, dedupe_mi=6.0, min_pop=0, min_spacing_mi=8.0,
+        LINE,
+        LINE_MILES,
+        100.0,
+        places,
+        [],  # leg curated to 100 mi
+        buffer_mi=2.0,
+        dedupe_mi=6.0,
+        min_pop=0,
+        min_spacing_mi=8.0,
     )
     assert out[0]["at_mi"] == 50.0  # halfway up the line, on the 100-mi scale

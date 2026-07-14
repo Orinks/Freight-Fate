@@ -12,6 +12,7 @@ respect to world.json.
     ORS_BASE_URL=http://localhost:8080/ors ORS_API_KEY=selfhosted \
         uv run --group tooling python tools/spider_trace.py --ref I-70 [--write]
 """
+
 from __future__ import annotations
 
 import argparse
@@ -66,7 +67,9 @@ def main():
     cum = cumulative(coords)
     hav_total = cum[-1] or 1.0
 
-    print(f"{a.ref} ({corridor['spoken']}): {parsed['miles']:.1f} ORS truck miles, {len(coords)} points")
+    print(
+        f"{a.ref} ({corridor['spoken']}): {parsed['miles']:.1f} ORS truck miles, {len(coords)} points"
+    )
     print("pin check (each waypoint's distance off the trace -- want ~0):")
     worst = 0.0
     for wp in wps:
@@ -82,8 +85,11 @@ def main():
             "ref": a.ref,
             "miles": round(parsed["miles"], 1),
             "points": [
-                {"lat": round(ll[1], 5), "lon": round(ll[0], 5),
-                 "at_mi": round(c * parsed["miles"] / hav_total, 1)}
+                {
+                    "lat": round(ll[1], 5),
+                    "lon": round(ll[0], 5),
+                    "at_mi": round(c * parsed["miles"] / hav_total, 1),
+                }
                 for ll, c in zip(coords, cum, strict=False)
             ],
         }

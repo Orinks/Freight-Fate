@@ -27,6 +27,7 @@ import os
 import secrets
 import shutil
 import sys
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -47,6 +48,12 @@ SIGNATURE_FIELD = "_signature"
 SIGNATURE_VERSION_FIELD = "_signature_version"
 SIGNATURE_VERSION = 1
 SECRET_FILE = "profile.key"
+
+# Called with the profile after every successful save. The app points this at
+# the cloud backup service so every save site -- deliveries, achievements,
+# menu exits, shutdown -- queues a backup without knowing the service exists.
+# Best-effort only: a listener failure must never break the local save.
+save_listener: Callable[[Profile], None] | None = None
 
 _legacy_checked = False
 
@@ -430,6 +437,11 @@ class Profile:
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(self.to_dict(), f, indent=2)
         os.replace(tmp, path)
+        if save_listener is not None:
+            try:
+                save_listener(self)
+            except Exception:
+                log.debug("Profile save listener failed", exc_info=True)
         return path
 
     @classmethod

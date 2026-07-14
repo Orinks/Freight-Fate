@@ -534,8 +534,7 @@ def _overpass_named_candidates(
     if len(samples) >= 6:
         mid_points += [samples[len(samples) // 4], samples[3 * len(samples) // 4]]
     candidate_points = [
-        (f"{leg_prefix}--{point['at_mi']:.1f}", point, OVERPASS_POI_SOURCE)
-        for point in mid_points
+        (f"{leg_prefix}--{point['at_mi']:.1f}", point, OVERPASS_POI_SOURCE) for point in mid_points
     ]
     candidate_points += [
         (f"named-city--{leg['from']}", samples[0], _city_poi_source(leg["from"])),

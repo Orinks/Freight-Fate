@@ -7,11 +7,7 @@ from .base import MenuItem, MenuState
 
 def fully_rested(profile) -> bool:
     """Fresh hours of service and zero fatigue: sleeping gains nothing but time."""
-    return (
-        profile.hos.driving_min <= 0.0
-        and profile.hos.duty_min <= 0.0
-        and profile.fatigue <= 0.0
-    )
+    return profile.hos.driving_min <= 0.0 and profile.hos.duty_min <= 0.0 and profile.fatigue <= 0.0
 
 
 class CareerStatsState(MenuState):

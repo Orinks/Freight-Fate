@@ -348,6 +348,7 @@ class PickupFacilityState(MenuState):
 
         self._save_state()
         self.ctx.say("Saved. Your pickup objective will resume here.", interrupt=True)
+        MainMenuState.arm_update_check(self.ctx.settings)
         self.ctx.reset_to(MainMenuState(self.ctx))
 
     def _cancel(self) -> None:
@@ -421,10 +422,24 @@ class RouteSelectState(MenuState):
             + self.current_text()
         )
 
+    def _via_text(self, route: Route) -> str:
+        """The cities a route passes through, state-qualified so an unknown
+        town still points the compass ("McCall, Idaho": ah, we head north).
+        Long chains are capped for speech; F1 help reads the full list."""
+        vias = [self.ctx.world.spoken_city(n, qualified=True) for n in route.cities[1:-1]]
+        if not vias:
+            return "passing no major cities"
+        if len(vias) > 3:
+            return f"through {', '.join(vias[:3])}, and {len(vias) - 3} more"
+        return f"through {', '.join(vias)}"
+
     def build_items(self) -> list[MenuItem]:
         items = []
         for i, route in enumerate(self.routes):
-            label = f"Route {i + 1}: {route.describe()}. {route_planning_summary(route)}"
+            label = (
+                f"Route {i + 1}: {route.describe()}, {self._via_text(route)}. "
+                f"{route_planning_summary(route)}"
+            )
             items.append(
                 MenuItem(
                     label,
@@ -432,7 +447,10 @@ class RouteSelectState(MenuState):
                     help=(
                         "Via "
                         + ", ".join(
-                            [self.ctx.world.spoken_city(n) for n in route.cities[1:-1]]
+                            [
+                                self.ctx.world.spoken_city(n, qualified=True)
+                                for n in route.cities[1:-1]
+                            ]
                             or ["no major cities"]
                         )
                         + ". Press W for weather."
@@ -463,7 +481,9 @@ class RouteSelectState(MenuState):
             for name in route.cities[1:][:5]:
                 kind = provider.get(name)
                 if kind is not None:
-                    parts.append(f"{self.ctx.world.spoken_city(name)}: {kind.value}")
+                    parts.append(
+                        f"{self.ctx.world.spoken_city(name, qualified=True)}: {kind.value}"
+                    )
             if parts:
                 self.ctx.say("Live weather along the route. " + ". ".join(parts) + ".")
                 return

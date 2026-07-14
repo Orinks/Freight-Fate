@@ -86,6 +86,8 @@ ORS_CORRIDOR_SOURCE = (
 ORS_GRADE_SOURCE = (
     "OpenRouteService route elevation profile segmented by terrain (development-time)."
 )
+
+
 def spoken_state(data, value):
     """Full state name for a city ``state`` value.
 

@@ -575,6 +575,25 @@ class DrivingEventMixin:
     def _destination_exit_details(
         self, *, include_past: bool = False
     ) -> tuple[float, str, str] | None:
+        if include_past:
+            return self._scan_destination_exit_details(include_past=True)
+        # This runs every frame from _check_destination_exit, and the scan
+        # walks every interchange on the route building spoken phrases -- far
+        # too much churn to redo per tick on a coast-to-coast route. The
+        # winning exit only changes when the truck passes it, so reuse the
+        # last answer until then. A backward position move (missed-exit
+        # rewind, rescue) invalidates the cache wholesale, because exits
+        # behind the compute position come back into play.
+        pos = self.trip.position_mi
+        cache = self._destination_exit_cache
+        if cache is None or pos < cache[0] or (cache[1] is not None and cache[1][0] <= pos + 0.05):
+            cache = (pos, self._scan_destination_exit_details())
+            self._destination_exit_cache = cache
+        return cache[1]
+
+    def _scan_destination_exit_details(
+        self, *, include_past: bool = False
+    ) -> tuple[float, str, str] | None:
         if not self.route.legs:
             return None
         # Matched against real interchange sign text, so compare the spoken
@@ -598,16 +617,14 @@ class DrivingEventMixin:
                 )
                 candidates.append(
                     (
-                        not matches_destination,
                         len(self.route.legs) - 1 - i,
                         dist_from_destination,
+                        not matches_destination,
                         route_mile,
                         ix.exit_label,
                         ix.spoken_phrase,
                     )
                 )
-            if candidates and not candidates[0][0]:
-                break
         if not candidates:
             return None
         candidates.sort()
@@ -1073,6 +1090,7 @@ class DrivingEventMixin:
             return
         self._cruise_mph = t.speed_mph
         self._cruise_throttle = t.throttle
+        self._cruise_applied = t.throttle
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
@@ -1101,6 +1119,7 @@ class DrivingEventMixin:
     def _cancel_cruise(self) -> None:
         self._cruise_mph = None
         self._cruise_throttle = 0.0
+        self._cruise_applied = 0.0
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
@@ -1149,7 +1168,9 @@ class DrivingEventMixin:
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
         return lowest_limit, lowest_reason
 
-    def _update_cruise(self, dt: float, braking: bool, accelerating: bool) -> None:
+    def _update_cruise(
+        self, dt: float, braking: bool, accelerating: bool, clutch_disengaged: bool
+    ) -> None:
         """Hold speed when clear, and follow slower modeled traffic when present."""
         if self._cruise_mph is None:
             return
@@ -1160,6 +1181,14 @@ class DrivingEventMixin:
             return
         if accelerating:
             return  # manual override; cruise resumes when the key lifts
+        if clutch_disengaged:
+            # Clutch in / mid-shift: driveline is open, so any applied throttle
+            # only free-revs the engine. Cut throttle to idle and hold the
+            # integrator; the applied throttle ramps back up from zero once the
+            # clutch engages again.
+            t.throttle = 0.0
+            self._cruise_applied = 0.0
+            return
         target_mph = self._cruise_mph
         # Predictive ACC: never carry the driver past the posted limit. With real
         # OSM limits baked per leg, a held set speed would otherwise sail through
@@ -1199,7 +1228,21 @@ class DrivingEventMixin:
         self._acc_following = following
         error = target_mph - t.speed_mph
         self._cruise_throttle = max(0.0, min(1.0, self._cruise_throttle + error * 0.08 * dt))
-        t.throttle = self._cruise_throttle
+        # Ramp the applied throttle up to the held integrator value rather than
+        # snapping, so cruise eases back in after a clutch release; drops (traffic
+        # or a lower limit) still apply immediately. On a steady frame the applied
+        # throttle already equals _cruise_throttle, so this holds as before.
+        if self._cruise_throttle > self._cruise_applied:
+            load_fraction = min(1.0, max(0.0, t.cargo_kg / REFERENCE_CARGO_KG))
+            recovery_rate = 0.7 + 0.8 * (1.0 - load_fraction)
+            recovery_rate += min(0.6, max(0.0, error) / 15.0)
+            self._cruise_applied = min(
+                self._cruise_throttle,
+                self._cruise_applied + dt * recovery_rate,
+            )
+        else:
+            self._cruise_applied = self._cruise_throttle
+        t.throttle = self._cruise_applied
         if (following or limit_capped) and error < -2.0:
             weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
             t.brake = max(t.brake, min(weather_brake, abs(error) / 30.0))
@@ -1543,6 +1586,9 @@ class DrivingEventMixin:
             moving=moving,
             truck_label=truck.label if truck else "",
         )
+
+    def online_presence(self):
+        return self.presence()
 
     def lines(self) -> list[str]:
         t = self.truck

@@ -101,9 +101,7 @@ def merge_checkpoints(
 def _parse_candidate(raw: str) -> dict[str, Any]:
     parts = [p.strip() for p in raw.split("|")]
     if len(parts) not in (4, 5, 6):
-        raise SystemExit(
-            f"--candidate must be 'Name|lat|lon|State[|type[|highway]]', got {raw!r}"
-        )
+        raise SystemExit(f"--candidate must be 'Name|lat|lon|State[|type[|highway]]', got {raw!r}")
     name, lat, lon, state = parts[:4]
     if not name or "_" in name:
         raise SystemExit(f"candidate name {name!r} must be spoken text (no slugs)")
@@ -124,7 +122,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Position real named-place checkpoints on a leg's ORS geometry."
     )
-    parser.add_argument("--leg", required=True, help="Leg as 'from_slug:to_slug' (direction matters).")
+    parser.add_argument(
+        "--leg", required=True, help="Leg as 'from_slug:to_slug' (direction matters)."
+    )
     parser.add_argument(
         "--candidate",
         action="append",

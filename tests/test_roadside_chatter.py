@@ -242,9 +242,7 @@ def test_chatter_switches_gate_spoken_callouts(monkeypatch):
     try:
         d = _driving(app)
         calls = []
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True: calls.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: calls.append(text))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         river = TripEvent(
             TripEventKind.LANDMARK, "Crossing the White River.", {"category": "river"}
