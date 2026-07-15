@@ -153,6 +153,18 @@ terminal becomes the anchor of that week instead of a spawn point.
       dragging, when to grab a lower gear, what each rung means -- pairs
       with the latching-controls lesson (latch the brake, hear the
       ladder climb).
+- [ ] **Ambience honesty: season, temperature, and region gate the
+      wildlife (owner playtest 2026-07-16).** The night ambience sang
+      cicadas over a 52-degree March windstorm in Holbrook -- wrong
+      season (cicadas are a summer chorus), wrong temperature (they go
+      quiet below about 60 degrees), wrong feel for a high-plateau
+      desert night (wind, a distant coyote, honest silence). Ambience
+      beds should key on the same season/temperature/region state the
+      weather system already tracks: insect layers gated by season AND
+      warmth, regional voices where they belong (cicadas in a Georgia
+      summer, absolutely; Holbrook in March, never). Audit the existing
+      loops against this rule; the owner's NAS library sources the
+      replacements.
 - [ ] **Cab and rig sonification pass (owner 2026-07-15).** The state the
       truck is in should be hearable before it is spoken. First candidates:
       a chain-clatter loop whenever chains are mounted, pitched and paced
