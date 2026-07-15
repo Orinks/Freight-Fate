@@ -450,6 +450,103 @@ def test_linux_packaged_payload_requires_prism_dependency_bundle(tmp_path, monke
         raise AssertionError("verify_packaged_payload accepted missing Prism deps")
 
 
+def write_release_archive(out: Path, entries: dict[str, tuple[bytes, int]]) -> None:
+    """Write a minimal release archive with explicit permission modes."""
+    import io
+    import tarfile
+    import zipfile
+
+    if out.name.endswith(".tar.gz"):
+        with tarfile.open(out, "w:gz") as tar:
+            for name, (payload, mode) in entries.items():
+                info = tarfile.TarInfo(name)
+                info.size = len(payload)
+                info.mode = mode
+                tar.addfile(info, io.BytesIO(payload))
+    else:
+        with zipfile.ZipFile(out, "w") as z:
+            for name, (payload, mode) in entries.items():
+                info = zipfile.ZipInfo(name)
+                info.external_attr = mode << 16
+                z.writestr(info, payload)
+
+
+def release_archive_entries(root: str, exe: str, exe_mode: int = 0o755):
+    """The payload every finished release archive must carry."""
+    return {
+        f"{root}/{exe}": (b"binary", exe_mode),
+        f"{root}/build_info.json": (b"{}", 0o644),
+        f"{root}/LICENSE.txt": (b"PolyForm Noncommercial\n", 0o644),
+        f"{root}/USER_MANUAL.md": (b"# Manual\n", 0o644),
+        f"{root}/freight_fate/sounds.pak": (b"pack", 0o644),
+    }
+
+
+def test_verify_archive_accepts_complete_platform_archives(tmp_path):
+    build_release = load_build_release_module()
+
+    linux = tmp_path / "FreightFate-nightly-20260714-linux-x64.tar.gz"
+    write_release_archive(linux, release_archive_entries("FreightFate", "FreightFate"))
+    build_release.verify_archive(linux)
+
+    windows = tmp_path / "FreightFate-nightly-20260714-windows-portable.zip"
+    write_release_archive(
+        windows, release_archive_entries("FreightFate", "FreightFate.exe", exe_mode=0o644)
+    )
+    build_release.verify_archive(windows)
+
+    macos = tmp_path / "FreightFate-nightly-20260714-macos.zip"
+    write_release_archive(
+        macos, release_archive_entries("FreightFate.app/Contents/MacOS", "FreightFate")
+    )
+    build_release.verify_archive(macos)
+
+
+def test_verify_archive_rejects_missing_linux_executable(tmp_path):
+    build_release = load_build_release_module()
+    entries = release_archive_entries("FreightFate", "FreightFate")
+    del entries["FreightFate/FreightFate"]
+    out = tmp_path / "FreightFate-nightly-20260714-linux-x64.tar.gz"
+    write_release_archive(out, entries)
+
+    try:
+        build_release.verify_archive(out)
+    except RuntimeError as exc:
+        assert "missing the executable" in str(exc)
+    else:
+        raise AssertionError("verify_archive accepted a tarball with no executable")
+
+
+def test_verify_archive_rejects_non_executable_posix_binary(tmp_path):
+    build_release = load_build_release_module()
+    out = tmp_path / "FreightFate-nightly-20260714-linux-x64.tar.gz"
+    write_release_archive(
+        out, release_archive_entries("FreightFate", "FreightFate", exe_mode=0o644)
+    )
+
+    try:
+        build_release.verify_archive(out)
+    except RuntimeError as exc:
+        assert "executable permission" in str(exc)
+    else:
+        raise AssertionError("verify_archive accepted a non-runnable Linux binary")
+
+
+def test_verify_archive_rejects_missing_payload_files(tmp_path):
+    build_release = load_build_release_module()
+    entries = release_archive_entries("FreightFate", "FreightFate.exe", exe_mode=0o644)
+    del entries["FreightFate/freight_fate/sounds.pak"]
+    out = tmp_path / "FreightFate-nightly-20260714-windows-portable.zip"
+    write_release_archive(out, entries)
+
+    try:
+        build_release.verify_archive(out)
+    except RuntimeError as exc:
+        assert "sounds.pak" in str(exc)
+    else:
+        raise AssertionError("verify_archive accepted an archive missing sounds.pak")
+
+
 def test_nuitka_standalone_folder_counts_as_packaged_build(tmp_path, monkeypatch):
     exe = tmp_path / "FreightFate.exe"
     exe.write_text("", encoding="utf-8")
