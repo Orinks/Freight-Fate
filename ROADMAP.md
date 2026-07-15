@@ -414,6 +414,16 @@ section below and the Unreleased changelog; the release-line view:
       arc, radio, world narration switches, saves and the integrity gate.
       The winter/physics suite stays in
       `docs/physics-playtest-checklists.md` as the companion volume.
+- [x] **Scenario playtest levers.** Three environment variables put a
+      parked career in position for a scenario without setup driving:
+      `FREIGHT_FATE_FORCE_CITY` relocates on career load,
+      `FREIGHT_FATE_FORCE_CLOCK` rolls the clock forward to a local hour
+      (logged as off duty; a ten-plus-hour wait rests the driver), and
+      `FREIGHT_FATE_FORCE_DEST` guarantees the dispatch board offers a
+      load to a destination and puts it first in assigned dispatch. All
+      spoken plainly, no miles or money moved, refused mid-load;
+      documented in the test book Appendix A. The shared-profile event
+      ledger must record forced moves when it lands (Josh's server side).
 - [ ] **Overlay re-sweep on the slug world.** The local-approach /
       city-service / turn-level geometry sweeps predate the slug migration
       and the newest cities; the runtime canonicalizes old ids and new

@@ -643,6 +643,37 @@ next exit, U upcoming, A repeat last announcement, M radio with
 brackets to tune and Y for status, T stop at an announced service, F
 fuel, Enter accept a city-service arrival, F1 the full key help.
 
+### Scenario levers
+
+Three more environment variables move a career into position for a
+scenario without hours of setup driving. All three speak what they did
+in plain words, move no miles and no money, and only touch a career
+that is parked with no load in progress. Set them before launching the
+game, load your career from the main menu, and unset them when the
+scenario is done. In PowerShell:
+
+    $env:FREIGHT_FATE_FORCE_CITY = "denver_co_us"
+    $env:FREIGHT_FATE_FORCE_CLOCK = "21"
+    $env:FREIGHT_FATE_FORCE_DEST = "silverthorne_co_us"
+
+- `FREIGHT_FATE_FORCE_CITY` — relocate the parked career to a city
+  (slug or plain name) as the career loads. You hear "Playtest lever:
+  relocated to..." after the terminal announcement.
+- `FREIGHT_FATE_FORCE_CLOCK` — roll the career clock forward to the
+  next time the local wall clock reads that hour (0 to 23). The wait is
+  logged as off duty; ten or more hours counts as a full break and
+  resets hours of service, exactly like sleeping at the terminal.
+- `FREIGHT_FATE_FORCE_DEST` — the next freshly built dispatch board is
+  guaranteed to offer a load to that city when a supported corridor
+  reaches it, and assigned dispatch hands you that load first. If the
+  board was cached before you set the lever, sleep once or deliver a
+  load to refresh it.
+
+Unset with `Remove-Item Env:FREIGHT_FATE_FORCE_CITY` (and the same for
+the other two) before normal play. When shared profiles arrive, the
+event ledger must record forced relocations and clock moves so a
+shared save carries an honest history (see docs/profile-invariants.md).
+
 ## Appendix B. Reporting a run
 
 One line of setup, what you heard, what you expected. Say which chapter

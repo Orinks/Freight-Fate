@@ -798,6 +798,55 @@ class JobBoard:
         jobs.sort(key=lambda j: j.distance_mi)
         return jobs
 
+    def offer_to(
+        self,
+        city: str,
+        destination: str,
+        endorsements: set[str],
+        market: Market | None = None,
+        level: int = 1,
+        carrier_key: str | None = None,
+        direct_freight: bool = False,
+    ) -> Job | None:
+        """One offer to a specific destination, for the playtest lever.
+
+        Ignores the level distance cap on purpose: a tester forcing a
+        destination wants that run regardless of career progress. Returns
+        None when no supported corridor reaches the destination or no
+        unlocked cargo pairing exists.
+        """
+        city = self.world.resolve_city_key(city)
+        destination = self.world.resolve_city_key(destination)
+        city_obj = self.world.city(city)
+        carrier_key = carrier_key or DEFAULT_START_KEY
+        matches = [c for c in self._candidates(city) if c[0] == destination]
+        if not matches:
+            return None
+        destination, miles, _legs = min(matches, key=lambda c: c[1])
+        for _ in range(30):
+            location = self._choose_origin_location(city_obj, level, carrier_key)
+            cargo_key = self._choose_cargo_for_location(city_obj, location, level, carrier_key)
+            cargo = CARGO_CATALOG[cargo_key]
+            if cargo.endorsement and cargo.endorsement not in endorsements:
+                continue
+            dest_location = self._destination_location(destination, cargo, level)
+            if dest_location is None:
+                continue
+            return self._make_job(
+                cargo,
+                city,
+                location.name,
+                destination,
+                miles,
+                market,
+                level,
+                location,
+                dest_location,
+                carrier_key,
+                direct_freight,
+            )
+        return None
+
     def _spread_destinations(
         self,
         origin: str,

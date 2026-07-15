@@ -12,6 +12,7 @@ from ..achievements import ACHIEVEMENTS, earned_ids
 from ..models.profile import Profile, ProfileIntegrityError
 from ..models.start_options import apply_start_option, option_for_profile
 from ..music import select_menu_music_sequence
+from ..playtest_levers import apply_continue_levers
 from ..settings import TIME_SCALES
 from .base import MenuItem, MenuState, State
 from .main_menu_help import (
@@ -260,6 +261,7 @@ class MainMenuState(MenuState):
             self.refresh()
             return
         self.ctx.profile = saves[0][1]
+        lever_notes = apply_continue_levers(self.ctx)
         p = self.ctx.profile
         if p.active_trip:
             self.ctx.say(f"Welcome back, {p.name}.", interrupt=True)
@@ -272,6 +274,8 @@ class MainMenuState(MenuState):
                 interrupt=True,
             )
         enter_world(self.ctx)
+        for note in lever_notes:
+            self.ctx.say(note, interrupt=False)
 
     def _load_menu(self) -> None:
         self.ctx.push_state(LoadDriverState(self.ctx))
@@ -435,8 +439,11 @@ class LoadDriverState(MenuState):
 
     def _pick(self, profile: Profile) -> None:
         self.ctx.profile = profile
+        lever_notes = apply_continue_levers(self.ctx)
         self.ctx.say(f"Welcome back, {profile.name}.")
         self.ctx.replace_state(_world_entry_state(self.ctx))
+        for note in lever_notes:
+            self.ctx.say(note, interrupt=False)
 
 
 class ManageCareersState(MenuState):
