@@ -106,11 +106,14 @@ city service drives below.)
       service in dray reach (402 -> 157). Curated facilities are never
       gated, and accepting a stale cached board offer for a retired
       facility pulls the offer instead of crashing.
-- [ ] **Grant ports to the Great Lakes cities missing one.** Toledo,
-      Detroit, Chicago, and Green Bay are real Great Lakes ports but get no
-      port facility at all (the great_lakes region carries no port market
-      tag). Give them one via city tags, and consider deduping the ~40
-      cities that carry both a curated port and a template port terminal.
+- [x] **Grant ports to the Great Lakes cities missing one.** Toledo,
+      Detroit, Chicago, and Green Bay carry the port market tag as city
+      tags and joined the template-port allowlist, so each now hosts a
+      port terminal (82 template ports total). Their endpoint/approach
+      records ride the next data sweep like any map growth. Dedupe
+      decision: the 40 cities with both a curated port and a template
+      port terminal keep both -- real ports run many terminals, and the
+      extra facility is freight variety, not a realism error.
 - [ ] **Surface intersections.** Phase 4 of `docs/surface-roads-plan.md`:
       stop signs and traffic signals at surface-street junctions, junction
       decision prompts, and traffic pressure at intersections -- extending

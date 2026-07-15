@@ -379,6 +379,8 @@
   towns far from any rail yard no longer list an intermodal ramp on the
   dispatch board. If a saved dispatch board still shows one of the old
   offers, accepting it politely pulls the load instead of misbehaving.
+  And four real Great Lakes ports the old map missed -- Toledo, Detroit,
+  Chicago, and Green Bay -- now have working docks of their own.
 
 - **Restoring a cloud backup works again.** Every new server-verified backup
   was wrongly refused with "failed its integrity check" the moment you tried
