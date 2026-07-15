@@ -210,6 +210,19 @@ terminal becomes the anchor of that week instead of a spawn point.
       always walks away -- "You walked away. The truck didn't." -- the
       wallet, the clock, and the record take the damage, never the
       driver.
+- [ ] **Ramp endings announced early, and in real time (owner playtest
+      2026-07-16).** The stop sign or light at a ramp's end is announced
+      only as the exit is taken -- and under speed-based time compression
+      a hot entry burns the whole half-mile ramp in a few REAL seconds
+      (log receipt: exit 17:00:13, "stop sign at the end" 17:00:15, sign
+      blown 17:00:18 with cross traffic clipped). Two prongs: (1) the
+      signal-on announcement a mile-plus out names the ending -- "ramp
+      ends at a stop sign" -- and the U upcoming key carries it, so the
+      deceleration plan starts on the mainline; (2) a ramp ending in a
+      control drops time compression toward real time at the gore
+      instead of easing only with speed, so the warning buys human
+      reaction seconds, not compressed ones. The data already knows the
+      terminal control; it just speaks too late to act on.
 - [ ] **Signal running: dice and tickets, not a guaranteed clip (owner
       playtest 2026-07-15).** Blowing the ramp-end red or stop sign today
       ALWAYS clips cross traffic and never draws a citation -- backwards
