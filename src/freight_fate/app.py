@@ -339,7 +339,9 @@ class GameContext:
         result = award(self.profile, achievement_id)
         if result is None:
             return None
-        self.profile.save()
+        # Through the guard: a sandboxed session's achievements evaporate
+        # with the rest of the run instead of leaking to disk.
+        self.save_profile()
         if queue_achievement(
             self._app.journal, result.achievement, earned_at_ms=int(time.time() * 1000)
         ):
@@ -558,8 +560,11 @@ class App:
         pygame.display.flip()
 
     def shutdown(self) -> None:
-        if self.ctx.profile is not None:
-            self.ctx.profile.save()
+        # Through the guard, not straight to disk: the quit-time save is how
+        # a sandboxed playtest session leaked its whole run onto the real
+        # career (owner-found live: the Denver snow run persisted at quit
+        # despite the sandbox holding for the entire drive).
+        self.ctx.save_profile()
         self.settings.save()
         self.presence.shutdown()
         self.online.shutdown()

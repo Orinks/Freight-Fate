@@ -100,6 +100,24 @@ def test_forced_dest_alone_still_sandboxes_a_parked_career(world, monkeypatch):
     assert any("sandbox" in note.lower() for note in notes)
 
 
+def test_quit_save_honors_the_playtest_sandbox():
+    """The quit-time save must respect the sandbox: the owner's Denver snow
+    run held sandboxed for the whole drive, then App.shutdown() wrote the
+    final state straight to disk and the run persisted anyway."""
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+
+    app = App()
+    saves = []
+    try:
+        app.ctx.profile = Profile(name="Sandbox Quit")
+        app.ctx.profile.save = lambda: saves.append(True)
+        app.ctx.playtest_sandbox = True
+    finally:
+        app.shutdown()
+    assert saves == []
+
+
 def test_save_profile_honors_the_playtest_sandbox():
     from types import SimpleNamespace
 
