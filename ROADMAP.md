@@ -88,6 +88,36 @@ terminal becomes the anchor of that week instead of a spawn point.
       from the pause menu, and on demand while driving alongside the U
       upcoming key. Feeds off corridor.grade_segments and the future
       curve records; kin to the map-stats explorer idea.
+- [ ] **On-demand safe-speed key, now (playtest 2026-07-15).** The exit
+      advisory speed is spoken in the approach sentence and routinely gets
+      cut off or buried in other speech, so the number is lost exactly when
+      it matters. Pull the terse safe-speed key out of the curve-tier design
+      (above) and ship it early: one keypress, one grip-adjusted number for
+      the next exit or curve ("Safe speed 30"), G-grade-key verdict grammar,
+      repeatable without penalty.
+- [ ] **Stale event-speech backlog (playtest 2026-07-15).** The event voice
+      queues utterances faster than it can speak them, so arriving at the
+      yard plays the whole approach script late -- "slow down to dock, at
+      dock, delivering" heard after the load is already dropped -- and the
+      backlog talks over light dings and buzzers, costing whole light
+      cycles. Time-sensitive events need queue pruning: a new phase
+      announcement should replace still-queued older ones in the same
+      stream, and stale utterances past a short max-age should drop instead
+      of speak. Applies to every event backend, but the slow default
+      Windows voice makes it worst; audit which cues deserve
+      interrupt-current too.
+- [ ] **Dispatch lane variety (playtest 2026-07-15).** The assigned-load
+      queue keeps handing the same short lane back-to-back (Winslow to
+      Holbrook, again and again). Higher levels widen the distance cap,
+      which helps, but assignment should also remember the last few lanes
+      and prefer a fresh origin-destination pair when candidates allow.
+- [ ] **Billboards on short routes (playtest 2026-07-15).** Nothing was
+      deleted -- the pools, corridor signs, and wiring are all intact -- but
+      the spacing math (15-mile lead-in plus a 35-to-65-mile gap roll)
+      means a run under about 30 miles usually rolls zero billboards, which
+      reads as "the billboards are gone" on short-lane days. Scale the
+      lead-in and gap down on short routes so even an errand run can pass
+      one sign.
 - [ ] Runaway truck ramps as regular highway furniture on steep descents: announced on approach, takeable as the escape move when the brakes are gone (the physics already runs away honestly -- bench `grade-runaway` tops 149 mph and grenades the engine past redline).
 - [x] **Chain laws and the tire-type ladder.** Traction equipment is now a three-rung ladder on the per-truck condition record: all-season (today's physics), winter compound (x1.3 grip on snow, x1.5 on ice, honestly paid for with x1.5 tread wear and a 3 percent dry-grip loss -- owner-operator garage purchase at a 25 percent set premium; company tractors run carrier rubber), and chains (x1.5 snow / x2.5 ice, steel replaces the contact patch so tread wear and hydroplaning stop mattering, $750 a set, carrier-billed for company drivers). Chain-law areas sit over sustained steep grade (5 percent for a mile-plus) and activate from live weather -- snow = Level 1 (winter tires or chains), freezing rain = Level 2 (chains) -- with a flashing-sign GPS callout on approach, escalation re-announced. Chaining up is a pause-menu act while stopped: 25 minutes and 6 fatigue by day, 40 minutes and 10 fatigue by headlamp at night (the lonely-snowy-night-out-of-Denver penalty, delivered); removal 10 minutes. Chains are consumable: ~500 miles used right, ~2 miles on bare pavement at highway speed before a cross chain snaps into the fender (4 percent damage, set scrapped, spoken cue). Non-compliance in an active law speaks a warning, then a seeded checkpoint past the area midpoint writes a $500 citation (0.6 staffed chance, one roll per area -- reloads do not re-roll). Bench anchors: ice stop 880 ft stock / 613 winter / 215 chained from 30; the chained jake holds the icy 4 percent it lost unchained (2:14 slip vs 15:06).
 - [ ] Chain-up areas as physical pullouts: today chaining works anywhere stopped and the pullout is spoken flavor; a real chain-up area stop (safe, lit, maybe a helper service that installs for money) rides the stoppable-stop spine with Big Buck's.
