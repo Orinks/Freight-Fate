@@ -119,6 +119,13 @@ Resume like this, in the ff-city-services worktree:
    - chain tally: no city_service chain over 5.0 total miles, and total
      chain count STAYS at or above 5,784 (the resweep's coverage must
      survive your re-bake);
+   - the display-name collision regression is CONFIRMED and map-wide, not
+     just Jackson: 31 display names are shared by 2+ cities and 23 of the
+     old city_services entries sit on colliding bare names (Albany, Austin,
+     Buffalo, Charleston, Columbus, Las Vegas NM, ...). Acceptance: every
+     city_services key after your re-bake is a canonical slug, each twin
+     city gets its own entry, and spot-check both Jacksons plus Las Vegas
+     NM resolve to their own services in-engine;
    - in-engine: tyler_tx_us:freight_market, beckley_wv_us:freight_market,
      mankato_mn_us:garage all under 5 miles;
    - tools/refresh_map_data.py --limits-lint still reports zero;
