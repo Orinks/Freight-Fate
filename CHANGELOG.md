@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.3 - 2026-07-14
+
 ### Added
 
 - **Cloud restores now get a second integrity check.** Beyond the server's
