@@ -38,6 +38,7 @@ from ..models.jobs import (
     facility_text,
     job_from_payload,
     job_payload,
+    lane_key,
     normalize_job_cities,
     route_drive_hours,
 )
@@ -1134,6 +1135,16 @@ class JobBoardState(MenuState):
         declined = self._declined_indices()
         fresh = [index for index in ordered if index not in declined]
         reoffered = [index for index in ordered if index in declined]
+        # Lane variety: dispatch prefers a lane the driver has not just run.
+        # A stable partition, so score order still rules inside each group,
+        # and when every candidate is a recent lane nothing changes -- the
+        # nudge can delay a repeat, never block dispatch.
+        recent = set(getattr(self.ctx.profile, "recent_lanes", ()) or ())
+        if recent:
+            world = self.ctx.world
+            fresh = [i for i in fresh if lane_key(world, self.jobs[i]) not in recent] + [
+                i for i in fresh if lane_key(world, self.jobs[i]) in recent
+            ]
         queue = fresh + reoffered
         forced = forced_dispatch_destination()
         if forced and queue:

@@ -96,6 +96,21 @@ terminal becomes the anchor of that week instead of a spawn point.
       sentence ("Safe speed 45 miles per hour for the ramp."), repeatable
       free. Curve advisories join the same key when the Job 2 curve
       records land (the curve-tier bullet above).
+- [ ] **Speech history review -- walk back through what you heard (owner
+      playtest 2026-07-15 night).** The repeat keys hold one line each
+      (comma = last spoken anywhere, A = last route announcement), but on
+      a busy road the line you missed is several announcements back: the
+      owner pressed comma hunting the flashing chain-law sign and got
+      "25 miles per hour, gear 7, 1427 RPM" -- the status readout that
+      happened to speak last (log receipt, Denver night run). Keep a
+      ring of the last ~20 spoken lines across both channels; the first
+      comma press repeats the newest (today's behavior), and further
+      presses within a few seconds each step ONE LINE OLDER -- press,
+      press, press walks back in time, exactly the speech-history
+      pattern NVDA users already know. A fresh announcement resets the
+      walk to newest. A keeps its route-announcement meaning unchanged.
+      While in the file: log a transcript marker when the event pacer
+      flushes a stale backlog, so playtest logs show the flushes.
 - [x] **Stale event-speech backlog -- FIXED 2026-07-15.** The event voice
       queued utterances faster than it spoke them, so arriving at the yard
       played the whole approach script late ("slow down to dock, at dock,
@@ -107,11 +122,13 @@ terminal becomes the anchor of that week instead of a spawn point.
       speaks immediately, and interrupting lines reset the projection to
       truth. Follow-up if the estimate ever misbehaves: scale the
       chars-per-second to the configured event voice rate.
-- [ ] **Dispatch lane variety (playtest 2026-07-15).** The assigned-load
-      queue keeps handing the same short lane back-to-back (Winslow to
-      Holbrook, again and again). Higher levels widen the distance cap,
-      which helps, but assignment should also remember the last few lanes
-      and prefer a fresh origin-destination pair when candidates allow.
+- [x] **Dispatch lane variety -- SHIPPED 2026-07-15.** The profile
+      remembers the last six delivered from:to lanes
+      (`Profile.recent_lanes`, saved), and the assignment queue
+      stable-partitions fresh candidates so an unseen lane goes first --
+      score order still rules within each group, an all-recent board
+      changes nothing, so the nudge delays a repeat but never blocks
+      dispatch. Higher levels widening the distance cap stacks on top.
 - [ ] **Billboards on short routes (playtest 2026-07-15).** Nothing was
       deleted -- the pools, corridor signs, and wiring are all intact -- but
       the spacing math (15-mile lead-in plus a 35-to-65-mile gap roll)

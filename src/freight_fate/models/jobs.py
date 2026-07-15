@@ -432,6 +432,13 @@ PREMIUM_LANE_LEVEL = 12
 PREMIUM_LANE_LONG_HAUL_BIAS = 0.5
 
 
+def lane_key(world, job: Job) -> str:
+    """Canonical from:to lane for dispatch-variety memory."""
+    return (
+        f"{world.resolve_city_key(job.origin)}:{world.resolve_city_key(job.destination)}"
+    )
+
+
 def board_offer_count(level: int) -> int:
     """How many offers the dispatch board shows at this career level."""
     count = BASE_BOARD_OFFERS

@@ -425,6 +425,10 @@ class Profile:
     duty_log: DutyLog = field(default_factory=DutyLog)  # rolling Record of Duty Status
     achievements: list[str] = field(default_factory=list)
     achievement_stats: dict = field(default_factory=dict)
+    # Last few delivered from:to lanes, newest first -- assigned dispatch
+    # prefers a lane not in this list so short-haul careers stop bouncing
+    # between the same two cities forever.
+    recent_lanes: list[str] = field(default_factory=list)
 
     # -- serialization -------------------------------------------------------
 
@@ -614,6 +618,15 @@ class Profile:
         truck.engine_wear_pct = self.engine_wear_pct
         truck.tire_type = self.tire_type
         truck.chain_wear_pct = self.chain_wear_pct
+
+    RECENT_LANES_KEPT = 6
+
+    def remember_lane(self, lane: str) -> None:
+        """Record a delivered from:to lane for dispatch-variety preference."""
+        if not lane:
+            return
+        lanes = [lane] + [entry for entry in self.recent_lanes if entry != lane]
+        self.recent_lanes = lanes[: self.RECENT_LANES_KEPT]
 
     def store_truck_condition(self, truck) -> None:
         """Write the rig's current condition back to the profile for saving."""

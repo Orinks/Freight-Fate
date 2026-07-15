@@ -10,6 +10,12 @@
 
 - **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
 
+- **Dispatch stops handing you the same run over and over.** Assigned
+  dispatch now remembers your last few delivered routes and leads with a
+  load to somewhere you have not just been, whenever the board has one.
+  Repeats can still happen when the board is small, but the days of
+  bouncing between the same two cities forever are over.
+
 - **One key now answers "how fast should I be going?"** Press D while
   driving to hear a single safe-speed number for right now, sitting right
   next to the S posted-limit key. Slick weather and an upcoming exit ramp

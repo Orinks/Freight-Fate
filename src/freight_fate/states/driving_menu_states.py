@@ -1096,6 +1096,9 @@ class ArrivalState(MenuState):
         on_time = hours <= job.deadline_game_h
         p.money += net_pay
         p.current_city = job.destination
+        from ..models.jobs import lane_key
+
+        p.remember_lane(lane_key(self.ctx.world, job))
         # Tire, brake, and engine wear now come off the truck itself -- the
         # physics accrued them mile by mile during the run. Grime stays a
         # simple per-mile film; it has no physics to earn it.
