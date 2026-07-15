@@ -1138,7 +1138,25 @@ Deliver -> Earn and level up -> Repeat
       book there is a candidate lesson here. Curriculum effectively drafted
       by the 2026-07-14 learn-by-test-book session (test book Chapter 4
       leads). Pairs naturally with the lease-to-start onramp: school first,
-      then the working career.
+      then the working career. Owner-expanded 2026-07-15: lessons run on a
+      simulated practice road (spoken instruction, no career consequences)
+      with weather sim and, when the curve tier lands, curve lessons;
+      school is enterable from anywhere, any time; buying a truck with new
+      equipment (jake stages, assists, a manual box) offers a
+      return-to-school refresher on the new bits. Build it as a complete
+      presentation for Josh -- done, tested, preset-integrated -- and he
+      decides if it ships.
+- [ ] **Assists as equipment and skill at the realism tier (owner idea
+      2026-07-15, the transmission pattern applied).** At the realistic
+      preset, driving assists become what they are in a real cab: truck
+      equipment by model year and spec (a new tractor carries AEB and
+      lane centering; a lease-starter rig carries nothing) plus trained
+      skill from driving school. The Settings presets stay exactly as
+      built -- the permanent, free accessibility override that always
+      wins, same as the Transmission setting over per-truck gearboxes
+      (owner-approved precedent 2026-07-13). Realism players feel the
+      equipment; accessibility players keep every accommodation; Josh's
+      framework becomes the front door to both layers.
 - [ ] **Endorsements earned by coursework, not just cash (owner idea
       2026-07-15).** Today an endorsement is a level threshold or a paid
       course with no learning in it; both should route through the
