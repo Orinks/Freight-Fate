@@ -1178,6 +1178,89 @@ def test_delivery_exit_prefers_nearest_interchange_over_early_city_sign():
         app.shutdown()
 
 
+def test_destination_exit_scan_is_cached_until_the_exit_passes():
+    # The scan walks every interchange on the route building spoken phrases,
+    # and _check_destination_exit runs every frame -- the cache must absorb
+    # that (issue 70's crash landed in this per-frame churn) while still
+    # rescanning when the winning exit is passed or the truck moves backward.
+    import dataclasses
+
+    from freight_fate.app import App
+    from freight_fate.data.world_models import Interchange
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Cached Exit", current_city="Buffalo")
+        route = app.ctx.world.supported_route("Buffalo", "Rochester")
+        leg = route.legs[-1]
+        early = Interchange(
+            at_mi=10.0,
+            exit_ref="10",
+            destinations=("Rochester",),
+            name="",
+            highway=leg.highway,
+            source="test",
+        )
+        near = Interchange(
+            at_mi=leg.miles - 1.0,
+            exit_ref="near",
+            destinations=("Freight district",),
+            name="",
+            highway=leg.highway,
+            source="test",
+        )
+        route.legs[-1] = dataclasses.replace(leg, interchanges=(early, near))
+        job = Job(
+            CARGO_CATALOG["general"],
+            12.0,
+            "Buffalo",
+            "company yard",
+            "Rochester",
+            route.miles,
+            1000.0,
+            12.0,
+            destination_location="Rochester freight market",
+        )
+        driving = DrivingState(app.ctx, job, route, phase="delivery")
+
+        calls = 0
+        scan = driving._scan_destination_exit_details
+
+        def counting_scan(**kwargs):
+            nonlocal calls
+            calls += 1
+            return scan(**kwargs)
+
+        driving._scan_destination_exit_details = counting_scan
+
+        first = driving._destination_exit_details()
+        assert first is not None
+        assert first[1] == "exit near"
+        assert driving._destination_exit_details() == first
+        assert calls == 1
+
+        # Passing the winning exit forces one rescan; nothing is left ahead,
+        # and that empty answer is itself cached.
+        driving.trip.position_mi = first[0] + 0.1
+        assert driving._destination_exit_details() is None
+        assert driving._destination_exit_details() is None
+        assert calls == 2
+
+        # A backward move (the missed-exit rewind) brings the exit back.
+        driving.trip.position_mi = first[0] - 1.0
+        assert driving._destination_exit_details() == first
+        assert calls == 3
+
+        # include_past bypasses the cache entirely for the one-shot callers.
+        assert driving._destination_exit_details(include_past=True) == first
+        assert calls == 4
+    finally:
+        app.shutdown()
+
+
 def test_terse_destination_exit_omits_press_x_instruction(monkeypatch):
     from freight_fate.app import App
 
@@ -1219,6 +1302,18 @@ def test_destination_exit_announces_and_disables_cruise(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        # Pin the exit signage: the random job assignment picks the route,
+        # and not every destination exit carries a "toward" phrase in its
+        # sign data, so scanning the real interchanges here is a coin flip.
+        monkeypatch.setattr(
+            driving,
+            "_destination_exit_details",
+            lambda *, include_past=False: (
+                24.0,
+                "exit 20",
+                "exit 20 for US-64 East toward Memphis",
+            ),
+        )
         destination = driving._destination_exit_stop()
         driving.trip.position_mi = destination.at_mi - 4.0
         driving._cruise_mph = 60.0

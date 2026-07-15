@@ -117,6 +117,33 @@ def _error_body(e: urllib.error.HTTPError) -> dict:
         return {}
 
 
+class CloudAuthError(Exception):
+    """orinks.net answered but refused this machine's driver credentials.
+
+    Raised (never swallowed into a generic ``None``) so the Cloud backup
+    menus can tell the player to reconnect instead of blaming the network.
+    The usual cause: the account issued a fresh driver token to another
+    computer, which retires the token stored on this one.
+    """
+
+
+# The spoken guidance for CloudAuthError, shared by every cloud menu so the
+# player always hears the same recovery path. orinks.net issues one token
+# per computer, so a refusal means this computer's token was signed out
+# from the account's computer list (or replaced by a sign-out-everywhere).
+AUTH_HELP = (
+    "orinks.net no longer accepts this computer's sign-in. This usually "
+    "means this computer was signed out from the computer list on your "
+    "orinks.net driver setup page. On that page, choose Add computer to get "
+    "a fresh token, then paste it under Set up orinks.net account in "
+    "Settings, Online."
+)
+
+
+def _auth_refused(e: urllib.error.HTTPError, body: dict) -> bool:
+    return e.code == 401 or body.get("error") in ("unauthorized", "driver_not_found")
+
+
 # -- sync state ----------------------------------------------------------------
 
 
@@ -251,10 +278,21 @@ def upload_save(
 
 def list_saves(identity: OnlineIdentity, *, transport: Transport = _http_json) -> list[dict] | None:
     """All kept cloud revisions for this driver (newest first), or None when
-    the site is unreachable. Called from menu worker threads only."""
+    the site is unreachable. Raises :class:`CloudAuthError` when the server
+    answers but refuses the credentials. Called from menu worker threads only."""
     url = f"{_saves_url()}?driverId={identity.driver_id}"
     try:
         reply = transport(url, None, _auth_headers(identity))
+    except urllib.error.HTTPError as e:
+        body = _error_body(e)
+        if _auth_refused(e, body) or e.code == 404:
+            log.warning(
+                "Cloud save list refused (HTTP %s): this computer's sign-in is no longer accepted",
+                e.code,
+            )
+            raise CloudAuthError from e
+        log.warning("Cloud save list failed: HTTP %s", e.code)
+        return None
     except Exception as e:
         log.debug("Cloud save list failed: %s", e)
         return None
@@ -277,6 +315,21 @@ def download_save(
         url += f"&revision={revision}"
     try:
         reply = transport(url, None, _auth_headers(identity))
+    except urllib.error.HTTPError as e:
+        body = _error_body(e)
+        if _auth_refused(e, body):
+            log.warning(
+                "Cloud save download of %s refused (HTTP %s): this computer's sign-in is no longer accepted",
+                save_name,
+                e.code,
+            )
+            raise CloudAuthError from e
+        log.warning("Cloud save download of %s failed: HTTP %s", save_name, e.code)
+        return None
+    except Exception as e:
+        log.debug("Cloud save download failed: %s", e)
+        return None
+    try:
         content = base64.b64decode(reply["content"])
     except Exception as e:
         log.debug("Cloud save download failed: %s", e)
@@ -598,9 +651,17 @@ class CloudSaves:
                 result.get("latestRevision"),
             )
             return
+        if result.get("reason") in ("unauthorized", "driver_not_found", "http_401"):
+            # The credentials were retired (usually by connecting another
+            # computer); every retry would fail identically, and the player
+            # can only fix it by reconnecting.
+            self._set_status(
+                "Backups are paused: orinks.net no longer accepts this "
+                "computer's sign-in. Reconnect under Settings, Online."
+            )
+            self._done_with(name, snapshot)
+            return
         if result.get("reason") in (
-            "unauthorized",
-            "driver_not_found",
             "too_large",
             "invalid_schema",
             "invalid_name",

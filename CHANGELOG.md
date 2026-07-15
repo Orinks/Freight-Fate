@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+### Added
+
+- **Cloud restores now get a second integrity check.** Beyond the server's
+  signature, a restored profile has to pass the game's own sanity rules --
+  wear between zero and one hundred, honest delivery counts, a fuel tank
+  that fits in a truck. A file that fails is refused with a plainly spoken
+  reason instead of being loaded, and saves from newer versions of the
+  game still restore fine.
+
+### Fixed
+
+- **Restoring a cloud backup works again.** Every new server-verified backup
+  was wrongly refused with "failed its integrity check" the moment you tried
+  to restore it. The refusal was the game's mistake, not a problem with your
+  save. Restores of verified backups now complete normally.
+- **Cloud backup now tells you when this computer needs to reconnect.** If
+  orinks.net stops accepting this computer's sign-in, the cloud backup menu
+  now says so and explains the fix, instead of wrongly reporting that your
+  backups could not be reached.
+- **Long deliveries are easier on the game while you drive.** The destination
+  exit is now worked out once and remembered instead of being recalculated
+  every moment of the drive, removing a heavy background load tied to a
+  reported crash on coast-to-coast routes.
+
+### Changed
+
+- **Playing on more than one computer no longer signs the other one out.**
+  orinks.net now gives each of your computers its own token: add a computer
+  from the driver setup page and your other machines keep working. If the
+  game says your sign-in is no longer accepted, it now points you to the
+  computer list on the setup page to get a fresh token for that computer.
+
 ## 1.8.1 - 2026-07-13
 
 ### Fixed

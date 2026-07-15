@@ -597,3 +597,5 @@ fit for an audio-first game.
 - [x] Opt-in Profile sharing for fictional road journals, achievements, and last-saved profile summaries
 - [x] Online posts carry the game's build identity (release tag or source checkout) so moderation can tell which version a driver runs
 - [x] Validated and server-signed private cloud revisions with verified public profile summaries
+- [x] Profile integrity, client half: `profile_invariants.py` runs the hard, version-stable sanity rules (ranges, counter relations, upgrade tiers) as defense in depth behind the Ed25519 signature on every cloud restore, refusing with a plain spoken reason; `docs/profile-invariants.md` is the maintained validation list for the server gate. Follow-up: the append-only event ledger that upgrades server validation from plausibility to recomputation
+- [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)
