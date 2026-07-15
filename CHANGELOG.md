@@ -372,6 +372,15 @@
 
 ### Fixed
 
+- **Adaptive cruise no longer crawls behind traffic it has not caught up
+  to.** Cruise used to match the speed of any slower vehicle up to two and
+  a half miles ahead, so the truck could dawdle far below the limit behind
+  someone you could not even hear yet, while "Traffic ahead, adaptive
+  cruise reducing speed" repeated every few seconds. Cruise now holds your
+  set speed until you are genuinely closing in, eases down smoothly to
+  follow at the set gap, and speaks the traffic warning once, not on
+  repeat.
+
 - **Careers from older versions now trade every cargo type at real market
   prices.** A career started before the cargo list grew to sixteen classes
   kept freight-market prices only for the original eight, so pay for the
