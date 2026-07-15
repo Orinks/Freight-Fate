@@ -91,3 +91,37 @@ reintroduce what it removes):**
 Job 1 first: it is fully offline and unblocks the worst player-facing pain.
 Job 2 whenever Overpass is confirmed healthy. Both in a worktree; never in
 parallel with each other (both write world-adjacent data).
+
+## RESUME INSTRUCTIONS — Job 1, after the 2026-07-14 evening pause
+
+You were paused mid-Job-1 because a national surface resweep landed on the
+main branch underneath you (tier-1 chains 821 -> 1,541; 5,784 chains total
+in local_geometry.json). Your bake OUTPUTS are stale; your TOOL changes are
+exactly what we want and carry over. Verified from the main window: the
+match cap, the fallback guard, the canonical-key fix (Jackson MS vs Jackson
+MI -- good catch, keep it), fetch_state_extracts.py, and the runbook doc.
+
+Resume like this, in the ff-city-services worktree:
+
+1. Stash or commit ONLY the tool + test + doc changes
+   (tools/build_city_services.py, tools/build_local_approaches.py,
+   tools/build_local_geometry.py, tests/test_build_city_services_tool.py,
+   tools/fetch_state_extracts.py, docs/refresh-city-service-data.md).
+   Discard your modified data files -- they were baked against the old base
+   and are superseded.
+2. Rebase the branch onto the updated feat/career-1.9 (commit d6af862 or
+   later): it now contains the resweep your re-bake must run on top of.
+3. Re-run the bakes offline against the local PBF extracts with your fixed
+   tools. The canonical-key change may relocate entries keyed by display
+   name -- make sure legacy keys still resolve (the runtime has
+   resolve_city_key; verify a Jackson and a Portland by hand).
+4. Verify before committing:
+   - chain tally: no city_service chain over 5.0 total miles, and total
+     chain count STAYS at or above 5,784 (the resweep's coverage must
+     survive your re-bake);
+   - in-engine: tyler_tx_us:freight_market, beckley_wv_us:freight_market,
+     mankato_mn_us:garage all under 5 miles;
+   - tools/refresh_map_data.py --limits-lint still reports zero;
+   - full gates (pytest, ruff, compileall).
+5. Changelog entry (player-facing: errands stop being 80-minute drives) and
+   a ROADMAP check-off on the overlong-city-service bullet.

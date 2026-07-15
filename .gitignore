@@ -59,3 +59,4 @@ data/spider/signsheets/*.zip
 STATUS.md
 
 logs/
+.cache/
