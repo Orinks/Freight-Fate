@@ -49,7 +49,7 @@ from ..models.trailers import (
 )
 from ..models.trucks import TRUCK_CATALOG
 from ..music import select_menu_music_sequence
-from ..playtest_levers import forced_dispatch_destination
+from ..playtest_levers import forced_dispatch_destination, resolve_city_forgiving
 from ..sim.hos import LIMITS, clock_text, time_of_day
 from ..sim.timezones import appointment_text, city_zone, to_local
 from .base import MenuItem, MenuState
@@ -631,7 +631,7 @@ def _add_forced_board_job(ctx, board: JobBoard, jobs: list[Job]) -> str:
     if not dest:
         return ""
     p = ctx.profile
-    key = ctx.world.resolve_city_key(dest)
+    key = resolve_city_forgiving(ctx.world, dest)
     if key not in ctx.world.cities:
         return f"Playtest lever: no city called {dest} to dispatch to."
     if key == ctx.world.resolve_city_key(p.current_city):

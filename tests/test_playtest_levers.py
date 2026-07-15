@@ -130,6 +130,20 @@ def test_force_city_refuses_mid_load(world, monkeypatch):
     assert any("load in progress" in note for note in notes)
 
 
+def test_force_city_forgives_tester_spellings(world, monkeypatch):
+    """Owner hit this live: PowerShell turns 'holbrook,az,us' into
+    'holbrook az us', and commas are a natural way to type a slug anyway.
+    Every reasonable spelling lands on the canonical key."""
+    for spelling in ("holbrook,az,us", "holbrook az us", "Holbrook, AZ, US"):
+        ctx = _Ctx(world, Profile(name="Lever Test", current_city="denver_co_us"))
+        monkeypatch.setenv(playtest_levers.CITY_ENV, spelling)
+
+        notes = apply_continue_levers(ctx)
+
+        assert ctx.profile.current_city == "holbrook_az_us", spelling
+        assert any("relocated to Holbrook" in note for note in notes), spelling
+
+
 def test_force_city_unknown_city_stays_put(world, monkeypatch, parked_ctx):
     monkeypatch.setenv(playtest_levers.CITY_ENV, "atlantis")
 

@@ -30,6 +30,7 @@ must record forced relocations and clock moves so shared saves stay honest
 from __future__ import annotations
 
 import os
+import re
 
 CITY_ENV = "FREIGHT_FATE_FORCE_CITY"
 CLOCK_ENV = "FREIGHT_FATE_FORCE_CLOCK"
@@ -105,8 +106,20 @@ def apply_continue_levers(ctx) -> list[str]:
     return notes
 
 
+def resolve_city_forgiving(world, city: str) -> str:
+    """Resolve a tester-typed city: exact slug or display name first, then a
+    slugified retry so "holbrook,az,us", "Holbrook, AZ, US", and the
+    PowerShell-array casualty "holbrook az us" all land on holbrook_az_us."""
+    key = world.resolve_city_key(city)
+    if key in world.cities:
+        return key
+    slugged = re.sub(r"[^a-z0-9]+", "_", city.lower()).strip("_")
+    key = world.resolve_city_key(slugged)
+    return key if key in world.cities else city
+
+
 def _apply_city(ctx, p, city: str) -> list[str]:
-    key = ctx.world.resolve_city_key(city)
+    key = resolve_city_forgiving(ctx.world, city)
     if key not in ctx.world.cities:
         return [f"Playtest lever: no city called {city}. Staying put."]
     if key == ctx.world.resolve_city_key(p.current_city):
