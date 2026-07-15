@@ -118,6 +118,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._descent_control_active = False
         self._descent_limit_state = ""
         self._descent_capture_active = False
+        self._keeper_mph: float | None = None
+        self._keeper_throttle = 0.0
+        self._keeper_zone = ""
         self._arrival_stop_said = False
         self._arrival_full_stop_said = False
         self._arrival_menu_open = False

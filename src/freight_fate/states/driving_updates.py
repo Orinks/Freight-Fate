@@ -120,6 +120,7 @@ class DrivingUpdateMixin:
         clutch_disengaged = t.transmission.clutch > 0.5 or t.transmission.shifting
         self._update_lane(keys, dt)
         self._update_cruise(dt, braking, accelerating, clutch_disengaged)
+        self._update_keeper(dt, braking, accelerating, clutch_disengaged)
 
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()

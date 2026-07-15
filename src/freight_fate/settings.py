@@ -50,6 +50,10 @@ class Settings:
     stop_and_go_assist: bool = True
     lane_centering_assist: bool = False
     descent_speed_control: str = "realistic"
+    # Holds a gentle speed through low-speed zones where adaptive cruise is
+    # unavailable, so nobody has to keep the accelerator key held down. An
+    # input-accessibility aid, not a realism choice: presets never touch it.
+    speed_keeper: bool = True
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.5

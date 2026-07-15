@@ -19,6 +19,8 @@ class DrivingEventMixin:
                 return  # off the highway: the hazard passes you by
             if self._cruise_mph is not None:
                 self._cancel_cruise()  # hands back on the wheel to brake
+            if self._keeper_mph is not None:
+                self._cancel_keeper()  # same: the hazard call says brake
             self.ctx.audio.play(sound or "ui/warning")
             self.ctx.controller.rumble.hazard()  # 750 ms right->left sweep
             # The deadline is braking physics plus reaction slack. The physics
@@ -421,6 +423,7 @@ class DrivingEventMixin:
             self._ramp_end_said = False
             self._destination_exit_taken = stop.type == "delivery_destination"
             self._cancel_cruise()
+            self._cancel_keeper()
             self.ctx.audio.play("ui/notify", volume=0.7)
             if stop.type == "delivery_destination":
                 labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
@@ -457,21 +460,26 @@ class DrivingEventMixin:
 
     def _toggle_cruise(self) -> None:
         t = self.truck
+        if self._keeper_mph is not None:
+            self._cancel_keeper()
+            self.ctx.say("Speed keeper off.")
+            return
         if self._cruise_mph is not None:
             self._cancel_cruise()
             self.ctx.say("Adaptive cruise off.")
+            return
+        limit, zone_reason = self.trip.speed_limit_at(self.trip.position_mi)
+        if zone_reason is not None:
+            # Adaptive cruise never runs on facility access roads, gates, work
+            # zones, or heavy traffic. The speed keeper covers those low-speed
+            # stretches instead, so nobody has to hold the accelerator down.
+            self._engage_keeper(limit, zone_reason)
             return
         if not t.engine_on or t.speed_mph < CRUISE_MIN_MPH:
             self.ctx.say(
                 "Adaptive cruise needs the engine running and at "
                 f"least {self.ctx.settings.speed_text(CRUISE_MIN_MPH)}."
             )
-            return
-        _, zone_reason = self.trip.speed_limit_at(self.trip.position_mi)
-        if zone_reason is not None:
-            # No cruise on facility access roads, gates, work zones, or heavy
-            # traffic -- low-speed local stretches a real driver takes manually.
-            self.ctx.say(f"Adaptive cruise is not available in a {zone_reason} zone.")
             return
         self._cruise_mph = t.speed_mph
         self._cruise_throttle = t.throttle
@@ -509,6 +517,79 @@ class DrivingEventMixin:
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
         self._descent_control_active = False
+
+    def _engage_keeper(self, limit_mph: float, zone_reason: str) -> None:
+        """Hold the current speed through a low-speed zone (K in a zone).
+
+        An input-accessibility aid: facility access roads, gate queues, work
+        zones, and congestion otherwise demand a continuously held accelerator,
+        which some players cannot sustain. The keeper caps at the zone's limit,
+        follows queued traffic, and hands back on any brake input.
+        """
+        t = self.truck
+        if not self.ctx.settings.speed_keeper:
+            self.ctx.say(f"Adaptive cruise is not available in a {zone_reason} zone.")
+            return
+        if not t.engine_on or t.speed_mph < KEEPER_MIN_MPH:
+            self.ctx.say("The speed keeper needs the engine running and the truck rolling.")
+            return
+        self._keeper_mph = min(t.speed_mph, limit_mph)
+        self._keeper_zone = zone_reason
+        self._keeper_throttle = t.throttle
+        self.ctx.audio.play("ui/notify", volume=0.5)
+        self.ctx.say(
+            f"Speed keeper holding {self.ctx.settings.speed_text(self._keeper_mph)} "
+            f"through the {zone_reason} zone. K or braking cancels."
+        )
+
+    def _cancel_keeper(self) -> None:
+        self._keeper_mph = None
+        self._keeper_throttle = 0.0
+        self._keeper_zone = ""
+
+    def _update_keeper(
+        self, dt: float, braking: bool, accelerating: bool, clutch_disengaged: bool
+    ) -> None:
+        """Hold a gentle low-speed target while the zone lasts."""
+        if self._keeper_mph is None:
+            return
+        t = self.truck
+        if braking or t.emergency_brake or t.air_brakes_holding or not t.engine_on or t.stalled:
+            self._cancel_keeper()
+            self.ctx.say_event("Speed keeper canceled.", interrupt=False)
+            return
+        if accelerating:
+            return  # manual override; the keeper resumes when the key lifts
+        if clutch_disengaged:
+            t.throttle = 0.0
+            return
+        limit, zone_reason = self.trip.speed_limit_at(self.trip.position_mi)
+        if zone_reason is None:
+            # Back on the open road: hand control back rather than creeping
+            # along at zone speed, and point at adaptive cruise for the rest.
+            self._cancel_keeper()
+            self.ctx.say_event(
+                "Speed keeper released; open road ahead. Press K at road "
+                "speed for adaptive cruise.",
+                interrupt=False,
+            )
+            return
+        self._keeper_zone = zone_reason
+        target_mph = min(self._keeper_mph, limit)
+        context = self.trip.traffic_context()
+        if context is not None and (
+            context.gap_seconds <= KEEPER_GAP_SECONDS or context.lead.speed_mph < target_mph
+        ):
+            # Creep along with the queue, all the way down to a stop, and roll
+            # again when it moves -- gates and work zones are queue country.
+            target_mph = min(target_mph, context.lead.speed_mph)
+        error = target_mph - t.speed_mph
+        self._keeper_throttle = max(
+            0.0, min(KEEPER_MAX_THROTTLE, self._keeper_throttle + error * 0.1 * dt)
+        )
+        t.throttle = self._keeper_throttle
+        if error < -1.5:
+            t.brake = max(t.brake, min(0.4, abs(error) / 15.0))
 
     def _acc_gap_seconds(self) -> float:
         effects = self.weather.effects

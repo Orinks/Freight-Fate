@@ -68,6 +68,9 @@ RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
 
+KEEPER_MIN_MPH = 2.0  # the speed keeper just needs the truck rolling
+KEEPER_MAX_THROTTLE = 0.5  # zone speeds never need more than half throttle
+KEEPER_GAP_SECONDS = 3.0  # follow queued traffic at this gap, down to a stop
 CRUISE_MIN_MPH = 20.0  # cruise control needs road speed to hold
 CRUISE_STEP_MPH = 5.0  # set-point change per Accel/Coast (+/-) tap
 CRUISE_MAX_MPH = 85.0  # highest cruise set point (top US posted limits)

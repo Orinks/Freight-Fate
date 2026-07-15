@@ -1181,6 +1181,11 @@ class SettingsCategoryState(MenuState):
                 "Descent speed control",
                 "Manages engine braking on descents. Balanced and Interactive capture a lower target when you brake. All assists also selects safe targets and uses stronger intervention.",
             ),
+            (
+                "speed_keeper",
+                "Speed keeper",
+                "In low-speed zones where adaptive cruise is unavailable, such as facility roads, gates, and work zones, pressing K holds your current speed so the accelerator does not need to stay held. Braking cancels. Presets never change this.",
+            ),
         )
 
     def _assist_preset_label(self) -> str:
@@ -1204,6 +1209,12 @@ class SettingsCategoryState(MenuState):
         self._announce()
 
     def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
+        if field == "speed_keeper":
+            # An input-accessibility aid, not a realism choice: it lives
+            # outside the presets, so toggling it never reads as Custom.
+            self.ctx.settings.speed_keeper = not self.ctx.settings.speed_keeper
+            self._announce()
+            return
         if field not in DRIVING_ASSIST_FIELDS:
             return
         if field == "descent_speed_control":
