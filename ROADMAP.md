@@ -1100,6 +1100,24 @@ Deliver -> Earn and level up -> Repeat
       by the 2026-07-14 learn-by-test-book session (test book Chapter 4
       leads). Pairs naturally with the lease-to-start onramp: school first,
       then the working career.
+- [ ] **Endorsements earned by coursework, not just cash (owner idea
+      2026-07-15).** Today an endorsement is a level threshold or a paid
+      course with no learning in it; both should route through the
+      driving school as a spoken written-test module -- study material
+      read aloud, then a short question set to pass. Hazmat is the
+      flagship and does not exist yet: placarding, tunnel restrictions
+      (the map already bakes them), segregation rules, plus the real
+      TSA-style background wait modeled as game days before it
+      activates. Company drivers get courses on the carrier account;
+      owner-operators pay their own way.
+- [ ] **Endorsement grants must be heard, not missed.** The level-up
+      announcement is spoken once inside the delivery-summary chatter
+      and is gone; the owner declined a reefer load he was already
+      cleared for. The Career stats endorsements line (shipped
+      2026-07-15) is the reviewable record; still worth doing: repeat
+      the grant on the next terminal entry, and let unlocked
+      endorsement jobs on the board name the clearance ("you hold the
+      refrigerated endorsement") the first few times.
 
 ### World
 - [x] More cities and regional highways (1.4.0)

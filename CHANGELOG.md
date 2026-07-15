@@ -10,6 +10,12 @@
 
 - **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
 
+- **Career stats now list your endorsements.** The endorsements you hold,
+  earned by rank or paid for as a course, used to be announced only once,
+  the moment you gained them. The Career stats screen now has an
+  Endorsements line you can review any time, so you always know whether
+  that refrigerated or heavy-machinery load on the board is yours to take.
+
 - **Real streets reach the whole map now.** The street and facility data
   sweep re-ran over all six hundred twenty-three cities: sixty percent of
   home-terminal yards now start every load with spoken turn-by-turn
