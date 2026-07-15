@@ -475,6 +475,12 @@ section below and the Unreleased changelog; the release-line view:
       pulled by `tools/fetch_state_extracts.py`; the whole periodic re-bake
       is documented in `docs/refresh-city-service-data.md`.
 
+- [ ] **Periodic macOS boot test (owner ask 2026-07-15).** The speech
+      layer already plans for it (AVSpeech is the baked-in macOS event
+      voice hint, Speech Dispatcher for Linux), but nobody has proven
+      pygame + BASS + Prism boot on a Mac. Owner has a Mac Mini; run the
+      smoke suite and a spoken menu walk there occasionally so the
+      cross-platform seams stay honest.
 - [ ] **Earcon audition pass.** The five 1.9 steering sounds (turn
       left/right/ahead, ramp light red/green) shipped verified by
       measurement, not by ear; regenerate any that sound off via
