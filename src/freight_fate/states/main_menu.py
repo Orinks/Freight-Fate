@@ -1170,6 +1170,11 @@ class SettingsCategoryState(MenuState):
                 "Speed keeper",
                 "In low-speed zones where adaptive cruise is unavailable, such as facility roads, gates, and work zones, pressing K holds your current speed so the accelerator does not need to stay held. Braking cancels. Presets never change this.",
             ),
+            (
+                "pedal_latch",
+                "Latching pedals",
+                "Tap the accelerator or brake, then press again and hold for half a second: a click and a spoken confirmation latch the pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly. Presets never change this.",
+            ),
         )
 
     def _assist_preset_label(self) -> str:
@@ -1193,10 +1198,10 @@ class SettingsCategoryState(MenuState):
         self._announce()
 
     def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
-        if field == "speed_keeper":
-            # An input-accessibility aid, not a realism choice: it lives
-            # outside the presets, so toggling it never reads as Custom.
-            self.ctx.settings.speed_keeper = not self.ctx.settings.speed_keeper
+        if field in ("speed_keeper", "pedal_latch"):
+            # Input-accessibility aids, not realism choices: they live
+            # outside the presets, so toggling one never reads as Custom.
+            setattr(self.ctx.settings, field, not getattr(self.ctx.settings, field))
             self._announce()
             return
         if field not in DRIVING_ASSIST_FIELDS:

@@ -187,8 +187,18 @@ class DrivingControlsMixin:
                 "and once stopped, release and hold it again to shift back into "
                 "forward. Holding a brake through a stop just holds the truck. "
             )
+        latch_help = (
+            "Tap the accelerator or brake, then press again and hold half a "
+            "second, to latch the pedal so it stays applied hands-free: a "
+            "click and a spoken confirmation mark the catch. Press the same "
+            "key once to take the pedal back; the opposite pedal or any "
+            "safety alert releases it instantly. "
+            if self.ctx.settings.pedal_latch
+            else ""
+        )
         self.ctx.say(
             "Hold Up arrow to accelerate, Down arrow to brake. "
+            + latch_help
             + automatic_help
             + "Hold B for the emergency brake, the hardest possible stop. "
             "K sets adaptive cruise at your current speed; bad weather "
@@ -223,7 +233,8 @@ class DrivingControlsMixin:
             "C clock, deadline, and hours of service. "
             "R route. Shift R next listed highway exit. V weather. L lane position. "
             "A repeats the last announcement. Comma re-reads the last spoken "
-            "line of any kind, here and in every menu. U reads what is "
+            "line of any kind, here and in every menu; press it again quickly "
+            "to step back through earlier lines. U reads what is "
             "coming up: imposed limits, stops, and exits ahead. "
             "The Tab status menu includes a Driver apps tablet menu for "
             "navigation, weather, traffic, truck stops, road chatter, and ELD. "
@@ -624,7 +635,13 @@ class DrivingControlsMixin:
                 )
         stop = self.trip.upcoming_stop(within_mi)
         if stop is not None:
-            parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}")
+            # The ramp's ending is part of the plan: a stop sign first heard
+            # mid-ramp is too late to brake for.
+            ending = {
+                "signal": ", where the ramp ends at a traffic light",
+                "stop": ", where the ramp ends at a stop sign",
+            }.get(self._ramp_control_for(stop), "")
+            parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}{ending}")
         pressure = self.trip.next_traffic_pressure_within(within_mi)
         if pressure is not None:
             parts.append(
@@ -906,3 +923,61 @@ class DrivingControlsMixin:
         self.ctx.say(" ".join(parts))
 
     # -- per-frame update -----------------------------------------------------------------
+
+    def _update_pedal_latches(
+        self,
+        key_up: bool,
+        key_down: bool,
+        pad_throttle: float,
+        pad_brake: float,
+        emergency: bool,
+        dt: float,
+    ) -> tuple[bool, bool]:
+        """Advance both pedal latches and blend them into the pedal state.
+
+        Called once per frame from update() with the raw pedal inputs;
+        returns the effective (key_up, key_down) the rest of the frame
+        drives on. The catch clicks (its own sound, not the gear click)
+        and both directions speak. The opposite pedal always releases a
+        latch instantly, and safety systems outrank a latched accelerator:
+        a live hazard (including automatic emergency braking), the
+        emergency brake, and the overspeed alarm all drop it audibly.
+        """
+        if not self.ctx.settings.pedal_latch:
+            if self._throttle_latch.release():
+                self.ctx.say_event("Throttle released.", interrupt=False)
+            if self._brake_latch.release():
+                self.ctx.say_event("Brake released.", interrupt=False)
+            return key_up, key_down
+        for latch, held, name in (
+            (self._throttle_latch, key_up, "Throttle"),
+            (self._brake_latch, key_down, "Brake"),
+        ):
+            event = latch.update(bool(held), dt)
+            if event == "latched":
+                # The latch gesture's second press is also a press-and-hold
+                # at whatever speed the truck has -- at a standstill that
+                # would arm a direction change and grab reverse a tenth of
+                # a second after the catch. The catch wins: latching a
+                # pedal means "hold this", never "change direction".
+                self._direction_armed = ""
+                self._direction_hold_s = 0.0
+                self.ctx.audio.play("ui/tick", volume=1.0)
+                self.ctx.say_event(f"{name} latched.", interrupt=False)
+            elif event == "released":
+                self.ctx.say_event(f"{name} released.", interrupt=False)
+        throttle_overridden = (
+            key_down
+            or pad_brake > 0.05
+            or emergency
+            or self._hazard_deadline is not None
+            or self._overspeed_active
+        )
+        if throttle_overridden and self._throttle_latch.release():
+            self.ctx.say_event("Throttle released.", interrupt=False)
+        if (key_up or pad_throttle > 0.05) and self._brake_latch.release():
+            self.ctx.say_event("Brake released.", interrupt=False)
+        return (
+            key_up or self._throttle_latch.latched,
+            key_down or self._brake_latch.latched,
+        )

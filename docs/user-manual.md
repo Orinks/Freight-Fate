@@ -382,6 +382,7 @@ Driving controls are active while the road view is focused:
 | --- | --- |
 | Up arrow, hold | Throttle. |
 | Down arrow, hold | Brake. With simple automatic direction changes, keep holding it after stopping to select reverse and back slowly. With deliberate direction changes, release it and press again. |
+| Up or Down arrow, tap then press and hold | Latch that pedal so it stays applied hands-free, like the old hand-throttle knob. A click and a spoken confirmation mark the catch after about half a second of holding. Press the same key once to take the pedal back; the opposite pedal, the emergency brake, a hazard, or the overspeed alarm releases it instantly, spoken. Turn the gesture off under Settings, Driving assistance, Latching pedals. |
 | B, hold | Emergency brake. |
 | E | Start the engine. Stop the engine only below 5 miles per hour. |
 | P | Release or set the parking brake. |
@@ -403,6 +404,7 @@ Driving controls are active while the road view is focused:
 | V | Report weather and forecast. |
 | L | Report lane position when lane drift is enabled. |
 | A | Repeat the last route announcement, in case you missed it. |
+| Comma | Re-read the last spoken line of any kind, here and in every menu. Press it again within a few seconds to step back through the last 20 lines; each older line is prefaced with how far back it is, and any new announcement returns the key to the newest line. |
 | U | Report what is coming up: imposed speed limits, patrols, stops, and exits ahead. |
 | F1 | Show the driving control list and current objective. |
 | Escape | Open the pause menu. |
@@ -523,7 +525,12 @@ date, season, and temperature follow the real-world calendar instead.
 Stops are reported as you approach them. A one-mile cue tells you when to take
 an exit. As an announced exit approaches, use X to signal or cancel your intent,
 slow to 45 miles per hour or less, and set up the exit lane when lane drift is
-enabled. If your speed, lane setup, and route intent are valid at the marker,
+enabled. The signal-on announcement also names how the ramp ends -- a traffic
+light or a stop sign -- so the braking plan can start on the mainline, and the
+U upcoming readout carries the same warning. Once you are on a ramp that ends
+in a light or a sign, the game clock runs in real time until you are through
+the intersection, so the warning buys real reaction seconds instead of
+compressed ones. If your speed, lane setup, and route intent are valid at the marker,
 the truck takes the ramp automatically. If you reach the gore too fast, without
 signaling, or without the exit lane set, you stay on the
 highway and the game tells you what went wrong. The timing is generous so the

@@ -113,6 +113,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.patrols = self._place_patrols()
         self.traffic_manager.add_patrol_traffic(self.patrols)
         self.chain_law_areas = self._place_chain_law_areas()
+        # True while the player is on an exit ramp that ends in a light or a
+        # stop sign; the driving state maintains it every frame. It pins the
+        # clock to real time (see effective_time_scale).
+        self.controlled_ramp = False
         self._announced_chain_law: set[str] = set()
         self._announced_landmarks: set[str] = set()
         self._announced_billboards: set[str] = set()
@@ -143,6 +147,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         full = self.time_scale
         if self.waiting and self.truck.parking_brake and self.truck.speed_mph < 1.0:
             return full * PARKED_TIME_SCALE_MULT
+        if self.controlled_ramp:
+            # A ramp ending in a light or a sign plays out in real time
+            # from the gore: the stop-sign warning must buy human reaction
+            # seconds, not compressed ones. A hot entry used to burn the
+            # whole half mile in a few real seconds.
+            return min(full, 1.0)
         floor = min(LOW_SPEED_TIME_SCALE, full)
         ramp = min(1.0, self.truck.speed_mph / FULL_COMPRESSION_MPH)
         return floor + (full - floor) * ramp

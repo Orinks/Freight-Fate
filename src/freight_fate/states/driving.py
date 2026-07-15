@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from ..sim.pedal_latch import PedalLatch
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from .driving_events import DrivingEventMixin
@@ -254,6 +255,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # The gear engages only past DIRECTION_CHANGE_HOLD_S.
         self._direction_armed = ""
         self._direction_hold_s = 0.0
+        # Latching pedals (double-tap-and-hold, see sim/pedal_latch.py):
+        # a latched pedal reads as held everywhere downstream.
+        self._throttle_latch = PedalLatch()
+        self._brake_latch = PedalLatch()
         self._status_text = f"Press {self.ctx.control_hint('engine')} to start the engine."
 
     def _terse_speech(self) -> bool:

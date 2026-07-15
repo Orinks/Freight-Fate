@@ -16,6 +16,34 @@
   Repeats can still happen when the board is small, but the days of
   bouncing between the same two cities forever are over.
 
+- **Ramp endings are announced early, and play out in real time.** When
+  you signal for an exit, the announcement now says how the ramp ends --
+  "The ramp ends at a stop sign" -- while there is still a mile of
+  highway to plan your braking on, and the U upcoming readout carries
+  the same warning. And from the moment you are on a ramp that ends in
+  a light or a sign, the game clock drops to real time until you are
+  through the intersection: no more hearing about a stop sign two
+  seconds before blowing past it because the clock was compressed.
+
+- **Latch a pedal and give your hands a rest.** Tap the accelerator or
+  brake, then press again and hold for half a second: a click and a
+  spoken confirmation latch the pedal so it stays applied without
+  holding the key, like the old hand-throttle knob in a real cab. Press
+  the same key once to take the pedal back, or touch the opposite pedal
+  and it lets go instantly. Emergency braking, hazards, and the
+  overspeed alarm always outrank a latched pedal and release it with a
+  spoken note. Made for long pulls, steady downhill braking, and hands
+  that tire of holding keys; turn it off any time under Settings,
+  Driving assistance, Latching pedals.
+
+- **The repeat key now walks back through recent speech.** Comma still
+  re-reads the last spoken line anywhere in the game, and pressing it
+  again within a few seconds now steps back through the last twenty
+  lines, one per press, from menus and driving events alike. Each older
+  line starts with how far back it is, like "2 back", and the moment
+  anything new speaks, the key returns to the newest line. A missed
+  warning buried under two announcements is never gone anymore.
+
 - **One key now answers "how fast should I be going?"** Press D while
   driving to hear a single safe-speed number for right now, sitting right
   next to the S posted-limit key. Slick weather and an upcoming exit ramp

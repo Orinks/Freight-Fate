@@ -96,6 +96,12 @@ class Settings:
     # unavailable, so nobody has to keep the accelerator key held down. An
     # input-accessibility aid, not a realism choice: presets never touch it.
     speed_keeper: bool = True
+    # Double-tap-and-hold latches the accelerator or brake key so a long
+    # pull or a steady snub needs no sustained hold; a fresh press of the
+    # same key, the opposite pedal, or any safety override releases it.
+    # The same input-accessibility layer as the keeper: presets never
+    # touch it. Realism cover: the hand-throttle knob is a real cab control.
+    pedal_latch: bool = True
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.5

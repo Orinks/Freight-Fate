@@ -25,7 +25,7 @@ from .music import music_track_duration_s
 from .online_journal import JournalOutbox, queue_achievement
 from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
-from .speech import EventSpeechPacer, Speech
+from .speech import EventSpeechPacer, Speech, SpeechHistory
 from .states.base import State
 
 log = logging.getLogger(__name__)
@@ -82,7 +82,9 @@ class GameContext:
         self._music_rotation_elapsed_s = 0.0
         self.achievement_notice = ""
         self.achievement_notice_timer = 0.0
-        # The most recent spoken line, for the global repeat key (comma).
+        # Recent spoken lines, for the global repeat key (comma): one press
+        # repeats the newest, quick further presses walk back through the ring.
+        self._speech_history = SpeechHistory()
         self.last_spoken = ""
         # Anti-backlog projection for the dedicated event voice: queued
         # driving events that would start speaking stale get flushed instead.
@@ -107,19 +109,29 @@ class GameContext:
     def say(self, text: str, interrupt: bool = True) -> None:
         transcript.info("%s", text)
         self.last_spoken = text
+        self._speech_history.record(text)
         self.speech.say(text, interrupt)
 
     def repeat_last_spoken(self) -> None:
-        """Re-speak the most recent line (the comma key, from anywhere).
+        """Walk back through recent speech (the comma key, from anywhere).
 
         Speech is the whole interface, and a line lost to a cough or an
-        overlapping announcement should never be gone for good. Repeats on
-        the main channel and stays out of the transcript's way beyond a
-        marker, so a replay never reads as a fresh game event."""
-        if not self.last_spoken:
+        overlapping announcement should never be gone for good. The first
+        press re-speaks the newest line; quick further presses step one
+        line older each, spoken as "2 back: ..." so the player always knows
+        where in the history they stand. Any fresh announcement resets the
+        walk. Repeats ride the main channel and stay out of the transcript's
+        way beyond a marker, so a replay never reads as a fresh game event."""
+        step = self._speech_history.step_back()
+        if step is None:
             return
-        transcript.info("[repeat] %s", self.last_spoken)
-        self.speech.say(self.last_spoken, interrupt=True)
+        back, line = step
+        if back == 0:
+            transcript.info("[repeat] %s", line)
+            self.speech.say(line, interrupt=True)
+        else:
+            transcript.info("[repeat -%d] %s", back, line)
+            self.speech.say(f"{back} back: {line}", interrupt=True)
 
     def say_event(self, text: str, interrupt: bool = True) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
@@ -139,12 +151,14 @@ class GameContext:
         """
         transcript.info("[event] %s", text)
         self.last_spoken = text
+        self._speech_history.record(text)
         if self.settings.sapi_events:
             if interrupt:
                 self._event_pacer.note_interrupt(text)
             elif self._event_pacer.should_flush(text):
                 # The channel is backed up past the point of truth: purging
                 # and speaking fresh IS the queued line's honest delivery.
+                transcript.info("[pacer] stale event backlog flushed")
                 interrupt = True
             self.speech.say_event(text, interrupt)
         else:

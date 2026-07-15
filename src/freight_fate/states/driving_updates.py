@@ -59,6 +59,14 @@ class DrivingUpdateMixin:
         pad_brake = pad.brake if pad_on else 0.0
         key_up = keys[pygame.K_UP]
         key_down = keys[pygame.K_DOWN]
+        # Latching pedals: after the double-tap-and-hold gesture a pedal
+        # reads as held right here, so everything downstream -- the reverse
+        # gesture, cruise cancel, the hazard's brake answer -- sees one
+        # truth. Microsleeps stay on the raw keys: only a live reaction
+        # proves the driver awake.
+        key_up, key_down = self._update_pedal_latches(
+            key_up, key_down, pad_throttle, pad_brake, keys[pygame.K_b], dt
+        )
         accelerating = key_up or pad_throttle > 0.05
         braking_key = key_down or pad_brake > 0.05
         # The shift gesture keys off a fresh press, so it reads the trigger's

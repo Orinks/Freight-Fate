@@ -319,6 +319,46 @@ run red with more than words.
 
 Pass when: red means stop, green frees you, and running it hurt.
 
+### 4.6 The ramp's ending is announced before the ramp
+
+Setup: any leg with announced exits.
+
+Do: signal for an exit with X and listen to the whole announcement.
+Press U on the mainline before the exit. Then take the ramp and watch
+the clock: press C once on the open highway and again while braking
+down a ramp that ends in a light or sign.
+
+Listen for: the signal-on announcement naming the ending -- "The ramp
+ends at a stop sign." -- with a mile-plus still to drive, U carrying
+the same phrase, and time slowing to real seconds from the gore of a
+controlled ramp: the half mile down to the sign takes as long as it
+would take a real truck, not a compressed blink.
+
+Pass when: you always know how the ramp ends before you are on it, and
+you always have real time to brake for it. A free-flow ramp still
+passes in compressed time.
+
+### 4.7 Latching pedals
+
+Setup: Settings, Driving assistance, Latching pedals on (the default).
+
+Do: on open highway, tap the accelerator, then press it again and hold
+for half a second. Let go. Later, press it once to take it back. Latch
+it again and tap the brake. Latch the brake on a long downgrade and
+listen to the drums.
+
+Listen for: a catch click clearly different from the gear click, then
+"Throttle latched."; the truck holding power with your hands off;
+"Throttle released." on the single press or instantly on the opposite
+pedal; hazards, emergency braking, and the overspeed alarm dropping a
+latched throttle on their own, spoken. A latched brake on a grade
+heats and fades exactly like a held one -- the latch never edits
+physics.
+
+Pass when: the gesture never fires from ordinary pumping taps, every
+latch and release is spoken, and no alarm ever has to shout over a
+latched pedal that refuses to let go.
+
 ## Chapter 5. Traffic with a clock
 
 ### 5.1 Rush hour is a place and a time
@@ -603,6 +643,24 @@ local time, and deadlines always read in the destination's local time.
 Pass when: you can never be surprised by an hour you were not told
 about.
 
+### 11.4 The comma walks back through what you heard
+
+Setup: any busy drive -- callouts, status keys, a warning or two.
+
+Do: press comma once and you get the newest line, as always. Now press
+it again quickly, and again: each press steps one line older, spoken as
+"2 back:", "3 back:". Wait ten seconds and press once more. Then press
+Space (a fresh status line) and comma again.
+
+Listen for: the walk stepping through both voices' recent lines --
+menu speech and driving events share one history -- the position
+prefix on every older line, the pause snapping the key back to the
+newest line, and any fresh announcement doing the same.
+
+Pass when: a warning you missed two announcements ago is reachable in
+three presses, and a comma pressed cold always answers "what did it
+just say?".
+
 ## Chapter 12. Saves, restores, and the integrity gate
 
 ### 12.1 Old careers migrate honestly
@@ -639,7 +697,9 @@ and the physics key list live in the companion volume,
 `docs/physics-playtest-checklists.md`. The keys this book leans on
 beyond those: X commit to the exit (or signal a pull-over), L lane
 readout, Left/Right lane change with assist off, R progress, Shift+R
-next exit, U upcoming, A repeat last announcement, M radio with
+next exit, U upcoming, A repeat last announcement, comma repeat the
+last spoken line (press again quickly to walk back through the last
+twenty), M radio with
 brackets to tune and Y for status, T stop at an announced service, F
 fuel, Enter accept a city-service arrival, F1 the full key help.
 

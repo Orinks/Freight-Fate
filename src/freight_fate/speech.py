@@ -166,6 +166,56 @@ class EventSpeechPacer:
         self._clear_at = 0.0
 
 
+class SpeechHistory:
+    """The repeat key's memory: a short ring of everything spoken.
+
+    Speech is the whole interface, and a single repeat only rescues the
+    newest line -- a warning buried two announcements ago used to be gone
+    for good. The ring keeps the last ``KEPT`` lines from both channels
+    (game speech and driving events). The first press of the repeat key
+    speaks the newest line, exactly as before; pressing again within
+    ``STEP_WINDOW_S`` walks one line older per press, and the walk clamps
+    at the oldest line rather than wrapping. Any fresh announcement, or a
+    pause longer than the window, snaps the cursor back to the newest line,
+    so a comma pressed out of the blue always answers "what did it just
+    say?". Consecutive duplicates collapse into one entry -- walking back
+    through five identical status lines tells the player nothing.
+    """
+
+    KEPT = 20
+    STEP_WINDOW_S = 10.0  # presses this close together keep walking older
+
+    def __init__(self, clock=None) -> None:
+        import time
+        from collections import deque
+
+        self._clock = clock or time.monotonic
+        self._lines: deque[str] = deque(maxlen=self.KEPT)
+        self._cursor = -1  # -1 = not walking; otherwise lines back from newest
+        self._pressed_at = 0.0
+
+    def record(self, text: str) -> None:
+        """A line was freshly spoken: remember it and end any walk-back."""
+        if text and (not self._lines or self._lines[-1] != text):
+            self._lines.append(text)
+        self._cursor = -1
+
+    def step_back(self) -> tuple[int, str] | None:
+        """One press of the repeat key.
+
+        Returns ``(lines_back, text)`` -- 0 means the newest line -- or
+        ``None`` when nothing has been spoken yet."""
+        if not self._lines:
+            return None
+        now = self._clock()
+        if self._cursor < 0 or now - self._pressed_at > self.STEP_WINDOW_S:
+            self._cursor = 0
+        else:
+            self._cursor = min(self._cursor + 1, len(self._lines) - 1)
+        self._pressed_at = now
+        return self._cursor, self._lines[-1 - self._cursor]
+
+
 # Ranks the UIA backend below every other voice even while Narrator is
 # running. Prism's UIA backend raises all notifications with
 # NotificationProcessing_ImportantAll, which Narrator queues without ever

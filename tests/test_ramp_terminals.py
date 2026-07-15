@@ -315,3 +315,119 @@ def test_interchange_parser_accepts_and_validates_ramp_control():
     raw["ramp_control"] = "roundabout"
     with pytest.raises(ValueError):
         _parse_interchange(raw, 50.0, "A", "B", "I-99")
+
+
+def test_ramp_control_is_knowable_before_the_ramp():
+    """The signal-on announcement a mile out and the ramp itself must
+    always agree: _ramp_control_for is a pure preview of the decision
+    _begin_ramp_terminal commits to."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        for at_mi in (10.0, 22.5, 30.0, 41.0, 55.0):
+            stop = _FakeStop(at_mi=at_mi)
+            early = d._ramp_control_for(stop)
+            d._begin_ramp_terminal(stop)
+            assert d._ramp_control == early, at_mi
+    finally:
+        app.shutdown()
+
+
+def test_signal_on_names_the_ramp_ending(monkeypatch):
+    """Owner playtest 2026-07-16: the stop sign was announced only on the
+    ramp, far too late to brake for. The signal-on announcement names the
+    ending while there is still a mile of mainline to plan on."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(d.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        d.trip.ramp_control_at = lambda mi: "stop"
+        stop = _FakeStop(at_mi=d.trip.position_mi + 1.2)
+        stop.spoken_name = "Test Plaza"
+        stop.exit_label = ""
+        d._exit_stop = stop
+        d._exit_signal_on = False
+
+        d._toggle_exit_signal()
+
+        assert d._exit_signal_on
+        assert "The ramp ends at a stop sign." in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_upcoming_readout_names_the_ramp_ending(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(d.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        d.trip.ramp_control_at = lambda mi: "signal"
+        stop = _FakeStop(at_mi=d.trip.position_mi + 5.0)
+        stop.spoken_name = "Test Plaza"
+        d.trip.upcoming_stop = lambda within_mi: stop
+
+        d._speak_upcoming()
+
+        assert any(
+            "Test Plaza" in text and "ramp ends at a traffic light" in text
+            for text in spoken
+        )
+    finally:
+        app.shutdown()
+
+
+def test_controlled_ramp_pins_the_clock_to_real_time():
+    """Under speed-based compression a hot ramp entry burned the whole
+    half mile in a few real seconds (log receipt: exit 17:00:13, sign
+    blown 17:00:18). From the gore of a controlled ramp the clock runs
+    real, so the warning buys human reaction seconds."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.time_scale = 10.0
+        d.truck.velocity_mps = 45.0 / 2.2369362920544  # hot entry
+        assert d.trip.effective_time_scale > 8.0
+
+        d.trip.controlled_ramp = True
+        assert d.trip.effective_time_scale == 1.0
+
+        d.trip.controlled_ramp = False
+        assert d.trip.effective_time_scale > 8.0
+    finally:
+        app.shutdown()
+
+
+def test_update_exit_maintains_the_controlled_ramp_flag():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _on_ramp(d, "stop", red=False, mph=40.0)
+        d._ramp_mi = RAMP_ACCESS_MI + 0.3
+        d._ramp_stop = _FakeStop()
+        d._update_exit(0.0)
+        assert d.trip.controlled_ramp
+
+        # Past the terminal the clock may compress again.
+        d._ramp_terminal_done = True
+        d._update_exit(0.0)
+        assert not d.trip.controlled_ramp
+
+        # A free-flow ramp never pins the clock.
+        d._ramp_terminal_done = False
+        d._ramp_control = "none"
+        d._update_exit(0.0)
+        assert not d.trip.controlled_ramp
+    finally:
+        app.shutdown()

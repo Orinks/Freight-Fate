@@ -97,21 +97,17 @@ terminal becomes the anchor of that week instead of a spawn point.
       sentence ("Safe speed 45 miles per hour for the ramp."), repeatable
       free. Curve advisories join the same key when the Job 2 curve
       records land (the curve-tier bullet above).
-- [ ] **Speech history review -- walk back through what you heard (owner
-      playtest 2026-07-15 night).** The repeat keys hold one line each
-      (comma = last spoken anywhere, A = last route announcement), but on
-      a busy road the line you missed is several announcements back: the
-      owner pressed comma hunting the flashing chain-law sign and got
-      "25 miles per hour, gear 7, 1427 RPM" -- the status readout that
-      happened to speak last (log receipt, Denver night run). Keep a
-      ring of the last ~20 spoken lines across both channels; the first
-      comma press repeats the newest (today's behavior), and further
-      presses within a few seconds each step ONE LINE OLDER -- press,
-      press, press walks back in time, exactly the speech-history
-      pattern NVDA users already know. A fresh announcement resets the
-      walk to newest. A keeps its route-announcement meaning unchanged.
-      While in the file: log a transcript marker when the event pacer
-      flushes a stale backlog, so playtest logs show the flushes.
+- [x] **Speech history review -- SHIPPED 2026-07-15.** Comma now walks
+      back through a ring of the last 20 spoken lines across both
+      channels: first press repeats the newest (unchanged), further
+      presses within ten seconds each step one line older, spoken with a
+      "2 back:" position prefix, clamped at the oldest -- the
+      speech-history pattern NVDA users already know. A fresh
+      announcement (or a pause past the window) resets the walk to
+      newest; consecutive duplicate lines collapse to one entry. A keeps
+      its route-announcement meaning unchanged. The event pacer also
+      logs a `[pacer]` transcript marker whenever it flushes a stale
+      backlog, so playtest logs show the flushes.
 - [x] **Stale event-speech backlog -- FIXED 2026-07-15.** The event voice
       queued utterances faster than it spoke them, so arriving at the yard
       played the whole approach script late ("slow down to dock, at dock,
@@ -210,19 +206,18 @@ terminal becomes the anchor of that week instead of a spawn point.
       always walks away -- "You walked away. The truck didn't." -- the
       wallet, the clock, and the record take the damage, never the
       driver.
-- [ ] **Ramp endings announced early, and in real time (owner playtest
-      2026-07-16).** The stop sign or light at a ramp's end is announced
-      only as the exit is taken -- and under speed-based time compression
-      a hot entry burns the whole half-mile ramp in a few REAL seconds
-      (log receipt: exit 17:00:13, "stop sign at the end" 17:00:15, sign
-      blown 17:00:18 with cross traffic clipped). Two prongs: (1) the
-      signal-on announcement a mile-plus out names the ending -- "ramp
-      ends at a stop sign" -- and the U upcoming key carries it, so the
-      deceleration plan starts on the mainline; (2) a ramp ending in a
-      control drops time compression toward real time at the gore
-      instead of easing only with speed, so the warning buys human
-      reaction seconds, not compressed ones. The data already knows the
-      terminal control; it just speaks too late to act on.
+- [x] **Ramp endings announced early, and in real time -- SHIPPED
+      2026-07-15.** Both prongs, exactly as designed off the log receipt
+      (exit 17:00:13, sign blown 17:00:18): (1) the signal-on
+      announcement names the ending ("The ramp ends at a stop sign.")
+      with a mile-plus of mainline to plan on, and the U upcoming key
+      carries the same phrase -- the terminal-control decision was made
+      previewable (`_ramp_control_for`, pure function of trip seed +
+      baked OSM data) so the early call and the ramp always agree; (2)
+      `trip.controlled_ramp` pins the clock to REAL time from the gore
+      until the truck is through a light/sign terminal, instead of
+      easing compression only with speed. Free-flow ramps compress as
+      before.
 - [ ] **Signal running: dice and tickets, not a guaranteed clip (owner
       playtest 2026-07-15).** Blowing the ramp-end red or stop sign today
       ALWAYS clips cross traffic and never draws a citation -- backwards
@@ -1369,34 +1364,23 @@ Deliver -> Earn and level up -> Repeat
       (owner-approved precedent 2026-07-13). Realism players feel the
       equipment; accessibility players keep every accommodation; Josh's
       framework becomes the front door to both layers.
-- [ ] **Latching controls -- sticky keys for the cab (owner idea
-      2026-07-15).** Press to latch the brake or accelerator, press
-      again to release, spoken both ways ("Brake latched. Brake
-      released."). Generalizes the speed keeper's motor-accessibility
-      case to every sustained hold: descent snubs, long pulls, backing.
-      Free settings-layer accommodation, never gated. Safety semantics:
-      AEB, the hazard brake-to-answer verb, and the overspeed alarm all
-      outrank a latched accelerator and release it audibly; the reverse
-      press-and-hold gesture must read a latched brake as held or
-      reverse becomes unreachable for exactly the players the latch
-      serves. Gesture design (owner, playtest 2026-07-15): the latch
-      should live on the pedal keys themselves, no chord to learn --
-      but a bare double-tap false-triggers on feathering (players pump
-      the throttle in taps), so the gesture is DOUBLE-TAP-AND-HOLD:
-      tap, then press again and keep holding about half a second; a
-      click marks the catch, then "Throttle latched" -- and the catch
-      click must be its own sound, clearly distinct from the gear click
-      and easy to hear over the engine (owner note 2026-07-15). Release is any
-      single press of the same key (returning to manual), and the
-      opposite pedal always releases instantly -- a brake press kills a
-      latched throttle as it brakes, spoken. Realism cover: the latched
-      accelerator is the old hand-throttle knob, a real cab control --
-      and a latched service brake on a long grade cooks the drums
-      exactly like the brake-fire physics says it should, which is the
-      jake-brake lesson teaching itself. Cruise covers hold-a-speed;
-      the latch covers hold-a-pedal (full-torque pulls, steady snubs)
-      -- different tools, both spoken. Natural driving-school lesson
-      once both land.
+- [x] **Latching controls -- SHIPPED 2026-07-15.** Double-tap-and-hold
+      on the pedal keys (tap, press again, hold half a second) latches
+      the accelerator or brake hands-free, exactly the owner's gesture
+      design: a catch click (ui/tick placeholder until the NAS sound
+      pass, distinct from the gear click) plus "Throttle latched.",
+      release by a single press of the same key or instantly by the
+      opposite pedal, all spoken both ways. Safety semantics as
+      designed: hazards (including AEB), the emergency brake, and the
+      overspeed alarm outrank a latched accelerator and drop it
+      audibly; microsleeps deliberately read the RAW keys, so a latched
+      brake never answers a nod-off for you; a latched brake reads as
+      held everywhere else (reverse gesture, cruise cancel). Lives in
+      Settings, Driving assistance, as "Latching pedals", on by
+      default, outside the presets like the speed keeper. Follow-ups:
+      swap the catch click for a proper cab sound from the NAS library,
+      and the driving-school lesson that teaches latch + jake + brake
+      heat together (school-curriculum bullet).
 - [ ] **Endorsements earned by coursework, not just cash (owner idea
       2026-07-15).** Today an endorsement is a level threshold or a paid
       course with no learning in it; both should route through the

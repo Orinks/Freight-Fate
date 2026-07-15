@@ -241,11 +241,19 @@ def test_comma_repeats_the_last_spoken_line():
         app.ctx.repeat_last_spoken()
         assert spoken[-1] == "Crossing the Agua Fria River."
 
-        # An empty history stays silent instead of erroring.
-        app.ctx.last_spoken = ""
-        before = len(spoken)
+    finally:
+        app.shutdown()
+
+
+def test_comma_with_nothing_spoken_stays_silent():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        spoken = []
+        app.ctx.speech.say = lambda text, interrupt=True: spoken.append(text)
         app.ctx.repeat_last_spoken()
-        assert len(spoken) == before
+        assert spoken == []
     finally:
         app.shutdown()
 

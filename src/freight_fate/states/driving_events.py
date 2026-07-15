@@ -356,19 +356,26 @@ class DrivingEventMixin:
         else:
             head = f"Signal on for the {stop.spoken_name} exit,"
         lane_hint = "" if self.lane.lane == 0 else " Get into the right lane."
+        # Name the ramp's ending now, while there is still a mile of
+        # mainline to plan the braking on: a stop sign heard only on the
+        # ramp cost real playtesters real cross-traffic damage.
+        ending = {
+            "signal": " The ramp ends at a traffic light.",
+            "stop": " The ramp ends at a stop sign.",
+        }.get(self._ramp_control_for(stop), "")
         if self.ctx.settings.steering_assist == "off":
             self._exit_lane_alignment = EXIT_LANE_READY
             self._exit_lane_ready_said = True
             self.ctx.audio.play("ui/notify", volume=0.6)
             self.ctx.say(
                 f"{head} {ahead:.1f} miles ahead. Exit lane set.{lane_hint} "
-                f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp."
+                f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp.{ending}"
             )
             return
         self.ctx.say(
             f"{head} {ahead:.1f} miles ahead.{lane_hint} "
             "Move right for the exit lane, then slow to "
-            f"{RAMP_MAX_MPH:.0f} or less for the ramp."
+            f"{RAMP_MAX_MPH:.0f} or less for the ramp.{ending}"
         )
 
     def _reset_exit_lane_state(self) -> None:
@@ -785,16 +792,19 @@ class DrivingEventMixin:
             interrupt=False,
         )
 
-    def _begin_ramp_terminal(self, stop) -> None:
-        """Decide what controls the end of the ramp just taken.
+    def _ramp_control_for(self, stop, rng=None) -> str:
+        """The control at this stop's ramp end, decidable any time.
 
         Baked OSM data (a traffic_signals or stop node on the exit's ramp
         links) wins; otherwise a seeded urban/rural heuristic stands in --
         most urban diamond terminals are signalized, rural ones lean to stop
-        signs, and a share flow free like a cloverleaf loop."""
-        rng = random.Random((self.trip_seed << 16) ^ int(stop.at_mi * 100.0))
+        signs, and a share flow free like a cloverleaf loop. Pure function
+        of the trip seed, the stop, and baked data, so the signal-on
+        announcement a mile out and the ramp itself always agree."""
         control = self.trip.ramp_control_at(stop.at_mi)
         if not control:
+            if rng is None:
+                rng = random.Random((self.trip_seed << 16) ^ int(stop.at_mi * 100.0))
             signal_w, stop_w = (
                 RAMP_CONTROL_URBAN_WEIGHTS
                 if self.trip._near_city(stop.at_mi)
@@ -802,14 +812,19 @@ class DrivingEventMixin:
             )
             roll = rng.random()
             control = "signal" if roll < signal_w else "stop" if roll < stop_w else "none"
-        self._ramp_control = control
+        return control
+
+    def _begin_ramp_terminal(self, stop) -> None:
+        """Set up the terminal control state for the ramp just taken."""
+        rng = random.Random((self.trip_seed << 16) ^ int(stop.at_mi * 100.0))
+        self._ramp_control = self._ramp_control_for(stop, rng)
         self._ramp_light_timer = 0.0
         self._ramp_light_offset_s = rng.random() * (
             RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
         )
         self._ramp_light_announced = False
         self._ramp_light_last_phase = ""
-        self._ramp_terminal_done = control == "none"
+        self._ramp_terminal_done = self._ramp_control == "none"
         self._ramp_waiting_at_light = False
 
     def _ramp_light_phase(self) -> str:
@@ -968,6 +983,14 @@ class DrivingEventMixin:
 
     def _update_exit(self, moved_mi: float) -> None:
         """Advance an armed exit or an active ramp; opens the stop menu."""
+        # Real time from the gore to the terminal: while the ramp ends in
+        # a live light or sign, the clock must not compress the seconds
+        # the driver needs to brake for it.
+        self.trip.controlled_ramp = (
+            self._ramp_mi is not None
+            and self._ramp_control in ("signal", "stop")
+            and not self._ramp_terminal_done
+        )
         if self._ramp_mi is not None:
             self._ramp_mi -= moved_mi
             if not self._ramp_light_announced and self._ramp_mi <= RAMP_CONTROL_ANNOUNCE_MI:
