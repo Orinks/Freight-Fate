@@ -1244,13 +1244,6 @@ class SettingsCategoryState(MenuState):
             "debug_off": "off (developer)",
         }.get(self.ctx.settings.hos_mode, "realistic")
 
-    def _steering_label(self) -> str:
-        return {
-            "off": "off",
-            "light": "light",
-            "realistic": "realistic",
-        }.get(self.ctx.settings.steering_assist, "off")
-
     def _announce(self) -> None:
         self.refresh()
         self.ctx.settings.save()
@@ -1305,18 +1298,6 @@ class SettingsCategoryState(MenuState):
         except ValueError:
             i = 0
         self.ctx.settings.hos_mode = modes[(i + d) % len(modes)]
-        self._announce()
-
-    def _cycle_steering(self, d: int) -> None:
-        modes = ["off", "light", "realistic"]
-        try:
-            i = modes.index(self.ctx.settings.steering_assist)
-        except ValueError:
-            i = 0
-        self.ctx.settings.steering_assist = modes[(i + d) % len(modes)]
-        self.ctx.settings.lane_departure_warning = self.ctx.settings.steering_assist != "off"
-        self.ctx.settings.lane_centering_assist = self.ctx.settings.steering_assist == "light"
-        self.ctx.settings.refresh_driving_assistance_preset()
         self._announce()
 
     def _toggle_discord_presence(self, _d: int) -> None:
