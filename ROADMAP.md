@@ -1211,7 +1211,22 @@ Deliver -> Earn and level up -> Repeat
       outrank a latched accelerator and release it audibly; the reverse
       press-and-hold gesture must read a latched brake as held or
       reverse becomes unreachable for exactly the players the latch
-      serves.
+      serves. Gesture design (owner, playtest 2026-07-15): the latch
+      should live on the pedal keys themselves, no chord to learn --
+      but a bare double-tap false-triggers on feathering (players pump
+      the throttle in taps), so the gesture is DOUBLE-TAP-AND-HOLD:
+      tap, then press again and keep holding about half a second; a
+      click marks the catch, then "Throttle latched." Release is any
+      single press of the same key (returning to manual), and the
+      opposite pedal always releases instantly -- a brake press kills a
+      latched throttle as it brakes, spoken. Realism cover: the latched
+      accelerator is the old hand-throttle knob, a real cab control --
+      and a latched service brake on a long grade cooks the drums
+      exactly like the brake-fire physics says it should, which is the
+      jake-brake lesson teaching itself. Cruise covers hold-a-speed;
+      the latch covers hold-a-pedal (full-torque pulls, steady snubs)
+      -- different tools, both spoken. Natural driving-school lesson
+      once both land.
 - [ ] **Endorsements earned by coursework, not just cash (owner idea
       2026-07-15).** Today an endorsement is a level threshold or a paid
       course with no learning in it; both should route through the
