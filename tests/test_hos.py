@@ -582,16 +582,21 @@ def job_with_supported_route(world, city, level, jobs=None):
 
     Tries the given ``jobs`` first, then searches seeds so a shifted job draw
     (which happens as the map grows) can't StopIteration -- the test only needs
-    a genuine acceptable job, not one particular seed's.
+    a genuine acceptable job, not one particular seed's. Endorsement cargo is
+    skipped: an unendorsed test profile would be refused for the endorsement,
+    not the hours these tests are about.
     """
     from freight_fate.models.jobs import JobBoard
 
+    def acceptable(job):
+        return not job.cargo.endorsement and world.supported_route(job.origin, job.destination)
+
     for job in jobs or ():
-        if world.supported_route(job.origin, job.destination):
+        if acceptable(job):
             return job
     for seed in range(200):
         for job in JobBoard(world, seed=seed).offers(city, set(), level=level):
-            if world.supported_route(job.origin, job.destination):
+            if acceptable(job):
                 return job
     raise AssertionError(f"no offered {city} job with a supported route under any seed")
 

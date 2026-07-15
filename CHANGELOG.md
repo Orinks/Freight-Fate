@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Real streets reach the whole map now.** The street and facility data
+  sweep re-ran over all six hundred twenty-three cities: sixty percent of
+  home-terminal yards now start every load with spoken turn-by-turn
+  directions on named local streets, up from a small Midwest batch, and
+  nearly every local approach in the country names its real road.
+
 - **Hundreds more facilities now start and end on real city streets.**
   Short yard-to-facility drives used to skip their street route and fall
   back to one straight access road; now any facility whose real path has
@@ -278,6 +284,15 @@
   truck.** Any press of the service brake or the emergency brake drops
   cruise immediately and announces it, instead of cruise quietly pulling
   the truck back up to speed after you slowed down on purpose.
+- **Port terminals only show up in cities that really have a port now.**
+  Inland towns like Dallas, Atlanta, and Lampasas no longer offer loads
+  from a make-believe port terminal. Port freight comes from coastal,
+  Great Lakes, and navigable-river cities with working docks, and small
+  towns far from any rail yard no longer list an intermodal ramp on the
+  dispatch board. If a saved dispatch board still shows one of the old
+  offers, accepting it politely pulls the load instead of misbehaving.
+  And four real Great Lakes ports the old map missed -- Toledo, Detroit,
+  Chicago, and Green Bay -- now have working docks of their own.
 - **Restoring a cloud backup works again.** Every new server-verified backup
   was wrongly refused with "failed its integrity check" the moment you tried
   to restore it. The refusal was the game's mistake, not a problem with your

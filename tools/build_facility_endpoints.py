@@ -123,10 +123,15 @@ def build_facility_endpoints(
         "sources": [],
         "endpoints": {},
     }
-    for state in sorted(by_state):
+    state_count = len(by_state)
+    for state_index, state in enumerate(sorted(by_state), start=1):
         extract = state_extract_path(cache_dir, state)
         payload["sources"].append(source_record(state, extract))
         buckets = by_state[state]
+        print(
+            f"[{state_index}/{state_count}] {state}: {len(buckets)} cities",
+            flush=True,
+        )
         if extract.exists():
             collect_state_candidates(extract, buckets, radius_mi)
         for city in sorted(buckets):

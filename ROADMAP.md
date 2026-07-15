@@ -8,6 +8,30 @@
 > follows at release. Keep this file current: when a feature lands on the 1.9
 > line, check it off here in the same change.
 
+## 1.10 planned -- the working week and home
+
+Design doc: `docs/eld-home-terminal-design.md`. The ELD grows from a daily
+countdown into the system that shapes a driver's week, and the home
+terminal becomes the anchor of that week instead of a spawn point.
+
+- [ ] **70-hour/8-day cycle with the 34-hour restart.** A rolling on-duty
+      ledger on `HosClock`, spoken through the existing ELD status line;
+      restarts at the home terminal are free and full, road restarts cost
+      motel money and comfort. The 1.10 centerpiece.
+- [ ] **Home terminal persisted and consequential.** `home_terminal_city`
+      on the profile (old saves default to the current city with a
+      one-time spoken note), ELD readouts in home-terminal time,
+      discounted garage work at your terminal, dispatch "gets you home"
+      lane notes, and paid domicile relocation for owner-operators.
+- [ ] **Local board (short-haul identity).** A second dispatch surface at
+      the home terminal: short home-region runs, home every night, no
+      cycle pressure, lower pay -- weighted toward new hires in the
+      assigned-dispatch levels.
+- [ ] **ELD character events.** Daily log certification, carrier edit
+      approve/reject prompts, personal conveyance and yard-move duty
+      statuses, a rare ELD-malfunction paper-log day, and the
+      adverse-conditions +2-hour exception wired to live weather.
+
 ## 1.9 in flight (`feat/career-1.9`)
 
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
@@ -29,6 +53,7 @@
 - [ ] Road-stop tire service sells wear repair only; swapping compound (and pricing winter rubber) stays a terminal-garage act. Revisit if field tire swaps earn their menu weight.
 - [ ] Chain controls by state personality: CO/CA tier wording shipped as the generic shape; later, region-flavored signs and the CA R1/R2/R3 phrasing on the California legs. Pure sign-wording work -- the corridors already carry curated ORS grades, and chain-law areas place today on 158 legs (I-70 Denver-Silverthorne, Siskiyou, the Grapevine).
 - [x] **Profile integrity, client half.** `profile_invariants.py` enforces the hard, version-stable invariants (ranges, counter relations, closed enums, per-truck condition bounds) as defense-in-depth behind the Ed25519 signature check on every cloud restore, with a plain spoken refusal; unknown content keys from newer builds deliberately pass. `docs/profile-invariants.md` is the maintained validation list for the server gate -- hard rules mirrored in code, plausibility heuristics (money-vs-earnings, XP-vs-miles, achievements-vs-stats, possession-implies-acquisition with the Golden Antler as the flagship) specified for the server with exact game constants. Follow-up: the append-only event ledger that upgrades server validation from plausibility to recomputation.
+- [x] Release-archive verification: after a player report of a Linux snapshot with no game file (2026-07-14 sweep found all published archives intact), `tools/build_release.py` now re-opens each finished archive and proves the executable (with its permission bits) and key payload survived archiving, and `build.yml` fails instead of publishing a release with a missing platform download.
 
 Four threads: make the drive *between* the exits real, give every maneuver
 and working hour weight, make the career read like real employment, and
@@ -80,14 +105,37 @@ city service drives below.)
       direction flipped -- then merges up the on-ramp onto the highway trip
       with clock and toll continuity and a `departure_chain` save marker.
       Facilities without turn-level data keep the scripted highway start.
-- [ ] **Tier-1 surface coverage expansion.** The "Data Expansion" pass of
-      `docs/surface-roads-plan.md`: re-run the endpoint and local-approach
-      sweeps over the post-expansion 623-city map (the checked-in files
-      predate the slug migration and stop at the 2026-06-27 facility set),
-      and revisit the excluded facility types (grain elevators, ports, cold
-      storage) that already have high source-backed endpoint rates. A July
-      playtest found the default Evansville starter yard had no turn-level
-      chain -- starter cities must never regress below turn-level coverage.
+- [x] **Tier-1 surface coverage expansion.** The "Data Expansion" pass of
+      `docs/surface-roads-plan.md` shipped: the endpoint, local-approach,
+      city-service-geometry, and facility-approach sweeps re-ran over the
+      full 623-city map (5,486 facilities, 3,636 source-backed endpoints,
+      6,223 of 6,233 approaches on named roads, 1,541 turn-level facility
+      chains; 372 of 623 home-terminal yards start loads with turn-by-turn
+      streets). The builders survived the slug migration and now print
+      per-state progress. Still open below: widening the high-confidence
+      facility-type set for turn geometry (grain elevators, cold storage).
+- [ ] **Turn geometry for more facility types.** The turn-level route pass
+      still limits itself to the original high-confidence type set (yards,
+      cross-docks, warehouses, plants, ramps, parcel hubs). Grain
+      elevators, cold storage, and food processors now have source-backed
+      endpoints at scale -- extend `HIGH_CONFIDENCE_TYPES` in
+      `tools/build_facility_approaches.py` after judging spoken-name
+      quality on a sample.
+- [x] **Template facility realism pass.** Template port terminals are now
+      gated on a MARAD/USACE-derived allowlist of real deep-water, Great
+      Lakes, and navigable-river port cities (282 -> 78), and template
+      intermodal ramps are suppressed in ~250 towns with no rail intermodal
+      service in dray reach (402 -> 157). Curated facilities are never
+      gated, and accepting a stale cached board offer for a retired
+      facility pulls the offer instead of crashing.
+- [x] **Grant ports to the Great Lakes cities missing one.** Toledo,
+      Detroit, Chicago, and Green Bay carry the port market tag as city
+      tags and joined the template-port allowlist, so each now hosts a
+      port terminal (82 template ports total). Their endpoint/approach
+      records ride the next data sweep like any map growth. Dedupe
+      decision: the 40 cities with both a curated port and a template
+      port terminal keep both -- real ports run many terminals, and the
+      extra facility is freight variety, not a realism error.
 - [ ] **Surface intersections.** Phase 4 of `docs/surface-roads-plan.md`:
       stop signs and traffic signals at surface-street junctions, junction
       decision prompts, and traffic pressure at intersections -- extending
@@ -1203,4 +1251,12 @@ fit for an audio-first game.
 - [x] Opt-in Profile sharing for fictional road journals, achievements, and last-saved profile summaries
 - [x] Online posts carry the game's build identity (release tag or source checkout) so moderation can tell which version a driver runs
 - [x] Validated and server-signed private cloud revisions with verified public profile summaries
+- [ ] Richer verified driver profiles: identity headline (level title, business
+      status, carrier, rig), a rates-first resume (lifetime deliveries and
+      miles, on-time and damage-free percentages with a minimum-deliveries
+      floor, clean-inspections-vs-citations safety record), traveler stats
+      (states and cities visited, longest haul), the two or three most recent
+      badges, and net worth (cash plus equipment) labeled by business status.
+      One fact per spoken line, identity first; keep XP, fatigue, HOS state,
+      and dispatcher standing private.
 - [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)

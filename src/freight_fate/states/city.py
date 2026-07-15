@@ -1212,7 +1212,25 @@ class JobBoardState(MenuState):
         self._confirm_risky_job = None
         from .driving import DRIVE_PHASE_PICKUP, DrivingState
 
-        route = self.ctx.world.facility_approach_route(job.origin, job.origin_location)
+        try:
+            route = self.ctx.world.facility_approach_route(job.origin, job.origin_location)
+        except KeyError:
+            # A cached board can outlive its facilities (a data update may
+            # retire one, e.g. a template gated out by geography). Drop the
+            # dead offer instead of crashing; the next board visit rebuilds.
+            p.dispatch_board_cache = None
+            self.jobs = [j for j in self.jobs if j is not job]
+            self._assigned_queue = (
+                self._assignment_queue() if dispatch_policy(p).assigns_load else []
+            )
+            self.refresh(keep_index=False)
+            self.ctx.audio.play("ui/warning")
+            self.ctx.say(
+                "That load's facility is no longer on the network. Dispatch "
+                "pulled the offer; the board will refresh with new loads.",
+                interrupt=True,
+            )
+            return
         terminal = self.ctx.world.home_terminal(p.current_city)
         driving = DrivingState(self.ctx, job, route, phase=DRIVE_PHASE_PICKUP)
         p.dispatch_board_cache = None

@@ -25,12 +25,12 @@ def test_facility_approach_data_covers_full_facility_set(world):
     )
     coverage = data["coverage"]
 
-    assert coverage["facilities"] == 2401
-    assert coverage["source_backed_endpoints"] == 1838
-    assert coverage["road_snapped"] == 916
-    assert coverage["turn_level"] == 821
-    assert coverage["nearest_road_fallback"] == 922
-    assert coverage["representative_fallback"] == 563
+    assert coverage["facilities"] == 5037
+    assert coverage["source_backed_endpoints"] == 3198
+    assert coverage["road_snapped"] == 1579
+    assert coverage["turn_level"] == 1415
+    assert coverage["nearest_road_fallback"] == 1619
+    assert coverage["representative_fallback"] == 1839
     assert coverage["gate_yard_dock_hints"] == 0
 
     # The 2026-07-14 regen keys records by current slug facility ids and

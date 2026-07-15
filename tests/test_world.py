@@ -182,7 +182,11 @@ def test_freight_location_categories_are_live(world):
 
 def test_each_metro_expands_to_representative_facilities(world):
     for city in world.cities.values():
-        assert len(city.locations) >= 6
+        # Floor is 5, not 6: the geography gate can strip both the template
+        # port terminal and the intermodal ramp from a remote town (rural
+        # Nevada keeps five). Inventing a different filler facility to hold
+        # the count at six would repeat the realism bug the gate fixes.
+        assert len(city.locations) >= 5
         assert city.market_tags
         assert any(loc.template for loc in city.locations)
         assert any(loc.type in {"company_yard", "terminal"} for loc in city.locations)

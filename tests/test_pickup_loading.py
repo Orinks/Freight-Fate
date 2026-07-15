@@ -308,3 +308,45 @@ def test_job_board_help_names_drivable_pickup_before_route_planning():
 
     assert "local deadhead pickup drive from your terminal" in JobBoardState.intro_help
     assert "route planning" not in JobBoardState.intro_help
+
+
+def test_accepting_stale_cached_offer_drops_it_instead_of_crashing():
+    """A cached dispatch board can outlive its facilities: a data update may
+    retire one (e.g. a template gated out by geography). Accepting such an
+    offer must pull it and refresh, never crash."""
+    from freight_fate.app import App
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import JobBoardState
+
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+    try:
+        app.ctx.profile = Profile(name="Stale Board", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.dispatch_board_cache = {"stale": True}
+        dead = Job(
+            CARGO_CATALOG["general"],
+            12.0,
+            "Chicago",
+            "Chicago Retired Facility",
+            "Milwaukee",
+            92.0,
+            1800.0,
+            7.0,
+        )
+        app.push_state(JobBoardState(app.ctx, [dead]))
+
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert isinstance(app.state, JobBoardState)
+        assert p.active_trip is None
+        assert p.dispatch_board_cache is None
+        assert dead not in app.state.jobs
+        assert any("no longer on the network" in line for line in spoken)
+    finally:
+        app.shutdown()
