@@ -162,9 +162,14 @@ terminal becomes the anchor of that week instead of a spawn point.
       beds should key on the same season/temperature/region state the
       weather system already tracks: insect layers gated by season AND
       warmth, regional voices where they belong (cicadas in a Georgia
-      summer, absolutely; Holbrook in March, never). Audit the existing
-      loops against this rule; the owner's NAS library sources the
-      replacements.
+      summer, absolutely; Holbrook in March, never). And the gate swings
+      both ways (owner, same night): a per-season palette, not just
+      evictions -- spring peepers near Midwest water at dusk, the full
+      summer chorus in the South, fall geese overhead, and winter's
+      snow-muffled hush. A rest stop should sound like a date on a
+      calendar somewhere real. Audit the existing loops against this
+      rule; the owner's NAS library sources both the evictions'
+      replacements and the new seasonal beds.
 - [ ] **Cab and rig sonification pass (owner 2026-07-15).** The state the
       truck is in should be hearable before it is spoken. First candidates:
       a chain-clatter loop whenever chains are mounted, pitched and paced
