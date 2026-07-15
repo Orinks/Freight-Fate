@@ -146,7 +146,9 @@ def test_cruise_refuses_to_engage_in_a_facility_zone(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: said.append(text))
-        # On a low-speed facility access road, cruise must not engage.
+        # With the speed keeper turned off, the original explanation applies:
+        # cruise must not engage on a low-speed facility access road.
+        app.ctx.settings.speed_keeper = False
         driving.trip.speed_limit_at = lambda mile: (25.0, "facility access road")
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 4
@@ -154,7 +156,133 @@ def test_cruise_refuses_to_engage_in_a_facility_zone(monkeypatch):
         driving.handle_event(key_event(pygame.K_k))
 
         assert driving._cruise_mph is None
+        assert driving._keeper_mph is None
         assert any("not available" in s and "facility access road" in s for s in said)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_speed_keeper_holds_through_a_facility_zone(monkeypatch):
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    said = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: said.append(text))
+        driving.trip.speed_limit_at = lambda mile: (15.0, "facility access road")
+        driving.trip.traffic_context = lambda: None
+        driving.handle_event(key_event(pygame.K_e))
+        t = driving.truck
+        t.cargo_kg = 0.0
+        t.grade = 0.0
+        t.transmission.gear = 3
+        t.velocity_mps = 4.5  # ~10 mph, no need to hold the accelerator
+        driving.handle_event(key_event(pygame.K_k))
+
+        assert driving._cruise_mph is None
+        assert driving._keeper_mph == pytest.approx(10.0, abs=0.5)
+        assert any("Speed keeper holding" in s for s in said)
+        for _ in range(60 * 10):  # ten seconds, no keys held
+            driving.update(1 / 60)
+        assert driving._keeper_mph is not None
+        assert abs(t.speed_mph - 10.0) < 4.0
+    finally:
+        app.shutdown()
+
+
+def test_speed_keeper_cancels_on_braking(monkeypatch):
+    from freight_fate.app import App
+
+    class Keys:
+        pressed = set()
+
+        def __getitem__(self, key):
+            return key in self.pressed
+
+    keys = Keys()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: keys)
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        driving.trip.speed_limit_at = lambda mile: (15.0, "facility access road")
+        driving.trip.traffic_context = lambda: None
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 3
+        driving.truck.velocity_mps = 4.5
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._keeper_mph is not None
+
+        keys.pressed = {pygame.K_DOWN}  # brake
+        driving.update(1 / 60)
+        assert driving._keeper_mph is None
+        assert any("Speed keeper canceled" in s for s in events)
+    finally:
+        app.shutdown()
+
+
+def test_speed_keeper_releases_on_the_open_road(monkeypatch):
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        zone = {"reason": "facility access road"}
+        driving.trip.speed_limit_at = lambda mile: (15.0, zone["reason"])
+        driving.trip.traffic_context = lambda: None
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 3
+        driving.truck.velocity_mps = 4.5
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._keeper_mph is not None
+
+        zone["reason"] = None  # the access stretch ends
+        driving.update(1 / 60)
+        assert driving._keeper_mph is None
+        assert any("Speed keeper released" in s for s in events)
+        # The truck no longer drives itself once control is handed back.
+        assert driving.truck.throttle == 0.0
+    finally:
+        app.shutdown()
+
+
+def test_speed_keeper_needs_the_truck_rolling(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    said = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: said.append(text))
+        driving.trip.speed_limit_at = lambda mile: (15.0, "facility access road")
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.velocity_mps = 0.0
+        driving.handle_event(key_event(pygame.K_k))
+
+        assert driving._keeper_mph is None
+        assert any("needs the engine running and the truck rolling" in s for s in said)
     finally:
         app.shutdown()
 
@@ -609,6 +737,63 @@ def test_hazard_deadline_covers_braking_time_from_current_speed():
         brake_s = (t.speed_mph - HAZARD_SAFE_MPH) / MPH_PER_MPS / (G * t.specs.max_brake_decel_g)
         assert driving._hazard_deadline == pytest.approx(brake_s + 3.0, abs=0.01)
         assert driving._hazard_deadline > 7.5
+    finally:
+        app.shutdown()
+
+
+def test_automatic_emergency_braking_engages_once_and_cancels_cruise(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    app.ctx.say_event = lambda text, interrupt=False: spoken.append((text, interrupt))
+    try:
+        driving = start_drive(app)
+        driving.truck.velocity_mps = 25.0
+        driving._cruise_mph = 55.0
+        driving._hazard_deadline = driving._brake_budget_s()
+        driving._update_hazard(0.01)
+        driving._update_hazard(0.01)
+        assert driving.truck.brake == 1.0
+        assert driving._cruise_mph is None
+        assert [text for text, _ in spoken].count("Emergency braking engaged.") == 1
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.parametrize(
+    ("level", "braking", "expected_active"),
+    [
+        ("off", False, False),
+        ("realistic", False, True),
+        ("balanced", True, True),
+        ("interactive", True, True),
+    ],
+)
+def test_descent_control_levels_and_brake_capture(monkeypatch, level, braking, expected_active):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    app.ctx.say_event = lambda text, interrupt=False: spoken.append(text)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        open_limits(driving)
+        driving.trip.traffic_context = lambda: None
+        driving.ctx.settings.descent_speed_control = level
+        driving.truck.grade = -0.06
+        driving.truck.engine_on = True
+        driving.truck.velocity_mps = 22.0
+        driving.truck.transmission.automatic = True
+        driving._cruise_mph = 60.0
+        driving._update_cruise(0.1, braking, False, False)
+        assert driving._descent_control_active is expected_active
+        if braking and level in ("balanced", "interactive"):
+            assert driving._cruise_mph == pytest.approx(driving.truck.speed_mph)
+            assert sum("Descent target changed" in text for text in spoken) == 1
+            driving._update_cruise(0.1, True, False, False)
+            assert sum("Descent target changed" in text for text in spoken) == 1
     finally:
         app.shutdown()
 

@@ -500,6 +500,8 @@ From a batch of player reports:
   trooper milestone (below) remains the home for *visible, immediate*
   enforcement: getting pulled over and on-the-spot fines.
 
+- [x] **Speed keeper for low-speed zones.** Shipped alongside the presets: in facility access roads, gate queues, work zones, and congestion -- where adaptive cruise is deliberately unavailable -- K holds the current speed at or below the zone limit and follows queued traffic, so players who cannot keep the accelerator held (or whose fingers tire) are not locked out of those stretches. Preset-independent and on by default.
+- [x] **Driving assistance presets and descent control.** Shipped for the current snapshot: Realistic, Balanced, All assists, and Custom coordinate optional lane, emergency-braking, stop-and-go, and interactive descent support without changing inherent adaptive-cruise behavior or simulation settings. Automatic exits, destination stops, yard entry, and docking remain deferred to Career 1.9 or later. On the 1.9 line, lane drift itself lives in the Driving assistance category but stays preset-independent like the speed keeper: presets tune warnings and support, never whether the lane task runs, so fresh careers keep the centered-lane accessible default.
 - [x] **Limit-aware adaptive cruise.** Shipped: once real OSM limits, zones,
   and trooper enforcement landed, plain "hold the set speed" cruise would carry
   the driver straight through an urban drop into strikes and pull-overs. Cruise
@@ -1111,4 +1113,5 @@ fit for an audio-first game.
       badges, and net worth (cash plus equipment) labeled by business status.
       One fact per spoken line, identity first; keep XP, fatigue, HOS state,
       and dispatcher standing private.
+- [x] Profile integrity, client half: `profile_invariants.py` runs the hard, version-stable sanity rules (ranges, counter relations, upgrade tiers) as defense in depth behind the Ed25519 signature on every cloud restore, refusing with a plain spoken reason; `docs/profile-invariants.md` is the maintained validation list for the server gate. Follow-up: the append-only event ledger that upgrades server validation from plausibility to recomputation
 - [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)

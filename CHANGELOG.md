@@ -65,12 +65,6 @@
   decision cadence. Safety warnings also stay in front of hours and fatigue
   chatter instead of being interrupted.
 
-- **Playing on more than one computer no longer signs the other one out.**
-  orinks.net now gives each of your computers its own token: add a computer
-  from the driver setup page and your other machines keep working. If the
-  game says your sign-in is no longer accepted, it now points you to the
-  computer list on the setup page to get a fresh token for that computer.
-
 ### Added
 
 - **The in-cab radio picks up forty-three more real stations.** With real
@@ -112,6 +106,10 @@
 ### Changed
 
 ### Added
+
+- **Choose how much driving assistance the truck provides.** A new Driving assistance settings category offers Realistic, Balanced, All assists, and Custom presets for emergency braking, lane support, stop-and-go behavior, and interactive descent speed control. Adaptive cruise keeps its existing traffic, posted-limit, and weather behavior. Presets never change trip pacing, hours rules, transmission, weather, or hazard frequency. These assists lay the groundwork for the version 1.9 driving changes.
+
+- **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
 
 - **The world got five new sounds, and every shipped sound now earns its
   keep.** Rest stops sound different by daylight: a new daytime truck-stop
@@ -372,6 +370,13 @@
 
 ### Fixed
 
+- **Careers from older versions now trade every cargo type at real market
+  prices.** A career started before the cargo list grew to sixteen classes
+  kept freight-market prices only for the original eight, so pay for the
+  newer cargo types never rose or fell. Loading such a career now fills in
+  the missing market prices, which also keeps cloud backups of these older
+  careers in step with orinks.net.
+
 - **Port terminals only show up in cities that really have a port now.**
   Inland towns like Dallas, Atlanta, and Lampasas no longer offer loads
   from a make-believe port terminal. Port freight comes from coastal,
@@ -381,6 +386,19 @@
   offers, accepting it politely pulls the load instead of misbehaving.
   And four real Great Lakes ports the old map missed -- Toledo, Detroit,
   Chicago, and Green Bay -- now have working docks of their own.
+
+## 1.8.3 - 2026-07-14
+
+### Added
+
+- **Cloud restores now get a second integrity check.** Beyond the server's
+  signature, a restored profile has to pass the game's own sanity rules --
+  wear between zero and one hundred, honest delivery counts, a fuel tank
+  that fits in a truck. A file that fails is refused with a plainly spoken
+  reason instead of being loaded, and saves from newer versions of the
+  game still restore fine.
+
+### Fixed
 
 - **Restoring a cloud backup works again.** Every new server-verified backup
   was wrongly refused with "failed its integrity check" the moment you tried
@@ -394,6 +412,14 @@
   exit is now worked out once and remembered instead of being recalculated
   every moment of the drive, removing a heavy background load tied to a
   reported crash on coast-to-coast routes.
+
+### Changed
+
+- **Playing on more than one computer no longer signs the other one out.**
+  orinks.net now gives each of your computers its own token: add a computer
+  from the driver setup page and your other machines keep working. If the
+  game says your sign-in is no longer accepted, it now points you to the
+  computer list on the setup page to get a fresh token for that computer.
 
 ## 1.8.1 - 2026-07-13
 

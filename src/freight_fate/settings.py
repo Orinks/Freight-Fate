@@ -40,6 +40,20 @@ CHATTER_FIELDS = (
     "chatter_billboards",
 )
 
+DRIVING_ASSIST_FIELDS = (
+    "automatic_emergency_braking",
+    "lane_departure_warning",
+    "stop_and_go_assist",
+    "lane_centering_assist",
+    "descent_speed_control",
+)
+
+DRIVING_ASSIST_PRESETS = {
+    "realistic": (True, True, True, False, "realistic"),
+    "balanced": (True, True, True, True, "balanced"),
+    "all": (True, True, True, True, "interactive"),
+}
+
 
 @dataclass
 class Settings:
@@ -56,7 +70,20 @@ class Settings:
     hos_mode: str = (
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
+    # Whether the lane-position task runs at all. A simulation choice like
+    # the speed keeper, not a safety assist: presets never change it, and the
+    # 1.9 exit mechanics only demand signals and lane discipline when it is on.
     steering_assist: str = "off"  # off/light/realistic lane drift
+    driving_assistance_preset: str = "realistic"
+    automatic_emergency_braking: bool = True
+    lane_departure_warning: bool = True
+    stop_and_go_assist: bool = True
+    lane_centering_assist: bool = False
+    descent_speed_control: str = "realistic"
+    # Holds a gentle speed through low-speed zones where adaptive cruise is
+    # unavailable, so nobody has to keep the accelerator key held down. An
+    # input-accessibility aid, not a realism choice: presets never touch it.
+    speed_keeper: bool = True
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.5
@@ -117,9 +144,22 @@ class Settings:
             json.dump(asdict(self), f, indent=2)
         tmp.replace(self.path)
 
+    def apply_driving_assistance_preset(self, preset: str) -> None:
+        values = DRIVING_ASSIST_PRESETS[preset]
+        for field, value in zip(DRIVING_ASSIST_FIELDS, values, strict=True):
+            setattr(self, field, value)
+        self.driving_assistance_preset = preset
+
+    def refresh_driving_assistance_preset(self) -> str:
+        values = tuple(getattr(self, field) for field in DRIVING_ASSIST_FIELDS)
+        matches = [name for name, mapping in DRIVING_ASSIST_PRESETS.items() if mapping == values]
+        self.driving_assistance_preset = matches[0] if len(matches) == 1 else "custom"
+        return self.driving_assistance_preset
+
     @classmethod
     def load(cls) -> Settings:
         s = cls()
+        data = None
         try:
             with open(s.path, encoding="utf-8") as f:
                 data = json.load(f)
@@ -143,6 +183,24 @@ class Settings:
             s.hos_mode = "realistic"
         if s.steering_assist not in ("off", "light", "realistic"):
             s.steering_assist = "off"
+            s.lane_departure_warning = False
+            s.lane_centering_assist = False
+        if data is not None and "driving_assistance_preset" not in data:
+            s.lane_departure_warning = s.steering_assist != "off"
+            s.lane_centering_assist = s.steering_assist == "light"
+            s.automatic_emergency_braking = False
+            s.stop_and_go_assist = False
+            s.descent_speed_control = "off"
+            s.driving_assistance_preset = "custom"
+        for field in DRIVING_ASSIST_FIELDS[:-1]:
+            if not isinstance(getattr(s, field), bool):
+                setattr(s, field, getattr(cls(), field))
+        if s.descent_speed_control not in ("off", "realistic", "balanced", "interactive"):
+            s.descent_speed_control = "realistic"
+        if s.driving_assistance_preset not in (*DRIVING_ASSIST_PRESETS, "custom"):
+            s.driving_assistance_preset = "custom"
+        if data is None or "driving_assistance_preset" in data:
+            s.refresh_driving_assistance_preset()
         if s.automatic_direction_changes not in ("simple", "deliberate"):
             s.automatic_direction_changes = "simple"
         if s.update_channel not in ("", "stable", "dev"):

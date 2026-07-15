@@ -693,6 +693,16 @@ Late delivery and cargo damage reduce pay.
 
 ## Settings
 
+### Driving assistance
+
+Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds light lane centering and lets braking capture a lower descent target. All assists adds automatic safe descent targets and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
+
+The five individual controls are Automatic emergency braking, Lane-departure warning, Stop-and-go assistance, Lane centering assistance, and Descent speed control. Descent speed control has four levels: Off, Realistic, Balanced, and Interactive. Interactive is a descent-control level, not a preset.
+
+Lane drift also lives in this category and, like the speed keeper, sits outside the presets. It chooses whether the lane-position task runs at all: Off keeps the truck centered with no lane work, Light drifts gently with centering help, and Realistic drifts like a real wheel. When lane drift is on, a short beep comes from the side you drift toward, so steer away from the beep; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. With lane drift on, taking an exit needs your turn signal set and the exit lane held. Choosing Light or Realistic turns the matching lane support on. Presets never change lane drift.
+
+A sixth control, Speed keeper, sits outside the presets. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K holds your current speed at or below the zone limit and creeps along behind queued traffic, so the accelerator does not need to stay held down. Any brake input, a hazard, or reaching the open road hands control back and says so. It is on by default and never changed by choosing a preset.
+
 Settings are grouped into categories. In a settings category, Up and Down choose
 a setting, Right arrow or Enter changes it forward, Left arrow changes it
 backward, and Escape returns to the category list. Changes are saved as they
@@ -707,7 +717,7 @@ Gameplay settings include:
 | Automatic direction changes | In an automatic, Simple changes between forward and reverse when you keep holding the control after stopping. Deliberate requires releasing and pressing it again. |
 | Driving mode | Choose Relaxed, Standard, or Realistic pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most real time to respond. Standard keeps balanced timing and consequences. Realistic moves distance and time fastest, so decisions arrive sooner without extra forgiveness. At low speed the clock still eases toward real time, and deliberate parked waiting runs at double the selected pace. |
 | Hours of service | Choose realistic or relaxed legal limits. Relaxed hours rules lengthen the limits and further reduce random hazard frequency; real violations keep their normal consequences. |
-| Lane drift | Choose whether lane drift is off, light, or realistic. When on, a short beep comes from the side you drift toward, so steer away from the beep. A dedicated centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. |
+| Driving assistance | Open Settings, Driving assistance for lane drift, lane warning, lane centering, emergency braking, stop-and-go, descent, and speed keeper controls. |
 
 Audio settings include:
 

@@ -351,15 +351,29 @@ def changed_files(base: str, head: str) -> list[str]:
     return git_output_lines(["diff", "--name-only", f"{base}..{head}"])
 
 
-def unreleased_added_entries(base: str, head: str) -> list[str]:
-    released = released_versions()
-    base_entries = entries_from_sections(nightly_candidate_sections(changelog_at(base), released))
+def all_player_facing_sections(text: str) -> list[ChangelogSection]:
+    """Every player-facing changelog section, released or not."""
+    sections: list[ChangelogSection] = []
+    for block in release_blocks(text):
+        sections.extend(eligible_sections(block.body))
+    return sections
+
+
+def changelog_added_entries(base: str, head: str) -> list[str]:
+    """Player-facing bullets present at ``head`` but not at ``base``.
+
+    Entries count wherever they land in the changelog. A single-push
+    release sync moves curated notes from ``Unreleased`` straight under a
+    freshly tagged version heading; the gate must still credit them as
+    this push's additions rather than dismissing the block as released.
+    """
+    base_entries = entries_from_sections(all_player_facing_sections(changelog_at(base)))
     head_text = (
         changelog_at(head) if head != "HEAD" else changelog_file().read_text(encoding="utf-8")
     )
     return [
         entry
-        for section in nightly_candidate_sections(head_text, released)
+        for section in all_player_facing_sections(head_text)
         for entry in section.entries
         if normalize_entry(entry) not in base_entries
     ]
@@ -383,14 +397,14 @@ def check_command(args: argparse.Namespace) -> int:
             print(f"- {path}", file=sys.stderr)
         return 1
 
-    if not unreleased_added_entries(base, args.head):
+    if not changelog_added_entries(base, args.head):
         print(
             "CHANGELOG.md changed, but no new player-facing bullet was added.",
             file=sys.stderr,
         )
         return 1
 
-    print("Found CHANGELOG.md Unreleased entries for user-facing changes.")
+    print("Found new CHANGELOG.md entries for user-facing changes.")
     return 0
 
 

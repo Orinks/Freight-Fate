@@ -134,6 +134,7 @@ class DrivingUpdateMixin:
         self._update_lane(keys, dt)
         self._update_exit_preparation(keys, dt)
         self._update_cruise(dt, braking, accelerating, clutch_disengaged)
+        self._update_keeper(dt, braking, accelerating, clutch_disengaged)
 
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
@@ -465,6 +466,8 @@ class DrivingUpdateMixin:
             curve += 0.35
         wind = self.weather.effects.wind
         if self.lane.update(dt, self.truck.velocity_mps, curve=curve, wind=wind, assist=mode):
+            if not self.ctx.settings.lane_departure_warning:
+                return
             self.ctx.audio.play("vehicle/rumble_strip", volume=1.0, pan=self._lane_pan())
             self.truck.damage_pct = min(100.0, self.truck.damage_pct + 1.0)
             message = self.lane.describe()
@@ -636,7 +639,7 @@ class DrivingUpdateMixin:
         return "center"
 
     def _update_lane_guidance_audio(self) -> None:
-        if self.ctx.settings.steering_assist == "off":
+        if not self.ctx.settings.lane_departure_warning:
             self._lane_guidance_state = "center"
             return
         zone = self._lane_guidance_zone()
@@ -912,14 +915,26 @@ class DrivingUpdateMixin:
             return
         if self.truck.speed_mph <= HAZARD_SAFE_MPH:
             self._hazard_deadline = None
+            self._automatic_braking_announced = False
             self.ctx.audio.play("events/hazard_clear", volume=0.75)
             self.ctx.controller.rumble.alert(intensity=0.4)
             self.ctx.say_event("Hazard avoided. Well done.", interrupt=False)
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
         self._hazard_deadline -= dt
+        if (
+            self.ctx.settings.automatic_emergency_braking
+            and self._hazard_deadline <= self._brake_budget_s()
+        ):
+            self.truck.brake = max(self.truck.brake, 1.0)
+            if not self._automatic_braking_announced:
+                self._automatic_braking_announced = True
+                self.ctx.say_event("Emergency braking engaged.", interrupt=True)
+            if self._cruise_mph is not None:
+                self._cancel_cruise()
         if self._hazard_deadline <= 0:
             self._hazard_deadline = None
+            self._automatic_braking_announced = False
             self.ctx.audio.play("vehicle/collision")
             severity = min(1.0, self.truck.speed_mph / 70.0)
             severity *= tuning_for_time_scale(self.trip.time_scale).collision_damage
