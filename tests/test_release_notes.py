@@ -387,6 +387,44 @@ def test_generated_notes_flatten_to_speakable_lines(tmp_path, monkeypatch):
     assert all("**" not in line and "https://" not in line for line in spoken)
 
 
+def test_check_accepts_single_push_release_sync(tmp_path, monkeypatch, capsys):
+    """A release-sync push lands new bullets already under a tagged version
+    heading (the v1.8.3 release did the merge and the heading in one push);
+    the changelog gate must credit those bullets to the push, not dismiss
+    the block as already released."""
+    release_notes = load_release_notes_module()
+    stable_history = "## 1.8.1 - 2026-07-13\n\n### Fixed\n- Old stable fix.\n"
+    repo = make_repo(tmp_path, changelog("", stable_history))
+    git(repo, "tag", "v1.8.1")
+    base = git(repo, "rev-parse", "HEAD")
+
+    (repo / "src").mkdir()
+    (repo / "src" / "game.py").write_text("GAME = True\n", encoding="utf-8")
+    (repo / "CHANGELOG.md").write_text(
+        changelog(
+            "",
+            "## 1.8.3 - 2026-07-14\n\n### Fixed\n- Restoring a cloud backup works again.\n\n"
+            + stable_history,
+        ),
+        encoding="utf-8",
+    )
+    commit(repo, "release: merge dev into main for 1.8.3")
+    git(repo, "tag", "v1.8.3")
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+
+    args = release_notes.argparse.Namespace(base=base, head="HEAD")
+    assert release_notes.check_command(args) == 0
+
+    # The same push without new bullets must still fail the gate.
+    git(repo, "tag", "-d", "v1.8.3")
+    (repo / "CHANGELOG.md").write_text(
+        changelog("", "## 1.8.3 - 2026-07-14\n\n" + stable_history), encoding="utf-8"
+    )
+    commit(repo, "release: heading only")
+    capsys.readouterr()
+    assert release_notes.check_command(args) == 1
+
+
 def test_build_workflow_uses_curated_nightly_decision_and_notes():
     workflow = (
         Path(__file__).resolve().parents[1] / ".github" / "workflows" / "build.yml"
