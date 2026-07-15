@@ -387,6 +387,17 @@ class DrivingEventMixin:
         if not self._exit_signal_on:
             return
         ahead = stop.at_mi - self.trip.position_mi
+        if self.ctx.settings.exit_speed_assist and 0 < ahead <= 1.5:
+            if self._cruise_mph is not None:
+                self._cancel_cruise()
+            if self.truck.speed_mph > RAMP_MAX_MPH:
+                self.truck.brake = max(self.truck.brake, 0.35)
+                if not self._assist_exit_slowing_said:
+                    self._assist_exit_slowing_said = True
+                    self.ctx.say_event(
+                        "Exit speed assistance slowing. Confirm the exit when ready.",
+                        interrupt=False,
+                    )
         if ahead < -EXIT_COMMIT_WINDOW_MI:
             return
 
@@ -1511,6 +1522,18 @@ class DrivingEventMixin:
         )
 
     def _handle_arrival_gate(self) -> None:
+        if self.ctx.settings.destination_approach_assist:
+            self._cancel_cruise()
+            self.truck.throttle = 0.0
+            self.truck.brake = 1.0
+            if self.truck.speed_mph <= 0.5 and not self._arrival_full_stop_said:
+                self._arrival_full_stop_said = True
+                self.truck.set_parking_brake()
+                self.ctx.say_event(
+                    "Destination approach stopped and holding. Press Enter, or controller A, to continue into the facility.",
+                    interrupt=True,
+                )
+            return
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
             self._open_facility_arrival()
             return

@@ -464,6 +464,30 @@ class DrivingUpdateMixin:
             curve = 0.55
         if self._ramp_mi is not None:
             curve += 0.35
+        curve_assisting = (
+            self.ctx.settings.curve_speed_assist
+            and curve > 0
+            and self.truck.speed_mph > 50 - curve * 20
+        )
+        if curve_assisting:
+            self.truck.brake = max(self.truck.brake, min(0.5, curve))
+            if not self._curve_assist_active:
+                self.ctx.say_event("Curve speed assistance slowing.", interrupt=False)
+        elif self._curve_assist_active:
+            self.ctx.say_event("Curve speed assistance released.", interrupt=False)
+        self._curve_assist_active = curve_assisting
+        transition_assisting = (
+            self.ctx.settings.route_transition_assist
+            and self._ramp_mi is not None
+            and self.truck.speed_mph > RAMP_MAX_MPH
+        )
+        if transition_assisting:
+            self.truck.brake = max(self.truck.brake, 0.4)
+            if not self._transition_assist_active:
+                self.ctx.say_event("Route-transition assistance slowing.", interrupt=False)
+        elif self._transition_assist_active:
+            self.ctx.say_event("Route-transition assistance released.", interrupt=False)
+        self._transition_assist_active = transition_assisting
         wind = self.weather.effects.wind
         if self.lane.update(dt, self.truck.velocity_mps, curve=curve, wind=wind, assist=mode):
             if not self.ctx.settings.lane_departure_warning:

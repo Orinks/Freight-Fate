@@ -41,6 +41,8 @@
   small Arizona town with one very famous corner. Each still nods to a
   country or trucking song.
 
+- **Driving assistance reduces workload without driving for you.** One preset coordinates emergency braking, lane and descent support, stop-and-go traffic, curve and route-transition speed help, exit slowing, and stopping at the selected destination arrival point. You still steer, confirm routes and exits, leave long stops, and handle every yard and dock task.
+
 ### Changed
 
 - **The career is a months-long arc now, and every level up hands you

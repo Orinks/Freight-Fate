@@ -94,6 +94,7 @@ def open_limits(driving):
 
 def take_destination_exit(driving):
     """Move onto the delivery ramp and stop at the destination gate."""
+    driving.ctx.settings.destination_approach_assist = False
     destination = driving._destination_exit_stop()
     assert destination is not None
     driving._exit_stop = destination
@@ -110,6 +111,15 @@ def take_destination_exit(driving):
         driving.truck.velocity_mps = 0.0
         driving._handle_arrival_gate()
     finish_timed_state(driving.ctx._app)
+    if driving.ctx._app.state is driving:
+        driving.trip.position_mi = driving.trip.total_miles
+        driving.trip.finished = True
+        driving._handle_arrival_gate()
+        finish_timed_state(driving.ctx._app)
+    if driving.ctx._app.state is driving and driving.ctx.settings.destination_approach_assist:
+        driving._handle_arrival_gate()
+        if driving._arrival_full_stop_said:
+            driving.handle_event(key_event(pygame.K_RETURN))
 
 
 def mark_destination_exit_taken(driving):

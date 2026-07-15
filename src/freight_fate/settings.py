@@ -46,12 +46,16 @@ DRIVING_ASSIST_FIELDS = (
     "stop_and_go_assist",
     "lane_centering_assist",
     "descent_speed_control",
+    "exit_speed_assist",
+    "destination_approach_assist",
+    "curve_speed_assist",
+    "route_transition_assist",
 )
 
 DRIVING_ASSIST_PRESETS = {
-    "realistic": (True, True, True, False, "realistic"),
-    "balanced": (True, True, True, True, "balanced"),
-    "all": (True, True, True, True, "interactive"),
+    "realistic": (True, True, True, False, "realistic", True, False, True, True),
+    "balanced": (True, True, True, True, "balanced", True, True, True, True),
+    "all": (True, True, True, True, "interactive", True, True, True, True),
 }
 
 
@@ -80,6 +84,10 @@ class Settings:
     stop_and_go_assist: bool = True
     lane_centering_assist: bool = False
     descent_speed_control: str = "realistic"
+    exit_speed_assist: bool = True
+    destination_approach_assist: bool = False
+    curve_speed_assist: bool = True
+    route_transition_assist: bool = True
     # Holds a gentle speed through low-speed zones where adaptive cruise is
     # unavailable, so nobody has to keep the accelerator key held down. An
     # input-accessibility aid, not a realism choice: presets never touch it.
@@ -188,11 +196,15 @@ class Settings:
         if data is not None and "driving_assistance_preset" not in data:
             s.lane_departure_warning = s.steering_assist != "off"
             s.lane_centering_assist = s.steering_assist == "light"
-            s.automatic_emergency_braking = False
-            s.stop_and_go_assist = False
-            s.descent_speed_control = "off"
+            for field in DRIVING_ASSIST_FIELDS:
+                if field == "descent_speed_control":
+                    setattr(s, field, "off")
+                elif field not in ("lane_departure_warning", "lane_centering_assist"):
+                    setattr(s, field, False)
             s.driving_assistance_preset = "custom"
-        for field in DRIVING_ASSIST_FIELDS[:-1]:
+        for field in DRIVING_ASSIST_FIELDS:
+            if field == "descent_speed_control":
+                continue
             if not isinstance(getattr(s, field), bool):
                 setattr(s, field, getattr(cls(), field))
         if s.descent_speed_control not in ("off", "realistic", "balanced", "interactive"):

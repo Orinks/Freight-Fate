@@ -707,7 +707,7 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Driving assistance preset: {self._assist_preset_label()}",
                     lambda: self._cycle_assist_preset(1),
-                    help="Realistic provides modern truck safety support. Balanced adds light lane centering and downhill speed help. All assists enables every available driving assist. Changing an individual assist makes this Custom. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
+                    help="Realistic provides modern truck safety support. Balanced adds light lane centering and downhill speed help. All assists enables every available driving assist. Changing an individual assist makes this Custom. You still steer, choose routes, confirm exits, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
                 )
             ]
             items.extend(
@@ -1125,6 +1125,26 @@ class SettingsCategoryState(MenuState):
                 "descent_speed_control",
                 "Descent speed control",
                 "Manages engine braking on descents. Balanced and Interactive capture a lower target when you brake. All assists also selects safe targets and uses stronger intervention.",
+            ),
+            (
+                "exit_speed_assist",
+                "Exit speed assistance",
+                "Slows for an already-selected exit; you still confirm and take it.",
+            ),
+            (
+                "destination_approach_assist",
+                "Destination approach assistance",
+                "Slows and stops at the selected facility arrival point; it never enters the yard or docks.",
+            ),
+            (
+                "curve_speed_assist",
+                "Curve speed assistance",
+                "Reduces speed workload for mapped curves; you still steer.",
+            ),
+            (
+                "route_transition_assist",
+                "Route-transition assistance",
+                "Helps manage speed and lane workload at confirmed route transitions.",
             ),
             (
                 "speed_keeper",

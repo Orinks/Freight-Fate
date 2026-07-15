@@ -180,6 +180,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._descent_control_active = False
         self._descent_limit_state = ""
         self._descent_capture_active = False
+        self._assist_exit_slowing_said = False
+        self._curve_assist_active = False
+        self._transition_assist_active = False
         self._keeper_mph: float | None = None
         self._keeper_throttle = 0.0
         self._keeper_zone = ""
