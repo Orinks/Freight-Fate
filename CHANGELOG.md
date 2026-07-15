@@ -372,6 +372,16 @@
 
 ### Fixed
 
+- **Street directions come one turn at a time now.** Setting out on city
+  streets used to read the whole route in one burst -- start, turn, and
+  continue directions all at once. The navigator now speaks only the next
+  maneuver, announcing each turn as you approach it.
+
+- **Street names no longer read out raw map codes.** Some streets spoke
+  their entire highway-number list from the source map data, like "North
+  Michigan Street, S R 9 3 3, B U S, U S 3 1". Spoken street names now
+  keep just the street and its primary route number.
+
 - **The merge instruction is the first thing you hear when you depart.**
   Pulling out with a load used to announce a travel plaza ahead before the
   "merge onto the highway" instruction, all in the same breath as the

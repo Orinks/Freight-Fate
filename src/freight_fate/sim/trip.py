@@ -23,6 +23,7 @@ from .weather import WeatherSystem
 # Keep the two uses on one constant; letting them drift is what caused resumed
 # trips to occasionally replay a STOP_AHEAD.
 STOP_AHEAD_LOOKAHEAD_MI = 5.0
+LOCAL_TURN_LOOKAHEAD_MI = 0.3  # street maneuvers announce at block scale, not highway scale
 
 
 def _spoken_distance(value: float, unit: str) -> str:
@@ -1360,9 +1361,23 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 self._emit(TripEventKind.STOP_AHEAD, " ".join(parts), stop=stop)
 
     def _check_navigation_cues(self) -> None:
+        # One maneuver at a time on street chains: several block-scale
+        # boundaries sit inside the generic lookahead, so a departure tick
+        # would otherwise read the whole itinerary at once. Only the nearest
+        # not-yet-passed local turn may speak each tick.
+        next_turn_key = None
+        next_turn_ahead = None
+        for cue in self.navigation_cues:
+            if cue.kind != "local_turn":
+                continue
+            ahead = cue.at_mi - self.position_mi
+            if ahead >= -0.1 and (next_turn_ahead is None or ahead < next_turn_ahead):
+                next_turn_key, next_turn_ahead = cue.key, ahead
         for cue in self.navigation_cues:
             ahead = cue.at_mi - self.position_mi
             if cue.kind == "interchange":
+                continue
+            if cue.kind == "local_turn" and cue.key != next_turn_key:
                 continue
             if cue.kind in ("continue", "onramp"):
                 key = f"{cue.key}:near"
@@ -1404,7 +1419,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                     self._announced_navigation.add(near_key)
                     self._emit(TripEventKind.STATE_CROSSING, cue.near_text, cue=cue)
                 continue
-            lookahead = 2.0
+            # Street maneuvers use a block-scale lookahead; the highway-scale
+            # default would put a whole surface chain "ahead" at departure.
+            lookahead = LOCAL_TURN_LOOKAHEAD_MI if cue.kind == "local_turn" else 2.0
             if 0 < ahead <= lookahead and advance_key not in self._announced_navigation:
                 self._announced_navigation.add(advance_key)
                 distance = self._distance_text(ahead)

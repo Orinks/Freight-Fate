@@ -101,6 +101,34 @@ city service drives below.)
       endpoints at scale -- extend `HIGH_CONFIDENCE_TYPES` in
       `tools/build_facility_approaches.py` after judging spoken-name
       quality on a sample.
+- [x] **Street cue pacing and clean spoken names.** Street cues pace one
+      maneuver at a time with a block-scale lookahead (a departure used to
+      read the whole itinerary in one burst), and spoken street names trim
+      raw OSM ref lists at load ("(SR 933;BUS US 31)" speaks as "(SR 933)").
+- [ ] **Interactive street turns ride nromey's turn-by-turn work.** A
+      steer-each-turn prototype (arrow key inside a reaction window, missed
+      turns stop and turn around, realistic-preset default) was built and
+      then withdrawn on 2026-07-15 in favor of the fork's richer
+      turn-by-turn solution on the PR #75 line. When that lands, fold the
+      one-maneuver pacing above into it and revisit whether manual steering
+      still needs a preset hook here.
+- [ ] **Normalize street refs in the builder sweep.** The runtime trims
+      multi-ref lists to the first ref, but the baked data still carries
+      them (1,185 in facility_approaches.json), and abbreviations like
+      "BUS US 31" or "Hist" would read better expanded ("Business US 31",
+      "Historic"). Fold proper ref selection and expansion into the next
+      facility-approach/city-service geometry sweep.
+- [ ] **Street chains for single-segment approaches.** A 2026-07-15 logged
+      playtest out of Gary Intermodal Ramp had no spoken street guidance in
+      either direction: its facility approach is source-backed but a single
+      non-turn-level segment (2.1 miles on Richard G. Hatcher Boulevard), and
+      the chain gates require a multi-segment turn-level chain, so both the
+      arrival and the loaded departure kept the scripted highway start.
+      Either let genuine source-backed single-road approaches drive as
+      (turnless) chains -- "out of the gate onto Richard G. Hatcher
+      Boulevard, 2.1 miles to the I-90 on-ramp" is real guidance -- or make
+      the next facility-approach sweep try harder for turn-level geometry at
+      intermodal ramps like Gary's before falling back to one segment.
 - [x] **Template facility realism pass.** Template port terminals are now
       gated on a MARAD/USACE-derived allowlist of real deep-water, Great
       Lakes, and navigable-river port cities (282 -> 78), and template

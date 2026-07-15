@@ -1,6 +1,8 @@
 import pygame
 import pytest
 
+from freight_fate.data.world_services import _spoken_road_text
+
 
 def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
@@ -80,7 +82,16 @@ def test_city_service_data_covers_every_supported_city(world):
                 assert service.fallback
             elif geometry is not None and geometry.turn_level:
                 assert route.miles == pytest.approx(geometry.total_miles)
-                assert route.highways == [segment.road for segment in geometry.segments]
+                # Route legs speak the sanitized road name: raw multi-ref
+                # lists are trimmed to the first ref, and Route.highways
+                # collapses the consecutive duplicates that trimming can
+                # create (the street itself did not change).
+                spoken = []
+                for segment in geometry.segments:
+                    road = _spoken_road_text(segment.road)
+                    if not spoken or spoken[-1] != road:
+                        spoken.append(road)
+                assert route.highways == spoken
             else:
                 assert route.miles == approach.approach_miles
                 assert route.highways[0] == approach.road
