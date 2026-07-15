@@ -62,8 +62,16 @@ terminal becomes the anchor of that week instead of a spawn point.
       advisory 25"), guide the bend with a panned tone tracking the road
       center (the lane-guidance audio grammar), require the slowdown, and
       let hot entries pay physics consequences (drift off-lane, load and
-      ice against the lateral-traction bullet above). Assist presets keep
-      it optional; realism players steer the mountain.
+      ice against the lateral-traction bullet above). Owner-shaped design
+      points (2026-07-15): opt-in as a new DRIVING_ASSIST_FIELDS entry so
+      Josh's presets own it (All assists = today's auto-curves, Realistic
+      = drive them yourself); keyboard stays first-class
+      (tap-to-nudge/hold-to-sweep with the guidance tone closing the
+      loop) with analog pad.steering as the smoother option -- the lane
+      code reads it already; and a terse safe-speed key speaking one
+      grip-adjusted number ("Safe speed 18" -- weather baked into the
+      math, never into the speech), same verdict grammar as the G grade
+      key.
 - [ ] **Signal-and-steer turns on surface streets (owner idea
       2026-07-15).** Turn-by-turn today is automatic: the truck follows
       the baked chain, the player hears the cue and panned chime and only
