@@ -372,6 +372,14 @@
 
 ### Fixed
 
+- **Port terminals only show up in cities that really have a port now.**
+  Inland towns like Dallas, Atlanta, and Lampasas no longer offer loads
+  from a make-believe port terminal. Port freight comes from coastal,
+  Great Lakes, and navigable-river cities with working docks, and small
+  towns far from any rail yard no longer list an intermodal ramp on the
+  dispatch board. If a saved dispatch board still shows one of the old
+  offers, accepting it politely pulls the load instead of misbehaving.
+
 - **Restoring a cloud backup works again.** Every new server-verified backup
   was wrongly refused with "failed its integrity check" the moment you tried
   to restore it. The refusal was the game's mistake, not a problem with your

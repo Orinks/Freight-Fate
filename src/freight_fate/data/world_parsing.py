@@ -118,6 +118,16 @@ def _expand_market_locations(
     for facility_type in _dedupe(desired_types):
         if facility_type in existing_types:
             continue
+        # Geography gate: region/state market tags over-stamp water- and
+        # rail-dependent types; skip a template the city plainly can't host
+        # (curated facilities above are never gated).
+        gate = TEMPLATE_FACILITY_CITY_GATES.get(facility_type)
+        if gate is not None:
+            allowlist, denylist = gate
+            if allowlist is not None and city_key not in allowlist:
+                continue
+            if denylist is not None and city_key in denylist:
+                continue
         location = _template_location(city_key, spoken_city, lat, lon, facility_type, market_tags)
         if location.name.lower() in existing_names:
             location = _template_location(
