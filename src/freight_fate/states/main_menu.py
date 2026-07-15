@@ -1182,6 +1182,7 @@ class SettingsCategoryState(MenuState):
             return
         if field not in DRIVING_ASSIST_FIELDS:
             return
+        was_custom = self.ctx.settings.driving_assistance_preset == "custom"
         if field == "descent_speed_control":
             levels = ("off", "realistic", "balanced", "interactive")
             current = levels.index(self.ctx.settings.descent_speed_control)
@@ -1190,8 +1191,12 @@ class SettingsCategoryState(MenuState):
             setattr(self.ctx.settings, field, not getattr(self.ctx.settings, field))
         self.ctx.settings.refresh_driving_assistance_preset()
         self._announce()
-        if self.ctx.settings.driving_assistance_preset == "custom":
-            self.ctx.say("Driving assistance preset: Custom.")
+        # Queue the preset note behind the toggle announcement (an interrupting
+        # say here would cut off the new on/off state the player just changed),
+        # and only on the change into Custom -- repeating it on every later
+        # toggle is noise the preset row already answers.
+        if self.ctx.settings.driving_assistance_preset == "custom" and not was_custom:
+            self.ctx.say("Driving assistance preset: Custom.", interrupt=False)
 
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
