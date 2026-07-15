@@ -17,6 +17,11 @@
   readings are gone: the limit you hear at the wheel now matches the
   road you are actually on, and speeding enforcement judges you against
   that honest number.
+- **Turning a driving assist on or off now speaks its new state, like every
+  other setting.** The note that the preset had become Custom used to talk
+  over the toggle announcement, so you heard the note but never whether the
+  assist was now on or off. The note now waits its turn and is only spoken
+  the first time a change makes the preset Custom.
 - **Careers from older versions now trade every cargo type at real market
   prices.** A career started before the cargo list grew to sixteen classes
   kept freight-market prices only for the original eight, so pay for the

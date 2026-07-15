@@ -213,7 +213,13 @@ def test_driving_assistance_preset_keyboard_path_and_custom_transition():
 
     app = App()
     spoken = []
-    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+    utterances = []
+
+    def fake_say(text, interrupt=True):
+        spoken.append(text)
+        utterances.append((text, interrupt))
+
+    app.ctx.say = fake_say
     try:
         cat = open_settings_category(app, "Driving assistance")
         assert cat.items[0].text == "Driving assistance preset: Realistic"
@@ -238,6 +244,26 @@ def test_driving_assistance_preset_keyboard_path_and_custom_transition():
         cat.handle_event(key_event(pygame.K_RIGHT))
         assert app.ctx.settings.driving_assistance_preset == "realistic"
         assert original_index == 1
+
+        # A toggle that lands on Custom queues the preset note after the
+        # spoken on/off state instead of interrupting it, and later toggles
+        # while already Custom do not repeat the note.
+        spoken.clear()
+        utterances.clear()
+        cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.driving_assistance_preset == "custom"
+        state_line = next(
+            i for i, line in enumerate(spoken) if "Automatic emergency braking: off" in line
+        )
+        assert state_line < spoken.index("Driving assistance preset: Custom.")
+        assert ("Driving assistance preset: Custom.", False) in utterances
+        spoken.clear()
+        cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.driving_assistance_preset == "custom"
+        assert any("Lane-departure warning: off" in line for line in spoken)
+        assert "Driving assistance preset: Custom." not in spoken
     finally:
         app.shutdown()
 
