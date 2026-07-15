@@ -1,0 +1,1635 @@
+{
+  "ramps": [
+    {
+      "lat": 31.893618,
+      "lon": -106.465653,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 31.901287,
+      "lon": -106.447928,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 31.905058,
+      "lon": -106.521349,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 32.67267,
+      "lon": -116.084361,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 32.961608,
+      "lon": -105.795975,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 33.30382,
+      "lon": -111.088042,
+      "name": "Runaway truck lane",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 33.303892,
+      "lon": -111.08992,
+      "name": "Runaway truck lane",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 33.65435,
+      "lon": -85.785237,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 33.787467,
+      "lon": -110.494067,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 33.948105,
+      "lon": -111.422012,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 33.94937,
+      "lon": -111.419341,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.023233,
+      "lon": -118.802037,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.026178,
+      "lon": -118.800733,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.091783,
+      "lon": -118.400177,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.210026,
+      "lon": -118.200174,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.21192,
+      "lon": -118.200169,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.21441,
+      "lon": -118.200139,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.320424,
+      "lon": -86.31168,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.537575,
+      "lon": -111.91878,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.537631,
+      "lon": -111.923648,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.687207,
+      "lon": -113.601039,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.707635,
+      "lon": -111.743526,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.709098,
+      "lon": -111.739441,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.764367,
+      "lon": -83.921504,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.914068,
+      "lon": -118.923118,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.917437,
+      "lon": -118.923961,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.922825,
+      "lon": -118.923889,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 34.999501,
+      "lon": -119.419878,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.035975,
+      "lon": -119.419804,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.174353,
+      "lon": -114.592232,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.181743,
+      "lon": -85.81004,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.185573,
+      "lon": -114.476362,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.185723,
+      "lon": -114.479963,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.187569,
+      "lon": -114.54739,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.18828,
+      "lon": -114.544597,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.196662,
+      "lon": -85.813993,
+      "name": "Monteagle Ramp 2",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.238526,
+      "lon": -83.331858,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.264754,
+      "lon": -83.299643,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.306418,
+      "lon": -85.165079,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.308519,
+      "lon": -85.164205,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.464259,
+      "lon": -115.461245,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.465936,
+      "lon": -115.457902,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.601824,
+      "lon": -117.909682,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.602208,
+      "lon": -117.911353,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.622352,
+      "lon": -82.221983,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.622811,
+      "lon": -82.223045,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.624625,
+      "lon": -82.208596,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.624745,
+      "lon": -82.209676,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.624947,
+      "lon": -82.213503,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.625045,
+      "lon": -82.214676,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.784688,
+      "lon": -92.543205,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.841144,
+      "lon": -82.04765,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.842343,
+      "lon": -82.047156,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.862312,
+      "lon": -82.532954,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.880844,
+      "lon": -82.55075,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.915226,
+      "lon": -81.938629,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.92033,
+      "lon": -82.55757,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.9702,
+      "lon": -82.551457,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.97149,
+      "lon": -82.550511,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.993153,
+      "lon": -82.543832,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 35.995354,
+      "lon": -82.543091,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.047286,
+      "lon": -81.593761,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.203549,
+      "lon": -81.43942,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.204214,
+      "lon": -81.440525,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.2078,
+      "lon": -81.453106,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.208201,
+      "lon": -81.454004,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.518968,
+      "lon": -107.325301,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.528343,
+      "lon": -107.331155,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.597632,
+      "lon": -80.742516,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.624927,
+      "lon": -80.732681,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.635432,
+      "lon": -111.648971,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.642304,
+      "lon": -80.715766,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 36.70666,
+      "lon": -80.299008,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.140066,
+      "lon": -81.129602,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.157414,
+      "lon": -82.644234,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.157926,
+      "lon": -82.642228,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.160123,
+      "lon": -83.383971,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.182123,
+      "lon": -113.274038,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.190686,
+      "lon": -80.723986,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.192059,
+      "lon": -80.724378,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.327228,
+      "lon": -81.301029,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.454366,
+      "lon": -106.888469,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.471789,
+      "lon": -106.873232,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.575351,
+      "lon": -83.706332,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.662879,
+      "lon": -107.800731,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.66484,
+      "lon": -107.798418,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.730608,
+      "lon": -112.838565,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.739286,
+      "lon": -107.076809,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 37.740829,
+      "lon": -79.333579,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.018458,
+      "lon": -108.914242,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.032807,
+      "lon": -78.811325,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.162229,
+      "lon": -122.456084,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.162349,
+      "lon": -122.456018,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.447864,
+      "lon": -106.356021,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.548556,
+      "lon": -106.300643,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.599183,
+      "lon": -79.178808,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.643114,
+      "lon": -78.627582,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.722776,
+      "lon": -85.369528,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.919106,
+      "lon": -84.883397,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.931006,
+      "lon": -110.466139,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 38.931894,
+      "lon": -110.488656,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.116618,
+      "lon": -119.779933,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.117824,
+      "lon": -119.777472,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.119632,
+      "lon": -119.840712,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.14243,
+      "lon": -79.001519,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.2061,
+      "lon": -120.792869,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.228816,
+      "lon": -79.163954,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.253874,
+      "lon": -119.970874,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.480755,
+      "lon": -79.094805,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.586892,
+      "lon": -106.245441,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.5894,
+      "lon": -106.243469,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.622217,
+      "lon": -106.278253,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.623952,
+      "lon": -106.277265,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.626626,
+      "lon": -105.910835,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.626705,
+      "lon": -105.913665,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.626973,
+      "lon": -105.913817,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.651938,
+      "lon": -106.016985,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.652368,
+      "lon": -106.014626,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.654028,
+      "lon": -79.744042,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.673713,
+      "lon": -105.971685,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.673806,
+      "lon": -105.969255,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.69872,
+      "lon": -105.236758,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.706765,
+      "lon": -78.310118,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.707159,
+      "lon": -78.262664,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.708459,
+      "lon": -78.26575,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.865718,
+      "lon": -79.681523,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 39.931035,
+      "lon": -77.931733,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.014058,
+      "lon": -78.117878,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.016531,
+      "lon": -78.123656,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.138376,
+      "lon": -79.469869,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.139132,
+      "lon": -79.470588,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.16681,
+      "lon": -75.885674,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.16748,
+      "lon": -75.88764,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.205864,
+      "lon": -79.179605,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.343508,
+      "lon": -112.604847,
+      "name": "Truck Runaway Lane",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.366515,
+      "lon": -106.78214,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.426263,
+      "lon": -80.030717,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.635265,
+      "lon": -109.479397,
+      "name": "heavy traffic runaway line",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.637248,
+      "lon": -111.493064,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.727116,
+      "lon": -77.879267,
+      "name": "",
+      "ref": "SR 9305",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.733871,
+      "lon": -77.63596,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.74389,
+      "lon": -111.688586,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.801883,
+      "lon": -78.059553,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.802344,
+      "lon": -78.06031,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.849237,
+      "lon": -77.694162,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.873077,
+      "lon": -75.788886,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.898062,
+      "lon": -78.203586,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 40.938125,
+      "lon": -78.975821,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.035629,
+      "lon": -109.410171,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.22628,
+      "lon": -75.800743,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.238583,
+      "lon": -75.80622,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.35115,
+      "lon": -111.807728,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.359448,
+      "lon": -124.005969,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.359705,
+      "lon": -124.004787,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.376144,
+      "lon": -123.994251,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.391017,
+      "lon": -79.838523,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.391702,
+      "lon": -79.837935,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.408544,
+      "lon": -78.708223,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.416784,
+      "lon": -78.714608,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.422847,
+      "lon": -78.723221,
+      "name": "Run Off Road",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.428358,
+      "lon": -78.714628,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.434449,
+      "lon": -78.713387,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.460639,
+      "lon": -75.558891,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.495264,
+      "lon": -111.996077,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.496313,
+      "lon": -109.487627,
+      "name": "Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.545403,
+      "lon": -75.971002,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.80488,
+      "lon": -72.814286,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.825271,
+      "lon": -111.293076,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 41.941012,
+      "lon": -111.410051,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 42.086076,
+      "lon": -122.601443,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 42.093561,
+      "lon": -73.073171,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 42.094432,
+      "lon": -73.073405,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 42.157484,
+      "lon": -72.8204,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 42.15829,
+      "lon": -72.821995,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 42.687721,
+      "lon": -73.233525,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 42.878927,
+      "lon": -73.112106,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 42.89315,
+      "lon": -72.9558,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 42.896146,
+      "lon": -72.965131,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 42.994238,
+      "lon": -75.317375,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 42.997842,
+      "lon": -75.008125,
+      "name": "Runaway Vehicles",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.028431,
+      "lon": -91.203349,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.029832,
+      "lon": -71.020469,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.029865,
+      "lon": -71.020542,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.070046,
+      "lon": -75.311983,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.419359,
+      "lon": -103.474024,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.494211,
+      "lon": -110.920383,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.49522,
+      "lon": -110.907833,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.82439,
+      "lon": -99.317945,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.824717,
+      "lon": -99.315097,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.845946,
+      "lon": -116.228621,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.863159,
+      "lon": -116.214447,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.874555,
+      "lon": -116.201572,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 43.890962,
+      "lon": -116.20918,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 44.11234,
+      "lon": -107.272226,
+      "name": "Run away truck lane",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 44.118208,
+      "lon": -72.652734,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 44.33207,
+      "lon": -106.825289,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 44.347001,
+      "lon": -103.730101,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 44.58584,
+      "lon": -107.603819,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 44.775717,
+      "lon": -85.652875,
+      "name": "M-72 Runaway Truck Ramp",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 44.784409,
+      "lon": -107.968761,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 44.798237,
+      "lon": -107.909962,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 44.799662,
+      "lon": -107.963733,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 44.836861,
+      "lon": -120.930607,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.305678,
+      "lon": -121.816007,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.588335,
+      "lon": -118.617981,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.588444,
+      "lon": -118.61676,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.588647,
+      "lon": -118.615021,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.601003,
+      "lon": -118.631827,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.601329,
+      "lon": -118.632894,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.602332,
+      "lon": -118.635523,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.804258,
+      "lon": -116.2866,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.804818,
+      "lon": -116.28513,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.827579,
+      "lon": -116.255089,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.828119,
+      "lon": -116.253249,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.909682,
+      "lon": -112.309113,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 45.909985,
+      "lon": -112.312003,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.206887,
+      "lon": -119.743404,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.311463,
+      "lon": -122.374356,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.426716,
+      "lon": -117.000061,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.432747,
+      "lon": -116.994425,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.433958,
+      "lon": -117.340294,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.43425,
+      "lon": -116.992224,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.442776,
+      "lon": -116.985091,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.443949,
+      "lon": -116.983373,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.447463,
+      "lon": -116.974861,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.449263,
+      "lon": -116.972021,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.46102,
+      "lon": -116.963921,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.461437,
+      "lon": -116.96539,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 46.683032,
+      "lon": -121.545524,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 47.465531,
+      "lon": -115.755036,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 47.469356,
+      "lon": -115.769976,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 47.762397,
+      "lon": -90.344042,
+      "name": "",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    },
+    {
+      "lat": 48.703078,
+      "lon": -116.313732,
+      "name": "Truck Runaway Lane",
+      "ref": "",
+      "source": "OpenStreetMap highway=escape ways, read from local Geofabrik state extracts; development-time. (c) OpenStreetMap contributors, ODbL."
+    }
+  ]
+}

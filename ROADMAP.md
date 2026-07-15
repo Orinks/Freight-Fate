@@ -48,8 +48,32 @@ terminal becomes the anchor of that week instead of a spawn point.
 - [ ] Staged jake in-cab control: the physics supports stages 1-3 but the J key still toggles off/full. Add a spoken stage cycle (and gamepad binding) so drivers can pick partial retard on purpose.
 - [x] **Traction deep-dive: freezing rain, hydroplaning, jake grip cap.** `WeatherKind.ICE` (grip 0.15, a third of snow) forms physically -- rain sampled in the 1 to -4 C band glazes, and the live NWS feed maps freezing rain/sleet/ice to it instead of snow -- with its own hazards, spoken "ice on the road" status, and a bench `stop-ice` anchor (880 ft from 40 mph vs 329 dry from 60). Hydroplaning follows the Horne relation: onset ~106 mph on fresh tread (trucks at highway pressure basically never plane), pulled down by tread wear and standing-water depth (`WeatherEffects.water_mm` -> `truck.water_mm`) -- 80 percent worn rubber planes at ~59 in heavy rain, grip collapsing toward a 0.3 floor over a 12 mph band, with a spoken onset warning and hydro-aware conditions incidents. The jake is now capped by drive-axle grip (42.5 percent of gross, half usable before lockup): dry never binds, glare ice breaks stage 3 loose in a low gear while stage 1 stays hooked up, `jake_slipping` speaks a warning, and the bench `grade-jake-ice` run shows the capped jake losing ground on a 4 percent it would hold dry.
 - [ ] Jake-slip and hydroplane consequences beyond the warning: sustained sliding should be able to escalate into a real incident (trolley jackknife / spin) through the event system, which needs a "release the jake / ease off" resolution verb rather than the brake-to-answer hazard contract.
-- [ ] Lateral traction on curves and ramps: no curve geometry exists in the 1-D model, so cornering grip, curve-speed advisories keyed to load and ice, and rollover/off-tracking stay future -- rides the interchange/ramp data and the off-tracking phase gated on surface streets.
-- [ ] Runaway truck ramps as regular highway furniture on steep descents: announced on approach, takeable as the escape move when the brakes are gone (the physics already runs away honestly -- bench `grade-runaway` tops 149 mph and grenades the engine past redline).
+- [x] **Dense maxspeed and curve-geometry sweep (2026-07-15).** Every leg in
+      the country re-sampled along its real routed geometry with a
+      curvature-adaptive sampler (dense through curves, collapsed on tangents):
+      posted speed limits now step through the real canyon and mountain zones a
+      driver hears, instead of one heuristic guess -- all 1,287 legs carry a
+      profile and the anchor linter reports zero on the fresh data. The same
+      pass banked the fine data the driving model needs next: 63,724 per-curve
+      records (radius, direction, and a physics advisory speed v = sqrt(a_lat
+      R)) and 96 real runaway-truck ramps, stored as delta-encoded, sharded,
+      regenerable text under `world_data/us/geometry` and
+      `world_data/us/gameplay`. Tools: `bake_curve_geometry.py` (the sweep) and
+      `harvest_escape_ramps.py` (escape ramps read offline from the local
+      Geofabrik PBFs, since the self-hosted Overpass extract omits them).
+- [ ] Lateral traction on curves and ramps: the curve geometry now exists (the
+      2026-07-15 sweep above bakes per-curve radius, direction, and an advisory
+      speed per leg), but the 1-D truck model does not yet consume it -- so
+      cornering grip, curve-speed advisories keyed to load and ice, and
+      rollover/off-tracking stay future, now unblocked on the data side and
+      gated on surface streets for off-tracking.
+- [ ] Runaway truck ramps as regular highway furniture on steep descents: the
+      real ramps are now baked (96 tagged escape ramps with side and milepost
+      in `world_data/us/gameplay/ramps.jsonl`), so approach announcements and
+      the escape move are wiring work now, not a data gap -- announced on
+      approach, takeable as the escape move when the brakes are gone (the
+      physics already runs away honestly -- bench `grade-runaway` tops 149 mph
+      and grenades the engine past redline).
 - [x] **Chain laws and the tire-type ladder.** Traction equipment is now a three-rung ladder on the per-truck condition record: all-season (today's physics), winter compound (x1.3 grip on snow, x1.5 on ice, honestly paid for with x1.5 tread wear and a 3 percent dry-grip loss -- owner-operator garage purchase at a 25 percent set premium; company tractors run carrier rubber), and chains (x1.5 snow / x2.5 ice, steel replaces the contact patch so tread wear and hydroplaning stop mattering, $750 a set, carrier-billed for company drivers). Chain-law areas sit over sustained steep grade (5 percent for a mile-plus) and activate from live weather -- snow = Level 1 (winter tires or chains), freezing rain = Level 2 (chains) -- with a flashing-sign GPS callout on approach, escalation re-announced. Chaining up is a pause-menu act while stopped: 25 minutes and 6 fatigue by day, 40 minutes and 10 fatigue by headlamp at night (the lonely-snowy-night-out-of-Denver penalty, delivered); removal 10 minutes. Chains are consumable: ~500 miles used right, ~2 miles on bare pavement at highway speed before a cross chain snaps into the fender (4 percent damage, set scrapped, spoken cue). Non-compliance in an active law speaks a warning, then a seeded checkpoint past the area midpoint writes a $500 citation (0.6 staffed chance, one roll per area -- reloads do not re-roll). Bench anchors: ice stop 880 ft stock / 613 winter / 215 chained from 30; the chained jake holds the icy 4 percent it lost unchained (2:14 slip vs 15:06).
 - [ ] Chain-up areas as physical pullouts: today chaining works anywhere stopped and the pullout is spoken flavor; a real chain-up area stop (safe, lit, maybe a helper service that installs for money) rides the stoppable-stop spine with Big Buck's.
 - [ ] Road-stop tire service sells wear repair only; swapping compound (and pricing winter rubber) stays a terminal-garage act. Revisit if field tire swaps earn their menu weight.

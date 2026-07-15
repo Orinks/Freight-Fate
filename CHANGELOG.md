@@ -49,6 +49,16 @@
 
 ### Changed
 
+- **Speed limits follow the real road now, all the way across the map.**
+  Every route in the country carries its actual posted limits, read from
+  real map data instead of one smooth estimate. You will hear the honest
+  zones a mountain highway steps through -- the slow canyon stretches, the
+  drop before a long descent, the climb back up to highway speed -- where the
+  truck used to hold a single guess for miles. Adaptive cruise, the speed
+  keeper, and the spoken limit changes all follow these real limits. The same
+  sweep quietly recorded every curve and every real runaway-truck ramp along
+  the way, groundwork for the steering and descent features still to come.
+
 - **The career is a months-long arc now, and every level up hands you
   something real.** Experience pays out more honestly -- every settled load
   teaches a flat lesson, on-time streaks compound up to forty-five percent,

@@ -1082,7 +1082,10 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
 
     trip.position_mi = 120.3
     rest = trip.update(0.0)
-    assert not _gps_events(rest)
+    # The dense maxspeed sweep gives this I-65 leg a real 65 mph zone at mile
+    # 120; jumping here from the 55 zone at the crossing announces that raise.
+    # The rest-stop cue still does not re-fire -- that is what this asserts.
+    assert _gps_messages(rest) == ["Speed limit raised to 65."]
 
 
 def test_likely_parking_is_not_announced_as_truck_parking():
