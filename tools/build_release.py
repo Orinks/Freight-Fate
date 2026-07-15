@@ -528,6 +528,62 @@ def strip_user_data(build_dir: Path) -> None:
                 print(f"Stripped bundled '{name}/' from the build (never ship user data).")
 
 
+def _archive_entries(out: Path) -> dict[str, tuple[int, int]]:
+    """Map an archive's file entries to (size, permission mode)."""
+    if out.name.endswith(".tar.gz"):
+        with tarfile.open(out, "r:gz") as tar:
+            return {m.name: (m.size, m.mode) for m in tar.getmembers() if m.isfile()}
+    with zipfile.ZipFile(out) as z:
+        return {
+            info.filename: (info.file_size, (info.external_attr >> 16) & 0o7777)
+            for info in z.infolist()
+            if not info.is_dir()
+        }
+
+
+def verify_archive(out: Path) -> None:
+    """Re-open the finished archive and prove the payload survived archiving.
+
+    ``verify_packaged_payload`` checks the staged build folder, but the
+    archiving step after it is what players actually download. A bad glob,
+    archiver quirk, or dropped permission bit here would ship a download with
+    no runnable game inside (for example a Linux snapshot missing its
+    executable) and nothing else would notice.
+    """
+    if out.name.endswith("-macos.zip"):
+        root = f"{APP_NAME}.app/Contents/MacOS"
+        exe_entry = f"{root}/{APP_NAME}"
+        needs_exec = True
+    elif out.name.endswith("-linux-x64.tar.gz"):
+        root = APP_NAME
+        exe_entry = f"{root}/{APP_NAME}"
+        needs_exec = True
+    elif out.name.endswith("-windows-portable.zip"):
+        root = APP_NAME
+        exe_entry = f"{root}/{APP_NAME}.exe"
+        needs_exec = False
+    else:
+        raise RuntimeError(f"Unrecognized release archive name: {out.name}")
+
+    entries = _archive_entries(out)
+    if exe_entry not in entries:
+        raise RuntimeError(f"Release archive is missing the executable {exe_entry}: {out.name}")
+    size, mode = entries[exe_entry]
+    if size == 0:
+        raise RuntimeError(f"Release archive executable is empty: {exe_entry} in {out.name}")
+    if needs_exec and not mode & 0o111:
+        raise RuntimeError(
+            f"Release archive executable lost its executable permission: {exe_entry} in {out.name}"
+        )
+
+    required = ("build_info.json", "LICENSE.txt", "USER_MANUAL.md", "freight_fate/sounds.pak")
+    missing = [name for name in required if f"{root}/{name}" not in entries]
+    if missing:
+        raise RuntimeError(
+            f"Release archive is missing payload files: {', '.join(missing)} in {out.name}"
+        )
+
+
 def archive(build_dir: Path, label: str) -> Path:
     if sys.platform == "win32":
         out = DIST / f"{APP_NAME}-{label}-windows-portable.zip"
@@ -573,6 +629,7 @@ def main() -> int:
         smoke_check(build_dir)
     strip_user_data(build_dir)  # smoke check leaves a saves/ folder; never ship it
     out = archive(build_dir, label)
+    verify_archive(out)
     print(f"Built {out} ({out.stat().st_size / 1e6:.1f} MB)")
     return 0
 
