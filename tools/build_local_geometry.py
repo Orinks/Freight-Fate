@@ -22,6 +22,7 @@ from typing import Any
 import osmium
 
 from freight_fate.data.world import get_world
+from freight_fate.data.world_services import CITY_SERVICE_APPROACH_MILES
 
 ROOT = Path(__file__).resolve().parents[1]
 CITY_SERVICES_PATH = ROOT / "src" / "freight_fate" / "data" / "city_services.json"
@@ -443,13 +444,32 @@ def geometry_record(target: Target, geometry: GeometryPath | None, extract: Path
             reason = "Target is beyond the bounded local route graph distance for this pass."
         else:
             reason = "No connected public-road path was found between the city context and target."
+    # Safety net for the 30-mile-errand bug: never bake an approach longer than
+    # the bounded local-route distance as one 25 mph segment. The match cap in
+    # build_city_services keeps sourced services within ~10 road-miles, so a
+    # real city service (a terminal or dealer on the city's industrial edge)
+    # keeps its honest distance; only an absurd residual beyond
+    # MAX_CITY_SERVICE_ROUTE_MI is clamped to the synthesized errand default.
+    fallback_miles = geometry.miles if geometry else target.approach_miles
+    if (
+        not turn_level
+        and target.target_type == "city_service"
+        and target.approach_miles > MAX_CITY_SERVICE_ROUTE_MI
+    ):
+        default_miles = CITY_SERVICE_APPROACH_MILES.get(target.role, 3.0)
+        reason = (
+            f"{reason} Approach clamped from {target.approach_miles:.1f} "
+            f"(beyond the {MAX_CITY_SERVICE_ROUTE_MI:.0f}-mile local-route limit) "
+            f"to {default_miles:.1f} synthesized errand miles."
+        ).strip()
+        fallback_miles = default_miles
     segments = (
         list(geometry.segments)
         if geometry
         else [
             {
                 "road": target.approach_road or "local approach road",
-                "miles": round(max(target.approach_miles, 0.4), 2),
+                "miles": round(max(fallback_miles, 0.4), 2),
                 "cue": f"Use {target.approach_road or 'the local approach road'} for the local approach.",
                 "speed_mph": 25.0,
             }
@@ -465,7 +485,7 @@ def geometry_record(target: Target, geometry: GeometryPath | None, extract: Path
         "estimated": bool(target.estimated or not turn_level),
         "fallback": not turn_level,
         "fallback_reason": reason,
-        "total_miles": round(geometry.miles if geometry else target.approach_miles, 2),
+        "total_miles": round(geometry.miles if geometry else fallback_miles, 2),
         "segments": clean_segments(segments),
         "final_hint": (
             "Final driveway, yard, gate, or dock path is not source-backed yet."

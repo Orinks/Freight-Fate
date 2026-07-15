@@ -372,6 +372,13 @@
 
 ### Fixed
 
+- **City services no longer send you across the county.** Driving to a
+  city's freight market, garage, or truck dealer could route you ten to
+  thirty-five miles to a look-alike business in a neighboring town -- an
+  hour-plus round trip just to run an errand. Now every city's services
+  point at a real facility within a short drive, and hundreds more cities
+  carry real, source-backed services instead of a generic stand-in.
+
 - **Port terminals only show up in cities that really have a port now.**
   Inland towns like Dallas, Atlanta, and Lampasas no longer offer loads
   from a make-believe port terminal. Port freight comes from coastal,
