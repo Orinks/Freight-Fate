@@ -372,6 +372,13 @@
 
 ### Fixed
 
+- **The merge instruction is the first thing you hear when you depart.**
+  Pulling out with a load used to announce a travel plaza ahead before the
+  "merge onto the highway" instruction, all in the same breath as the
+  dispatch summary, so the one line you had to act on was easy to miss.
+  Navigation now speaks first, and travel plaza and rest stop notices wait
+  a moment whenever another road announcement just played.
+
 - **Adaptive cruise no longer crawls behind traffic it has not caught up
   to.** Cruise used to match the speed of any slower vehicle up to two and
   a half miles ahead, so the truck could dawdle far below the limit behind

@@ -33,6 +33,11 @@ class DrivingEventMixin:
     def _should_space_ambient_event(self, event) -> bool:
         if event.kind == TripEventKind.WEATHER_CHANGE:
             return True
+        if event.kind == TripEventKind.STOP_AHEAD:
+            # Travel-plaza and rest-stop notices are informational: they queue
+            # behind whatever route speech just played instead of stacking on
+            # it -- at departure that keeps the merge instruction in front.
+            return True
         if event.kind == TripEventKind.GPS_CUE:
             cue = event.data.get("cue")
             return (
@@ -129,6 +134,12 @@ class DrivingEventMixin:
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:
                     self.ctx.audio.play(sound, pan=_route_event_sound_pan(event))
                 self.ctx.say_event(event.message, interrupt=False)
+                # Any spoken route line pushes spaced ambient chatter back, so
+                # an informational notice never lands on top of a navigation
+                # instruction the player needs to act on.
+                self._ambient_event_cooldown_s = tuning_for_time_scale(
+                    self.trip.time_scale
+                ).ambient_spacing_s
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play(sound or "ui/notify")
             zone = event.data.get("zone")

@@ -1152,10 +1152,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         )
         self._check_zones()
         self._check_speed_limit()
-        self._check_stops()
+        # Navigation before stop notices: when both fire on the same tick --
+        # departure is the big one, where the onramp merge cue and a nearby
+        # travel plaza announce together -- the actionable instruction must
+        # reach the event voice first.
+        self._check_navigation_cues()
         self._check_npc_traffic_cues()
         self._check_traffic_pressures()
-        self._check_navigation_cues()
+        self._check_stops()
         self._check_roadside_callouts()
         self._check_tolls()
         self._check_cities()

@@ -238,6 +238,56 @@ def test_truly_ambient_chatter_is_spaced_without_blocking_safety(monkeypatch):
         app.shutdown()
 
 
+def test_departure_merge_cue_is_emitted_before_the_stop_notice(world):
+    """Regression: at departure the travel-plaza notice used to be emitted
+    ahead of the onramp merge cue, so the one actionable instruction was the
+    last thing queued on the event voice."""
+    from test_weather_trip import make_trip
+
+    from freight_fate.sim.trip_models import RoadStop
+
+    trip, _truck = make_trip(world)
+    trip.stops = [RoadStop("Test Travel Plaza", 1.0)]
+    trip._announced_stops = set()
+    events = trip.update(1 / 60)
+
+    kinds = [
+        "merge" if getattr(e.data.get("cue"), "kind", "") == "onramp" else e.kind.value
+        for e in events
+        if e.kind in (TripEventKind.GPS_CUE, TripEventKind.STOP_AHEAD)
+    ]
+    assert "merge" in kinds
+    assert "stop_ahead" in kinds
+    assert kinds.index("merge") < kinds.index("stop_ahead")
+
+
+def test_stop_notice_yields_to_recent_route_speech(monkeypatch):
+    """A travel-plaza notice right after a spoken navigation line queues
+    behind the spacing window instead of stacking on the instruction."""
+    from freight_fate.app import App
+    from freight_fate.sim.driving_modes import tuning_for_time_scale
+
+    app = App()
+    try:
+        d = _driving(app)
+        calls = []
+        monkeypatch.setattr(
+            app.ctx, "say_event", lambda text, interrupt=True: calls.append((text, interrupt))
+        )
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+
+        merge = "Merge onto I-90 East toward South Bend; 66 miles."
+        plaza = "service plaza: Petro Stopping Centers in 1 mile. Press X to signal for the exit."
+        d._handle_trip_event(TripEvent(TripEventKind.GPS_CUE, merge))
+        d._handle_trip_event(TripEvent(TripEventKind.STOP_AHEAD, plaza))
+        assert [text for text, _ in calls] == [merge]  # the plaza notice waits
+
+        d._update_ambient_events(tuning_for_time_scale(d.trip.time_scale).ambient_spacing_s)
+        assert calls[-1] == (plaza, False)  # and speaks once the window clears
+    finally:
+        app.shutdown()
+
+
 def test_ambient_chatter_waits_while_hazard_is_active(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import AMBIENT_EVENT_SPACING_S
