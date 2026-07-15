@@ -13,6 +13,20 @@ log = logging.getLogger(__name__)
 TIME_SCALES = (10.0, 20.0, 40.0)
 PROFILE_SHARING_CONSENT_VERSION = 3
 
+DRIVING_ASSIST_FIELDS = (
+    "automatic_emergency_braking",
+    "lane_departure_warning",
+    "stop_and_go_assist",
+    "lane_centering_assist",
+    "descent_speed_control",
+)
+
+DRIVING_ASSIST_PRESETS = {
+    "realistic": (True, True, True, False, "realistic"),
+    "balanced": (True, True, True, True, "balanced"),
+    "all": (True, True, True, True, "interactive"),
+}
+
 
 @dataclass
 class Settings:
@@ -30,6 +44,12 @@ class Settings:
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
     steering_assist: str = "off"  # off/light/realistic lane drift
+    driving_assistance_preset: str = "realistic"
+    automatic_emergency_braking: bool = True
+    lane_departure_warning: bool = True
+    stop_and_go_assist: bool = True
+    lane_centering_assist: bool = False
+    descent_speed_control: str = "realistic"
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.5
@@ -76,9 +96,32 @@ class Settings:
             json.dump(asdict(self), f, indent=2)
         tmp.replace(self.path)
 
+    def apply_driving_assistance_preset(self, preset: str) -> None:
+        values = DRIVING_ASSIST_PRESETS[preset]
+        for field, value in zip(DRIVING_ASSIST_FIELDS, values, strict=True):
+            setattr(self, field, value)
+        self.driving_assistance_preset = preset
+        self._sync_legacy_lane_setting()
+
+    def refresh_driving_assistance_preset(self) -> str:
+        values = tuple(getattr(self, field) for field in DRIVING_ASSIST_FIELDS)
+        matches = [name for name, mapping in DRIVING_ASSIST_PRESETS.items() if mapping == values]
+        self.driving_assistance_preset = matches[0] if len(matches) == 1 else "custom"
+        self._sync_legacy_lane_setting()
+        return self.driving_assistance_preset
+
+    def _sync_legacy_lane_setting(self) -> None:
+        if self.lane_centering_assist:
+            self.steering_assist = "light"
+        elif self.lane_departure_warning:
+            self.steering_assist = "realistic"
+        else:
+            self.steering_assist = "off"
+
     @classmethod
     def load(cls) -> Settings:
         s = cls()
+        data = None
         try:
             with open(s.path, encoding="utf-8") as f:
                 data = json.load(f)
@@ -102,6 +145,24 @@ class Settings:
             s.hos_mode = "realistic"
         if s.steering_assist not in ("off", "light", "realistic"):
             s.steering_assist = "off"
+            s.lane_departure_warning = False
+            s.lane_centering_assist = False
+        if data is not None and "driving_assistance_preset" not in data:
+            s.lane_departure_warning = s.steering_assist != "off"
+            s.lane_centering_assist = s.steering_assist == "light"
+            s.automatic_emergency_braking = False
+            s.stop_and_go_assist = False
+            s.descent_speed_control = "off"
+            s.driving_assistance_preset = "custom"
+        for field in DRIVING_ASSIST_FIELDS[:-1]:
+            if not isinstance(getattr(s, field), bool):
+                setattr(s, field, getattr(cls(), field))
+        if s.descent_speed_control not in ("off", "realistic", "balanced", "interactive"):
+            s.descent_speed_control = "realistic"
+        if s.driving_assistance_preset not in (*DRIVING_ASSIST_PRESETS, "custom"):
+            s.driving_assistance_preset = "custom"
+        if data is None or "driving_assistance_preset" in data:
+            s.refresh_driving_assistance_preset()
         if s.automatic_direction_changes not in ("simple", "deliberate"):
             s.automatic_direction_changes = "simple"
         if s.update_channel not in ("", "stable", "dev"):

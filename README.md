@@ -38,6 +38,7 @@ visual display mirrors all speech for sighted players and helpers.
   speeds, construction and traffic zones, road hazards that demand quick
   braking, curated rest stops and service plazas with parking certainty,
   carrier-paid toll-road settlement charges, and roadside rescue when you run dry.
+- **Adjustable driving assistance** — open Settings → Driving assistance for one Realistic, Balanced, or All assists preset selector plus individual emergency-braking, lane, stop-and-go, and descent controls. Individual changes are shown as Custom.
 - **Real-world weather (optional)** — flip Settings → Weather source to
   "real world" and each city uses its live current conditions from the free
   [National Weather Service](https://www.weather.gov/documentation/services-web-api)
@@ -209,7 +210,7 @@ Plug in an Xbox, PlayStation, or other compatible controller and the game picks
 up the first one automatically. It detects a controller connected or unplugged
 mid-game — unplugging pauses the drive — and you can switch back to the keyboard
 at any time. Button names below use the Xbox layout; the equivalents map
-automatically on other pads. Turn controller support off under Settings →
+automatically on other pads. Driving support can be adjusted under Settings → Driving assistance with Realistic, Balanced, All assists, or Custom presets. These presets affect driving assists only. Turn controller support off under Settings →
 Gameplay → Controller if you prefer keyboard only.
 
 #### Menus

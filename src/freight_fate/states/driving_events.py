@@ -30,6 +30,7 @@ class DrivingEventMixin:
             self._hazard_deadline = self._brake_budget_s() + slack * hos.reaction_window_mult(
                 self.ctx.profile.fatigue
             )
+            self._automatic_braking_announced = False
             message = terse_hazard_message(event.message) if self._terse_speech() else event.message
             self.ctx.say_event(message, interrupt=True)
         elif kind == TripEventKind.INSPECTION:
@@ -507,6 +508,7 @@ class DrivingEventMixin:
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
+        self._descent_control_active = False
 
     def _acc_gap_seconds(self) -> float:
         effects = self.weather.effects
@@ -559,6 +561,57 @@ class DrivingEventMixin:
         if self._cruise_mph is None:
             return
         t = self.truck
+        descent_level = self.ctx.settings.descent_speed_control
+        descending = t.grade <= -0.025 and descent_level != "off"
+        if descending and self._cruise_mph is not None:
+            if braking and descent_level in ("balanced", "interactive"):
+                self._descent_control_active = True
+                new_target = max(CRUISE_MIN_MPH, t.speed_mph)
+                should_announce = (
+                    not self._descent_capture_active or abs(new_target - self._cruise_mph) >= 2.0
+                )
+                self._descent_capture_active = True
+                self._cruise_mph = new_target
+                if should_announce:
+                    self.ctx.say_event(
+                        f"Descent target changed to {self.ctx.settings.speed_text(self._cruise_mph)}.",
+                        interrupt=False,
+                    )
+                return
+            self._descent_capture_active = False
+            if not self._descent_control_active:
+                self._descent_control_active = True
+                self.ctx.say_event(
+                    f"Descent control holding {self.ctx.settings.speed_text(self._cruise_mph)}.",
+                    interrupt=False,
+                )
+            if not t.transmission.automatic and t.rpm < 1100:
+                limit_state = "gear"
+                limit_message = "Descent control needs a lower gear. Downshift now."
+            elif t.grip < 0.55:
+                limit_state = "traction"
+                limit_message = "Low traction limits descent control. Apply brakes carefully."
+            else:
+                limit_state = ""
+                limit_message = ""
+                t.engine_brake = True
+                if descent_level == "interactive":
+                    safe_target = min(self._cruise_mph, 55.0)
+                    self._cruise_mph = safe_target
+                    if t.speed_mph > safe_target + 8.0:
+                        t.brake = max(t.brake, min(0.7, (t.speed_mph - safe_target) / 25.0))
+                if t.speed_mph > self._cruise_mph + 10.0:
+                    limit_state = "grade"
+                    limit_message = "Descent control cannot hold this grade. Apply service brakes."
+            if limit_state != self._descent_limit_state:
+                self._descent_limit_state = limit_state
+                if limit_message:
+                    self.ctx.say_event(limit_message, interrupt=True)
+        elif self._descent_control_active:
+            self._descent_control_active = False
+            self._descent_limit_state = ""
+            self._descent_capture_active = False
+            t.engine_brake = False
         if braking or t.emergency_brake or t.air_brakes_holding or not t.engine_on or t.stalled:
             self._cancel_cruise()
             self.ctx.say_event("Adaptive cruise canceled.", interrupt=False)
@@ -604,6 +657,12 @@ class DrivingEventMixin:
                 self._acc_weather_gap_said = True
                 self.ctx.say_event(reason, interrupt=False)
             if context.gap_seconds <= desired_gap + 1.0 or context.lead.speed_mph < target_mph:
+                if context.lead.speed_mph <= 5.0 and not self.ctx.settings.stop_and_go_assist:
+                    self._cancel_cruise()
+                    self.ctx.say_event(
+                        "Stopped traffic ahead; adaptive cruise canceled.", interrupt=False
+                    )
+                    return
                 target_mph = min(target_mph, context.lead.speed_mph)
                 following = True
         if following and not self._acc_following:
