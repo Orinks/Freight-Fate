@@ -208,6 +208,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
+        self._acc_follow_cue_s = 0.0  # quiet window between "Traffic ahead" cues
         self._descent_control_active = False
         self._descent_limit_state = ""
         self._descent_capture_active = False

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import zlib
 
 from .world_constants import (
@@ -31,6 +32,21 @@ CITY_SERVICE_APPROACH_ROADS = {
     "garage": "terminal service lane",
     "truck_dealer": "dealer access road",
 }
+
+
+_ROAD_REF_LIST = re.compile(r"\(([^()]*;[^()]*)\)")
+
+
+def _spoken_road_text(text: str) -> str:
+    """Trim raw OSM ref lists out of player-facing street text.
+
+    Source-backed street names sometimes carry the full multi-ref
+    parenthetical straight from the map tags -- "North Michigan Street
+    (SR 933;BUS US 31)". Read aloud, the semicolon list is tag soup, so
+    keep the first ref only: "North Michigan Street (SR 933)"."""
+    if not text or ";" not in text:
+        return text
+    return _ROAD_REF_LIST.sub(lambda m: f"({m.group(1).split(';')[0].strip()})", text)
 
 
 def _local_cue_direction(cue: str) -> str:
@@ -186,10 +202,10 @@ class WorldServiceMixin:
                     city,
                     city,
                     segment.miles,
-                    segment.road,
+                    _spoken_road_text(segment.road),
                     "flat",
                     (),
-                    local_cue=segment.cue,
+                    local_cue=_spoken_road_text(segment.cue),
                     local_speed_mph=segment.speed_mph,
                 )
                 for segment in geometry.segments
@@ -238,10 +254,10 @@ class WorldServiceMixin:
                     city,
                     city,
                     segment.miles,
-                    segment.road,
+                    _spoken_road_text(segment.road),
                     "flat",
                     (),
-                    local_cue=segment.cue,
+                    local_cue=_spoken_road_text(segment.cue),
                     local_speed_mph=segment.speed_mph,
                 )
                 for segment in source_approach.segments

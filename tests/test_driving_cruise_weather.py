@@ -489,6 +489,92 @@ def test_adaptive_cruise_follows_npc_traffic(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_adaptive_cruise_ignores_distant_slower_traffic(monkeypatch):
+    """A slower vehicle far out in the traffic bubble must not drag cruise down:
+    matching a distant lead's speed parked the truck at the bubble edge, where
+    the lead popped in and out of range and re-announced itself every lap."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import NPCVehicle
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        open_limits(driving)
+        driving.trip.traffic_manager.vehicles = [
+            NPCVehicle("npc:far", driving.trip.position_mi + 2.3, 30.0, 30.0, 0, "slow_car")
+        ]
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 26.8  # ~60 mph
+        driving.handle_event(key_event(pygame.K_k))
+        driving.update(1 / 60)
+
+        assert not driving._acc_following
+        assert driving.truck.brake == 0.0
+        assert "Traffic ahead, adaptive cruise reducing speed." not in events
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_adaptive_cruise_follow_cue_does_not_repeat_within_the_cooldown(monkeypatch):
+    """If following flaps (the lead leaves the bubble and comes back), the
+    spoken cue must not fire again inside the quiet window."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import NPCVehicle
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        open_limits(driving)
+        # Flat ground: this test pins the follow-cue cooldown, not descent
+        # physics. The helper route opens on a real 8.6 percent downhill,
+        # where descent control engages the jake, the automatic starts a
+        # downshift, and cruise rightly skips traffic decisions mid-shift --
+        # on exactly the frame this test asserts.
+        driving.trip.grade_at = lambda mile: 0.0
+
+        # The lead must also sit clearly INSIDE the follow gap: at the bubble
+        # edge the approach-control formula is deliberately indifferent (a
+        # distant lead must not drag the target down), and "following" there
+        # flips on hundredths of a mile per hour of truck state.
+        def slow_lead():
+            return [
+                NPCVehicle("npc:acc", driving.trip.position_mi + 0.04, 44.0, 44.0, 0, "slow_car")
+            ]
+
+        driving.trip.traffic_manager.vehicles = slow_lead()
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 29.0  # ~65 mph
+        driving.handle_event(key_event(pygame.K_k))
+
+        def cue_count():
+            return events.count("Traffic ahead, adaptive cruise reducing speed.")
+
+        driving.update(1 / 60)
+        assert driving._acc_following
+        assert cue_count() == 1
+
+        driving.trip.traffic_manager.vehicles = []  # lead drifts out of the bubble
+        driving.update(1 / 60)
+        assert not driving._acc_following
+
+        driving.trip.traffic_manager.vehicles = slow_lead()  # and back in
+        driving.update(1 / 60)
+        assert driving._acc_following  # follows again, but quietly
+        assert cue_count() == 1
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_adaptive_cruise_caps_at_posted_limit(monkeypatch):
     from freight_fate.app import App
 

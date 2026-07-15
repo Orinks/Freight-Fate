@@ -276,6 +276,32 @@
   describe, the stale ones are now dropped and the newest speaks
   immediately, so what you hear is always about what is happening now.
 
+- **Street directions come one turn at a time now.** Setting out on city
+  streets used to read the whole route in one burst -- start, turn, and
+  continue directions all at once. The navigator now speaks only the next
+  maneuver, announcing each turn as you approach it.
+
+- **Street names no longer read out raw map codes.** Some streets spoke
+  their entire highway-number list from the source map data, like "North
+  Michigan Street, S R 9 3 3, B U S, U S 3 1". Spoken street names now
+  keep just the street and its primary route number.
+
+- **The merge instruction is the first thing you hear when you depart.**
+  Pulling out with a load used to announce a travel plaza ahead before the
+  "merge onto the highway" instruction, all in the same breath as the
+  dispatch summary, so the one line you had to act on was easy to miss.
+  Navigation now speaks first, and travel plaza and rest stop notices wait
+  a moment whenever another road announcement just played.
+
+- **Adaptive cruise no longer crawls behind traffic it has not caught up
+  to.** Cruise used to match the speed of any slower vehicle up to two and
+  a half miles ahead, so the truck could dawdle far below the limit behind
+  someone you could not even hear yet, while "Traffic ahead, adaptive
+  cruise reducing speed" repeated every few seconds. Cruise now holds your
+  set speed until you are genuinely closing in, eases down smoothly to
+  follow at the set gap, and speaks the traffic warning once, not on
+  repeat.
+
 - **Careers from older versions now trade every cargo type at real market
   prices.** A career started before the cargo list grew to sixteen classes
   kept freight-market prices only for the original eight, so pay for the

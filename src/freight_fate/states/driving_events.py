@@ -33,6 +33,11 @@ class DrivingEventMixin:
     def _should_space_ambient_event(self, event) -> bool:
         if event.kind == TripEventKind.WEATHER_CHANGE:
             return True
+        if event.kind == TripEventKind.STOP_AHEAD:
+            # Travel-plaza and rest-stop notices are informational: they queue
+            # behind whatever route speech just played instead of stacking on
+            # it -- at departure that keeps the merge instruction in front.
+            return True
         if event.kind == TripEventKind.GPS_CUE:
             cue = event.data.get("cue")
             return (
@@ -129,6 +134,12 @@ class DrivingEventMixin:
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:
                     self.ctx.audio.play(sound, pan=_route_event_sound_pan(event))
                 self.ctx.say_event(event.message, interrupt=False)
+                # Any spoken route line pushes spaced ambient chatter back, so
+                # an informational notice never lands on top of a navigation
+                # instruction the player needs to act on.
+                self._ambient_event_cooldown_s = tuning_for_time_scale(
+                    self.trip.time_scale
+                ).ambient_spacing_s
         if kind == TripEventKind.ZONE_ENTER:
             self.ctx.audio.play(sound or "ui/notify")
             zone = event.data.get("zone")
@@ -1274,6 +1285,7 @@ class DrivingEventMixin:
         if self._cruise_mph is None:
             return
         t = self.truck
+        self._acc_follow_cue_s = max(0.0, self._acc_follow_cue_s - dt)
         descent_level = self.ctx.settings.descent_speed_control
         descending = t.grade <= -0.025 and descent_level != "off"
         if descending and self._cruise_mph is not None:
@@ -1369,16 +1381,35 @@ class DrivingEventMixin:
             ):
                 self._acc_weather_gap_said = True
                 self.ctx.say_event(reason, interrupt=False)
-            if context.gap_seconds <= desired_gap + 1.0 or context.lead.speed_mph < target_mph:
-                if context.lead.speed_mph <= 5.0 and not self.ctx.settings.stop_and_go_assist:
-                    self._cancel_cruise()
-                    self.ctx.say_event(
-                        "Stopped traffic ahead; adaptive cruise canceled.", interrupt=False
-                    )
-                    return
-                target_mph = min(target_mph, context.lead.speed_mph)
+            lead_mph = context.lead.speed_mph
+            if (
+                lead_mph <= 5.0
+                and not self.ctx.settings.stop_and_go_assist
+                and context.closing_mph > 0.5
+                and context.gap_mi / context.closing_mph * 3600.0 <= ACC_STOPPED_CANCEL_S
+            ):
+                self._cancel_cruise()
+                self.ctx.say_event(
+                    "Stopped traffic ahead; adaptive cruise canceled.", interrupt=False
+                )
+                return
+            # Approach control: a slower lead constrains the target only once the
+            # gap actually matters. Distance beyond the desired gap converts to
+            # allowed closing speed at a gentle planned deceleration, so the truck
+            # closes smoothly and settles onto the lead's speed at the desired
+            # gap. A slower vehicle merely existing in the traffic bubble must
+            # not drag the target down: matching a distant lead's speed parks the
+            # truck at the bubble edge, where the lead drifts in and out of range
+            # and the follow cue re-announces itself forever.
+            headway_mi = desired_gap * max(lead_mph, 5.0) / 3600.0
+            approach_m = max(0.0, context.gap_mi - headway_mi) * 1609.344
+            closing_allowed_mph = (2.0 * ACC_FOLLOW_DECEL_MPS2 * approach_m) ** 0.5 * MPH_PER_MPS
+            follow_mph = lead_mph + closing_allowed_mph
+            if follow_mph < target_mph - 0.5 or context.gap_seconds <= desired_gap + 1.0:
+                target_mph = min(target_mph, follow_mph)
                 following = True
-        if following and not self._acc_following:
+        if following and not self._acc_following and self._acc_follow_cue_s <= 0.0:
+            self._acc_follow_cue_s = ACC_FOLLOW_CUE_COOLDOWN_S
             self.ctx.audio.play("ui/notify", volume=0.55)
             self.ctx.say_event("Traffic ahead, adaptive cruise reducing speed.", interrupt=False)
         self._acc_following = following
