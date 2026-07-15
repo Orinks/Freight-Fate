@@ -270,6 +270,13 @@ class CityMenuState(MenuState):
                 "the carrier sponsors it at the listed level.",
             ),
             MenuItem(
+                "Driving school",
+                self._driving_school,
+                help="Spoken lessons on a practice road where nothing "
+                "counts: no money, no wear, no hours. Learn the "
+                "controls or test new equipment consequence-free.",
+            ),
+            MenuItem(
                 "Truck status",
                 self._truck_status,
                 help="Hear assigned or owned tractor status at a glance.",
@@ -382,6 +389,11 @@ class CityMenuState(MenuState):
 
     def _business_status(self) -> None:
         self.ctx.push_state(BusinessStatusState(self.ctx))
+
+    def _driving_school(self) -> None:
+        from .driving_school import DrivingSchoolState
+
+        self.ctx.push_state(DrivingSchoolState(self.ctx))
 
     def _endorsement_courses(self) -> None:
         self.ctx.push_state(EndorsementCourseState(self.ctx))

@@ -16,6 +16,15 @@
   Endorsements line you can review any time, so you always know whether
   that refrigerated or heavy-machinery load on the board is yours to take.
 
+- **The driving school opens its doors.** A new Driving school item at the
+  terminal offers spoken lessons on a flat, empty practice road where
+  nothing counts: no money spent, no wear, no fuel burned, no hours used.
+  An instructor walks you through each step and waits for you to do it.
+  The first lesson covers rolling basics, from starting the engine and
+  releasing the parking brake to a smooth stop from thirty. More lessons
+  will follow; use it to learn the controls or just to practice without
+  risking your career.
+
 - **Real streets reach the whole map now.** The street and facility data
   sweep re-ran over all six hundred twenty-three cities: sixty percent of
   home-terminal yards now start every load with spoken turn-by-turn

@@ -167,6 +167,10 @@ class GameContext:
         self._app.running = False
 
     def save_profile(self) -> None:
+        # Driving-school sandbox: the profile is a throwaway copy and must
+        # never reach disk; the real save is restored when school ends.
+        if getattr(self, "school_sandbox", False):
+            return
         if self.profile is not None:
             self.profile.save()
 

@@ -220,6 +220,7 @@ def timezone_crossing_message(event, terse: bool) -> str:
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
 DRIVE_PHASE_CITY_SERVICE = "city_service"
+DRIVE_PHASE_SCHOOL = "school"  # sandbox practice drive, never persisted
 
 # Microsleeps: once fatigue is severe, the driver involuntarily nods off and
 # must respond (steer or brake) within a short window or drift off the road.

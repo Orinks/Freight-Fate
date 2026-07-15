@@ -1135,7 +1135,15 @@ Deliver -> Earn and level up -> Repeat
       load cancellation shipped; future repeat-offender dispatch hooks remain)
 - [ ] Special event jobs (oversize loads, urgent medical freight)
 - [ ] Trailer types with handling differences
-- [ ] **In-game driving school (owner-approved 2026-07-14).** A CDL-style
+- [ ] **In-game driving school (owner-approved 2026-07-14; skeleton
+      SHIPPED 2026-07-15).** Landed: the Driving school terminal item, the
+      sandbox architecture (lessons run the real driving engine on a
+      throwaway profile copy -- wear, money, and hours die with the
+      lesson; one save_profile guard keeps it off disk; every exit path
+      restores the career), the 25-mile flat practice road, and Lesson 1
+      "Rolling basics" (engine, air, parking brake, roll to thirty,
+      smooth stop) as an instructor riding the first-run tutorial's
+      hooks. Remaining below. A CDL-style
       spoken tutorial mode: guided lessons for air brakes, shifting and the
       jake, exits and lanes, chain-up, and hours of service, each teaching
       by doing in a consequence-free practice drive. Solves cold-start
