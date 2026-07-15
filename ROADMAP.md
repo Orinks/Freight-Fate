@@ -145,7 +145,36 @@ terminal becomes the anchor of that week instead of a spawn point.
       too-hot squeal); the latch catch click (distinct from the gear
       click). Source from the owner's NAS sound library (film/broadcast
       quality) first, generate only what it lacks.
-- [ ] Runaway truck ramps as regular highway furniture on steep descents: announced on approach, takeable as the escape move when the brakes are gone (the physics already runs away honestly -- bench `grade-runaway` tops 149 mph and grenades the engine past redline).
+- [ ] Runaway truck ramps as regular highway furniture on steep descents: announced on approach, takeable as the escape move when the brakes are gone (the physics already runs away honestly -- bench `grade-runaway` tops 149 mph and grenades the engine past redline). Data: harvested as REAL tagged ramps (`highway=escape`) in the Job 2 geometry sweep, curated DOT gap-fill after -- never synthesized where the real road has none (owner call 2026-07-15).
+- [ ] **Runaway ramp aftermath (owner design 2026-07-15).** An arrester
+      bed buries the rig to the axles; you do not drive out. The sequence:
+      gravel roar and grind-down, cab contents going forward, air hiss,
+      then ticking silence -- and the truck is stuck with the engine fine
+      and the brakes cooked. Mandatory roadside call for a heavy-wrecker
+      winch-out: expensive, hours lost, carrier-billed for company
+      drivers, the GOLDEN FLARE membership's flagship moment. NO citation
+      ever -- taking the ramp is the right move and must never score worse
+      than the alternative; the lesson costs money and time, not blame.
+- [ ] **Crash consequence tiers (owner design 2026-07-15).** Today every
+      collision scrubs speed, adds at most 18 percent damage, and you keep
+      rolling -- there is no catastrophic outcome. Add a severity
+      threshold: below it, today's fender-bender behavior stands; above
+      it the truck is DISABLED where it sits -- tow to the nearest city,
+      trip over, load salvaged or claimed, a heavy invoice, and a safety
+      record strike a carrier cares about. Head-ons and rollovers are the
+      tier's ceiling (truck effectively totaled, load gone). The player
+      always walks away -- "You walked away. The truck didn't." -- the
+      wallet, the clock, and the record take the damage, never the
+      driver.
+- [ ] **Signal running: dice and tickets, not a guaranteed clip (owner
+      playtest 2026-07-15).** Blowing the ramp-end red or stop sign today
+      ALWAYS clips cross traffic and never draws a citation -- backwards
+      on both counts. Make the clip a seeded traffic roll (sometimes the
+      horn and a near miss, sometimes a T-bone that belongs in the
+      catastrophic tier), and make running the light risk a citation on
+      the existing trooper/citation rails (chain-law checkpoint pattern).
+      Rides the back-road stoplights feature where the signal mechanic
+      lives.
 - [x] **Chain laws and the tire-type ladder.** Traction equipment is now a three-rung ladder on the per-truck condition record: all-season (today's physics), winter compound (x1.3 grip on snow, x1.5 on ice, honestly paid for with x1.5 tread wear and a 3 percent dry-grip loss -- owner-operator garage purchase at a 25 percent set premium; company tractors run carrier rubber), and chains (x1.5 snow / x2.5 ice, steel replaces the contact patch so tread wear and hydroplaning stop mattering, $750 a set, carrier-billed for company drivers). Chain-law areas sit over sustained steep grade (5 percent for a mile-plus) and activate from live weather -- snow = Level 1 (winter tires or chains), freezing rain = Level 2 (chains) -- with a flashing-sign GPS callout on approach, escalation re-announced. Chaining up is a pause-menu act while stopped: 25 minutes and 6 fatigue by day, 40 minutes and 10 fatigue by headlamp at night (the lonely-snowy-night-out-of-Denver penalty, delivered); removal 10 minutes. Chains are consumable: ~500 miles used right, ~2 miles on bare pavement at highway speed before a cross chain snaps into the fender (4 percent damage, set scrapped, spoken cue). Non-compliance in an active law speaks a warning, then a seeded checkpoint past the area midpoint writes a $500 citation (0.6 staffed chance, one roll per area -- reloads do not re-roll). Bench anchors: ice stop 880 ft stock / 613 winter / 215 chained from 30; the chained jake holds the icy 4 percent it lost unchained (2:14 slip vs 15:06).
 - [ ] Chain-up areas as physical pullouts: today chaining works anywhere stopped and the pullout is spoken flavor; a real chain-up area stop (safe, lit, maybe a helper service that installs for money) rides the stoppable-stop spine with Big Buck's.
 - [ ] Road-stop tire service sells wear repair only; swapping compound (and pricing winter rubber) stays a terminal-garage act. Revisit if field tire swaps earn their menu weight.
