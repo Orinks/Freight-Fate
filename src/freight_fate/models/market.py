@@ -58,9 +58,17 @@ class Market:
     multipliers: dict[str, float] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
-        if not self.multipliers:
-            rng = random.Random(self.seed)
-            self.multipliers = {key: round(rng.uniform(0.9, 1.15), 3) for key in MARKET_CARGO_KEYS}
+        missing = [key for key in MARKET_CARGO_KEYS if key not in self.multipliers]
+        if not missing:
+            return
+        # Careers saved before a cargo-class expansion carry multipliers only
+        # for the classes that existed then. Newly tracked classes get their
+        # seeded starting values -- the same draw a fresh market would make --
+        # so every career trades the full catalog and stays deterministic.
+        rng = random.Random(self.seed)
+        seeded = {key: round(rng.uniform(0.9, 1.15), 3) for key in MARKET_CARGO_KEYS}
+        for key in missing:
+            self.multipliers[key] = seeded[key]
 
     def multiplier(self, cargo_key: str) -> float:
         return self.multipliers.get(cargo_key, 1.0)

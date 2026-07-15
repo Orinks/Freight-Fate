@@ -22,6 +22,34 @@ def test_initial_multipliers_cover_all_cargo_classes():
     assert_in_bounds(m)
 
 
+def test_legacy_market_gains_newly_tracked_cargo_classes():
+    # A career saved before a cargo-class expansion carries only the classes
+    # that existed then (8 in the wild). Loading it must fill in the rest.
+    legacy_keys = (
+        "bulk",
+        "container",
+        "electronics",
+        "food",
+        "general",
+        "machinery",
+        "refrigerated",
+        "retail",
+    )
+    kept = {key: 1.25 for key in legacy_keys}
+    m = Market(seed=42, day=12, multipliers=dict(kept))
+    assert set(m.multipliers) == set(MARKET_CARGO_KEYS)
+    # The classes the career already tracked keep their drifted values.
+    assert {key: m.multipliers[key] for key in legacy_keys} == kept
+    assert_in_bounds(m)
+    # The fill is deterministic: the same seed always draws the same values.
+    again = Market(seed=42, day=12, multipliers=dict(kept))
+    assert again.multipliers == m.multipliers
+    # And the migrated market keeps drifting every class from here on.
+    m.advance_to(13)
+    assert set(m.multipliers) == set(MARKET_CARGO_KEYS)
+    assert_in_bounds(m)
+
+
 def test_drift_stays_within_bounds_over_a_long_career():
     m = Market(seed=7)
     m.advance_to(400)
@@ -104,3 +132,27 @@ def test_profile_persists_market_state():
     assert loaded.market.seed == p.market.seed
     assert loaded.market.day == 5
     assert loaded.market.multipliers == snapshot
+
+
+def test_profile_load_migrates_legacy_market():
+    # Saved by a build that only knew 8 cargo classes; loading must fill in
+    # the full catalog without touching the classes the save already had.
+    p = Profile(name="Legacy Market")
+    legacy = {
+        key: p.market.multipliers[key]
+        for key in (
+            "bulk",
+            "container",
+            "electronics",
+            "food",
+            "general",
+            "machinery",
+            "refrigerated",
+            "retail",
+        )
+    }
+    p.market.multipliers = dict(legacy)
+    path = p.save()
+    loaded = Profile.load(path)
+    assert set(loaded.market.multipliers) == set(MARKET_CARGO_KEYS)
+    assert {k: loaded.market.multipliers[k] for k in legacy} == legacy

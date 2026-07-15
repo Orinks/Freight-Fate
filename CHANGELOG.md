@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Careers from older versions now trade every cargo type at real market
+  prices.** A career started before the cargo list grew to sixteen classes
+  kept freight-market prices only for the original eight, so pay for the
+  newer cargo types never rose or fell. Loading such a career now fills in
+  the missing market prices, which also keeps cloud backups of these older
+  careers in step with orinks.net.
+
 ## 1.8.3 - 2026-07-14
 
 ### Added
