@@ -49,6 +49,37 @@ terminal becomes the anchor of that week instead of a spawn point.
 - [x] **Traction deep-dive: freezing rain, hydroplaning, jake grip cap.** `WeatherKind.ICE` (grip 0.15, a third of snow) forms physically -- rain sampled in the 1 to -4 C band glazes, and the live NWS feed maps freezing rain/sleet/ice to it instead of snow -- with its own hazards, spoken "ice on the road" status, and a bench `stop-ice` anchor (880 ft from 40 mph vs 329 dry from 60). Hydroplaning follows the Horne relation: onset ~106 mph on fresh tread (trucks at highway pressure basically never plane), pulled down by tread wear and standing-water depth (`WeatherEffects.water_mm` -> `truck.water_mm`) -- 80 percent worn rubber planes at ~59 in heavy rain, grip collapsing toward a 0.3 floor over a 12 mph band, with a spoken onset warning and hydro-aware conditions incidents. The jake is now capped by drive-axle grip (42.5 percent of gross, half usable before lockup): dry never binds, glare ice breaks stage 3 loose in a low gear while stage 1 stays hooked up, `jake_slipping` speaks a warning, and the bench `grade-jake-ice` run shows the capped jake losing ground on a 4 percent it would hold dry.
 - [ ] Jake-slip and hydroplane consequences beyond the warning: sustained sliding should be able to escalate into a real incident (trolley jackknife / spin) through the event system, which needs a "release the jake / ease off" resolution verb rather than the brake-to-answer hazard contract.
 - [ ] Lateral traction on curves and ramps: no curve geometry exists in the 1-D model, so cornering grip, curve-speed advisories keyed to load and ice, and rollover/off-tracking stay future -- rides the interchange/ramp data and the off-tracking phase gated on surface streets.
+- [ ] **Curve management as a difficulty tier (owner idea 2026-07-15).**
+      Today "curves" are only per-leg terrain wander (hills 0.25 /
+      mountain 0.55 fed to lane drift) -- no bend has a place, direction,
+      or severity, and the curve speed assist auto-brakes on that same
+      blunt terrain number (above ~39 mph on every mountain leg, even
+      65-mph interstates; even the realistic preset ships it on). The
+      real feature: bake discrete curve records from OSM route geometry
+      (at-mile, direction, severity, advisory speed -- the same canyon
+      data as the dense maxspeed sweep), then at the manage-curves
+      difficulty tier speak the approach ("sharp right, quarter mile,
+      advisory 25"), guide the bend with a panned tone tracking the road
+      center (the lane-guidance audio grammar), require the slowdown, and
+      let hot entries pay physics consequences (drift off-lane, load and
+      ice against the lateral-traction bullet above). Assist presets keep
+      it optional; realism players steer the mountain.
+- [ ] **Signal-and-steer turns on surface streets (owner idea
+      2026-07-15).** Turn-by-turn today is automatic: the truck follows
+      the baked chain, the player hears the cue and panned chime and only
+      manages speed and stops. At the higher-realism tier a turn should
+      be driven: signal (indicator stalk sound already shipped), brake to
+      turn speed, steer through with the same guidance-tone grammar as
+      curves, with missed or unsignaled turns costing a reroute or
+      strike. Natural interaction layer for per-turn trailer
+      off-tracking.
+- [ ] **Route terrain browser (owner idea 2026-07-15).** A reviewable,
+      navigable summary of what the route will demand: big climbs and
+      descents with grade and length, sharp-curve clusters, chain-law
+      areas, by milepost -- readable at dispatch and route selection,
+      from the pause menu, and on demand while driving alongside the U
+      upcoming key. Feeds off corridor.grade_segments and the future
+      curve records; kin to the map-stats explorer idea.
 - [ ] Runaway truck ramps as regular highway furniture on steep descents: announced on approach, takeable as the escape move when the brakes are gone (the physics already runs away honestly -- bench `grade-runaway` tops 149 mph and grenades the engine past redline).
 - [x] **Chain laws and the tire-type ladder.** Traction equipment is now a three-rung ladder on the per-truck condition record: all-season (today's physics), winter compound (x1.3 grip on snow, x1.5 on ice, honestly paid for with x1.5 tread wear and a 3 percent dry-grip loss -- owner-operator garage purchase at a 25 percent set premium; company tractors run carrier rubber), and chains (x1.5 snow / x2.5 ice, steel replaces the contact patch so tread wear and hydroplaning stop mattering, $750 a set, carrier-billed for company drivers). Chain-law areas sit over sustained steep grade (5 percent for a mile-plus) and activate from live weather -- snow = Level 1 (winter tires or chains), freezing rain = Level 2 (chains) -- with a flashing-sign GPS callout on approach, escalation re-announced. Chaining up is a pause-menu act while stopped: 25 minutes and 6 fatigue by day, 40 minutes and 10 fatigue by headlamp at night (the lonely-snowy-night-out-of-Denver penalty, delivered); removal 10 minutes. Chains are consumable: ~500 miles used right, ~2 miles on bare pavement at highway speed before a cross chain snaps into the fender (4 percent damage, set scrapped, spoken cue). Non-compliance in an active law speaks a warning, then a seeded checkpoint past the area midpoint writes a $500 citation (0.6 staffed chance, one roll per area -- reloads do not re-roll). Bench anchors: ice stop 880 ft stock / 613 winter / 215 chained from 30; the chained jake holds the icy 4 percent it lost unchained (2:14 slip vs 15:06).
 - [ ] Chain-up areas as physical pullouts: today chaining works anywhere stopped and the pullout is spoken flavor; a real chain-up area stop (safe, lit, maybe a helper service that installs for money) rides the stoppable-stop spine with Big Buck's.
