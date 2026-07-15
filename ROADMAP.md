@@ -426,11 +426,16 @@ section below and the Unreleased changelog; the release-line view:
       spoken plainly, no miles or money moved, refused mid-load;
       documented in the test book Appendix A. The shared-profile event
       ledger must record forced moves when it lands (Josh's server side).
-- [ ] **Overlay re-sweep on the slug world.** The local-approach /
-      city-service / turn-level geometry sweeps predate the slug migration
-      and the newest cities; the runtime canonicalizes old ids and new
-      targets simply fall back until the five-builder overlay pipeline is
-      updated for slug keys and re-run over the 375-city map.
+- [x] **Overlay re-sweep on the slug world.** The local-approach and
+      turn-level geometry builders emit canonical world-key ids, and the
+      city-service sweep now covers all 623 cities (1,869 services, 1,076
+      turn-level routes) instead of the old 249-city batch. A 10-road-mile
+      match cap keeps each city's freight market, garage, and truck dealer a
+      real in-town errand rather than a ten-to-thirty-five-mile haul to a
+      look-alike business in the next town. Fresh per-state OSM extracts are
+      pulled by `tools/fetch_state_extracts.py`; the whole periodic re-bake
+      is documented in `docs/refresh-city-service-data.md`.
+
 - [ ] **Earcon audition pass.** The five 1.9 steering sounds (turn
       left/right/ahead, ramp light red/green) shipped verified by
       measurement, not by ear; regenerate any that sound off via

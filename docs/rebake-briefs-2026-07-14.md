@@ -116,9 +116,13 @@ Resume like this, in the ff-city-services worktree:
    name -- make sure legacy keys still resolve (the runtime has
    resolve_city_key; verify a Jackson and a Portland by hand).
 4. Verify before committing:
-   - chain tally: no city_service chain over 5.0 total miles, and total
-     chain count STAYS at or above 5,784 (the resweep's coverage must
-     survive your re-bake);
+   - chain tally: no city_service chain over 11.0 total miles (the
+     10-road-mile match cap plus routing slack; RATIFIED at merge time
+     2026-07-15 -- a real facility on the industrial edge keeps its
+     honest 5-to-10-mile distance and the game speaks it before you
+     drive, per the realism-wins rule. The original ≤5.0 line predated
+     the data), and total chain count STAYS at or above 5,784 (the
+     resweep's coverage must survive your re-bake);
    - the display-name collision regression is CONFIRMED and map-wide, not
      just Jackson: 31 display names are shared by 2+ cities and 23 of the
      old city_services entries sit on colliding bare names (Albany, Austin,

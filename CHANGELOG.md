@@ -992,6 +992,13 @@
 
 ### Fixed
 
+- **City services no longer send you across the county.** Driving to a
+  city's freight market, garage, or truck dealer could route you ten to
+  thirty-five miles to a look-alike business in a neighboring town -- an
+  hour-plus round trip just to run an errand. Now every city's services
+  point at a real facility within a short drive, and hundreds more cities
+  carry real, source-backed services instead of a generic stand-in.
+
 - **A few routes now name the right highway.** On the runs from Denver to Salt
   Lake City, Santa Rosa to Stockton, and Clarksville to Huntsville, the game
   announced a highway the route never actually takes; it now names the road you

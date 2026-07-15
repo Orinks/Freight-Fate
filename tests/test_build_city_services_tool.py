@@ -77,26 +77,16 @@ def test_build_city_services_from_tiny_osm_fixture(tmp_path):
 
 def test_build_all_supported_marks_missing_extracts_as_fallback(tmp_path, monkeypatch):
     tool = _load_tool()
-    world_path = tmp_path / "world.json"
-    world_path.write_text(
-        """{
-  "cities": {
-    "Fixture City": {
-      "state": "Example State",
-      "region": "midwest",
-      "lat": 40.0,
-      "lon": -90.0,
-      "locations": [
-        {"name": "Fixture Yard", "type": "terminal", "cargo": ["general"]}
-      ]
-    }
-  },
-  "legs": []
-}
-""",
-        encoding="utf-8",
+    # The city list is sourced from the loaded world (so the state resolves to a
+    # full name for the per-state extract filename); inject a fixture city at
+    # that seam and point at an empty cache so every service falls back.
+    monkeypatch.setattr(
+        tool,
+        "load_world_cities",
+        lambda *, radius_mi=tool.DEFAULT_RADIUS_MI: [
+            tool.CityInfo("Fixture City", "Example State", 40.0, -90.0, radius_mi)
+        ],
     )
-    monkeypatch.setattr(tool, "WORLD_PATH", world_path)
 
     payload = tool.build_all_supported(tmp_path / "missing-cache")
 
