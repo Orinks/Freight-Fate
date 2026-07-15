@@ -118,6 +118,22 @@ terminal becomes the anchor of that week instead of a spawn point.
       reads as "the billboards are gone" on short-lane days. Scale the
       lead-in and gap down on short routes so even an errand run can pass
       one sign.
+- [ ] **Brake-heat sensory ladder (owner ask 2026-07-15).** The physics
+      already tracks brake temperature continuously (heating, cooling,
+      fade onset, effectiveness collapse) but the player only hears three
+      coarse buckets buried in the detailed status readout, plus a squeal
+      that fires once it is already too late. Real trucks have no brake
+      temperature gauge -- drivers judge by smell, pedal feel, and smoke
+      -- so the honest interface is a five-rung spoken sensory ladder
+      (cool, warm, hot, fading, smoking) with each transition announced
+      once as the sensation ("You smell hot brakes", "The pedal is going
+      soft"), a one-word trend on the hot rungs (still heating vs
+      cooling -- the whole question on a long descent), and the heat word
+      added to the quick status key, not just the long readout. Prime
+      driving-school lesson: a long practice grade, snub braking versus
+      dragging, when to grab a lower gear, what each rung means -- pairs
+      with the latching-controls lesson (latch the brake, hear the
+      ladder climb).
 - [ ] Runaway truck ramps as regular highway furniture on steep descents: announced on approach, takeable as the escape move when the brakes are gone (the physics already runs away honestly -- bench `grade-runaway` tops 149 mph and grenades the engine past redline).
 - [x] **Chain laws and the tire-type ladder.** Traction equipment is now a three-rung ladder on the per-truck condition record: all-season (today's physics), winter compound (x1.3 grip on snow, x1.5 on ice, honestly paid for with x1.5 tread wear and a 3 percent dry-grip loss -- owner-operator garage purchase at a 25 percent set premium; company tractors run carrier rubber), and chains (x1.5 snow / x2.5 ice, steel replaces the contact patch so tread wear and hydroplaning stop mattering, $750 a set, carrier-billed for company drivers). Chain-law areas sit over sustained steep grade (5 percent for a mile-plus) and activate from live weather -- snow = Level 1 (winter tires or chains), freezing rain = Level 2 (chains) -- with a flashing-sign GPS callout on approach, escalation re-announced. Chaining up is a pause-menu act while stopped: 25 minutes and 6 fatigue by day, 40 minutes and 10 fatigue by headlamp at night (the lonely-snowy-night-out-of-Denver penalty, delivered); removal 10 minutes. Chains are consumable: ~500 miles used right, ~2 miles on bare pavement at highway speed before a cross chain snaps into the fender (4 percent damage, set scrapped, spoken cue). Non-compliance in an active law speaks a warning, then a seeded checkpoint past the area midpoint writes a $500 citation (0.6 staffed chance, one roll per area -- reloads do not re-roll). Bench anchors: ice stop 880 ft stock / 613 winter / 215 chained from 30; the chained jake holds the icy 4 percent it lost unchained (2:14 slip vs 15:06).
 - [ ] Chain-up areas as physical pullouts: today chaining works anywhere stopped and the pullout is spoken flavor; a real chain-up area stop (safe, lit, maybe a helper service that installs for money) rides the stoppable-stop spine with Big Buck's.
