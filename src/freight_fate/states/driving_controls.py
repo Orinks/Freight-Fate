@@ -7,6 +7,10 @@ from .driving_menu_states import DrivingStatusState, PauseMenuState
 # Wear meters join the status readout once they're worth planning around.
 WEAR_STATUS_PCT = 50.0
 
+# An armed exit owns the D safe-speed answer once it is this close: past
+# here the ramp speed is the number that matters, not the mainline's.
+SAFE_SPEED_EXIT_MI = 2.0
+
 
 class DrivingControlsMixin:
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -89,6 +93,8 @@ class DrivingControlsMixin:
             self.ctx.say(self.lane.describe())
         elif key == pygame.K_s:
             self._speak_speed_limit()
+        elif key == pygame.K_d:
+            self._speak_safe_speed()
         elif key == pygame.K_a:
             self._speak_last_announcement()
         elif key == pygame.K_g:
@@ -496,6 +502,29 @@ class DrivingControlsMixin:
             f" You are about {self.ctx.settings.speed_text(over)} over." if over >= 1 else ""
         )
         self.ctx.say(f"Speed limit {self.ctx.settings.speed_text(limit)}{zone}.{comparison}")
+
+    def _speak_safe_speed(self) -> None:
+        """D: one number -- the speed that is safe right here, right now.
+
+        Sits next to S on purpose: S answers "what is posted", D answers
+        "what should I actually be doing". Weather grip and an armed exit
+        are baked into the math, never into the sentence, so the answer
+        survives being heard exactly once at speed. Repeatable free.
+        """
+        limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        safe = min(limit, self.weather.effects.safe_speed_mph)
+        context = ""
+        stop = getattr(self, "_exit_stop", None)
+        ahead = (stop.at_mi - self.trip.position_mi) if stop is not None else None
+        exit_armed = (
+            getattr(self, "_exit_signal_on", False)
+            and ahead is not None
+            and 0 < ahead <= SAFE_SPEED_EXIT_MI
+        )
+        if getattr(self, "_ramp_mi", None) is not None or exit_armed:
+            safe = min(safe, RAMP_MAX_MPH)
+            context = " for the ramp"
+        self.ctx.say(f"Safe speed {self.ctx.settings.speed_text(safe)}{context}.")
 
     def _speak_last_announcement(self) -> None:
         """A: replay the last route announcement, for one you missed."""

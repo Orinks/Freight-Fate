@@ -25,7 +25,7 @@ from .music import music_track_duration_s
 from .online_journal import JournalOutbox, queue_achievement
 from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
-from .speech import Speech
+from .speech import EventSpeechPacer, Speech
 from .states.base import State
 
 log = logging.getLogger(__name__)
@@ -84,6 +84,9 @@ class GameContext:
         self.achievement_notice_timer = 0.0
         # The most recent spoken line, for the global repeat key (comma).
         self.last_spoken = ""
+        # Anti-backlog projection for the dedicated event voice: queued
+        # driving events that would start speaking stale get flushed instead.
+        self._event_pacer = EventSpeechPacer()
 
     def real_weather_provider(self):
         """Shared NWS provider when real weather is enabled, else None.
@@ -126,10 +129,20 @@ class GameContext:
         With it disabled the player has chosen to hear events through their
         screen reader. Urgent events first flush stale game speech, then speak
         as a fresh queued utterance so old messages do not bury the warning.
+
+        Queued events ride an anti-backlog projection either way: a line that
+        would start speaking well after the moment it described flushes the
+        expired backlog and speaks now instead of joining the recital.
         """
         transcript.info("[event] %s", text)
         self.last_spoken = text
         if self.settings.sapi_events:
+            if interrupt:
+                self._event_pacer.note_interrupt(text)
+            elif self._event_pacer.should_flush(text):
+                # The channel is backed up past the point of truth: purging
+                # and speaking fresh IS the queued line's honest delivery.
+                interrupt = True
             self.speech.say_event(text, interrupt)
         else:
             if interrupt:
@@ -137,6 +150,7 @@ class GameContext:
             self.speech.say(text, interrupt=False)
 
     def stop_event_speech(self) -> None:
+        self._event_pacer.reset()
         _stop_event_speech(self.speech)
 
     def stop_speech(self) -> None:
@@ -146,6 +160,7 @@ class GameContext:
         ``stop_event_speech`` does not quiet them. This silences everything so a
         single key works as a "stop talking" everywhere in the game.
         """
+        self._event_pacer.reset()
         _stop_main_speech(self.speech)
         _stop_event_speech(self.speech)
 

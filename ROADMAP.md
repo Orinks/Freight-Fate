@@ -88,24 +88,25 @@ terminal becomes the anchor of that week instead of a spawn point.
       from the pause menu, and on demand while driving alongside the U
       upcoming key. Feeds off corridor.grade_segments and the future
       curve records; kin to the map-stats explorer idea.
-- [ ] **On-demand safe-speed key, now (playtest 2026-07-15).** The exit
-      advisory speed is spoken in the approach sentence and routinely gets
-      cut off or buried in other speech, so the number is lost exactly when
-      it matters. Pull the terse safe-speed key out of the curve-tier design
-      (above) and ship it early: one keypress, one grip-adjusted number for
-      the next exit or curve ("Safe speed 30"), G-grade-key verdict grammar,
-      repeatable without penalty.
-- [ ] **Stale event-speech backlog (playtest 2026-07-15).** The event voice
-      queues utterances faster than it can speak them, so arriving at the
-      yard plays the whole approach script late -- "slow down to dock, at
-      dock, delivering" heard after the load is already dropped -- and the
-      backlog talks over light dings and buzzers, costing whole light
-      cycles. Time-sensitive events need queue pruning: a new phase
-      announcement should replace still-queued older ones in the same
-      stream, and stale utterances past a short max-age should drop instead
-      of speak. Applies to every event backend, but the slow default
-      Windows voice makes it worst; audit which cues deserve
-      interrupt-current too.
+- [x] **On-demand safe-speed key -- SHIPPED 2026-07-15.** D (next to S's
+      posted limit, a deliberate spatial pair) speaks one number: the
+      minimum of the posted limit, the weather-grip safe speed, and the
+      ramp speed once an exit is armed within two miles or the truck is on
+      the ramp. Weather and context are baked into the math, never the
+      sentence ("Safe speed 45 miles per hour for the ramp."), repeatable
+      free. Curve advisories join the same key when the Job 2 curve
+      records land (the curve-tier bullet above).
+- [x] **Stale event-speech backlog -- FIXED 2026-07-15.** The event voice
+      queued utterances faster than it spoke them, so arriving at the yard
+      played the whole approach script late ("slow down to dock, at dock,
+      delivering" after the load was dropped) and the backlog talked over
+      light dings. `EventSpeechPacer` (speech.py) now projects when the
+      channel falls silent from utterance length and a conservative
+      speaking rate; a queued line that would start more than three
+      seconds after the moment it described flushes the dead backlog and
+      speaks immediately, and interrupting lines reset the projection to
+      truth. Follow-up if the estimate ever misbehaves: scale the
+      chars-per-second to the configured event voice rate.
 - [ ] **Dispatch lane variety (playtest 2026-07-15).** The assigned-load
       queue keeps handing the same short lane back-to-back (Winslow to
       Holbrook, again and again). Higher levels widen the distance cap,

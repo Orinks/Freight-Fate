@@ -131,6 +131,8 @@ HELP_PAGES = [
         [
             "Space speaks your speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state.",
             "S speaks the posted speed limit here, the zone if any, and how far over you are.",
+            "D speaks one safe-speed number for right now: weather grip and an armed exit ramp are already baked into it.",
+            "G speaks the grade under the wheels and whether the truck is holding, pulling, or losing it.",
             "Tab opens a driving status menu for route, driver, map, and a Driver apps tablet menu.",
             "Inside Driver apps, choose Navigation, Weather, Traffic, Truck stops,",
             "Road chatter, or ELD, then review that app line by line.",

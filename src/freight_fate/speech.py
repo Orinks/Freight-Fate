@@ -110,6 +110,62 @@ def _name_of(ctx, backend_id) -> str:
         return str(backend_id)
 
 
+class EventSpeechPacer:
+    """Keeps the dedicated event voice from performing the past.
+
+    The event channel is a queue: the voice speaks utterances in submission
+    order, and nothing stops a slow voice from narrating a backlog of moments
+    the truck has already driven past -- "slow down to dock, at dock,
+    delivering" heard after the trailer is empty, and every light ding buried
+    under it. The voice's real queue cannot be inspected, so the pacer keeps a
+    projection: each submitted line extends a projected clear time by its
+    estimated speaking duration. When a queued line would START speaking more
+    than ``STALE_WAIT_S`` after the moment it described, the whole backlog is
+    by definition stale -- the caller flushes the channel and the new line
+    speaks now. Interrupting lines reset the projection to truth, so estimate
+    drift never outlives one backlog.
+
+    Durations are estimated from text length at a conservative default-voice
+    speaking rate. A faster voice just flushes a little less eagerly than it
+    could; a slower one flushes a little late but stays bounded -- either way
+    the player never again waits through a paragraph of expired narration.
+    """
+
+    STALE_WAIT_S = 3.0  # a queued line may start at most this far in the past
+    BASE_UTTERANCE_S = 0.4  # per-utterance pause before the voice gets going
+    CHARS_PER_S = 13.0  # the default Windows voice at its default rate
+
+    def __init__(self, clock=None) -> None:
+        import time
+
+        self._clock = clock or time.monotonic
+        self._clear_at = 0.0
+
+    def _duration_s(self, text: str) -> float:
+        return self.BASE_UTTERANCE_S + len(text) / self.CHARS_PER_S
+
+    def note_interrupt(self, text: str) -> None:
+        """An interrupting line purges the channel: the projection restarts."""
+        self._clear_at = self._clock() + self._duration_s(text)
+
+    def should_flush(self, text: str) -> bool:
+        """Decide a queued line's fate and update the projection either way.
+
+        Returns True when the line would otherwise start stale -- the caller
+        must then submit it interrupting (which purges the dead backlog)."""
+        now = self._clock()
+        start = max(now, self._clear_at)
+        if start - now > self.STALE_WAIT_S:
+            self._clear_at = now + self._duration_s(text)
+            return True
+        self._clear_at = start + self._duration_s(text)
+        return False
+
+    def reset(self) -> None:
+        """The channel was silenced outside the pacer's view (Ctrl, menus)."""
+        self._clear_at = 0.0
+
+
 # Ranks the UIA backend below every other voice even while Narrator is
 # running. Prism's UIA backend raises all notifications with
 # NotificationProcessing_ImportantAll, which Narrator queues without ever

@@ -10,6 +10,12 @@
 
 - **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
 
+- **One key now answers "how fast should I be going?"** Press D while
+  driving to hear a single safe-speed number for right now, sitting right
+  next to the S posted-limit key. Slick weather and an upcoming exit ramp
+  are already baked into the number, never into the sentence, so the
+  answer is short enough to catch at speed and free to repeat.
+
 - **Career stats now list your endorsements.** The endorsements you hold,
   earned by rank or paid for as a course, used to be announced only once,
   the moment you gained them. The Career stats screen now has an
@@ -244,6 +250,15 @@
   to nromey.
 
 ### Fixed
+
+- **The driving event voice no longer narrates the past.** With the
+  separate event voice enabled, a busy stretch could queue announcements
+  faster than the voice speaks, so you would arrive at the dock and sit
+  through "slow down for the dock, at the dock, delivering" after the
+  trailer was already empty, while the backlog talked over traffic-light
+  sounds. When queued announcements fall too far behind the moment they
+  describe, the stale ones are now dropped and the newest speaks
+  immediately, so what you hear is always about what is happening now.
 
 - **Careers from older versions now trade every cargo type at real market
   prices.** A career started before the cargo list grew to sixteen classes

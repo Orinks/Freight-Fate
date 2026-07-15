@@ -393,6 +393,8 @@ Driving controls are active while the road view is focused:
 | H | Hold to sound the horn; release to stop it. |
 | Space | Report speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. |
+| D | Report one safe-speed number for right now. Weather grip and an armed exit ramp are already baked into the number. |
+| G | Report the grade under the wheels and whether the truck is holding, pulling, or losing it. |
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
 | C | Report clock, deadline, estimated arrival, and hours of service. |

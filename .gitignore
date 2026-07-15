@@ -60,3 +60,6 @@ STATUS.md
 
 logs/
 .cache/
+
+# personal play/test launchers (owner-local, not for commit)
+FF*.ps1

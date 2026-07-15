@@ -256,6 +256,52 @@ def test_name_entry_keeps_its_commas():
     assert NameEntryState.captures_text_input is True
 
 
+def test_safe_speed_key_speaks_one_number(monkeypatch):
+    """D: terse, weather baked into the math and never into the sentence."""
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = d.trip.total_miles / 2  # out on the open road
+        limit, _ = d.trip.speed_limit_at(d.trip.position_mi)
+        spoken = _capture(app, monkeypatch)
+
+        # Clear weather: the posted limit is the safe speed.
+        d.weather.current = WeatherKind.CLEAR
+        d.handle_event(key_event(pygame.K_d))
+        assert spoken[-1] == f"Safe speed {limit:.0f} miles per hour."
+
+        # Rain caps below the posted limit -- the number drops, and the
+        # sentence never says why (the whole point of the terse key).
+        d.weather.current = WeatherKind.RAIN
+        d.handle_event(key_event(pygame.K_d))
+        assert spoken[-1] == "Safe speed 55 miles per hour."
+        assert "rain" not in spoken[-1].lower()
+    finally:
+        app.shutdown()
+
+
+def test_safe_speed_key_answers_for_the_ramp(monkeypatch):
+    """On the ramp (or with an armed exit close ahead) the ramp speed rules."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        from freight_fate.sim.weather import WeatherKind
+
+        d.weather.current = WeatherKind.CLEAR
+        d.trip.position_mi = d.trip.total_miles / 2
+        d._ramp_mi = d.trip.position_mi  # on the ramp now
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_d))
+        assert spoken[-1] == "Safe speed 45 miles per hour for the ramp."
+    finally:
+        app.shutdown()
+
+
 def test_grade_key_reads_slope_and_verdict(monkeypatch):
     """G speaks the grade under the wheels and the sim's own force verdict."""
     from freight_fate.app import App
