@@ -18,6 +18,13 @@ must record forced relocations and clock moves so shared saves stay honest
 ``FREIGHT_FATE_FORCE_DEST``
     Guarantee the dispatch board offers a load to a destination, and put
     that load first in line when dispatch assigns loads.
+``FREIGHT_FATE_FORCE_PERSIST``
+    Set to 1 to make a lever session permanent. WITHOUT it, any lever
+    session is a SANDBOX (owner design 2026-07-15): the whole run plays on
+    the loaded career in memory and nothing is ever saved -- quit, launch
+    normally, and the career is exactly where it was, same city, same
+    date, same money. A tester teleports somewhere, breaks whatever the
+    scenario needs, and their real save never knows.
 """
 
 from __future__ import annotations
@@ -27,6 +34,7 @@ import os
 CITY_ENV = "FREIGHT_FATE_FORCE_CITY"
 CLOCK_ENV = "FREIGHT_FATE_FORCE_CLOCK"
 DEST_ENV = "FREIGHT_FATE_FORCE_DEST"
+PERSIST_ENV = "FREIGHT_FATE_FORCE_PERSIST"
 
 
 def forced_city() -> str:
@@ -50,6 +58,10 @@ def forced_dispatch_destination() -> str:
     return os.environ.get(DEST_ENV, "").strip()
 
 
+def persist_requested() -> bool:
+    return os.environ.get(PERSIST_ENV, "").strip() not in ("", "0")
+
+
 def apply_continue_levers(ctx) -> list[str]:
     """Relocation and clock levers, applied as a saved career resumes.
 
@@ -57,13 +69,22 @@ def apply_continue_levers(ctx) -> list[str]:
     keeps its state. Returns the spoken notes for the caller to queue
     after its own entry announcement (entry speech interrupts, and a
     lever note must never be lost to it).
+
+    Any lever session is a sandbox unless ``FREIGHT_FATE_FORCE_PERSIST``
+    says otherwise: ``ctx.playtest_sandbox`` goes True and ``save_profile``
+    becomes a no-op for the whole run, so the career file on disk never
+    learns the scenario happened.
     """
     p = ctx.profile
     city = forced_city()
     clock = forced_clock_hour()
-    if not city and clock is None:
+    if not city and clock is None and not forced_dispatch_destination():
         return []
     if p.active_trip:
+        if not city and clock is None:
+            # A forced dispatch destination alone has nothing to do until
+            # the board opens; it neither moves nor sandboxes a live load.
+            return []
         return [
             "Playtest lever ignored: this career has a load in progress. "
             "Deliver or abandon it first."
@@ -73,7 +94,13 @@ def apply_continue_levers(ctx) -> list[str]:
         notes.extend(_apply_city(ctx, p, city))
     if clock is not None:
         notes.extend(_apply_clock(ctx, p, clock))
-    if notes:
+    if not persist_requested():
+        ctx.playtest_sandbox = True
+        notes.append(
+            "Playtest sandbox: nothing this session is saved. Your career "
+            "resumes untouched next time you play normally."
+        )
+    elif notes:
         ctx.save_profile()
     return notes
 

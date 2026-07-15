@@ -648,9 +648,19 @@ fuel, Enter accept a city-service arrival, F1 the full key help.
 Three more environment variables move a career into position for a
 scenario without hours of setup driving. All three speak what they did
 in plain words, move no miles and no money, and only touch a career
-that is parked with no load in progress. Set them before launching the
-game, load your career from the main menu, and unset them when the
-scenario is done. In PowerShell:
+that is parked with no load in progress.
+
+**A lever session is a sandbox by default.** The whole run — the
+relocation, any loads you take, money won or lost, damage, abandoned
+jobs — plays out in memory and is never saved. You hear "Playtest
+sandbox: nothing this session is saved" as the career loads, and your
+real save resumes untouched the next time you play normally. For the
+rare run whose changes should stick (moving your career home, say), set
+`FREIGHT_FATE_FORCE_PERSIST = "1"` alongside the levers and the session
+saves like normal play.
+
+Set the levers before launching the game, load your career from the
+main menu, and unset them when the scenario is done. In PowerShell:
 
     $env:FREIGHT_FATE_FORCE_CITY = "denver_co_us"
     $env:FREIGHT_FATE_FORCE_CLOCK = "21"

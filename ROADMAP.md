@@ -552,6 +552,14 @@ section below and the Unreleased changelog; the release-line view:
       spoken plainly, no miles or money moved, refused mid-load;
       documented in the test book Appendix A. The shared-profile event
       ledger must record forced moves when it lands (Josh's server side).
+      SANDBOX BY DEFAULT (owner design 2026-07-15, after a lever run
+      cost a real career $500): a lever session plays entirely in memory
+      -- `save_profile` no-ops for the run, spoken as "Playtest sandbox:
+      nothing this session is saved" -- and the career file resumes
+      untouched; `FREIGHT_FATE_FORCE_PERSIST=1` opts one run back into
+      permanence. Follow-up (shared with the driving school): gate
+      online presence and the achievement journal during sandbox
+      sessions so a sandboxed run never publishes real-looking events.
 - [x] **Overlay re-sweep on the slug world.** The local-approach and
       turn-level geometry builders emit canonical world-key ids, and the
       city-service sweep now covers all 623 cities (1,869 services, 1,076

@@ -87,6 +87,9 @@ class GameContext:
         # Anti-backlog projection for the dedicated event voice: queued
         # driving events that would start speaking stale get flushed instead.
         self._event_pacer = EventSpeechPacer()
+        # True while a playtest-lever scenario runs unsaved (see
+        # playtest_levers.apply_continue_levers); save_profile honors it.
+        self.playtest_sandbox = False
 
     def real_weather_provider(self):
         """Shared NWS provider when real weather is enabled, else None.
@@ -184,7 +187,9 @@ class GameContext:
     def save_profile(self) -> None:
         # Driving-school sandbox: the profile is a throwaway copy and must
         # never reach disk; the real save is restored when school ends.
-        if getattr(self, "school_sandbox", False):
+        # Playtest-lever sandbox: a forced scenario run is temporary by
+        # default -- the career file on disk stays exactly as it was.
+        if getattr(self, "school_sandbox", False) or getattr(self, "playtest_sandbox", False):
             return
         if self.profile is not None:
             self.profile.save()

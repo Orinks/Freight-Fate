@@ -21,6 +21,7 @@ class _Ctx:
         self.profile = profile
         self.spoken: list[str] = []
         self.saves = 0
+        self.playtest_sandbox = False
 
     def say(self, text: str, interrupt: bool = True) -> None:
         self.spoken.append(text)
@@ -37,11 +38,13 @@ def parked_ctx(world):
 def test_no_levers_is_a_no_op(world, monkeypatch, parked_ctx):
     monkeypatch.delenv(playtest_levers.CITY_ENV, raising=False)
     monkeypatch.delenv(playtest_levers.CLOCK_ENV, raising=False)
+    monkeypatch.delenv(playtest_levers.DEST_ENV, raising=False)
 
     notes = apply_continue_levers(parked_ctx)
 
     assert notes == []
     assert parked_ctx.saves == 0
+    assert parked_ctx.playtest_sandbox is False
 
 
 def test_clock_env_parsing(monkeypatch):
@@ -53,18 +56,66 @@ def test_clock_env_parsing(monkeypatch):
         assert playtest_levers.forced_clock_hour() is None
 
 
-def test_force_city_relocates_parked_career(world, monkeypatch):
+def test_force_city_relocates_into_a_sandbox_by_default(world, monkeypatch):
+    """Owner design 2026-07-15: a lever run is temporary. The scenario plays
+    in memory, nothing saves, and the real career resumes untouched."""
     ctx = _Ctx(world, Profile(name="Lever Test", current_city="Chicago"))
     ctx.profile.dispatch_board_cache = {"key": "stale"}
     monkeypatch.setenv(playtest_levers.CITY_ENV, "denver_co_us")
+    monkeypatch.delenv(playtest_levers.PERSIST_ENV, raising=False)
 
     notes = apply_continue_levers(ctx)
 
     assert ctx.profile.current_city == "denver_co_us"
     assert ctx.profile.dispatch_board_cache is None
-    assert ctx.saves == 1
+    assert ctx.playtest_sandbox is True
+    assert ctx.saves == 0
     assert any("relocated to Denver" in note for note in notes)
     assert any("No miles driven, no money changed" in note for note in notes)
+    assert any("sandbox" in note.lower() for note in notes)
+
+
+def test_force_persist_makes_the_relocation_permanent(world, monkeypatch):
+    ctx = _Ctx(world, Profile(name="Lever Test", current_city="Chicago"))
+    monkeypatch.setenv(playtest_levers.CITY_ENV, "denver_co_us")
+    monkeypatch.setenv(playtest_levers.PERSIST_ENV, "1")
+
+    notes = apply_continue_levers(ctx)
+
+    assert ctx.profile.current_city == "denver_co_us"
+    assert ctx.playtest_sandbox is False
+    assert ctx.saves == 1
+    assert not any("sandbox" in note.lower() for note in notes)
+
+
+def test_forced_dest_alone_still_sandboxes_a_parked_career(world, monkeypatch):
+    ctx = _Ctx(world, Profile(name="Lever Test", current_city="denver_co_us"))
+    monkeypatch.setenv(playtest_levers.DEST_ENV, "silverthorne_co_us")
+    monkeypatch.delenv(playtest_levers.PERSIST_ENV, raising=False)
+
+    notes = apply_continue_levers(ctx)
+
+    assert ctx.playtest_sandbox is True
+    assert ctx.saves == 0
+    assert any("sandbox" in note.lower() for note in notes)
+
+
+def test_save_profile_honors_the_playtest_sandbox():
+    from types import SimpleNamespace
+
+    from freight_fate.app import GameContext
+
+    saved = []
+    ctx = object.__new__(GameContext)
+    ctx.profile = SimpleNamespace(save=lambda: saved.append(True))
+    ctx.school_sandbox = False
+    ctx.playtest_sandbox = True
+    ctx.save_profile()
+    assert saved == []
+
+    ctx.playtest_sandbox = False
+    ctx.save_profile()
+    assert saved == [True]
 
 
 def test_force_city_refuses_mid_load(world, monkeypatch):
@@ -88,12 +139,18 @@ def test_force_city_unknown_city_stays_put(world, monkeypatch, parked_ctx):
     assert any("no city called atlantis" in note for note in notes)
 
 
-def test_force_city_already_there_is_silent(world, monkeypatch, parked_ctx):
+def test_force_city_already_there_speaks_only_the_sandbox_note(
+    world, monkeypatch, parked_ctx
+):
     monkeypatch.setenv(playtest_levers.CITY_ENV, "denver_co_us")
+    monkeypatch.delenv(playtest_levers.PERSIST_ENV, raising=False)
 
     notes = apply_continue_levers(parked_ctx)
 
-    assert notes == []
+    # No relocation happened, but the lever is set, so the session is
+    # still a sandbox and must say so.
+    assert [n for n in notes if "sandbox" not in n.lower()] == []
+    assert parked_ctx.playtest_sandbox is True
     assert parked_ctx.saves == 0
 
 
@@ -123,15 +180,18 @@ def test_force_clock_advances_to_local_hour(world, monkeypatch, parked_ctx):
     assert segment.end_hour == pytest.approx(p.game_hours)
 
 
-def test_force_clock_already_at_hour_is_silent(world, monkeypatch, parked_ctx):
+def test_force_clock_already_at_hour_speaks_only_the_sandbox_note(
+    world, monkeypatch, parked_ctx
+):
     p = parked_ctx.profile
     zone = city_zone(world.city(p.current_city))
     local = to_local(p.game_hours, zone) % 24.0
     monkeypatch.setenv(playtest_levers.CLOCK_ENV, str(local))
+    monkeypatch.delenv(playtest_levers.PERSIST_ENV, raising=False)
 
     notes = apply_continue_levers(parked_ctx)
 
-    assert notes == []
+    assert [n for n in notes if "sandbox" not in n.lower()] == []
     assert parked_ctx.saves == 0
 
 
