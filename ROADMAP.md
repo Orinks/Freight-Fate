@@ -1157,6 +1157,17 @@ Deliver -> Earn and level up -> Repeat
       (owner-approved precedent 2026-07-13). Realism players feel the
       equipment; accessibility players keep every accommodation; Josh's
       framework becomes the front door to both layers.
+- [ ] **Latching controls -- sticky keys for the cab (owner idea
+      2026-07-15).** Press to latch the brake or accelerator, press
+      again to release, spoken both ways ("Brake latched. Brake
+      released."). Generalizes the speed keeper's motor-accessibility
+      case to every sustained hold: descent snubs, long pulls, backing.
+      Free settings-layer accommodation, never gated. Safety semantics:
+      AEB, the hazard brake-to-answer verb, and the overspeed alarm all
+      outrank a latched accelerator and release it audibly; the reverse
+      press-and-hold gesture must read a latched brake as held or
+      reverse becomes unreachable for exactly the players the latch
+      serves.
 - [ ] **Endorsements earned by coursework, not just cash (owner idea
       2026-07-15).** Today an endorsement is a level threshold or a paid
       course with no learning in it; both should route through the
