@@ -147,6 +147,9 @@ jobs:
           path: |
             dist/FreightFate-*.zip
             dist/FreightFate-*.tar.gz
+          # A rename or bad glob must fail the build, not silently ship a
+          # release without this platform's download.
+          if-no-files-found: error
 
   release:
     name: Release
@@ -163,6 +166,17 @@ jobs:
         with:
           path: assets
           merge-multiple: true
+
+      - name: Verify every platform archive is present
+        run: |
+          missing=0
+          for suffix in windows-portable.zip macos.zip linux-x64.tar.gz; do
+            if ! ls assets/FreightFate-*-"$suffix" >/dev/null 2>&1; then
+              echo "Release is missing the $suffix download" >&2
+              missing=1
+            fi
+          done
+          exit $missing
 
       - name: Prepare release notes and checksums
         env:

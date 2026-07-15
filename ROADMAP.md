@@ -34,6 +34,8 @@ terminal becomes the anchor of that week instead of a spawn point.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] Add one driving-assistance preset selector with independently adjustable emergency braking, lane, stop-and-go, descent, exit, destination, curve, and route-transition support while preserving player confirmation and control.
+- [ ] Add future individual yard-entry guidance and assisted docking; no current preset navigates a yard or completes a delivery.
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
 - [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
@@ -644,6 +646,9 @@ From a batch of player reports:
   trooper milestone (below) remains the home for *visible, immediate*
   enforcement: getting pulled over and on-the-spot fines.
 
+- [x] **Speed keeper for low-speed zones.** Shipped alongside the presets: in facility access roads, gate queues, work zones, and congestion -- where adaptive cruise is deliberately unavailable -- K holds the current speed at or below the zone limit and follows queued traffic, so players who cannot keep the accelerator held (or whose fingers tire) are not locked out of those stretches. Preset-independent and on by default.
+- [x] **Driving assistance presets and descent control.** Shipped for the current snapshot: Realistic, Balanced, All assists, and Custom coordinate optional lane, emergency-braking, stop-and-go, and interactive descent support without changing inherent adaptive-cruise behavior or simulation settings. Automatic exits, destination stops, yard entry, and docking remain deferred to Career 1.9 or later. On the 1.9 line, lane drift itself lives in the Driving assistance category but stays preset-independent like the speed keeper: presets tune warnings and support, never whether the lane task runs, so fresh careers keep the centered-lane accessible default.
+- [ ] **De-duplicate assist chatter on fast ramps.** A 2026-07-15 logged playtest of the four 1.9 assists showed curve speed assistance and route-transition assistance both firing on the same too-fast exit ramp (the ramp adds curve weight, and both brake and announce back-to-back). With the realistic preset both are on by default, so every hot ramp speaks two assist lines; the ramp case should speak one. Same playtest confirmed the destination approach assist deliberately does not cover the ramp-end stop sign -- players can still roll it with the assist on, which may deserve a clearer spoken hint.
 - [x] **Limit-aware adaptive cruise.** Shipped: once real OSM limits, zones,
   and trooper enforcement landed, plain "hold the set speed" cruise would carry
   the driver straight through an urban drop into strikes and pull-overs. Cruise
@@ -1269,4 +1274,5 @@ fit for an audio-first game.
       badges, and net worth (cash plus equipment) labeled by business status.
       One fact per spoken line, identity first; keep XP, fatigue, HOS state,
       and dispatcher standing private.
+- [x] Profile integrity, client half: `profile_invariants.py` runs the hard, version-stable sanity rules (ranges, counter relations, upgrade tiers) as defense in depth behind the Ed25519 signature on every cloud restore, refusing with a plain spoken reason; `docs/profile-invariants.md` is the maintained validation list for the server gate. Follow-up: the append-only event ledger that upgrades server validation from plausibility to recomputation
 - [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)

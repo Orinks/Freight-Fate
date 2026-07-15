@@ -244,6 +244,8 @@ class PlaytestHarness:
             if driving.trip.finished:
                 driving.truck.velocity_mps = 0.0
                 driving._handle_arrival_gate()
+                if driving._arrival_full_stop_said:
+                    driving.handle_event(key_event(pygame.K_RETURN))
                 _finish_timed_state(self.app)
                 break
         else:

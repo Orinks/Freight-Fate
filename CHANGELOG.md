@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Driving assistance reduces workload without driving for you.** One preset coordinates emergency braking, lane and descent support, stop-and-go traffic, curve and route-transition speed help, exit slowing, and stopping at the selected destination arrival point. You still steer, confirm routes and exits, leave long stops, and handle every yard and dock task.
+
+- **Choose how much driving assistance the truck provides.** A new Driving assistance settings category offers Realistic, Balanced, All assists, and Custom presets for emergency braking, lane support, stop-and-go behavior, and interactive descent speed control. Adaptive cruise keeps its existing traffic, posted-limit, and weather behavior. Presets never change trip pacing, hours rules, transmission, weather, or hazard frequency. These assists lay the groundwork for the version 1.9 driving changes.
+
+- **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
+
 - **Real streets reach the whole map now.** The street and facility data
   sweep re-ran over all six hundred twenty-three cities: sixty percent of
   home-terminal yards now start every load with spoken turn-by-turn
@@ -135,13 +141,6 @@
   and when to call it working. Written for screen-reader playtesting from
   the first line, with the winter driving tests in a companion volume.
 
-- **Cloud restores now get a second integrity check.** Beyond the server's
-  signature, a restored profile has to pass the game's own sanity rules --
-  wear between zero and one hundred, honest delivery counts, a fuel tank
-  that fits in a truck. A file that fails is refused with a plainly spoken
-  reason instead of being loaded, and saves from newer versions of the
-  game still restore fine.
-
 - **Winter tires are now a real choice at the garage.** A winter-compound set
   bites noticeably harder on snow and ice, and the trade is honest: it wears
   faster and gives up a touch of grip on warm dry pavement. Company tractors
@@ -231,6 +230,13 @@
 
 ### Fixed
 
+- **Careers from older versions now trade every cargo type at real market
+  prices.** A career started before the cargo list grew to sixteen classes
+  kept freight-market prices only for the original eight, so pay for the
+  newer cargo types never rose or fell. Loading such a career now fills in
+  the missing market prices, which also keeps cloud backups of these older
+  careers in step with orinks.net.
+
 - **Braking to a stop no longer drops the truck into reverse -- and
   neither does tapping the brake to check you are stopped.** Holding
   the brake through a stop used to select reverse the moment the truck
@@ -293,6 +299,21 @@
   offers, accepting it politely pulls the load instead of misbehaving.
   And four real Great Lakes ports the old map missed -- Toledo, Detroit,
   Chicago, and Green Bay -- now have working docks of their own.
+### Changed
+
+## 1.8.3 - 2026-07-14
+
+### Added
+
+- **Cloud restores now get a second integrity check.** Beyond the server's
+  signature, a restored profile has to pass the game's own sanity rules --
+  wear between zero and one hundred, honest delivery counts, a fuel tank
+  that fits in a truck. A file that fails is refused with a plainly spoken
+  reason instead of being loaded, and saves from newer versions of the
+  game still restore fine.
+
+### Fixed
+
 - **Restoring a cloud backup works again.** Every new server-verified backup
   was wrongly refused with "failed its integrity check" the moment you tried
   to restore it. The refusal was the game's mistake, not a problem with your

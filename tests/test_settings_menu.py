@@ -39,21 +39,18 @@ def test_settings_menu_cycles_hours_of_service():
 
 
 @pytest.mark.smoke
-def test_settings_menu_cycles_lane_drift():
+def test_lane_controls_live_only_in_driving_assistance():
     from freight_fate.app import App
 
     app = App()
     try:
-        assert app.ctx.settings.steering_assist == "off"
-        cat = open_settings_category(app, "Gameplay")
-        while not cat.items[cat.index].text.startswith("Lane drift"):
-            cat.handle_event(key_event(pygame.K_DOWN))
-        cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.steering_assist == "light"
-        cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.steering_assist == "realistic"
-        cat.handle_event(key_event(pygame.K_LEFT))
-        assert app.ctx.settings.steering_assist == "light"
+        gameplay = open_settings_category(app, "Gameplay")
+        assert not any(item.text.startswith("Lane drift") for item in gameplay.items)
+        gameplay.handle_event(key_event(pygame.K_ESCAPE))
+        assistance = open_settings_category(app, "Driving assistance")
+        labels = [item.text for item in assistance.items]
+        assert any(label.startswith("Lane-departure warning") for label in labels)
+        assert any(label.startswith("Lane centering assistance") for label in labels)
     finally:
         app.shutdown()
 
@@ -183,7 +180,15 @@ def test_settings_menu_uses_category_submenus():
         picker = SettingsState(app.ctx)
         app.push_state(picker)
         labels = [item.text for item in picker.items]
-        assert labels == ["Gameplay", "Audio", "Speech and weather", "Online", "Updates", "Back"]
+        assert labels == [
+            "Gameplay",
+            "Driving assistance",
+            "Audio",
+            "Speech and weather",
+            "Online",
+            "Updates",
+            "Back",
+        ]
 
         while picker.items[picker.index].text != "Audio":
             picker.handle_event(key_event(pygame.K_DOWN))
@@ -198,6 +203,96 @@ def test_settings_menu_uses_category_submenus():
         spoken.clear()
         app.state.handle_event(key_event(pygame.K_ESCAPE))
         assert "Settings saved." in spoken
+    finally:
+        app.shutdown()
+
+
+def test_driving_assistance_preset_keyboard_path_and_custom_transition():
+    from freight_fate.app import App
+    from freight_fate.settings import Settings
+
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+    try:
+        cat = open_settings_category(app, "Driving assistance")
+        assert cat.items[0].text == "Driving assistance preset: Realistic"
+        cat.handle_event(key_event(pygame.K_RIGHT))
+        assert app.ctx.settings.driving_assistance_preset == "balanced"
+        assert app.ctx.settings.lane_centering_assist is True
+        assert app.ctx.settings.time_scale == 10.0
+        assert app.ctx.settings.hos_mode == "realistic"
+        cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.driving_assistance_preset == "custom"
+        assert cat.items[0].text == "Driving assistance preset: Custom"
+        loaded = Settings.load()
+        assert loaded.driving_assistance_preset == "custom"
+        assert any("Automatic emergency braking: off" in line for line in spoken)
+        assert "Driving assistance preset: Custom." in spoken
+        original_index = cat.index
+        cat.handle_event(key_event(pygame.K_HOME))
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.driving_assistance_preset == "all"
+        assert cat.items[cat.index].text == "Driving assistance preset: All assists"
+        cat.handle_event(key_event(pygame.K_RIGHT))
+        assert app.ctx.settings.driving_assistance_preset == "realistic"
+        assert original_index == 1
+    finally:
+        app.shutdown()
+
+
+def test_driving_assistance_presets_apply_complete_mappings():
+    from freight_fate.settings import DRIVING_ASSIST_FIELDS, DRIVING_ASSIST_PRESETS, Settings
+
+    settings = Settings()
+    for preset, expected in DRIVING_ASSIST_PRESETS.items():
+        settings.apply_driving_assistance_preset(preset)
+        assert tuple(getattr(settings, field) for field in DRIVING_ASSIST_FIELDS) == expected
+        assert settings.driving_assistance_preset == preset
+
+
+def test_driving_assistance_presets_survive_reload():
+    from freight_fate.settings import DRIVING_ASSIST_FIELDS, DRIVING_ASSIST_PRESETS, Settings
+
+    for preset, expected in DRIVING_ASSIST_PRESETS.items():
+        settings = Settings()
+        settings.apply_driving_assistance_preset(preset)
+        settings.save()
+        loaded = Settings.load()
+        assert loaded.driving_assistance_preset == preset
+        assert tuple(getattr(loaded, field) for field in DRIVING_ASSIST_FIELDS) == expected
+
+
+def test_legacy_settings_preserve_lane_drift_choice():
+    import json
+
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.path.parent.mkdir(parents=True, exist_ok=True)
+    settings.path.write_text(json.dumps({"steering_assist": "off"}), encoding="utf-8")
+    loaded = Settings.load()
+    assert loaded.steering_assist == "off"
+    assert loaded.lane_departure_warning is False
+    assert loaded.automatic_emergency_braking is False
+    assert loaded.stop_and_go_assist is False
+    assert loaded.descent_speed_control == "off"
+    assert loaded.driving_assistance_preset == "custom"
+
+
+def test_exactly_one_driving_assistance_preset_selector():
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    app = App()
+    try:
+        menu = SettingsCategoryState(app.ctx, "assistance")
+        labels = [item.text for item in menu.build_items()]
+        assert sum(label.startswith("Driving assistance preset:") for label in labels) == 1
+        assert not any(
+            "player style" in label.lower() or "descent preset" in label.lower() for label in labels
+        )
     finally:
         app.shutdown()
 

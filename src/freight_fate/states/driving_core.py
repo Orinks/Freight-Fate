@@ -172,6 +172,9 @@ KEEP_RIGHT_REPEAT_S = 75.0  # spacing for repeat nags while still camping
 KEEP_RIGHT_MIN_MPH = 45.0  # lane discipline only matters at highway speed
 PASSING_LOOKAHEAD_MI = 0.6  # slower right-lane traffic inside this justifies the left lane
 
+KEEPER_MIN_MPH = 2.0  # the speed keeper just needs the truck rolling
+KEEPER_MAX_THROTTLE = 0.5  # zone speeds never need more than half throttle
+KEEPER_GAP_SECONDS = 3.0  # follow queued traffic at this gap, down to a stop
 CRUISE_MIN_MPH = 20.0  # cruise control needs road speed to hold
 CRUISE_STEP_MPH = 5.0  # set-point change per Accel/Coast (+/-) tap
 CRUISE_MAX_MPH = 85.0  # highest cruise set point (top US posted limits)
