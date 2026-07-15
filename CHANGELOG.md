@@ -9,6 +9,14 @@
 
 ### Fixed
 
+- **Highways no longer inherit city-street speed limits near their start
+  and end.** On six hundred eighty routes, the posted limit spoken and
+  enforced at the edges of a drive could come from a city street beside
+  the highway instead of the highway itself, so an interstate might hold
+  you to thirty miles per hour for miles of open road. Those stray
+  readings are gone: the limit you hear at the wheel now matches the
+  road you are actually on, and speeding enforcement judges you against
+  that honest number.
 - **Careers from older versions now trade every cargo type at real market
   prices.** A career started before the cargo list grew to sixteen classes
   kept freight-market prices only for the original eight, so pay for the
