@@ -80,7 +80,6 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._microsleep_cooldown_gm = 0.0
         self._microsleep_misses = 0  # consecutive nods drifted off the road
         self._hazard_deadline: float | None = None
-        self._automatic_braking_announced = False
         self._last_event_message = ""  # last spoken route announcement, for replay
         self._speed_announce_timer = 0.0
         self._last_announced_mph = 0.0
@@ -115,9 +114,6 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
-        self._descent_control_active = False
-        self._descent_limit_state = ""
-        self._descent_capture_active = False
         self._keeper_mph: float | None = None
         self._keeper_throttle = 0.0
         self._keeper_zone = ""

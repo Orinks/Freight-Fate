@@ -4,8 +4,11 @@
 
 ### Added
 
-- **Choose how much driving assistance the truck provides.** A new Driving assistance settings category offers Realistic, Balanced, All assists, and Custom presets for emergency braking, lane support, stop-and-go behavior, and interactive descent speed control. Adaptive cruise keeps its existing traffic, posted-limit, and weather behavior. Presets never change trip pacing, hours rules, transmission, weather, or hazard frequency. These assists lay the groundwork for the version 1.9 driving changes.
-- **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
+- **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default; turn it off in Settings, Gameplay.
+
+### Changed
+
+- **The driving assistance presets have been set aside for version 1.9.** Recent developer snapshots briefly offered a Driving assistance settings category with emergency braking, lane support, stop-and-go, and descent control presets. That work now ships complete with version 1.9 instead. The speed keeper stays, now under Settings, Gameplay, and your other settings are untouched.
 
 ### Fixed
 
@@ -17,11 +20,6 @@
   readings are gone: the limit you hear at the wheel now matches the
   road you are actually on, and speeding enforcement judges you against
   that honest number.
-- **Turning a driving assist on or off now speaks its new state, like every
-  other setting.** The note that the preset had become Custom used to talk
-  over the toggle announcement, so you heard the note but never whether the
-  assist was now on or off. The note now waits its turn and is only spoken
-  the first time a change makes the preset Custom.
 - **Careers from older versions now trade every cargo type at real market
   prices.** A career started before the cargo list grew to sixteen classes
   kept freight-market prices only for the original eight, so pay for the
