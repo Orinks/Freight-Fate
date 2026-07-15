@@ -134,6 +134,17 @@ terminal becomes the anchor of that week instead of a spawn point.
       dragging, when to grab a lower gear, what each rung means -- pairs
       with the latching-controls lesson (latch the brake, hear the
       ladder climb).
+- [ ] **Cab and rig sonification pass (owner 2026-07-15).** The state the
+      truck is in should be hearable before it is spoken. First candidates:
+      a chain-clatter loop whenever chains are mounted, pitched and paced
+      with speed -- on snow it is texture, on bare pavement it is the
+      warning that saves the set (the physics snaps a cross chain after
+      about two dry miles at highway speed; today the snap is the first
+      thing you hear); a wear-based brake squeak (worn pads chirp at every
+      stop -- the real wear-indicator sound, distinct from the existing
+      too-hot squeal); the latch catch click (distinct from the gear
+      click). Source from the owner's NAS sound library (film/broadcast
+      quality) first, generate only what it lacks.
 - [ ] Runaway truck ramps as regular highway furniture on steep descents: announced on approach, takeable as the escape move when the brakes are gone (the physics already runs away honestly -- bench `grade-runaway` tops 149 mph and grenades the engine past redline).
 - [x] **Chain laws and the tire-type ladder.** Traction equipment is now a three-rung ladder on the per-truck condition record: all-season (today's physics), winter compound (x1.3 grip on snow, x1.5 on ice, honestly paid for with x1.5 tread wear and a 3 percent dry-grip loss -- owner-operator garage purchase at a 25 percent set premium; company tractors run carrier rubber), and chains (x1.5 snow / x2.5 ice, steel replaces the contact patch so tread wear and hydroplaning stop mattering, $750 a set, carrier-billed for company drivers). Chain-law areas sit over sustained steep grade (5 percent for a mile-plus) and activate from live weather -- snow = Level 1 (winter tires or chains), freezing rain = Level 2 (chains) -- with a flashing-sign GPS callout on approach, escalation re-announced. Chaining up is a pause-menu act while stopped: 25 minutes and 6 fatigue by day, 40 minutes and 10 fatigue by headlamp at night (the lonely-snowy-night-out-of-Denver penalty, delivered); removal 10 minutes. Chains are consumable: ~500 miles used right, ~2 miles on bare pavement at highway speed before a cross chain snaps into the fender (4 percent damage, set scrapped, spoken cue). Non-compliance in an active law speaks a warning, then a seeded checkpoint past the area midpoint writes a $500 citation (0.6 staffed chance, one roll per area -- reloads do not re-roll). Bench anchors: ice stop 880 ft stock / 613 winter / 215 chained from 30; the chained jake holds the icy 4 percent it lost unchained (2:14 slip vs 15:06).
 - [ ] Chain-up areas as physical pullouts: today chaining works anywhere stopped and the pullout is spoken flavor; a real chain-up area stop (safe, lit, maybe a helper service that installs for money) rides the stoppable-stop spine with Big Buck's.
@@ -1232,7 +1243,9 @@ Deliver -> Earn and level up -> Repeat
       but a bare double-tap false-triggers on feathering (players pump
       the throttle in taps), so the gesture is DOUBLE-TAP-AND-HOLD:
       tap, then press again and keep holding about half a second; a
-      click marks the catch, then "Throttle latched." Release is any
+      click marks the catch, then "Throttle latched" -- and the catch
+      click must be its own sound, clearly distinct from the gear click
+      and easy to hear over the engine (owner note 2026-07-15). Release is any
       single press of the same key (returning to manual), and the
       opposite pedal always releases instantly -- a brake press kills a
       latched throttle as it brakes, spoken. Realism cover: the latched
