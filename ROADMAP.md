@@ -1099,4 +1099,12 @@ fit for an audio-first game.
 - [x] Opt-in Profile sharing for fictional road journals, achievements, and last-saved profile summaries
 - [x] Online posts carry the game's build identity (release tag or source checkout) so moderation can tell which version a driver runs
 - [x] Validated and server-signed private cloud revisions with verified public profile summaries
+- [ ] Richer verified driver profiles: identity headline (level title, business
+      status, carrier, rig), a rates-first resume (lifetime deliveries and
+      miles, on-time and damage-free percentages with a minimum-deliveries
+      floor, clean-inspections-vs-citations safety record), traveler stats
+      (states and cities visited, longest haul), the two or three most recent
+      badges, and net worth (cash plus equipment) labeled by business status.
+      One fact per spoken line, identity first; keep XP, fatigue, HOS state,
+      and dispatcher standing private.
 - [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)
