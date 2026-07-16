@@ -50,29 +50,49 @@ terminal becomes the anchor of that week instead of a spawn point.
 - [ ] Jake-slip and hydroplane consequences beyond the warning: sustained sliding should be able to escalate into a real incident (trolley jackknife / spin) through the event system, which needs a "release the jake / ease off" resolution verb rather than the brake-to-answer hazard contract.
 <<<<<<< HEAD
 - [ ] Lateral traction on curves and ramps: no curve geometry exists in the 1-D model, so cornering grip, curve-speed advisories keyed to load and ice, and rollover/off-tracking stay future -- rides the interchange/ramp data and the off-tracking phase gated on surface streets.
-- [ ] **Curve management as a difficulty tier (owner idea 2026-07-15).**
-      Today "curves" are only per-leg terrain wander (hills 0.25 /
-      mountain 0.55 fed to lane drift) -- no bend has a place, direction,
-      or severity, and the curve speed assist auto-brakes on that same
-      blunt terrain number (above ~39 mph on every mountain leg, even
-      65-mph interstates; even the realistic preset ships it on). The
-      real feature: bake discrete curve records from OSM route geometry
-      (at-mile, direction, severity, advisory speed -- the same canyon
-      data as the dense maxspeed sweep), then at the manage-curves
-      difficulty tier speak the approach ("sharp right, quarter mile,
-      advisory 25"), guide the bend with a panned tone tracking the road
-      center (the lane-guidance audio grammar), require the slowdown, and
-      let hot entries pay physics consequences (drift off-lane, load and
-      ice against the lateral-traction bullet above). Owner-shaped design
-      points (2026-07-15): opt-in as a new DRIVING_ASSIST_FIELDS entry so
-      Josh's presets own it (All assists = today's auto-curves, Realistic
-      = drive them yourself); keyboard stays first-class
-      (tap-to-nudge/hold-to-sweep with the guidance tone closing the
-      loop) with analog pad.steering as the smoother option -- the lane
-      code reads it already; and a terse safe-speed key speaking one
-      grip-adjusted number ("Safe speed 18" -- weather baked into the
-      math, never into the speech), same verdict grammar as the G grade
-      key.
+- [ ] **Curve management as a difficulty tier (owner idea 2026-07-15;
+      sound grammar designed 2026-07-16).** The data half is DONE: 63,725
+      discrete curve records (at-mile, direction, radius, physics
+      advisory speed) are baked and shipped under world_data/us/gameplay.
+      The feature: at the manage-curves difficulty tier speak the
+      approach ("sharp right, quarter mile, advisory 25" -- plain
+      language pacenotes from the real records, warned in REAL reaction
+      seconds like ramp endings), guide the bend, require the slowdown,
+      and let hot entries pay physics consequences (drift off-lane, load
+      and ice against the lateral-traction bullet above). SOUND GRAMMAR
+      (owner + Fable design session 2026-07-16, Forza Motorsport's Blind
+      Driving Assists as validated prior art): silence-is-centered on
+      straights -- the lane speaks only when you drift (fatigue beats
+      information density over a ten-hour haul); when the road bends,
+      the PURSUIT guide takes over -- pan the existing road/engine bed
+      along the arc (Forza's steering guide panned engine+tires toward
+      the needed steer; pursuit tracking beats error-nulling in the
+      human-factors literature -- the owner independently reinvented it
+      from bed); drift cues stay underneath as the error backstop; lane
+      EDGES get per-side textures (rumble strip inside vs gravel
+      shoulder outside) so single-sided hearing still knows which way it
+      wandered; and every cue gets a preview-in-Settings audition, Forza
+      style -- a natural driving-school lesson. Steering input, presets
+      (Josh's DRIVING_ASSIST_FIELDS entry, keyboard first-class, analog
+      pad.steering as the smoother option), and the exact guide sound
+      are OPEN QUESTIONS going to the audiogames.net community and Josh
+      first -- see docs/steering-sound-rfc.md before building.
+- [ ] **Real lane counts from OSM (owner ask 2026-07-16).** OSM tags
+      lanes directly (lanes=, lanes:forward=); bake per-mile lane counts
+      along every leg from the self-hosted Overpass/PBF harvest, the
+      exact pattern of the dense maxspeed sweep. Buys real widths (four
+      lanes through Albuquerque on I-40, two-plus-two rural) and REAL
+      LANE DROPS: where three lanes become two, that is a genuine merge
+      event with a real location, not a scripted taper. Goes in the next
+      map re-bake brief.
+- [ ] **A turn signal you actually operate (owner idea 2026-07-16).**
+      Today lane-change taps click the signal for you; give the player
+      the stalk: signal before a lane change, and unsignaled changes
+      become a discipline the CB and troopers can notice at the
+      higher-realism tiers. Pairs with a LANE-LINE CROSSING sound --
+      a soft paint-and-dots tick when crossing a dashed line, the
+      clearly-quieter kin of the edge rumble strip, so every lane change
+      has a physical moment (owner idea, same night).
 - [ ] **Signal-and-steer turns on surface streets (owner idea
       2026-07-15).** Turn-by-turn today is automatic: the truck follows
       the baked chain, the player hears the cue and panned chime and only
