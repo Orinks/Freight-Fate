@@ -128,6 +128,14 @@
 
 ### Changed
 
+- **The All assists preset now switches lane drift off.** The easiest preset
+  used to leave whatever lane drift level you had chosen running, so a player
+  who wanted the fully assisted ride could still be stuck holding the wheel
+  through every exit. Choosing All assists now also sets lane drift to off:
+  the truck keeps its lane for you, a tap of Left or Right changes lanes, and
+  the change is spoken when you pick the preset. The other presets still never
+  touch lane drift, and you can always set it back yourself.
+
 - **Speed limits follow the real road now, all the way across the map.**
   Every route in the country carries its actual posted limits, read from
   real map data instead of one smooth estimate. You will hear the honest
@@ -318,6 +326,27 @@
   to nromey.
 
 ### Fixed
+
+- **Taking an exit no longer talks you out of it.** With lane drift on, the
+  exit slowdown used to say "confirm the exit when ready" -- but there is no
+  confirm control, and pressing the exit key again actually canceled your
+  signal and cost you the exit. The prompt now says what to really do: hold
+  Right for the exit lane and keep slowing. And within the last mile of an
+  exit, a stray press of the exit key keeps your signal on and says so;
+  canceling there now takes a deliberate second press. If you tap Left or
+  Right near an exit with lane drift on, the game now explains that taps only
+  nudge the wheel and you should hold the key instead of leaving you in
+  silence, and after a missed exit the short-form turnaround announcement now
+  reminds you to signal again for the next pass.
+
+- **Missing the destination exit twice no longer strands you at the end of
+  the road.** The first missed destination exit looped you back for another
+  approach, but a second miss silently gave up: the trip pinned at zero miles
+  remaining, driving or backing changed nothing, cruise refused to stay on,
+  and no exit was left to signal for. Dispatch now reroutes you back for
+  another approach every time, and the turnaround drops you far enough out to
+  hear the callout, signal, and brake -- a full approach window instead of a
+  few compressed seconds.
 
 - **Live weather no longer turns light haze into thick fog.** With real-world
   weather on, weather stations report haze or mist whenever they can see less

@@ -83,6 +83,114 @@ def test_x_signals_for_upcoming_route_exit_without_taking_it(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_x_near_the_exit_keeps_the_signal_until_a_second_press(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.steering_assist = "realistic"
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        driving.trip.position_mi = stop.at_mi - 1.5
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_signal_on
+
+        # Inside the guard mile a stray press keeps the signal and says so;
+        # a playtested X meant as "confirm" must not throw the exit away.
+        driving.trip.position_mi = stop.at_mi - 0.5
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_signal_on
+        assert any("Signal stays on" in line for line in spoken)
+        assert not any("Signal canceled" in line for line in spoken)
+
+        # A deliberate second press still cancels.
+        driving.handle_event(key_event(pygame.K_x))
+        assert not driving._exit_signal_on
+        assert any("Signal canceled" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_right_taps_with_drift_on_earn_the_hold_hint_once(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.steering_assist = "realistic"
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        driving.trip.position_mi = stop.at_mi - 1.5
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_signal_on
+        spoken.clear()
+
+        held = HeldKeys(pygame.K_RIGHT)
+        released = HeldKeys()
+        for _ in range(2):
+            driving._update_exit_preparation(held, 1 / 60)
+            driving._update_exit_preparation(released, 1 / 60)
+        assert len([line for line in spoken if "Hold Right to steer" in line]) == 1
+
+        # Further taps stay quiet: the hint speaks once per approach.
+        driving._update_exit_preparation(held, 1 / 60)
+        driving._update_exit_preparation(released, 1 / 60)
+        assert len([line for line in spoken if "Hold Right to steer" in line]) == 1
+
+        # Actually holding Right still builds the exit lane past the hint.
+        for _ in range(180):
+            driving._update_exit_preparation(held, 1 / 60)
+        assert driving._exit_lane_ready()
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_missed_destination_exit_reroutes_every_time(monkeypatch):
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.steering_assist = "realistic"
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+
+        # Missing the destination exit twice must loop back both times; the
+        # say-once latch used to swallow the second reposition and strand the
+        # trip pinned at the end of the route with no exit left to signal for.
+        for _ in range(2):
+            driving.trip.position_mi = driving.trip.total_miles
+            driving.trip.finished = True
+            driving.truck.velocity_mps = 20.0
+            driving.update(1 / 60)
+            assert not driving.trip.finished
+            assert driving.trip.position_mi < stop.at_mi
+
+        assert len([s for s in spoken if "missed the destination exit" in s]) == 2
+
+        # The re-approach leaves the full exit window: a real exit to signal
+        # for, far enough out to hear, arm, and brake under time compression.
+        assert stop.at_mi - driving.trip.position_mi >= 5.0
+        driving.trip.position_mi = stop.at_mi - 1.5
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_signal_on
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_x_without_route_exit_reports_no_signal_target(monkeypatch):
     from freight_fate.app import App
 
@@ -159,6 +267,10 @@ def test_canceled_destination_exit_signal_stays_on_highway(monkeypatch):
 
         driving.handle_event(key_event(pygame.K_x))
         assert driving._exit_lane_ready()
+        # Inside the guard mile, canceling deliberately takes two presses;
+        # the first keeps the signal so a stray X cannot throw the exit away.
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_signal_on
         driving.handle_event(key_event(pygame.K_x))
         assert driving._exit_stop is not None
         assert not driving._exit_signal_on

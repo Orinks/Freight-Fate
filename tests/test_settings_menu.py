@@ -278,6 +278,21 @@ def test_driving_assistance_presets_apply_complete_mappings():
         assert settings.driving_assistance_preset == preset
 
 
+def test_all_assists_preset_switches_lane_drift_off():
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.steering_assist = "realistic"
+    settings.apply_driving_assistance_preset("all")
+    assert settings.steering_assist == "off"
+    # Only All assists touches lane drift; the other presets leave it alone.
+    settings.steering_assist = "realistic"
+    settings.apply_driving_assistance_preset("balanced")
+    assert settings.steering_assist == "realistic"
+    settings.apply_driving_assistance_preset("realistic")
+    assert settings.steering_assist == "realistic"
+
+
 def test_driving_assistance_presets_survive_reload():
     from freight_fate.settings import DRIVING_ASSIST_FIELDS, DRIVING_ASSIST_PRESETS, Settings
 

@@ -715,7 +715,7 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Driving assistance preset: {self._assist_preset_label()}",
                     lambda: self._cycle_assist_preset(1),
-                    help="Realistic provides modern truck safety support. Balanced adds light lane centering and downhill speed help. All assists enables every available driving assist. Changing an individual assist makes this Custom. You still steer, choose routes, confirm exits, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
+                    help="Realistic provides modern truck safety support. Balanced adds light lane centering and downhill speed help. All assists enables every available driving assist and switches lane drift off, so lanes are kept for you and a tap changes lanes. Changing an individual assist makes this Custom. You still steer, choose routes, confirm exits, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
                 )
             ]
             items.extend(
@@ -742,7 +742,8 @@ class SettingsCategoryState(MenuState):
                     "drifts gently with centering help, and realistic drifts "
                     "like a real wheel, so exits need a signal and the exit "
                     "lane. Choosing light or realistic turns the matching "
-                    "lane support on. Presets never change this.",
+                    "lane support on. The All assists preset switches this "
+                    "off; other presets never change it.",
                 )
             )
             items.append(MenuItem("Back", self.go_back))
@@ -1192,10 +1193,16 @@ class SettingsCategoryState(MenuState):
         presets = tuple(DRIVING_ASSIST_PRESETS)
         current = self.ctx.settings.driving_assistance_preset
         index = presets.index(current) if current in presets else (-1 if direction > 0 else 0)
+        drift_before = self.ctx.settings.steering_assist
         self.ctx.settings.apply_driving_assistance_preset(
             presets[(index + direction) % len(presets)]
         )
         self._announce()
+        if self.ctx.settings.steering_assist != drift_before:
+            self.ctx.say(
+                "Lane drift off: automated lane keeping, tap Left or Right to change lanes.",
+                interrupt=False,
+            )
 
     def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
         if field in ("speed_keeper", "pedal_latch"):

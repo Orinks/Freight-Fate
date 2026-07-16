@@ -128,6 +128,8 @@ EXIT_LANE_PREP_MI = 2.0  # where GPS starts asking for the exit lane
 EXIT_COMMIT_WINDOW_MI = 0.4  # generous gore-window grace after the marker
 EXIT_LANE_READY = 0.85  # accumulated right-lane commitment
 EXIT_LANE_OFFSET_READY = 0.45  # right-side lane position also counts
+EXIT_CANCEL_GUARD_MI = 1.0  # inside this, X keeps the signal; a second press cancels
+EXIT_TAP_HOLD_S = 0.35  # a Right press this short is a tap, not held steering
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 # Ramp terminals: where the off-ramp meets the surface road there is usually

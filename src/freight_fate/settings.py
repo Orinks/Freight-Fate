@@ -79,8 +79,11 @@ class Settings:
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
     # Whether the lane-position task runs at all. A simulation choice like
-    # the speed keeper, not a safety assist: presets never change it, and the
-    # 1.9 exit mechanics only demand signals and lane discipline when it is on.
+    # the speed keeper, not a safety assist: the 1.9 exit mechanics only
+    # demand signals and lane discipline when it is on. Presets leave it
+    # alone with one exception: All assists drops it to "off" (automated
+    # lane keeping, tap lane changes), because the easiest preset must not
+    # leave a manual steering task running.
     steering_assist: str = "off"  # off/light/realistic lane drift
     driving_assistance_preset: str = "realistic"
     automatic_emergency_braking: bool = True
@@ -166,6 +169,8 @@ class Settings:
         values = DRIVING_ASSIST_PRESETS[preset]
         for field, value in zip(DRIVING_ASSIST_FIELDS, values, strict=True):
             setattr(self, field, value)
+        if preset == "all":
+            self.steering_assist = "off"
         self.driving_assistance_preset = preset
 
     def refresh_driving_assistance_preset(self) -> str:

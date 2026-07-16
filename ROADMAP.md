@@ -331,6 +331,23 @@ city service drives below.)
 
 ### Lanes and maneuvering
 
+- [x] **Exit-flow speech honesty (playtest transcript, 2026-07-16).** The
+      drift-on exit slowdown said "confirm the exit" though no confirm
+      action exists -- obeying it toggled the signal OFF and cost the exit.
+      Fixed four ways: the prompt now says "hold Right for the exit lane";
+      inside the last mile a stray X keeps the signal (deliberate second
+      press cancels); two quick Left/Right taps with drift on explain that
+      taps only nudge the wheel (taps are the assist-off lane change, so the
+      silence read as broken keys); and the terse missed-exit turnaround now
+      says to re-signal. Same session: the All assists preset now drops lane
+      drift to off (owner call) -- the easiest preset must not leave a
+      manual steering task running; other presets still never touch it.
+      Second finding, same transcript: the missed-destination-exit recovery
+      only worked ONCE (the say-once latch also swallowed the reposition), so
+      a second miss soft-locked the trip at 0 miles remaining with cruise
+      dying every frame; and the turnaround dropped the player 1 mile out --
+      a few real seconds under compression. Now every miss reroutes, and the
+      turnaround uses the full _exit_window_mi() lead like a first approach.
 - [x] **Discrete lanes on the drift model.** `LaneKeeping` carries a discrete
       lane index under its continuous offset: with steering assist on,
       steering across the line is the lane change; with assist off, a

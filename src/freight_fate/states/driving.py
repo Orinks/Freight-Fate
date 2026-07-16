@@ -174,6 +174,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._exit_lane_prompt_said = False
         self._exit_lane_ready_said = False
         self._exit_commit_said = False
+        self._exit_cancel_armed = False
+        self._exit_right_hold_s = 0.0
+        self._exit_right_taps = 0
+        self._exit_tap_hint_said = False
         self._ramp_mi: float | None = None  # ramp distance left, once taken
         self._ramp_stop = None
         self._ramp_end_said = False
@@ -403,8 +407,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             # Chains stay on the drives across a save; absent on older saves.
             state.truck.chains_on = bool(data.get("chains_on", False))
             state.rig_buffs = {
-                str(group): dict(info)
-                for group, info in dict(data.get("rig_buffs", {})).items()
+                str(group): dict(info) for group, info in dict(data.get("rig_buffs", {})).items()
             }
             state.speeding_strikes = int(data["speeding_strikes"])
             state.trip.restore(position_mi, game_minutes)

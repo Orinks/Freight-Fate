@@ -334,12 +334,26 @@ class DrivingEventMixin:
             )
             return
         self._exit_stop = stop
-        self._exit_signal_on = not self._exit_signal_on
         ahead = stop.at_mi - self.trip.position_mi
-        if not self._exit_signal_on:
+        if self._exit_signal_on:
+            # This close to the gore, one stray press must not silently throw
+            # the approach away (playtested: an X meant as "confirm" canceled
+            # the signal and cost the exit). The first press keeps the signal
+            # and says so; only a deliberate second press cancels.
+            if ahead <= EXIT_CANCEL_GUARD_MI and not self._exit_cancel_armed:
+                self._exit_cancel_armed = True
+                self.ctx.say(
+                    "Signal stays on. Hold the exit lane and keep slowing. "
+                    f"Press {self.ctx.control_hint('take_exit')} again to cancel the exit."
+                )
+                return
+            self._exit_signal_on = False
+            self._exit_cancel_armed = False
             self._exit_signal_canceled = True
             self.ctx.say("Signal canceled. Keep following the highway.")
             return
+        self._exit_signal_on = True
+        self._exit_cancel_armed = False
         self._exit_signal_canceled = False
         self.ctx.audio.play("vehicle/turn_signal", volume=0.7)
         if stop.type == "delivery_destination":
@@ -383,6 +397,10 @@ class DrivingEventMixin:
         self._exit_lane_prompt_said = False
         self._exit_lane_ready_said = False
         self._exit_commit_said = False
+        self._exit_cancel_armed = False
+        self._exit_right_hold_s = 0.0
+        self._exit_right_taps = 0
+        self._exit_tap_hint_said = False
 
     def _exit_lane_ready(self) -> bool:
         # Ramps peel off the right lane: no amount of in-lane alignment
@@ -412,8 +430,11 @@ class DrivingEventMixin:
                 self.truck.brake = max(self.truck.brake, 0.35)
                 if not self._assist_exit_slowing_said:
                     self._assist_exit_slowing_said = True
+                    # Never "confirm": there is no confirm action, and an X
+                    # pressed to obey it cancels the signal instead.
                     self.ctx.say_event(
-                        "Exit speed assistance slowing. Confirm the exit when ready.",
+                        "Exit speed assistance slowing. Hold Right for the "
+                        "exit lane and keep slowing.",
                         interrupt=False,
                     )
         if ahead < -EXIT_COMMIT_WINDOW_MI:
@@ -421,6 +442,26 @@ class DrivingEventMixin:
 
         right = keys[pygame.K_RIGHT]
         left = keys[pygame.K_LEFT]
+        # A quick tap is how assist-off players change lanes; with drift on
+        # it only nudges the wheel and the exit lane never builds. Two taps
+        # on one approach earn the how-to, once, so the silence never reads
+        # as broken keys.
+        if right:
+            self._exit_right_hold_s += dt
+        else:
+            if 0.0 < self._exit_right_hold_s <= EXIT_TAP_HOLD_S:
+                self._exit_right_taps += 1
+            self._exit_right_hold_s = 0.0
+        if (
+            self._exit_right_taps >= 2
+            and self._exit_lane_alignment < EXIT_LANE_READY
+            and not self._exit_tap_hint_said
+        ):
+            self._exit_tap_hint_said = True
+            self.ctx.say(
+                "Lane drift is on, so taps only nudge the wheel. "
+                "Hold Right to steer into the exit lane."
+            )
         if right:
             self._exit_lane_alignment += dt / 1.2
         elif left:
@@ -1562,19 +1603,36 @@ class DrivingEventMixin:
         self._exit_signal_on = False
         self._exit_signal_canceled = False
         self._cancel_cruise()
-        if self._missed_destination_exit_said:
-            return
-        self._missed_destination_exit_said = True
+        if exit_details is None:
+            # Nothing to loop back to: say it once, not every frame.
+            if self._missed_destination_exit_said:
+                return
+            self._missed_destination_exit_said = True
         reroute_text = (
             "Continue to the next safe turnaround. Dispatch reroutes you back "
             "onto the approach; take the destination exit when it comes up."
         )
         if exit_details is not None:
+            # Every miss loops back. The say-once latch must never swallow
+            # this reposition: when it did, the second miss stranded the trip
+            # pinned at the end of the route with no exit left to signal for,
+            # cruise dying every frame (playtest transcript, 2026-07-16).
+            self._missed_destination_exit_said = True
             self.trip.game_minutes += 20.0
-            self.trip.position_mi = max(0.0, exit_details[0] - 1.0)
+            # Drop back a full exit window, not a fixed mile: under time
+            # compression one mile passes in a few real seconds, making the
+            # re-approach unwinnable before it was heard.
+            self.trip.position_mi = max(0.0, exit_details[0] - self._exit_window_mi())
             self._destination_exit_announced_key = None
             if self._terse_speech():
+                # The signal reset with the miss; with lane drift on, terse
+                # players still need to hear that arming it is on them again.
                 reroute_text = "Safe turnaround. Destination exit ahead again."
+                if self.ctx.settings.steering_assist != "off":
+                    reroute_text = (
+                        "Safe turnaround. Destination exit ahead again; press "
+                        f"{self.ctx.control_hint('take_exit')} to signal."
+                    )
             else:
                 reroute_text = (
                     "You continue to the next safe turnaround and loop back onto "
