@@ -16,6 +16,13 @@
   Repeats can still happen when the board is small, but the days of
   bouncing between the same two cities forever are over.
 
+- **The player manual caught up with the alpha.** New sections cover
+  mountain driving (the engine brake, gearing down, brake heat and
+  fade) and winter driving (winter tires, snow chains, chain laws),
+  and the manual now documents the driving school, truck-stop meals
+  and showers, lane changes and hazard dodges, wear meters, roadside
+  chatter switches, the overspeed warning setting, and every new key.
+
 - **Ramp endings are announced early, and play out in real time.** When
   you signal for an exit, the announcement now says how the ramp ends --
   "The ramp ends at a stop sign" -- while there is still a mile of
