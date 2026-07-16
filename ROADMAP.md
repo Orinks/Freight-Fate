@@ -202,8 +202,14 @@ terminal becomes the anchor of that week instead of a spawn point.
       stop -- the real wear-indicator sound, distinct from the existing
       too-hot squeal); the latch catch click (shipped 2026-07-15 with a
       ui/tick placeholder -- swap for a proper cab sound in this pass).
-      Source from the owner's NAS sound library (film/broadcast
-      quality) first, generate only what it lacks.
+      Also: a true shift sound (driveline clunk + air/turbo breath --
+      the click is UI, not a truck), auditioned only AFTER the engine
+      voices revs honestly across shifts (the low-gear bullet below).
+      Sourcing ladder (owner 2026-07-16): NAS library first, then
+      freesound CC0/CC-BY, then ElevenLabs generation, then field
+      recording (a community call for truck recordings is an option),
+      then CC-licensed YouTube only, with attribution -- never ordinary
+      YouTube rips; CREDITS.md tracks provenance for every asset.
 - [ ] **Engine and shift audio tells the truth at low speed (owner
       playtest 2026-07-16).** Rolling out through the low gears today is
       "click, click, click, and about half a second of rev sound" -- the
