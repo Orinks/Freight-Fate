@@ -75,3 +75,25 @@ redistribution, driver credited (or anonymous, their choice) in
 assets/sounds/CREDITS.md like every other source. Offer the credit up
 front -- "your truck will be the voice of the game" is part of the
 pitch.
+
+## Etiquette and payment
+
+This is a free, open-source game: the standard deal is voluntary
+contribution plus visible credit, and the permission line above is
+what actually matters. Floor of decency: buy the meal, offer the
+credit as part of the ask. If a driver asks for a modest session fee,
+pay it without blinking -- optional, cheap, and their right.
+
+## Ride-along notes
+
+Target OWNER-OPERATORS for ride-alongs: company drivers usually
+cannot carry passengers (fleet policy, insurance riders), but an O/O
+answers to nobody. Parked yard sessions work with any driver on a
+break. A ride-along is worth more than its audio -- hours of in-cab
+listening is design research for the realism bar.
+
+Recorder: Zoom Essential series (H6essential) -- 32-bit float means
+no gain worry ever, and the spoken accessibility menus mean the whole
+rig is operable solo by a blind recordist. Suggested cab setup: XY
+capsule at the passenger seat, a lav taped near the shifter for the
+engagement clunk, remaining tracks as the day suggests.
