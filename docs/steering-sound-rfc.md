@@ -1,9 +1,11 @@
-# Steering by ear: design notes
+# Steering by ear: parked design notes
 
-Phil's working notes for Norm, 2026-07-16. Raw material: summarize
-freely for the audiogames.net post and the note to Josh -- nothing here
-is written to be pasted anywhere. The recommendations are mine and are
-all overridable by what the community and Josh actually report.
+Phil's brainstorm, parked 2026-07-16. Norm has offered Josh the audio
+design lead for driving, without detail and on purpose: Josh's own
+ideas get first swing. These notes exist so OUR thinking is banked --
+a comparison point for finessing whatever comes back, not direction
+for anyone. If Josh passes, this file plus a community consultation
+becomes the starting point instead.
 
 ## The problem in one sentence
 

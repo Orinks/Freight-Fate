@@ -75,8 +75,14 @@ terminal becomes the anchor of that week instead of a spawn point.
       style -- a natural driving-school lesson. Steering input, presets
       (Josh's DRIVING_ASSIST_FIELDS entry, keyboard first-class, analog
       pad.steering as the smoother option), and the exact guide sound
-      are OPEN QUESTIONS going to the audiogames.net community and Josh
-      first -- see docs/steering-sound-rfc.md before building.
+      are OPEN. Owner decision 2026-07-16: Josh is being OFFERED the
+      audio-design lead for driving, deliberately without a spec -- his
+      ideas get first swing, and our side holds physics, data, and the
+      invariants-as-tests (real reaction seconds, per-side edge
+      textures, previewable cues, keyboard first-class). Phil's parked
+      brainstorm lives in docs/steering-sound-rfc.md as a comparison
+      point for finessing, and becomes the starting point (plus an
+      audiogames.net consultation) only if Josh passes.
 - [ ] **Real lane counts from OSM (owner ask 2026-07-16).** OSM tags
       lanes directly (lanes=, lanes:forward=); bake per-mile lane counts
       along every leg from the self-hosted Overpass/PBF harvest, the
