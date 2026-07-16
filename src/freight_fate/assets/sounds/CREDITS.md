@@ -5,8 +5,9 @@ the tables below: original effects created for Freight Fate (no third-party
 recordings or samples), authorized in-cab truck sounds Darren Duff found and
 shared for selected vehicle cues, and weather and road loops produced with ElevenLabs
 sound effects tooling. The main menu, Open Road, and Night Haul themes are Suno
-remakes created by the project owner. The July 2026 radio-station batch (fifty
-tracks marked "2026-07 Zero batch" below) was composed with Suno V5 through the
+remakes created by the project owner. The July 2026 radio-station batch
+(fifty-two tracks marked "2026-07 Zero batch" below) was composed with Suno V5
+through the
 Zero capability marketplace, with original lyrics written for Freight Fate;
 those tracks are subject to the applicable Suno terms for the generating
 account.
@@ -163,6 +164,8 @@ current idle, start, and shutdown cues.
 | Silver Falcon | `music/radio_rock_silver_falcon.ogg` | Suno-composed female-fronted muscle-car rocker for the in-game radio (2026-07 Zero batch) |
 | Last Ferry Home | `music/radio_rock_last_ferry_home.ogg` | Suno-composed warm harbor-dusk rock song for the in-game radio (2026-07 Zero batch) |
 | Static and Stars | `music/radio_rock_static_and_stars.ogg` | Suno-composed wide-open night-sky heartland rock for the in-game radio (2026-07 Zero batch) |
+| Greywater Quay | `music/radio_rock_greywater_quay.ogg` | Suno-composed folk-rock tribute to Saltwake's Greywater Quay for the in-game radio (2026-07 Zero batch) |
+| Inland Sea | `music/radio_rock_inland_sea.ogg` | Suno-composed heartland rock song about the Great Salt Lake for the in-game radio (2026-07 Zero batch) |
 | Raincheck | `music/radio_blues_raincheck.ogg` | Suno-composed slow rained-out electric blues for the in-game radio (2026-07 Zero batch) |
 | Magnolia Porch | `music/radio_blues_magnolia_porch.ogg` | Suno-composed warm porch-evening southern soul for the in-game radio (2026-07 Zero batch) |
 | Neon and Bourbon | `music/radio_blues_neon_bourbon.ogg` | Suno-composed smoky Chicago bar-band blues for the in-game radio (2026-07 Zero batch) |

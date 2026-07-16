@@ -176,13 +176,19 @@ CLASSIC_ROCK_TRACKS: tuple[MusicTrack, ...] = (
         "radio_rock_silver_falcon", "Silver Falcon", "Female-fronted muscle-car rocker", 134.9
     ),
     MusicTrack(
-        "radio_rock_last_ferry_home", "Last Ferry Home", "Warm harbor-dusk rock song", 142.3
+        "radio_rock_last_ferry_home", "Last Ferry Home", "Warm harbor-dusk rock song", 184.4
     ),
     MusicTrack(
         "radio_rock_static_and_stars",
         "Static and Stars",
         "Wide-open night-sky heartland rock",
         197.3,
+    ),
+    MusicTrack(
+        "radio_rock_greywater_quay", "Greywater Quay", "Folk-rock tale of a salvaged sailor", 123.1
+    ),
+    MusicTrack(
+        "radio_rock_inland_sea", "Inland Sea", "Heartland rock for the Great Salt Lake", 141.7
     ),
 )
 

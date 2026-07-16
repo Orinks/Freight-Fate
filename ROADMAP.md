@@ -283,9 +283,10 @@ section below and the Unreleased changelog; the release-line view:
       (Brownsville, McAllen, Laredo), Savannah (GPB not listed on Radio
       Browser), and Amarillo still have no receivable real station -- try
       again in a later sweep.
-- [x] **Full music rotations for the fictional stations.** A 50-track
+- [x] **Full music rotations for the fictional stations.** A 52-track
       Suno-composed batch (via the Zero CLI) grows the format pools to
-      radio-scale: country 15 songs, classic rock 15, blues and soul 12,
+      radio-scale: country 15 songs, classic rock 17 (including a Saltwake
+      tribute, "Greywater Quay"), blues and soul 12,
       ten new Roadhouse daytime instrumentals, four new night beds, and
       two Night Line-only vocal ballads. Second takes of the 24 vocal
       songs are kept outside the repo as auditionable spares.
