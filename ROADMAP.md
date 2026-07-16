@@ -210,19 +210,32 @@ terminal becomes the anchor of that week instead of a spawn point.
       recording (a community call for truck recordings is an option),
       then CC-licensed YouTube only, with attribution -- never ordinary
       YouTube rips; CREDITS.md tracks provenance for every asset.
-- [ ] **Engine and shift audio tells the truth at low speed (owner
-      playtest 2026-07-16).** Rolling out through the low gears today is
-      "click, click, click, and about half a second of rev sound" -- the
-      gear click fires but the engine barely voices the pull between
-      shifts, so a launch reads as UI noises instead of a working
-      diesel. Suspects to investigate before touching assets: the
-      shift-time engine-load audio cap (SHIFT_LOAD_CAP 0.45) and its
-      recovery window swallowing the whole between-shift interval when
-      low-speed upshifts arrive back to back; RPM-to-pitch/volume
-      mapping too flat across the low band; and automatic upshift pacing
-      itself. The fix should make first-to-fourth sound like climbing
-      through a real gearbox: revs build, drop on the shift, build
-      again. Part of the sound overhaul but diagnosable in code first.
+- [ ] **Engine and shift audio tells the truth at low speed --
+      DIAGNOSED 2026-07-16 (Fable, overnight).** The physics is honest;
+      the audio map flattens it. BASS (the default backend) voices the
+      engine as ONE idle loop whose playback frequency runs linear from
+      1.0x at 600 RPM to only 1.75x at 2200 (`engine_freq_mult`,
+      audio.py) -- but real engine pitch is PROPORTIONAL to RPM, so the
+      600-to-1000 launch pull that should rise 67 percent in pitch
+      rises 11. Progressive shifting (realistic!) upshifts the low
+      gears at 1000/1300/1400 RPM, so every launch pull lives entirely
+      inside the crushed band; each pull lasts 1-2 s, then SHIFT_TIME
+      (1.0 s, transmission.py) of torque interrupt with RPM gliding
+      down under the 0.45 audio load cap, and the gear click fires at
+      shift START with nothing at engagement. Net: "click, click,
+      click, half a second of rev" -- exactly the owner's report.
+      FIX OPTIONS, owner's ear required before shipping any: (1)
+      RECOMMENDED port the pygame backend's 4-band crossfade
+      (idle/low/mid/high loops at 620/1000/1500/2100 centers -- assets
+      already shipped) to BASS with per-band frequency slides of
+      rpm/band_center, so pitch tracks RPM proportionally everywhere
+      with at most ~30 percent stretch per loop (no chipmunk); (2)
+      quick tweak: piecewise freq map, proportional to ~1100 RPM
+      (~1.8x) then flattening to ~2.1x at redline; (3) a soft
+      engagement clunk at shift END so the rhythm reads
+      pull-interrupt-engage-pull; (4) separately decide whether
+      SHIFT_TIME 1.0 s eases to ~0.7 s -- that one is PHYSICS (torque
+      gap on grades) and needs the bench re-run, not just ears.
 - [ ] **Audible traffic -- hear the vehicle you overtake (owner idea
       2026-07-16).** Traffic already exists as modeled vehicles with
       lanes and speeds; give the near ones voices: continuous positional
