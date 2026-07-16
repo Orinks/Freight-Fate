@@ -30,14 +30,23 @@ def test_played_profile_passes_clean():
     p = Profile(name="Veteran")
     p.money = 84_000.0
     p.fatigue = 62.0
-    p.truck_damage_pct = 7.5
-    p.tire_wear_pct = 34.0
-    p.truck_fuel_gal = 180.0
     p.career.xp = 32_000.0
     p.career.deliveries = 41
     p.career.on_time_deliveries = 39
+    p.career.on_time_streak = 12
     p.career.total_miles = 21_500.0
     p.career.total_earnings = 96_000.0
+    p.career.purchased_endorsements = ["heavy_haul"]
+    p.truck_conditions["rig"] = {
+        "tire_wear_pct": 34.0,
+        "brake_wear_pct": 12.5,
+        "engine_wear_pct": 8.0,
+        "damage_pct": 3.0,
+        "fuel_gal": 180.0,
+        "tire_type": "winter",
+        "chains_owned": True,
+        "chain_wear_pct": 22.0,
+    }
     p.upgrades["engine_tune"] = 1
     assert check_profile_invariants(p) == []
 
@@ -52,37 +61,53 @@ def test_range_edits_are_caught():
     assert {"money", "fatigue", "xp", "reputation"} <= found
 
 
-def test_condition_edits_are_caught():
-    p = Profile(name="Edited")
-    p.tire_wear_pct = -20.0  # fresher than new
-    p.truck_damage_pct = 250.0
-    p.truck_fuel_gal = 9_000.0  # tanker, not a tank
-    found = codes(p)
-    assert {"tire_wear", "damage", "fuel_range"} <= found
-
-
 def test_counter_relations_are_caught():
     p = Profile(name="Edited")
     p.career.deliveries = 3
     p.career.on_time_deliveries = 9
+    p.career.on_time_streak = 40
     assert "on_time_exceeds" in codes(p)
+    p2 = Profile(name="Edited")
+    p2.career.deliveries = 9
+    p2.career.on_time_deliveries = 3
+    p2.career.on_time_streak = 7
+    assert "streak_exceeds" in codes(p2)
 
 
-def test_upgrade_tiers_and_dupes_are_caught():
+def test_condition_record_edits_are_caught():
     p = Profile(name="Edited")
+    p.truck_conditions["rig"] = {
+        "tire_wear_pct": -20.0,  # fresher than new
+        "fuel_gal": 9_000.0,  # tanker, not a tank
+        "tire_type": "slicks",
+        "chain_wear_pct": 250.0,
+    }
+    found = codes(p)
+    assert {"condition_range", "fuel_range", "tire_type"} <= found
+
+
+def test_closed_sets_and_upgrade_tiers_are_caught():
+    p = Profile(name="Edited")
+    p.business_status = "fleet_emperor"
+    p.career.purchased_endorsements = ["rocket_fuel"]
     p.upgrades["engine_tune"] = 99
     p.achievements = ["first_delivery", "first_delivery"]
     found = codes(p)
-    assert {"upgrade_tier", "achievement_dupes"} <= found
+    assert {"business_status", "endorsement", "upgrade_tier", "achievement_dupes"} <= found
 
 
 def test_unknown_keys_from_newer_builds_pass():
-    # Version tolerance: a newer build's truck, upgrade, or achievement
-    # key is not an edit -- values are judged, keys are not.
+    # Version tolerance: a newer build's truck, buff, upgrade, or
+    # achievement key is not an edit -- values are judged, keys are not.
     p = Profile(name="From The Future")
     p.owned_trucks = ["cabover_classic_2027"]
+    p.truck_conditions["cabover_classic_2027"] = {
+        "tire_wear_pct": 10.0,
+        "fuel_gal": 100.0,
+    }
     p.upgrades["chrome_stacks"] = 2
     p.achievements = ["antler_polisher"]
+    p.active_buffs = [{"key": "mystery_meat", "label": "Mystery meat", "expires_h": 4.0}]
     assert check_profile_invariants(p) == []
 
 

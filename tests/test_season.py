@@ -8,6 +8,7 @@ from freight_fate.sim.season import (
     CAREER_START_DAY_OF_YEAR,
     DAYS_PER_YEAR,
     FREEZING_C,
+    FREEZING_RAIN_FLOOR_C,
     adjust_for_temperature,
     career_year,
     date_text,
@@ -90,6 +91,22 @@ def test_precipitation_falls_as_snow_when_freezing():
     assert adjust_for_temperature(WeatherKind.HEAVY_RAIN, cold) is WeatherKind.SNOW
     assert adjust_for_temperature(WeatherKind.THUNDERSTORM, cold) is WeatherKind.SNOW
     assert adjust_for_temperature(WeatherKind.SNOW, cold) is WeatherKind.SNOW
+
+
+def test_rain_in_the_freezing_band_glazes_as_ice():
+    # Rain just below freezing glazes on contact -- freezing rain. Colder than
+    # the band it is plain snow, and only rain glazes: heavier precipitation
+    # in the same band still falls as snow.
+    in_band = (FREEZING_C + FREEZING_RAIN_FLOOR_C) / 2.0
+    assert adjust_for_temperature(WeatherKind.RAIN, in_band) is WeatherKind.ICE
+    assert adjust_for_temperature(WeatherKind.HEAVY_RAIN, in_band) is WeatherKind.SNOW
+    assert adjust_for_temperature(WeatherKind.RAIN, FREEZING_RAIN_FLOOR_C - 2.0) is (
+        WeatherKind.SNOW
+    )
+    # Ice persists while it stays cold, and thaws the way snow does.
+    assert adjust_for_temperature(WeatherKind.ICE, in_band) is WeatherKind.ICE
+    assert adjust_for_temperature(WeatherKind.ICE, 4.0) is WeatherKind.RAIN
+    assert adjust_for_temperature(WeatherKind.ICE, 20.0) is WeatherKind.CLOUDY
 
 
 def test_snow_thaws_to_rain_or_cloud_when_warm():

@@ -472,8 +472,10 @@ def _parse_traffic_volumes(raw_samples, leg_miles: float, from_city: str, to_cit
 
 
 # Mirrors the bake-side filter in tools/enrich_routes_landmarks.py, plus the
-# hand-curated highway heritage markers ("the Loneliest Road in America");
-# anything outside this set is a bake bug and should fail the load loudly.
+# hand-curated highway heritage markers ("the Loneliest Road in America") and
+# placed roadside billboards ("billboard_sign", baked by the billboard spider at
+# an attraction's real milepost); anything outside this set is a bake bug and
+# should fail the load loudly.
 LANDMARK_CATEGORIES = frozenset(
     {
         "national_park",
@@ -484,8 +486,6 @@ LANDMARK_CATEGORIES = frozenset(
         "museum",
         "protected_area",
         "highway_marker",
-        # Real roadside signs baked by the 623-city map sweep; spoken under
-        # the billboards chatter switch.
         "billboard_sign",
     }
 )

@@ -14,7 +14,8 @@ import random
 import pygame
 
 from ..achievements import add_unique_stat, increment_stat
-from ..data.amenities import spoken_amenities
+from ..data.amenities import classify_brand, spoken_amenities
+from ..data.buffs import buffs_for_stop
 from ..data.world import Route
 from ..models.business import (
     build_business_settlement,
@@ -62,7 +63,14 @@ from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.trip_models import leg_lane_count
-from ..sim.vehicle import KG_PER_TON, REFERENCE_CARGO_KG, G, TruckState
+from ..sim.vehicle import (
+    CHAIN_SAFE_MPH,
+    KG_PER_TON,
+    REFERENCE_CARGO_KG,
+    TIRE_WINTER,
+    G,
+    TruckState,
+)
 from ..sim.weather import WeatherKind, WeatherSystem
 from .base import MenuItem, MenuState, State
 
@@ -76,6 +84,33 @@ FIELD_REPAIR_DAMAGE_PCT = 25.0  # damage level the patch repairs down to
 MECHANIC_CALLOUT_FEE = 500.0
 MECHANIC_RATE_PER_PCT = 110.0  # premium over the garage's 85 per percent
 MECHANIC_WAIT_MIN = 90.0  # game minutes waiting for the truck to be fixed
+# Chaining up is done kneeling on the shoulder in the weather that made it
+# necessary. Real crews quote twenty to thirty minutes for a drive-axle set;
+# doing it in the dark by headlamp costs more time and much more out of the
+# driver. Removal is quick by comparison.
+CHAIN_INSTALL_MIN = 25.0
+CHAIN_INSTALL_NIGHT_MULT = 1.6
+CHAIN_REMOVE_MIN = 10.0
+CHAIN_INSTALL_FATIGUE = 6.0
+CHAIN_INSTALL_NIGHT_FATIGUE = 10.0
+CHAIN_REMOVE_FATIGUE = 2.0
+# Rolling into an active chain law out of compliance: the checkpoint at the
+# bottom of the grade is staffed often enough that gambling is a bad trade.
+# The fine tracks Colorado's minimum chain-law citation.
+CHAIN_LAW_FINE = 500.0
+CHAIN_LAW_CHECKPOINT_CHANCE = 0.6
+# Road wear service at branded travel centers -- the brand IS the capability
+# (amenities.classify_brand): Love's and Speedco run dedicated tire bays at
+# close to the terminal-garage rate and turn the truck around fast; TA and
+# Petro full-service shops also reline brakes; every other major travel
+# center can mount tires at a road markup. Engine overhauls stay in the
+# terminal garage, and a landmark like Big Buck's fixes nothing.
+ROAD_TIRE_SPECIALIST_COST_PER_PCT = 50.0  # tire brands, near the garage's 45
+ROAD_TIRE_SPECIALIST_MIN = 45.0
+ROAD_TIRE_COST_PER_PCT = 60.0  # everyone else marks tire work up
+ROAD_TIRE_MIN = 75.0
+ROAD_BRAKE_COST_PER_PCT = 55.0  # road-shop premium over the garage's 40
+ROAD_BRAKE_MIN = 120.0
 FUEL_STOP_MIN = 20.0  # fueling is on-duty-not-driving work
 INSPECTION_MIN = 15.0  # routine scale/inspection check-in time
 OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
@@ -102,8 +137,12 @@ RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 RAMP_ACCESS_MI = 0.12  # terminal-to-driveway stretch at the ramp's end
 RAMP_CONTROL_ANNOUNCE_MI = 0.38  # where the terminal callout fires on the ramp
 RAMP_LIGHT_RED_S = 12.0  # red phase of the terminal light, real seconds
-RAMP_LIGHT_GREEN_S = 9.0  # green phase, real seconds
+RAMP_LIGHT_GREEN_S = 15.0  # green phase: a real minor-leg minimum, crossable from a stop
+RAMP_LIGHT_YELLOW_S = 4.0  # yellow phase; entering on yellow is legal, like the real law
 RED_STOP_MPH = 3.0  # at or under this you have honored a red or a stop sign
+# A direction change engages only after the control is held this long at a
+# standstill: a confirm-tap on the brake must never grab reverse.
+DIRECTION_CHANGE_HOLD_S = 0.6
 RAMP_TERMINAL_GRACE_MI = 0.02  # rolling this far past the bar commits the violation
 GREEN_ROLL_MPH = 25.0  # green lets you roll the terminal up to this
 STOP_ROLL_CLIP_MPH = 15.0  # blowing a stop sign this fast clips cross traffic
@@ -184,6 +223,7 @@ def timezone_crossing_message(event, terse: bool) -> str:
 DRIVE_PHASE_PICKUP = "pickup"
 DRIVE_PHASE_DELIVERY = "delivery"
 DRIVE_PHASE_CITY_SERVICE = "city_service"
+DRIVE_PHASE_SCHOOL = "school"  # sandbox practice drive, never persisted
 
 # Microsleeps: once fatigue is severe, the driver involuntarily nods off and
 # must respond (steer or brake) within a short window or drift off the road.
@@ -329,6 +369,19 @@ class _DrivingRadioBackend:
 # against the leg's real OSM maxspeed rather than a flat number.
 SPEEDING_LEEWAY_MPH = 9.0
 SPEEDING_HOLD_S = 6.0
+# The dash overspeed alert speaks up before enforcement does: it arms a few
+# mph over the limit (under the strike leeway), then chimes on an interval
+# until the truck settles back under. Real carrier trucks nag exactly like
+# this, which is why nobody in one is surprised by their own speed.
+OVERSPEED_WARN_MPH = 5.0  # over the limit where the warning arms
+OVERSPEED_RESET_MPH = 1.0  # back within this of the limit disarms it
+# The cadence carries the magnitude: slightly over dings politely, a real
+# runaway dings twice a second. Interval slides between these ends as the
+# overage grows. "Urgent only" mode arms nothing below the urgent line --
+# the speed demon's compromise: haul as you like, but a runaway still rings.
+OVERSPEED_CHIME_REPEAT_S = 5.0  # cadence just past the warn threshold
+OVERSPEED_CHIME_FAST_S = 0.5  # cadence at OVERSPEED_URGENT_MPH over and beyond
+OVERSPEED_URGENT_MPH = 20.0
 # On-the-spot speeding tickets, escalating per ticket within a trip. Paid
 # immediately when a trooper pulls you over (unlike the silent at-delivery
 # strikes, which stand in for the cost of speeding nobody caught).
@@ -544,8 +597,7 @@ def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
             f"Roadside debris and wake turbulence added "
             f"{hos.SHOULDER_DAMAGE_PCT:.0f} percent truck damage."
         )
-    p.truck_fuel_gal = driving.truck.fuel_gal
-    p.truck_damage_pct = driving.truck.damage_pct
+    p.store_truck_condition(driving.truck)
     p.active_trip = driving.snapshot()
     driving.ctx.save_profile()
     parts.append(_deadline_text(driving))

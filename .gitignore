@@ -57,3 +57,9 @@ data/spider/signsheets/*.zip
 
 # local scratch status (not for commit)
 STATUS.md
+
+logs/
+.cache/
+
+# personal play/test launchers (owner-local, not for commit)
+FF*.ps1

@@ -46,6 +46,7 @@ def _settle(
     pay_advance=0.0,
     pay_advance_used_for_load=False,
     business_status=COMPANY_DRIVER,
+    wear=None,
 ):
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import ArrivalState, DrivingState
@@ -59,6 +60,12 @@ def _settle(
     route = app.ctx.world.route_from_cities(route_cities)
     driving = DrivingState(app.ctx, job, route, phase="delivery")
     driving.speeding_strikes = speeding_strikes
+    if wear:
+        # Wear the physics would have accrued over the run (the teleport
+        # below skips the update ticks that would earn it for real).
+        driving.truck.tire_wear_pct += wear.get("tire", 0.0)
+        driving.truck.brake_wear_pct += wear.get("brake", 0.0)
+        driving.truck.engine_wear_pct += wear.get("engine", 0.0)
     driving.trip.position_mi = driving.trip.total_miles
     driving.trip.update(0.0)
     gross = job.payout(_settlement_hours(driving), 0.0)
@@ -98,17 +105,29 @@ def test_carrier_paid_charges_do_not_increase_player_progression():
         app.shutdown()
 
 
-def test_delivery_adds_tire_wear_and_road_grime():
+def test_delivery_stores_wear_and_road_grime():
+    """Wear the truck accrued on the run lands on the profile and is spoken."""
     from freight_fate.app import App
 
     app = App()
     try:
         job = _job(destination_type="retail_distribution")
-        _gross, summary = _settle(app, job, ["New York", "Philadelphia"], money=1000.0)
+        _gross, summary = _settle(
+            app,
+            job,
+            ["New York", "Philadelphia"],
+            money=1000.0,
+            wear={"tire": 1.5, "brake": 0.8, "engine": 0.3},
+        )
 
-        assert app.ctx.profile.tire_wear_pct > 0.0
-        assert app.ctx.profile.road_grime_pct > 0.0
+        p = app.ctx.profile
+        assert p.tire_wear_pct == pytest.approx(1.5)
+        assert p.brake_wear_pct == pytest.approx(0.8)
+        assert p.engine_wear_pct == pytest.approx(0.3)
+        assert p.road_grime_pct > 0.0
         assert "tire wear" in summary
+        assert "brake wear" in summary
+        assert "engine wear" in summary
         assert "road grime" in summary
     finally:
         app.shutdown()

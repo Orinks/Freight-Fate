@@ -12,6 +12,7 @@ from ..achievements import ACHIEVEMENTS, earned_ids
 from ..models.profile import Profile, ProfileIntegrityError
 from ..models.start_options import apply_start_option, option_for_profile
 from ..music import select_menu_music_sequence
+from ..playtest_levers import apply_continue_levers
 from ..settings import DRIVING_ASSIST_FIELDS, DRIVING_ASSIST_PRESETS, TIME_SCALES
 from .base import MenuItem, MenuState, State
 from .main_menu_help import (
@@ -260,6 +261,7 @@ class MainMenuState(MenuState):
             self.refresh()
             return
         self.ctx.profile = saves[0][1]
+        lever_notes = apply_continue_levers(self.ctx)
         p = self.ctx.profile
         if p.active_trip:
             self.ctx.say(f"Welcome back, {p.name}.", interrupt=True)
@@ -272,6 +274,8 @@ class MainMenuState(MenuState):
                 interrupt=True,
             )
         enter_world(self.ctx)
+        for note in lever_notes:
+            self.ctx.say(note, interrupt=False)
 
     def _load_menu(self) -> None:
         self.ctx.push_state(LoadDriverState(self.ctx))
@@ -435,8 +439,11 @@ class LoadDriverState(MenuState):
 
     def _pick(self, profile: Profile) -> None:
         self.ctx.profile = profile
+        lever_notes = apply_continue_levers(self.ctx)
         self.ctx.say(f"Welcome back, {profile.name}.")
         self.ctx.replace_state(_world_entry_state(self.ctx))
+        for note in lever_notes:
+            self.ctx.say(note, interrupt=False)
 
 
 class ManageCareersState(MenuState):
@@ -574,6 +581,7 @@ class NameEntryState(State):
     """Accessible text entry: characters are echoed as you type."""
 
     MAX_LEN = 24
+    captures_text_input = True  # keep typed commas; the global repeat key yields
 
     def __init__(self, ctx) -> None:
         super().__init__(ctx)
@@ -759,10 +767,20 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Automatic direction changes: {s.automatic_direction_changes}",
                     lambda: self._cycle_automatic_direction_changes(1),
-                    help="Simple changes between forward and reverse when you keep "
-                    "holding the control after the truck stops. Deliberate waits "
-                    "for you to release the control and press it again. This only "
-                    "affects automatic transmission.",
+                    help="Both styles change direction with a fresh press at a "
+                    "standstill; a brake held through a stop just holds the "
+                    "truck. Deliberate requires the release-and-press gesture "
+                    "everywhere. This only affects automatic transmission.",
+                ),
+                MenuItem(
+                    lambda: f"Overspeed warning: {s.overspeed_warning}",
+                    lambda: self._toggle_overspeed_warning(1),
+                    help="A dash chime and a spoken heads-up when you run over "
+                    "the posted limit, dinging faster the further over you go, "
+                    "like a carrier-set overspeed alert in a real company "
+                    "truck. Urgent only stays quiet until you are far past "
+                    "the limit, for drivers who speed on purpose but still "
+                    "want the runaway alarm.",
                 ),
                 MenuItem(
                     lambda: f"Driving mode: {self._pace_label()}",
@@ -954,6 +972,7 @@ class SettingsCategoryState(MenuState):
                     self._toggle_units,
                     self._toggle_transmission,
                     self._cycle_automatic_direction_changes,
+                    self._toggle_overspeed_warning,
                     self._cycle_pace,
                     self._cycle_hos,
                     self._toggle_controller,
@@ -1151,6 +1170,11 @@ class SettingsCategoryState(MenuState):
                 "Speed keeper",
                 "In low-speed zones where adaptive cruise is unavailable, such as facility roads, gates, and work zones, pressing K holds your current speed so the accelerator does not need to stay held. Braking cancels. Presets never change this.",
             ),
+            (
+                "pedal_latch",
+                "Latching pedals",
+                "Tap the accelerator or brake, then press again and hold for half a second: a click and a spoken confirmation latch the pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly. Presets never change this.",
+            ),
         )
 
     def _assist_preset_label(self) -> str:
@@ -1174,10 +1198,10 @@ class SettingsCategoryState(MenuState):
         self._announce()
 
     def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
-        if field == "speed_keeper":
-            # An input-accessibility aid, not a realism choice: it lives
-            # outside the presets, so toggling it never reads as Custom.
-            self.ctx.settings.speed_keeper = not self.ctx.settings.speed_keeper
+        if field in ("speed_keeper", "pedal_latch"):
+            # Input-accessibility aids, not realism choices: they live
+            # outside the presets, so toggling one never reads as Custom.
+            setattr(self.ctx.settings, field, not getattr(self.ctx.settings, field))
             self._announce()
             return
         if field not in DRIVING_ASSIST_FIELDS:
@@ -1236,6 +1260,15 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_transmission(self, _d: int) -> None:
         self.ctx.settings.automatic_transmission = not self.ctx.settings.automatic_transmission
+        self._announce()
+
+    def _toggle_overspeed_warning(self, d: int) -> None:
+        modes = ["on", "urgent only", "off"]
+        try:
+            i = modes.index(self.ctx.settings.overspeed_warning)
+        except ValueError:
+            i = 0
+        self.ctx.settings.overspeed_warning = modes[(i + d) % len(modes)]
         self._announce()
 
     def _cycle_automatic_direction_changes(self, d: int) -> None:

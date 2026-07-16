@@ -104,7 +104,14 @@ MENU = (
     "Beaver Bites -- glazed corn-nut things that are dangerously good",
     "a slab of homemade fudge from the fudge counter",
     "a foot of house-smoked jerky off the jerky wall",
-    "a soda cup you could bathe a puppy in",
+    # The comfort-stop buff pair -- names live here, effects are gameplay-layer.
+    # The Bladder Buster caffeinates you but fills the tank, nudging you toward an
+    # optional (non-HOS) comfort stop; the Iron Bladder is the premium item that
+    # skips that stop outright. Both move fatigue and optional minutes only,
+    # never the legal Hours-of-Service clock.
+    "the Bladder Buster -- a sixty-four-ounce soda cup you could bathe a puppy in",
+    "the Iron Bladder -- premium road briefs for the driver who refuses to stop, "
+    "priced like they know you have no choice",
     "a souvenir tee that says I Survived Big Buck's",
 )
 

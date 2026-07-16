@@ -65,7 +65,12 @@ def test_catalog_loads_structured_regional_and_afn_stations():
     assert len({station.region for station in locals_}) >= 7
     assert all(station.stream_url for station in afn + locals_)
     assert all(station.stream_format for station in afn + locals_)
-    assert all(station.supported for station in locals_)
+    # A local stream can rot off the air (WABE 2026-07-14), but going dark
+    # is a documented state, never a silent one: unsupported locals carry
+    # notes saying why, and the dial stays overwhelmingly alive.
+    dark_locals = [station for station in locals_ if not station.supported]
+    assert all(station.notes for station in dark_locals)
+    assert len(dark_locals) <= len(locals_) // 10
     assert sum(1 for station in afn if station.supported) >= 15
     assert all(station.lat is not None and station.lon is not None for station in locals_)
     assert all(station.range_miles > 0 for station in locals_)

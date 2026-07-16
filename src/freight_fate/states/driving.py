@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from ..sim.pedal_latch import PedalLatch
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from .driving_events import DrivingEventMixin
@@ -34,10 +35,18 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # so a heavy load pulls away gently and lugs on grades.
         self.truck.cargo_kg = job.weight_tons * KG_PER_TON if phase == DRIVE_PHASE_DELIVERY else 0.0
         self.truck.transmission.automatic = ctx.settings.automatic_transmission
-        self.truck.fuel_gal = min(profile.truck_fuel_gal, self.truck.specs.fuel_tank_gal)
-        self.truck.damage_pct = profile.truck_damage_pct
+        profile.load_truck_condition(self.truck)
         self.truck.set_cold_air_start()
         self.start_damage = profile.truck_damage_pct
+        # Trip-start wear, for "this run added..." deltas at settlement
+        # (mid-trip saves re-sync the profile, so the profile can't provide
+        # these once the trip is underway).
+        self.start_tire_wear = profile.tire_wear_pct
+        self.start_brake_wear = profile.brake_wear_pct
+        self.start_engine_wear = profile.engine_wear_pct
+        # Rig-care buffs (quick lube, tire rotation) hold for the rest of
+        # the trip and die with it -- keyed by buff group, see data/buffs.py.
+        self.rig_buffs: dict[str, dict] = {}
         region = ctx.world.city(job.origin).region
         self.weather = WeatherSystem(
             region,
@@ -61,6 +70,17 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             ),
             career_hours=profile.game_hours,
         )
+        if phase == DRIVE_PHASE_DELIVERY:
+            # The destination exit, ramp terminal, and street chain own the
+            # arrival speeds now. The trip's legacy last-miles arrival zones
+            # were already silenced as freeway chatter, but they stayed
+            # enforceable -- a silent 35 under a spoken 65, writing real
+            # speeding fines on the final highway miles (owner-hit on I-10).
+            self.trip.zones = [
+                zone
+                for zone in self.trip.zones
+                if zone.reason not in ("destination approach", "facility gate")
+            ]
         self.lane = LaneKeeping(seed=self.trip_seed)
         self._day_music_sequence = select_drive_music_sequence(
             self.route, self.trip_seed, 12.0, self.weather.current
@@ -106,10 +126,23 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._last_announced_mph = 0.0
         self._speeding_timer = 0.0
         self.speeding_strikes = 0
+        # Compliance grace after a posted-limit drop: braking time before
+        # strikes accrue, earned only while actually slowing.
+        self._enforced_limit_prev: float | None = None
+        self._limit_drop_grace_s = 0.0
+        # Dash overspeed alert: armed while over the limit, chiming on an
+        # interval until the truck settles back under.
+        self._overspeed_active = False
+        self._overspeed_chime_timer = 0.0
         # Congestion badges: both kinds of slow inside one trip earns a nod.
         self.construction_seen = False
         self.traffic_seen = False
         self._brake_squeal_cooldown_s = 0.0  # hot-brake squeal cue spacing
+        self._hydro_active = False  # spoken hydroplane warning edge tracking
+        self._jake_slip_active = False  # spoken jake-slip warning edge tracking
+        self._chains_fast_active = False  # spoken chains-over-speed warning edge tracking
+        self._chain_law_warned: set[tuple[int, int]] = set()  # (area, level) spoken warnings
+        self._chain_law_cited: set[tuple[int, int]] = set()  # checkpoint rolls already taken
         # Trooper pull-overs: a strike inside a patrol window may get you stopped
         # for an immediate ticket, separate from the silent at-delivery strikes.
         self.speeding_tickets = 0
@@ -150,8 +183,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._ramp_light_offset_s = 0.0  # seeded phase into the light cycle
         self._ramp_light_timer = 0.0  # real seconds since the ramp was taken
         self._ramp_light_announced = False
-        self._ramp_light_was_red = False
-        self._ramp_light_flip_said = False
+        self._ramp_light_last_phase = ""  # "red" | "yellow" | "green", once announced
         self._ramp_terminal_done = False
         self._ramp_waiting_at_light = False
         self._destination_exit_taken = False
@@ -218,6 +250,15 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # fresh press (release then press) rather than a held control.
         self._reverse_brake_held = False
         self._reverse_accel_held = False
+        # Direction-change gesture state: which change a fresh standstill
+        # press has armed, and how long the control has been held since.
+        # The gear engages only past DIRECTION_CHANGE_HOLD_S.
+        self._direction_armed = ""
+        self._direction_hold_s = 0.0
+        # Latching pedals (double-tap-and-hold, see sim/pedal_latch.py):
+        # a latched pedal reads as held everywhere downstream.
+        self._throttle_latch = PedalLatch()
+        self._brake_latch = PedalLatch()
         self._status_text = f"Press {self.ctx.control_hint('engine')} to start the engine."
 
     def _terse_speech(self) -> bool:
@@ -280,9 +321,16 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 for charge in self.trip.toll_charges
             ],
             "start_damage": self.start_damage,
+            "start_wear": {
+                "tire": self.start_tire_wear,
+                "brake": self.start_brake_wear,
+                "engine": self.start_engine_wear,
+            },
+            "rig_buffs": self.rig_buffs,
             "speeding_strikes": self.speeding_strikes,
             "air_brake": self.truck.air_brake_snapshot(),
             "engine_on": self.truck.engine_on,
+            "chains_on": self.truck.chains_on,
             "hos": self.hos.to_dict(),
             "fatigue": self.ctx.profile.fatigue,
             "hos_fine_count": self.hos_fine_count,
@@ -345,6 +393,19 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             )
             state.resumed = True
             state.start_damage = float(data["start_damage"])
+            # Saves from before the wear meters count deltas from the resume
+            # point: the truck just loaded the profile's wear, so the run
+            # simply reports a little less instead of failing to load.
+            start_wear = data.get("start_wear", {})
+            state.start_tire_wear = float(start_wear.get("tire", state.truck.tire_wear_pct))
+            state.start_brake_wear = float(start_wear.get("brake", state.truck.brake_wear_pct))
+            state.start_engine_wear = float(start_wear.get("engine", state.truck.engine_wear_pct))
+            # Chains stay on the drives across a save; absent on older saves.
+            state.truck.chains_on = bool(data.get("chains_on", False))
+            state.rig_buffs = {
+                str(group): dict(info)
+                for group, info in dict(data.get("rig_buffs", {})).items()
+            }
             state.speeding_strikes = int(data["speeding_strikes"])
             state.trip.restore(position_mi, game_minutes)
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
@@ -521,7 +582,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         seen = add_unique_stat(p, "weather_seen", kind.name)
         if kind in {WeatherKind.RAIN, WeatherKind.HEAVY_RAIN}:
             self.ctx.award_achievement("rain_driver", event=event)
-        elif kind in {WeatherKind.SNOW, WeatherKind.WIND}:
+        elif kind in {WeatherKind.SNOW, WeatherKind.ICE, WeatherKind.WIND}:
             self.ctx.award_achievement("winter_or_wind", event=event)
         elif kind in {WeatherKind.FOG, WeatherKind.THUNDERSTORM}:
             self.ctx.award_achievement("low_visibility", event=event)

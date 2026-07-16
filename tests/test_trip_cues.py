@@ -125,26 +125,34 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     trip, _truck = make_trip(world)
     trip.traffic_manager.vehicles = []
 
-    # State lines no longer warn miles in advance: one spoken crossing at
-    # the boundary, then silence (route alerts stopped repeating in 1.8.1).
+    # State crossings speak once, at the line -- the old 10-mile advance
+    # warning was cut in the reduce-repeated-alerts player-feedback round.
     trip.position_mi = 23.0
     advance = trip.update(0.0)
-    assert not _gps_events(advance)
-
-    line = next(cue for cue in trip.navigation_cues if cue.kind == "state_crossing")
-    trip.position_mi = line.at_mi + 0.1
-    crossing = trip.update(0.0)
     repeat = trip.update(0.0)
+    assert not _gps_events(advance)
+    assert not _gps_events(repeat)
+
+    trip.position_mi = 31.5
+    near = trip.update(0.0)
+    assert not _gps_events(near)
+
+    trip.position_mi = 32.8
+    crossing = trip.update(0.0)
     assert [event.message for event in crossing if event.kind == TripEventKind.STATE_CROSSING] == [
         "Crossing into Indiana near the I-65 state line south of Hammond."
     ]
-    assert not [event for event in repeat if event.kind == TripEventKind.STATE_CROSSING]
+    again = trip.update(0.0)
+    assert not [e for e in again if e.kind == TripEventKind.STATE_CROSSING]
 
-    # Rest stops get their one actionable announcement from the five-mile
-    # stop check; the old one-mile reminder is gone.
+    # Road stops keep their single actionable announcement from _check_stops
+    # at five miles; the extra one-mile reminder is gone for the same reason.
     trip.position_mi = 120.3
     rest = trip.update(0.0)
-    assert not _gps_events(rest)
+    # The dense maxspeed sweep gives this I-65 leg a real 65 mph zone at mile
+    # 120; arriving from the 55 zone at the crossing announces that raise. The
+    # rest-stop cue still does not re-fire -- that is what this asserts.
+    assert _gps_messages(rest) == ["Speed limit raised to 65."]
 
 
 def test_gps_traffic_cue_deduplicates(world):
@@ -172,10 +180,10 @@ def test_gps_traffic_cue_deduplicates(world):
 def test_toll_cues_and_charges_deduplicate(world):
     trip, _truck = make_trip(world, "New York", "Philadelphia")
 
+    # No advance state-crossing chatter -- the line itself will speak when
+    # the truck reaches it.
     trip.position_mi = 6.1
     crossing = trip.update(0.0)
-
-    # State lines speak at the boundary now, not a mile out.
     assert not _gps_events(crossing)
 
     trip.position_mi = 7.2

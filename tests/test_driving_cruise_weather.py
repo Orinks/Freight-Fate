@@ -49,6 +49,48 @@ def test_cruise_control_holds_the_set_speed(monkeypatch):
         app.shutdown()
 
 
+def test_players_brake_press_cancels_cruise(monkeypatch):
+    from freight_fate.app import App
+
+    class Keys:
+        pressed = set()
+
+        def __getitem__(self, key):
+            return key in self.pressed
+
+    keys = Keys()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: keys)
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        open_limits(driving)
+        t = driving.truck
+        driving.handle_event(key_event(pygame.K_e))  # engine on
+        t.cargo_kg = 0.0
+        t.grade = 0.0
+        t.transmission.gear = 10
+        t.velocity_mps = 26.8  # ~60 mph
+        t.throttle = 0.35
+        driving.handle_event(key_event(pygame.K_k))  # engage cruise
+        assert driving._cruise_mph is not None
+
+        # The first tap of the service brake drops cruise, like a real truck.
+        keys.pressed = {pygame.K_DOWN}
+        driving.update(1 / 60)
+        assert driving._cruise_mph is None
+
+        # Releasing the brake must not bring it back.
+        keys.pressed = set()
+        for _ in range(30):
+            driving.update(1 / 60)
+        assert driving._cruise_mph is None
+    finally:
+        app.shutdown()
+
+
 def test_cruise_does_not_rev_engine_when_clutch_is_depressed(monkeypatch):
     from freight_fate.app import App
 
@@ -491,8 +533,23 @@ def test_adaptive_cruise_follow_cue_does_not_repeat_within_the_cooldown(monkeypa
         quiet_trip(driving)
         monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
         open_limits(driving)
-        lead = [NPCVehicle("npc:acc", driving.trip.position_mi + 0.08, 44.0, 44.0, 0, "slow_car")]
-        driving.trip.traffic_manager.vehicles = list(lead)
+        # Flat ground: this test pins the follow-cue cooldown, not descent
+        # physics. The helper route opens on a real 8.6 percent downhill,
+        # where descent control engages the jake, the automatic starts a
+        # downshift, and cruise rightly skips traffic decisions mid-shift --
+        # on exactly the frame this test asserts.
+        driving.trip.grade_at = lambda mile: 0.0
+
+        # The lead must also sit clearly INSIDE the follow gap: at the bubble
+        # edge the approach-control formula is deliberately indifferent (a
+        # distant lead must not drag the target down), and "following" there
+        # flips on hundredths of a mile per hour of truck state.
+        def slow_lead():
+            return [
+                NPCVehicle("npc:acc", driving.trip.position_mi + 0.04, 44.0, 44.0, 0, "slow_car")
+            ]
+
+        driving.trip.traffic_manager.vehicles = slow_lead()
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
         driving.truck.velocity_mps = 29.0  # ~65 mph
@@ -509,7 +566,7 @@ def test_adaptive_cruise_follow_cue_does_not_repeat_within_the_cooldown(monkeypa
         driving.update(1 / 60)
         assert not driving._acc_following
 
-        driving.trip.traffic_manager.vehicles = list(lead)  # and back in
+        driving.trip.traffic_manager.vehicles = slow_lead()  # and back in
         driving.update(1 / 60)
         assert driving._acc_following  # follows again, but quietly
         assert cue_count() == 1
@@ -968,5 +1025,128 @@ def test_real_weather_applies_and_awards_live_condition(monkeypatch):
         assert driving.weather.live is True
         assert driving.weather.current is WeatherKind.RAIN
         assert "rain_driver" in driving.ctx.profile.achievements
+    finally:
+        app.shutdown()
+
+
+def test_limit_drop_earns_braking_grace(monkeypatch):
+    """A posted-limit drop gives braking time before strikes accrue -- real
+    enforcement tickets sustained disregard, not the transition (owner struck
+    0.6 s after the 65-to-50 step in the Queen Creek canyon). Staying on the
+    throttle forfeits the grace."""
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        driving.trip.patrols = []
+        t = driving.truck
+        t.velocity_mps = 65.0 / 2.23694
+        t.throttle = 0.0
+
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (65.0, None))
+        driving._update_speeding(0.1)  # seed the previous limit
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (50.0, None))
+
+        before = driving.speeding_strikes
+        for _ in range(70):  # 7 s: inside the (65-50)/2 = 7.5 s grace
+            driving._update_speeding(0.1)
+        assert driving.speeding_strikes == before
+
+        # Grace spent, still 15 over with no brake: the normal hold applies.
+        for _ in range(100):  # 0.5 s of leftover grace + the 6 s hold, once
+            driving._update_speeding(0.1)
+        assert driving.speeding_strikes == before + 1
+
+        # Second drop, but the driver stays on the throttle: no grace.
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (35.0, None))
+        t.throttle = 1.0
+        strikes = driving.speeding_strikes
+        for _ in range(70):  # > SPEEDING_HOLD_S at 0.1 s steps
+            driving._update_speeding(0.1)
+        assert driving.speeding_strikes == strikes + 1
+    finally:
+        app.shutdown()
+
+
+def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
+    """The dash overspeed alert: spoken once when armed, chiming on an
+    interval while over, disarmed by settling back under the limit -- and
+    a fresh episode speaks again. Off means silent."""
+    from freight_fate.app import App
+
+    app = App()
+    events, played = [], []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, **k: played.append(key))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True: events.append(text)
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        driving.trip.patrols = []
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (50.0, None))
+        t = driving.truck
+        t.throttle = 0.3
+        # 56 in a 50: over the warn threshold, inside the strike leeway.
+        t.velocity_mps = 56.0 / 2.23694
+
+        driving._update_speeding(0.1)
+        assert any("Watch your speed" in e for e in events)
+        assert played.count("vehicle/overspeed_chime") == 1
+
+        for _ in range(52):  # past one 5 s repeat interval
+            driving._update_speeding(0.1)
+        assert played.count("vehicle/overspeed_chime") == 2
+        assert sum("Watch your speed" in e for e in events) == 1  # spoken once
+
+        # Settling under the limit disarms; the next episode speaks again.
+        t.velocity_mps = 50.0 / 2.23694
+        driving._update_speeding(0.1)
+        t.velocity_mps = 56.0 / 2.23694
+        driving._update_speeding(0.1)
+        assert sum("Watch your speed" in e for e in events) == 2
+
+        # Way over, the cadence escalates: at 25 over the ding runs about
+        # every 1.5 seconds instead of every 5.
+        t.velocity_mps = 75.0 / 2.23694
+        played.clear()
+        for _ in range(40):  # 4 seconds
+            driving._update_speeding(0.1)
+        assert played.count("vehicle/overspeed_chime") >= 2
+
+        # Urgent-only mode: deliberate fast cruising stays unjudged, but a
+        # runaway past the urgent line still rings, at the fast cadence.
+        app.ctx.settings.overspeed_warning = "urgent only"
+        t.velocity_mps = 50.0 / 2.23694
+        driving._update_speeding(0.1)  # disarm
+        played.clear()
+        events.clear()
+        t.velocity_mps = 60.0 / 2.23694  # 10 over: quiet in urgent-only
+        for _ in range(60):
+            driving._update_speeding(0.1)
+        assert played.count("vehicle/overspeed_chime") == 0
+        t.velocity_mps = 75.0 / 2.23694  # 25 over: the runaway alarm rings
+        for _ in range(30):  # 3 seconds at the 0.5 s cadence
+            driving._update_speeding(0.1)
+        assert any("Watch your speed" in e for e in events)
+        assert played.count("vehicle/overspeed_chime") >= 4
+
+        # The setting turns the whole alert off.
+        app.ctx.settings.overspeed_warning = "off"
+        t.velocity_mps = 50.0 / 2.23694
+        driving._update_speeding(0.1)
+        t.velocity_mps = 56.0 / 2.23694
+        chimes = played.count("vehicle/overspeed_chime")
+        spoken = sum("Watch your speed" in e for e in events)
+        for _ in range(60):
+            driving._update_speeding(0.1)
+        assert played.count("vehicle/overspeed_chime") == chimes
+        assert sum("Watch your speed" in e for e in events) == spoken
     finally:
         app.shutdown()

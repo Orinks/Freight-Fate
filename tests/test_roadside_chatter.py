@@ -143,6 +143,7 @@ def test_chatter_settings_map_categories():
         "highway_marker",
         "museum",
         "billboard",
+        "billboard_sign",
     ):
         assert s.chatter_enabled(category)
 
@@ -155,6 +156,8 @@ def test_chatter_settings_map_categories():
     s.set_all_chatter(False)
     assert s.chatter_summary() == "off"
     assert not s.chatter_enabled("billboard")
+    # Placed billboard signs ride the same billboards switch as the random pool.
+    assert not s.chatter_enabled("billboard_sign")
     # An unknown future category speaks rather than silently vanishing.
     assert s.chatter_enabled("meteor_crater")
 

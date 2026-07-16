@@ -190,7 +190,10 @@ def test_old_save_without_truck_fields_loads_with_defaults():
         "trailer_programs",
         "owned_trailers",
         "tire_wear_pct",
+        "brake_wear_pct",
+        "engine_wear_pct",
         "road_grime_pct",
+        "active_buffs",
     ):
         data.pop(legacy_missing, None)
     data.pop("_signature", None)
@@ -204,8 +207,39 @@ def test_old_save_without_truck_fields_loads_with_defaults():
     assert loaded.active_trailer_programs() == ()
     assert loaded.visible_owned_trailers() == ()
     assert loaded.tire_wear_pct == 0.0
+    assert loaded.brake_wear_pct == 0.0
+    assert loaded.engine_wear_pct == 0.0
     assert loaded.road_grime_pct == 0.0
+    assert loaded.active_buffs == []
     assert loaded.market.multipliers  # fresh market seeded on load
+
+
+def test_truck_condition_round_trips_through_profile():
+    from freight_fate.sim.vehicle import TruckState
+
+    p = Profile(name="Wear Sync")
+    p.truck_fuel_gal = 120.0
+    p.truck_damage_pct = 8.0
+    p.tire_wear_pct = 12.0
+    p.brake_wear_pct = 34.0
+    p.engine_wear_pct = 5.5
+    truck = TruckState()
+    p.load_truck_condition(truck)
+    assert truck.fuel_gal == 120.0
+    assert truck.damage_pct == 8.0
+    assert truck.tire_wear_pct == 12.0
+    assert truck.brake_wear_pct == 34.0
+    assert truck.engine_wear_pct == 5.5
+
+    truck.tire_wear_pct += 1.5
+    truck.brake_wear_pct += 2.0
+    truck.engine_wear_pct += 0.25
+    truck.fuel_gal -= 30.0
+    p.store_truck_condition(truck)
+    assert p.truck_fuel_gal == 90.0
+    assert p.tire_wear_pct == 13.5
+    assert p.brake_wear_pct == 36.0
+    assert p.engine_wear_pct == 5.75
 
 
 def test_company_driver_profile_uses_assigned_standard_tractor():

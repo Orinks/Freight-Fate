@@ -38,6 +38,7 @@ from ..models.jobs import (
     facility_text,
     job_from_payload,
     job_payload,
+    lane_key,
     normalize_job_cities,
     route_drive_hours,
 )
@@ -49,6 +50,7 @@ from ..models.trailers import (
 )
 from ..models.trucks import TRUCK_CATALOG
 from ..music import select_menu_music_sequence
+from ..playtest_levers import forced_dispatch_destination, resolve_city_forgiving
 from ..sim.hos import LIMITS, clock_text, time_of_day
 from ..sim.timezones import appointment_text, city_zone, to_local
 from .base import MenuItem, MenuState
@@ -269,6 +271,13 @@ class CityMenuState(MenuState):
                 "the carrier sponsors it at the listed level.",
             ),
             MenuItem(
+                "Driving school",
+                self._driving_school,
+                help="Spoken lessons on a practice road where nothing "
+                "counts: no money, no wear, no hours. Learn the "
+                "controls or test new equipment consequence-free.",
+            ),
+            MenuItem(
                 "Truck status",
                 self._truck_status,
                 help="Hear assigned or owned tractor status at a glance.",
@@ -382,6 +391,11 @@ class CityMenuState(MenuState):
     def _business_status(self) -> None:
         self.ctx.push_state(BusinessStatusState(self.ctx))
 
+    def _driving_school(self) -> None:
+        from .driving_school import DrivingSchoolState
+
+        self.ctx.push_state(DrivingSchoolState(self.ctx))
+
     def _endorsement_courses(self) -> None:
         self.ctx.push_state(EndorsementCourseState(self.ctx))
 
@@ -439,13 +453,25 @@ class CityMenuState(MenuState):
             lead = f"Assigned {carrier_name(p)} tractor: {truck.label}."
         else:
             lead = f"Owned tractor: {truck.label}."
+        compound = "winter" if p.tire_type == "winter" else "all-season"
+        if not p.chains_owned:
+            chains = "No snow chains aboard."
+        elif p.chain_wear_pct >= 100:
+            chains = "The snow chain set aboard is snapped scrap."
+        elif p.chain_wear_pct >= 1:
+            chains = f"Snow chains aboard, {p.chain_wear_pct:.0f} percent worn."
+        else:
+            chains = "Snow chains aboard and fresh."
         self.ctx.say(
             f"{lead} Fuel {fuel_pct:.0f} percent, "
             f"{p.truck_fuel_gal:.0f} gallons of "
             f"{specs.fuel_tank_gal:.0f}. "
             f"Tractor condition {condition}, {damage:.0f} percent damage. "
-            f"Tire wear {p.tire_wear_pct:.0f} percent. "
-            f"Road grime {p.road_grime_pct:.0f} percent."
+            f"Tire wear {p.tire_wear_pct:.0f} percent, {compound} compound. "
+            f"Brake wear {p.brake_wear_pct:.0f} percent. "
+            f"Engine wear {p.engine_wear_pct:.0f} percent. "
+            f"Road grime {p.road_grime_pct:.0f} percent. "
+            f"{chains}"
         )
 
     def _time_weather(self) -> None:
@@ -558,6 +584,7 @@ def dispatch_cache_key(p) -> dict:
         "level": p.career.level,
         "endorsements": sorted(p.career.endorsements),
         "count": board_offer_count(p.career.level),
+        "force_dest": forced_dispatch_destination(),
     }
 
 
@@ -567,6 +594,7 @@ def open_freight_market(ctx) -> list[Job]:
     market_changed = p.market.advance_to(p.market_day())
     key = dispatch_cache_key(p)
     cache = p.dispatch_board_cache if not market_changed else None
+    lever_note = ""
     if cache and cache.get("key") == key:
         # Cached payloads may predate the slug migration; normalize their
         # city references so a restored board keeps resolving.
@@ -584,13 +612,48 @@ def open_freight_market(ctx) -> list[Job]:
             carrier_key=getattr(p, "carrier_key", ""),
             direct_freight=p.business_status == INDEPENDENT_AUTHORITY,
         )
+        lever_note = _add_forced_board_job(ctx, board, jobs)
         p.dispatch_board_cache = {
             "key": key,
             "jobs": [_job_payload(job) for job in jobs],
         }
         ctx.save_profile()
     ctx.push_state(JobBoardState(ctx, jobs))
+    if lever_note:
+        # Queued behind the board announcement, which interrupts.
+        ctx.say(lever_note, interrupt=False)
     return jobs
+
+
+def _add_forced_board_job(ctx, board: JobBoard, jobs: list[Job]) -> str:
+    """FREIGHT_FATE_FORCE_DEST playtest lever: guarantee one load to the
+    forced destination on a freshly built board. Returns the spoken note."""
+    dest = forced_dispatch_destination()
+    if not dest:
+        return ""
+    p = ctx.profile
+    key = resolve_city_forgiving(ctx.world, dest)
+    if key not in ctx.world.cities:
+        return f"Playtest lever: no city called {dest} to dispatch to."
+    if key == ctx.world.resolve_city_key(p.current_city):
+        return ""
+    spoken = ctx.world.spoken_city(key, qualified=True)
+    if any(ctx.world.resolve_city_key(job.destination) == key for job in jobs):
+        return f"Playtest lever: the board already offers {spoken}."
+    job = board.offer_to(
+        p.current_city,
+        key,
+        p.career.endorsements,
+        market=p.market,
+        level=p.career.level,
+        carrier_key=getattr(p, "carrier_key", ""),
+        direct_freight=p.business_status == INDEPENDENT_AUTHORITY,
+    )
+    if job is None:
+        return f"Playtest lever: no supported dispatch from here to {spoken}."
+    jobs.append(job)
+    jobs.sort(key=lambda j: j.distance_mi)
+    return f"Playtest lever: added a load to {spoken} to the board."
 
 
 class CityServiceSelectState(MenuState):
@@ -1072,7 +1135,27 @@ class JobBoardState(MenuState):
         declined = self._declined_indices()
         fresh = [index for index in ordered if index not in declined]
         reoffered = [index for index in ordered if index in declined]
-        return fresh + reoffered
+        # Lane variety: dispatch prefers a lane the driver has not just run.
+        # A stable partition, so score order still rules inside each group,
+        # and when every candidate is a recent lane nothing changes -- the
+        # nudge can delay a repeat, never block dispatch.
+        recent = set(getattr(self.ctx.profile, "recent_lanes", ()) or ())
+        if recent:
+            world = self.ctx.world
+            fresh = [i for i in fresh if lane_key(world, self.jobs[i]) not in recent] + [
+                i for i in fresh if lane_key(world, self.jobs[i]) in recent
+            ]
+        queue = fresh + reoffered
+        forced = forced_dispatch_destination()
+        if forced and queue:
+            # Playtest lever: dispatch assigns the forced-destination load
+            # first, so a tester is not stuck with pot luck.
+            key = self.ctx.world.resolve_city_key(forced)
+            for i, index in enumerate(queue):
+                if self.ctx.world.resolve_city_key(self.jobs[index].destination) == key:
+                    queue.insert(0, queue.pop(i))
+                    break
+        return queue
 
     def _locked_reason(self, job: Job) -> str:
         p = self.ctx.profile

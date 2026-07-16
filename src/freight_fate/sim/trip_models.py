@@ -278,6 +278,17 @@ FULL_COMPRESSION_MPH = 50.0  # road speed where full pacing resumes
 # 80x). Releasing the brake returns to the speed ramp instantly.
 PARKED_TIME_SCALE_MULT = 2.0
 CONSTRUCTION_ENFORCEMENT_GRACE_MI = 1.5
+# Chain-law areas sit over sustained steep grade -- the real trigger for
+# CDOT/Caltrans chain controls. The areas are fixed in space at trip build;
+# whether the law is ACTIVE follows the live weather: snow puts the signs at
+# Level 1 (winter-rated tires or chains), freezing rain at Level 2 (chains on
+# all commercial vehicles). The lead mile stands in for the chain-up pullout
+# just before the grade.
+CHAIN_LAW_MIN_GRADE = 0.05
+CHAIN_LAW_MIN_RUN_MI = 1.0
+CHAIN_LAW_JOIN_GAP_MI = 2.0
+CHAIN_LAW_LEAD_MI = 0.5
+CHAIN_LAW_SAMPLE_MI = 0.25
 # Driving faster than the weather's safe speed risks a traction-loss incident,
 # so the safe-speed readout has teeth. Risk scales with how far over you are and
 # how little grip the conditions leave; only adverse grip counts.
@@ -398,12 +409,20 @@ HAZARDS: tuple[HazardDef, ...] = (
     ),
     # Snow and ice only.
     HazardDef("a snow squall whiting out the lane", 1.0, weather=(WeatherKind.SNOW,)),
-    HazardDef("ice on the bridge deck", 1.0, weather=(WeatherKind.SNOW,)),
+    HazardDef("ice on the bridge deck", 1.0, weather=(WeatherKind.SNOW, WeatherKind.ICE)),
     HazardDef(
         "black ice on the shaded grade",
         1.1,
-        weather=(WeatherKind.SNOW,),
+        weather=(WeatherKind.SNOW, WeatherKind.ICE),
         terrain=("mountain", "hills"),
+    ),
+    # Freezing rain only: the whole road is finding out at the same time.
+    HazardDef("glaze ice sheeting the whole lane", 1.3, weather=(WeatherKind.ICE,)),
+    HazardDef(
+        "a car spun out on the glaze ahead",
+        1.1,
+        weather=(WeatherKind.ICE,),
+        dodgeable=True,
     ),
     # Dense fog only.
     HazardDef("brake lights looming in dense fog", 1.2, weather=(WeatherKind.FOG,)),

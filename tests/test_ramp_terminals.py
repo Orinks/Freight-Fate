@@ -8,6 +8,7 @@ from freight_fate.states.driving import (
     RAMP_ACCESS_MI,
     RAMP_LIGHT_GREEN_S,
     RAMP_LIGHT_RED_S,
+    RAMP_LIGHT_YELLOW_S,
     RED_STOP_MPH,
 )
 
@@ -51,7 +52,7 @@ def _on_ramp(d, control: str, *, red: bool, mph: float) -> None:
     d._ramp_light_offset_s = 0.0 if red else RAMP_LIGHT_RED_S  # phase start
     d._ramp_light_timer = 0.0
     d._ramp_light_announced = True
-    d._ramp_light_was_red = red
+    d._ramp_light_last_phase = "red" if red else "green"
     d._ramp_terminal_done = False
     d._ramp_waiting_at_light = False
 
@@ -245,10 +246,57 @@ def test_light_cycle_alternates():
         d._ramp_light_offset_s = 0.0
         d._ramp_light_timer = 0.0
         assert d._ramp_light_is_red()
+        assert d._ramp_light_phase() == "red"
         d._ramp_light_timer = RAMP_LIGHT_RED_S + 0.1
         assert not d._ramp_light_is_red()
+        assert d._ramp_light_phase() == "green"
+        # Green ends in yellow, not a hard cut to red -- and yellow is legal.
         d._ramp_light_timer = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + 0.1
+        assert d._ramp_light_phase() == "yellow"
+        assert not d._ramp_light_is_red()
+        d._ramp_light_timer = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S + 0.1
         assert d._ramp_light_is_red()
+    finally:
+        app.shutdown()
+
+
+def test_crossing_on_yellow_is_legal():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _on_ramp(d, "signal", red=False, mph=GREEN_ROLL_MPH - 5.0)
+        # Put the cycle just into the yellow phase at the stop bar.
+        d._ramp_light_offset_s = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + 0.5
+        assert d._ramp_light_phase() == "yellow"
+        d._update_ramp_terminal()
+        assert d._ramp_terminal_done
+        assert d.truck.damage_pct == 0.0
+    finally:
+        app.shutdown()
+
+
+def test_every_light_change_is_spoken_on_the_approach(monkeypatch):
+    """The silent flip back to red between a spoken green and the stop bar
+    cost a real playtester trailer damage; every phase change must speak."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(
+            d.ctx, "say_event", lambda text, interrupt=True: spoken.append(text)
+        )
+        _on_ramp(d, "signal", red=True, mph=10.0)
+        d._ramp_mi = RAMP_ACCESS_MI + 0.3  # still descending the ramp
+        cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
+        for _ in range(int(cycle * 10) + 5):  # one full cycle at 0.1 s steps
+            d._update_ramp_light(0.1)
+        assert any("turns green" in text for text in spoken)
+        assert any("turns yellow" in text for text in spoken)
+        assert any("turns red" in text for text in spoken)
     finally:
         app.shutdown()
 
@@ -267,3 +315,119 @@ def test_interchange_parser_accepts_and_validates_ramp_control():
     raw["ramp_control"] = "roundabout"
     with pytest.raises(ValueError):
         _parse_interchange(raw, 50.0, "A", "B", "I-99")
+
+
+def test_ramp_control_is_knowable_before_the_ramp():
+    """The signal-on announcement a mile out and the ramp itself must
+    always agree: _ramp_control_for is a pure preview of the decision
+    _begin_ramp_terminal commits to."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        for at_mi in (10.0, 22.5, 30.0, 41.0, 55.0):
+            stop = _FakeStop(at_mi=at_mi)
+            early = d._ramp_control_for(stop)
+            d._begin_ramp_terminal(stop)
+            assert d._ramp_control == early, at_mi
+    finally:
+        app.shutdown()
+
+
+def test_signal_on_names_the_ramp_ending(monkeypatch):
+    """Owner playtest 2026-07-16: the stop sign was announced only on the
+    ramp, far too late to brake for. The signal-on announcement names the
+    ending while there is still a mile of mainline to plan on."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(d.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        d.trip.ramp_control_at = lambda mi: "stop"
+        stop = _FakeStop(at_mi=d.trip.position_mi + 1.2)
+        stop.spoken_name = "Test Plaza"
+        stop.exit_label = ""
+        d._exit_stop = stop
+        d._exit_signal_on = False
+
+        d._toggle_exit_signal()
+
+        assert d._exit_signal_on
+        assert "The ramp ends at a stop sign." in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_upcoming_readout_names_the_ramp_ending(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(d.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        d.trip.ramp_control_at = lambda mi: "signal"
+        stop = _FakeStop(at_mi=d.trip.position_mi + 5.0)
+        stop.spoken_name = "Test Plaza"
+        d.trip.upcoming_stop = lambda within_mi: stop
+
+        d._speak_upcoming()
+
+        assert any(
+            "Test Plaza" in text and "ramp ends at a traffic light" in text
+            for text in spoken
+        )
+    finally:
+        app.shutdown()
+
+
+def test_controlled_ramp_pins_the_clock_to_real_time():
+    """Under speed-based compression a hot ramp entry burned the whole
+    half mile in a few real seconds (log receipt: exit 17:00:13, sign
+    blown 17:00:18). From the gore of a controlled ramp the clock runs
+    real, so the warning buys human reaction seconds."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.time_scale = 10.0
+        d.truck.velocity_mps = 45.0 / 2.2369362920544  # hot entry
+        assert d.trip.effective_time_scale > 8.0
+
+        d.trip.controlled_ramp = True
+        assert d.trip.effective_time_scale == 1.0
+
+        d.trip.controlled_ramp = False
+        assert d.trip.effective_time_scale > 8.0
+    finally:
+        app.shutdown()
+
+
+def test_update_exit_maintains_the_controlled_ramp_flag():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _on_ramp(d, "stop", red=False, mph=40.0)
+        d._ramp_mi = RAMP_ACCESS_MI + 0.3
+        d._ramp_stop = _FakeStop()
+        d._update_exit(0.0)
+        assert d.trip.controlled_ramp
+
+        # Past the terminal the clock may compress again.
+        d._ramp_terminal_done = True
+        d._update_exit(0.0)
+        assert not d.trip.controlled_ramp
+
+        # A free-flow ramp never pins the clock.
+        d._ramp_terminal_done = False
+        d._ramp_control = "none"
+        d._update_exit(0.0)
+        assert not d.trip.controlled_ramp
+    finally:
+        app.shutdown()

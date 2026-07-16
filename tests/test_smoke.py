@@ -403,7 +403,7 @@ def test_garage_services_tires_and_wash():
         garage = GarageState(app.ctx)
         app.push_state(garage)
 
-        assert any("Replace tires" in item.text for item in garage.items)
+        assert any("Replace all-season tires" in item.text for item in garage.items)
         assert any("Wash truck" in item.text for item in garage.items)
 
         garage._service_tires()
@@ -413,6 +413,64 @@ def test_garage_services_tires_and_wash():
         garage._wash_truck()
         assert p.road_grime_pct == 0.0
         assert p.money == 515.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_garage_services_brakes_and_engine():
+    from freight_fate.app import App
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import GarageState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Maintenance", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.money = 10_000.0
+        p.brake_wear_pct = 20.0
+        p.engine_wear_pct = 30.0
+        garage = GarageState(app.ctx)
+        app.push_state(garage)
+
+        assert any("Brake job" in item.text for item in garage.items)
+        assert any("Engine overhaul" in item.text for item in garage.items)
+
+        garage._service_brakes()
+        assert p.brake_wear_pct == 0.0
+        assert p.money == 10_000.0 - 20.0 * 40.0
+
+        garage._service_engine()
+        assert p.engine_wear_pct == 0.0
+        assert p.money == 10_000.0 - 20.0 * 40.0 - 30.0 * 120.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_garage_partial_brake_service_when_broke():
+    from freight_fate.app import App
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import GarageState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Broke", current_city="Chicago")
+        p = app.ctx.profile
+        p.business_status = LEASED_OWNER_OPERATOR
+        p.owned_trucks = ["rig"]
+        p.money = 200.0  # 5 percent of brake service at 40 dollars per percent
+        p.brake_wear_pct = 50.0
+        garage = GarageState(app.ctx)
+        app.push_state(garage)
+
+        garage._service_brakes()
+        assert p.brake_wear_pct == pytest.approx(45.0)
+        assert p.money == pytest.approx(0.0)
     finally:
         app.shutdown()
 
@@ -513,7 +571,6 @@ def test_pause_and_abandon_returns_to_city():
 @pytest.mark.smoke
 def test_abandon_prompt_no_returns_to_pause_menu():
     from freight_fate.app import App
-    from freight_fate.states.city import PickupFacilityState
     from freight_fate.states.driving import (
         AbandonJobConfirmationState,
         DrivingState,
@@ -536,17 +593,6 @@ def test_abandon_prompt_no_returns_to_pause_menu():
         app.state.handle_event(key_event(pygame.K_RETURN))  # job board
         assert app.state.assigned_mode
         app.state.handle_event(key_event(pygame.K_RETURN))  # accept assigned job
-        assert isinstance(app.state, DrivingState)
-        app.state.trip.position_mi = app.state.trip.total_miles
-        app.state.trip.finished = True
-        app.state.truck.velocity_mps = 0.0
-        app.state.update(1 / 60)
-        finish_timed_state(app)
-        assert isinstance(app.state, PickupFacilityState)
-        app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
-        app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
-        finish_timed_state(app)
-        app.state.handle_event(key_event(pygame.K_RETURN))  # depart on assigned route
         assert isinstance(app.state, DrivingState)
 
         app.state.handle_event(key_event(pygame.K_ESCAPE))

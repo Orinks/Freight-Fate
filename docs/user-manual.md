@@ -173,8 +173,9 @@ Your terminal is the safe hub between jobs. Public terminal actions include:
 | Business status | Review company-driver or owner-operator status. |
 | Garage | Refuel, repair, service tires, and wash company equipment; owner-operators can also buy upgrades, buy tractors, switch owned tractors, add trailer programs, or buy trailers after own authority. |
 | Request pay advance | Draw cash against your next load when you are broke. |
-| Career stats | Review level, reputation, deliveries, and career totals. |
+| Career stats | Review level, reputation, deliveries, career totals, and the endorsements you currently hold. |
 | Endorsement courses | Pay for refrigerated, heavy-haul, or high-value training early; the carrier sponsors each course for free at its unlock level. |
+| Driving school | Spoken lessons on a flat, empty practice road where nothing counts: no money, no wear, no fuel, no hours. An instructor walks you through each step and waits for you to do it. Use it to learn the controls or practice without risking the career. |
 | Truck status | Review truck model, fuel, tank size, damage, tire wear, and road grime. |
 | Time and weather | Review the clock, career day, and current city weather. |
 | Logbook | Review your recent Record of Duty Status entries. |
@@ -274,7 +275,9 @@ sells:
 | Bulk trailer program | Opens grain, farm inputs, and loose bulk cargo for owner-operators. |
 | Owned trailer | Own-authority drivers can buy dry van, reefer, flatbed, or bulk trailers. Matching direct freight uses an owned-trailer reserve at settlement. |
 
-Upgrades are fleet packages and apply to every truck you own.
+Upgrades are fleet packages and apply to every truck you own. The garage
+also sells winter equipment -- winter tires and snow chains -- covered in
+the Winter Driving section.
 
 ## Dispatch And Jobs
 
@@ -382,6 +385,7 @@ Driving controls are active while the road view is focused:
 | --- | --- |
 | Up arrow, hold | Throttle. |
 | Down arrow, hold | Brake. With simple automatic direction changes, keep holding it after stopping to select reverse and back slowly. With deliberate direction changes, release it and press again. |
+| Up or Down arrow, tap then press and hold | Latch that pedal so it stays applied hands-free, like the old hand-throttle knob. A click and a spoken confirmation mark the catch after about half a second of holding. Press the same key once to take the pedal back; the opposite pedal, the emergency brake, a hazard, or the overspeed alarm releases it instantly, spoken. Turn the gesture off under Settings, Driving assistance, Latching pedals. |
 | B, hold | Emergency brake. |
 | E | Start the engine. Stop the engine only below 5 miles per hour. |
 | P | Release or set the parking brake. |
@@ -393,14 +397,18 @@ Driving controls are active while the road view is focused:
 | H | Hold to sound the horn; release to stop it. |
 | Space | Report speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. |
+| D | Report one safe-speed number for right now. Weather grip and an armed exit ramp are already baked into the number. |
+| G | Report the grade under the wheels and whether the truck is holding, pulling, or losing it. |
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
 | C | Report clock, deadline, estimated arrival, and hours of service. |
 | R | Report route progress and GPS context. |
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
-| L | Report lane position when lane drift is enabled. |
+| L | Report which lane you are in and whether you are centered, drifting, or at an edge. |
+| Left / Right arrow | With lane drift on, steer; steer across the line to change lanes. With lane drift off, tap to change one lane in that direction -- the signal clicks and the change is announced. |
 | A | Repeat the last route announcement, in case you missed it. |
+| Comma | Re-read the last spoken line of any kind, here and in every menu. Press it again within a few seconds to step back through the last 20 lines; each older line is prefaced with how far back it is, and any new announcement returns the key to the newest line. |
 | U | Report what is coming up: imposed speed limits, patrols, stops, and exits ahead. |
 | F1 | Show the driving control list and current objective. |
 | Escape | Open the pause menu. |
@@ -430,11 +438,18 @@ The truck simulation includes:
 - Ten forward gears in manual mode.
 - Air pressure, low-air warnings, parking brakes, and spring brakes.
 - Separate primary, secondary, and trailer air tanks in detailed status.
-- Engine braking.
-- Grades and terrain.
-- Brake heat and fade.
+- A three-stage engine brake worked through the gears.
+- Grades and terrain from real elevation data.
+- Brake heat, fade, and wear from real energy accounting.
 - Fuel burn.
 - Damage that reduces performance.
+- Wear meters for tires, brakes, and engine, driven by how you actually
+  drive. Wear talks back: bald tires grip less, worn brakes fade sooner,
+  and a tired engine loses power and drinks fuel.
+
+Condition belongs to the truck, not to you. Each truck you own keeps its
+own wear, damage, fuel, and traction equipment, so switching tractors
+means switching into that truck's actual state.
 
 A loaded tractor-trailer pulls away gradually. The automatic transmission holds
 the first few gears long enough to feel the weight, then settles into normal
@@ -457,6 +472,59 @@ it keeps you legal even if you set it higher. Weather can increase the following
 gap, and modeled traffic can make cruise reduce speed. Cruise does not steer,
 change lanes, or replace your attention.
 
+## Mountain Driving
+
+Grades are real: the game samples actual elevation along every route, so
+the long climbs and descents you hear are the ones a real driver runs.
+Press G at any time for the grade under your wheels and a plain verdict
+on whether the truck is holding it, pulling it, or losing it.
+
+Going down is the discipline. The service brakes turn speed into heat,
+and heat is the enemy: drag the brakes down a long grade and they fade,
+which means the same pedal gives you less and less stopping power right
+when you need it most. The way down a mountain is the engine brake.
+Press J to toggle it. It is strongest in a low gear at high RPM and
+nearly useless in overdrive, so gear down before the descent, let the
+engine hold the truck back, and save the service brakes for short, firm
+corrections -- brake down a few miles per hour, release, and let the
+brakes cool while the engine does the steady work. The automatic
+transmission helps by pre-selecting a lower gear when the engine brake
+needs one.
+
+If you cook the brakes anyway, you will hear it: hot brakes squeal, and
+a spoken warning names the trend. Press D for the one safe-speed number
+that already accounts for the conditions. Descent speed control, in the
+driving assistance settings, can manage engine braking for you at the
+level you choose.
+
+## Winter Driving
+
+Cold seasons bring snow, ice, and the one weather worth parking for:
+freezing rain. Traction is honest -- ice cuts grip to a small fraction
+of dry pavement, worn tires make everything worse, and the engine brake
+can break the drive wheels loose on a slick surface.
+
+The garage sells the winter answers:
+
+| Equipment | What It Does |
+| --- | --- |
+| Winter tires | A fresh set in a winter compound. Better grip on snow and ice all season, no speed penalty, normal wear. Company drivers ride on whatever the carrier specs. |
+| Snow chains | A set kept in the truck's side box until you hang them. Chains rule ice and packed snow, but demand chain speed -- around 30 miles per hour -- and they grind apart fast on bare pavement. Snapped chains are replaced at the garage. |
+
+Chain up from the pause menu while stopped. Hanging chains takes real
+minutes and real effort, more in the dark, and the time is logged as
+on-duty work. Removing them is quicker. Listen to the road: chains on
+bare pavement complain before they snap, so take them off when the
+surface clears.
+
+Mountain passes carry chain laws. When a chain law is active, flashing
+signs announce it ahead of the restricted stretch, and the requirement
+is spoken plainly: Level 1 wants winter tires or chains, Level 2 wants
+chains on the drive axles. Running a checkpoint without meeting the
+requirement risks a citation of around five hundred dollars. The signs,
+the warnings, and the checkpoints all ride real mountain grades from
+the map data.
+
 ## Road Events, Weather, And Rest Stops
 
 The road can report traffic, construction, state lines, city pass-throughs,
@@ -466,8 +534,12 @@ metro/checkpoint corridors can also produce random road hazards a little more
 often than open-country stretches.
 
 Hazards can happen while moving. When a "Brake now" warning appears, slow below
-25 miles per hour quickly to avoid a collision. Fatigue shortens the reaction
-window.
+25 miles per hour quickly to avoid a collision. Some hazards are called out as
+"Brake or change lanes" -- those can be dodged with a lane change instead of
+braking, if the lane beside you is clear. Press L first if you are not sure
+which lane you are in, and listen for the nearby-vehicle callouts; changing
+lanes into a real vehicle risks a sideswipe.
+Fatigue shortens the reaction window.
 
 Construction and traffic zones lower the speed limit. Construction zones may
 begin with a merge/flagger taper before the lower work-zone limit. Speeding in
@@ -521,7 +593,12 @@ date, season, and temperature follow the real-world calendar instead.
 Stops are reported as you approach them. A one-mile cue tells you when to take
 an exit. As an announced exit approaches, use X to signal or cancel your intent,
 slow to 45 miles per hour or less, and set up the exit lane when lane drift is
-enabled. If your speed, lane setup, and route intent are valid at the marker,
+enabled. The signal-on announcement also names how the ramp ends -- a traffic
+light or a stop sign -- so the braking plan can start on the mainline, and the
+U upcoming readout carries the same warning. Once you are on a ramp that ends
+in a light or a sign, the game clock runs in real time until you are through
+the intersection, so the warning buys real reaction seconds instead of
+compressed ones. If your speed, lane setup, and route intent are valid at the marker,
 the truck takes the ramp automatically. If you reach the gore too fast, without
 signaling, or without the exit lane set, you stay on the
 highway and the game tells you what went wrong. The timing is generous so the
@@ -548,13 +625,22 @@ context.
 Stop actions depend on that stop's data. A stop may offer:
 
 - Fuel.
-- Food and coffee.
+- Meals, drinks, and showers.
 - A 30-minute break.
-- 10-hour sleep.
-- Repairs.
+- 10-hour sleep or sleeper-berth splits.
+- Repairs and rig care.
 - Roadside assistance or towing.
 - Inspection check-in.
 - Save point.
+
+Meals, drinks, and showers are purchases with spoken effects and clocks
+on them: a hot meal or a coffee helps fatigue for a while and says so
+when it wears off, and a sit-down meal's half hour also satisfies the
+30-minute break rule. Showers are commonly free with a fuel purchase at
+the same visit. Rig care such as lube work and tire checks is truck
+work, so the carrier covers it for company drivers; food and showers
+are always your own money. Different stop brands are good at what they
+are really known for.
 
 Not every stop offers every action. A public rest area usually does not offer
 fuel or repair. A weigh station is for inspection, not food or sleep: slow
@@ -647,6 +733,8 @@ Escape opens the pause menu during a drive. Public pause choices include:
 | Trip status | Review cargo, objective, route progress, time used, and air status. |
 | Controls and help | Open the how-to-play reference at the driving keys, page by page, without leaving the drive. |
 | Call a roadside mechanic | Patch severe truck damage enough to continue, at a high cost. |
+| Install snow chains | While stopped with chains in the side box: hang the chains. Takes real minutes, more in the dark, logged as on-duty work. |
+| Remove snow chains | While stopped with chains mounted: take them off before bare pavement grinds them apart. |
 | Emergency shoulder sleep | Rest on the shoulder when stopped away from route points; warnings get stronger when hours or fatigue are urgent. |
 | Settings | Open settings during the drive. |
 | Abandon job | Pay a penalty and return to the origin city. |
@@ -669,8 +757,11 @@ moving the app does not move them.
 ## Destination And Settlement
 
 At the destination, slow down for the facility gate, stop, and choose **Dock
-and deliver**. On highway deliveries, take the announced destination exit first.
-You can also review paperwork before settling.
+and deliver**. On highway deliveries, take the announced destination exit
+first; in cities with street data, the arrival flows off the ramp onto the
+destination's real local streets with spoken turn-by-turn cues, and loaded
+departures drive the streets back out to the on-ramp the same way. You can
+also review paperwork before settling.
 
 The destination menu includes:
 
@@ -703,6 +794,8 @@ Lane drift also lives in this category and, like the speed keeper, sits outside 
 
 One more control, Speed keeper, sits outside the presets. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K holds your current speed at or below the zone limit and creeps along behind queued traffic, so the accelerator does not need to stay held down. Any brake input, a hazard, or reaching the open road hands control back and says so. It is on by default and never changed by choosing a preset.
 
+Latching pedals is the same kind of control: an input accommodation that sits outside the presets, on by default. Tap the accelerator or brake, then press again and hold for half a second, and a click plus a spoken confirmation latch that pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly, spoken. See the driving controls table for the full gesture.
+
 Settings are grouped into categories. In a settings category, Up and Down choose
 a setting, Right arrow or Enter changes it forward, Left arrow changes it
 backward, and Escape returns to the category list. Changes are saved as they
@@ -715,6 +808,7 @@ Gameplay settings include:
 | Units | Switch speed and distance between miles and kilometers. |
 | Transmission | Switch between automatic and manual transmission. |
 | Automatic direction changes | In an automatic, Simple changes between forward and reverse when you keep holding the control after stopping. Deliberate requires releasing and pressing it again. |
+| Overspeed warning | The dash alert for running over the posted limit: On speaks once and then chimes faster the further over you are, Urgent only keeps just the runaway alarm for deliberate fast cruising, and Off silences it. |
 | Driving mode | Choose Relaxed, Standard, or Realistic pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most real time to respond. Standard keeps balanced timing and consequences. Realistic moves distance and time fastest, so decisions arrive sooner without extra forgiveness. At low speed the clock still eases toward real time, and deliberate parked waiting runs at double the selected pace. |
 | Hours of service | Choose realistic or relaxed legal limits. Relaxed hours rules lengthen the limits and further reduce random hazard frequency; real violations keep their normal consequences. |
 | Driving assistance | Open Settings, Driving assistance for lane drift, lane warning, lane centering, emergency braking, stop-and-go, descent, and speed keeper controls. |
@@ -738,6 +832,7 @@ Speech and weather settings include:
 | Setting | Purpose |
 | --- | --- |
 | Speech verbosity | Controls how often driving status reminders run. |
+| Roadside chatter | The ambient color spoken between navigation cues: entering parks and forests, named river crossings, mountain passes, museums and attractions, and parody billboards. One master switch turns it all on or off, and each kind has its own switch below it. Safety and navigation speech is never affected. |
 | Menu position announcements | When on, menus say the position, like 3 of 10, after each option. Turn off to hear only the option. |
 | Driving event voice | Routes road events through the main voice or a separate software voice when available. |
 | Speech rate | Appears only when the current voice source supports rate changes. |

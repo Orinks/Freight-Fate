@@ -25,7 +25,7 @@ from .music import music_track_duration_s
 from .online_journal import JournalOutbox, queue_achievement
 from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
-from .speech import Speech
+from .speech import EventSpeechPacer, Speech, SpeechHistory
 from .states.base import State
 
 log = logging.getLogger(__name__)
@@ -82,6 +82,16 @@ class GameContext:
         self._music_rotation_elapsed_s = 0.0
         self.achievement_notice = ""
         self.achievement_notice_timer = 0.0
+        # Recent spoken lines, for the global repeat key (comma): one press
+        # repeats the newest, quick further presses walk back through the ring.
+        self._speech_history = SpeechHistory()
+        self.last_spoken = ""
+        # Anti-backlog projection for the dedicated event voice: queued
+        # driving events that would start speaking stale get flushed instead.
+        self._event_pacer = EventSpeechPacer()
+        # True while a playtest-lever scenario runs unsaved (see
+        # playtest_levers.apply_continue_levers); save_profile honors it.
+        self.playtest_sandbox = False
 
     def real_weather_provider(self):
         """Shared NWS provider when real weather is enabled, else None.
@@ -98,7 +108,30 @@ class GameContext:
 
     def say(self, text: str, interrupt: bool = True) -> None:
         transcript.info("%s", text)
+        self.last_spoken = text
+        self._speech_history.record(text)
         self.speech.say(text, interrupt)
+
+    def repeat_last_spoken(self) -> None:
+        """Walk back through recent speech (the comma key, from anywhere).
+
+        Speech is the whole interface, and a line lost to a cough or an
+        overlapping announcement should never be gone for good. The first
+        press re-speaks the newest line; quick further presses step one
+        line older each, spoken as "2 back: ..." so the player always knows
+        where in the history they stand. Any fresh announcement resets the
+        walk. Repeats ride the main channel and stay out of the transcript's
+        way beyond a marker, so a replay never reads as a fresh game event."""
+        step = self._speech_history.step_back()
+        if step is None:
+            return
+        back, line = step
+        if back == 0:
+            transcript.info("[repeat] %s", line)
+            self.speech.say(line, interrupt=True)
+        else:
+            transcript.info("[repeat -%d] %s", back, line)
+            self.speech.say(f"{back} back: {line}", interrupt=True)
 
     def say_event(self, text: str, interrupt: bool = True) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
@@ -111,9 +144,22 @@ class GameContext:
         With it disabled the player has chosen to hear events through their
         screen reader. Urgent events first flush stale game speech, then speak
         as a fresh queued utterance so old messages do not bury the warning.
+
+        Queued events ride an anti-backlog projection either way: a line that
+        would start speaking well after the moment it described flushes the
+        expired backlog and speaks now instead of joining the recital.
         """
         transcript.info("[event] %s", text)
+        self.last_spoken = text
+        self._speech_history.record(text)
         if self.settings.sapi_events:
+            if interrupt:
+                self._event_pacer.note_interrupt(text)
+            elif self._event_pacer.should_flush(text):
+                # The channel is backed up past the point of truth: purging
+                # and speaking fresh IS the queued line's honest delivery.
+                transcript.info("[pacer] stale event backlog flushed")
+                interrupt = True
             self.speech.say_event(text, interrupt)
         else:
             if interrupt:
@@ -121,6 +167,7 @@ class GameContext:
             self.speech.say(text, interrupt=False)
 
     def stop_event_speech(self) -> None:
+        self._event_pacer.reset()
         _stop_event_speech(self.speech)
 
     def stop_speech(self) -> None:
@@ -130,6 +177,7 @@ class GameContext:
         ``stop_event_speech`` does not quiet them. This silences everything so a
         single key works as a "stop talking" everywhere in the game.
         """
+        self._event_pacer.reset()
         _stop_main_speech(self.speech)
         _stop_event_speech(self.speech)
 
@@ -151,6 +199,12 @@ class GameContext:
         self._app.running = False
 
     def save_profile(self) -> None:
+        # Driving-school sandbox: the profile is a throwaway copy and must
+        # never reach disk; the real save is restored when school ends.
+        # Playtest-lever sandbox: a forced scenario run is temporary by
+        # default -- the career file on disk stays exactly as it was.
+        if getattr(self, "school_sandbox", False) or getattr(self, "playtest_sandbox", False):
+            return
         if self.profile is not None:
             self.profile.save()
 
@@ -299,7 +353,9 @@ class GameContext:
         result = award(self.profile, achievement_id)
         if result is None:
             return None
-        self.profile.save()
+        # Through the guard: a sandboxed session's achievements evaporate
+        # with the rest of the run instead of leaking to disk.
+        self.save_profile()
         if queue_achievement(
             self._app.journal, result.achievement, earned_at_ms=int(time.time() * 1000)
         ):
@@ -453,6 +509,14 @@ class App:
                     elif self.state is not None:
                         if event.type == pygame.KEYDOWN:
                             self.controller.note_keyboard()
+                            # Global repeat-last-spoken. Text entry keeps its
+                            # commas; menus are safe (first-letter jump is
+                            # alphanumeric only).
+                            if event.key == pygame.K_COMMA and not getattr(
+                                self.state, "captures_text_input", False
+                            ):
+                                self.ctx.repeat_last_spoken()
+                                continue
                         self.state.handle_event(event)
                 # Auto-repeat (held D-pad left/right) and analog smoothing.
                 # Synthetic repeats go straight to the state (bypassing the
@@ -510,8 +574,11 @@ class App:
         pygame.display.flip()
 
     def shutdown(self) -> None:
-        if self.ctx.profile is not None:
-            self.ctx.profile.save()
+        # Through the guard, not straight to disk: the quit-time save is how
+        # a sandboxed playtest session leaked its whole run onto the real
+        # career (owner-found live: the Denver snow run persisted at quit
+        # despite the sandbox holding for the entire drive).
+        self.ctx.save_profile()
         self.settings.save()
         self.presence.shutdown()
         self.online.shutdown()

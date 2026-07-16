@@ -20,6 +20,7 @@ class WeatherKind(Enum):
     HEAVY_RAIN = "heavy rain"
     THUNDERSTORM = "thunderstorm"
     SNOW = "snow"
+    ICE = "freezing rain"
     FOG = "fog"
     WIND = "high winds"
 
@@ -32,16 +33,27 @@ class WeatherEffects:
     sound: str | None  # ambience loop key, e.g. "weather/rain_light"
     wind: float  # 0..1 wind loop intensity
     safe_speed_mph: float
+    water_mm: float = 0.0  # standing water depth; drives hydroplane onset
+    surface: str = "dry"  # what the tires touch: dry, wet, snow, or ice
 
 
+# Freezing rain never rolls in the random weather draw: it forms when rain
+# falls into the narrow band just below freezing (see season.py) or when the
+# live NWS feed reports it. Its grip is glare-ice territory -- a third of
+# snow -- which is what makes it the one condition worth parking for.
 EFFECTS: dict[WeatherKind, WeatherEffects] = {
     WeatherKind.CLEAR: WeatherEffects(1.00, 1.00, 10.0, None, 0.0, 70),
     WeatherKind.CLOUDY: WeatherEffects(1.00, 1.00, 8.0, None, 0.1, 70),
-    WeatherKind.RAIN: WeatherEffects(0.80, 1.05, 4.0, "weather/rain_light", 0.2, 55),
-    WeatherKind.HEAVY_RAIN: WeatherEffects(0.62, 1.12, 1.5, "weather/rain_heavy", 0.4, 45),
-    WeatherKind.THUNDERSTORM: WeatherEffects(0.58, 1.18, 1.0, "weather/rain_heavy", 0.6, 40),
-    WeatherKind.SNOW: WeatherEffects(0.45, 1.08, 2.0, "weather/snow_wind", 0.5, 35),
-    WeatherKind.FOG: WeatherEffects(0.92, 1.00, 0.3, "weather/fog_horn", 0.1, 40),
+    WeatherKind.RAIN: WeatherEffects(0.80, 1.05, 4.0, "weather/rain_light", 0.2, 55, 1.5, "wet"),
+    WeatherKind.HEAVY_RAIN: WeatherEffects(
+        0.62, 1.12, 1.5, "weather/rain_heavy", 0.4, 45, 3.0, "wet"
+    ),
+    WeatherKind.THUNDERSTORM: WeatherEffects(
+        0.58, 1.18, 1.0, "weather/rain_heavy", 0.6, 40, 4.0, "wet"
+    ),
+    WeatherKind.SNOW: WeatherEffects(0.45, 1.08, 2.0, "weather/snow_wind", 0.5, 35, 0.0, "snow"),
+    WeatherKind.ICE: WeatherEffects(0.15, 1.02, 3.0, "weather/rain_light", 0.2, 20, 0.0, "ice"),
+    WeatherKind.FOG: WeatherEffects(0.92, 1.00, 0.3, "weather/fog_horn", 0.1, 40, 0.0, "wet"),
     WeatherKind.WIND: WeatherEffects(0.90, 1.25, 7.0, None, 0.9, 55),
 }
 
@@ -339,6 +351,7 @@ class WeatherSystem:
                 WeatherKind.HEAVY_RAIN: [WeatherKind.RAIN, WeatherKind.THUNDERSTORM],
                 WeatherKind.THUNDERSTORM: [WeatherKind.HEAVY_RAIN, WeatherKind.RAIN],
                 WeatherKind.SNOW: [WeatherKind.CLOUDY, WeatherKind.SNOW],
+                WeatherKind.ICE: [WeatherKind.RAIN, WeatherKind.SNOW, WeatherKind.CLOUDY],
                 WeatherKind.FOG: [WeatherKind.CLOUDY, WeatherKind.CLEAR],
                 WeatherKind.WIND: [WeatherKind.CLEAR, WeatherKind.CLOUDY],
             }
@@ -490,7 +503,9 @@ class WeatherSystem:
             else:
                 visibility = f"{eff.visibility_mi * 1.609344:g} kilometers"
             parts.append(f"visibility {visibility}")
-        if eff.grip < 0.7:
+        if self.current is WeatherKind.ICE:
+            parts.append("ice on the road")
+        elif eff.grip < 0.7:
             parts.append("slick roads")
         if eff.wind > 0.6:
             parts.append("strong crosswinds")

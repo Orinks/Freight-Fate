@@ -1,0 +1,9 @@
+{"meta": {"data_version": "sha256:eb80f491f1ec", "params": {"a_lat_g": 0.3, "connector_window_mi": 0.75, "curve_radius_ft": 3000.0, "deflection_floor_deg": 8.0, "eps_curve_m": 0, "eps_tangent_m": 30.0, "point_budget": 600, "quant_deg": 5, "radius_window_m": 80.0, "sign_hysteresis_deg": 5.0}, "schema": 1, "source": "OpenRouteService driving-hgv (self-hosted) + OSM via Overpass (ODbL, (c) OpenStreetMap contributors)"}}
+{"at_mi": 0.6, "hgv": false, "leg": "globe_az_us:show_low_az_us", "mph": 30}
+{"at_mi": 1.3, "hgv": false, "leg": "globe_az_us:show_low_az_us", "mph": 45}
+{"at_mi": 1.9, "hgv": false, "leg": "globe_az_us:show_low_az_us", "mph": null}
+{"at_mi": 74.7, "hgv": false, "leg": "globe_az_us:show_low_az_us", "mph": 65}
+{"at_mi": 83.6, "hgv": false, "leg": "globe_az_us:show_low_az_us", "mph": 55}
+{"at_mi": 85.4, "hgv": false, "leg": "globe_az_us:show_low_az_us", "mph": 45}
+{"at_mi": 86.2, "hgv": false, "leg": "globe_az_us:show_low_az_us", "mph": 35}
+{"at_mi": 4.1, "hgv": false, "leg": "hays_ks_us:colby_ks_us", "mph": 75}

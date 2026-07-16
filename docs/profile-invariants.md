@@ -20,12 +20,6 @@ Maintenance rule: when a feature adds or changes a field, this doc and the
 client module change **in the same PR** as the feature. A field with no
 entry here is a field the gate silently trusts.
 
-Which fields exist depends on the client line: entries marked **(1.9
-alpha)** below belong to fields the 1.9 alpha line writes; this line's
-saves do not carry them, and this line's client module mirrors only the
-fields it knows. The server enforces the full list — a rule over a field
-a given save does not carry simply does not fire for that save.
-
 ## 1. Hard invariants (client-enforced, version-stable)
 
 Ranges — all numeric fields must be finite (no NaN, no infinity):
@@ -33,30 +27,26 @@ Ranges — all numeric fields must be finite (no NaN, no infinity):
 - `money`: greater than -1,000,000 and below 1,000,000,000 (structural
   ceiling; the real judgment is rule 2.1).
 - `fatigue`, `road_grime_pct`: 0 to 100.
-- `truck_damage_pct`, `tire_wear_pct`: 0 to 100.
-- `truck_fuel_gal`: 0 to the largest buildable tank (biggest catalog tank
-  plus the long-range upgrade's 50 extra gallons — 250 today).
 - `pay_advance`: 0 to 1,000,000.
 - `career.xp`: 0 to 100,000,000 (structural; see 2.2).
 - `career.reputation`: 0 to 100.
-- `career.deliveries`, `on_time_deliveries`: non-negative integers.
-- `career.on_time_streak`, `career.dispatch_declines_used`: non-negative
-  integers **(1.9 alpha)**.
+- `career.deliveries`, `on_time_deliveries`, `on_time_streak`,
+  `dispatch_declines_used`: non-negative integers.
 - `career.total_miles`, `career.total_earnings`: non-negative.
-- Every `truck_conditions` record **(1.9 alpha)**: `tire_wear_pct`,
-  `brake_wear_pct`, `engine_wear_pct`, `damage_pct`, `chain_wear_pct`
-  each 0 to 100; `fuel_gal` 0 to the largest buildable tank.
+- Every `truck_conditions` record: `tire_wear_pct`, `brake_wear_pct`,
+  `engine_wear_pct`, `damage_pct`, `chain_wear_pct` each 0 to 100;
+  `fuel_gal` 0 to the largest buildable tank (biggest catalog tank plus
+  the long-range upgrade's 50 extra gallons — 250 today).
 
 Relations:
 
 - `on_time_deliveries` never exceeds `deliveries`.
-- `on_time_streak` never exceeds `on_time_deliveries` **(1.9 alpha)**.
+- `on_time_streak` never exceeds `on_time_deliveries`.
 - No achievement id appears twice.
 - A known upgrade key's tier never exceeds that upgrade's top tier, and no
   tier is below 1.
 
-Closed sets (stable enums — an unknown value is an edit; all **1.9
-alpha** fields today):
+Closed sets (stable enums — an unknown value is an edit):
 
 - `business_status`: `company_driver`, `leased_owner_operator`,
   `independent_authority`.
@@ -86,10 +76,9 @@ XP on the order of miles driven times single-digit multipliers.
 
 2.3 **Endorsements.** Earned endorsements come free at levels 2/3/4
 (refrigerated/heavy_haul/high_value) — they are DERIVED from level, never
-stored. Stored `purchased_endorsements` **(1.9 alpha)** mean the player
-paid the course (900 / 1,600 / 1,300 dollars); a purchased endorsement on
-a profile whose earnings history could not have afforded it is
-suspicious, not fatal.
+stored. Stored `purchased_endorsements` mean the player paid the course
+(900 / 1,600 / 1,300 dollars); a purchased endorsement on a profile whose
+earnings history could not have afforded it is suspicious, not fatal.
 
 2.4 **Achievements against the stats that earn them.** Every id in
 `achievements` (see `src/freight_fate/achievements.py` for the canonical
@@ -99,11 +88,10 @@ set) has a triggering condition; the gate spot-checks the cheap ones:
 XP, `twenty_five_grand` against `total_earnings`. An achievement without
 its stats fails.
 
-2.5 **Equipment against business status (1.9 alpha).** `owned_trucks`,
-`upgrades`, and `owned_trailers` belong to owner-operators; a
-`company_driver` with a garage full of owned equipment fails.
-`truck_conditions` keys should be a subset of `owned_trucks` plus the
-carrier's standard tractor.
+2.5 **Equipment against business status.** `owned_trucks`, `upgrades`,
+and `owned_trailers` belong to owner-operators; a `company_driver` with a
+garage full of owned equipment fails. `truck_conditions` keys should be a
+subset of `owned_trucks` plus the carrier's standard tractor.
 
 2.6 **Market sanity.** `market.multipliers` values are drawn from
 0.9 to 1.15; anything outside a small tolerance of that band is edited.

@@ -46,9 +46,12 @@ STRONG_WIND_KMH = 38.0
 # (e.g. "Chance Light Rain", "Patchy Fog"); matching is case-insensitive.
 _CONDITION_RULES: tuple[tuple[WeatherKind, tuple[str, ...]], ...] = (
     (WeatherKind.THUNDERSTORM, ("thunder", "t-storm", "tstorm", "squall")),
+    # Glaze conditions before snow and rain: "Freezing Rain" must land on ice,
+    # not match the plain rain group below.
+    (WeatherKind.ICE, ("freezing", "sleet", "ice", "icy", "glaze")),
     (
         WeatherKind.SNOW,
-        ("snow", "sleet", "flurr", "blizzard", "wintry", "ice", "icy", "freezing", "frost"),
+        ("snow", "flurr", "blizzard", "wintry", "frost"),
     ),
     (WeatherKind.HEAVY_RAIN, ("heavy rain", "heavy shower")),
     (WeatherKind.RAIN, ("rain", "shower", "drizzle", "spray")),

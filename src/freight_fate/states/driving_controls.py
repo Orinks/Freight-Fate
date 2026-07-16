@@ -4,6 +4,13 @@ from __future__ import annotations
 from .driving_core import *
 from .driving_menu_states import DrivingStatusState, PauseMenuState
 
+# Wear meters join the status readout once they're worth planning around.
+WEAR_STATUS_PCT = 50.0
+
+# An armed exit owns the D safe-speed answer once it is this close: past
+# here the ramp speed is the number that matters, not the mainline's.
+SAFE_SPEED_EXIT_MI = 2.0
+
 
 class DrivingControlsMixin:
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -86,8 +93,12 @@ class DrivingControlsMixin:
             self.ctx.say(self.lane.describe())
         elif key == pygame.K_s:
             self._speak_speed_limit()
+        elif key == pygame.K_d:
+            self._speak_safe_speed()
         elif key == pygame.K_a:
             self._speak_last_announcement()
+        elif key == pygame.K_g:
+            self._speak_grade()
         elif key == pygame.K_u:
             self._speak_upcoming()
         elif key == pygame.K_m:
@@ -163,19 +174,31 @@ class DrivingControlsMixin:
         if self.ctx.settings.automatic_direction_changes == "deliberate":
             automatic_help = (
                 "In automatic with deliberate direction changes, brake to a stop, "
-                "then release the Down arrow and press it again to shift into reverse "
-                "and back slowly. While reversing, hold the Up arrow to brake to a "
-                "stop, then release it and press again to shift back into forward. "
+                "then release the Down arrow and press and hold it again to shift "
+                "into reverse and back slowly. While reversing, hold the Up arrow "
+                "to brake to a stop, then release it and press and hold again to "
+                "shift back into forward. A quick tap just brakes. "
             )
         else:
             automatic_help = (
-                "In automatic with simple direction changes, keep holding the Down "
-                "arrow after you stop to shift into reverse and back slowly. While "
-                "reversing, keep holding the Up arrow after you stop to shift back "
-                "into forward. "
+                "In automatic with simple direction changes, brake to a stop, "
+                "release the Down arrow, then press and hold it again to shift into "
+                "reverse and back slowly. While reversing, brake with the Up arrow, "
+                "and once stopped, release and hold it again to shift back into "
+                "forward. Holding a brake through a stop just holds the truck. "
             )
+        latch_help = (
+            "Tap the accelerator or brake, then press again and hold half a "
+            "second, to latch the pedal so it stays applied hands-free: a "
+            "click and a spoken confirmation mark the catch. Press the same "
+            "key once to take the pedal back; the opposite pedal or any "
+            "safety alert releases it instantly. "
+            if self.ctx.settings.pedal_latch
+            else ""
+        )
         self.ctx.say(
             "Hold Up arrow to accelerate, Down arrow to brake. "
+            + latch_help
             + automatic_help
             + "Hold B for the emergency brake, the hardest possible stop. "
             "K sets adaptive cruise at your current speed; bad weather "
@@ -205,11 +228,14 @@ class DrivingControlsMixin:
             "below 100 psi, wait with the engine running. "
             f"{objective_help}"
             "Space speed, and cruise set speed when cruise is on. "
-            "S posted speed limit. Tab status menu. F fuel. "
+            "S posted speed limit. G the grade under the wheels and whether "
+            "the truck is holding it. Tab status menu. F fuel. "
             "C clock, deadline, and hours of service. "
             "R route. Shift R next listed highway exit. V weather. L lane position. "
-            "A repeats the last announcement. U reads what is coming up: "
-            "imposed limits, stops, and exits ahead. "
+            "A repeats the last announcement. Comma re-reads the last spoken "
+            "line of any kind, here and in every menu; press it again quickly "
+            "to step back through earlier lines. U reads what is "
+            "coming up: imposed limits, stops, and exits ahead. "
             "The Tab status menu includes a Driver apps tablet menu for "
             "navigation, weather, traffic, truck stops, road chatter, and ELD. "
             "Left or Right Control stops the driving event voice. "
@@ -241,17 +267,20 @@ class DrivingControlsMixin:
         elif self.ctx.settings.automatic_direction_changes == "deliberate":
             gears = (
                 "In automatic with deliberate direction changes, brake to a stop, "
-                "then let the left trigger return to neutral and press it again to "
-                "shift into reverse and back slowly. While reversing, hold the right "
-                "trigger to brake to a stop, then let it return to neutral and press "
-                "again to shift back into forward. "
+                "then let the left trigger return to neutral and press and hold it "
+                "again to shift into reverse and back slowly. While reversing, hold "
+                "the right trigger to brake to a stop, then let it return to "
+                "neutral and press and hold again to shift back into forward. A "
+                "quick tap just brakes. "
             )
         else:
             gears = (
-                "In automatic with simple direction changes, keep holding the left "
-                "trigger after you stop to shift into reverse and back slowly. While "
-                "reversing, keep holding the right trigger after you stop to shift "
-                "back into forward. "
+                "In automatic with simple direction changes, brake to a stop, let "
+                "the left trigger return to neutral, then press and hold it again to "
+                "shift into reverse and back slowly. While reversing, brake with the "
+                "right trigger, and once stopped, release and press it again to "
+                "shift back into forward. Holding a brake through a stop just holds "
+                "the truck. "
             )
         self.ctx.say(
             "Right trigger is the gas, left trigger the brake; press the left "
@@ -485,12 +514,96 @@ class DrivingControlsMixin:
         )
         self.ctx.say(f"Speed limit {self.ctx.settings.speed_text(limit)}{zone}.{comparison}")
 
+    def _speak_safe_speed(self) -> None:
+        """D: one number -- the speed that is safe right here, right now.
+
+        Sits next to S on purpose: S answers "what is posted", D answers
+        "what should I actually be doing". Weather grip and an armed exit
+        are baked into the math, never into the sentence, so the answer
+        survives being heard exactly once at speed. Repeatable free.
+        """
+        limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        safe = min(limit, self.weather.effects.safe_speed_mph)
+        context = ""
+        stop = getattr(self, "_exit_stop", None)
+        ahead = (stop.at_mi - self.trip.position_mi) if stop is not None else None
+        exit_armed = (
+            getattr(self, "_exit_signal_on", False)
+            and ahead is not None
+            and 0 < ahead <= SAFE_SPEED_EXIT_MI
+        )
+        if getattr(self, "_ramp_mi", None) is not None or exit_armed:
+            safe = min(safe, RAMP_MAX_MPH)
+            context = " for the ramp"
+        self.ctx.say(f"Safe speed {self.ctx.settings.speed_text(safe)}{context}.")
+
     def _speak_last_announcement(self) -> None:
         """A: replay the last route announcement, for one you missed."""
         if self._last_event_message:
             self.ctx.say(self._last_event_message)
         else:
             self.ctx.say("No recent announcement to repeat.")
+
+    def _speak_grade(self) -> None:
+        """G: the grade under the wheels and what it is doing to the truck.
+
+        The verdict comes from the sim's own net-force balance, so the spoken
+        answer to "why am I slowing down" is the same physics the wheels feel
+        -- including whether the jake has the descent or is about to lose it.
+        """
+        t = self.truck
+        grade = t.grade
+        if abs(grade) < 0.005:
+            parts = ["Level road."]
+        else:
+            direction = "uphill" if grade > 0 else "downhill"
+            lead = f"Grade {abs(grade) * 100:.1f} percent {direction}"
+            # How far the slope keeps its character, sampled the way the
+            # chain-law scan does; flat or reversed counts as the end.
+            sign = 1.0 if grade > 0 else -1.0
+            run_mi = None
+            probe = 0.25
+            while probe <= 15.0:
+                at = self.trip.position_mi + probe
+                if at >= self.trip.total_miles:
+                    break
+                if self.trip.grade_at(at) * sign <= 0.002:
+                    run_mi = probe
+                    break
+                probe += 0.25
+            if run_mi is not None and run_mi >= 1.0:
+                lead += f" for another {self.trip._distance_text(run_mi)}"
+            parts = [lead + "."]
+        moving = t.velocity_mps > 0.5
+        if moving:
+            net = t.drive_force() - t.resistance_force() - t.brake_force()
+            accel_mph_s = net / t.gross_mass_kg * 2.23694
+            stage = t.engine_brake_stage
+            if grade > 0.005:
+                if accel_mph_s < -0.2:
+                    parts.append("The hill has the load; expect to lose speed.")
+                elif accel_mph_s > 0.2:
+                    parts.append("Pulling it with speed to spare.")
+                else:
+                    parts.append("Holding speed.")
+            elif grade < -0.005:
+                if t.jake_slipping:
+                    parts.append(
+                        "The jake is sliding the drive wheels; back it off a stage."
+                    )
+                elif accel_mph_s > 0.2:
+                    if stage > 0:
+                        parts.append(
+                            f"Jake stage {stage} is not holding it; "
+                            "gear down or snub the brakes."
+                        )
+                    elif t.throttle <= 0.05:
+                        parts.append("Speed is building; set the jake before it runs.")
+                elif stage > 0:
+                    parts.append(f"Jake stage {stage} has it.")
+                else:
+                    parts.append("Speed in hand.")
+        self.ctx.say(" ".join(parts))
 
     def _speak_upcoming(self, within_mi: float = 15.0) -> None:
         """U: what is coming up -- imposed limits, stops, and exits ahead."""
@@ -522,7 +635,13 @@ class DrivingControlsMixin:
                 )
         stop = self.trip.upcoming_stop(within_mi)
         if stop is not None:
-            parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}")
+            # The ramp's ending is part of the plan: a stop sign first heard
+            # mid-ramp is too late to brake for.
+            ending = {
+                "signal": ", where the ramp ends at a traffic light",
+                "stop": ", where the ramp ends at a stop sign",
+            }.get(self._ramp_control_for(stop), "")
+            parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}{ending}")
         pressure = self.trip.next_traffic_pressure_within(within_mi)
         if pressure is not None:
             parts.append(
@@ -588,6 +707,25 @@ class DrivingControlsMixin:
                 )
         if t.damage_pct - self.start_damage > 1:
             lines.append(f"Damage: new damage {t.damage_pct - self.start_damage:.0f} percent")
+        for worn, label in (
+            (t.tire_wear_pct, "Tires"),
+            (t.brake_wear_pct, "Brakes"),
+            (t.engine_wear_pct, "Engine"),
+        ):
+            if worn >= WEAR_STATUS_PCT:
+                lines.append(f"{label}: {worn:.0f} percent worn")
+        now_h = self._absolute_game_hour()
+        for entry in self.ctx.profile.active_buffs:
+            left_h = float(entry.get("expires_h", 0.0)) - now_h
+            if left_h <= 0.0:
+                continue
+            if left_h >= 1.05:
+                left = f"about {left_h:.0f} hours left"
+            else:
+                left = f"about {left_h * 60.0:.0f} minutes left"
+            lines.append(f"{entry.get('label', 'Buff')}: {left}")
+        for info in self.rig_buffs.values():
+            lines.append(f"{info.get('label', 'Rig service')}: good for the rest of the trip")
         if self.ctx.settings.speech_verbosity >= 1:
             fatigue = self.ctx.profile.fatigue
             if fatigue >= hos.FATIGUE_DROWSY:
@@ -785,3 +923,61 @@ class DrivingControlsMixin:
         self.ctx.say(" ".join(parts))
 
     # -- per-frame update -----------------------------------------------------------------
+
+    def _update_pedal_latches(
+        self,
+        key_up: bool,
+        key_down: bool,
+        pad_throttle: float,
+        pad_brake: float,
+        emergency: bool,
+        dt: float,
+    ) -> tuple[bool, bool]:
+        """Advance both pedal latches and blend them into the pedal state.
+
+        Called once per frame from update() with the raw pedal inputs;
+        returns the effective (key_up, key_down) the rest of the frame
+        drives on. The catch clicks (its own sound, not the gear click)
+        and both directions speak. The opposite pedal always releases a
+        latch instantly, and safety systems outrank a latched accelerator:
+        a live hazard (including automatic emergency braking), the
+        emergency brake, and the overspeed alarm all drop it audibly.
+        """
+        if not self.ctx.settings.pedal_latch:
+            if self._throttle_latch.release():
+                self.ctx.say_event("Throttle released.", interrupt=False)
+            if self._brake_latch.release():
+                self.ctx.say_event("Brake released.", interrupt=False)
+            return key_up, key_down
+        for latch, held, name in (
+            (self._throttle_latch, key_up, "Throttle"),
+            (self._brake_latch, key_down, "Brake"),
+        ):
+            event = latch.update(bool(held), dt)
+            if event == "latched":
+                # The latch gesture's second press is also a press-and-hold
+                # at whatever speed the truck has -- at a standstill that
+                # would arm a direction change and grab reverse a tenth of
+                # a second after the catch. The catch wins: latching a
+                # pedal means "hold this", never "change direction".
+                self._direction_armed = ""
+                self._direction_hold_s = 0.0
+                self.ctx.audio.play("ui/tick", volume=1.0)
+                self.ctx.say_event(f"{name} latched.", interrupt=False)
+            elif event == "released":
+                self.ctx.say_event(f"{name} released.", interrupt=False)
+        throttle_overridden = (
+            key_down
+            or pad_brake > 0.05
+            or emergency
+            or self._hazard_deadline is not None
+            or self._overspeed_active
+        )
+        if throttle_overridden and self._throttle_latch.release():
+            self.ctx.say_event("Throttle released.", interrupt=False)
+        if (key_up or pad_throttle > 0.05) and self._brake_latch.release():
+            self.ctx.say_event("Brake released.", interrupt=False)
+        return (
+            key_up or self._throttle_latch.latched,
+            key_down or self._brake_latch.latched,
+        )

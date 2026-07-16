@@ -25,14 +25,22 @@ from typing import Any
 
 import osmium
 
+from freight_fate.data.world import get_world
+
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 CITY_SERVICES_PATH = ROOT / "src" / "freight_fate" / "data" / "city_services.json"
 DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 EARTH_RADIUS_MI = 3958.7613
 ACCESSED_DATE = "2026-06-27"
 SERVICE_ORDER = ("freight_market", "garage", "truck_dealer")
 DEFAULT_RADIUS_MI = 28.0
+# A city service is an errand, not a haul. A sourced POI whose estimated road
+# distance from the city anchor exceeds this is a wrong match for the mechanic:
+# it belongs to a neighbouring town, not this city. The search radius above may
+# still be generous, but selection is bounded here. (crow-flies x the factor is
+# the road-distance estimate applied at match time.)
+MAX_CITY_SERVICE_MATCH_MI = 10.0
+ROAD_ESTIMATE_FACTOR = 1.3
 
 SERVICE_LABELS = {
     "freight_market": "freight market office",
@@ -80,11 +88,21 @@ STATE_SLUGS = {
 
 @dataclass(frozen=True)
 class CityInfo:
+    # ``name`` is the spoken display name ("Tyler") -- it lands in player-facing
+    # service names, so it is never a slug. ``key`` is the canonical world key
+    # ("tyler_tx_us"); it keys the output file (unique across states, unlike
+    # display names, which repeat -- Jackson MS / Jackson MI). ``canonical``
+    # falls back to the name for ad-hoc single-city builds that omit the key.
     name: str
     state: str
     lat: float
     lon: float
     radius_mi: float = DEFAULT_RADIUS_MI
+    key: str = ""
+
+    @property
+    def canonical(self) -> str:
+        return self.key or self.name
 
 
 @dataclass(frozen=True)
@@ -155,7 +173,7 @@ def build_all_supported(
         state_cities = sorted(by_state[state], key=lambda item: item.name)
         if not extract.exists():
             for city in state_cities:
-                payload["cities"][city.name] = fallback_entries(
+                payload["cities"][city.canonical] = fallback_entries(
                     city,
                     f"Missing local OSM extract: {extract}",
                 )
@@ -164,7 +182,9 @@ def build_all_supported(
         payload["sources"].append(source_record(state, extract, available=True))
         buckets = collect_state_services(extract, state_cities, include_roads=False)
         for city in state_cities:
-            payload["cities"][city.name] = build_entries_for_city(buckets[city.name], extract)
+            payload["cities"][city.canonical] = build_entries_for_city(
+                buckets[city.canonical], extract
+            )
 
     payload["coverage"] = coverage_summary(payload)
     return payload
@@ -176,7 +196,7 @@ def collect_state_services(
     *,
     include_roads: bool = False,
 ) -> dict[str, CityBucket]:
-    buckets = {city.name: CityBucket(city) for city in cities}
+    buckets = {city.canonical: CityBucket(city) for city in cities}
     entities = osmium.osm.osm_entity_bits.NODE | osmium.osm.osm_entity_bits.WAY
     keys = [
         "shop",
@@ -216,7 +236,7 @@ def _collect_node(
         if candidate_cache is False:
             candidate_cache = _candidate_from_tags(tags, lat, lon, f"node/{obj.id}")
         if candidate_cache is not None:
-            buckets[city.name].candidates.append(candidate_cache)
+            buckets[city.canonical].candidates.append(candidate_cache)
 
 
 def _collect_way(
@@ -242,34 +262,33 @@ def _collect_way(
         lat, lon = _centroid(local)
         candidate = _candidate_from_tags(tags, lat, lon, f"way/{obj.id}")
         if candidate is not None:
-            buckets[city.name].candidates.append(candidate)
+            buckets[city.canonical].candidates.append(candidate)
         if road_label and include_roads:
             stride = max(1, len(local) // 12)
             for rlat, rlon in local[::stride]:
-                buckets[city.name].roads.append(RoadPoint(rlat, rlon, road_label))
+                buckets[city.canonical].roads.append(RoadPoint(rlat, rlon, road_label))
 
 
 def build_entries_for_city(bucket: CityBucket, source_path: Path) -> list[dict[str, Any]]:
     city = bucket.city
     chosen: dict[str, Candidate] = {}
     for key in SERVICE_ORDER:
-        choices = [c for c in bucket.candidates if c.key == key]
-        if not choices:
+        in_cap = [
+            c
+            for c in bucket.candidates
+            if c.key == key and _match_road_mi(city, c) <= MAX_CITY_SERVICE_MATCH_MI
+        ]
+        if not in_cap:
             continue
-        choices.sort(key=lambda c: (-c.score, _haversine_mi(city.lat, city.lon, c.lat, c.lon)))
-        chosen[key] = choices[0]
+        in_cap.sort(key=lambda c: (-c.score, _haversine_mi(city.lat, city.lon, c.lat, c.lon)))
+        chosen[key] = in_cap[0]
 
     entries: list[dict[str, Any]] = []
     for key in SERVICE_ORDER:
         candidate = chosen.get(key)
         if candidate is None:
             entries.append(
-                fallback_entry(
-                    city,
-                    key,
-                    "No realistic source-backed OSM candidate found within "
-                    f"{city.radius_mi:.0f} miles in {source_path.name}.",
-                )
+                fallback_entry(city, key, _no_candidate_reason(city, bucket, key, source_path))
             )
             continue
         road = _nearest_road(candidate, bucket.roads)
@@ -279,7 +298,7 @@ def build_entries_for_city(bucket: CityBucket, source_path: Path) -> list[dict[s
                 "key": key,
                 "kind": key,
                 "name": candidate.name,
-                "city": city.name,
+                "city": city.canonical,
                 "state": city.state,
                 "lat": round(candidate.lat, 6),
                 "lon": round(candidate.lon, 6),
@@ -312,7 +331,7 @@ def fallback_entry(city: CityInfo, key: str, reason: str) -> dict[str, Any]:
         "key": key,
         "kind": key,
         "name": names[key],
-        "city": city.name,
+        "city": city.canonical,
         "state": city.state,
         "lat": round(city.lat, 6),
         "lon": round(city.lon, 6),
@@ -381,17 +400,26 @@ def nearby_cities(cities: list[CityInfo], lat: float, lon: float) -> list[CityIn
 
 
 def load_world_cities(*, radius_mi: float = DEFAULT_RADIUS_MI) -> list[CityInfo]:
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
-    return [
-        CityInfo(
-            name=str(name),
-            state=str(raw["state"]),
-            lat=float(raw["lat"]),
-            lon=float(raw["lon"]),
-            radius_mi=radius_mi,
+    # Resolve the full state name from the loaded world (e.g. "Texas"), not the
+    # raw world.json "state" field, which now stores the two-letter code. The
+    # per-state extract filenames key on the full name, and the sibling bake
+    # tools (build_local_approaches / build_local_geometry) already do this, so
+    # matching them keeps the three bakes reading the same extracts.
+    world = get_world()
+    cities: list[CityInfo] = []
+    for key in sorted(world.city_names()):
+        info = world.city(key)
+        cities.append(
+            CityInfo(
+                name=info.name,
+                state=info.state,
+                lat=float(info.lat),
+                lon=float(info.lon),
+                radius_mi=radius_mi,
+                key=key,
+            )
         )
-        for name, raw in sorted(data["cities"].items())
-    ]
+    return cities
 
 
 def state_slug(state: str) -> str:
@@ -526,6 +554,33 @@ def _approach_miles(city_lat: float, city_lon: float, lat: float, lon: float) ->
     return round(max(0.6, min(25.0, straight_line * 1.35)), 1)
 
 
+def _match_road_mi(city: CityInfo, candidate: Candidate) -> float:
+    """Estimated road distance from the city anchor to a candidate POI, used to
+    decide whether the POI is a plausible city-errand match."""
+    return _haversine_mi(city.lat, city.lon, candidate.lat, candidate.lon) * ROAD_ESTIMATE_FACTOR
+
+
+def _no_candidate_reason(
+    city: CityInfo, bucket: CityBucket, key: str, source_path: Path
+) -> str:
+    """Explain why a service fell back: either nothing was found, or the nearest
+    real POI sits beyond the city-errand cap (name the discarded distance)."""
+    others = [c for c in bucket.candidates if c.key == key]
+    if others:
+        nearest_road = min(_match_road_mi(city, c) for c in others)
+        return (
+            f"Nearest source-backed OSM {SERVICE_LABELS[key]} is about "
+            f"{nearest_road:.0f} road-miles from the city anchor, beyond the "
+            f"{MAX_CITY_SERVICE_MATCH_MI:.0f}-mile city-service cap, in "
+            f"{source_path.name}; treated as a neighbouring-town facility, not "
+            f"{city.name}'s."
+        )
+    return (
+        "No realistic source-backed OSM candidate found within "
+        f"{city.radius_mi:.0f} miles in {source_path.name}."
+    )
+
+
 def _centroid(points: list[tuple[float, float]]) -> tuple[float, float]:
     return (
         sum(lat for lat, _lon in points) / len(points),
@@ -539,12 +594,6 @@ def _haversine_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     dlmb = math.radians(lon2 - lon1)
     h = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2
     return 2 * EARTH_RADIUS_MI * math.asin(math.sqrt(h))
-
-
-def _world_city(city: str) -> tuple[str, float, float]:
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
-    raw = data["cities"][city]
-    return str(raw["state"]), float(raw["lat"]), float(raw["lon"])
 
 
 def _write_payload(path: Path, payload: dict[str, Any]) -> None:
@@ -611,9 +660,13 @@ def main() -> int:
 
     if args.osm is None:
         parser.error("--city requires --osm")
-    state, lat, lon = _world_city(args.city)
-    city_info = CityInfo(args.city, state, lat, lon, args.radius_mi)
-    entries = build_city_services(args.osm, args.city, state, lat, lon, args.radius_mi)
+    world = get_world()
+    info = world.city(args.city)
+    state, lat, lon = info.state, float(info.lat), float(info.lon)
+    city_info = CityInfo(
+        info.name, state, lat, lon, args.radius_mi, key=world.resolve_city_key(args.city)
+    )
+    entries = build_city_services(args.osm, info.name, state, lat, lon, args.radius_mi)
     found = {entry["key"] for entry in entries}
     entries.extend(
         fallback_entry(
@@ -628,7 +681,7 @@ def main() -> int:
     entries.sort(key=lambda item: SERVICE_ORDER.index(item["key"]))
     print(json.dumps(entries, indent=2, sort_keys=True))
     if args.write:
-        _write_single_city(args.output, args.city, entries, args.osm, args.radius_mi)
+        _write_single_city(args.output, city_info.canonical, entries, args.osm, args.radius_mi)
         print(f"Wrote {args.output}")
     return 0
 

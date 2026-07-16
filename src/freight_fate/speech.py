@@ -110,6 +110,112 @@ def _name_of(ctx, backend_id) -> str:
         return str(backend_id)
 
 
+class EventSpeechPacer:
+    """Keeps the dedicated event voice from performing the past.
+
+    The event channel is a queue: the voice speaks utterances in submission
+    order, and nothing stops a slow voice from narrating a backlog of moments
+    the truck has already driven past -- "slow down to dock, at dock,
+    delivering" heard after the trailer is empty, and every light ding buried
+    under it. The voice's real queue cannot be inspected, so the pacer keeps a
+    projection: each submitted line extends a projected clear time by its
+    estimated speaking duration. When a queued line would START speaking more
+    than ``STALE_WAIT_S`` after the moment it described, the whole backlog is
+    by definition stale -- the caller flushes the channel and the new line
+    speaks now. Interrupting lines reset the projection to truth, so estimate
+    drift never outlives one backlog.
+
+    Durations are estimated from text length at a conservative default-voice
+    speaking rate. A faster voice just flushes a little less eagerly than it
+    could; a slower one flushes a little late but stays bounded -- either way
+    the player never again waits through a paragraph of expired narration.
+    """
+
+    STALE_WAIT_S = 3.0  # a queued line may start at most this far in the past
+    BASE_UTTERANCE_S = 0.4  # per-utterance pause before the voice gets going
+    CHARS_PER_S = 13.0  # the default Windows voice at its default rate
+
+    def __init__(self, clock=None) -> None:
+        import time
+
+        self._clock = clock or time.monotonic
+        self._clear_at = 0.0
+
+    def _duration_s(self, text: str) -> float:
+        return self.BASE_UTTERANCE_S + len(text) / self.CHARS_PER_S
+
+    def note_interrupt(self, text: str) -> None:
+        """An interrupting line purges the channel: the projection restarts."""
+        self._clear_at = self._clock() + self._duration_s(text)
+
+    def should_flush(self, text: str) -> bool:
+        """Decide a queued line's fate and update the projection either way.
+
+        Returns True when the line would otherwise start stale -- the caller
+        must then submit it interrupting (which purges the dead backlog)."""
+        now = self._clock()
+        start = max(now, self._clear_at)
+        if start - now > self.STALE_WAIT_S:
+            self._clear_at = now + self._duration_s(text)
+            return True
+        self._clear_at = start + self._duration_s(text)
+        return False
+
+    def reset(self) -> None:
+        """The channel was silenced outside the pacer's view (Ctrl, menus)."""
+        self._clear_at = 0.0
+
+
+class SpeechHistory:
+    """The repeat key's memory: a short ring of everything spoken.
+
+    Speech is the whole interface, and a single repeat only rescues the
+    newest line -- a warning buried two announcements ago used to be gone
+    for good. The ring keeps the last ``KEPT`` lines from both channels
+    (game speech and driving events). The first press of the repeat key
+    speaks the newest line, exactly as before; pressing again within
+    ``STEP_WINDOW_S`` walks one line older per press, and the walk clamps
+    at the oldest line rather than wrapping. Any fresh announcement, or a
+    pause longer than the window, snaps the cursor back to the newest line,
+    so a comma pressed out of the blue always answers "what did it just
+    say?". Consecutive duplicates collapse into one entry -- walking back
+    through five identical status lines tells the player nothing.
+    """
+
+    KEPT = 20
+    STEP_WINDOW_S = 10.0  # presses this close together keep walking older
+
+    def __init__(self, clock=None) -> None:
+        import time
+        from collections import deque
+
+        self._clock = clock or time.monotonic
+        self._lines: deque[str] = deque(maxlen=self.KEPT)
+        self._cursor = -1  # -1 = not walking; otherwise lines back from newest
+        self._pressed_at = 0.0
+
+    def record(self, text: str) -> None:
+        """A line was freshly spoken: remember it and end any walk-back."""
+        if text and (not self._lines or self._lines[-1] != text):
+            self._lines.append(text)
+        self._cursor = -1
+
+    def step_back(self) -> tuple[int, str] | None:
+        """One press of the repeat key.
+
+        Returns ``(lines_back, text)`` -- 0 means the newest line -- or
+        ``None`` when nothing has been spoken yet."""
+        if not self._lines:
+            return None
+        now = self._clock()
+        if self._cursor < 0 or now - self._pressed_at > self.STEP_WINDOW_S:
+            self._cursor = 0
+        else:
+            self._cursor = min(self._cursor + 1, len(self._lines) - 1)
+        self._pressed_at = now
+        return self._cursor, self._lines[-1 - self._cursor]
+
+
 # Ranks the UIA backend below every other voice even while Narrator is
 # running. Prism's UIA backend raises all notifications with
 # NotificationProcessing_ImportantAll, which Narrator queues without ever

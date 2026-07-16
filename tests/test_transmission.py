@@ -4,6 +4,8 @@ from freight_fate.sim.transmission import (
     AUTO_UPSHIFT_RPM,
     FINAL_DRIVE,
     GEAR_RATIOS,
+    JAKE_MAX_RPM,
+    JAKE_PRESELECT_RPM,
     NEUTRAL,
     REVERSE,
     Transmission,
@@ -79,9 +81,28 @@ def test_manual_rejected_in_automatic_mode():
 
 
 def test_auto_upshifts_at_high_rpm():
+    # The upshift point now comes from the caller (the vehicle passes its
+    # progressive per-gear schedule); at exactly the threshold the box holds,
+    # one RPM over it shifts.
     tr = Transmission(automatic=True, gear=3)
-    assert tr.auto_update(AUTO_UPSHIFT_RPM, throttle=0.8, moving=True) is None
-    assert tr.auto_update(AUTO_UPSHIFT_RPM + 1, throttle=0.8, moving=True) == 4
+    assert (
+        tr.auto_update(
+            AUTO_UPSHIFT_RPM,
+            throttle=0.8,
+            moving=True,
+            upshift_rpm=AUTO_UPSHIFT_RPM,
+        )
+        is None
+    )
+    assert (
+        tr.auto_update(
+            AUTO_UPSHIFT_RPM + 1,
+            throttle=0.8,
+            moving=True,
+            upshift_rpm=AUTO_UPSHIFT_RPM,
+        )
+        == 4
+    )
 
 
 def test_auto_downshifts_at_low_rpm():
@@ -98,6 +119,29 @@ def test_auto_holds_gear_while_braking_instead_of_upshifting():
     # Without braking the same high rpm still upshifts (default unchanged).
     tr = Transmission(automatic=True, gear=5)
     assert tr.auto_update(1800, throttle=0.8, moving=True) == 6
+
+
+def test_engine_brake_preselects_down_and_holds_the_retard_band():
+    # Below the retard band with the jake on: drop a gear to make it bite.
+    tr = Transmission(automatic=True, gear=8)
+    assert tr.auto_update(1400, throttle=0.0, moving=True, engine_braking=True) == 7
+    tr.update(2.0)  # let the shift finish
+    # In the band: hold the gear even though plain RPM rules would upshift.
+    assert tr.auto_update(2000, throttle=0.0, moving=True, engine_braking=True) is None
+    # Never preselect into a gear that would spin the engine past the ceiling.
+    tr = Transmission(automatic=True, gear=7)
+    rpm = JAKE_PRESELECT_RPM - 50
+    assert rpm * GEAR_RATIOS[5] / GEAR_RATIOS[6] > JAKE_MAX_RPM
+    assert tr.auto_update(rpm, throttle=0.0, moving=True, engine_braking=True) is None
+
+
+def test_engine_protection_upshifts_past_the_rpm_ceiling():
+    # The road spinning the engine past the ceiling beats the jake hold:
+    # a real automatic protects its engine even mid-descent.
+    tr = Transmission(automatic=True, gear=7)
+    assert tr.auto_update(JAKE_MAX_RPM + 10, throttle=0.0, moving=True, engine_braking=True) == 8
+    tr = Transmission(automatic=True, gear=7)
+    assert tr.auto_update(JAKE_MAX_RPM + 10, throttle=0.0, moving=True, braking=True) == 8
 
 
 def test_auto_engages_first_from_neutral_on_throttle():

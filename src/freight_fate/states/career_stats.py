@@ -32,13 +32,24 @@ class CareerStatsState(MenuState):
         return items
 
     def _lines(self) -> list[str]:
+        from ..models.jobs import ENDORSEMENT_LABELS
+
         p = self.ctx.profile
         career = p.career
         pct = (100 * career.on_time_deliveries / career.deliveries) if career.deliveries else 100
         rest = "fully rested" if fully_rested(p) else f"fatigue {p.fatigue:.0f} percent"
+        held = sorted(
+            ENDORSEMENT_LABELS.get(e, e.replace("_", " ")).replace(" endorsement", "")
+            for e in career.endorsements
+        )
+        # Earned endorsements were only ever spoken once, at the level-up
+        # that granted them; this line is the reviewable record (owner got
+        # stuck declining a reefer load he was already cleared to haul).
+        endorsements = f"Endorsements: {', '.join(held)}" if held else "Endorsements: none yet"
         return [
             f"Level {career.level} driver, {career.xp:.0f} experience",
             f"Reputation: {career.reputation:.0f} out of 100",
+            endorsements,
             f"Deliveries: {career.deliveries}, {pct:.0f} percent on time",
             f"Lifetime miles: {career.total_miles:,.0f}",
             f"Lifetime earnings: {career.total_earnings:,.0f} dollars",

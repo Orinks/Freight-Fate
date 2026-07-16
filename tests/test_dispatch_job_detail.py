@@ -10,7 +10,8 @@ def _job_board(app):
 
     app.ctx.profile = Profile(name="Dispatch Detail", current_city="Buffalo")
     # Senior driver: the seed-7 deal reshuffles whenever the world grows, and
-    # a level-locked first job would strip the detail view of its accept item.
+    # a level-locked first job would strip the detail view of its accept item
+    # (1.9 hardens this helper the same way).
     app.ctx.profile.career.xp = LEVEL_XP[-1]
     jobs = JobBoard(app.ctx.world, seed=7).offers(
         "Buffalo", {"refrigerated", "heavy_haul", "high_value"}, level=5
@@ -61,13 +62,12 @@ def test_tab_repeats_only_the_market_watch(monkeypatch):
         spoken = []
         monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
 
-        # The board may open on a recommended dispatch; Tab must not move it.
-        selected = board.index
+        index_before = board.index  # the board may open on a recommended job
         board.handle_event(key_event(pygame.K_TAB))
 
         # Exactly the market summary is spoken -- no job line, no HOS note.
         assert spoken == [app.ctx.profile.market.summary()]
-        assert board.index == selected  # Tab does not move the selection
+        assert board.index == index_before  # Tab does not move the selection
     finally:
         app.shutdown()
 

@@ -184,3 +184,4 @@ current idle, start, and shutdown cues.
 | Roadhouse host breaks | `music/host_roadhouse_01.ogg` … `music/host_roadhouse_06.ogg` | ElevenLabs TTS host segments for the Freight Fate Roadhouse |
 | Night Line host breaks | `music/host_nightline_01.ogg` … `music/host_nightline_06.ogg` | ElevenLabs TTS host segments for the Freight Fate Night Line |
 | Radio static burst | `radio/static_burst.ogg` | Procedurally generated band-limited noise (tools/generate_radio.py) |
+| Overspeed dash chime | `vehicle/overspeed_chime.ogg` | Procedurally synthesized two-partial bell strike (deterministic numpy/soundfile recipe, 2026-07-14) |

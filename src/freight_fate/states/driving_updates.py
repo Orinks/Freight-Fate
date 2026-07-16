@@ -59,6 +59,14 @@ class DrivingUpdateMixin:
         pad_brake = pad.brake if pad_on else 0.0
         key_up = keys[pygame.K_UP]
         key_down = keys[pygame.K_DOWN]
+        # Latching pedals: after the double-tap-and-hold gesture a pedal
+        # reads as held right here, so everything downstream -- the reverse
+        # gesture, cruise cancel, the hazard's brake answer -- sees one
+        # truth. Microsleeps stay on the raw keys: only a live reaction
+        # proves the driver awake.
+        key_up, key_down = self._update_pedal_latches(
+            key_up, key_down, pad_throttle, pad_brake, keys[pygame.K_b], dt
+        )
         accelerating = key_up or pad_throttle > 0.05
         braking_key = key_down or pad_brake > 0.05
         # The shift gesture keys off a fresh press, so it reads the trigger's
@@ -67,7 +75,9 @@ class DrivingUpdateMixin:
         # the release-then-press never registers as neutral in between.
         accel_held = key_up or (pad.throttle_target if pad_on else 0.0) > 0.05
         brake_held = key_down or (pad.brake_target if pad_on else 0.0) > 0.05
-        backing = self._update_reverse_controls(accelerating, braking_key, accel_held, brake_held)
+        backing = self._update_reverse_controls(
+            accelerating, braking_key, accel_held, brake_held, dt
+        )
         if accelerating and not backing and t.air_brakes_holding:
             self._maybe_say_air_brake_lockout()
         if key_up and not backing and not t.transmission.in_reverse:
@@ -95,6 +105,12 @@ class DrivingUpdateMixin:
             t.brake = max(t.brake, pad_brake)
         braking = braking_ramp or (pad_brake > 0.05 and not backing)
         emergency = keys[pygame.K_b]
+        # A real truck drops cruise at the first tap of the service brake.
+        # Only the player's own pedal cancels here; the sim's automatic brake
+        # ramps (reverse arrest, hazard events) go through their own cancels.
+        if self._cruise_mph is not None and (braking_key or emergency) and not backing:
+            self._cancel_cruise()
+            self.ctx.say_event("Cruise off.", interrupt=False)
         if emergency:
             # no ramp: slams to full application instantly, plus spring brakes
             if not t.emergency_brake and abs(t.velocity_mps) > 1:
@@ -183,6 +199,8 @@ class DrivingUpdateMixin:
         self._update_speeding(dt)
         self._update_pull_over(dt)
         self._update_brake_heat_cue(dt)
+        self._update_traction_cues()
+        self._update_chain_law()
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
@@ -334,6 +352,7 @@ class DrivingUpdateMixin:
         braking_key: bool,
         accel_held: bool | None = None,
         brake_held: bool | None = None,
+        dt: float = 1 / 60.0,
     ) -> bool:
         """Return True when the current key state means backing up.
 
@@ -357,27 +376,47 @@ class DrivingUpdateMixin:
         self._reverse_brake_held = brake_held
         self._reverse_accel_held = accel_held
         if not tr.automatic:
+            self._direction_armed = ""
+            self._direction_hold_s = 0.0
             return tr.in_reverse and braking_key and not accelerating
-        deliberate = self.ctx.settings.automatic_direction_changes == "deliberate"
-        forward_requested = accel_edge if deliberate else accelerating
-        reverse_requested = brake_edge if deliberate else braking_key
-        if tr.in_reverse:
-            if forward_requested and abs(t.velocity_mps) < 0.3:
-                tr.gear = 1
+        # One safe gesture for every direction change: a FRESH press observed
+        # at a standstill arms it, and the gear engages only after the
+        # control is held through a short beat. A press that lands while
+        # still rolling is part of a stop and never arms; a hold that
+        # predates the stop never arms; a quick confirm-tap at a stop -- how
+        # a screen-reader driver checks the truck is holding -- just brakes.
+        # (Owner-hit three ways on 2026-07-14: held through the stop,
+        # feathered to a stop, and confirm-tapped at the yard.)
+        stopped = abs(t.velocity_mps) < 0.3
+        want = "forward" if tr.in_reverse else "reverse"
+        control_edge = accel_edge if tr.in_reverse else brake_edge
+        control_held = accel_held if tr.in_reverse else brake_held
+        other_held = brake_held if tr.in_reverse else accel_held
+        if control_edge and stopped and not other_held:
+            self._direction_armed = want
+            self._direction_hold_s = 0.0
+        if self._direction_armed == want and control_held and stopped and not other_held:
+            self._direction_hold_s += dt
+            if self._direction_hold_s >= DIRECTION_CHANGE_HOLD_S:
+                self._direction_armed = ""
+                self._direction_hold_s = 0.0
                 tr._shift_timer = 0.0
                 self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
-                self._set_status("Forward gear selected.")
-                self.ctx.say_event("Forward gear selected.", interrupt=False)
-                return False
+                if want == "forward":
+                    tr.gear = 1
+                    self._set_status("Forward gear selected.")
+                    self.ctx.say_event("Forward gear selected.", interrupt=False)
+                    return False
+                tr.gear = REVERSE
+                self._cancel_cruise()
+                self._set_status("Reverse selected. Backing slowly.")
+                self.ctx.say_event("Reverse selected. Backing slowly.", interrupt=False)
+                return True
+        else:
+            self._direction_armed = ""
+            self._direction_hold_s = 0.0
+        if tr.in_reverse:
             return braking_key and not accelerating
-        if reverse_requested and not accel_held and t.speed_mph < 0.5:
-            tr.gear = REVERSE
-            tr._shift_timer = 0.0
-            self._cancel_cruise()
-            self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
-            self._set_status("Reverse selected. Backing slowly.")
-            self.ctx.say_event("Reverse selected. Backing slowly.", interrupt=False)
-            return True
         return False
 
     def _update_hours_and_fatigue(self, dt: float) -> None:
@@ -403,9 +442,25 @@ class DrivingUpdateMixin:
         )
 
         night = is_night(self.trip.local_hour)
+        now_h = self._absolute_game_hour()
         if moving:
+            # Pressure-mode tuning scales how fast the day wears on you, and
+            # an active food/drink buff slows accrual (data/buffs.py); neither
+            # touches the HOS duty clock above.
             fatigue_mult = tuning_for_time_scale(self.trip.time_scale).fatigue_rate
-            p.fatigue = min(100.0, p.fatigue + hos.fatigue_rate_per_min(night) * gm * fatigue_mult)
+            p.fatigue = min(
+                100.0,
+                p.fatigue
+                + hos.fatigue_rate_per_min(night)
+                * gm
+                * fatigue_mult
+                * p.fatigue_buff_rate(now_h),
+            )
+        for worn in p.expire_buffs(now_h):
+            text = worn.get("worn_off") or f"The {worn.get('label', 'buff').lower()} has worn off."
+            self.ctx.say_event(text, interrupt=False)
+        self.truck.engine_wear_buff_mult = float(self.rig_buffs.get("engine", {}).get("rate", 1.0))
+        self.truck.tire_wear_buff_mult = float(self.rig_buffs.get("tire", {}).get("rate", 1.0))
         fatigue = p.fatigue
         alerts_clear = self._hazard_deadline is None
         if fatigue >= hos.FATIGUE_SEVERE and not self._severe_said and alerts_clear:
@@ -750,13 +805,14 @@ class DrivingUpdateMixin:
     # -- radio reception and station rotation --------------------------------------
 
     def tick_covered_music(self, dt: float) -> None:
-        """Keep the radio rotating while a menu covers this state.
+        """Keep the radio spinning while a menu covers the drive.
 
-        Menus stacked over the drive tick this through the app loop, so a
-        song or host break that ends mid-pause hands off to the next track
-        instead of going silent. Day/night stays as it was when the menu
-        opened; the switch happens when driving resumes."""
-        self._update_radio_playback(self._music_night, dt)
+        A paused rig is still a cab with the radio on: the station keeps
+        rotating songs and host breaks under the pause menu instead of going
+        silent when the current bed runs out. Day/night flavor stays as it
+        was when the menu opened; it catches up when driving resumes."""
+        if self.radio.enabled:
+            self._update_radio_playback(self._music_night, dt)
 
     def _update_radio_reception(self, dt: float) -> None:
         """Fade ranged stations with distance and retune when they drop out."""
@@ -1087,6 +1143,24 @@ class DrivingUpdateMixin:
         if self._pull_over is not None:
             return  # already being pulled over; don't pile on strikes
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        self._update_overspeed_warning(dt, limit)
+        # A dropped limit earns braking time before strikes accrue: real
+        # enforcement tickets sustained disregard, not the transition, and a
+        # loaded truck cannot shed 15 mph the instant a sign changes. About
+        # 2 mph per second of comfortable braking sets the window.
+        if self._enforced_limit_prev is not None and limit < self._enforced_limit_prev:
+            grace = (self.truck.speed_mph - limit) / 2.0
+            self._limit_drop_grace_s = max(self._limit_drop_grace_s, min(15.0, grace))
+        self._enforced_limit_prev = limit
+        if self._limit_drop_grace_s > 0.0:
+            self._limit_drop_grace_s = max(0.0, self._limit_drop_grace_s - dt)
+            if self.truck.throttle > 0.05:
+                # Staying on the throttle through the drop is disregard, not
+                # compliance: the grace collapses and the clock runs.
+                self._limit_drop_grace_s = 0.0
+            else:
+                self._speeding_timer = 0.0
+                return
         if self.truck.speed_mph > limit + SPEEDING_LEEWAY_MPH:
             if (
                 self._cruise_mph is not None
@@ -1128,6 +1202,55 @@ class DrivingUpdateMixin:
                     )
         else:
             self._speeding_timer = 0.0
+
+    def _update_overspeed_warning(self, dt: float, limit: float) -> None:
+        """The dash overspeed alert: speak once, then chime until compliant.
+
+        Arms a few mph over the limit -- inside the enforcement leeway, so an
+        attentive driver hears the dash before any strike clock matters. The
+        first trigger speaks the limit; while the truck stays over, the chime
+        repeats on its interval. Actively braking down quiets the nag (the
+        driver is already complying), and settling back under the limit
+        disarms it for the next episode.
+        """
+        mode = getattr(self.ctx.settings, "overspeed_warning", "on")
+        if mode == "off" or mode is False:
+            self._overspeed_active = False
+            return
+        urgent_only = mode == "urgent only"
+        speed = self.truck.speed_mph
+        # In urgent-only mode the alert arms only at runaway overspeed, and
+        # disarms once the runaway is contained -- deliberate fast cruising
+        # below the urgent line stays unjudged, exactly as requested.
+        arm_over = OVERSPEED_URGENT_MPH if urgent_only else OVERSPEED_WARN_MPH
+        reset_over = (OVERSPEED_URGENT_MPH - 2.0) if urgent_only else OVERSPEED_RESET_MPH
+        if self._overspeed_active:
+            if speed <= limit + reset_over:
+                self._overspeed_active = False
+                return
+            braking_down = self.truck.brake > 0.0 and self.truck.throttle <= 0.05
+            # The further over, the faster the ding: cadence slides from
+            # polite to urgent as the overage approaches OVERSPEED_URGENT_MPH.
+            urgency = (speed - limit - OVERSPEED_WARN_MPH) / (
+                OVERSPEED_URGENT_MPH - OVERSPEED_WARN_MPH
+            )
+            urgency = max(0.0, min(1.0, urgency))
+            interval = OVERSPEED_CHIME_REPEAT_S - urgency * (
+                OVERSPEED_CHIME_REPEAT_S - OVERSPEED_CHIME_FAST_S
+            )
+            self._overspeed_chime_timer += dt
+            if self._overspeed_chime_timer >= interval and not braking_down:
+                self._overspeed_chime_timer = 0.0
+                self.ctx.audio.play("vehicle/overspeed_chime", volume=0.55)
+            return
+        if speed > limit + arm_over:
+            self._overspeed_active = True
+            self._overspeed_chime_timer = 0.0
+            self.ctx.audio.play("vehicle/overspeed_chime", volume=0.65)
+            self.ctx.say_event(
+                f"Watch your speed. The limit is {self.ctx.settings.speed_text(limit)}.",
+                interrupt=False,
+            )
 
     def _trooper_catches_speeder(self, limit: float) -> bool:
         """Whether a patrol clocks this speeding strike, by patrol intensity."""
@@ -1286,6 +1409,83 @@ class DrivingUpdateMixin:
         if t.brake >= 0.4 and t.speed_mph > 10.0 and t.brake_temp_c >= t.specs.brake_fade_temp_c:
             self.ctx.audio.play("vehicle/brake_squeal", volume=0.8)
             self._brake_squeal_cooldown_s = 4.0
+
+    def _update_traction_cues(self) -> None:
+        """Speak the physical traction states once, on the edge they begin.
+
+        Each warning names the state and the action that clears it: ease off
+        the speed when the tires float, ease off the jake when the drive
+        wheels slide. The flag resets when the state clears, so a second
+        excursion warns again.
+        """
+        t = self.truck
+        planing = t.hydroplaning
+        if planing and not self._hydro_active:
+            self.ctx.say_event("Hydroplaning. The steering has gone light; ease off the speed.")
+        self._hydro_active = planing
+        slipping = t.jake_slipping and t.speed_mph > 5.0
+        if slipping and not self._jake_slip_active:
+            self.ctx.say_event(
+                "The drive wheels are sliding under the engine brake. Ease off the jake."
+            )
+        self._jake_slip_active = slipping
+        if t.chains_just_snapped:
+            t.chains_just_snapped = False
+            self.ctx.say_event(
+                "A tire chain let go and hammered the fender on its way off. "
+                "The set is scrap; you are running on rubber again."
+            )
+        chains_fast = t.chains_on and t.speed_mph > CHAIN_SAFE_MPH + 2.0
+        if chains_fast and not self._chains_fast_active:
+            self.ctx.say_event(
+                "The chains are hammering the pavement at this speed. "
+                f"Keep it under {CHAIN_SAFE_MPH:.0f} or they will not last."
+            )
+        self._chains_fast_active = chains_fast
+
+    def _update_chain_law(self) -> None:
+        """Warn once per area, then run the deterministic checkpoint.
+
+        The physics is the real enforcement -- glare ice at 0.15 grip does not
+        negotiate -- but the law adds the honest paper consequence: roll past
+        the midpoint of an active control out of compliance and the checkpoint
+        at the bottom of the grade may have your number. One citation per area
+        per level; the roll is seeded, so a reload does not re-roll the dice.
+        """
+        t = self.truck
+        level = self.trip.chain_law_level()
+        if level == 0 or t.speed_mph < 3.0:
+            return
+        area = self.trip.chain_law_area_at(self.trip.position_mi)
+        if area is None:
+            return
+        compliant = t.chains_on or (level == 1 and t.tire_type == TIRE_WINTER)
+        if compliant:
+            return
+        key = (area, level)
+        if key not in self._chain_law_warned:
+            self._chain_law_warned.add(key)
+            need = "chains" if level >= 2 else "winter-rated tires or chains"
+            self.ctx.say_event(
+                f"You are rolling into an active chain law without {need}. "
+                "Stop and chain up, or hope the checkpoint is unstaffed."
+            )
+        start, end = self.trip.chain_law_areas[area]
+        if self.trip.position_mi < (start + end) / 2.0 or key in self._chain_law_cited:
+            return
+        self._chain_law_cited.add(key)
+        roll = random.Random(f"{self.trip_seed}:chain-law:{area}:{level}").random()
+        if roll >= CHAIN_LAW_CHECKPOINT_CHANCE:
+            return
+        p = self.ctx.profile
+        p.money -= CHAIN_LAW_FINE
+        self.ticket_fines_paid += CHAIN_LAW_FINE
+        self.ctx.audio.play("ui/error")
+        self.ctx.say_event(
+            "Chain checkpoint. An officer waves you onto the scale apron and "
+            f"writes a chain-law citation: {CHAIN_LAW_FINE:,.0f} dollars. "
+            f"You have {p.money:,.0f} dollars."
+        )
 
     def _update_pull_over(self, dt: float) -> None:
         if self._pull_over is None:

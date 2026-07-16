@@ -60,7 +60,9 @@ def test_manual_governor_holds_low_gear_without_engine_damage():
     damage_at_governor = truck.damage_pct
     drive(truck, 10.0)
 
-    assert truck.rpm == pytest.approx(truck.specs.max_rpm)
+    # The hard fuel cut lets the equilibrium hover a hair over the governed
+    # figure, so the check allows a tenth of a percent of overshoot.
+    assert truck.rpm == pytest.approx(truck.specs.max_rpm, rel=1e-3)
     assert truck.speed_mph == pytest.approx(speed_at_governor, abs=0.5)
     assert truck.damage_pct == pytest.approx(damage_at_governor)
 
@@ -210,11 +212,14 @@ def test_loaded_launch_uses_lower_low_speed_traction():
     from freight_fate.sim.vehicle import (
         LAUNCH_TRACTION_ROLLING_G,
         LAUNCH_TRACTION_START_G,
+        REFERENCE_CARGO_KG,
         G,
     )
 
+    # The gentle launch belongs to the load: this probes a rig at the full
+    # reference cargo, where the low-speed easing is at its strongest.
     t = make_auto_truck()
-    t.set_air_ready(parking_brake=False)
+    t.cargo_kg = REFERENCE_CARGO_KG
     t.transmission.gear = 1
     t.rpm = t.specs.peak_torque_rpm
     t.throttle = 1.0
@@ -222,31 +227,35 @@ def test_loaded_launch_uses_lower_low_speed_traction():
     # From a dead stop the loaded rig eases in: drive force sits at the
     # launch cap, well below the rolling traction cap.
     start_force = abs(t.drive_force())
-    assert start_force == pytest.approx(t.traction_limit_n())
-    assert start_force / t.gross_mass_kg == pytest.approx(G * LAUNCH_TRACTION_START_G)
-
-    # By 25 mph the cap has ramped to the full rolling third-of-weight.
+    # At 25 mph in first gear the governor has already cut fuel, so the
+    # rolling end of the ramp is probed through the shared traction cap the
+    # drive and the shift prediction both use.
     t.velocity_mps = 25.0 / 2.23694
-    assert t.traction_limit_n() / t.gross_mass_kg == pytest.approx(G * LAUNCH_TRACTION_ROLLING_G)
-    assert start_force < t.traction_limit_n()
+    rolling_limit = t.drive_traction_limit()
+
+    assert start_force / t.gross_mass_kg == pytest.approx(G * LAUNCH_TRACTION_START_G)
+    assert rolling_limit / t.gross_mass_kg == pytest.approx(G * LAUNCH_TRACTION_ROLLING_G)
+    assert start_force < rolling_limit
 
 
 def test_empty_deadhead_launches_at_full_traction():
     from freight_fate.sim.vehicle import LAUNCH_TRACTION_ROLLING_G, G
 
     t = make_auto_truck()
-    t.set_air_ready(parking_brake=False)
     t.cargo_kg = 0.0
-    assert t.traction_limit_n() / t.gross_mass_kg == pytest.approx(G * LAUNCH_TRACTION_ROLLING_G)
+    assert t.drive_traction_limit() / t.gross_mass_kg == pytest.approx(
+        G * LAUNCH_TRACTION_ROLLING_G
+    )
 
 
 def test_steep_climb_gets_the_full_traction_cap_at_crawl_speed():
     from freight_fate.sim.vehicle import LAUNCH_TRACTION_ROLLING_G, G
 
     t = make_auto_truck()
-    t.set_air_ready(parking_brake=False)
     t.grade = 0.06
-    assert t.traction_limit_n() / t.gross_mass_kg == pytest.approx(G * LAUNCH_TRACTION_ROLLING_G)
+    assert t.drive_traction_limit() / t.gross_mass_kg == pytest.approx(
+        G * LAUNCH_TRACTION_ROLLING_G
+    )
 
 
 def test_automatic_does_not_rush_through_low_gears_on_launch():
@@ -544,6 +553,334 @@ def test_brake_heat_builds_and_cools():
     for _ in range(6000):
         t._update_temps(1 / 60)
     assert t.brake_temp_c < hot
+
+
+def test_tire_wear_accrues_with_miles_and_load():
+    from freight_fate.sim.vehicle import KG_PER_TON
+
+    light = make_auto_truck()
+    heavy = make_auto_truck()
+    light.cargo_kg = 0.0
+    heavy.cargo_kg = 25 * KG_PER_TON
+    for t in (light, heavy):
+        t.velocity_mps = 25.0
+        t.fuel_burn_mult = 60.0  # a compressed-time cruise, like a real trip
+        for _ in range(600):
+            t._update_wear(1 / 60)
+    assert light.tire_wear_pct > 0.0
+    assert heavy.tire_wear_pct > light.tire_wear_pct
+
+
+def test_parked_truck_does_not_wear_tires_or_brakes():
+    t = TruckState()
+    t.set_air_ready(parking_brake=True)  # spring brakes applied, speed zero
+    for _ in range(600):
+        t._update_wear(1 / 60)
+    assert t.tire_wear_pct == 0.0
+    assert t.brake_wear_pct == 0.0
+
+
+def test_jake_brake_spares_the_service_brakes():
+    """The same descent on the jake costs the shoes nothing; riding the
+    service brakes wears them -- the whole point of the jake as a mechanic."""
+    service = make_auto_truck()
+    jake = make_auto_truck()
+    for t in (service, jake):
+        t.velocity_mps = 13.0  # ~30 mph downgrade
+        t.grade = -0.06
+    service.brake = 0.5
+    jake.engine_brake = True
+    for _ in range(1200):  # 20 seconds of descent
+        service._update_wear(1 / 60)
+        jake._update_wear(1 / 60)
+    assert service.brake_wear_pct > 0.0
+    assert jake.brake_wear_pct == 0.0
+
+
+def test_hot_brakes_wear_faster():
+    cool = make_auto_truck()
+    glazed = make_auto_truck()
+    for t in (cool, glazed):
+        t.velocity_mps = 20.0
+        t.brake = 1.0
+    glazed.brake_temp_c = glazed.specs.brake_fade_temp_c + 50.0
+    cool._update_wear(1.0)
+    glazed._update_wear(1.0)
+    assert glazed.brake_wear_pct > cool.brake_wear_pct
+
+
+def test_worn_tires_cut_grip_and_lengthen_stops():
+    fresh = make_auto_truck()
+    bald = make_auto_truck()
+    bald.tire_wear_pct = 100.0
+    assert bald.effective_grip < fresh.effective_grip
+    fresh.velocity_mps = bald.velocity_mps = 25.0
+    fresh.brake = bald.brake = 1.0
+    assert abs(bald.brake_force()) < abs(fresh.brake_force())
+
+
+def test_worn_brakes_fade_sooner_and_pull_weaker():
+    fresh = make_auto_truck()
+    worn = make_auto_truck()
+    worn.brake_wear_pct = 80.0
+    assert worn.brake_fade_onset_c < fresh.brake_fade_onset_c
+    fresh.velocity_mps = worn.velocity_mps = 25.0
+    fresh.brake = worn.brake = 1.0
+    # Cool brakes: worn shoes still pull weaker than fresh ones.
+    assert abs(worn.brake_force()) < abs(fresh.brake_force())
+    # At a temperature between the worn and fresh fade onsets, only the
+    # worn shoes have started to fade.
+    temp = (worn.brake_fade_onset_c + fresh.brake_fade_onset_c) / 2.0
+    fresh.brake_temp_c = worn.brake_temp_c = temp
+    ratio = abs(worn.brake_force()) / abs(fresh.brake_force())
+    assert ratio < worn.brake_wear_factor
+
+
+def test_over_rev_wears_engine_not_damage():
+    t = make_auto_truck()
+    t.rpm = t.specs.max_rpm * 1.1  # the road driving the engine past the governor
+    t._update_wear(1.0)
+    assert t.engine_wear_pct > 0.5
+    assert t.damage_pct == 0.0
+
+
+def test_jake_force_scales_with_gear_stage_and_rpm():
+    """The jake is torque through the gearing: a lower gear multiplies it, a
+    lighter stage weakens it, and low RPM starves it -- the grade discipline."""
+    t = make_auto_truck()
+    t.velocity_mps = 15.0
+    t.throttle = 0.0
+    t.rpm = 1800.0
+    t.engine_brake_stage = 3
+    t.transmission.gear = 8
+    tall = t.jake_brake_force()
+    t.transmission.gear = 7
+    low = t.jake_brake_force()
+    assert tall > 0.0
+    assert low > tall  # lower gear, more retard at the wheels
+    t.engine_brake_stage = 1
+    assert t.jake_brake_force() < low / 2.0  # stage 1 is a third of stage 3
+    t.engine_brake_stage = 3
+    t.rpm = 900.0
+    assert t.jake_brake_force() < low  # slow engine, weak jake
+
+
+def test_engine_brake_bool_view_selects_full_stage():
+    t = make_auto_truck()
+    t.engine_brake = True
+    assert t.engine_brake_stage == 3
+    assert t.engine_brake
+    t.engine_brake = False
+    assert t.engine_brake_stage == 0
+
+
+def test_jake_is_capped_by_drive_axle_grip_on_ice():
+    """On glare ice a hard jake in a low gear outruns what the drive axle can
+    transmit: force caps, the slipping flag raises, and a lighter stage stays
+    hooked up -- the CDL rule about compression brakes on slick roads."""
+    t = make_auto_truck()
+    t.velocity_mps = 15.0
+    t.throttle = 0.0
+    t.rpm = 1800.0
+    t.engine_brake_stage = 3
+    t.transmission.gear = 7
+    dry = t.jake_brake_force()
+    assert not t.jake_slipping
+    t.grip = 0.15  # glare ice
+    assert t.jake_slipping
+    assert t.jake_brake_force() < dry
+    t.engine_brake_stage = 1  # light stage asks for a third; the axle holds it
+    assert not t.jake_slipping
+
+
+def test_hydroplane_onset_needs_water_and_drops_with_tread_wear():
+    """Fresh tread at highway pressure essentially never planes; worn tread in
+    deep water planes right in the speeds the game drives."""
+    t = make_auto_truck()
+    t.water_mm = 0.2  # a damp film cannot float a loaded truck tire
+    assert t.hydro_onset_mph is None
+    t.water_mm = 3.0  # heavy rain
+    fresh = t.hydro_onset_mph
+    assert fresh is not None and fresh > 85.0
+    t.tire_wear_pct = 80.0
+    worn = t.hydro_onset_mph
+    assert worn is not None and worn < fresh
+    assert 50.0 < worn < 70.0  # reachable at highway speed
+
+
+def test_hydroplaning_collapses_grip_and_slowing_restores_it():
+    t = make_auto_truck()
+    t.grip = 0.62  # heavy-rain surface
+    t.water_mm = 3.0
+    t.tire_wear_pct = 80.0
+    onset = t.hydro_onset_mph
+    assert onset is not None
+    t.velocity_mps = (onset + 15.0) / 2.23694  # past the collapse band
+    assert t.hydroplaning
+    planing = t.effective_grip
+    t.velocity_mps = (onset - 5.0) / 2.23694
+    assert not t.hydroplaning
+    assert t.effective_grip > planing * 2.0  # contact restored
+
+
+def test_winter_tires_trade_dry_grip_for_snow_and_ice():
+    """The winter compound is a real trade, not a free upgrade: more bite on
+    snow and ice, slightly less on warm dry pavement, and faster tread wear."""
+    from freight_fate.sim.vehicle import (
+        TIRE_WINTER,
+        WINTER_DRY_GRIP_LOSS,
+        WINTER_ICE_GRIP_MULT,
+        WINTER_SNOW_GRIP_MULT,
+    )
+
+    t = make_auto_truck()
+    t.grip, t.surface = 0.45, "snow"
+    stock_snow = t.effective_grip
+    t.tire_type = TIRE_WINTER
+    assert t.effective_grip == pytest.approx(stock_snow * WINTER_SNOW_GRIP_MULT)
+    t.grip, t.surface = 0.15, "ice"
+    assert t.effective_grip == pytest.approx(0.15 * WINTER_ICE_GRIP_MULT)
+    t.grip, t.surface = 1.0, "dry"
+    assert t.effective_grip == pytest.approx(1.0 - WINTER_DRY_GRIP_LOSS)
+
+    # Same mile at the same speed costs the winter set more tread.
+    winter = make_auto_truck()
+    winter.tire_type = TIRE_WINTER
+    stock = make_auto_truck()
+    for truck in (winter, stock):
+        truck.velocity_mps = 25.0
+        truck._update_wear(60.0)
+    assert winter.tire_wear_pct > stock.tire_wear_pct
+
+
+def test_chains_replace_the_contact_patch():
+    """With chains on, steel touches the road: tread wear and the water film
+    stop mattering, and the chain multiplier alone works on the weather grip."""
+    from freight_fate.sim.vehicle import CHAIN_BARE_GRIP_LOSS, CHAIN_ICE_GRIP_MULT
+
+    t = make_auto_truck()
+    t.grip, t.surface, t.water_mm = 0.62, "wet", 3.0
+    t.tire_wear_pct = 80.0
+    t.velocity_mps = 70.0 / 2.23694
+    assert t.hydroplaning
+    t.chains_on = True
+    assert not t.hydroplaning  # chains bite through the film
+    assert t.effective_grip == pytest.approx(0.62 * (1.0 - CHAIN_BARE_GRIP_LOSS))
+    t.grip, t.surface, t.water_mm = 0.15, "ice", 0.0
+    assert t.effective_grip == pytest.approx(0.15 * CHAIN_ICE_GRIP_MULT)
+
+
+def test_chained_jake_holds_the_icy_grade():
+    """The jake cap that breaks loose on glare ice holds once the drives are
+    chained: the same demand fits under two and a half times the grip."""
+    t = make_auto_truck()
+    t.velocity_mps = 15.0
+    t.rpm = 1800.0
+    t.engine_brake_stage = 3
+    t.transmission.gear = 7
+    t.grip, t.surface = 0.15, "ice"
+    assert t.jake_slipping
+    t.chains_on = True
+    assert not t.jake_slipping
+
+
+def test_chains_grind_apart_on_bare_pavement_and_snap():
+    """Chains left on at highway speed on dry pavement destroy themselves in a
+    couple of miles: the set snaps, takes a bite of the fender, and is scrap."""
+    from freight_fate.sim.vehicle import CHAIN_SNAP_DAMAGE_PCT
+
+    t = make_auto_truck()
+    t.chains_on = True
+    t.surface = "dry"
+    t.velocity_mps = 55.0 / 2.23694
+    for _ in range(4000):  # up to 400 simulated seconds at highway speed
+        t._update_wear(0.1)
+        if t.chains_just_snapped:
+            break
+    assert t.chains_just_snapped
+    assert not t.chains_on
+    assert t.chain_wear_pct == pytest.approx(100.0)
+    assert t.damage_pct == pytest.approx(CHAIN_SNAP_DAMAGE_PCT)
+    # Used as intended -- packed snow at chain speed -- a set lasts the pass.
+    proper = make_auto_truck()
+    proper.chains_on = True
+    proper.grip, proper.surface = 0.45, "snow"
+    proper.velocity_mps = 25.0 / 2.23694
+    proper._update_wear(600.0)  # ten minutes of chained descent
+    assert proper.chains_on
+    assert proper.chain_wear_pct < 2.0
+
+
+def test_governed_speed_is_not_abuse():
+    """Sitting AT the governor is normal diesel running; overspeed wear only
+    starts past it, when a downgrade drives the engine through the wheels."""
+    t = make_auto_truck()
+    t.rpm = t.specs.max_rpm
+    t._update_wear(1.0)
+    assert t.engine_wear_pct < 0.1
+
+
+def test_lugging_wears_the_engine():
+    lugger = TruckState()
+    lugger.start_engine()
+    lugger.transmission.automatic = False
+    lugger.transmission.gear = 8
+    lugger.velocity_mps = 3.0
+    lugger.throttle = 1.0
+    lugger.rpm = lugger.specs.idle_rpm  # far below the torque band, wide open
+    clean = TruckState()
+    clean.start_engine()
+    clean.transmission.automatic = False
+    clean.transmission.gear = 8
+    clean.velocity_mps = 25.0
+    clean.throttle = 1.0
+    clean.rpm = clean.specs.peak_torque_rpm
+    lugger._update_wear(1.0)
+    clean._update_wear(1.0)
+    assert lugger.engine_wear_pct > clean.engine_wear_pct + 0.01
+
+
+def test_engine_wear_cuts_power():
+    fresh = make_auto_truck()
+    tired = make_auto_truck()
+    tired.engine_wear_pct = 100.0
+    for t in (fresh, tired):
+        t.transmission.gear = 10
+        t.velocity_mps = 25.0
+        t.rpm = t.specs.peak_torque_rpm
+        t.throttle = 1.0
+    assert tired.drive_force() < fresh.drive_force()
+
+
+def test_engine_wear_burns_more_fuel_for_the_same_power():
+    """At low speed both trucks are traction-limited to the same drive force,
+    so equal power output shows the worn engine's fuel penalty cleanly."""
+    fresh = make_auto_truck()
+    tired = make_auto_truck()
+    tired.engine_wear_pct = 100.0
+    for t in (fresh, tired):
+        t.transmission.gear = 1
+        t.velocity_mps = 5.0
+        t.rpm = t.specs.peak_torque_rpm
+        t.throttle = 1.0
+    assert tired.drive_force() == pytest.approx(fresh.drive_force())
+    fresh_start, tired_start = fresh.fuel_gal, tired.fuel_gal
+    fresh._update_fuel(10.0)
+    tired._update_fuel(10.0)
+    assert (tired_start - tired.fuel_gal) > (fresh_start - fresh.fuel_gal)
+
+
+def test_wear_clamps_at_100():
+    t = make_auto_truck()
+    t.tire_wear_pct = t.brake_wear_pct = t.engine_wear_pct = 99.999
+    t.velocity_mps = 30.0
+    t.brake = 1.0
+    t.rpm = t.specs.max_rpm
+    t.fuel_burn_mult = 10_000.0
+    t._update_wear(60.0)
+    assert t.tire_wear_pct == 100.0
+    assert t.brake_wear_pct == 100.0
+    assert t.engine_wear_pct == 100.0
 
 
 def test_air_pressure_builds_when_engine_running_and_stops_at_cutout():

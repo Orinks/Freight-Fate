@@ -18,7 +18,7 @@ from freight_fate.models.career_ladder import (
     rank_for_level,
 )
 from freight_fate.models.jobs import CARGO_CATALOG, plan_hos
-from freight_fate.models.profile import SIGNATURE_FIELD, ProfileIntegrityError
+from freight_fate.models.profile import SAVE_VERSION, SIGNATURE_FIELD, ProfileIntegrityError
 from freight_fate.settings import Settings
 
 # -- jobs ---------------------------------------------------------------------
@@ -297,7 +297,7 @@ def test_profile_save_is_atomic_and_versioned():
     p = Profile(name="Atomic")
     path = p.save()
     data = json.loads(path.read_text())
-    assert data["version"] == 10
+    assert data["version"] == SAVE_VERSION
     assert SIGNATURE_FIELD in data
     assert not path.with_suffix(".json.tmp").exists()
 

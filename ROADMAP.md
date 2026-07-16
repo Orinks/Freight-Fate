@@ -1,6 +1,6 @@
 # Freight Fate Roadmap
 
-> Current stable: **1.8.1** (shipped 2026-07-13). Next release: **1.9.0**, in
+> Current stable: **1.8.0** (shipped 2026-07-05). Next release: **1.9.0**, in
 > flight on the `feat/career-1.9` branch -- driving realism between the exits
 > (discrete lanes, ramp terminals, congestion, real surface streets) plus the
 > highway-spider world expansion, roadside narration, and real time zones.
@@ -39,6 +39,287 @@ terminal becomes the anchor of that week instead of a spawn point.
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
 - [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
+- [x] **Physics test bench** (`tools/physics_bench.py`): deterministic scripted-driver scenarios over the real truck model -- descents, runaway coasts, stop tests -- printing plain-text, screen-reader-friendly, diffable reports (peak brake temp, fade onset, wear added, the cues the game would have played). The tuning loop for every physics change; `tests/test_physics_bench.py` keeps its orderings honest. Now also a tuning instrument: `--sweep` re-runs a scenario across one knob (speed, cargo, grade, wear) one line per value, and `--solve` bisects for an edge ("the fastest drag speed that stays under fade"), both plain-text and deterministic.
+- [x] **Per-truck condition.** Wear, damage, and fuel moved off the profile into `truck_conditions`, keyed by truck, so each owned tractor keeps its own state and swapping trucks no longer teleports condition. Legacy saves migrate (all owned trucks inherit current wear; no pristine spare), per-truck wear is under the save signature, and the field is scoped by truck *model* key -- true per-instance trucks are still the rental feature's job.
+- [ ] Truck selling / trade-in at the dealer: no sell path exists today, so `truck_conditions` never needs to drop a record. When selling lands, drop the sold truck's condition record (and decide salvage value from its wear).
+- [ ] Transmission as a per-truck purchase spec (rides the dealer/sell path above): a gearbox is bought with the truck, never swapped in later. Carrier-spec company tractors run automatics like real fleets; owner-operators choose at the dealer, and the cheap old rigs of the lease-to-start onramp skew manual -- cheap entry costs shifting skill. Gear count (10/13/18-speed) can join as a spec later. The global Transmission setting survives as the player's accessibility override, and dispatch respects it.
+- [x] **Jake brake realism.** The jake is now retarding torque through the gearing -- three stages, scaling with RPM and gear ratio -- so gear discipline decides descents: stage 3 in 7th holds a loaded rig on a 6 percent grade with zero service brake, stage 1 makes the shoes work, and overdrive gives almost nothing. Automatics pre-select down into the retard band with the jake on and upshift past the RPM ceiling to protect the engine (the realistic runaway spiral). Bench-solved anchors: jake-only holds up to ~26 tonnes of payload on the 6 percent; past that you snub or run away. The on/off key still works; a staged in-cab control is open follow-up below.
+- [x] **Brake thermal realism.** Drum heat is now real energy accounting: dissipated brake power soaks a drum thermal mass, cooling is convective (square root of speed -- outrunning your brakes no longer air-conditions them), and faded shoes grip less so they also heat less. The six-mile 6 percent drag now peaks at 466 C with miles ridden past fade, while jake-and-snub finishes cool -- the drag-vs-snub lesson finally has teeth. Overspeed realism came with it: the road can drive the engine past the governor (that wears it; governed running is safe), and brake wear is now charged per megajoule actually dissipated in the shoes.
+- [ ] Staged jake in-cab control: the physics supports stages 1-3 but the J key still toggles off/full. Add a spoken stage cycle (and gamepad binding) so drivers can pick partial retard on purpose.
+- [x] **Traction deep-dive: freezing rain, hydroplaning, jake grip cap.** `WeatherKind.ICE` (grip 0.15, a third of snow) forms physically -- rain sampled in the 1 to -4 C band glazes, and the live NWS feed maps freezing rain/sleet/ice to it instead of snow -- with its own hazards, spoken "ice on the road" status, and a bench `stop-ice` anchor (880 ft from 40 mph vs 329 dry from 60). Hydroplaning follows the Horne relation: onset ~106 mph on fresh tread (trucks at highway pressure basically never plane), pulled down by tread wear and standing-water depth (`WeatherEffects.water_mm` -> `truck.water_mm`) -- 80 percent worn rubber planes at ~59 in heavy rain, grip collapsing toward a 0.3 floor over a 12 mph band, with a spoken onset warning and hydro-aware conditions incidents. The jake is now capped by drive-axle grip (42.5 percent of gross, half usable before lockup): dry never binds, glare ice breaks stage 3 loose in a low gear while stage 1 stays hooked up, `jake_slipping` speaks a warning, and the bench `grade-jake-ice` run shows the capped jake losing ground on a 4 percent it would hold dry.
+- [ ] Jake-slip and hydroplane consequences beyond the warning: sustained sliding should be able to escalate into a real incident (trolley jackknife / spin) through the event system, which needs a "release the jake / ease off" resolution verb rather than the brake-to-answer hazard contract.
+- [ ] **Curve management as a difficulty tier (owner idea 2026-07-15;
+      sound grammar designed 2026-07-16).** The data half is DONE: 63,725
+      discrete curve records (at-mile, direction, radius, physics
+      advisory speed) are baked and shipped under world_data/us/gameplay.
+      The feature: at the manage-curves difficulty tier speak the
+      approach ("sharp right, quarter mile, advisory 25" -- plain
+      language pacenotes from the real records, warned in REAL reaction
+      seconds like ramp endings), guide the bend, require the slowdown,
+      and let hot entries pay physics consequences (drift off-lane, load
+      and ice against the lateral-traction bullet above). SOUND GRAMMAR
+      (owner + Fable design session 2026-07-16, Forza Motorsport's Blind
+      Driving Assists as validated prior art): silence-is-centered on
+      straights -- the lane speaks only when you drift (fatigue beats
+      information density over a ten-hour haul); when the road bends,
+      the PURSUIT guide takes over -- pan the existing road/engine bed
+      along the arc (Forza's steering guide panned engine+tires toward
+      the needed steer; pursuit tracking beats error-nulling in the
+      human-factors literature -- the owner independently reinvented it
+      from bed); drift cues stay underneath as the error backstop; lane
+      EDGES get per-side textures (rumble strip inside vs gravel
+      shoulder outside) so single-sided hearing still knows which way it
+      wandered; and every cue gets a preview-in-Settings audition, Forza
+      style -- a natural driving-school lesson. Steering input, presets
+      (Josh's DRIVING_ASSIST_FIELDS entry, keyboard first-class, analog
+      pad.steering as the smoother option), and the exact guide sound
+      are OPEN. Owner decision 2026-07-16: Josh is being OFFERED the
+      audio-design lead for driving, deliberately without a spec -- his
+      ideas get first swing, and our side holds physics, data, and the
+      invariants-as-tests (real reaction seconds, per-side edge
+      textures, previewable cues, keyboard first-class). Phil's parked
+      brainstorm lives in docs/steering-sound-rfc.md as a comparison
+      point for finessing, and becomes the starting point (plus an
+      audiogames.net consultation) only if Josh passes.
+- [ ] **Real lane counts from OSM (owner ask 2026-07-16).** OSM tags
+      lanes directly (lanes=, lanes:forward=); bake per-mile lane counts
+      along every leg from the self-hosted Overpass/PBF harvest, the
+      exact pattern of the dense maxspeed sweep. Buys real widths (four
+      lanes through Albuquerque on I-40, two-plus-two rural) and REAL
+      LANE DROPS: where three lanes become two, that is a genuine merge
+      event with a real location, not a scripted taper. Goes in the next
+      map re-bake brief.
+- [ ] **A turn signal you actually operate (owner idea 2026-07-16).**
+      Today lane-change taps click the signal for you; give the player
+      the stalk: signal before a lane change, and unsignaled changes
+      become a discipline the CB and troopers can notice at the
+      higher-realism tiers. Pairs with a LANE-LINE CROSSING sound --
+      a soft paint-and-dots tick when crossing a dashed line, the
+      clearly-quieter kin of the edge rumble strip, so every lane change
+      has a physical moment (owner idea, same night).
+- [ ] **Signal-and-steer turns on surface streets (owner idea
+      2026-07-15).** Turn-by-turn today is automatic: the truck follows
+      the baked chain, the player hears the cue and panned chime and only
+      manages speed and stops. At the higher-realism tier a turn should
+      be driven: signal (indicator stalk sound already shipped), brake to
+      turn speed, steer through with the same guidance-tone grammar as
+      curves, with missed or unsignaled turns costing a reroute or
+      strike. Natural interaction layer for per-turn trailer
+      off-tracking.
+- [ ] **Route terrain browser (owner idea 2026-07-15).** A reviewable,
+      navigable summary of what the route will demand: big climbs and
+      descents with grade and length, sharp-curve clusters, chain-law
+      areas, by milepost -- readable at dispatch and route selection,
+      from the pause menu, and on demand while driving alongside the U
+      upcoming key. Feeds off corridor.grade_segments and the future
+      curve records; kin to the map-stats explorer idea.
+- [x] **On-demand safe-speed key -- SHIPPED 2026-07-15.** D (next to S's
+      posted limit, a deliberate spatial pair) speaks one number: the
+      minimum of the posted limit, the weather-grip safe speed, and the
+      ramp speed once an exit is armed within two miles or the truck is on
+      the ramp. Weather and context are baked into the math, never the
+      sentence ("Safe speed 45 miles per hour for the ramp."), repeatable
+      free. Curve advisories join the same key when the Job 2 curve
+      records land (the curve-tier bullet above).
+- [x] **Speech history review -- SHIPPED 2026-07-15.** Comma now walks
+      back through a ring of the last 20 spoken lines across both
+      channels: first press repeats the newest (unchanged), further
+      presses within ten seconds each step one line older, spoken with a
+      "2 back:" position prefix, clamped at the oldest -- the
+      speech-history pattern NVDA users already know. A fresh
+      announcement (or a pause past the window) resets the walk to
+      newest; consecutive duplicate lines collapse to one entry. A keeps
+      its route-announcement meaning unchanged. The event pacer also
+      logs a `[pacer]` transcript marker whenever it flushes a stale
+      backlog, so playtest logs show the flushes.
+- [x] **Stale event-speech backlog -- FIXED 2026-07-15.** The event voice
+      queued utterances faster than it spoke them, so arriving at the yard
+      played the whole approach script late ("slow down to dock, at dock,
+      delivering" after the load was dropped) and the backlog talked over
+      light dings. `EventSpeechPacer` (speech.py) now projects when the
+      channel falls silent from utterance length and a conservative
+      speaking rate; a queued line that would start more than three
+      seconds after the moment it described flushes the dead backlog and
+      speaks immediately, and interrupting lines reset the projection to
+      truth. Follow-up if the estimate ever misbehaves: scale the
+      chars-per-second to the configured event voice rate.
+- [x] **Dispatch lane variety -- SHIPPED 2026-07-15.** The profile
+      remembers the last six delivered from:to lanes
+      (`Profile.recent_lanes`, saved), and the assignment queue
+      stable-partitions fresh candidates so an unseen lane goes first --
+      score order still rules within each group, an all-recent board
+      changes nothing, so the nudge delays a repeat but never blocks
+      dispatch. Higher levels widening the distance cap stacks on top.
+- [ ] **Billboards on short routes (playtest 2026-07-15).** Nothing was
+      deleted -- the pools, corridor signs, and wiring are all intact -- but
+      the spacing math (15-mile lead-in plus a 35-to-65-mile gap roll)
+      means a run under about 30 miles usually rolls zero billboards, which
+      reads as "the billboards are gone" on short-lane days. Scale the
+      lead-in and gap down on short routes so even an errand run can pass
+      one sign.
+- [ ] **Brake-heat sensory ladder (owner ask 2026-07-15).** The physics
+      already tracks brake temperature continuously (heating, cooling,
+      fade onset, effectiveness collapse) but the player only hears three
+      coarse buckets buried in the detailed status readout, plus a squeal
+      that fires once it is already too late. Real trucks have no brake
+      temperature gauge -- drivers judge by smell, pedal feel, and smoke
+      -- so the honest interface is a five-rung spoken sensory ladder
+      (cool, warm, hot, fading, smoking) with each transition announced
+      once as the sensation ("You smell hot brakes", "The pedal is going
+      soft"), a one-word trend on the hot rungs (still heating vs
+      cooling -- the whole question on a long descent), and the heat word
+      added to the quick status key, not just the long readout. Prime
+      driving-school lesson: a long practice grade, snub braking versus
+      dragging, when to grab a lower gear, what each rung means -- pairs
+      with the latching-controls lesson (latch the brake, hear the
+      ladder climb).
+- [ ] **Ambience honesty: season, temperature, and region gate the
+      wildlife (owner playtest 2026-07-16).** The night ambience sang
+      cicadas over a 52-degree March windstorm in Holbrook -- wrong
+      season (cicadas are a summer chorus), wrong temperature (they go
+      quiet below about 60 degrees), wrong feel for a high-plateau
+      desert night (wind, a distant coyote, honest silence). Ambience
+      beds should key on the same season/temperature/region state the
+      weather system already tracks: insect layers gated by season AND
+      warmth, regional voices where they belong (cicadas in a Georgia
+      summer, absolutely; Holbrook in March, never). And the gate swings
+      both ways (owner, same night): a per-season palette, not just
+      evictions -- spring peepers near Midwest water at dusk, the full
+      summer chorus in the South, fall geese overhead, and winter's
+      snow-muffled hush. A rest stop should sound like a date on a
+      calendar somewhere real. Audit the existing loops against this
+      rule; the owner's NAS library sources both the evictions'
+      replacements and the new seasonal beds.
+- [ ] **Cab and rig sonification pass (owner 2026-07-15).** The state the
+      truck is in should be hearable before it is spoken. First candidates:
+      a chain-clatter loop whenever chains are mounted, pitched and paced
+      with speed -- on snow it is texture, on bare pavement it is the
+      warning that saves the set (the physics snaps a cross chain after
+      about two dry miles at highway speed; today the snap is the first
+      thing you hear); a wear-based brake squeak (worn pads chirp at every
+      stop -- the real wear-indicator sound, distinct from the existing
+      too-hot squeal); the latch catch click (shipped 2026-07-15 with a
+      ui/tick placeholder -- swap for a proper cab sound in this pass).
+      Also: a true shift sound (driveline clunk + air/turbo breath --
+      the click is UI, not a truck), auditioned only AFTER the engine
+      voices revs honestly across shifts (the low-gear bullet below).
+      Sourcing ladder (owner 2026-07-16): NAS library first, then
+      freesound CC0/CC-BY, then ElevenLabs generation, then field
+      recording (a community call for truck recordings is an option),
+      then CC-licensed YouTube only, with attribution -- never ordinary
+      YouTube rips; CREDITS.md tracks provenance for every asset.
+- [ ] **Engine and shift audio tells the truth at low speed --
+      DIAGNOSED 2026-07-16 (Fable, overnight).** The physics is honest;
+      the audio map flattens it. BASS (the default backend) voices the
+      engine as ONE idle loop whose playback frequency runs linear from
+      1.0x at 600 RPM to only 1.75x at 2200 (`engine_freq_mult`,
+      audio.py) -- but real engine pitch is PROPORTIONAL to RPM, so the
+      600-to-1000 launch pull that should rise 67 percent in pitch
+      rises 11. Progressive shifting (realistic!) upshifts the low
+      gears at 1000/1300/1400 RPM, so every launch pull lives entirely
+      inside the crushed band; each pull lasts 1-2 s, then SHIFT_TIME
+      (1.0 s, transmission.py) of torque interrupt with RPM gliding
+      down under the 0.45 audio load cap, and the gear click fires at
+      shift START with nothing at engagement. Net: "click, click,
+      click, half a second of rev" -- exactly the owner's report.
+      FIX OPTIONS, owner's ear required before shipping any: (1)
+      RECOMMENDED port the pygame backend's 4-band crossfade
+      (idle/low/mid/high loops at 620/1000/1500/2100 centers -- assets
+      already shipped) to BASS with per-band frequency slides of
+      rpm/band_center, so pitch tracks RPM proportionally everywhere
+      with at most ~30 percent stretch per loop (no chipmunk); (2)
+      quick tweak: piecewise freq map, proportional to ~1100 RPM
+      (~1.8x) then flattening to ~2.1x at redline; (3) a soft
+      engagement clunk at shift END so the rhythm reads
+      pull-interrupt-engage-pull; (4) separately decide whether
+      SHIFT_TIME 1.0 s eases to ~0.7 s -- that one is PHYSICS (torque
+      gap on grades) and needs the bench re-run, not just ears.
+- [ ] **Audible traffic -- hear the vehicle you overtake (owner idea
+      2026-07-16).** Traffic already exists as modeled vehicles with
+      lanes and speeds; give the near ones voices: continuous positional
+      emitters (engine/tire loops) panned by relative lane and faded by
+      gap, so closing on a slow truck is heard before any speech, an
+      overtake tracks past the window, and a vehicle sitting in the
+      passing lane is audible before a lane change -- the ear-level
+      groundwork that makes real overtaking decisions possible. Speech
+      stays the fallback (L and the traffic status already report
+      lanes); sounds from the NAS library. Infrastructure work on our
+      side of the fence -- independent of the steering-grammar design
+      offered to Josh.
+- [ ] Runaway truck ramps as regular highway furniture on steep descents: the
+      real ramps are now baked (96 tagged escape ramps with side and milepost
+      in `world_data/us/gameplay/ramps.jsonl`, read offline from the local
+      Geofabrik PBFs), so approach announcements and the escape move are
+      wiring work now, not a data gap -- announced on approach, takeable as
+      the escape move when the brakes are gone (the physics already runs away
+      honestly -- bench `grade-runaway` tops 149 mph and grenades the engine
+      past redline). Curated DOT gap-fill welcome later; never synthesized
+      where the real road has none (owner call 2026-07-15).
+- [ ] **Runaway ramp aftermath (owner design 2026-07-15).** An arrester
+      bed buries the rig to the axles; you do not drive out. The sequence:
+      gravel roar and grind-down, cab contents going forward, air hiss,
+      then ticking silence -- and the truck is stuck with the engine fine
+      and the brakes cooked. Mandatory roadside call for a heavy-wrecker
+      winch-out: expensive, hours lost, carrier-billed for company
+      drivers, the GOLDEN FLARE membership's flagship moment. NO citation
+      ever -- taking the ramp is the right move and must never score worse
+      than the alternative; the lesson costs money and time, not blame.
+- [ ] **Crash consequence tiers (owner design 2026-07-15).** Today every
+      collision scrubs speed, adds at most 18 percent damage, and you keep
+      rolling -- there is no catastrophic outcome. Add a severity
+      threshold: below it, today's fender-bender behavior stands; above
+      it the truck is DISABLED where it sits -- tow to the nearest city,
+      trip over, load salvaged or claimed, a heavy invoice, and a safety
+      record strike a carrier cares about. Head-ons and rollovers are the
+      tier's ceiling (truck effectively totaled, load gone). The player
+      always walks away -- "You walked away. The truck didn't." -- the
+      wallet, the clock, and the record take the damage, never the
+      driver.
+- [x] **Ramp endings announced early, and in real time -- SHIPPED
+      2026-07-15.** Both prongs, exactly as designed off the log receipt
+      (exit 17:00:13, sign blown 17:00:18): (1) the signal-on
+      announcement names the ending ("The ramp ends at a stop sign.")
+      with a mile-plus of mainline to plan on, and the U upcoming key
+      carries the same phrase -- the terminal-control decision was made
+      previewable (`_ramp_control_for`, pure function of trip seed +
+      baked OSM data) so the early call and the ramp always agree; (2)
+      `trip.controlled_ramp` pins the clock to REAL time from the gore
+      until the truck is through a light/sign terminal, instead of
+      easing compression only with speed. Free-flow ramps compress as
+      before.
+- [ ] **Signal running: dice and tickets, not a guaranteed clip (owner
+      playtest 2026-07-15).** Blowing the ramp-end red or stop sign today
+      ALWAYS clips cross traffic and never draws a citation -- backwards
+      on both counts. Make the clip a seeded traffic roll (sometimes the
+      horn and a near miss, sometimes a T-bone that belongs in the
+      catastrophic tier), and make running the light risk a citation on
+      the existing trooper/citation rails (chain-law checkpoint pattern).
+      Rides the back-road stoplights feature where the signal mechanic
+      lives.
+- [x] **Dense maxspeed and curve-geometry sweep (2026-07-15).** Every leg in
+      the country re-sampled along its real routed geometry with a
+      curvature-adaptive sampler (dense through curves, collapsed on tangents):
+      posted speed limits now step through the real canyon and mountain zones a
+      driver hears, instead of one heuristic guess -- all 1,287 legs carry a
+      profile and the anchor linter reports zero on the fresh data. The same
+      pass banked the fine data the driving model needs next: 63,724 per-curve
+      records (radius, direction, and a physics advisory speed v = sqrt(a_lat
+      R)) and 96 real runaway-truck ramps, stored as delta-encoded, sharded,
+      regenerable text under `world_data/us/geometry` and
+      `world_data/us/gameplay`. Tools: `bake_curve_geometry.py` (the sweep) and
+      `harvest_escape_ramps.py` (escape ramps read offline from the local
+      Geofabrik PBFs, since the self-hosted Overpass extract omits them).
+- [ ] Lateral traction on curves and ramps: the curve geometry now exists (the
+      2026-07-15 sweep above bakes per-curve radius, direction, and an advisory
+      speed per leg), but the 1-D truck model does not yet consume it -- so
+      cornering grip, curve-speed advisories keyed to load and ice, and
+      rollover/off-tracking stay future, now unblocked on the data side and
+      gated on surface streets for off-tracking.
+- [x] **Chain laws and the tire-type ladder.** Traction equipment is now a three-rung ladder on the per-truck condition record: all-season (today's physics), winter compound (x1.3 grip on snow, x1.5 on ice, honestly paid for with x1.5 tread wear and a 3 percent dry-grip loss -- owner-operator garage purchase at a 25 percent set premium; company tractors run carrier rubber), and chains (x1.5 snow / x2.5 ice, steel replaces the contact patch so tread wear and hydroplaning stop mattering, $750 a set, carrier-billed for company drivers). Chain-law areas sit over sustained steep grade (5 percent for a mile-plus) and activate from live weather -- snow = Level 1 (winter tires or chains), freezing rain = Level 2 (chains) -- with a flashing-sign GPS callout on approach, escalation re-announced. Chaining up is a pause-menu act while stopped: 25 minutes and 6 fatigue by day, 40 minutes and 10 fatigue by headlamp at night (the lonely-snowy-night-out-of-Denver penalty, delivered); removal 10 minutes. Chains are consumable: ~500 miles used right, ~2 miles on bare pavement at highway speed before a cross chain snaps into the fender (4 percent damage, set scrapped, spoken cue). Non-compliance in an active law speaks a warning, then a seeded checkpoint past the area midpoint writes a $500 citation (0.6 staffed chance, one roll per area -- reloads do not re-roll). Bench anchors: ice stop 880 ft stock / 613 winter / 215 chained from 30; the chained jake holds the icy 4 percent it lost unchained (2:14 slip vs 15:06).
+- [ ] Chain-up areas as physical pullouts: today chaining works anywhere stopped and the pullout is spoken flavor; a real chain-up area stop (safe, lit, maybe a helper service that installs for money) rides the stoppable-stop spine with Big Buck's.
+- [ ] Road-stop tire service sells wear repair only; swapping compound (and pricing winter rubber) stays a terminal-garage act. Revisit if field tire swaps earn their menu weight.
+- [ ] Chain controls by state personality: CO/CA tier wording shipped as the generic shape; later, region-flavored signs and the CA R1/R2/R3 phrasing on the California legs. Pure sign-wording work -- the corridors already carry curated ORS grades, and chain-law areas place today on 158 legs (I-70 Denver-Silverthorne, Siskiyou, the Grapevine).
+- [x] **Profile integrity, client half.** `profile_invariants.py` enforces the hard, version-stable invariants (ranges, counter relations, closed enums, per-truck condition bounds) as defense-in-depth behind the Ed25519 signature check on every cloud restore, with a plain spoken refusal; unknown content keys from newer builds deliberately pass. `docs/profile-invariants.md` is the maintained validation list for the server gate -- hard rules mirrored in code, plausibility heuristics (money-vs-earnings, XP-vs-miles, achievements-vs-stats, possession-implies-acquisition with the Golden Antler as the flagship) specified for the server with exact game constants. Follow-up: the append-only event ledger that upgrades server validation from plausibility to recomputation.
 - [x] Release-archive verification: after a player report of a Linux snapshot with no game file (2026-07-14 sweep found all published archives intact), `tools/build_release.py` now re-opens each finished archive and proves the executable (with its permission bits) and key payload survived archiving, and `build.yml` fails instead of publishing a release with a missing platform download.
 
 Four threads: make the drive *between* the exits real, give every maneuver
@@ -62,6 +343,12 @@ city service drives below.)
       (heuristic elsewhere): a red/green cycle at the stop bar, grace
       distance, cross-traffic clips for running it -- now with dedicated
       red and green light earcons alongside the spoken callouts.
+      Reworked 2026-07-14 after a log-proven playtest crash: lights now
+      run a real green-yellow-red cycle (15 s green crossable from a
+      stop, 4 s yellow, entering on yellow legal like the law), and
+      every phase change on the approach is spoken -- the old one-flip
+      announce cap could say green, silently flip red, and punish the
+      driver for obeying the last thing they heard.
 - [x] **Congestion grounded in FHWA HPMS volume.** Real AADT baked per leg
       drives clock-gated jams on a commuter curve: metro stretches jam at
       rush hour and flow free at midnight; entering a live jam injects slow
@@ -282,7 +569,8 @@ section below and the Unreleased changelog; the release-line view:
       markets are covered by KWMU and KUHF instead); the Rio Grande Valley
       (Brownsville, McAllen, Laredo), Savannah (GPB not listed on Radio
       Browser), and Amarillo still have no receivable real station -- try
-      again in a later sweep.
+      again in a later sweep. WABE Atlanta joined the dark list
+      2026-07-14 (every known mount refused; supported:false with notes).
 - [x] **Full music rotations for the fictional stations.** A 52-track
       Suno-composed batch (via the Zero CLI) grows the format pools to
       radio-scale: country 15 songs, classic rock 17 (including a Saltwake
@@ -296,10 +584,106 @@ section below and the Unreleased changelog; the release-line view:
       bed; Freight Yard Moon, Midnight Siding, and Low Beams behind the
       night piano theme. Menus stay instrumental (no vocals or host
       breaks) so music never competes with menu speech.
+- [x] **Map-refresh utility shipped (v1, report-only) --
+      tools/refresh_map_data.py, 2026-07-14.** The owner-run drift
+      checker: --radio plays every supported real stream through the
+      game's BASS stack and reports the dead; --limits-lint runs the
+      anchor-repair judgment rules as a linter (fresh bakes must report
+      zero); --stops re-queries OSM per leg (honors OVERPASS_URL) and
+      diffs live named truck POIs against baked stops, with a direct
+      existence check around each baked stop's own corridor point so a
+      sampled miss never reads as a closure. Never writes; exit code 1
+      when anything needs attention, so a scheduled run can alert.
+      Curation stays with the recipes. Future: fold in landmark and
+      interchange drift.
+- [ ] **Stream URLs rot fast -- fold a dial health check into the
+      map-refresh tool.** One day after the 57-station sweep, seven
+      streams were already dead (KJZZ, KCRW, KUNM, KUTX, KERA, KCUR,
+      WBUR -- all repointed 2026-07-14 after a full BASS live sweep of
+      the catalog). The owner-run map-refresh tool should re-test every
+      real stream the same way and report movers, so the dial stays
+      honest between releases.
+- [x] **The desert Southwest sweep landed: six stations, ten total.** KTNN
+      660 AM (Window Rock, the Voice of the Navajo Nation, 175-mile AM
+      groundwave contour -- widest in the catalog, honestly), KNAU
+      (Flagstaff), KXCI (Tucson), KRWG (Las Cruces), KANW (Albuquerque
+      beside KUNM, like the real dial), and KAWC (Yuma), each BASS
+      smoke-verified 2026-07-14. StreamTheWorld stations use the stable
+      livestream-redirect URLs -- the numbered edge hosts Radio Browser
+      caches rotate and die (that is what killed the first KNAU/KRWG/KANW
+      attempts). Still dark: Santa Fe and KUAZ Tucson (skipped, KXCI
+      covers the market); KTNN pairs naturally with the future
+      tribal-nation crossing callouts.
 
 ### World and narration
 
-- [x] **Highway-spider map expansion.** Corridor-inventory tooling plus
+- [x] **Interstate speed limits polluted by city-street samples at leg
+      endpoints -- FIXED 2026-07-14 (found live by the owner on I-10).**
+      The maxspeed bake's shield-match guard cannot fire when the
+      interstate is outside the 400 m sample box at the mile-0/end city
+      anchors, so a city arterial's 25-40 was baked onto the corridor
+      and the step function held it for miles (I-10 out of Buckeye
+      enforced 30 for ten miles; worst case 25 mph for 73 miles on
+      I-84). Repaired offline, no Overpass needed:
+      tools/repair_interstate_anchor_limits.py dropped every leading and
+      trailing sub-45 sample on interstate legs (430 legs repaired, the
+      step function heals back to mile 0), and the bake tool now skips
+      shield-less sub-45 readings on interstate corridors so a re-sweep
+      cannot reintroduce them. No re-bake needed unless we want denser
+      urban 55/65 sampling later. Extended same day to surface highways:
+      227 more legs dropped a city-street mile-0 anchor sample owning a
+      fast corridor (US-60 out of Phoenix: 25 mph baked for 22 miles of
+      the Superstition Freeway), honest small-town limits kept, and
+      speeding enforcement gained a braking-grace window after any
+      posted-limit drop.
+- [x] **Cruise control now cancels on the player's own service brake
+      (owner report, FIXED 2026-07-14).** Any service or emergency brake
+      input drops cruise immediately and announces "Cruise off" -- the
+      first tap of the pedal, like a real truck.
+- [x] **Comma repeats the last spoken line, anywhere (owner ask,
+      2026-07-14).** One global key re-speaks whatever said last -- menu
+      item, readout, or road event -- complementing the driving-only A
+      key. Text entry keeps its commas.
+- [x] **G speaks the grade and the force verdict (owner ask,
+      2026-07-14).** Slope, how far it runs, and whether the truck is
+      holding it -- straight from the sim's net-force balance, including
+      jake-holding and jake-slipping states.
+- [x] **Overspeed dash warning (forum ask via JaceK's I-70 story, owner
+      go 2026-07-14).** A few mph over the posted limit arms a spoken
+      heads-up and a soft repeating dash chime -- carrier-style, exactly
+      what a real company truck does -- quiet while actively braking
+      down, disarmed by compliance, Gameplay settings toggle (default
+      on). Chime is a deterministic procedurally-synthesized bell strike
+      (vehicle/overspeed_chime.ogg, recipe in CREDITS.md). Answers "no
+      clue I was speeding until I hit space."
+- [ ] **Physics bench: add climb scenarios.** The bench covers descents
+      and stops but nothing uphill; the 2026-07-14 climb audit (0-60
+      loaded 66-69 s, 6 percent balance 29.8 mph, 3 percent balance
+      44.9 -- all inside real envelopes) lived in a scratch script and
+      deserves scenario status so regressions get caught.
+- [ ] **Phoenix-metro interchange density is thin.** The interchange
+      bake took (12 baked on the 40-mile Buckeye-Phoenix leg, speaking
+      under the exits verbosity setting) but real I-10 there has 25-plus
+      exits; metro legs deserve a densifying pass when the interchange
+      bake next runs.
+- [ ] **Overlong city-service routes from a bad geometry bake (proven
+      in-engine 2026-07-14).** local_geometry.json carries 91 city-service
+      chains over 10 miles (max 35.0), all single-segment with
+      turn_level=false -- and the local_approaches fallback bakes the same
+      broken distance, so the game really builds a 35-mile route at a
+      blanket 25 mph to, e.g., the Tyler TX freight market, the Beckley WV
+      freight market, and the Mankato MN garage (~80 game-minutes to run
+      an errand). Yard/facility approaches are healthy (max 4.0 mi). Root
+      cause is the dev-side build_local_geometry.py POI match picking a
+      distant candidate and collapsing the failed turn-level route into
+      one giant segment. ROOT-CAUSED 2026-07-14: two radii never
+      reconciled -- build_city_services matches POIs within 28 crow-flies
+      miles while build_local_geometry only routes within 18, so every
+      sourced service in the 18-28 band is guaranteed to bake its full
+      distance as one 25-mph fallback segment. Full execution spec for
+      the re-bake (offline, local PBFs, no Overpass needed) lives in
+      docs/rebake-briefs-2026-07-14.md alongside the dense maxspeed
+      sweep brief; Opus executes both in a worktree.
       dozens of spider batches grow the map to 375 cities and 626 enriched
       legs -- real corridors across the Great Basin, the Hi-Line, the
       Dakotas, Appalachia, West Texas, and more, each with real roads,
@@ -319,15 +703,59 @@ section below and the Unreleased changelog; the release-line view:
 - [x] **Real US time zones.** The compressed career clock now crosses real
       zone boundaries with spoken zone changes; deadlines read in the
       destination's local time.
-- [ ] **Service-stop buffs and the Big Buck's catalog.** The amenities and
-      `big_bucks` modules ship content and tiers; the gameplay layer --
-      purchase menus and buff effects on rest quality, fatigue, or morale --
-      is not wired yet.
-- [ ] **Overlay re-sweep on the slug world.** The local-approach /
-      city-service / turn-level geometry sweeps predate the slug migration
-      and the newest cities; the runtime canonicalizes old ids and new
-      targets simply fall back until the five-builder overlay pipeline is
-      updated for slug keys and re-run over the 375-city map.
+- [x] **Service-stop buffs shipped.** Truck stops sell meals, showers, and
+      rig care as spoken, clocked buffs: food eases fatigue and slows its
+      build, lube bays and tire rotations slow engine and tread wear for
+      the trip, brands behave by their real reputations (free shower with
+      fuel at Pilot/Flying J, the Iron Skillet at Petro, tire bays at
+      Love's/Speedco, road brake jobs at TA/Petro, Big Buck's fixes
+      nothing), one buff per group with replacement, and none of it ever
+      adds legal driving hours. The Big Buck's purchase-catalog gameplay
+      still rides the drive-and-enter stop above.
+- [x] **The 1.9 alpha test book.** `docs/alpha-test-book.md`: an
+      exhaustive spoken-first delta chapter (everything the alpha changes
+      versus the nightly line, system by system) plus setup / do / listen
+      for / pass checklists for every non-physics 1.9 system -- wear and
+      per-truck condition, truck-stop buffs and brand repairs, lanes and
+      exits and ramp lights, congestion, surface streets and city
+      services, enforcement and the logbook, pressure modes, the career
+      arc, radio, world narration switches, saves and the integrity gate.
+      The winter/physics suite stays in
+      `docs/physics-playtest-checklists.md` as the companion volume.
+- [x] **Scenario playtest levers.** Three environment variables put a
+      parked career in position for a scenario without setup driving:
+      `FREIGHT_FATE_FORCE_CITY` relocates on career load,
+      `FREIGHT_FATE_FORCE_CLOCK` rolls the clock forward to a local hour
+      (logged as off duty; a ten-plus-hour wait rests the driver), and
+      `FREIGHT_FATE_FORCE_DEST` guarantees the dispatch board offers a
+      load to a destination and puts it first in assigned dispatch. All
+      spoken plainly, no miles or money moved, refused mid-load;
+      documented in the test book Appendix A. The shared-profile event
+      ledger must record forced moves when it lands (Josh's server side).
+      SANDBOX BY DEFAULT (owner design 2026-07-15, after a lever run
+      cost a real career $500): a lever session plays entirely in memory
+      -- `save_profile` no-ops for the run, spoken as "Playtest sandbox:
+      nothing this session is saved" -- and the career file resumes
+      untouched; `FREIGHT_FATE_FORCE_PERSIST=1` opts one run back into
+      permanence. Follow-up (shared with the driving school): gate
+      online presence and the achievement journal during sandbox
+      sessions so a sandboxed run never publishes real-looking events.
+- [x] **Overlay re-sweep on the slug world.** The local-approach and
+      turn-level geometry builders emit canonical world-key ids, and the
+      city-service sweep now covers all 623 cities (1,869 services, 1,076
+      turn-level routes) instead of the old 249-city batch. A 10-road-mile
+      match cap keeps each city's freight market, garage, and truck dealer a
+      real in-town errand rather than a ten-to-thirty-five-mile haul to a
+      look-alike business in the next town. Fresh per-state OSM extracts are
+      pulled by `tools/fetch_state_extracts.py`; the whole periodic re-bake
+      is documented in `docs/refresh-city-service-data.md`.
+
+- [ ] **Periodic macOS boot test (owner ask 2026-07-15).** The speech
+      layer already plans for it (AVSpeech is the baked-in macOS event
+      voice hint, Speech Dispatcher for Linux), but nobody has proven
+      pygame + BASS + Prism boot on a Mac. Owner has a Mac Mini; run the
+      smoke suite and a spoken menu walk there occasionally so the
+      cross-platform seams stay honest.
 - [ ] **Earcon audition pass.** The five 1.9 steering sounds (turn
       left/right/ahead, ramp light red/green) shipped verified by
       measurement, not by ear; regenerate any that sound off via
@@ -586,16 +1014,20 @@ Net-new realism candidates, roughly by area:
   physics (storms/wind cost top speed and fuel), driving well over the
   conditions-safe speed on a slick road risks a traction-loss incident
   (`_check_conditions_speed`), and low visibility shortens hazard reaction time
-  (`_visibility_reaction_factor`). Remaining follow-ups: black-ice risk on clear
-  cold mornings after wet roads (currently ice rides on active snow); steady
+  (`_visibility_reaction_factor`). Freezing rain is now its own condition (see
+  the 1.9 traction deep-dive above), so glaze ice no longer rides on active
+  snow. Remaining follow-ups: black-ice risk on clear cold mornings after wet
+  roads (refreeze after the rain has stopped is still not modeled); steady
   crosswind nudging the trailer; and seasonal daylight length.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
   acceleration, grade lugging, fuel burn, and now braking: the foundation
   brakes have a fixed force ceiling sized for the rated gross, so loads over
   the rated weight are brake-capacity limited -- they stop longer and heat
   the brakes faster -- while loads at or below the rated gross are unchanged.
-  Remaining: tire and brake wear over a truck's life, and finer grade-based
-  fuel burn.
+  Tire, brake, and engine wear over a truck's life shipped with the 1.9 rig
+  wear system (wear accrues from how the truck is driven and feeds grip,
+  brake force, fade onset, power, and fuel burn). Remaining: finer
+  grade-based fuel burn.
 - **Traffic and corridors.** Three slices shipped: rush-hour departure windows
   (morning and afternoon commute) raise modeled traffic density, especially on
   checkpoint/metro corridors, and can slow lead traffic packs with
@@ -607,11 +1039,6 @@ Net-new realism candidates, roughly by area:
   surrounding-vehicle behavior and multi-lane traffic choices.
 - **Hours of service.** Split-sleeper provision and the 60/70-hour cycle
   with 34-hour restart (the HOS model intentionally skips these today).
-- [x] **National hub network fill (407 → 623 cities).** Audit-driven map
-  expansion on the 1.8.x nightly line (community PR #68): every >10,000-pop
-  independent city without a bigger neighbor within ~30 miles was built with
-  the full enrichment recipe -- 1,287 legs, ~139,000 network miles, real toll
-  events on the major turnpikes, and posted speed limits on every leg.
 - **Local delivery realism.** The checked-in map-data foundation now includes
   source-backed city-service POIs for every supported city, nearest-public-road
   local approach context for 2,395 of 2,401 service/facility targets, turn-level
@@ -629,6 +1056,11 @@ Net-new realism candidates, roughly by area:
 - **Business realism.** The grounded 30-level company-driver to independent
   owner-operator arc is shipped; true-authority depth, trailer polish,
   operating-cost tuning, and market pricing are tracked under Business.
+- [x] **National hub network fill (407 → 623 cities).** Audit-driven map
+  expansion on the 1.8.x nightly line (community PR #68): every >10,000-pop
+  independent city without a bigger neighbor within ~30 miles was built with
+  the full enrichment recipe -- 1,287 legs, ~139,000 network miles, real toll
+  events on the major turnpikes, and posted speed limits on every leg.
 
 ## Local city service drives (built for 1.8, releases with 1.9)
 
@@ -978,6 +1410,77 @@ Deliver -> Earn and level up -> Repeat
       load cancellation shipped; future repeat-offender dispatch hooks remain)
 - [ ] Special event jobs (oversize loads, urgent medical freight)
 - [ ] Trailer types with handling differences
+- [ ] **In-game driving school (owner-approved 2026-07-14; skeleton
+      SHIPPED 2026-07-15).** Landed: the Driving school terminal item, the
+      sandbox architecture (lessons run the real driving engine on a
+      throwaway profile copy -- wear, money, and hours die with the
+      lesson; one save_profile guard keeps it off disk; every exit path
+      restores the career), the 25-mile flat practice road, and Lesson 1
+      "Rolling basics" (engine, air, parking brake, roll to thirty,
+      smooth stop) as an instructor riding the first-run tutorial's
+      hooks. Remaining below. A CDL-style
+      spoken tutorial mode: guided lessons for air brakes, shifting and the
+      jake, exits and lanes, chain-up, and hours of service, each teaching
+      by doing in a consequence-free practice drive. Solves cold-start
+      onboarding for alpha and new players -- today the game teaches via
+      How to play, F1 key help, and the test book; every system learned by
+      book there is a candidate lesson here. Curriculum effectively drafted
+      by the 2026-07-14 learn-by-test-book session (test book Chapter 4
+      leads). Pairs naturally with the lease-to-start onramp: school first,
+      then the working career. Owner-expanded 2026-07-15: lessons run on a
+      simulated practice road (spoken instruction, no career consequences)
+      with weather sim and, when the curve tier lands, curve lessons;
+      school is enterable from anywhere, any time; buying a truck with new
+      equipment (jake stages, assists, a manual box) offers a
+      return-to-school refresher on the new bits. Build it as a complete
+      presentation for Josh -- done, tested, preset-integrated -- and he
+      decides if it ships.
+- [ ] **Assists as equipment and skill at the realism tier (owner idea
+      2026-07-15, the transmission pattern applied).** At the realistic
+      preset, driving assists become what they are in a real cab: truck
+      equipment by model year and spec (a new tractor carries AEB and
+      lane centering; a lease-starter rig carries nothing) plus trained
+      skill from driving school. The Settings presets stay exactly as
+      built -- the permanent, free accessibility override that always
+      wins, same as the Transmission setting over per-truck gearboxes
+      (owner-approved precedent 2026-07-13). Realism players feel the
+      equipment; accessibility players keep every accommodation; Josh's
+      framework becomes the front door to both layers.
+- [x] **Latching controls -- SHIPPED 2026-07-15.** Double-tap-and-hold
+      on the pedal keys (tap, press again, hold half a second) latches
+      the accelerator or brake hands-free, exactly the owner's gesture
+      design: a catch click (ui/tick placeholder until the NAS sound
+      pass, distinct from the gear click) plus "Throttle latched.",
+      release by a single press of the same key or instantly by the
+      opposite pedal, all spoken both ways. Safety semantics as
+      designed: hazards (including AEB), the emergency brake, and the
+      overspeed alarm outrank a latched accelerator and drop it
+      audibly; microsleeps deliberately read the RAW keys, so a latched
+      brake never answers a nod-off for you; a latched brake reads as
+      held everywhere else (reverse gesture, cruise cancel). Lives in
+      Settings, Driving assistance, as "Latching pedals", on by
+      default, outside the presets like the speed keeper. Follow-ups:
+      swap the catch click for a proper cab sound from the NAS library,
+      and the driving-school lesson that teaches latch + jake + brake
+      heat together (school-curriculum bullet).
+- [ ] **Endorsements earned by coursework, not just cash (owner idea
+      2026-07-15).** Today an endorsement is a level threshold or a paid
+      course with no learning in it; both should route through the
+      driving school as a spoken written-test module -- study material
+      read aloud, then a short question set to pass. Hazmat is the
+      flagship and does not exist yet: placarding, tunnel restrictions
+      (the map already bakes them), segregation rules, plus the real
+      TSA-style background wait modeled as game days before it
+      activates. Company drivers get courses on the carrier account;
+      owner-operators pay their own way.
+- [ ] **Endorsement grants must be heard, not missed.** The level-up
+      announcement is spoken once inside the delivery-summary chatter
+      and is gone; the owner declined a reefer load he was already
+      cleared for. The Career stats endorsements line (shipped
+      2026-07-15) is the reviewable record; still worth doing: repeat
+      the grant on the next terminal entry, and let unlocked
+      endorsement jobs on the board name the clearance ("you hold the
+      refrigerated endorsement") the first few times.
 
 ### World
 - [x] More cities and regional highways (1.4.0)

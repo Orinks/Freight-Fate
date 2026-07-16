@@ -9,7 +9,6 @@ from .driving_core import *
 from .driving_rest_states import ShoulderSleepConfirmationState
 
 DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH = 55.0
-TIRE_WEAR_PER_MILE = 0.003
 ROAD_GRIME_PER_MILE = 0.004
 
 # Plain "deliver into this city" badges (titles claim nothing extra). Mostly
@@ -501,6 +500,31 @@ class PauseMenuState(MenuState):
                 help="Change units, transmission, volumes, weather, "
                 "voices, update channel, and trip pacing.",
             ),
+        ]
+        if self.driving.truck.chains_on:
+            items.append(
+                MenuItem(
+                    f"Remove snow chains: about {CHAIN_REMOVE_MIN:.0f} minutes",
+                    self._remove_chains,
+                    help="Pull the chains off the drives and stow them. Do it "
+                    "as soon as the road is bare again; chains grind apart "
+                    "fast on pavement.",
+                )
+            )
+        elif self.ctx.profile.chains_owned and self.ctx.profile.chain_wear_pct < 100:
+            items.append(
+                MenuItem(
+                    self._install_chains_label,
+                    self._install_chains,
+                    help="Stop, kneel on the shoulder, and hang the chain set "
+                    "on the drives. Chains bite snow and glare ice like "
+                    "nothing else. Keep it near chain speed, about thirty "
+                    "miles per hour, and pull them the moment the road is "
+                    "bare. Installing in the dark takes longer and takes "
+                    "more out of you.",
+                )
+            )
+        items += [
             MenuItem(
                 "Abandon job",
                 self._abandon,
@@ -574,6 +598,74 @@ class PauseMenuState(MenuState):
             f"{FIELD_REPAIR_DAMAGE_PCT:.0f} percent damage {billing}. "
             f"The repair took an hour and a half: it is "
             f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
+        )
+
+    def _chain_night(self) -> bool:
+        return is_night(self.driving.trip.local_hour)
+
+    def _install_chains_label(self) -> str:
+        minutes = CHAIN_INSTALL_MIN * (CHAIN_INSTALL_NIGHT_MULT if self._chain_night() else 1.0)
+        when = " in the dark" if self._chain_night() else ""
+        return f"Install snow chains{when}: about {minutes:.0f} minutes"
+
+    def _install_chains(self) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        if d.truck.speed_mph > 3:
+            self.ctx.say("Come to a complete stop first.")
+            return
+        night = self._chain_night()
+        minutes = CHAIN_INSTALL_MIN * (CHAIN_INSTALL_NIGHT_MULT if night else 1.0)
+        fatigue = CHAIN_INSTALL_NIGHT_FATIGUE if night else CHAIN_INSTALL_FATIGUE
+        _advance_rest_clock(d, minutes, "on_duty_not_driving", "chain up")
+        d.hos.on_duty(minutes)
+        p.fatigue = min(100.0, p.fatigue + fatigue)
+        d.truck.chains_on = True
+        d._chains_fast_active = False
+        self.ctx.audio.play("ui/notify")
+        self.refresh()
+        effort = (
+            "Kneeling on a dark shoulder by headlamp, it takes everything "
+            "your gloves have got. "
+            if night
+            else ""
+        )
+        bare = (
+            " The road here is bare; they will grind apart fast until you "
+            "reach the snow."
+            if d.truck.surface not in ("snow", "ice")
+            else ""
+        )
+        self.ctx.say(
+            f"Chains hung on the drives in {minutes:.0f} minutes. {effort}"
+            f"Keep it near {CHAIN_SAFE_MPH:.0f} miles per hour, and pull them "
+            f"when the road turns bare.{bare} It is "
+            f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
+        )
+
+    def _remove_chains(self) -> None:
+        d = self.driving
+        if d.truck.speed_mph > 3:
+            self.ctx.say("Come to a complete stop first.")
+            return
+        _advance_rest_clock(d, CHAIN_REMOVE_MIN, "on_duty_not_driving", "remove chains")
+        d.hos.on_duty(CHAIN_REMOVE_MIN)
+        p = self.ctx.profile
+        p.fatigue = min(100.0, p.fatigue + CHAIN_REMOVE_FATIGUE)
+        d.truck.chains_on = False
+        self.ctx.audio.play("ui/notify")
+        self.refresh()
+        wear = d.truck.chain_wear_pct
+        state_word = (
+            "They are about done; pick up a fresh set at a garage."
+            if wear >= 75
+            else f"The set is {wear:.0f} percent worn."
+            if wear >= 1
+            else "The set is still fresh."
+        )
+        self.ctx.say(
+            f"Chains off and stowed in {CHAIN_REMOVE_MIN:.0f} minutes. "
+            f"{state_word} It is {clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
         )
 
     def _emergency_shoulder_sleep(self) -> None:
@@ -698,8 +790,7 @@ class AbandonJobConfirmationState(MenuState):
         p = self.ctx.profile
         p.money -= 500.0
         p.career.reputation = max(0.0, p.career.reputation - 5.0)
-        p.truck_fuel_gal = self.driving.truck.fuel_gal
-        p.truck_damage_pct = self.driving.truck.damage_pct
+        p.store_truck_condition(self.driving.truck)
         # the hours spent on the failed run still happened: keep the world
         # clock consistent with the HOS and fatigue already accrued
         p.game_hours += self.driving.trip.game_minutes / 60.0
@@ -904,8 +995,7 @@ class ArrivalState(MenuState):
                 f"Driver-responsibility charges: speeding fines cost you "
                 f"{driver_charges:,.0f} dollars."
             )
-        p.truck_fuel_gal = d.truck.fuel_gal
-        p.truck_damage_pct = d.truck.damage_pct
+        p.store_truck_condition(d.truck)
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None
@@ -1006,11 +1096,14 @@ class ArrivalState(MenuState):
         on_time = hours <= job.deadline_game_h
         p.money += net_pay
         p.current_city = job.destination
-        p.truck_fuel_gal = d.truck.fuel_gal
-        p.truck_damage_pct = d.truck.damage_pct
-        tire_wear_added = min(100.0, job.distance_mi * TIRE_WEAR_PER_MILE)
+        from ..models.jobs import lane_key
+
+        p.remember_lane(lane_key(self.ctx.world, job))
+        # Tire, brake, and engine wear now come off the truck itself -- the
+        # physics accrued them mile by mile during the run. Grime stays a
+        # simple per-mile film; it has no physics to earn it.
+        p.store_truck_condition(d.truck)
         road_grime_added = min(100.0, job.distance_mi * ROAD_GRIME_PER_MILE)
-        p.tire_wear_pct = min(100.0, p.tire_wear_pct + tire_wear_added)
         p.road_grime_pct = min(100.0, p.road_grime_pct + road_grime_added)
         previous_level = p.career.level
         announcements = p.career.record_delivery(
@@ -1091,11 +1184,22 @@ class ArrivalState(MenuState):
                 f"The cargo run added {trip_damage:.0f} percent truck damage. "
                 "Visit the garage when you can."
             )
-        if tire_wear_added > 0.0 or road_grime_added > 0.0:
-            self.summary_parts.append(
-                f"The run added {tire_wear_added:.1f} percent tire wear and "
-                f"{road_grime_added:.1f} percent road grime."
+        wear_parts = []
+        for added, meter in (
+            (max(0.0, d.truck.tire_wear_pct - d.start_tire_wear), "tire wear"),
+            (max(0.0, d.truck.brake_wear_pct - d.start_brake_wear), "brake wear"),
+            (max(0.0, d.truck.engine_wear_pct - d.start_engine_wear), "engine wear"),
+            (road_grime_added, "road grime"),
+        ):
+            if added >= 0.1:
+                wear_parts.append(f"{added:.1f} percent {meter}")
+        if wear_parts:
+            joined = (
+                ", ".join(wear_parts[:-1]) + f", and {wear_parts[-1]}"
+                if len(wear_parts) > 1
+                else wear_parts[0]
             )
+            self.summary_parts.append(f"The run added {joined}.")
         self.summary_parts.extend(announcements)
         self._award_arrival_achievements(
             on_time=on_time,

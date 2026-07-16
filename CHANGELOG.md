@@ -21,6 +21,74 @@
   quiet new night beds joined the after-dark rotation, and the Night Line
   now slips in two late-night vocal ballads between its host breaks.
 
+- **Driving assistance reduces workload without driving for you.** One preset coordinates emergency braking, lane and descent support, stop-and-go traffic, curve and route-transition speed help, exit slowing, and stopping at the selected destination arrival point. You still steer, confirm routes and exits, leave long stops, and handle every yard and dock task.
+
+- **Choose how much driving assistance the truck provides.** A new Driving assistance settings category offers Realistic, Balanced, All assists, and Custom presets for emergency braking, lane support, stop-and-go behavior, and interactive descent speed control. Adaptive cruise keeps its existing traffic, posted-limit, and weather behavior. Presets never change trip pacing, hours rules, transmission, weather, or hazard frequency. These assists lay the groundwork for the version 1.9 driving changes.
+
+- **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
+
+- **Dispatch stops handing you the same run over and over.** Assigned
+  dispatch now remembers your last few delivered routes and leads with a
+  load to somewhere you have not just been, whenever the board has one.
+  Repeats can still happen when the board is small, but the days of
+  bouncing between the same two cities forever are over.
+
+- **The player manual caught up with the alpha.** New sections cover
+  mountain driving (the engine brake, gearing down, brake heat and
+  fade) and winter driving (winter tires, snow chains, chain laws),
+  and the manual now documents the driving school, truck-stop meals
+  and showers, lane changes and hazard dodges, wear meters, roadside
+  chatter switches, the overspeed warning setting, and every new key.
+
+- **Ramp endings are announced early, and play out in real time.** When
+  you signal for an exit, the announcement now says how the ramp ends --
+  "The ramp ends at a stop sign" -- while there is still a mile of
+  highway to plan your braking on, and the U upcoming readout carries
+  the same warning. And from the moment you are on a ramp that ends in
+  a light or a sign, the game clock drops to real time until you are
+  through the intersection: no more hearing about a stop sign two
+  seconds before blowing past it because the clock was compressed.
+
+- **Latch a pedal and give your hands a rest.** Tap the accelerator or
+  brake, then press again and hold for half a second: a click and a
+  spoken confirmation latch the pedal so it stays applied without
+  holding the key, like the old hand-throttle knob in a real cab. Press
+  the same key once to take the pedal back, or touch the opposite pedal
+  and it lets go instantly. Emergency braking, hazards, and the
+  overspeed alarm always outrank a latched pedal and release it with a
+  spoken note. Made for long pulls, steady downhill braking, and hands
+  that tire of holding keys; turn it off any time under Settings,
+  Driving assistance, Latching pedals.
+
+- **The repeat key now walks back through recent speech.** Comma still
+  re-reads the last spoken line anywhere in the game, and pressing it
+  again within a few seconds now steps back through the last twenty
+  lines, one per press, from menus and driving events alike. Each older
+  line starts with how far back it is, like "2 back", and the moment
+  anything new speaks, the key returns to the newest line. A missed
+  warning buried under two announcements is never gone anymore.
+
+- **One key now answers "how fast should I be going?"** Press D while
+  driving to hear a single safe-speed number for right now, sitting right
+  next to the S posted-limit key. Slick weather and an upcoming exit ramp
+  are already baked into the number, never into the sentence, so the
+  answer is short enough to catch at speed and free to repeat.
+
+- **Career stats now list your endorsements.** The endorsements you hold,
+  earned by rank or paid for as a course, used to be announced only once,
+  the moment you gained them. The Career stats screen now has an
+  Endorsements line you can review any time, so you always know whether
+  that refrigerated or heavy-machinery load on the board is yours to take.
+
+- **The driving school opens its doors.** A new Driving school item at the
+  terminal offers spoken lessons on a flat, empty practice road where
+  nothing counts: no money spent, no wear, no fuel burned, no hours used.
+  An instructor walks you through each step and waits for you to do it.
+  The first lesson covers rolling basics, from starting the engine and
+  releasing the parking brake to a smooth stop from thirty. More lessons
+  will follow; use it to learn the controls or just to practice without
+  risking your career.
+
 - **Real streets reach the whole map now.** The street and facility data
   sweep re-ran over all six hundred twenty-three cities: sixty percent of
   home-terminal yards now start every load with spoken turn-by-turn
@@ -58,9 +126,17 @@
   small Arizona town with one very famous corner. Each still nods to a
   country or trucking song.
 
-- **Driving assistance reduces workload without driving for you.** One preset coordinates emergency braking, lane and descent support, stop-and-go traffic, curve and route-transition speed help, exit slowing, and stopping at the selected destination arrival point. You still steer, confirm routes and exits, leave long stops, and handle every yard and dock task.
-
 ### Changed
+
+- **Speed limits follow the real road now, all the way across the map.**
+  Every route in the country carries its actual posted limits, read from
+  real map data instead of one smooth estimate. You will hear the honest
+  zones a mountain highway steps through -- the slow canyon stretches, the
+  drop before a long descent, the climb back up to highway speed -- where the
+  truck used to hold a single guess for miles. Adaptive cruise, the speed
+  keeper, and the spoken limit changes all follow these real limits. The same
+  sweep quietly recorded every curve and every real runaway-truck ramp along
+  the way, groundwork for the steering and descent features still to come.
 
 - **The career is a months-long arc now, and every level up hands you
   something real.** Experience pays out more honestly -- every settled load
@@ -72,6 +148,27 @@
   dispatch board at 6, 10, and 12, specialty freight favored on your board
   at 11, premium long-haul lanes at 12, the full owner-operator checklist
   read out from level 14, and the fleet tractor upgrades above.
+
+- **The engine brake now works like a real three-stage jake.** It slows the
+  truck through the gears, so it pulls hardest in a low gear with the engine
+  turning fast, and does very little in top gear -- set your gear and speed
+  before the hill starts. An automatic transmission drops a gear to put the
+  jake to work, and shifts up to protect the engine if the hill spins it too
+  fast, leaving you a weaker jake in a taller gear. Heavy enough loads can
+  outrun the jake entirely, so snub the brakes early or crawl.
+
+- **Brakes now heat and cool like real drums.** Dragging the service brakes
+  down a long grade overheats them until they fade badly; short firm
+  applications with the jake carrying the load keep them cool. Going faster
+  no longer cools hot brakes, and letting a downhill rev the engine past its
+  limit now wears the engine -- running at governed speed is safe.
+
+- **Each truck now keeps its own condition.** Tire, brake, and engine wear,
+  damage, and fuel stay with the truck they happened to, so swapping tractors
+  at the dealer no longer carries your wear -- or your empty tank -- onto the
+  next rig, and the garage fixes the truck you actually drove in. A new truck
+  off the lot rolls out fresh with a full tank. Careers from earlier versions
+  load unchanged: your current wear settles onto every truck you own.
 
 - **Career 1.9 playtests now follow more of a driver's real journey.** Reusable transcript checks cover career stages, driving modes, keyboard-operated controls, speech ordering, and deterministic road events so regressions are caught before they reach players. A new pacing model also verifies the months-long level curve stays honest as the balance changes.
 
@@ -86,6 +183,27 @@
 
 ### Added
 
+- **The dash now warns you about your own speed, like a real company
+  truck.** Run a few miles per hour over the posted limit and a soft
+  chime sounds with a spoken heads-up -- "Watch your speed. The limit is
+  65" -- then the chime repeats until you settle back under, politely at
+  a few over and escalating to twice a second when a descent is truly
+  running away. It stays quiet while you are actively braking down. The
+  new Gameplay setting has three positions: on, urgent only -- which
+  keeps just the runaway alarm, for drivers who speed on purpose -- and
+  off. No more finding out from the fine.
+
+- **G speaks the grade under the wheels and what it is doing to the
+  truck.** Press G while driving to hear the slope, how far it runs, and
+  the sim's own verdict: whether the hill has the load, whether the jake
+  is holding the descent, or whether speed is building and it is time to
+  set the jake -- the spoken answer to "why am I slowing down."
+
+- **Comma re-reads the last spoken line, anywhere in the game.** Missed a
+  menu item, a status readout, or a road callout under other noise? Press
+  Comma and the game says it again -- in menus, in the truck, everywhere.
+  The A key still replays the last route announcement while driving.
+
 - **The in-cab radio picks up forty-three more real stations.** With real
   streams allowed in settings, live local radio now reaches Portland, Boise,
   Spokane, Salt Lake City, Las Vegas, Reno, Minneapolis, Milwaukee, Detroit,
@@ -96,298 +214,119 @@
   Virginia. Real jazz, news, roots, and independent music fades in and out
   as you drive through each market, just like FM.
 
-- **New: real roadside landmarks as you drive.** Routes now call out the world
-  going by -- entering a national forest, crossing a named river, approaching a
-  mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real
-  map data so a long haul has a sense of place instead of silence. The callouts
-  ride the quiet background voice: they wait their turn behind navigation and
-  never talk over a safety warning. Thanks to nromey.
+- **The desert Southwest gets its real radio dial.** Six more live
+  stations light up the border-to-canyon country: KTNN out of Window
+  Rock, the Voice of the Navajo Nation, whose 50,000-watt AM signal
+  carries news and country across most of the Four Corners; Arizona
+  Public Radio from Flagstaff; Tucson's KXCI community radio; New Mexico
+  music on KANW alongside Albuquerque's KUNM; public radio from Las
+  Cruces; and community radio in Yuma on the Colorado River. Turn on
+  real public streams in Settings and drive Route 66 with the real
+  Navajo Nation blowtorch on the dial.
 
-- **Billboards line the highway now, and they have opinions.** Every long run
-  passes the occasional billboard, read aloud as you go by: earnest church
-  signs, truck-wreck attorneys, mystery spots, and the world's largest
-  several things. Some routes get their own real roadside culture -- free ice
-  water on Interstate 90, alien jerky on Interstate 15 -- and no sign repeats
-  itself on the same trip.
+- **The alpha ships with a test book.** A new guide in the docs folder
+  walks through everything this version changes and how to hear each
+  change for yourself: what to set up, what to do, what to listen for,
+  and when to call it working. Written for screen-reader playtesting from
+  the first line, with the winter driving tests in a companion volume.
 
-- **You choose the roadside chatter you want to hear.** A new Roadside
-  chatter group in Settings, Speech and weather, has one master switch and
-  separate switches for parks and forests, river crossings, mountain passes,
-  museums and attractions, and billboards -- so you can keep the geography
-  and lose the jokes, or the other way around. Terse speech verbosity mutes
-  all of it, and safety and navigation announcements are never affected.
+- **Winter tires are now a real choice at the garage.** A winter-compound set
+  bites noticeably harder on snow and ice, and the trade is honest: it wears
+  faster and gives up a touch of grip on warm dry pavement. Company tractors
+  stay on whatever the carrier specs; owner-operators pick their rubber. The
+  rig readout and the garage both say which compound is mounted.
 
-- **Name-brand truck stops now tell you what they are good at.** Pulling up
-  the details on a branded stop adds its specialty -- tire care and a quick
-  lube at a Love's, the sit-down restaurant at a Petro -- to the spoken
-  rundown at the stop and in the en-route stop listings.
+- **Snow chains and chain laws have arrived on the steep grades.** Buy a
+  chain set at the garage and it rides in the side box until a flashing sign
+  before a snowy or icy pass calls a chain law: Level 1 wants winter tires or
+  chains, Level 2 wants chains on the drives. Chaining up happens from the
+  pause menu while stopped -- it costs real minutes and real fatigue, and
+  doing it in the dark costs more of both. Chained on glare ice the truck
+  actually holds: stops shorten dramatically and the engine brake stops
+  breaking the drive wheels loose on the descent.
 
-### Changed
+- **Chains are honest equipment, not a magic button.** They want chain speed,
+  about thirty miles per hour, and they hate bare pavement: run them fast or
+  dry and they grind apart until a chain lets go, whips the fender, and the
+  set is scrap. Rolling into an active chain law out of compliance gets a
+  spoken warning, and the checkpoint past the sign may write a five hundred
+  dollar citation.
 
-### Added
+- **Freezing rain is now its own weather, and it is the one worth parking
+  for.** Rain falling just below freezing glazes the road with ice far
+  slicker than snow -- a stop from 40 can take more than twice the room of a
+  dry stop from 60. The forecast and weather reports call it out, live
+  weather recognizes real freezing rain and sleet, and new road hazards come
+  with it. If you drive it, crawl.
 
-- **Choose how much driving assistance the truck provides.** A new Driving assistance settings category offers Realistic, Balanced, All assists, and Custom presets for emergency braking, lane support, stop-and-go behavior, and interactive descent speed control. Adaptive cruise keeps its existing traffic, posted-limit, and weather behavior. Presets never change trip pacing, hours rules, transmission, weather, or hazard frequency. These assists lay the groundwork for the version 1.9 driving changes.
+- **Hydroplaning now depends on your tires, not just the sky.** Fresh tread
+  at highway pressure almost never floats, but the more worn your tires, the
+  lower the speed where they start riding the water instead of the road --
+  bald tires in a heavy downpour let go near 60. When it happens the truck
+  calls it out and steering and braking go soft until you ease off. Deeper
+  standing water makes it worse; keeping good rubber on the truck is the fix.
 
-- **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
+- **The engine brake can now break the drive wheels loose on slick roads.**
+  The jake slows only the drive axle, and on ice a full-stage jake in a low
+  gear is more than that axle can hold -- the truck warns you the wheels are
+  sliding, the retard fades, and the right move is a lighter stage or none at
+  all. On dry pavement nothing changes; this is a winter discipline.
 
-- **The world got five new sounds, and every shipped sound now earns its
-  keep.** Rest stops sound different by daylight: a new daytime truck-stop
-  lot ambience (idling diesels, air brakes, a highway pass-by) plays at
-  stops before dusk, with the familiar night loop after dark. Warehouse,
-  cold-storage, and distribution docks now wrap you in a big reverberant
-  warehouse interior instead of the generic gate loop. Signaling for an
-  exit or a pull-over clicks like a real indicator stalk, overworked
-  brakes squeal once they pass their fade temperature, and a microsleep
-  forced stop ends in a proper tire screech. All five are ElevenLabs
-  generations added to the `tools/generate_sounds.py` catalog (which now
-  supports seamless-loop requests), and the last orphaned synthesizer-era
-  asset is gone.
-- **54 new achievements -- the badge wall passes one hundred.** The catalog
-  grows from 60 to 114 badges: new state, region, and city arrivals (Virginia
-  ridges, bluegrass country, the Jersey Turnpike, Waco, the Mississippi coast,
-  Nashville, El Paso, Laredo, Baton Rouge, and more), compass runs north and
-  south, cargo firsts (refrigerated, heavy-haul, high-value, farm freight, and
-  max-gross loads), career milestones out to 200 deliveries and 100,000 miles,
-  season and calendar badges (including one for a certain day in early April),
-  close-call deliveries (deadline squeakers, empty fuel tanks, midnight and
-  pre-dawn docks), citation mishaps, congestion, inspections, deep repairs,
-  roadside rescues, bobtail repositions, and a fully optioned rig. As always,
-  every badge quietly tips its hat to a country or trucking song -- this round
-  adds nods to a heap of underground country artists alongside the classics.
-- **The career economy now pays like a real one.** Company drivers fuel and
-  repair on the carrier account on the road, not just at terminals -- an
-  out-of-fuel rescue dings the service record instead of the wallet, while
-  owner-operators keep paying their own way. Demanding freight teaches more:
-  specialty and premium cargo earn bonus experience and on-time streaks
-  compound it, so the mid-career grind rewards exactly the freight dispatch
-  recommends. Reputation now pays continuously through a dispatch trust
-  bonus on company settlements. And personal money has real uses: pay for
-  endorsement courses to unlock specialty freight before the carrier
-  sponsors the training, or take a motel room for full-quality rest where
-  truck parking is poor or full.
-- **How to play now teaches the current game.** The in-game help reader
-  gained a dedicated radio page (stations, hosts, signal ranges, and the
-  streamer-safe rules), The goal and Deliveries pages explain earned dispatch
-  freedom -- assigned loads and routes for new hires, declines, the level-8
-  board unlock, F1 job details, and hours warnings -- and terminal, board,
-  and early-career guidance text no longer tells assigned new hires to
-  browse and pick freight.
-- **The in-cab radio now has hosts, regional stations, and real signal
-  ranges.** The Freight Fate Roadhouse and the Night Line each have a live
-  host who breaks in between songs, and twelve fictional regional stations --
-  country, classic rock, and blues and soul, each with newly composed songs --
-  cover markets from Seattle to New Orleans. Stations behave like real FM
-  signals: full and clear near their market, thinner with static crackle at
-  the fringe, and gone past their range, with a spoken fallback to the
-  Roadhouse when the signal drops. Three more Radio Browser-checked AFN 360
-  channels (Global Fans, Global Holiday, and Mach 5) join the catalog for the
-  real-streams opt-in.
-- **Every career level band now has its own voice.** Levels 8 and 9 celebrate
-  the load-choice unlock, and level 30 gets distinct top-of-the-ladder
-  guidance for company drivers, leased-on owner-operators, and independent
-  authority instead of repeating the level-25 text.
-- **Haul length now progresses through the whole company arc.** Dispatch
-  distance caps used to grow 500 miles per level and blow past every real
-  U.S. route by level 12; they now grow gradually and top out at a real
-  coast-to-coast run, so longer freight keeps unlocking into the late teens.
-- **Old saves load cleanly on snapshot builds.** Careers saved by earlier
-  stable and nightly builds (back through the version 4 schema) load with
-  sensible defaults for everything added since -- business status, hours
-  clock, duty log, tire wear -- and a save touched by a newer snapshot no
-  longer crashes an older-schema load with unknown fields.
-- **Freight and route freedom is now earned, not given.** Reaching level 8 is
-  announced as the load-choice unlock, career guidance for levels 8 and 9
-  celebrates picking your own freight, and a declined load stays declined:
-  leaving the dispatch board and coming back re-offers it only after the
-  fresh candidates run out. New company hires
-  run the load and lane dispatch assigns: the dispatch board offers a single
-  assignment with accept or decline, declining draws another load but costs
-  reputation and comes from a small budget that refills at your next
-  promotion, and departure runs dispatch's routing with no route menu. Load
-  choice from the full board opens at level 8, and choosing your own routes
-  is the owner-operator and own-authority reward, matching how forced
-  dispatch works at real starter carriers.
-- **New-career first day has a stronger handoff.** After choosing a start and
-  home terminal, the terminal repeats a first-day briefing until the first
-  dispatch is accepted. It names the carrier or owner-operator setup, the
-  terminal, who pays equipment costs, and why the first dispatch matters.
-- **Career terminals now name the next practical step.** After the first
-  dispatch, the terminal adds a Career plan item and the dispatch board frames
-  realistic next moves such as probation loads, dispatcher trust, cash
-  reserves, owner-operator preparation, and direct-freight margins.
-- **CB chatter sounds more like drivers talking.** Road radio warnings now use
-  vague bear and work-zone enforcement chatter instead of pinpoint enforcement
-  language.
-- **Career progression now stretches to 30 levels.** The company-driver path
-  grows through senior company ranks before a level-18 leased-on
-  owner-operator gate, level-21 authority prep, level-25 own authority, and
-  established independent owner-operator ranks through level 30.
-- **Local turns now say and sound which way to steer.** Turn-by-turn cues on
-  local streets say "Turn left onto" or "Turn right onto" instead of just
-  "Turn onto", and each turn plays a soft chime from the side you are about
-  to steer toward: a falling chime on the left, a rising chime on the right,
-  and a single steady tone for continuing straight. Gentle bends where the
-  street just changes name are spoken as "Continue onto" so a turn cue always
-  means a real turn. Spoken GPS instructions with road names remain the main
-  guidance.
-- **The traffic light at the end of an exit ramp has its own sound.** A firm
-  low two-tone cue means the light is red and you should brake; a bright go
-  chime means green. You hear them when the light is first called out, when
-  it changes ahead of you, and when a wait at the stop bar ends, alongside
-  the spoken callouts.
-- **Loaded runs now pull out of the gate onto real streets.** Leaving a
-  shipper that has turn-level street data, the drive starts at the facility
-  gate and follows the same named streets you arrived by, with every turn
-  mirrored for the outbound direction, then merges up the on-ramp onto the
-  highway. A save made on the outbound streets resumes there, and facilities
-  without street data keep the usual highway start.
-- **Dispatch rows now preview trailer fit and take-home.** Company drivers keep
-  carrier-provided trailer support, while owner-operators and own-authority
-  drivers hear when a load needs a missing trailer program or owned trailer.
-  Rows also include a short estimated driver-pay or take-home preview before
-  pay advances, using the current business status and trailer setup.
-- **In-cab radio now follows the map.** Press M to toggle the radio, bracket
-  keys to tune receivable stations, Y for spoken station status, and Tab for a
-  Radio status screen. The checked-in catalog now includes regional public
-  stations across the game map plus multiple AFN choices. Streamer-safe mode
-  stays on by default, real public streams stay hidden unless explicitly opted
-  in, and external streams fall back safely until live stream playback is added.
-- **Highway exits now require a real setup.** X signals for the next announced
-  exit instead of magically taking it. The GPS now stages the maneuver, asks for
-  the right-side exit lane, checks that you are slowed to ramp speed at the
-  gore, and explains missed exits when you are too fast or in the wrong lane.
-- **Destination exits now follow the route setup.** The delivery ramp is taken
-  when speed, lane setup, and route intent are valid. Lane-drift modes require
-  a signal; with lane drift off, the GPS infers destination intent from the
-  route unless you explicitly cancel the signal.
-- **Merge and exit traffic now puts pressure on the maneuver.** The route can
-  call out traffic building near exits, highway merges, construction tapers,
-  and lead-traffic packs. Relaxed mode keeps those cues calmer, and missed
-  exits now distinguish being boxed out by traffic from simply missing the lane.
-- **Law enforcement now watches scales and unsafe trucks.** Open weigh stations
-  warn you before the scale; blow past one at highway speed and a scale officer
-  can light you up for a roadside enforcement stop. Severe visible truck damage
-  can also trigger a safety stop when you pass active enforcement. Both
-  stops use spoken warnings, X to signal, a full stop on the shoulder, an
-  on-the-spot fine, and a reputation hit.
-- **Running from a stop now escalates before it ends badly.** If you keep
-  driving with lights behind you, the game gives a failure-to-stop warning and
-  a final warning before spike strips. A felony stop now means a major fine,
-  reputation damage, truck damage, processing time, and cancellation of the
-  active loaded run, with a clear return to the terminal afterward.
-- **Local approaches now name real streets almost everywhere.** The road
-  snap used to let a nameless service way beat a named street a few meters
-  farther, so 39 percent of deadheads and facility approaches said "unnamed
-  public road." The snap now prefers the nearest named road inside the same
-  search radius, and the regenerated data names a real street for every
-  road-snapped target -- "Deadhead 2.1 miles on North Meridian Street"
-  instead of an unnamed mystery road.
-- **Tuning the radio no longer says the station name twice.** "Tuned to"
-  announcements already name the station, so the station line that follows
-  now skips the repeat, and the doubled period between them is gone.
-- **Route cues no longer say "In 0 miles."** When you are already on top of
-  a cue, the redundant advance warning is skipped; the arrival announcement
-  that follows carries the news. State-line and hours-of-service readouts
-  also gained a missing sentence break, so the duty window no longer runs
-  into the rest-stop advice.
-- **Construction-zone warnings give you room to react.** The warning now comes
-  earlier at highway speed and starts with "Brake now!", and troopers wait a
-  little longer inside the zone before clocking you, so normal braking from the
-  warning is fair and the emergency brake can still save a late reaction.
-- **Route chatter no longer stacks into a wall of speech.** Low-priority road
-  chatter now has a short spacing window and keeps only the newest pending cue,
-  so weather, toll, state-line, CB, and similar ambient lines do not all pile up
-  in one burst. Safety cues and actionable GPS distances still speak immediately.
-- **More freight destinations use real map-backed endpoints.** The offline map
-  data now includes source-backed freight facility endpoints where local OSM
-  data supports them, while facilities without a confident match stay clearly
-  marked as representative fallbacks. The game does not claim gates, yards,
-  docks, or truck-legal turn-by-turn facility routing from this layer yet.
-- **Some freight facility approaches now use real local road turns.** A bounded
-  Midwest map pass snaps 71 high-confidence source-backed freight facilities to
-  public-road context, with 6 long enough to use checked-in turn-level approach
-  geometry. Other facilities keep explicit fallback road context.
-- **Own-authority drivers can now buy trailers.** The garage sells dry van,
-  reefer, flatbed, and bulk trailers after own authority is active. Direct
-  freight rows say when an owned trailer fits, and settlement uses an
-  owned-trailer reserve instead of the trailer-program charge.
-- **Authority prep now leads to a first own-authority mode.** Qualified
-  owner-operators can pay the startup cost from Business status, unlock direct
-  freight on the dispatch board, and see insurance, compliance, trailer, truck,
-  and factoring costs in settlement without turning the game into a compliance
-  simulator.
-- **Trailer fit now matters for owner-operators.** Company drivers still use
-  carrier-provided trailers, while leased-on owner-operators start with dry van
-  access and can add reefer, flatbed, or bulk trailer programs from the garage.
-  Dispatch now tells you when specialty cargo needs a trailer program.
-- **Carrier choice now shapes the dispatch board.** Starter carriers still stay
-  grounded, but they now change how often you see short, regional, long-haul,
-  grain or bulk, and high-value jobs. Some training loads also have more
-  forgiving deadlines.
-- **Owner-operators now have an authority prep milestone.** Qualified
-  level-21 owner-operators can set aside a reserve from Business status before
-  taking the later own-authority step.
-- **New careers now offer grounded start choices.** Pick from several
-  fictional company-driver carriers with assigned equipment and modest wage or
-  freight tradeoffs, or choose a higher-risk owner-operator start with owned
-  starter equipment and operating costs active from day one.
-- **Busy corridors now feel busier beyond rush hour.** Random road-hazard checks
-  now use corridor busyness: dense metro/checkpoint interstates check sooner,
-  while sparse open-country corridors leave more breathing room. Relaxed mode
-  still keeps random hazards rare overall.
-- **Construction zones now stage the slowdown.** Work zones add a merge/flagger
-  taper before the barrels, with spoken guidance to slow first for the taper and
-  then for the lower work-zone limit. The taper shows up in speed-limit and
-  upcoming-road readouts, while ticket enforcement still waits until the main
-  work zone after the fair braking window.
-- **Loaded trucks pull away more like loaded trucks.** Low-speed drive force now
-  ramps in from a stop instead of hitting the full rolling traction cap
-  immediately, and the automatic holds the first few gears a little longer, so a
-  heavy tractor-trailer launch has weight without losing highway acceleration.
-- **Career progression now has a 30-level business arc.** New drivers start
-  with fictional carrier Northstar Freight Lines, move through company-driver
-  and owner-operator preparation ranks, and unlock the leased-on
-  owner-operator buy-in later in the ladder instead of jumping there at level 5.
-- **Company-driver equipment now reads like company equipment.** New drivers
-  use an assigned carrier tractor with carrier-paid fuel and routine repairs;
-  buying, switching, and upgrading owned tractors waits until the leased-on
-  owner-operator path.
-- **City service drives use sourced local service names across the map.** The
-  garage, freight/logistics office, and truck dealer drives now prefer
-  checked-in source-backed local service data for every supported city, with
-  representative fallbacks only where no suitable sourced role is available.
-- **Local service and facility drives use checked-in road context.** GPS and
-  route summaries now prefer source-backed nearby road names for city-service
-  drives and pickup/delivery facility approaches, while simplified fallbacks
-  remain clearly marked in the data.
-- **Some city service drives now have real local turns.** Where local OSM data
-  supports it, service drives can use checked-in street-by-street approach
-  geometry with spoken local turn cues. Other services and representative
-  facility approaches still fall back to simpler road context.
-- **Rush hour makes traffic feel busier.** Starting a trip during morning or
-  afternoon commute windows now raises modeled traffic density, especially near
-  metro/checkpoint corridors, and can slow lead traffic with commuter or merge
-  callouts.
-- **Loading, unloading, and pulling in now take a beat.** Pickup loading and
-  destination unloading now give a short spoken wait and advance the in-game
-  clock as on-duty work. Pulling into pickup gates, destination gates, and route
-  stops also gives the first menu option a moment to speak, so holding Down
-  Arrow to brake no longer skips past it.
-- **Coffee helps alertness a little longer.** Food-and-coffee stops now ease
-  fatigue more than before, but they still do not satisfy the 30-minute break
-  rule and remain much weaker than a full break or proper sleep.
-- **In-cab logbook.** The game now records a rolling Record of Duty Status as
-  you drive, fuel, repair, load, take breaks, sleep, or get placed out of
-  service. You can review it from the terminal or the driving status menu, and
-  traffic stops now read the recent logbook entries instead of only pretending
-  to check them.
-- **CB radio enforcement chatter.** CB chatter can now warn you a few miles
-  before drivers are talking about a bear ahead or enforcement near a work
-  zone, with a radio squelch cue and a clear "check your speed" line. The cue
-  stays secondary to hazards and construction warnings, and the U upcoming key
-  can review that chatter alongside stops, speed zones, and exits.
+- **Your rig now wears with how you drive it -- tires, brakes, and engine each
+  have their own meter.** Miles and heavy loads slowly eat tire tread, riding
+  the service brakes wears the shoes (hot brakes wear them even faster), and
+  hours under load wear the engine -- with over-revving and lugging punishing
+  it hardest. Wear talks back: bald tires grip less, worn brakes pull weaker
+  and overheat sooner, and a tired engine loses power and burns more fuel. The
+  engine brake still costs the shoes nothing, so use it on the long downgrades.
+  Your delivery summary tells you what each run added, the truck status
+  readouts speak all three meters, and the terminal garage now offers brake
+  jobs and engine overhauls alongside tires -- each takes shop time and, for
+  owner-operators, real money. Company drivers bill the carrier, as always.
+
+- **Truck stops now sell more than fuel: meals, showers, and rig care that
+  keep you and the truck going longer.** A hot meal or an energy drink eases
+  fatigue right away and makes the next few hours of driving tire you more
+  slowly -- Petro's Iron Skillet dinner beats any roadside diner. At a Pilot
+  or Flying J, a fuel purchase makes the shower free, just like real life.
+  On the truck side, a Speedco or Love's lube bay slows engine wear for the
+  rest of the trip, a tire rotation does the same for tread, and a bottle of
+  diesel additive helps a little anywhere you fuel. One food buff and one of
+  each rig service at a time -- a new one replaces the old -- and none of it
+  ever adds legal driving hours. Your status readout tells you what is
+  active and how long it has left.
+
+- **The big-name truck stops along your route now fix your rig -- and each
+  brand is good at what it is really known for.** Pull into a Love's or a
+  Speedco and their tire bay replaces worn tires fast, close to the garage
+  price. TravelCenters of America and Petro run full service shops that also
+  do brake jobs on the road. Any other major travel center can mount tires,
+  at a road markup -- and an engine overhaul still means a trip to your
+  terminal garage. Independent stops fix what their listing says, and Big
+  Buck's, famously, fixes nothing. Road shops sell the whole job or none of
+  it, so if cash is short, plan for the terminal.
+
+- **The biggest map update yet -- 100 new cities to pick up and deliver in.** A
+  city is a place a load can start or end, and the map grew from 249 to 349 of
+  them, filling in dead zones that used to have nothing drivable for hundreds of
+  miles: the mountain West, the northern plains, the Nevada Great Basin, the
+  Oregon and California coast, and Appalachia. Whole corridors that simply were
+  not there before now connect city to city on the real roads -- Interstate 70
+  over the Colorado Rockies, the US-2 Hi-Line across the northern tier, Interstate
+  80 across Nevada, and Interstate 75 through the Kentucky mountains among them. Be careful, though -- there are still some challenging
+  routes where you had better watch your fuel and get it when you can. Thanks
+  to nromey.
 
 ### Fixed
+
+- **The driving event voice no longer narrates the past.** With the
+  separate event voice enabled, a busy stretch could queue announcements
+  faster than the voice speaks, so you would arrive at the dock and sit
+  through "slow down for the dock, at the dock, delivering" after the
+  trailer was already empty, while the backlog talked over traffic-light
+  sounds. When queued announcements fall too far behind the moment they
+  describe, the stale ones are now dropped and the newest speaks
+  immediately, so what you hear is always about what is happening now.
 
 - **Street directions come one turn at a time now.** Setting out on city
   streets used to read the whole route in one burst -- start, turn, and
@@ -422,6 +361,59 @@
   the missing market prices, which also keeps cloud backups of these older
   careers in step with orinks.net.
 
+- **Braking to a stop no longer drops the truck into reverse -- and
+  neither does tapping the brake to check you are stopped.** Holding
+  the brake through a stop used to select reverse the moment the truck
+  stopped -- including when the game itself said to hold the brakes at
+  a red light -- and reverse then swaps the pedals, so your next press
+  moved you the wrong way. Now every direction change takes one
+  deliberate gesture in both direction-change styles: come to a stop,
+  release the control, then press and HOLD it for a moment. A press
+  that lands while still rolling is part of the stop, and a quick tap
+  at a standstill just brakes -- so confirming the truck is holding
+  never grabs a gear. The spoken key help teaches the gesture. This is
+  a changed habit if you were used to hold-through reversing.
+- **Seven real radio streams play again after a full dial checkup.** KJZZ
+  Phoenix, KCRW Los Angeles, KUNM Albuquerque, KUTX Austin, KERA Dallas,
+  KCUR Kansas City, and WBUR Boston had all moved or retired their old
+  stream addresses, so tuning them fell back to satellite with "station
+  unavailable." Every real stream in the catalog was live-tested and the
+  dead ones repointed to each station's current stream. WABE Atlanta has
+  no working public stream right now and leaves the dial until one
+  returns.
+- **Ramp-end traffic lights now have a yellow phase, speak every change,
+  and no longer punish you for a light that changed behind your back.**
+  The light used to announce only its first change: it could say green
+  while you were still rolling up, silently flip back to red, and then
+  blame you for running it -- with real trailer damage. Now every green,
+  yellow, and red is spoken as it happens, greens run long enough to
+  cross from a stop, and entering on yellow is legal, exactly like the
+  real law. Yellow means stop if you are not already at the light.
+- **Interstate speed limits no longer drop to city speeds at the ends of a
+  leg.** Leaving or approaching a city, the spoken limit could fall to a
+  25 or 30 from a nearby city street and stay there for miles of open
+  interstate -- Interstate 10 out of Buckeye held 30 for ten miles. Four
+  hundred thirty legs across the interstate network now carry their real
+  highway limits the whole way, so the limit you hear is the limit the
+  road actually posts, and speeding enforcement matches it.
+- **US highways and parkways got the same speed-limit cleanup.** US-60
+  out of Phoenix held a baked 25 for twenty-two miles of the
+  Superstition Freeway. Two hundred twenty-seven more legs now start at
+  their real highway speed, while honest small-town limits -- like
+  US-60's real 35 through Globe -- stay exactly as posted. And where a
+  town's street speed was the only reading a long route had -- Globe's
+  35 used to rule all eighty-eight miles to Show Low -- the route now
+  uses honest open-highway speeds instead, on twenty-three more legs.
+- **A dropped speed limit now gives you braking time before a strike.**
+  When the posted limit steps down, enforcement waits while you actually
+  slow -- about the seconds a loaded truck honestly needs -- instead of
+  writing a strike the moment the sign changes. Staying on the throttle
+  through the drop forfeits the grace, so it rewards compliance, not
+  coasting past signs.
+- **Touching the brake now switches cruise control off, like a real
+  truck.** Any press of the service brake or the emergency brake drops
+  cruise immediately and announces it, instead of cruise quietly pulling
+  the truck back up to speed after you slowed down on purpose.
 - **Port terminals only show up in cities that really have a port now.**
   Inland towns like Dallas, Atlanta, and Lampasas no longer offer loads
   from a make-believe port terminal. Port freight comes from coastal,
@@ -431,6 +423,7 @@
   offers, accepting it politely pulls the load instead of misbehaving.
   And four real Great Lakes ports the old map missed -- Toledo, Detroit,
   Chicago, and Green Bay -- now have working docks of their own.
+### Changed
 
 ## 1.8.3 - 2026-07-14
 
@@ -703,6 +696,57 @@
   making them do something -- rest, showers, repairs, and buffs -- comes in a
   later update. Thanks to nromey.
 
+- **The map keeps filling in -- twenty more cities across seven new corridors.**
+  Since the big update above, the network grew city by city: Interstate 80 across
+  western Nebraska (Kearney, Lexington, Ogallala, and Sidney), Interstate 70 over
+  the Kansas high plains into Colorado (Hays, Colby, Junction City, and
+  Burlington), Interstate 10 through the West Texas desert (Fort Stockton, Ozona,
+  and Junction), Interstate 25 over Raton Pass into New Mexico (Raton and
+  Trinidad), Interstate 5 over the Siskiyou Mountains (Mount Shasta and Yreka),
+  Interstate 29 up the Dakota plains (Watertown), and the full Willamette Valley
+  run from Portland down to Eugene -- Woodburn and Albany on Interstate 5, plus a
+  wine-country alternate through Newberg and McMinnville. Each new city is a real
+  place to pick up and deliver, wired to its neighbors on truck-routed roads with
+  real named stops to fuel and park along the way, and grades that rise and fall
+  with the real terrain.
+
+- **Nevada's Great Basin opens up -- six new cities on three high-desert
+  corridors.** The empty interior between the interstates fills in: US-93 up the
+  eastern Great Basin from Las Vegas through Alamo and Ely to Wells; US-50 -- "the
+  Loneliest Road in America" -- across the middle through Eureka, Austin, and
+  Fallon; and US-6 tying Ely to Tonopah. These are long, quiet, climbing hauls
+  over real mountain grades (the run to Wells tops seven percent over Pequop
+  Summit), and every leg points you to a real diesel pump so you never run dry on
+  the lonely stretches. Ely, Fallon, and Wells are new places to pick up and
+  deliver -- and Wells now splits the old Elko run, so Interstate 80 freight
+  passes through the real town instead of leaping it.
+
+- **New: real roadside landmarks as you drive.** Routes now call out the world
+  going by -- entering a national forest, crossing a named river, approaching a
+  mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real
+  map data so a long haul has a sense of place instead of silence. The callouts
+  ride the quiet background voice: they wait their turn behind navigation and
+  never talk over a safety warning. Thanks to nromey.
+
+- **Billboards line the highway now, and they have opinions.** Every long run
+  passes the occasional billboard, read aloud as you go by: earnest church
+  signs, truck-wreck attorneys, mystery spots, and the world's largest
+  several things. Some routes get their own real roadside culture -- free ice
+  water on Interstate 90, alien jerky on Interstate 15 -- and no sign repeats
+  itself on the same trip.
+
+- **You choose the roadside chatter you want to hear.** A new Roadside
+  chatter group in Settings, Speech and weather, has one master switch and
+  separate switches for parks and forests, river crossings, mountain passes,
+  museums and attractions, and billboards -- so you can keep the geography
+  and lose the jokes, or the other way around. Terse speech verbosity mutes
+  all of it, and safety and navigation announcements are never affected.
+
+- **Name-brand truck stops now tell you what they are good at.** Pulling up
+  the details on a branded stop adds its specialty -- tire care and a quick
+  lube at a Love's, the sit-down restaurant at a Petro -- to the spoken
+  rundown at the stop and in the en-route stop listings.
+
 - **Some hauls now offer more than one way to drive them.** Where two real truck
   routes reach the same place, the map keeps both, so a run can offer a choice --
   a faster interstate or a shorter back road -- instead of a single fixed path.
@@ -812,7 +856,272 @@
   prices, freight market flavor, and road hazards, so a winter run out of
   Duluth no longer sounds like a summer haul into Cincinnati.
 
+
+- **The world got five new sounds, and every shipped sound now earns its
+  keep.** Rest stops sound different by daylight: a new daytime truck-stop
+  lot ambience (idling diesels, air brakes, a highway pass-by) plays at
+  stops before dusk, with the familiar night loop after dark. Warehouse,
+  cold-storage, and distribution docks now wrap you in a big reverberant
+  warehouse interior instead of the generic gate loop. Signaling for an
+  exit or a pull-over clicks like a real indicator stalk, overworked
+  brakes squeal once they pass their fade temperature, and a microsleep
+  forced stop ends in a proper tire screech. All five are ElevenLabs
+  generations added to the `tools/generate_sounds.py` catalog (which now
+  supports seamless-loop requests), and the last orphaned synthesizer-era
+  asset is gone.
+- **54 new achievements -- the badge wall passes one hundred.** The catalog
+  grows from 60 to 114 badges: new state, region, and city arrivals (Virginia
+  ridges, bluegrass country, the Jersey Turnpike, Waco, the Mississippi coast,
+  Nashville, El Paso, Laredo, Baton Rouge, and more), compass runs north and
+  south, cargo firsts (refrigerated, heavy-haul, high-value, farm freight, and
+  max-gross loads), career milestones out to 200 deliveries and 100,000 miles,
+  season and calendar badges (including one for a certain day in early April),
+  close-call deliveries (deadline squeakers, empty fuel tanks, midnight and
+  pre-dawn docks), citation mishaps, congestion, inspections, deep repairs,
+  roadside rescues, bobtail repositions, and a fully optioned rig. As always,
+  every badge quietly tips its hat to a country or trucking song -- this round
+  adds nods to a heap of underground country artists alongside the classics.
+- **The career economy now pays like a real one.** Company drivers fuel and
+  repair on the carrier account on the road, not just at terminals -- an
+  out-of-fuel rescue dings the service record instead of the wallet, while
+  owner-operators keep paying their own way. Demanding freight teaches more:
+  specialty and premium cargo earn bonus experience and on-time streaks
+  compound it, so the mid-career grind rewards exactly the freight dispatch
+  recommends. Reputation now pays continuously through a dispatch trust
+  bonus on company settlements. And personal money has real uses: pay for
+  endorsement courses to unlock specialty freight before the carrier
+  sponsors the training, or take a motel room for full-quality rest where
+  truck parking is poor or full.
+- **How to play now teaches the current game.** The in-game help reader
+  gained a dedicated radio page (stations, hosts, signal ranges, and the
+  streamer-safe rules), The goal and Deliveries pages explain earned dispatch
+  freedom -- assigned loads and routes for new hires, declines, the level-8
+  board unlock, F1 job details, and hours warnings -- and terminal, board,
+  and early-career guidance text no longer tells assigned new hires to
+  browse and pick freight.
+- **The in-cab radio now has hosts, regional stations, and real signal
+  ranges.** The Freight Fate Roadhouse and the Night Line each have a live
+  host who breaks in between songs, and twelve fictional regional stations --
+  country, classic rock, and blues and soul, each with newly composed songs --
+  cover markets from Seattle to New Orleans. Stations behave like real FM
+  signals: full and clear near their market, thinner with static crackle at
+  the fringe, and gone past their range, with a spoken fallback to the
+  Roadhouse when the signal drops. Three more Radio Browser-checked AFN 360
+  channels (Global Fans, Global Holiday, and Mach 5) join the catalog for the
+  real-streams opt-in.
+- **Every career level band now has its own voice.** Levels 8 and 9 celebrate
+  the load-choice unlock, and level 30 gets distinct top-of-the-ladder
+  guidance for company drivers, leased-on owner-operators, and independent
+  authority instead of repeating the level-25 text.
+- **Haul length now progresses through the whole company arc.** Dispatch
+  distance caps used to grow 500 miles per level and blow past every real
+  U.S. route by level 12; they now grow gradually and top out at a real
+  coast-to-coast run, so longer freight keeps unlocking into the late teens.
+- **Old saves load cleanly on snapshot builds.** Careers saved by earlier
+  stable and nightly builds (back through the version 4 schema) load with
+  sensible defaults for everything added since -- business status, hours
+  clock, duty log, tire wear -- and a save touched by a newer snapshot no
+  longer crashes an older-schema load with unknown fields.
+- **Freight and route freedom is now earned, not given.** Reaching level 8 is
+  announced as the load-choice unlock, career guidance for levels 8 and 9
+  celebrates picking your own freight, and a declined load stays declined:
+  leaving the dispatch board and coming back re-offers it only after the
+  fresh candidates run out. New company hires
+  run the load and lane dispatch assigns: the dispatch board offers a single
+  assignment with accept or decline, declining draws another load but costs
+  reputation and comes from a small budget that refills at your next
+  promotion, and departure runs dispatch's routing with no route menu. Load
+  choice from the full board opens at level 8, and choosing your own routes
+  is the owner-operator and own-authority reward, matching how forced
+  dispatch works at real starter carriers.
+- **New-career first day has a stronger handoff.** After choosing a start and
+  home terminal, the terminal repeats a first-day briefing until the first
+  dispatch is accepted. It names the carrier or owner-operator setup, the
+  terminal, who pays equipment costs, and why the first dispatch matters.
+- **Career terminals now name the next practical step.** After the first
+  dispatch, the terminal adds a Career plan item and the dispatch board frames
+  realistic next moves such as probation loads, dispatcher trust, cash
+  reserves, owner-operator preparation, and direct-freight margins.
+- **CB chatter sounds more like drivers talking.** Road radio warnings now use
+  vague bear and work-zone enforcement chatter instead of pinpoint enforcement
+  language.
+- **Career progression now stretches to 30 levels.** The company-driver path
+  grows through senior company ranks before a level-18 leased-on
+  owner-operator gate, level-21 authority prep, level-25 own authority, and
+  established independent owner-operator ranks through level 30.
+- **Local turns now say and sound which way to steer.** Turn-by-turn cues on
+  local streets say "Turn left onto" or "Turn right onto" instead of just
+  "Turn onto", and each turn plays a soft chime from the side you are about
+  to steer toward: a falling chime on the left, a rising chime on the right,
+  and a single steady tone for continuing straight. Gentle bends where the
+  street just changes name are spoken as "Continue onto" so a turn cue always
+  means a real turn. Spoken GPS instructions with road names remain the main
+  guidance.
+- **The traffic light at the end of an exit ramp has its own sound.** A firm
+  low two-tone cue means the light is red and you should brake; a bright go
+  chime means green. You hear them when the light is first called out, when
+  it changes ahead of you, and when a wait at the stop bar ends, alongside
+  the spoken callouts.
+- **Loaded runs now pull out of the gate onto real streets.** Leaving a
+  shipper that has turn-level street data, the drive starts at the facility
+  gate and follows the same named streets you arrived by, with every turn
+  mirrored for the outbound direction, then merges up the on-ramp onto the
+  highway. A save made on the outbound streets resumes there, and facilities
+  without street data keep the usual highway start.
+- **Dispatch rows now preview trailer fit and take-home.** Company drivers keep
+  carrier-provided trailer support, while owner-operators and own-authority
+  drivers hear when a load needs a missing trailer program or owned trailer.
+  Rows also include a short estimated driver-pay or take-home preview before
+  pay advances, using the current business status and trailer setup.
+- **In-cab radio now follows the map.** Press M to toggle the radio, bracket
+  keys to tune receivable stations, Y for spoken station status, and Tab for a
+  Radio status screen. The checked-in catalog now includes regional public
+  stations across the game map plus multiple AFN choices. Streamer-safe mode
+  stays on by default, real public streams stay hidden unless explicitly opted
+  in, and external streams fall back safely until live stream playback is added.
+- **Highway exits now require a real setup.** X signals for the next announced
+  exit instead of magically taking it. The GPS now stages the maneuver, asks for
+  the right-side exit lane, checks that you are slowed to ramp speed at the
+  gore, and explains missed exits when you are too fast or in the wrong lane.
+- **Destination exits now follow the route setup.** The delivery ramp is taken
+  when speed, lane setup, and route intent are valid. Lane-drift modes require
+  a signal; with lane drift off, the GPS infers destination intent from the
+  route unless you explicitly cancel the signal.
+- **Merge and exit traffic now puts pressure on the maneuver.** The route can
+  call out traffic building near exits, highway merges, construction tapers,
+  and lead-traffic packs. Relaxed mode keeps those cues calmer, and missed
+  exits now distinguish being boxed out by traffic from simply missing the lane.
+- **Law enforcement now watches scales and unsafe trucks.** Open weigh stations
+  warn you before the scale; blow past one at highway speed and a scale officer
+  can light you up for a roadside enforcement stop. Severe visible truck damage
+  can also trigger a safety stop when you pass active enforcement. Both
+  stops use spoken warnings, X to signal, a full stop on the shoulder, an
+  on-the-spot fine, and a reputation hit.
+- **Running from a stop now escalates before it ends badly.** If you keep
+  driving with lights behind you, the game gives a failure-to-stop warning and
+  a final warning before spike strips. A felony stop now means a major fine,
+  reputation damage, truck damage, processing time, and cancellation of the
+  active loaded run, with a clear return to the terminal afterward.
+- **Local approaches now name real streets almost everywhere.** The road
+  snap used to let a nameless service way beat a named street a few meters
+  farther, so 39 percent of deadheads and facility approaches said "unnamed
+  public road." The snap now prefers the nearest named road inside the same
+  search radius, and the regenerated data names a real street for every
+  road-snapped target -- "Deadhead 2.1 miles on North Meridian Street"
+  instead of an unnamed mystery road.
+- **Tuning the radio no longer says the station name twice.** "Tuned to"
+  announcements already name the station, so the station line that follows
+  now skips the repeat, and the doubled period between them is gone.
+- **Route cues no longer say "In 0 miles."** When you are already on top of
+  a cue, the redundant advance warning is skipped; the arrival announcement
+  that follows carries the news. State-line and hours-of-service readouts
+  also gained a missing sentence break, so the duty window no longer runs
+  into the rest-stop advice.
+- **Construction-zone warnings give you room to react.** The warning now comes
+  earlier at highway speed and starts with "Brake now!", and troopers wait a
+  little longer inside the zone before clocking you, so normal braking from the
+  warning is fair and the emergency brake can still save a late reaction.
+- **Route chatter no longer stacks into a wall of speech.** Low-priority road
+  chatter now has a short spacing window and keeps only the newest pending cue,
+  so weather, toll, state-line, CB, and similar ambient lines do not all pile up
+  in one burst. Safety cues and actionable GPS distances still speak immediately.
+- **More freight destinations use real map-backed endpoints.** The offline map
+  data now includes source-backed freight facility endpoints where local OSM
+  data supports them, while facilities without a confident match stay clearly
+  marked as representative fallbacks. The game does not claim gates, yards,
+  docks, or truck-legal turn-by-turn facility routing from this layer yet.
+- **Some freight facility approaches now use real local road turns.** A bounded
+  Midwest map pass snaps 71 high-confidence source-backed freight facilities to
+  public-road context, with 6 long enough to use checked-in turn-level approach
+  geometry. Other facilities keep explicit fallback road context.
+- **Own-authority drivers can now buy trailers.** The garage sells dry van,
+  reefer, flatbed, and bulk trailers after own authority is active. Direct
+  freight rows say when an owned trailer fits, and settlement uses an
+  owned-trailer reserve instead of the trailer-program charge.
+- **Authority prep now leads to a first own-authority mode.** Qualified
+  owner-operators can pay the startup cost from Business status, unlock direct
+  freight on the dispatch board, and see insurance, compliance, trailer, truck,
+  and factoring costs in settlement without turning the game into a compliance
+  simulator.
+- **Trailer fit now matters for owner-operators.** Company drivers still use
+  carrier-provided trailers, while leased-on owner-operators start with dry van
+  access and can add reefer, flatbed, or bulk trailer programs from the garage.
+  Dispatch now tells you when specialty cargo needs a trailer program.
+- **Carrier choice now shapes the dispatch board.** Starter carriers still stay
+  grounded, but they now change how often you see short, regional, long-haul,
+  grain or bulk, and high-value jobs. Some training loads also have more
+  forgiving deadlines.
+- **Owner-operators now have an authority prep milestone.** Qualified
+  level-21 owner-operators can set aside a reserve from Business status before
+  taking the later own-authority step.
+- **New careers now offer grounded start choices.** Pick from several
+  fictional company-driver carriers with assigned equipment and modest wage or
+  freight tradeoffs, or choose a higher-risk owner-operator start with owned
+  starter equipment and operating costs active from day one.
+- **Busy corridors now feel busier beyond rush hour.** Random road-hazard checks
+  now use corridor busyness: dense metro/checkpoint interstates check sooner,
+  while sparse open-country corridors leave more breathing room. Relaxed mode
+  still keeps random hazards rare overall.
+- **Construction zones now stage the slowdown.** Work zones add a merge/flagger
+  taper before the barrels, with spoken guidance to slow first for the taper and
+  then for the lower work-zone limit. The taper shows up in speed-limit and
+  upcoming-road readouts, while ticket enforcement still waits until the main
+  work zone after the fair braking window.
+- **Loaded trucks pull away more like loaded trucks.** Low-speed drive force now
+  ramps in from a stop instead of hitting the full rolling traction cap
+  immediately, and the automatic holds the first few gears a little longer, so a
+  heavy tractor-trailer launch has weight without losing highway acceleration.
+- **Career progression now has a 30-level business arc.** New drivers start
+  with fictional carrier Northstar Freight Lines, move through company-driver
+  and owner-operator preparation ranks, and unlock the leased-on
+  owner-operator buy-in later in the ladder instead of jumping there at level 5.
+- **Company-driver equipment now reads like company equipment.** New drivers
+  use an assigned carrier tractor with carrier-paid fuel and routine repairs;
+  buying, switching, and upgrading owned tractors waits until the leased-on
+  owner-operator path.
+- **City service drives use sourced local service names across the map.** The
+  garage, freight/logistics office, and truck dealer drives now prefer
+  checked-in source-backed local service data for every supported city, with
+  representative fallbacks only where no suitable sourced role is available.
+- **Local service and facility drives use checked-in road context.** GPS and
+  route summaries now prefer source-backed nearby road names for city-service
+  drives and pickup/delivery facility approaches, while simplified fallbacks
+  remain clearly marked in the data.
+- **Some city service drives now have real local turns.** Where local OSM data
+  supports it, service drives can use checked-in street-by-street approach
+  geometry with spoken local turn cues. Other services and representative
+  facility approaches still fall back to simpler road context.
+- **Rush hour makes traffic feel busier.** Starting a trip during morning or
+  afternoon commute windows now raises modeled traffic density, especially near
+  metro/checkpoint corridors, and can slow lead traffic with commuter or merge
+  callouts.
+- **Loading, unloading, and pulling in now take a beat.** Pickup loading and
+  destination unloading now give a short spoken wait and advance the in-game
+  clock as on-duty work. Pulling into pickup gates, destination gates, and route
+  stops also gives the first menu option a moment to speak, so holding Down
+  Arrow to brake no longer skips past it.
+- **Coffee helps alertness a little longer.** Food-and-coffee stops now ease
+  fatigue more than before, but they still do not satisfy the 30-minute break
+  rule and remain much weaker than a full break or proper sleep.
+- **In-cab logbook.** The game now records a rolling Record of Duty Status as
+  you drive, fuel, repair, load, take breaks, sleep, or get placed out of
+  service. You can review it from the terminal or the driving status menu, and
+  traffic stops now read the recent logbook entries instead of only pretending
+  to check them.
+- **CB radio enforcement chatter.** CB chatter can now warn you a few miles
+  before drivers are talking about a bear ahead or enforcement near a work
+  zone, with a radio squelch cue and a clear "check your speed" line. The cue
+  stays secondary to hazards and construction warnings, and the U upcoming key
+  can review that chatter alongside stops, speed zones, and exits.
+
 ### Fixed
+
+- **City services no longer send you across the county.** Driving to a
+  city's freight market, garage, or truck dealer could route you ten to
+  thirty-five miles to a look-alike business in a neighboring town -- an
+  hour-plus round trip just to run an errand. Now every city's services
+  point at a real facility within a short drive, and hundreds more cities
+  carry real, source-backed services instead of a generic stand-in.
 
 - **A few routes now name the right highway.** On the runs from Denver to Salt
   Lake City, Santa Rosa to Stockton, and Clarksville to Huntsville, the game
@@ -1380,9 +1689,9 @@
 - **Dispatcher pay advances (no more soft lock).** A broke driver who can no
   longer afford fuel can now draw a cash advance against the next load -- from
   the terminal hub or any in-trip rest stop -- and it is repaid automatically
-  out of the next delivery settlement. The advance is offered only while cash
-  is low and is capped, so it stays a recovery line rather than free money. A
-  negative balance is no longer a dead end.
+  out of the next delivery settlement. The advance is offered only when cash is
+  nearly gone and is capped, so it stays a recovery line rather than free
+  money. A negative balance is no longer a dead end.
 - **Discord Rich Presence (optional).** When Discord is running, your profile
   can show broad game activity -- the main menu, the terminal, driving a route,
   resting, or delivering -- with high-level route and cargo context. Only

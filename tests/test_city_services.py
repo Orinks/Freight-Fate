@@ -9,7 +9,7 @@ def key_event(key, unicode=""):
 
 
 def test_city_services_are_source_backed(world):
-    services = world.city_services("Chicago")
+    services = world.city_services("Indianapolis")
 
     assert [service.key for service in services] == [
         "freight_market",
@@ -26,9 +26,9 @@ def test_city_services_are_source_backed(world):
         assert "OpenStreetMap" in service.source_note
         assert "node/" not in service.spoken_name.lower()
         assert "way/" not in service.spoken_name.lower()
-        route = world.city_service_route("Chicago", service.key)
-        approach = world.city_service_approach("Chicago", service.key)
-        geometry = world.city_service_geometry("Chicago", service.key)
+        route = world.city_service_route("Indianapolis", service.key)
+        approach = world.city_service_approach("Indianapolis", service.key)
+        geometry = world.city_service_geometry("Indianapolis", service.key)
         assert approach is not None
         if geometry is not None and geometry.turn_level:
             assert route.miles == pytest.approx(geometry.total_miles)
@@ -107,10 +107,10 @@ def test_city_service_data_covers_every_supported_city(world):
                 assert service.approach_miles > 0
                 assert service.approach_road
 
-    # The sweep inventory itself must stay fully resolvable as the map is
-    # re-keyed and grows: every source-backed record from the last sweep
-    # still lands on its city. Cities added since then fall back.
-    assert source_backed == 618
+    # The sweep now covers every city on the map. Each city's three services
+    # are source-backed where a real POI sits within the city-errand cap, and
+    # fall back to a synthesized errand where none does.
+    assert source_backed == 1174
     assert fallback == len(world.city_names()) * 3 - source_backed
 
 

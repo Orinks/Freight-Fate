@@ -114,8 +114,7 @@ class PickupFacilityState(MenuState):
             self.truck = driving.truck
         else:
             self.truck = TruckState(specs=ctx.profile.truck_specs())
-            self.truck.fuel_gal = min(ctx.profile.truck_fuel_gal, self.truck.specs.fuel_tank_gal)
-            self.truck.damage_pct = ctx.profile.truck_damage_pct
+            ctx.profile.load_truck_condition(self.truck)
             self.truck.restore_air_brake_snapshot(air_brake, default_ready=True)
             if engine_on:
                 self.truck.start_engine()
@@ -218,8 +217,7 @@ class PickupFacilityState(MenuState):
         ]
 
     def _save_state(self) -> None:
-        self.ctx.profile.truck_fuel_gal = self.truck.fuel_gal
-        self.ctx.profile.truck_damage_pct = self.truck.damage_pct
+        self.ctx.profile.store_truck_condition(self.truck)
         self.ctx.profile.active_trip = pickup_snapshot(
             self.job,
             checked_in=self.checked_in,

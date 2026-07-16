@@ -59,6 +59,9 @@ def test_stop_speech_silences_both_channels():
     )
     ctx = object.__new__(GameContext)
     ctx.speech = speech
+    from freight_fate.speech import EventSpeechPacer
+
+    ctx._event_pacer = EventSpeechPacer()  # stop_speech resets the event pacer
     ctx.stop_speech()
     assert stopped == ["main", "event"]
 

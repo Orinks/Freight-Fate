@@ -40,6 +40,17 @@ def test_all_conditions_have_effects():
         assert kind in EFFECTS
 
 
+def test_every_condition_names_a_real_surface():
+    """The surface field keys the traction-equipment ladder, so every row must
+    use one of the four words the physics understands."""
+    for kind, eff in EFFECTS.items():
+        assert eff.surface in ("dry", "wet", "snow", "ice"), kind
+    assert EFFECTS[WeatherKind.SNOW].surface == "snow"
+    assert EFFECTS[WeatherKind.ICE].surface == "ice"
+    assert EFFECTS[WeatherKind.RAIN].surface == "wet"
+    assert EFFECTS[WeatherKind.CLEAR].surface == "dry"
+
+
 def test_all_regions_in_world_have_weights(world):
     regions = {c.region for c in world.cities.values()}
     for region in regions:
@@ -1071,7 +1082,10 @@ def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
 
     trip.position_mi = 120.3
     rest = trip.update(0.0)
-    assert not _gps_events(rest)
+    # The dense maxspeed sweep gives this I-65 leg a real 65 mph zone at mile
+    # 120; jumping here from the 55 zone at the crossing announces that raise.
+    # The rest-stop cue still does not re-fire -- that is what this asserts.
+    assert _gps_messages(rest) == ["Speed limit raised to 65."]
 
 
 def test_likely_parking_is_not_announced_as_truck_parking():

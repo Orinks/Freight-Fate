@@ -9,6 +9,7 @@ POOLS = [
     bb.ATTORNEY_BILLBOARDS,
     bb.FAITH_BILLBOARDS,
     bb.ROADSIDE_ODDITIES,
+    bb.BIG_BUCKS_BILLBOARDS,
 ]
 
 
@@ -43,6 +44,11 @@ def test_corridor_lookup_normalizes_shield_format():
 def test_unknown_corridor_returns_empty():
     assert bb.corridor_billboards("I-976") == ()
     assert bb.corridor_billboards("some county road") == ()
+
+
+def test_big_bucks_billboards_accessor_returns_pool():
+    assert bb.big_bucks_billboards() == bb.BIG_BUCKS_BILLBOARDS
+    assert bb.BIG_BUCKS_BILLBOARDS
 
 
 def test_random_billboard_is_deterministic_and_in_pool():

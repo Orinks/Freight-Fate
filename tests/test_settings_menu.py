@@ -67,7 +67,7 @@ def test_settings_menu_cycles_automatic_direction_changes():
         while not cat.items[cat.index].text.startswith("Automatic direction changes"):
             cat.handle_event(key_event(pygame.K_DOWN))
 
-        assert cat.current_help().startswith("Simple changes between forward and reverse")
+        assert cat.current_help().startswith("Both styles change direction with a fresh press")
         cat.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.automatic_direction_changes == "deliberate"
         assert Settings.load().automatic_direction_changes == "deliberate"

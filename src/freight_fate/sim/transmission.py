@@ -20,6 +20,12 @@ NEUTRAL = 0
 AUTO_UPSHIFT_RPM = 1750
 AUTO_DOWNSHIFT_RPM = 1050
 SHIFT_TIME = 1.0  # seconds of torque interruption
+# With the engine brake working, a real automatic pre-selects a lower range
+# to put the engine where the retarder bites (high RPM) instead of upshifting
+# away from it. Downshift while below the target band, but never into a gear
+# that would spin the engine past the ceiling.
+JAKE_PRESELECT_RPM = 1700
+JAKE_MAX_RPM = 2150
 PROGRESSIVE_UPSHIFT_RPM = (1000, 1300, 1400, 1500, 1600, 1700, 1700, 1700, 1700, 1800)
 
 
@@ -104,12 +110,15 @@ class Transmission:
         start_gear: int = 1,
         upshift_steps: int = 1,
         downshift_target: int | None = None,
+        engine_braking: bool = False,
     ) -> int | None:
         """Pick a gear in automatic mode. Returns the new gear when it changes.
 
         While braking the box never upshifts -- a real automatic holds the gear
         for engine braking instead of grabbing a taller one as you slow, which
-        otherwise read as "geared up while stopping"."""
+        otherwise read as "geared up while stopping". With the engine brake
+        active it goes further and pre-selects DOWN toward the retard band,
+        because a jake in overdrive at low RPM is barely a brake at all."""
         if not self.automatic or self.shifting:
             return None
         if self.in_reverse:
@@ -129,13 +138,33 @@ class Transmission:
             self._shift_timer = SHIFT_TIME
             self._gear_hold_timer = 0.0
             return self.gear
-        if self._gear_hold_timer < minimum_shift_interval_s:
+        # The comfort hold between shifts never delays engine protection:
+        # with the road driving the engine past the jake ceiling, the box
+        # upshifts NOW, timer or no timer. Under power the governor caps RPM,
+        # so the hold stays in charge and anti-hunting keeps its teeth.
+        if self._gear_hold_timer < minimum_shift_interval_s and not (
+            engine_braking and rpm > JAKE_MAX_RPM
+        ):
             return None
-        if rpm > upshift_rpm and self.gear < self.num_gears and not braking and can_upshift:
+        # Braking or engine-braking holds the gear -- except that a real
+        # automatic protects its engine: once the road spins it past the
+        # ceiling, the box upshifts anyway. On a downgrade that trades
+        # engine safety for a taller gear and a weaker jake, which is
+        # exactly the runaway spiral a mismanaged descent earns.
+        hold_gear = (braking or engine_braking) and rpm < JAKE_MAX_RPM
+        if rpm > upshift_rpm and self.gear < self.num_gears and not hold_gear and can_upshift:
             self.gear = min(self.num_gears, self.gear + max(1, upshift_steps))
             self._shift_timer = SHIFT_TIME
             self._gear_hold_timer = 0.0
             return self.gear
+        if engine_braking and moving and self.gear > 1 and rpm < JAKE_PRESELECT_RPM:
+            lower = GEAR_RATIOS[self.gear - 2]
+            current = GEAR_RATIOS[self.gear - 1]
+            if rpm * lower / current <= JAKE_MAX_RPM:
+                self.gear -= 1
+                self._shift_timer = SHIFT_TIME
+                self._gear_hold_timer = 0.0
+                return self.gear
         if rpm < AUTO_DOWNSHIFT_RPM and self.gear > 1 and moving:
             target = self.gear - 1 if downshift_target is None else downshift_target
             self.gear = max(1, min(self.gear - 1, target))
