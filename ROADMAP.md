@@ -200,9 +200,35 @@ terminal becomes the anchor of that week instead of a spawn point.
       about two dry miles at highway speed; today the snap is the first
       thing you hear); a wear-based brake squeak (worn pads chirp at every
       stop -- the real wear-indicator sound, distinct from the existing
-      too-hot squeal); the latch catch click (distinct from the gear
-      click). Source from the owner's NAS sound library (film/broadcast
+      too-hot squeal); the latch catch click (shipped 2026-07-15 with a
+      ui/tick placeholder -- swap for a proper cab sound in this pass).
+      Source from the owner's NAS sound library (film/broadcast
       quality) first, generate only what it lacks.
+- [ ] **Engine and shift audio tells the truth at low speed (owner
+      playtest 2026-07-16).** Rolling out through the low gears today is
+      "click, click, click, and about half a second of rev sound" -- the
+      gear click fires but the engine barely voices the pull between
+      shifts, so a launch reads as UI noises instead of a working
+      diesel. Suspects to investigate before touching assets: the
+      shift-time engine-load audio cap (SHIFT_LOAD_CAP 0.45) and its
+      recovery window swallowing the whole between-shift interval when
+      low-speed upshifts arrive back to back; RPM-to-pitch/volume
+      mapping too flat across the low band; and automatic upshift pacing
+      itself. The fix should make first-to-fourth sound like climbing
+      through a real gearbox: revs build, drop on the shift, build
+      again. Part of the sound overhaul but diagnosable in code first.
+- [ ] **Audible traffic -- hear the vehicle you overtake (owner idea
+      2026-07-16).** Traffic already exists as modeled vehicles with
+      lanes and speeds; give the near ones voices: continuous positional
+      emitters (engine/tire loops) panned by relative lane and faded by
+      gap, so closing on a slow truck is heard before any speech, an
+      overtake tracks past the window, and a vehicle sitting in the
+      passing lane is audible before a lane change -- the ear-level
+      groundwork that makes real overtaking decisions possible. Speech
+      stays the fallback (L and the traffic status already report
+      lanes); sounds from the NAS library. Infrastructure work on our
+      side of the fence -- independent of the steering-grammar design
+      offered to Josh.
 - [ ] Runaway truck ramps as regular highway furniture on steep descents: the
       real ramps are now baked (96 tagged escape ramps with side and milepost
       in `world_data/us/gameplay/ramps.jsonl`, read offline from the local
