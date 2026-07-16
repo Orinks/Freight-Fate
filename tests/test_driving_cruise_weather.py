@@ -847,10 +847,11 @@ def clear_weather(driving):
 def test_hazard_deadline_covers_braking_time_from_current_speed():
     """A fixed 3-4.5 s window was unbeatable at highway speed: a full-service
     stop from 65 to 25 mph alone takes ~5 s. The deadline must be the braking
-    time from the current speed plus the rolled reaction slack."""
+    time the truck actually needs -- fade, wear, and load included -- from
+    the current speed, plus the rolled reaction slack."""
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind
-    from freight_fate.states.driving import HAZARD_SAFE_MPH, MPH_PER_MPS, G
+    from freight_fate.states.driving import HAZARD_SAFE_MPH, MPH_PER_MPS
 
     app = App()
     try:
@@ -862,7 +863,7 @@ def test_hazard_deadline_covers_braking_time_from_current_speed():
         t.grip, t.grade = 1.0, 0.0
         hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 3.0})
         driving._handle_trip_event(hazard)
-        brake_s = (t.speed_mph - HAZARD_SAFE_MPH) / MPH_PER_MPS / (G * t.specs.max_brake_decel_g)
+        brake_s = (t.speed_mph - HAZARD_SAFE_MPH) / MPH_PER_MPS / t.full_service_decel_mps2()
         assert driving._hazard_deadline == pytest.approx(brake_s + 3.0, abs=0.01)
         assert driving._hazard_deadline > 7.5
     finally:
@@ -885,6 +886,49 @@ def test_automatic_emergency_braking_engages_once_and_cancels_cruise(monkeypatch
         assert driving.truck.brake == 1.0
         assert driving._cruise_mph is None
         assert [text for text, _ in spoken].count("Emergency braking engaged.") == 1
+    finally:
+        app.shutdown()
+
+
+def test_brake_budget_honors_fade_wear_and_load():
+    """The AEB budget must use the braking the truck can actually deliver:
+    the spec number engaged the assist two seconds before a collision on
+    hot brakes (playtest transcript, 2026-07-16)."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        t = driving.truck
+        t.velocity_mps = 29.0  # ~65 mph
+        t.grip, t.grade = 1.0, 0.0
+        fresh = driving._brake_budget_s()
+
+        t.brake_temp_c = t.specs.brake_fade_temp_c + 150.0  # cooked drums
+        hot = driving._brake_budget_s()
+        assert hot > fresh * 1.5
+
+        t.brake_temp_c = 20.0
+        t.brake_wear_pct = 60.0
+        worn = driving._brake_budget_s()
+        assert worn > fresh
+    finally:
+        app.shutdown()
+
+
+def test_automatic_emergency_braking_leads_the_budget(monkeypatch):
+    """The assist engages with margin over the physics budget: braking heats
+    the brakes, so a zero-margin engage under-delivers exactly as it fires."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        driving.truck.velocity_mps = 25.0
+        # More time left than the raw budget, but within the safety lead.
+        driving._hazard_deadline = driving._brake_budget_s() * 1.1 + 0.2
+        driving._update_hazard(0.01)
+        assert driving.truck.brake == 1.0
     finally:
         app.shutdown()
 
@@ -1082,9 +1126,7 @@ def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
     app = App()
     events, played = [], []
     monkeypatch.setattr(app.ctx.audio, "play", lambda key, **k: played.append(key))
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: events.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)

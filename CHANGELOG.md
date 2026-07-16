@@ -339,6 +339,22 @@
   silence, and after a missed exit the short-form turnaround announcement now
   reminds you to signal again for the next pass.
 
+- **Emergency braking now saves you even on hot or worn brakes.** The
+  automatic emergency braking assist timed its intervention using the
+  truck's spec-sheet braking numbers, but hot drums, worn shoes, and a
+  heavy load all brake worse than the spec sheet -- so on tired brakes the
+  assist could engage two seconds before the collision it was supposed to
+  prevent. The assist now measures what the brakes can actually deliver
+  right now and engages early enough to matter, with a safety margin for
+  the heat the stop itself adds. Hazard warnings also arrive earlier when
+  the truck genuinely needs more stopping room.
+
+- **The ramp light says how far back you stopped.** "Creep ahead" was the
+  wrong instruction when your cautious stop landed six hundred feet from
+  the stop bar -- creeping that far takes several light cycles. When you
+  stop well short, the game now says the distance and tells you to drive
+  up and stop at the bar, using the red phase to close the gap.
+
 - **The ramp light now tells you where you are, not just what color it is.**
   Stopping cautiously when the ramp light was announced could leave you a
   quarter mile short of the actual stop bar -- too far to cross on one green

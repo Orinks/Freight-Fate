@@ -355,8 +355,20 @@ city service drives below.)
       standstill -- an endless red/green loop with zero position feedback.
       Speech is now stop-bar-aware: a stopped-short creep prompt, at-the-bar
       vs short-of-it yellow/green wording, and the callout says to stop AT
-      the light. Open follow-up: consider a queue-position readout (S-style
-      key) for distance to the bar while on a controlled ramp.
+      the light. Round 2 (verified live, same day): the prompt now NAMES the
+      gap in feet/meters and says "drive up" past ~200 ft -- "creep" over
+      600 ft spans several cycles and still read as broken. Open follow-up:
+      consider a queue-position readout (S-style key) for distance to the
+      bar while on a controlled ramp.
+- [x] **AEB budget honesty (playtest, 2026-07-16).** `_brake_budget_s` used
+      the spec-sheet decel (rated g x weather grip) while the real brake
+      model applies fade (to 20 percent when cooked), shoe wear, tread, and
+      the overweight capacity cap -- so on hot brakes the assist engaged
+      with zero margin and the collision landed 2 s after "Emergency
+      braking engaged." Now `TruckState.full_service_decel_mps2()` feeds
+      the budget (hazard warning lead times inherit the honesty), and the
+      assist leads by AEB_BUDGET_MARGIN + AEB_LEAD_S for the heat the stop
+      itself adds.
 - [x] **Discrete lanes on the drift model.** `LaneKeeping` carries a discrete
       lane index under its continuous offset: with steering assist on,
       steering across the line is the lane change; with assist off, a

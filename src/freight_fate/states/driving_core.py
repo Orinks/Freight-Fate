@@ -130,6 +130,9 @@ EXIT_LANE_READY = 0.85  # accumulated right-lane commitment
 EXIT_LANE_OFFSET_READY = 0.45  # right-side lane position also counts
 EXIT_CANCEL_GUARD_MI = 1.0  # inside this, X keeps the signal; a second press cancels
 EXIT_TAP_HOLD_S = 0.35  # a Right press this short is a tap, not held steering
+AEB_BUDGET_MARGIN = 1.2  # emergency braking leads the physics budget by this factor
+AEB_LEAD_S = 0.5  # plus this flat lead, covering brake heat added during the stop
+RAMP_CREEP_MI = 0.04  # within ~200 ft of the bar, "creep"; farther is a drive
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 # Ramp terminals: where the off-ramp meets the surface road there is usually

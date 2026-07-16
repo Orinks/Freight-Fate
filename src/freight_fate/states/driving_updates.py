@@ -451,10 +451,7 @@ class DrivingUpdateMixin:
             p.fatigue = min(
                 100.0,
                 p.fatigue
-                + hos.fatigue_rate_per_min(night)
-                * gm
-                * fatigue_mult
-                * p.fatigue_buff_rate(now_h),
+                + hos.fatigue_rate_per_min(night) * gm * fatigue_mult * p.fatigue_buff_rate(now_h),
             )
         for worn in p.expire_buffs(now_h):
             text = worn.get("worn_off") or f"The {worn.get('label', 'buff').lower()} has worn off."
@@ -981,13 +978,14 @@ class DrivingUpdateMixin:
     def _brake_budget_s(self) -> float:
         """Seconds of full service braking to reach the hazard-safe speed.
 
-        Uses the truck's rated deceleration on the current surface, helped
-        uphill and hurt downhill, so a warning at 65 in the snow allows the
-        stop it actually takes there.
+        Uses the braking the truck can actually deliver right now -- fade,
+        wear, load, and grip -- helped uphill and hurt downhill. The rated
+        spec number engaged the assist two seconds before a collision on
+        hot brakes (playtest transcript, 2026-07-16).
         """
         t = self.truck
         over_mps = max(0.0, (t.speed_mph - HAZARD_SAFE_MPH) / MPH_PER_MPS)
-        decel = G * (t.specs.max_brake_decel_g * t.grip + t.grade)
+        decel = t.full_service_decel_mps2() + G * t.grade
         return over_mps / max(decel, 0.5)
 
     def _update_hazard(self, dt: float) -> None:
@@ -1002,9 +1000,12 @@ class DrivingUpdateMixin:
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
         self._hazard_deadline -= dt
+        # The assist leads the budget: braking heats the brakes, so the stop
+        # the budget just predicted gets slower while it happens. Engaging at
+        # zero margin collided two seconds after "Emergency braking engaged."
         if (
             self.ctx.settings.automatic_emergency_braking
-            and self._hazard_deadline <= self._brake_budget_s()
+            and self._hazard_deadline <= self._brake_budget_s() * AEB_BUDGET_MARGIN + AEB_LEAD_S
         ):
             self.truck.brake = max(self.truck.brake, 1.0)
             if not self._automatic_braking_announced:

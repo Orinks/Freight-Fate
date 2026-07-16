@@ -945,7 +945,24 @@ class DrivingEventMixin:
         if self._ramp_creep_prompt_said:
             return
         self._ramp_creep_prompt_said = True
-        if self._ramp_light_phase() == "green":
+        # Name the gap: "creep" for a real 600-foot gap takes minutes and
+        # reads as a light stuck in a loop. Far back is a drive, and the red
+        # phase is exactly the time to make it.
+        gap_mi = self._ramp_mi - RAMP_ACCESS_MI
+        on_green = self._ramp_light_phase() == "green"
+        if gap_mi > RAMP_CREEP_MI:
+            gap = self._short_distance_text(gap_mi)
+            if on_green:
+                message = (
+                    f"You are stopped about {gap} short of the light, and it "
+                    "is green. Drive up now; stop at the bar if it changes."
+                )
+            else:
+                message = (
+                    f"You are stopped about {gap} short of the light. Drive "
+                    "up and stop at the bar; the red is the time to close the gap."
+                )
+        elif on_green:
             message = "You are stopped short of the light and it is green. Roll ahead now."
         else:
             message = (
@@ -953,6 +970,14 @@ class DrivingEventMixin:
                 "at the stop bar for green."
             )
         self.ctx.say_event(message, interrupt=False)
+
+    def _short_distance_text(self, miles: float) -> str:
+        """A short gap in round spoken units: feet or meters, never decimals."""
+        if self.ctx.settings.imperial_units:
+            feet = max(50, int(round(miles * 5280.0 / 50.0)) * 50)
+            return f"{feet} feet"
+        meters = max(20, int(round(miles * 1609.344 / 20.0)) * 20)
+        return f"{meters} meters"
 
     def _announce_ramp_terminal(self) -> None:
         """Mid-ramp callout naming the control at the terminal."""

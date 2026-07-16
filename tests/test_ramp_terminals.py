@@ -291,18 +291,24 @@ def test_stopped_short_of_the_light_gets_creep_guidance(monkeypatch):
         d._ramp_mi = RAMP_ACCESS_MI + 0.15  # stopped well short of the bar
 
         d._update_ramp_light(0.1)
-        assert any("stopped short of the light" in text for text in spoken)
+        # A real gap is named in feet and driven, not crept: 0.15 mi of
+        # "creep" spans several light cycles and reads as a stuck light.
+        assert any("800 feet short of the light" in text for text in spoken)
+        assert any("Drive up" in text for text in spoken)
 
         # Once per stop, not every frame.
         d._update_ramp_light(0.1)
-        assert len([t for t in spoken if "stopped short of the light" in t]) == 1
+        assert len([t for t in spoken if "short of the light" in t]) == 1
 
-        # Rolling re-arms the prompt; the next stop short prompts again.
+        # Rolling re-arms the prompt; the next stop short prompts again --
+        # and within a couple hundred feet the wording drops to a creep.
         d.truck.velocity_mps = 10.0 / 2.2369362920544
         d._update_ramp_light(0.1)
         d.truck.velocity_mps = 0.0
+        d._ramp_mi = RAMP_ACCESS_MI + 0.02
         d._update_ramp_light(0.1)
-        assert len([t for t in spoken if "stopped short of the light" in t]) == 2
+        assert len([t for t in spoken if "short of the light" in t]) == 2
+        assert any("Creep ahead" in text for text in spoken)
 
         # At the bar the prompt stays quiet: the waiting handshake owns it.
         spoken.clear()
