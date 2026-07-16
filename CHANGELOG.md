@@ -4,6 +4,14 @@
 
 ### Added
 
+- **The radio finally sounds like radio: fifty new original songs.** The
+  fictional stations grew real rotations -- the country stations now spin
+  fifteen songs, the classic rock stations fifteen, and the blues and soul
+  stations twelve, mixing sung songs with instrumentals in each format.
+  The Freight Fate Roadhouse picked up ten fresh daytime instrumentals,
+  quiet new night beds joined the after-dark rotation, and the Night Line
+  now slips in two late-night vocal ballads between its host breaks.
+
 - **Real streets reach the whole map now.** The street and facility data
   sweep re-ran over all six hundred twenty-three cities: sixty percent of
   home-terminal yards now start every load with spoken turn-by-turn
