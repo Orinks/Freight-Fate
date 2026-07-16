@@ -867,6 +867,7 @@ class DrivingEventMixin:
         self._ramp_light_last_phase = ""
         self._ramp_terminal_done = self._ramp_control == "none"
         self._ramp_waiting_at_light = False
+        self._ramp_creep_prompt_said = False
 
     def _ramp_light_phase(self) -> str:
         cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
@@ -887,6 +888,7 @@ class DrivingEventMixin:
         if self._ramp_mi is None or self._ramp_control != "signal" or self._ramp_terminal_done:
             return
         self._ramp_light_timer += dt
+        self._update_ramp_queue_guidance()
         phase = self._ramp_light_phase()
         if not self._ramp_light_announced or phase == self._ramp_light_last_phase:
             return
@@ -900,19 +902,57 @@ class DrivingEventMixin:
             return
         # Every phase change speaks. The light is an instruction, not
         # ambiance: a silent flip back to red between the spoken green and
-        # the stop bar cost real playtesters real trailer damage.
+        # the stop bar cost real playtesters real trailer damage. The wording
+        # is distance-aware: a screen shows where the stop bar is, so speech
+        # has to say whether the driver has reached it.
+        short = self._ramp_mi > RAMP_ACCESS_MI
         if phase == "red":
             self.ctx.audio.play("events/ramp_light_red", volume=0.7)
             self.ctx.say_event("The light ahead turns red. Be ready to stop.", interrupt=False)
         elif phase == "yellow":
             self.ctx.audio.play("ui/notify", volume=0.7)
-            self.ctx.say_event(
-                "The light ahead turns yellow. Stop if you are not at it yet.",
-                interrupt=False,
+            message = (
+                "The light ahead turns yellow. You are short of it: stop, "
+                "then creep up to the bar on the red."
+                if short
+                else "The light turns yellow at the bar. Continuing through is legal."
             )
+            self.ctx.say_event(message, interrupt=False)
         else:
             self.ctx.audio.play("events/ramp_light_green", volume=0.7)
-            self.ctx.say_event("The light ahead turns green.", interrupt=False)
+            message = (
+                "The light ahead turns green. Roll toward it; if it changes "
+                "before you are there, stop and creep up on the red."
+                if short
+                else "The light ahead turns green."
+            )
+            self.ctx.say_event(message, interrupt=False)
+
+    def _update_ramp_queue_guidance(self) -> None:
+        """Tell a driver stopped short of the stop bar to close the gap.
+
+        A cautious stop on the first "brake to a stop" callout can land a
+        quarter mile short of the bar, where one green is never enough road
+        from a standstill. Without this prompt that plays as a light stuck
+        in an endless loop (playtest transcript, 2026-07-16)."""
+        if not self._ramp_light_announced or self._ramp_waiting_at_light:
+            return
+        if self._ramp_mi is None or self._ramp_mi <= RAMP_ACCESS_MI:
+            return
+        if self.truck.speed_mph > RED_STOP_MPH:
+            self._ramp_creep_prompt_said = False
+            return
+        if self._ramp_creep_prompt_said:
+            return
+        self._ramp_creep_prompt_said = True
+        if self._ramp_light_phase() == "green":
+            message = "You are stopped short of the light and it is green. Roll ahead now."
+        else:
+            message = (
+                "You are stopped short of the light. Creep ahead and hold "
+                "at the stop bar for green."
+            )
+        self.ctx.say_event(message, interrupt=False)
 
     def _announce_ramp_terminal(self) -> None:
         """Mid-ramp callout naming the control at the terminal."""
@@ -924,12 +964,17 @@ class DrivingEventMixin:
                 "events/ramp_light_red" if phase == "red" else "events/ramp_light_green",
                 volume=0.8,
             )
+            # "Brake to a stop" alone invites stopping right here, a quarter
+            # mile short of the bar; the stop belongs at the light.
             if phase == "red":
-                message = "Traffic light at the end of the ramp, currently red. Brake to a stop."
+                message = (
+                    "Traffic light at the end of the ramp, currently red. "
+                    "Roll down and stop at the light."
+                )
             elif phase == "yellow":
                 message = (
                     "Traffic light at the end of the ramp, currently yellow -- "
-                    "it will be red when you reach it. Brake to a stop."
+                    "it will be red when you reach it. Roll down and stop at the light."
                 )
             else:
                 message = "Traffic light at the end of the ramp, currently green."

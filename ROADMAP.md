@@ -348,6 +348,15 @@ city service drives below.)
       dying every frame; and the turnaround dropped the player 1 mile out --
       a few real seconds under compression. Now every miss reroutes, and the
       turnaround uses the full _exit_window_mi() lead like a first approach.
+      Third finding (turnaround fix verified live in the same session): a
+      cautious stop on "brake to a stop" landed ~0.2 mi short of the ramp
+      light's stop bar, outside RAMP_ACCESS_MI, where the waiting handshake
+      never engages and one 15-second green cannot be crossed from a
+      standstill -- an endless red/green loop with zero position feedback.
+      Speech is now stop-bar-aware: a stopped-short creep prompt, at-the-bar
+      vs short-of-it yellow/green wording, and the callout says to stop AT
+      the light. Open follow-up: consider a queue-position readout (S-style
+      key) for distance to the bar while on a controlled ramp.
 - [x] **Discrete lanes on the drift model.** `LaneKeeping` carries a discrete
       lane index under its continuous offset: with steering assist on,
       steering across the line is the lane change; with assist off, a

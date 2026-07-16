@@ -339,6 +339,15 @@
   silence, and after a missed exit the short-form turnaround announcement now
   reminds you to signal again for the next pass.
 
+- **The ramp light now tells you where you are, not just what color it is.**
+  Stopping cautiously when the ramp light was announced could leave you a
+  quarter mile short of the actual stop bar -- too far to cross on one green
+  from a standstill -- and the light just kept cycling with no way to know
+  why. The game now says when you are stopped short of the light and tells
+  you to creep up to the stop bar, the yellow and green announcements say
+  whether you have reached the bar, and the first callout says to roll down
+  and stop at the light rather than just "brake to a stop."
+
 - **Missing the destination exit twice no longer strands you at the end of
   the road.** The first missed destination exit looped you back for another
   approach, but a second miss silently gave up: the trip pinned at zero miles

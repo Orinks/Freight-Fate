@@ -277,6 +277,66 @@ def test_crossing_on_yellow_is_legal():
         app.shutdown()
 
 
+def test_stopped_short_of_the_light_gets_creep_guidance(monkeypatch):
+    """A cautious stop far short of the bar must not read as a stuck light:
+    the game says the driver is short and to creep up (playtest 2026-07-16)."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(d.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+        _on_ramp(d, "signal", red=True, mph=0.0)
+        d._ramp_mi = RAMP_ACCESS_MI + 0.15  # stopped well short of the bar
+
+        d._update_ramp_light(0.1)
+        assert any("stopped short of the light" in text for text in spoken)
+
+        # Once per stop, not every frame.
+        d._update_ramp_light(0.1)
+        assert len([t for t in spoken if "stopped short of the light" in t]) == 1
+
+        # Rolling re-arms the prompt; the next stop short prompts again.
+        d.truck.velocity_mps = 10.0 / 2.2369362920544
+        d._update_ramp_light(0.1)
+        d.truck.velocity_mps = 0.0
+        d._update_ramp_light(0.1)
+        assert len([t for t in spoken if "stopped short of the light" in t]) == 2
+
+        # At the bar the prompt stays quiet: the waiting handshake owns it.
+        spoken.clear()
+        d._ramp_creep_prompt_said = False
+        d._ramp_mi = RAMP_ACCESS_MI
+        d._update_ramp_light(0.1)
+        assert not any("stopped short" in text for text in spoken)
+    finally:
+        app.shutdown()
+
+
+def test_yellow_and_green_wording_track_distance_to_the_bar(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = []
+        monkeypatch.setattr(d.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+        # Short of the bar, moving: yellow says stop then creep up on the red.
+        _on_ramp(d, "signal", red=False, mph=20.0)
+        d._ramp_mi = RAMP_ACCESS_MI + 0.15
+        d._update_ramp_light(RAMP_LIGHT_GREEN_S + 0.5)  # into yellow
+        assert any("creep up to the bar" in text for text in spoken)
+
+        # At the bar: yellow says continuing through is legal.
+        spoken.clear()
+        _on_ramp(d, "signal", red=False, mph=20.0)
+        d._update_ramp_light(RAMP_LIGHT_GREEN_S + 0.5)
+        assert any("Continuing through is legal" in text for text in spoken)
+    finally:
+        app.shutdown()
+
+
 def test_every_light_change_is_spoken_on_the_approach(monkeypatch):
     """The silent flip back to red between a spoken green and the stop bar
     cost a real playtester trailer damage; every phase change must speak."""
@@ -286,9 +346,7 @@ def test_every_light_change_is_spoken_on_the_approach(monkeypatch):
     try:
         d = _driving(app)
         spoken = []
-        monkeypatch.setattr(
-            d.ctx, "say_event", lambda text, interrupt=True: spoken.append(text)
-        )
+        monkeypatch.setattr(d.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
         _on_ramp(d, "signal", red=True, mph=10.0)
         d._ramp_mi = RAMP_ACCESS_MI + 0.3  # still descending the ramp
         cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
@@ -377,8 +435,7 @@ def test_upcoming_readout_names_the_ramp_ending(monkeypatch):
         d._speak_upcoming()
 
         assert any(
-            "Test Plaza" in text and "ramp ends at a traffic light" in text
-            for text in spoken
+            "Test Plaza" in text and "ramp ends at a traffic light" in text for text in spoken
         )
     finally:
         app.shutdown()
