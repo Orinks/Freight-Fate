@@ -12,6 +12,13 @@
 
 ### Fixed
 
+- **Live weather no longer turns light haze into thick fog.** With real-world
+  weather on, weather stations report haze or mist whenever they can see less
+  than about seven miles, and the game treated every such report as dense fog:
+  fog horns, a forty mile per hour safe speed, and near-zero visibility, often
+  for an entire route on a humid summer night. The game now checks how far the
+  station can actually see, and only genuinely low visibility becomes fog;
+  ordinary haze plays as an overcast sky instead.
 - **Highways no longer inherit city-street speed limits near their start
   and end.** On six hundred eighty routes, the posted limit spoken and
   enforced at the edges of a drive could come from a city street beside
