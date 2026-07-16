@@ -44,6 +44,14 @@ SIGNATURE_SERVICE_LABELS = {
     "restaurant": "a sit-down restaurant",
     "barbecue": "smoked barbecue and brisket",
     "souvenirs": "souvenirs and road snacks",
+    "cat_scale": "a Cat certified weigh scale",
+    "laundry": "public laundry facilities",
+    "game_room": "a game room",
+    "barber": "a barber shop",
+    "premium_wifi": "premium wifi",
+    "check_cashing": "check cashing services",
+    "def": "diesel exhaust fluid lanes",
+    "atm": "ATM services",
 }
 
 
@@ -103,14 +111,14 @@ BRANDS: tuple[Brand, ...] = (
         "flying_j",
         "Flying J",
         "travel_center",
-        signature=("showers",),
+        signature=("showers", "cat_scale", "laundry", "premium_wifi", "game_room"),
         keywords=("flying j",),
     ),
     Brand(
         "pilot",
         "Pilot",
         "travel_center",
-        signature=("showers",),
+        signature=("showers", "cat_scale", "laundry", "premium_wifi"),
         keywords=("pilot",),
     ),
     Brand(
