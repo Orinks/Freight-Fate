@@ -4,6 +4,15 @@
 
 ### Added
 
+- **The menus borrow a few songs from the radio.** Six radio instrumentals
+  now round out the menu music rotation. By day, the pedal steel of Steel
+  String Sunday, the mellow Dobro Dusk, and the rock of Glass Highway take
+  turns after your career milestone theme; after dark, the night blues of
+  Freight Yard Moon and Midnight Siding and the late-night jazz of Low Beams
+  play behind the quiet piano theme. Your milestone theme still always plays
+  first, and the menus stay instrumental so they never talk over your screen
+  reader.
+
 - **The radio finally sounds like radio: fifty-two new original songs.** The
   fictional stations grew real rotations -- the country stations now spin
   fifteen songs, the classic rock stations seventeen, and the blues and soul

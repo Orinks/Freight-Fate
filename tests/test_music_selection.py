@@ -77,6 +77,20 @@ def test_menu_music_sequence_is_milestone_pool():
     assert "menu_theme" in coast_pool
 
 
+def test_menu_day_rotation_borrows_radio_instrumentals():
+    from freight_fate.models.profile import Profile
+    from freight_fate.music import MENU_DAY_ROTATION_TRACKS, MENU_NIGHT_ROTATION_TRACKS
+
+    day = Profile(name="Rookie")
+    day.game_hours = 12.0
+    pool = select_menu_music_sequence(day)
+    for track in MENU_DAY_ROTATION_TRACKS:
+        assert track.key in pool
+    # The night blues stay behind the night theme only.
+    for track in MENU_NIGHT_ROTATION_TRACKS:
+        assert track.key not in pool
+
+
 def test_menu_music_uses_night_theme_after_dark():
     from freight_fate.models.profile import Profile
 
@@ -95,6 +109,14 @@ def test_menu_music_uses_night_theme_after_dark():
     assert seq[0] == "menu_theme_night"
     assert "menu_theme" in seq
     assert len(seq) > 1
+
+    # The night menu rotates in the night instrumentals, not the day picks.
+    from freight_fate.music import MENU_DAY_ROTATION_TRACKS, MENU_NIGHT_ROTATION_TRACKS
+
+    for track in MENU_NIGHT_ROTATION_TRACKS:
+        assert track.key in seq
+    for track in MENU_DAY_ROTATION_TRACKS:
+        assert track.key not in seq
 
     # No loaded career (title screen, no saves) falls back to the day bed.
     assert select_menu_music(None) == "menu_theme"
@@ -250,7 +272,10 @@ def test_menu_theme_rotates_after_its_duration(monkeypatch):
 
         app.state.update(music_track_duration_s("menu_theme") + 0.1)
 
-        assert played == ["menu_theme", "menu_first_rig"]
+        assert played[0] == "menu_theme"
+        assert len(played) == 2
+        assert played[1] != "menu_theme"
+        assert played[1] in select_menu_music_sequence(app.ctx.profile)
     finally:
         app.shutdown()
 

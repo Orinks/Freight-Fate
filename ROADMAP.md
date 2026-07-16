@@ -290,6 +290,12 @@ section below and the Unreleased changelog; the release-line view:
       ten new Roadhouse daytime instrumentals, four new night beds, and
       two Night Line-only vocal ballads. Second takes of the 24 vocal
       songs are kept outside the repo as auditionable spares.
+- [x] **Menu rotation borrows radio instrumentals.** Six curated radio
+      instrumentals joined the menu music pools: Steel String Sunday,
+      Dobro Dusk, and Glass Highway rotate behind the daytime milestone
+      bed; Freight Yard Moon, Midnight Siding, and Low Beams behind the
+      night piano theme. Menus stay instrumental (no vocals or host
+      breaks) so music never competes with menu speech.
 
 ### World and narration
 
