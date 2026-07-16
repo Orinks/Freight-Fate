@@ -319,6 +319,14 @@
 
 ### Fixed
 
+- **Live weather no longer turns light haze into thick fog.** With real-world
+  weather on, weather stations report haze or mist whenever they can see less
+  than about seven miles, and the game treated every such report as dense fog:
+  fog horns, a forty mile per hour safe speed, and near-zero visibility, often
+  for an entire route on a humid summer night. The game now checks how far the
+  station can actually see, and only genuinely low visibility becomes fog;
+  ordinary haze plays as an overcast sky instead.
+
 - **The driving event voice no longer narrates the past.** With the
   separate event voice enabled, a busy stretch could queue announcements
   faster than the voice speaks, so you would arrive at the dock and sit

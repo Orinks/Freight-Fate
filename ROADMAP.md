@@ -1016,9 +1016,17 @@ Net-new realism candidates, roughly by area:
   (`_check_conditions_speed`), and low visibility shortens hazard reaction time
   (`_visibility_reaction_factor`). Freezing rain is now its own condition (see
   the 1.9 traction deep-dive above), so glaze ice no longer rides on active
-  snow. Remaining follow-ups: black-ice risk on clear cold mornings after wet
+  snow. Live-weather fog is now gated on the station's measured visibility
+  (NWS "Fog/Mist"/"Haze" at 6+ miles played as pea-soup fog before).
+  Remaining follow-ups: black-ice risk on clear cold mornings after wet
   roads (refreeze after the rain has stopped is still not modeled); steady
   crosswind nudging the trailer; and seasonal daylight length.
+- [ ] **Live-weather staleness fallback.** If the network drops mid-trip,
+  `RealWeatherProvider.unavailable()` still reports a city as available while
+  its cache entry is stale (>30 min), so `WeatherSystem.update()` holds the
+  last live condition indefinitely instead of falling back to simulated
+  weather. Treat a stale-only cache as offline (and consider a spoken note
+  when live weather falls back) so conditions can't silently freeze.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
   acceleration, grade lugging, fuel burn, and now braking: the foundation
   brakes have a fixed force ceiling sized for the rated gross, so loads over
