@@ -76,6 +76,20 @@ assets/sounds/CREDITS.md like every other source. Offer the credit up
 front -- "your truck will be the voice of the game" is part of the
 pitch.
 
+## Finding the driver
+
+- Ham radio channels first (Norm is a ham): QRZ and eham forums,
+  local club meetings, r/amateurradio -- trucker hams are a real
+  community, the ham-to-ham ask carries built-in trust, and a ham's
+  cab has a mobile rig in it (real radio texture for the CB layer).
+  Some would record to spec themselves for the fun of it.
+- The truck stop counter: drivers on a 30-minute break, in person.
+- r/Truckers and the TruckersReport forums.
+- Trucking YouTubers/TikTokers: they already own quality recordings
+  of their own cabs and can license raw audio directly.
+- The audiogames.net community: drivers who lost their vision lost
+  the career -- this game is for them, and some are already there.
+
 ## Etiquette and payment
 
 This is a free, open-source game: the standard deal is voluntary
