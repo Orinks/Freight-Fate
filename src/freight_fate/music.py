@@ -185,7 +185,7 @@ CLASSIC_ROCK_TRACKS: tuple[MusicTrack, ...] = (
         197.3,
     ),
     MusicTrack(
-        "radio_rock_greywater_quay", "Greywater Quay", "Folk-rock tale of a salvaged sailor", 123.1
+        "radio_rock_greywater_quay", "Greywater Quay", "Folk-rock tale of a salvaged sailor", 213.1
     ),
     MusicTrack(
         "radio_rock_inland_sea", "Inland Sea", "Heartland rock for the Great Salt Lake", 141.7
