@@ -77,6 +77,10 @@ from .base import MenuItem, MenuState, State
 log = logging.getLogger(__name__)
 
 HAZARD_SAFE_MPH = 25.0
+# A fixed object in your lane -- debris, a stopped vehicle -- cannot be
+# rolled over at 25: clearing it by brake alone means coming nearly to a
+# stop and easing around. A lane change remains the no-time-lost answer.
+HAZARD_CREEP_MPH = 8.0
 MPH_PER_MPS = 2.23694
 
 # Roadside mechanic: a field patch, not a garage restoration.

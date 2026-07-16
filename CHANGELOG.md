@@ -339,6 +339,17 @@
   silence, and after a missed exit the short-form turnaround announcement now
   reminds you to signal again for the next pass.
 
+- **You cannot roll over a ladder at 25 anymore.** Hazards called out as
+  "brake or change lanes" are fixed objects in your lane -- road debris, a
+  blown retread, a stopped vehicle -- and slowing to the moving-hazard safe
+  speed used to clear them, which never made sense. Now a fixed object takes
+  either the swerve (a lane change into a clear lane, at full speed) or
+  braking nearly to a stop before you ease around it. The warning window
+  allows for the longer stop, a spoken hint reminds you the object is still
+  in your lane if you settle at the old safe speed, and automatic emergency
+  braking brings the truck all the way down to a crawl for these. Moving
+  hazards -- animals, whiteouts, stopped traffic -- still clear below 25.
+
 - **Emergency braking now saves you even on hot or worn brakes.** The
   automatic emergency braking assist timed its intervention using the
   truck's spec-sheet braking numbers, but hot drums, worn shoes, and a

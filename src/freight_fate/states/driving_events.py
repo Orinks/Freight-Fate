@@ -79,16 +79,18 @@ class DrivingEventMixin:
             # on this surface; the rolled window covers hearing the warning and
             # getting on the pedal, and fatigue eats into that part only --
             # a drowsy driver reacts late, but the truck stops no slower.
-            slack = event.data.get("deadline_s", 4.0)
-            reaction = tuning_for_time_scale(self.trip.time_scale).reaction_window
-            self._hazard_deadline = self._brake_budget_s() + slack * reaction * (
-                hos.reaction_window_mult(self.ctx.profile.fatigue)
-            )
             # A dodgeable hazard sits in the lane you are in *now*; ending up
             # in any other lane before the deadline clears it, if that lane
-            # is actually open. See _finish_lane_change.
+            # is actually open (see _finish_lane_change). By brake alone it
+            # takes nearly a stop, so its deadline budgets the longer stop.
             self._hazard_dodgeable = bool(event.data.get("dodgeable", False))
             self._hazard_lane = self.lane.lane
+            self._hazard_slow_hint_said = False
+            slack = event.data.get("deadline_s", 4.0)
+            reaction = tuning_for_time_scale(self.trip.time_scale).reaction_window
+            self._hazard_deadline = self._brake_budget_s(self._hazard_target_mph()) + (
+                slack * reaction * hos.reaction_window_mult(self.ctx.profile.fatigue)
+            )
             self._automatic_braking_announced = False
             message = terse_hazard_message(event.message) if self._terse_speech() else event.message
             self.ctx.say_event(message, interrupt=True)

@@ -890,6 +890,76 @@ def test_automatic_emergency_braking_engages_once_and_cancels_cruise(monkeypatch
         app.shutdown()
 
 
+def test_fixed_object_hazard_needs_nearly_a_stop_or_a_swerve(monkeypatch):
+    """You cannot roll over a ladder at 25: a dodgeable hazard resolved by
+    brake alone takes nearly a stop, with a one-time hint past the old safe
+    speed so the quiet never reads as an already-cleared hazard."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving import HAZARD_CREEP_MPH, HAZARD_SAFE_MPH, MPH_PER_MPS
+
+    app = App()
+    spoken = []
+    app.ctx.say_event = lambda text, interrupt=False: spoken.append(text)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.velocity_mps = 29.0  # ~65 mph
+        t.grip, t.grade = 1.0, 0.0
+        hazard = TripEvent(
+            TripEventKind.HAZARD,
+            "Brake or change lanes! Debris on the road.",
+            {"deadline_s": 3.0, "dodgeable": True},
+        )
+        driving._handle_trip_event(hazard)
+        assert driving._hazard_dodgeable
+
+        # The old moving-hazard speed no longer clears it; the hint speaks once.
+        t.velocity_mps = (HAZARD_SAFE_MPH - 1.0) / MPH_PER_MPS
+        driving._update_hazard(1 / 60)
+        driving._update_hazard(1 / 60)
+        assert driving._hazard_deadline is not None
+        assert spoken.count("It is still in your lane. Nearly stop, or change lanes.") == 1
+
+        # Nearly stopping resolves it, with the ease-around fiction spoken.
+        t.velocity_mps = (HAZARD_CREEP_MPH - 1.0) / MPH_PER_MPS
+        driving._update_hazard(1 / 60)
+        assert driving._hazard_deadline is None
+        assert any("ease around it" in text for text in spoken)
+    finally:
+        app.shutdown()
+
+
+def test_fixed_object_hazard_deadline_budgets_the_longer_stop():
+    """The dodgeable deadline must cover braking to the creep speed, not the
+    moving-hazard speed -- otherwise the honest demand becomes unwinnable."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving import HAZARD_CREEP_MPH
+
+    app = App()
+    try:
+        app.ctx.settings.time_scale = 20.0  # reaction window multiplier 1.0
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.velocity_mps = 29.0  # ~65 mph
+        t.grip, t.grade = 1.0, 0.0
+        hazard = TripEvent(
+            TripEventKind.HAZARD,
+            "Brake or change lanes! Debris on the road.",
+            {"deadline_s": 3.0, "dodgeable": True},
+        )
+        driving._handle_trip_event(hazard)
+        assert driving._hazard_deadline == pytest.approx(
+            driving._brake_budget_s(HAZARD_CREEP_MPH) + 3.0, abs=0.01
+        )
+        assert driving._hazard_deadline > driving._brake_budget_s() + 3.0
+    finally:
+        app.shutdown()
+
+
 def test_brake_budget_honors_fade_wear_and_load():
     """The AEB budget must use the braking the truck can actually deliver:
     the spec number engaged the assist two seconds before a collision on

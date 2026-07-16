@@ -360,6 +360,14 @@ city service drives below.)
       600 ft spans several cycles and still read as broken. Open follow-up:
       consider a queue-position readout (S-style key) for distance to the
       bar while on a controlled ramp.
+- [x] **Stop-or-swerve for fixed-object hazards (owner call, 2026-07-16).**
+      "Brake to 25 clears debris" never made physical sense. Dodgeable
+      (fixed-in-lane) hazards now resolve by lane change at speed OR by
+      braking to HAZARD_CREEP_MPH (8) and easing around; the deadline
+      budgets the longer stop via _brake_budget_s(target), a once-per-hazard
+      hint fires if the player settles at the old 25 ("still in your
+      lane"), and AEB brakes to the creep speed for these. Moving/surface
+      hazards keep the 25-mph contract. Manual + in-game help updated.
 - [x] **AEB budget honesty (playtest, 2026-07-16).** `_brake_budget_s` used
       the spec-sheet decel (rated g x weather grip) while the real brake
       model applies fade (to 20 percent when cooked), shoe wear, tread, and

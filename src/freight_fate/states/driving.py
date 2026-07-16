@@ -120,6 +120,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._microsleep_cooldown_gm = 0.0
         self._microsleep_misses = 0  # consecutive nods drifted off the road
         self._hazard_deadline: float | None = None
+        self._hazard_slow_hint_said = False
         self._automatic_braking_announced = False
         self._last_event_message = ""  # last spoken route announcement, for replay
         self._speed_announce_timer = 0.0
