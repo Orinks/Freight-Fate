@@ -328,6 +328,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         stop.services,
                         stop.parking,
                         exit_label,
+                        parking_spaces=stop.parking_spaces,
                     )
                 )
         return out
@@ -465,6 +466,17 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         start + offset,
                         f"toll road ahead: {toll.road}",
                         f"{toll.method_label} toll point ahead: {toll.name}. {toll_text}",
+                    )
+                )
+            for restriction in leg.restrictions:
+                offset = _stop_offset_for_direction(restriction.at_mi, leg.miles, forward)
+                cues.append(
+                    NavigationCue(
+                        f"restriction:{i}:{restriction.at_mi}:{restriction.kind}",
+                        "restriction",
+                        start + offset,
+                        restriction.spoken_ahead,
+                        restriction.spoken_near,
                     )
                 )
             for ix in leg.interchanges:
@@ -1129,6 +1141,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             return f"Traffic in {ahead_text}: {cue.text}{speed}."
         if cue.kind == "toll":
             return f"Toll point in {ahead_text}: {cue.text}."
+        if cue.kind == "restriction":
+            return f"Posted restriction in {ahead_text}: {cue.text}."
         return f"Next guidance in {ahead_text}: {cue.text}."
 
     def next_navigation_cue(self) -> NavigationCue | None:

@@ -4,6 +4,20 @@
 
 ### Added
 
+- **Rest stops can now tell you how big the lot is.** Where the official
+  federal truck-parking survey covers a stop, the spoken parking note adds
+  the counted spaces, like confirmed truck parking, 45 spaces. Lot size
+  matters at night too: a small surveyed turnout fills up earlier in the
+  evening crunch, while a big travel plaza holds out longer. A couple of
+  surveyed public lots also joined sparse corridors as new rest stops.
+
+- **The GPS now calls out posted low bridges and weight limits.** Corridors
+  carry real posted clearance and weight signs from the map data, and the
+  GPS speaks them ahead of the point like it does toll plazas: in two miles,
+  low clearance ahead, posted 13 feet 6 inches. Your route already avoids
+  bridges a truck cannot legally pass, so these are heads-up calls, not
+  detours.
+
 - **The menus borrow a few songs from the radio.** Six radio instrumentals
   now round out the menu music rotation. By day, the pedal steel of Steel
   String Sunday, the mellow Dobro Dusk, and the rock of Glass Highway take

@@ -601,6 +601,9 @@ class RoadStop:
     services: tuple[str, ...] = ()
     parking: str = "unknown"
     exit_label: str = ""  # "exit 7" when a real OSM interchange sits here
+    # Surveyed truck-parking spot count (FHWA Jason's Law via BTS NTAD);
+    # 0 means unsurveyed and the spoken cue stays capacity-silent.
+    parking_spaces: int = 0
 
     @property
     def label(self) -> str:
@@ -612,13 +615,16 @@ class RoadStop:
 
     @property
     def parking_text(self) -> str:
-        return {
+        text = {
             "confirmed": "confirmed truck parking",
             "likely": "",
             "limited": "limited truck parking",
             "unknown": "parking not verified",
             "none": "no truck parking",
         }.get(self.parking, "parking not verified")
+        if text and self.parking_spaces > 0 and self.parking in {"confirmed", "limited"}:
+            return f"{text}, {self.parking_spaces} spaces"
+        return text
 
 
 @dataclass

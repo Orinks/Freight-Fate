@@ -82,6 +82,14 @@ Route stops and corridor details live on a leg in
         "estimated": true,
         "source": "Toll authority rate table or calculator, accessed 2026-06-16."
       }
+    ],
+    "restrictions": [
+      {
+        "at_mi": 57.2,
+        "kind": "low_clearance",
+        "feet": 13.5,
+        "source": "OpenStreetMap maxheight tags snapped to route geometry."
+      }
     ]
   },
   "stops": [
@@ -92,6 +100,7 @@ Route stops and corridor details live on a leg in
       "actions": ["park", "save", "fuel", "food", "break", "sleep"],
       "services": ["diesel", "food", "parking"],
       "parking": "confirmed",
+      "parking_spaces": 43,
       "directions": ["both"],
       "curation": "curated",
       "source": "Official operator page or curated Overpass/OSM review."
@@ -115,6 +124,24 @@ right now. Current values are `confirmed`, `likely`, `limited`, `unknown`, and
 parking. Use `limited` for public rest areas or small lots where parking is
 available but capacity is not guaranteed. Use `unknown` only for quarantined or
 incomplete data; unknown parking does not satisfy the dispatch-support contract.
+
+`parking_spaces` is an optional surveyed truck-parking spot count from an
+official inventory -- currently the FHWA Jason's Law survey published as the
+USDOT BTS NTAD "Truck Stop Parking" dataset. 0 or absent means unsurveyed:
+speech stays capacity-silent and the overnight parking crunch keeps its flat
+baseline. When present on a `confirmed` or `limited` stop, the spoken parking
+note appends the count ("confirmed truck parking, 43 spaces") and lot size
+shifts the deterministic overnight fullness odds (small lots fill earlier,
+large travel plazas later).
+
+`restrictions` are route-positioned advisory events like `toll_events`, baked
+from OpenStreetMap `maxheight`/`maxweight` tags on the corridor's mainline
+ways (`tools/build_interchanges.py --restrictions`). `kind` is
+`low_clearance` (with `feet`) or `weight_limit` (with US short `tons`). The
+GPS speaks them ahead of the point; they never reroute or block, because the
+driving-hgv routing already avoids impassable restrictions. An empty baked
+`restrictions` list means the sweep ran and found the corridor clean --
+presence of the key marks a leg as surveyed.
 
 `directions` defaults to `["both"]`. Use `["forward"]` or `["reverse"]` only
 when a ramp, rest area, service plaza, or weigh station applies to one travel
@@ -175,6 +202,7 @@ The GPS layer reads the itinerary and announces concise audio-first cues:
 - one-mile rest-stop exit cues;
 - modeled traffic slowdowns when a lead vehicle or queue is ahead.
 - toll-road and toll-gantry cues with settlement wording.
+- posted low-clearance and weight-limit advisories ahead of the signed point.
 
 Basic traffic is deterministic for a trip seed. The first slice models lead
 traffic packs with a speed, gap, and reason such as slow lead traffic, merging
@@ -258,6 +286,12 @@ checks. The checked-in runtime data is static. Examples include:
   service plazas, truck parking, repair shops, fuel stations, and weigh
   stations. Convert candidates into curated names, categories, services, and
   actions before committing them. Do not call it at runtime.
+- USDOT BTS NTAD "Truck Stop Parking" (the FHWA Jason's Law truck-parking
+  survey): official per-facility truck-parking spot counts used both as a
+  new-stop candidate source and to annotate existing stops with
+  `parking_spaces` and confirmed parking. Downloaded once as GeoJSON and
+  re-run offline:
+  https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about
 - Census/TIGER or Census-derived public state boundary GeoJSON for computing
   state crossings from route geometry.
 - Toll authority calculators and rate pages for source-backed commercial
@@ -542,7 +576,9 @@ expansion must not silently invent unsupported road conditions.
 Stop type labels remain spoken before the curated stop name, such as `public
 rest area: Kenosha Safety Rest Area` or `travel center: Road Ranger Waco`. The
 keyboard flow remains audio-first: stops are announced ahead, the cue includes
-parking certainty such as `confirmed truck parking` or `limited truck parking`,
+parking certainty such as `confirmed truck parking` or `limited truck parking`
+(with the surveyed spot count appended when an official inventory covers the
+lot, such as `confirmed truck parking, 43 spaces`),
 `X` arms the exit, and `T` opens the POI menu when parked at one. Menu items are
 generated from source-backed actions, so a rest area does not offer fuel or
 repair by default, and a weigh station does not pretend to be a travel center.

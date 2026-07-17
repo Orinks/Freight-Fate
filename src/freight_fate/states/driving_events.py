@@ -316,7 +316,9 @@ class DrivingEventMixin:
             return
 
         can_sleep = "sleep" in stop.actions
-        if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi, self.trip.local_hour):
+        if can_sleep and hos.parking_is_full(
+            self.trip_seed, stop.at_mi, self.trip.local_hour, stop.parking_spaces
+        ):
             self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
             return
         self.ctx.push_state(RestStopState(self.ctx, self, stop))

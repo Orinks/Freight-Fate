@@ -683,6 +683,39 @@ section below and the Unreleased changelog; the release-line view:
 
 ### World and narration
 
+- [x] **Official truck-parking capacity on rest stops (landed 2026-07-17).**
+      The FHWA Jason's Law survey (USDOT BTS NTAD Truck Stop Parking, the
+      dataset behind the national truck-parking inventory) now annotates
+      checked-in stops: 68 stops on 57 legs carry a surveyed
+      `parking_spaces` count, spoken with the parking certainty ("confirmed
+      truck parking, 45 spaces"), and the overnight parking crunch is
+      capacity-aware -- a surveyed 8-spot turnout fills earlier than a
+      100-spot travel plaza. Annotation runs offline from a downloaded
+      snapshot (`tools/curate_route_pois.py --annotate-parking`), matches
+      conservatively (distinctive-name overlap, or same-class public
+      facility at the same spot; a branded travel center never inherits a
+      nearby public lot's count), and records the source on each stop.
+- [x] **Unmatched Jason's Law records offered as fill POIs (landed
+      2026-07-17).** `curate_route_pois.py --jasons-law-only` annotates
+      first, then offers only the records that matched no checked-in stop
+      as new public rest-area POIs on legs under the stop-density
+      thresholds (3-mile corridor radius, offline from the local
+      snapshot). Netted 2 new surveyed lots (I-90 near Presho SD, I-25
+      Mile 129 turnout); 9 under-threshold legs have no surveyed lot
+      within reach and keep their coverage gap visible. Survey names are
+      whitespace-sanitized and mile-marker jargon is spoken as "Mile";
+      one previously committed survey name with an embedded newline
+      (Hancock County Welcome Center) was cleaned in the same pass.
+- [x] **Posted low-clearance and weight-limit advisories (landed
+      2026-07-17).** OSM `maxheight`/`maxweight` tags on mainline corridor
+      ways now bake into `corridor.restrictions`
+      (`tools/build_interchanges.py --restrictions`, offline from the cached
+      per-state extracts), and the GPS speaks them ahead like toll points:
+      "In 2 miles, low clearance ahead: posted 13 feet 6 inches." Routing
+      already avoids impassable bridges, so these are the advisory signs a
+      legal truck really passes; a bearing gate keeps restricted streets
+      that cross *over* the highway from baking onto it. An empty baked
+      list records a clean sweep, so silent legs are surveyed, not unknown.
 - [x] **Destination exit offered a state early on rural-highway finishes --
       FIXED 2026-07-16 (player transcripts).** The destination-exit scan
       accepted the last labeled interchange anywhere on the route, so

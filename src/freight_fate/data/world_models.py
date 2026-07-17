@@ -148,6 +148,9 @@ class Stop:
     parking: str = "unknown"
     directions: tuple[str, ...] = ("both",)
     curation: str = "curated"
+    # Truck-parking spot count from an official inventory (FHWA Jason's Law
+    # via BTS NTAD); 0 means unsurveyed and capacity stays out of speech.
+    parking_spaces: int = 0
 
     @property
     def label(self) -> str:
@@ -159,7 +162,10 @@ class Stop:
 
     @property
     def parking_label(self) -> str:
-        return PARKING_CERTAINTY_LABELS[self.parking]
+        label = PARKING_CERTAINTY_LABELS[self.parking]
+        if self.parking_spaces > 0 and self.parking in {"confirmed", "limited"}:
+            return f"{label}, {self.parking_spaces} spaces"
+        return label
 
     @property
     def curated(self) -> bool:
@@ -298,6 +304,49 @@ class TollEvent:
     @property
     def spoken_name(self) -> str:
         return f"toll point: {self.name}"
+
+
+@dataclass(frozen=True)
+class RouteRestriction:
+    """A posted clearance or weight advisory on the driven corridor.
+
+    Baked from OpenStreetMap ``maxheight``/``maxweight`` tags at build time
+    (see ``tools/build_interchanges.py --restrictions``) and stored already
+    normalized: ``feet`` for a ``low_clearance``, US short ``tons`` for a
+    ``weight_limit``. Routing already avoids impassable restrictions, so these
+    are advisory signage a legal truck drives past -- the GPS speaks them
+    ahead like toll points; they never reroute or block."""
+
+    at_mi: float
+    kind: str  # low_clearance | weight_limit
+    feet: float = 0.0
+    tons: float = 0.0
+    source: str = ""
+
+    @property
+    def value_text(self) -> str:
+        if self.kind == "low_clearance":
+            whole = int(self.feet)
+            inches = int(round((self.feet - whole) * 12))
+            if inches >= 12:
+                whole, inches = whole + 1, inches - 12
+            if inches:
+                return f"{whole} feet {inches} inches"
+            return f"{whole} feet"
+        tons = round(self.tons, 1)
+        return f"{int(tons)} tons" if tons == int(tons) else f"{tons} tons"
+
+    @property
+    def kind_label(self) -> str:
+        return "low clearance" if self.kind == "low_clearance" else "weight limit"
+
+    @property
+    def spoken_ahead(self) -> str:
+        return f"{self.kind_label} ahead: posted {self.value_text}"
+
+    @property
+    def spoken_near(self) -> str:
+        return f"{self.kind_label.capitalize()}: posted {self.value_text}."
 
 
 @dataclass(frozen=True)
@@ -476,6 +525,8 @@ class Leg:
     local_speed_mph: float = 0.0
     # Narratable roadside features (OSM bake), spoken as ambient chatter.
     landmarks: tuple[Landmark, ...] = ()
+    # Posted clearance/weight advisories (OSM bake), spoken ahead like tolls.
+    restrictions: tuple[RouteRestriction, ...] = ()
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
