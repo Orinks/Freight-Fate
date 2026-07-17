@@ -42,7 +42,9 @@ visual display mirrors all speech for sighted players and helpers.
   "real world" and each city uses its live current conditions from the free
   [National Weather Service](https://www.weather.gov/documentation/services-web-api)
   API. If it is raining in Chicago right now, it is raining in your game. Works
-  without an API key and falls back to simulated weather offline.
+  without an API key and falls back to simulated weather offline. A separate
+  calendar setting lets career dates and seasons keep advancing while live
+  conditions remain enabled.
 - **Route planning** — route options per job with distance, highways, state
   context, grade/terrain, toll events, curated POIs, and weather forecasts.
   Geometry coverage is broad, while generated placeholder POIs are reported as

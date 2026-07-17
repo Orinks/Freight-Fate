@@ -259,11 +259,13 @@ def test_profile_roundtrip():
     p = Profile(name="Roundtrip Test")
     p.money = 1234.5
     p.career.xp = 2600
+    p.calendar_offset_days = 147
     path = p.save()
     loaded = Profile.load(path)
     assert loaded.money == 1234.5
     assert loaded.career.level == 3
     assert loaded.name == "Roundtrip Test"
+    assert loaded.calendar_offset_days == 147
 
 
 def test_profile_save_is_atomic_and_versioned():

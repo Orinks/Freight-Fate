@@ -8,6 +8,7 @@ from freight_fate.sim.season import (
     CAREER_START_DAY_OF_YEAR,
     DAYS_PER_YEAR,
     FREEZING_C,
+    adjust_for_calendar,
     adjust_for_temperature,
     career_year,
     date_text,
@@ -38,6 +39,19 @@ def test_career_year_increments_after_a_full_year():
     assert career_year(0.0) == 1
     assert career_year(24.0 * (DAYS_PER_YEAR - 1)) == 1
     assert career_year(24.0 * DAYS_PER_YEAR) == 2
+
+
+def test_profile_calendar_offset_changes_date_without_changing_career_time():
+    from freight_fate.models.profile import Profile
+
+    profile = Profile(name="Established", game_hours=30.0)
+    target = _hours_for_day(200) + 15.0
+    profile.anchor_calendar_to(target)
+
+    assert profile.game_hours == 30.0
+    assert date_text(profile.calendar_game_hours) == date_text(target)
+    assert profile.calendar_game_hours % 24 == profile.game_hours % 24
+    assert 0 <= profile.calendar_offset_days < 365
 
 
 def test_weather_system_exposes_date_text():
@@ -103,6 +117,21 @@ def test_thunderstorms_need_warmth():
     assert adjust_for_temperature(WeatherKind.THUNDERSTORM, 25.0) is WeatherKind.THUNDERSTORM
 
 
+def test_calendar_guard_keeps_snow_in_winter_and_storms_in_summer():
+    summer = _hours_for_day(200)
+    winter = _hours_for_day(15)
+    assert adjust_for_calendar(WeatherKind.SNOW, -10.0, summer) is WeatherKind.RAIN
+    assert (
+        adjust_for_calendar(WeatherKind.THUNDERSTORM, 25.0, winter)
+        is WeatherKind.HEAVY_RAIN
+    )
+    assert adjust_for_calendar(WeatherKind.SNOW, -10.0, winter) is WeatherKind.SNOW
+    assert (
+        adjust_for_calendar(WeatherKind.THUNDERSTORM, 25.0, summer)
+        is WeatherKind.THUNDERSTORM
+    )
+
+
 def test_dry_conditions_and_unknown_temperature_pass_through():
     for kind in (WeatherKind.CLEAR, WeatherKind.CLOUDY, WeatherKind.FOG, WeatherKind.WIND):
         assert adjust_for_temperature(kind, -20.0) is kind
@@ -145,7 +174,131 @@ def test_live_weather_makes_season_follow_the_real_clock():
     )
 
 
+def test_live_weather_can_leave_calendar_on_career_clock():
+    """Live conditions do not freeze the career calendar when opted out."""
+
+    class _Provider:
+        def request(self, *a):
+            pass
+
+        def get(self, *a):
+            return WeatherKind.CLEAR
+
+    start = _hours_for_day(151) + 23.5
+    live = WeatherSystem(
+        "great_lakes",
+        seed=1,
+        game_hours=start,
+        provider=_Provider(),
+        live_weather_controls_calendar=False,
+    )
+    before = live.date_text
+    live.update(60.0)
+    assert live.date_text != before
+    assert live.date_text == date_text(start + 1.0)
+    assert live.season == season(start + 1.0)
+
+
+def test_live_snow_is_guarded_by_independent_career_season():
+    class _Provider:
+        def request(self, *a):
+            pass
+
+        def get(self, *a):
+            return WeatherKind.SNOW
+
+        def get_temperature(self, *a):
+            return -10.0
+
+    summer = _hours_for_day(200) + 15.0
+    live = WeatherSystem(
+        "great_lakes",
+        seed=1,
+        game_hours=summer,
+        provider=_Provider(),
+        live_weather_controls_calendar=False,
+    )
+    live.set_city("Chicago", 41.8, -87.6)
+    live.update(0.0)
+    assert live.live is True
+    assert live.season == "summer"
+    assert live.current is not WeatherKind.SNOW
+
+
 def test_temperature_text_uses_player_units():
     hours = _hours_for_day(200) + 15
     assert temperature_text("florida", hours, imperial=True).endswith("Fahrenheit")
     assert temperature_text("florida", hours, imperial=False).endswith("Celsius")
+
+
+def test_terminal_sleep_uses_independent_calendar_with_live_weather(monkeypatch):
+    """Regression: the terminal readout must honor the calendar toggle too."""
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    class _Provider:
+        def request(self, *a):
+            pass
+
+        def get(self, *a):
+            return WeatherKind.CLEAR
+
+        def get_temperature(self, *a):
+            return 25.0
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: _Provider())
+    app.ctx.settings.real_weather = True
+    app.ctx.settings.live_weather_controls_calendar = False
+    app.ctx.profile = Profile(name="Calendar Driver")
+    terminal = CityMenuState(app.ctx)
+    try:
+        terminal._time_weather()
+        assert "March 21" in spoken[-1]
+        assert "July 17" not in spoken[-1]
+        assert "77 degrees" in spoken[-1]
+
+        # A fresh driver gets a confirmation before deliberately sleeping.
+        terminal._sleep()
+        terminal._sleep()
+        terminal._time_weather()
+        assert app.ctx.profile.game_hours == pytest.approx(16.0)
+        assert "March 21" in spoken[-1]  # 6 AM + 10 hours has not crossed midnight
+        assert "July 17" not in spoken[-1]
+        assert "77 degrees" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_terminal_does_not_present_modeled_temperature_while_live_weather_loads(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    class _LoadingProvider:
+        def request(self, *a):
+            pass
+
+        def get(self, *a):
+            return None
+
+        def unavailable(self, *a):
+            return False
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: _LoadingProvider())
+    app.ctx.settings.real_weather = True
+    app.ctx.settings.live_weather_controls_calendar = False
+    app.ctx.profile = Profile(name="Loading Weather Driver")
+    try:
+        CityMenuState(app.ctx)._time_weather()
+        assert "Live weather" in spoken[-1]
+        assert "still loading" in spoken[-1]
+        assert "degrees" not in spoken[-1]
+    finally:
+        app.shutdown()
