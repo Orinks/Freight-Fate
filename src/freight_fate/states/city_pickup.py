@@ -52,15 +52,14 @@ def route_planning_summary(route: Route) -> str:
     )
 
 
-def route_departure_summary(route: Route) -> str:
+def route_departure_summary(route: Route, distance_text: str = "") -> str:
     toll_text = (
         f" Carrier toll estimate {route.estimated_tolls:,.0f} dollars."
         if route.estimated_tolls > 0
         else ""
     )
-    return (
-        f"Loaded trip is {route.miles:.0f} miles via {', then '.join(route.highways)}.{toll_text}"
-    )
+    distance = distance_text or f"{route.miles:.0f} miles"
+    return f"Loaded trip is {distance} via {', then '.join(route.highways)}.{toll_text}"
 
 
 def start_loaded_drive(
@@ -81,7 +80,11 @@ def start_loaded_drive(
     ctx.profile.active_trip = driving.snapshot()
     ctx.save_profile()
     next_context = driving.trip.next_navigation_context()
-    ctx.say(f"{lead}{route_departure_summary(route)} {next_context} Departing now.", interrupt=True)
+    ctx.say(
+        f"{lead}{route_departure_summary(route, ctx.settings.distance_text(route.miles))} "
+        f"{next_context} Departing now.",
+        interrupt=True,
+    )
     ctx.push_state(driving)
 
 
@@ -435,7 +438,9 @@ class RouteSelectState(MenuState):
         items = []
         for i, route in enumerate(self.routes):
             label = (
-                f"Route {i + 1}: {route.describe()}, {self._via_text(route)}. "
+                f"Route {i + 1}: "
+                f"{route.describe(self.ctx.settings.distance_text(route.miles))}, "
+                f"{self._via_text(route)}. "
                 f"{route_planning_summary(route)}"
             )
             items.append(

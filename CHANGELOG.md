@@ -16,6 +16,14 @@
   Repeats can still happen when the board is small, but the days of
   bouncing between the same two cities forever are over.
 
+- **Kilometer mode stays kilometers everywhere.** With units set to
+  kilometers, the dispatch board, route selection, exit signals, GPS
+  and deadhead announcements, city-service errands, settlement
+  distance, the radio station list, and the chain-speed and lane-change
+  advice all still spoke miles here and there. Every spoken distance
+  and speed now follows your units setting, and one mile is finally
+  "1 mile", not "1 miles". Thanks to the forum for the report.
+
 - **The player manual caught up with the alpha.** New sections cover
   mountain driving (the engine brake, gearing down, brake heat and
   fade) and winter driving (winter tires, snow chains, chain laws),

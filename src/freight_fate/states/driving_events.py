@@ -363,17 +363,18 @@ class DrivingEventMixin:
             "signal": " The ramp ends at a traffic light.",
             "stop": " The ramp ends at a stop sign.",
         }.get(self._ramp_control_for(stop), "")
+        ahead_text = self.ctx.settings.distance_text(ahead, precise=True)
         if self.ctx.settings.steering_assist == "off":
             self._exit_lane_alignment = EXIT_LANE_READY
             self._exit_lane_ready_said = True
             self.ctx.audio.play("ui/notify", volume=0.6)
             self.ctx.say(
-                f"{head} {ahead:.1f} miles ahead. Exit lane set.{lane_hint} "
+                f"{head} {ahead_text} ahead. Exit lane set.{lane_hint} "
                 f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp.{ending}"
             )
             return
         self.ctx.say(
-            f"{head} {ahead:.1f} miles ahead.{lane_hint} "
+            f"{head} {ahead_text} ahead.{lane_hint} "
             "Move right for the exit lane, then slow to "
             f"{RAMP_MAX_MPH:.0f} or less for the ramp.{ending}"
         )
@@ -448,7 +449,8 @@ class DrivingEventMixin:
                 else ""
             )
             self.ctx.say_event(
-                f"Exit lane in {ahead:.1f} miles. Signal is on; steer right "
+                f"Exit lane in {self.ctx.settings.distance_text(ahead, precise=True)}. "
+                f"Signal is on; steer right "
                 f"for the exit lane and slow to {RAMP_MAX_MPH:.0f}.{pressure_text}",
                 interrupt=False,
             )
@@ -554,7 +556,7 @@ class DrivingEventMixin:
 
     def _destination_exit_announcement(self, stop, ahead: float) -> str:
         labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
-        distance = f"{ahead:.0f} miles" if round(ahead) != 1 else "1 mile"
+        distance = self.ctx.settings.distance_text(ahead)
         core = (
             f"In {distance}, {labeled}, destination exit."
             if labeled
@@ -1687,16 +1689,19 @@ class DrivingEventMixin:
         return "deliver to " + self._destination_facility_text()
 
     def _pickup_progress_summary(self) -> str:
+        s = self.ctx.settings
         return (
-            f"{self.trip.remaining_miles:.1f} miles remaining of "
-            f"{self.trip.total_miles:.1f} to pickup at "
+            f"{s.distance_text(self.trip.remaining_miles, precise=True)} remaining of "
+            f"{s.distance_text(self.trip.total_miles, precise=True)} to pickup at "
             f"{self._pickup_facility_text()}."
         )
 
     def _city_service_progress_summary(self) -> str:
+        s = self.ctx.settings
         return (
-            f"{self.trip.remaining_miles:.1f} miles remaining of "
-            f"{self.trip.total_miles:.1f} to {self._city_service_text()}."
+            f"{s.distance_text(self.trip.remaining_miles, precise=True)} remaining of "
+            f"{s.distance_text(self.trip.total_miles, precise=True)} to "
+            f"{self._city_service_text()}."
         )
 
     def _handle_city_service_gate(self) -> None:
@@ -1819,9 +1824,11 @@ class DrivingEventMixin:
             else f"Driving loaded to {self.job.spoken_destination}"
         )
         remaining = (
-            f"{self.trip.remaining_miles:.1f} of {self.trip.total_miles:.1f} miles"
+            f"{self.ctx.settings.distance_text(self.trip.remaining_miles, precise=True)}"
+            f" of {self.ctx.settings.distance_text(self.trip.total_miles, precise=True)}"
             if self.phase == DRIVE_PHASE_PICKUP
-            else f"{self.trip.remaining_miles:.0f} of {self.trip.total_miles:.0f} miles"
+            else f"{self.ctx.settings.distance_text(self.trip.remaining_miles)}"
+            f" of {self.ctx.settings.distance_text(self.trip.total_miles)}"
         )
         return [
             title,

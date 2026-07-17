@@ -310,16 +310,19 @@ class RadioState:
     def available_stations(self) -> tuple[RadioStation, ...]:
         return tuple(reception.station for reception in self.receivable_stations())
 
-    def station_list_lines(self, limit: int = 12) -> list[str]:
+    def station_list_lines(self, limit: int = 12, distance_text=None) -> list[str]:
         lines = []
         for reception in self.receivable_stations()[:limit]:
             station = reception.station
             selected = "current, " if station.id == self.current_station().id else ""
-            distance = (
-                f", {reception.distance_miles:.0f} miles away"
-                if reception.distance_miles is not None
-                else ""
-            )
+            distance = ""
+            if reception.distance_miles is not None:
+                spoken = (
+                    distance_text(reception.distance_miles)
+                    if distance_text is not None
+                    else f"{reception.distance_miles:.0f} miles"
+                )
+                distance = f", {spoken} away"
             lines.append(
                 f"{selected}{station.display_name}: {station.format}, "
                 f"{reception.signal_label}{distance}. Source: {station.source}."

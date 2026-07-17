@@ -75,16 +75,22 @@ terminal becomes the anchor of that week instead of a spawn point.
       style -- a natural driving-school lesson. Steering input, presets
       (Josh's DRIVING_ASSIST_FIELDS entry, keyboard first-class, analog
       pad.steering as the smoother option), and the exact guide sound
-      are OPEN. Josh was offered the audio-design lead (2026-07-16,
-      no spec attached) and passed the same day, so the design is ours:
-      docs/steering-sound-rfc.md is the working document, the owner
-      posted the open questions to the audiogames.net forum
-      (2026-07-16), and community answers fold in as they arrive. If
-      the thread stays quiet, build from the notes with Phil's
-      recommendations as defaults. The pacenote/speech layer and D-key
-      curve advisories are fully settled and data-ready -- they can
-      start ahead of the forum verdict; only the continuous-sound
-      layers and the steering-input feel wait on answers.
+      NARROWING: Josh passed on the audio-design lead (2026-07-16), the
+      owner posted the open questions to the audiogames.net forum
+      (posted 2026-07-17 in the Freight Fate thread, replies same day),
+      and the community RESOLVED two of them our way: NO steering
+      tones (JaceK: continuous tones overwhelm the soundscape and hurt
+      players with sensory/hearing issues; rumble strips and real-world
+      edge sounds instead -- exactly the silence-is-centered +
+      per-side-textures design, owner concurs and had already resolved
+      on rumble strips), and the guide stays the panned existing bed,
+      never a new tone. JaceK also ruled: BRAKE BEFORE THE BEND, never
+      in it (locked wheels lose steering) -- pacenotes must front-load
+      the slow-down call, and mid-curve braking should cost grip in the
+      physics. Still open: steering-input feel (his "thinking ahead,
+      not jerking the wheel" leans hold-to-sweep) and pacenote
+      language. The pacenote/speech layer and D-key curve advisories
+      are settled and data-ready -- cleared to build now.
 - [ ] **Real lane counts from OSM (owner ask 2026-07-16).** OSM tags
       lanes directly (lanes=, lanes:forward=); bake per-mile lane counts
       along every leg from the self-hosted Overpass/PBF harvest, the
@@ -207,11 +213,32 @@ terminal becomes the anchor of that week instead of a spawn point.
       Also: a true shift sound (driveline clunk + air/turbo breath --
       the click is UI, not a truck), auditioned only AFTER the engine
       voices revs honestly across shifts (the low-gear bullet below).
+      Community votes 2026-07-17 (antonio luigi): the JAKE needs its
+      sound most of all (the slowing works, silently -- and the jake
+      sample is the known library gap), and the service-brake RELEASE
+      should breathe its little air sigh, not just the apply.
+      vehicle/brake_release.ogg already ships -- check the wiring.
       Sourcing ladder (owner 2026-07-16): NAS library first, then
       freesound CC0/CC-BY, then ElevenLabs generation, then field
       recording (a community call for truck recordings is an option),
       then CC-licensed YouTube only, with attribution -- never ordinary
       YouTube rips; CREDITS.md tracks provenance for every asset.
+- [ ] **Bobtail means no trailer at all (forum report, SRD625
+      2026-07-17).** The physics models every unloaded state as tractor
+      plus EMPTY TRAILER (`tare_kg`, vehicle.py: "Tractor plus empty
+      trailer"), but bobtail city-service and fly-to-board drives are
+      the tractor alone -- five to six tonnes lighter, quicker off the
+      line, shorter stops, different handling. Give the bobtail flag a
+      real tare (drop the trailer's share), bench-verify acceleration
+      and braking anchors, and let deadhead-with-empty-trailer keep the
+      current number. Community-confirmed realism gap.
+- [ ] **Dispatch board first-visit hitch (forum lead, Draq via Claude
+      2026-07-17).** JobBoard._candidates() walks all 623 cities with
+      supported_route() on the first board build in each city --
+      measured ~350 ms per new city on a fast machine (then 0: the
+      session cache already fixed the old multi-second lag, as SRD625
+      reported). Polish: warm the cache off-thread on city arrival so
+      even the first board opens instantly on slow hardware.
 - [ ] **Engine and shift audio tells the truth at low speed --
       DIAGNOSED 2026-07-16 (Fable, overnight).** The physics is honest;
       the audio map flattens it. BASS (the default backend) voices the

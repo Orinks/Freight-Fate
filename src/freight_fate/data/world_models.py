@@ -563,10 +563,11 @@ class Route:
             return "mountainous in places"
         return "rolling hills"
 
-    def describe(self) -> str:
+    def describe(self, distance_text: str = "") -> str:
         via = " then ".join(self.highways)
+        distance = distance_text or f"{self.miles:.0f} miles"
         return (
-            f"{self.miles:.0f} miles via {via}, "
+            f"{distance} via {via}, "
             f"{len(self.legs)} leg{'s' if len(self.legs) != 1 else ''}, "
             f"terrain {self.terrain_summary}"
         )

@@ -206,6 +206,7 @@ class Job:
         trailer_note: str = "",
         display_pay: float | None = None,
         market_preview: str = "",
+        distance_text: str = "",
     ) -> str:
         prefix = f"Job {index} of {total}: " if index is not None else ""
         condition = market_condition(self.market_mult)
@@ -218,9 +219,10 @@ class Job:
         dest = "to " + self.destination_offer_text()
         trailer = f" {trailer_note}" if trailer_note else ""
         pay = self.pay if display_pay is None else display_pay
+        distance = distance_text or f"{self.distance_mi:.0f} miles"
         return (
             f"{prefix}{self.weight_tons:.0f} tons of {self.cargo.label} "
-            f"{origin} {dest}. {self.distance_mi:.0f} miles. "
+            f"{origin} {dest}. {distance}. "
             f"{pay_label} {pay:,.0f} dollars. "
             f"Deadline {self.deadline_game_h:.0f} hours. "
             f"Equipment: {self.cargo.equipment_text}.{trailer}{preview}{market}"

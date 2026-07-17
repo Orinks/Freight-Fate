@@ -129,7 +129,7 @@ class DrivingControlsMixin:
         if not t.engine_on or t.speed_mph < LANE_MIN_MPH:
             self.ctx.say(
                 "Lane changes need the engine running and at least "
-                f"{LANE_MIN_MPH:.0f} miles per hour."
+                f"{self.ctx.settings.speed_text(LANE_MIN_MPH)}."
             )
             return
         target = lane.lane + direction
