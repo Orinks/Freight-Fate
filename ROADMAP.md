@@ -106,6 +106,26 @@ terminal becomes the anchor of that week instead of a spawn point.
       curves, with missed or unsignaled turns costing a reroute or
       strike. Natural interaction layer for per-turn trailer
       off-tracking.
+- [ ] **Real construction zones from state 511 APIs.** When real-time
+      traffic is enabled, construction zones should be generated from actual
+      state DOT work zone data instead of simulated zones. Requires:
+      parsing construction events from 511 APIs, mapping real construction
+      locations to route mile markers, converting real data into Zone objects
+      with appropriate speed limits, and fallback to simulated zones when
+      real data is unavailable. The current implementation only announces
+      construction as traffic alerts; this would make the zones themselves
+      match real-world work zones.
+- [x] **No-key realism enhancements -- SHIPPED 2026-07-16.** Four foundational
+      realism systems added without API keys: enhanced truck stop amenities
+      (CAT scales, laundry, game rooms, barber shops, premium wifi, check
+      cashing, DEF lanes, ATM services), truck stop loyalty programs (points
+      per gallon, shower credits, reward redemption), real-time traffic data
+      via state 511 APIs (Ohio OHGO as reference), and truck parking
+      availability via TPIMS APIs (Ohio OHGO as reference). All three
+      real-data systems are optional settings with graceful fallback to
+      simulated data. Amenities are data-only; loyalty is fully playable;
+      traffic and parking are integrated as announcements and availability
+      checks.
 - [ ] **Route terrain browser (owner idea 2026-07-15).** A reviewable,
       navigable summary of what the route will demand: big climbs and
       descents with grade and length, sharp-curve clusters, chain-law

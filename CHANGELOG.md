@@ -98,10 +98,41 @@
 - **Hundreds more facilities now start and end on real city streets.**
   Short yard-to-facility drives used to skip their street route and fall
   back to one straight access road; now any facility whose real path has
-  actual turns keeps them, even close to the yard. Deadheads and final
-  approaches at hundreds more warehouses, cross-docks, and company yards --
-  including the Evansville starter yard every new company driver leaves
-  first -- speak real turn-by-turn directions on named local streets.
+  a street chain under five miles uses it, so you hear real road names and
+  turns at hundreds more pickup and dropoff sites across the country.
+  Deadheads and final approaches at hundreds more warehouses, cross-docks,
+  and company yards -- including the Evansville starter yard every new
+  company driver leaves first -- speak real turn-by-turn directions on
+  named local streets.
+
+- **Truck stops now track loyalty points and rewards.** When you fuel at
+  truck stops, you earn loyalty points based on the stop type: major chains
+  like Pilot and Flying J give one point per gallon, landmark stops like Big
+  Buck's give one and a half points per gallon, and unbranded stops give half
+  a point per gallon. Fueling fifty gallons or more also earns shower credits.
+  Points can be redeemed for showers, parking discounts, food discounts, and
+  laundry discounts through a new loyalty menu at each truck stop. The system
+  mimics real-world programs like Pilot Pro Rewards and TA UltraONE.
+
+- **Real-time traffic incidents can be announced while driving.** When
+  enabled in Settings, Gameplay, the game fetches live traffic data from
+  state 511 APIs and announces high and medium severity incidents near your
+  route, such as accidents and construction zones. The system uses Ohio's
+  OHGO API as a reference implementation and gracefully falls back to
+  simulated traffic when the API is unavailable.
+
+- **Real-time truck parking availability is announced at stops.** When
+  enabled in Settings, Gameplay, the game fetches live parking availability
+  from TPIMS APIs and announces how many spaces are available nearby when
+  you arrive at a truck stop. The system uses Ohio's OHGO TPIMS as a
+  reference implementation and gracefully falls back to static parking
+  data when the API is unavailable.
+
+- **Truck stops now offer more realistic amenities.** Eight new amenity
+  types have been added to the data layer: CAT scales, laundry facilities,
+  game rooms, barber shops, premium wifi, check cashing services, DEF lanes,
+  and ATM services. These amenities are recognized at Pilot and Flying J
+  locations and can be spoken when you visit those stops.
 
 - **Dispatch assigns your tractor now, and better equipment follows
   seniority.** Like a real fleet, the carrier hands every new hire the same
