@@ -358,6 +358,15 @@
 
 ### Fixed
 
+- **The destination exit can no longer show up a state early.** On routes
+  that finish on rural highways, the game could announce the destination
+  exit at the last big interchange anywhere along the way -- one delivery to
+  Havre, Montana offered its "destination exit" in Wisconsin, over a
+  thousand miles out, and taking it ended the trip and paid the load right
+  there. The destination exit now only appears within the final miles of
+  your route; where the last stretch has no signed interchange, you get the
+  normal final approach to the facility instead.
+
 - **Taking an exit no longer talks you out of it.** With lane drift on, the
   exit slowdown used to say "confirm the exit when ready" -- but there is no
   confirm control, and pressing the exit key again actually canceled your

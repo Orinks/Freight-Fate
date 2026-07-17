@@ -162,6 +162,14 @@ STOP_ROLL_DAMAGE = 0.2  # lighter clip for blowing the stop sign
 RAMP_CONTROL_URBAN_WEIGHTS = (0.70, 0.95)
 RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
+# A real interchange counts as the destination exit only inside this final
+# approach window. Routes that finish on rural highways carry no baked
+# interchanges, and without the floor the scan crowned the last labeled exit
+# anywhere on the route -- one playtest got its "destination exit" on I-39 in
+# Wisconsin, 1,158 miles from the Montana receiver, and taking it settled the
+# load from there (transcripts, 2026-07-16). Past the window the synthetic
+# end-of-route exit takes over.
+DESTINATION_EXIT_SCAN_WINDOW_MI = 25.0
 UNLOADING_MIN = 45.0  # receiver dock work before settlement
 UNLOADING_WAIT_S = 1.5
 
