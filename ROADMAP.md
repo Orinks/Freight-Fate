@@ -42,6 +42,19 @@ milestone below (speeding consequences especially).
 
 From a batch of player reports:
 
+- [x] **Destination exit offered a state early on rural-highway finishes --
+  FIXED 2026-07-16 (player transcripts).** The destination-exit scan accepted
+  the last labeled interchange anywhere on the route, so routes whose final
+  legs are unbaked rural highways (US-281 into Lampasas, US-2 across the
+  plains to Havre) crowned an exit hundreds of miles out -- worst case 1,158
+  miles, I-39 in Wisconsin for a Havre, Montana receiver -- and taking it
+  settled the delivery from there. The scan now only accepts exits within the
+  final 25 miles of the route and otherwise falls back to the synthetic
+  end-of-route exit. Regression test pinned on both transcript routes.
+- [ ] Bake labeled exits or junction cues for rural US-highway final
+  approaches so arrivals there can name a real exit instead of the generic
+  end-of-route fallback (follow-up to the 2026-07-16 destination-exit fix;
+  needs an OSM junction sweep over non-motorway trunk corridors).
 - [x] **Quick info keys.** S reads the posted speed limit (was buried in the
   Tab menu); A repeats the last route announcement; U reads what is coming
   up (imposed limits, stops, exits ahead).

@@ -351,9 +351,14 @@ class DrivingEventMixin:
         # Matched against real interchange sign text, so compare the spoken
         # city name ("Nashville"), never the slug key.
         destination = self.ctx.world.spoken_city(self.route.cities[-1], qualified=False).casefold()
+        scan_floor = self.trip.total_miles - DESTINATION_EXIT_SCAN_WINDOW_MI
         candidates = []
         for i in range(len(self.route.legs) - 1, -1, -1):
             leg = self.route.legs[i]
+            if self.trip._leg_starts[i] + leg.miles < scan_floor:
+                # This leg ends before the final approach; every earlier leg
+                # is farther out still.
+                break
             forward = self.route.cities[i] == leg.a
             target = leg.miles if forward else 0.0
             for ix in leg.interchanges:
@@ -361,6 +366,8 @@ class DrivingEventMixin:
                     continue
                 offset = ix.at_mi if forward else leg.miles - ix.at_mi
                 route_mile = self.trip._leg_starts[i] + offset
+                if route_mile < scan_floor:
+                    continue
                 if not include_past and route_mile <= self.trip.position_mi + 0.05:
                     continue
                 dist_from_destination = abs(ix.at_mi - target)
