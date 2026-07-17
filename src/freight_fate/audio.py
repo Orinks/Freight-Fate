@@ -144,15 +144,17 @@ def engine_freq_mult(rpm: float) -> float:
 
 
 def engine_load_gain(throttle: float) -> float:
-    """Narrow engine-load gain used for the automatic-shift envelope.
+    """Audible engine effort: present off-throttle, fuller under power.
 
-    Normal driving sends full load regardless of raw throttle, preventing
-    accelerator release and adaptive cruise from pumping the engine bed. An
-    automatic shift can still pass a lower value for a subtle unload cue. The
-    deliberately narrow ten-percent range keeps that cue from sounding like
-    the whole engine is ducked.
+    The load carries real feedback -- a truck holding speed uphill sits on
+    more throttle and sounds fuller, and an automatic shift briefly unloads
+    the engine. Both stay audible here. The floor sits at 0.68 (not 0.55) so
+    coasting is not too quiet, while the 0.32 span keeps the load contour
+    clearly perceptible. Pumping from accelerator release and adaptive-cruise
+    corrections is handled upstream by smoothing the throttle before it
+    reaches this envelope, not by flattening the range.
     """
-    return 0.9 + 0.1 * max(0.0, min(1.0, throttle))
+    return 0.68 + 0.32 * max(0.0, min(1.0, throttle))
 
 
 def _one_shot_category(key: str) -> str:

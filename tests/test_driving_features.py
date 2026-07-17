@@ -1816,7 +1816,7 @@ def test_engine_audio_load_eases_without_dropping_out_during_automatic_shift(mon
         assert samples[-1] == (1700.0, 0.45)
         from freight_fate.audio import engine_load_gain
 
-        assert engine_load_gain(samples[-1][1]) >= 0.94
+        assert engine_load_gain(samples[-1][1]) >= 0.75
     finally:
         app.shutdown()
 

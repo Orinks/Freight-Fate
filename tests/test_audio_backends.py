@@ -94,10 +94,13 @@ def test_engine_freq_mult_mapping():
     assert abs(mid - (1.0 + ENGINE_FREQ_MAX_MULT) / 2) < 1e-9
 
 
-def test_engine_load_gain_has_only_a_subtle_shift_range():
-    assert engine_load_gain(-1.0) == 0.9
-    assert engine_load_gain(0.0) == 0.9
-    assert engine_load_gain(0.45) == pytest.approx(0.945)
+def test_engine_load_gain_keeps_audible_load_contour():
+    # Floor raised off the old 0.55 so coasting is not too quiet, but the span
+    # stays wide enough to hear effort changes and the automatic-shift unload.
+    assert engine_load_gain(-1.0) == pytest.approx(0.68)
+    assert engine_load_gain(0.0) == pytest.approx(0.68)
+    assert engine_load_gain(0.45) == pytest.approx(0.824)
+    assert engine_load_gain(0.08) < engine_load_gain(0.7)
     assert engine_load_gain(1.0) == 1.0
     assert engine_load_gain(2.0) == 1.0
 
