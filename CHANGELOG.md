@@ -8,6 +8,13 @@
 
 ### Changed
 
+- **You can sleep at turnpike service plazas now.** Service plazas used to
+  offer fuel, food, and a short break but never a proper rest, so a tired
+  driver had to push on to the next truck stop even while parked at a big
+  Thruway or Turnpike plaza with overnight truck parking. Every service
+  plaza's stop menu now offers sleep like truck stops and travel centers do,
+  and route planning counts them as places you can end your day.
+
 - **The driving assistance presets have been set aside for version 1.9.** Recent developer snapshots briefly offered a Driving assistance settings category with emergency braking, lane support, stop-and-go, and descent control presets. That work now ships complete with version 1.9 instead. The speed keeper stays, now under Settings, Gameplay, and your other settings are untouched.
 
 ### Fixed

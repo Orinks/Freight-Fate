@@ -107,7 +107,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
                 f"route geometry, accessed {ACCESSED_DATE}: "
                 "https://www.thruway.ny.gov/travelers/service-areas"
             ),
-            "actions": ["park", "save", "fuel", "food", "break"],
+            "actions": ["park", "save", "fuel", "food", "break", "sleep"],
             "services": ["diesel", "food", "parking", "restrooms"],
             "directions": ["both"],
             "parking": "likely",
@@ -124,7 +124,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
                 f"checked route geometry, accessed {ACCESSED_DATE}: "
                 "https://www.thruway.ny.gov/travelers/service-areas"
             ),
-            "actions": ["park", "save", "fuel", "food", "break"],
+            "actions": ["park", "save", "fuel", "food", "break", "sleep"],
             "services": ["diesel", "food", "parking", "restrooms"],
             "directions": ["both"],
             "parking": "likely",
@@ -140,7 +140,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
                 "Thruway; at_mi estimated from checked route geometry, accessed "
                 f"{ACCESSED_DATE}: https://www.applegreen.com/"
             ),
-            "actions": ["park", "save", "fuel", "food", "break"],
+            "actions": ["park", "save", "fuel", "food", "break", "sleep"],
             "services": ["diesel", "food", "parking", "restrooms"],
             "directions": ["both"],
             "parking": "likely",
