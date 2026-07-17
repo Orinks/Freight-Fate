@@ -55,6 +55,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             game_hours=profile.game_hours,
         )
         self._weather_source_real = ctx.settings.real_weather
+        self._traffic_source_real = ctx.settings.real_traffic
+        self._parking_source_real = ctx.settings.real_parking
         trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
         self.trip = Trip(
             route,
@@ -69,6 +71,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 * tuning_for_time_scale(ctx.settings.time_scale).hazard_frequency
             ),
             career_hours=profile.game_hours,
+            traffic_provider=ctx.real_traffic_provider(),
+            parking_provider=ctx.truck_parking_provider(),
         )
         if phase == DRIVE_PHASE_DELIVERY:
             # The destination exit, ramp terminal, and street chain own the

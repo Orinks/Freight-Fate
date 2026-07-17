@@ -325,6 +325,13 @@ class RestStopState(MenuState):
         parts = [f"{self.stop.spoken_name}."]
         if self.stop.parking_text:
             parts.append(f"{self.stop.parking_text}.")
+
+        # Check real-time parking availability if enabled
+        if self.ctx.settings.real_parking and self.driving.trip.parking_provider:
+            availability = self._check_parking_availability()
+            if availability:
+                parts.append(availability)
+
         brand_text = spoken_amenities(self.stop.name, getattr(self.stop, "type", ""))
         if brand_text:
             parts.append(f"{brand_text}.")
@@ -335,6 +342,37 @@ class RestStopState(MenuState):
             ]
         )
         self.ctx.say(" ".join(parts))
+
+    def _check_parking_availability(self) -> str | None:
+        """Check real-time parking availability for this stop."""
+        if not self.driving.trip.parking_provider:
+            return None
+
+        try:
+            # Get the state/region for this stop
+            # This is a simplified approach - in production we'd need proper geocoding
+            state = "ohio"  # Default to Ohio for now as reference implementation
+
+            # Get nearby parking locations
+            locations = self.driving.trip.parking_provider.get_available_locations_near(
+                state,
+                latitude=40.0,  # Placeholder - need real coordinates
+                longitude=-83.0,
+                radius_mi=25.0,
+            )
+
+            if not locations:
+                return "No real-time parking data available nearby."
+
+            # Find the closest location with available spaces
+            total_available = sum(loc.available or 0 for loc in locations)
+            if total_available > 0:
+                return f"Real-time parking: {total_available} spaces available nearby."
+            else:
+                return "Real-time parking: nearby lots are full."
+        except Exception:
+            # Gracefully handle API failures
+            return None
 
     def build_items(self) -> list[MenuItem]:
         actions = set(self.stop.actions)

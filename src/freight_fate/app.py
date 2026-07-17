@@ -75,6 +75,8 @@ class GameContext:
         self.economy: Economy = app.economy
         self.profile: Profile | None = None
         self._real_weather = None
+        self._real_traffic = None
+        self._truck_parking = None
         self._music_pool_positions: dict[tuple[str, tuple[str, ...]], int] = {}
         self._music_pool_last: dict[str, str] = {}
         self._music_rotation_pool: tuple[str, tuple[str, ...]] | None = None
@@ -105,6 +107,32 @@ class GameContext:
 
             self._real_weather = RealWeatherProvider()
         return self._real_weather
+
+    def real_traffic_provider(self):
+        """Shared state 511 provider when real traffic is enabled, else None.
+
+        Created lazily and kept for the whole session so its cache spans trips.
+        """
+        if not self.settings.real_traffic:
+            return None
+        if self._real_traffic is None:
+            from .sim.real_traffic import RealTrafficProvider
+
+            self._real_traffic = RealTrafficProvider()
+        return self._real_traffic
+
+    def truck_parking_provider(self):
+        """Shared TPIMS provider when real parking is enabled, else None.
+
+        Created lazily and kept for the whole session so its cache spans trips.
+        """
+        if not self.settings.real_parking:
+            return None
+        if self._truck_parking is None:
+            from .sim.truck_parking import TruckParkingProvider
+
+            self._truck_parking = TruckParkingProvider()
+        return self._truck_parking
 
     def say(self, text: str, interrupt: bool = True) -> None:
         transcript.info("%s", text)

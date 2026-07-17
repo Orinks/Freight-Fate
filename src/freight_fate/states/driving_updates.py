@@ -962,6 +962,20 @@ class DrivingUpdateMixin:
         self.ctx.audio.set_weather(self.weather.effects.sound)
         self.ctx.audio.set_wind(self.weather.effects.wind)
 
+    def _sync_traffic_source(self) -> None:
+        real = self.ctx.settings.real_traffic
+        if real == self._traffic_source_real:
+            return
+        self._traffic_source_real = real
+        self.trip.traffic_provider = self.ctx.real_traffic_provider() if real else None
+
+    def _sync_parking_source(self) -> None:
+        real = self.ctx.settings.real_parking
+        if real == self._parking_source_real:
+            return
+        self._parking_source_real = real
+        self.trip.parking_provider = self.ctx.truck_parking_provider() if real else None
+
     def _update_announcements(self, dt: float) -> None:
         if self.ctx.settings.speech_verbosity == 0:
             return

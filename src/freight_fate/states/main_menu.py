@@ -1116,6 +1116,20 @@ class SettingsCategoryState(MenuState):
                 "Real world uses live city conditions when available.",
             )
         )
+        specs.append(
+            (
+                lambda: f"Traffic source: {'real time' if s.real_traffic else 'simulated'}",
+                self._toggle_real_traffic,
+                "Real time uses live traffic incidents from state 511 APIs when available.",
+            )
+        )
+        specs.append(
+            (
+                lambda: f"Parking source: {'real time' if s.real_parking else 'simulated'}",
+                self._toggle_real_parking,
+                "Real time uses live truck parking availability from TPIMS APIs when available.",
+            )
+        )
         return specs
 
     @staticmethod
@@ -1475,6 +1489,17 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_real_weather(self, _d: int) -> None:
         self.ctx.settings.real_weather = not self.ctx.settings.real_weather
+        self.ctx.settings.save()
+        self._announce()
+
+    def _toggle_real_traffic(self, _d: int) -> None:
+        self.ctx.settings.real_traffic = not self.ctx.settings.real_traffic
+        self.ctx.settings.save()
+        self._announce()
+
+    def _toggle_real_parking(self, _d: int) -> None:
+        self.ctx.settings.real_parking = not self.ctx.settings.real_parking
+        self.ctx.settings.save()
         self._announce()
 
     def _channel(self) -> str:

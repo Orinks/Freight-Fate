@@ -75,6 +75,8 @@ class Settings:
     # step up to standard or realistic in Settings, Gameplay.
     time_scale: float = 10.0
     real_weather: bool = False  # live conditions from the NWS API
+    real_traffic: bool = False  # live traffic incidents from state 511 APIs
+    real_parking: bool = False  # live truck parking availability from TPIMS APIs
     hos_mode: str = (
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
