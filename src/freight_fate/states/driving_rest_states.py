@@ -619,9 +619,7 @@ class RestStopState(MenuState):
             self.ctx.audio.play("vehicle/fuel_pump")
 
             # Award loyalty points for fueling
-            loyalty_result = p.loyalty.add_fueling(
-                need, stop_name=self.stop.name, location=self.stop.city
-            )
+            loyalty_result = p.loyalty.add_fueling(need, stop_name=self.stop.name, location=region)
             loyalty_text = loyalty_earnings_text(
                 need, loyalty_result["points_earned"], loyalty_result["rewards"]
             )
@@ -651,9 +649,7 @@ class RestStopState(MenuState):
         self.ctx.audio.play("vehicle/fuel_pump")
 
         # Award loyalty points for fueling
-        loyalty_result = p.loyalty.add_fueling(
-            need, stop_name=self.stop.name, location=self.stop.city
-        )
+        loyalty_result = p.loyalty.add_fueling(need, stop_name=self.stop.name, location=region)
         loyalty_text = loyalty_earnings_text(
             need, loyalty_result["points_earned"], loyalty_result["rewards"]
         )
