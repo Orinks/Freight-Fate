@@ -210,7 +210,7 @@ raw tags, or source keys in speech, menus, or help text.
 Supported first-pass POI types and actions:
 
 - `travel_center` and `truck_stop`: park, save, fuel, food, break, sleep.
-- `service_plaza`: park, save, fuel, food, break.
+- `service_plaza`: park, save, fuel, food, break, sleep.
 - `fuel_station`: park, save, fuel, break.
 - `public_rest_area` and `truck_parking`: park, save, break, sleep.
 - `weigh_station`: inspect.

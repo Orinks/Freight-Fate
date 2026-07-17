@@ -159,6 +159,13 @@
 
 ### Changed
 
+- **You can sleep at turnpike service plazas now.** Service plazas used to
+  offer fuel, food, and a short break but never a proper rest, so a tired
+  driver had to push on to the next truck stop even while parked at a big
+  Thruway or Turnpike plaza with overnight truck parking. Every service
+  plaza's stop menu now offers sleep like truck stops and travel centers do,
+  and route planning counts them as places you can end your day.
+
 - **The All assists preset now switches lane drift off.** The easiest preset
   used to leave whatever lane drift level you had chosen running, so a player
   who wanted the fully assisted ride could still be stuck holding the wheel
