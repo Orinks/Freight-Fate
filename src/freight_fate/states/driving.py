@@ -42,8 +42,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             seed=self.trip_seed,
             provider=ctx.real_weather_provider(),
             game_hours=profile.game_hours,
+            live_weather_controls_calendar=ctx.settings.live_weather_controls_calendar,
         )
         self._weather_source_real = ctx.settings.real_weather
+        self._live_weather_controls_calendar = ctx.settings.live_weather_controls_calendar
         trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
         self.trip = Trip(
             route,

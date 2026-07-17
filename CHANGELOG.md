@@ -67,6 +67,11 @@
   newer cargo types never rose or fell. Loading such a career now fills in
   the missing market prices, which also keeps cloud backups of these older
   careers in step with orinks.net.
+- **Live weather can now leave your career calendar running.** The new Live
+  weather controls calendar setting keeps today's real date when on. Turn it
+  off to keep live city conditions while your career date advances at midnight
+  and the seasons pass normally. Live conditions are adjusted to the career
+  season so summer snow and cold-season thunderstorms do not slip through.
 
 ## 1.8.3 - 2026-07-14
 

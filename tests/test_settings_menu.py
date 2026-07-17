@@ -131,6 +131,25 @@ def test_settings_menu_saves_each_change():
         app.shutdown()
 
 
+def test_live_weather_calendar_setting_defaults_on_and_persists():
+    from freight_fate.app import App
+    from freight_fate.settings import Settings
+
+    app = App()
+    try:
+        assert app.ctx.settings.live_weather_controls_calendar is True
+        cat = open_settings_category(app, "Speech and weather")
+        while not cat.items[cat.index].text.startswith("Live weather controls calendar"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        assert "today's real date" in cat.current_help()
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.live_weather_controls_calendar is False
+        assert Settings.load().live_weather_controls_calendar is False
+        assert cat.items[cat.index].text == "Live weather controls calendar: off"
+    finally:
+        app.shutdown()
+
+
 def test_settings_menu_volume_survives_new_app_session():
     from freight_fate.app import App
     from freight_fate.settings import Settings

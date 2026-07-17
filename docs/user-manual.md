@@ -338,7 +338,12 @@ snow and ice are cold-season risks, thunderstorms a warm-season one, and the
 regional temperature follows the time of year and time of day. The current
 date and season are announced with the clock (press C while driving), in the
 Tab status menu, and at the city terminal. With live weather turned on, the
-date, season, and temperature follow the real-world calendar instead.
+default is for the date, season, and temperature to follow the real-world
+calendar. Turn **Live weather controls calendar** off to keep live city
+conditions while the career date advances at midnight and its seasons pass.
+Conditions remain seasonally plausible, so live snow is changed to rain or
+cloud when the career calendar is in warm weather, and thunderstorms are
+changed to heavy rain when the career season is too cold for them.
 
 Stops are reported as you approach them. A one-mile cue tells you when to take
 an exit. Press X to signal for the exit, slow to 45 miles per hour or less, and
@@ -531,6 +536,7 @@ Speech and weather settings include:
 | Speech volume | Appears only when the current voice source supports volume changes. |
 | Speech voice | Appears only when selectable voices are available. |
 | Weather source | Switches between simulated weather and live city conditions when available. |
+| Live weather controls calendar | When on, live weather uses today's real date and season. When off, live conditions continue while the career date advances at midnight and its seasons pass. |
 
 Online settings include:
 

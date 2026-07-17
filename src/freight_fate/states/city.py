@@ -300,11 +300,31 @@ class CityMenuState(MenuState):
             kind = provider.get(city.key)
             if kind is not None:
                 desc, live = kind.value, True
-        from ..sim.season import date_text, real_clock_game_hours, season
+        from ..sim.season import (
+            adjust_for_calendar,
+            date_text,
+            real_clock_game_hours,
+            season,
+            temperature_c,
+        )
 
-        # With live weather on, the season follows the real calendar so it
-        # matches the real conditions; otherwise it follows the career clock.
-        season_hours = real_clock_game_hours() if provider is not None else p.game_hours
+        # Live conditions and the calendar are separate player choices. The
+        # legacy default follows today's real date; an independent calendar
+        # advances with career time even while conditions remain live.
+        season_hours = (
+            real_clock_game_hours()
+            if provider is not None and self.ctx.settings.live_weather_controls_calendar
+            else p.game_hours
+        )
+        if live:
+            observed = None
+            getter = getattr(provider, "get_temperature", None)
+            if getter is not None and self.ctx.settings.live_weather_controls_calendar:
+                observed = getter(city.key)
+            guard_temp = observed
+            if guard_temp is None:
+                guard_temp = temperature_c(city.region, season_hours)
+            desc = adjust_for_calendar(kind, guard_temp, season_hours).value
         if desc is None:
             # deterministic per city and hour, so asking twice agrees
             seed = zlib.crc32(f"{city.key}:{int(p.game_hours)}".encode())

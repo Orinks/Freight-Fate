@@ -699,8 +699,29 @@ class RouteSelectState(MenuState):
         if provider is not None:
             parts = []
             for name in route.cities[1:][:5]:
-                kind = provider.get(name)
+                city = self.ctx.world.cities[name]
+                kind = provider.get(city.key)
                 if kind is not None:
+                    from ..sim.season import (
+                        adjust_for_calendar,
+                        real_clock_game_hours,
+                        temperature_c,
+                    )
+
+                    hours = (
+                        real_clock_game_hours()
+                        if self.ctx.settings.live_weather_controls_calendar
+                        else self.ctx.profile.game_hours
+                    )
+                    observed = None
+                    getter = getattr(provider, "get_temperature", None)
+                    if getter is not None and self.ctx.settings.live_weather_controls_calendar:
+                        observed = getter(city.key)
+                    kind = adjust_for_calendar(
+                        kind,
+                        observed if observed is not None else temperature_c(city.region, hours),
+                        hours,
+                    )
                     parts.append(
                         f"{self.ctx.world.spoken_city(name, qualified=True)}: {kind.value}"
                     )

@@ -270,8 +270,11 @@ Net-new realism candidates, roughly by area:
   (winter ice/squalls, summer hail). Seasons are opt-in via `WeatherSystem`'s
   `game_hours` so seed-based tests stay deterministic; real-weather mode keeps
   driving conditions (and thus hazard context) from live data, and with live
-  weather on the season follows the real-world calendar so it matches those
-  conditions. Real observation temperature is now extracted too (`_temp_to_c`
+  weather on the season follows the real-world calendar by default so it
+  matches those conditions. Players can now turn off **Live weather controls
+  calendar** to keep live conditions while the career date and seasons
+  advance; a seasonal reconciliation guard prevents summer snow and
+  cold-season thunderstorms in that mode. Real observation temperature is now extracted too (`_temp_to_c`
   -> `RealWeatherProvider.get_temperature` -> `WeatherSystem._temperature`), so
   live mode reports the station's real degrees and falls back to the climate
   model only when a reading is missing. Weather also bites mechanically now,
