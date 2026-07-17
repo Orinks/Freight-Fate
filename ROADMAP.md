@@ -697,7 +697,16 @@ section below and the Unreleased changelog; the release-line view:
       approaches so arrivals there can name a real exit instead of the
       generic end-of-route fallback (follow-up to the 2026-07-16
       destination-exit fix; needs an OSM junction sweep over non-motorway
-      trunk corridors).
+      trunk corridors). Scale, measured 2026-07-16 on this branch's data:
+      533 of 1,287 legs carry no labeled interchange, and 192 of 623
+      cities have none on any approach leg, so every arrival there uses
+      the generic fallback. A seeded 2,489-route sample of supported
+      routes found 44 percent previously misfired the destination exit
+      by more than 25 miles (worst sampled: Payson, Arizona to Newport,
+      Oregon, 1,152 miles early on a 1,420-mile route); all of those now
+      take the fallback this sweep would upgrade. Regen should run
+      offline from the cached PBFs like the overlay pipeline, targeting
+      trunk/primary junction nodes on the 533 unlabeled legs.
 - [x] **Interstate speed limits polluted by city-street samples at leg
       endpoints -- FIXED 2026-07-14 (found live by the owner on I-10).**
       The maxspeed bake's shield-match guard cannot fire when the
