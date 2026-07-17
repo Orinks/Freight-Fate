@@ -1821,6 +1821,39 @@ def test_engine_audio_load_eases_without_dropping_out_during_automatic_shift(mon
         app.shutdown()
 
 
+def test_engine_audio_load_tracks_manual_throttle_smoothly(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    samples = []
+    monkeypatch.setattr(
+        app.ctx.audio, "set_engine_rpm", lambda rpm, throttle=0.0: samples.append((rpm, throttle))
+    )
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.transmission._shift_timer = 0.0
+        driving._engine_audio_throttle = 0.5
+        driving.truck.throttle = 0.75
+        driving._update_audio(0.1)
+        rising = samples[-1][1]
+        driving.truck.throttle = 0.25
+        driving._update_audio(0.1)
+        falling = samples[-1][1]
+
+        # Raw throttle still controls audible load, but the 450-millisecond
+        # filter prevents an immediate gain step for a cruise correction.
+        assert rising == pytest.approx(0.5 + (0.75 - 0.5) * (0.1 / 0.45))
+        assert falling == pytest.approx(rising + (0.25 - rising) * (0.1 / 0.45))
+        assert 0.25 < falling < rising < 0.75
+    finally:
+        app.shutdown()
+
+
 def test_reverse_audio_cue_loops_while_reverse_is_engaged(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.transmission import REVERSE

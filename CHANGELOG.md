@@ -36,6 +36,10 @@
 
 ### Fixed
 
+- **The engine load now follows throttle smoothly.** Engine effort remains
+  audible when you accelerate or ease off, while manual releases and
+  adaptive-cruise corrections blend gradually instead of making the engine
+  volume jump. Automatic shifts retain a brief, gentle unload and recovery.
 - **Terminal weather now agrees with the live report on the road.** Time and
   weather uses the real station temperature even when live weather does not
   control the career calendar. If the first observation is still loading, the

@@ -144,12 +144,17 @@ def engine_freq_mult(rpm: float) -> float:
 
 
 def engine_load_gain(throttle: float) -> float:
-    """Audible engine effort: present at idle, fuller under power.
+    """Audible engine effort: present off-throttle, fuller under power.
 
-    An automated shift cuts engine torque. Honoring the supplied load makes
-    that interruption audible instead of pitch-sliding one continuous siren.
+    The load carries real feedback -- a truck holding speed uphill sits on
+    more throttle and sounds fuller, and an automatic shift briefly unloads
+    the engine. Both stay audible here. The floor sits at 0.68 (not 0.55) so
+    coasting is not too quiet, while the 0.32 span keeps the load contour
+    clearly perceptible. Pumping from accelerator release and adaptive-cruise
+    corrections is handled upstream by smoothing the throttle before it
+    reaches this envelope, not by flattening the range.
     """
-    return 0.55 + 0.45 * max(0.0, min(1.0, throttle))
+    return 0.68 + 0.32 * max(0.0, min(1.0, throttle))
 
 
 def _one_shot_category(key: str) -> str:

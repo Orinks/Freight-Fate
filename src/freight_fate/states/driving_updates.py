@@ -26,6 +26,11 @@ SHIFT_LOAD_RECOVERY_S = 0.032
 SHIFT_LOAD_RECOVERY_CURVE = "ease_out"
 _shift_recovery_curve = _resolve_curve(SHIFT_LOAD_RECOVERY_CURVE)
 
+# Low-pass raw throttle before it reaches the audible engine-load envelope.
+# This preserves engine effort while making small adaptive-cruise adjustments
+# blend together rather than sound like a succession of volume blips.
+ENGINE_LOAD_SMOOTH_S = 0.45
+
 
 class DrivingUpdateMixin:
     def update(self, dt: float) -> None:
@@ -506,7 +511,18 @@ class DrivingUpdateMixin:
             )
         else:
             cap = 1.0
-        engine_load = min(t.throttle, cap)
+        target_load = max(0.0, min(1.0, t.throttle))
+        if dt <= 0.0:
+            # Direct callers and tests use a zero-length update to request an
+            # immediate audio sync.
+            self._engine_audio_throttle = target_load
+        else:
+            blend = min(1.0, dt / ENGINE_LOAD_SMOOTH_S)
+            self._engine_audio_throttle += (target_load - self._engine_audio_throttle) * blend
+        # Keep normal engine-load response, then apply the separate automatic
+        # shift envelope. The narrow gain range in engine_load_gain makes the
+        # remaining load change audible without ducking the whole engine bed.
+        engine_load = min(self._engine_audio_throttle, cap)
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:
