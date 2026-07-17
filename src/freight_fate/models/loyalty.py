@@ -43,6 +43,27 @@ class LoyaltyAccount:
     brand_points: dict[str, float] = field(default_factory=dict)  # Points per brand
     fueling_history: list[dict] = field(default_factory=list)  # Track fueling sessions
 
+    def to_dict(self) -> dict:
+        return {
+            "total_points": self.total_points,
+            "total_gallons_fueled": self.total_gallons_fueled,
+            "shower_credits": self.shower_credits,
+            "brand_points": self.brand_points,
+            "fueling_history": self.fueling_history,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> LoyaltyAccount:
+        if not isinstance(data, dict):
+            return cls()
+        return cls(
+            total_points=float(data.get("total_points", 0.0)),
+            total_gallons_fueled=float(data.get("total_gallons_fueled", 0.0)),
+            shower_credits=int(data.get("shower_credits", 0)),
+            brand_points=dict(data.get("brand_points", {})),
+            fueling_history=list(data.get("fueling_history", [])),
+        )
+
     def add_fueling(
         self,
         gallons: float,

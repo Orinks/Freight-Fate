@@ -339,6 +339,19 @@ class RestStopState(MenuState):
     def build_items(self) -> list[MenuItem]:
         actions = set(self.stop.actions)
         items: list[MenuItem] = []
+
+        # Loyalty program status
+        p = self.ctx.profile
+        loyalty_summary = p.loyalty.summary()
+        items.append(
+            MenuItem(
+                f"Loyalty program: {loyalty_summary}",
+                self._loyalty_menu,
+                help="Check your loyalty points, shower credits, and redeem rewards "
+                "at this truck stop.",
+            )
+        )
+
         if "fuel" in actions:
             items.append(
                 MenuItem(
@@ -549,6 +562,8 @@ class RestStopState(MenuState):
         return f"Refuel {need:.0f} gallons for {cost:,.0f} dollars"
 
     def _refuel(self) -> None:
+        from ..models.loyalty import loyalty_earnings_text
+
         d = self.driving
         p = self.ctx.profile
         region = d.trip.current_region
@@ -564,9 +579,18 @@ class RestStopState(MenuState):
             d.hos.on_duty(FUEL_STOP_MIN)
             self._save_here(silent=True)
             self.ctx.audio.play("vehicle/fuel_pump")
+
+            # Award loyalty points for fueling
+            loyalty_result = p.loyalty.add_fueling(
+                need, stop_name=self.stop.name, location=self.stop.city
+            )
+            loyalty_text = loyalty_earnings_text(
+                need, loyalty_result["points_earned"], loyalty_result["rewards"]
+            )
+
             self.ctx.say(
                 f"Refueled {need:.0f} gallons on the carrier fuel card. "
-                f"Fueling took {FUEL_STOP_MIN:.0f} minutes."
+                f"Fueling took {FUEL_STOP_MIN:.0f} minutes. {loyalty_text}"
             )
             self.ctx.award_achievement("route_refuel")
             self.refresh()
@@ -587,13 +611,195 @@ class RestStopState(MenuState):
         d.hos.on_duty(FUEL_STOP_MIN)
         self._save_here(silent=True)
         self.ctx.audio.play("vehicle/fuel_pump")
+
+        # Award loyalty points for fueling
+        loyalty_result = p.loyalty.add_fueling(
+            need, stop_name=self.stop.name, location=self.stop.city
+        )
+        loyalty_text = loyalty_earnings_text(
+            need, loyalty_result["points_earned"], loyalty_result["rewards"]
+        )
+
         self.ctx.say(
             f"Refueled {need:.0f} gallons for {cost:,.0f} dollars. "
             f"You have {p.money:,.0f} dollars. Fueling took "
-            f"{FUEL_STOP_MIN:.0f} minutes."
+            f"{FUEL_STOP_MIN:.0f} minutes. {loyalty_text}"
         )
         self.ctx.award_achievement("route_refuel")
         self.refresh()
+
+    def _loyalty_menu(self) -> None:
+        """Show loyalty program details and redemption options."""
+        self.ctx.push_state(LoyaltyRewardsState(self.ctx, self.driving, self.stop))
+
+
+class LoyaltyRewardsState(MenuState):
+    """Loyalty program reward redemption menu."""
+
+    title = "Loyalty rewards"
+    intro_help = (
+        "Use up and down arrows to navigate, Enter to select. "
+        "Escape cancels and returns to the previous menu."
+    )
+
+    def __init__(self, ctx, driving: DrivingState, stop) -> None:
+        super().__init__(ctx)
+        self.driving = driving
+        self.stop = stop
+
+    def announce_entry(self) -> None:
+
+        p = self.ctx.profile
+        loyalty = p.loyalty
+
+        self.ctx.say(
+            f"{self.title}. {loyalty.summary()} "
+            f"You are at {self.stop.spoken_name}. "
+            f"Choose a reward to redeem or go back."
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        from ..models.loyalty import reward_cost_text
+
+        p = self.ctx.profile
+        loyalty = p.loyalty
+        items: list[MenuItem] = []
+
+        # Shower credits option
+        if loyalty.shower_credits > 0:
+            items.append(
+                MenuItem(
+                    f"Use shower credit ({loyalty.shower_credits} available)",
+                    self._use_shower_credit,
+                    help="Use a shower credit earned from fueling 50+ gallons.",
+                )
+            )
+
+        # Point redemption options
+        if loyalty.can_redeem("shower"):
+            cost_text = reward_cost_text("shower")
+            items.append(
+                MenuItem(
+                    f"Redeem {cost_text}",
+                    self._redeem_shower,
+                    help="Redeem loyalty points for a free shower.",
+                )
+            )
+
+        if loyalty.can_redeem("parking"):
+            cost_text = reward_cost_text("parking")
+            items.append(
+                MenuItem(
+                    f"Redeem {cost_text}",
+                    self._redeem_parking,
+                    help="Redeem loyalty points for a parking discount.",
+                )
+            )
+
+        if loyalty.can_redeem("food"):
+            cost_text = reward_cost_text("food")
+            items.append(
+                MenuItem(
+                    f"Redeem {cost_text}",
+                    self._redeem_food,
+                    help="Redeem loyalty points for a food discount.",
+                )
+            )
+
+        if loyalty.can_redeem("laundry"):
+            cost_text = reward_cost_text("laundry")
+            items.append(
+                MenuItem(
+                    f"Redeem {cost_text}",
+                    self._redeem_laundry,
+                    help="Redeem loyalty points for a laundry discount.",
+                )
+            )
+
+        if not items:
+            items.append(
+                MenuItem(
+                    "No rewards available - need more points",
+                    None,
+                    help="Fuel at truck stops to earn loyalty points.",
+                )
+            )
+
+        items.append(
+            MenuItem(
+                "Back to truck stop",
+                self.go_back,
+                help="Return to the truck stop menu.",
+            )
+        )
+
+        return items
+
+    def _use_shower_credit(self) -> None:
+        p = self.ctx.profile
+        if p.loyalty.use_shower_credit():
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say("Shower credit used. You can now use the shower at no cost.")
+            self.refresh()
+        else:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("No shower credits available.")
+
+    def _redeem_shower(self) -> None:
+        p = self.ctx.profile
+        result = p.loyalty.redeem_reward("shower")
+        if result["success"]:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Shower redeemed! {result['points_spent']} points spent. "
+                f"You have {result['points_remaining']} points remaining."
+            )
+            self.refresh()
+        else:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Unable to redeem shower. Insufficient points.")
+
+    def _redeem_parking(self) -> None:
+        p = self.ctx.profile
+        result = p.loyalty.redeem_reward("parking")
+        if result["success"]:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Parking discount redeemed! {result['points_spent']} points spent. "
+                f"You have {result['points_remaining']} points remaining."
+            )
+            self.refresh()
+        else:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Unable to redeem parking discount. Insufficient points.")
+
+    def _redeem_food(self) -> None:
+        p = self.ctx.profile
+        result = p.loyalty.redeem_reward("food")
+        if result["success"]:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Food discount redeemed! {result['points_spent']} points spent. "
+                f"You have {result['points_remaining']} points remaining."
+            )
+            self.refresh()
+        else:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Unable to redeem food discount. Insufficient points.")
+
+    def _redeem_laundry(self) -> None:
+        p = self.ctx.profile
+        result = p.loyalty.redeem_reward("laundry")
+        if result["success"]:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Laundry discount redeemed! {result['points_spent']} points spent. "
+                f"You have {result['points_remaining']} points remaining."
+            )
+            self.refresh()
+        else:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("Unable to redeem laundry discount. Insufficient points.")
 
     def _take_break(self) -> None:
         d = self.driving
@@ -883,8 +1089,7 @@ class RestStopState(MenuState):
         if p.money < cost:
             self.ctx.audio.play("ui/error")
             self.ctx.say(
-                f"{service_noun.capitalize()} costs {cost:,.0f} dollars "
-                "here. You cannot afford it."
+                f"{service_noun.capitalize()} costs {cost:,.0f} dollars here. You cannot afford it."
             )
             return
         p.money -= cost
@@ -925,8 +1130,7 @@ class RestStopState(MenuState):
         if not carrier_pays and p.money < price:
             self.ctx.audio.play("ui/error")
             self.ctx.say(
-                f"The {buff.label.lower()} costs {price:,.0f} dollars "
-                f"and you have {p.money:,.0f}."
+                f"The {buff.label.lower()} costs {price:,.0f} dollars and you have {p.money:,.0f}."
             )
             return
         if not carrier_pays:
@@ -961,8 +1165,7 @@ class RestStopState(MenuState):
         else:
             billing = f"{price:,.0f} dollars. You have {p.money:,.0f} dollars."
         self.ctx.say(
-            f"{buff.purchased} {billing} It is "
-            f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
+            f"{buff.purchased} {billing} It is {clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
         )
         self.refresh()
 

@@ -224,3 +224,28 @@ def test_realistic_fueling_scenario():
     shower_result = account.redeem_reward("shower")
     assert shower_result["success"]
     assert account.total_points == 135.0  # 185 - 50
+
+
+def test_loyalty_serialization():
+    """Test that loyalty accounts can be serialized and deserialized."""
+    account = LoyaltyAccount()
+    account.add_fueling(50.0, stop_name="Pilot Travel Center", location="Springfield, IL")
+
+    data = account.to_dict()
+    assert data["total_points"] == 50.0
+    assert data["shower_credits"] == 1
+    assert len(data["fueling_history"]) == 1
+
+    restored = LoyaltyAccount.from_dict(data)
+    assert restored.total_points == 50.0
+    assert restored.shower_credits == 1
+    assert len(restored.fueling_history) == 1
+
+
+def test_loyalty_from_empty_dict():
+    """Test that empty dict creates a fresh account."""
+    account = LoyaltyAccount.from_dict({})
+    assert account.total_points == 0.0
+    assert account.shower_credits == 0
+    assert account.brand_points == {}
+    assert account.fueling_history == []
