@@ -8,6 +8,15 @@
 
 ### Changed
 
+- **On-time deliveries now pay a real bonus.** Delivering on time used to add
+  only a sliver of extra pay unless you raced in absurdly far ahead of the
+  deadline, so the bonus line at settlement rarely felt like one. Pay now
+  works the way real shipper scorecards do: hit the delivery window and you
+  earn a flat ten percent on-time bonus every time, and arriving hours early
+  pays no more than making the appointment. The settlement summary now calls
+  it an on-time delivery bonus. Late and damaged deliveries still pay less,
+  exactly as before.
+
 - **You can sleep at turnpike service plazas now.** Service plazas used to
   offer fuel, food, and a short break but never a proper rest, so a tired
   driver had to push on to the next truck stop even while parked at a big

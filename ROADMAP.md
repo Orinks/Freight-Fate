@@ -237,6 +237,19 @@ From a batch of player reports:
   Accel/Coast buttons), so you engage once rolling and dial the target up to the
   speed you want; the truck accelerates up to it, capped by the limit offset.
 
+- [x] **Window-model on-time bonus.** Shipped on the 1.8.x nightly line:
+  `Job.payout` used to scale its on-time bonus by unused deadline (max 15%
+  only for a near-instant delivery, a few percent in practice), which
+  rewarded racing the clock and paid almost nothing for normal on-time runs.
+  It now pays a flat 10% for any delivery inside the window, the way real
+  shipper scorecards (OTIF-style) pay for service; late/damage penalties are
+  unchanged. Compared against feat/career-1.9 before landing: 1.9's carrier
+  pay plans add their own flat on-time share (2-6% of gross) plus reputation
+  trust pay (max 6%) *on top of* gross, and its `Job.payout` is identical to
+  dev's, so this reshapes the shared gross curve and merges cleanly; watch
+  the combined stack (10% gross + carrier share + trust) when rebalancing
+  the 1.9 economy.
+
 ### Realism north star (ongoing)
 
 The guiding goal for 1.8 and beyond: make every system as true to real

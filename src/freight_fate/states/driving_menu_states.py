@@ -632,7 +632,7 @@ class ArrivalState(MenuState):
         toll_expense = d.trip.toll_expense
         accessorials = carrier_accessorial_charges(job)
         carrier_charges = toll_expense + charge_total(accessorials)
-        early_bonus = max(0.0, gross_pay - job.payout(job.deadline_game_h, trip_damage))
+        on_time_bonus_paid = max(0.0, gross_pay - job.payout(hours, trip_damage, on_time_bonus=0.0))
         driver_charges = _speeding_settlement_fine(d.speeding_strikes)
         if driver_charges:
             self.summary_parts.append(
@@ -717,8 +717,11 @@ class ArrivalState(MenuState):
                 f"{self.terminal.name} for the {job.spoken_destination} service area."
             ),
         )
-        if early_bonus >= 1.0:
-            self.summary_parts.append(f"Early delivery bonus: {early_bonus:,.0f} dollars.")
+        if on_time_bonus_paid >= 1.0:
+            self.summary_parts.append(
+                f"On-time delivery bonus: {on_time_bonus_paid:,.0f} dollars "
+                "for hitting the delivery window."
+            )
         if trip_damage > 1:
             self.summary_parts.append(
                 f"The cargo run added {trip_damage:.0f} percent truck damage. "
@@ -741,9 +744,9 @@ class ArrivalState(MenuState):
         self.summary_parts.extend(self._achievement_messages)
         timing = "On time" if on_time else "Late"
         bonus_text = (
-            f"Early delivery bonus: {early_bonus:,.0f} dollars"
-            if early_bonus >= 1.0
-            else "No early delivery bonus on this run"
+            f"On-time delivery bonus: {on_time_bonus_paid:,.0f} dollars"
+            if on_time_bonus_paid >= 1.0
+            else "No on-time delivery bonus on this run"
         )
         cargo_condition = (
             f"Truck damage added on this run: {trip_damage:.0f} percent"

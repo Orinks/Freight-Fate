@@ -268,7 +268,7 @@ HELP_PAGES = [
             "Once loaded and sealed, dispatch gives you the destination route.",
             "GPS cues call out highway changes, state lines, places, and rest stops.",
             "The job is the load and destination; route choice happens after pickup.",
-            "Deliver before the deadline for a bonus. Late or damaged cargo pays less.",
+            "Hit the delivery window for a ten percent on-time bonus. Late or damaged cargo pays less.",
             "At the destination facility, stop, then dock and deliver.",
             "Delivery settlement reports gross pay, carrier-paid or reimbursed charges,",
             "driver-responsibility charges, and net driver pay.",

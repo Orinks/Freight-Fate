@@ -480,7 +480,9 @@ achievements.
 
 Tolls and approved accessorial charges are carrier settlement items. They are
 reported for transparency but do not reduce driver pay. Driver-caused charges,
-such as speeding fines, can reduce driver pay. Early delivery can increase pay.
+such as speeding fines, can reduce driver pay. Hitting the delivery window
+earns a flat ten percent on-time bonus, the way real shipper scorecards pay
+for service: arriving hours early pays no more than making the appointment.
 Late delivery and cargo damage reduce pay.
 
 ## Settings

@@ -176,14 +176,17 @@ def test_endorsement_gating(world):
     assert len(locked) <= 1
 
 
-def test_payout_on_time_beats_late():
+def test_payout_on_time_window_beats_late():
     from freight_fate.models.jobs import Job
 
     job = Job(CARGO_CATALOG["general"], 15, "A", "Loc", "B", 300, 700.0, 9.0)
     early = job.payout(hours_taken=5.0, damage_pct=0.0)
     on_dot = job.payout(hours_taken=9.0, damage_pct=0.0)
     late = job.payout(hours_taken=12.0, damage_pct=0.0)
-    assert early > on_dot >= late
+    # Window model: any on-time arrival earns the same flat bonus; racing in
+    # early pays no more than hitting the appointment.
+    assert early == on_dot
+    assert on_dot > 700.0 > late
     assert late >= 700.0 * 0.4
 
 
