@@ -1816,7 +1816,31 @@ def test_engine_audio_load_eases_without_dropping_out_during_automatic_shift(mon
         assert samples[-1] == (1700.0, 0.45)
         from freight_fate.audio import engine_load_gain
 
-        assert engine_load_gain(samples[-1][1]) >= 0.75
+        assert engine_load_gain(samples[-1][1]) >= 0.94
+    finally:
+        app.shutdown()
+
+
+def test_engine_audio_volume_ignores_manual_throttle_outside_shifts(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    samples = []
+    monkeypatch.setattr(
+        app.ctx.audio, "set_engine_rpm", lambda rpm, throttle=0.0: samples.append((rpm, throttle))
+    )
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.transmission._shift_timer = 0.0
+        for throttle in (0.0, 0.25, 1.0, 0.0):
+            driving.truck.throttle = throttle
+            driving._update_audio(1 / 60)
+        assert [load for _rpm, load in samples[-4:]] == [1.0, 1.0, 1.0, 1.0]
     finally:
         app.shutdown()
 

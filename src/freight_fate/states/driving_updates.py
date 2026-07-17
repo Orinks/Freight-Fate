@@ -506,7 +506,10 @@ class DrivingUpdateMixin:
             )
         else:
             cap = 1.0
-        engine_load = min(t.throttle, cap)
+        # Raw throttle must not control the engine bed: releasing the key and
+        # adaptive-cruise corrections otherwise pump its volume. Only the
+        # explicit automatic-shift envelope lowers audible load.
+        engine_load = cap
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:

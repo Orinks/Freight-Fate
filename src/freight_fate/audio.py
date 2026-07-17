@@ -144,12 +144,15 @@ def engine_freq_mult(rpm: float) -> float:
 
 
 def engine_load_gain(throttle: float) -> float:
-    """Audible engine effort: present at idle, fuller under power.
+    """Narrow engine-load gain used for the automatic-shift envelope.
 
-    An automated shift cuts engine torque. Honoring the supplied load makes
-    that interruption audible instead of pitch-sliding one continuous siren.
+    Normal driving sends full load regardless of raw throttle, preventing
+    accelerator release and adaptive cruise from pumping the engine bed. An
+    automatic shift can still pass a lower value for a subtle unload cue. The
+    deliberately narrow ten-percent range keeps that cue from sounding like
+    the whole engine is ducked.
     """
-    return 0.55 + 0.45 * max(0.0, min(1.0, throttle))
+    return 0.9 + 0.1 * max(0.0, min(1.0, throttle))
 
 
 def _one_shot_category(key: str) -> str:
