@@ -42,6 +42,28 @@ milestone below (speeding consequences especially).
 
 From a batch of player reports:
 
+- [x] **Destination exit offered a state early on rural-highway finishes --
+  FIXED 2026-07-16 (player transcripts).** The destination-exit scan accepted
+  the last labeled interchange anywhere on the route, so routes whose final
+  legs are unbaked rural highways (US-281 into Lampasas, US-2 across the
+  plains to Havre) crowned an exit hundreds of miles out -- worst case 1,158
+  miles, I-39 in Wisconsin for a Havre, Montana receiver -- and taking it
+  settled the delivery from there. The scan now only accepts exits within the
+  final 25 miles of the route and otherwise falls back to the synthetic
+  end-of-route exit. Regression test pinned on both transcript routes.
+- [ ] Bake labeled exits or junction cues for rural US-highway final
+  approaches so arrivals there can name a real exit instead of the generic
+  end-of-route fallback (follow-up to the 2026-07-16 destination-exit fix;
+  needs an OSM junction sweep over non-motorway trunk corridors). Scale,
+  measured 2026-07-16: 533 of 1,287 legs carry no labeled interchange, and
+  192 of 623 cities have none on any approach leg, so every arrival there
+  uses the generic fallback. A seeded 2,489-route sample of supported routes
+  found 44 percent previously misfired the destination exit by more than 25
+  miles (worst sampled: Payson, Arizona to Newport, Oregon, 1,152 miles
+  early on a 1,420-mile route); all of those now take the fallback this
+  sweep would upgrade. Regen should run offline from the cached PBFs like
+  the overlay pipeline, targeting trunk/primary junction nodes on the 533
+  unlabeled legs.
 - [x] **Quick info keys.** S reads the posted speed limit (was buried in the
   Tab menu); A repeats the last route announcement; U reads what is coming
   up (imposed limits, stops, exits ahead).
@@ -214,6 +236,19 @@ From a batch of player reports:
   Plus and Minus adjust the set point by `CRUISE_STEP_MPH` (the real
   Accel/Coast buttons), so you engage once rolling and dial the target up to the
   speed you want; the truck accelerates up to it, capped by the limit offset.
+
+- [x] **Window-model on-time bonus.** Shipped on the 1.8.x nightly line:
+  `Job.payout` used to scale its on-time bonus by unused deadline (max 15%
+  only for a near-instant delivery, a few percent in practice), which
+  rewarded racing the clock and paid almost nothing for normal on-time runs.
+  It now pays a flat 10% for any delivery inside the window, the way real
+  shipper scorecards (OTIF-style) pay for service; late/damage penalties are
+  unchanged. Compared against feat/career-1.9 before landing: 1.9's carrier
+  pay plans add their own flat on-time share (2-6% of gross) plus reputation
+  trust pay (max 6%) *on top of* gross, and its `Job.payout` is identical to
+  dev's, so this reshapes the shared gross curve and merges cleanly; watch
+  the combined stack (10% gross + carrier share + trust) when rebalancing
+  the 1.9 economy.
 
 ### Realism north star (ongoing)
 

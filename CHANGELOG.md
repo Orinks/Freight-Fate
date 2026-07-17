@@ -8,6 +8,22 @@
 
 ### Changed
 
+- **On-time deliveries now pay a real bonus.** Delivering on time used to add
+  only a sliver of extra pay unless you raced in absurdly far ahead of the
+  deadline, so the bonus line at settlement rarely felt like one. Pay now
+  works the way real shipper scorecards do: hit the delivery window and you
+  earn a flat ten percent on-time bonus every time, and arriving hours early
+  pays no more than making the appointment. The settlement summary now calls
+  it an on-time delivery bonus. Late and damaged deliveries still pay less,
+  exactly as before.
+
+- **You can sleep at turnpike service plazas now.** Service plazas used to
+  offer fuel, food, and a short break but never a proper rest, so a tired
+  driver had to push on to the next truck stop even while parked at a big
+  Thruway or Turnpike plaza with overnight truck parking. Every service
+  plaza's stop menu now offers sleep like truck stops and travel centers do,
+  and route planning counts them as places you can end your day.
+
 - **The driving assistance presets have been set aside for version 1.9.** Recent developer snapshots briefly offered a Driving assistance settings category with emergency braking, lane support, stop-and-go, and descent control presets. That work now ships complete with version 1.9 instead. The speed keeper stays, now under Settings, Gameplay, and your other settings are untouched.
 
 ### Fixed
@@ -20,6 +36,15 @@
   speeding. Every such sample is gone (no US interstate mainline posts
   below 45), and an automatic check now keeps them from ever coming back.
   Small-town limits on US and state highways are real and unchanged.
+
+- **The destination exit can no longer show up a state early.** On routes
+  that finish on rural highways, the game could announce the destination
+  exit at the last big interchange anywhere along the way -- one delivery to
+  Havre, Montana offered its "destination exit" in Wisconsin, over a
+  thousand miles out, and taking it ended the trip and paid the load right
+  there. The destination exit now only appears within the final miles of
+  your route; where the last stretch has no signed interchange, you get the
+  normal final approach to the facility instead.
 
 - **Live weather no longer turns light haze into thick fog.** With real-world
   weather on, weather stations report haze or mist whenever they can see less

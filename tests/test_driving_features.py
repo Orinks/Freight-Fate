@@ -2199,3 +2199,39 @@ def test_route_planning_labels_name_through_cities_with_states():
         assert world.city(job.destination).spoken_qualified == job.spoken_destination
     finally:
         app.shutdown()
+
+
+def test_destination_exit_scan_stays_on_the_final_approach():
+    """Routes that finish on rural highways carry no baked interchanges, and
+    the scan used to crown the last labeled exit anywhere on the route as the
+    destination exit: player transcripts (2026-07-16) show a Lampasas run
+    settled from Wichita Falls, 224 miles out, and a Havre, Montana run
+    settled from I-39 in Wisconsin, 1,158 miles out. The scan must find an
+    exit on the final approach or report none, so the synthetic end-of-route
+    exit takes over."""
+    from types import SimpleNamespace
+
+    from freight_fate.data.world import get_world
+    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.driving_core import DESTINATION_EXIT_SCAN_WINDOW_MI
+
+    world = get_world()
+    for start, end in [
+        ("springfield_il_us", "lampasas_tx_us"),
+        ("jamestown_ny_us", "havre_mt_us"),
+    ]:
+        route = world.shortest_route(start, end, require_metadata=True)
+        assert route is not None
+        leg_starts: list[float] = []
+        total = 0.0
+        for leg in route.legs:
+            leg_starts.append(total)
+            total += leg.miles
+        driving = SimpleNamespace(
+            route=route,
+            trip=SimpleNamespace(_leg_starts=leg_starts, position_mi=0.0, total_miles=total),
+            ctx=SimpleNamespace(world=world),
+        )
+        details = DrivingState._scan_destination_exit_details(driving)
+        if details is not None:
+            assert details[0] >= total - DESTINATION_EXIT_SCAN_WINDOW_MI

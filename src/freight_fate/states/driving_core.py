@@ -67,6 +67,14 @@ EXIT_WINDOW_MAX_MI = 20.0
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
+# A real interchange counts as the destination exit only inside this final
+# approach window. Routes that finish on rural highways carry no baked
+# interchanges, and without the floor the scan crowned the last labeled exit
+# anywhere on the route -- one playtest got its "destination exit" on I-39 in
+# Wisconsin, 1,158 miles from the Montana receiver, and taking it settled the
+# load from there (transcripts, 2026-07-16). Past the window the synthetic
+# end-of-route exit takes over.
+DESTINATION_EXIT_SCAN_WINDOW_MI = 25.0
 
 KEEPER_MIN_MPH = 2.0  # the speed keeper just needs the truck rolling
 KEEPER_MAX_THROTTLE = 0.5  # zone speeds never need more than half throttle

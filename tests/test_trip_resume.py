@@ -287,7 +287,7 @@ def test_weather_source_change_applies_to_the_active_trip(monkeypatch):
 
 
 @pytest.mark.smoke
-def test_arrival_summary_calls_out_early_delivery_bonus():
+def test_arrival_summary_calls_out_on_time_delivery_bonus():
     from freight_fate.app import App
     from freight_fate.states.driving import ArrivalState
 
@@ -296,7 +296,7 @@ def test_arrival_summary_calls_out_early_delivery_bonus():
         driving = start_drive(app)
         driving.trip.game_minutes = driving.job.deadline_game_h * 30.0
         arrival = ArrivalState(app.ctx, driving)
-        assert any("Early delivery bonus" in part for part in arrival.summary_parts)
+        assert any("On-time delivery bonus" in part for part in arrival.summary_parts)
     finally:
         app.shutdown()
 
