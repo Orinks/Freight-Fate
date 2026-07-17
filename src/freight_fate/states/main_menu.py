@@ -1132,6 +1132,18 @@ class SettingsCategoryState(MenuState):
                 "Real world uses live city conditions when available.",
             )
         )
+        specs.append(
+            (
+                lambda: (
+                    "Live weather controls calendar: "
+                    f"{'on' if s.live_weather_controls_calendar else 'off'}"
+                ),
+                self._toggle_live_weather_calendar,
+                "When on, live weather uses today's real date and season. When off, "
+                "the career date advances at midnight and seasons pass while weather "
+                "conditions still come from the real world.",
+            )
+        )
         return specs
 
     def _toggle_speed_keeper(self, _d: int = 1) -> None:
@@ -1340,6 +1352,19 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_real_weather(self, _d: int) -> None:
         self.ctx.settings.real_weather = not self.ctx.settings.real_weather
+        self._announce()
+
+    def _toggle_live_weather_calendar(self, _d: int) -> None:
+        turning_off = self.ctx.settings.live_weather_controls_calendar
+        self.ctx.settings.live_weather_controls_calendar = (
+            not self.ctx.settings.live_weather_controls_calendar
+        )
+        profile = self.ctx.profile
+        if turning_off and profile is not None and profile.has_started_career():
+            from ..sim.season import real_clock_game_hours
+
+            profile.anchor_calendar_to(real_clock_game_hours())
+            profile.save()
         self._announce()
 
     def _channel(self) -> str:

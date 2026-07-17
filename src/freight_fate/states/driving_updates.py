@@ -595,10 +595,22 @@ class DrivingUpdateMixin:
 
     def _sync_weather_source(self) -> None:
         real = self.ctx.settings.real_weather
-        if real == self._weather_source_real:
+        controls_calendar = self.ctx.settings.live_weather_controls_calendar
+        if (
+            real == self._weather_source_real
+            and controls_calendar == self._live_weather_controls_calendar
+        ):
             return
         self._weather_source_real = real
+        self._live_weather_controls_calendar = controls_calendar
         self.weather.provider = self.ctx.real_weather_provider() if real else None
+        self.weather.live_weather_controls_calendar = controls_calendar
+        if not controls_calendar:
+            # The setting may just have anchored an established profile to
+            # today's date. Include time already driven on this active trip.
+            self.weather.game_hours = (
+                self.ctx.profile.calendar_game_hours + self.trip.game_minutes / 60.0
+            )
         if not real:
             self.weather.live = False
         self.ctx.audio.set_weather(self.weather.effects.sound)

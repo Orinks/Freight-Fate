@@ -62,6 +62,10 @@ def check_profile_invariants(profile: Profile) -> list[Violation]:
     _check_range(out, "fatigue", "Fatigue", profile.fatigue, 0.0, 100.0)
     _check_range(out, "road_grime", "Road grime", profile.road_grime_pct, 0.0, 100.0)
     _check_range(out, "pay_advance", "The pay advance", profile.pay_advance, 0.0, ADVANCE_CEILING)
+    if not isinstance(profile.calendar_offset_days, int) or not (
+        0 <= profile.calendar_offset_days < 365
+    ):
+        out.append(Violation("calendar_offset", "The calendar offset is not possible."))
     _check_range(out, "damage", "Truck damage", profile.truck_damage_pct, 0.0, 100.0)
     _check_range(out, "tire_wear", "Tire wear", profile.tire_wear_pct, 0.0, 100.0)
     if not _finite(profile.truck_fuel_gal) or not (0.0 <= profile.truck_fuel_gal <= _MAX_FUEL_GAL):

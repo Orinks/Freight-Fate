@@ -26,6 +26,10 @@ class Settings:
     # step up to standard or fast in Settings, Gameplay.
     time_scale: float = 10.0
     real_weather: bool = False  # live conditions from the NWS API
+    # Preserve the historical behavior by default: live weather also follows
+    # the wall-clock date. Turn this off to let the career calendar advance
+    # while live conditions continue to come from the NWS.
+    live_weather_controls_calendar: bool = True
     hos_mode: str = (
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
@@ -119,6 +123,8 @@ class Settings:
             s.haptics_enabled = True
         if not isinstance(s.cloud_saves, bool):
             s.cloud_saves = False
+        if not isinstance(s.live_weather_controls_calendar, bool):
+            s.live_weather_controls_calendar = True
         for attr in (
             "master_volume",
             "sfx_volume",

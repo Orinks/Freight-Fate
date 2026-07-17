@@ -33,6 +33,7 @@ Ranges — all numeric fields must be finite (no NaN, no infinity):
 - `money`: greater than -1,000,000 and below 1,000,000,000 (structural
   ceiling; the real judgment is rule 2.1).
 - `fatigue`, `road_grime_pct`: 0 to 100.
+- `calendar_offset_days`: integer from 0 through 364.
 - `truck_damage_pct`, `tire_wear_pct`: 0 to 100.
 - `truck_fuel_gal`: 0 to the largest buildable tank (biggest catalog tank
   plus the long-range upgrade's 50 extra gallons — 250 today).

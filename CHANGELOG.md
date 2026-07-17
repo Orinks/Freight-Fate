@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Live weather can now leave your career calendar running.** The new Live
+  weather controls calendar setting keeps today's real date when on. Turn it
+  off to keep live city conditions while your career date advances at midnight
+  and the seasons pass normally. Live conditions are adjusted to the career
+  season so summer snow and cold-season thunderstorms do not slip through. An
+  established career begins its independent calendar from today's date when
+  you turn the setting off, avoiding a jump back to its old hidden date; a new
+  career still begins on March 21.
 - **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default; turn it off in Settings, Gameplay.
 
 ### Changed
@@ -32,6 +40,11 @@
   audible when you accelerate or ease off, while manual releases and
   adaptive-cruise corrections blend gradually instead of making the engine
   volume jump. Automatic shifts retain a brief, gentle unload and recovery.
+- **Terminal weather now agrees with the live report on the road.** Time and
+  weather uses the real station temperature even when live weather does not
+  control the career calendar. If the first observation is still loading, the
+  terminal says so instead of announcing a modeled temperature that may change
+  when you start driving.
 - **Interstates stop enforcing a side street's speed limit mid-route.** A
   handful of highway legs still carried a 25 to 40 mile per hour sample in
   the middle of the corridor, picked up from a nearby city street or ramp

@@ -243,10 +243,12 @@ class WeatherSystem:
         seed: int | None = None,
         provider=None,
         game_hours: float | None = None,
+        live_weather_controls_calendar: bool = True,
     ) -> None:
         self._rng = random.Random(seed)
         self.region = region
         self.provider = provider
+        self.live_weather_controls_calendar = live_weather_controls_calendar
         # Career clock at this point in the trip. When provided, weather is
         # season- and temperature-aware (snow only when cold, storms only when
         # warm); when None, the simulated draw is used as-is so seed-based
@@ -278,7 +280,7 @@ class WeatherSystem:
         otherwise they follow the career clock, and are off entirely when no
         career clock was supplied.
         """
-        if self.provider is not None:
+        if self.provider is not None and self.live_weather_controls_calendar:
             from .season import real_clock_game_hours
 
             return real_clock_game_hours()
@@ -316,12 +318,25 @@ class WeatherSystem:
 
     def _seasonal(self, kind: WeatherKind) -> WeatherKind:
         """Reconcile a simulated condition with the season's temperature."""
-        temp = self._temperature()
+        # When live weather does not control the calendar, precipitation must
+        # agree with the career season even if the real station is currently
+        # reporting a wintry condition. This prevents summer snow and cold-
+        # season thunderstorms in the career's independent calendar.
+        if self.provider is not None and not self.live_weather_controls_calendar:
+            clock = self._season_clock()
+            if clock is None:
+                temp = None
+            else:
+                from .season import temperature_c
+
+                temp = temperature_c(self.region, clock)
+        else:
+            temp = self._temperature()
         if temp is None:
             return kind
-        from .season import adjust_for_temperature
+        from .season import adjust_for_calendar
 
-        return adjust_for_temperature(kind, temp)
+        return adjust_for_calendar(kind, temp, self._season_clock())
 
     def set_city(self, city: str, lat: float, lon: float) -> None:
         """Track the city whose real weather should apply (provider mode)."""
@@ -417,9 +432,10 @@ class WeatherSystem:
             self.live = False
             return None
         self.live = True
-        if kind != self.current:
-            self.current = kind
-            return kind
+        guarded = self._seasonal(kind)
+        if guarded != self.current:
+            self.current = guarded
+            return guarded
         return None
 
     def should_thunder(self) -> bool:
