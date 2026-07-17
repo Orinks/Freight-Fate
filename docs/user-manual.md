@@ -344,6 +344,10 @@ conditions while the career date advances at midnight and its seasons pass.
 Conditions remain seasonally plausible, so live snow is changed to rain or
 cloud when the career calendar is in warm weather, and thunderstorms are
 changed to heavy rain when the career season is too cold for them.
+The Time and weather item at a terminal always uses the live station
+temperature when it is available, regardless of which calendar controls the
+season. On the first request it may say live weather is still loading; try the
+item again after a moment rather than treating a modeled temperature as live.
 
 Stops are reported as you approach them. A one-mile cue tells you when to take
 an exit. Press X to signal for the exit, slow to 45 miles per hour or less, and

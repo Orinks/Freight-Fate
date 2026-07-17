@@ -246,6 +246,7 @@ def test_terminal_sleep_uses_independent_calendar_with_live_weather(monkeypatch)
         terminal._time_weather()
         assert "March 21" in spoken[-1]
         assert "July 17" not in spoken[-1]
+        assert "77 degrees" in spoken[-1]
 
         # A fresh driver gets a confirmation before deliberately sleeping.
         terminal._sleep()
@@ -254,5 +255,37 @@ def test_terminal_sleep_uses_independent_calendar_with_live_weather(monkeypatch)
         assert app.ctx.profile.game_hours == pytest.approx(16.0)
         assert "March 21" in spoken[-1]  # 6 AM + 10 hours has not crossed midnight
         assert "July 17" not in spoken[-1]
+        assert "77 degrees" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_terminal_does_not_present_modeled_temperature_while_live_weather_loads(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    class _LoadingProvider:
+        def request(self, *a):
+            pass
+
+        def get(self, *a):
+            return None
+
+        def unavailable(self, *a):
+            return False
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: _LoadingProvider())
+    app.ctx.settings.real_weather = True
+    app.ctx.settings.live_weather_controls_calendar = False
+    app.ctx.profile = Profile(name="Loading Weather Driver")
+    try:
+        CityMenuState(app.ctx)._time_weather()
+        assert "Live weather" in spoken[-1]
+        assert "still loading" in spoken[-1]
+        assert "degrees" not in spoken[-1]
     finally:
         app.shutdown()

@@ -28,6 +28,11 @@
 
 ### Fixed
 
+- **Terminal weather now agrees with the live report on the road.** Time and
+  weather uses the real station temperature even when live weather does not
+  control the career calendar. If the first observation is still loading, the
+  terminal says so instead of announcing a modeled temperature that may change
+  when you start driving.
 - **Interstates stop enforcing a side street's speed limit mid-route.** A
   handful of highway legs still carried a 25 to 40 mile per hour sample in
   the middle of the corridor, picked up from a nearby city street or ramp
