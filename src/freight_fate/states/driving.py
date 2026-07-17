@@ -41,7 +41,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             region,
             seed=self.trip_seed,
             provider=ctx.real_weather_provider(),
-            game_hours=profile.game_hours,
+            game_hours=profile.calendar_game_hours,
             live_weather_controls_calendar=ctx.settings.live_weather_controls_calendar,
         )
         self._weather_source_real = ctx.settings.real_weather

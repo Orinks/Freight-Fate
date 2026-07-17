@@ -150,6 +150,48 @@ def test_live_weather_calendar_setting_defaults_on_and_persists():
         app.shutdown()
 
 
+def test_disabling_live_calendar_anchors_established_career_to_today(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.sim.season import date_text
+
+    app = App()
+    app.ctx.profile = Profile(name="Established Driver", game_hours=54.0)
+    target = 200.0 * 24.0 + 17.0
+    monkeypatch.setattr("freight_fate.sim.season.real_clock_game_hours", lambda: target)
+    try:
+        original_game_hours = app.ctx.profile.game_hours
+        cat = open_settings_category(app, "Speech and weather")
+        while not cat.items[cat.index].text.startswith("Live weather controls calendar"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RETURN))
+
+        assert app.ctx.settings.live_weather_controls_calendar is False
+        assert app.ctx.profile.game_hours == original_game_hours
+        assert date_text(app.ctx.profile.calendar_game_hours) == date_text(target)
+        assert app.ctx.profile.calendar_game_hours % 24 == original_game_hours % 24
+    finally:
+        app.shutdown()
+
+
+def test_disabling_live_calendar_keeps_new_career_on_march_21(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+
+    app = App()
+    app.ctx.profile = Profile(name="Brand New Driver")
+    monkeypatch.setattr("freight_fate.sim.season.real_clock_game_hours", lambda: 200.0 * 24.0)
+    try:
+        cat = open_settings_category(app, "Speech and weather")
+        while not cat.items[cat.index].text.startswith("Live weather controls calendar"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.profile.calendar_offset_days == 0
+        assert app.ctx.profile.calendar_game_hours == 6.0
+    finally:
+        app.shutdown()
+
+
 def test_settings_menu_volume_survives_new_app_session():
     from freight_fate.app import App
     from freight_fate.settings import Settings

@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Live weather can now leave your career calendar running.** The new Live
+  weather controls calendar setting keeps today's real date when on. Turn it
+  off to keep live city conditions while your career date advances at midnight
+  and the seasons pass normally. Live conditions are adjusted to the career
+  season so summer snow and cold-season thunderstorms do not slip through. An
+  established career begins its independent calendar from today's date when
+  you turn the setting off, avoiding a jump back to its old hidden date; a new
+  career still begins on March 21.
 - **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default; turn it off in Settings, Gameplay.
 
 ### Changed
@@ -72,11 +80,6 @@
   newer cargo types never rose or fell. Loading such a career now fills in
   the missing market prices, which also keeps cloud backups of these older
   careers in step with orinks.net.
-- **Live weather can now leave your career calendar running.** The new Live
-  weather controls calendar setting keeps today's real date when on. Turn it
-  off to keep live city conditions while your career date advances at midnight
-  and the seasons pass normally. Live conditions are adjusted to the career
-  season so summer snow and cold-season thunderstorms do not slip through.
 
 ## 1.8.3 - 2026-07-14
 

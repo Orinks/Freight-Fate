@@ -317,7 +317,7 @@ class CityMenuState(MenuState):
         season_hours = (
             real_clock_game_hours()
             if provider is not None and self.ctx.settings.live_weather_controls_calendar
-            else p.game_hours
+            else p.calendar_game_hours
         )
         if live:
             observed = None

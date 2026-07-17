@@ -341,6 +341,9 @@ Tab status menu, and at the city terminal. With live weather turned on, the
 default is for the date, season, and temperature to follow the real-world
 calendar. Turn **Live weather controls calendar** off to keep live city
 conditions while the career date advances at midnight and its seasons pass.
+For an established career, turning it off begins the independent calendar on
+today's date so the date does not jump backward. A newly created career still
+begins on March 21.
 Conditions remain seasonally plausible, so live snow is changed to rain or
 cloud when the career calendar is in warm weather, and thunderstorms are
 changed to heavy rain when the career season is too cold for them.

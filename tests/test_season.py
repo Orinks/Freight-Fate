@@ -41,6 +41,19 @@ def test_career_year_increments_after_a_full_year():
     assert career_year(24.0 * DAYS_PER_YEAR) == 2
 
 
+def test_profile_calendar_offset_changes_date_without_changing_career_time():
+    from freight_fate.models.profile import Profile
+
+    profile = Profile(name="Established", game_hours=30.0)
+    target = _hours_for_day(200) + 15.0
+    profile.anchor_calendar_to(target)
+
+    assert profile.game_hours == 30.0
+    assert date_text(profile.calendar_game_hours) == date_text(target)
+    assert profile.calendar_game_hours % 24 == profile.game_hours % 24
+    assert 0 <= profile.calendar_offset_days < 365
+
+
 def test_weather_system_exposes_date_text():
     sim = WeatherSystem("heartland", seed=1, game_hours=0.0)
     assert sim.date_text == "March 21"

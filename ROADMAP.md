@@ -273,7 +273,8 @@ Net-new realism candidates, roughly by area:
   weather on the season follows the real-world calendar by default so it
   matches those conditions. Players can now turn off **Live weather controls
   calendar** to keep live conditions while the career date and seasons
-  advance; a seasonal reconciliation guard prevents summer snow and
+  advance; established careers anchor that independent calendar to today's
+  date at the handoff while new careers retain the March 21 start. A seasonal reconciliation guard prevents summer snow and
   cold-season thunderstorms in that mode. Real observation temperature is now extracted too (`_temp_to_c`
   -> `RealWeatherProvider.get_temperature` -> `WeatherSystem._temperature`), so
   live mode reports the station's real degrees and falls back to the climate

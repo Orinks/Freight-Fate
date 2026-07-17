@@ -711,7 +711,7 @@ class RouteSelectState(MenuState):
                     hours = (
                         real_clock_game_hours()
                         if self.ctx.settings.live_weather_controls_calendar
-                        else self.ctx.profile.game_hours
+                        else self.ctx.profile.calendar_game_hours
                     )
                     observed = None
                     getter = getattr(provider, "get_temperature", None)

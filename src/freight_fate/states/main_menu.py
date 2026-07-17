@@ -1355,9 +1355,16 @@ class SettingsCategoryState(MenuState):
         self._announce()
 
     def _toggle_live_weather_calendar(self, _d: int) -> None:
+        turning_off = self.ctx.settings.live_weather_controls_calendar
         self.ctx.settings.live_weather_controls_calendar = (
             not self.ctx.settings.live_weather_controls_calendar
         )
+        profile = self.ctx.profile
+        if turning_off and profile is not None and profile.has_started_career():
+            from ..sim.season import real_clock_game_hours
+
+            profile.anchor_calendar_to(real_clock_game_hours())
+            profile.save()
         self._announce()
 
     def _channel(self) -> str:
