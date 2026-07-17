@@ -1,11 +1,11 @@
-# Steering by ear: parked design notes
+# Steering by ear: design notes (ours to build)
 
-Phil's brainstorm, parked 2026-07-16. Norm has offered Josh the audio
-design lead for driving, without detail and on purpose: Josh's own
-ideas get first swing. These notes exist so OUR thinking is banked --
-a comparison point for finessing whatever comes back, not direction
-for anyone. If Josh passes, this file plus a community consultation
-becomes the starting point instead.
+Phil's brainstorm, parked 2026-07-16 while Josh was offered the audio
+design lead. Josh passed the same day ("you handle this"), so this
+file is the working design again. Norm posted the open questions to
+the audiogames.net forum 2026-07-16; community answers get folded in
+as they arrive, and if the thread stays quiet, we build from these
+notes with Phil's recommendations as the defaults.
 
 ## The problem in one sentence
 
