@@ -54,7 +54,16 @@ From a batch of player reports:
 - [ ] Bake labeled exits or junction cues for rural US-highway final
   approaches so arrivals there can name a real exit instead of the generic
   end-of-route fallback (follow-up to the 2026-07-16 destination-exit fix;
-  needs an OSM junction sweep over non-motorway trunk corridors).
+  needs an OSM junction sweep over non-motorway trunk corridors). Scale,
+  measured 2026-07-16: 533 of 1,287 legs carry no labeled interchange, and
+  192 of 623 cities have none on any approach leg, so every arrival there
+  uses the generic fallback. A seeded 2,489-route sample of supported routes
+  found 44 percent previously misfired the destination exit by more than 25
+  miles (worst sampled: Payson, Arizona to Newport, Oregon, 1,152 miles
+  early on a 1,420-mile route); all of those now take the fallback this
+  sweep would upgrade. Regen should run offline from the cached PBFs like
+  the overlay pipeline, targeting trunk/primary junction nodes on the 533
+  unlabeled legs.
 - [x] **Quick info keys.** S reads the posted speed limit (was buried in the
   Tab menu); A repeats the last route announcement; U reads what is coming
   up (imposed limits, stops, exits ahead).
