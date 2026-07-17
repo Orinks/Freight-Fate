@@ -131,6 +131,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
         self._shift_recover_t = 1.0  # 0->1 recovery progress after an automatic shift ends
+        # Smoothed throttle sent to the engine audio. The physics always uses
+        # the raw control; this only prevents small controller/cruise changes
+        # from pumping the engine loop's gain.
+        self._engine_audio_throttle = 0.0
         # Prev-frame accel/brake state, so a forward<->reverse shift needs a
         # fresh press (release then press) rather than a held control.
         self._reverse_brake_held = False

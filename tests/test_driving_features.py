@@ -1821,7 +1821,7 @@ def test_engine_audio_load_eases_without_dropping_out_during_automatic_shift(mon
         app.shutdown()
 
 
-def test_engine_audio_volume_ignores_manual_throttle_outside_shifts(monkeypatch):
+def test_engine_audio_load_tracks_manual_throttle_smoothly(monkeypatch):
     from freight_fate.app import App
 
     app = App()
@@ -1837,10 +1837,19 @@ def test_engine_audio_volume_ignores_manual_throttle_outside_shifts(monkeypatch)
         driving = start_drive(app)
         quiet_trip(driving)
         driving.truck.transmission._shift_timer = 0.0
-        for throttle in (0.0, 0.25, 1.0, 0.0):
-            driving.truck.throttle = throttle
-            driving._update_audio(1 / 60)
-        assert [load for _rpm, load in samples[-4:]] == [1.0, 1.0, 1.0, 1.0]
+        driving._engine_audio_throttle = 0.5
+        driving.truck.throttle = 0.75
+        driving._update_audio(0.1)
+        rising = samples[-1][1]
+        driving.truck.throttle = 0.25
+        driving._update_audio(0.1)
+        falling = samples[-1][1]
+
+        # Raw throttle still controls audible load, but the 450-millisecond
+        # filter prevents an immediate gain step for a cruise correction.
+        assert rising == pytest.approx(0.5 + (0.75 - 0.5) * (0.1 / 0.45))
+        assert falling == pytest.approx(rising + (0.25 - rising) * (0.1 / 0.45))
+        assert 0.25 < falling < rising < 0.75
     finally:
         app.shutdown()
 

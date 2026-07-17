@@ -28,10 +28,10 @@
 
 ### Fixed
 
-- **The engine no longer fades when you release the accelerator.** The engine
-  bed now stays at a steady volume through manual driving and adaptive-cruise
-  corrections. Automatic shifts retain a brief, much gentler unload and smooth
-  recovery, so gear changes remain audible without making the engine drop away.
+- **The engine load now follows throttle smoothly.** Engine effort remains
+  audible when you accelerate or ease off, while manual releases and
+  adaptive-cruise corrections blend gradually instead of making the engine
+  volume jump. Automatic shifts retain a brief, gentle unload and recovery.
 - **Interstates stop enforcing a side street's speed limit mid-route.** A
   handful of highway legs still carried a 25 to 40 mile per hour sample in
   the middle of the corridor, picked up from a nearby city street or ramp
