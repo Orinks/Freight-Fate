@@ -40,3 +40,27 @@ def test_no_anchor_polluted_speed_profiles() -> None:
         f"(first few: {details}). A data sweep reintroduced the pollution -- "
         "fix the bake, do not hand-edit; see tools/repair_interstate_anchor_limits.py."
     )
+
+
+def test_no_interstate_sample_below_45_at_any_position() -> None:
+    """The 2026-07-16 class: a mid-leg city-street sample enforced on the
+    interstate mainline (player-found live on I-55 toward Memphis). The
+    repair tool now drops these; this direct assertion holds even if the
+    tool's own rules ever drift."""
+    tool = _load_repair_tool()
+    data = json.loads(tool.WORLD_PATH.read_text(encoding="utf-8"))
+    offenders = []
+    for leg in data["legs"]:
+        if not tool.is_interstate(leg.get("highway", "")):
+            continue
+        for row in (leg.get("corridor") or {}).get("speed_limits") or []:
+            if row["mph"] < tool.INTERSTATE_MIN_PLAUSIBLE_MPH:
+                offenders.append(
+                    f"{leg['from']}-{leg['to']} ({leg['highway']}) "
+                    f"{row['mph']:.0f} mph at mile {row['at_mi']}"
+                )
+    assert offenders == [], (
+        f"{len(offenders)} sub-45 samples on interstate legs (first few: "
+        f"{'; '.join(offenders[:5])}). No US interstate mainline posts below "
+        "45; these are wrong-road matches -- fix the bake, do not hand-edit."
+    )

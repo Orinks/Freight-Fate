@@ -28,6 +28,15 @@
 
 ### Fixed
 
+- **Interstates stop enforcing a side street's speed limit mid-route.** A
+  handful of highway legs still carried a 25 to 40 mile per hour sample in
+  the middle of the corridor, picked up from a nearby city street or ramp
+  during the map sweep -- so the GPS would suddenly announce a 35 limit on
+  the open interstate and enforcement would treat highway speed as
+  speeding. Every such sample is gone (no US interstate mainline posts
+  below 45), and an automatic check now keeps them from ever coming back.
+  Small-town limits on US and state highways are real and unchanged.
+
 - **The destination exit can no longer show up a state early.** On routes
   that finish on rural highways, the game could announce the destination
   exit at the last big interchange anywhere along the way -- one delivery to
