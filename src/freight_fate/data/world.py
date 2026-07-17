@@ -12,6 +12,7 @@ import heapq
 import json
 import re
 import zlib
+from dataclasses import replace
 from pathlib import Path
 
 from .legacy_aliases import LEGACY_CITY_SLUGS
@@ -93,9 +94,7 @@ class World:
             leg_from = self.resolve_city_key(leg["from"])
             leg_to = self.resolve_city_key(leg["to"])
             miles = float(leg["miles"])
-            stops = tuple(
-                _parse_stop(s, miles, leg_from, leg_to) for s in leg.get("stops", ())
-            )
+            stops = tuple(_parse_stop(s, miles, leg_from, leg_to) for s in leg.get("stops", ()))
             corridor = leg.get("corridor", {})
             route_points = tuple(
                 _parse_route_point(p, miles, leg_from, leg_to)
@@ -118,8 +117,7 @@ class World:
                 for c in corridor.get("checkpoints", ())
             )
             state_miles = tuple(
-                _parse_state_mileage(m, leg_from, leg_to)
-                for m in corridor.get("state_miles", ())
+                _parse_state_mileage(m, leg_from, leg_to) for m in corridor.get("state_miles", ())
             )
             toll_events = tuple(
                 _parse_toll_event(e, miles, leg_from, leg_to, leg["highway"])
@@ -374,6 +372,10 @@ class World:
         cur = end
         while cur != start:
             parent, leg = prev[cur]
+            # Ensure leg direction matches forward route (parent -> cur)
+            if leg.a == cur and leg.b == parent:
+                # Leg is reversed, flip it by swapping a and b
+                leg = replace(leg, a=leg.b, b=leg.a)
             legs.append(leg)
             cities.append(parent)
             cur = parent
