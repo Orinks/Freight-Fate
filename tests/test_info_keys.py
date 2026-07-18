@@ -193,6 +193,7 @@ def test_upcoming_key_handles_a_clear_road(monkeypatch):
         d.trip.stops = []
         d.trip.navigation_cues = []
         d.trip.patrols = []
+        d.trip.curves = ()
         spoken = _capture(app, monkeypatch)
         d.handle_event(key_event(pygame.K_u))
         assert "Nothing notable" in spoken[-1]

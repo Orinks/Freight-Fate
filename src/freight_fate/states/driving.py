@@ -7,10 +7,17 @@ from ..sim.pedal_latch import PedalLatch
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from .driving_events import DrivingEventMixin
+from .driving_pacenotes import DrivingPacenoteMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 
 
-class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, State):
+class DrivingState(
+    DrivingControlsMixin,
+    DrivingUpdateMixin,
+    DrivingEventMixin,
+    DrivingPacenoteMixin,
+    State,
+):
     def __init__(
         self,
         ctx,
@@ -269,6 +276,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # a latched pedal reads as held everywhere downstream.
         self._throttle_latch = PedalLatch()
         self._brake_latch = PedalLatch()
+        # Curve calls already made this trip (keys are curve entry miles).
+        self._pacenote_spoken: set[int] = set()
         self._status_text = f"Press {self.ctx.control_hint('engine')} to start the engine."
 
     def _terse_speech(self) -> bool:

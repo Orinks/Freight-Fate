@@ -86,9 +86,18 @@ terminal becomes the anchor of that week instead of a spawn point.
       in it (locked wheels lose steering) -- pacenotes must front-load
       the slow-down call, and mid-curve braking should cost grip in the
       physics. Still open: steering-input feel (his "thinking ahead,
-      not jerking the wheel" leans hold-to-sweep) and pacenote
-      language. The pacenote/speech layer and D-key curve advisories
-      are settled and data-ready -- cleared to build now.
+      not jerking the wheel" leans hold-to-sweep).
+      PACENOTE LAYER SHIPPED (2026-07-18): data/curves.py reads the
+      shard (143 ms once, cached), Trip carries route-mapped
+      direction-mirrored curves, and DrivingPacenoteMixin speaks the
+      calls -- severity from the baked advisory (hairpin <=25 / sharp
+      <=35 / curve <=50 / gentle bend), front-loaded lead (5 s reaction
+      + comfortable-braking distance, floor a third of a mile), silent
+      when already slow enough, linked "then right" tails, U lists the
+      next bends, D folds the bend into its number, Settings toggle
+      outside presets. Remaining slices: the required-slowdown
+      consequence tier (hot entries pay physics), the pursuit guide and
+      edge textures (audio assets), steering-input feel, cue previews.
 - [ ] **Real lane counts from OSM (owner ask 2026-07-16).** OSM tags
       lanes directly (lanes=, lanes:forward=); bake per-mile lane counts
       along every leg from the self-hosted Overpass/PBF harvest, the

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import random
 
+from ..data.curves import RouteCurve, route_curves
 from ..data.world import Leg, Route, get_world
 from .hos import clock_text, is_night
 from .season import is_weekend
@@ -117,6 +118,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.patrols = self._place_patrols()
         self.traffic_manager.add_patrol_traffic(self.patrols)
         self.chain_law_areas = self._place_chain_law_areas()
+        self.curves = route_curves(self.route, self.route.cities)
         # True while the player is on an exit ramp that ends in a light or a
         # stop sign; the driving state maintains it every frame. It pins the
         # clock to real time (see effective_time_scale).
@@ -1006,6 +1008,19 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         if self._near_city(mile):
             return min(base, URBAN_LIMIT_MPH)
         return base
+
+    def curves_within(self, within_mi: float) -> list[RouteCurve]:
+        """Mainline curves whose entry lies ahead within the window."""
+        return [
+            c for c in self.curves if 0 < c.start_mi - self.position_mi <= within_mi
+        ]
+
+    def curve_at(self, mile: float) -> RouteCurve | None:
+        """The curve the given route mile is inside, if any."""
+        for c in self.curves:
+            if c.start_mi <= mile <= c.end_mi:
+                return c
+        return None
 
     def next_zone_within(self, within_mi: float) -> Zone | None:
         ahead = [

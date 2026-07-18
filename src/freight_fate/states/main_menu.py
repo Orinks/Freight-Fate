@@ -1190,6 +1190,11 @@ class SettingsCategoryState(MenuState):
                 "Latching pedals",
                 "Tap the accelerator or brake, then press again and hold for half a second: a click and a spoken confirmation latch the pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly. Presets never change this.",
             ),
+            (
+                "curve_callouts",
+                "Curve callouts",
+                "A co-driver reads the road: bends that demand slowing are called before they arrive, like Sharp left, half a mile, advise 35. Bends you are already slow enough for stay silent. The U readout lists the next few either way. Presets never change this.",
+            ),
         )
 
     def _assist_preset_label(self) -> str:
@@ -1219,9 +1224,10 @@ class SettingsCategoryState(MenuState):
             )
 
     def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
-        if field in ("speed_keeper", "pedal_latch"):
-            # Input-accessibility aids, not realism choices: they live
-            # outside the presets, so toggling one never reads as Custom.
+        if field in ("speed_keeper", "pedal_latch", "curve_callouts"):
+            # Input-accessibility aids and information layers, not realism
+            # choices: they live outside the presets, so toggling one never
+            # reads as Custom.
             setattr(self.ctx.settings, field, not getattr(self.ctx.settings, field))
             self._announce()
             return

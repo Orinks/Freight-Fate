@@ -397,7 +397,7 @@ Driving controls are active while the road view is focused:
 | H | Hold to sound the horn; release to stop it. |
 | Space | Report speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. |
-| D | Report one safe-speed number for right now. Weather grip and an armed exit ramp are already baked into the number. |
+| D | Report one safe-speed number for right now. Weather grip, an armed exit ramp, and the next bend are already baked into the number. |
 | G | Report the grade under the wheels and whether the truck is holding, pulling, or losing it. |
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
@@ -409,7 +409,7 @@ Driving controls are active while the road view is focused:
 | Left / Right arrow | With lane drift on, steer; steer across the line to change lanes. With lane drift off, tap to change one lane in that direction -- the signal clicks and the change is announced. |
 | A | Repeat the last route announcement, in case you missed it. |
 | Comma | Re-read the last spoken line of any kind, here and in every menu. Press it again within a few seconds to step back through the last 20 lines; each older line is prefaced with how far back it is, and any new announcement returns the key to the newest line. |
-| U | Report what is coming up: imposed speed limits, patrols, stops, and exits ahead. |
+| U | Report what is coming up: imposed speed limits, patrols, stops, exits, and the next few bends ahead with their advisory speeds. |
 | F1 | Show the driving control list and current objective. |
 | Escape | Open the pause menu. |
 
@@ -478,6 +478,18 @@ Grades are real: the game samples actual elevation along every route, so
 the long climbs and descents you hear are the ones a real driver runs.
 Press G at any time for the grade under your wheels and a plain verdict
 on whether the truck is holding it, pulling it, or losing it.
+
+Curves are real too, and a co-driver reads them to you. When a bend
+ahead demands slowing at your current speed, you hear the call early --
+"Sharp left, half a mile. Advise 35." -- with enough road left to brake
+before the bend, never in it. The severity ladder runs gentle bend,
+curve, sharp, and hairpin, and tight pairs link into one call: "Sharp
+left, a quarter mile. Advise 30. Then right." Bends you are already slow
+enough for stay silent, so a straight interstate stays quiet. Press U
+any time to hear the next few bends with their advisory speeds, and D to
+get one safe-speed number with the bend already baked in. Turn the calls
+off under Settings, Driving assistance, Curve callouts; U and D keep
+reporting bends either way.
 
 Going down is the discipline. The service brakes turn speed into heat,
 and heat is the enemy: drag the brakes down a long grade and they fade,
@@ -799,6 +811,11 @@ Lane drift also lives in this category and, like the speed keeper, sits outside 
 One more control, Speed keeper, sits outside the presets. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K holds your current speed at or below the zone limit and creeps along behind queued traffic, so the accelerator does not need to stay held down. Any brake input, a hazard, or reaching the open road hands control back and says so. It is on by default and never changed by choosing a preset.
 
 Latching pedals is the same kind of control: an input accommodation that sits outside the presets, on by default. Tap the accelerator or brake, then press again and hold for half a second, and a click plus a spoken confirmation latch that pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly, spoken. See the driving controls table for the full gesture.
+
+Curve callouts also sit outside the presets, on by default. A co-driver
+calls the bends that demand slowing before they arrive -- "Sharp left,
+half a mile. Advise 35." -- and stays silent for bends you are already
+slow enough for. See Mountain Driving for how to drive with the calls.
 
 Settings are grouped into categories. In a settings category, Up and Down choose
 a setting, Right arrow or Enter changes it forward, Left arrow changes it

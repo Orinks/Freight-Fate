@@ -191,6 +191,7 @@ class DrivingUpdateMixin:
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)
         self._update_announcements(dt)
+        self._update_pacenotes(dt)
         self._update_ambient_events(dt)
         self._update_ramp_light(dt)
         self._update_hazard(dt)

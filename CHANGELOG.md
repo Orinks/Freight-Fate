@@ -4,6 +4,18 @@
 
 ### Added
 
+- **A co-driver now reads the road: spoken curve callouts.** Bends that
+  demand slowing at your current speed are called before they arrive --
+  "Sharp left, half a mile. Advise 35." -- early enough to brake before
+  the bend, never in it. Bends you are already slow enough for stay
+  silent, so a legal cruise down a straight interstate is as quiet as it
+  ever was, while a canyon run finally talks you through. Every call
+  comes from the real measured geometry of the road, tight bends link
+  into one call ("then right"), the U readout lists the next few bends
+  with their advisory speeds, and D folds the bend into its one
+  safe-speed number. Turn it off any time under Settings, Driving
+  assistance, Curve callouts.
+
 - **Rest stops can now tell you how big the lot is.** Where the official
   federal truck-parking survey covers a stop, the spoken parking note adds
   the counted spaces, like confirmed truck parking, 45 spaces. Lot size
