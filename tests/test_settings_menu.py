@@ -438,6 +438,7 @@ def test_online_menu_keeps_profile_sharing_and_private_cloud_backup_separate():
         menu = open_settings_category(app, "Online")
         labels = [item.text for item in menu.items]
         assert labels == [
+            "Online services: on",
             "Set up orinks.net account",
             "Profile sharing: not set up",
             "Back up saves to your orinks.net account: not set up",

@@ -122,13 +122,13 @@ def test_provider_initialization():
 
 
 def test_provider_unsupported_state():
-    """Test that unsupported states return empty data."""
+    """Test that states not in STATE_APIS return empty data."""
     provider = RealTrafficProvider()
-    data = provider.request("california")
+    data = provider.request("atlantis")
 
-    assert data.state == "california"
+    assert data.state == "atlantis"
     assert data.events == []
-    assert data.source == "unsupported"
+    assert data.source == "empty"
 
 
 def test_provider_supported_state_returns_empty_initially():
