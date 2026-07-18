@@ -16,6 +16,15 @@
 
 ### Changed
 
+- **Each truck you own now keeps its own fuel, damage, tire wear, and road
+  grime.** Refueling, repairing, or dirtying one truck no longer affects the
+  others, and a newly bought truck arrives with a full tank and a clean bill
+  of health. Switching trucks no longer moves fuel between them. Careers from
+  older versions are updated automatically the first time they load, and the
+  game tells you once that the updated save can no longer be opened by older
+  versions: the truck you were driving keeps its condition, and your other
+  trucks start fueled and fresh.
+
 - **On-time deliveries now pay a real bonus.** Delivering on time used to add
   only a sliver of extra pay unless you raced in absurdly far ahead of the
   deadline, so the bonus line at settlement rarely felt like one. Pay now

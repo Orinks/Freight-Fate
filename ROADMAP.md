@@ -294,6 +294,15 @@ Net-new realism candidates, roughly by area:
   last live condition indefinitely instead of falling back to simulated
   weather. Treat a stale-only cache as offline (and consider a spoken note
   when live weather falls back) so conditions can't silently freeze.
+- [x] **Per-truck condition tracking.** Every owned truck now keeps its own
+  fuel, damage, tire wear, and road grime (save version 5); newly bought
+  trucks arrive fueled and fresh, and switching trucks no longer carries or
+  loses fuel. Older saves are migrated automatically on load, with a one-time
+  spoken notice that the save is no longer readable by older versions.
+- [ ] **Teach the server-side validation gate and cloud-save consumers the
+  `truck_conditions` shape.** The client invariants and docs are updated for
+  save version 5, but the server plausibility rules still describe the flat
+  pre-v5 condition fields.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
   acceleration, grade lugging, fuel burn, and now braking: the foundation
   brakes have a fixed force ceiling sized for the rated gross, so loads over

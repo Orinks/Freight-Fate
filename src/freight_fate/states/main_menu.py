@@ -30,6 +30,11 @@ _last_invalid_saves: list[Path] = []
 
 def enter_world(ctx) -> None:
     """Resume a saved mid-trip delivery if there is one, else the terminal hub."""
+    if ctx.profile.migration_notice_pending:
+        from .save_notice import SaveMigrationNoticeState
+
+        ctx.push_state(SaveMigrationNoticeState(ctx))
+        return
     ctx.push_state(_world_entry_state(ctx))
 
 
@@ -433,6 +438,11 @@ class LoadDriverState(MenuState):
     def _pick(self, profile: Profile) -> None:
         self.ctx.profile = profile
         self.ctx.say(f"Welcome back, {profile.name}.")
+        if profile.migration_notice_pending:
+            from .save_notice import SaveMigrationNoticeState
+
+            self.ctx.replace_state(SaveMigrationNoticeState(self.ctx))
+            return
         self.ctx.replace_state(_world_entry_state(self.ctx))
 
 
