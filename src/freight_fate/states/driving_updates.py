@@ -509,20 +509,54 @@ class DrivingUpdateMixin:
         leg = self.trip.route.legs[self.trip.current_leg_index]
         # The exit ramp is a single lane; the mainline keeps its leg count.
         self.lane.set_lane_count(1 if self._ramp_mi is not None else leg_lane_count(leg))
-        curve = 0.0
-        if leg.terrain == "hills":
-            curve = 0.25
-        elif leg.terrain == "mountain":
-            curve = 0.55
+        # Use the real baked curve data when the truck is inside a curve.
+        # The curve force pushes the lane offset outward proportionally to
+        # how much the truck's speed exceeds the advisory speed, scaled by
+        # load, grip, and the curve's tightness.
+        active = self.trip.curve_at(self.trip.position_mi)
+        if active is not None and not active.connector:
+            excess = max(0.0, self.truck.speed_mph - active.advisory_mph)
+            tightness = max(0.2, 1.0 - active.min_radius_ft / 5000.0)
+            # Curve push: full CURVE_RATE at advisory, ramping with excess.
+            # A heavier load pushes harder (more inertia to pull wide);
+            # worn or icy grip means less lateral resistance.
+            load = min(1.5, self.truck.gross_mass_kg / self.truck.specs.mass_kg)
+            grip_factor = min(1.0, self.truck.effective_grip)
+            curve_push = (
+                CURVE_RATE * tightness * (1.0 + excess * 0.05) * load / max(0.2, grip_factor)
+            )
+            # Centrifugal force pushes the truck OUTSIDE the curve: a left
+            # curve pushes right (positive offset), a right curve pushes left
+            # (negative offset). The lane model's positive offset = rightward.
+            direction = 1.0 if active.direction == "L" else -1.0
+            curve = curve_push * direction
+            # Spoken slip warning: entering a curve well above advisory
+            # pushes the truck toward the shoulder and the driver should
+            # know why.
+            if excess > 15 and not self._curve_slip_active:
+                self._curve_slip_active = True
+                self.ctx.say_event(
+                    f"{active.spoken_phrase}: too fast, drifting to the outside.",
+                    interrupt=True,
+                )
+        else:
+            curve = 0.0
         if self._ramp_mi is not None:
             curve += 0.35
-        curve_assisting = (
-            self.ctx.settings.curve_speed_assist
-            and curve > 0
-            and self.truck.speed_mph > 50 - curve * 20
-        )
+        if active is None and self._curve_slip_active:
+            self._curve_slip_active = False
+        # Curve speed assist: use the real advisory speed when one is active
+        # instead of the old terrain heuristic.
+        curve_assisting = False
+        if self.ctx.settings.curve_speed_assist:
+            if active is not None and not active.connector:
+                # Approaching or inside a curve and going faster than advisory + margin
+                curve_assisting = self.truck.speed_mph > active.advisory_mph + 5
+            elif curve != 0.0:
+                # Fallback: old terrain- or ramp-based heuristic
+                curve_assisting = self.truck.speed_mph > 50 - abs(curve) * 20
         if curve_assisting:
-            self.truck.brake = max(self.truck.brake, min(0.5, curve))
+            self.truck.brake = max(self.truck.brake, min(0.35, abs(curve)))
             if not self._curve_assist_active:
                 self.ctx.say_event("Curve speed assistance slowing.", interrupt=False)
         elif self._curve_assist_active:

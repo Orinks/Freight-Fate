@@ -135,6 +135,37 @@
   OHGO API as a reference implementation and gracefully falls back to
   simulated traffic when the API is unavailable.
 
+- **Construction zones from the road ahead now read from real state 511
+  data.** When a 511 endpoint provides construction work zone data for the
+  state you are driving through, the game converts those events into
+  approachable zones with taper warnings, reduced speed limits, and lane
+  closure announcements -- real construction, where it really is, with the
+  real speed reduction. As you cross a state line the system queries that
+  state's DOT feed automatically; if no API is configured for the state,
+  procedurally generated construction zones take over as before.
+
+- **Twenty-four state DOTs now provide live 511 data for construction
+  work zones.** Ohio continues on the OHGO API, five states use the shared
+  Iteris platform (Arizona, Connecticut, Georgia, New York, Wisconsin),
+  and eighteen states are configured for the federal Work Zone Data
+  Exchange (WZDx) standard (California, Colorado, Florida, Idaho, Indiana,
+  Maryland, Michigan, Minnesota, Missouri, Nevada, New Jersey, North
+  Carolina, Oregon, Pennsylvania, Tennessee, Texas, Utah, Virginia,
+  Washington). The remaining states fall back gracefully to simulated
+  construction zones -- the game never shows a blank map for an
+  unsupported state.
+
+- **Curves now speak with the real road's voice: sixty-three thousand
+  baked curve records warn you about approaching bends with the actual
+  advisory speed, direction, and severity from DOT survey data.** Sharp
+  curves (advisory under 50 or radius under 2,500 feet) call out a
+  pacenote as you approach -- "sharp curve left, half mile, advisory 35"
+  -- and the truck's physics responds: the centrifugal drift pushes your
+  lane position, the curve speed assist eases the throttle when you are
+  well above the advisory, and the safe-speed key (D) now factors in the
+  next curve's advisory. Connector ramps and gentle curves stay quiet, and
+  only the first approach per curve is announced.
+
 - **Real-time truck parking availability is announced at stops.** When
   enabled in Settings, Gameplay, the game fetches live parking availability
   from TPIMS APIs and announces how many spaces are available nearby when

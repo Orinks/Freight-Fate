@@ -114,6 +114,24 @@ class DrivingEventMixin:
             self.ctx.say_event(
                 timezone_crossing_message(event, self._terse_speech()), interrupt=False
             )
+        elif kind == TripEventKind.CURVE:
+            # Curve approach warnings are critical navigation cues: they
+            # preempt ambient chatter and play on the event voice.
+            if self._hazard_deadline is not None or self._ramp_mi is not None:
+                return
+            advisory = event.data.get("advisory_mph", 0)
+            self._last_event_message = event.message
+            # A curve well above the cruise set point: cancel and tell the
+            # driver why, so they don't wonder why cruise dropped mid-bend.
+            if self._cruise_mph is not None and self._cruise_mph > advisory + 5:
+                self._cancel_cruise()
+                self.ctx.say_event(
+                    event.message + " Adaptive cruise off; you need manual speed control.",
+                    interrupt=True,
+                )
+            else:
+                self.ctx.audio.play("ui/notify", volume=0.6)
+                self.ctx.say_event(event.message, interrupt=False)
         elif kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
             self._speak_ambient_event(event.message)
         elif kind == TripEventKind.ARRIVED:

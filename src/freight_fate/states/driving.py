@@ -148,6 +148,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._chains_fast_active = False  # spoken chains-over-speed warning edge tracking
         self._chain_law_warned: set[tuple[int, int]] = set()  # (area, level) spoken warnings
         self._chain_law_cited: set[tuple[int, int]] = set()  # checkpoint rolls already taken
+        # Curve management: whether a hot-entry slip warning has been spoken
+        # for the current curve.
+        self._curve_slip_active = False
         # Trooper pull-overs: a strike inside a patrol window may get you stopped
         # for an immediate ticket, separate from the silent at-delivery strikes.
         self.speeding_tickets = 0
