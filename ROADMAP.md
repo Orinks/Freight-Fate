@@ -48,8 +48,6 @@ terminal becomes the anchor of that week instead of a spawn point.
 - [ ] Staged jake in-cab control: the physics supports stages 1-3 but the J key still toggles off/full. Add a spoken stage cycle (and gamepad binding) so drivers can pick partial retard on purpose.
 - [x] **Traction deep-dive: freezing rain, hydroplaning, jake grip cap.** `WeatherKind.ICE` (grip 0.15, a third of snow) forms physically -- rain sampled in the 1 to -4 C band glazes, and the live NWS feed maps freezing rain/sleet/ice to it instead of snow -- with its own hazards, spoken "ice on the road" status, and a bench `stop-ice` anchor (880 ft from 40 mph vs 329 dry from 60). Hydroplaning follows the Horne relation: onset ~106 mph on fresh tread (trucks at highway pressure basically never plane), pulled down by tread wear and standing-water depth (`WeatherEffects.water_mm` -> `truck.water_mm`) -- 80 percent worn rubber planes at ~59 in heavy rain, grip collapsing toward a 0.3 floor over a 12 mph band, with a spoken onset warning and hydro-aware conditions incidents. The jake is now capped by drive-axle grip (42.5 percent of gross, half usable before lockup): dry never binds, glare ice breaks stage 3 loose in a low gear while stage 1 stays hooked up, `jake_slipping` speaks a warning, and the bench `grade-jake-ice` run shows the capped jake losing ground on a 4 percent it would hold dry.
 - [ ] Jake-slip and hydroplane consequences beyond the warning: sustained sliding should be able to escalate into a real incident (trolley jackknife / spin) through the event system, which needs a "release the jake / ease off" resolution verb rather than the brake-to-answer hazard contract.
-<<<<<<< HEAD
-- [ ] Lateral traction on curves and ramps: no curve geometry exists in the 1-D model, so cornering grip, curve-speed advisories keyed to load and ice, and rollover/off-tracking stay future -- rides the interchange/ramp data and the off-tracking phase gated on surface streets.
 - [ ] **Curve management as a difficulty tier (owner idea 2026-07-15;
       sound grammar designed 2026-07-16).** The data half is DONE: 63,725
       discrete curve records (at-mile, direction, radius, physics
@@ -116,6 +114,26 @@ terminal becomes the anchor of that week instead of a spawn point.
       curves, with missed or unsignaled turns costing a reroute or
       strike. Natural interaction layer for per-turn trailer
       off-tracking.
+- [ ] **Real construction zones from state 511 APIs.** When real-time
+      traffic is enabled, construction zones should be generated from actual
+      state DOT work zone data instead of simulated zones. Requires:
+      parsing construction events from 511 APIs, mapping real construction
+      locations to route mile markers, converting real data into Zone objects
+      with appropriate speed limits, and fallback to simulated zones when
+      real data is unavailable. The current implementation only announces
+      construction as traffic alerts; this would make the zones themselves
+      match real-world work zones.
+- [x] **No-key realism enhancements -- SHIPPED 2026-07-16.** Four foundational
+      realism systems added without API keys: enhanced truck stop amenities
+      (CAT scales, laundry, game rooms, barber shops, premium wifi, check
+      cashing, DEF lanes, ATM services), truck stop loyalty programs (points
+      per gallon, shower credits, reward redemption), real-time traffic data
+      via state 511 APIs (Ohio OHGO as reference), and truck parking
+      availability via TPIMS APIs (Ohio OHGO as reference). All three
+      real-data systems are optional settings with graceful fallback to
+      simulated data. Amenities are data-only; loyalty is fully playable;
+      traffic and parking are integrated as announcements and availability
+      checks.
 - [ ] **Route terrain browser (owner idea 2026-07-15).** A reviewable,
       navigable summary of what the route will demand: big climbs and
       descents with grade and length, sharp-curve clusters, chain-law
@@ -362,6 +380,52 @@ city service drives below.)
 
 ### Lanes and maneuvering
 
+- [x] **Exit-flow speech honesty (playtest transcript, 2026-07-16).** The
+      drift-on exit slowdown said "confirm the exit" though no confirm
+      action exists -- obeying it toggled the signal OFF and cost the exit.
+      Fixed four ways: the prompt now says "hold Right for the exit lane";
+      inside the last mile a stray X keeps the signal (deliberate second
+      press cancels); two quick Left/Right taps with drift on explain that
+      taps only nudge the wheel (taps are the assist-off lane change, so the
+      silence read as broken keys); and the terse missed-exit turnaround now
+      says to re-signal. Same session: the All assists preset now drops lane
+      drift to off (owner call) -- the easiest preset must not leave a
+      manual steering task running; other presets still never touch it.
+      Second finding, same transcript: the missed-destination-exit recovery
+      only worked ONCE (the say-once latch also swallowed the reposition), so
+      a second miss soft-locked the trip at 0 miles remaining with cruise
+      dying every frame; and the turnaround dropped the player 1 mile out --
+      a few real seconds under compression. Now every miss reroutes, and the
+      turnaround uses the full _exit_window_mi() lead like a first approach.
+      Third finding (turnaround fix verified live in the same session): a
+      cautious stop on "brake to a stop" landed ~0.2 mi short of the ramp
+      light's stop bar, outside RAMP_ACCESS_MI, where the waiting handshake
+      never engages and one 15-second green cannot be crossed from a
+      standstill -- an endless red/green loop with zero position feedback.
+      Speech is now stop-bar-aware: a stopped-short creep prompt, at-the-bar
+      vs short-of-it yellow/green wording, and the callout says to stop AT
+      the light. Round 2 (verified live, same day): the prompt now NAMES the
+      gap in feet/meters and says "drive up" past ~200 ft -- "creep" over
+      600 ft spans several cycles and still read as broken. Open follow-up:
+      consider a queue-position readout (S-style key) for distance to the
+      bar while on a controlled ramp.
+- [x] **Stop-or-swerve for fixed-object hazards (owner call, 2026-07-16).**
+      "Brake to 25 clears debris" never made physical sense. Dodgeable
+      (fixed-in-lane) hazards now resolve by lane change at speed OR by
+      braking to HAZARD_CREEP_MPH (8) and easing around; the deadline
+      budgets the longer stop via _brake_budget_s(target), a once-per-hazard
+      hint fires if the player settles at the old 25 ("still in your
+      lane"), and AEB brakes to the creep speed for these. Moving/surface
+      hazards keep the 25-mph contract. Manual + in-game help updated.
+- [x] **AEB budget honesty (playtest, 2026-07-16).** `_brake_budget_s` used
+      the spec-sheet decel (rated g x weather grip) while the real brake
+      model applies fade (to 20 percent when cooked), shoe wear, tread, and
+      the overweight capacity cap -- so on hot brakes the assist engaged
+      with zero margin and the collision landed 2 s after "Emergency
+      braking engaged." Now `TruckState.full_service_decel_mps2()` feeds
+      the budget (hazard warning lead times inherit the honesty), and the
+      assist leads by AEB_BUDGET_MARGIN + AEB_LEAD_S for the heat the stop
+      itself adds.
 - [x] **Discrete lanes on the drift model.** `LaneKeeping` carries a discrete
       lane index under its continuous offset: with steering assist on,
       steering across the line is the lane change; with assist off, a
@@ -602,6 +666,19 @@ section below and the Unreleased changelog; the release-line view:
       Browser), and Amarillo still have no receivable real station -- try
       again in a later sweep. WABE Atlanta joined the dark list
       2026-07-14 (every known mount refused; supported:false with notes).
+- [x] **Full music rotations for the fictional stations.** A 52-track
+      Suno-composed batch (via the Zero CLI) grows the format pools to
+      radio-scale: country 15 songs, classic rock 17 (including a Saltwake
+      tribute, "Greywater Quay"), blues and soul 12,
+      ten new Roadhouse daytime instrumentals, four new night beds, and
+      two Night Line-only vocal ballads. Second takes of the 24 vocal
+      songs are kept outside the repo as auditionable spares.
+- [x] **Menu rotation borrows radio instrumentals.** Six curated radio
+      instrumentals joined the menu music pools: Steel String Sunday,
+      Dobro Dusk, and Glass Highway rotate behind the daytime milestone
+      bed; Freight Yard Moon, Midnight Siding, and Low Beams behind the
+      night piano theme. Menus stay instrumental (no vocals or host
+      breaks) so music never competes with menu speech.
 - [x] **Map-refresh utility shipped (v1, report-only) --
       tools/refresh_map_data.py, 2026-07-14.** The owner-run drift
       checker: --radio plays every supported real stream through the
@@ -635,6 +712,63 @@ section below and the Unreleased changelog; the release-line view:
 
 ### World and narration
 
+- [x] **Official truck-parking capacity on rest stops (landed 2026-07-17).**
+      The FHWA Jason's Law survey (USDOT BTS NTAD Truck Stop Parking, the
+      dataset behind the national truck-parking inventory) now annotates
+      checked-in stops: 68 stops on 57 legs carry a surveyed
+      `parking_spaces` count, spoken with the parking certainty ("confirmed
+      truck parking, 45 spaces"), and the overnight parking crunch is
+      capacity-aware -- a surveyed 8-spot turnout fills earlier than a
+      100-spot travel plaza. Annotation runs offline from a downloaded
+      snapshot (`tools/curate_route_pois.py --annotate-parking`), matches
+      conservatively (distinctive-name overlap, or same-class public
+      facility at the same spot; a branded travel center never inherits a
+      nearby public lot's count), and records the source on each stop.
+- [x] **Unmatched Jason's Law records offered as fill POIs (landed
+      2026-07-17).** `curate_route_pois.py --jasons-law-only` annotates
+      first, then offers only the records that matched no checked-in stop
+      as new public rest-area POIs on legs under the stop-density
+      thresholds (3-mile corridor radius, offline from the local
+      snapshot). Netted 2 new surveyed lots (I-90 near Presho SD, I-25
+      Mile 129 turnout); 9 under-threshold legs have no surveyed lot
+      within reach and keep their coverage gap visible. Survey names are
+      whitespace-sanitized and mile-marker jargon is spoken as "Mile";
+      one previously committed survey name with an embedded newline
+      (Hancock County Welcome Center) was cleaned in the same pass.
+- [x] **Posted low-clearance and weight-limit advisories (landed
+      2026-07-17).** OSM `maxheight`/`maxweight` tags on mainline corridor
+      ways now bake into `corridor.restrictions`
+      (`tools/build_interchanges.py --restrictions`, offline from the cached
+      per-state extracts), and the GPS speaks them ahead like toll points:
+      "In 2 miles, low clearance ahead: posted 13 feet 6 inches." Routing
+      already avoids impassable bridges, so these are the advisory signs a
+      legal truck really passes; a bearing gate keeps restricted streets
+      that cross *over* the highway from baking onto it. An empty baked
+      list records a clean sweep, so silent legs are surveyed, not unknown.
+- [x] **Destination exit offered a state early on rural-highway finishes --
+      FIXED 2026-07-16 (player transcripts).** The destination-exit scan
+      accepted the last labeled interchange anywhere on the route, so
+      routes whose final legs are unbaked rural highways (US-281 into
+      Lampasas, US-2 across the plains to Havre) crowned an exit hundreds
+      of miles out -- worst case 1,158 miles, I-39 in Wisconsin for a
+      Havre, Montana receiver -- and taking it settled the delivery from
+      there. The scan now only accepts exits within the final 25 miles of
+      the route and otherwise falls back to the synthetic end-of-route
+      exit. Regression test pinned on both transcript routes.
+- [ ] Bake labeled exits or junction cues for rural US-highway final
+      approaches so arrivals there can name a real exit instead of the
+      generic end-of-route fallback (follow-up to the 2026-07-16
+      destination-exit fix; needs an OSM junction sweep over non-motorway
+      trunk corridors). Scale, measured 2026-07-16 on this branch's data:
+      533 of 1,287 legs carry no labeled interchange, and 192 of 623
+      cities have none on any approach leg, so every arrival there uses
+      the generic fallback. A seeded 2,489-route sample of supported
+      routes found 44 percent previously misfired the destination exit
+      by more than 25 miles (worst sampled: Payson, Arizona to Newport,
+      Oregon, 1,152 miles early on a 1,420-mile route); all of those now
+      take the fallback this sweep would upgrade. Regen should run
+      offline from the cached PBFs like the overlay pipeline, targeting
+      trunk/primary junction nodes on the 533 unlabeled legs.
 - [x] **Interstate speed limits polluted by city-street samples at leg
       endpoints -- FIXED 2026-07-14 (found live by the owner on I-10).**
       The maxspeed bake's shield-match guard cannot fire when the
@@ -1034,9 +1168,17 @@ Net-new realism candidates, roughly by area:
   (`_check_conditions_speed`), and low visibility shortens hazard reaction time
   (`_visibility_reaction_factor`). Freezing rain is now its own condition (see
   the 1.9 traction deep-dive above), so glaze ice no longer rides on active
-  snow. Remaining follow-ups: black-ice risk on clear cold mornings after wet
+  snow. Live-weather fog is now gated on the station's measured visibility
+  (NWS "Fog/Mist"/"Haze" at 6+ miles played as pea-soup fog before).
+  Remaining follow-ups: black-ice risk on clear cold mornings after wet
   roads (refreeze after the rain has stopped is still not modeled); steady
   crosswind nudging the trailer; and seasonal daylight length.
+- [ ] **Live-weather staleness fallback.** If the network drops mid-trip,
+  `RealWeatherProvider.unavailable()` still reports a city as available while
+  its cache entry is stale (>30 min), so `WeatherSystem.update()` holds the
+  last live condition indefinitely instead of falling back to simulated
+  weather. Treat a stale-only cache as offline (and consider a spoken note
+  when live weather falls back) so conditions can't silently freeze.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
   acceleration, grade lugging, fuel burn, and now braking: the foundation
   brakes have a fixed force ceiling sized for the rated gross, so loads over

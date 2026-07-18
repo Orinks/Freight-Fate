@@ -5,7 +5,12 @@ the tables below: original effects created for Freight Fate (no third-party
 recordings or samples), authorized in-cab truck sounds Darren Duff found and
 shared for selected vehicle cues, and weather and road loops produced with ElevenLabs
 sound effects tooling. The main menu, Open Road, and Night Haul themes are Suno
-remakes created by the project owner.
+remakes created by the project owner. The July 2026 radio-station batch
+(fifty-two tracks marked "2026-07 Zero batch" below) was composed with Suno V5
+through the
+Zero capability marketplace, with original lyrics written for Freight Fate;
+those tracks are subject to the applicable Suno terms for the generating
+account.
 
 The default sound_lib weather loops were generated for Freight Fate with
 ElevenLabs sound effects tooling, then reviewed and selected for the in-cab
@@ -118,7 +123,59 @@ current idle, start, and shutdown cues.
 | Chrome Horizon | `music/radio_rock_chrome_horizon.ogg` | ElevenLabs-composed heartland rock song for regional radio |
 | Delta Mile | `music/radio_blues_delta_mile.ogg` | ElevenLabs-composed delta blues song for regional radio |
 | Crossroad Coffee | `music/radio_blues_crossroad_coffee.ogg` | ElevenLabs-composed soul blues song for regional radio |
-| Low Beams | `music/radio_night_low_beams.ogg` | ElevenLabs-composed late-night jazz instrumental for the Night Line |
+| Low Beams | `music/radio_night_low_beams.ogg` | ElevenLabs-composed late-night jazz instrumental for the Night Line and the night menu rotation |
+| High Plains Wind | `music/drive_high_plains_wind.ogg` | Suno-composed warm high-plains Americana bed for the in-game radio (2026-07 Zero batch) |
+| Open Sky Run | `music/drive_open_sky_run.ogg` | Suno-composed breezy open-sky Americana bed for the in-game radio (2026-07 Zero batch) |
+| Golden Hour Freeway | `music/drive_golden_hour_freeway.ogg` | Suno-composed golden-hour heartland drive bed for the in-game radio (2026-07 Zero batch) |
+| Amber Lanes | `music/drive_amber_lanes.ogg` | Suno-composed warm sunset freeway drive bed for the in-game radio (2026-07 Zero batch) |
+| River Valley Roll | `music/drive_river_valley_roll.ogg` | Suno-composed rolling folk-rock valley bed for the in-game radio (2026-07 Zero batch) |
+| Green Mile Bend | `music/drive_green_mile_bend.ogg` | Suno-composed easy fingerpicked river-road bed for the in-game radio (2026-07 Zero batch) |
+| County Line Cruise | `music/drive_county_line_cruise.ogg` | Suno-composed laid-back twangy cruising bed for the in-game radio (2026-07 Zero batch) |
+| Two-Lane Daydream | `music/drive_two_lane_daydream.ogg` | Suno-composed relaxed two-lane country-rock bed for the in-game radio (2026-07 Zero batch) |
+| Chrome Creek | `music/drive_chrome_creek.ogg` | Suno-composed breezy slide-guitar roots bed for the in-game radio (2026-07 Zero batch) |
+| Silver Current | `music/drive_silver_current.ogg` | Suno-composed sparkling slide-guitar morning bed for the in-game radio (2026-07 Zero batch) |
+| Quiet Mile | `music/night_quiet_mile.ogg` | Suno-composed calm electric-piano night bed for the in-game radio (2026-07 Zero batch) |
+| Soft Shoulder | `music/night_soft_shoulder.ogg` | Suno-composed soft ambient night-highway bed for the in-game radio (2026-07 Zero batch) |
+| Starlight Grade | `music/night_starlight_grade.ogg` | Suno-composed gentle piano mountain-night bed for the in-game radio (2026-07 Zero batch) |
+| High Beam Hush | `music/night_high_beam_hush.ogg` | Suno-composed hushed strings-and-piano night bed for the in-game radio (2026-07 Zero batch) |
+| Last Diner Open | `music/radio_night_last_diner.ogg` | Suno-composed quiet late-night diner ballad for the in-game radio (2026-07 Zero batch) |
+| Third Shift Waltz | `music/radio_night_third_shift_waltz.ogg` | Suno-composed gentle waltz for night workers for the in-game radio (2026-07 Zero batch) |
+| County Fair | `music/radio_country_county_fair.ogg` | Suno-composed upbeat county-fair country song for the in-game radio (2026-07 Zero batch) |
+| Porch Light | `music/radio_country_porch_light.ogg` | Suno-composed warm homecoming country song for the in-game radio (2026-07 Zero batch) |
+| Wildflower Mile | `music/radio_country_wildflower_mile.ogg` | Suno-composed hopeful springtime country song for the in-game radio (2026-07 Zero batch) |
+| Dust and Daylight | `music/radio_country_dust_and_daylight.ogg` | Suno-composed gritty outlaw country song for the in-game radio (2026-07 Zero batch) |
+| Blue Ridge Morning | `music/radio_country_blue_ridge_morning.ogg` | Suno-composed upbeat bluegrass instrumental for the in-game radio (2026-07 Zero batch) |
+| Appalachian Sunrise | `music/radio_country_appalachian_sunrise.ogg` | Suno-composed bright mountain bluegrass instrumental for the in-game radio (2026-07 Zero batch) |
+| Steel String Sunday | `music/radio_country_steel_string_sunday.ogg` | Suno-composed lazy pedal-steel instrumental for the in-game radio and the day menu rotation (2026-07 Zero batch) |
+| Dobro Dusk | `music/radio_country_dobro_dusk.ogg` | Suno-composed mellow dobro country instrumental for the in-game radio and the day menu rotation (2026-07 Zero batch) |
+| Mile Marker Moon | `music/radio_country_mile_marker_moon.ogg` | Suno-composed moonlit homesick country waltz for the in-game radio (2026-07 Zero batch) |
+| Paper Town | `music/radio_country_paper_town.ogg` | Suno-composed wistful small-town country song for the in-game radio (2026-07 Zero batch) |
+| Tailgate Summer | `music/radio_country_tailgate_summer.ogg` | Suno-composed rowdy lakeside party country song for the in-game radio (2026-07 Zero batch) |
+| Grandpa's Radio | `music/radio_country_grandpas_radio.ogg` | Suno-composed tender heirloom-radio country ballad for the in-game radio (2026-07 Zero batch) |
+| Thunder County | `music/radio_rock_thunder_county.ogg` | Suno-composed storm-charged seventies rock anthem for the in-game radio (2026-07 Zero batch) |
+| Midnight Arcade | `music/radio_rock_midnight_arcade.ogg` | Suno-composed neon eighties arena rock song for the in-game radio (2026-07 Zero batch) |
+| Neon Avenue | `music/radio_rock_neon_avenue.ogg` | Suno-composed late-night organ-driven rock groove for the in-game radio (2026-07 Zero batch) |
+| Ember Sky | `music/radio_rock_ember_sky.ogg` | Suno-composed hopeful heartland rock song for the in-game radio (2026-07 Zero batch) |
+| Glass Highway | `music/radio_rock_glass_highway.ogg` | Suno-composed melodic highway rock instrumental for the in-game radio and the day menu rotation (2026-07 Zero batch) |
+| Mercury Miles | `music/radio_rock_mercury_miles.ogg` | Suno-composed soaring lead-guitar rock instrumental for the in-game radio (2026-07 Zero batch) |
+| Switchback | `music/radio_rock_switchback.ogg` | Suno-composed funky seventies rock instrumental for the in-game radio (2026-07 Zero batch) |
+| Hairpin | `music/radio_rock_hairpin.ogg` | Suno-composed wah-driven mountain rock instrumental for the in-game radio (2026-07 Zero batch) |
+| Wildfire Line | `music/radio_rock_wildfire_line.ogg` | Suno-composed driving fire-crew hard rock anthem for the in-game radio (2026-07 Zero batch) |
+| Silver Falcon | `music/radio_rock_silver_falcon.ogg` | Suno-composed female-fronted muscle-car rocker for the in-game radio (2026-07 Zero batch) |
+| Last Ferry Home | `music/radio_rock_last_ferry_home.ogg` | Suno-composed warm harbor-dusk rock song for the in-game radio (2026-07 Zero batch) |
+| Static and Stars | `music/radio_rock_static_and_stars.ogg` | Suno-composed wide-open night-sky heartland rock for the in-game radio (2026-07 Zero batch) |
+| Greywater Quay | `music/radio_rock_greywater_quay.ogg` | Suno-composed folk-rock tribute to Saltwake's Greywater Quay for the in-game radio (2026-07 Zero batch) |
+| Inland Sea | `music/radio_rock_inland_sea.ogg` | Suno-composed heartland rock song about the Great Salt Lake for the in-game radio (2026-07 Zero batch) |
+| Raincheck | `music/radio_blues_raincheck.ogg` | Suno-composed slow rained-out electric blues for the in-game radio (2026-07 Zero batch) |
+| Magnolia Porch | `music/radio_blues_magnolia_porch.ogg` | Suno-composed warm porch-evening southern soul for the in-game radio (2026-07 Zero batch) |
+| Neon and Bourbon | `music/radio_blues_neon_bourbon.ogg` | Suno-composed smoky Chicago bar-band blues for the in-game radio (2026-07 Zero batch) |
+| Freight Yard Moon | `music/radio_blues_freight_yard_moon.ogg` | Suno-composed midnight rail-yard blues instrumental for the in-game radio and the night menu rotation (2026-07 Zero batch) |
+| Midnight Siding | `music/radio_blues_midnight_siding.ogg` | Suno-composed slow-burning night blues instrumental for the in-game radio and the night menu rotation (2026-07 Zero batch) |
+| Slow Train Shuffle | `music/radio_blues_slow_train_shuffle.ogg` | Suno-composed rolling harmonica blues instrumental for the in-game radio (2026-07 Zero batch) |
+| Boxcar Stroll | `music/radio_blues_boxcar_stroll.ogg` | Suno-composed easy boxcar harmonica instrumental for the in-game radio (2026-07 Zero batch) |
+| Grits and Gasoline | `music/radio_blues_grits_and_gasoline.ogg` | Suno-composed greasy roadside blues rocker for the in-game radio (2026-07 Zero batch) |
+| Paycheck Friday | `music/radio_blues_paycheck_friday.ogg` | Suno-composed swinging horn-section jump blues for the in-game radio (2026-07 Zero batch) |
+| Levee Moon | `music/radio_blues_levee_moon.ogg` | Suno-composed smoky riverside delta soul for the in-game radio (2026-07 Zero batch) |
 
 ## Radio Hosts And Static
 

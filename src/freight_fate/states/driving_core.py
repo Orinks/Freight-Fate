@@ -77,6 +77,10 @@ from .base import MenuItem, MenuState, State
 log = logging.getLogger(__name__)
 
 HAZARD_SAFE_MPH = 25.0
+# A fixed object in your lane -- debris, a stopped vehicle -- cannot be
+# rolled over at 25: clearing it by brake alone means coming nearly to a
+# stop and easing around. A lane change remains the no-time-lost answer.
+HAZARD_CREEP_MPH = 8.0
 MPH_PER_MPS = 2.23694
 
 # Roadside mechanic: a field patch, not a garage restoration.
@@ -128,6 +132,11 @@ EXIT_LANE_PREP_MI = 2.0  # where GPS starts asking for the exit lane
 EXIT_COMMIT_WINDOW_MI = 0.4  # generous gore-window grace after the marker
 EXIT_LANE_READY = 0.85  # accumulated right-lane commitment
 EXIT_LANE_OFFSET_READY = 0.45  # right-side lane position also counts
+EXIT_CANCEL_GUARD_MI = 1.0  # inside this, X keeps the signal; a second press cancels
+EXIT_TAP_HOLD_S = 0.35  # a Right press this short is a tap, not held steering
+AEB_BUDGET_MARGIN = 1.2  # emergency braking leads the physics budget by this factor
+AEB_LEAD_S = 0.5  # plus this flat lead, covering brake heat added during the stop
+RAMP_CREEP_MI = 0.04  # within ~200 ft of the bar, "creep"; farther is a drive
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 # Ramp terminals: where the off-ramp meets the surface road there is usually
@@ -153,6 +162,14 @@ STOP_ROLL_DAMAGE = 0.2  # lighter clip for blowing the stop sign
 RAMP_CONTROL_URBAN_WEIGHTS = (0.70, 0.95)
 RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
+# A real interchange counts as the destination exit only inside this final
+# approach window. Routes that finish on rural highways carry no baked
+# interchanges, and without the floor the scan crowned the last labeled exit
+# anywhere on the route -- one playtest got its "destination exit" on I-39 in
+# Wisconsin, 1,158 miles from the Montana receiver, and taking it settled the
+# load from there (transcripts, 2026-07-16). Past the window the synthetic
+# end-of-route exit takes over.
+DESTINATION_EXIT_SCAN_WINDOW_MI = 25.0
 UNLOADING_MIN = 45.0  # receiver dock work before settlement
 UNLOADING_WAIT_S = 1.5
 

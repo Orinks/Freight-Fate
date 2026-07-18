@@ -242,8 +242,9 @@ class DrivingControlsMixin:
             "Left and Right arrows steer when lane drift is enabled; steer "
             "across the lane line to change lanes. With lane drift off, tap "
             "Left or Right to change lanes instead. Exits leave from the "
-            "right lane, and hazards called out as brake or change lanes "
-            "can be dodged with a clear lane beside you. "
+            "right lane. Hazards called out as brake or change lanes are "
+            "fixed objects in your lane: dodge with a clear lane beside "
+            "you, or brake nearly to a stop and ease around. "
             "T route POI menu when already stopped "
             "at one: available actions may include fuel, break, sleep, "
             "inspect, roadside assistance, or save when source-backed. H horn. "
@@ -588,14 +589,11 @@ class DrivingControlsMixin:
                     parts.append("Holding speed.")
             elif grade < -0.005:
                 if t.jake_slipping:
-                    parts.append(
-                        "The jake is sliding the drive wheels; back it off a stage."
-                    )
+                    parts.append("The jake is sliding the drive wheels; back it off a stage.")
                 elif accel_mph_s > 0.2:
                     if stage > 0:
                         parts.append(
-                            f"Jake stage {stage} is not holding it; "
-                            "gear down or snub the brakes."
+                            f"Jake stage {stage} is not holding it; gear down or snub the brakes."
                         )
                     elif t.throttle <= 0.05:
                         parts.append("Speed is building; set the jake before it runs.")

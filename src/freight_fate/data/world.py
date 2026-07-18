@@ -34,6 +34,7 @@ from .world_parsing import (
     _parse_interchange,
     _parse_landmarks,
     _parse_location,
+    _parse_restrictions,
     _parse_route_point,
     _parse_speed_limits,
     _parse_state_crossing,
@@ -179,6 +180,9 @@ class World(WorldServiceMixin):
                 corridor.get("traffic_aadt", ()), miles, leg_from, leg_to
             )
             landmarks = _parse_landmarks(corridor.get("landmarks", ()), miles, leg_from, leg_to)
+            restrictions = _parse_restrictions(
+                corridor.get("restrictions", ()), miles, leg_from, leg_to
+            )
             self.legs.append(
                 Leg(
                     leg_from,
@@ -199,6 +203,7 @@ class World(WorldServiceMixin):
                     traffic_volumes,
                     max(0, int(leg.get("lanes", 0))),
                     landmarks=landmarks,
+                    restrictions=restrictions,
                 )
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}

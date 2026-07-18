@@ -64,6 +64,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         imperial: bool = True,
         hazard_scale: float = 1.0,
         career_hours: float | None = None,
+        traffic_provider=None,
+        parking_provider=None,
     ) -> None:
         self.route = route
         self.truck = truck
@@ -76,6 +78,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         # tests) reads as a weekday, the more demanding default.
         self.career_hours = career_hours
         self._imperial = imperial
+        self.traffic_provider = traffic_provider
+        self.parking_provider = parking_provider
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
@@ -129,6 +133,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._announced_zone_warnings: set[str] = set()
         self._announced_traffic_pressures: set[str] = set()
         self._announced_npc_traffic: set[str] = set()
+        self._announced_real_traffic: set[str] = set()
         self._construction_zone_grace_start: dict[str, float] = {}
         self._announced_patrols: set[str] = set()
         self._hazard_check_mi = 5.0
@@ -323,6 +328,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         stop.services,
                         stop.parking,
                         exit_label,
+                        parking_spaces=stop.parking_spaces,
                     )
                 )
         return out
@@ -460,6 +466,17 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         start + offset,
                         f"toll road ahead: {toll.road}",
                         f"{toll.method_label} toll point ahead: {toll.name}. {toll_text}",
+                    )
+                )
+            for restriction in leg.restrictions:
+                offset = _stop_offset_for_direction(restriction.at_mi, leg.miles, forward)
+                cues.append(
+                    NavigationCue(
+                        f"restriction:{i}:{restriction.at_mi}:{restriction.kind}",
+                        "restriction",
+                        start + offset,
+                        restriction.spoken_ahead,
+                        restriction.spoken_near,
                     )
                 )
             for ix in leg.interchanges:
@@ -1124,6 +1141,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             return f"Traffic in {ahead_text}: {cue.text}{speed}."
         if cue.kind == "toll":
             return f"Toll point in {ahead_text}: {cue.text}."
+        if cue.kind == "restriction":
+            return f"Posted restriction in {ahead_text}: {cue.text}."
         return f"Next guidance in {ahead_text}: {cue.text}."
 
     def next_navigation_cue(self) -> NavigationCue | None:
@@ -1255,6 +1274,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._check_navigation_cues()
         self._check_npc_traffic_cues()
         self._check_traffic_pressures()
+        self._check_real_traffic_events()
         self._check_stops()
         self._check_roadside_callouts()
         self._check_tolls()

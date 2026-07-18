@@ -801,14 +801,19 @@ def park_at_first_stop(driving):
 
 
 def park_away_from_stops(driving, *, after_stop) -> None:
-    position = after_stop.at_mi + 2.0
-    while position < driving.trip.total_miles - 1.0:
-        driving.trip.position_mi = position
-        nearby = driving.trip.nearest_stop_within() is not None
-        sleep_ahead = driving._upcoming_stop_with_action("sleep", 30.0) is not None
-        if not nearby and not sleep_ahead:
-            return
-        position += 5.0
+    # Sleep-capable plazas can saturate a drawn route; if no natural gap
+    # exists, drop the other stops so the shoulder-sleep scenario stays
+    # reachable regardless of which route the career happened to draw.
+    for stops in (driving.trip.stops, [after_stop]):
+        driving.trip.stops = stops
+        position = after_stop.at_mi + 2.0
+        while position < driving.trip.total_miles - 1.0:
+            driving.trip.position_mi = position
+            nearby = driving.trip.nearest_stop_within() is not None
+            sleep_ahead = driving._upcoming_stop_with_action("sleep", 30.0) is not None
+            if not nearby and not sleep_ahead:
+                return
+            position += 5.0
     raise AssertionError("route has no shoulder-sleep test position away from stops")
 
 

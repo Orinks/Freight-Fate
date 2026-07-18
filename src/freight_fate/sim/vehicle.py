@@ -493,6 +493,13 @@ class TruckState:
         grade_f = self.gross_mass_kg * G * math.sin(math.atan(self.grade))
         return drag + rolling + grade_f
 
+    def _brake_fade_factor(self) -> float:
+        """How much of the rated brake effort survives the current drum heat."""
+        fade_temp = self.brake_fade_onset_c
+        if self.brake_temp_c < fade_temp:
+            return 1.0
+        return max(0.20, 1.0 - (self.brake_temp_c - fade_temp) / 300)
+
     def service_brake_force(self) -> float:
         """Magnitude of the foundation-brake force biting the drums right now.
 
@@ -502,16 +509,17 @@ class TruckState:
         if abs(self.velocity_mps) <= 0.01:
             return 0.0
         s = self.specs
-        fade_temp = self.brake_fade_onset_c
-        fade = (
-            1.0
-            if self.brake_temp_c < fade_temp
-            else max(0.20, 1.0 - (self.brake_temp_c - fade_temp) / 300)
-        )
         holding = self.air_brakes_holding
         application = 1.0 if self.emergency_brake or holding else self.brake
         boost = EMERGENCY_BRAKE_MULT if self.emergency_brake or holding else 1.0
-        effort = G * s.max_brake_decel_g * application * boost * fade * self.brake_wear_factor
+        effort = (
+            G
+            * s.max_brake_decel_g
+            * application
+            * boost
+            * self._brake_fade_factor()
+            * self.brake_wear_factor
+        )
         # Tire friction scales with the weight on the tires (and weather grip);
         # the foundation brakes have a fixed force ceiling sized for the rated
         # gross (``specs.mass_kg``). A load at or below the rated weight reaches
@@ -521,6 +529,19 @@ class TruckState:
         friction = self.gross_mass_kg * effort * self.effective_grip
         capacity = s.mass_kg * effort
         return min(friction, capacity)
+
+    def full_service_decel_mps2(self) -> float:
+        """Deceleration a full service-brake application delivers right now.
+
+        Fade, wear, load, and grip included -- what an emergency-braking
+        budget must use. The spec-sheet number overpromises exactly when it
+        matters most: hot or worn brakes on a loaded rig.
+        """
+        s = self.specs
+        effort = G * s.max_brake_decel_g * self._brake_fade_factor() * self.brake_wear_factor
+        friction = self.gross_mass_kg * effort * self.effective_grip
+        capacity = s.mass_kg * effort
+        return min(friction, capacity) / max(self.gross_mass_kg, 1.0)
 
     def jake_retard_torque_nm(self) -> float:
         """Compression-brake torque at the crank for the current stage and RPM."""
@@ -534,8 +555,8 @@ class TruckState:
         s = self.specs
         rpm_frac = max(0.0, min(1.0, self.rpm / s.max_rpm))
         stage = min(JAKE_STAGES, self.engine_brake_stage) / JAKE_STAGES
-        return s.engine_brake_torque_nm * stage * (
-            JAKE_RPM_FLOOR + (1.0 - JAKE_RPM_FLOOR) * rpm_frac
+        return (
+            s.engine_brake_torque_nm * stage * (JAKE_RPM_FLOOR + (1.0 - JAKE_RPM_FLOOR) * rpm_frac)
         )
 
     def _jake_force_demand(self) -> float:
@@ -554,7 +575,10 @@ class TruckState:
     def _jake_traction_cap(self) -> float:
         """The most retard the drive axle can transmit before its wheels slide."""
         return (
-            self.gross_mass_kg * G * DRIVE_AXLE_LOAD_FRACTION * JAKE_LOCK_MARGIN
+            self.gross_mass_kg
+            * G
+            * DRIVE_AXLE_LOAD_FRACTION
+            * JAKE_LOCK_MARGIN
             * self.effective_grip
         )
 
@@ -862,9 +886,7 @@ class TruckState:
                 rate *= CHAIN_WEAR_BARE_MULT
             if self.speed_mph > CHAIN_SAFE_MPH:
                 rate *= CHAIN_WEAR_OVERSPEED_MULT
-            self.chain_wear_pct = min(
-                100.0, self.chain_wear_pct + rate * speed * sim_dt / 1609.344
-            )
+            self.chain_wear_pct = min(100.0, self.chain_wear_pct + rate * speed * sim_dt / 1609.344)
             if self.chain_wear_pct >= 100.0:
                 self.chains_on = False
                 self.chains_just_snapped = True

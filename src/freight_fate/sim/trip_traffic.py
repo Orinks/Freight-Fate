@@ -101,6 +101,43 @@ class TripTrafficMixin:
             return None
         return max(active, key=lambda pressure: pressure.intensity)
 
+    def _check_real_traffic_events(self) -> None:
+        """Check for real-time traffic events from state 511 APIs."""
+        if self.traffic_provider is None:
+            return
+
+        # Get current state from the route
+        current_leg = self._leg_at(self.position_mi)
+        if current_leg is None:
+            return
+
+        # Try to determine state from the leg (this is a simplified approach)
+        # In production, we'd need proper state/region mapping
+        state = "ohio"  # Default to Ohio for now as reference implementation
+
+        # Get nearby traffic events
+        try:
+            events = self.traffic_provider.get_events_near(
+                state,
+                latitude=40.0,  # Placeholder - need real coordinates
+                longitude=-83.0,
+                radius_mi=50.0,
+            )
+
+            # Filter for high-severity events that haven't been announced
+            for event in events:
+                if event.severity in ("high", "medium"):
+                    event_key = f"real_traffic:{event.id}"
+                    if event_key not in self._announced_real_traffic:
+                        message = f"Traffic alert: {event.description}"
+                        if event.lanes_affected:
+                            message += f". {event.lanes_affected} affected."
+                        self._emit(TripEventKind.GPS_CUE, message, real_traffic_event=event)
+                        self._announced_real_traffic.add(event_key)
+        except Exception:
+            # Gracefully handle API failures - real traffic is optional
+            pass
+
     def next_traffic_pressure_within(
         self, within_mi: float = TRAFFIC_PRESSURE_LOOKAHEAD_MI
     ) -> TrafficPressure | None:

@@ -57,6 +57,23 @@ def test_strong_wind_promotes_clear_to_windy():
     assert map_condition("Breezy") is WeatherKind.WIND
 
 
+def test_fog_family_gated_on_measured_visibility():
+    # NWS says "Fog/Mist" or "Haze" for anything under ~7 miles of visibility;
+    # at 6 miles that's ordinary muggy air, not the game's quarter-mile fog.
+    assert map_condition("Fog/Mist", visibility_mi=6.0) is WeatherKind.CLOUDY
+    assert map_condition("Haze", visibility_mi=6.0) is WeatherKind.CLOUDY
+    # Genuinely low visibility is still fog.
+    assert map_condition("Fog", visibility_mi=0.25) is WeatherKind.FOG
+    assert map_condition("Fog/Mist", visibility_mi=1.0) is WeatherKind.FOG
+    # No measured visibility: trust the condition text.
+    assert map_condition("Fog") is WeatherKind.FOG
+    assert map_condition("Patchy Fog") is WeatherKind.FOG
+    # The gate never touches non-fog conditions.
+    assert map_condition("Light Rain", visibility_mi=6.0) is WeatherKind.RAIN
+    # Hazy but windy air promotes to high winds like any cloudy sky.
+    assert map_condition("Haze", wind_kmh=45.0, visibility_mi=6.0) is WeatherKind.WIND
+
+
 # -- provider ----------------------------------------------------------------
 
 
@@ -78,7 +95,7 @@ def test_provider_fetches_and_caches():
 
     def fake_fetch(lat, lon):
         calls.append((lat, lon))
-        return "Light Rain", 12.0, 8.0
+        return "Light Rain", 12.0, 8.0, 4.0
 
     p = SyncProvider(fetch=fake_fetch)
     assert p.get("Chicago") is None
@@ -107,7 +124,7 @@ def test_provider_refetches_after_ttl():
     conditions = iter(["Clear", "Thunderstorm"])
 
     def fake_fetch(lat, lon):
-        return next(conditions), 0.0, None
+        return next(conditions), 0.0, None, None
 
     p = SyncProvider(fetch=fake_fetch, clock=lambda: now[0])
     p.request("Dallas", 32.8, -96.8)
@@ -129,8 +146,27 @@ def test_temp_to_c_handles_units_and_nulls():
     assert _temp_to_c(None) is None
 
 
+def test_visibility_to_mi_handles_units_and_nulls():
+    from freight_fate.sim.real_weather import _visibility_to_mi
+
+    mi = _visibility_to_mi({"value": 16093.44, "unitCode": "wmoUnit:m"})
+    assert mi is not None and abs(mi - 10.0) < 0.01
+    km = _visibility_to_mi({"value": 1.609344, "unitCode": "wmoUnit:km"})
+    assert km is not None and abs(km - 1.0) < 0.01
+    assert _visibility_to_mi({"value": None, "unitCode": "wmoUnit:m"}) is None
+    assert _visibility_to_mi(None) is None
+
+
+def test_provider_reports_haze_with_good_visibility_as_cloudy():
+    # The regression that shipped fog horns over a 6-mile-visibility summer
+    # haze: the provider itself must apply the visibility gate.
+    p = SyncProvider(fetch=lambda lat, lon: ("Haze", 9.0, 27.0, 6.0))
+    p.request("Wilmington", 39.74, -75.54)
+    assert p.get("Wilmington") is WeatherKind.CLOUDY
+
+
 def test_provider_caches_observed_temperature():
-    p = SyncProvider(fetch=lambda lat, lon: ("Clear", 0.0, -3.5))
+    p = SyncProvider(fetch=lambda lat, lon: ("Clear", 0.0, -3.5, 10.0))
     assert p.get_temperature("Fargo") is None  # nothing fetched yet
     p.request("Fargo", 46.88, -96.79)
     assert p.get("Fargo") is WeatherKind.CLEAR
@@ -138,7 +174,7 @@ def test_provider_caches_observed_temperature():
 
 
 def test_provider_temperature_none_when_station_omits_it():
-    p = SyncProvider(fetch=lambda lat, lon: ("Clear", 0.0, None))
+    p = SyncProvider(fetch=lambda lat, lon: ("Clear", 0.0, None, None))
     p.request("Reno", 39.5, -119.8)
     assert p.get("Reno") is WeatherKind.CLEAR
     assert p.get_temperature("Reno") is None
@@ -147,7 +183,7 @@ def test_provider_temperature_none_when_station_omits_it():
 def test_weather_system_reports_real_observed_temperature():
     # A live provider with a real reading: the system reports the station's
     # temperature, not the seasonal climate model.
-    p = SyncProvider(fetch=lambda lat, lon: ("Clear", 0.0, 2.0))  # 2 C real
+    p = SyncProvider(fetch=lambda lat, lon: ("Clear", 0.0, 2.0, 10.0))  # 2 C real
     ws = WeatherSystem("great_lakes", seed=1, provider=p)
     ws.set_city("Chicago", 41.88, -87.63)
     ws.update(1.0)
@@ -160,7 +196,7 @@ def test_weather_system_reports_real_observed_temperature():
 
 
 def test_weather_system_applies_live_conditions():
-    p = SyncProvider(fetch=lambda lat, lon: ("Heavy Rain", 5.0, 18.0))
+    p = SyncProvider(fetch=lambda lat, lon: ("Heavy Rain", 5.0, 18.0, 1.5))
     ws = WeatherSystem("desert_southwest", seed=1, provider=p)
     ws.set_city("Phoenix", 33.45, -112.07)
     changed = ws.update(1.0)

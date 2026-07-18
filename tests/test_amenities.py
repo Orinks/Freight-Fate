@@ -73,6 +73,53 @@ def test_every_signature_key_has_a_spoken_label():
             assert key in SIGNATURE_SERVICE_LABELS, key
 
 
+def test_new_amenities_have_spoken_labels():
+    """Test that new realistic amenities have proper spoken labels."""
+    new_amenities = [
+        "cat_scale",
+        "laundry",
+        "game_room",
+        "barber",
+        "premium_wifi",
+        "check_cashing",
+        "def",
+        "atm",
+    ]
+    for amenity in new_amenities:
+        assert amenity in SIGNATURE_SERVICE_LABELS, f"Missing label for {amenity}"
+        # Ensure labels are screen-reader friendly (no abbreviations that get spelled out)
+        label = SIGNATURE_SERVICE_LABELS[amenity]
+        # Cat is a brand name and should be preserved as-is
+        if amenity == "cat_scale":
+            assert "Cat" in label or "CAT" in label, "Cat brand name should be preserved"
+        # Wi-Fi should be readable (WiFi, Wi-Fi, or wifi are all acceptable)
+        if amenity == "premium_wifi":
+            assert "Wi-Fi" in label or "WiFi" in label or "wifi" in label, (
+                "Wi-Fi should be readable"
+            )
+
+
+def test_pilot_has_enhanced_amenities():
+    """Test that Pilot centers now have more realistic amenities."""
+    pilot = classify_brand("Pilot Travel Center")
+    assert pilot is not None
+    assert "showers" in pilot.signature
+    assert "cat_scale" in pilot.signature
+    assert "laundry" in pilot.signature
+    assert "premium_wifi" in pilot.signature
+
+
+def test_flying_j_has_enhanced_amenities():
+    """Test that Flying J centers now have more realistic amenities."""
+    flying_j = classify_brand("Flying J Travel Center")
+    assert flying_j is not None
+    assert "showers" in flying_j.signature
+    assert "cat_scale" in flying_j.signature
+    assert "laundry" in flying_j.signature
+    assert "premium_wifi" in flying_j.signature
+    assert "game_room" in flying_j.signature
+
+
 def test_poi_offers_text_surfaces_brand_specialty():
     # Integration: the driving route-info menu speaks each stop through this.
     from freight_fate.sim.trip_models import RoadStop

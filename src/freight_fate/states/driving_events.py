@@ -79,16 +79,18 @@ class DrivingEventMixin:
             # on this surface; the rolled window covers hearing the warning and
             # getting on the pedal, and fatigue eats into that part only --
             # a drowsy driver reacts late, but the truck stops no slower.
-            slack = event.data.get("deadline_s", 4.0)
-            reaction = tuning_for_time_scale(self.trip.time_scale).reaction_window
-            self._hazard_deadline = self._brake_budget_s() + slack * reaction * (
-                hos.reaction_window_mult(self.ctx.profile.fatigue)
-            )
             # A dodgeable hazard sits in the lane you are in *now*; ending up
             # in any other lane before the deadline clears it, if that lane
-            # is actually open. See _finish_lane_change.
+            # is actually open (see _finish_lane_change). By brake alone it
+            # takes nearly a stop, so its deadline budgets the longer stop.
             self._hazard_dodgeable = bool(event.data.get("dodgeable", False))
             self._hazard_lane = self.lane.lane
+            self._hazard_slow_hint_said = False
+            slack = event.data.get("deadline_s", 4.0)
+            reaction = tuning_for_time_scale(self.trip.time_scale).reaction_window
+            self._hazard_deadline = self._brake_budget_s(self._hazard_target_mph()) + (
+                slack * reaction * hos.reaction_window_mult(self.ctx.profile.fatigue)
+            )
             self._automatic_braking_announced = False
             message = terse_hazard_message(event.message) if self._terse_speech() else event.message
             self.ctx.say_event(message, interrupt=True)
@@ -314,7 +316,9 @@ class DrivingEventMixin:
             return
 
         can_sleep = "sleep" in stop.actions
-        if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi, self.trip.local_hour):
+        if can_sleep and hos.parking_is_full(
+            self.trip_seed, stop.at_mi, self.trip.local_hour, stop.parking_spaces
+        ):
             self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
             return
         self.ctx.push_state(RestStopState(self.ctx, self, stop))
@@ -334,12 +338,26 @@ class DrivingEventMixin:
             )
             return
         self._exit_stop = stop
-        self._exit_signal_on = not self._exit_signal_on
         ahead = stop.at_mi - self.trip.position_mi
-        if not self._exit_signal_on:
+        if self._exit_signal_on:
+            # This close to the gore, one stray press must not silently throw
+            # the approach away (playtested: an X meant as "confirm" canceled
+            # the signal and cost the exit). The first press keeps the signal
+            # and says so; only a deliberate second press cancels.
+            if ahead <= EXIT_CANCEL_GUARD_MI and not self._exit_cancel_armed:
+                self._exit_cancel_armed = True
+                self.ctx.say(
+                    "Signal stays on. Hold the exit lane and keep slowing. "
+                    f"Press {self.ctx.control_hint('take_exit')} again to cancel the exit."
+                )
+                return
+            self._exit_signal_on = False
+            self._exit_cancel_armed = False
             self._exit_signal_canceled = True
             self.ctx.say("Signal canceled. Keep following the highway.")
             return
+        self._exit_signal_on = True
+        self._exit_cancel_armed = False
         self._exit_signal_canceled = False
         self.ctx.audio.play("vehicle/turn_signal", volume=0.7)
         if stop.type == "delivery_destination":
@@ -384,6 +402,10 @@ class DrivingEventMixin:
         self._exit_lane_prompt_said = False
         self._exit_lane_ready_said = False
         self._exit_commit_said = False
+        self._exit_cancel_armed = False
+        self._exit_right_hold_s = 0.0
+        self._exit_right_taps = 0
+        self._exit_tap_hint_said = False
 
     def _exit_lane_ready(self) -> bool:
         # Ramps peel off the right lane: no amount of in-lane alignment
@@ -413,8 +435,11 @@ class DrivingEventMixin:
                 self.truck.brake = max(self.truck.brake, 0.35)
                 if not self._assist_exit_slowing_said:
                     self._assist_exit_slowing_said = True
+                    # Never "confirm": there is no confirm action, and an X
+                    # pressed to obey it cancels the signal instead.
                     self.ctx.say_event(
-                        "Exit speed assistance slowing. Confirm the exit when ready.",
+                        "Exit speed assistance slowing. Hold Right for the "
+                        "exit lane and keep slowing.",
                         interrupt=False,
                     )
         if ahead < -EXIT_COMMIT_WINDOW_MI:
@@ -422,6 +447,26 @@ class DrivingEventMixin:
 
         right = keys[pygame.K_RIGHT]
         left = keys[pygame.K_LEFT]
+        # A quick tap is how assist-off players change lanes; with drift on
+        # it only nudges the wheel and the exit lane never builds. Two taps
+        # on one approach earn the how-to, once, so the silence never reads
+        # as broken keys.
+        if right:
+            self._exit_right_hold_s += dt
+        else:
+            if 0.0 < self._exit_right_hold_s <= EXIT_TAP_HOLD_S:
+                self._exit_right_taps += 1
+            self._exit_right_hold_s = 0.0
+        if (
+            self._exit_right_taps >= 2
+            and self._exit_lane_alignment < EXIT_LANE_READY
+            and not self._exit_tap_hint_said
+        ):
+            self._exit_tap_hint_said = True
+            self.ctx.say(
+                "Lane drift is on, so taps only nudge the wheel. "
+                "Hold Right to steer into the exit lane."
+            )
         if right:
             self._exit_lane_alignment += dt / 1.2
         elif left:
@@ -622,9 +667,14 @@ class DrivingEventMixin:
         # Matched against real interchange sign text, so compare the spoken
         # city name ("Nashville"), never the slug key.
         destination = self.ctx.world.spoken_city(self.route.cities[-1], qualified=False).casefold()
+        scan_floor = self.trip.total_miles - DESTINATION_EXIT_SCAN_WINDOW_MI
         candidates = []
         for i in range(len(self.route.legs) - 1, -1, -1):
             leg = self.route.legs[i]
+            if self.trip._leg_starts[i] + leg.miles < scan_floor:
+                # This leg ends before the final approach; every earlier leg
+                # is farther out still.
+                break
             forward = self.route.cities[i] == leg.a
             target = leg.miles if forward else 0.0
             for ix in leg.interchanges:
@@ -632,6 +682,8 @@ class DrivingEventMixin:
                     continue
                 offset = ix.at_mi if forward else leg.miles - ix.at_mi
                 route_mile = self.trip._leg_starts[i] + offset
+                if route_mile < scan_floor:
+                    continue
                 if not include_past and route_mile <= self.trip.position_mi + 0.05:
                     continue
                 dist_from_destination = abs(ix.at_mi - target)
@@ -828,6 +880,7 @@ class DrivingEventMixin:
         self._ramp_light_last_phase = ""
         self._ramp_terminal_done = self._ramp_control == "none"
         self._ramp_waiting_at_light = False
+        self._ramp_creep_prompt_said = False
 
     def _ramp_light_phase(self) -> str:
         cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
@@ -848,6 +901,7 @@ class DrivingEventMixin:
         if self._ramp_mi is None or self._ramp_control != "signal" or self._ramp_terminal_done:
             return
         self._ramp_light_timer += dt
+        self._update_ramp_queue_guidance()
         phase = self._ramp_light_phase()
         if not self._ramp_light_announced or phase == self._ramp_light_last_phase:
             return
@@ -861,19 +915,82 @@ class DrivingEventMixin:
             return
         # Every phase change speaks. The light is an instruction, not
         # ambiance: a silent flip back to red between the spoken green and
-        # the stop bar cost real playtesters real trailer damage.
+        # the stop bar cost real playtesters real trailer damage. The wording
+        # is distance-aware: a screen shows where the stop bar is, so speech
+        # has to say whether the driver has reached it.
+        short = self._ramp_mi > RAMP_ACCESS_MI
         if phase == "red":
             self.ctx.audio.play("events/ramp_light_red", volume=0.7)
             self.ctx.say_event("The light ahead turns red. Be ready to stop.", interrupt=False)
         elif phase == "yellow":
             self.ctx.audio.play("ui/notify", volume=0.7)
-            self.ctx.say_event(
-                "The light ahead turns yellow. Stop if you are not at it yet.",
-                interrupt=False,
+            message = (
+                "The light ahead turns yellow. You are short of it: stop, "
+                "then creep up to the bar on the red."
+                if short
+                else "The light turns yellow at the bar. Continuing through is legal."
             )
+            self.ctx.say_event(message, interrupt=False)
         else:
             self.ctx.audio.play("events/ramp_light_green", volume=0.7)
-            self.ctx.say_event("The light ahead turns green.", interrupt=False)
+            message = (
+                "The light ahead turns green. Roll toward it; if it changes "
+                "before you are there, stop and creep up on the red."
+                if short
+                else "The light ahead turns green."
+            )
+            self.ctx.say_event(message, interrupt=False)
+
+    def _update_ramp_queue_guidance(self) -> None:
+        """Tell a driver stopped short of the stop bar to close the gap.
+
+        A cautious stop on the first "brake to a stop" callout can land a
+        quarter mile short of the bar, where one green is never enough road
+        from a standstill. Without this prompt that plays as a light stuck
+        in an endless loop (playtest transcript, 2026-07-16)."""
+        if not self._ramp_light_announced or self._ramp_waiting_at_light:
+            return
+        if self._ramp_mi is None or self._ramp_mi <= RAMP_ACCESS_MI:
+            return
+        if self.truck.speed_mph > RED_STOP_MPH:
+            self._ramp_creep_prompt_said = False
+            return
+        if self._ramp_creep_prompt_said:
+            return
+        self._ramp_creep_prompt_said = True
+        # Name the gap: "creep" for a real 600-foot gap takes minutes and
+        # reads as a light stuck in a loop. Far back is a drive, and the red
+        # phase is exactly the time to make it.
+        gap_mi = self._ramp_mi - RAMP_ACCESS_MI
+        on_green = self._ramp_light_phase() == "green"
+        if gap_mi > RAMP_CREEP_MI:
+            gap = self._short_distance_text(gap_mi)
+            if on_green:
+                message = (
+                    f"You are stopped about {gap} short of the light, and it "
+                    "is green. Drive up now; stop at the bar if it changes."
+                )
+            else:
+                message = (
+                    f"You are stopped about {gap} short of the light. Drive "
+                    "up and stop at the bar; the red is the time to close the gap."
+                )
+        elif on_green:
+            message = "You are stopped short of the light and it is green. Roll ahead now."
+        else:
+            message = (
+                "You are stopped short of the light. Creep ahead and hold "
+                "at the stop bar for green."
+            )
+        self.ctx.say_event(message, interrupt=False)
+
+    def _short_distance_text(self, miles: float) -> str:
+        """A short gap in round spoken units: feet or meters, never decimals."""
+        if self.ctx.settings.imperial_units:
+            feet = max(50, int(round(miles * 5280.0 / 50.0)) * 50)
+            return f"{feet} feet"
+        meters = max(20, int(round(miles * 1609.344 / 20.0)) * 20)
+        return f"{meters} meters"
 
     def _announce_ramp_terminal(self) -> None:
         """Mid-ramp callout naming the control at the terminal."""
@@ -885,12 +1002,17 @@ class DrivingEventMixin:
                 "events/ramp_light_red" if phase == "red" else "events/ramp_light_green",
                 volume=0.8,
             )
+            # "Brake to a stop" alone invites stopping right here, a quarter
+            # mile short of the bar; the stop belongs at the light.
             if phase == "red":
-                message = "Traffic light at the end of the ramp, currently red. Brake to a stop."
+                message = (
+                    "Traffic light at the end of the ramp, currently red. "
+                    "Roll down and stop at the light."
+                )
             elif phase == "yellow":
                 message = (
                     "Traffic light at the end of the ramp, currently yellow -- "
-                    "it will be red when you reach it. Brake to a stop."
+                    "it will be red when you reach it. Roll down and stop at the light."
                 )
             else:
                 message = "Traffic light at the end of the ramp, currently green."
@@ -1564,19 +1686,36 @@ class DrivingEventMixin:
         self._exit_signal_on = False
         self._exit_signal_canceled = False
         self._cancel_cruise()
-        if self._missed_destination_exit_said:
-            return
-        self._missed_destination_exit_said = True
+        if exit_details is None:
+            # Nothing to loop back to: say it once, not every frame.
+            if self._missed_destination_exit_said:
+                return
+            self._missed_destination_exit_said = True
         reroute_text = (
             "Continue to the next safe turnaround. Dispatch reroutes you back "
             "onto the approach; take the destination exit when it comes up."
         )
         if exit_details is not None:
+            # Every miss loops back. The say-once latch must never swallow
+            # this reposition: when it did, the second miss stranded the trip
+            # pinned at the end of the route with no exit left to signal for,
+            # cruise dying every frame (playtest transcript, 2026-07-16).
+            self._missed_destination_exit_said = True
             self.trip.game_minutes += 20.0
-            self.trip.position_mi = max(0.0, exit_details[0] - 1.0)
+            # Drop back a full exit window, not a fixed mile: under time
+            # compression one mile passes in a few real seconds, making the
+            # re-approach unwinnable before it was heard.
+            self.trip.position_mi = max(0.0, exit_details[0] - self._exit_window_mi())
             self._destination_exit_announced_key = None
             if self._terse_speech():
+                # The signal reset with the miss; with lane drift on, terse
+                # players still need to hear that arming it is on them again.
                 reroute_text = "Safe turnaround. Destination exit ahead again."
+                if self.ctx.settings.steering_assist != "off":
+                    reroute_text = (
+                        "Safe turnaround. Destination exit ahead again; press "
+                        f"{self.ctx.control_hint('take_exit')} to signal."
+                    )
             else:
                 reroute_text = (
                     "You continue to the next safe turnaround and loop back onto "

@@ -36,6 +36,7 @@ from ..updater import is_frozen
 from .business import COMPANY_DRIVER, INDEPENDENT_AUTHORITY, is_owner_operator
 from .career import Career
 from .career_ladder import STARTER_CARRIER_NAME
+from .loyalty import LoyaltyAccount
 from .market import Market
 from .start_options import DEFAULT_START_KEY, START_MODE_COMPANY
 
@@ -423,6 +424,7 @@ class Profile:
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock
     duty_log: DutyLog = field(default_factory=DutyLog)  # rolling Record of Duty Status
+    loyalty: LoyaltyAccount = field(default_factory=LoyaltyAccount)  # truck stop loyalty program
     achievements: list[str] = field(default_factory=list)
     achievement_stats: dict = field(default_factory=dict)
     # Last few delivered from:to lanes, newest first -- assigned dispatch
@@ -456,11 +458,16 @@ class Profile:
         market = Market(**_known_fields(Market, d.pop("market", {})))
         hos = HosClock.from_dict(d.pop("hos", None))  # absent in v2 saves: fresh clock
         duty_log = DutyLog.from_dict(d.pop("duty_log", None))
+        loyalty = LoyaltyAccount(**_known_fields(LoyaltyAccount, d.pop("loyalty", {})))
         known = {
-            f for f in cls.__dataclass_fields__ if f not in ("career", "market", "hos", "duty_log")
+            f
+            for f in cls.__dataclass_fields__
+            if f not in ("career", "market", "hos", "duty_log", "loyalty")
         }
         kwargs = {k: v for k, v in d.items() if k in known}
-        return cls(career=career, market=market, hos=hos, duty_log=duty_log, **kwargs)
+        return cls(
+            career=career, market=market, hos=hos, duty_log=duty_log, loyalty=loyalty, **kwargs
+        )
 
     # -- truck ------------------------------------------------------------------
 

@@ -357,6 +357,12 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
             f"{from_city} to {to_city} stop {name!r} mixes 'both' with "
             "direction-specific applicability"
         )
+    parking_spaces = int(raw.get("parking_spaces", 0))
+    if not 0 <= parking_spaces <= 1000:
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} has implausible "
+            f"parking_spaces {parking_spaces}"
+        )
     curation = str(raw.get("curation", "")).strip() or _infer_stop_curation(name, source)
     if curation not in STOP_CURATION_LEVELS:
         raise ValueError(
@@ -376,7 +382,18 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
             raise ValueError(
                 f"{from_city} to {to_city} stop {name!r} action {action!r} requires a source note"
             )
-    return Stop(name, at_mi, stop_type, source, actions, services, parking, directions, curation)
+    return Stop(
+        name,
+        at_mi,
+        stop_type,
+        source,
+        actions,
+        services,
+        parking,
+        directions,
+        curation,
+        parking_spaces=parking_spaces,
+    )
 
 
 def _parse_route_point(raw, leg_miles: float, from_city: str, to_city: str) -> RoutePoint:
@@ -450,6 +467,35 @@ def _parse_speed_limits(
     Sorting by ``at_mi`` lets the runtime treat it as a step function without
     trusting the order the samples happen to be stored in."""
     samples = tuple(_parse_speed_limit(s, leg_miles, from_city, to_city) for s in raw_samples)
+    return tuple(sorted(samples, key=lambda s: s.at_mi))
+
+
+def _parse_restriction(raw, leg_miles: float, from_city: str, to_city: str) -> RouteRestriction:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} restriction must be an object")
+    at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "restriction", allow_endpoints=True)
+    kind = str(raw.get("kind", "")).strip()
+    if kind not in {"low_clearance", "weight_limit"}:
+        raise ValueError(f"{from_city} to {to_city} restriction has unknown kind {kind!r}")
+    feet = float(raw.get("feet", 0.0))
+    tons = float(raw.get("tons", 0.0))
+    if kind == "low_clearance" and not 9.0 <= feet <= 16.5:
+        raise ValueError(
+            f"{from_city} to {to_city} restriction has implausible clearance {feet} ft"
+        )
+    if kind == "weight_limit" and not 3.0 <= tons <= 40.0:
+        raise ValueError(
+            f"{from_city} to {to_city} restriction has implausible weight limit {tons} tons"
+        )
+    source = str(raw.get("source", "")).strip()
+    return RouteRestriction(at_mi, kind, feet, tons, source)
+
+
+def _parse_restrictions(
+    raw_samples, leg_miles: float, from_city: str, to_city: str
+) -> tuple[RouteRestriction, ...]:
+    """Parse the baked restriction advisories, ordered along the leg."""
+    samples = tuple(_parse_restriction(s, leg_miles, from_city, to_city) for s in raw_samples)
     return tuple(sorted(samples, key=lambda s: s.at_mi))
 
 

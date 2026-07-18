@@ -715,7 +715,7 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Driving assistance preset: {self._assist_preset_label()}",
                     lambda: self._cycle_assist_preset(1),
-                    help="Realistic provides modern truck safety support. Balanced adds light lane centering and downhill speed help. All assists enables every available driving assist. Changing an individual assist makes this Custom. You still steer, choose routes, confirm exits, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
+                    help="Realistic provides modern truck safety support. Balanced adds light lane centering and downhill speed help. All assists enables every available driving assist and switches lane drift off, so lanes are kept for you and a tap changes lanes. Changing an individual assist makes this Custom. You still steer, choose routes, confirm exits, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
                 )
             ]
             items.extend(
@@ -742,7 +742,8 @@ class SettingsCategoryState(MenuState):
                     "drifts gently with centering help, and realistic drifts "
                     "like a real wheel, so exits need a signal and the exit "
                     "lane. Choosing light or realistic turns the matching "
-                    "lane support on. Presets never change this.",
+                    "lane support on. The All assists preset switches this "
+                    "off; other presets never change it.",
                 )
             )
             items.append(MenuItem("Back", self.go_back))
@@ -1115,6 +1116,20 @@ class SettingsCategoryState(MenuState):
                 "Real world uses live city conditions when available.",
             )
         )
+        specs.append(
+            (
+                lambda: f"Traffic source: {'real time' if s.real_traffic else 'simulated'}",
+                self._toggle_real_traffic,
+                "Real time uses live traffic incidents from state 511 APIs when available.",
+            )
+        )
+        specs.append(
+            (
+                lambda: f"Parking source: {'real time' if s.real_parking else 'simulated'}",
+                self._toggle_real_parking,
+                "Real time uses live truck parking availability from TPIMS APIs when available.",
+            )
+        )
         return specs
 
     @staticmethod
@@ -1192,10 +1207,16 @@ class SettingsCategoryState(MenuState):
         presets = tuple(DRIVING_ASSIST_PRESETS)
         current = self.ctx.settings.driving_assistance_preset
         index = presets.index(current) if current in presets else (-1 if direction > 0 else 0)
+        drift_before = self.ctx.settings.steering_assist
         self.ctx.settings.apply_driving_assistance_preset(
             presets[(index + direction) % len(presets)]
         )
         self._announce()
+        if self.ctx.settings.steering_assist != drift_before:
+            self.ctx.say(
+                "Lane drift off: automated lane keeping, tap Left or Right to change lanes.",
+                interrupt=False,
+            )
 
     def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
         if field in ("speed_keeper", "pedal_latch"):
@@ -1206,6 +1227,7 @@ class SettingsCategoryState(MenuState):
             return
         if field not in DRIVING_ASSIST_FIELDS:
             return
+        was_custom = self.ctx.settings.driving_assistance_preset == "custom"
         if field == "descent_speed_control":
             levels = ("off", "realistic", "balanced", "interactive")
             current = levels.index(self.ctx.settings.descent_speed_control)
@@ -1214,8 +1236,12 @@ class SettingsCategoryState(MenuState):
             setattr(self.ctx.settings, field, not getattr(self.ctx.settings, field))
         self.ctx.settings.refresh_driving_assistance_preset()
         self._announce()
-        if self.ctx.settings.driving_assistance_preset == "custom":
-            self.ctx.say("Driving assistance preset: Custom.")
+        # Queue the preset note behind the toggle announcement (an interrupting
+        # say here would cut off the new on/off state the player just changed),
+        # and only on the change into Custom -- repeating it on every later
+        # toggle is noise the preset row already answers.
+        if self.ctx.settings.driving_assistance_preset == "custom" and not was_custom:
+            self.ctx.say("Driving assistance preset: Custom.", interrupt=False)
 
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
@@ -1463,6 +1489,17 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_real_weather(self, _d: int) -> None:
         self.ctx.settings.real_weather = not self.ctx.settings.real_weather
+        self.ctx.settings.save()
+        self._announce()
+
+    def _toggle_real_traffic(self, _d: int) -> None:
+        self.ctx.settings.real_traffic = not self.ctx.settings.real_traffic
+        self.ctx.settings.save()
+        self._announce()
+
+    def _toggle_real_parking(self, _d: int) -> None:
+        self.ctx.settings.real_parking = not self.ctx.settings.real_parking
+        self.ctx.settings.save()
         self._announce()
 
     def _channel(self) -> str:

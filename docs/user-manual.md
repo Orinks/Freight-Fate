@@ -535,10 +535,14 @@ often than open-country stretches.
 
 Hazards can happen while moving. When a "Brake now" warning appears, slow below
 25 miles per hour quickly to avoid a collision. Some hazards are called out as
-"Brake or change lanes" -- those can be dodged with a lane change instead of
-braking, if the lane beside you is clear. Press L first if you are not sure
-which lane you are in, and listen for the nearby-vehicle callouts; changing
-lanes into a real vehicle risks a sideswipe.
+"Brake or change lanes" -- those are fixed objects in your lane, like road
+debris or a stopped vehicle. A lane change dodges them at full speed if the
+lane beside you is clear; braking works too, but you cannot roll over a ladder
+at 25 -- an object in the lane takes braking nearly to a stop, and then you
+ease around it. Press L first if you are not sure which lane you are in, and
+listen for the nearby-vehicle callouts; changing lanes into a real vehicle
+risks a sideswipe. With automatic emergency braking on, the truck brakes for
+you at the last moment -- down to a crawl for an object in the lane.
 Fatigue shortens the reaction window.
 
 Construction and traffic zones lower the speed limit. Construction zones may
@@ -790,7 +794,7 @@ Three driving assistance presets are available: Realistic, Balanced, and All ass
 
 The individual controls are Automatic emergency braking, Lane-departure warning, Stop-and-go assistance, Lane centering assistance, Descent speed control, Exit speed assistance, Destination approach assistance, Curve speed assistance, and Route-transition assistance. Descent speed control has four levels: Off, Realistic, Balanced, and Interactive. Interactive is a descent-control level, not a preset. Exit speed assistance slows for an already-selected exit, destination approach assistance slows and stops at the selected facility arrival point, curve speed assistance reduces speed workload for mapped curves, and route-transition assistance helps manage speed and lane workload at confirmed route transitions. Assists never choose a route, take an exit, enter a yard, dock, or complete a delivery: you still steer, confirm route choices and exits, initiate lane changes, leave long stops, and handle every precision task.
 
-Lane drift also lives in this category and, like the speed keeper, sits outside the presets. It chooses whether the lane-position task runs at all: Off keeps the truck centered with no lane work, Light drifts gently with centering help, and Realistic drifts like a real wheel. When lane drift is on, a short beep comes from the side you drift toward, so steer away from the beep; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. With lane drift on, taking an exit needs your turn signal set and the exit lane held. Choosing Light or Realistic turns the matching lane support on. Presets never change lane drift.
+Lane drift also lives in this category and, like the speed keeper, sits outside the presets. It chooses whether the lane-position task runs at all: Off keeps the truck centered with no lane work, Light drifts gently with centering help, and Realistic drifts like a real wheel. When lane drift is on, a short beep comes from the side you drift toward, so steer away from the beep; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. With lane drift on, taking an exit needs your turn signal set and the exit lane held. Choosing Light or Realistic turns the matching lane support on. The All assists preset switches lane drift off, so lanes are kept for you and a tap changes lanes; other presets never change it.
 
 One more control, Speed keeper, sits outside the presets. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K holds your current speed at or below the zone limit and creeps along behind queued traffic, so the accelerator does not need to stay held down. Any brake input, a hazard, or reaching the open road hands control back and says so. It is on by default and never changed by choosing a preset.
 

@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import time
 import urllib.error
 import urllib.request
@@ -31,7 +32,20 @@ JASONS_LAW_ENDPOINT = (
 )
 USER_AGENT = "FreightFateRouteCuration/1.0"
 ACCESSED_DATE = "2026-06-17"
+JASONS_LAW_ACCESSED_DATE = "2026-07-17"
+JASONS_LAW_ABOUT_URL = "https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about"
 EARTH_RADIUS_MI = 3958.7613
+
+# Existing stop types an official truck-parking survey record may annotate.
+# Weigh stations and toll plazas are not parking; placeholders stay quarantined.
+PARKING_ANNOTATABLE_TYPES = {
+    "public_rest_area",
+    "truck_parking",
+    "travel_center",
+    "truck_stop",
+    "service_plaza",
+    "fuel_station",
+}
 
 
 @dataclass(frozen=True)
@@ -51,6 +65,8 @@ class Candidate:
     actions: tuple[str, ...]
     at_mi: float | None = None
     distance_mi: float | None = None
+    # Surveyed truck-parking spot count (Jason's Law records carry one).
+    parking_spaces: int = 0
 
     def with_projection(self, at_mi: float, distance_mi: float) -> Candidate:
         return Candidate(
@@ -69,6 +85,7 @@ class Candidate:
             self.actions,
             at_mi,
             distance_mi,
+            parking_spaces=self.parking_spaces,
         )
 
     def to_stop(self) -> dict[str, Any]:
@@ -81,7 +98,7 @@ class Candidate:
             f"({self.distance_mi:.1f} mi from simplified corridor line), "
             f"accessed {ACCESSED_DATE}: {self.source_url}"
         )
-        return {
+        stop = {
             "name": self.name,
             "type": self.poi_type,
             "at_mi": round(self.at_mi, 1),
@@ -92,6 +109,9 @@ class Candidate:
             "parking": self.parking,
             "curation": "curated",
         }
+        if self.parking_spaces > 0:
+            stop["parking_spaces"] = self.parking_spaces
+        return stop
 
 
 MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
@@ -107,7 +127,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
                 f"route geometry, accessed {ACCESSED_DATE}: "
                 "https://www.thruway.ny.gov/travelers/service-areas"
             ),
-            "actions": ["park", "save", "fuel", "food", "break"],
+            "actions": ["park", "save", "fuel", "food", "break", "sleep"],
             "services": ["diesel", "food", "parking", "restrooms"],
             "directions": ["both"],
             "parking": "likely",
@@ -124,7 +144,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
                 f"checked route geometry, accessed {ACCESSED_DATE}: "
                 "https://www.thruway.ny.gov/travelers/service-areas"
             ),
-            "actions": ["park", "save", "fuel", "food", "break"],
+            "actions": ["park", "save", "fuel", "food", "break", "sleep"],
             "services": ["diesel", "food", "parking", "restrooms"],
             "directions": ["both"],
             "parking": "likely",
@@ -140,7 +160,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
                 "Thruway; at_mi estimated from checked route geometry, accessed "
                 f"{ACCESSED_DATE}: https://www.applegreen.com/"
             ),
-            "actions": ["park", "save", "fuel", "food", "break"],
+            "actions": ["park", "save", "fuel", "food", "break", "sleep"],
             "services": ["diesel", "food", "parking", "restrooms"],
             "directions": ["both"],
             "parking": "likely",
@@ -317,12 +337,71 @@ def main() -> None:
         help="Also pull the FHWA Jason's Law public truck-parking "
         "inventory to fill corridors the chains miss.",
     )
+    parser.add_argument(
+        "--annotate-parking",
+        action="store_true",
+        help="Annotate existing curated stops with official truck-parking "
+        "capacity from the FHWA Jason's Law inventory instead of adding "
+        "new stops (skips the operator chain feeds).",
+    )
+    parser.add_argument(
+        "--jasons-law-file",
+        type=Path,
+        help="Read a locally downloaded GeoJSON snapshot of the Jason's Law "
+        "layer instead of the live BTS endpoint.",
+    )
+    parser.add_argument(
+        "--jasons-law-only",
+        action="store_true",
+        help="Fill under-density legs from the Jason's Law inventory alone "
+        "(no operator chain feeds): annotate existing stops first, then "
+        "offer only the records that matched no checked-in stop as new "
+        "public rest-area POIs.",
+    )
     args = parser.parse_args()
 
     data = json.loads(args.world.read_text(encoding="utf-8"))
+    if args.jasons_law_only:
+        candidates = fetch_jasons_law_candidates(args.jasons_law_file)
+        # Records that describe an already checked-in stop must not come back
+        # as lookalike new POIs under their survey names, so annotate first
+        # (idempotent) and fill only from what remains.
+        annotate_report = annotate_truck_parking(data, candidates)
+        matched = set(annotate_report["matched_keys"])
+        remaining = [c for c in candidates if c.key not in matched]
+        report = curate_world(data, remaining, args.radius_miles)
+        report["annotate"] = {
+            k: v for k, v in annotate_report.items() if k not in {"annotations", "matched_keys"}
+        }
+        if args.write_world:
+            args.world.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(report, indent=2))
+        else:
+            print(
+                f"Annotated {report['annotate']['annotated_stops']} stops, then "
+                f"curated {report['added_pois']} survey POIs on "
+                f"{report['updated_legs']} legs; "
+                f"{len(report['remaining_gaps'])} legs still under threshold."
+            )
+        return
+    if args.annotate_parking:
+        candidates = fetch_jasons_law_candidates(args.jasons_law_file)
+        report = annotate_truck_parking(data, candidates)
+        if args.write_world:
+            args.world.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        if args.json:
+            print(json.dumps(report, indent=2))
+        else:
+            print(
+                f"Annotated {report['annotated_stops']} stops on "
+                f"{report['annotated_legs']} legs from "
+                f"{report['matched_survey_records']} survey records."
+            )
+        return
     candidates = fetch_loves_candidates() + fetch_pilot_candidates()
     if args.include_jasons_law:
-        candidates += fetch_jasons_law_candidates()
+        candidates += fetch_jasons_law_candidates(args.jasons_law_file)
     report = curate_world(data, candidates, args.radius_miles)
     if args.write_world:
         args.world.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
@@ -440,17 +519,23 @@ def _strip_direction(route: str) -> str:
     return " ".join(parts)
 
 
-def fetch_jasons_law_candidates() -> list[Candidate]:
+def fetch_jasons_law_candidates(source_file: Path | None = None) -> list[Candidate]:
     """Public truck-parking facilities from the FHWA Jason's Law inventory.
 
     Government source covering corridors the major chains miss -- rest areas and
     welcome centers with real truck-parking spot counts. Typed as public rest
     areas (legal overnight parking, no guaranteed fuel/food).
+
+    ``source_file`` reads a locally downloaded GeoJSON snapshot of the same
+    layer instead of the live endpoint, so re-runs are offline and reproducible.
     """
-    params = urllib.parse.urlencode(
-        {"where": "1=1", "outFields": "*", "outSR": "4326", "f": "geojson"}
-    )
-    payload = _read_json(f"{JASONS_LAW_ENDPOINT}?{params}", accept_json=True)
+    if source_file is not None:
+        payload = json.loads(source_file.read_text(encoding="utf-8"))
+    else:
+        params = urllib.parse.urlencode(
+            {"where": "1=1", "outFields": "*", "outSR": "4326", "f": "geojson"}
+        )
+        payload = _read_json(f"{JASONS_LAW_ENDPOINT}?{params}", accept_json=True)
     out: list[Candidate] = []
     for feature in payload.get("features", []):
         props = feature.get("properties", {})
@@ -458,12 +543,16 @@ def fetch_jasons_law_candidates() -> list[Candidate]:
         lon, lat = coords[0], coords[1]
         if lat is None or lon is None:
             continue
-        raw_route = str(props.get("highway_route", "") or "").strip()
+        # Survey text arrives with stray newlines and doubled spaces; collapse
+        # to single spaces so player-facing names and notes stay clean.
+        raw_route = " ".join(str(props.get("highway_route", "") or "").split())
         highway = _strip_direction(raw_route)
-        municipality = str(props.get("municipality", "") or "").strip()
+        municipality = " ".join(str(props.get("municipality", "") or "").split())
         state = str(props.get("state", "") or "").strip()
         spots = props.get("number_of_spots")
-        name = str(props.get("nhs_rest_stop", "") or "").strip()
+        name = " ".join(str(props.get("nhs_rest_stop", "") or "").split())
+        # Survey shorthand "MM 129" is mile-marker jargon; speak it as "Mile".
+        name = re.sub(r"\bMM\b", "Mile", name)
         # Skip mandatory inspection/weigh facilities -- not a chooseable rest stop.
         if "weigh" in name.lower() or "inspection" in name.lower():
             continue
@@ -500,6 +589,7 @@ def fetch_jasons_law_candidates() -> list[Candidate]:
                 parking="confirmed",
                 services=("parking", "restrooms"),
                 actions=("park", "save", "break", "sleep"),
+                parking_spaces=(int(spots) if isinstance(spots, (int, float)) and spots > 0 else 0),
             )
         )
     return out
@@ -560,6 +650,188 @@ def curate_world(
         "updated_legs": updated_legs,
         "remaining_gaps": remaining_gaps,
     }
+
+
+def annotate_truck_parking(
+    data: dict[str, Any],
+    candidates: list[Candidate],
+    *,
+    max_at_mi_delta: float = 1.5,
+    max_corridor_mi: float = 1.0,
+) -> dict[str, Any]:
+    """Annotate existing curated stops with official truck-parking capacity.
+
+    Matches FHWA Jason's Law survey records to already checked-in stops (same
+    corridor highway, snapped within ``max_corridor_mi`` of the route and
+    ``max_at_mi_delta`` route miles of the stop) and writes ``parking_spaces``
+    plus ``parking: confirmed`` with an appended source sentence. Paired
+    directional records (EB/WB lots) collapse onto one stop keeping the larger
+    lot's count. Never invents stops and never touches ``parking: none``.
+    """
+    annotated: list[dict[str, Any]] = []
+    matched_keys: set[str] = set()
+    near_route_candidates = 0
+    for leg in data["legs"]:
+        stops = [
+            stop
+            for stop in leg.get("stops", [])
+            if not _stop_is_placeholder(stop)
+            and str(stop.get("type", "")) in PARKING_ANNOTATABLE_TYPES
+            and str(stop.get("parking", "")) != "none"
+        ]
+        if not stops:
+            continue
+        for candidate in candidates:
+            projected = _project_candidate(leg, candidate)
+            if (
+                projected is None
+                or projected.distance_mi is None
+                or projected.distance_mi > max_corridor_mi
+                or not _highway_matches(leg["highway"], projected.highway)
+            ):
+                continue
+            near_route_candidates += 1
+            best = _match_survey_record_to_stop(projected, stops, max_at_mi_delta)
+            if best is None:
+                continue
+            spaces = max(int(best.get("parking_spaces", 0)), projected.parking_spaces)
+            changed = False
+            if spaces > 0 and spaces != int(best.get("parking_spaces", 0)):
+                best["parking_spaces"] = spaces
+                changed = True
+            if str(best.get("parking", "")) != "confirmed":
+                best["parking"] = "confirmed"
+                changed = True
+            if "Jason's Law" not in str(best.get("source", "")):
+                spaces_part = f" with {spaces} truck parking spaces" if spaces else ""
+                best["source"] = (
+                    f"{str(best.get('source', '')).rstrip('. ')}. "
+                    f"Truck parking confirmed by the FHWA Jason's Law inventory "
+                    f"(USDOT BTS NTAD Truck Stop Parking, compiled 2019), which "
+                    f"lists {projected.name}{spaces_part} on this corridor, "
+                    f"accessed {JASONS_LAW_ACCESSED_DATE}: {JASONS_LAW_ABOUT_URL}"
+                )
+                changed = True
+            matched_keys.add(candidate.key)
+            if changed:
+                annotated.append(
+                    {
+                        "from": leg["from"],
+                        "to": leg["to"],
+                        "stop": best["name"],
+                        "parking_spaces": spaces,
+                        "survey_record": projected.name,
+                    }
+                )
+    annotated_legs = len({(item["from"], item["to"]) for item in annotated})
+    return {
+        "source_candidate_count": len(candidates),
+        "candidates_near_routes": near_route_candidates,
+        "matched_survey_records": len(matched_keys),
+        "matched_keys": sorted(matched_keys),
+        "annotated_stops": len(annotated),
+        "annotated_legs": annotated_legs,
+        "annotations": annotated,
+    }
+
+
+# Generic words that appear in almost every facility name; a name "match"
+# needs at least one distinctive token in common beyond these.
+_SURVEY_NAME_STOPWORDS = {
+    "rest",
+    "area",
+    "welcome",
+    "visitor",
+    "visitors",
+    "center",
+    "travel",
+    "stop",
+    "stops",
+    "truck",
+    "parking",
+    "plaza",
+    "service",
+    "county",
+    "state",
+    "road",
+    "highway",
+    "interstate",
+    "nhs",
+    "facility",
+    "turnout",
+    "north",
+    "south",
+    "east",
+    "west",
+    "northbound",
+    "southbound",
+    "eastbound",
+    "westbound",
+    "nb",
+    "sb",
+    "eb",
+    "wb",
+    "near",
+    "the",
+    "and",
+}
+
+
+def _survey_name_tokens(name: str) -> set[str]:
+    tokens = {t for t in re.findall(r"[a-z]+", str(name).lower()) if len(t) >= 3}
+    return tokens - _SURVEY_NAME_STOPWORDS
+
+
+def _survey_names_match(stop_name: str, record_name: str) -> bool:
+    return bool(_survey_name_tokens(stop_name) & _survey_name_tokens(record_name))
+
+
+def _survey_names_conflict(stop_name: str, record_name: str) -> bool:
+    """Both names carry distinctive place tokens and share none -- two
+    different facilities that happen to project near each other."""
+    stop_tokens = _survey_name_tokens(stop_name)
+    record_tokens = _survey_name_tokens(record_name)
+    return bool(stop_tokens) and bool(record_tokens) and not (stop_tokens & record_tokens)
+
+
+# Public facility classes where a same-spot, same-class record is near-certain
+# to be the same lot even when states name it by county rather than place.
+_PUBLIC_PARKING_TYPES = {"public_rest_area", "truck_parking"}
+_PUBLIC_MATCH_DELTA_MI = 0.7
+
+
+def _match_survey_record_to_stop(
+    projected: Candidate,
+    stops: list[dict[str, Any]],
+    max_at_mi_delta: float,
+) -> dict[str, Any] | None:
+    """The checked-in stop a survey record verifiably describes, or None.
+
+    A distinctive name-token overlap matches any stop type; without one, only a
+    public rest-area/truck-parking stop sitting nearly on top of the record
+    matches -- a branded travel center never inherits a nearby public lot's
+    count."""
+    best: dict[str, Any] | None = None
+    best_rank: tuple[int, float] | None = None
+    record_tokens = _survey_name_tokens(projected.name)
+    for stop in stops:
+        delta = abs(float(stop["at_mi"]) - float(projected.at_mi or 0.0))
+        if delta > max_at_mi_delta:
+            continue
+        overlap = len(_survey_name_tokens(str(stop.get("name", ""))) & record_tokens)
+        public = (
+            str(stop.get("type", "")) in _PUBLIC_PARKING_TYPES
+            and delta <= _PUBLIC_MATCH_DELTA_MI
+            and not _survey_names_conflict(str(stop.get("name", "")), projected.name)
+        )
+        if not overlap and not public:
+            continue
+        # More shared distinctive tokens beats closer distance: "Gee Creek"
+        # must out-rank the adjacent "Scatter Creek" for record "Gee Creek NB".
+        rank = (-overlap, delta)
+        if best_rank is None or rank < best_rank:
+            best, best_rank = stop, rank
+    return best
 
 
 def _read_json(url: str, *, accept_json: bool = False) -> dict[str, Any]:

@@ -800,18 +800,31 @@ def clock_text(game_hours: float) -> str:
 PARKING_CRUNCH_START, PARKING_CRUNCH_END = 20.0, 4.0  # 8 PM .. 4 AM
 
 
-def parking_full_probability(game_hours: float) -> float:
-    """Chance the lot is full, rising through the evening; 0 outside 8 PM-4 AM."""
+def parking_full_probability(game_hours: float, spaces: int = 0) -> float:
+    """Chance the lot is full, rising through the evening; 0 outside 8 PM-4 AM.
+
+    ``spaces`` is the surveyed truck-parking capacity (FHWA Jason's Law via BTS
+    NTAD) when known: a handful of spots fills earlier than a big travel-center
+    lot. 0 (unsurveyed) keeps the flat baseline."""
     h = clock_hour(game_hours)
     if not (h >= PARKING_CRUNCH_START or h < PARKING_CRUNCH_END):
         return 0.0
     hours_past_8pm = (h - PARKING_CRUNCH_START) % 24.0
-    return min(0.8, 0.2 + 0.1 * hours_past_8pm)
+    p = min(0.8, 0.2 + 0.1 * hours_past_8pm)
+    if spaces <= 0:
+        return p
+    if spaces <= 15:
+        return min(0.9, p + 0.15)
+    if spaces >= 100:
+        return p * 0.6
+    if spaces >= 40:
+        return p * 0.85
+    return p
 
 
-def parking_is_full(trip_seed: int, stop_mi: float, game_hours: float) -> bool:
+def parking_is_full(trip_seed: int, stop_mi: float, game_hours: float, spaces: int = 0) -> bool:
     """Deterministic per trip seed and stop, so saves and tests reproduce it."""
-    p = parking_full_probability(game_hours)
+    p = parking_full_probability(game_hours, spaces)
     if p <= 0.0:
         return False
     rng = random.Random(f"parking:{trip_seed}:{round(stop_mi * 10)}")

@@ -4,6 +4,37 @@
 
 ### Added
 
+- **Rest stops can now tell you how big the lot is.** Where the official
+  federal truck-parking survey covers a stop, the spoken parking note adds
+  the counted spaces, like confirmed truck parking, 45 spaces. Lot size
+  matters at night too: a small surveyed turnout fills up earlier in the
+  evening crunch, while a big travel plaza holds out longer. A couple of
+  surveyed public lots also joined sparse corridors as new rest stops.
+
+- **The GPS now calls out posted low bridges and weight limits.** Corridors
+  carry real posted clearance and weight signs from the map data, and the
+  GPS speaks them ahead of the point like it does toll plazas: in two miles,
+  low clearance ahead, posted 13 feet 6 inches. Your route already avoids
+  bridges a truck cannot legally pass, so these are heads-up calls, not
+  detours.
+
+- **The menus borrow a few songs from the radio.** Six radio instrumentals
+  now round out the menu music rotation. By day, the pedal steel of Steel
+  String Sunday, the mellow Dobro Dusk, and the rock of Glass Highway take
+  turns after your career milestone theme; after dark, the night blues of
+  Freight Yard Moon and Midnight Siding and the late-night jazz of Low Beams
+  play behind the quiet piano theme. Your milestone theme still always plays
+  first, and the menus stay instrumental so they never talk over your screen
+  reader.
+
+- **The radio finally sounds like radio: fifty-two new original songs.** The
+  fictional stations grew real rotations -- the country stations now spin
+  fifteen songs, the classic rock stations seventeen, and the blues and soul
+  stations twelve, mixing sung songs with instrumentals in each format.
+  The Freight Fate Roadhouse picked up ten fresh daytime instrumentals,
+  quiet new night beds joined the after-dark rotation, and the Night Line
+  now slips in two late-night vocal ballads between its host breaks.
+
 - **Driving assistance reduces workload without driving for you.** One preset coordinates emergency braking, lane and descent support, stop-and-go traffic, curve and route-transition speed help, exit slowing, and stopping at the selected destination arrival point. You still steer, confirm routes and exits, leave long stops, and handle every yard and dock task.
 
 - **Choose how much driving assistance the truck provides.** A new Driving assistance settings category offers Realistic, Balanced, All assists, and Custom presets for emergency braking, lane support, stop-and-go behavior, and interactive descent speed control. Adaptive cruise keeps its existing traffic, posted-limit, and weather behavior. Presets never change trip pacing, hours rules, transmission, weather, or hazard frequency. These assists lay the groundwork for the version 1.9 driving changes.
@@ -89,10 +120,41 @@
 - **Hundreds more facilities now start and end on real city streets.**
   Short yard-to-facility drives used to skip their street route and fall
   back to one straight access road; now any facility whose real path has
-  actual turns keeps them, even close to the yard. Deadheads and final
-  approaches at hundreds more warehouses, cross-docks, and company yards --
-  including the Evansville starter yard every new company driver leaves
-  first -- speak real turn-by-turn directions on named local streets.
+  a street chain under five miles uses it, so you hear real road names and
+  turns at hundreds more pickup and dropoff sites across the country.
+  Deadheads and final approaches at hundreds more warehouses, cross-docks,
+  and company yards -- including the Evansville starter yard every new
+  company driver leaves first -- speak real turn-by-turn directions on
+  named local streets.
+
+- **Truck stops now track loyalty points and rewards.** When you fuel at
+  truck stops, you earn loyalty points based on the stop type: major chains
+  like Pilot and Flying J give one point per gallon, landmark stops like Big
+  Buck's give one and a half points per gallon, and unbranded stops give half
+  a point per gallon. Fueling fifty gallons or more also earns shower credits.
+  Points can be redeemed for showers, parking discounts, food discounts, and
+  laundry discounts through a new loyalty menu at each truck stop. The system
+  mimics real-world programs like Pilot Pro Rewards and TA UltraONE.
+
+- **Real-time traffic incidents can be announced while driving.** When
+  enabled in Settings, Gameplay, the game fetches live traffic data from
+  state 511 APIs and announces high and medium severity incidents near your
+  route, such as accidents and construction zones. The system uses Ohio's
+  OHGO API as a reference implementation and gracefully falls back to
+  simulated traffic when the API is unavailable.
+
+- **Real-time truck parking availability is announced at stops.** When
+  enabled in Settings, Gameplay, the game fetches live parking availability
+  from TPIMS APIs and announces how many spaces are available nearby when
+  you arrive at a truck stop. The system uses Ohio's OHGO TPIMS as a
+  reference implementation and gracefully falls back to static parking
+  data when the API is unavailable.
+
+- **Truck stops now offer more realistic amenities.** Eight new amenity
+  types have been added to the data layer: CAT scales, laundry facilities,
+  game rooms, barber shops, premium wifi, check cashing services, DEF lanes,
+  and ATM services. These amenities are recognized at Pilot and Flying J
+  locations and can be spoken when you visit those stops.
 
 - **Dispatch assigns your tractor now, and better equipment follows
   seniority.** Like a real fleet, the carrier hands every new hire the same
@@ -117,62 +179,6 @@
   small Arizona town with one very famous corner. Each still nods to a
   country or trucking song.
 
-### Changed
-
-- **Speed limits follow the real road now, all the way across the map.**
-  Every route in the country carries its actual posted limits, read from
-  real map data instead of one smooth estimate. You will hear the honest
-  zones a mountain highway steps through -- the slow canyon stretches, the
-  drop before a long descent, the climb back up to highway speed -- where the
-  truck used to hold a single guess for miles. Adaptive cruise, the speed
-  keeper, and the spoken limit changes all follow these real limits. The same
-  sweep quietly recorded every curve and every real runaway-truck ramp along
-  the way, groundwork for the steering and descent features still to come.
-
-- **The career is a months-long arc now, and every level up hands you
-  something real.** Experience pays out more honestly -- every settled load
-  teaches a flat lesson, on-time streaks compound up to forty-five percent,
-  undamaged cargo adds a bonus, and specialty freight teaches half again as
-  much -- so early levels land within your first sessions while the road to
-  level 30 still takes months of real evenings. Along the way every rank
-  unlocks something concrete: an extra load refusal at level 5, a deeper
-  dispatch board at 6, 10, and 12, specialty freight favored on your board
-  at 11, premium long-haul lanes at 12, the full owner-operator checklist
-  read out from level 14, and the fleet tractor upgrades above.
-
-- **The engine brake now works like a real three-stage jake.** It slows the
-  truck through the gears, so it pulls hardest in a low gear with the engine
-  turning fast, and does very little in top gear -- set your gear and speed
-  before the hill starts. An automatic transmission drops a gear to put the
-  jake to work, and shifts up to protect the engine if the hill spins it too
-  fast, leaving you a weaker jake in a taller gear. Heavy enough loads can
-  outrun the jake entirely, so snub the brakes early or crawl.
-
-- **Brakes now heat and cool like real drums.** Dragging the service brakes
-  down a long grade overheats them until they fade badly; short firm
-  applications with the jake carrying the load keep them cool. Going faster
-  no longer cools hot brakes, and letting a downhill rev the engine past its
-  limit now wears the engine -- running at governed speed is safe.
-
-- **Each truck now keeps its own condition.** Tire, brake, and engine wear,
-  damage, and fuel stay with the truck they happened to, so swapping tractors
-  at the dealer no longer carries your wear -- or your empty tank -- onto the
-  next rig, and the garage fixes the truck you actually drove in. A new truck
-  off the lot rolls out fresh with a full tank. Careers from earlier versions
-  load unchanged: your current wear settles onto every truck you own.
-
-- **Career 1.9 playtests now follow more of a driver's real journey.** Reusable transcript checks cover career stages, driving modes, keyboard-operated controls, speech ordering, and deterministic road events so regressions are caught before they reach players. A new pacing model also verifies the months-long level curve stays honest as the balance changes.
-
-- **Relaxed driving now leaves real breathing room without removing the truck.**
-  Relaxed pacing keeps weather, traffic, air brakes, fatigue, hazards, and
-  consequences understandable, but hazards are spaced farther apart, warnings
-  allow more response time, collision damage and fatigue build more gently,
-  and routine speech is calmer. Standard keeps the previous balanced pressure,
-  while the former Fast pacing is now called Realistic and retains the quickest
-  decision cadence. Safety warnings also stay in front of hours and fatigue
-  chatter instead of being interrupted.
-
-### Added
 
 - **The dash now warns you about your own speed, like a real company
   truck.** Run a few miles per hour over the posted limit and a soft
@@ -308,7 +314,151 @@
   routes where you had better watch your fuel and get it when you can. Thanks
   to nromey.
 
+### Changed
+
+- **You can sleep at turnpike service plazas now.** Service plazas used to
+  offer fuel, food, and a short break but never a proper rest, so a tired
+  driver had to push on to the next truck stop even while parked at a big
+  Thruway or Turnpike plaza with overnight truck parking. Every service
+  plaza's stop menu now offers sleep like truck stops and travel centers do,
+  and route planning counts them as places you can end your day.
+
+- **The All assists preset now switches lane drift off.** The easiest preset
+  used to leave whatever lane drift level you had chosen running, so a player
+  who wanted the fully assisted ride could still be stuck holding the wheel
+  through every exit. Choosing All assists now also sets lane drift to off:
+  the truck keeps its lane for you, a tap of Left or Right changes lanes, and
+  the change is spoken when you pick the preset. The other presets still never
+  touch lane drift, and you can always set it back yourself.
+
+- **Speed limits follow the real road now, all the way across the map.**
+  Every route in the country carries its actual posted limits, read from
+  real map data instead of one smooth estimate. You will hear the honest
+  zones a mountain highway steps through -- the slow canyon stretches, the
+  drop before a long descent, the climb back up to highway speed -- where the
+  truck used to hold a single guess for miles. Adaptive cruise, the speed
+  keeper, and the spoken limit changes all follow these real limits. The same
+  sweep quietly recorded every curve and every real runaway-truck ramp along
+  the way, groundwork for the steering and descent features still to come.
+
+- **The career is a months-long arc now, and every level up hands you
+  something real.** Experience pays out more honestly -- every settled load
+  teaches a flat lesson, on-time streaks compound up to forty-five percent,
+  undamaged cargo adds a bonus, and specialty freight teaches half again as
+  much -- so early levels land within your first sessions while the road to
+  level 30 still takes months of real evenings. Along the way every rank
+  unlocks something concrete: an extra load refusal at level 5, a deeper
+  dispatch board at 6, 10, and 12, specialty freight favored on your board
+  at 11, premium long-haul lanes at 12, the full owner-operator checklist
+  read out from level 14, and the fleet tractor upgrades above.
+
+- **The engine brake now works like a real three-stage jake.** It slows the
+  truck through the gears, so it pulls hardest in a low gear with the engine
+  turning fast, and does very little in top gear -- set your gear and speed
+  before the hill starts. An automatic transmission drops a gear to put the
+  jake to work, and shifts up to protect the engine if the hill spins it too
+  fast, leaving you a weaker jake in a taller gear. Heavy enough loads can
+  outrun the jake entirely, so snub the brakes early or crawl.
+
+- **Brakes now heat and cool like real drums.** Dragging the service brakes
+  down a long grade overheats them until they fade badly; short firm
+  applications with the jake carrying the load keep them cool. Going faster
+  no longer cools hot brakes, and letting a downhill rev the engine past its
+  limit now wears the engine -- running at governed speed is safe.
+
+- **Each truck now keeps its own condition.** Tire, brake, and engine wear,
+  damage, and fuel stay with the truck they happened to, so swapping tractors
+  at the dealer no longer carries your wear -- or your empty tank -- onto the
+  next rig, and the garage fixes the truck you actually drove in. A new truck
+  off the lot rolls out fresh with a full tank. Careers from earlier versions
+  load unchanged: your current wear settles onto every truck you own.
+
+- **Career 1.9 playtests now follow more of a driver's real journey.** Reusable transcript checks cover career stages, driving modes, keyboard-operated controls, speech ordering, and deterministic road events so regressions are caught before they reach players. A new pacing model also verifies the months-long level curve stays honest as the balance changes.
+
+- **Relaxed driving now leaves real breathing room without removing the truck.**
+  Relaxed pacing keeps weather, traffic, air brakes, fatigue, hazards, and
+  consequences understandable, but hazards are spaced farther apart, warnings
+  allow more response time, collision damage and fatigue build more gently,
+  and routine speech is calmer. Standard keeps the previous balanced pressure,
+  while the former Fast pacing is now called Realistic and retains the quickest
+  decision cadence. Safety warnings also stay in front of hours and fatigue
+  chatter instead of being interrupted.
+
 ### Fixed
+
+- **The destination exit can no longer show up a state early.** On routes
+  that finish on rural highways, the game could announce the destination
+  exit at the last big interchange anywhere along the way -- one delivery to
+  Havre, Montana offered its "destination exit" in Wisconsin, over a
+  thousand miles out, and taking it ended the trip and paid the load right
+  there. The destination exit now only appears within the final miles of
+  your route; where the last stretch has no signed interchange, you get the
+  normal final approach to the facility instead.
+
+- **Taking an exit no longer talks you out of it.** With lane drift on, the
+  exit slowdown used to say "confirm the exit when ready" -- but there is no
+  confirm control, and pressing the exit key again actually canceled your
+  signal and cost you the exit. The prompt now says what to really do: hold
+  Right for the exit lane and keep slowing. And within the last mile of an
+  exit, a stray press of the exit key keeps your signal on and says so;
+  canceling there now takes a deliberate second press. If you tap Left or
+  Right near an exit with lane drift on, the game now explains that taps only
+  nudge the wheel and you should hold the key instead of leaving you in
+  silence, and after a missed exit the short-form turnaround announcement now
+  reminds you to signal again for the next pass.
+
+- **You cannot roll over a ladder at 25 anymore.** Hazards called out as
+  "brake or change lanes" are fixed objects in your lane -- road debris, a
+  blown retread, a stopped vehicle -- and slowing to the moving-hazard safe
+  speed used to clear them, which never made sense. Now a fixed object takes
+  either the swerve (a lane change into a clear lane, at full speed) or
+  braking nearly to a stop before you ease around it. The warning window
+  allows for the longer stop, a spoken hint reminds you the object is still
+  in your lane if you settle at the old safe speed, and automatic emergency
+  braking brings the truck all the way down to a crawl for these. Moving
+  hazards -- animals, whiteouts, stopped traffic -- still clear below 25.
+
+- **Emergency braking now saves you even on hot or worn brakes.** The
+  automatic emergency braking assist timed its intervention using the
+  truck's spec-sheet braking numbers, but hot drums, worn shoes, and a
+  heavy load all brake worse than the spec sheet -- so on tired brakes the
+  assist could engage two seconds before the collision it was supposed to
+  prevent. The assist now measures what the brakes can actually deliver
+  right now and engages early enough to matter, with a safety margin for
+  the heat the stop itself adds. Hazard warnings also arrive earlier when
+  the truck genuinely needs more stopping room.
+
+- **The ramp light says how far back you stopped.** "Creep ahead" was the
+  wrong instruction when your cautious stop landed six hundred feet from
+  the stop bar -- creeping that far takes several light cycles. When you
+  stop well short, the game now says the distance and tells you to drive
+  up and stop at the bar, using the red phase to close the gap.
+
+- **The ramp light now tells you where you are, not just what color it is.**
+  Stopping cautiously when the ramp light was announced could leave you a
+  quarter mile short of the actual stop bar -- too far to cross on one green
+  from a standstill -- and the light just kept cycling with no way to know
+  why. The game now says when you are stopped short of the light and tells
+  you to creep up to the stop bar, the yellow and green announcements say
+  whether you have reached the bar, and the first callout says to roll down
+  and stop at the light rather than just "brake to a stop."
+
+- **Missing the destination exit twice no longer strands you at the end of
+  the road.** The first missed destination exit looped you back for another
+  approach, but a second miss silently gave up: the trip pinned at zero miles
+  remaining, driving or backing changed nothing, cruise refused to stay on,
+  and no exit was left to signal for. Dispatch now reroutes you back for
+  another approach every time, and the turnaround drops you far enough out to
+  hear the callout, signal, and brake -- a full approach window instead of a
+  few compressed seconds.
+
+- **Live weather no longer turns light haze into thick fog.** With real-world
+  weather on, weather stations report haze or mist whenever they can see less
+  than about seven miles, and the game treated every such report as dense fog:
+  fog horns, a forty mile per hour safe speed, and near-zero visibility, often
+  for an entire route on a humid summer night. The game now checks how far the
+  station can actually see, and only genuinely low visibility becomes fog;
+  ordinary haze plays as an overcast sky instead.
 
 - **The driving event voice no longer narrates the past.** With the
   separate event voice enabled, a busy stretch could queue announcements
@@ -414,7 +564,7 @@
   offers, accepting it politely pulls the load instead of misbehaving.
   And four real Great Lakes ports the old map missed -- Toledo, Detroit,
   Chicago, and Green Bay -- now have working docks of their own.
-### Changed
+
 
 ## 1.8.3 - 2026-07-14
 

@@ -451,10 +451,7 @@ class DrivingUpdateMixin:
             p.fatigue = min(
                 100.0,
                 p.fatigue
-                + hos.fatigue_rate_per_min(night)
-                * gm
-                * fatigue_mult
-                * p.fatigue_buff_rate(now_h),
+                + hos.fatigue_rate_per_min(night) * gm * fatigue_mult * p.fatigue_buff_rate(now_h),
             )
         for worn in p.expire_buffs(now_h):
             text = worn.get("worn_off") or f"The {worn.get('label', 'buff').lower()} has worn off."
@@ -965,6 +962,20 @@ class DrivingUpdateMixin:
         self.ctx.audio.set_weather(self.weather.effects.sound)
         self.ctx.audio.set_wind(self.weather.effects.wind)
 
+    def _sync_traffic_source(self) -> None:
+        real = self.ctx.settings.real_traffic
+        if real == self._traffic_source_real:
+            return
+        self._traffic_source_real = real
+        self.trip.traffic_provider = self.ctx.real_traffic_provider() if real else None
+
+    def _sync_parking_source(self) -> None:
+        real = self.ctx.settings.real_parking
+        if real == self._parking_source_real:
+            return
+        self._parking_source_real = real
+        self.trip.parking_provider = self.ctx.truck_parking_provider() if real else None
+
     def _update_announcements(self, dt: float) -> None:
         if self.ctx.settings.speech_verbosity == 0:
             return
@@ -978,33 +989,67 @@ class DrivingUpdateMixin:
                 self._last_announced_mph = mph
                 self.ctx.say_event(self.ctx.settings.speed_text(mph), interrupt=False)
 
-    def _brake_budget_s(self) -> float:
-        """Seconds of full service braking to reach the hazard-safe speed.
+    def _brake_budget_s(self, target_mph: float = HAZARD_SAFE_MPH) -> float:
+        """Seconds of full service braking to reach the given safe speed.
 
-        Uses the truck's rated deceleration on the current surface, helped
-        uphill and hurt downhill, so a warning at 65 in the snow allows the
-        stop it actually takes there.
+        Uses the braking the truck can actually deliver right now -- fade,
+        wear, load, and grip -- helped uphill and hurt downhill. The rated
+        spec number engaged the assist two seconds before a collision on
+        hot brakes (playtest transcript, 2026-07-16).
         """
         t = self.truck
-        over_mps = max(0.0, (t.speed_mph - HAZARD_SAFE_MPH) / MPH_PER_MPS)
-        decel = G * (t.specs.max_brake_decel_g * t.grip + t.grade)
+        over_mps = max(0.0, (t.speed_mph - target_mph) / MPH_PER_MPS)
+        decel = t.full_service_decel_mps2() + G * t.grade
         return over_mps / max(decel, 0.5)
+
+    def _hazard_target_mph(self) -> float:
+        """The speed that resolves the active hazard by brake alone.
+
+        A fixed object in your lane (dodgeable) cannot be rolled over at the
+        moving-hazard safe speed: it takes nearly a stop, then easing around.
+        """
+        return HAZARD_CREEP_MPH if self._hazard_dodgeable else HAZARD_SAFE_MPH
 
     def _update_hazard(self, dt: float) -> None:
         if self._hazard_deadline is None:
             return
-        if self.truck.speed_mph <= HAZARD_SAFE_MPH:
+        target = self._hazard_target_mph()
+        if self.truck.speed_mph <= target:
             self._hazard_deadline = None
             self._automatic_braking_announced = False
+            self._hazard_slow_hint_said = False
             self.ctx.audio.play("events/hazard_clear", volume=0.75)
             self.ctx.controller.rumble.alert(intensity=0.4)
-            self.ctx.say_event("Hazard avoided. Well done.", interrupt=False)
+            message = (
+                "You slow nearly to a stop and ease around it. Well done."
+                if self._hazard_dodgeable
+                else "Hazard avoided. Well done."
+            )
+            self.ctx.say_event(message, interrupt=False)
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
+        # Old instinct says 25 clears everything; for a fixed object it no
+        # longer does. Braking past the moving-hazard speed with the object
+        # still in the lane earns the how-to once, so the quiet is never
+        # read as an already-cleared hazard.
+        if (
+            self._hazard_dodgeable
+            and not self._hazard_slow_hint_said
+            and self.truck.speed_mph <= HAZARD_SAFE_MPH
+        ):
+            self._hazard_slow_hint_said = True
+            self.ctx.say_event(
+                "It is still in your lane. Nearly stop, or change lanes.",
+                interrupt=False,
+            )
         self._hazard_deadline -= dt
+        # The assist leads the budget: braking heats the brakes, so the stop
+        # the budget just predicted gets slower while it happens. Engaging at
+        # zero margin collided two seconds after "Emergency braking engaged."
         if (
             self.ctx.settings.automatic_emergency_braking
-            and self._hazard_deadline <= self._brake_budget_s()
+            and self._hazard_deadline
+            <= self._brake_budget_s(target) * AEB_BUDGET_MARGIN + AEB_LEAD_S
         ):
             self.truck.brake = max(self.truck.brake, 1.0)
             if not self._automatic_braking_announced:

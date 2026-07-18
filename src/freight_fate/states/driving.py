@@ -55,6 +55,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             game_hours=profile.game_hours,
         )
         self._weather_source_real = ctx.settings.real_weather
+        self._traffic_source_real = ctx.settings.real_traffic
+        self._parking_source_real = ctx.settings.real_parking
         trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
         self.trip = Trip(
             route,
@@ -69,6 +71,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 * tuning_for_time_scale(ctx.settings.time_scale).hazard_frequency
             ),
             career_hours=profile.game_hours,
+            traffic_provider=ctx.real_traffic_provider(),
+            parking_provider=ctx.truck_parking_provider(),
         )
         if phase == DRIVE_PHASE_DELIVERY:
             # The destination exit, ramp terminal, and street chain own the
@@ -120,6 +124,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._microsleep_cooldown_gm = 0.0
         self._microsleep_misses = 0  # consecutive nods drifted off the road
         self._hazard_deadline: float | None = None
+        self._hazard_slow_hint_said = False
         self._automatic_braking_announced = False
         self._last_event_message = ""  # last spoken route announcement, for replay
         self._speed_announce_timer = 0.0
@@ -174,6 +179,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._exit_lane_prompt_said = False
         self._exit_lane_ready_said = False
         self._exit_commit_said = False
+        self._exit_cancel_armed = False
+        self._exit_right_hold_s = 0.0
+        self._exit_right_taps = 0
+        self._exit_tap_hint_said = False
         self._ramp_mi: float | None = None  # ramp distance left, once taken
         self._ramp_stop = None
         self._ramp_end_said = False
@@ -186,6 +195,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._ramp_light_last_phase = ""  # "red" | "yellow" | "green", once announced
         self._ramp_terminal_done = False
         self._ramp_waiting_at_light = False
+        self._ramp_creep_prompt_said = False
         self._destination_exit_taken = False
         self._missed_destination_exit_said = False
         self._destination_exit_announced_key = ""
@@ -403,8 +413,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             # Chains stay on the drives across a save; absent on older saves.
             state.truck.chains_on = bool(data.get("chains_on", False))
             state.rig_buffs = {
-                str(group): dict(info)
-                for group, info in dict(data.get("rig_buffs", {})).items()
+                str(group): dict(info) for group, info in dict(data.get("rig_buffs", {})).items()
             }
             state.speeding_strikes = int(data["speeding_strikes"])
             state.trip.restore(position_mi, game_minutes)
