@@ -294,8 +294,25 @@ def test_weather_source_change_applies_to_the_active_trip(monkeypatch):
         app.shutdown()
 
 
+def test_live_weather_calendar_change_applies_to_active_trip(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.season import date_text
+
+    app = App()
+    app.ctx.settings.real_weather = True
+    try:
+        driving = start_drive(app)
+        assert driving.weather.live_weather_controls_calendar is True
+        app.ctx.settings.live_weather_controls_calendar = False
+        driving.update(1 / 60)
+        assert driving.weather.live_weather_controls_calendar is False
+        assert driving.weather.date_text == date_text(driving.weather.game_hours)
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
-def test_arrival_summary_calls_out_early_delivery_bonus():
+def test_arrival_summary_calls_out_on_time_delivery_bonus():
     from freight_fate.app import App
     from freight_fate.states.driving import ArrivalState
 
@@ -304,7 +321,7 @@ def test_arrival_summary_calls_out_early_delivery_bonus():
         driving = start_drive(app)
         driving.trip.game_minutes = driving.job.deadline_game_h * 30.0
         arrival = ArrivalState(app.ctx, driving)
-        assert any("Early delivery bonus" in part for part in arrival.summary_parts)
+        assert any("On-time delivery bonus" in part for part in arrival.summary_parts)
     finally:
         app.shutdown()
 

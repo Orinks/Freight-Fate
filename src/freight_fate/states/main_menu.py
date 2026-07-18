@@ -801,6 +801,19 @@ class SettingsCategoryState(MenuState):
                     "driver responsibility: hours, fueling, and repairs.",
                 ),
                 MenuItem(
+                    lambda: f"Lane drift: {self._steering_label()}",
+                    lambda: self._cycle_steering(1),
+                    help="Choose whether lane drift is off, light, or realistic.",
+                ),
+                MenuItem(
+                    lambda: f"Speed keeper: {'on' if s.speed_keeper else 'off'}",
+                    lambda: self._toggle_speed_keeper(1),
+                    help="In low-speed zones where adaptive cruise is unavailable, "
+                    "such as facility roads, gates, and work zones, pressing K "
+                    "holds your current speed so the accelerator does not need "
+                    "to stay held. Braking cancels.",
+                ),
+                MenuItem(
                     lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",
                     lambda: self._toggle_controller(1),
                     help="Accept game-controller input alongside the keyboard. "
@@ -984,8 +997,17 @@ class SettingsCategoryState(MenuState):
                     self._toggle_overspeed_warning,
                     self._cycle_pace,
                     self._cycle_hos,
+                    self._cycle_steering,
+                    self._toggle_speed_keeper,
                     self._toggle_controller,
                     self._toggle_haptics,
+                ],
+                "assistance": [
+                    self._cycle_assist_preset,
+                    *[
+                        (lambda d, field=field: self._toggle_driving_assist(field, d))
+                        for field, _, _ in self._driving_assist_specs()
+                    ],
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
@@ -997,13 +1019,6 @@ class SettingsCategoryState(MenuState):
                     self._toggle_radio_streamer_safe,
                     self._toggle_radio_real_streams,
                     lambda d: self._volume("ui_volume", 0.1 * d),
-                ],
-                "assistance": [
-                    self._cycle_assist_preset,
-                    *[
-                        (lambda d, field=field: self._toggle_driving_assist(field, d))
-                        for field, _, _ in self._driving_assist_specs()
-                    ],
                 ],
                 # Account setup and restore are actions, so left/right does
                 # nothing on those rows instead of changing a nearby toggle.
@@ -1137,6 +1152,18 @@ class SettingsCategoryState(MenuState):
                 lambda: f"Parking source: {'real time' if s.real_parking else 'simulated'}",
                 self._toggle_real_parking,
                 "Real time uses live truck parking availability from TPIMS APIs when available.",
+            )
+        )
+        specs.append(
+            (
+                lambda: (
+                    "Live weather controls calendar: "
+                    f"{'on' if s.live_weather_controls_calendar else 'off'}"
+                ),
+                self._toggle_live_weather_calendar,
+                "When on, live weather uses today's real date and season. When off, "
+                "the career date advances at midnight and seasons pass while weather "
+                "conditions still come from the real world.",
             )
         )
         return specs
@@ -1354,9 +1381,11 @@ class SettingsCategoryState(MenuState):
         except ValueError:
             i = 0
         self.ctx.settings.steering_assist = modes[(i + d) % len(modes)]
-        self.ctx.settings.lane_departure_warning = self.ctx.settings.steering_assist != "off"
-        self.ctx.settings.lane_centering_assist = self.ctx.settings.steering_assist == "light"
-        self.ctx.settings.refresh_driving_assistance_preset()
+        self._announce()
+
+    def _toggle_speed_keeper(self, _d: int = 1) -> None:
+        """Toggle the speed keeper setting."""
+        self.ctx.settings.speed_keeper = not self.ctx.settings.speed_keeper
         self._announce()
 
     def _toggle_online_services(self, _d: int) -> None:
@@ -1532,6 +1561,19 @@ class SettingsCategoryState(MenuState):
     def _toggle_real_parking(self, _d: int) -> None:
         self.ctx.settings.real_parking = not self.ctx.settings.real_parking
         self.ctx.settings.save()
+        self._announce()
+
+    def _toggle_live_weather_calendar(self, _d: int) -> None:
+        turning_off = self.ctx.settings.live_weather_controls_calendar
+        self.ctx.settings.live_weather_controls_calendar = (
+            not self.ctx.settings.live_weather_controls_calendar
+        )
+        profile = self.ctx.profile
+        if turning_off and profile is not None and profile.has_started_career():
+            from ..sim.season import real_clock_game_hours
+
+            profile.anchor_calendar_to(real_clock_game_hours())
+            profile.save()
         self._announce()
 
     def _channel(self) -> str:

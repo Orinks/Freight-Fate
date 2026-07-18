@@ -84,6 +84,10 @@ class Settings:
     real_weather: bool = False  # live conditions from the NWS API
     real_traffic: bool = False  # live traffic incidents from state 511 APIs
     real_parking: bool = False  # live truck parking availability from TPIMS APIs
+    # Preserve the historical behavior by default: live weather also follows
+    # the wall-clock date. Turn this off to let the career calendar advance
+    # while live conditions continue to come from the NWS.
+    live_weather_controls_calendar: bool = True
     hos_mode: str = (
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
@@ -106,7 +110,8 @@ class Settings:
     route_transition_assist: bool = True
     # Holds a gentle speed through low-speed zones where adaptive cruise is
     # unavailable, so nobody has to keep the accelerator key held down. An
-    # input-accessibility aid, not a realism choice: presets never touch it.
+    # input-accessibility aid, kept while the wider assistance framework
+    # ships with 1.9 instead of this line.
     speed_keeper: bool = True
     # Double-tap-and-hold latches the accelerator or brake key so a long
     # pull or a steady snub needs no sustained hold; a fresh press of the
@@ -259,6 +264,8 @@ class Settings:
                 setattr(s, attr, True)
         if not isinstance(s.cloud_saves, bool):
             s.cloud_saves = False
+        if not isinstance(s.live_weather_controls_calendar, bool):
+            s.live_weather_controls_calendar = True
         for attr in (
             "master_volume",
             "sfx_volume",

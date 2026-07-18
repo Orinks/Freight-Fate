@@ -690,9 +690,7 @@ def test_drive_music_advances_to_next_track_while_paused(monkeypatch):
 
         driving.handle_event(key_event(pygame.K_ESCAPE))
         assert isinstance(app.state, PauseMenuState)
-        current = driving._radio_playlist[
-            driving._radio_track_index % len(driving._radio_playlist)
-        ]
+        current = driving._radio_playlist[driving._radio_track_index % len(driving._radio_playlist)]
         index_before = driving._radio_track_index
         host_before = driving._radio_playing_host
         played.clear()
@@ -702,8 +700,7 @@ def test_drive_music_advances_to_next_track_while_paused(monkeypatch):
 
         assert played, "the radio went silent under the pause menu"
         assert (
-            driving._radio_track_index != index_before
-            or driving._radio_playing_host != host_before
+            driving._radio_track_index != index_before or driving._radio_playing_host != host_before
         )
     finally:
         app.shutdown()
@@ -2240,6 +2237,39 @@ def test_engine_audio_load_eases_without_dropping_out_during_automatic_shift(mon
         app.shutdown()
 
 
+def test_engine_audio_load_tracks_manual_throttle_smoothly(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    samples = []
+    monkeypatch.setattr(
+        app.ctx.audio, "set_engine_rpm", lambda rpm, throttle=0.0: samples.append((rpm, throttle))
+    )
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.transmission._shift_timer = 0.0
+        driving._engine_audio_throttle = 0.5
+        driving.truck.throttle = 0.75
+        driving._update_audio(0.1)
+        rising = samples[-1][1]
+        driving.truck.throttle = 0.25
+        driving._update_audio(0.1)
+        falling = samples[-1][1]
+
+        # Raw throttle still controls audible load, but the 450-millisecond
+        # filter prevents an immediate gain step for a cruise correction.
+        assert rising == pytest.approx(0.5 + (0.75 - 0.5) * (0.1 / 0.45))
+        assert falling == pytest.approx(rising + (0.25 - rising) * (0.1 / 0.45))
+        assert 0.25 < falling < rising < 0.75
+    finally:
+        app.shutdown()
+
+
 def test_reverse_audio_cue_loops_while_reverse_is_engaged(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.transmission import REVERSE
@@ -2620,3 +2650,39 @@ def test_route_planning_labels_name_through_cities_with_states():
         assert world.city(job.destination).spoken_qualified == job.spoken_destination
     finally:
         app.shutdown()
+
+
+def test_destination_exit_scan_stays_on_the_final_approach():
+    """Routes that finish on rural highways carry no baked interchanges, and
+    the scan used to crown the last labeled exit anywhere on the route as the
+    destination exit: player transcripts (2026-07-16) show a Lampasas run
+    settled from Wichita Falls, 224 miles out, and a Havre, Montana run
+    settled from I-39 in Wisconsin, 1,158 miles out. The scan must find an
+    exit on the final approach or report none, so the synthetic end-of-route
+    exit takes over."""
+    from types import SimpleNamespace
+
+    from freight_fate.data.world import get_world
+    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.driving_core import DESTINATION_EXIT_SCAN_WINDOW_MI
+
+    world = get_world()
+    for start, end in [
+        ("springfield_il_us", "lampasas_tx_us"),
+        ("jamestown_ny_us", "havre_mt_us"),
+    ]:
+        route = world.shortest_route(start, end, require_metadata=True)
+        assert route is not None
+        leg_starts: list[float] = []
+        total = 0.0
+        for leg in route.legs:
+            leg_starts.append(total)
+            total += leg.miles
+        driving = SimpleNamespace(
+            route=route,
+            trip=SimpleNamespace(_leg_starts=leg_starts, position_mi=0.0, total_miles=total),
+            ctx=SimpleNamespace(world=world),
+        )
+        details = DrivingState._scan_destination_exit_details(driving)
+        if details is not None:
+            assert details[0] >= total - DESTINATION_EXIT_SCAN_WINDOW_MI

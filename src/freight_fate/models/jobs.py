@@ -280,11 +280,15 @@ class Job:
         return trailer_keys_for_cargo(self.cargo.key)
 
     def payout(self, hours_taken: float, damage_pct: float, on_time_bonus: float = 0.15) -> float:
-        """Final payment given delivery time and cargo condition."""
+        """Final payment given delivery time and cargo condition.
+
+        On-time pay works like real shipper scorecards: hitting the delivery
+        window earns the full flat bonus, with no extra reward for racing in
+        far ahead of the appointment.
+        """
         pay = self.pay
         if hours_taken <= self.deadline_game_h:
-            margin = 1.0 - hours_taken / self.deadline_game_h
-            pay *= 1.0 + on_time_bonus * margin
+            pay *= 1.0 + on_time_bonus
         else:
             hours_late = hours_taken - self.deadline_game_h
             pay *= max(0.4, 1.0 - 0.08 * hours_late)
@@ -434,9 +438,7 @@ PREMIUM_LANE_LONG_HAUL_BIAS = 0.5
 
 def lane_key(world, job: Job) -> str:
     """Canonical from:to lane for dispatch-variety memory."""
-    return (
-        f"{world.resolve_city_key(job.origin)}:{world.resolve_city_key(job.destination)}"
-    )
+    return f"{world.resolve_city_key(job.origin)}:{world.resolve_city_key(job.destination)}"
 
 
 def board_offer_count(level: int) -> int:

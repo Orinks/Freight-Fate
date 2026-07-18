@@ -592,7 +592,19 @@ snow and ice are cold-season risks, thunderstorms a warm-season one, and the
 regional temperature follows the time of year and time of day. The current
 date and season are announced with the clock (press C while driving), in the
 Tab status menu, and at the city terminal. With live weather turned on, the
-date, season, and temperature follow the real-world calendar instead.
+default is for the date, season, and temperature to follow the real-world
+calendar. Turn **Live weather controls calendar** off to keep live city
+conditions while the career date advances at midnight and its seasons pass.
+For an established career, turning it off begins the independent calendar on
+today's date so the date does not jump backward. A newly created career still
+begins on March 21.
+Conditions remain seasonally plausible, so live snow is changed to rain or
+cloud when the career calendar is in warm weather, and thunderstorms are
+changed to heavy rain when the career season is too cold for them.
+The Time and weather item at a terminal always uses the live station
+temperature when it is available, regardless of which calendar controls the
+season. On the first request it may say live weather is still loading; try the
+item again after a moment rather than treating a modeled temperature as live.
 
 Stops are reported as you approach them. A one-mile cue tells you when to take
 an exit. As an announced exit approaches, use X to signal or cancel your intent,
@@ -783,12 +795,14 @@ messages, and achievements.
 
 Tolls and approved accessorial charges are carrier settlement items. They are
 reported for transparency but do not reduce driver pay. Driver-caused charges,
-such as speeding fines, can reduce driver pay. Early delivery can increase pay.
+such as speeding fines, can reduce driver pay. Hitting the delivery window
+earns a flat ten percent on-time bonus, the way real shipper scorecards pay
+for service: arriving hours early pays no more than making the appointment.
 Late delivery and cargo damage reduce pay.
 
 ## Settings
 
-### Driving assistance
+### Speed keeper
 
 Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds light lane centering and lets braking capture a lower descent target. All assists adds automatic safe descent targets and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
 
@@ -799,6 +813,7 @@ Lane drift also lives in this category and, like the speed keeper, sits outside 
 One more control, Speed keeper, sits outside the presets. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K holds your current speed at or below the zone limit and creeps along behind queued traffic, so the accelerator does not need to stay held down. Any brake input, a hazard, or reaching the open road hands control back and says so. It is on by default and never changed by choosing a preset.
 
 Latching pedals is the same kind of control: an input accommodation that sits outside the presets, on by default. Tap the accelerator or brake, then press again and hold for half a second, and a click plus a spoken confirmation latch that pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly, spoken. See the driving controls table for the full gesture.
+In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K engages the speed keeper: it holds your current speed at or below the zone limit and creeps along behind queued traffic, so the accelerator does not need to stay held down. Any brake input, a hazard, or reaching the open road hands control back and says so. It is on by default and can be turned off in Settings, Gameplay.
 
 Settings are grouped into categories. In a settings category, Up and Down choose
 a setting, Right arrow or Enter changes it forward, Left arrow changes it
@@ -816,6 +831,10 @@ Gameplay settings include:
 | Driving mode | Choose Relaxed, Standard, or Realistic pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most real time to respond. Standard keeps balanced timing and consequences. Realistic moves distance and time fastest, so decisions arrive sooner without extra forgiveness. At low speed the clock still eases toward real time, and deliberate parked waiting runs at double the selected pace. |
 | Hours of service | Choose realistic or relaxed legal limits. Relaxed hours rules lengthen the limits and further reduce random hazard frequency; real violations keep their normal consequences. |
 | Driving assistance | Open Settings, Driving assistance for lane drift, lane warning, lane centering, emergency braking, stop-and-go, descent, and speed keeper controls. |
+| Trip pacing | Choose relaxed, standard, or fast pacing. Pacing applies at highway speed; the clock eases toward real time while you accelerate, brake, or maneuver, so working up through the gears does not cost most of a game hour. Setting the parking brake while stopped means deliberate waiting: time then passes at double your pacing, letting weather and daylight move along. |
+| Hours of service | Choose realistic or relaxed hours rules. |
+| Lane drift | Choose whether lane drift is off, light, or realistic. When on, a short beep comes from the side you drift toward, so steer away from the beep. A dedicated centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. |
+| Speed keeper | Turn the K-key speed keeper for low-speed zones on or off. |
 
 Audio settings include:
 
@@ -844,6 +863,7 @@ Speech and weather settings include:
 | Speech volume | Appears only when the current voice source supports volume changes. |
 | Speech voice | Appears only when selectable voices are available. |
 | Weather source | Switches between simulated weather and live city conditions when available. |
+| Live weather controls calendar | When on, live weather uses today's real date and season. When off, live conditions continue while the career date advances at midnight and its seasons pass. |
 
 Online settings include:
 

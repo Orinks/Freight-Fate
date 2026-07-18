@@ -625,14 +625,12 @@ class PauseMenuState(MenuState):
         self.ctx.audio.play("ui/notify")
         self.refresh()
         effort = (
-            "Kneeling on a dark shoulder by headlamp, it takes everything "
-            "your gloves have got. "
+            "Kneeling on a dark shoulder by headlamp, it takes everything your gloves have got. "
             if night
             else ""
         )
         bare = (
-            " The road here is bare; they will grind apart fast until you "
-            "reach the snow."
+            " The road here is bare; they will grind apart fast until you reach the snow."
             if d.truck.surface not in ("snow", "ice")
             else ""
         )
