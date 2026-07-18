@@ -15,9 +15,8 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from pathlib import Path
 
-_SHARD = Path(__file__).parent / "world_data" / "us" / "gameplay" / "curves.jsonl"
+from .data_resources import read_data_text
 
 HAIRPIN_MAX_MPH = 25
 SHARP_MAX_MPH = 35
@@ -72,9 +71,10 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
     if _CACHE is not None:
         return _CACHE
     by_leg: dict[str, list[CurveRecord]] = {}
-    if _SHARD.exists():
-        with _SHARD.open(encoding="utf-8") as f:
-            for line in f:
+    text = read_data_text("world_data/us/gameplay/curves.jsonl")
+    if text is not None:
+        for line in text.splitlines():
+            if line.strip():
                 row = json.loads(line)
                 if "meta" in row or row.get("connector"):
                     continue

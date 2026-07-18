@@ -692,6 +692,23 @@ def main() -> int:
 
             get_world()
             verify_sound_assets()
+            # And the deepest load path: continuing a career imports the
+            # driving stack, which reads every baked runtime data file. A
+            # missing file must fail the build here, not a player's first
+            # Continue career (frozen 1.9 canary, 2026-07-18).
+            from .data.buffs import BUFF_CATALOG
+            from .data.curves import leg_curves
+            from .data.world_local_data import load_facility_approaches
+            from .radio import load_radio_catalog
+            from .states import driving  # noqa: F401
+
+            if not BUFF_CATALOG:
+                raise RuntimeError("smoke: buff catalog is empty")
+            if not leg_curves("aberdeen_sd_us:pierre_sd_us"):
+                raise RuntimeError("smoke: curve shard is empty")
+            if not load_facility_approaches():
+                raise RuntimeError("smoke: facility approaches are empty")
+            load_radio_catalog()
         App().run(max_frames=5 if smoke else None)
     except Exception:
         log.exception("Fatal error")

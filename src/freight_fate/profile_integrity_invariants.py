@@ -17,9 +17,12 @@ def _json_number(value: float) -> int | float:
 
 
 def invariant_data() -> dict:
+    # Source-tree-only export for the orinks.net validator; never called by
+    # the game at runtime, so frozen builds (which carry no world_data
+    # tree) are unaffected.
     data_root = Path(__file__).resolve().parent / "data" / "world_data"
-    cities = json.loads((data_root / "us" / "cities.json").read_text(encoding="utf-8"))["cities"]
-    countries = json.loads((data_root / "geo.json").read_text(encoding="utf-8"))["countries"]
+    cities = json.loads((data_root / "us" / "cities.json").read_text(encoding="utf-8"))["cities"]  # runtime-data-ok
+    countries = json.loads((data_root / "geo.json").read_text(encoding="utf-8"))["countries"]  # runtime-data-ok
     states = countries["US"]["states"]
     city_labels = {
         slug: f"{city['spoken_city']}, {states.get(city.get('state'), city.get('state', ''))}".rstrip(

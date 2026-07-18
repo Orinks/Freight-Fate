@@ -6,8 +6,9 @@ import contextlib
 import json
 import math
 from dataclasses import dataclass
-from importlib import resources
 from typing import Protocol
+
+from .data.data_resources import read_data_text
 
 SAFE_ROUTE_PLAYLIST = "route_playlist"
 SAFE_FALLBACK_STATION_ID = "ff-safety-satellite"
@@ -93,11 +94,10 @@ class RadioAction:
 
 
 def load_radio_catalog() -> tuple[RadioStation, ...]:
-    data = json.loads(
-        resources.files("freight_fate.data")
-        .joinpath(RADIO_CATALOG_RESOURCE)
-        .read_text(encoding="utf-8")
-    )
+    text = read_data_text(RADIO_CATALOG_RESOURCE)
+    if text is None:
+        raise FileNotFoundError("radio_catalog.json is missing from this build")
+    data = json.loads(text)
     stations = tuple(_station_from_dict(row) for row in data["stations"])
     if not stations:
         raise ValueError("radio catalog is empty")

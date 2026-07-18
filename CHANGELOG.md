@@ -398,6 +398,15 @@
 
 ### Fixed
 
+- **Downloaded builds no longer crash when you continue a career.** The
+  packaged game was missing several data files that the source version
+  reads straight from disk: continuing a career crashed on the missing
+  buff catalog, and truck-stop purchases, city-service errands, real
+  facility driveways, the radio catalog, and the new curve callouts
+  could be silently absent from a downloaded build. All of that data now
+  ships sealed inside the game itself, and the build check now refuses
+  to package a game that cannot load its own career.
+
 - **The destination exit can no longer show up a state early.** On routes
   that finish on rural highways, the game could announce the destination
   exit at the last big interchange anywhere along the way -- one delivery to
