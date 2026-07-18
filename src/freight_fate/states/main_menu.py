@@ -877,6 +877,14 @@ class SettingsCategoryState(MenuState):
 
             return [
                 MenuItem(
+                    lambda: f"Online services: {'on' if s.online_services else 'off'}",
+                    lambda: self._toggle_online_services(1),
+                    help="Master switch for all online/live-data features. "
+                    "When off, real-time weather, traffic, parking, Discord "
+                    "presence, and cloud backup all behave as disabled "
+                    "without losing their individual settings.",
+                ),
+                MenuItem(
                     lambda: (
                         "orinks.net account: connected"
                         if OnlineIdentity.load() is not None
@@ -1000,6 +1008,7 @@ class SettingsCategoryState(MenuState):
                 # Account setup and restore are actions, so left/right does
                 # nothing on those rows instead of changing a nearby toggle.
                 "online": [
+                    self._toggle_online_services,
                     lambda _d: None,
                     self._toggle_online_presence,
                     self._toggle_cloud_saves,
@@ -1348,6 +1357,29 @@ class SettingsCategoryState(MenuState):
         self.ctx.settings.lane_departure_warning = self.ctx.settings.steering_assist != "off"
         self.ctx.settings.lane_centering_assist = self.ctx.settings.steering_assist == "light"
         self.ctx.settings.refresh_driving_assistance_preset()
+        self._announce()
+
+    def _toggle_online_services(self, _d: int) -> None:
+        """Toggle the master online services switch.
+
+        When turned off all online features stop immediately.  Individual
+        toggle values are preserved so re-enabling restores the previous
+        configuration without re-setting each service.
+        """
+        s = self.ctx.settings
+        was = s.online_services
+        s.online_services = not s.online_services
+        s.save()
+        if was:
+            # Turned off: tell every live service to stand down.
+            self.ctx.apply_presence()
+            self.ctx.apply_online_presence()
+            self.ctx.apply_cloud_saves()
+        else:
+            # Turned back on: reconnect live services.
+            self.ctx.apply_presence()
+            self.ctx.apply_online_presence()
+            self.ctx.apply_cloud_saves()
         self._announce()
 
     def _toggle_discord_presence(self, _d: int) -> None:

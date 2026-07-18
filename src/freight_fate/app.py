@@ -95,12 +95,17 @@ class GameContext:
         # playtest_levers.apply_continue_levers); save_profile honors it.
         self.playtest_sandbox = False
 
+    def _online_enabled(self, setting: bool) -> bool:
+        """True when both the master ``online_services`` switch and the
+        individual ``setting`` are enabled."""
+        return self.settings.online_services and setting
+
     def real_weather_provider(self):
         """Shared NWS provider when real weather is enabled, else None.
 
         Created lazily and kept for the whole session so its cache spans trips.
         """
-        if not self.settings.real_weather:
+        if not self._online_enabled(self.settings.real_weather):
             return None
         if self._real_weather is None:
             from .sim.real_weather import RealWeatherProvider
@@ -113,7 +118,7 @@ class GameContext:
 
         Created lazily and kept for the whole session so its cache spans trips.
         """
-        if not self.settings.real_traffic:
+        if not self._online_enabled(self.settings.real_traffic):
             return None
         if self._real_traffic is None:
             from .sim.real_traffic import RealTrafficProvider
@@ -126,7 +131,7 @@ class GameContext:
 
         Created lazily and kept for the whole session so its cache spans trips.
         """
-        if not self.settings.real_parking:
+        if not self._online_enabled(self.settings.real_parking):
             return None
         if self._truck_parking is None:
             from .sim.truck_parking import TruckParkingProvider
@@ -248,17 +253,20 @@ class GameContext:
 
     def apply_presence(self) -> None:
         """Reflect the Discord presence setting (e.g. after a settings change)."""
-        self._app.presence.set_enabled(self.settings.discord_presence)
+        self._app.presence.set_enabled(self._online_enabled(self.settings.discord_presence))
 
     def apply_online_presence(self) -> None:
         """Reflect the drivers-board setting (e.g. after a settings change)."""
-        enabled = self.settings.online_presence and not self.settings.profile_sharing_pending_off
+        enabled = (
+            self._online_enabled(self.settings.online_presence)
+            and not self.settings.profile_sharing_pending_off
+        )
         self._app.online.set_enabled(enabled)
         self._app.journal.set_enabled(enabled)
 
     def apply_cloud_saves(self) -> None:
         """Reflect the cloud backup setting (e.g. after a settings change)."""
-        self._app.cloud.set_enabled(self.settings.cloud_saves)
+        self._app.cloud.set_enabled(self._online_enabled(self.settings.cloud_saves))
 
     def cloud_saves_service(self) -> CloudSaves:
         """The backup service, for the Cloud backup menu."""

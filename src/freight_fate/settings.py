@@ -61,6 +61,13 @@ DRIVING_ASSIST_PRESETS = {
 
 @dataclass
 class Settings:
+    # Master switch for all online/live-data features.
+    # When off, ``real_weather``, ``real_traffic``, ``real_parking``,
+    # ``online_presence``, ``cloud_saves``, and Discord presence all behave
+    # as if disabled regardless of their individual settings.  Individual
+    # toggles stay visible in the menu (and keep their saved values) so the
+    # player can turn the master back on without reconfiguring each service.
+    online_services: bool = True
     imperial_units: bool = True
     automatic_transmission: bool = True  # friendlier default for new players
     # Simple keeps the familiar hold-through-stop behavior. Deliberate requires
