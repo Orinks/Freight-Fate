@@ -8,6 +8,11 @@ macOS apps live in ``/Applications`` and must not write beside themselves
 (that folder is admin-owned and often read-only), so on macOS saves go in the
 standard per-user ``~/Library/Application Support/FreightFate`` folder.
 
+The same reasoning covers Windows and Linux when the game itself sits in a
+read-only location (for example Windows ``Program Files``): if the ``saves``
+folder beside the game cannot be written, saves fall back to that per-user
+data directory instead of failing on the first write and crashing mid-session.
+
 Override the location with the ``FREIGHT_FATE_DATA_DIR`` environment variable
 (which the tests use). Saves from older versions or misplaced layouts are
 migrated into the active location automatically on first run.
@@ -53,6 +58,7 @@ SECRET_FILE = "profile.key"
 save_listener: Callable[[Profile], None] | None = None
 
 _legacy_checked = False
+_unwritable_warned = False
 
 
 def _macos_data_dir() -> Path:
@@ -75,16 +81,48 @@ def _legacy_data_dir() -> Path:
     return base / "FreightFate"
 
 
+def _is_writable_dir(path: Path) -> bool:
+    """Whether ``path`` exists (or can be created) and accepts a write.
+
+    Detects installs in protected locations, such as Windows ``Program
+    Files``, where the portable ``saves`` folder beside the game would raise
+    on the first save and crash the game mid-session.
+    """
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+        probe = path / ".freightfate-write-test"
+        probe.write_text("", encoding="ascii")
+        probe.unlink()
+    except OSError:
+        return False
+    return True
+
+
 def _save_root() -> Path:
     """The active save directory for this platform.
 
     Windows and Linux keep the portable ``saves`` folder next to the game.
     macOS uses the per-user Application Support folder so the app never has to
-    write into ``/Applications``.
+    write into ``/Applications``. When the game sits in a read-only location
+    such as ``Program Files``, Windows and Linux fall back to that same
+    per-user folder rather than crashing on the first save.
     """
     if sys.platform == "darwin":
         return _macos_data_dir()
-    return game_root() / "saves"
+    if _is_writable_dir(game_root()):
+        return game_root() / "saves"
+    fallback = _legacy_data_dir()
+    global _unwritable_warned
+    if not _unwritable_warned:
+        _unwritable_warned = True
+        log.warning(
+            "Game directory %s is not writable; saving to the per-user folder "
+            "%s instead. Move Freight Fate out of a protected location such as "
+            "Program Files to keep saves beside the game.",
+            game_root(),
+            fallback,
+        )
+    return fallback
 
 
 def game_root() -> Path:

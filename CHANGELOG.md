@@ -39,6 +39,13 @@
 
 ### Fixed
 
+- **The game no longer crashes when it is installed in a protected folder.**
+  If you put Freight Fate somewhere Windows guards, such as Program Files, the
+  game could not write next to itself and would crash the moment it tried to
+  save, often right as you reached a facility. Freight Fate now notices when
+  its own folder is read only and keeps your saves in your personal user
+  folder instead, so the game saves and plays normally wherever you install
+  it. Saves that are already beside the game are still used as before.
 - **The engine load now follows throttle smoothly.** Engine effort remains
   audible when you accelerate or ease off, while manual releases and
   adaptive-cruise corrections blend gradually instead of making the engine
