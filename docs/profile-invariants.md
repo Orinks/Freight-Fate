@@ -32,11 +32,15 @@ Ranges — all numeric fields must be finite (no NaN, no infinity):
 
 - `money`: greater than -1,000,000 and below 1,000,000,000 (structural
   ceiling; the real judgment is rule 2.1).
-- `fatigue`, `road_grime_pct`: 0 to 100.
+- `fatigue`: 0 to 100.
 - `calendar_offset_days`: integer from 0 through 364.
-- `truck_damage_pct`, `tire_wear_pct`: 0 to 100.
-- `truck_fuel_gal`: 0 to the largest buildable tank (biggest catalog tank
-  plus the long-range upgrade's 50 extra gallons — 250 today).
+- Every `truck_conditions` record this line writes (save version 5, one
+  record per owned truck; the flat `truck_damage_pct`, `tire_wear_pct`,
+  `road_grime_pct`, `truck_fuel_gal` fields belong to version 4 and
+  earlier and are migrated into the active truck's record on load):
+  `damage_pct`, `tire_wear_pct`, `grime_pct` each 0 to 100; `fuel_gal`
+  0 to the largest buildable tank (biggest catalog tank plus the
+  long-range upgrade's 50 extra gallons — 250 today).
 - `pay_advance`: 0 to 1,000,000.
 - `career.xp`: 0 to 100,000,000 (structural; see 2.2).
 - `career.reputation`: 0 to 100.

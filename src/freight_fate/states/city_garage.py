@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from ..models.economy import REPAIR_COST_PER_PCT
-from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckModel, Upgrade
+from ..models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckCondition, TruckModel, Upgrade
 from .base import MenuItem, MenuState
 
 TERMINAL_FUEL_MIN = 20.0
@@ -345,6 +345,7 @@ class TruckShopState(MenuState):
                 return
             p.money -= model.price
             p.owned_trucks.append(model.key)
+            p.truck_conditions[model.key] = TruckCondition.fresh(model.key, p.upgrades)
             self.ctx.audio.play("ui/cash")
             self._switch_to(model)
             self.ctx.say(
@@ -361,6 +362,5 @@ class TruckShopState(MenuState):
     def _switch_to(self, model: TruckModel) -> None:
         p = self.ctx.profile
         p.truck = model.key
-        p.truck_fuel_gal = min(p.truck_fuel_gal, p.truck_specs().fuel_tank_gal)
         self.ctx.save_profile()
         self.refresh()
