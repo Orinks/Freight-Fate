@@ -133,26 +133,24 @@ terminal becomes the anchor of that week instead of a spawn point.
       clones, costs Josh quotas), no history rewrite (Josh's call,
       someday). Lands FIRST so data sweeps commit small diffs, not 58 MB
       blobs.
-- [ ] **Truck-accessibility sweep: car-only stops leave the truck's
-      world (Josh's design, owner concurs, 2026-07-18).** Wawa/Exxon-class
-      stops where a rig physically cannot park get truck_accessible:
-      false -- gone from exit-stop announcements, U readouts, route
-      planning fuel/sleep counts, GPS cues, and the tablet list; kept in
-      the data as roadside texture (and a future bobtail escape valve).
-      Classify via amenities.classify_brand + OSM tags (hgv=no, no truck
-      parking) on our Overpass. OWNER'S EXCEPTION: on a service-desert
-      leg where the car-only stop is the ONLY service for a long
-      stretch, it keeps a degraded truck offering ("rough parking, tight
-      lot, no amenities") instead of the flag -- real drivers use the
-      lone gravel-lot gas station, and a route must never become
-      undrivable. TWO FLAGS, not one (owner, 2026-07-18): physically
-      impossible (truck_accessible: false -- geometry, no pass ever
-      helps) vs policy-banned (big_rig_banned: true -- the lot fits a
-      rig but the venue forbids it), because the Big Buck's GOLDEN
-      ANTLER pass waives policy bans per visit, never physics. The
-      sweep records the distinction now so the pass mechanic hooks in
-      without a re-sweep. Oatis sweep AFTER sharding lands;
-      announcement-layer filter is game-side.
+- [ ] **Truck-accessibility sweep: vehicle_access classification
+      (Josh's spec via Codex, owner + Phil concur, 2026-07-18).** Full
+      brief: docs/truck-access-sweep-brief.md. Three tiers on every
+      stop, separate from parking: tractor_trailer (announced, usable),
+      bobtail_only (on the map, hidden from semi announcements and HOS
+      planning; usable in 1.9 while GENUINELY bobtailing -- an empty
+      trailer is not a bobtail), none (landmark only). Never filter by
+      brand (some Exxons and the Wawa Travel Center are truck-oriented;
+      1,082 generic fuel_station records need real classification, not
+      a brand purge); generic fuel stations default bobtail_only unless
+      truck access is verified via OSM/Overpass. Route gaps left by the
+      sweep get filled with REAL truck stops, plazas, and rest areas --
+      never disguised gas stations. The parking buff may affect
+      fullness at legal stops, never admit semis to impossible lots.
+      Policy bans (Big Buck's GOLDEN ANTLER waiver) stay a separate
+      future flag; the pass never overrides physics. OATIS runs the
+      sweep in his own window AFTER sharding lands; the
+      announcement/HOS filter is game-side.
 - [ ] **Real construction zones from state 511 APIs.** When real-time
       traffic is enabled, construction zones should be generated from actual
       state DOT work zone data instead of simulated zones. Requires:
