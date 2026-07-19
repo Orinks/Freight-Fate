@@ -371,9 +371,6 @@ class World:
         cur = end
         while cur != start:
             parent, leg = prev[cur]
-            # Keep the leg in its native data orientation. Route.cities records
-            # the travel direction, and Trip uses it to mirror directional
-            # stops, interchanges, grades, and other milepost-backed metadata.
             legs.append(leg)
             cities.append(parent)
             cur = parent
