@@ -23,7 +23,9 @@
   older versions are updated automatically the first time they load, and the
   game tells you once that the updated save can no longer be opened by older
   versions: the truck you were driving keeps its condition, and your other
-  trucks start fueled and fresh.
+  trucks start fueled and fresh. Back up your career save before opening it in
+  this version. If the conversion causes a problem, include both the original
+  backup and the updated save with your issue report.
 
 - **On-time deliveries now pay a real bonus.** Delivering on time used to add
   only a sliver of extra pay unless you raced in absurdly far ahead of the
