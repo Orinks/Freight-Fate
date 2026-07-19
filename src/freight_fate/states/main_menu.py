@@ -30,6 +30,11 @@ _last_invalid_saves: list[Path] = []
 
 def enter_world(ctx) -> None:
     """Resume a saved mid-trip delivery if there is one, else the terminal hub."""
+    if ctx.profile.migration_notice_pending:
+        from .save_notice import SaveMigrationNoticeState
+
+        ctx.push_state(SaveMigrationNoticeState(ctx))
+        return
     ctx.push_state(_world_entry_state(ctx))
 
 
@@ -433,6 +438,11 @@ class LoadDriverState(MenuState):
     def _pick(self, profile: Profile) -> None:
         self.ctx.profile = profile
         self.ctx.say(f"Welcome back, {profile.name}.")
+        if profile.migration_notice_pending:
+            from .save_notice import SaveMigrationNoticeState
+
+            self.ctx.replace_state(SaveMigrationNoticeState(self.ctx))
+            return
         self.ctx.replace_state(_world_entry_state(self.ctx))
 
 
@@ -873,9 +883,9 @@ class SettingsCategoryState(MenuState):
                     lambda: f"Speed keeper: {'on' if s.speed_keeper else 'off'}",
                     lambda: self._toggle_speed_keeper(1),
                     help="In low-speed zones where adaptive cruise is unavailable, "
-                    "such as facility roads, gates, and work zones, pressing K "
-                    "holds your current speed so the accelerator does not need "
-                    "to stay held. Braking cancels.",
+                    "such as facility roads, gates, and work zones, automatic "
+                    "speed control uses the keeper, then switches back to adaptive "
+                    "cruise on open roads. Braking cancels the whole session.",
                 ),
                 MenuItem(
                     lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",

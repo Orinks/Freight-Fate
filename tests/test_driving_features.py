@@ -396,6 +396,7 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         driving._speak_keyboard_help()
         assert "simple direction changes" in spoken[-1]
         assert "keep holding the Down arrow" in spoken[-1]
+        assert "R route and current location" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_keyboard_help()
@@ -406,6 +407,7 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         driving._speak_controller_help()
         assert "simple direction changes" in spoken[-1]
         assert "keep holding the left trigger" in spoken[-1]
+        assert "D-pad up reads your route and current location" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_controller_help()
@@ -530,7 +532,8 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "three second clear-weather gap" in help_text
     assert "increase the following gap" in help_text
     assert "keypad keys" in help_text
-    assert "cruise set speed" in help_text
+    assert "active speed-control mode" in help_text
+    assert "open-road target" in help_text
     assert "sharp posted-limit drops" in help_text
     assert "highway stops use clear place names" in help_text
     assert "list the actions available there" in help_text
@@ -567,7 +570,7 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "low visibility shortens" in help_text
     assert "career runs on a calendar that starts in spring" in help_text
     assert "state troopers patrol" in help_text
-    assert "will not engage on low-speed local roads" in help_text
+    assert "speed keeper handles low-speed local roads" in help_text
 
 
 def test_dispatch_board_keeps_route_planning_out_of_load_offer():
@@ -1289,15 +1292,21 @@ def test_terse_destination_exit_omits_press_x_instruction(monkeypatch):
         app.shutdown()
 
 
-def test_destination_exit_announces_and_disables_cruise(monkeypatch):
+def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
     from freight_fate.app import App
 
     app = App()
     events = []
+    said = []
     monkeypatch.setattr(
         app.ctx,
         "say_event",
         lambda text, interrupt=True: events.append((text, interrupt)),
+    )
+    monkeypatch.setattr(
+        app.ctx,
+        "say",
+        lambda text, interrupt=True: said.append(text),
     )
     try:
         driving = start_drive(app)
@@ -1316,18 +1325,31 @@ def test_destination_exit_announces_and_disables_cruise(monkeypatch):
         )
         destination = driving._destination_exit_stop()
         driving.trip.position_mi = destination.at_mi - 4.0
+        driving.truck.velocity_mps = 60.0 / 2.23694
         driving._cruise_mph = 60.0
+        driving._speed_control_target_mph = 60.0
 
         driving._check_destination_exit()
 
-        assert driving._cruise_mph is None
+        assert driving._cruise_mph == 60.0
+        assert driving._cruise_exit_mph == 45.0
         message, interrupt = events[-1]
         assert interrupt is True
         assert "exit " in message
         assert "toward" in message
         assert "destination exit" in message
         assert "Press X to take it" in message
-        assert "Adaptive cruise disabled" in message
+        assert "Adaptive cruise easing to 45 miles per hour for the ramp" in message
+
+        driving._adjust_cruise(-5.0)
+        assert said[-1] == (
+            "Open-road cruise target 55 miles per hour. Ramp approach target 45 miles per hour."
+        )
+        for _tap in range(3):
+            driving._adjust_cruise(-5.0)
+        assert said[-1] == (
+            "Open-road cruise target 40 miles per hour. Ramp approach target 40 miles per hour."
+        )
     finally:
         app.shutdown()
 
@@ -1369,7 +1391,7 @@ def test_destination_exit_suppresses_matching_interchange_gps_cue(monkeypatch):
         app.shutdown()
 
 
-def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch):
+def test_missed_destination_exit_reroutes_every_time(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import DrivingState
 
@@ -1379,19 +1401,39 @@ def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch)
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        driving.trip.position_mi = driving.trip.total_miles
-        driving.trip.finished = True
-        driving.truck.velocity_mps = 0.0
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        reroute_distances = []
 
-        driving.update(1 / 60)
+        for _ in range(2):
+            driving.trip.position_mi = driving.trip.total_miles
+            driving.trip.finished = True
+            driving.truck.velocity_mps = 20.0
 
-        assert isinstance(app.state, DrivingState)
-        assert not driving.trip.finished
-        assert driving.trip.position_mi < driving.trip.total_miles
-        assert driving._destination_exit_stop() is not None
-        assert "missed the destination exit" in events[-1].lower()
-        assert "safe turnaround" in events[-1].lower()
-        assert "back up" not in events[-1].lower()
+            driving.update(1 / 60)
+
+            assert isinstance(app.state, DrivingState)
+            assert not driving.trip.finished
+            assert driving.trip.position_mi < stop.at_mi
+            reroute_distances.append(stop.at_mi - driving.trip.position_mi)
+
+            driving.trip.position_mi = stop.at_mi - 1.0
+            driving._check_destination_exit()
+            assert "destination exit" in events[-1].lower()
+            driving.handle_event(key_event(pygame.K_x))
+            assert driving._exit_stop is not None
+            assert driving._exit_stop.type == "delivery_destination"
+            driving.handle_event(key_event(pygame.K_x))
+            assert driving._exit_stop is None
+
+        missed_events = [
+            event for event in events if "missed the destination exit" in event.lower()
+        ]
+        assert len(missed_events) == 2
+        assert len([event for event in events if "destination exit" in event.lower()]) >= 4
+        assert "safe turnaround" in missed_events[-1].lower()
+        assert "back up" not in missed_events[-1].lower()
+        assert min(reroute_distances) >= 5.0
     finally:
         app.shutdown()
 

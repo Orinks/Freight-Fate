@@ -272,6 +272,73 @@ def test_departing_loaded_trip_keeps_idling_engine():
         app.shutdown()
 
 
+def test_pickup_save_and_route_planning_keep_speed_control_session(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import PickupFacilityState, RouteSelectState
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    spoken = []
+    events = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    try:
+        pickup_drive = accept_pickup_drive(app)
+        pickup_drive.truck.start_engine()
+        pickup_drive.truck.set_air_ready(parking_brake=False)
+        pickup_drive.truck.velocity_mps = 5.0
+        pickup_drive.handle_event(key_event(pygame.K_k))
+        pickup_drive._speed_control_target_mph = 47.0
+        assert pickup_drive._speed_control_armed
+
+        pickup = arrive_at_pickup(app)
+        assert isinstance(pickup, PickupFacilityState)
+        assert pickup.speed_control_armed
+        assert pickup.speed_control_target_mph == 47.0
+        assert app.ctx.profile.active_trip["speed_control_armed"] is True
+        assert (
+            events.count(
+                "Automatic speed control paused for pickup. It will resume after "
+                "you depart with the load."
+            )
+            == 1
+        )
+        pickup._status()
+        assert "open-road target 47 miles per hour" in spoken[-1]
+
+        pickup.handle_event(key_event(pygame.K_RETURN))  # check in
+        while pickup.items[pickup.index].text != "Save and quit to main menu":
+            pickup.handle_event(key_event(pygame.K_DOWN))
+        pickup.handle_event(key_event(pygame.K_RETURN))
+        while not app.state.items[app.state.index].text.startswith("Continue latest career"):
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert isinstance(app.state, PickupFacilityState)
+        assert app.state.speed_control_armed
+        assert app.state.speed_control_target_mph == 47.0
+        assert any(
+            "Automatic speed control is paused; open-road target 47 miles per hour" in text
+            for text in spoken
+        )
+        app.state.handle_event(key_event(pygame.K_RETURN))  # load
+        app.state.handle_event(key_event(pygame.K_RETURN))  # plan route
+        assert isinstance(app.state, RouteSelectState)
+        app.state.handle_event(key_event(pygame.K_RETURN))
+
+        assert isinstance(app.state, DrivingState)
+        assert app.state._speed_control_armed
+        assert app.state._speed_control_target_mph == 47.0
+        assert app.ctx.profile.active_trip["speed_control_armed"] is True
+        assert app.ctx.profile.active_trip["speed_control_target_mph"] == 47.0
+        app.state._speak_speed()
+        assert "automatic speed control paused" in spoken[-1]
+        assert "open-road target 47 miles per hour" in spoken[-1]
+        assert "Open-road target: 47 miles per hour" in app.state.status_lines()
+    finally:
+        app.shutdown()
+
+
 def test_job_board_help_names_drivable_pickup_before_route_planning():
     from freight_fate.states.city import JobBoardState
 

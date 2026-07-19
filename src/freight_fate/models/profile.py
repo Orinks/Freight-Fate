@@ -8,9 +8,18 @@ macOS apps live in ``/Applications`` and must not write beside themselves
 (that folder is admin-owned and often read-only), so on macOS saves go in the
 standard per-user ``~/Library/Application Support/FreightFate`` folder.
 
+The same reasoning covers Windows and Linux when the game itself sits in a
+read-only location (for example Windows ``Program Files``): if the ``saves``
+folder beside the game cannot be written, saves fall back to that per-user
+data directory instead of failing on the first write and crashing mid-session.
+
 Override the location with the ``FREIGHT_FATE_DATA_DIR`` environment variable
 (which the tests use). Saves from older versions or misplaced layouts are
 migrated into the active location automatically on first run.
+
+When running from source, ``FREIGHT_FATE_SKIP_SAVE_SIGNING=1`` skips the
+save-signature check (the file is re-signed locally on load) so arbitrary
+save files can be loaded for testing. Frozen builds ignore the flag.
 
 Saves are atomic: written to a temp file, then renamed over the old save,
 so a crash mid-write can never corrupt an existing profile.
@@ -35,10 +44,11 @@ from ..sim.hos import HosClock
 from ..updater import is_frozen
 from .career import Career
 from .market import Market
+from .trucks import TruckCondition
 
 log = logging.getLogger(__name__)
 
-SAVE_VERSION = 4
+SAVE_VERSION = 5
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "chicago_il_us"
 SIGNATURE_FIELD = "_signature"
@@ -53,6 +63,7 @@ SECRET_FILE = "profile.key"
 save_listener: Callable[[Profile], None] | None = None
 
 _legacy_checked = False
+_unwritable_warned = False
 
 
 def _macos_data_dir() -> Path:
@@ -75,16 +86,48 @@ def _legacy_data_dir() -> Path:
     return base / "FreightFate"
 
 
+def _is_writable_dir(path: Path) -> bool:
+    """Whether ``path`` exists (or can be created) and accepts a write.
+
+    Detects installs in protected locations, such as Windows ``Program
+    Files``, where the portable ``saves`` folder beside the game would raise
+    on the first save and crash the game mid-session.
+    """
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+        probe = path / ".freightfate-write-test"
+        probe.write_text("", encoding="ascii")
+        probe.unlink()
+    except OSError:
+        return False
+    return True
+
+
 def _save_root() -> Path:
     """The active save directory for this platform.
 
     Windows and Linux keep the portable ``saves`` folder next to the game.
     macOS uses the per-user Application Support folder so the app never has to
-    write into ``/Applications``.
+    write into ``/Applications``. When the game sits in a read-only location
+    such as ``Program Files``, Windows and Linux fall back to that same
+    per-user folder rather than crashing on the first save.
     """
     if sys.platform == "darwin":
         return _macos_data_dir()
-    return game_root() / "saves"
+    if _is_writable_dir(game_root()):
+        return game_root() / "saves"
+    fallback = _legacy_data_dir()
+    global _unwritable_warned
+    if not _unwritable_warned:
+        _unwritable_warned = True
+        log.warning(
+            "Game directory %s is not writable; saving to the per-user folder "
+            "%s instead. Move Freight Fate out of a protected location such as "
+            "Program Files to keep saves beside the game.",
+            game_root(),
+            fallback,
+        )
+    return fallback
 
 
 def game_root() -> Path:
@@ -267,8 +310,15 @@ def _profile_secret() -> bytes:
         return secret
 
 
+# Field names signed by pre-v5 saves, kept in the payload allow-list so a
+# valid v4 signature still verifies on load. v5 saves never contain these keys.
+_LEGACY_SIGNED_FIELDS = frozenset(
+    {"truck_damage_pct", "tire_wear_pct", "road_grime_pct", "truck_fuel_gal"}
+)
+
+
 def _signed_payload(data: dict) -> dict:
-    allowed = set(Profile.__dataclass_fields__) | {"version"}
+    allowed = set(Profile.__dataclass_fields__) | {"version"} | _LEGACY_SIGNED_FIELDS
     return {key: data[key] for key in sorted(allowed) if key in data}
 
 
@@ -286,6 +336,14 @@ def _is_signature_valid(data: dict) -> bool:
     return hmac.compare_digest(signature, _signature_for(data))
 
 
+def _signing_checks_disabled() -> bool:
+    """Dev escape hatch: ``FREIGHT_FATE_SKIP_SAVE_SIGNING=1`` loads any save
+    regardless of its signature, so arbitrary files can be tested. Honored
+    only when running from source; frozen player builds always enforce
+    signing so the flag can never become a tampering vector."""
+    return not is_frozen() and os.environ.get("FREIGHT_FATE_SKIP_SAVE_SIGNING") == "1"
+
+
 def _quarantine(path: Path) -> Path:
     target = path.with_suffix(path.suffix + ".invalid")
     n = 1
@@ -301,10 +359,12 @@ class Profile:
     name: str = "Driver"
     money: float = STARTING_MONEY
     current_city: str = DEFAULT_CITY
-    truck_damage_pct: float = 0.0
-    tire_wear_pct: float = 0.0
-    road_grime_pct: float = 0.0
-    truck_fuel_gal: float = 150.0
+    # Per-truck condition, keyed into trucks.TRUCK_CATALOG. Records for trucks
+    # this build has never heard of are kept as-is (a newer build may own them).
+    truck_conditions: dict[str, TruckCondition] = field(default_factory=dict)
+    # An old save was converted to the per-truck format; the player has not yet
+    # heard the one-time notice. Cleared when they dismiss it.
+    migration_notice_pending: bool = False
     game_hours: float = 6.0  # in-game clock, hours since career start
     # Whole-day offset used only by the spoken calendar and seasonal weather.
     # Existing careers can anchor their independent calendar to today's date
@@ -325,6 +385,11 @@ class Profile:
     achievements: list[str] = field(default_factory=list)
     achievement_stats: dict = field(default_factory=dict)
 
+    # Set on the instance by from_dict when the raw dict needed a format
+    # migration, so load() can rewrite the converted save to disk. Never
+    # serialized (it is a class attribute, not a dataclass field).
+    needs_migration_resave = False
+
     # -- serialization -------------------------------------------------------
 
     def to_dict(self) -> dict:
@@ -336,16 +401,25 @@ class Profile:
 
     @classmethod
     def from_dict(cls, d: dict) -> Profile:
-        d = dict(d)
+        from .save_migration import migrate_save_data
+
+        d, migrated = migrate_save_data(dict(d))
         d.pop("version", None)
         d.pop(SIGNATURE_FIELD, None)
         d.pop(SIGNATURE_VERSION_FIELD, None)
         career = Career(**d.pop("career", {}))
         market = Market(**d.pop("market", {}))
         hos = HosClock.from_dict(d.pop("hos", None))  # absent in v2 saves: fresh clock
-        known = {f for f in cls.__dataclass_fields__ if f not in ("career", "market", "hos")}
+        raw_conditions = d.pop("truck_conditions", None)
+        conditions = {}
+        if isinstance(raw_conditions, dict):
+            conditions = {str(k): TruckCondition.from_dict(v) for k, v in raw_conditions.items()}
+        skip = ("career", "market", "hos", "truck_conditions")
+        known = {f for f in cls.__dataclass_fields__ if f not in skip}
         kwargs = {k: v for k, v in d.items() if k in known}
-        return cls(career=career, market=market, hos=hos, **kwargs)
+        profile = cls(career=career, market=market, hos=hos, truck_conditions=conditions, **kwargs)
+        profile.needs_migration_resave = migrated
+        return profile
 
     # -- truck ------------------------------------------------------------------
 
@@ -354,6 +428,49 @@ class Profile:
         from .trucks import build_truck_specs
 
         return build_truck_specs(self.truck, self.upgrades)
+
+    def condition_for(self, truck_key: str) -> TruckCondition:
+        """This truck's condition record, created purchase-fresh if absent."""
+        cond = self.truck_conditions.get(truck_key)
+        if cond is None:
+            cond = TruckCondition.fresh(truck_key, self.upgrades)
+            self.truck_conditions[truck_key] = cond
+        return cond
+
+    # The active truck's condition under the pre-v5 flat names, so gameplay
+    # code can keep saying "the truck" without caring which truck that is.
+
+    @property
+    def truck_fuel_gal(self) -> float:
+        return self.condition_for(self.truck).fuel_gal
+
+    @truck_fuel_gal.setter
+    def truck_fuel_gal(self, value: float) -> None:
+        self.condition_for(self.truck).fuel_gal = value
+
+    @property
+    def truck_damage_pct(self) -> float:
+        return self.condition_for(self.truck).damage_pct
+
+    @truck_damage_pct.setter
+    def truck_damage_pct(self, value: float) -> None:
+        self.condition_for(self.truck).damage_pct = value
+
+    @property
+    def tire_wear_pct(self) -> float:
+        return self.condition_for(self.truck).tire_wear_pct
+
+    @tire_wear_pct.setter
+    def tire_wear_pct(self, value: float) -> None:
+        self.condition_for(self.truck).tire_wear_pct = value
+
+    @property
+    def road_grime_pct(self) -> float:
+        return self.condition_for(self.truck).grime_pct
+
+    @road_grime_pct.setter
+    def road_grime_pct(self, value: float) -> None:
+        self.condition_for(self.truck).grime_pct = value
 
     def market_day(self) -> int:
         return int(self.game_hours // 24)
@@ -412,11 +529,19 @@ class Profile:
         if not isinstance(data, dict):
             raise ProfileIntegrityError("Save file is not a profile object.")
         signed = SIGNATURE_FIELD in data
+        resign = False
         if signed and not _is_signature_valid(data):
-            _quarantine(path)
-            raise ProfileIntegrityError("Save file failed its integrity check and was quarantined.")
+            if not _signing_checks_disabled():
+                _quarantine(path)
+                raise ProfileIntegrityError(
+                    "Save file failed its integrity check and was quarantined."
+                )
+            # Re-save below so the file gets a valid local signature and
+            # keeps loading once the dev flag is off again.
+            log.warning("Signature check skipped for %s (FREIGHT_FATE_SKIP_SAVE_SIGNING)", path)
+            resign = True
         profile = cls.from_dict(data)
-        if not signed:
+        if profile.needs_migration_resave or resign or not signed:
             profile.save()
         return profile
 

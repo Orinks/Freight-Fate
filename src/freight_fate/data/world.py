@@ -93,9 +93,7 @@ class World:
             leg_from = self.resolve_city_key(leg["from"])
             leg_to = self.resolve_city_key(leg["to"])
             miles = float(leg["miles"])
-            stops = tuple(
-                _parse_stop(s, miles, leg_from, leg_to) for s in leg.get("stops", ())
-            )
+            stops = tuple(_parse_stop(s, miles, leg_from, leg_to) for s in leg.get("stops", ()))
             corridor = leg.get("corridor", {})
             route_points = tuple(
                 _parse_route_point(p, miles, leg_from, leg_to)
@@ -118,8 +116,7 @@ class World:
                 for c in corridor.get("checkpoints", ())
             )
             state_miles = tuple(
-                _parse_state_mileage(m, leg_from, leg_to)
-                for m in corridor.get("state_miles", ())
+                _parse_state_mileage(m, leg_from, leg_to) for m in corridor.get("state_miles", ())
             )
             toll_events = tuple(
                 _parse_toll_event(e, miles, leg_from, leg_to, leg["highway"])

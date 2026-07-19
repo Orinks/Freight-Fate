@@ -16,8 +16,9 @@
       facility-aware job generation.
 - [x] Playable air-brake pressure mechanics: cold starts need a short air
       build before the parking brake can release, service-brake applications
-      consume air, low-air and spring-brake thresholds are spoken, and active
-      trip saves preserve the air-brake state.
+      consume air, parked engine-off time bleeds reservoir pressure (issue
+      #79), low-air and spring-brake thresholds are spoken, and active trip
+      saves preserve the air-brake state.
 - [x] Dedicated air-system audio assets: the compressor-ready cue now plays a
       real air-dryer purge (`vehicle/air_dryer_purge.ogg`) and the low-air /
       spring-brake warnings a low-air buzzer (`vehicle/low_air_buzzer.ogg`),
@@ -64,9 +65,25 @@ From a batch of player reports:
   sweep would upgrade. Regen should run offline from the cached PBFs like
   the overlay pipeline, targeting trunk/primary junction nodes on the 533
   unlabeled legs.
+- [x] **State lines repeated at intermediate cities -- FIXED 2026-07-19
+  (player transcript).** Mapped state-boundary cues are now authoritative, so
+  passing the next major city no longer claims that the truck crossed the same
+  state line again. City narration retains the old crossing wording only as a
+  fallback for legacy legs without mapped boundaries. Full harness regressions
+  cover Tennessee and Texas routes, reverse travel, and an all-Texas route.
+- [ ] Reconcile checkpoint positions with state-boundary positions on seven
+  corridor legs. A 24-route forward/reverse harness sweep found 13 places
+  spoken on the wrong side of a state line: Fort Oglethorpe on
+  Nashville--Atlanta; Peekskill, Newburgh, Kingston, Ravena, Rotterdam, and
+  Amsterdam on New York--Buffalo; North East and Conneaut on
+  Buffalo--Cleveland; Mesquite on Las Vegas--Salt Lake City; the Longview--
+  Portland corridor checkpoint; Ashland on Portland--San Francisco; and
+  Vernal on Denver--Salt Lake City. This is a route-data ordering issue, not
+  another city-narration composition bug.
 - [x] **Quick info keys.** S reads the posted speed limit (was buried in the
   Tab menu); A repeats the last route announcement; U reads what is coming
-  up (imposed limits, stops, exits ahead).
+  up (imposed limits, stops, exits ahead); R includes the current road, state,
+  direction, nearest named place, and trip progress in its route report.
 - [x] **Stop details and planned stops (1.8.x nightly).** Enter on a Map-screen
   stop opens a job-details-style view (exit, distance, offers, parking, and an
   ELD-rule ETA with an arrive-before-your-next-HOS-limit note), with plan /
@@ -147,6 +164,16 @@ From a batch of player reports:
 
 ### Driving feel
 
+- [x] **Windows event-voice interruption crash (issue #85).** Urgent road
+  alerts now use the speech backend's atomic interrupt-and-speak operation
+  instead of issuing a separate SAPI stop immediately beforehand.
+- [x] **Fair enforcement after lower speed signs (issues #80 and #87).** A
+  driver who releases the accelerator now gets the braking time a loaded truck
+  needs before a lower posted limit can produce a speeding strike. Continuing
+  on the throttle forfeits the grace.
+- [x] **Repeat destination-exit recovery (issues #84 and #90).** Every missed
+  destination exit now reroutes the delivery back through a full approach
+  window; the second miss can no longer leave the trip pinned at zero miles.
 - [x] **Over-rev damage is now audible while it happens.** Sustained redline
   (easiest by backing up fast for a long stretch: the road-coupled RPM pins at
   `max_rpm`) silently ground the truck down 0.8%/s and only surfaced on the
@@ -231,7 +258,7 @@ From a batch of player reports:
   trooper milestone (below) remains the home for *visible, immediate*
   enforcement: getting pulled over and on-the-spot fines.
 
-- [x] **Speed keeper for low-speed zones.** Shipped: in facility access roads, gate queues, work zones, and congestion -- where adaptive cruise is deliberately unavailable -- K holds the current speed at or below the zone limit and follows queued traffic, so players who cannot keep the accelerator held (or whose fingers tire) are not locked out of those stretches. On by default, toggleable in Settings, Gameplay.
+- [x] **Speed keeper for low-speed zones.** Shipped: K starts a job-scoped speed-control session that uses the speed keeper on facility roads, in gate queues, work zones, and congestion, then automatically hands off to adaptive cruise on the open road. It pauses through the planned pickup, persists through pickup saves, and resumes once the loaded truck is rolling. It restores the chosen cruise target across zones, follows queued traffic, and eases to ramp speed when the destination exit is announced before releasing control on the ramp. It fully disarms on other braking or hazards so it cannot restart unexpectedly. On by default, toggleable in Settings, Gameplay.
 - [ ] **Driving assistance presets and descent control.** Built and then withdrawn from the 1.8 nightly line after playtesting (the underlying assists need the 1.9 driving arc around them); the work lives on feat/career-1.9 and ships with 1.9. Release-merge note: the withdrawal was a git revert of merge 9b406fe (plus 9f2dbff and b971684) on dev, so merging feat/career-1.9 back will NOT re-apply this content on its own -- the release merge must first revert the revert commit on dev, then merge.
 - [x] **Limit-aware adaptive cruise.** Shipped: once real OSM limits, zones,
   and trooper enforcement landed, plain "hold the set speed" cruise would carry
@@ -301,6 +328,15 @@ Net-new realism candidates, roughly by area:
   last live condition indefinitely instead of falling back to simulated
   weather. Treat a stale-only cache as offline (and consider a spoken note
   when live weather falls back) so conditions can't silently freeze.
+- [x] **Per-truck condition tracking.** Every owned truck now keeps its own
+  fuel, damage, tire wear, and road grime (save version 5); newly bought
+  trucks arrive fueled and fresh, and switching trucks no longer carries or
+  loses fuel. Older saves are migrated automatically on load, with a one-time
+  spoken notice that the save is no longer readable by older versions.
+- [ ] **Teach the server-side validation gate and cloud-save consumers the
+  `truck_conditions` shape.** The client invariants and docs are updated for
+  save version 5, but the server plausibility rules still describe the flat
+  pre-v5 condition fields.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
   acceleration, grade lugging, fuel burn, and now braking: the foundation
   brakes have a fixed force ceiling sized for the rated gross, so loads over

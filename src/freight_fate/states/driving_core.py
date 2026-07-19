@@ -301,6 +301,7 @@ class Tutorial:
 
 def _advance_rest_clock(driving: DrivingState, minutes: float) -> None:
     """Resting advances game time, so deadlines keep counting."""
+    driving.truck.advance_parked_time(minutes)
     driving.trip.game_minutes += minutes
     driving.weather.update(minutes)
 
@@ -316,6 +317,20 @@ def _shut_down_engine(driving: DrivingState) -> str:
     # made here (from a rest menu) would leave the loop playing forever.
     driving.ctx.audio.engine_stop()
     return "You shut down the engine. "
+
+
+def _wake_air_instruction(driving: DrivingState, *, from_rest_menu: bool = True) -> str:
+    """Describe the required keyboard/controller recovery after parked air loss."""
+    truck = driving.truck
+    if truck.air_ready:
+        return ""
+    road_step = "Choose Back to the road, then press" if from_rest_menu else "Press"
+    return (
+        f" Air pressure {truck.air_pressure_psi:.0f} psi. {road_step} "
+        f"{driving.ctx.control_hint('engine')} to start the engine. Wait "
+        f"for air pressure ready, then press "
+        f"{driving.ctx.control_hint('parking_brake')} to release the parking brake."
+    )
 
 
 def _deadline_appointment(driving: DrivingState) -> str:
@@ -348,6 +363,7 @@ def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
         f"{engine_off}You sleep poorly on the shoulder, woken again and again by "
         f"passing trucks. It is {clock_text(driving.trip.local_hour)}. "
         f"Hours of service reset, but you are still tired."
+        f"{_wake_air_instruction(driving, from_rest_menu=False)}"
     ]
     if hos.shoulder_fine_due(driving.trip_seed, anchor_mi):
         p.money -= hos.SHOULDER_FINE

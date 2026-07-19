@@ -7,7 +7,7 @@ import pytest
 from freight_fate.models import Career, Economy, JobBoard, Profile
 from freight_fate.models.career import level_for_xp
 from freight_fate.models.jobs import CARGO_CATALOG, plan_hos
-from freight_fate.models.profile import SIGNATURE_FIELD, ProfileIntegrityError
+from freight_fate.models.profile import SAVE_VERSION, SIGNATURE_FIELD, ProfileIntegrityError
 from freight_fate.settings import Settings
 
 # -- jobs ---------------------------------------------------------------------
@@ -272,7 +272,7 @@ def test_profile_save_is_atomic_and_versioned():
     p = Profile(name="Atomic")
     path = p.save()
     data = json.loads(path.read_text())
-    assert data["version"] == 4
+    assert data["version"] == SAVE_VERSION
     assert SIGNATURE_FIELD in data
     assert not path.with_suffix(".json.tmp").exists()
 
@@ -299,6 +299,41 @@ def test_profile_tampered_money_is_rejected_and_quarantined():
     with pytest.raises(ProfileIntegrityError):
         Profile.load(path)
     assert not path.exists()
+    assert path.with_suffix(".json.invalid").exists()
+
+
+def test_skip_signing_flag_loads_tampered_save_from_source(monkeypatch):
+    p = Profile(name="Dev Tampered")
+    path = p.save()
+    data = json.loads(path.read_text())
+    data["money"] = 999_999.0
+    path.write_text(json.dumps(data))
+
+    monkeypatch.setenv("FREIGHT_FATE_SKIP_SAVE_SIGNING", "1")
+    loaded = Profile.load(path)
+    assert loaded.money == 999_999.0
+    assert not path.with_suffix(".json.invalid").exists()
+
+    # The load re-signed the file, so it keeps working with the flag off.
+    monkeypatch.delenv("FREIGHT_FATE_SKIP_SAVE_SIGNING")
+    assert Profile.load(path).money == 999_999.0
+
+
+def test_skip_signing_flag_is_ignored_in_frozen_builds(monkeypatch):
+    import pytest
+
+    import freight_fate.models.profile as profile_module
+
+    p = Profile(name="Frozen Tampered")
+    path = p.save()
+    data = json.loads(path.read_text())
+    data["money"] = 999_999.0
+    path.write_text(json.dumps(data))
+
+    monkeypatch.setenv("FREIGHT_FATE_SKIP_SAVE_SIGNING", "1")
+    monkeypatch.setattr(profile_module, "is_frozen", lambda: True)
+    with pytest.raises(ProfileIntegrityError):
+        Profile.load(path)
     assert path.with_suffix(".json.invalid").exists()
 
 

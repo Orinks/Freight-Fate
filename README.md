@@ -234,7 +234,7 @@ Gameplay → Controller if you prefer keyboard only.
 | Left bumper (LB) | Clutch (manual mode) |
 | A | Shift up a gear (manual mode) |
 | X | Shift down a gear (manual mode) |
-| Y | Adaptive cruise on / off |
+| Y | Automatic speed control on / off |
 | B | Speak speed, gear, RPM |
 | D-pad Up | Route progress |
 | D-pad Down | Take exit / signal a pull-over |
@@ -254,7 +254,7 @@ Hold the right bumper (RB) as a modifier for a second layer of driving bindings:
 | RB + Y | Release / set parking brake |
 | RB + D-pad Up | Next listed highway exit |
 | RB + D-pad Down | Refuel and rest (stopped at a rest stop) |
-| RB + D-pad Left / Right | Lower / raise cruise speed |
+| RB + D-pad Left / Right | Lower / raise the open-road cruise target |
 | RB + Start | Driving status menu |
 
 The left and right triggers are analog: hold them wherever you like for partial

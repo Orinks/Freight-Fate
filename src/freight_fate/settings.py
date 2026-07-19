@@ -34,10 +34,9 @@ class Settings:
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
     steering_assist: str = "off"  # off/light/realistic lane drift
-    # Holds a gentle speed through low-speed zones where adaptive cruise is
-    # unavailable, so nobody has to keep the accelerator key held down. An
-    # input-accessibility aid, kept while the wider assistance framework
-    # ships with 1.9 instead of this line.
+    # Lets an armed speed-control session cover low-speed zones without a held
+    # accelerator, then hand back to adaptive cruise on open roads. This input
+    # accessibility aid remains independent of the wider 1.9 assist framework.
     speed_keeper: bool = True
     master_volume: float = 1.0
     sfx_volume: float = 0.8

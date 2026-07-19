@@ -194,6 +194,7 @@ def test_old_save_without_truck_fields_loads_with_defaults():
     assert loaded.upgrades == {}
     assert loaded.tire_wear_pct == 0.0
     assert loaded.road_grime_pct == 0.0
+    assert loaded.condition_for("rig").damage_pct == 0.0
     assert loaded.market.multipliers  # fresh market seeded on load
 
 
