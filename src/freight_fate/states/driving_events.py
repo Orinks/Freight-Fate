@@ -406,6 +406,7 @@ class DrivingEventMixin:
         self._exit_right_hold_s = 0.0
         self._exit_right_taps = 0
         self._exit_tap_hint_said = False
+        self._exit_countdown_said: set[float] = set()
 
     def _exit_lane_ready(self) -> bool:
         # Ramps peel off the right lane: no amount of in-lane alignment
@@ -418,11 +419,55 @@ class DrivingEventMixin:
             or self.lane.offset >= EXIT_LANE_OFFSET_READY
         )
 
+    def _update_exit_countdown(self, stop) -> None:
+        """Distance reminders for an armed exit, every steering mode.
+
+        A canyon approach buries a single signal-on announcement under
+        pacenotes and limit changes (owner playtest: signal at 4.7 miles,
+        then silence until the miss). The countdown re-anchors the exit as
+        it closes, and names the lane fix while there is road to make it."""
+        ahead = stop.at_mi - self.trip.position_mi
+        if ahead <= 0:
+            return
+        milestones = EXIT_COUNTDOWN_MILESTONES_MI
+        if self.ctx.settings.steering_assist != "off":
+            # Drift-on players already get the two-mile exit-lane prep
+            # prompt; the countdown adds only the closer anchors.
+            milestones = milestones[1:]
+        crossed = [m for m in milestones
+                   if ahead <= m and m not in self._exit_countdown_said]
+        if not crossed:
+            return
+        # Time compression can cross several milestones in one frame:
+        # mark them all, speak only the nearest.
+        self._exit_countdown_said.update(crossed)
+        nearest = min(crossed)
+        if nearest >= 1.0:
+            distance = self.ctx.settings.distance_text(nearest)
+        else:
+            distance = self.ctx.settings.short_distance_text(nearest)
+        name = (
+            "Destination exit"
+            if stop.type == "delivery_destination"
+            else f"Exit for {stop.spoken_name}"
+        )
+        lane_text = ""
+        if not self._exit_lane_ready():
+            lane_text = (
+                " Tap Right to the right lane."
+                if self.ctx.settings.steering_assist == "off"
+                else " Steer right for the exit lane."
+            )
+        self.ctx.audio.play("ui/notify", volume=0.6)
+        self.ctx.say_event(f"{name} in {distance}.{lane_text}", interrupt=False)
+
     def _update_exit_preparation(self, keys, dt: float) -> None:
         stop = self._exit_stop
         if stop is None or self._ramp_mi is not None:
             self._reset_exit_lane_state()
             return
+        if self._exit_signal_on:
+            self._update_exit_countdown(stop)
         if self.ctx.settings.steering_assist == "off":
             return
         if not self._exit_signal_on:
@@ -1686,43 +1731,45 @@ class DrivingEventMixin:
         self._exit_signal_on = False
         self._exit_signal_canceled = False
         self._cancel_cruise()
-        if exit_details is None:
-            # Nothing to loop back to: say it once, not every frame.
-            if self._missed_destination_exit_said:
-                return
-            self._missed_destination_exit_said = True
-        reroute_text = (
-            "Continue to the next safe turnaround. Dispatch reroutes you back "
-            "onto the approach; take the destination exit when it comes up."
-        )
         if exit_details is not None:
-            # Every miss loops back. The say-once latch must never swallow
-            # this reposition: when it did, the second miss stranded the trip
-            # pinned at the end of the route with no exit left to signal for,
-            # cruise dying every frame (playtest transcript, 2026-07-16).
-            self._missed_destination_exit_said = True
-            self.trip.game_minutes += 20.0
-            # Drop back a full exit window, not a fixed mile: under time
-            # compression one mile passes in a few real seconds, making the
-            # re-approach unwinnable before it was heard.
-            self.trip.position_mi = max(0.0, exit_details[0] - self._exit_window_mi())
-            self._destination_exit_announced_key = None
-            if self._terse_speech():
-                # The signal reset with the miss; with lane drift on, terse
-                # players still need to hear that arming it is on them again.
-                reroute_text = "Safe turnaround. Destination exit ahead again."
-                if self.ctx.settings.steering_assist != "off":
-                    reroute_text = (
-                        "Safe turnaround. Destination exit ahead again; press "
-                        f"{self.ctx.control_hint('take_exit')} to signal."
-                    )
-            else:
+            exit_at = exit_details[0]
+        else:
+            # Rural approaches carry no baked interchange, so the details
+            # scan finds nothing -- but the exit the player just missed was
+            # the synthetic one _destination_exit_stop places a mile before
+            # route end, and the loop-back must return to it. Without this
+            # the second miss stranded the trip at 0 miles remaining with
+            # no exit left to signal for (owner playtest, Sedona to Camp
+            # Verde on AZ-260, 2026-07-18).
+            exit_at = max(0.0, self.trip.total_miles - DESTINATION_EXIT_BEFORE_END_MI)
+        # Every miss loops back. The say-once latch must never swallow
+        # this reposition: when it did, the second miss stranded the trip
+        # pinned at the end of the route with no exit left to signal for,
+        # cruise dying every frame (playtest transcript, 2026-07-16).
+        self._missed_destination_exit_said = True
+        self.trip.game_minutes += 20.0
+        # Drop back a full exit window, not a fixed mile: under time
+        # compression one mile passes in a few real seconds, making the
+        # re-approach unwinnable before it was heard.
+        self.trip.position_mi = max(0.0, exit_at - self._exit_window_mi())
+        self._destination_exit_announced_key = None
+        self._destination_exit_cache = None
+        if self._terse_speech():
+            # The signal reset with the miss; with lane drift on, terse
+            # players still need to hear that arming it is on them again.
+            reroute_text = "Safe turnaround. Destination exit ahead again."
+            if self.ctx.settings.steering_assist != "off":
                 reroute_text = (
-                    "You continue to the next safe turnaround and loop back onto "
-                    "the approach. The destination exit is ahead again; press "
-                    f"{self.ctx.control_hint('take_exit')} "
-                    "when you are close enough to take it."
+                    "Safe turnaround. Destination exit ahead again; press "
+                    f"{self.ctx.control_hint('take_exit')} to signal."
                 )
+        else:
+            reroute_text = (
+                "You continue to the next safe turnaround and loop back onto "
+                "the approach. The destination exit is ahead again; press "
+                f"{self.ctx.control_hint('take_exit')} "
+                "when you are close enough to take it."
+            )
         self.ctx.audio.play("ui/warning")
         self._set_status("Destination exit missed. Use the next safe turnaround.")
         self.ctx.say_event(

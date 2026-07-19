@@ -36,6 +36,8 @@ PACENOTE_MAX_LEAD_MI = 1.5
 PACENOTE_LINK_GAP_MI = 0.3
 # No calls while crawling: parking lots and gate queues are not rally stages.
 PACENOTE_MIN_SPEED_MPH = 20.0
+# The cue tone leans hard toward the curve's side of the stereo field.
+PACENOTE_CUE_PAN = 0.85
 
 _SEVERITY_PHRASE = {
     "hairpin": "Hairpin",
@@ -106,6 +108,15 @@ class DrivingPacenoteMixin:
             if ahead > self._pacenote_lead_mi(speed, curve.advisory_mph):
                 continue
             spoken.add(key)
+            # A curve call sounds like any other announcement until it has
+            # a signature: a short cue panned to the curve's side marks
+            # "road shape ahead", never a steering command -- the owner
+            # steered a lane change off a bare "Sharp left" (playtest,
+            # 2026-07-18). One-shot, not the continuous steering tone the
+            # community ruled out. Placeholder sound until a dedicated cue
+            # is sourced.
+            pan = -PACENOTE_CUE_PAN if curve.direction == "L" else PACENOTE_CUE_PAN
+            self.ctx.audio.play("ui/tick", volume=0.9, pan=pan)
             self.ctx.say_event(self._pacenote_text(curve, ahead, speed))
             break
         if len(spoken) > 64:

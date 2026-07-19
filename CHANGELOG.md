@@ -4,6 +4,20 @@
 
 ### Added
 
+- **An armed exit now counts itself down.** Once your signal is on, the
+  exit calls out again at two miles, one mile, and half a mile -- and if
+  you are not in the right lane, each call says so while there is still
+  road to fix it. No more hearing about an exit once, five twisty miles
+  early, and never again until you have missed it.
+
+- **Curve calls now open with a tone on the curve's side.** A short cue
+  panned left or right lands just before the spoken call, so a pacenote
+  is recognizable as road shape -- never a steering instruction, and
+  never mistakable for GPS chatter -- before the first word. The S key
+  also grew curve sense: in bend country it speaks the posted limit and
+  the bend's advisory speed together, so a legal 55 through hairpins no
+  longer sounds like nonsense.
+
 - **A co-driver now reads the road: spoken curve callouts.** Bends that
   demand slowing at your current speed are called before they arrive --
   "Sharp left, half a mile. Advise 35." -- early enough to brake before
@@ -397,6 +411,14 @@
   chatter instead of being interrupted.
 
 ### Fixed
+
+- **Missing your destination exit on a rural highway no longer strands
+  you.** On two-lane highways the game could lose track of the
+  destination exit after a second miss: dispatch claimed to reroute you,
+  but no exit was ever announced again and the trip sat at zero miles
+  remaining while you drove in circles. Every miss now loops you back
+  onto a real approach with the exit announced fresh, on every kind of
+  road.
 
 - **Downloaded builds no longer crash when you continue a career.** The
   packaged game was missing several data files that the source version

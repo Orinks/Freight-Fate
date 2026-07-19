@@ -190,6 +190,7 @@ class DrivingState(
         self._exit_right_hold_s = 0.0
         self._exit_right_taps = 0
         self._exit_tap_hint_said = False
+        self._exit_countdown_said: set[float] = set()
         self._ramp_mi: float | None = None  # ramp distance left, once taken
         self._ramp_stop = None
         self._ramp_end_said = False

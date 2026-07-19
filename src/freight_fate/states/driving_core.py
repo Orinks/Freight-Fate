@@ -129,6 +129,9 @@ EXIT_WINDOW_MI = 5.0  # how far out X can arm the upcoming exit, at minimum
 EXIT_WARNING_REAL_S = 25.0  # target real seconds from callout to the ramp
 EXIT_WINDOW_MAX_MI = 20.0
 EXIT_LANE_PREP_MI = 2.0  # where GPS starts asking for the exit lane
+# Spoken distance anchors for an armed exit; a signal-on announcement miles
+# out gets buried under canyon pacenotes without them.
+EXIT_COUNTDOWN_MILESTONES_MI = (2.0, 1.0, 0.5)
 EXIT_COMMIT_WINDOW_MI = 0.4  # generous gore-window grace after the marker
 EXIT_LANE_READY = 0.85  # accumulated right-lane commitment
 EXIT_LANE_OFFSET_READY = 0.45  # right-side lane position also counts

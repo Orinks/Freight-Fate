@@ -396,7 +396,7 @@ Driving controls are active while the road view is focused:
 | J | Toggle the engine brake. |
 | H | Hold to sound the horn; release to stop it. |
 | Space | Report speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state. |
-| S | Report the posted speed limit here, the zone if any, and how far over you are. |
+| S | Report the posted speed limit here, the zone if any, and how far over you are. In bend country it adds the bend's advisory speed -- the posted limit and the yellow diamond are different numbers on a real road. |
 | D | Report one safe-speed number for right now. Weather grip, an armed exit ramp, and the next bend are already baked into the number. |
 | G | Report the grade under the wheels and whether the truck is holding, pulling, or losing it. |
 | Tab | Open the driving status menu. |
@@ -480,9 +480,11 @@ Press G at any time for the grade under your wheels and a plain verdict
 on whether the truck is holding it, pulling it, or losing it.
 
 Curves are real too, and a co-driver reads them to you. When a bend
-ahead demands slowing at your current speed, you hear the call early --
-"Sharp left, half a mile. Advise 35." -- with enough road left to brake
-before the bend, never in it. The severity ladder runs gentle bend,
+ahead demands slowing at your current speed, a short tone sounds on the
+curve's side -- left tone for a left bend -- and the call follows:
+"Sharp left, half a mile. Advise 35." The tone marks the words as a
+description of the road, never a steering instruction, and the call
+lands with enough road left to brake before the bend, never in it. The severity ladder runs gentle bend,
 curve, sharp, and hairpin, and tight pairs link into one call: "Sharp
 left, a quarter mile. Advise 30. Then right." Bends you are already slow
 enough for stay silent, so a straight interstate stays quiet. Press U

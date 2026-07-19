@@ -54,6 +54,22 @@ Sources:
    from radius (gentle / moderate / sharp / hairpin). Advisory speed
    spoken only when it is below current speed. U reads the next few;
    the D safe-speed key folds curve advisories into its one number.
+   SHIPPED 2026-07-18, and the first drive taught two lessons (owner
+   playtest, Sedona to Camp Verde): a bare "Sharp left" reads as a
+   steering command -- the owner tap-changed into the left lane off
+   one -- so every call now leads with a short cue panned to the
+   curve's side, marking "road shape ahead, not an instruction"
+   (placeholder ui/tick until a dedicated cue is sourced).
+
+1b. THE DISCRETE TONE LADDER THROUGH A BEND (owner design,
+   2026-07-18). Not the continuous steering tone the community ruled
+   out -- a grammar of one-shot cues: the panned warning cue with the
+   call (shipped), a tone at curve ENTRY, and a tone back at center
+   when the bend releases and the wheel should unwind. Edge rumbles
+   stay silent while centered. Event-driven guidance through the
+   curve with zero sustained tones; slots between the pacenotes and
+   the panned-bed pursuit guide, and may make a dedicated guide tone
+   unnecessary for most drivers.
 
 2. SILENCE IS CENTERED. On a straight, a centered truck is quiet.
    Drift raises a soft textured cue on the drift side, growing with

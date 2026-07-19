@@ -519,7 +519,21 @@ class DrivingControlsMixin:
         comparison = (
             f" You are about {self.ctx.settings.speed_text(over)} over." if over >= 1 else ""
         )
-        self.ctx.say(f"Speed limit {self.ctx.settings.speed_text(limit)}{zone}.{comparison}")
+        # A posted 55 through hairpin country is honest -- the yellow
+        # diamond is advisory, not the limit -- but S saying only "55"
+        # mid-canyon reads as nonsense, so name the bend's number too.
+        curve = self.trip.curve_at(self.trip.position_mi)
+        if curve is None:
+            upcoming = self.trip.curves_within(SAFE_SPEED_CURVE_MI)
+            curve = upcoming[0] if upcoming else None
+        advisory = ""
+        if curve is not None and curve.advisory_mph < limit:
+            advisory = (
+                f" The bend here advises {self.ctx.settings.speed_text(curve.advisory_mph)}."
+            )
+        self.ctx.say(
+            f"Speed limit {self.ctx.settings.speed_text(limit)}{zone}.{comparison}{advisory}"
+        )
 
     def _speak_safe_speed(self) -> None:
         """D: one number -- the speed that is safe right here, right now.
