@@ -520,7 +520,10 @@
   rounding up, and at highway speed every call now comes at least
   thirty seconds before the bend -- the faster you go, the further out
   the co-driver reads. If a call ever cuts something off, the comma
-  key steps back through recent speech.
+  key steps back through recent speech. And if your own stop-speech
+  key silences a curve call mid-sentence, the call comes back once, a
+  couple of seconds later, with a fresh distance -- unless you have
+  already slowed for the bend, in which case it respects the silence.
 
 - **Speed-limit calls now know which way the town is.** A limit drop
   just past a city used to say you were approaching it while it shrank

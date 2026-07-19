@@ -161,6 +161,12 @@ RAMP_GAP_MILESTONES_M = (300, 150, 100, 50)
 RAMP_BAR_TICK_RANGE_MI = 300.0 / 5280.0
 RAMP_BAR_TICK_SLOW_S = 1.1  # period at the edge of the range
 RAMP_BAR_TICK_FAST_S = 0.15  # period at the bar
+# Safety-call re-arm: Ctrl always silences (a screen-reader reflex must
+# never be fought), but a curve call cut inside this window re-speaks
+# once, refreshed, after the delay -- IF the bend is still ahead and the
+# truck is still hot. A stale warning re-spoken is worse than none.
+CRITICAL_CALL_WINDOW_S = 8.0
+CRITICAL_RESPEAK_DELAY_S = 2.0
 RAMP_CONTROL_ANNOUNCE_MI = 0.38  # where the terminal callout fires on the ramp
 RAMP_LIGHT_RED_S = 12.0  # red phase of the terminal light, real seconds
 RAMP_LIGHT_GREEN_S = 15.0  # green phase: a real minor-leg minimum, crossable from a stop

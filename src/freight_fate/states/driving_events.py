@@ -155,6 +155,13 @@ class DrivingEventMixin:
                 # were honest when emitted and stale when finally spoken).
                 # Ambient lines can wait; the road cannot.
                 self.ctx.say_event(message, interrupt=True)
+            # Open the re-arm window: if Ctrl silences this call before it
+            # finishes, it gets one refreshed re-speak (owner worry,
+            # 2026-07-20 -- his stop-speech reflex vs a safety cue).
+            if curve is not None:
+                self._critical_curve = curve
+                self._critical_call_age_s = 0.0
+                self._critical_respeak_at = None
         elif kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
             self._speak_ambient_event(event.message)
         elif kind == TripEventKind.ARRIVED:

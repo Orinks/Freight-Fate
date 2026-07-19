@@ -258,3 +258,44 @@ def test_close_curve_says_just_ahead(monkeypatch):
         assert "quarter" not in spoken[0]
     finally:
         app.shutdown()
+
+
+def test_silenced_curve_call_respeaks_once_refreshed(monkeypatch):
+    # Ctrl must silence instantly (screen-reader reflex), but a safety call
+    # cut mid-sentence re-speaks once with a fresh distance -- and only
+    # while the bend is still ahead and the truck still hot.
+    import pygame
+    from driving_feature_helpers import key_event
+
+    app_module = pytest.importorskip("freight_fate.app")
+    app = app_module.App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        pos = driving.trip.position_mi
+        spoken = _spoken_pacenotes(
+            app, driving, monkeypatch, [_curve(pos + 0.3, "R", advisory=30)], 60.0
+        )
+        assert len(spoken) == 1
+
+        driving.handle_event(key_event(pygame.K_LCTRL))  # the reflex
+        driving._update_critical_respeak(2.5)  # past the re-speak delay
+        assert len(spoken) == 2 and "Sharp right" in spoken[1]
+
+        # One shot only: another Ctrl after the re-arm is spent stays quiet.
+        driving.handle_event(key_event(pygame.K_LCTRL))
+        driving._update_critical_respeak(2.5)
+        assert len(spoken) == 2
+
+        # And a call silenced AFTER braking below the advisory stays quiet.
+        driving.trip._announced_curves = set()
+        spoken2 = _spoken_pacenotes(
+            app, driving, monkeypatch, [_curve(pos + 0.3, "R", advisory=30)], 60.0
+        )
+        assert len(spoken2) == 1
+        driving.truck.velocity_mps = 25.0 * 0.44704
+        driving.handle_event(key_event(pygame.K_LCTRL))
+        driving._update_critical_respeak(2.5)
+        assert len(spoken2) == 1
+    finally:
+        app.shutdown()

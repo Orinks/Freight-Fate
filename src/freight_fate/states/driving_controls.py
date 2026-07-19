@@ -26,6 +26,7 @@ class DrivingControlsMixin:
         tr = self.truck.transmission
         if key in (pygame.K_LCTRL, pygame.K_RCTRL):
             self.ctx.stop_event_speech()
+            self._note_critical_speech_stopped()
             self._set_status("Event voice stopped.")
         elif key == pygame.K_ESCAPE:
             self.ctx.audio.horn_stop()

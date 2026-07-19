@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from ..audio_fades import curve as _resolve_curve
 from .driving_core import *
+from .driving_pacenotes import PACENOTE_MARGIN_MPH
 from .driving_rest_states import EnforcementStopState, FelonyStopState, TrafficStopState
 
 LANE_GUIDANCE_DRIFT_START = 0.3
@@ -31,6 +32,46 @@ ENGINE_LOAD_SMOOTH_S = 0.45
 
 
 class DrivingUpdateMixin:
+    def _update_critical_respeak(self, dt: float) -> None:
+        """Re-speak a safety call the player silenced before it finished.
+
+        Ctrl is a screen-reader reflex and must always silence instantly --
+        but a curve call cut mid-sentence is information the road still
+        owes the driver (owner's worry, 2026-07-20: "how you gonna get it
+        spoken?"). If Ctrl landed inside the call's speaking window, the
+        call re-arms once and speaks again with a REFRESHED distance --
+        provided the bend is still ahead and the truck is still above its
+        advisory. Passed it, or slowed for it: stay quiet."""
+        if self._critical_curve is None:
+            return
+        self._critical_call_age_s += dt
+        if self._critical_respeak_at is None:
+            if self._critical_call_age_s > CRITICAL_CALL_WINDOW_S:
+                self._critical_curve = None  # spoke to the end, most likely
+            return
+        if self._critical_call_age_s < self._critical_respeak_at:
+            return
+        curve = self._critical_curve
+        self._critical_curve = None
+        self._critical_respeak_at = None
+        ahead = curve.start_mi - self.trip.position_mi
+        speed = self.truck.speed_mph
+        if ahead <= 0 or speed <= curve.advisory_mph + PACENOTE_MARGIN_MPH:
+            return
+        pan = -PACENOTE_CUE_PAN if curve.direction == "L" else PACENOTE_CUE_PAN
+        self.ctx.audio.play("ui/tick", volume=0.9, pan=pan)
+        self.ctx.say_event(self._pacenote_text(curve, ahead, speed), interrupt=True)
+
+    def _note_critical_speech_stopped(self) -> None:
+        """Called from the Ctrl handler: arm the one-shot refreshed re-speak
+        when the silence landed inside a safety call's speaking window."""
+        if (
+            self._critical_curve is not None
+            and self._critical_respeak_at is None
+            and self._critical_call_age_s < CRITICAL_CALL_WINDOW_S
+        ):
+            self._critical_respeak_at = self._critical_call_age_s + CRITICAL_RESPEAK_DELAY_S
+
     def update(self, dt: float) -> None:
         t = self.truck
         # A fresh loaded run out of a chain-capable origin starts on the
@@ -196,6 +237,7 @@ class DrivingUpdateMixin:
         self._update_announcements(dt)
         self._update_ambient_events(dt)
         self._update_ramp_light(dt)
+        self._update_critical_respeak(dt)
         self._update_hazard(dt)
         self._update_microsleep(keys, dt)
         self._update_overrev(dt)
