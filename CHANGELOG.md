@@ -29,6 +29,11 @@
 
 ### Changed
 
+- **The drivers board now checks in a little less often.** With online
+  presence on, the game reports you every ninety seconds instead of every
+  minute, and the board waits four minutes before it calls a driver gone. You
+  still appear the moment you go on duty; a driver who closes the game may sit
+  on the board about a minute longer than before.
 - **Moving a planned stop now asks first, and each stop only cancels its own
   plan.** A stop's details screen shows the cancel option only when that stop
   is the one you planned. Choosing "Plan to stop" while another stop is already

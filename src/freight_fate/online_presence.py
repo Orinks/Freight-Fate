@@ -46,10 +46,13 @@ log = logging.getLogger(__name__)
 # redirect -- so heartbeats against the apex fail with HTTPError 307.
 DEFAULT_BASE_URL = "https://www.orinks.net"
 
-# The board treats a driver as gone after ~3 missed beats (server TTL is
-# three minutes), so one heartbeat a minute keeps a steady presence without
-# meaningful traffic.
-HEARTBEAT_INTERVAL_S = 60.0
+# Presence is by far the biggest source of backend writes -- a driver on a
+# long haul beats for hours -- so beat every ninety seconds rather than every
+# sixty. The board drops a driver four minutes after their last beat, which
+# still absorbs one dropped request before anyone is called gone; keep this
+# and PRESENCE_TTL_MS on the server in step, or a single lost beat will blink
+# a driver off the board.
+HEARTBEAT_INTERVAL_S = 90.0
 
 # When the activity changes (new leg, pulled over, back on the road), push
 # the update sooner than the next heartbeat -- but never more often than this.
