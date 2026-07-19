@@ -1075,7 +1075,7 @@
           "name": "Ayer & Goss",
           "type": "fuel_station",
           "at_mi": 27.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -1088,13 +1088,14 @@
             "parking"
           ],
           "lat": 43.18037,
-          "lon": -71.82512
+          "lon": -71.82512,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Speedway",
           "type": "fuel_station",
           "at_mi": 41.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -1107,7 +1108,8 @@
             "parking"
           ],
           "lat": 43.19399,
-          "lon": -71.52766
+          "lon": -71.52766,
+          "vehicle_access": "bobtail_only"
         }
       ]
     },
@@ -2355,7 +2357,7 @@
           "name": "Irving",
           "type": "fuel_station",
           "at_mi": 27.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -2368,7 +2370,8 @@
             "parking"
           ],
           "lat": 42.58617,
-          "lon": -72.62462
+          "lon": -72.62462,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Roady's Truck Stops",
@@ -2390,7 +2393,8 @@
             "parking"
           ],
           "lat": 42.09109,
-          "lon": -72.58296
+          "lon": -72.58296,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -2418,7 +2422,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Love's Travel Stop",
@@ -2440,7 +2445,8 @@
             "parking"
           ],
           "lat": 41.92716,
-          "lon": -72.25926
+          "lon": -72.25926,
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "corridor": {
@@ -4477,7 +4483,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "corridor": {
@@ -6108,7 +6115,8 @@
             "parking"
           ],
           "lat": 42.81413,
-          "lon": -71.48642
+          "lon": -71.48642,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Rest Area NB",
@@ -6129,7 +6137,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "corridor": {
@@ -8241,7 +8250,8 @@
             "parking"
           ],
           "lat": 43.04274,
-          "lon": -70.81843
+          "lon": -70.81843,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Service Plaza SB",
@@ -8263,7 +8273,8 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "parking_spaces": 70
+          "parking_spaces": 70,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -8926,7 +8937,8 @@
             "parking"
           ],
           "lat": 43.04274,
-          "lon": -70.81843
+          "lon": -70.81843,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Seabrook Rest Area",
@@ -8947,7 +8959,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -9611,7 +9624,8 @@
             "parking"
           ],
           "lat": 43.04274,
-          "lon": -70.81843
+          "lon": -70.81843,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "I-95 truck parking near Kennebunk",
@@ -9633,7 +9647,8 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "parking_spaces": 40
+          "parking_spaces": 40,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     }

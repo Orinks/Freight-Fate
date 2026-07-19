@@ -2624,7 +2624,8 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "parking_spaces": 45
+          "parking_spaces": 45,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "I-95 truck parking near Kennebunk",
@@ -2645,7 +2646,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -4456,7 +4458,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -5716,7 +5719,7 @@
           "name": "Haffner\u2019s",
           "type": "fuel_station",
           "at_mi": 42.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -5729,7 +5732,8 @@
             "parking"
           ],
           "lat": 43.28162,
-          "lon": -70.59443
+          "lon": -70.59443,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Hampton Liquor and Wine Outlet Southbound",
@@ -5748,7 +5752,8 @@
             "restrooms"
           ],
           "lat": 42.93778,
-          "lon": -70.86261
+          "lon": -70.86261,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -6336,7 +6341,8 @@
             "parking"
           ],
           "lat": 43.82431,
-          "lon": -70.32017
+          "lon": -70.32017,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -7811,7 +7817,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -8983,7 +8990,8 @@
             "food",
             "parking"
           ],
-          "parking_spaces": 37
+          "parking_spaces": 37,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Irving",
@@ -9003,7 +9011,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -11871,7 +11880,7 @@
           "name": "Maine Standard Biofuels",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the portland_me_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the portland_me_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -11884,13 +11893,14 @@
             "parking"
           ],
           "lat": 43.69164,
-          "lon": -70.32831
+          "lon": -70.32831,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Irving",
           "type": "fuel_station",
           "at_mi": 142.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -11903,7 +11913,8 @@
             "parking"
           ],
           "lat": 44.4146,
-          "lon": -72.13246
+          "lon": -72.13246,
+          "vehicle_access": "bobtail_only"
         }
       ]
     }

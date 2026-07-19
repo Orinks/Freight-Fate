@@ -2072,7 +2072,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -4462,7 +4463,8 @@
             "parking",
             "restrooms"
           ],
-          "parking_spaces": 7
+          "parking_spaces": 7,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Springfield Rest Area",
@@ -4484,7 +4486,8 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "parking_spaces": 10
+          "parking_spaces": 10,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -5148,7 +5151,8 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "parking_spaces": 3
+          "parking_spaces": 3,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Rest Area I-89 (North Bound)",
@@ -5167,7 +5171,8 @@
             "restrooms"
           ],
           "lat": 44.43614,
-          "lon": -73.07847
+          "lon": -73.07847,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -7106,7 +7111,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Springfield Rest Area I-89 (North Bound)",
@@ -7125,7 +7131,8 @@
             "restrooms"
           ],
           "lat": 43.46808,
-          "lon": -72.10199
+          "lon": -72.10199,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -8535,7 +8542,7 @@
           "name": "Cumberland Farms",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rutland_vt_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rutland_vt_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -8548,13 +8555,14 @@
             "parking"
           ],
           "lat": 43.5935,
-          "lon": -72.96905
+          "lon": -72.96905,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "East Dorset General Store",
           "type": "fuel_station",
           "at_mi": 21.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -8567,13 +8575,14 @@
             "parking"
           ],
           "lat": 43.23965,
-          "lon": -73.01051
+          "lon": -73.01051,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Mobil",
           "type": "fuel_station",
           "at_mi": 42.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -8586,7 +8595,8 @@
             "parking"
           ],
           "lat": 42.95057,
-          "lon": -73.21088
+          "lon": -73.21088,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Plaza 23 Truck Stop",
@@ -8608,7 +8618,8 @@
             "parking"
           ],
           "lat": 42.63499,
-          "lon": -73.75477
+          "lon": -73.75477,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -9773,7 +9784,7 @@
           "name": "Cumberland Farms",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rutland_vt_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rutland_vt_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -9786,13 +9797,14 @@
             "parking"
           ],
           "lat": 43.5935,
-          "lon": -72.96905
+          "lon": -72.96905,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "McDonoughs Fuel & Service Center",
           "type": "fuel_station",
           "at_mi": 16.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -9805,13 +9817,14 @@
             "parking"
           ],
           "lat": 43.80031,
-          "lon": -73.09338
+          "lon": -73.09338,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Shell",
           "type": "fuel_station",
           "at_mi": 32.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -9824,7 +9837,8 @@
             "parking"
           ],
           "lat": 44.01215,
-          "lon": -73.16423
+          "lon": -73.16423,
+          "vehicle_access": "bobtail_only"
         }
       ]
     }

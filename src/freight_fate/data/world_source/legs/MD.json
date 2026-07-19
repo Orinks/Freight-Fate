@@ -818,13 +818,14 @@
             "parking"
           ],
           "lat": 39.27868,
-          "lon": -76.54885
+          "lon": -76.54885,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Citgo",
           "type": "fuel_station",
           "at_mi": 43.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -837,7 +838,8 @@
             "parking"
           ],
           "lat": 38.98135,
-          "lon": -76.16132
+          "lon": -76.16132,
+          "vehicle_access": "bobtail_only"
         }
       ]
     },
@@ -4389,7 +4391,8 @@
             "parking"
           ],
           "lat": 39.27868,
-          "lon": -76.54885
+          "lon": -76.54885,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "South Mountain Welcome Center",
@@ -4406,7 +4409,8 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Pilot Travel Center Hagerstown",
@@ -4432,7 +4436,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Flying J Travel Center",
@@ -4452,7 +4457,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "South Midway Service Plaza",
@@ -4474,7 +4480,8 @@
             "parking"
           ],
           "lat": 40.03013,
-          "lon": -78.49269
+          "lon": -78.49269,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Flying J Travel Center Smithton",
@@ -4500,7 +4507,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -7155,7 +7163,8 @@
             "parking"
           ],
           "lat": 39.27868,
-          "lon": -76.54885
+          "lon": -76.54885,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Dale City Car-Only Safety Rest Area South",
@@ -7174,7 +7183,8 @@
             "restrooms"
           ],
           "lat": 38.5965,
-          "lon": -77.31596
+          "lon": -77.31596,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Love's Travel Stop Ruther Glen",
@@ -7199,7 +7209,8 @@
             "both"
           ],
           "parking": "likely",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Doswell / Roady's Truck Stop",
@@ -7221,7 +7232,8 @@
             "parking"
           ],
           "lat": 37.84733,
-          "lon": -77.44977
+          "lon": -77.44977,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -8051,7 +8063,8 @@
             "parking"
           ],
           "lat": 39.27868,
-          "lon": -76.54885
+          "lon": -76.54885,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "I-95 I-495 truck parking near College Park",
@@ -8072,7 +8085,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -9024,7 +9038,8 @@
             "parking"
           ],
           "lat": 39.6719,
-          "lon": -78.71638
+          "lon": -78.71638,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Sideling Hill Rest Area Westbound",
@@ -9043,7 +9058,8 @@
             "restrooms"
           ],
           "lat": 39.71832,
-          "lon": -78.28052
+          "lon": -78.28052,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Pilot Travel Center",
@@ -9065,7 +9081,8 @@
             "parking"
           ],
           "lat": 39.62906,
-          "lon": -77.78268
+          "lon": -77.78268,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -10115,13 +10132,14 @@
             "parking"
           ],
           "lat": 39.6719,
-          "lon": -78.71638
+          "lon": -78.71638,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Liberty",
           "type": "fuel_station",
           "at_mi": 46.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -10134,7 +10152,8 @@
             "parking"
           ],
           "lat": 39.3824,
-          "lon": -78.29892
+          "lon": -78.29892,
+          "vehicle_access": "bobtail_only"
         }
       ]
     },
@@ -11294,7 +11313,8 @@
             "parking"
           ],
           "lat": 39.62906,
-          "lon": -77.78268
+          "lon": -77.78268,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Truck Rest Area",
@@ -11311,7 +11331,8 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "TA Travel Center",
@@ -11333,7 +11354,8 @@
             "parking"
           ],
           "lat": 39.27868,
-          "lon": -76.54885
+          "lon": -76.54885,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -12403,7 +12425,8 @@
             "parking"
           ],
           "lat": 39.62906,
-          "lon": -77.78268
+          "lon": -77.78268,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "TravelCenters of America",
@@ -12425,7 +12448,8 @@
             "parking",
             "showers",
             "scale"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -13582,7 +13606,8 @@
             "parking"
           ],
           "lat": 38.40972,
-          "lon": -75.64174
+          "lon": -75.64174,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "TA Travel Center",
@@ -13604,7 +13629,8 @@
             "parking"
           ],
           "lat": 39.27868,
-          "lon": -76.54885
+          "lon": -76.54885,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     }

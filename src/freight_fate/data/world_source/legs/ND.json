@@ -1252,7 +1252,8 @@
             "parking"
           ],
           "lat": 46.82989,
-          "lon": -100.72868
+          "lon": -100.72868,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -2150,13 +2151,14 @@
             "parking"
           ],
           "lat": 46.82989,
-          "lon": -100.72868
+          "lon": -100.72868,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Love's",
           "type": "fuel_station",
           "at_mi": 25.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -2169,7 +2171,8 @@
             "parking"
           ],
           "lat": 46.83874,
-          "lon": -100.2867
+          "lon": -100.2867,
+          "vehicle_access": "bobtail_only"
         }
       ]
     },
@@ -3388,7 +3391,8 @@
             "parking"
           ],
           "lat": 46.82989,
-          "lon": -100.72868
+          "lon": -100.72868,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Flying J Travel Center",
@@ -3410,7 +3414,8 @@
             "parking"
           ],
           "lat": 48.22394,
-          "lon": -101.35022
+          "lon": -101.35022,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -3846,7 +3851,7 @@
           "name": "Holiday",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the devils_lake_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the devils_lake_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -3859,7 +3864,8 @@
             "parking"
           ],
           "lat": 48.10365,
-          "lon": -98.86603
+          "lon": -98.86603,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Pilot",
@@ -3881,7 +3887,8 @@
             "parking"
           ],
           "lat": 47.88796,
-          "lon": -97.09338
+          "lon": -97.09338,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -5225,7 +5232,7 @@
           "name": "Circle K",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dickinson_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the dickinson_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -5238,7 +5245,8 @@
             "parking"
           ],
           "lat": 46.89388,
-          "lon": -102.78872
+          "lon": -102.78872,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Wild Bison Travel Center",
@@ -5260,7 +5268,8 @@
             "parking"
           ],
           "lat": 47.80499,
-          "lon": -103.6444
+          "lon": -103.6444,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -5285,7 +5294,8 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Petro Stopping Centers",
@@ -5305,13 +5315,14 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Kwik Trip",
           "type": "fuel_station",
           "at_mi": 205.6,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -5324,7 +5335,8 @@
             "parking"
           ],
           "lat": 45.21739,
-          "lon": -93.59833
+          "lon": -93.59833,
+          "vehicle_access": "bobtail_only"
         }
       ],
       "corridor": {
@@ -8078,7 +8090,7 @@
           "name": "Casey's General Store",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fargo_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fargo_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -8091,13 +8103,14 @@
             "parking"
           ],
           "lat": 46.83651,
-          "lon": -96.76878
+          "lon": -96.76878,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Cenex",
           "type": "fuel_station",
           "at_mi": 89.4,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -8110,7 +8123,8 @@
             "parking"
           ],
           "lat": 45.65927,
-          "lon": -97.01794
+          "lon": -97.01794,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Coffee Cup Travel Plaza",
@@ -8132,7 +8146,8 @@
             "parking"
           ],
           "lat": 45.31163,
-          "lon": -97.04742
+          "lon": -97.04742,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -8844,13 +8859,14 @@
             "parking"
           ],
           "lat": 47.88796,
-          "lon": -97.09338
+          "lon": -97.09338,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Ampride",
           "type": "fuel_station",
           "at_mi": 28.8,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -8863,7 +8879,8 @@
             "parking"
           ],
           "lat": 47.76651,
-          "lon": -96.62936
+          "lon": -96.62936,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Oak Lake Rest Area",
@@ -8882,13 +8899,14 @@
             "restrooms"
           ],
           "lat": 47.65775,
-          "lon": -95.96879
+          "lon": -95.96879,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "West Side Express",
           "type": "fuel_station",
           "at_mi": 86.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -8901,7 +8919,8 @@
             "parking"
           ],
           "lat": 47.52231,
-          "lon": -95.40925
+          "lon": -95.40925,
+          "vehicle_access": "bobtail_only"
         }
       ]
     },
@@ -9335,13 +9354,14 @@
             "parking"
           ],
           "lat": 47.88796,
-          "lon": -97.09338
+          "lon": -97.09338,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Sorum Oil",
           "type": "fuel_station",
           "at_mi": 41.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -9354,7 +9374,8 @@
             "parking"
           ],
           "lat": 47.40481,
-          "lon": -97.05964
+          "lon": -97.05964,
+          "vehicle_access": "bobtail_only"
         }
       ]
     },
@@ -10133,7 +10154,7 @@
           "name": "Casey's General Store",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jamestown_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the jamestown_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -10146,7 +10167,8 @@
             "parking"
           ],
           "lat": 46.92114,
-          "lon": -98.69505
+          "lon": -98.69505,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Oriska Rest area",
@@ -10166,13 +10188,14 @@
           ],
           "lat": 46.91945,
           "lon": -97.75028,
-          "parking_spaces": 11
+          "parking_spaces": 11,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Marathon",
           "type": "fuel_station",
           "at_mi": 70.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -10185,13 +10208,14 @@
             "parking"
           ],
           "lat": 46.87596,
-          "lon": -97.20993
+          "lon": -97.20993,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Loaf 'N Jug",
           "type": "fuel_station",
           "at_mi": 93.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fargo_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the fargo_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -10204,7 +10228,8 @@
             "parking"
           ],
           "lat": 46.9196,
-          "lon": -96.78684
+          "lon": -96.78684,
+          "vehicle_access": "bobtail_only"
         }
       ]
     },
@@ -10878,13 +10903,14 @@
             "parking"
           ],
           "lat": 48.22394,
-          "lon": -101.35022
+          "lon": -101.35022,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Holiday",
           "type": "fuel_station",
           "at_mi": 120.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the devils_lake_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the devils_lake_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -10897,7 +10923,8 @@
             "parking"
           ],
           "lat": 48.10365,
-          "lon": -98.86603
+          "lon": -98.86603,
+          "vehicle_access": "bobtail_only"
         }
       ]
     },
@@ -11755,7 +11782,7 @@
           "name": "Mobil",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the williston_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the williston_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -11768,7 +11795,8 @@
             "parking"
           ],
           "lat": 48.14732,
-          "lon": -103.60341
+          "lon": -103.60341,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Pilot Travel Center",
@@ -11790,7 +11818,8 @@
             "parking"
           ],
           "lat": 47.68529,
-          "lon": -104.17622
+          "lon": -104.17622,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -13080,7 +13109,7 @@
           "name": "Mobil",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the williston_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the williston_nd_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -13093,7 +13122,8 @@
             "parking"
           ],
           "lat": 48.14732,
-          "lon": -103.60341
+          "lon": -103.60341,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Flying J Travel Center",
@@ -13115,7 +13145,8 @@
             "parking"
           ],
           "lat": 48.22394,
-          "lon": -101.35022
+          "lon": -101.35022,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     }
