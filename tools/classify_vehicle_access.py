@@ -104,6 +104,24 @@ ACCESS_CLOSED = {"no", "private", "customers"}
 
 EARTH_RADIUS_M = 6371000.0
 
+# Human verdicts, keyed by the stop's coordinate to 5 decimals. These outrank
+# every automatic rule: a person who knows the site beats a mapper's tag and a
+# brand name both. Kept here rather than hand-edited into the world data so a
+# cache wipe and a fresh sweep still reproduce them.
+CURATED_ACCESS: dict[str, tuple[str, str]] = {
+    # Love's Alternative Energy is the operator's CNG/RNG fleet-fueling
+    # business -- transit, shuttle, refuse, and municipal fleets -- not a
+    # Class 8 travel stop, and OSM tags this site hgv=no. Owner-confirmed.
+    "33.80007,-117.89128": (
+        "none",
+        "Love's Alternative Energy is the operator's CNG/renewable fleet "
+        "fueling division (transit, shuttle, refuse, and municipal fleets, "
+        "lovesalternativeenergy.com), not a Class 8 travel stop; "
+        "OpenStreetMap also tags this site hgv=no. Owner-confirmed "
+        f"{ACCESSED_DATE}.",
+    ),
+}
+
 
 def _overpass_url() -> str:
     """The Overpass endpoint, preferring the self-hosted one.
@@ -179,6 +197,10 @@ def classify(stop: dict[str, Any], elements: list[dict[str, Any]]) -> tuple[str,
 
     # Read the tags of everything we found, nearest first.
     lat, lon = float(stop.get("lat", 0.0)), float(stop.get("lon", 0.0))
+
+    curated = CURATED_ACCESS.get(f"{lat:.5f},{lon:.5f}")
+    if curated is not None:
+        return curated
 
     def _distance(element: dict[str, Any]) -> float:
         center = element.get("center") or element
@@ -372,11 +394,16 @@ def main(argv: list[str] | None = None) -> int:
         if stop.get("vehicle_access") != access:
             changed += 1
         stop["vehicle_access"] = access
-        if access != "tractor_trailer":
-            note = str(stop.get("source", "")).rstrip()
-            marker = "Truck access:"
-            if marker not in note:
-                stop["source"] = f"{note} {marker} {why}".strip()
+        # Rewrite the reason every run rather than appending once. A rule
+        # correction or a curated override has to be able to replace what an
+        # earlier pass concluded, or the note keeps asserting the reasoning we
+        # just fixed.
+        marker = "Truck access:"
+        note = str(stop.get("source", "")).split(marker)[0].rstrip()
+        if access == "tractor_trailer":
+            stop["source"] = note
+        else:
+            stop["source"] = f"{note} {marker} {why}".strip()
     _save_cache(cache)
 
     print()
