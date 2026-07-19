@@ -12,7 +12,6 @@ import heapq
 import json
 import re
 import zlib
-from dataclasses import replace
 from pathlib import Path
 
 from .legacy_aliases import LEGACY_CITY_SLUGS
@@ -372,10 +371,9 @@ class World:
         cur = end
         while cur != start:
             parent, leg = prev[cur]
-            # Ensure leg direction matches forward route (parent -> cur)
-            if leg.a == cur and leg.b == parent:
-                # Leg is reversed, flip it by swapping a and b
-                leg = replace(leg, a=leg.b, b=leg.a)
+            # Keep the leg in its native data orientation. Route.cities records
+            # the travel direction, and Trip uses it to mirror directional
+            # stops, interchanges, grades, and other milepost-backed metadata.
             legs.append(leg)
             cities.append(parent)
             cur = parent
