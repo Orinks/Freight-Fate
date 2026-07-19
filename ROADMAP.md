@@ -123,16 +123,20 @@ terminal becomes the anchor of that week instead of a spawn point.
       curves, with missed or unsignaled turns costing a reroute or
       strike. Natural interaction layer for per-turn trailer
       off-tracking.
-- [ ] **Map sharding: split the two 58 MB JSON files before GitHub's
-      100 MB wall (Josh's ask, 2026-07-18; plan agreed).** world.json
-      (build-tool source) and world_data/us/legs.json are both past the
-      50 MB warning line. Plan: tools/world_source.py load/save helper
-      returning the same merged dict every build tool sees today, writing
-      deterministic per-state shards; index_world.py emits sharded legs;
-      world_loader globs them up; --check stays. No git-lfs (breaks plain
-      clones, costs Josh quotas), no history rewrite (Josh's call,
-      someday). Lands FIRST so data sweeps commit small diffs, not 58 MB
-      blobs.
+- [x] **Map sharding: split the two 60 MB JSON files before GitHub's
+      100 MB wall (Josh's ask, 2026-07-18; SHIPPED 2026-07-19).** Both
+      trees are now per-state shards keyed on the state a leg starts in:
+      the source moved from world.json to world_source/ (meta.json,
+      cities.json, legs/TX.json ...) and world_data/us/legs.json became
+      world_data/us/legs/. Largest shard is Texas at 5.4 MB, down from
+      60 MB. tools/world_source.py hands every build tool the same merged
+      dict it always got (load_world / save_world), so ~25 tools migrated
+      mechanically and none changed behavior; save_world rewrites only
+      the shards that actually changed, so a one-leg edit is a one-file
+      diff. index_world.py emits the runtime shards and its --check now
+      also catches a stale shard left behind after its last leg moved
+      states. No git-lfs (breaks plain clones, costs Josh quotas), no
+      history rewrite (Josh's call, someday) -- the 341 MB pack stays.
 - [ ] **Truck-accessibility sweep: vehicle_access classification
       (Josh's spec via Codex, owner + Phil concur, 2026-07-18).** Full
       brief: docs/truck-access-sweep-brief.md. Three tiers on every

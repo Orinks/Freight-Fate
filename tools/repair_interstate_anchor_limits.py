@@ -29,9 +29,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 
-WORLD_PATH = Path(__file__).resolve().parent.parent / "src" / "freight_fate" / "data" / "world.json"
+from world_source import load_world, save_world
 
 INTERSTATE_MIN_PLAUSIBLE_MPH = 45.0
 
@@ -105,11 +104,13 @@ def repair(data: dict) -> list[dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--write", action="store_true", help="write world.json (default: dry run)")
+    parser.add_argument(
+        "--write", action="store_true", help="write the world source (default: dry run)"
+    )
     parser.add_argument("--json", action="store_true", help="print the full report as JSON")
     args = parser.parse_args()
 
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     repaired = repair(data)
 
     if args.json:
@@ -123,7 +124,7 @@ def main() -> None:
     print(f"\n{len(repaired)} interstate legs repaired ({'written' if args.write else 'dry run'})")
 
     if args.write and repaired:
-        WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        save_world(data)
 
 
 if __name__ == "__main__":

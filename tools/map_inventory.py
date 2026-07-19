@@ -16,13 +16,13 @@ Read-only. Run any time:
 from __future__ import annotations
 
 import argparse
-import json
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from world_source import load_world
+
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 PLACEHOLDER_MARK = "corridor between"
 
 # Compact offline map of postal code -> full state name, so the inventory reads
@@ -183,7 +183,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", default=str(ROOT / "map_inventory.txt"), help="Output file path.")
     parser.add_argument("--print", action="store_true", dest="echo", help="Also echo to stdout.")
     args = parser.parse_args(argv)
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     text = build_inventory(data)
     Path(args.out).write_text(text, encoding="utf-8")
     if args.echo:

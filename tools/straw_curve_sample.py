@@ -53,9 +53,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from enrich_routes_ors import fetch_ors_hgv_route, parse_ors_route  # noqa: E402
 from enrich_routes_pois import _maxspeed_from_tags  # noqa: E402
+from world_source import load_world  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-WORLD = ROOT / "src" / "freight_fate" / "data" / "world.json"
 OUT = ROOT / "straw"
 
 OVERPASS_URL = os.environ.get("OVERPASS_URL", "http://localhost:12347/api/interpreter")
@@ -507,7 +507,7 @@ def roundtrip_check(geom: dict[str, Any], authoritative: list[dict[str, Any]]) -
 
 # --- driver -----------------------------------------------------------------
 def main() -> None:
-    world = json.loads(WORLD.read_text(encoding="utf-8"))
+    world = load_world()
     nodes = world["cities"]
     api_key = os.environ.get("ORS_API_KEY", "selfhosted")
     (OUT / "us" / "geometry").mkdir(parents=True, exist_ok=True)

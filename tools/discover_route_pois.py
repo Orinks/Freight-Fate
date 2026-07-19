@@ -13,11 +13,10 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
+from world_source import load_world
+
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 USER_AGENT = "Freight-Fate route POI curation smoke (https://github.com/Orinks/Freight-Fate)"
 
@@ -31,7 +30,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--all",
         action="store_true",
-        help="Query every leg in world.json, optionally capped by --max-legs.",
+        help="Query every leg in the world source, optionally capped by --max-legs.",
     )
     parser.add_argument("--max-legs", type=int, default=0)
     parser.add_argument("--radius-m", type=int, default=12_000)
@@ -40,7 +39,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     if not args.all and (not args.from_city or not args.to_city):
         raise SystemExit("--from-city and --to-city are required unless --all is used")
     legs = data["legs"] if args.all else [_require_leg(data, args.from_city, args.to_city)]

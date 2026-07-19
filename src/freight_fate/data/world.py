@@ -53,7 +53,6 @@ from .world_parsing import (
 )
 from .world_services import WorldServiceMixin
 
-WORLD_PATH = Path(__file__).parent / "world.json"
 WORLD_DATA_PATH = Path(__file__).parent / "world_data"
 WORLD_INDEX_PATH = WORLD_DATA_PATH / "index.json"
 # Alternate routes should feel like dispatch choices, not graph leftovers.

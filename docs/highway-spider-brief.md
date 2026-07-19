@@ -25,9 +25,10 @@ via a self-hosted Overpass.
 ## 2. Current state (the thing being grown)
 
 - **293 cities, 626 legs.** (Was 258/562 before the last hand-expansion.)
-- Data lives in `src/freight_fate/data/world.json` (single source), split to
-  `src/freight_fate/data/world_data/` by `tools/index_world.py` (`--check` verifies
-  in sync; CI + tests require it).
+- Data lives in `src/freight_fate/data/world_source/` (per-state shards, read
+  and written through `tools/world_source.py`), indexed into
+  `src/freight_fate/data/world_data/` by `tools/index_world.py` (`--check`
+  verifies in sync; CI + tests require it).
 - **City schema** (`world.py` / `world_models.py`): key is a slug
   `{city}_{st}_{country}` (e.g. `amarillo_tx_us`); fields `spoken_city`, `state`
   (2-letter), `country`, `region` (must equal `classify_region(state, lat, lon)` —

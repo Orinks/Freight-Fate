@@ -15,7 +15,7 @@ off-route distance. Two uses:
   sparse region.
 
 Data: GeoNames US populated places (CC BY), cached under .route-cache/.
-Read-only -- never writes world.json. Review the list, then feed the ones
+Read-only -- never writes the world source. Review the list, then feed the ones
 you want to place_checkpoints (checkpoints) or add as nodes (spider).
 """
 
@@ -35,6 +35,7 @@ if str(TOOLS_DIR) not in sys.path:
 
 import enrich_routes as er  # noqa: E402
 import pick_nodes as pn  # noqa: E402
+from world_source import load_world  # noqa: E402
 
 GEONAMES_US_URL = "https://download.geonames.org/export/dump/US.zip"
 # Feature codes under class P we do NOT want as checkpoints/nodes: neighborhoods
@@ -194,7 +195,7 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit(
             f"Needs {er.ORS_API_KEY_ENV} and the tooling group (uv run --group tooling ...)."
         )
-    data = json.loads(er.WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     cache_dir = Path(args.cache_dir)
     places = load_us_places(cache_dir)
     node_coords = [(float(c["lat"]), float(c["lon"])) for c in data["cities"].values()]
@@ -210,7 +211,7 @@ def main(argv: list[str] | None = None) -> int:
             None,
         )
         if leg is None:
-            raise SystemExit(f"No leg {args.leg!r} in world.json")
+            raise SystemExit(f"No leg {args.leg!r} in the world source")
         parsed = er._cached_ors_route(data, leg, cache_dir, args.rate_limit, api_key)
         leg_miles = float(leg["miles"])
         highway = leg["highway"]

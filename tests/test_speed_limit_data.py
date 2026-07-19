@@ -11,7 +11,6 @@ remember the linter. The tool's dry run must always report zero.
 from __future__ import annotations
 
 import importlib.util
-import json
 import sys
 from pathlib import Path
 
@@ -19,7 +18,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _load_repair_tool():
-    """Import tools/repair_interstate_anchor_limits.py by path (tools is not a package)."""
+    """Import tools/repair_interstate_anchor_limits.py by path (tools is not a package).
+
+    The tool imports its sibling world_source helper; pytest's ``pythonpath``
+    setting puts tools/ on the path so that resolves here as it does in a script.
+    """
     spec = importlib.util.spec_from_file_location(
         "repair_interstate_anchor_limits",
         ROOT / "tools" / "repair_interstate_anchor_limits.py",
@@ -32,7 +35,7 @@ def _load_repair_tool():
 
 def test_no_anchor_polluted_speed_profiles() -> None:
     tool = _load_repair_tool()
-    data = json.loads(tool.WORLD_PATH.read_text(encoding="utf-8"))
+    data = tool.load_world()
     repaired = tool.repair(data)
     details = "; ".join(f"{entry['leg']} ({entry['highway']})" for entry in repaired[:5])
     assert repaired == [], (
@@ -48,7 +51,7 @@ def test_no_interstate_sample_below_45_at_any_position() -> None:
     repair tool now drops these; this direct assertion holds even if the
     tool's own rules ever drift."""
     tool = _load_repair_tool()
-    data = json.loads(tool.WORLD_PATH.read_text(encoding="utf-8"))
+    data = tool.load_world()
     offenders = []
     for leg in data["legs"]:
         if not tool.is_interstate(leg.get("highway", "")):

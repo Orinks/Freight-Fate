@@ -1,0 +1,68 @@
+{
+  "route_stop_data": {
+    "schema": 1,
+    "position_units": "route miles from each leg.from city toward leg.to city",
+    "strategy": "Offline curated dataset from public DOT rest-area pages, operator location pages, operator locator APIs, and development-time map review. Runtime play never calls external route or amenity services.",
+    "license_notes": "OpenStreetMap-derived future imports require ODbL attribution/share-alike review. Current route data keeps source notes per stop and favors public agency/operator pages."
+  },
+  "geo": {
+    "countries": {
+      "US": {
+        "name": "United States",
+        "states": {
+          "AK": "Alaska",
+          "AL": "Alabama",
+          "AR": "Arkansas",
+          "AZ": "Arizona",
+          "CA": "California",
+          "CO": "Colorado",
+          "CT": "Connecticut",
+          "DC": "District of Columbia",
+          "DE": "Delaware",
+          "FL": "Florida",
+          "GA": "Georgia",
+          "HI": "Hawaii",
+          "IA": "Iowa",
+          "ID": "Idaho",
+          "IL": "Illinois",
+          "IN": "Indiana",
+          "KS": "Kansas",
+          "KY": "Kentucky",
+          "LA": "Louisiana",
+          "MA": "Massachusetts",
+          "MD": "Maryland",
+          "ME": "Maine",
+          "MI": "Michigan",
+          "MN": "Minnesota",
+          "MO": "Missouri",
+          "MS": "Mississippi",
+          "MT": "Montana",
+          "NC": "North Carolina",
+          "ND": "North Dakota",
+          "NE": "Nebraska",
+          "NH": "New Hampshire",
+          "NJ": "New Jersey",
+          "NM": "New Mexico",
+          "NV": "Nevada",
+          "NY": "New York",
+          "OH": "Ohio",
+          "OK": "Oklahoma",
+          "OR": "Oregon",
+          "PA": "Pennsylvania",
+          "RI": "Rhode Island",
+          "SC": "South Carolina",
+          "SD": "South Dakota",
+          "TN": "Tennessee",
+          "TX": "Texas",
+          "UT": "Utah",
+          "VA": "Virginia",
+          "VT": "Vermont",
+          "WA": "Washington",
+          "WI": "Wisconsin",
+          "WV": "West Virginia",
+          "WY": "Wyoming"
+        }
+      }
+    }
+  }
+}

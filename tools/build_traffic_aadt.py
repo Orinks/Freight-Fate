@@ -14,7 +14,7 @@ and a crawl can be resumed after an interruption.
 
 Run from the repo root:
     uv run python tools/build_traffic_aadt.py               # report only
-    uv run python tools/build_traffic_aadt.py --write        # update world.json
+    uv run python tools/build_traffic_aadt.py --write        # update the world source
     uv run python tools/build_traffic_aadt.py --only "Chicago->Indianapolis" --write
 
 After a --write run, regenerate the runtime tree:
@@ -24,7 +24,6 @@ After a --write run, regenerate the runtime tree:
 from __future__ import annotations
 
 import argparse
-import json
 import math
 import re
 import sys
@@ -37,6 +36,7 @@ if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
 
 import build_interchanges as bi  # noqa: E402
+from world_source import WORLD_SOURCE_PATH, load_world, save_world  # noqa: E402
 
 HPMS_QUERY_URL = (
     "https://services2.arcgis.com/FiaPA4ga0iQKduv3/arcgis/rest/services/"
@@ -281,8 +281,8 @@ def bake_leg(leg: dict[str, Any], rate_limit: float) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Bake HPMS AADT profiles into world.json.")
-    parser.add_argument("--write", action="store_true", help="Write back into world.json.")
+    parser = argparse.ArgumentParser(description="Bake HPMS AADT profiles into the world source.")
+    parser.add_argument("--write", action="store_true", help="Write back into the world source.")
     parser.add_argument("--only", default="", help="Limit to one leg, e.g. 'A->B'.")
     parser.add_argument("--max-legs", type=int, default=0)
     parser.add_argument("--rate-limit", type=float, default=0.2)
@@ -291,7 +291,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    data = json.loads(bi.WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     legs = data["legs"]
     if args.only:
         a, _, b = args.only.partition("->")
@@ -328,15 +328,15 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print("    no on-corridor HPMS sections; keeping the heuristic", flush=True)
         if args.write and baked_legs and i % 10 == 0:
-            bi.WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-            print(f"    ...checkpointed world.json ({baked_legs} legs so far)", flush=True)
+            save_world(data)
+            print(f"    ...checkpointed the world source ({baked_legs} legs so far)", flush=True)
 
     print(f"\n{len(targets)} legs processed, {baked_legs} baked, {baked_samples} samples.")
     if args.write and baked_legs:
-        bi.WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-        print(f"Wrote {bi.WORLD_PATH}")
+        save_world(data)
+        print(f"Wrote {WORLD_SOURCE_PATH}")
     elif not args.write:
-        print("(dry run; pass --write to update world.json)")
+        print("(dry run; pass --write to update the world source)")
     return 0
 
 

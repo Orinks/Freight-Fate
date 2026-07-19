@@ -28,12 +28,10 @@ Idempotent + additive; without --write it is a dry run.
 from __future__ import annotations
 
 import argparse
-import json
 import re
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-WORLD = ROOT / "src" / "freight_fate" / "data" / "world.json"
+from world_source import load_world, save_world
 
 # Treatment -> baked landmark category. Both are CURATED categories that
 # bake_landmarks.py must preserve when it overwrites a leg's OSM landmarks.
@@ -104,7 +102,7 @@ def main() -> int:
     ap.add_argument("--write", action="store_true")
     a = ap.parse_args()
 
-    d = json.loads(WORLD.read_text(encoding="utf-8"))
+    d = load_world()
     legs_by_pair = {(lg["from"], lg["to"]): lg for lg in d["legs"]}
 
     signs = parse_sheet(Path(a.sheet).read_text(encoding="utf-8"))
@@ -124,8 +122,8 @@ def main() -> int:
 
     print(f"\nbaked {baked} signs, skipped {skipped}")
     if a.write:
-        WORLD.write_text(json.dumps(d, indent=2) + "\n", encoding="utf-8")
-        print("WRITTEN to world.json -- now run: uv run python tools/index_world.py")
+        save_world(d)
+        print("WRITTEN to the world source -- now run: uv run python tools/index_world.py")
     else:
         print("(dry run -- pass --write to apply)")
     return 0

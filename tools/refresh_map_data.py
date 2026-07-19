@@ -36,8 +36,9 @@ import sys
 import time
 from pathlib import Path
 
+from world_source import load_world
+
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 RADIO_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_catalog.json"
 CACHE_DIR = ROOT / ".cache" / "map-refresh"
 
@@ -86,7 +87,7 @@ def check_limits() -> list[dict]:
     """Run the anchor-repair judgment rules as a linter (no writes)."""
     from repair_interstate_anchor_limits import repair
 
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     return repair(data)  # mutates only the in-memory copy
 
 
@@ -100,7 +101,7 @@ def check_stops(only: set[tuple[str, str]], max_legs: int) -> dict[str, list[str
     _overpass_named_candidates = enrich_routes._overpass_named_candidates
 
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     fresh: list[str] = []
     recheck: list[str] = []
     checked = 0

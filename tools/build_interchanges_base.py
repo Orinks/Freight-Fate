@@ -12,8 +12,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from world_source import WORLD_SOURCE_PATH, save_world  # re-exported to the sweep modules
+
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 CACHE_DIR = ROOT / ".route-cache" / "interchanges"
 OVERPASS_MIRRORS = (
     "https://overpass-api.de/api/interpreter",

@@ -530,34 +530,35 @@ def run_restrictions(data: dict[str, Any], args: argparse.Namespace) -> int:
                 print(f"    {record['kind']} {value} at mile {record['at_mi']}", flush=True)
         if args.write and processed % 100 == 0:
             _write_world_retrying(data)
-            print(f"    ...checkpointed world.json ({baked} legs with advisories)", flush=True)
+            print(
+                f"    ...checkpointed the world source ({baked} legs with advisories)", flush=True
+            )
 
     print(f"\n{processed} legs swept, {baked} carry restriction advisories.")
     if args.write:
         _write_world_retrying(data)
-        print(f"Wrote {WORLD_PATH}")
+        print(f"Wrote {WORLD_SOURCE_PATH}")
     else:
-        print("(dry run; pass --write to update world.json)")
+        print("(dry run; pass --write to update the world source)")
     return 0
 
 
 def _write_world_retrying(data: dict[str, Any], attempts: int = 5) -> None:
-    """Write world.json, riding out transient Windows locks on the big file.
+    """Write the world source, riding out transient Windows locks on the shards.
 
     Antivirus/indexer scans intermittently fail the open with EINVAL/EACCES;
     a short backoff and retry recovers. The world stays intact on failure
     because the open itself is what errors."""
-    text = json.dumps(data, indent=2) + "\n"
     for attempt in range(attempts):
         try:
-            WORLD_PATH.write_text(text, encoding="utf-8")
+            save_world(data)
             return
         except OSError as exc:
             if attempt == attempts - 1:
                 raise
             wait = 2.0 * (attempt + 1)
             print(
-                f"    world.json write failed ({exc}); retrying in {wait:.0f}s",
+                f"    world source write failed ({exc}); retrying in {wait:.0f}s",
                 flush=True,
             )
             time.sleep(wait)

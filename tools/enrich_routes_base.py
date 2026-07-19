@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 CACHE_PATH = ROOT / ".route-cache"
 USER_AGENT = "Freight-Fate route-enrichment smoke (https://github.com/Orinks/Freight-Fate)"
 OSRM_ROUTE_URL = "https://router.project-osrm.org/route/v1/driving/{coords}"

@@ -15,15 +15,14 @@ Usage::
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import sys
 from pathlib import Path
 
+from world_source import load_world
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tests"))
-
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 
 CHECKS = [
     ("TBD road name", re.compile(r"\bTBD\b")),
@@ -43,7 +42,7 @@ class _Monkeypatch:
 
 def corridors_by_system() -> list[tuple[str, str, str, str]]:
     """The shortest corridor from each highway-name system in the world."""
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     best: dict[str, tuple[str, str, str, float]] = {}
     for leg in data["legs"]:
         highway = leg.get("highway") or "TBD"

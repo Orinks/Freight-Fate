@@ -1,5 +1,5 @@
 # ruff: noqa: F821,I001
-"""Discover highway interchanges along each leg and curate them into world.json.
+"""Discover highway interchanges along each leg and curate them into the world source.
 
 Development-time helper (never called at runtime). For every Interstate leg it:
 
@@ -20,7 +20,7 @@ requirement, so a leg with no clean OSM exit data simply gets none.
 
 Run from the repo root:
     uv run python tools/build_interchanges.py            # report only
-    uv run python tools/build_interchanges.py --write     # update world.json
+    uv run python tools/build_interchanges.py --write     # update the world source
     uv run python tools/build_interchanges.py --only "New York->Philadelphia" --write
     uv run --group tooling python tools/build_interchanges.py --pbf us.osm.pbf --write
 """
@@ -43,8 +43,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from world_source import WORLD_SOURCE_PATH, load_world, save_world
+
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 CACHE_DIR = ROOT / ".route-cache" / "interchanges"
 PUBLIC_OVERPASS_MIRRORS = (
     "https://overpass-api.de/api/interpreter",
@@ -964,9 +965,11 @@ run_restrictions = _RESTRICTIONS_MODULE.run_restrictions
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Curate OSM interchanges into world.json.")
+    parser = argparse.ArgumentParser(description="Curate OSM interchanges into the world source.")
     parser.add_argument(
-        "--write", action="store_true", help="Write discovered interchanges back into world.json."
+        "--write",
+        action="store_true",
+        help="Write discovered interchanges back into the world source.",
     )
     parser.add_argument(
         "--only", default="", help="Limit to one leg, e.g. 'New York->Philadelphia'."
@@ -1045,7 +1048,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     if args.ramp_controls:
         return run_ramp_controls(data, args)
     if args.restrictions:
@@ -1131,8 +1134,8 @@ def main(argv: list[str] | None = None) -> int:
         # Flush periodically so a long crawl is crash-safe and resumable: a
         # re-run without --force skips legs already written here.
         if args.write and updated_legs and processed % 10 == 0:
-            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-            print(f"    ...checkpointed world.json ({updated_legs} legs so far)", flush=True)
+            save_world(data)
+            print(f"    ...checkpointed the world source ({updated_legs} legs so far)", flush=True)
 
     print(
         f"\n{eligible} Interstate legs eligible; "
@@ -1140,10 +1143,10 @@ def main(argv: list[str] | None = None) -> int:
         f"{total_added} interchanges total."
     )
     if args.write and updated_legs:
-        WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-        print(f"Wrote {WORLD_PATH}")
+        save_world(data)
+        print(f"Wrote {WORLD_SOURCE_PATH}")
     elif not args.write:
-        print("(dry run; pass --write to update world.json)")
+        print("(dry run; pass --write to update the world source)")
     return 0
 
 

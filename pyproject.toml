@@ -81,6 +81,10 @@ allow-direct-references = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Several tests load a build tool by file path. Tools import their siblings
+# bare (`import enrich_routes`, `from world_source import load_world`), which
+# only resolves when tools/ is importable -- true when a tool runs as a script.
+pythonpath = ["tools"]
 # Per-test timeout (thread method works on Windows) so a hung simulation fails
 # fast with a stack trace instead of stalling the whole run.
 addopts = "-q --timeout=120 --timeout-method=thread"

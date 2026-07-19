@@ -313,17 +313,25 @@ a player-facing `CHANGELOG.md` entry unless the whole change set uses
 
 ### World data
 
-The route tools edit the single `src/freight_fate/data/world.json`, but the game
-loads the indexed `src/freight_fate/data/world_data/` tree. After changing world
-data, regenerate the index so the two stay in sync:
+The route tools edit `src/freight_fate/data/world_source/`, but the game loads
+the indexed `src/freight_fate/data/world_data/` tree. After changing world data,
+regenerate the index so the two stay in sync:
 
 ```bash
-uv run python tools/index_world.py          # rewrite world_data/ from world.json
+uv run python tools/index_world.py          # rewrite world_data/ from world_source/
 uv run python tools/index_world.py --check  # verify in sync (CI + pre-commit do this)
 ```
 
-A pre-commit hook and a test both fail if `world_data/` drifts from `world.json`,
-so commit the regenerated `world_data/` files alongside your `world.json` edits.
+A pre-commit hook and a test both fail if `world_data/` drifts from the source,
+so commit the regenerated `world_data/` files alongside your source edits.
+
+Both trees are sharded by the state a leg starts in — `legs/TX.json`,
+`legs/CA.json` — because a single file had reached 60 MB, past GitHub's warning
+line and heading for its 100 MB limit. Tools never touch the shards directly:
+`tools/world_source.py` gives them `load_world()`, which returns the whole world
+as one dict, and `save_world(data)`, which writes only the shards that actually
+changed. So a one-leg edit is a small reviewable diff, and the code that edits
+world data is unchanged from when it was one file.
 
 ### Playtesting
 

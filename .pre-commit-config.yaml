@@ -14,10 +14,10 @@ repos:
         types_or: [python, pyi]
         stages: [pre-commit]
       - id: world-data-index
-        name: world_data is in sync with world.json
+        name: world_data is in sync with world_source
         entry: uv run python tools/index_world.py --check
         language: system
-        files: ^src/freight_fate/data/world\.json$
+        files: ^src/freight_fate/data/world_source/.*\.json$
         pass_filenames: false
         stages: [pre-commit]
       - id: freight-fate-release-notes

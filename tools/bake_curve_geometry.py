@@ -4,17 +4,17 @@ Generalizes the ratified straw sampler (``tools/straw_curve_sample.py``, reviewe
 in ``docs/curve-geometry-straw-review.md``) over the whole network. One pass per
 leg emits two layers:
 
-  * ``world.json`` ``corridor.speed_limits`` -- the confirmed posted step
+  * the world source's ``corridor.speed_limits`` -- the confirmed posted step
     function the runtime/linter/tests read. Dense sampling yields real
     transitions, so no lone city-street anchor survives and the anchor linter
     reports ZERO on fresh data. (Null coverage-gap markers live only in the
-    derived shard; world.json carries numeric postings, per its schema.)
+    derived shard; the world source carries numeric postings, per its schema.)
   * derived shards the runtime does not yet read (Phil wires curve-nav later):
       - ``world_data/us/geometry/<state>.jsonl`` -- the encoded archival polyline
       - ``world_data/us/gameplay/curves.jsonl``  -- per-curve steering rows
       - ``world_data/us/gameplay/ramps.jsonl``   -- runaway/escape ramps
       - ``world_data/us/gameplay/speed_limits.jsonl`` -- coverage-aware postings
-    ``index_world.py`` only manages the files it derives from world.json, so
+    ``index_world.py`` only manages the files it derives from the world source, so
     these extra files are safe under ``world_data/`` and ``--check`` ignores them.
 
 Phil's rev-2 riders, all folded in:
@@ -57,6 +57,7 @@ import straw_curve_sample as scs  # noqa: E402  (the ratified primitives)
 from enrich_routes_ors import fetch_ors_hgv_route, parse_ors_route  # noqa: E402
 from enrich_routes_pois import MAXSPEED_SOURCE, _maxspeed_from_tags  # noqa: E402
 from repair_interstate_anchor_limits import repair as _repair_profiles  # noqa: E402
+from world_source import load_world, save_world  # noqa: E402
 
 # Rider 1: widen the keep-verbatim margin so marginal edge-of-span curves
 # survive the archive bake (Phil measured a 951 ft sweep lost at the Colby
@@ -64,7 +65,6 @@ from repair_interstate_anchor_limits import repair as _repair_profiles  # noqa: 
 scs.CURVE_PAD_M = 150.0
 
 ROOT = Path(__file__).resolve().parent.parent
-WORLD = ROOT / "src" / "freight_fate" / "data" / "world.json"
 WORLD_DATA = ROOT / "src" / "freight_fate" / "data" / "world_data"
 GEOM_DIR = WORLD_DATA / "us" / "geometry"
 GAMEPLAY_DIR = WORLD_DATA / "us" / "gameplay"
@@ -79,7 +79,7 @@ SOURCE_NOTE = (
 RAMP_SOURCE = "OpenStreetMap highway=escape ways (Overpass), development-time."
 RAMP_MATCH_M = 160.0  # an escape way farther than this from the route isn't on it
 RAMP_DEDUP_MI = 0.3  # same-side ramps closer than this are one physical ramp
-FLUSH_EVERY = 25  # write world.json + shards every N legs so progress is durable
+FLUSH_EVERY = 25  # write the world source + shards every N legs so progress is durable
 
 
 # --- combined per-leg Overpass query (maxspeed + escape ramps, rider 2) -----
@@ -108,7 +108,7 @@ def query_leg_ways(coords: list[list[float]]) -> list[dict]:
     return _overpass(query).get("elements", [])
 
 
-# --- maxspeed step function (confirmed for world.json; gap-aware for shard) --
+# --- maxspeed step function (confirmed for the world source; gap-aware for shard) --
 def bake_speed_limits(
     highway: str,
     coords: list[list[float]],
@@ -118,9 +118,9 @@ def bake_speed_limits(
 ) -> list[dict[str, Any]]:
     """Coverage-aware step function: numeric postings + null coverage gaps.
 
-    Numeric rows carry MAXSPEED_SOURCE for the world.json schema; ``mph: null``
+    Numeric rows carry MAXSPEED_SOURCE for the world-source schema; ``mph: null``
     rows mark a >SPEED_GAP_MI OSM hole (mid-leg and trailing, rider 3) and are
-    stripped before the profile is written into world.json."""
+    stripped before the profile is written into the world source."""
     lats = [c[1] for c in coords]
     shield_nums = scs._shield_numbers(highway)
     interstate = str(highway).strip().upper().startswith("I-")
@@ -358,7 +358,7 @@ def process_leg(
         gameplay_curves.append(row)
 
     rt = scs.roundtrip_check(geom, curv_dec["curves"])
-    # world.json profile: numeric confirmed postings only (schema needs a number),
+    # world-source profile: numeric confirmed postings only (schema needs a number),
     # then run the anchor linter's OWN repair so fresh data is clean by
     # construction -- it drops interstate sub-45 end anchors and fast-corridor
     # surface mile-0/end city-street anchors exactly as the post-bake linter
@@ -399,9 +399,7 @@ def process_leg(
 
 
 def flush(world: dict, geom_by_state, curves_by_leg, ramps_by_leg, speed_by_leg) -> None:
-    # ensure_ascii=True matches world.json's existing \uXXXX escaping, so the only
-    # diff is the speed_limits we changed -- no spurious churn on unrelated names.
-    WORLD.write_text(json.dumps(world, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+    save_world(world)
     for state, by_leg in geom_by_state.items():
         _write_shard(GEOM_DIR / f"{state}.jsonl", by_leg, {"layer": "geometry"})
     _write_shard(GAMEPLAY_DIR / "curves.jsonl", curves_by_leg, {"layer": "curves"})
@@ -418,7 +416,7 @@ def main() -> int:
     ap.add_argument("--limit", type=int, help="cap leg count (with --all, for smoke tests)")
     args = ap.parse_args()
 
-    world = json.loads(WORLD.read_text(encoding="utf-8"))
+    world = load_world()
     cities = world["cities"]
     api_key = os.environ.get("ORS_API_KEY", "selfhosted")
     legs = select_legs(world, args)
@@ -449,7 +447,7 @@ def main() -> int:
             print(f"  [{n}/{len(legs)}] {r['leg_id']} ROUND-TRIP FAIL {r['roundtrip']}", flush=True)
             continue
         lid = r["leg_id"]
-        # world.json: write the confirmed profile onto the actual leg object only
+        # world source: write the confirmed profile onto the actual leg object only
         # when the dense bake produced one. If it found nothing (no OSM maxspeed,
         # or every sample was city-street pollution the linter drops), LEAVE any
         # existing profile untouched -- the sweep must never regress a leg that

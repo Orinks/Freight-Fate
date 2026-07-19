@@ -39,8 +39,13 @@ determinism contract). Read those first if you have not.
   came from and how it was positioned. The placement tool writes these
   automatically; keep the convention if you edit by hand.
 - **Data stays deterministic and offline.** All queries here are build-time.
-  After any world.json edit: regenerate (`uv run python tools/index_world.py`),
+  After any world-source edit: regenerate (`uv run python tools/index_world.py`),
   verify (`--check`), and run the world tests.
+- **Go through `tools/world_source.py`.** The source is per-state shards under
+  `src/freight_fate/data/world_source/`, not one file. `load_world()` hands you
+  the whole world as one dict and `save_world(data)` writes it back, so the
+  tools in this recipe work exactly as they always have — but never open a
+  shard directly, and never hand-edit one you have not read in full.
 
 ## Prerequisites
 

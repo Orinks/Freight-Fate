@@ -21,8 +21,9 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from world_source import WORLD_SOURCE_PATH, load_world
+
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 PLACEHOLDER_MARK = "corridor between"
 
 
@@ -97,12 +98,39 @@ def format_stats(s: dict[str, Any]) -> str:
 
 
 def _load_ref(ref: str) -> dict[str, Any] | None:
-    """Load world.json from a git ref (e.g. 'dev'), or None if unavailable."""
-    rel = WORLD_PATH.relative_to(ROOT).as_posix()
-    out = subprocess.run(["git", "show", f"{ref}:{rel}"], cwd=ROOT, capture_output=True)
-    if out.returncode != 0:
+    """Load the world source at a git ref (e.g. 'dev'), or None if unavailable.
+
+    The source is a tree of per-state shards, so this walks the ref's tree and
+    reassembles it the way ``world_source.load_world`` reassembles the working
+    copy -- shards merged in sorted filename order.
+    """
+    prefix = WORLD_SOURCE_PATH.relative_to(ROOT).as_posix()
+    listing = subprocess.run(
+        ["git", "ls-tree", "-r", "--name-only", ref, "--", prefix],
+        cwd=ROOT,
+        capture_output=True,
+    )
+    if listing.returncode != 0:
         return None
-    return json.loads(out.stdout.decode("utf-8"))
+
+    def _show(rel: str) -> dict[str, Any] | None:
+        out = subprocess.run(["git", "show", f"{ref}:{rel}"], cwd=ROOT, capture_output=True)
+        return None if out.returncode != 0 else json.loads(out.stdout.decode("utf-8"))
+
+    paths = listing.stdout.decode("utf-8").split()
+    meta = _show(f"{prefix}/meta.json")
+    cities = _show(f"{prefix}/cities.json")
+    if meta is None or cities is None:
+        return None
+
+    data: dict[str, Any] = dict(meta)
+    data["cities"] = cities["cities"]
+    data["legs"] = []
+    for rel in sorted(p for p in paths if p.startswith(f"{prefix}/legs/")):
+        shard = _show(rel)
+        if shard is not None:
+            data["legs"].extend(shard["legs"])
+    return data
 
 
 def format_delta(cur: dict[str, Any], base: dict[str, Any], ref: str) -> str:
@@ -134,7 +162,7 @@ def main(argv: list[str] | None = None) -> int:
         "'origin/dev'), with a ready-to-paste changelog line.",
     )
     args = parser.parse_args(argv)
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     stats = compute_stats(data)
     if args.json:
         out = dict(stats)
@@ -154,7 +182,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.since:
         base = _load_ref(args.since)
         if base is None:
-            print(f"\n(could not load world.json at ref {args.since!r})")
+            print(f"\n(could not load the world source at ref {args.since!r})")
         else:
             print("\n" + format_delta(stats, compute_stats(base), args.since))
     return 0

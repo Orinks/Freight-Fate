@@ -1,4 +1,4 @@
-"""One-shot migration: rekey ``world.json`` cities to stable slug keys.
+"""One-shot migration: rekey the world source's cities to stable slug keys.
 
 The city dict key doubles as the spoken city name today, which breaks the
 moment two cities share a name (Jackson MS vs Jackson TN) or the map leaves
@@ -29,13 +29,13 @@ After running, regenerate the split tree: ``uv run python tools/index_world.py``
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Any
 
+from world_source import WORLD_SOURCE_PATH, load_world, save_world
+
 ROOT = Path(__file__).resolve().parents[1]
-WORLD_PATH = ROOT / "src" / "freight_fate" / "data" / "world.json"
 ALIASES_PATH = ROOT / "src" / "freight_fate" / "data" / "legacy_aliases.py"
 
 COUNTRY_NAMES = {"US": "United States"}
@@ -124,7 +124,7 @@ def migrate(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, str]]:
     if already:
         raise SystemExit(
             f"Refusing to migrate: {len(already)} cities already carry spoken_city "
-            f"(first: {already[0]!r}). world.json looks migrated."
+            f"(first: {already[0]!r}). The world source looks migrated."
         )
 
     name_to_slug: dict[str, str] = {}
@@ -213,11 +213,11 @@ def render_aliases(name_to_slug: dict[str, str]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Rekey world.json cities to slugs.")
+    parser = argparse.ArgumentParser(description="Rekey the world source's cities to slugs.")
     parser.add_argument("--dry-run", action="store_true", help="Report without writing.")
     args = parser.parse_args(argv)
 
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     migrated, name_to_slug = migrate(data)
 
     states = sorted({c["state"] for c in migrated["cities"].values()})
@@ -227,9 +227,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.dry_run:
         return 0
 
-    WORLD_PATH.write_text(json.dumps(migrated, indent=2) + "\n", encoding="utf-8")
+    written = save_world(migrated)
     ALIASES_PATH.write_text(render_aliases(name_to_slug), encoding="utf-8")
-    print(f"Wrote {WORLD_PATH.relative_to(ROOT)} and {ALIASES_PATH.relative_to(ROOT)}.")
+    print(
+        f"Wrote {written} shard(s) under {WORLD_SOURCE_PATH.relative_to(ROOT)} "
+        f"and {ALIASES_PATH.relative_to(ROOT)}."
+    )
     print("Now run: uv run python tools/index_world.py")
     return 0
 

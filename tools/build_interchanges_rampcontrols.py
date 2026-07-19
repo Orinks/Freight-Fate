@@ -370,18 +370,18 @@ def run_ramp_controls(data: dict[str, Any], args: argparse.Namespace) -> int:
             baked_total += baked
             baked_legs += 1
         if args.write and baked_legs and processed % 10 == 0:
-            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-            print(f"    ...checkpointed world.json ({baked_legs} legs so far)", flush=True)
+            save_world(data)
+            print(f"    ...checkpointed the world source ({baked_legs} legs so far)", flush=True)
 
     print(
         f"\n{processed} legs processed, {baked_legs} touched, "
         f"{baked_total} interchanges given ramp controls."
     )
     if args.write and baked_legs:
-        WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-        print(f"Wrote {WORLD_PATH}")
+        save_world(data)
+        print(f"Wrote {WORLD_SOURCE_PATH}")
     elif not args.write:
-        print("(dry run; pass --write to update world.json)")
+        print("(dry run; pass --write to update the world source)")
     return 0
 
 

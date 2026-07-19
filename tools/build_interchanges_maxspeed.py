@@ -527,15 +527,15 @@ def run_maxspeed(data: dict[str, Any], args: argparse.Namespace) -> int:
         else:
             print("    no on-corridor maxspeed; keeping the heuristic", flush=True)
         if args.write and baked and processed % 10 == 0:
-            WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-            print(f"    ...checkpointed world.json ({baked} legs so far)", flush=True)
+            save_world(data)
+            print(f"    ...checkpointed the world source ({baked} legs so far)", flush=True)
 
     print(f"\n{processed} legs processed, {baked} given a maxspeed profile.")
     if args.write and baked:
-        WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-        print(f"Wrote {WORLD_PATH}")
+        save_world(data)
+        print(f"Wrote {WORLD_SOURCE_PATH}")
     elif not args.write:
-        print("(dry run; pass --write to update world.json)")
+        print("(dry run; pass --write to update the world source)")
     return 0
 
 

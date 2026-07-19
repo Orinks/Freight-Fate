@@ -8,11 +8,9 @@ set (the corridor's internal legs) plus, optionally, legs reaching one hop
 out. Output is ready to paste as a "Built legs" block in a Ready_*.md sheet.
 """
 
-import json
 import sys
-from pathlib import Path
 
-WORLD = Path(__file__).resolve().parents[1] / "src/freight_fate/data/world.json"
+from world_source import load_world
 
 
 def main() -> int:
@@ -22,7 +20,7 @@ def main() -> int:
         print("give city slugs (optionally --neighbors)", file=sys.stderr)
         return 2
     cities = set(args)
-    w = json.loads(WORLD.read_text(encoding="utf-8"))
+    w = load_world()
     legs = w["legs"]
     internal, reaching = [], []
     for lg in legs:

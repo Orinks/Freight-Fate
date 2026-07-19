@@ -26,13 +26,13 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-WORLD = ROOT / "src" / "freight_fate" / "data" / "world.json"
 sys.path.insert(0, str(ROOT / "tools"))
 from enrich_routes_landmarks import (  # noqa: E402
     NARRATABLE_OSM_TAGS,
     classify_narratable_feature,
     spoken_landmark_text,
 )
+from world_source import load_world, save_world  # noqa: E402
 
 OVERPASS_URL = os.environ.get("OVERPASS_URL", "http://localhost:12347/api/interpreter")
 R_MI = 3958.8
@@ -301,7 +301,7 @@ def main():
     a = ap.parse_args()
     only = {frozenset(p.split(":")) for p in a.only.split(";") if ":" in p}
 
-    d = json.loads(WORLD.read_text(encoding="utf-8"))
+    d = load_world()
     total_lm = updated = 0
     for leg in d["legs"]:
         if only and frozenset((leg["from"], leg["to"])) not in only:
@@ -321,7 +321,7 @@ def main():
             updated += 1
     print(f"landmarks: {total_lm} across {updated} legs")
     if a.write:
-        WORLD.write_text(json.dumps(d, indent=2) + "\n", encoding="utf-8")
+        save_world(d)
         print("WRITTEN")
     else:
         print("(dry run)")

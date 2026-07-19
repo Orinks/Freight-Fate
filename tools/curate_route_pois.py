@@ -2,7 +2,7 @@
 
 This is a development-time helper. It fetches public, no-key operator locator
 feeds, projects candidate truck-relevant stops onto checked-in route geometry,
-and can write explicit curated POIs into ``world.json``. Runtime gameplay stays
+and can write explicit curated POIs into the world source. Runtime gameplay stays
 offline and reads only the checked-in result.
 """
 
@@ -19,7 +19,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from freight_fate.data.world import WORLD_PATH, minimum_curated_pois
+from world_source import WORLD_SOURCE_PATH, load_world, save_world
+
+from freight_fate.data.world import minimum_curated_pois
 
 LOVES_ENDPOINT = "https://www.loves.com/api/fetch_stores"
 PILOT_ENDPOINT = "https://locations.pilotflyingj.com/search"
@@ -327,7 +329,7 @@ MANUAL_CORRIDOR_POIS: dict[tuple[str, str], tuple[dict[str, Any], ...]] = {
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--world", type=Path, default=WORLD_PATH)
+    parser.add_argument("--world-source", type=Path, default=WORLD_SOURCE_PATH)
     parser.add_argument("--radius-miles", type=float, default=20.0)
     parser.add_argument("--write-world", action="store_true")
     parser.add_argument("--json", action="store_true")
@@ -360,7 +362,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    data = json.loads(args.world.read_text(encoding="utf-8"))
+    data = load_world(args.world_source)
     if args.jasons_law_only:
         candidates = fetch_jasons_law_candidates(args.jasons_law_file)
         # Records that describe an already checked-in stop must not come back
@@ -374,7 +376,7 @@ def main() -> None:
             k: v for k, v in annotate_report.items() if k not in {"annotations", "matched_keys"}
         }
         if args.write_world:
-            args.world.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+            save_world(data, args.world_source)
         if args.json:
             print(json.dumps(report, indent=2))
         else:
@@ -389,7 +391,7 @@ def main() -> None:
         candidates = fetch_jasons_law_candidates(args.jasons_law_file)
         report = annotate_truck_parking(data, candidates)
         if args.write_world:
-            args.world.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+            save_world(data, args.world_source)
         if args.json:
             print(json.dumps(report, indent=2))
         else:
@@ -404,7 +406,7 @@ def main() -> None:
         candidates += fetch_jasons_law_candidates(args.jasons_law_file)
     report = curate_world(data, candidates, args.radius_miles)
     if args.write_world:
-        args.world.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+        save_world(data, args.world_source)
     if args.json:
         print(json.dumps(report, indent=2))
     else:

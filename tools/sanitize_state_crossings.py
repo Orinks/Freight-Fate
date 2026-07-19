@@ -1,4 +1,4 @@
-"""Offline cleanup for state-line crossing noise baked into world.json.
+"""Offline cleanup for state-line crossing noise baked into the world source.
 
 Highways that run alongside a river border picked up phantom state crossings
 when corridor geometry was sampled vertex-by-vertex against a *simplified* state
@@ -15,14 +15,13 @@ state sequence from the baked crossings, collapses short round-trip excursions,
 and rewrites ``state_crossings`` / ``state_miles`` to match. Legs that are
 already clean are left byte-for-byte untouched.
 
-    python tools/sanitize_state_crossings.py            # rewrite world.json
+    python tools/sanitize_state_crossings.py            # rewrite the world source
     python tools/sanitize_state_crossings.py --check    # report only, exit 1 if dirty
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -30,12 +29,12 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from enrich_routes import (  # noqa: E402  (path shim above must run first)
-    WORLD_PATH,
     coalesce_short_states,
     crossings_from_sequence,
     spoken_state,
     state_miles_from_sequence,
 )
+from world_source import WORLD_SOURCE_PATH, load_world, save_world  # noqa: E402
 
 
 def _sequence_from_crossings(
@@ -107,11 +106,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    data = json.loads(WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     changes = sanitize(data)
 
     if not changes:
-        print("No phantom state crossings found; world.json is clean.")
+        print("No phantom state crossings found; the world source is clean.")
         return 0
 
     total_dropped = sum(change["dropped"] for change in changes)
@@ -127,8 +126,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.check:
         return 1
 
-    WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-    print(f"\nWrote {WORLD_PATH}")
+    save_world(data)
+    print(f"\nWrote {WORLD_SOURCE_PATH}")
     return 0
 
 

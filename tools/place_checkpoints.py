@@ -7,8 +7,8 @@ driving-hgv polyline, reject candidates that sit too far off the route (the
 sanity gate against wrong or misplaced towns), and emit checkpoint entries
 whose name/state are spoken text.
 
-Dry-run by default; ``--write`` merges the accepted checkpoints into
-``world.json`` (sorted by mile, deduped by name) and drops the synthetic
+Dry-run by default; ``--write`` merges the accepted checkpoints into the
+world source (sorted by mile, deduped by name) and drops the synthetic
 "corridor between" placeholder once at least one real checkpoint covers the
 leg. Run ``tools/index_world.py`` after writing, as with any world edit.
 
@@ -23,7 +23,6 @@ Example:
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -33,6 +32,7 @@ if str(TOOLS_DIR) not in sys.path:
     sys.path.insert(0, str(TOOLS_DIR))
 
 import enrich_routes as er  # noqa: E402  (needs sys.path above)
+from world_source import load_world, save_world  # noqa: E402
 
 # A candidate further off the route than this is probably the wrong town, a
 # coordinate typo, or a place on a different road -- reject it rather than
@@ -139,7 +139,7 @@ def main(argv: list[str] | None = None) -> int:
         default=MAX_OFF_ROUTE_MI,
         help="Reject candidates further off the route than this (sanity gate).",
     )
-    parser.add_argument("--write", action="store_true", help="Merge into world.json.")
+    parser.add_argument("--write", action="store_true", help="Merge into the world source.")
     parser.add_argument("--cache-dir", default=str(er.CACHE_PATH))
     parser.add_argument("--rate-limit", type=float, default=1.0)
     args = parser.parse_args(argv)
@@ -150,7 +150,7 @@ def main(argv: list[str] | None = None) -> int:
             f"Needs the {er.ORS_API_KEY_ENV} environment variable and the "
             "tooling group (uv run --group tooling ...)."
         )
-    data = json.loads(er.WORLD_PATH.read_text(encoding="utf-8"))
+    data = load_world()
     from_city, _, to_city = args.leg.partition(":")
     leg = next(
         (
@@ -166,7 +166,7 @@ def main(argv: list[str] | None = None) -> int:
             for candidate_leg in data["legs"]
         )
         hint = " (the reverse direction exists -- at_mi is measured from 'from')" if reverse else ""
-        raise SystemExit(f"No leg {args.leg!r} in world.json{hint}")
+        raise SystemExit(f"No leg {args.leg!r} in the world source{hint}")
 
     parsed = er._cached_ors_route(data, leg, Path(args.cache_dir), args.rate_limit, api_key)
     leg_miles = float(leg["miles"])
@@ -207,7 +207,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ACCEPTED {cand['name']} at mile {at_mi} ({off_mi} mi off-route)")
 
     if not accepted:
-        print("Nothing accepted; world.json unchanged.")
+        print("Nothing accepted; the world source is unchanged.")
         return 1
     corridor = leg.setdefault("corridor", {})
     merged = merge_checkpoints(list(corridor.get("checkpoints", [])), accepted)
@@ -216,8 +216,8 @@ def main(argv: list[str] | None = None) -> int:
     for checkpoint in merged:
         print(f"  {checkpoint['at_mi']:>7.1f}  {checkpoint['name']}, {checkpoint['state']}")
     if args.write:
-        er.WORLD_PATH.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-        print("\nWrote world.json -- now run: uv run python tools/index_world.py")
+        save_world(data)
+        print("\nWrote the world source -- now run: uv run python tools/index_world.py")
     else:
         print("\nDry run (pass --write to save).")
     return 0

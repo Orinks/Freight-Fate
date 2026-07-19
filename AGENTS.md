@@ -61,10 +61,15 @@ code, in the same change:
 
 ## World and route data
 
-- The build tools edit `src/freight_fate/data/world.json`; the game loads the
-  split `src/freight_fate/data/world_data/` tree. After editing `world.json`,
-  regenerate with `uv run python tools/index_world.py` and verify with
+- The build tools edit `src/freight_fate/data/world_source/`; the game loads
+  the indexed `src/freight_fate/data/world_data/` tree. After editing the
+  source, regenerate with `uv run python tools/index_world.py` and verify with
   `--check` -- CI and tests expect the two in sync.
+- Never read or write the source files directly. Go through
+  `tools/world_source.py`: `load_world()` returns the whole world as one dict,
+  `save_world(data)` writes it back as per-state shards. Both trees are
+  sharded by the state a leg starts in (`legs/TX.json`) so a one-leg edit is a
+  small reviewable diff instead of a 60 MB blob.
 - Data must be deterministic and load offline. Add source notes for
   real-world facilities, stops, and limits. No raw OpenStreetMap tags in
   player-facing names.

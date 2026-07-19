@@ -25,8 +25,9 @@ transponder/settlement accounting, not as a manual stop at every gantry.
 
 ## Schema
 
-Route stops and corridor details live on a leg in
-`src/freight_fate/data/world.json`:
+Route stops and corridor details live on a leg in the world source
+(`src/freight_fate/data/world_source/legs/<STATE>.json`, reached through
+`tools/world_source.py`):
 
 ```json
 {
