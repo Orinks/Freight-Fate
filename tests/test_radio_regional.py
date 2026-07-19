@@ -3,6 +3,7 @@
 from importlib import resources
 
 import pytest
+from asset_helpers import asset_exists
 
 from freight_fate.models.jobs import CARGO_CATALOG, Job
 from freight_fate.music import (
@@ -49,14 +50,14 @@ def test_regional_playlists_have_generated_music_on_disk():
     for playlist, tracks in STATION_PLAYLISTS.items():
         assert tracks, playlist
         for track in tracks:
-            assert (sounds / f"{track.key}.ogg").is_file(), track.key
+            assert asset_exists(sounds, track.key), track.key
 
 
 def test_host_segments_have_generated_voice_clips_on_disk():
     sounds = resources.files("freight_fate.assets") / "sounds" / "music"
     assert len(ALL_HOST_SEGMENTS) == 12
     for segment in ALL_HOST_SEGMENTS:
-        assert (sounds / f"{segment.key}.ogg").is_file(), segment.key
+        assert asset_exists(sounds, segment.key), segment.key
     static = resources.files("freight_fate.assets") / "sounds" / "radio" / "static_burst.ogg"
     assert static.is_file()
 

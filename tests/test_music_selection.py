@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+from asset_helpers import asset_exists, find_asset
+
 from freight_fate.music import (
     ALL_MUSIC_TRACKS,
     DAY_DRIVE_TRACKS,
@@ -489,9 +491,7 @@ def test_night_haul_rotates_in_night_driving_pool(monkeypatch):
 
 def test_all_cataloged_music_tracks_exist():
     missing = [
-        track.key
-        for track in ALL_MUSIC_TRACKS
-        if not (ASSETS / "music" / f"{track.key}.ogg").exists()
+        track.key for track in ALL_MUSIC_TRACKS if not asset_exists(ASSETS / "music", track.key)
     ]
     assert not missing
 
@@ -501,7 +501,9 @@ def test_all_cataloged_music_tracks_are_at_least_one_minute():
 
     too_short = []
     for track in ALL_MUSIC_TRACKS:
-        info = sf.info(str(ASSETS / "music" / f"{track.key}.ogg"))
+        path = find_asset(ASSETS / "music", track.key)
+        assert path is not None, track.key
+        info = sf.info(str(path))
         duration = info.frames / info.samplerate
         if duration < 60.0:
             too_short.append((track.key, duration))

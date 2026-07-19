@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass, field
 
+from asset_helpers import asset_exists
+
 from freight_fate import speech as speech_module
 from freight_fate.audio import ASSETS, AudioEngine
 from freight_fate.speech import REFRESH_INTERVAL_S, Speech, pick_backend, pick_event_backend
@@ -746,9 +748,7 @@ def test_all_referenced_assets_exist():
     for py in src.rglob("*.py"):
         keys |= set(pattern.findall(py.read_text(encoding="utf-8")))
     assert keys, "expected to find sound keys in source"
-    missing = [
-        k for k in keys if not ((ASSETS / f"{k}.wav").exists() or (ASSETS / f"{k}.ogg").exists())
-    ]
+    missing = [k for k in keys if not asset_exists(ASSETS, k)]
     assert not missing, f"missing sound files: {missing}"
 
 
@@ -756,4 +756,4 @@ def test_music_tracks_exist():
     from freight_fate.music import ALL_MUSIC_TRACKS
 
     for track in (track.key for track in ALL_MUSIC_TRACKS):
-        assert (ASSETS / "music" / f"{track}.ogg").exists(), track
+        assert asset_exists(ASSETS / "music", track), track
