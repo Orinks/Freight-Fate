@@ -494,3 +494,87 @@ def test_update_exit_maintains_the_controlled_ramp_flag():
         assert not d.trip.controlled_ramp
     finally:
         app.shutdown()
+
+
+def test_stop_bar_query_names_light_and_distance():
+    # Owner playtest 2026-07-19: "where's the bar, you never know." S must
+    # answer with the light phase and the gap, any time the driver asks.
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _on_ramp(d, "signal", red=True, mph=20.0)
+        d._ramp_mi = RAMP_ACCESS_MI + 0.1  # ~530 feet short of the bar
+        text = d._ramp_light_query_text()
+        assert text is not None
+        assert "red" in text and "feet" in text and "stop bar" in text
+
+        spoken = []
+        app.ctx.say = lambda t, interrupt=True: spoken.append(t)
+        d._speak_speed_limit()
+        assert spoken and "stop bar" in spoken[0]
+
+        # Off the ramp, S goes back to the posted limit.
+        d._ramp_mi = None
+        assert d._ramp_light_query_text() is None
+    finally:
+        app.shutdown()
+
+
+def test_rolling_countdown_speaks_each_milestone_once():
+    from freight_fate.app import App
+    from freight_fate.states.driving import RAMP_GAP_MILESTONES_FT
+
+    app = App()
+    try:
+        d = _driving(app)
+        _on_ramp(d, "signal", red=True, mph=15.0)
+        spoken = []
+        app.ctx.say_event = lambda t, interrupt=True: spoken.append(t)
+        for feet in (900, 450, 250, 100):
+            d._ramp_mi = RAMP_ACCESS_MI + feet / 5280.0
+            d._update_ramp_gap_countdown()
+            d._update_ramp_gap_countdown()  # same gap again: no repeat
+        bar_calls = [t for t in spoken if "to the bar" in t]
+        assert len(bar_calls) == len(RAMP_GAP_MILESTONES_FT)
+        assert bar_calls[0] == "1000 feet to the bar."
+        assert bar_calls[-1] == "150 feet to the bar."
+
+        # Stopped: the countdown yields to the stopped-driver guidance.
+        spoken.clear()
+        d.truck.velocity_mps = 0.0
+        d._ramp_gap_milestones_said.clear()
+        d._update_ramp_gap_countdown()
+        assert not spoken
+    finally:
+        app.shutdown()
+
+
+def test_bar_ticks_speed_up_as_the_bar_closes():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _on_ramp(d, "signal", red=True, mph=10.0)
+        played = []
+        d.ctx.audio.play = lambda *a, **k: played.append(a)
+
+        def ticks_over(feet, seconds=3.0, dt=0.05):
+            played.clear()
+            d._ramp_mi = RAMP_ACCESS_MI + feet / 5280.0
+            d._ramp_bar_tick_timer = 0.0
+            for _ in range(int(seconds / dt)):
+                d._update_ramp_bar_ticks(dt)
+            return len(played)
+
+        far, near = ticks_over(280), ticks_over(30)
+        assert near > far > 0
+
+        # Beyond the range, and at a standstill, the tick is silent.
+        assert ticks_over(600) == 0
+        d.truck.velocity_mps = 0.0
+        assert ticks_over(50) == 0
+    finally:
+        app.shutdown()

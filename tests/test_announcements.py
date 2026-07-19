@@ -181,11 +181,13 @@ def test_curve_callout_setting_controls_the_single_automatic_announcement(monkey
         )
 
         d._handle_trip_event(event)
-        assert calls == [(event.message, False)]
+        # Curve calls interrupt: queued behind chatter they arrived with the
+        # bend seconds away (owner's AZ-260 log, 2026-07-19).
+        assert calls == [(event.message, True)]
 
         app.ctx.settings.curve_callouts = False
         d._handle_trip_event(event)
-        assert calls == [(event.message, False)]
+        assert calls == [(event.message, True)]
     finally:
         app.shutdown()
 

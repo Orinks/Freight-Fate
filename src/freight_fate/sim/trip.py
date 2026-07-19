@@ -26,12 +26,22 @@ from .weather import WeatherSystem
 STOP_AHEAD_LOOKAHEAD_MI = 5.0
 LOCAL_TURN_LOOKAHEAD_MI = 0.3  # street maneuvers announce at block scale, not highway scale
 
-PACENOTE_REACTION_S = 5.0
-PACENOTE_BRAKE_MPH_PER_S = 3.0
+# The reaction allowance covers hearing the call out loud (the sentence
+# itself takes several seconds through a screen reader), orienting by ear,
+# and moving a foot to the brake -- audio-first reaction is slower than a
+# sighted glance at a sign. The comfortable brake rate is a loaded rig's,
+# not a car's. Retuned from the owner's AZ-260 run (2026-07-19): at the
+# posted 55 the old floor left too little road.
+PACENOTE_REACTION_S = 8.0
+PACENOTE_BRAKE_MPH_PER_S = 2.5
 PACENOTE_MARGIN_MPH = 3.0
 PACENOTE_GENTLE_MARGIN_MPH = 8.0
 PACENOTE_MIN_LEAD_MI = 0.33
 PACENOTE_MAX_LEAD_MI = 1.5
+# Adaptive floor: never call a curve with less than this many seconds of
+# travel at the current speed. A fixed minimum distance shrinks, in time,
+# exactly when speed makes the warning matter most.
+PACENOTE_LEAD_FLOOR_S = 30.0
 
 # Speed-limit lookahead (the co-driver warns before a big posted drop, the
 # same way she calls a curve): only drops of at least this size get a
@@ -699,7 +709,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         react_mi = speed_mph * PACENOTE_REACTION_S / 3600.0
         brake_s = over / PACENOTE_BRAKE_MPH_PER_S
         brake_mi = (speed_mph + advisory_mph) / 2.0 * brake_s / 3600.0
-        return min(PACENOTE_MAX_LEAD_MI, max(PACENOTE_MIN_LEAD_MI, react_mi + brake_mi))
+        floor_mi = max(PACENOTE_MIN_LEAD_MI, speed_mph * PACENOTE_LEAD_FLOOR_S / 3600.0)
+        return min(PACENOTE_MAX_LEAD_MI, max(floor_mi, react_mi + brake_mi))
 
     def _check_curves(self) -> None:
         """Emit a CURVE event when approaching a meaningful curve."""

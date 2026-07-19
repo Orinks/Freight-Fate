@@ -149,7 +149,12 @@ class DrivingEventMixin:
                     interrupt=True,
                 )
             else:
-                self.ctx.say_event(message, interrupt=False)
+                # Interrupt, always: a pacenote queued behind landmark chatter
+                # arrived with the bend three seconds away instead of a
+                # quarter mile (owner's AZ-260 log, 2026-07-19 -- the words
+                # were honest when emitted and stale when finally spoken).
+                # Ambient lines can wait; the road cannot.
+                self.ctx.say_event(message, interrupt=True)
         elif kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
             self._speak_ambient_event(event.message)
         elif kind == TripEventKind.ARRIVED:
@@ -964,6 +969,8 @@ class DrivingEventMixin:
         self._ramp_terminal_done = self._ramp_control == "none"
         self._ramp_waiting_at_light = False
         self._ramp_creep_prompt_said = False
+        self._ramp_gap_milestones_said: set[int] = set()
+        self._ramp_bar_tick_timer = 0.0
 
     def _ramp_light_phase(self) -> str:
         cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
@@ -985,6 +992,8 @@ class DrivingEventMixin:
             return
         self._ramp_light_timer += dt
         self._update_ramp_queue_guidance()
+        self._update_ramp_gap_countdown()
+        self._update_ramp_bar_ticks(dt)
         phase = self._ramp_light_phase()
         if not self._ramp_light_announced or phase == self._ramp_light_last_phase:
             return
@@ -1066,6 +1075,71 @@ class DrivingEventMixin:
                 "at the stop bar for green."
             )
         self.ctx.say_event(message, interrupt=False)
+
+    def _update_ramp_gap_countdown(self) -> None:
+        """Count the stop bar down while the truck is rolling toward it.
+
+        The stopped-driver prompt above names the gap only at a standstill,
+        so a rolling driver had no idea where the bar was: the owner crept
+        1300 feet in stop-and-listen hops across three light cycles
+        (playtest log, 2026-07-19). Rolling milestone calls give the bar a
+        position the same way the exit countdown gives the exit one."""
+        if not self._ramp_light_announced or self._ramp_waiting_at_light:
+            return
+        if self._ramp_mi is None or self._ramp_mi <= RAMP_ACCESS_MI:
+            return
+        if self.truck.speed_mph <= RED_STOP_MPH:
+            return
+        gap_mi = self._ramp_mi - RAMP_ACCESS_MI
+        thresholds = (
+            RAMP_GAP_MILESTONES_FT
+            if self.ctx.settings.imperial_units
+            else RAMP_GAP_MILESTONES_M
+        )
+        unit_mi = 1.0 / 5280.0 if self.ctx.settings.imperial_units else 1.0 / 1609.344
+        unit_word = "feet" if self.ctx.settings.imperial_units else "meters"
+        for threshold in thresholds:
+            if gap_mi <= threshold * unit_mi and threshold not in self._ramp_gap_milestones_said:
+                self._ramp_gap_milestones_said.add(threshold)
+                self.ctx.say_event(f"{threshold} {unit_word} to the bar.", interrupt=False)
+                return
+
+    def _update_ramp_bar_ticks(self, dt: float) -> None:
+        """Parking-sensor tick for the stop bar's last few hundred feet.
+
+        Rate carries the distance -- faster is closer -- and silence means
+        stopped, so the cue never nags a driver holding at the bar. Center
+        pan, unlike the side-panned curve cues, so the two never read as
+        the same instrument (owner ask, 2026-07-19)."""
+        if not self._ramp_light_announced or self._ramp_waiting_at_light:
+            return
+        if self._ramp_mi is None or self._ramp_terminal_done:
+            return
+        if self.truck.speed_mph <= RED_STOP_MPH:
+            return
+        gap_mi = self._ramp_mi - RAMP_ACCESS_MI
+        if gap_mi > RAMP_BAR_TICK_RANGE_MI or gap_mi < 0:
+            return
+        closeness = 1.0 - gap_mi / RAMP_BAR_TICK_RANGE_MI
+        period = RAMP_BAR_TICK_SLOW_S - closeness * (RAMP_BAR_TICK_SLOW_S - RAMP_BAR_TICK_FAST_S)
+        self._ramp_bar_tick_timer += dt
+        if self._ramp_bar_tick_timer >= period:
+            self._ramp_bar_tick_timer = 0.0
+            self.ctx.audio.play("ui/tick", volume=0.5)
+
+    def _ramp_light_query_text(self) -> str | None:
+        """Light phase and bar distance on demand, for the info keys.
+
+        "Stop at the bar" is only an instruction if the bar has a position;
+        a sighted driver reads it off the windshield, so speech must answer
+        the same question whenever the driver asks (owner ask, 2026-07-19)."""
+        if self._ramp_mi is None or self._ramp_control != "signal" or self._ramp_terminal_done:
+            return None
+        phase = self._ramp_light_phase()
+        gap_mi = self._ramp_mi - RAMP_ACCESS_MI
+        if gap_mi <= 0:
+            return f"At the stop bar. The light is {phase}."
+        return f"Light {phase}, about {self._short_distance_text(gap_mi)} to the stop bar."
 
     def _short_distance_text(self, miles: float) -> str:
         """A short gap in round spoken units: feet or meters, never decimals."""

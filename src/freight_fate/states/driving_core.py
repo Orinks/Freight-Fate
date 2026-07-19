@@ -149,6 +149,18 @@ RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 # (cloverleafs). The control comes from baked OSM traffic_signals/stop nodes
 # on the ramp links when available, else a seeded urban/rural heuristic.
 RAMP_ACCESS_MI = 0.12  # terminal-to-driveway stretch at the ramp's end
+# Rolling stop-bar countdown milestones (spoken as each is crossed while
+# moving): the bar needs a position the way an exit does, or a driver
+# stops a quarter mile short and creeps blind (owner playtest, 2026-07-19).
+RAMP_GAP_MILESTONES_FT = (1000, 500, 300, 150)
+RAMP_GAP_MILESTONES_M = (300, 150, 100, 50)
+# Parking-sensor tick for the stop bar (owner ask, 2026-07-19): inside
+# this range a center tick speeds up as the bar closes -- rate carries
+# the distance, silence means stopped. Placeholder ui/tick until the
+# audio-design pass gives the bar its own voice (steering-sound RFC).
+RAMP_BAR_TICK_RANGE_MI = 300.0 / 5280.0
+RAMP_BAR_TICK_SLOW_S = 1.1  # period at the edge of the range
+RAMP_BAR_TICK_FAST_S = 0.15  # period at the bar
 RAMP_CONTROL_ANNOUNCE_MI = 0.38  # where the terminal callout fires on the ramp
 RAMP_LIGHT_RED_S = 12.0  # red phase of the terminal light, real seconds
 RAMP_LIGHT_GREEN_S = 15.0  # green phase: a real minor-leg minimum, crossable from a stop

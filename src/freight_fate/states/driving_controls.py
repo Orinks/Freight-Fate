@@ -512,7 +512,16 @@ class DrivingControlsMixin:
         )
 
     def _speak_speed_limit(self) -> None:
-        """S: the posted limit here, the zone if any, and how far over you are."""
+        """S: the posted limit here, the zone if any, and how far over you are.
+
+        On a signal-controlled ramp the light IS the law here, so S answers
+        with the light and the distance to the stop bar instead -- the
+        driver could never ask "where is the bar" before this (owner
+        playtest, 2026-07-19: five stop-and-listen hops over 1300 feet)."""
+        light = self._ramp_light_query_text()
+        if light is not None:
+            self.ctx.say(light)
+            return
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
         zone = f", in a {reason} zone" if reason else ""
         over = self.truck.speed_mph - limit
@@ -635,10 +644,16 @@ class DrivingControlsMixin:
         self.ctx.say(" ".join(parts))
 
     def _speak_upcoming(self, within_mi: float = 15.0) -> None:
-        """U: what is coming up -- imposed limits, stops, and exits ahead."""
+        """U: what is coming up -- imposed limits, stops, and exits ahead.
+
+        On a signal-controlled ramp the nearest upcoming thing is always
+        the stop bar, so it leads the readout with the light's phase."""
         s = self.ctx.settings
         pos = self.trip.position_mi
         parts: list[str] = []
+        light = self._ramp_light_query_text()
+        if light is not None:
+            parts.append(light.rstrip(".").lower())
         zone = self.trip.next_zone_within(within_mi)
         if zone is not None:
             paired = None

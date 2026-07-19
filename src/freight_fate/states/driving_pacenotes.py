@@ -19,6 +19,10 @@ from __future__ import annotations
 # "then left/right" tail instead of its own later call.
 PACENOTE_LINK_GAP_MI = 0.3
 PACENOTE_MARGIN_MPH = 3.0
+# Below this the quarter-mile rounding would LIE upward: a bend 200 feet
+# out spoken as "a quarter mile" reads as time the driver does not have
+# (owner's AZ-260 log, 2026-07-19). Say "just ahead" instead.
+PACENOTE_JUST_AHEAD_MI = 0.15
 
 _SEVERITY_PHRASE = {
     "hairpin": "Hairpin",
@@ -37,7 +41,12 @@ class DrivingPacenoteMixin:
 
     def _pacenote_text(self, curve, ahead_mi: float, speed_mph: float) -> str:
         s = self.ctx.settings
-        call = f"{self._pacenote_phrase(curve)}, {s.short_distance_text(ahead_mi)}."
+        distance = (
+            "just ahead"
+            if ahead_mi < PACENOTE_JUST_AHEAD_MI
+            else s.short_distance_text(ahead_mi)
+        )
+        call = f"{self._pacenote_phrase(curve)}, {distance}."
         if speed_mph > curve.advisory_mph + PACENOTE_MARGIN_MPH:
             call += f" Advise {s.speed_text(curve.advisory_mph)}."
         linked = self._pacenote_linked(curve)

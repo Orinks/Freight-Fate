@@ -17,6 +17,15 @@
   highway genuinely has nothing -- and some real ones do -- the game
   now tells you the truth instead of inventing a stop.
 
+- **The stop bar at the end of a delivery ramp finally has a
+  position.** Rolling toward the light you now hear the distance count
+  down -- one thousand feet, five hundred, three hundred, one hundred
+  fifty -- and inside the last stretch a soft tick speeds up as the bar
+  closes, parking-sensor style, going quiet when you stop. Press S on
+  the ramp any time to hear the light's color and how far the bar is.
+  No more stopping a quarter mile short and creeping through three
+  greens wondering where the intersection went.
+
 - **The co-driver now warns you before the speed limit drops.** When a
   real posted drop is coming that your speed can't ignore -- a village 30
   at the end of an open 55, a city ring at the end of a fast interstate
@@ -495,6 +504,16 @@
   chatter instead of being interrupted.
 
 ### Fixed
+
+- **Curve calls arrive on time and tell the truth about distance.**
+  A curve warning could get stuck in line behind scenery chatter and
+  reach your ears with the bend seconds away while still saying "a
+  quarter mile." Curve calls now cut ahead of everything less urgent,
+  a bend closer than a few hundred feet says "just ahead" instead of
+  rounding up, and at highway speed every call now comes at least
+  thirty seconds before the bend -- the faster you go, the further out
+  the co-driver reads. If a call ever cuts something off, the comma
+  key steps back through recent speech.
 
 - **Speed-limit calls now know which way the town is.** A limit drop
   just past a city used to say you were approaching it while it shrank

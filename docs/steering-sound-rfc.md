@@ -159,3 +159,18 @@ everything the game speaks.
   drops as genuine merge events. Next map brief.
 - A player-operated turn signal, with unsignaled lane changes as a
   discipline the CB and troopers can notice at higher realism tiers.
+- **Stop-bar proximity earcon (owner playtest, 2026-07-19).** Speech
+  milestones now count the bar down while rolling, and S answers with
+  light + distance on demand -- but the last hundred feet want a
+  parking-sensor tick whose rate rises as the bar closes, going solid
+  at the bar. Same one-shot family as the curve tone ladder, never a
+  continuous steering tone. Parked here for the audio-design pass
+  rather than freelanced, alongside:
+- **A speech priority ladder (owner, 2026-07-19: "I miss stuff").**
+  Curve calls now interrupt (a late pacenote is a lie), which sharpens
+  the underlying problem: ~40 driving call sites use binary interrupt
+  and cut each other. Design wanted: three tiers -- safety (interrupts,
+  never yields), instruction (queued, flushed when stale), ambient
+  (speaks only into silence, DROPPED when stale, never queued) -- plus
+  interrupted-line requeue so a cut instruction finishes later. The
+  comma-key history walk is the recovery net meanwhile.

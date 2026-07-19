@@ -231,3 +231,30 @@ def test_upcoming_lists_the_next_bends(monkeypatch):
         assert "gentle" not in text.lower()
     finally:
         app.shutdown()
+
+
+def test_lead_floor_scales_with_speed():
+    # Owner's AZ-260 run (2026-07-19): at the posted 55 a fixed quarter-mile
+    # floor is seconds, not a warning. The floor is now time-based.
+    from freight_fate.sim.trip import PACENOTE_LEAD_FLOOR_S, Trip
+
+    lead_55 = Trip._curve_pacenote_lead_mi(55.0, 25.0)
+    assert lead_55 >= 55.0 * PACENOTE_LEAD_FLOOR_S / 3600.0
+    # Slow approaches keep the old fixed minimum.
+    assert Trip._curve_pacenote_lead_mi(20.0, 15.0) == pytest.approx(0.33)
+
+
+def test_close_curve_says_just_ahead(monkeypatch):
+    # Sub-quarter-mile distances must never round UP to "a quarter mile":
+    # the words promised time the driver did not have (AZ-260, 2026-07-19).
+    app_module = pytest.importorskip("freight_fate.app")
+    app = app_module.App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        pos = driving.trip.position_mi
+        spoken = _spoken_pacenotes(app, driving, monkeypatch, [_curve(pos + 0.05)], 50.0)
+        assert spoken and "just ahead" in spoken[0]
+        assert "quarter" not in spoken[0]
+    finally:
+        app.shutdown()

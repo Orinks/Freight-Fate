@@ -396,7 +396,7 @@ Driving controls are active while the road view is focused:
 | J | Toggle the engine brake. |
 | H | Hold to sound the horn; release to stop it. |
 | Space | Report speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state. |
-| S | Report the posted speed limit here, the zone if any, and how far over you are. In bend country it adds the bend's advisory speed -- the posted limit and the yellow diamond are different numbers on a real road. |
+| S | Report the posted speed limit here, the zone if any, and how far over you are. In bend country it adds the bend's advisory speed -- the posted limit and the yellow diamond are different numbers on a real road. On a delivery ramp that ends at a traffic light, S answers with the light and the distance to the stop bar instead, since the light is the law there. |
 | D | Report one safe-speed number for right now. Weather grip, an armed exit ramp, and the next bend are already baked into the number. |
 | G | Report the grade under the wheels and whether the truck is holding, pulling, or losing it. |
 | Tab | Open the driving status menu. |

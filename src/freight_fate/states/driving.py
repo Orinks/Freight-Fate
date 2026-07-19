@@ -210,6 +210,8 @@ class DrivingState(
         self._ramp_terminal_done = False
         self._ramp_waiting_at_light = False
         self._ramp_creep_prompt_said = False
+        self._ramp_gap_milestones_said: set[int] = set()
+        self._ramp_bar_tick_timer = 0.0
         self._destination_exit_taken = False
         self._missed_destination_exit_said = False
         self._destination_exit_announced_key = ""
