@@ -98,6 +98,9 @@ class DrivingState(
         self._last_announced_mph = 0.0
         self._speeding_timer = 0.0
         self.speeding_strikes = 0
+        # Give a slowing driver time to comply after a posted-limit drop.
+        self._enforced_limit_prev: float | None = None
+        self._limit_drop_grace_s = 0.0
         # Trooper pull-overs: a strike inside a patrol window may get you stopped
         # for an immediate ticket, separate from the silent at-delivery strikes.
         self.speeding_tickets = 0

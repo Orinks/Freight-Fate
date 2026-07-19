@@ -39,7 +39,9 @@ def test_app_forces_dummy_video_when_speech_is_disabled():
 
     env = os.environ.copy()
     env["FREIGHT_FATE_NO_SPEECH"] = "1"
-    env["SDL_VIDEODRIVER"] = "windib"
+    # A sentinel proves App replaces a pre-existing non-dummy choice without
+    # risking a visible Windows driver during the subprocess test.
+    env["SDL_VIDEODRIVER"] = "visible-driver-must-not-start"
     env["PYTHONPATH"] = os.pathsep.join(filter(None, ["src", env.get("PYTHONPATH", "")]))
     script = (
         "import pygame; "

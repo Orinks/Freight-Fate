@@ -165,7 +165,7 @@ class DrivingUpdateMixin:
         self._update_hazard(dt)
         self._update_microsleep(keys, dt)
         self._update_overrev(dt)
-        self._update_speeding(dt)
+        self._update_speeding(dt, accelerator_held=accel_held)
         self._update_pull_over(dt)
         if self.tutorial:
             self.tutorial.update(dt, t)
@@ -772,7 +772,7 @@ class DrivingUpdateMixin:
         )
         self.ctx.say_event(message, interrupt=True)
 
-    def _update_speeding(self, dt: float) -> None:
+    def _update_speeding(self, dt: float, *, accelerator_held: bool = False) -> None:
         if self._ramp_mi is not None:
             return  # the ramp is off the highway and unpatrolled
         if self._missed_destination_exit_said and not self._destination_exit_taken:
@@ -780,6 +780,24 @@ class DrivingUpdateMixin:
         if self._pull_over is not None:
             return  # already being pulled over; don't pile on strikes
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        # A loaded truck cannot shed speed the instant a lower-limit sign
+        # takes effect. A driver who releases the throttle gets roughly the
+        # comfortable braking time needed at 2 mph per second, capped so the
+        # grace cannot be used to coast through a whole restricted zone.
+        if self._enforced_limit_prev is not None and limit < self._enforced_limit_prev:
+            grace = (self.truck.speed_mph - limit) / 2.0
+            self._limit_drop_grace_s = max(self._limit_drop_grace_s, min(15.0, grace))
+        self._enforced_limit_prev = limit
+        if self._limit_drop_grace_s > 0.0:
+            self._limit_drop_grace_s = max(0.0, self._limit_drop_grace_s - dt)
+            # Use the current key/trigger position, not smoothed truck
+            # throttle. Immediately after releasing Up the applied throttle
+            # is still ramping down, but the driver has already begun coasting.
+            if accelerator_held:
+                self._limit_drop_grace_s = 0.0
+            else:
+                self._speeding_timer = 0.0
+                return
         if self.truck.speed_mph > limit + SPEEDING_LEEWAY_MPH:
             if (
                 self._cruise_mph is not None

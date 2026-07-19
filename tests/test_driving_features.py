@@ -1391,7 +1391,7 @@ def test_destination_exit_suppresses_matching_interchange_gps_cue(monkeypatch):
         app.shutdown()
 
 
-def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch):
+def test_missed_destination_exit_reroutes_every_time(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import DrivingState
 
@@ -1401,19 +1401,39 @@ def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch)
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        driving.trip.position_mi = driving.trip.total_miles
-        driving.trip.finished = True
-        driving.truck.velocity_mps = 0.0
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        reroute_distances = []
 
-        driving.update(1 / 60)
+        for _ in range(2):
+            driving.trip.position_mi = driving.trip.total_miles
+            driving.trip.finished = True
+            driving.truck.velocity_mps = 20.0
 
-        assert isinstance(app.state, DrivingState)
-        assert not driving.trip.finished
-        assert driving.trip.position_mi < driving.trip.total_miles
-        assert driving._destination_exit_stop() is not None
-        assert "missed the destination exit" in events[-1].lower()
-        assert "safe turnaround" in events[-1].lower()
-        assert "back up" not in events[-1].lower()
+            driving.update(1 / 60)
+
+            assert isinstance(app.state, DrivingState)
+            assert not driving.trip.finished
+            assert driving.trip.position_mi < stop.at_mi
+            reroute_distances.append(stop.at_mi - driving.trip.position_mi)
+
+            driving.trip.position_mi = stop.at_mi - 1.0
+            driving._check_destination_exit()
+            assert "destination exit" in events[-1].lower()
+            driving.handle_event(key_event(pygame.K_x))
+            assert driving._exit_stop is not None
+            assert driving._exit_stop.type == "delivery_destination"
+            driving.handle_event(key_event(pygame.K_x))
+            assert driving._exit_stop is None
+
+        missed_events = [
+            event for event in events if "missed the destination exit" in event.lower()
+        ]
+        assert len(missed_events) == 2
+        assert len([event for event in events if "destination exit" in event.lower()]) >= 4
+        assert "safe turnaround" in missed_events[-1].lower()
+        assert "back up" not in missed_events[-1].lower()
+        assert min(reroute_distances) >= 5.0
     finally:
         app.shutdown()
 

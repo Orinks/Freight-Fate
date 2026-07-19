@@ -2,9 +2,12 @@
 
 import os
 
-os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
-os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
-os.environ.setdefault("FREIGHT_FATE_NO_SPEECH", "1")
+# Tests must never inherit a visible desktop/audio driver from the launching
+# shell. Force the headless settings so running the suite cannot flash Freight
+# Fate windows or speak over the user.
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+os.environ["SDL_AUDIODRIVER"] = "dummy"
+os.environ["FREIGHT_FATE_NO_SPEECH"] = "1"
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pytest

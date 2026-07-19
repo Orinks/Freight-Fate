@@ -816,16 +816,22 @@ class DrivingEventMixin:
         self.trip.finished = False
         self._exit_stop = None
         self._cancel_cruise()
-        if self._missed_destination_exit_said:
-            return
-        self._missed_destination_exit_said = True
+        if exit_details is None:
+            # With no exit to loop back to, say the recovery instruction once
+            # instead of repeating it every frame.
+            if self._missed_destination_exit_said:
+                return
+            self._missed_destination_exit_said = True
         reroute_text = (
             "Continue to the next safe turnaround. Dispatch reroutes you back "
             "onto the approach; take the destination exit when it comes up."
         )
         if exit_details is not None:
+            # Every miss must reposition the trip. The old say-once guard
+            # swallowed a second miss and left the truck stuck at zero miles.
+            self._missed_destination_exit_said = True
             self.trip.game_minutes += 20.0
-            self.trip.position_mi = max(0.0, exit_details[0] - 1.0)
+            self.trip.position_mi = max(0.0, exit_details[0] - self._exit_window_mi())
             self._destination_exit_announced_key = None
             if self._terse_speech():
                 reroute_text = "Safe turnaround. Destination exit ahead again."

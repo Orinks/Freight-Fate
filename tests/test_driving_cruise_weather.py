@@ -929,3 +929,79 @@ def test_real_weather_applies_and_awards_live_condition(monkeypatch):
         assert "rain_driver" in driving.ctx.profile.achievements
     finally:
         app.shutdown()
+
+
+def test_limit_drop_earns_braking_grace(monkeypatch):
+    """A slowing driver gets compliance time after a posted-limit drop."""
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        driving.trip.patrols = []
+        truck = driving.truck
+        truck.velocity_mps = 65.0 / 2.23694
+        truck.throttle = 0.0
+
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (65.0, None))
+        driving._update_speeding(0.1)
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (50.0, None))
+
+        before = driving.speeding_strikes
+        for _ in range(70):
+            driving._update_speeding(0.1)
+        assert driving.speeding_strikes == before
+
+        for _ in range(100):
+            driving._update_speeding(0.1)
+        assert driving.speeding_strikes == before + 1
+
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (35.0, None))
+        truck.throttle = 1.0
+        strikes = driving.speeding_strikes
+        for _ in range(70):
+            driving._update_speeding(0.1, accelerator_held=True)
+        assert driving.speeding_strikes == strikes + 1
+    finally:
+        app.shutdown()
+
+
+def test_limit_drop_grace_uses_released_key_not_smoothed_throttle(monkeypatch):
+    """Releasing Up keeps grace even while applied throttle ramps down."""
+    from freight_fate.app import App
+
+    class Keys:
+        pressed = {pygame.K_UP}
+
+        def __getitem__(self, key):
+            return key in self.pressed
+
+    keys = Keys()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: keys)
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        driving.trip.patrols = []
+        driving.truck.velocity_mps = 65.0 / 2.23694
+        driving.truck.throttle = 1.0
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (65.0, None))
+
+        driving.update(1 / 60)
+        assert driving.truck.throttle > 0.0
+
+        keys.pressed.clear()
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (50.0, None))
+        driving.update(1 / 60)
+
+        assert driving.truck.throttle > 0.0
+        assert driving._limit_drop_grace_s > 0.0
+    finally:
+        app.shutdown()

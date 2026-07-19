@@ -355,7 +355,7 @@ def test_main_speech_flush_does_not_stop_event_voice():
     assert main.spoken == [("Fresh menu item.", True)]
 
 
-def test_urgent_event_speech_flushes_event_voice_only():
+def test_urgent_event_speech_uses_backend_interrupt_without_extra_stop():
     s = Speech()
     main = RecordingBackend("NVDA", [], FakeParamFeatures(supports_stop=True))
     event = RecordingBackend("SAPI", [], FakeParamFeatures(supports_stop=True))
@@ -365,7 +365,7 @@ def test_urgent_event_speech_flushes_event_voice_only():
     s.say_event("Brake now.", interrupt=True)
 
     assert main.stop_calls == 0
-    assert event.stop_calls == 1
+    assert event.stop_calls == 0
     assert event.spoken == [("Brake now.", True)]
 
 
@@ -391,7 +391,7 @@ def test_failed_urgent_event_voice_falls_back_without_main_interrupt():
 
     s.say_event("Brake now.", interrupt=True)
 
-    assert event.stop_calls == 1
+    assert event.stop_calls == 0
     assert main.stop_calls == 1
     assert main.spoken == [("Brake now.", False)]
 

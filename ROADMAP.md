@@ -16,8 +16,9 @@
       facility-aware job generation.
 - [x] Playable air-brake pressure mechanics: cold starts need a short air
       build before the parking brake can release, service-brake applications
-      consume air, low-air and spring-brake thresholds are spoken, and active
-      trip saves preserve the air-brake state.
+      consume air, parked engine-off time bleeds reservoir pressure (issue
+      #79), low-air and spring-brake thresholds are spoken, and active trip
+      saves preserve the air-brake state.
 - [x] Dedicated air-system audio assets: the compressor-ready cue now plays a
       real air-dryer purge (`vehicle/air_dryer_purge.ogg`) and the low-air /
       spring-brake warnings a low-air buzzer (`vehicle/low_air_buzzer.ogg`),
@@ -156,6 +157,16 @@ From a batch of player reports:
 
 ### Driving feel
 
+- [x] **Windows event-voice interruption crash (issue #85).** Urgent road
+  alerts now use the speech backend's atomic interrupt-and-speak operation
+  instead of issuing a separate SAPI stop immediately beforehand.
+- [x] **Fair enforcement after lower speed signs (issues #80 and #87).** A
+  driver who releases the accelerator now gets the braking time a loaded truck
+  needs before a lower posted limit can produce a speeding strike. Continuing
+  on the throttle forfeits the grace.
+- [x] **Repeat destination-exit recovery (issues #84 and #90).** Every missed
+  destination exit now reroutes the delivery back through a full approach
+  window; the second miss can no longer leave the trip pinned at zero miles.
 - [x] **Over-rev damage is now audible while it happens.** Sustained redline
   (easiest by backing up fast for a long stretch: the road-coupled RPM pins at
   `max_rpm`) silently ground the truck down 0.8%/s and only surfaced on the

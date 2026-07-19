@@ -60,6 +60,9 @@ class TruckSpecs:
     air_cold_start_psi: float = 55.0
     air_build_idle_psi_per_s: float = 4.0
     air_build_fast_psi_per_s: float = 7.0
+    # Parked-time leakage is compressed with game time so a full overnight
+    # rest returns a charged truck to the same low-air state as a cold start.
+    air_leak_psi_per_game_hour: float = 7.0
     air_loss_primary_per_application_psi: float = 4.5
     air_loss_secondary_per_application_psi: float = 3.5
     air_loss_trailer_per_application_psi: float = 2.0
@@ -362,6 +365,16 @@ class TruckState:
         self.parking_brake = parking_brake
         self.air_compressor_active = False
         self._last_service_air_application = 0.0
+
+    def advance_parked_time(self, game_minutes: float) -> None:
+        """Apply reservoir leakage while an engine-off truck is parked."""
+        if game_minutes <= 0.0 or self.engine_on:
+            return
+        loss = self.specs.air_leak_psi_per_game_hour * game_minutes / 60.0
+        self.primary_air_psi = self._clamp_air_psi(self.primary_air_psi - loss)
+        self.secondary_air_psi = self._clamp_air_psi(self.secondary_air_psi - loss)
+        self.trailer_air_psi = self._clamp_air_psi(self.trailer_air_psi - loss)
+        self._sync_air_compressor()
 
     def set_parking_brake(self) -> None:
         self.parking_brake = True

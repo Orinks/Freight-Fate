@@ -436,6 +436,7 @@ class RestStopState(MenuState):
         self.ctx.say(
             f"{engine_off}You slept {hours} hours in the sleeper berth. "
             f"It is {clock_text(d.trip.local_hour)}. {status} {_deadline_text(d)}"
+            f"{_wake_air_instruction(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
         self.refresh()
@@ -454,6 +455,7 @@ class RestStopState(MenuState):
             f"{engine_off}You slept 10 hours and woke rested. "
             f"It is {clock_text(d.trip.local_hour)}. "
             f"Hours of service reset. {_deadline_text(d)}"
+            f"{_wake_air_instruction(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
         if before_fatigue < hos.FATIGUE_SEVERE:
@@ -475,7 +477,7 @@ class RestStopState(MenuState):
             f"{engine_off}You bed down in the cramped lot, off to the side. "
             f"It is {clock_text(d.trip.local_hour)}. Hours of service "
             f"reset, but the rest was poor and you wake still tired. "
-            f"{_deadline_text(d)}"
+            f"{_deadline_text(d)}{_wake_air_instruction(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
 

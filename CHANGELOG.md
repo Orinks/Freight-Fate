@@ -19,6 +19,10 @@
 
 ### Changed
 
+- **Air pressure now bleeds down while the truck is parked with its engine
+  off.** After a full night's sleep, you must start the engine and rebuild air
+  before releasing the parking brake instead of waking to fully charged tanks.
+
 - **Each truck you own now keeps its own fuel, damage, tire wear, and road
   grime.** Refueling, repairing, or dirtying one truck no longer affects the
   others, and a newly bought truck arrives with a full tank and a clean bill
@@ -50,6 +54,16 @@
 
 ### Fixed
 
+- **Back-to-back road alerts no longer crash the Windows event voice.** Urgent
+  hazards still interrupt the current event announcement immediately, without
+  making a separate redundant stop call that could crash inside SAPI.
+- **Lower speed zones now give you time to brake.** When a construction zone
+  or other posted limit drops, releasing the accelerator gives a loaded truck
+  a fair braking window before speeding enforcement begins. Staying on the
+  throttle forfeits that grace.
+- **Missing the destination exit twice no longer strands the delivery.** Every
+  missed attempt now loops you back far enough to hear the exit, signal, and
+  slow down again instead of leaving the route stuck at zero miles remaining.
 - **Automatic speed control now slows you for the destination exit.** When the
   signed delivery exit is announced, adaptive cruise eases the truck to ramp
   speed instead of switching off at highway speed. Press X to take the exit;

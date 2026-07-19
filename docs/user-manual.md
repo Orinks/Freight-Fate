@@ -365,8 +365,9 @@ and tells you to press X. If adaptive cruise is active, it eases the truck to
 45 miles per hour or your lower cruise target so you can reach ramp speed
 without an abrupt handoff. Press X to take the exit; automatic speed control
 releases as you enter the ramp, then you brake to the stop. If you miss the
-destination exit, the delivery does not complete; back up until the exit is
-ahead again, then press X to take it.
+destination exit, continue to the next safe turnaround. Dispatch loops you
+back onto the approach so you can hear the exit call again and press X to take
+it.
 
 Ordinary highway exits that do not lead to a current action are not announced
 during the drive. Press Shift+R if you want the next listed exit for route
