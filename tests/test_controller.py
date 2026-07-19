@@ -2,7 +2,7 @@
 
 import pygame
 import pytest
-from driving_feature_helpers import quiet_trip, start_drive
+from driving_feature_helpers import key_event, quiet_trip, start_drive
 
 from freight_fate.controller import ControllerAction, ControllerManager
 from freight_fate.input_hints import CONTROLLER, KEYBOARD, control_hint
@@ -453,6 +453,26 @@ def test_controller_speed_control_handoff_status_adjustment_and_brake(monkeypatc
     driving.update(1 / 60)
     assert not driving._speed_control_armed
     assert driving._keeper_mph is None
+    app.shutdown()
+
+
+def test_paused_speed_control_can_be_canceled_by_keyboard_or_controller(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    force_controller(app)
+    driving = start_drive(app)
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+
+    driving._restore_speed_control_session(armed=True, target_mph=47.0)
+    driving.handle_event(key_event(pygame.K_k))
+    assert not driving._speed_control_armed
+
+    driving._restore_speed_control_session(armed=True, target_mph=47.0)
+    app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_Y))
+    assert not driving._speed_control_armed
+    assert spoken.count("Automatic speed control off.") == 2
     app.shutdown()
 
 

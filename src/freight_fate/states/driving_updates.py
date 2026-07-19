@@ -124,6 +124,7 @@ class DrivingUpdateMixin:
         t.transmission.clutch = clutch_val if not t.transmission.automatic else 0.0
         clutch_disengaged = t.transmission.clutch > 0.5 or t.transmission.shifting
         self._update_lane(keys, dt)
+        self._resume_speed_control_if_ready(braking=braking)
         self._update_cruise(dt, braking, accelerating, clutch_disengaged)
         self._update_keeper(dt, braking, accelerating, clutch_disengaged)
 

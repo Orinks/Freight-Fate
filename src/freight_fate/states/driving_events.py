@@ -22,10 +22,8 @@ class DrivingEventMixin:
                 or self._cruise_mph is not None
                 or self._keeper_mph is not None
             )
-            if self._cruise_mph is not None:
-                self._cancel_cruise()  # hands back on the wheel to brake
-            if self._keeper_mph is not None:
-                self._cancel_keeper()  # same: the hazard call says brake
+            if speed_control_was_active:
+                self._disarm_speed_control()  # hands back on the wheel to brake
             self.ctx.audio.play(sound or "ui/warning")
             self.ctx.controller.rumble.hazard()  # 750 ms right->left sweep
             # The deadline is braking physics plus reaction slack. The physics
@@ -787,58 +785,6 @@ class DrivingEventMixin:
             interrupt=True,
         )
 
-    def _handle_pickup_gate(self) -> None:
-        if self.truck.speed_mph <= DOCKING_MAX_MPH:
-            self._open_pickup_arrival()
-            return
-        if self.truck.speed_mph <= DELIVERY_PARK_MPH:
-            self._handle_pickup_creep()
-            return
-        if self._arrival_stop_said:
-            return
-        self._arrival_stop_said = True
-        self._cancel_cruise()
-        self.ctx.audio.play("ui/warning")
-        self._set_status("Pickup ahead: slow down and come to a complete stop.")
-        message = (
-            f"Pickup ahead: {self._pickup_facility_text()}."
-            if self._terse_speech()
-            else (
-                f"Pickup ahead: {self._pickup_facility_text()}. "
-                "Slow down and come to a complete stop at the gate."
-            )
-        )
-        self.ctx.say_event(message, interrupt=True)
-
-    def _handle_pickup_creep(self) -> None:
-        if self._arrival_full_stop_said:
-            return
-        self._arrival_full_stop_said = True
-        self._cancel_cruise()
-        self.ctx.audio.play("ui/notify", volume=0.7)
-        self._set_status("Pickup gate: stop to check in.")
-        self.ctx.say_event(f"At {self._pickup_facility_text()}. Stop to check in.", interrupt=False)
-
-    def _open_pickup_arrival(self) -> None:
-        if self._arrival_menu_open:
-            return
-        from .city import PickupFacilityState, pickup_snapshot
-
-        p = self.ctx.profile
-        self._arrival_menu_open = True
-        self._cancel_cruise()
-        self.truck.throttle = 0.0
-        self.truck.brake = 1.0
-        self.truck.set_parking_brake()
-        p.truck_fuel_gal = self.truck.fuel_gal
-        p.truck_damage_pct = self.truck.damage_pct
-        p.game_hours += self.trip.game_minutes / 60.0
-        p.market.advance_to(p.market_day())
-        p.active_trip = pickup_snapshot(self.job, air_brake=self.truck.air_brake_snapshot())
-        self.ctx.save_profile()
-        self._set_status("Parked at pickup. Check in and load.")
-        self.ctx.replace_state(PickupFacilityState(self.ctx, self.job, driving=self))
-
     def _arrive(self) -> None:
         self.ctx.replace_state(ArrivalState(self.ctx, self))
 
@@ -922,16 +868,6 @@ class DrivingEventMixin:
 
     def _destination_facility_text(self) -> str:
         return self.job.destination_facility_text()
-
-    def _pickup_facility_text(self) -> str:
-        return self.job.origin_facility_text()
-
-    def _pickup_progress_summary(self) -> str:
-        return (
-            f"{self.trip.remaining_miles:.1f} miles remaining of "
-            f"{self.trip.total_miles:.1f} to pickup at "
-            f"{self._pickup_facility_text()}."
-        )
 
     def _set_status(self, text: str) -> None:
         self._status_text = text

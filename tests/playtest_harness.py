@@ -77,7 +77,12 @@ class PlaytestHarness:
         self.result.transcript.append(f"[event] {text}")
 
     def start_delivery(
-        self, *, profile_name: str = "Playtest", job_rank: int = 0, route_rank: int = 0
+        self,
+        *,
+        profile_name: str = "Playtest",
+        job_rank: int = 0,
+        route_rank: int = 0,
+        arm_speed_control_on_deadhead: bool = False,
     ) -> PlaytestResult:
         from freight_fate.states.city import (
             CityMenuState,
@@ -108,8 +113,19 @@ class PlaytestHarness:
         assert isinstance(self.app.state, DrivingState)
         assert self.app.state.phase == "pickup"
 
+        if arm_speed_control_on_deadhead:
+            self.app.state.truck.start_engine()
+            self.app.state.truck.set_air_ready(parking_brake=False)
+            self.app.state.truck.velocity_mps = 5.0
+            self.app.state.handle_event(key_event(pygame.K_k))
+            assert self.app.state._speed_control_armed
+
         self.app.state.trip.position_mi = self.app.state.trip.total_miles
         self.app.state.trip.finished = True
+        if arm_speed_control_on_deadhead:
+            self.app.state.truck.velocity_mps = 26.8
+            self.app.state.update(1 / 60)
+            assert isinstance(self.app.state, DrivingState)
         self.app.state.truck.velocity_mps = 0.0
         self.app.state.update(1 / 60)
         _finish_timed_state(self.app)

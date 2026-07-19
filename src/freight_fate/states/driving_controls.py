@@ -121,7 +121,9 @@ class DrivingControlsMixin:
             "roads and the speed keeper handles low-speed zones, switching "
             "automatically between them. Bad weather increases the following "
             "gap, sharp posted-limit drops make it slow early, and braking "
-            "cancels the whole session. Plus and minus, including the keypad "
+            "cancels the whole session. At the planned pickup, it pauses while "
+            "you check in and load, then resumes once you depart and get rolling. "
+            "Plus and minus, including the keypad "
             "keys, change the remembered open-road target by five; it will not "
             "hold above the posted limit. "
             "X takes the next announced exit, called out by its number "
@@ -185,7 +187,8 @@ class DrivingControlsMixin:
             "The Y button starts automatic speed control, switching between "
             "adaptive cruise and the low-speed keeper as needed. Hold the right "
             "bumper and press D-pad left or right to lower or raise the open-road "
-            "cruise target by five. "
+            "cruise target by five. It pauses through the planned pickup and "
+            "resumes once the loaded truck is rolling. "
             "D-pad down takes the next announced exit, or signals a pull-over. "
             "D-pad up reads your route, D-pad left the weather, D-pad right the "
             "clock. The B button speaks your speed. Click the left stick to honk, "
@@ -400,7 +403,11 @@ class DrivingControlsMixin:
                 ", automatic speed control, speed keeper holding "
                 f"{self.ctx.settings.speed_text(self._keeper_mph)}{keeper_target}"
                 if self._keeper_mph is not None
-                else ""
+                else (
+                    f", automatic speed control paused{keeper_target}"
+                    if self._speed_control_armed
+                    else ""
+                )
             )
         )
         self.ctx.say(
@@ -494,6 +501,14 @@ class DrivingControlsMixin:
                 f"Speed control: speed keeper holding "
                 f"{self.ctx.settings.speed_text(self._keeper_mph)}",
             )
+            target = (
+                self.ctx.settings.speed_text(self._speed_control_target_mph)
+                if self._speed_control_target_mph is not None
+                else "posted limit when the open road begins"
+            )
+            lines.insert(2, f"Open-road target: {target}")
+        elif self._speed_control_armed:
+            lines.insert(1, "Speed control: paused; resumes when the truck is rolling")
             target = (
                 self.ctx.settings.speed_text(self._speed_control_target_mph)
                 if self._speed_control_target_mph is not None

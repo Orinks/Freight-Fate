@@ -72,6 +72,30 @@ def test_playtest_harness_records_headless_delivery_transcript(monkeypatch):
     result.assert_no_known_destination_exit_regressions()
 
 
+def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(
+            profile_name="Speed Control Handoff",
+            arm_speed_control_on_deadhead=True,
+        )
+        driving = harness.driving
+        assert driving is not None
+        assert driving._speed_control_armed
+        assert driving._keeper_mph is None
+        assert driving._cruise_mph is None
+
+        driving.truck.set_air_ready(parking_brake=False)
+        driving.truck.velocity_mps = 2.0
+        driving.update(1 / 60)
+
+        assert driving._keeper_mph is not None or driving._cruise_mph is not None
+
+    transcript = result.transcript_text
+    assert "Automatic speed control on" in transcript
+    assert transcript.count("Automatic speed control paused for pickup") == 1
+    assert "resuming" in transcript
+
+
 @pytest.mark.smoke
 def test_delivery_publication_is_queued_without_spoken_interruption(monkeypatch):
     from freight_fate.online_presence import OnlineIdentity

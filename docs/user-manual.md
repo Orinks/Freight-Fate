@@ -231,7 +231,7 @@ Driving controls are active while the road view is focused:
 | B, hold | Emergency brake. |
 | E | Start the engine. Stop the engine only below 5 miles per hour. |
 | P | Release or set the parking brake. |
-| K | Start or cancel automatic speed control. It uses adaptive cruise on open roads and speed keeper in low-speed zones. Braking also cancels it. |
+| K | Start or cancel automatic speed control. It uses adaptive cruise on open roads and speed keeper in low-speed zones. It pauses through the planned pickup and resumes once the loaded truck is rolling. Braking elsewhere also cancels it. |
 | Plus / Minus | Raise or lower the open-road cruise target by 5 mph while automatic speed control is active. The keypad Plus and Minus keys work too. |
 | X | Arm or cancel the next exit when it is close enough. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
@@ -321,7 +321,10 @@ Ignoring the lights is logged as evasion and costs far more. Speeding the
 patrols do not catch still adds a quieter charge at delivery settlement.
 In low-speed local roads such as facility access, construction, or heavy
 traffic, automatic speed control uses the speed keeper instead. It switches
-back to adaptive cruise when the open road begins.
+back to adaptive cruise when the open road begins. If you start it during the
+deadhead, the planned pickup pauses the session while you check in and load.
+After departure, get the loaded truck rolling and speed control resumes on its
+own. The paused state is kept if you save at the pickup.
 
 Weather affects safe speed, traction, braking, visibility, traffic pressure,
 adaptive cruise following distance, and audio layers such as rain, wind,
@@ -501,7 +504,7 @@ Late delivery and cargo damage reduce pay.
 
 ### Speed keeper
 
-In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K starts automatic speed control in speed-keeper mode. It holds your current speed at or below the zone limit and creeps behind queued traffic, so the accelerator does not need to stay held down. On the open road it automatically changes to adaptive cruise and accelerates toward the posted limit, or restores the cruise target you selected earlier. Entering another restricted zone changes back to the speed keeper. Plus and Minus adjust the remembered open-road cruise target in either mode. Any brake input, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Speed keeper is on by default and can be turned off in Settings, Gameplay.
+In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K starts automatic speed control in speed-keeper mode. It holds your current speed at or below the zone limit and creeps behind queued traffic, so the accelerator does not need to stay held down. On the open road it automatically changes to adaptive cruise and accelerates toward the posted limit, or restores the cruise target you selected earlier. Entering another restricted zone changes back to the speed keeper. If you start it during the deadhead, the planned pickup pauses the session while you check in and load, keeps it through a save, and resumes it after departure once the truck is rolling. Plus and Minus adjust the remembered open-road cruise target in either mode. Any brake input outside that planned pickup, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Speed keeper is on by default and can be turned off in Settings, Gameplay.
 
 Settings are grouped into categories. In a settings category, Up and Down choose
 a setting, Right arrow or Enter changes it forward, Left arrow changes it
