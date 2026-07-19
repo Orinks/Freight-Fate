@@ -923,7 +923,8 @@
             "restrooms"
           ],
           "lat": 41.68638,
-          "lon": -70.28821
+          "lon": -70.28821,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Rest Area SR-25 Welcome Center",
@@ -942,7 +943,8 @@
             "restrooms"
           ],
           "lat": 41.78067,
-          "lon": -70.61125
+          "lon": -70.61125,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Massachusetts Tourist Information Center",
@@ -961,7 +963,8 @@
             "restrooms"
           ],
           "lat": 41.93627,
-          "lon": -70.66194
+          "lon": -70.66194,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -2172,7 +2175,8 @@
             "restrooms"
           ],
           "lat": 41.68638,
-          "lon": -70.28821
+          "lon": -70.28821,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Rest Area SR-25 Welcome Center",
@@ -2191,13 +2195,14 @@
             "restrooms"
           ],
           "lat": 41.78067,
-          "lon": -70.61125
+          "lon": -70.61125,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Mobil",
           "type": "fuel_station",
           "at_mi": 37.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -2210,7 +2215,8 @@
             "parking"
           ],
           "lat": 41.98725,
-          "lon": -70.71483
+          "lon": -70.71483,
+          "vehicle_access": "bobtail_only"
         }
       ]
     },
@@ -3716,7 +3722,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Pilot Travel Center Sturbridge",
@@ -3741,7 +3748,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Love's Travel Stop",
@@ -3761,7 +3769,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -4703,7 +4712,8 @@
             "restrooms"
           ],
           "lat": 42.75528,
-          "lon": -71.22081
+          "lon": -71.22081,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -5542,7 +5552,8 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -6249,7 +6260,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Westborough Service Plaza",
@@ -6269,7 +6281,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -7722,7 +7735,8 @@
             "parking"
           ],
           "lat": 42.09109,
-          "lon": -72.58296
+          "lon": -72.58296,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Blandford Service Plaza Eastbound",
@@ -7742,7 +7756,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Lee Service Plaza Eastbound",
@@ -7764,7 +7779,8 @@
             "parking"
           ],
           "lat": 42.29695,
-          "lon": -73.27476
+          "lon": -73.27476,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Plaza 23 Truck Stop",
@@ -7786,7 +7802,8 @@
             "parking"
           ],
           "lat": 42.63499,
-          "lon": -73.75477
+          "lon": -73.75477,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -8376,7 +8393,8 @@
             "parking"
           ],
           "lat": 42.09109,
-          "lon": -72.58296
+          "lon": -72.58296,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -9540,7 +9558,8 @@
             "parking"
           ],
           "lat": 42.09109,
-          "lon": -72.58296
+          "lon": -72.58296,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Wallingford Rest Area",
@@ -9557,7 +9576,8 @@
           "services": [
             "parking",
             "restrooms"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -10439,7 +10459,8 @@
             "parking"
           ],
           "lat": 42.09109,
-          "lon": -72.58296
+          "lon": -72.58296,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Ludlow Service Plaza Eastbound",
@@ -10459,7 +10480,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Charlton Service Plaza Westbound",
@@ -10479,7 +10501,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -11509,7 +11532,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Love's Travel Stop Willington",
@@ -11534,7 +11558,8 @@
             "both"
           ],
           "parking": "likely",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -14509,7 +14534,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Love's Travel Stop Willington",
@@ -14534,7 +14560,8 @@
             "both"
           ],
           "parking": "likely",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "TA Travel Center",
@@ -14556,7 +14583,8 @@
             "parking"
           ],
           "lat": 41.56517,
-          "lon": -72.90972
+          "lon": -72.90972,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     }

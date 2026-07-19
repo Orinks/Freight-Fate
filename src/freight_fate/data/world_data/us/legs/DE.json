@@ -474,7 +474,8 @@
             "parking"
           ],
           "lat": 38.40972,
-          "lon": -75.64174
+          "lon": -75.64174,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -1174,7 +1175,8 @@
             "restrooms"
           ],
           "lat": 39.3227,
-          "lon": -75.61812
+          "lon": -75.61812,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "I-95 truck parking near North East",
@@ -1195,7 +1197,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -2367,7 +2370,8 @@
             "parking"
           ],
           "lat": 39.63871,
-          "lon": -75.80719
+          "lon": -75.80719,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "White Marsh Truck Stop",
@@ -2387,7 +2391,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -3013,7 +3018,8 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "parking_spaces": 11
+          "parking_spaces": 11,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -4231,7 +4237,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Royal Farms",
@@ -4253,7 +4260,8 @@
             "parking"
           ],
           "lat": 38.40972,
-          "lon": -75.64174
+          "lon": -75.64174,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     }

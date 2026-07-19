@@ -2058,6 +2058,50 @@
       },
       "stops": [
         {
+          "name": "Exxon",
+          "type": "travel_center",
+          "at_mi": 109.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.2386562,
+          "lon": -73.6866449,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Clifton Park Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 138.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Clifton Park with 28 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 42.8768511,
+          "lon": -73.7766736,
+          "vehicle_access": "tractor_trailer",
+          "parking_spaces": 28
+        },
+        {
           "name": "Clifton Park",
           "type": "public_rest_area",
           "at_mi": 148.0,
@@ -2076,7 +2120,31 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Plaza 23 Truck Stop",
+          "type": "travel_center",
+          "at_mi": 157.9,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.6349919,
+          "lon": -73.7547675,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -4451,6 +4519,26 @@
       },
       "stops": [
         {
+          "name": "Rest Area I-89 (North Bound)",
+          "type": "public_rest_area",
+          "at_mi": 8.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 44.4361364,
+          "lon": -73.0784655,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Vermont Welcome Center - Sharon",
           "type": "public_rest_area",
           "at_mi": 83.0,
@@ -4466,7 +4554,28 @@
             "parking",
             "restrooms"
           ],
-          "parking_spaces": 7
+          "parking_spaces": 7,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Rest Area I-91 (South Bound)",
+          "type": "public_rest_area",
+          "at_mi": 92.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 43.6211795,
+          "lon": -72.3482392,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Springfield Rest Area",
@@ -4488,7 +4597,8 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "parking_spaces": 10
+          "parking_spaces": 10,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -5152,7 +5262,8 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "parking_spaces": 3
+          "parking_spaces": 3,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Rest Area I-89 (North Bound)",
@@ -5171,7 +5282,8 @@
             "restrooms"
           ],
           "lat": 44.43614,
-          "lon": -73.07847
+          "lon": -73.07847,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -7092,6 +7204,27 @@
       },
       "stops": [
         {
+          "name": "Vermont Welcome Center - Sharon",
+          "type": "public_rest_area",
+          "at_mi": 45.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists Sharon Rest Area with 7 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 43.7273024,
+          "lon": -72.4261542,
+          "vehicle_access": "tractor_trailer",
+          "parking_spaces": 7
+        },
+        {
           "name": "Lebanon Rest Area",
           "type": "public_rest_area",
           "at_mi": 56.9,
@@ -7110,7 +7243,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Springfield Rest Area I-89 (North Bound)",
@@ -7129,7 +7263,8 @@
             "restrooms"
           ],
           "lat": 43.46808,
-          "lon": -72.10199
+          "lon": -72.10199,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -8539,7 +8674,7 @@
           "name": "Cumberland Farms",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rutland_vt_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rutland_vt_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -8552,13 +8687,14 @@
             "parking"
           ],
           "lat": 43.5935,
-          "lon": -72.96905
+          "lon": -72.96905,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "East Dorset General Store",
           "type": "fuel_station",
           "at_mi": 21.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -8571,13 +8707,14 @@
             "parking"
           ],
           "lat": 43.23965,
-          "lon": -73.01051
+          "lon": -73.01051,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Mobil",
           "type": "fuel_station",
           "at_mi": 42.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -8590,7 +8727,8 @@
             "parking"
           ],
           "lat": 42.95057,
-          "lon": -73.21088
+          "lon": -73.21088,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Plaza 23 Truck Stop",
@@ -8612,7 +8750,8 @@
             "parking"
           ],
           "lat": 42.63499,
-          "lon": -73.75477
+          "lon": -73.75477,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -9781,7 +9920,7 @@
           "name": "Cumberland Farms",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rutland_vt_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the rutland_vt_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -9794,13 +9933,14 @@
             "parking"
           ],
           "lat": 43.5935,
-          "lon": -72.96905
+          "lon": -72.96905,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "McDonoughs Fuel & Service Center",
           "type": "fuel_station",
           "at_mi": 16.2,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -9813,13 +9953,14 @@
             "parking"
           ],
           "lat": 43.80031,
-          "lon": -73.09338
+          "lon": -73.09338,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Shell",
           "type": "fuel_station",
           "at_mi": 32.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -9832,7 +9973,8 @@
             "parking"
           ],
           "lat": 44.01215,
-          "lon": -73.16423
+          "lon": -73.16423,
+          "vehicle_access": "bobtail_only"
         }
       ]
     }

@@ -2628,7 +2628,31 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
-          "parking_spaces": 45
+          "parking_spaces": 45,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Gray Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 125.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.8243126,
+          "lon": -70.3201738,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "I-95 truck parking near Kennebunk",
@@ -2649,7 +2673,8 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -4442,6 +4467,29 @@
       },
       "stops": [
         {
+          "name": "Dysarts Travel Stop",
+          "type": "travel_center",
+          "at_mi": 4.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 44.7699343,
+          "lon": -68.8562072,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "I-95 truck parking near Sidney",
           "type": "public_rest_area",
           "at_mi": 68.3,
@@ -4460,7 +4508,32 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "West Gardiner Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 83.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck parking confirmed by the FHWA Jason's Law inventory (USDOT BTS NTAD Truck Stop Parking, compiled 2019), which lists I-95, I-295 truck parking near West Gardiner with 45 truck parking spaces on this corridor, accessed 2026-07-17: https://geodata.bts.gov/datasets/usdot::truck-stop-parking/about",
+          "parking": "confirmed",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 44.2072428,
+          "lon": -69.8275832,
+          "vehicle_access": "tractor_trailer",
+          "parking_spaces": 45
         }
       ]
     },
@@ -5720,7 +5793,7 @@
           "name": "Haffner\u2019s",
           "type": "fuel_station",
           "at_mi": 42.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -5733,7 +5806,8 @@
             "parking"
           ],
           "lat": 43.28162,
-          "lon": -70.59443
+          "lon": -70.59443,
+          "vehicle_access": "bobtail_only"
         },
         {
           "name": "Hampton Liquor and Wine Outlet Southbound",
@@ -5752,7 +5826,8 @@
             "restrooms"
           ],
           "lat": 42.93778,
-          "lon": -70.86261
+          "lon": -70.86261,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -6340,7 +6415,8 @@
             "parking"
           ],
           "lat": 43.82431,
-          "lon": -70.32017
+          "lon": -70.32017,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -7801,6 +7877,29 @@
       },
       "stops": [
         {
+          "name": "Kennebunk Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 21.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.410105,
+          "lon": -70.5588919,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "I-95 truck parking near Kittery",
           "type": "public_rest_area",
           "at_mi": 45.9,
@@ -7819,7 +7918,31 @@
             "both"
           ],
           "parking": "confirmed",
-          "curation": "curated"
+          "curation": "curated",
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "TA",
+          "type": "service_plaza",
+          "at_mi": 55.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.0427442,
+          "lon": -70.8184263,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -8991,7 +9114,8 @@
             "food",
             "parking"
           ],
-          "parking_spaces": 37
+          "parking_spaces": 37,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Irving",
@@ -9011,7 +9135,8 @@
             "diesel",
             "food",
             "parking"
-          ]
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -11895,7 +12020,7 @@
           "name": "Maine Standard Biofuels",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the portland_me_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the portland_me_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -11908,13 +12033,80 @@
             "parking"
           ],
           "lat": 43.69164,
-          "lon": -70.32831
+          "lon": -70.32831,
+          "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Gray Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 12.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.8243126,
+          "lon": -70.3201738,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Presby Energy",
+          "type": "travel_center",
+          "at_mi": 110.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 44.2845613,
+          "lon": -71.7352647,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Littleton Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 120.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 44.3269556,
+          "lon": -71.8729475,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Irving",
           "type": "fuel_station",
           "at_mi": 142.5,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
           "parking": "limited",
           "actions": [
             "park",
@@ -11927,7 +12119,8 @@
             "parking"
           ],
           "lat": 44.4146,
-          "lon": -72.13246
+          "lon": -72.13246,
+          "vehicle_access": "bobtail_only"
         }
       ]
     }

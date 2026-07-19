@@ -137,7 +137,7 @@ terminal becomes the anchor of that week instead of a spawn point.
       also catches a stale shard left behind after its last leg moved
       states. No git-lfs (breaks plain clones, costs Josh quotas), no
       history rewrite (Josh's call, someday) -- the 341 MB pack stays.
-- [ ] **Truck-accessibility sweep: vehicle_access classification
+- [x] **Truck-accessibility sweep: vehicle_access classification
       (Josh's spec via Codex, owner + Phil concur, 2026-07-18).** Full
       brief: docs/truck-access-sweep-brief.md. Three tiers on every
       stop, separate from parking: tractor_trailer (announced, usable),
@@ -154,17 +154,15 @@ terminal becomes the anchor of that week instead of a spawn point.
       Policy bans (Big Buck's GOLDEN ANTLER waiver) stay a separate
       future flag; the pass never overrides physics. OATIS runs the
       sweep in his own window AFTER sharding lands; the
-      announcement/HOS filter is game-side. STATUS 2026-07-19: rails
-      landed game-side (b91d476, every stop defaults tractor_trailer);
-      sweep DONE on map/truck-access-sweep (3,742 stops: 2,717
-      tractor_trailer / 1,021 bobtail_only / 4 owner-adjudicated none;
-      527 real gap-fill facilities on 248 legs), pending Phil's review
-      merge. Open: 81 UNVERIFIED legs (OSM likely under-tagged, e.g.
-      I-80 into Sacramento), 22 legs over 100 mi with no truck-usable
-      stop (owner+Josh decision: fill honestly via Jason's Law pass
-      first), and the POI discovery layer itself samples only ~7 fixed
-      boxes per leg regardless of length -- whole-corridor re-survey is
-      its own roadmap line.
+      announcement/HOS filter is game-side. SHIPPED 2026-07-19: rails
+      game-side (b91d476, every stop defaults tractor_trailer), sweep
+      merged from map/truck-access-sweep -- all 3,745 stops classified
+      (2,720 tractor_trailer / 1,021 bobtail_only / 4 owner-adjudicated
+      none), 527 real gap-fill facilities on 248 legs, 100-mile-plus
+      service gaps roughly halved (sleep 271 -> 136). Follow-ups live
+      as their own bullets below (locators, warn-at-dispatch, sampling
+      density, classify-at-creation); 81 legs remain UNVERIFIED where
+      OSM is likely under-tagged rather than the corridor truly empty.
 - [ ] **Terrain audit: relief-aware reclassification (player-found by
       Josh, 2026-07-19).** The grade-segment classifier calls any
       segment over 3% "mountain" with no relief context, so East Texas
@@ -181,6 +179,77 @@ terminal becomes the anchor of that week instead of a spawn point.
       ad-hoc script silently rewrites the map (same class as the
       FREIGHT_FATE_DATA_DIR rule for saves). Add a loud failure when
       tests write the real source without explicitly opting in.
+- [ ] **More first-party truck-stop locators, and public parking feeds
+      (owner approved, 2026-07-19).** `curate_route_pois.py` queries only
+      Love's and Pilot/Flying J today (730 + 877 locations). Pointed at the
+      21 legs with no truck-accessible stop, those two closed exactly one
+      (Pilot Dealer Perris, I-15 mile 88) -- useful, and evidence the
+      corridors really are thin rather than merely untagged. Add the chains
+      we never ask: **TA/Petro** (the big omission), Sapp Bros, Bosselman,
+      Road Ranger, Maverik, plus the **AmBest** and **NATSO** member
+      directories, which is where the rural independents live. Same code
+      path, same `Candidate` shape, same citable source notes.
+      **TA/Petro specifically is LOW PRIORITY, and here is why so nobody
+      re-derives it:** Love's + Pilot gave 1,607 real first-party locations
+      and produced exactly ONE hit across the 20 legs. TA is ~360 locations
+      with the same Interstate-heavy profile, so expected yield is ~0-1. The
+      structural reason is that national chains build where freight density
+      is -- on Interstates -- and every remaining gap leg is a US or state
+      route. No chain locator can close them, by definition. Checked
+      2026-07-19: TA's sitemap lists 361 location pages and robots.txt
+      permits crawling them, but the JSON-LD is EMPTY (lat/lon/address
+      render client-side) and the official API needs a partner token, so it
+      costs a JS renderer or a business relationship for near-zero return.
+      Also investigate **Park My Truck** (NATSO/ATRI) for a DOCUMENTED public
+      feed -- real-time space counts, publicly funded origins.
+      DO NOT scrape Trucker Path, AllStays, or similar apps: the data is
+      their product, their terms forbid it, it is not licensed for
+      redistribution, and user-reported availability cannot go in a
+      deterministic offline game that must answer every player identically
+      forever.
+- [ ] **Warn the driver before an under-served route, instead of faking a
+      stop on it (owner, 2026-07-19).** After the access sweep, 21 legs over
+      100 miles carry no stop a combination vehicle can enter. Designating an
+      invented truck stop would falsify real geography -- a 158-mile US-2
+      Hi-Line stretch with nowhere to pull in is TRUE, and US-50 across Nevada
+      is meant to be empty. So surface the constraint rather than paper over
+      it: at dispatch and route selection, warn when (a) the calculated fuel
+      range will not clear the route's longest stretch with no truck-accessible
+      fuel, or (b) HOS says a sleep falls due inside a stretch with no
+      truck-accessible sleep stop. Turns a data gap into the planning tension
+      the game is about -- and it is honest where an invented stop is not.
+      The gap maths already exists in tools/truck_access_gap_report.py
+      (longest serviceless stretch per leg per capability) and wants moving
+      into the sim beside the HOS planner. Note the evidence limit: on I-15
+      San Diego-Riverside and I-69 Bloomington-Evansville a dense 5-mile probe
+      found 53 and 19 named stations with ZERO truck tags of any kind, so
+      "no verified stop" cannot be read as "no stop exists" -- another reason
+      to warn rather than assert.
+- [ ] **Densify corridor POI sampling in the mapping utility (found
+      during the access sweep, 2026-07-19).** `_overpass_named_candidates`
+      queries a fixed 7 boxes per leg -- five mid-corridor samples plus the
+      two endpoint cities -- each about 7.5 miles of road. That is ~52 miles
+      inspected regardless of leg length: a third of a 162-mile leg, a
+      seventh of a 345-mile one, so coverage is thinnest exactly where a
+      serviceless stretch strands somebody. The five mid-points are indices
+      into `route_points`, not evenly spaced miles, so they cluster wherever
+      geometry vertices fall; the Love's at Williams and the truck stops at
+      Corning sit in the blind spots on I-5, both `hgv=yes` in the extract we
+      already query. Generic car fuel (the `rural_fallback` relaxation) hid
+      this by making thin corridors look served until the access sweep
+      demoted them. Fix belongs in the enrichment tool: sample by mileage and
+      scale the probe count to leg length.
+      `tools/fill_truck_access_gaps.py` densifies only INSIDE qualifying
+      gaps, so corridors that are merely thin are still under-sampled and a
+      map-wide re-sweep is still owed.
+- [ ] **Emit `vehicle_access` when the mapping utility creates a stop
+      (owner, 2026-07-19).** Every POI-adding path should classify at
+      creation instead of waiting for a re-sweep, or each map expansion
+      reintroduces unclassified stops. When judging an unfamiliar operator,
+      read the OSM `website` tag -- it often carries the operator's own
+      location page, which settles format and amenities better than a brand
+      name (it identified Love's #120 as a Vian country store). That matters
+      most for Hawaii, Alaska, and Canada, where the chains are unfamiliar.
 - [ ] **Real construction zones from state 511 APIs.** When real-time
       traffic is enabled, construction zones should be generated from actual
       state DOT work zone data instead of simulated zones. Requires:

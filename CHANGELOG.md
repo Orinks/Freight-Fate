@@ -4,6 +4,19 @@
 
 ### Added
 
+- **Every stop the game announces is now one your rig can actually
+  enter.** Every fuel stop, rest area, and truck stop on the map was
+  checked against real-world truck access. Car-scale gas stations that
+  a seventy-foot rig cannot turn around in are no longer announced, no
+  longer offered as exits, and no longer counted when dispatch plans
+  your fuel and sleep stops -- they stay on the map for the day you are
+  running tractor-only. In their place, hundreds of real truck stops,
+  service plazas, and rest areas the map had never looked for were
+  added along thin corridors, so the longest stretches with no legal
+  place to sleep are about half as common as before. Where a remote
+  highway genuinely has nothing -- and some real ones do -- the game
+  now tells you the truth instead of inventing a stop.
+
 - **The co-driver now warns you before the speed limit drops.** When a
   real posted drop is coming that your speed can't ignore -- a village 30
   at the end of an open 55, a city ring at the end of a fast interstate
