@@ -396,6 +396,7 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         driving._speak_keyboard_help()
         assert "simple direction changes" in spoken[-1]
         assert "keep holding the Down arrow" in spoken[-1]
+        assert "R route and current location" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_keyboard_help()
@@ -406,6 +407,7 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         driving._speak_controller_help()
         assert "simple direction changes" in spoken[-1]
         assert "keep holding the left trigger" in spoken[-1]
+        assert "D-pad up reads your route and current location" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_controller_help()

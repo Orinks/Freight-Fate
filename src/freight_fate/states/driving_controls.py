@@ -67,7 +67,7 @@ class DrivingControlsMixin:
             if event.mod & pygame.KMOD_SHIFT:
                 self.ctx.say(self.trip.next_exit_context())
             else:
-                self.ctx.say(self.trip.progress_summary(self.ctx.settings.imperial_units))
+                self._speak_route_status()
         elif key == pygame.K_v:
             self._speak_weather()
         elif key == pygame.K_l:
@@ -139,8 +139,9 @@ class DrivingControlsMixin:
             "Space speed, active speed-control mode, and target. "
             "S posted speed limit. Tab status menu. F fuel. "
             "C clock, deadline, and hours of service. "
-            "R route. Shift R next listed highway exit. V weather. L lane position. "
-            "A repeats the last announcement. U reads what is coming up: "
+            "R route and current location. Shift R next listed highway exit. "
+            "V weather. L lane position. A repeats the last announcement. "
+            "U reads what is coming up: "
             "imposed limits, stops, and exits ahead. "
             "Left or Right Control stops the driving event voice. "
             "Left and Right arrows steer when lane drift is enabled. "
@@ -190,8 +191,8 @@ class DrivingControlsMixin:
             "cruise target by five. It pauses through the planned pickup and "
             "resumes once the loaded truck is rolling. "
             "D-pad down takes the next announced exit, or signals a pull-over. "
-            "D-pad up reads your route, D-pad left the weather, D-pad right the "
-            "clock. The B button speaks your speed. Click the left stick to honk, "
+            "D-pad up reads your route and current location, D-pad left the weather, "
+            "D-pad right the clock. The B button speaks your speed. Click the left stick to honk, "
             "the right stick to toggle the engine brake. "
             "Hold the right bumper for the second layer: plus A starts or stops "
             "the engine, plus B reads fuel, plus Y sets or releases the parking "
@@ -244,7 +245,7 @@ class DrivingControlsMixin:
         elif button == pygame.CONTROLLER_BUTTON_RIGHTSTICK:
             self._toggle_engine_brake()
         elif button == pygame.CONTROLLER_BUTTON_DPAD_UP:
-            self.ctx.say(self.trip.progress_summary(self.ctx.settings.imperial_units))
+            self._speak_route_status()
         elif button == pygame.CONTROLLER_BUTTON_DPAD_DOWN:
             if self._pull_over is not None:
                 self._signal_pull_over()

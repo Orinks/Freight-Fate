@@ -4,6 +4,9 @@
 
 ### Added
 
+- **The route report now tells you where you are.** Press R, or D-pad up on a
+  controller, to hear the current road and direction, state, nearest named city,
+  checkpoint, or road stop, along with your progress and upcoming guidance.
 - **Live weather can now leave your career calendar running.** The new Live
   weather controls calendar setting keeps today's real date when on. Turn it
   off to keep live city conditions while your career date advances at midnight

@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from playtest_harness import PlaytestHarness
+from playtest_harness import PlaytestHarness, key_event
 
 
 def test_playtest_harness_forces_headless_environment_before_pygame():
@@ -140,6 +140,16 @@ def test_playtest_harness_drives_a_specific_route(monkeypatch):
     # State lines announce only when crossed; this short delivery finishes at
     # the terminal before its mapped crossing cue.
     assert "New Jersey into New York" not in transcript
+
+
+def test_playtest_route_report_includes_current_location_on_real_keyboard_path(monkeypatch):
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_route("Buffalo", "Rochester")
+        harness.driving.trip.position_mi = 40.0
+        harness.driving.handle_event(key_event(ord("r")))
+
+    assert result.transcript[-1].startswith("Route status: on I-90 East in New York")
+    assert "Near Batavia, New York" in result.transcript[-1]
 
 
 def test_playtest_transcript_covers_both_automatic_direction_styles(monkeypatch):

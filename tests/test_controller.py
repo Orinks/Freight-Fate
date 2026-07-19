@@ -399,7 +399,7 @@ def test_controller_info_buttons_speak(monkeypatch):
     quiet_trip(driving)
     spoken = []
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
-    # B button speaks speed; RB+B speaks fuel.
+    # B button speaks speed; RB+B speaks fuel; D-pad up reports the route and location.
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_B))
     assert any("per hour" in t for t in spoken)
     app._dispatch_controller(_button_up(pygame.CONTROLLER_BUTTON_B))  # release before re-press
@@ -407,6 +407,12 @@ def test_controller_info_buttons_speak(monkeypatch):
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_RIGHTSHOULDER))
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_B))
     assert any("fuel" in t.lower() or "range" in t.lower() for t in spoken)
+    app._dispatch_controller(_button_up(pygame.CONTROLLER_BUTTON_B))
+    app._dispatch_controller(_button_up(pygame.CONTROLLER_BUTTON_RIGHTSHOULDER))
+    spoken.clear()
+    app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_DPAD_UP))
+    assert spoken[-1].startswith("Route status:")
+    assert "Nearest named place" in spoken[-1] or "Near " in spoken[-1]
     app.shutdown()
 
 

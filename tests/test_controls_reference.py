@@ -34,6 +34,7 @@ def test_controls_help_page_points_at_the_driving_keys():
     assert "active speed-control mode" in joined
     assert "open-road target" in joined
     assert "S speaks the posted speed limit" in joined
+    assert "R speaks your current road" in joined
     assert "A repeats the last route announcement" in joined
     assert "U speaks what is coming up" in joined
     assert "Left or Right Control stops the driving event voice" in joined

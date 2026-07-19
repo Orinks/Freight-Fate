@@ -15,7 +15,7 @@ import pygame
 
 
 def key_event(key: int, unicode: str = ""):
-    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
+    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode, mod=0)
 
 
 def _finish_timed_state(app) -> None:

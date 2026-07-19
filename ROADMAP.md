@@ -66,7 +66,8 @@ From a batch of player reports:
   unlabeled legs.
 - [x] **Quick info keys.** S reads the posted speed limit (was buried in the
   Tab menu); A repeats the last route announcement; U reads what is coming
-  up (imposed limits, stops, exits ahead).
+  up (imposed limits, stops, exits ahead); R includes the current road, state,
+  direction, nearest named place, and trip progress in its route report.
 - [x] **Announcement priority and lead time.** Safety cues (zone entry,
   construction/traffic warnings, checkpoints) preempt ambient chatter on the
   event voice instead of queuing behind it; zone warnings lead by real time

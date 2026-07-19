@@ -242,7 +242,7 @@ Driving controls are active while the road view is focused:
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
 | C | Report clock, deadline, estimated arrival, and hours of service. |
-| R | Report route progress and GPS context. |
+| R | Report the current road and direction, state, nearest named place, route progress, grade, and GPS context. |
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
 | L | Report lane position when lane drift is enabled. |

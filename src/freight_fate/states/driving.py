@@ -6,6 +6,7 @@ from __future__ import annotations
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from .driving_events import DrivingEventMixin
+from .driving_location import DrivingLocationMixin
 from .driving_pickup import DrivingPickupMixin
 from .driving_speed_control import SpeedControlStateMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
@@ -15,6 +16,7 @@ class DrivingState(
     DrivingControlsMixin,
     DrivingUpdateMixin,
     SpeedControlStateMixin,
+    DrivingLocationMixin,
     DrivingPickupMixin,
     DrivingEventMixin,
     State,
