@@ -70,6 +70,13 @@
 
 ### Fixed
 
+- **Taking a pay advance no longer makes your cloud backup look edited.** A
+  pay advance is money from your next load paid early, but your career was
+  only crediting the part of the settlement left after the advance came back
+  out. Those advanced dollars sat in your bank with nothing in your lifetime
+  earnings to account for them, so cloud backup upload could refuse the save
+  and mark the driver for review. Lifetime earnings now count the whole
+  settlement, and taking an advance no longer counts against you.
 - **Planning a stop now plays a single confirmation sound.** Choosing "Plan to
   stop" from a stop's details no longer stacks a menu click and a confirmation
   chime back to back; you hear just the confirmation.

@@ -696,6 +696,12 @@ class ArrivalState(MenuState):
                 f"already paid, {d.ticket_fines_paid:,.0f} dollars."
             )
         net_pay = max(0.0, gross_pay - driver_charges)
+        # What the load earned the driver, before any advance comes back out of
+        # it. An advance is those same dollars paid early, so lifetime earnings
+        # book the whole settlement -- book only the remainder and the advanced
+        # money becomes cash the career cannot account for, which reads as an
+        # edited save to cloud upload screening.
+        settled_pay = net_pay
         advance_repaid = round(min(p.pay_advance, net_pay), 2)
         if advance_repaid > 0:
             net_pay = round(net_pay - advance_repaid, 2)
@@ -719,7 +725,7 @@ class ArrivalState(MenuState):
         p.tire_wear_pct = min(100.0, p.tire_wear_pct + tire_wear_added)
         p.road_grime_pct = min(100.0, p.road_grime_pct + road_grime_added)
         previous_level = p.career.level
-        announcements = p.career.record_delivery(job.distance_mi, net_pay, on_time, trip_damage)
+        announcements = p.career.record_delivery(job.distance_mi, settled_pay, on_time, trip_damage)
         p.game_hours += hours
         p.market.advance_to(p.market_day())
         p.active_trip = None

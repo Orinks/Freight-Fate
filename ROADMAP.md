@@ -125,6 +125,16 @@ From a batch of player reports:
   `Profile.pay_advance`; deterministic and save-compatible. Money still
   goes negative freely for fines/tows by design, but broke-and-empty is no
   longer a dead end.
+- [x] **Advances count toward lifetime earnings.** Settlement was crediting
+  `total_earnings` with the post-repayment remainder, so advanced dollars
+  were cash the career could not account for and cloud upload screening
+  refused the save and stamped a sticky integrity flag. Lifetime earnings
+  now book the whole settlement.
+- [ ] **Review integrity flags stamped before that fix.** Drivers flagged by
+  the advance accounting bug are legitimate; a save carrying the old
+  shortfall keeps failing upload until the driver spends the difference on
+  fuel or repairs. Decide whether to clear those flags by hand or repair
+  the earnings figure on load, and confirm no honest driver is stuck.
 
 ### Fatigue and driver responsibility
 
