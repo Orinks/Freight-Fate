@@ -58,7 +58,7 @@ from ..radio import (
 from ..sim import hos
 from ..sim.driving_modes import tuning_for_time_scale
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
-from ..sim.lane import LaneKeeping, lane_label
+from ..sim.lane import CURVE_RATE, LaneKeeping, lane_label
 from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
@@ -132,6 +132,8 @@ EXIT_LANE_PREP_MI = 2.0  # where GPS starts asking for the exit lane
 # Spoken distance anchors for an armed exit; a signal-on announcement miles
 # out gets buried under canyon pacenotes without them.
 EXIT_COUNTDOWN_MILESTONES_MI = (2.0, 1.0, 0.5)
+# The pacenote cue tone leans hard toward the curve's side of the field.
+PACENOTE_CUE_PAN = 0.85
 EXIT_COMMIT_WINDOW_MI = 0.4  # generous gore-window grace after the marker
 EXIT_LANE_READY = 0.85  # accumulated right-lane commitment
 EXIT_LANE_OFFSET_READY = 0.45  # right-side lane position also counts

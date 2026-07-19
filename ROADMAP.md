@@ -250,6 +250,21 @@ terminal becomes the anchor of that week instead of a spawn point.
       recording (a community call for truck recordings is an option),
       then CC-licensed YouTube only, with attribution -- never ordinary
       YouTube rips; CREDITS.md tracks provenance for every asset.
+      NAS SWEEP DONE 2026-07-18: `docs/sound-shortlist.md` lists
+      unauditioned candidates for all seven needs plus ready-to-run
+      ElevenLabs prompts. Three findings change the plan. (a) The
+      RUMBLE STRIP DOES NOT EXIST in the 62,280-file library -- no
+      washboard, no corrugation, no shoulder-drift take; it has to be
+      synthesized as a speed-tracking pulse train over a gravel noise
+      floor (Sound Ideas 6009 "Auto Road Surfaces" supplies the floor),
+      which is the better answer anyway since the buzz rate should
+      follow wheel speed. (b) The CURVE TONE LADDER has its material:
+      Sony Vol. 4 Vintage Cartoon holds thirteen chromatic `Xylophone
+      Single Note` one-shots from one session -- one timbre, three
+      pitches, exactly the RFC 1b grammar. (c) TURBO AND DRIVELINE are
+      thin (no wastegate, no blow-off, no diesel turbo anywhere), so
+      the shift sound gets built from a GMC 6000 gear clunk plus a
+      pitched-down transmission clunk plus an air release.
 - [ ] **Bobtail means no trailer at all (forum report, SRD625
       2026-07-17).** The physics models every unloaded state as tractor
       plus EMPTY TRAILER (`tare_kg`, vehicle.py: "Tractor plus empty
@@ -958,6 +973,28 @@ milestone below (speeding consequences especially).
 
 From a batch of player reports:
 
+- [x] **Destination exit offered a state early on rural-highway finishes --
+  FIXED 2026-07-16 (player transcripts).** The destination-exit scan accepted
+  the last labeled interchange anywhere on the route, so routes whose final
+  legs are unbaked rural highways (US-281 into Lampasas, US-2 across the
+  plains to Havre) crowned an exit hundreds of miles out -- worst case 1,158
+  miles, I-39 in Wisconsin for a Havre, Montana receiver -- and taking it
+  settled the delivery from there. The scan now only accepts exits within the
+  final 25 miles of the route and otherwise falls back to the synthetic
+  end-of-route exit. Regression test pinned on both transcript routes.
+- [ ] Bake labeled exits or junction cues for rural US-highway final
+  approaches so arrivals there can name a real exit instead of the generic
+  end-of-route fallback (follow-up to the 2026-07-16 destination-exit fix;
+  needs an OSM junction sweep over non-motorway trunk corridors). Scale,
+  measured 2026-07-16: 533 of 1,287 legs carry no labeled interchange, and
+  192 of 623 cities have none on any approach leg, so every arrival there
+  uses the generic fallback. A seeded 2,489-route sample of supported routes
+  found 44 percent previously misfired the destination exit by more than 25
+  miles (worst sampled: Payson, Arizona to Newport, Oregon, 1,152 miles
+  early on a 1,420-mile route); all of those now take the fallback this
+  sweep would upgrade. Regen should run offline from the cached PBFs like
+  the overlay pipeline, targeting trunk/primary junction nodes on the 533
+  unlabeled legs.
 - [x] **Quick info keys.** S reads the posted speed limit (was buried in the
   Tab menu); A repeats the last route announcement; U reads what is coming
   up (imposed limits, stops, exits ahead).
@@ -1135,6 +1172,8 @@ From a batch of player reports:
 - [x] **Speed keeper for low-speed zones.** Shipped alongside the presets: in facility access roads, gate queues, work zones, and congestion -- where adaptive cruise is deliberately unavailable -- K holds the current speed at or below the zone limit and follows queued traffic, so players who cannot keep the accelerator held (or whose fingers tire) are not locked out of those stretches. Preset-independent and on by default.
 - [x] **Driving assistance presets and descent control.** Shipped for the current snapshot: Realistic, Balanced, All assists, and Custom coordinate optional lane, emergency-braking, stop-and-go, and interactive descent support without changing inherent adaptive-cruise behavior or simulation settings. Automatic exits, destination stops, yard entry, and docking remain deferred to Career 1.9 or later. On the 1.9 line, lane drift itself lives in the Driving assistance category but stays preset-independent like the speed keeper: presets tune warnings and support, never whether the lane task runs, so fresh careers keep the centered-lane accessible default.
 - [ ] **De-duplicate assist chatter on fast ramps.** A 2026-07-15 logged playtest of the four 1.9 assists showed curve speed assistance and route-transition assistance both firing on the same too-fast exit ramp (the ramp adds curve weight, and both brake and announce back-to-back). With the realistic preset both are on by default, so every hot ramp speaks two assist lines; the ramp case should speak one. Same playtest confirmed the destination approach assist deliberately does not cover the ramp-end stop sign -- players can still roll it with the assist on, which may deserve a clearer spoken hint.
+- [x] **Speed keeper for low-speed zones.** Shipped: in facility access roads, gate queues, work zones, and congestion -- where adaptive cruise is deliberately unavailable -- K holds the current speed at or below the zone limit and follows queued traffic, so players who cannot keep the accelerator held (or whose fingers tire) are not locked out of those stretches. On by default, toggleable in Settings, Gameplay.
+- [ ] **Driving assistance presets and descent control.** Built and then withdrawn from the 1.8 nightly line after playtesting (the underlying assists need the 1.9 driving arc around them); the work lives on feat/career-1.9 and ships with 1.9. Release-merge note: the withdrawal was a git revert of merge 9b406fe (plus 9f2dbff and b971684) on dev, so merging feat/career-1.9 back will NOT re-apply this content on its own -- the release merge must first revert the revert commit on dev, then merge.
 - [x] **Limit-aware adaptive cruise.** Shipped: once real OSM limits, zones,
   and trooper enforcement landed, plain "hold the set speed" cruise would carry
   the driver straight through an urban drop into strikes and pull-overs. Cruise
@@ -1145,6 +1184,19 @@ From a batch of player reports:
   Plus and Minus adjust the set point by `CRUISE_STEP_MPH` (the real
   Accel/Coast buttons), so you engage once rolling and dial the target up to the
   speed you want; the truck accelerates up to it, capped by the limit offset.
+
+- [x] **Window-model on-time bonus.** Shipped on the 1.8.x nightly line:
+  `Job.payout` used to scale its on-time bonus by unused deadline (max 15%
+  only for a near-instant delivery, a few percent in practice), which
+  rewarded racing the clock and paid almost nothing for normal on-time runs.
+  It now pays a flat 10% for any delivery inside the window, the way real
+  shipper scorecards (OTIF-style) pay for service; late/damage penalties are
+  unchanged. Compared against feat/career-1.9 before landing: 1.9's carrier
+  pay plans add their own flat on-time share (2-6% of gross) plus reputation
+  trust pay (max 6%) *on top of* gross, and its `Job.payout` is identical to
+  dev's, so this reshapes the shared gross curve and merges cleanly; watch
+  the combined stack (10% gross + carrier share + trust) when rebalancing
+  the 1.9 economy.
 
 ### Realism north star (ongoing)
 
@@ -1166,8 +1218,12 @@ Net-new realism candidates, roughly by area:
   (winter ice/squalls, summer hail). Seasons are opt-in via `WeatherSystem`'s
   `game_hours` so seed-based tests stay deterministic; real-weather mode keeps
   driving conditions (and thus hazard context) from live data, and with live
-  weather on the season follows the real-world calendar so it matches those
-  conditions. Real observation temperature is now extracted too (`_temp_to_c`
+  weather on the season follows the real-world calendar by default so it
+  matches those conditions. Players can now turn off **Live weather controls
+  calendar** to keep live conditions while the career date and seasons
+  advance; established careers anchor that independent calendar to today's
+  date at the handoff while new careers retain the March 21 start. A seasonal reconciliation guard prevents summer snow and
+  cold-season thunderstorms in that mode. Real observation temperature is now extracted too (`_temp_to_c`
   -> `RealWeatherProvider.get_temperature` -> `WeatherSystem._temperature`), so
   live mode reports the station's real degrees and falls back to the climate
   model only when a reading is missing. Weather also bites mechanically now,
@@ -1182,6 +1238,11 @@ Net-new realism candidates, roughly by area:
   Remaining follow-ups: black-ice risk on clear cold mornings after wet
   roads (refreeze after the rain has stopped is still not modeled); steady
   crosswind nudging the trailer; and seasonal daylight length.
+  (`_visibility_reaction_factor`). Remaining follow-ups: black-ice risk on clear
+  cold mornings after wet roads (currently ice rides on active snow); steady
+  crosswind nudging the trailer; and seasonal daylight length. Live-weather fog
+  is now gated on the station's measured visibility (NWS "Fog/Mist"/"Haze" at
+  6+ miles played as pea-soup fog before).
 - [ ] **Live-weather staleness fallback.** If the network drops mid-trip,
   `RealWeatherProvider.unavailable()` still reports a city as available while
   its cache entry is stale (>30 min), so `WeatherSystem.update()` holds the

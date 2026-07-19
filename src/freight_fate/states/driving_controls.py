@@ -539,9 +539,10 @@ class DrivingControlsMixin:
         """D: one number -- the speed that is safe right here, right now.
 
         Sits next to S on purpose: S answers "what is posted", D answers
-        "what should I actually be doing". Weather grip and an armed exit
-        are baked into the math, never into the sentence, so the answer
-        survives being heard exactly once at speed. Repeatable free.
+        "what should I actually be doing". Weather grip, an armed exit, and
+        an approaching curve are baked into the math, never into the
+        sentence, so the answer survives being heard exactly once at speed.
+        Repeatable free.
         """
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
         safe = min(limit, self.weather.effects.safe_speed_mph)
@@ -563,6 +564,19 @@ class DrivingControlsMixin:
         if getattr(self, "_ramp_mi", None) is not None or exit_armed:
             safe = min(safe, RAMP_MAX_MPH)
             context = " for the ramp"
+        # Curve advisory: if the truck is approaching a sharp curve, the
+        # safe speed includes the advisory so the player knows to slow
+        # before the bend.
+        next_curve = self.trip._next_curve_approach()
+        if next_curve is not None:
+            safe = min(safe, next_curve.advisory_mph)
+            if not context:
+                context = f" for the {next_curve.spoken_phrase}"
+        # Active curve: if the truck is already in a curve, respect its
+        # advisory speed even without the approaching callout.
+        active_curve = self.trip.curve_at(self.trip.position_mi)
+        if active_curve is not None and not active_curve.connector:
+            safe = min(safe, active_curve.advisory_mph)
         self.ctx.say(f"Safe speed {self.ctx.settings.speed_text(safe)}{context}.")
 
     def _speak_last_announcement(self) -> None:

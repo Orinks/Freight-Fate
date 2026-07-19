@@ -67,6 +67,14 @@ def check_profile_invariants(profile: Profile) -> list[Violation]:
     _check_range(out, "fatigue", "Fatigue", profile.fatigue, 0.0, 100.0)
     _check_range(out, "road_grime", "Road grime", profile.road_grime_pct, 0.0, 100.0)
     _check_range(out, "pay_advance", "The pay advance", profile.pay_advance, 0.0, ADVANCE_CEILING)
+    if not isinstance(profile.calendar_offset_days, int) or not (
+        0 <= profile.calendar_offset_days < 365
+    ):
+        out.append(Violation("calendar_offset", "The calendar offset is not possible."))
+    _check_range(out, "damage", "Truck damage", profile.truck_damage_pct, 0.0, 100.0)
+    _check_range(out, "tire_wear", "Tire wear", profile.tire_wear_pct, 0.0, 100.0)
+    if not _finite(profile.truck_fuel_gal) or not (0.0 <= profile.truck_fuel_gal <= _MAX_FUEL_GAL):
+        out.append(Violation("fuel_range", "The truck carries an impossible amount of fuel."))
 
     career = profile.career
     _check_range(out, "xp", "Career experience", career.xp, 0.0, XP_CEILING)
@@ -88,9 +96,7 @@ def check_profile_invariants(profile: Profile) -> list[Violation]:
         and isinstance(career.on_time_deliveries, int)
         and career.on_time_deliveries > career.deliveries >= 0
     ):
-        out.append(
-            Violation("on_time_exceeds", "More on-time deliveries than deliveries driven.")
-        )
+        out.append(Violation("on_time_exceeds", "More on-time deliveries than deliveries driven."))
     if (
         isinstance(career.on_time_deliveries, int)
         and isinstance(career.on_time_streak, int)
@@ -123,9 +129,7 @@ def check_profile_invariants(profile: Profile) -> list[Violation]:
         ):
             value = record.get(field_name, 0.0)
             if not _finite(value) or not (0.0 <= float(value) <= 100.0):
-                out.append(
-                    Violation("condition_range", f"A truck's {label} is outside 0 to 100.")
-                )
+                out.append(Violation("condition_range", f"A truck's {label} is outside 0 to 100."))
         fuel = record.get("fuel_gal", 0.0)
         if not _finite(fuel) or not (0.0 <= float(fuel) <= _MAX_FUEL_GAL):
             out.append(Violation("fuel_range", "A truck carries an impossible amount of fuel."))

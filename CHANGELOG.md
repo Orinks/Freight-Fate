@@ -66,6 +66,35 @@
 - **Choose how much driving assistance the truck provides.** A new Driving assistance settings category offers Realistic, Balanced, All assists, and Custom presets for emergency braking, lane support, stop-and-go behavior, and interactive descent speed control. Adaptive cruise keeps its existing traffic, posted-limit, and weather behavior. Presets never change trip pacing, hours rules, transmission, weather, or hazard frequency. These assists lay the groundwork for the version 1.9 driving changes.
 
 - **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
+- **Live weather can now leave your career calendar running.** The new Live
+  weather controls calendar setting keeps today's real date when on. Turn it
+  off to keep live city conditions while your career date advances at midnight
+  and the seasons pass normally. Live conditions are adjusted to the career
+  season so summer snow and cold-season thunderstorms do not slip through. An
+  established career begins its independent calendar from today's date when
+  you turn the setting off, avoiding a jump back to its old hidden date; a new
+  career still begins on March 21.
+- **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default; turn it off in Settings, Gameplay.
+
+### Changed
+
+- **On-time deliveries now pay a real bonus.** Delivering on time used to add
+  only a sliver of extra pay unless you raced in absurdly far ahead of the
+  deadline, so the bonus line at settlement rarely felt like one. Pay now
+  works the way real shipper scorecards do: hit the delivery window and you
+  earn a flat ten percent on-time bonus every time, and arriving hours early
+  pays no more than making the appointment. The settlement summary now calls
+  it an on-time delivery bonus. Late and damaged deliveries still pay less,
+  exactly as before.
+
+- **You can sleep at turnpike service plazas now.** Service plazas used to
+  offer fuel, food, and a short break but never a proper rest, so a tired
+  driver had to push on to the next truck stop even while parked at a big
+  Thruway or Turnpike plaza with overnight truck parking. Every service
+  plaza's stop menu now offers sleep like truck stops and travel centers do,
+  and route planning counts them as places you can end your day.
+
+- **The driving assistance presets have been set aside for version 1.9.** Recent developer snapshots briefly offered a Driving assistance settings category with emergency braking, lane support, stop-and-go, and descent control presets. That work now ships complete with version 1.9 instead. The speed keeper stays, now under Settings, Gameplay, and your other settings are untouched.
 
 - **Dispatch stops handing you the same run over and over.** Assigned
   dispatch now remembers your last few delivered routes and leads with a
@@ -168,6 +197,37 @@
   route, such as accidents and construction zones. The system uses Ohio's
   OHGO API as a reference implementation and gracefully falls back to
   simulated traffic when the API is unavailable.
+
+- **Construction zones from the road ahead now read from real state 511
+  data.** When a 511 endpoint provides construction work zone data for the
+  state you are driving through, the game converts those events into
+  approachable zones with taper warnings, reduced speed limits, and lane
+  closure announcements -- real construction, where it really is, with the
+  real speed reduction. As you cross a state line the system queries that
+  state's DOT feed automatically; if no API is configured for the state,
+  procedurally generated construction zones take over as before.
+
+- **Twenty-four state DOTs now provide live 511 data for construction
+  work zones.** Ohio continues on the OHGO API, five states use the shared
+  Iteris platform (Arizona, Connecticut, Georgia, New York, Wisconsin),
+  and eighteen states are configured for the federal Work Zone Data
+  Exchange (WZDx) standard (California, Colorado, Florida, Idaho, Indiana,
+  Maryland, Michigan, Minnesota, Missouri, Nevada, New Jersey, North
+  Carolina, Oregon, Pennsylvania, Tennessee, Texas, Utah, Virginia,
+  Washington). The remaining states fall back gracefully to simulated
+  construction zones -- the game never shows a blank map for an
+  unsupported state.
+
+- **Blowing a bend's advisory now costs you for real.** The curves the
+  co-driver calls are the same curves the physics feels: enter a bend
+  well above its advisory speed and centrifugal force shoves the truck
+  toward the outside of the curve -- harder with a heavy load, much
+  harder on a slick road -- with a spoken slip warning as the tires
+  start to complain. The curve speed assistance setting can ease you
+  down toward the advisory before the bend, adaptive cruise drops out
+  with a spoken reason when its set speed is too hot for the curve
+  ahead, and interchange ramp arcs push the same way the mainline bends
+  do. Hold the advisory and none of this touches you.
 
 - **Real-time truck parking availability is announced at stops.** When
   enabled in Settings, Gameplay, the game fetches live parking availability
@@ -420,6 +480,23 @@
   onto a real approach with the exit announced fresh, on every kind of
   road.
 
+- **The engine load now follows throttle smoothly.** Engine effort remains
+  audible when you accelerate or ease off, while manual releases and
+  adaptive-cruise corrections blend gradually instead of making the engine
+  volume jump. Automatic shifts retain a brief, gentle unload and recovery.
+- **Terminal weather now agrees with the live report on the road.** Time and
+  weather uses the real station temperature even when live weather does not
+  control the career calendar. If the first observation is still loading, the
+  terminal says so instead of announcing a modeled temperature that may change
+  when you start driving.
+- **Interstates stop enforcing a side street's speed limit mid-route.** A
+  handful of highway legs still carried a 25 to 40 mile per hour sample in
+  the middle of the corridor, picked up from a nearby city street or ramp
+  during the map sweep -- so the GPS would suddenly announce a 35 limit on
+  the open interstate and enforcement would treat highway speed as
+  speeding. Every such sample is gone (no US interstate mainline posts
+  below 45), and an automatic check now keeps them from ever coming back.
+  Small-town limits on US and state highways are real and unchanged.
 - **Downloaded builds no longer crash when you continue a career.** The
   packaged game was missing several data files that the source version
   reads straight from disk: continuing a career crashed on the missing
@@ -538,6 +615,14 @@
   follow at the set gap, and speaks the traffic warning once, not on
   repeat.
 
+- **Highways no longer inherit city-street speed limits near their start
+  and end.** On six hundred eighty routes, the posted limit spoken and
+  enforced at the edges of a drive could come from a city street beside
+  the highway instead of the highway itself, so an interstate might hold
+  you to thirty miles per hour for miles of open road. Those stray
+  readings are gone: the limit you hear at the wheel now matches the
+  road you are actually on, and speeding enforcement judges you against
+  that honest number.
 - **Careers from older versions now trade every cargo type at real market
   prices.** A career started before the cargo list grew to sixteen classes
   kept freight-market prices only for the original eight, so pay for the

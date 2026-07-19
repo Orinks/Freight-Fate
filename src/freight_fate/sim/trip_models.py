@@ -533,6 +533,7 @@ class TripEventKind(Enum):
     TOLL_CHARGED = "toll_charged"
     LANDMARK = "landmark"
     BILLBOARD = "billboard"
+    CURVE = "curve"
     ARRIVED = "arrived"
 
 

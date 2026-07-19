@@ -4,7 +4,7 @@ from __future__ import annotations
 import math
 import re
 
-from ..data.world import get_world
+from ..data.world import Leg, get_world
 from .trip_models import Zone
 
 
@@ -67,6 +67,47 @@ def _fallback_grade(terrain: str, mile: float, highway: str) -> float:
     wavelength = {"hills": 14.0, "mountain": 8.0}.get(terrain, 16.0)
     phase = (sum(ord(ch) for ch in highway) % 628) / 100.0
     return amplitude * math.sin(2 * math.pi * mile / wavelength + phase)
+
+
+def _nearest_mile_on_leg(
+    lat: float, lon: float, leg: Leg, forward: bool, leg_start_mi: float
+) -> float | None:
+    """Snap a (lat, lon) coordinate to the nearest route point on a leg,
+    returning the trip-absolute milepost, or None when the leg has no route
+    points or the coordinate is too far from the route (>2 miles).
+
+    Uses great-circle distance against the leg's baked RoutePoint samples.
+    When no close match is found (the construction event is on a cross street,
+        not the highway itself), returns None.
+    """
+    if not leg.route_points:
+        return None
+
+    best = None
+    best_dist_mi = float("inf")
+    for rp in leg.route_points:
+        d = _haversine_distance_mi(lat, lon, rp.lat, rp.lon)
+        if d < best_dist_mi:
+            best_dist_mi = d
+            best = rp
+
+    # More than 2 miles from any route point is unlikely to be on the highway
+    if best is None or best_dist_mi > 2.0:
+        return None
+
+    offset = _stop_offset_for_direction(best.at_mi, leg.miles, forward)
+    return leg_start_mi + offset
+
+
+def _haversine_distance_mi(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Great-circle distance in miles between two coordinates."""
+    from math import asin, cos, radians, sin, sqrt
+
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    return 2 * asin(sqrt(a)) * 3956.0
 
 
 __all__ = [name for name in globals() if not name.startswith("__")]

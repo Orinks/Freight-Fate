@@ -26,7 +26,7 @@ HAIRPIN_DEFLECTION_DEG = 150.0
 
 @dataclass(frozen=True)
 class CurveRecord:
-    """One mainline curve in bake direction, miles from leg city a."""
+    """One baked curve in bake direction, miles from leg city a."""
 
     start_mi: float
     apex_mi: float
@@ -35,6 +35,7 @@ class CurveRecord:
     advisory_mph: int
     min_radius_ft: int
     deflection_deg: float
+    connector: bool = False
 
 
 @dataclass(frozen=True)
@@ -48,13 +49,11 @@ class RouteCurve:
     advisory_mph: int
     min_radius_ft: int
     deflection_deg: float
+    connector: bool = False
 
     @property
     def severity(self) -> str:
-        if (
-            self.advisory_mph <= HAIRPIN_MAX_MPH
-            or self.deflection_deg >= HAIRPIN_DEFLECTION_DEG
-        ):
+        if self.advisory_mph <= HAIRPIN_MAX_MPH or self.deflection_deg >= HAIRPIN_DEFLECTION_DEG:
             return "hairpin"
         if self.advisory_mph <= SHARP_MAX_MPH:
             return "sharp"
@@ -76,8 +75,11 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
         for line in text.splitlines():
             if line.strip():
                 row = json.loads(line)
-                if "meta" in row or row.get("connector"):
+                if "meta" in row:
                     continue
+                # Connector arcs (interchange ramps) stay in the data with
+                # their flag: curve physics wants them, spoken layers skip
+                # them -- ramps carry their own speech.
                 by_leg.setdefault(row["leg"], []).append(
                     CurveRecord(
                         start_mi=row["start_mi"],
@@ -87,31 +89,39 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
                         advisory_mph=row["advisory_mph"],
                         min_radius_ft=row["min_radius_ft"],
                         deflection_deg=row["deflection_deg"],
+                        connector=bool(row.get("connector", False)),
                     )
                 )
     _CACHE = {key: tuple(rows) for key, rows in by_leg.items()}
     return _CACHE
 
 
-def leg_curves(leg_key: str) -> tuple[CurveRecord, ...]:
-    """Baked mainline curves for ``"a_slug:b_slug"``, bake direction."""
-    return _load().get(leg_key, ())
+def leg_curves(leg_key: str, mainline_only: bool = True) -> tuple[CurveRecord, ...]:
+    """Baked curves for ``"a_slug:b_slug"``, bake direction. Connector
+    arcs are excluded unless asked for."""
+    rows = _load().get(leg_key, ())
+    if mainline_only:
+        return tuple(r for r in rows if not r.connector)
+    return rows
 
 
 _MIRROR = {"L": "R", "R": "L"}
 
 
-def route_curves(route, cities: list[str]) -> tuple[RouteCurve, ...]:
-    """Every mainline curve on the route, in travel order and direction.
+def route_curves(
+    route, cities: list[str], mainline_only: bool = True
+) -> tuple[RouteCurve, ...]:
+    """Every curve on the route, in travel order and direction.
 
     ``cities`` is the route's city sequence; each leg is mirrored when the
     route runs it b-to-a (offsets flip across the leg, left becomes right).
+    Pass ``mainline_only=False`` to keep connector arcs for physics.
     """
     out: list[RouteCurve] = []
     leg_start = 0.0
     for from_city, leg in zip(cities, route.legs, strict=False):
         forward = from_city == leg.a
-        for rec in leg_curves(f"{leg.a}:{leg.b}"):
+        for rec in leg_curves(f"{leg.a}:{leg.b}", mainline_only=mainline_only):
             if forward:
                 start, apex, end = rec.start_mi, rec.apex_mi, rec.end_mi
                 direction = rec.direction
@@ -129,6 +139,7 @@ def route_curves(route, cities: list[str]) -> tuple[RouteCurve, ...]:
                     advisory_mph=rec.advisory_mph,
                     min_radius_ft=rec.min_radius_ft,
                     deflection_deg=rec.deflection_deg,
+                    connector=rec.connector,
                 )
             )
         leg_start += leg.miles

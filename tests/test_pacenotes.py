@@ -10,6 +10,7 @@ from driving_feature_helpers import quiet_trip, start_drive
 
 from freight_fate.data.curves import RouteCurve, leg_curves, route_curves
 from freight_fate.settings import Settings
+from freight_fate.sim.trip_models import TripEventKind
 
 
 def _curve(start, direction="L", advisory=35, radius=307, deflection=60.0):
@@ -69,13 +70,13 @@ def test_short_distance_text_units():
 
 def _spoken_pacenotes(app, driving, monkeypatch, curves, speed_mph):
     spoken = []
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
     driving.trip.curves = tuple(curves)
-    driving._pacenote_spoken = set()
+    driving.trip._announced_curves = set()
     driving.truck.velocity_mps = speed_mph * 0.44704
-    driving._update_pacenotes(1 / 60)
+    for event in driving.trip.update(0):
+        if event.kind == TripEventKind.CURVE:
+            driving._handle_trip_event(event)
     return spoken
 
 
@@ -93,7 +94,9 @@ def test_pacenote_called_before_a_demanding_bend(monkeypatch):
         assert "Sharp right" in spoken[0]
         assert "Advise" in spoken[0]
         # The same frame never calls twice, and the next frame stays quiet.
-        driving._update_pacenotes(1 / 60)
+        for event in driving.trip.update(0):
+            if event.kind == TripEventKind.CURVE:
+                driving._handle_trip_event(event)
         assert len(spoken) == 1
     finally:
         app.shutdown()
@@ -151,6 +154,46 @@ def test_pacenote_respects_the_setting(monkeypatch):
         app.shutdown()
 
 
+def test_curve_event_uses_the_documented_short_pacenote_wording(monkeypatch):
+    app_module = pytest.importorskip("freight_fate.app")
+    app = app_module.App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        pos = driving.trip.position_mi
+        spoken = _spoken_pacenotes(
+            app, driving, monkeypatch, [_curve(pos + 0.3, "R", advisory=30)], 60.0
+        )
+        assert spoken == ["Sharp right, a quarter mile. Advise 30 miles per hour."]
+    finally:
+        app.shutdown()
+
+
+def test_upcoming_curve_remains_eligible_after_resume(monkeypatch):
+    app_module = pytest.importorskip("freight_fate.app")
+    app = app_module.App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        spoken = []
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+        pos = driving.trip.position_mi
+        curve = _curve(pos + 0.3, "L", advisory=30)
+        driving.trip.curves = (curve,)
+        driving.truck.velocity_mps = 60.0 * 0.44704
+
+        driving.trip.restore(pos, driving.trip.game_minutes)
+        key = f"curve:{curve.start_mi:.3f}:{curve.direction}"
+        assert key not in driving.trip._announced_curves
+
+        for event in driving.trip.update(0):
+            if event.kind == TripEventKind.CURVE:
+                driving._handle_trip_event(event)
+        assert spoken == ["Sharp left, a quarter mile. Advise 30 miles per hour."]
+    finally:
+        app.shutdown()
+
+
 def test_safe_speed_folds_in_the_bend(monkeypatch):
     app_module = pytest.importorskip("freight_fate.app")
     app = app_module.App()
@@ -158,9 +201,7 @@ def test_safe_speed_folds_in_the_bend(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         spoken = []
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True: spoken.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
         pos = driving.trip.position_mi
         driving.trip.curves = (_curve(pos + 0.2, advisory=25),)
         driving._speak_safe_speed()
@@ -177,9 +218,7 @@ def test_upcoming_lists_the_next_bends(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         spoken = []
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True: spoken.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
         pos = driving.trip.position_mi
         driving.trip.curves = (
             _curve(pos + 2.0, "L", advisory=30),

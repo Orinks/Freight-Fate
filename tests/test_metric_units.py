@@ -20,11 +20,13 @@ def test_distance_text_units_and_precision():
     s = Settings()
     assert s.distance_text(38.0) == "38 miles"
     assert s.distance_text(1.0) == "1 mile"
+    assert s.distance_text(1.0, precise=True) == "1.0 mile"
     assert s.distance_text(1.2, precise=True) == "1.2 miles"
 
     m = _metric()
     assert m.distance_text(38.0) == "61 kilometers"
     assert m.distance_text(1.2, precise=True) == "1.9 kilometers"
+    assert m.distance_text(1 / 1.609344, precise=True) == "1.0 kilometer"
     assert m.distance_text(0.62) == "1 kilometer"
 
 
@@ -60,9 +62,7 @@ def test_exit_signal_announcement_speaks_kilometers(monkeypatch):
         app.ctx.settings.imperial_units = False
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True: spoken.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
 
         class _Stop:
             at_mi = driving.trip.position_mi + 1.2
@@ -94,10 +94,6 @@ def test_no_hardcoded_miles_in_spoken_driving_paths():
     offenders = []
     for path in root.glob("*.py"):
         for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            if (
-                pattern.search(line)
-                and "per hour" not in line
-                and "distance_text or" not in line
-            ):
+            if pattern.search(line) and "per hour" not in line and "distance_text or" not in line:
                 offenders.append(f"{path.name}:{i}: {line.strip()}")
     assert offenders == [], "hardcoded spoken miles: " + "; ".join(offenders[:5])

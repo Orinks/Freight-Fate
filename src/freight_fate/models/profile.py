@@ -399,6 +399,10 @@ class Profile:
     current_city: str = DEFAULT_CITY
     road_grime_pct: float = 0.0
     game_hours: float = 6.0  # in-game clock, hours since career start
+    # Whole-day offset used only by the spoken calendar and seasonal weather.
+    # Existing careers can anchor their independent calendar to today's date
+    # without changing deadlines, HOS, markets, or elapsed career time.
+    calendar_offset_days: int = 0
     tutorial_done: bool = False
     truck: str = "rig"  # owner-operator active tractor, or assignment key
     owned_trucks: list[str] = field(default_factory=list)  # owned tractors after buy-in
@@ -672,6 +676,33 @@ class Profile:
 
     def market_day(self) -> int:
         return int(self.game_hours // 24)
+
+    @property
+    def calendar_game_hours(self) -> float:
+        return self.game_hours + self.calendar_offset_days * 24.0
+
+    def has_started_career(self) -> bool:
+        """Whether this profile has progressed beyond a just-created career."""
+        return bool(
+            self.game_hours > 6.0 + 1e-6
+            or self.calendar_offset_days != 0
+            or self.tutorial_done
+            or self.active_trip is not None
+            or self.dispatch_board_cache is not None
+            or self.money != STARTING_MONEY
+            or bool(self.upgrades)
+            or self.pay_advance > 0
+            or self.career.xp > 0
+            or self.career.deliveries > 0
+            or self.career.total_miles > 0
+            or bool(self.achievements)
+        )
+
+    def anchor_calendar_to(self, target_game_hours: float) -> None:
+        """Make the independent calendar show target's date without moving time."""
+        target_day = int(target_game_hours // 24) % 365
+        career_day = int(self.game_hours // 24) % 365
+        self.calendar_offset_days = (target_day - career_day) % 365
 
     # -- persistence -----------------------------------------------------------
 

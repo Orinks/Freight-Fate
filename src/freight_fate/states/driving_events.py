@@ -114,6 +114,42 @@ class DrivingEventMixin:
             self.ctx.say_event(
                 timezone_crossing_message(event, self._terse_speech()), interrupt=False
             )
+        elif kind == TripEventKind.CURVE:
+            # Curve approach warnings are critical navigation cues: they
+            # preempt ambient chatter and play on the event voice.
+            if self._hazard_deadline is not None or self._ramp_mi is not None:
+                return
+            if not self.ctx.settings.curve_callouts:
+                return
+            advisory = event.data.get("advisory_mph", 0)
+            curve = event.data.get("curve")
+            ahead = event.data.get("ahead_mi", 0)
+            message = (
+                self._pacenote_text(curve, ahead, self.truck.speed_mph)
+                if curve is not None
+                else event.message
+            )
+            self._last_event_message = message
+            # A curve call sounds like any other announcement until it has
+            # a signature: a short cue panned to the curve's side marks
+            # "road shape ahead", never a steering command -- the owner
+            # steered a lane change off a bare "Sharp left" (playtest,
+            # 2026-07-18). One-shot, not the continuous steering tone the
+            # community ruled out. Placeholder sound until a dedicated cue
+            # is auditioned (docs/sound-hunt-brief.md, need 1).
+            if curve is not None:
+                pan = -PACENOTE_CUE_PAN if curve.direction == "L" else PACENOTE_CUE_PAN
+                self.ctx.audio.play("ui/tick", volume=0.9, pan=pan)
+            # A curve well above the cruise set point: cancel and tell the
+            # driver why, so they don't wonder why cruise dropped mid-bend.
+            if self._cruise_mph is not None and self._cruise_mph > advisory + 5:
+                self._cancel_cruise()
+                self.ctx.say_event(
+                    message + " Adaptive cruise off; you need manual speed control.",
+                    interrupt=True,
+                )
+            else:
+                self.ctx.say_event(message, interrupt=False)
         elif kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
             self._speak_ambient_event(event.message)
         elif kind == TripEventKind.ARRIVED:

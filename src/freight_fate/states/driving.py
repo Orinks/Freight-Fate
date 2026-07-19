@@ -59,9 +59,11 @@ class DrivingState(
             region,
             seed=self.trip_seed,
             provider=ctx.real_weather_provider(),
-            game_hours=profile.game_hours,
+            game_hours=profile.calendar_game_hours,
+            live_weather_controls_calendar=ctx.settings.live_weather_controls_calendar,
         )
         self._weather_source_real = ctx.settings.real_weather
+        self._live_weather_controls_calendar = ctx.settings.live_weather_controls_calendar
         self._traffic_source_real = ctx.settings.real_traffic
         self._parking_source_real = ctx.settings.real_parking
         trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
@@ -155,6 +157,9 @@ class DrivingState(
         self._chains_fast_active = False  # spoken chains-over-speed warning edge tracking
         self._chain_law_warned: set[tuple[int, int]] = set()  # (area, level) spoken warnings
         self._chain_law_cited: set[tuple[int, int]] = set()  # checkpoint rolls already taken
+        # Curve management: whether a hot-entry slip warning has been spoken
+        # for the current curve.
+        self._curve_slip_active = False
         # Trooper pull-overs: a strike inside a patrol window may get you stopped
         # for an immediate ticket, separate from the silent at-delivery strikes.
         self.speeding_tickets = 0
@@ -264,6 +269,9 @@ class DrivingState(
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
         self._shift_recover_t = 1.0  # 0->1 recovery progress after an automatic shift ends
+        # Smooth only the audible engine load. Physics keeps the raw throttle,
+        # while small controller and cruise changes blend into the engine bed.
+        self._engine_audio_throttle = 0.0
         # Prev-frame accel/brake state, so a forward<->reverse shift needs a
         # fresh press (release then press) rather than a held control.
         self._reverse_brake_held = False

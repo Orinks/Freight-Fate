@@ -46,7 +46,17 @@ browse the tree.
    loop-cuttable road textures: `rumble, gravel, shoulder, washboard,
    corrugat, dirt.?road, cattle.?guard`.
 3. **Turn-signal relay.** A real flasher-relay click pair: `turn
-   signal, indicator, relay, flasher, blinker`.
+   signal, indicator, relay, flasher, blinker`. Owner's field spec
+   (rode with his dad, 2026-07-18): very staccato, very sharp, TWO
+   tones alternating -- close to but not exactly an octave apart --
+   the relay closing (higher tick) and releasing (lower tock) at
+   roughly 80-90 per minute. ElevenLabs prompt seed: "a car turn
+   signal relay: alternating two-tone mechanical tick-tock, sharp
+   staccato clicks about 50 milliseconds each, the second click lower
+   in pitch, dry, no reverb, no engine noise." DESIGN NOTE: the same
+   high/low pair is the intended grammar for the curve tone ladder
+   (high tick = curve entry, low tock = back to center), so shortlist
+   candidates whose two tones would also work solo as one-shots.
 4. **Driveline clunk + air/turbo for shifts.** The shift-sound gap:
    `clunk, driveline, gear.?engage, air.?release, turbo, wastegate,
    hiss`.

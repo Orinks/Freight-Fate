@@ -61,6 +61,22 @@ def test_range_edits_are_caught():
     assert {"money", "fatigue", "xp", "reputation"} <= found
 
 
+@pytest.mark.parametrize("value", [-1, 365, 1.5, float("nan")])
+def test_calendar_offset_edits_are_caught(value):
+    p = Profile(name="Edited Calendar")
+    p.calendar_offset_days = value
+    assert "calendar_offset" in codes(p)
+
+
+def test_condition_edits_are_caught():
+    p = Profile(name="Edited")
+    p.tire_wear_pct = -20.0  # fresher than new
+    p.truck_damage_pct = 250.0
+    p.truck_fuel_gal = 9_000.0  # tanker, not a tank
+    found = codes(p)
+    assert {"tire_wear", "damage", "fuel_range"} <= found
+
+
 def test_counter_relations_are_caught():
     p = Profile(name="Edited")
     p.career.deliveries = 3
@@ -143,8 +159,10 @@ def signed_envelope(payload: dict) -> dict:
 
 def test_signed_honest_payload_restores():
     payload = Profile(name="Honest Norm").to_dict()
+    signed_bytes = canonical_profile(payload)
     profile = verify_cloud_revision(payload, signed_envelope(payload), public_keys=PUBLIC_KEYS)
     assert profile.name == "Honest Norm"
+    assert canonical_profile(payload) == signed_bytes
 
 
 def test_signed_but_impossible_payload_is_refused():

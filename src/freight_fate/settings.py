@@ -61,6 +61,13 @@ DRIVING_ASSIST_PRESETS = {
 
 @dataclass
 class Settings:
+    # Master switch for all online/live-data features.
+    # When off, ``real_weather``, ``real_traffic``, ``real_parking``,
+    # ``online_presence``, ``cloud_saves``, and Discord presence all behave
+    # as if disabled regardless of their individual settings.  Individual
+    # toggles stay visible in the menu (and keep their saved values) so the
+    # player can turn the master back on without reconfiguring each service.
+    online_services: bool = True
     imperial_units: bool = True
     automatic_transmission: bool = True  # friendlier default for new players
     # Simple keeps the familiar hold-through-stop behavior. Deliberate requires
@@ -77,6 +84,10 @@ class Settings:
     real_weather: bool = False  # live conditions from the NWS API
     real_traffic: bool = False  # live traffic incidents from state 511 APIs
     real_parking: bool = False  # live truck parking availability from TPIMS APIs
+    # Preserve the historical behavior by default: live weather also follows
+    # the wall-clock date. Turn this off to let the career calendar advance
+    # while live conditions continue to come from the NWS.
+    live_weather_controls_calendar: bool = True
     hos_mode: str = (
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
@@ -99,7 +110,8 @@ class Settings:
     route_transition_assist: bool = True
     # Holds a gentle speed through low-speed zones where adaptive cruise is
     # unavailable, so nobody has to keep the accelerator key held down. An
-    # input-accessibility aid, not a realism choice: presets never touch it.
+    # input-accessibility aid, kept while the wider assistance framework
+    # ships with 1.9 instead of this line.
     speed_keeper: bool = True
     # Double-tap-and-hold latches the accelerator or brake key so a long
     # pull or a steady snub needs no sustained hold; a fresh press of the
@@ -257,6 +269,8 @@ class Settings:
                 setattr(s, attr, True)
         if not isinstance(s.cloud_saves, bool):
             s.cloud_saves = False
+        if not isinstance(s.live_weather_controls_calendar, bool):
+            s.live_weather_controls_calendar = True
         for attr in (
             "master_volume",
             "sfx_volume",
@@ -307,7 +321,7 @@ class Settings:
         value = miles if self.imperial_units else miles * 1.609344
         unit = "mile" if self.imperial_units else "kilometer"
         text = f"{value:.1f}" if precise else f"{value:.0f}"
-        plural = "" if text == "1" else "s"
+        plural = "" if float(text) == 1.0 else "s"
         return f"{text} {unit}{plural}"
 
     def short_distance_text(self, miles: float) -> str:

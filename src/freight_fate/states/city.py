@@ -482,7 +482,7 @@ class CityMenuState(MenuState):
         zone = city_zone(city)
         hour = to_local(p.game_hours, zone) % 24.0
         day = p.market_day() + 1
-        desc, live = None, False
+        desc, live, loading = None, False, False
         provider = self.ctx.real_weather_provider()
         if provider is not None:
             # Keyed by the city key, not the spoken name: two cities can share
@@ -491,18 +491,55 @@ class CityMenuState(MenuState):
             kind = provider.get(city.key)
             if kind is not None:
                 desc, live = kind.value, True
-        from ..sim.season import date_text, real_clock_game_hours, season
+            else:
+                unavailable = getattr(provider, "unavailable", None)
+                loading = unavailable is None or not unavailable(city.key)
+        from ..sim.season import (
+            adjust_for_calendar,
+            date_text,
+            real_clock_game_hours,
+            season,
+            temperature_c,
+        )
 
-        # With live weather on, the season follows the real calendar so it
-        # matches the real conditions; otherwise it follows the career clock.
-        season_hours = real_clock_game_hours() if provider is not None else p.game_hours
-        if desc is None:
+        # Live conditions and the calendar are separate player choices. The
+        # legacy default follows today's real date; an independent calendar
+        # advances with career time even while conditions remain live.
+        season_hours = (
+            real_clock_game_hours()
+            if provider is not None and self.ctx.settings.live_weather_controls_calendar
+            else p.calendar_game_hours
+        )
+        if live:
+            observed = None
+            getter = getattr(provider, "get_temperature", None)
+            if getter is not None:
+                observed = getter(city.key)
+            # The calendar toggle controls date, season, and plausibility -- it
+            # never replaces a real station temperature with a modeled one.
+            guard_temp = (
+                observed
+                if self.ctx.settings.live_weather_controls_calendar and observed is not None
+                else temperature_c(city.region, season_hours)
+            )
+            parts = [adjust_for_calendar(kind, guard_temp, season_hours).value]
+            if observed is not None:
+                if self.ctx.settings.imperial_units:
+                    parts.append(f"{observed * 9 / 5 + 32:.0f} degrees")
+                else:
+                    parts.append(f"{observed:.0f} degrees Celsius")
+            else:
+                parts.append("temperature unavailable")
+            desc = ", ".join(parts)
+        if loading:
+            desc = "still loading; try Time and weather again in a moment"
+        elif desc is None:
             # deterministic per city and hour, so asking twice agrees
             seed = zlib.crc32(f"{city.key}:{int(p.game_hours)}".encode())
             desc = WeatherSystem(city.region, seed=seed, game_hours=season_hours).describe(
                 self.ctx.settings.imperial_units
             )
-        source = "Live weather" if live else "Weather"
+        source = "Live weather" if live or loading else "Weather"
         self.ctx.say(
             f"It is {clock_text(hour)} {zone.name}, {time_of_day(hour)}, "
             f"{date_text(season_hours)}, in {season(season_hours)}, "

@@ -174,6 +174,27 @@ def adjust_for_temperature(kind: WeatherKind, temp_c: float | None) -> WeatherKi
     return kind
 
 
+def adjust_for_calendar(
+    kind: WeatherKind, temp_c: float | None, game_hours: float | None
+) -> WeatherKind:
+    """Reconcile weather with both temperature and the selected calendar.
+
+    Temperature handles the physical precipitation phase. The season check is
+    the final gameplay guard: snow is winter-only and thunderstorms are
+    summer-only, preventing a live observation from contradicting an
+    independently advancing career calendar.
+    """
+    adjusted = adjust_for_temperature(kind, temp_c)
+    if game_hours is None:
+        return adjusted
+    current_season = season(game_hours)
+    if adjusted is WeatherKind.SNOW and current_season != "winter":
+        return WeatherKind.RAIN if temp_c is not None and temp_c < 6.0 else WeatherKind.CLOUDY
+    if adjusted is WeatherKind.THUNDERSTORM and current_season != "summer":
+        return WeatherKind.HEAVY_RAIN
+    return adjusted
+
+
 def temperature_text(region: str, game_hours: float, imperial: bool = True) -> str:
     """Spoken temperature in the player's units."""
     temp_c = temperature_c(region, game_hours)

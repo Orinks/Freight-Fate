@@ -117,7 +117,9 @@ def main() -> None:
     else:
         for entry in repaired:
             drops = ", ".join(f"{d['mph']:.0f} mph at mile {d['at_mi']}" for d in entry["dropped"])
-            print(f"{entry['leg']} ({entry['highway']}): dropped {drops}; {entry['kept']} samples kept")
+            print(
+                f"{entry['leg']} ({entry['highway']}): dropped {drops}; {entry['kept']} samples kept"
+            )
     print(f"\n{len(repaired)} interstate legs repaired ({'written' if args.write else 'dry run'})")
 
     if args.write and repaired:

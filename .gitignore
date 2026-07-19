@@ -64,3 +64,10 @@ logs/
 
 # personal play/test launchers (owner-local, not for commit)
 FF*.ps1
+
+# Codebuff desktop app data
+.freebuff/
+
+# Windows null device artifact
+nul
+

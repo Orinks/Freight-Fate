@@ -26,6 +26,13 @@ from .weather import WeatherSystem
 STOP_AHEAD_LOOKAHEAD_MI = 5.0
 LOCAL_TURN_LOOKAHEAD_MI = 0.3  # street maneuvers announce at block scale, not highway scale
 
+PACENOTE_REACTION_S = 5.0
+PACENOTE_BRAKE_MPH_PER_S = 3.0
+PACENOTE_MARGIN_MPH = 3.0
+PACENOTE_GENTLE_MARGIN_MPH = 8.0
+PACENOTE_MIN_LEAD_MI = 0.33
+PACENOTE_MAX_LEAD_MI = 1.5
+
 
 def _spoken_distance(value: float, unit: str) -> str:
     """A whole-number distance with the unit pluralized for speech, so a
@@ -118,12 +125,15 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.patrols = self._place_patrols()
         self.traffic_manager.add_patrol_traffic(self.patrols)
         self.chain_law_areas = self._place_chain_law_areas()
-        self.curves = route_curves(self.route, self.route.cities)
+        # Curve data: baked real-world curve records per leg, resolved to trip
+        # miles so the driving state can query active curves and approach them.
+        self.curves = self._place_curves()
         # True while the player is on an exit ramp that ends in a light or a
         # stop sign; the driving state maintains it every frame. It pins the
         # clock to real time (see effective_time_scale).
         self.controlled_ramp = False
         self._announced_chain_law: set[str] = set()
+        self._announced_curves: set[str] = set()
         self._announced_landmarks: set[str] = set()
         self._announced_billboards: set[str] = set()
         self._announced_stops: set[str] = set()
@@ -576,6 +586,89 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             at += rng.uniform(BILLBOARD_MIN_GAP_MI, BILLBOARD_MAX_GAP_MI)
         return callouts
 
+    # -- curves -----------------------------------------------------------------
+
+    def _place_curves(self) -> list[RouteCurve]:
+        """Every baked curve on the route in trip-mile coordinates.
+
+        ``route_curves`` resolves the per-leg (A->B frame) records into the
+        trip's position coordinate, mirroring reversed legs. Connector
+        ramps are kept in the list for curve physics but filtered from the
+        spoken layers -- ramps carry their own speech.
+        """
+        if self._is_facility_approach_route():
+            return []
+        return list(route_curves(self.route, self.route.cities, mainline_only=False))
+
+    def curve_at(self, mile: float) -> RouteCurve | None:
+        """The curve whose footprint contains this milepost, or None.
+
+        After direction resolution, some baked curves may have their start_mi
+        slightly past their end_mi on the trip coordinate frame (a curve that
+        was oriented backward in the leg data). Check both orderings.
+        """
+        for cr in self.curves:
+            lo, hi = min(cr.start_mi, cr.end_mi), max(cr.start_mi, cr.end_mi)
+            if lo <= mile <= hi:
+                return cr
+        return None
+
+    def _next_curve_approach(self) -> RouteCurve | None:
+        """The next curve ahead that deserves a spoken approach warning.
+
+        Connector ramps use their own cues. Mainline bends stay silent when
+        the truck is already slow enough, and speak only once they enter the
+        reaction-plus-comfortable-braking window.
+        """
+        speed = self.truck.speed_mph
+        for cr in self.curves:
+            ahead = cr.start_mi - self.position_mi
+            if ahead <= 0:
+                continue
+            if ahead > PACENOTE_MAX_LEAD_MI:
+                break
+            if cr.connector:
+                continue
+            margin = PACENOTE_GENTLE_MARGIN_MPH if cr.severity == "gentle" else PACENOTE_MARGIN_MPH
+            if speed <= cr.advisory_mph + margin:
+                continue
+            if ahead > self._curve_pacenote_lead_mi(speed, cr.advisory_mph):
+                continue
+            return cr
+        return None
+
+    @staticmethod
+    def _curve_pacenote_lead_mi(speed_mph: float, advisory_mph: float) -> float:
+        over = max(0.0, speed_mph - advisory_mph)
+        react_mi = speed_mph * PACENOTE_REACTION_S / 3600.0
+        brake_s = over / PACENOTE_BRAKE_MPH_PER_S
+        brake_mi = (speed_mph + advisory_mph) / 2.0 * brake_s / 3600.0
+        return min(PACENOTE_MAX_LEAD_MI, max(PACENOTE_MIN_LEAD_MI, react_mi + brake_mi))
+
+    def _check_curves(self) -> None:
+        """Emit a CURVE event when approaching a meaningful curve."""
+        if self._is_facility_approach_route():
+            return
+        cr = self._next_curve_approach()
+        if cr is None:
+            return
+        ahead = cr.start_mi - self.position_mi
+        key = f"curve:{cr.start_mi:.3f}:{cr.direction}"
+        if key in self._announced_curves:
+            return
+        self._announced_curves.add(key)
+        # Build pacenote: "sharp curve left, half mile, advisory 35"
+        direction = "left" if cr.direction == "L" else "right"
+        prefix = "sharp " if cr.severity in ("hairpin", "sharp") else ""
+        distance = self._distance_text(ahead)
+        self._emit(
+            TripEventKind.CURVE,
+            f"{prefix}curve {direction}, {distance}, advisory {cr.advisory_mph:.0f}.",
+            curve=cr,
+            advisory_mph=cr.advisory_mph,
+            ahead_mi=ahead,
+        )
+
     def _check_roadside_callouts(self) -> None:
         self._check_callout_list(self.landmarks, self._announced_landmarks, TripEventKind.LANDMARK)
         self._check_callout_list(
@@ -635,8 +728,29 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 # Claim the whole signed footprint, taper included, so the
                 # next draw cannot land a second work zone inside this one.
                 spans.append((taper_start, end))
-        # Congestion is no longer a dice roll: traffic-prone stretches come
-        # from HPMS volume against capacity and turn on with the clock.
+        # Real construction zones from state 511 APIs: when available, these
+        # replace simulated zones on overlapping stretches so the player hears
+        # real work zone locations instead of procedurally generated ones.
+        real_construction = self._place_real_construction_zones()
+        if real_construction:
+            # Remove any simulated zones that overlap with real construction
+            real_spans = [
+                (z.start_mi, z.end_mi) for z in real_construction if z.reason == "construction"
+            ]
+            filtered: list[Zone] = []
+            for z in zones:
+                if z.reason not in ("construction", "construction merge"):
+                    filtered.append(z)
+                    continue
+                overlaps = any(
+                    z.start_mi < r_end + ZONE_MIN_GAP_MI and z.end_mi > r_start - ZONE_MIN_GAP_MI
+                    for r_start, r_end in real_spans
+                )
+                if not overlaps:
+                    filtered.append(z)
+            zones = filtered
+            zones.extend(real_construction)
+        # Congestion zones are always added regardless of construction data.
         zones.extend(self._place_congestion_zones())
         zones.extend(self._facility_speed_zones())
         zones.sort(key=lambda z: z.start_mi)
@@ -1010,17 +1124,15 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         return base
 
     def curves_within(self, within_mi: float) -> list[RouteCurve]:
-        """Mainline curves whose entry lies ahead within the window."""
-        return [
-            c for c in self.curves if 0 < c.start_mi - self.position_mi <= within_mi
-        ]
+        """Mainline curves whose entry lies ahead within the window.
 
-    def curve_at(self, mile: float) -> RouteCurve | None:
-        """The curve the given route mile is inside, if any."""
-        for c in self.curves:
-            if c.start_mi <= mile <= c.end_mi:
-                return c
-        return None
+        Connector arcs stay out: the spoken layers (pacenotes, U, S, D)
+        are this method's consumers, and ramps carry their own speech."""
+        return [
+            c
+            for c in self.curves
+            if not c.connector and 0 < c.start_mi - self.position_mi <= within_mi
+        ]
 
     def next_zone_within(self, within_mi: float) -> Zone | None:
         ahead = [
@@ -1200,6 +1312,13 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                     self._announced_billboards.add(callout.key)
                 else:
                     self._announced_landmarks.add(callout.key)
+        # Only curves already passed are certainly history. A curve still
+        # ahead may not have entered the speed-dependent call window before
+        # the save, so leave it eligible after resume rather than suppressing
+        # a safety cue the player never heard.
+        for cr in self.curves:
+            if cr.start_mi <= self.position_mi:
+                self._announced_curves.add(f"curve:{cr.start_mi:.3f}:{cr.direction}")
         for patrol in self.patrols:
             if patrol.start_mi <= self.position_mi:
                 self._announced_patrols.add(_patrol_key(patrol))
@@ -1290,6 +1409,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._check_npc_traffic_cues()
         self._check_traffic_pressures()
         self._check_real_traffic_events()
+        self._check_curves()
         self._check_stops()
         self._check_roadside_callouts()
         self._check_tolls()
