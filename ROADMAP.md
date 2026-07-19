@@ -64,6 +64,21 @@ From a batch of player reports:
   sweep would upgrade. Regen should run offline from the cached PBFs like
   the overlay pipeline, targeting trunk/primary junction nodes on the 533
   unlabeled legs.
+- [x] **State lines repeated at intermediate cities -- FIXED 2026-07-19
+  (player transcript).** Mapped state-boundary cues are now authoritative, so
+  passing the next major city no longer claims that the truck crossed the same
+  state line again. City narration retains the old crossing wording only as a
+  fallback for legacy legs without mapped boundaries. Full harness regressions
+  cover Tennessee and Texas routes, reverse travel, and an all-Texas route.
+- [ ] Reconcile checkpoint positions with state-boundary positions on seven
+  corridor legs. A 24-route forward/reverse harness sweep found 13 places
+  spoken on the wrong side of a state line: Fort Oglethorpe on
+  Nashville--Atlanta; Peekskill, Newburgh, Kingston, Ravena, Rotterdam, and
+  Amsterdam on New York--Buffalo; North East and Conneaut on
+  Buffalo--Cleveland; Mesquite on Las Vegas--Salt Lake City; the Longview--
+  Portland corridor checkpoint; Ashland on Portland--San Francisco; and
+  Vernal on Denver--Salt Lake City. This is a route-data ordering issue, not
+  another city-narration composition bug.
 - [x] **Quick info keys.** S reads the posted speed limit (was buried in the
   Tab menu); A repeats the last route announcement; U reads what is coming
   up (imposed limits, stops, exits ahead); R includes the current road, state,
@@ -225,7 +240,7 @@ From a batch of player reports:
   trooper milestone (below) remains the home for *visible, immediate*
   enforcement: getting pulled over and on-the-spot fines.
 
-- [x] **Speed keeper for low-speed zones.** Shipped: K starts a job-scoped speed-control session that uses the speed keeper on facility roads, in gate queues, work zones, and congestion, then automatically hands off to adaptive cruise on the open road. It pauses through the planned pickup, persists through pickup saves, and resumes once the loaded truck is rolling. It restores the chosen cruise target across zones, follows queued traffic, and fully disarms on other braking or hazards so it cannot restart unexpectedly. On by default, toggleable in Settings, Gameplay.
+- [x] **Speed keeper for low-speed zones.** Shipped: K starts a job-scoped speed-control session that uses the speed keeper on facility roads, in gate queues, work zones, and congestion, then automatically hands off to adaptive cruise on the open road. It pauses through the planned pickup, persists through pickup saves, and resumes once the loaded truck is rolling. It restores the chosen cruise target across zones, follows queued traffic, and eases to ramp speed when the destination exit is announced before releasing control on the ramp. It fully disarms on other braking or hazards so it cannot restart unexpectedly. On by default, toggleable in Settings, Gameplay.
 - [ ] **Driving assistance presets and descent control.** Built and then withdrawn from the 1.8 nightly line after playtesting (the underlying assists need the 1.9 driving arc around them); the work lives on feat/career-1.9 and ships with 1.9. Release-merge note: the withdrawal was a git revert of merge 9b406fe (plus 9f2dbff and b971684) on dev, so merging feat/career-1.9 back will NOT re-apply this content on its own -- the release merge must first revert the revert commit on dev, then merge.
 - [x] **Limit-aware adaptive cruise.** Shipped: once real OSM limits, zones,
   and trooper enforcement landed, plain "hold the set speed" cruise would carry

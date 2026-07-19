@@ -97,6 +97,134 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
 
 
 @pytest.mark.smoke
+@pytest.mark.parametrize(
+    (
+        "origin",
+        "destination",
+        "trip_seed",
+        "zone_reason",
+        "start_mi",
+        "end_mi",
+        "set_mph",
+        "modes",
+    ),
+    [
+        (
+            "Chicago",
+            "Indianapolis",
+            0,
+            "construction",
+            None,
+            None,
+            70.0,
+            ["cruise", "keeper", "cruise"],
+        ),
+        (
+            "Chicago",
+            "Indianapolis",
+            3,
+            "heavy traffic",
+            None,
+            None,
+            70.0,
+            ["cruise", "keeper", "cruise"],
+        ),
+        (
+            "wilmington_de_us",
+            "salisbury_md_us",
+            17,
+            None,
+            5.0,
+            22.0,
+            70.0,
+            ["cruise"],
+        ),
+    ],
+)
+def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
+    monkeypatch,
+    origin,
+    destination,
+    trip_seed,
+    zone_reason,
+    start_mi,
+    end_mi,
+    set_mph,
+    modes,
+):
+    from freight_fate.states.driving import SPEEDING_HOLD_S
+
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.ctx.settings.hos_mode = "realistic"
+        harness.app.ctx.settings.speed_keeper = True
+        harness.app.ctx.settings.automatic_transmission = True
+        harness.app.ctx.settings.time_scale = 10.0
+        harness.start_route(origin, destination, trip_seed=trip_seed)
+        if zone_reason is not None:
+            zone = next(zone for zone in harness.driving.trip.zones if zone.reason == zone_reason)
+            start_mi = max(0.0, zone.start_mi - 5.0)
+            end_mi = min(harness.driving.trip.total_miles, zone.end_mi + 3.0)
+        result = harness.drive_speed_control_segment(
+            start_mi=start_mi,
+            end_mi=end_mi,
+            set_mph=set_mph,
+        )
+        harness.settle_delivery_after_segment()
+
+    assert result.speed_control_transitions == modes
+    assert result.speeding_strikes == 0, result.transcript_text
+    assert result.speeding_tickets == 0, result.transcript_text
+    assert result.max_speeding_timer_s < SPEEDING_HOLD_S
+    assert "Speeding strike" not in result.transcript_text
+    assert "speeding fines" not in result.transcript_text.lower()
+    assert result.deliveries == 1
+    if "keeper" in modes:
+        assert "Speed keeper holding" in result.transcript_text
+        assert "Adaptive cruise resuming" in result.transcript_text
+    else:
+        assert "Posted limit lower; adaptive cruise easing" in result.transcript_text
+
+
+@pytest.mark.smoke
+@pytest.mark.parametrize("restricted_zone_reason", [None, "construction"])
+def test_realistic_cruise_eases_for_destination_exit_without_speeding_fine(
+    monkeypatch,
+    restricted_zone_reason,
+):
+    from freight_fate.states.driving import RAMP_MAX_MPH, SPEEDING_HOLD_S
+
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.ctx.settings.hos_mode = "realistic"
+        harness.app.ctx.settings.speed_keeper = True
+        harness.app.ctx.settings.automatic_transmission = True
+        harness.app.ctx.settings.time_scale = 10.0
+        harness.start_route("Chicago", "Indianapolis", trip_seed=0)
+        result = harness.drive_destination_exit_with_speed_control(
+            set_mph=70.0,
+            restricted_zone_reason=restricted_zone_reason,
+        )
+
+    assert result.destination_exit_speed_mph is not None
+    assert result.destination_exit_speed_mph <= RAMP_MAX_MPH
+    assert result.speeding_strikes == 0, result.transcript_text
+    assert result.speeding_tickets == 0, result.transcript_text
+    assert result.max_speeding_timer_s < SPEEDING_HOLD_S
+    assert "destination exit" in result.transcript_text
+    assert "Adaptive cruise easing to 45 miles per hour for the ramp" in result.transcript_text
+    assert "Signaling for" in result.transcript_text
+    assert "You take" in result.transcript_text
+    assert "missed the destination exit" not in result.transcript_text.lower()
+    assert "Speeding strike" not in result.transcript_text
+    assert "speeding fines" not in result.transcript_text.lower()
+    assert result.deliveries == 1
+    if restricted_zone_reason is not None:
+        assert "Speed keeper holding 45 miles per hour" in result.transcript_text
+        assert (
+            "Adaptive cruise resuming at 45 miles per hour for the ramp" in result.transcript_text
+        )
+
+
+@pytest.mark.smoke
 def test_delivery_publication_is_queued_without_spoken_interruption(monkeypatch):
     from freight_fate.online_presence import OnlineIdentity
 
@@ -140,6 +268,43 @@ def test_playtest_harness_drives_a_specific_route(monkeypatch):
     # State lines announce only when crossed; this short delivery finishes at
     # the terminal before its mapped crossing cue.
     assert "New Jersey into New York" not in transcript
+
+
+@pytest.mark.smoke
+@pytest.mark.parametrize(
+    ("route_cities", "state", "passing_city", "expected_crossings"),
+    [
+        (["Indianapolis", "Nashville", "Atlanta"], "Tennessee", "Nashville", 1),
+        (["Atlanta", "Nashville", "Indianapolis"], "Tennessee", "Nashville", 1),
+        (["Shreveport", "Dallas", "Albuquerque"], "Texas", "Dallas", 1),
+        (["Dallas", "San Antonio", "Houston"], "Texas", "San Antonio", 0),
+    ],
+)
+def test_mapped_state_lines_are_authoritative_in_delivery_transcripts(
+    monkeypatch, route_cities, state, passing_city, expected_crossings
+):
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_route(
+            route_cities[0],
+            route_cities[-1],
+            profile_name=f"{state} narration",
+            route_cities=route_cities,
+        )
+        harness.drive_delivery_to_completion()
+
+    crossing_lines = [line for line in result.transcript if f"Crossing into {state}" in line]
+    assert len(crossing_lines) == expected_crossings, result.transcript_text
+    passing_phrase = f"Passing {passing_city}, {state}."
+    assert passing_phrase in result.transcript_text
+    assert f"Crossing into {state}. Passing {passing_city}" not in result.transcript_text
+    if expected_crossings:
+        boundary_index = next(
+            i for i, line in enumerate(result.transcript) if f"Crossing into {state} near " in line
+        )
+        passing_index = next(
+            i for i, line in enumerate(result.transcript) if passing_phrase in line
+        )
+        assert boundary_index < passing_index, result.transcript_text
 
 
 def test_playtest_route_report_includes_current_location_on_real_keyboard_path(monkeypatch):

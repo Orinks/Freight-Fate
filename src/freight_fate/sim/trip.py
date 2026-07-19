@@ -1066,7 +1066,17 @@ class Trip:
                 world = get_world()
                 city_state = world.cities[city].state
                 prev_state = world.cities[prev].state
-                crossing = f"Crossing into {city_state}. " if city_state != prev_state else ""
+                completed_leg = self.route.legs[i - 1]
+                forward = prev == completed_leg.a
+                mapped_crossing_into_city = any(
+                    (boundary.state if forward else boundary.from_state) == city_state
+                    for boundary in completed_leg.state_crossings
+                )
+                crossing = (
+                    f"Crossing into {city_state}. "
+                    if city_state != prev_state and not mapped_crossing_into_city
+                    else ""
+                )
                 self._emit(
                     TripEventKind.CITY_REACHED,
                     f"{crossing}Passing {world.spoken_city(city, qualified=False)}, "

@@ -1292,15 +1292,21 @@ def test_terse_destination_exit_omits_press_x_instruction(monkeypatch):
         app.shutdown()
 
 
-def test_destination_exit_announces_and_disables_cruise(monkeypatch):
+def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
     from freight_fate.app import App
 
     app = App()
     events = []
+    said = []
     monkeypatch.setattr(
         app.ctx,
         "say_event",
         lambda text, interrupt=True: events.append((text, interrupt)),
+    )
+    monkeypatch.setattr(
+        app.ctx,
+        "say",
+        lambda text, interrupt=True: said.append(text),
     )
     try:
         driving = start_drive(app)
@@ -1319,18 +1325,31 @@ def test_destination_exit_announces_and_disables_cruise(monkeypatch):
         )
         destination = driving._destination_exit_stop()
         driving.trip.position_mi = destination.at_mi - 4.0
+        driving.truck.velocity_mps = 60.0 / 2.23694
         driving._cruise_mph = 60.0
+        driving._speed_control_target_mph = 60.0
 
         driving._check_destination_exit()
 
-        assert driving._cruise_mph is None
+        assert driving._cruise_mph == 60.0
+        assert driving._cruise_exit_mph == 45.0
         message, interrupt = events[-1]
         assert interrupt is True
         assert "exit " in message
         assert "toward" in message
         assert "destination exit" in message
         assert "Press X to take it" in message
-        assert "Adaptive cruise disabled" in message
+        assert "Adaptive cruise easing to 45 miles per hour for the ramp" in message
+
+        driving._adjust_cruise(-5.0)
+        assert said[-1] == (
+            "Open-road cruise target 55 miles per hour. Ramp approach target 45 miles per hour."
+        )
+        for _tap in range(3):
+            driving._adjust_cruise(-5.0)
+        assert said[-1] == (
+            "Open-road cruise target 40 miles per hour. Ramp approach target 40 miles per hour."
+        )
     finally:
         app.shutdown()
 

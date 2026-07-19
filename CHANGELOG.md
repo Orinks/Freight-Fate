@@ -50,6 +50,15 @@
 
 ### Fixed
 
+- **Automatic speed control now slows you for the destination exit.** When the
+  signed delivery exit is announced, adaptive cruise eases the truck to ramp
+  speed instead of switching off at highway speed. Press X to take the exit;
+  automatic control releases as you enter the ramp, ready for you to brake to
+  the facility stop without collecting an unwanted speeding fine.
+- **State-line announcements no longer repeat at the next major city.** When
+  the GPS calls out the real state boundary, passing the next city now says
+  only the city and onward route instead of claiming that you crossed the same
+  state line again.
 - **The game no longer crashes when it is installed in a protected folder.**
   If you put Freight Fate somewhere Windows guards, such as Program Files, the
   game could not write next to itself and would crash the moment it tried to

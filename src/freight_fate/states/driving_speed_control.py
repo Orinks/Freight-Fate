@@ -7,10 +7,12 @@ from .driving_core import KEEPER_MIN_MPH
 
 
 class SpeedControlStateMixin:
-    def _clear_cruise(self) -> None:
+    def _clear_cruise(self, *, preserve_exit_cap: bool = False) -> None:
         self._cruise_mph = None
         self._cruise_throttle = 0.0
         self._cruise_applied = 0.0
+        if not preserve_exit_cap:
+            self._cruise_exit_mph = None
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
@@ -78,7 +80,7 @@ class SpeedControlStateMixin:
 
     def _cancel_cruise(self, *, preserve_session: bool = False) -> None:
         if preserve_session:
-            self._clear_cruise()
+            self._clear_cruise(preserve_exit_cap=True)
         else:
             self._disarm_speed_control()
 

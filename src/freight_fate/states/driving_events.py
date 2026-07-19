@@ -344,8 +344,14 @@ class DrivingEventMixin:
         self._destination_exit_announced_key = key
         message = self._destination_exit_announcement(stop, ahead)
         if self._cruise_mph is not None:
-            self._cancel_cruise()
-            message += " Adaptive cruise disabled; take manual speed control."
+            self._cruise_exit_mph = min(self._cruise_mph, RAMP_MAX_MPH)
+            action = (
+                "easing to" if self.truck.speed_mph > self._cruise_exit_mph + 1.0 else "holding"
+            )
+            message += (
+                f" Adaptive cruise {action} "
+                f"{self.ctx.settings.speed_text(self._cruise_exit_mph)} for the ramp."
+            )
         self.ctx.audio.play("ui/notify", volume=0.7)
         self.ctx.say_event(message, interrupt=True)
 
@@ -526,10 +532,16 @@ class DrivingEventMixin:
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
         gap = self._acc_gap_seconds()
+        effective_mph = (
+            min(self._cruise_mph, self._cruise_exit_mph)
+            if self._cruise_exit_mph is not None
+            else self._cruise_mph
+        )
+        exit_note = " for the ramp" if self._cruise_exit_mph is not None else ""
         self.ctx.audio.play("ui/notify", volume=0.5)
         message = (
             f"Adaptive cruise {'resuming' if transition else 'set'} at "
-            f"{self.ctx.settings.speed_text(self._cruise_mph)}. "
+            f"{self.ctx.settings.speed_text(effective_mph)}{exit_note}. "
             f"Following gap {gap:.0f} seconds. K or braking cancels."
         )
         if transition:
@@ -553,7 +565,15 @@ class DrivingEventMixin:
         self._speed_control_target_mph = target
         if self._cruise_mph is not None:
             self._cruise_mph = target
-            self.ctx.say(f"Adaptive cruise {self.ctx.settings.speed_text(target)}.")
+            if self._cruise_exit_mph is not None:
+                ramp_target = min(target, self._cruise_exit_mph)
+                self.ctx.say(
+                    f"Open-road cruise target {self.ctx.settings.speed_text(target)}. "
+                    "Ramp approach target "
+                    f"{self.ctx.settings.speed_text(ramp_target)}."
+                )
+            else:
+                self.ctx.say(f"Adaptive cruise {self.ctx.settings.speed_text(target)}.")
         else:
             self.ctx.say(f"Open-road cruise target {self.ctx.settings.speed_text(target)}.")
 
@@ -710,6 +730,9 @@ class DrivingEventMixin:
             self._cruise_applied = 0.0
             return
         target_mph = self._cruise_mph
+        exit_capped = self._cruise_exit_mph is not None and self._cruise_exit_mph < target_mph
+        if exit_capped:
+            target_mph = self._cruise_exit_mph
         # Predictive ACC: never carry the driver past the posted limit. With real
         # OSM limits baked per leg, a held set speed would otherwise sail through
         # urban drops and corridor limit changes straight into speeding strikes,
@@ -763,7 +786,7 @@ class DrivingEventMixin:
         else:
             self._cruise_applied = self._cruise_throttle
         t.throttle = self._cruise_applied
-        if (following or limit_capped) and error < -2.0:
+        if (following or limit_capped or exit_capped) and error < -2.0:
             weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
             t.brake = max(t.brake, min(weather_brake, abs(error) / 30.0))
 

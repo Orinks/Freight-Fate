@@ -124,6 +124,7 @@ class DrivingState(
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._cruise_applied = 0.0
+        self._cruise_exit_mph: float | None = None
         # K arms one continuous speed-control session. The active controller
         # changes between adaptive cruise on open roads and the speed keeper in
         # restricted zones, while this target remembers what cruise should
