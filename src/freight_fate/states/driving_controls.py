@@ -424,7 +424,10 @@ class DrivingControlsMixin:
             )
         stop = self.trip.upcoming_stop(within_mi)
         if stop is not None:
-            parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}")
+            parts.append(
+                f"{self.trip.planned_prefix(stop)}{stop.spoken_name} "
+                f"in {s.distance_text(stop.at_mi - pos)}"
+            )
         cue = self.trip.next_exit_cue()
         if cue is not None and 0 < cue.at_mi - pos <= within_mi:
             parts.append(f"in {s.distance_text(cue.at_mi - pos)}, {cue.text}")
@@ -604,7 +607,8 @@ class DrivingControlsMixin:
         ahead = max(0.0, next_stop.at_mi - self.trip.position_mi)
         verdict = "before" if ahead <= legal_miles else "after"
         stop_text = (
-            f"Next legal stop: {next_stop.spoken_name} in {self.ctx.settings.distance_text(ahead)}"
+            f"Next legal stop: {self.trip.planned_prefix(next_stop)}{next_stop.spoken_name} "
+            f"in {self.ctx.settings.distance_text(ahead)}"
         )
         if next_stop.parking_text:
             stop_text += f", {next_stop.parking_text}"

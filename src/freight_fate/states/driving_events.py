@@ -192,6 +192,9 @@ class DrivingEventMixin:
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
+        if self.trip.is_planned(stop):
+            # Plan fulfilled; the stop menu announces itself.
+            self.trip.planned_stop_name = None
         can_sleep = "sleep" in stop.actions
         if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi, self.trip.local_hour):
             self.ctx.push_state(ParkingFullState(self.ctx, self, stop))

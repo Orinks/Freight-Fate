@@ -12,9 +12,25 @@
   established career begins its independent calendar from today's date when
   you turn the setting off, avoiding a jump back to its old hidden date; a new
   career still begins on March 21.
+- **Map stops now open a full details view, and you can plan your next
+  stop.** On the driving Map screen, pressing Enter on a stop now opens its
+  details instead of repeating the line: the exit, distance, what it offers,
+  parking, and an estimate of how long it will take to reach at your pace,
+  including whether you would arrive before your next break, driving limit,
+  or duty window. From there, plan to stop at it: approach announcements and
+  the upcoming and clock readouts then call it your planned stop, so you know
+  exactly when to signal for the exit. Plans can be canceled or replaced any
+  time, survive saving and resuming, and clear themselves when you pull in or
+  drive past.
 - **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default; turn it off in Settings, Gameplay.
 
 ### Changed
+
+- **Moving a planned stop now asks first, and each stop only cancels its own
+  plan.** A stop's details screen shows the cancel option only when that stop
+  is the one you planned. Choosing "Plan to stop" while another stop is already
+  planned now tells you which stop is planned and how far ahead it is, and asks
+  whether to move your plan here before changing it.
 
 - **On-time deliveries now pay a real bonus.** Delivering on time used to add
   only a sliver of extra pay unless you raced in absurdly far ahead of the
@@ -36,6 +52,9 @@
 
 ### Fixed
 
+- **Planning a stop now plays a single confirmation sound.** Choosing "Plan to
+  stop" from a stop's details no longer stacks a menu click and a confirmation
+  chime back to back; you hear just the confirmation.
 - **The engine load now follows throttle smoothly.** Engine effort remains
   audible when you accelerate or ease off, while manual releases and
   adaptive-cruise corrections blend gradually instead of making the engine

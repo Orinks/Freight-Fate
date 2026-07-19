@@ -183,6 +183,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             "speeding_tickets": self.speeding_tickets,
             "ticket_fines_paid": self.ticket_fines_paid,
             "lane_offset": self.lane.offset,
+            "planned_stop": self.trip.planned_stop_name,
         }
 
     @classmethod
@@ -222,6 +223,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             state.start_damage = float(data["start_damage"])
             state.speeding_strikes = int(data["speeding_strikes"])
             state.trip.restore(position_mi, game_minutes)
+            state.trip.planned_stop_name = data.get("planned_stop") or None
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
             state.truck.restore_air_brake_snapshot(data.get("air_brake"), default_ready=True)
             if bool(data.get("engine_on", False)):
