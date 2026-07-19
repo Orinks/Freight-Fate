@@ -4,11 +4,13 @@ Generalizes the ratified straw sampler (``tools/straw_curve_sample.py``, reviewe
 in ``docs/curve-geometry-straw-review.md``) over the whole network. One pass per
 leg emits two layers:
 
-  * the world source's ``corridor.speed_limits`` -- the confirmed posted step
-    function the runtime/linter/tests read. Dense sampling yields real
+  * the world source's ``corridor.speed_limits`` -- the coverage-aware posted
+    step function the runtime/linter/tests read. Dense sampling yields real
     transitions, so no lone city-street anchor survives and the anchor linter
-    reports ZERO on fresh data. (Null coverage-gap markers live only in the
-    derived shard; the world source carries numeric postings, per its schema.)
+    reports ZERO on fresh data. Null coverage-gap markers are kept in the
+    world source too (schema accepts them since 2026-07-19): the runtime
+    reverts to the highway/region heuristic inside a gap instead of holding
+    the last posting for miles.
   * derived shards the runtime does not yet read (Phil wires curve-nav later):
       - ``world_data/us/geometry/<state>.jsonl`` -- the encoded archival polyline
       - ``world_data/us/gameplay/curves.jsonl``  -- per-curve steering rows
@@ -358,15 +360,18 @@ def process_leg(
         gameplay_curves.append(row)
 
     rt = scs.roundtrip_check(geom, curv_dec["curves"])
-    # world-source profile: numeric confirmed postings only (schema needs a number),
-    # then run the anchor linter's OWN repair so fresh data is clean by
-    # construction -- it drops interstate sub-45 end anchors and fast-corridor
-    # surface mile-0/end city-street anchors exactly as the post-bake linter
-    # would, guaranteeing it then reports ZERO (repair is idempotent).
+    # world-source profile: the full coverage-aware step function, gap markers
+    # included (the schema accepts mph null since the NY-12 Norwich smear --
+    # a village 30 held for nine untagged miles). Then run the anchor
+    # linter's OWN repair so fresh data is clean by construction -- it drops
+    # interstate sub-45 end anchors and fast-corridor surface mile-0/end
+    # city-street anchors exactly as the post-bake linter would, guaranteeing
+    # it then reports ZERO (repair is idempotent and keeps gap markers).
     world_profile = [
-        {"at_mi": s["at_mi"], "mph": s["mph"], "source": s["source"], "hgv": s["hgv"]}
-        for s in speed_full
+        {"at_mi": s["at_mi"], "mph": s["mph"], "source": s.get("source", ""), "hgv": s.get("hgv", False)}
         if s["mph"] is not None
+        else {"at_mi": s["at_mi"], "mph": None}
+        for s in speed_full
     ]
     _tmp = {
         "legs": [

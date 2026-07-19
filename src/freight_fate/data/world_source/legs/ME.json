@@ -2489,6 +2489,10 @@
             "hgv": false
           },
           {
+            "at_mi": 83.1,
+            "mph": null
+          },
+          {
             "at_mi": 106.3,
             "mph": 70,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
@@ -7700,6 +7704,10 @@
             "hgv": false
           },
           {
+            "at_mi": 101.4,
+            "mph": null
+          },
+          {
             "at_mi": 105.8,
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
@@ -11606,6 +11614,10 @@
             "hgv": false
           },
           {
+            "at_mi": 10.2,
+            "mph": null
+          },
+          {
             "at_mi": 17.0,
             "mph": 30,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
@@ -11636,10 +11648,18 @@
             "hgv": false
           },
           {
+            "at_mi": 29.7,
+            "mph": null
+          },
+          {
             "at_mi": 53.9,
             "mph": 25,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 55.9,
+            "mph": null
           },
           {
             "at_mi": 60.2,
@@ -11796,6 +11816,10 @@
             "mph": 65,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 135.6,
+            "mph": null
           },
           {
             "at_mi": 163.2,

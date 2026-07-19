@@ -154,7 +154,33 @@ terminal becomes the anchor of that week instead of a spawn point.
       Policy bans (Big Buck's GOLDEN ANTLER waiver) stay a separate
       future flag; the pass never overrides physics. OATIS runs the
       sweep in his own window AFTER sharding lands; the
-      announcement/HOS filter is game-side.
+      announcement/HOS filter is game-side. STATUS 2026-07-19: rails
+      landed game-side (b91d476, every stop defaults tractor_trailer);
+      sweep DONE on map/truck-access-sweep (3,742 stops: 2,717
+      tractor_trailer / 1,021 bobtail_only / 4 owner-adjudicated none;
+      527 real gap-fill facilities on 248 legs), pending Phil's review
+      merge. Open: 81 UNVERIFIED legs (OSM likely under-tagged, e.g.
+      I-80 into Sacramento), 22 legs over 100 mi with no truck-usable
+      stop (owner+Josh decision: fill honestly via Jason's Law pass
+      first), and the POI discovery layer itself samples only ~7 fixed
+      boxes per leg regardless of length -- whole-corridor re-survey is
+      its own roadmap line.
+- [ ] **Terrain audit: relief-aware reclassification (player-found by
+      Josh, 2026-07-19).** The grade-segment classifier calls any
+      segment over 3% "mountain" with no relief context, so East Texas
+      creek dips read "terrain mountain" and can roll mountain-only
+      hazards (runaway truck) outside Lufkin; meanwhile 186 legs with
+      mountain-scale relief are labeled flat at leg level (the
+      Grapevine!). Physics is untouched (it reads numeric grades).
+      Full brief with rules, ground-truth checks (all 96 runaway ramps
+      must sit on mountain segments), and the handshake:
+      docs/terrain-audit-brief.md. Oatis's next map job after the
+      access sweep merges.
+- [ ] **Guard the real world source during tests.** save_world()
+      defaults to the checked-in source, so a stray call from a test or
+      ad-hoc script silently rewrites the map (same class as the
+      FREIGHT_FATE_DATA_DIR rule for saves). Add a loud failure when
+      tests write the real source without explicitly opting in.
 - [ ] **Real construction zones from state 511 APIs.** When real-time
       traffic is enabled, construction zones should be generated from actual
       state DOT work zone data instead of simulated zones. Requires:
@@ -414,6 +440,17 @@ terminal becomes the anchor of that week instead of a spawn point.
       `world_data/us/gameplay`. Tools: `bake_curve_geometry.py` (the sweep) and
       `harvest_escape_ramps.py` (escape ramps read offline from the local
       Geofabrik PBFs, since the self-hosted Overpass extract omits them).
+- [x] **Coverage-gap markers end the town-limit smear (2026-07-19).** The
+      sweep always knew where OSM tagging ran out (`mph: null` rows in the
+      derived shard) but the world schema dropped them, so a village 30 could
+      rule miles of untagged highway (player-found live: NY-12 out of Norwich
+      held 30 for nine miles). The schema, runtime, anchor repair, and bake
+      now carry the markers end to end -- inside a gap the road reverts to the
+      highway/region heuristic. 670 markers migrated onto 391 legs from the
+      existing sweep shard; 8 never-swept legs heal when the sweep reaches
+      them. Paired with co-driver speech: a warn-worthy posted drop is called
+      ahead with pacenote timing, and a short town zone has its length spoken
+      on entry.
 - [ ] Lateral traction on curves and ramps: the curve geometry now exists (the
       2026-07-15 sweep above bakes per-curve radius, direction, and an advisory
       speed per leg), but the 1-D truck model does not yet consume it -- so

@@ -9456,6 +9456,10 @@
             "hgv": true
           },
           {
+            "at_mi": 157.1,
+            "mph": null
+          },
+          {
             "at_mi": 164.1,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
@@ -9466,6 +9470,10 @@
             "mph": 50,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 167.0,
+            "mph": null
           },
           {
             "at_mi": 171.8,
@@ -9526,6 +9534,10 @@
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 223.8,
+            "mph": null
           },
           {
             "at_mi": 228.3,
@@ -11114,6 +11126,10 @@
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 135.9,
+            "mph": null
           }
         ],
         "landmarks": [
@@ -11933,6 +11949,10 @@
             "hgv": true
           },
           {
+            "at_mi": 14.0,
+            "mph": null
+          },
+          {
             "at_mi": 21.0,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
@@ -11943,6 +11963,10 @@
             "mph": 50,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 23.9,
+            "mph": null
           },
           {
             "at_mi": 28.6,
@@ -14324,6 +14348,10 @@
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 137.2,
+            "mph": null
           }
         ],
         "restrictions": []
@@ -17308,6 +17336,10 @@
             "hgv": true
           },
           {
+            "at_mi": 41.5,
+            "mph": null
+          },
+          {
             "at_mi": 48.6,
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
@@ -17318,6 +17350,10 @@
             "mph": 50,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 51.5,
+            "mph": null
           },
           {
             "at_mi": 56.2,
@@ -18093,6 +18129,10 @@
             "mph": 50,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 2.3,
+            "mph": null
           },
           {
             "at_mi": 7.6,
@@ -23285,6 +23325,10 @@
             "mph": 70,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 87.5,
+            "mph": null
           }
         ],
         "state_miles": [
@@ -24689,6 +24733,10 @@
             "mph": 70,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 44.1,
+            "mph": null
           }
         ],
         "restrictions": []
@@ -30208,6 +30256,10 @@
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 137.1,
+            "mph": null
           }
         ],
         "restrictions": []

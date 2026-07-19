@@ -57,7 +57,9 @@ def test_no_interstate_sample_below_45_at_any_position() -> None:
         if not tool.is_interstate(leg.get("highway", "")):
             continue
         for row in (leg.get("corridor") or {}).get("speed_limits") or []:
-            if row["mph"] < tool.INTERSTATE_MIN_PLAUSIBLE_MPH:
+            # Coverage-gap markers (mph null) are "tagging ends here", not
+            # postings -- the runtime reverts to the heuristic there.
+            if row["mph"] is not None and row["mph"] < tool.INTERSTATE_MIN_PLAUSIBLE_MPH:
                 offenders.append(
                     f"{leg['from']}-{leg['to']} ({leg['highway']}) "
                     f"{row['mph']:.0f} mph at mile {row['at_mi']}"

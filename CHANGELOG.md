@@ -4,6 +4,17 @@
 
 ### Added
 
+- **The co-driver now warns you before the speed limit drops.** When a
+  real posted drop is coming that your speed can't ignore -- a village 30
+  at the end of an open 55, a city ring at the end of a fast interstate
+  run -- she calls it while there is still room to brake a loaded rig:
+  "Speed limit drops to 30 in a quarter mile." Small steps and drops you
+  are already slow enough for stay silent. And when a lower limit only
+  lasts through a short town, the sign call now says so -- "Speed limit
+  reduced to 30 for half a mile" -- so a village main street reads as a
+  passing event, not your new cruising speed. Distances follow your
+  kilometers setting.
+
 - **An armed exit now counts itself down.** Once your signal is on, the
   exit calls out again at two miles, one mile, and half a mile -- and if
   you are not in the right lane, each call says so while there is still
@@ -471,6 +482,14 @@
   chatter instead of being interrupted.
 
 ### Fixed
+
+- **Town speed limits no longer follow you out of town.** On two-lane
+  highways the map sometimes knew a village's 30 but not where it ended,
+  and the low limit could rule miles of open road past the last house --
+  a player found NY-12 out of Norwich holding 30 for nine miles. The map
+  now records where real posted data runs out, and past that point the
+  road goes back to a normal open-road limit for its highway type. Nearly
+  every corridor gets this in the same sweep.
 
 - **Missing your destination exit on a rural highway no longer strands
   you.** On two-lane highways the game could lose track of the

@@ -1341,6 +1341,10 @@
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 70.2,
+            "mph": null
           }
         ],
         "restrictions": []
@@ -2106,6 +2110,10 @@
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 5.2,
+            "mph": null
           },
           {
             "at_mi": 19.2,
@@ -3857,6 +3865,10 @@
             "mph": 45,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 48.1,
+            "mph": null
           }
         ],
         "restrictions": []
@@ -26195,6 +26207,10 @@
             "hgv": false
           },
           {
+            "at_mi": 3.4,
+            "mph": null
+          },
+          {
             "at_mi": 11.7,
             "mph": 65,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
@@ -27167,6 +27183,10 @@
             "mph": 40,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 67.3,
+            "mph": null
           },
           {
             "at_mi": 72.1,
@@ -29302,6 +29322,10 @@
             "mph": 55,
             "source": "OpenStreetMap maxspeed tags on the corridor highway ways (Overpass), development-time, normalized to mph; maxspeed:hgv preferred where tagged.",
             "hgv": false
+          },
+          {
+            "at_mi": 93.7,
+            "mph": null
           },
           {
             "at_mi": 102.1,

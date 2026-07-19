@@ -102,6 +102,94 @@ def test_offset_before_first_sample_uses_first():
     assert _leg_speed_limit_at(leg, 0.0) == 60.0
 
 
+# --- coverage-gap markers ---------------------------------------------------
+
+
+def test_gap_marker_answers_none_instead_of_holding_the_last_posting():
+    # The NY-12 lesson: a village 30 whose tagging ends must not rule the
+    # untagged miles that follow -- inside the gap the caller's heuristic
+    # answers.
+    leg = _leg(
+        (
+            SpeedLimitSample(0.0, 30.0),
+            SpeedLimitSample(1.2, None),
+            SpeedLimitSample(40.0, 55.0),
+        )
+    )
+    assert _leg_speed_limit_at(leg, 0.5) == 30.0
+    assert _leg_speed_limit_at(leg, 20.0) is None
+    assert _leg_speed_limit_at(leg, 45.0) == 55.0
+
+
+def test_parser_accepts_gap_markers_and_still_rejects_bad_numbers():
+    from freight_fate.data.world_parsing import _parse_speed_limit
+
+    sample = _parse_speed_limit({"at_mi": 5.0, "mph": None}, 100.0, "A", "B")
+    assert sample.mph is None
+    with pytest.raises(ValueError):
+        _parse_speed_limit({"at_mi": 5.0, "mph": 150.0}, 100.0, "A", "B")
+
+
+def _load_repair():
+    spec = importlib.util.spec_from_file_location(
+        "repair_interstate_anchor_limits", ROOT / "tools" / "repair_interstate_anchor_limits.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.repair
+
+
+def test_anchor_repair_keeps_gap_markers_and_drops_street_pollution():
+    repair = _load_repair()
+    data = {
+        "legs": [
+            {
+                "from": "a",
+                "to": "b",
+                "highway": "I-40",
+                "miles": 100.0,
+                "corridor": {
+                    "speed_limits": [
+                        {"at_mi": 0.0, "mph": 40.0},  # city-street pollution
+                        {"at_mi": 3.0, "mph": 70.0},
+                        {"at_mi": 60.0, "mph": None},  # gap marker stays
+                    ]
+                },
+            }
+        ]
+    }
+    repaired = repair(data)
+    assert len(repaired) == 1
+    kept = data["legs"][0]["corridor"]["speed_limits"]
+    assert kept == [{"at_mi": 3.0, "mph": 70.0}, {"at_mi": 60.0, "mph": None}]
+
+
+def test_anchor_repair_trusts_a_surface_anchor_bounded_by_a_gap():
+    # A town 35 at mile 0 that the sweep marked as ending 1 mile in never
+    # owned the corridor -- the runtime already reverts inside the gap, so
+    # the sample is honest and must survive the surface-anchor rule.
+    repair = _load_repair()
+    data = {
+        "legs": [
+            {
+                "from": "a",
+                "to": "b",
+                "highway": "US-60",
+                "miles": 80.0,
+                "corridor": {
+                    "speed_limits": [
+                        {"at_mi": 0.0, "mph": 35.0},
+                        {"at_mi": 1.0, "mph": None},
+                        {"at_mi": 10.0, "mph": 65.0},
+                    ]
+                },
+            }
+        ]
+    }
+    assert repair(data) == []
+    assert len(data["legs"][0]["corridor"]["speed_limits"]) == 3
+
+
 # --- runtime preference and fallback ---------------------------------------
 
 
