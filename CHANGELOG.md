@@ -111,6 +111,13 @@
 
 ### Changed
 
+- **The game is about a third smaller to download.** The music now uses a
+  newer, more efficient audio format, cutting the download from roughly 282
+  to 191 megabytes without changing how anything sounds -- welcome news on a
+  slow or metered connection. Fifteen tracks were rebuilt from their original
+  studio recordings along the way, so those should sound a shade cleaner than
+  before.
+
 - **On-time deliveries now pay a real bonus.** Delivering on time used to add
   only a sliver of extra pay unless you raced in absurdly far ahead of the
   deadline, so the bonus line at settlement rarely felt like one. Pay now

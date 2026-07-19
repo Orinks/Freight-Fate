@@ -591,7 +591,11 @@ class _PygameBackend:
     def play_music(self, track: str, fade_ms: int = 1500) -> None:
         if not self.enabled or self._music_track == track:
             return
-        found = _asset_bytes(f"music/{track}", ("ogg", "wav"))
+        # Music ships as Opus (tools/encode_music_opus.py): far smaller for
+        # background beds at the same perceived quality. Ogg stays in the
+        # preference list so a partial migration and the effects tree, which
+        # are still Vorbis, keep resolving.
+        found = _asset_bytes(f"music/{track}", ("opus", "ogg", "wav"))
         if found is None:
             log.warning("Missing music track: %s", track)
             return
@@ -1196,7 +1200,11 @@ class _BassBackend:
     def play_music(self, track: str, fade_ms: int = 1500) -> None:
         if self._music_track == track:
             return
-        found = _asset_bytes(f"music/{track}", ("ogg", "wav"))
+        # Music ships as Opus (tools/encode_music_opus.py): far smaller for
+        # background beds at the same perceived quality. Ogg stays in the
+        # preference list so a partial migration and the effects tree, which
+        # are still Vorbis, keep resolving.
+        found = _asset_bytes(f"music/{track}", ("opus", "ogg", "wav"))
         if found is None:
             log.warning("Missing music track: %s", track)
             return
