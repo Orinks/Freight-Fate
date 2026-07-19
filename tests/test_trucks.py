@@ -171,11 +171,14 @@ def test_profile_persists_truck_and_upgrades():
 
 
 def test_old_save_without_truck_fields_loads_with_defaults():
-    p = Profile(name="Legacy")
-    path = p.save()
     import json
 
-    data = json.loads(path.read_text())
+    from freight_fate.models.profile import LEGACY_SAVE_SUFFIX, _decode_save_bytes
+
+    p = Profile(name="Legacy")
+    path = p.save()
+    data = _decode_save_bytes(path.read_bytes())[0]
+    path.unlink()
     for legacy_missing in (
         "truck",
         "owned_trucks",
@@ -187,8 +190,10 @@ def test_old_save_without_truck_fields_loads_with_defaults():
         data.pop(legacy_missing, None)
     data.pop("_signature", None)
     data.pop("_signature_version", None)
-    path.write_text(json.dumps(data))
-    loaded = Profile.load(path)
+    # An old install left this save as plain unsigned JSON.
+    legacy_path = path.with_suffix(LEGACY_SAVE_SUFFIX)
+    legacy_path.write_text(json.dumps(data))
+    loaded = Profile.load(legacy_path)
     assert loaded.truck == "rig"
     assert loaded.owned_trucks == ["rig"]
     assert loaded.upgrades == {}

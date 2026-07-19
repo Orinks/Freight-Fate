@@ -200,7 +200,7 @@ def test_save_survives_unwritable_game_dir(monkeypatch, tmp_path):
     monkeypatch.setattr(profile_mod, "_unwritable_warned", False)
     monkeypatch.setattr(profile_mod, "_is_writable_dir", lambda path: False)
     saved = profile_mod.Profile(name="Ryan").save()
-    assert saved == legacy / "profiles" / "Ryan.json"
+    assert saved == legacy / "profiles" / "Ryan.ffsave"
     assert saved.is_file()
 
 

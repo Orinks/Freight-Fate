@@ -26,7 +26,8 @@ HELP_PAGES = [
             "Press F1 in any menu for contextual help.",
             "Manage careers on the main menu lets you reset or delete saved careers,",
             "with a confirmation screen before anything destructive happens.",
-            "Edited or corrupted career saves may be moved aside at the main menu.",
+            "Corrupted career saves may be moved aside at the main menu. A save",
+            "changed outside the game still loads, but is marked as modified.",
         ],
     ),
     (

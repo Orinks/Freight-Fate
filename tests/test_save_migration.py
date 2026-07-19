@@ -4,7 +4,13 @@ import json
 
 import pygame
 
-from freight_fate.models.profile import SAVE_VERSION, Profile, _signature_for
+from freight_fate.models.profile import (
+    LEGACY_SAVE_SUFFIX,
+    SAVE_VERSION,
+    Profile,
+    _decode_save_bytes,
+    _signature_for,
+)
 from freight_fate.models.save_migration import migrate_save_data
 from freight_fate.models.trucks import TRUCK_CATALOG
 from freight_fate.profile_invariants import check_profile_invariants
@@ -25,12 +31,19 @@ def write_v4_save(
     grime=60.0,
     signed=True,
 ):
-    """Write a save shaped exactly like the pre-per-truck (version 4) format."""
+    """Write a save shaped exactly like the pre-per-truck (version 4) format.
+
+    Version-4 saves predate the packed container, so this writes plain JSON
+    at the legacy ``.json`` path, exactly as a real old install left it.
+    """
     p = Profile(name=name)
-    path = p.save()
-    data = json.loads(path.read_text())
+    packed_path = p.save()
+    data = _decode_save_bytes(packed_path.read_bytes())[0]
+    packed_path.unlink()
     data.pop("truck_conditions", None)
     data.pop("migration_notice_pending", None)
+    data.pop("integrity_modified", None)
+    data.pop("integrity_notice_pending", None)
     data.pop("_signature", None)
     data.pop("_signature_version", None)
     data["version"] = 4
@@ -43,6 +56,7 @@ def write_v4_save(
     if signed:
         data["_signature_version"] = 1
         data["_signature"] = _signature_for(data)
+    path = packed_path.with_suffix(LEGACY_SAVE_SUFFIX)
     path.write_text(json.dumps(data))
     return path
 
@@ -69,8 +83,12 @@ def test_v4_save_converts_to_per_truck_records():
 
 def test_v4_save_is_rewritten_to_disk_on_load():
     path = write_v4_save()
-    Profile.load(path)
-    on_disk = json.loads(path.read_text())
+    loaded = Profile.load(path)
+    # The conversion re-homes the career in the packed container; the old
+    # plain-JSON file stays behind only as a .json.bak rollback copy.
+    assert not path.exists()
+    path = loaded.path
+    on_disk = _decode_save_bytes(path.read_bytes())[0]
     assert on_disk["version"] == SAVE_VERSION
     assert "truck_conditions" in on_disk
     for legacy in ("truck_fuel_gal", "truck_damage_pct", "tire_wear_pct", "road_grime_pct"):
@@ -116,7 +134,7 @@ def test_migration_respects_long_range_tank_upgrade():
 def test_current_saves_pass_through_unchanged():
     p = Profile(name="Modern")
     path = p.save()
-    data = json.loads(path.read_text())
+    data = _decode_save_bytes(path.read_bytes())[0]
     migrated, changed = migrate_save_data(data)
     assert changed is False
     assert migrated is data
@@ -145,7 +163,8 @@ def test_migration_notice_shows_once_then_enters_world(monkeypatch):
         assert app.ctx.profile.migration_notice_pending is False
 
         # The dismissal is saved: a fresh load goes straight into the world.
-        app.ctx.profile = Profile.load(path)
+        # (The conversion moved the career into its packed .ffsave file.)
+        app.ctx.profile = Profile.load(app.ctx.profile.path)
         assert app.ctx.profile.migration_notice_pending is False
         enter_world(app.ctx)
         assert isinstance(app.state, CityMenuState)
@@ -169,6 +188,45 @@ def test_migration_notice_escape_also_acknowledges(monkeypatch):
         app.state.handle_event(key_event(pygame.K_ESCAPE))
         assert isinstance(app.state, CityMenuState)
         assert app.ctx.profile.migration_notice_pending is False
+    finally:
+        app.shutdown()
+
+
+def test_modified_notice_shows_once_then_enters_world(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import encode_save_bytes
+    from freight_fate.states.city import CityMenuState
+    from freight_fate.states.main_menu import enter_world
+    from freight_fate.states.save_notice import SaveModifiedNoticeState
+
+    p = Profile(name="Edited")
+    path = p.save()
+    data = _decode_save_bytes(path.read_bytes())[0]
+    data["money"] = 999_999.0
+    path.write_bytes(encode_save_bytes(data))
+
+    app = App()
+    try:
+        spoken = []
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        app.ctx.profile = Profile.load(path)
+        assert app.ctx.profile.integrity_modified is True
+
+        enter_world(app.ctx)
+        assert isinstance(app.state, SaveModifiedNoticeState)
+        assert any("marked as modified" in text for text in spoken)
+
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, CityMenuState)
+        assert app.ctx.profile.integrity_notice_pending is False
+        # The mark itself never clears from a dismissal.
+        assert app.ctx.profile.integrity_modified is True
+
+        # The dismissal is saved: a fresh load goes straight into the world.
+        app.ctx.profile = Profile.load(path)
+        assert app.ctx.profile.integrity_notice_pending is False
+        enter_world(app.ctx)
+        assert isinstance(app.state, CityMenuState)
     finally:
         app.shutdown()
 

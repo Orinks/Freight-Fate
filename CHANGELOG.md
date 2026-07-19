@@ -29,6 +29,16 @@
 
 ### Changed
 
+- **Career saves are now sealed files instead of plain text.** Saved careers
+  use a new packed format that ordinary text editors cannot open, and every
+  save is signed by your own installation. Your existing careers convert
+  automatically the first time they load, and a copy of the old file is kept
+  beside the new one in case you ever roll back to an older version of the
+  game. A save that was changed outside the game, or copied over from another
+  computer, still loads and plays normally, but the game tells you once and
+  marks that career as modified; shared features may not accept a modified
+  career.
+
 - **Moving a planned stop now asks first, and each stop only cancels its own
   plan.** A stop's details screen shows the cancel option only when that stop
   is the one you planned. Choosing "Plan to stop" while another stop is already

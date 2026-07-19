@@ -37,7 +37,7 @@ from freight_fate.cloud_saves import (
     upload_save,
 )
 from freight_fate.models import profile as profile_module
-from freight_fate.models.profile import SIGNATURE_FIELD, Profile
+from freight_fate.models.profile import SIGNATURE_FIELD, Profile, _decode_save_bytes
 from freight_fate.online_presence import OnlineIdentity, base_url
 from freight_fate.settings import Settings
 
@@ -432,12 +432,14 @@ def test_restore_verifies_then_writes_a_locally_signed_save():
 
     restored = Profile.load(path)
     assert restored.money == 77_000.0
-    assert SIGNATURE_FIELD in json.loads(path.read_text(encoding="utf-8"))
-    backup = path.with_suffix(".json.bak")
+    # Locally re-signed, and not flagged: a verified restore is not a tamper.
+    assert restored.integrity_modified is False
+    assert SIGNATURE_FIELD in _decode_save_bytes(path.read_bytes())[0]
+    backup = path.with_suffix(".ffsave.bak")
     assert backup.exists()
-    assert json.loads(backup.read_text(encoding="utf-8"))["money"] == 5.0
+    assert _decode_save_bytes(backup.read_bytes())[0]["money"] == 5.0
     # The fallback file must not appear in the careers list.
-    assert path.with_suffix(".json.bak") not in Profile.list_saves()
+    assert backup not in Profile.list_saves()
 
     # The restored revision is the next upload's parent, so continuing this
     # career does not immediately conflict with the copy just downloaded.

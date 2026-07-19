@@ -34,6 +34,7 @@ successful restore is immediately HMAC-signed for this installation.
 from __future__ import annotations
 
 import base64
+import contextlib
 import gzip
 import hashlib
 import json
@@ -364,21 +365,27 @@ def restore_to_disk(payload: dict, sync_state: SyncState | None = None) -> Path:
     """Write a downloaded cloud save over the local profile file.
 
     Verification and construction happen before touching disk. The current
-    local file (if any) is kept beside it as ``.json.bak``. The replacement is
-    atomically installed with this machine's HMAC signature, and the old file
-    is put back if installation fails. Sync state changes only after success.
+    local file (if any) is kept beside it as ``.ffsave.bak``. The replacement
+    is atomically installed with this machine's HMAC signature, and the old
+    file is put back if installation fails. Sync state changes only after
+    success.
     """
-    from .models.profile import profiles_dir
+    from .models.profile import (
+        LEGACY_SAVE_SUFFIX,
+        SAVE_SUFFIX,
+        encode_save_bytes,
+        save_path_for,
+    )
 
     profile = verify_cloud_revision(payload["profile"], payload)
     signed_data = profile.to_dict()
     name = save_slot_name(profile.name)
-    path = profiles_dir() / f"{name}.json"
-    tmp = path.with_suffix(".json.tmp")
-    backup = path.with_suffix(".json.bak")
+    path = save_path_for(name)
+    tmp = path.with_suffix(SAVE_SUFFIX + ".tmp")
+    backup = path.with_suffix(SAVE_SUFFIX + ".bak")
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(signed_data, f, indent=2)
+    with open(tmp, "wb") as f:
+        f.write(encode_save_bytes(signed_data))
     moved_old = False
     try:
         if path.exists():
@@ -391,6 +398,12 @@ def restore_to_disk(payload: dict, sync_state: SyncState | None = None) -> Path:
         if moved_old and backup.exists() and not path.exists():
             backup.replace(path)
         raise
+    # A leftover plain-JSON save for this career would shadow nothing (the
+    # packed file wins), but move it aside so only one live copy remains.
+    legacy = path.with_suffix(LEGACY_SAVE_SUFFIX)
+    if legacy.exists():
+        with contextlib.suppress(OSError):
+            legacy.replace(legacy.with_suffix(".json.bak"))
     if sync_state is not None and isinstance(payload.get("revision"), int):
         _, content_hash = cloud_content(payload["profile"])
         sync_state.record_synced(payload["saveName"], payload["revision"], content_hash)
