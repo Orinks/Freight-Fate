@@ -496,6 +496,12 @@
 
 ### Fixed
 
+- **Speed-limit calls now know which way the town is.** A limit drop
+  just past a city used to say you were approaching it while it shrank
+  in your mirrors. If the town is behind you, the call now says
+  "leaving" instead -- so a drop on the far side of Sedona no longer
+  sounds like you turned around.
+
 - **Town speed limits no longer follow you out of town.** On two-lane
   highways the map sometimes knew a village's 30 but not where it ended,
   and the low limit could rule miles of open road past the last house --

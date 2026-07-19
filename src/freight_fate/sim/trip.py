@@ -1157,13 +1157,15 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
     def _near_city(self, mile: float) -> bool:
         return any(abs(mile - mp) <= URBAN_RADIUS_MI for mp in self._city_mileposts)
 
-    def _nearest_urban_city(self, mile: float) -> str | None:
-        best, best_d = None, URBAN_RADIUS_MI
+    def _nearest_urban_city(self, mile: float) -> tuple[str, float] | None:
+        """The nearest route city within the urban radius, with its milepost --
+        the milepost tells callers whether the city is ahead or behind."""
+        best, best_mp, best_d = None, 0.0, URBAN_RADIUS_MI
         for i, mp in enumerate(self._city_mileposts):
             d = abs(mile - mp)
             if d <= best_d and i < len(self.route.cities):
-                best, best_d = self.route.cities[i], d
-        return best
+                best, best_mp, best_d = self.route.cities[i], mp, d
+        return None if best is None else (best, best_mp)
 
     def _corridor_limit_at(self, mile: float) -> float:
         leg_i, leg_start = self._leg_at_mile(mile)
@@ -1649,8 +1651,15 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             lowered = limit < self._announced_speed_limit
             self._announced_speed_limit = limit
             verb = "reduced to" if lowered else "raised to"
-            city = self._nearest_urban_city(self.position_mi) if lowered else None
-            where = f" approaching {get_world().spoken_city(city)}" if city else ""
+            near = self._nearest_urban_city(self.position_mi) if lowered else None
+            where = ""
+            if near is not None:
+                city, city_mp = near
+                # A drop while pulling AWAY from town is the road's doing, not
+                # the town's -- "approaching Sedona" with Sedona in the mirror
+                # reads as a wrong turn (owner-found live, 2026-07-20).
+                direction = "approaching" if city_mp >= self.position_mi else "leaving"
+                where = f" {direction} {get_world().spoken_city(city)}"
             # A short lower zone (a village main street) is a passing event,
             # not a new cruising speed: say how long it lasts so the player
             # is not left guessing when the road opens back up.

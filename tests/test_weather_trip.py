@@ -331,6 +331,21 @@ def test_speed_limit_cue_names_direction_and_city(world, monkeypatch):
     assert all("approaching" not in m for m in raised)
 
 
+def test_speed_limit_drop_behind_a_city_says_leaving(world, monkeypatch):
+    # Owner-found live leaving Sedona (2026-07-20): a drop with the town in
+    # the mirror must not claim you are approaching it.
+    trip, _ = make_trip(world)  # Chicago -> Indianapolis
+    trip._active_zone = None
+    trip.position_mi = 2.0  # past Chicago's milepost, still inside its radius
+    trip._announced_speed_limit = 45.0
+    monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 35.0)
+    trip._events.clear()
+    trip._check_speed_limit()
+    lowered = [e.message for e in trip._events]
+    assert any("reduced to" in m and "leaving" in m for m in lowered), lowered
+    assert all("approaching" not in m for m in lowered)
+
+
 def test_force_weather_override_locks_condition(monkeypatch):
     monkeypatch.setenv("FREIGHT_FATE_FORCE_WEATHER", "snow")
     ws = WeatherSystem("heartland", seed=1)
