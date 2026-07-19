@@ -84,6 +84,13 @@ From a batch of player reports:
   Tab menu); A repeats the last route announcement; U reads what is coming
   up (imposed limits, stops, exits ahead); R includes the current road, state,
   direction, nearest named place, and trip progress in its route report.
+- [x] **Stop details and planned stops (1.8.x nightly).** Enter on a Map-screen
+  stop opens a job-details-style view (exit, distance, offers, parking, and an
+  ELD-rule ETA with an arrive-before-your-next-HOS-limit note), with plan /
+  cancel / supersede buttons. The planned stop is announced with a "Planned
+  stop" prefix at every surface that names stops (5-mile exit announcement,
+  U key, C-key next-legal-stop, Map screen), persists in the active-trip
+  snapshot, and clears itself when taken or passed.
 - [x] **Announcement priority and lead time.** Safety cues (zone entry,
   construction/traffic warnings, checkpoints) preempt ambient chatter on the
   event voice instead of queuing behind it; zone warnings lead by real time

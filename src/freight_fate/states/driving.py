@@ -206,6 +206,7 @@ class DrivingState(
             "speeding_tickets": self.speeding_tickets,
             "ticket_fines_paid": self.ticket_fines_paid,
             "lane_offset": self.lane.offset,
+            "planned_stop": self.trip.planned_stop_name,
         }
 
     @classmethod
@@ -250,6 +251,7 @@ class DrivingState(
                 target_mph=None if target is None else float(target),
             )
             state.trip.restore(position_mi, game_minutes)
+            state.trip.planned_stop_name = data.get("planned_stop") or None
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
             state.truck.restore_air_brake_snapshot(data.get("air_brake"), default_ready=True)
             if bool(data.get("engine_on", False)):

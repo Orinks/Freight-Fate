@@ -15,9 +15,25 @@
   established career begins its independent calendar from today's date when
   you turn the setting off, avoiding a jump back to its old hidden date; a new
   career still begins on March 21.
+- **Map stops now open a full details view, and you can plan your next
+  stop.** On the driving Map screen, pressing Enter on a stop now opens its
+  details instead of repeating the line: the exit, distance, what it offers,
+  parking, and an estimate of how long it will take to reach at your pace,
+  including whether you would arrive before your next break, driving limit,
+  or duty window. From there, plan to stop at it: approach announcements and
+  the upcoming and clock readouts then call it your planned stop, so you know
+  exactly when to signal for the exit. Plans can be canceled or replaced any
+  time, survive saving and resuming, and clear themselves when you pull in or
+  drive past.
 - **Keep speed assistance active across the whole job.** Pressing K now starts one automatic speed-control session: the speed keeper handles facility roads, gate queues, work zones, and congestion, then adaptive cruise takes over on the open road. If started during the deadhead, it pauses through pickup check-in and loading, survives a save there, and resumes once the loaded truck is rolling. It restores your earlier cruise target or uses the new road's limit, and switches back to the keeper for the next restricted zone. Braking outside that planned pickup, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Plus and Minus adjust the remembered open-road target in either mode.
 
 ### Changed
+
+- **Moving a planned stop now asks first, and each stop only cancels its own
+  plan.** A stop's details screen shows the cancel option only when that stop
+  is the one you planned. Choosing "Plan to stop" while another stop is already
+  planned now tells you which stop is planned and how far ahead it is, and asks
+  whether to move your plan here before changing it.
 
 - **Air pressure now bleeds down while the truck is parked with its engine
   off.** After a full night's sleep, you must start the engine and rebuild air
@@ -54,6 +70,9 @@
 
 ### Fixed
 
+- **Planning a stop now plays a single confirmation sound.** Choosing "Plan to
+  stop" from a stop's details no longer stacks a menu click and a confirmation
+  chime back to back; you hear just the confirmation.
 - **Back-to-back road alerts no longer crash the Windows event voice.** Urgent
   hazards still interrupt the current event announcement immediately, without
   making a separate redundant stop call that could crash inside SAPI.
