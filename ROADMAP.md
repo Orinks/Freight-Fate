@@ -224,7 +224,7 @@ From a batch of player reports:
   trooper milestone (below) remains the home for *visible, immediate*
   enforcement: getting pulled over and on-the-spot fines.
 
-- [x] **Speed keeper for low-speed zones.** Shipped: in facility access roads, gate queues, work zones, and congestion -- where adaptive cruise is deliberately unavailable -- K holds the current speed at or below the zone limit and follows queued traffic, so players who cannot keep the accelerator held (or whose fingers tire) are not locked out of those stretches. On by default, toggleable in Settings, Gameplay.
+- [x] **Speed keeper for low-speed zones.** Shipped: K starts a continuous speed-control session that uses the speed keeper on facility roads, in gate queues, work zones, and congestion, then automatically hands off to adaptive cruise on the open road. It restores the chosen cruise target across zones, follows queued traffic, and fully disarms on braking or hazards so it cannot restart unexpectedly. On by default, toggleable in Settings, Gameplay.
 - [ ] **Driving assistance presets and descent control.** Built and then withdrawn from the 1.8 nightly line after playtesting (the underlying assists need the 1.9 driving arc around them); the work lives on feat/career-1.9 and ships with 1.9. Release-merge note: the withdrawal was a git revert of merge 9b406fe (plus 9f2dbff and b971684) on dev, so merging feat/career-1.9 back will NOT re-apply this content on its own -- the release merge must first revert the revert commit on dev, then merge.
 - [x] **Limit-aware adaptive cruise.** Shipped: once real OSM limits, zones,
   and trooper enforcement landed, plain "hold the set speed" cruise would carry

@@ -6,10 +6,17 @@ from __future__ import annotations
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from .driving_events import DrivingEventMixin
+from .driving_speed_control import SpeedControlStateMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 
 
-class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, State):
+class DrivingState(
+    DrivingControlsMixin,
+    DrivingUpdateMixin,
+    SpeedControlStateMixin,
+    DrivingEventMixin,
+    State,
+):
     def __init__(
         self,
         ctx,
@@ -113,6 +120,12 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._cruise_applied = 0.0
+        # K arms one continuous speed-control session. The active controller
+        # changes between adaptive cruise on open roads and the speed keeper in
+        # restricted zones, while this target remembers what cruise should
+        # resume at after the zone ends.
+        self._speed_control_armed = False
+        self._speed_control_target_mph: float | None = None
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False

@@ -57,7 +57,25 @@ def test_speed_key_includes_cruise_set_speed_when_active(monkeypatch):
         d._cruise_mph = 55.0
         spoken = _capture(app, monkeypatch)
         d.handle_event(key_event(pygame.K_SPACE))
+        assert "automatic speed control" in spoken[-1]
         assert "cruise set at 55 miles per hour" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_speed_key_includes_speed_keeper_target_when_active(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d._keeper_mph = 15.0
+        d._speed_control_target_mph = 55.0
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_SPACE))
+        assert "automatic speed control" in spoken[-1]
+        assert "speed keeper holding 15 miles per hour" in spoken[-1]
+        assert "open-road target 55 miles per hour" in spoken[-1]
     finally:
         app.shutdown()
 

@@ -17,6 +17,11 @@ class DrivingEventMixin:
         if kind == TripEventKind.HAZARD:
             if self._ramp_mi is not None:
                 return  # off the highway: the hazard passes you by
+            speed_control_was_active = (
+                self._speed_control_armed
+                or self._cruise_mph is not None
+                or self._keeper_mph is not None
+            )
             if self._cruise_mph is not None:
                 self._cancel_cruise()  # hands back on the wheel to brake
             if self._keeper_mph is not None:
@@ -33,6 +38,8 @@ class DrivingEventMixin:
                 self.ctx.profile.fatigue
             )
             message = terse_hazard_message(event.message) if self._terse_speech() else event.message
+            if speed_control_was_active:
+                message = f"{message} Automatic speed control canceled."
             self.ctx.say_event(message, interrupt=True)
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
@@ -60,7 +67,7 @@ class DrivingEventMixin:
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
         elif self._event_disables_cruise(event):
-            self._cancel_cruise_for_restricted_area(event.message)
+            self._cancel_cruise_for_restricted_area(event)
         else:
             if sound is not None and kind != TripEventKind.ZONE_ENTER:
                 self.ctx.audio.play(sound)
@@ -113,9 +120,29 @@ class DrivingEventMixin:
         zone = event.data.get("zone")
         if zone is None:
             return False
+        # An armed speed-control session stays on for the advance warning so
+        # cruise can slow for the lower limit, then hands off at zone entry.
+        if self._speed_control_armed and self.ctx.settings.speed_keeper:
+            return False
         return zone.reason in {"construction", "heavy traffic"}
 
-    def _cancel_cruise_for_restricted_area(self, message: str) -> None:
+    def _cancel_cruise_for_restricted_area(self, event) -> None:
+        message = event.message
+        zone = event.data.get("zone")
+        if self._speed_control_armed and self.ctx.settings.speed_keeper and zone is not None:
+            self._cancel_cruise(preserve_session=True)
+            self._engage_keeper(
+                zone.limit_mph,
+                zone.reason,
+                target_mph=zone.limit_mph,
+                announce=False,
+            )
+            self.ctx.audio.play("ui/notify")
+            message = (
+                f"{message} Speed keeper holding {self.ctx.settings.speed_text(self._keeper_mph)}."
+            )
+            self.ctx.say_event(message, interrupt=True)
+            return
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify")
         # A restricted area (construction, heavy traffic) is a safety cue: it
@@ -466,13 +493,13 @@ class DrivingEventMixin:
 
     def _toggle_cruise(self) -> None:
         t = self.truck
-        if self._keeper_mph is not None:
-            self._cancel_keeper()
-            self.ctx.say("Speed keeper off.")
-            return
-        if self._cruise_mph is not None:
-            self._cancel_cruise()
-            self.ctx.say("Adaptive cruise off.")
+        if (
+            self._speed_control_armed
+            or self._keeper_mph is not None
+            or self._cruise_mph is not None
+        ):
+            self._disarm_speed_control()
+            self.ctx.say("Automatic speed control off.")
             return
         limit, zone_reason = self.trip.speed_limit_at(self.trip.position_mi)
         if zone_reason is not None:
@@ -487,7 +514,14 @@ class DrivingEventMixin:
                 f"least {self.ctx.settings.speed_text(CRUISE_MIN_MPH)}."
             )
             return
-        self._cruise_mph = t.speed_mph
+        self._engage_cruise(t.speed_mph)
+
+    def _engage_cruise(self, target_mph: float, *, transition: bool = False) -> None:
+        """Start adaptive cruise as part of the armed speed-control session."""
+        t = self.truck
+        self._speed_control_armed = True
+        self._cruise_mph = max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, target_mph))
+        self._speed_control_target_mph = self._cruise_mph
         self._cruise_throttle = t.throttle
         self._cruise_applied = t.throttle
         self._acc_following = False
@@ -495,35 +529,44 @@ class DrivingEventMixin:
         self._acc_limit_capped = False
         gap = self._acc_gap_seconds()
         self.ctx.audio.play("ui/notify", volume=0.5)
-        self.ctx.say(
-            "Adaptive cruise set at "
-            f"{self.ctx.settings.speed_text(t.speed_mph)}. "
-            f"Following gap {gap:.0f} seconds. "
-            "K or braking cancels."
+        message = (
+            f"Adaptive cruise {'resuming' if transition else 'set'} at "
+            f"{self.ctx.settings.speed_text(self._cruise_mph)}. "
+            f"Following gap {gap:.0f} seconds. K or braking cancels."
         )
+        if transition:
+            self.ctx.say_event(f"Open road. {message}", interrupt=False)
+        else:
+            self.ctx.say(message)
 
     def _adjust_cruise(self, delta_mph: float) -> None:
         """Raise or lower the cruise set point -- the Accel/Coast (+/-) buttons.
 
-        Only while cruise is engaged: the truck then accelerates up to a higher
-        set point or eases down to a lower one, still capped at the posted limit
-        plus the offset. So you engage once rolling, then dial the target up to
-        the speed you want without having to reach it manually first."""
-        if self._cruise_mph is None:
+        While the speed keeper is handling a restricted zone, the same buttons
+        adjust the open-road target that adaptive cruise will resume."""
+        if self._cruise_mph is None and self._keeper_mph is None:
             self.ctx.say("Adaptive cruise is off. Press K to set it first.")
             return
-        self._cruise_mph = max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, self._cruise_mph + delta_mph))
-        self.ctx.say(f"Adaptive cruise {self.ctx.settings.speed_text(self._cruise_mph)}.")
+        base = self._speed_control_target_mph
+        if base is None:
+            limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+            base = max(CRUISE_MIN_MPH, limit)
+        target = max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, base + delta_mph))
+        self._speed_control_target_mph = target
+        if self._cruise_mph is not None:
+            self._cruise_mph = target
+            self.ctx.say(f"Adaptive cruise {self.ctx.settings.speed_text(target)}.")
+        else:
+            self.ctx.say(f"Open-road cruise target {self.ctx.settings.speed_text(target)}.")
 
-    def _cancel_cruise(self) -> None:
-        self._cruise_mph = None
-        self._cruise_throttle = 0.0
-        self._cruise_applied = 0.0
-        self._acc_following = False
-        self._acc_weather_gap_said = False
-        self._acc_limit_capped = False
-
-    def _engage_keeper(self, limit_mph: float, zone_reason: str) -> None:
+    def _engage_keeper(
+        self,
+        limit_mph: float,
+        zone_reason: str,
+        *,
+        target_mph: float | None = None,
+        announce: bool = True,
+    ) -> None:
         """Hold the current speed through a low-speed zone (K in a zone).
 
         An input-accessibility aid: facility access roads, gate queues, work
@@ -535,22 +578,20 @@ class DrivingEventMixin:
         if not self.ctx.settings.speed_keeper:
             self.ctx.say(f"Adaptive cruise is not available in a {zone_reason} zone.")
             return
-        if not t.engine_on or t.speed_mph < KEEPER_MIN_MPH:
+        if not t.engine_on or (target_mph is None and t.speed_mph < KEEPER_MIN_MPH):
             self.ctx.say("The speed keeper needs the engine running and the truck rolling.")
             return
-        self._keeper_mph = min(t.speed_mph, limit_mph)
+        self._speed_control_armed = True
+        self._keeper_mph = min(t.speed_mph if target_mph is None else target_mph, limit_mph)
         self._keeper_zone = zone_reason
         self._keeper_throttle = t.throttle
-        self.ctx.audio.play("ui/notify", volume=0.5)
-        self.ctx.say(
-            f"Speed keeper holding {self.ctx.settings.speed_text(self._keeper_mph)} "
-            f"through the {zone_reason} zone. K or braking cancels."
-        )
-
-    def _cancel_keeper(self) -> None:
-        self._keeper_mph = None
-        self._keeper_throttle = 0.0
-        self._keeper_zone = ""
+        if announce:
+            self.ctx.audio.play("ui/notify", volume=0.5)
+            self.ctx.say(
+                f"Automatic speed control on. Speed keeper holding "
+                f"{self.ctx.settings.speed_text(self._keeper_mph)} through the "
+                f"{zone_reason} zone. K or braking cancels."
+            )
 
     def _update_keeper(
         self, dt: float, braking: bool, accelerating: bool, clutch_disengaged: bool
@@ -561,7 +602,9 @@ class DrivingEventMixin:
         t = self.truck
         if braking or t.emergency_brake or t.air_brakes_holding or not t.engine_on or t.stalled:
             self._cancel_keeper()
-            self.ctx.say_event("Speed keeper canceled.", interrupt=False)
+            self.ctx.say_event(
+                "Speed keeper canceled; automatic speed control off.", interrupt=False
+            )
             return
         if accelerating:
             return  # manual override; the keeper resumes when the key lifts
@@ -570,14 +613,9 @@ class DrivingEventMixin:
             return
         limit, zone_reason = self.trip.speed_limit_at(self.trip.position_mi)
         if zone_reason is None:
-            # Back on the open road: hand control back rather than creeping
-            # along at zone speed, and point at adaptive cruise for the rest.
-            self._cancel_keeper()
-            self.ctx.say_event(
-                "Speed keeper released; open road ahead. Press K at road "
-                "speed for adaptive cruise.",
-                interrupt=False,
-            )
+            target_mph = self._speed_control_target_mph or limit
+            self._cancel_keeper(preserve_session=True)
+            self._engage_cruise(target_mph, transition=True)
             return
         self._keeper_zone = zone_reason
         target_mph = min(self._keeper_mph, limit)
@@ -649,7 +687,19 @@ class DrivingEventMixin:
         t = self.truck
         if braking or t.emergency_brake or t.air_brakes_holding or not t.engine_on or t.stalled:
             self._cancel_cruise()
-            self.ctx.say_event("Adaptive cruise canceled.", interrupt=False)
+            self.ctx.say_event(
+                "Adaptive cruise canceled; automatic speed control off.", interrupt=False
+            )
+            return
+        limit, zone_reason = self.trip.speed_limit_at(self.trip.position_mi)
+        if zone_reason is not None and self._speed_control_armed and self.ctx.settings.speed_keeper:
+            self._cancel_cruise(preserve_session=True)
+            self._engage_keeper(limit, zone_reason, target_mph=limit, announce=False)
+            self.ctx.say_event(
+                f"{zone_reason.title()} zone. Speed keeper holding "
+                f"{self.ctx.settings.speed_text(self._keeper_mph)}.",
+                interrupt=False,
+            )
             return
         if accelerating:
             return  # manual override; cruise resumes when the key lifts

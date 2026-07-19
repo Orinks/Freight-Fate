@@ -530,7 +530,8 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "three second clear-weather gap" in help_text
     assert "increase the following gap" in help_text
     assert "keypad keys" in help_text
-    assert "cruise set speed" in help_text
+    assert "active speed-control mode" in help_text
+    assert "open-road target" in help_text
     assert "sharp posted-limit drops" in help_text
     assert "highway stops use clear place names" in help_text
     assert "list the actions available there" in help_text
@@ -567,7 +568,7 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "low visibility shortens" in help_text
     assert "career runs on a calendar that starts in spring" in help_text
     assert "state troopers patrol" in help_text
-    assert "will not engage on low-speed local roads" in help_text
+    assert "speed keeper handles low-speed local roads" in help_text
 
 
 def test_dispatch_board_keeps_route_planning_out_of_load_offer():

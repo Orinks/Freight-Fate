@@ -1,6 +1,7 @@
 """Controller support: hint routing, the manager, menus, and driving."""
 
 import pygame
+import pytest
 from driving_feature_helpers import quiet_trip, start_drive
 
 from freight_fate.controller import ControllerAction, ControllerManager
@@ -406,6 +407,52 @@ def test_controller_info_buttons_speak(monkeypatch):
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_RIGHTSHOULDER))
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_B))
     assert any("fuel" in t.lower() or "range" in t.lower() for t in spoken)
+    app.shutdown()
+
+
+def test_controller_speed_control_handoff_status_adjustment_and_brake(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving_menu_states import DrivingStatusState
+
+    app = App()
+    force_controller(app)
+    driving = start_drive(app)
+    quiet_trip(driving)
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    state = {"limit": 65.0, "reason": None}
+    driving.trip.speed_limit_at = lambda mile: (state["limit"], state["reason"])
+    driving.trip.traffic_context = lambda: None
+    driving.truck.start_engine()
+    driving.truck.transmission.gear = 10
+    driving.truck.velocity_mps = 26.8
+
+    app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_Y))
+    assert driving._cruise_mph == pytest.approx(60.0, abs=1.0)
+
+    state.update(limit=25.0, reason="construction")
+    driving.update(1 / 60)
+    assert driving._keeper_mph == pytest.approx(25.0)
+
+    app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_B))
+    assert "speed keeper holding 25 miles per hour" in spoken[-1]
+    assert "open-road target 60 miles per hour" in spoken[-1]
+
+    app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_RIGHTSHOULDER))
+    app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_DPAD_RIGHT))
+    assert driving._speed_control_target_mph == pytest.approx(65.0, abs=1.0)
+
+    app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_START))
+    assert isinstance(app.state, DrivingStatusState)
+    app.ctx.pop_state()
+    app._dispatch_controller(_button_up(pygame.CONTROLLER_BUTTON_RIGHTSHOULDER))
+
+    app._dispatch_controller(_axis(pygame.CONTROLLER_AXIS_TRIGGERLEFT, 32767))
+    for _ in range(20):
+        app.controller.tick(1 / 60)
+    driving.update(1 / 60)
+    assert not driving._speed_control_armed
+    assert driving._keeper_mph is None
     app.shutdown()
 
 

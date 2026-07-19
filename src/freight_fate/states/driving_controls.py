@@ -117,12 +117,13 @@ class DrivingControlsMixin:
             "Hold Up arrow to accelerate, Down arrow to brake. "
             + automatic_help
             + "Hold B for the emergency brake, the hardest possible stop. "
-            "K sets adaptive cruise at your current speed; bad weather "
-            "increases the following gap, sharp posted-limit drops make it "
-            "slow early, and braking cancels. Plus and minus, including "
-            "the keypad keys, raise and lower the cruise speed by five, so "
-            "you can dial it up to the speed you want; it will not hold "
-            "above the posted limit. "
+            "K starts automatic speed control. Adaptive cruise handles open "
+            "roads and the speed keeper handles low-speed zones, switching "
+            "automatically between them. Bad weather increases the following "
+            "gap, sharp posted-limit drops make it slow early, and braking "
+            "cancels the whole session. Plus and minus, including the keypad "
+            "keys, change the remembered open-road target by five; it will not "
+            "hold above the posted limit. "
             "X takes the next announced exit, called out by its number "
             "when known: slow to 45 for the ramp, then brake to a stop for "
             "the rest stop menu. X also signals a pull-over if a trooper "
@@ -133,7 +134,7 @@ class DrivingControlsMixin:
             "Press P to release or set the parking brake; if pressure is "
             "below 100 psi, wait with the engine running. "
             f"{objective_help}"
-            "Space speed, and cruise set speed when cruise is on. "
+            "Space speed, active speed-control mode, and target. "
             "S posted speed limit. Tab status menu. F fuel. "
             "C clock, deadline, and hours of service. "
             "R route. Shift R next listed highway exit. V weather. L lane position. "
@@ -181,8 +182,10 @@ class DrivingControlsMixin:
             "trigger fully for the hardest stop. The left stick steers when lane "
             "drift is on. "
             f"{gears}"
-            "The Y button sets adaptive cruise; hold the right bumper and press "
-            "D-pad left or right to lower or raise the cruise speed by five. "
+            "The Y button starts automatic speed control, switching between "
+            "adaptive cruise and the low-speed keeper as needed. Hold the right "
+            "bumper and press D-pad left or right to lower or raise the open-road "
+            "cruise target by five. "
             "D-pad down takes the next announced exit, or signals a pull-over. "
             "D-pad up reads your route, D-pad left the weather, D-pad right the "
             "clock. The B button speaks your speed. Click the left stick to honk, "
@@ -384,10 +387,21 @@ class DrivingControlsMixin:
     def _speak_speed(self) -> None:
         t = self.truck
         gear = self._gear_text()
+        keeper_target = (
+            f", open-road target {self.ctx.settings.speed_text(self._speed_control_target_mph)}"
+            if self._speed_control_target_mph is not None
+            else ", open-road target will use the posted limit"
+        )
         cruise = (
-            f", cruise set at {self.ctx.settings.speed_text(self._cruise_mph)}"
+            ", automatic speed control, adaptive cruise set at "
+            f"{self.ctx.settings.speed_text(self._cruise_mph)}"
             if self._cruise_mph is not None
-            else ""
+            else (
+                ", automatic speed control, speed keeper holding "
+                f"{self.ctx.settings.speed_text(self._keeper_mph)}{keeper_target}"
+                if self._keeper_mph is not None
+                else ""
+            )
         )
         self.ctx.say(
             f"{self.ctx.settings.speed_text(t.speed_mph)}, {gear}, "
@@ -474,6 +488,18 @@ class DrivingControlsMixin:
                     f"{self.ctx.settings.distance_text(context.gap_mi)} ahead, "
                     f"{self.ctx.settings.speed_text(context.lead.speed_mph)}",
                 )
+        elif self._keeper_mph is not None:
+            lines.insert(
+                1,
+                f"Speed control: speed keeper holding "
+                f"{self.ctx.settings.speed_text(self._keeper_mph)}",
+            )
+            target = (
+                self.ctx.settings.speed_text(self._speed_control_target_mph)
+                if self._speed_control_target_mph is not None
+                else "posted limit when the open road begins"
+            )
+            lines.insert(2, f"Open-road target: {target}")
         if t.damage_pct - self.start_damage > 1:
             lines.append(f"Damage: new damage {t.damage_pct - self.start_damage:.0f} percent")
         if self.ctx.settings.speech_verbosity >= 1:

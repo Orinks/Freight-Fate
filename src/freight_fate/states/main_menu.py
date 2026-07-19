@@ -873,9 +873,9 @@ class SettingsCategoryState(MenuState):
                     lambda: f"Speed keeper: {'on' if s.speed_keeper else 'off'}",
                     lambda: self._toggle_speed_keeper(1),
                     help="In low-speed zones where adaptive cruise is unavailable, "
-                    "such as facility roads, gates, and work zones, pressing K "
-                    "holds your current speed so the accelerator does not need "
-                    "to stay held. Braking cancels.",
+                    "such as facility roads, gates, and work zones, automatic "
+                    "speed control uses the keeper, then switches back to adaptive "
+                    "cruise on open roads. Braking cancels the whole session.",
                 ),
                 MenuItem(
                     lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",

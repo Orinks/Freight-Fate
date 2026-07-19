@@ -12,7 +12,7 @@
   established career begins its independent calendar from today's date when
   you turn the setting off, avoiding a jump back to its old hidden date; a new
   career still begins on March 21.
-- **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default; turn it off in Settings, Gameplay.
+- **Keep speed assistance active across the whole road.** Pressing K now starts one automatic speed-control session: the speed keeper handles facility roads, gate queues, work zones, and congestion, then adaptive cruise takes over on the open road. It restores your earlier cruise target or uses the new road's limit, and switches back to the keeper for the next restricted zone. Braking, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Plus and Minus adjust the remembered open-road target in either mode.
 
 ### Changed
 
