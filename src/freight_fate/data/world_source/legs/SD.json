@@ -15483,6 +15483,31 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "I-90E truck parking near Valley Springs",
+          "type": "public_rest_area",
+          "at_mi": 15.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists I-90E truck parking near Valley Springs on I-90E in Valley Springs, SD with 21 truck parking spaces, mile post 412; at_mi estimated by projecting source coordinates onto checked-in route geometry (1.0 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 21,
+          "lat": 43.6073759997245,
+          "lon": -96.4625180000271,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Southgate Auto",
           "type": "fuel_station",
           "at_mi": 25.8,
@@ -15501,6 +15526,31 @@
           "lat": 43.65315,
           "lon": -96.21248,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Adrian EB",
+          "type": "public_rest_area",
+          "at_mi": 40.4,
+          "source": "FHWA Jason's Law truck parking inventory (NTAD via BTS) lists Adrian EB on I-90E in Adrian, MN with 6 truck parking spaces, mile post 24; at_mi estimated by projecting source coordinates onto checked-in route geometry (0.3 mi from simplified corridor line), accessed 2026-06-17: https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Truck_Stop_Parking/FeatureServer/0/query",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "directions": [
+            "both"
+          ],
+          "parking": "confirmed",
+          "curation": "curated",
+          "parking_spaces": 6,
+          "lat": 43.6374180001545,
+          "lon": -95.9815350003884,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "PJ's Mini Mart",

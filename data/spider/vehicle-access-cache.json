@@ -13003,6 +13003,27 @@
       "type": "node"
     }
   ],
+  "33.84032,-117.25540": [
+    {
+      "id": 4041965707,
+      "lat": 33.8407433,
+      "lon": -117.255134,
+      "tags": {
+        "addr:city": "Perris",
+        "addr:housenumber": "23261",
+        "addr:postcode": "92570",
+        "addr:state": "CA",
+        "addr:street": "Cajalco Road",
+        "amenity": "fuel",
+        "brand": "Arco",
+        "brand:wikidata": "Q304769",
+        "compressed_air": "yes",
+        "name": "Arco",
+        "opening_hours": "PH,Mo-Su 08:00-18:00+"
+      },
+      "type": "node"
+    }
+  ],
   "33.88111,-96.49907": [
     {
       "id": 12648494830,
@@ -50672,6 +50693,24 @@
       "type": "node"
     }
   ],
+  "43.60738,-96.46252": [
+    {
+      "center": {
+        "lat": 43.6070271,
+        "lon": -96.4624759
+      },
+      "id": 857923868,
+      "tags": {
+        "building": "yes",
+        "highway": "rest_area",
+        "information": "office",
+        "internet_access": "wlan",
+        "internet_access:fee": "no",
+        "tourism": "information"
+      },
+      "type": "way"
+    }
+  ],
   "43.60761,-88.72387": [
     {
       "id": 7230662953,
@@ -50732,6 +50771,29 @@
         "internet_access": "wlan",
         "name": "Rest Area I-91 (South Bound)",
         "opening_hours": "07:00-21:00"
+      },
+      "type": "way"
+    }
+  ],
+  "43.63742,-95.98154": [
+    {
+      "id": 946350646,
+      "lat": 43.6369534,
+      "lon": -95.9812357,
+      "tags": {
+        "highway": "rest_area",
+        "name": "Ardian Rest Area - I90 EB"
+      },
+      "type": "node"
+    },
+    {
+      "center": {
+        "lat": 43.6368534,
+        "lon": -95.9811267
+      },
+      "id": 1068300752,
+      "tags": {
+        "highway": "rest_area"
       },
       "type": "way"
     }
