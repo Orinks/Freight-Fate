@@ -9,13 +9,16 @@ miles of interstate (owner-found live: I-10 Buckeye-Phoenix enforced 30 mph
 for ten miles).
 
 No posted US interstate mainline runs below 45 mph, so on interstate-class
-legs an anchor sample under 45 is a wrong-road match, never a real limit.
-This repair drops leading and trailing sub-45 samples from interstate legs'
-``corridor.speed_limits``; the step function heals itself (the runtime holds
-the first surviving sample back to mile 0). Interior samples are left alone,
-and non-interstate highways keep their honest small-town 30s. Offline and
-deterministic -- no Overpass required. The bake tool gains the same guard so
-future sweeps cannot reintroduce the pollution.
+legs a sample under 45 is a wrong-road match, never a real limit -- at ANY
+position. The 2026-07-14 pass dropped only leading and trailing (anchor)
+samples and left interior ones alone; a player then found the interior
+class live on I-55 toward Memphis (a mid-leg 40 from a snapped side-road
+way, enforced on the mainline), and a census showed 147 such samples
+map-wide. This repair now drops every sub-45 sample from interstate legs'
+``corridor.speed_limits``; the step function heals itself (the runtime
+holds the previous surviving sample across the gap, and the first sample
+back to mile 0). Non-interstate highways keep their honest small-town 30s.
+Offline and deterministic -- no Overpass required.
 
 Usage:
     uv run python tools/repair_interstate_anchor_limits.py          # dry run
@@ -58,10 +61,10 @@ def repair(data: dict) -> list[dict]:
             continue
         dropped: list[dict] = []
         if is_interstate(leg.get("highway", "")):
-            while samples and samples[0]["mph"] < INTERSTATE_MIN_PLAUSIBLE_MPH:
-                dropped.append(samples.pop(0))
-            while samples and samples[-1]["mph"] < INTERSTATE_MIN_PLAUSIBLE_MPH:
-                dropped.append(samples.pop())
+            kept_samples = [s for s in samples if s["mph"] >= INTERSTATE_MIN_PLAUSIBLE_MPH]
+            if len(kept_samples) != len(samples):
+                dropped.extend(s for s in samples if s["mph"] < INTERSTATE_MIN_PLAUSIBLE_MPH)
+                samples[:] = kept_samples
         elif (
             len(samples) >= 2
             and samples[0]["at_mi"] == 0.0

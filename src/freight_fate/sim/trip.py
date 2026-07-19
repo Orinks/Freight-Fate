@@ -26,17 +26,12 @@ from .weather import WeatherSystem
 STOP_AHEAD_LOOKAHEAD_MI = 5.0
 LOCAL_TURN_LOOKAHEAD_MI = 0.3  # street maneuvers announce at block scale, not highway scale
 
-# Curve-approach warning: the player gets roughly CURVE_WARNING_REAL_S of real
-# time to hear and react to an upcoming curve. Scale the lead distance with
-# speed and pacing, clamped between a minimum and a generous maximum so a
-# sharp curve on a slow surface street still buys reaction time but a fast
-# highway at high compression isn't announced from 50 miles out.
-CURVE_WARNING_REAL_S = 15.0
-CURVE_WARNING_MIN_MI = 0.25
-CURVE_WARNING_MAX_MI = 4.0
-# Only curves with an advisory speed this far below the posted limit trigger
-# a spoken warning -- gentle curves matching the speed limit are not news.
-CURVE_ADVISORY_WARNING_DELTA_MPH = 10
+PACENOTE_REACTION_S = 5.0
+PACENOTE_BRAKE_MPH_PER_S = 3.0
+PACENOTE_MARGIN_MPH = 3.0
+PACENOTE_GENTLE_MARGIN_MPH = 8.0
+PACENOTE_MIN_LEAD_MI = 0.33
+PACENOTE_MAX_LEAD_MI = 1.5
 
 
 def _spoken_distance(value: float, unit: str) -> str:
@@ -612,14 +607,23 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             if not leg_curves:
                 continue
             for cr in leg_curves:
-                offset = _stop_offset_for_direction(cr.start_mi, leg.miles, forward)
+                if forward:
+                    curve_start = cr.start_mi
+                    curve_apex = cr.apex_mi
+                    curve_end = cr.end_mi
+                    direction = cr.direction
+                else:
+                    curve_start = leg.miles - cr.end_mi
+                    curve_apex = leg.miles - cr.apex_mi
+                    curve_end = leg.miles - cr.start_mi
+                    direction = "R" if cr.direction == "L" else "L"
                 curves.append(
                     CurveRecord(
-                        start_mi=start + offset,
-                        apex_mi=start + _stop_offset_for_direction(cr.apex_mi, leg.miles, forward),
-                        end_mi=start + _stop_offset_for_direction(cr.end_mi, leg.miles, forward),
+                        start_mi=start + curve_start,
+                        apex_mi=start + curve_apex,
+                        end_mi=start + curve_end,
                         deflection_deg=cr.deflection_deg,
-                        direction=cr.direction,
+                        direction=direction,
                         min_radius_ft=cr.min_radius_ft,
                         advisory_mph=cr.advisory_mph,
                         connector=cr.connector,
@@ -641,31 +645,37 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 return cr
         return None
 
-    def _curve_warning_lookahead_mi(self) -> float:
-        """Lead distance for a curve approach warning, scaled to real seconds."""
-        speed = max(self.truck.speed_mph, 1.0)
-        miles = CURVE_WARNING_REAL_S * speed * self.effective_time_scale / 3600.0
-        return max(CURVE_WARNING_MIN_MI, min(miles, CURVE_WARNING_MAX_MI))
-
     def _next_curve_approach(self) -> CurveRecord | None:
         """The next curve ahead that deserves a spoken approach warning.
 
-        Filters out connector ramps (handled by the exit system) and gentle
-        curves whose advisory is close to the posted limit."""
-        lookahead = self._curve_warning_lookahead_mi()
-        posted, _ = self.speed_limit_at(self.position_mi)
+        Connector ramps use their own cues. Mainline bends stay silent when
+        the truck is already slow enough, and speak only once they enter the
+        reaction-plus-comfortable-braking window.
+        """
+        speed = self.truck.speed_mph
         for cr in self.curves:
             ahead = cr.start_mi - self.position_mi
             if ahead <= 0:
                 continue
-            if ahead > lookahead:
+            if ahead > PACENOTE_MAX_LEAD_MI:
                 break
             if cr.connector:
                 continue
-            if cr.advisory_mph >= posted - CURVE_ADVISORY_WARNING_DELTA_MPH:
+            margin = PACENOTE_GENTLE_MARGIN_MPH if cr.severity == "gentle" else PACENOTE_MARGIN_MPH
+            if speed <= cr.advisory_mph + margin:
+                continue
+            if ahead > self._curve_pacenote_lead_mi(speed, cr.advisory_mph):
                 continue
             return cr
         return None
+
+    @staticmethod
+    def _curve_pacenote_lead_mi(speed_mph: float, advisory_mph: float) -> float:
+        over = max(0.0, speed_mph - advisory_mph)
+        react_mi = speed_mph * PACENOTE_REACTION_S / 3600.0
+        brake_s = over / PACENOTE_BRAKE_MPH_PER_S
+        brake_mi = (speed_mph + advisory_mph) / 2.0 * brake_s / 3600.0
+        return min(PACENOTE_MAX_LEAD_MI, max(PACENOTE_MIN_LEAD_MI, react_mi + brake_mi))
 
     def _check_curves(self) -> None:
         """Emit a CURVE event when approaching a meaningful curve."""
@@ -681,7 +691,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._announced_curves.add(key)
         # Build pacenote: "sharp curve left, half mile, advisory 35"
         direction = "left" if cr.direction == "L" else "right"
-        prefix = "sharp " if cr.is_sharp else ""
+        prefix = "sharp " if cr.severity in ("hairpin", "sharp") else ""
         distance = self._distance_text(ahead)
         self._emit(
             TripEventKind.CURVE,
@@ -1145,6 +1155,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             return min(base, URBAN_LIMIT_MPH)
         return base
 
+    def curves_within(self, within_mi: float) -> list[CurveRecord]:
+        """Mainline curves whose entry lies ahead within the window."""
+        return [c for c in self.curves if 0 < c.start_mi - self.position_mi <= within_mi]
+
     def next_zone_within(self, within_mi: float) -> Zone | None:
         ahead = [
             z
@@ -1323,12 +1337,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                     self._announced_billboards.add(callout.key)
                 else:
                     self._announced_landmarks.add(callout.key)
-        # Seed announced curves: any curve whose start is within the approach
-        # window or behind the resume point has already had its warning fired.
-        lookahead = self._curve_warning_lookahead_mi()
+        # Only curves already passed are certainly history. A curve still
+        # ahead may not have entered the speed-dependent call window before
+        # the save, so leave it eligible after resume rather than suppressing
+        # a safety cue the player never heard.
         for cr in self.curves:
-            ahead = cr.start_mi - self.position_mi
-            if ahead <= lookahead:
+            if cr.start_mi <= self.position_mi:
                 self._announced_curves.add(f"curve:{cr.start_mi:.3f}:{cr.direction}")
         for patrol in self.patrols:
             if patrol.start_mi <= self.position_mi:

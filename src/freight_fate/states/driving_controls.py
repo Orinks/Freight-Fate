@@ -10,6 +10,9 @@ WEAR_STATUS_PCT = 50.0
 # An armed exit owns the D safe-speed answer once it is this close: past
 # here the ramp speed is the number that matters, not the mainline's.
 SAFE_SPEED_EXIT_MI = 2.0
+# D looks this far ahead for a bend: about the pacenote call distance, so
+# the one number never contradicts the call you just heard.
+SAFE_SPEED_CURVE_MI = 0.5
 
 
 class DrivingControlsMixin:
@@ -129,7 +132,7 @@ class DrivingControlsMixin:
         if not t.engine_on or t.speed_mph < LANE_MIN_MPH:
             self.ctx.say(
                 "Lane changes need the engine running and at least "
-                f"{LANE_MIN_MPH:.0f} miles per hour."
+                f"{self.ctx.settings.speed_text(LANE_MIN_MPH)}."
             )
             return
         target = lane.lane + direction
@@ -235,7 +238,10 @@ class DrivingControlsMixin:
             "A repeats the last announcement. Comma re-reads the last spoken "
             "line of any kind, here and in every menu; press it again quickly "
             "to step back through earlier lines. U reads what is "
-            "coming up: imposed limits, stops, and exits ahead. "
+            "coming up: imposed limits, stops, exits, and bends ahead. "
+            "Curves that demand slowing are called before they arrive, "
+            "like Sharp left, half a mile, advise 35; D folds the bend "
+            "into its one safe-speed number. "
             "The Tab status menu includes a Driver apps tablet menu for "
             "navigation, weather, traffic, truck stops, road chatter, and ELD. "
             "Left or Right Control stops the driving event voice. "
@@ -527,6 +533,13 @@ class DrivingControlsMixin:
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
         safe = min(limit, self.weather.effects.safe_speed_mph)
         context = ""
+        curve = self.trip.curve_at(self.trip.position_mi)
+        if curve is None:
+            upcoming = self.trip.curves_within(SAFE_SPEED_CURVE_MI)
+            curve = upcoming[0] if upcoming else None
+        if curve is not None and curve.advisory_mph < safe:
+            safe = curve.advisory_mph
+            context = " for the bend"
         stop = getattr(self, "_exit_stop", None)
         ahead = (stop.at_mi - self.trip.position_mi) if stop is not None else None
         exit_armed = (
@@ -669,6 +682,21 @@ class DrivingControlsMixin:
         cue = self.trip.next_exit_cue()
         if cue is not None and 0 < cue.at_mi - pos <= within_mi:
             parts.append(f"in {s.distance_text(cue.at_mi - pos)}, {cue.text}")
+        # The next few bends that would demand slowing from the posted
+        # limit; gentle sweeps stay out of the readout like they stay out
+        # of the pacenotes.
+        limit, _ = self.trip.speed_limit_at(pos)
+        bends = [
+            c
+            for c in self.trip.curves_within(within_mi)
+            if c.advisory_mph < limit and c.severity != "gentle"
+        ][:3]
+        for c in bends:
+            parts.append(
+                f"{self._pacenote_phrase(c).lower()} in "
+                f"{s.distance_text(c.start_mi - pos, precise=True)}, "
+                f"advise {s.speed_text(c.advisory_mph)}"
+            )
         if not parts:
             self.ctx.say(f"Nothing notable in the next {s.distance_text(within_mi)}.")
             return

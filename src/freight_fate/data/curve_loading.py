@@ -7,13 +7,11 @@ loaded at runtime on first access and cached per leg pair.
 from __future__ import annotations
 
 import json
-import logging
 from dataclasses import dataclass
-from pathlib import Path
 
-log = logging.getLogger(__name__)
+from .data_resources import read_data_text
 
-CURVES_PATH = Path(__file__).parent / "world_data" / "us" / "gameplay" / "curves.jsonl"
+CURVES_RESOURCE = "world_data/us/gameplay/curves.jsonl"
 
 
 @dataclass(frozen=True)
@@ -63,6 +61,17 @@ class CurveRecord:
         prefix = "sharp " if self.is_sharp else ""
         return f"{prefix}curve {self.spoken_direction}"
 
+    @property
+    def severity(self) -> str:
+        """Plain-language pacenote severity derived from the baked advisory."""
+        if self.advisory_mph <= 25 or self.deflection_deg >= 150.0:
+            return "hairpin"
+        if self.advisory_mph <= 35:
+            return "sharp"
+        if self.advisory_mph <= 50:
+            return "moderate"
+        return "gentle"
+
 
 # -- per-leg cache ---------------------------------------------------------------
 
@@ -75,38 +84,35 @@ def _load_all_curves() -> dict[str, tuple[CurveRecord, ...]]:
     Returns a dict mapping ``"from_city:to_city"`` to its sorted curve tuple.
     The leg key matches the ``leg`` field in the JSONL.
     """
-    if not CURVES_PATH.exists():
-        log.warning("Curve data not found at %s", CURVES_PATH)
+    text = read_data_text(CURVES_RESOURCE)
+    if text is None:
         return {}
 
     by_leg: dict[str, list[CurveRecord]] = {}
-    with open(CURVES_PATH, encoding="utf-8") as f:
-        first = True
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            if first:
-                first = False  # skip metadata line
-                continue
-            try:
-                raw = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            leg_key = str(raw.get("leg", ""))
-            if not leg_key:
-                continue
-            record = CurveRecord(
-                start_mi=float(raw.get("start_mi", 0.0)),
-                apex_mi=float(raw.get("apex_mi", 0.0)),
-                end_mi=float(raw.get("end_mi", 0.0)),
-                deflection_deg=float(raw.get("deflection_deg", 0.0)),
-                direction=str(raw.get("direction", "L")),
-                min_radius_ft=float(raw.get("min_radius_ft", 99999.0)),
-                advisory_mph=float(raw.get("advisory_mph", 70.0)),
-                connector=bool(raw.get("connector", False)),
-            )
-            by_leg.setdefault(leg_key, []).append(record)
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            raw = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if "meta" in raw:
+            continue
+        leg_key = str(raw.get("leg", ""))
+        if not leg_key:
+            continue
+        record = CurveRecord(
+            start_mi=float(raw.get("start_mi", 0.0)),
+            apex_mi=float(raw.get("apex_mi", 0.0)),
+            end_mi=float(raw.get("end_mi", 0.0)),
+            deflection_deg=float(raw.get("deflection_deg", 0.0)),
+            direction=str(raw.get("direction", "L")),
+            min_radius_ft=float(raw.get("min_radius_ft", 99999.0)),
+            advisory_mph=float(raw.get("advisory_mph", 70.0)),
+            connector=bool(raw.get("connector", False)),
+        )
+        by_leg.setdefault(leg_key, []).append(record)
 
     # Sort each leg's curves by start_mi.
     result: dict[str, tuple[CurveRecord, ...]] = {}
@@ -114,8 +120,6 @@ def _load_all_curves() -> dict[str, tuple[CurveRecord, ...]]:
         records.sort(key=lambda c: c.start_mi)
         result[leg_key] = tuple(records)
 
-    total = sum(len(r) for r in result.values())
-    log.info("Loaded %d curves across %d legs", total, len(result))
     return result
 
 

@@ -22,9 +22,9 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from pathlib import Path
 
 from .amenities import classify_brand
+from .data_resources import read_data_text
 
 # "fatigue" buffs are timed (fixed game hours); "engine" and "tire" buffs
 # are rig services that last the rest of the trip and die with it.
@@ -51,7 +51,10 @@ class Buff:
 
 
 def _load_catalog() -> dict[str, Buff]:
-    raw = json.loads(Path(__file__).with_name("buffs.json").read_text(encoding="utf-8"))
+    text = read_data_text("buffs.json")
+    if text is None:
+        raise FileNotFoundError("buffs.json is missing from this build")
+    raw = json.loads(text)
     catalog: dict[str, Buff] = {}
     for buff_id, entry in raw.items():
         buff = Buff(

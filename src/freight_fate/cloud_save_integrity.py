@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import copy
 import json
 import math
 from collections.abc import Mapping
@@ -140,7 +141,10 @@ def verify_cloud_revision(
             "integrity_failed", "The backup signature is invalid."
         ) from exc
     try:
-        profile = Profile.from_dict(payload)
+        # Profile.from_dict normalizes nested save structures in place. Keep
+        # the signed payload byte-for-byte stable so callers can verify it
+        # again before committing a cloud restore to disk.
+        profile = Profile.from_dict(copy.deepcopy(payload))
     except Exception as exc:
         raise CloudSaveIntegrityError("invalid_profile", "The backup cannot be loaded.") from exc
     # Defense in depth behind the signature: a payload blessed by an older

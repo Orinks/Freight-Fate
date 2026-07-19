@@ -230,7 +230,9 @@ class DrivingStatusScreenState(MenuState):
         if position is not None:
             lines.append(f"Approximate truck radio position: {position[0]:.2f}, {position[1]:.2f}.")
         lines.append("Receivable stations:")
-        lines.extend(d.radio.station_list_lines(limit=16))
+        lines.extend(
+            d.radio.station_list_lines(limit=16, distance_text=self.ctx.settings.distance_text)
+        )
         return lines
 
 
@@ -363,7 +365,9 @@ class DriverAppScreenState(MenuState):
                 f"{settings.speed_text(context.lead.speed_mph)}."
             )
         line = self._next_traffic_line()
-        lines.append(line or "Traffic: no reported pinch in the next 20 miles.")
+        lines.append(
+            line or f"Traffic: no reported pinch in the next {settings.distance_text(20.0)}."
+        )
         return lines
 
     def _truck_stop_lines(self) -> list[str]:
@@ -371,7 +375,9 @@ class DriverAppScreenState(MenuState):
         settings = self.ctx.settings
         stops = self._upcoming_stops(100.0, limit=3)
         if not stops:
-            return ["Truck stops: no listed route stop in the next 100 miles."]
+            return [
+                f"Truck stops: no listed route stop in the next {settings.distance_text(100.0)}."
+            ]
         lines = []
         for stop in stops:
             ahead = max(0.0, stop.at_mi - d.trip.position_mi)
@@ -636,7 +642,7 @@ class PauseMenuState(MenuState):
         )
         self.ctx.say(
             f"Chains hung on the drives in {minutes:.0f} minutes. {effort}"
-            f"Keep it near {CHAIN_SAFE_MPH:.0f} miles per hour, and pull them "
+            f"Keep it near {self.ctx.settings.speed_text(CHAIN_SAFE_MPH)}, and pull them "
             f"when the road turns bare.{bare} It is "
             f"{clock_text(d.trip.local_hour)}. {_deadline_text(d)}"
         )
@@ -1044,6 +1050,16 @@ class ArrivalState(MenuState):
             owned_trailers=getattr(p, "owned_trailers", ()),
             reputation=p.career.reputation,
         )
+        no_on_time_bonus_business = build_business_settlement(
+            p.business_status,
+            job,
+            job.payout(hours, trip_damage, on_time_bonus=0.0),
+            on_time=hours <= job.deadline_game_h,
+            driver_charges=driver_charges,
+            carrier_key=getattr(p, "carrier_key", ""),
+            owned_trailers=getattr(p, "owned_trailers", ()),
+            reputation=p.career.reputation,
+        )
         reputation_before = p.career.reputation
         trust_bonus = (
             0.0
@@ -1060,6 +1076,7 @@ class ArrivalState(MenuState):
             owned_trailers=getattr(p, "owned_trailers", ()),
         )
         gross_pay = business.gross_pay
+        on_time_bonus_paid = max(0.0, gross_pay - no_on_time_bonus_business.gross_pay)
         early_bonus = max(0.0, gross_pay - deadline_business.gross_pay)
         if driver_charges:
             self.summary_parts.append(
@@ -1175,6 +1192,11 @@ class ArrivalState(MenuState):
                 f"{self.terminal.name} for the {job.spoken_destination} service area."
             ),
         )
+        if on_time_bonus_paid >= 1.0:
+            self.summary_parts.append(
+                f"On-time delivery bonus: {on_time_bonus_paid:,.0f} dollars "
+                "for hitting the delivery window."
+            )
         if early_bonus >= 1.0:
             self.summary_parts.append(f"Early delivery bonus: {early_bonus:,.0f} dollars.")
         if trip_damage > 1:
@@ -1209,11 +1231,13 @@ class ArrivalState(MenuState):
         )
         self.summary_parts.extend(self._achievement_messages)
         timing = "On time" if on_time else "Late"
-        bonus_text = (
-            f"Early delivery bonus: {early_bonus:,.0f} dollars"
-            if early_bonus >= 1.0
-            else "No early delivery bonus on this run"
-        )
+        bonus_lines = []
+        if on_time_bonus_paid >= 1.0:
+            bonus_lines.append(f"On-time delivery bonus: {on_time_bonus_paid:,.0f} dollars.")
+        if early_bonus >= 1.0:
+            bonus_lines.append(f"Early delivery bonus: {early_bonus:,.0f} dollars.")
+        if not bonus_lines:
+            bonus_lines.append("No delivery bonus on this run.")
         cargo_condition = (
             f"Truck damage added on this run: {trip_damage:.0f} percent"
             if trip_damage > 1
@@ -1250,9 +1274,9 @@ class ArrivalState(MenuState):
             *advance_lines,
             f"Net driver pay: {net_pay:,.0f} dollars.",
             f"Money after settlement: {p.money:,.0f} dollars.",
-            bonus_text + ".",
+            *bonus_lines,
             f"Route: {' to '.join(self.ctx.world.spoken_city(c) for c in d.route.cities)}.",
-            f"Distance credited: {job.distance_mi:.0f} miles.",
+            f"Distance credited: {self.ctx.settings.distance_text(job.distance_mi)}.",
             cargo_condition + ".",
             f"Fuel remaining: {d.truck.fuel_fraction * 100:.0f} percent.",
             f"Truck damage now: {d.truck.damage_pct:.0f} percent.",

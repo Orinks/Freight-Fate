@@ -119,6 +119,11 @@ class Settings:
     # The same input-accessibility layer as the keeper: presets never
     # touch it. Realism cover: the hand-throttle knob is a real cab control.
     pedal_latch: bool = True
+    # The co-driver reads the road: spoken curve calls from the baked
+    # geometry ("Sharp left, quarter mile, advise 35"), only for bends
+    # that actually demand slowing at your current speed. The first
+    # audible slice of the steering-by-ear work.
+    curve_callouts: bool = True
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.5
@@ -309,7 +314,32 @@ class Settings:
             return f"{mph:.0f} miles per hour"
         return f"{mph * 1.609344:.0f} kilometers per hour"
 
-    def distance_text(self, miles: float) -> str:
+    def distance_text(self, miles: float, precise: bool = False) -> str:
+        """Spoken distance in the player's unit. ``precise`` keeps one
+        decimal for short spans ("1.2 miles ahead") where whole numbers
+        would read as zero or lie by half a mile."""
+        value = miles if self.imperial_units else miles * 1.609344
+        unit = "mile" if self.imperial_units else "kilometer"
+        text = f"{value:.1f}" if precise else f"{value:.0f}"
+        plural = "" if float(text) == 1.0 else "s"
+        return f"{text} {unit}{plural}"
+
+    def short_distance_text(self, miles: float) -> str:
+        """Colloquial short range for pacenote-style calls: quarter-mile
+        steps under a mile ("half a mile"), 100-meter steps under a
+        kilometer ("400 meters"), the normal precise form beyond."""
         if self.imperial_units:
-            return f"{miles:.0f} miles"
-        return f"{miles * 1.609344:.0f} kilometers"
+            if miles > 1.125:
+                return self.distance_text(miles, precise=True)
+            quarters = max(1, round(miles * 4))
+            return {
+                1: "a quarter mile",
+                2: "half a mile",
+                3: "three quarters of a mile",
+                4: "one mile",
+            }.get(quarters, self.distance_text(miles, precise=True))
+        km = miles * 1.609344
+        if km >= 0.95:
+            return self.distance_text(miles, precise=True)
+        meters = max(1, round(km * 10)) * 100
+        return f"{meters} meters"

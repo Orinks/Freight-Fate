@@ -11,11 +11,7 @@ from unittest.mock import MagicMock
 
 from freight_fate.data.curve_loading import CurveRecord, get_curves, leg_curve_key
 from freight_fate.data.world import Leg, Route, World
-from freight_fate.sim.trip import (
-    CURVE_WARNING_MAX_MI,
-    CURVE_WARNING_MIN_MI,
-    Trip,
-)
+from freight_fate.sim.trip import Trip
 from freight_fate.sim.trip_models import TripEventKind
 from freight_fate.sim.vehicle import TruckState
 from freight_fate.sim.weather import WeatherSystem
@@ -221,27 +217,6 @@ class TestTripCurveIntegration:
         # The pacenote should mention advisory speed.
         for ev in curve_events:
             assert "advisory" in ev.message or "curve" in ev.message
-
-    def test_curve_lookahead_scaled(self) -> None:
-        """The approach lookahead is scaled by speed and time compression, but
-        clamped by CURVE_WARNING_MAX_MI and CURVE_WARNING_MIN_MI."""
-        truck = TruckState()
-        weather = _MockWeather()
-        world = World.load()
-        route = world.shortest_route("abilene_tx_us", "dallas_tx_us")
-        if route is None:
-            return
-        trip = Trip(route, truck, weather, time_scale=40.0, seed=42)
-        # At 60 mph and 40x compression, the raw formula gives ~10 miles
-        # but the MAX_MI constant (4.0) clamps it.
-        truck.velocity_mps = 60.0 * 0.44704  # 60 mph in m/s
-        lookahead = trip._curve_warning_lookahead_mi()
-        assert lookahead == CURVE_WARNING_MAX_MI  # clamped to max
-        # At slow speed and low compression, the MIN_MI applies
-        trip2 = Trip(route, truck, weather, time_scale=10.0, seed=43)
-        truck.velocity_mps = 15.0 * 0.44704  # 15 mph
-        lookahead2 = trip2._curve_warning_lookahead_mi()
-        assert lookahead2 >= CURVE_WARNING_MIN_MI
 
     def test_restore_seeds_announced_curves(self) -> None:
         """Restoring a save seeds curves behind the position as announced."""

@@ -163,6 +163,33 @@ def test_zone_warning_interrupts_while_weather_chatter_queues(monkeypatch):
         app.shutdown()
 
 
+def test_curve_callout_setting_controls_the_single_automatic_announcement(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        calls = []
+        monkeypatch.setattr(
+            app.ctx, "say_event", lambda text, interrupt=True: calls.append((text, interrupt))
+        )
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *args, **kwargs: None)
+        event = TripEvent(
+            TripEventKind.CURVE,
+            "Sharp curve left, half a mile, advisory 35.",
+            {"advisory_mph": 35},
+        )
+
+        d._handle_trip_event(event)
+        assert calls == [(event.message, False)]
+
+        app.ctx.settings.curve_callouts = False
+        d._handle_trip_event(event)
+        assert calls == [(event.message, False)]
+    finally:
+        app.shutdown()
+
+
 def test_cb_radio_chatter_queues_and_uses_cb_audio(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.trip import PatrolWindow

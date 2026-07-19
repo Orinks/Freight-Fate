@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from .data_resources import read_data_text
 from .world_constants import (
     CITY_SERVICE_ORDER,
     CITY_SERVICE_SOURCE_TYPES,
@@ -25,10 +26,24 @@ FACILITY_ENDPOINTS_PATH = Path(__file__).parent / "facility_endpoints.json"
 FACILITY_APPROACHES_PATH = Path(__file__).parent / "facility_approaches.json"
 
 
+def _read_runtime_json(path: Path, default_path: Path, name: str) -> dict | None:
+    """Parse a runtime data file: baked in frozen builds when the caller
+    kept the default path, read from disk when a test injected its own."""
+    if path == default_path:
+        text = read_data_text(name)
+    elif path.exists():
+        text = path.read_text(encoding="utf-8")
+    else:
+        text = None
+    if text is None:
+        return None
+    return json.loads(text.lstrip("﻿"))
+
+
 def load_city_service_data(path: Path = CITY_SERVICES_PATH) -> dict[str, dict[str, dict]]:
-    if not path.exists():
+    raw = _read_runtime_json(path, CITY_SERVICES_PATH, "city_services.json")
+    if raw is None:
         return {}
-    raw = json.loads(path.read_text(encoding="utf-8"))
     cities = raw.get("cities", {})
     if not isinstance(cities, dict):
         raise ValueError(f"{path} must contain a cities object")
@@ -82,9 +97,9 @@ def load_city_service_data(path: Path = CITY_SERVICES_PATH) -> dict[str, dict[st
 
 
 def load_local_approaches(path: Path = LOCAL_APPROACHES_PATH) -> dict[str, LocalApproach]:
-    if not path.exists():
+    raw = _read_runtime_json(path, LOCAL_APPROACHES_PATH, "local_approaches.json")
+    if raw is None:
         return {}
-    raw = json.loads(path.read_text(encoding="utf-8"))
     records = raw.get("approaches", {})
     if not isinstance(records, dict):
         raise ValueError(f"{path} must contain an approaches object")
@@ -133,9 +148,9 @@ def load_local_approaches(path: Path = LOCAL_APPROACHES_PATH) -> dict[str, Local
 
 
 def load_local_geometries(path: Path = LOCAL_GEOMETRY_PATH) -> dict[str, LocalGeometry]:
-    if not path.exists():
+    raw = _read_runtime_json(path, LOCAL_GEOMETRY_PATH, "local_geometry.json")
+    if raw is None:
         return {}
-    raw = json.loads(path.read_text(encoding="utf-8"))
     records = raw.get("geometries", {})
     if not isinstance(records, dict):
         raise ValueError(f"{path} must contain a geometries object")
@@ -198,9 +213,9 @@ def load_local_geometries(path: Path = LOCAL_GEOMETRY_PATH) -> dict[str, LocalGe
 
 
 def load_facility_endpoints(path: Path = FACILITY_ENDPOINTS_PATH) -> dict[str, FacilityEndpoint]:
-    if not path.exists():
+    raw = _read_runtime_json(path, FACILITY_ENDPOINTS_PATH, "facility_endpoints.json")
+    if raw is None:
         return {}
-    raw = json.loads(path.read_text(encoding="utf-8-sig"))
     records = raw.get("endpoints", {})
     if not isinstance(records, dict):
         raise ValueError(f"{path} must contain an endpoints object")
@@ -258,9 +273,9 @@ def load_facility_endpoints(path: Path = FACILITY_ENDPOINTS_PATH) -> dict[str, F
 
 
 def load_facility_approaches(path: Path = FACILITY_APPROACHES_PATH) -> dict[str, FacilityApproach]:
-    if not path.exists():
+    raw = _read_runtime_json(path, FACILITY_APPROACHES_PATH, "facility_approaches.json")
+    if raw is None:
         return {}
-    raw = json.loads(path.read_text(encoding="utf-8"))
     records = raw.get("approaches", {})
     if not isinstance(records, dict):
         raise ValueError(f"{path} must contain an approaches object")

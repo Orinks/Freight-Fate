@@ -26,6 +26,9 @@ SHIFT_LOAD_RECOVERY_S = 0.032
 SHIFT_LOAD_RECOVERY_CURVE = "ease_out"
 _shift_recovery_curve = _resolve_curve(SHIFT_LOAD_RECOVERY_CURVE)
 
+# Low-pass raw throttle before it reaches the audible engine-load envelope.
+ENGINE_LOAD_SMOOTH_S = 0.45
+
 
 class DrivingUpdateMixin:
     def update(self, dt: float) -> None:
@@ -796,7 +799,15 @@ class DrivingUpdateMixin:
             )
         else:
             cap = 1.0
-        engine_load = min(t.throttle, cap)
+        target_load = max(0.0, min(1.0, t.throttle))
+        if dt <= 0.0:
+            # Direct callers and tests use a zero-length update to request an
+            # immediate audio sync.
+            self._engine_audio_throttle = target_load
+        else:
+            blend = min(1.0, dt / ENGINE_LOAD_SMOOTH_S)
+            self._engine_audio_throttle += (target_load - self._engine_audio_throttle) * blend
+        engine_load = min(self._engine_audio_throttle, cap)
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:
@@ -987,10 +998,22 @@ class DrivingUpdateMixin:
 
     def _sync_weather_source(self) -> None:
         real = self.ctx.settings.real_weather
-        if real == self._weather_source_real:
+        controls_calendar = self.ctx.settings.live_weather_controls_calendar
+        if (
+            real == self._weather_source_real
+            and controls_calendar == self._live_weather_controls_calendar
+        ):
             return
         self._weather_source_real = real
+        self._live_weather_controls_calendar = controls_calendar
         self.weather.provider = self.ctx.real_weather_provider() if real else None
+        self.weather.live_weather_controls_calendar = controls_calendar
+        if not controls_calendar:
+            # Include time already driven when the active trip switches back
+            # to the independent in-game calendar.
+            self.weather.game_hours = (
+                self.ctx.profile.calendar_game_hours + self.trip.game_minutes / 60.0
+            )
         if not real:
             self.weather.live = False
         self.ctx.audio.set_weather(self.weather.effects.sound)

@@ -7,10 +7,17 @@ from ..sim.pedal_latch import PedalLatch
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from .driving_events import DrivingEventMixin
+from .driving_pacenotes import DrivingPacenoteMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 
 
-class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, State):
+class DrivingState(
+    DrivingControlsMixin,
+    DrivingUpdateMixin,
+    DrivingEventMixin,
+    DrivingPacenoteMixin,
+    State,
+):
     def __init__(
         self,
         ctx,
@@ -52,9 +59,11 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             region,
             seed=self.trip_seed,
             provider=ctx.real_weather_provider(),
-            game_hours=profile.game_hours,
+            game_hours=profile.calendar_game_hours,
+            live_weather_controls_calendar=ctx.settings.live_weather_controls_calendar,
         )
         self._weather_source_real = ctx.settings.real_weather
+        self._live_weather_controls_calendar = ctx.settings.live_weather_controls_calendar
         self._traffic_source_real = ctx.settings.real_traffic
         self._parking_source_real = ctx.settings.real_parking
         trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
@@ -259,6 +268,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
         self._shift_recover_t = 1.0  # 0->1 recovery progress after an automatic shift ends
+        # Smooth only the audible engine load. Physics keeps the raw throttle,
+        # while small controller and cruise changes blend into the engine bed.
+        self._engine_audio_throttle = 0.0
         # Prev-frame accel/brake state, so a forward<->reverse shift needs a
         # fresh press (release then press) rather than a held control.
         self._reverse_brake_held = False
@@ -272,6 +284,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         # a latched pedal reads as held everywhere downstream.
         self._throttle_latch = PedalLatch()
         self._brake_latch = PedalLatch()
+        # Curve calls already made this trip (keys are curve entry miles).
+        self._pacenote_spoken: set[int] = set()
         self._status_text = f"Press {self.ctx.control_hint('engine')} to start the engine."
 
     def _terse_speech(self) -> bool:

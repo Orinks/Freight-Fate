@@ -159,8 +159,10 @@ def signed_envelope(payload: dict) -> dict:
 
 def test_signed_honest_payload_restores():
     payload = Profile(name="Honest Norm").to_dict()
+    signed_bytes = canonical_profile(payload)
     profile = verify_cloud_revision(payload, signed_envelope(payload), public_keys=PUBLIC_KEYS)
     assert profile.name == "Honest Norm"
+    assert canonical_profile(payload) == signed_bytes
 
 
 def test_signed_but_impossible_payload_is_refused():

@@ -710,7 +710,7 @@ class CityServiceSelectState(MenuState):
             route = self.ctx.world.city_service_route(service.city, service.key)
             items.append(
                 MenuItem(
-                    f"{service.name}: {route.miles:.1f} miles",
+                    f"{service.name}: {self.ctx.settings.distance_text(route.miles, precise=True)}",
                     lambda key=service.key: self._start(key),
                     help=(
                         f"Drive to {service.spoken_name}. "
@@ -752,7 +752,8 @@ class CityServiceSelectState(MenuState):
         p.active_trip = driving.snapshot()
         self.ctx.save_profile()
         self.ctx.say(
-            f"GPS set for {service.spoken_name}, {route.miles:.1f} miles on "
+            f"GPS set for {service.spoken_name}, "
+            f"{self.ctx.settings.distance_text(route.miles, precise=True)} on "
             f"{route.highways[0]}. Stop there, then press Enter to go inside.",
             interrupt=True,
         )
@@ -813,7 +814,8 @@ class BobtailDestState(MenuState):
         self.ctx.save_profile()
         spoken_dest = job.spoken_destination
         self.ctx.say(
-            f"Bobtailing empty to {spoken_dest}, {route.miles:.0f} miles on "
+            f"Bobtailing empty to {spoken_dest}, "
+            f"{self.ctx.settings.distance_text(route.miles)} on "
             f"{route.highways[0]}. No load and no pay -- you will see the "
             f"{spoken_dest} dispatch board on arrival. Check in at the city "
             "terminal when you get there.",
@@ -1096,6 +1098,7 @@ class JobBoardState(MenuState):
             trailer_note=self._trailer_note(job),
             display_pay=business.gross_pay,
             market_preview=self._market_preview(business),
+            distance_text=self.ctx.settings.distance_text(job.distance_mi),
         )
 
     def _job_label(self, job: Job, index: int) -> str:
@@ -1346,7 +1349,8 @@ class JobBoardState(MenuState):
         self.ctx.save_profile()
         self.ctx.say(
             f"Dispatch accepted from {terminal.name}. Deadhead "
-            f"{route.miles:.1f} miles on {route.highways[0]} to pickup at "
+            f"{self.ctx.settings.distance_text(route.miles, precise=True)} on "
+            f"{route.highways[0]} to pickup at "
             f"{job.origin_facility_text()}. "
             "Check in with the shipper when you arrive.",
             interrupt=True,
@@ -1463,7 +1467,7 @@ class JobDetailState(MenuState):
             f"Cargo: {job.cargo.label}.",
             f"Origin: {job.origin_facility_text()}.",
             f"Destination: {destination_text}.",
-            f"Distance: {job.distance_mi:.0f} miles.",
+            f"Distance: {self.ctx.settings.distance_text(job.distance_mi)}.",
             f"{pay_label(p.business_status)}: {business.gross_pay:,.0f} dollars.",
             f"Dollars per mile: {dollars_per_mile:.2f}.",
             # The appointment reads in the receiver's local time, the way real
