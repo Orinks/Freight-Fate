@@ -3628,6 +3628,26 @@
       },
       "stops": [
         {
+          "name": "Kwik Trip",
+          "type": "fuel_station",
+          "at_mi": 2.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: No verified truck access: OpenStreetMap records no hgv allowance, truck parking, or truck-stop classification at this location (checked 2026-07-19). Generic fuel stations default to bobtail_only per the truck-accessibility policy.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ],
+          "lat": 46.7607881,
+          "lon": -92.1317561,
+          "vehicle_access": "bobtail_only"
+        },
+        {
           "name": "Thompson Hill Travel Information Center",
           "type": "public_rest_area",
           "at_mi": 6.1,
@@ -3669,6 +3689,26 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Tamarack Wayside Rest",
+          "type": "public_rest_area",
+          "at_mi": 53.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 46.6447562,
+          "lon": -93.126643,
           "vehicle_access": "tractor_trailer"
         },
         {
@@ -5221,6 +5261,26 @@
         "restrictions": []
       },
       "stops": [
+        {
+          "name": "Kwik Trip Gas Pumps",
+          "type": "fuel_station",
+          "at_mi": 42.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "break"
+          ],
+          "services": [
+            "diesel",
+            "parking"
+          ],
+          "lat": 46.433001,
+          "lon": -92.7558568,
+          "vehicle_access": "tractor_trailer"
+        },
         {
           "name": "Kettle River",
           "type": "public_rest_area",
@@ -9034,6 +9094,26 @@
       },
       "stops": [
         {
+          "name": "Rum River Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 136.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 45.9240033,
+          "lon": -93.6651692,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Kwik Trip",
           "type": "fuel_station",
           "at_mi": 181.7,
@@ -9050,6 +9130,29 @@
             "parking"
           ],
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "TA",
+          "type": "service_plaza",
+          "at_mi": 187.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 45.1968713,
+          "lon": -93.5493156,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },

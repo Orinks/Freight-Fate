@@ -155,6 +155,31 @@ terminal becomes the anchor of that week instead of a spawn point.
       future flag; the pass never overrides physics. OATIS runs the
       sweep in his own window AFTER sharding lands; the
       announcement/HOS filter is game-side.
+- [ ] **Densify corridor POI sampling in the mapping utility (found
+      during the access sweep, 2026-07-19).** `_overpass_named_candidates`
+      queries a fixed 7 boxes per leg -- five mid-corridor samples plus the
+      two endpoint cities -- each about 7.5 miles of road. That is ~52 miles
+      inspected regardless of leg length: a third of a 162-mile leg, a
+      seventh of a 345-mile one, so coverage is thinnest exactly where a
+      serviceless stretch strands somebody. The five mid-points are indices
+      into `route_points`, not evenly spaced miles, so they cluster wherever
+      geometry vertices fall; the Love's at Williams and the truck stops at
+      Corning sit in the blind spots on I-5, both `hgv=yes` in the extract we
+      already query. Generic car fuel (the `rural_fallback` relaxation) hid
+      this by making thin corridors look served until the access sweep
+      demoted them. Fix belongs in the enrichment tool: sample by mileage and
+      scale the probe count to leg length.
+      `tools/fill_truck_access_gaps.py` densifies only INSIDE qualifying
+      gaps, so corridors that are merely thin are still under-sampled and a
+      map-wide re-sweep is still owed.
+- [ ] **Emit `vehicle_access` when the mapping utility creates a stop
+      (owner, 2026-07-19).** Every POI-adding path should classify at
+      creation instead of waiting for a re-sweep, or each map expansion
+      reintroduces unclassified stops. When judging an unfamiliar operator,
+      read the OSM `website` tag -- it often carries the operator's own
+      location page, which settles format and amenities better than a brand
+      name (it identified Love's #120 as a Vian country store). That matters
+      most for Hawaii, Alaska, and Canada, where the chains are unfamiliar.
 - [ ] **Real construction zones from state 511 APIs.** When real-time
       traffic is enabled, construction zones should be generated from actual
       state DOT work zone data instead of simulated zones. Requires:

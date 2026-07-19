@@ -1745,6 +1745,52 @@
           "lat": 41.37145,
           "lon": -71.97017,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Madison, CT - North",
+          "type": "service_plaza",
+          "at_mi": 84.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.2903995,
+          "lon": -72.580404,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Branford Service Plaza Northbound",
+          "type": "service_plaza",
+          "at_mi": 98.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.2855015,
+          "lon": -72.8341641,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },

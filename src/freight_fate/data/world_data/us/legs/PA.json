@@ -2535,6 +2535,29 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-95 Fairfield SB Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 152.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.1476388,
+          "lon": -73.2565372,
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "corridor": {
@@ -19473,6 +19496,75 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Blue Mountain Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 43.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.1661021,
+          "lon": -77.5964527,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Sideling Hill Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 73.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.0589693,
+          "lon": -78.0816202,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 83.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.996703,
+          "lon": -78.2367835,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "I-76 E - PTC Mainline truck parking near Somerset Twp",
           "type": "public_rest_area",
           "at_mi": 133.5,
@@ -34298,6 +34390,52 @@
         "restrictions": []
       },
       "stops": [
+        {
+          "name": "New Stanton Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 36.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.2058957,
+          "lon": -79.5657701,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "North Somerset Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 70.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 40.0003604,
+          "lon": -79.0446,
+          "vehicle_access": "tractor_trailer"
+        },
         {
           "name": "South Midway Service Plaza",
           "type": "service_plaza",

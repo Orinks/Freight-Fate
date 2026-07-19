@@ -9028,6 +9028,29 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 17.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.6633613,
+          "lon": -87.7012663,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Speedway",
           "type": "fuel_station",
           "at_mi": 27.8,
@@ -9046,6 +9069,52 @@
           "lat": 41.55799,
           "lon": -87.79371,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Pilot",
+          "type": "travel_center",
+          "at_mi": 35.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.4278823,
+          "lon": -87.756781,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 63.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.0725939,
+          "lon": -87.8666247,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -21664,6 +21733,49 @@
           "lat": 39.93597,
           "lon": -91.407,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Fall Creek Rest Stop",
+          "type": "public_rest_area",
+          "at_mi": 13.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 39.7855769,
+          "lon": -91.2947305,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 71.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.6896383,
+          "lon": -90.2304794,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Road Ranger",

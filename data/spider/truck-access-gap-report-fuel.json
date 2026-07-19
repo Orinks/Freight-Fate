@@ -2,9 +2,9 @@
   "action": "fuel",
   "long_stretch_threshold_mi": 100.0,
   "legs_total": 1287,
-  "legs_worsened": 565,
-  "legs_over_threshold_before": 241,
-  "legs_over_threshold_after": 329,
+  "legs_worsened": 545,
+  "legs_over_threshold_before": 135,
+  "legs_over_threshold_after": 199,
   "legs": [
     {
       "from": "roswell_nm_us",
@@ -16,15 +16,6 @@
       "worsened_mi": 89.6
     },
     {
-      "from": "pierre_sd_us",
-      "to": "rapid_city_sd_us",
-      "highway": "US-14",
-      "miles": 179.0,
-      "before_mi": 88.5,
-      "after_mi": 178.0,
-      "worsened_mi": 89.5
-    },
-    {
       "from": "muskegon_mi_us",
       "to": "traverse_city_mi_us",
       "highway": "US-31",
@@ -34,22 +25,13 @@
       "worsened_mi": 87.6
     },
     {
-      "from": "dallas_tx_us",
-      "to": "wichita_falls_tx_us",
-      "highway": "US-287",
-      "miles": 138.0,
-      "before_mi": 55.2,
-      "after_mi": 137.0,
-      "worsened_mi": 81.8
-    },
-    {
-      "from": "sacramento_ca_us",
-      "to": "redding_ca_us",
-      "highway": "I-5",
-      "miles": 162.0,
-      "before_mi": 81.0,
-      "after_mi": 162.0,
-      "worsened_mi": 81.0
+      "from": "pierre_sd_us",
+      "to": "rapid_city_sd_us",
+      "highway": "US-14",
+      "miles": 179.0,
+      "before_mi": 88.5,
+      "after_mi": 169.0,
+      "worsened_mi": 80.5
     },
     {
       "from": "newport_or_us",
@@ -59,15 +41,6 @@
       "before_mi": 53.2,
       "after_mi": 133.0,
       "worsened_mi": 79.8
-    },
-    {
-      "from": "fort_smith_ar_us",
-      "to": "little_rock_ar_us",
-      "highway": "I-40",
-      "miles": 159.0,
-      "before_mi": 79.5,
-      "after_mi": 159.0,
-      "worsened_mi": 79.5
     },
     {
       "from": "miami_fl_us",
@@ -115,22 +88,13 @@
       "worsened_mi": 77.4
     },
     {
-      "from": "waco_tx_us",
-      "to": "tyler_tx_us",
-      "highway": "TX-31",
-      "miles": 130.0,
-      "before_mi": 52.0,
-      "after_mi": 129.0,
-      "worsened_mi": 77.0
-    },
-    {
       "from": "lincoln_ne_us",
       "to": "junction_city_ks_us",
       "highway": "US-77",
       "miles": 152.0,
-      "before_mi": 75.0,
-      "after_mi": 151.0,
-      "worsened_mi": 76.0
+      "before_mi": 67.5,
+      "after_mi": 142.5,
+      "worsened_mi": 75.0
     },
     {
       "from": "johnson_city_tn_us",
@@ -149,15 +113,6 @@
       "before_mi": 63.0,
       "after_mi": 128.0,
       "worsened_mi": 65.0
-    },
-    {
-      "from": "douglas_az_us",
-      "to": "tucson_az_us",
-      "highway": "AZ-80",
-      "miles": 118.0,
-      "before_mi": 58.0,
-      "after_mi": 118.0,
-      "worsened_mi": 60.0
     },
     {
       "from": "willits_ca_us",
@@ -196,24 +151,6 @@
       "worsened_mi": 58.5
     },
     {
-      "from": "hot_springs_ar_us",
-      "to": "fort_smith_ar_us",
-      "highway": "US-270",
-      "miles": 115.0,
-      "before_mi": 56.5,
-      "after_mi": 115.0,
-      "worsened_mi": 58.5
-    },
-    {
-      "from": "tulsa_ok_us",
-      "to": "fayetteville_ar_us",
-      "highway": "US-412",
-      "miles": 117.0,
-      "before_mi": 58.6,
-      "after_mi": 117.0,
-      "worsened_mi": 58.4
-    },
-    {
       "from": "washington_dc_us",
       "to": "charlottesville_va_us",
       "highway": "US-29",
@@ -250,15 +187,6 @@
       "worsened_mi": 57.5
     },
     {
-      "from": "tulsa_ok_us",
-      "to": "enid_ok_us",
-      "highway": "US-412",
-      "miles": 115.0,
-      "before_mi": 56.5,
-      "after_mi": 114.0,
-      "worsened_mi": 57.5
-    },
-    {
       "from": "hattiesburg_ms_us",
       "to": "new_orleans_la_us",
       "highway": "I-59",
@@ -277,15 +205,6 @@
       "worsened_mi": 57.0
     },
     {
-      "from": "new_york_ny_us",
-      "to": "albany_ny_us",
-      "highway": "I-87",
-      "miles": 145.0,
-      "before_mi": 58.0,
-      "after_mi": 115.0,
-      "worsened_mi": 57.0
-    },
-    {
       "from": "grand_forks_nd_us",
       "to": "bemidji_mn_us",
       "highway": "US-2",
@@ -293,42 +212,6 @@
       "before_mi": 57.4,
       "after_mi": 114.0,
       "worsened_mi": 56.6
-    },
-    {
-      "from": "victoria_tx_us",
-      "to": "san_antonio_tx_us",
-      "highway": "US-87",
-      "miles": 115.0,
-      "before_mi": 57.4,
-      "after_mi": 114.0,
-      "worsened_mi": 56.6
-    },
-    {
-      "from": "tallahassee_fl_us",
-      "to": "lake_city_fl_us",
-      "highway": "I-10",
-      "miles": 111.0,
-      "before_mi": 55.4,
-      "after_mi": 111.0,
-      "worsened_mi": 55.6
-    },
-    {
-      "from": "norfolk_ne_us",
-      "to": "omaha_ne_us",
-      "highway": "US-275",
-      "miles": 113.0,
-      "before_mi": 55.5,
-      "after_mi": 111.0,
-      "worsened_mi": 55.5
-    },
-    {
-      "from": "crestview_fl_us",
-      "to": "dothan_al_us",
-      "highway": "FL-85",
-      "miles": 111.0,
-      "before_mi": 55.4,
-      "after_mi": 110.0,
-      "worsened_mi": 54.6
     },
     {
       "from": "flagstaff_az_us",
@@ -349,15 +232,6 @@
       "worsened_mi": 54.0
     },
     {
-      "from": "charleston_sc_us",
-      "to": "savannah_ga_us",
-      "highway": "US-17",
-      "miles": 108.0,
-      "before_mi": 54.0,
-      "after_mi": 108.0,
-      "worsened_mi": 54.0
-    },
-    {
       "from": "charleston_wv_us",
       "to": "pikeville_ky_us",
       "highway": "US-119",
@@ -367,40 +241,13 @@
       "worsened_mi": 54.0
     },
     {
-      "from": "dothan_al_us",
-      "to": "tallahassee_fl_us",
-      "highway": "US-84",
-      "miles": 109.0,
-      "before_mi": 54.5,
-      "after_mi": 108.0,
+      "from": "hot_springs_ar_us",
+      "to": "fort_smith_ar_us",
+      "highway": "US-270",
+      "miles": 115.0,
+      "before_mi": 56.5,
+      "after_mi": 110.0,
       "worsened_mi": 53.5
-    },
-    {
-      "from": "ardmore_ok_us",
-      "to": "dallas_tx_us",
-      "highway": "I-35",
-      "miles": 109.0,
-      "before_mi": 54.5,
-      "after_mi": 108.0,
-      "worsened_mi": 53.5
-    },
-    {
-      "from": "baton_rouge_la_us",
-      "to": "gulfport_ms_us",
-      "highway": "I-12",
-      "miles": 136.0,
-      "before_mi": 54.4,
-      "after_mi": 107.8,
-      "worsened_mi": 53.4
-    },
-    {
-      "from": "mobile_al_us",
-      "to": "meridian_ms_us",
-      "highway": "US-45",
-      "miles": 133.0,
-      "before_mi": 78.8,
-      "after_mi": 132.0,
-      "worsened_mi": 53.2
     },
     {
       "from": "lufkin_tx_us",
@@ -430,15 +277,6 @@
       "worsened_mi": 52.8
     },
     {
-      "from": "selma_al_us",
-      "to": "meridian_ms_us",
-      "highway": "US-80",
-      "miles": 107.0,
-      "before_mi": 53.5,
-      "after_mi": 106.0,
-      "worsened_mi": 52.5
-    },
-    {
       "from": "susanville_ca_us",
       "to": "redding_ca_us",
       "highway": "CA-44",
@@ -457,6 +295,15 @@
       "worsened_mi": 52.5
     },
     {
+      "from": "mobile_al_us",
+      "to": "meridian_ms_us",
+      "highway": "US-45",
+      "miles": 133.0,
+      "before_mi": 74.3,
+      "after_mi": 126.5,
+      "worsened_mi": 52.2
+    },
+    {
       "from": "fort_smith_ar_us",
       "to": "texarkana_ar_us",
       "highway": "US-71",
@@ -473,15 +320,6 @@
       "before_mi": 106.0,
       "after_mi": 158.0,
       "worsened_mi": 52.0
-    },
-    {
-      "from": "saint_joseph_mo_us",
-      "to": "omaha_ne_us",
-      "highway": "I-29",
-      "miles": 132.0,
-      "before_mi": 78.2,
-      "after_mi": 130.0,
-      "worsened_mi": 51.8
     },
     {
       "from": "oxnard_ca_us",
@@ -511,6 +349,15 @@
       "worsened_mi": 51.0
     },
     {
+      "from": "douglas_az_us",
+      "to": "tucson_az_us",
+      "highway": "AZ-80",
+      "miles": 118.0,
+      "before_mi": 58.0,
+      "after_mi": 109.0,
+      "worsened_mi": 51.0
+    },
+    {
       "from": "prescott_az_us",
       "to": "phoenix_az_us",
       "highway": "AZ-69",
@@ -520,39 +367,12 @@
       "worsened_mi": 51.0
     },
     {
-      "from": "salinas_ca_us",
-      "to": "san_luis_obispo_ca_us",
-      "highway": "US-101",
-      "miles": 127.0,
-      "before_mi": 76.2,
-      "after_mi": 127.0,
-      "worsened_mi": 50.8
-    },
-    {
-      "from": "duluth_mn_us",
-      "to": "minneapolis_mn_us",
-      "highway": "I-35",
-      "miles": 152.0,
-      "before_mi": 76.0,
-      "after_mi": 126.7,
-      "worsened_mi": 50.7
-    },
-    {
       "from": "pine_bluff_ar_us",
       "to": "el_dorado_ar_us",
       "highway": "US-63",
       "miles": 101.0,
       "before_mi": 50.5,
       "after_mi": 101.0,
-      "worsened_mi": 50.5
-    },
-    {
-      "from": "memphis_tn_us",
-      "to": "grenada_ms_us",
-      "highway": "I-55",
-      "miles": 101.0,
-      "before_mi": 49.5,
-      "after_mi": 100.0,
       "worsened_mi": 50.5
     },
     {
@@ -574,6 +394,15 @@
       "worsened_mi": 49.8
     },
     {
+      "from": "victoria_tx_us",
+      "to": "san_antonio_tx_us",
+      "highway": "US-87",
+      "miles": 115.0,
+      "before_mi": 57.4,
+      "after_mi": 107.0,
+      "worsened_mi": 49.6
+    },
+    {
       "from": "little_rock_ar_us",
       "to": "el_dorado_ar_us",
       "highway": "US-167",
@@ -590,15 +419,6 @@
       "before_mi": 48.0,
       "after_mi": 97.0,
       "worsened_mi": 49.0
-    },
-    {
-      "from": "cedar_rapids_ia_us",
-      "to": "des_moines_ia_us",
-      "highway": "US-30",
-      "miles": 122.0,
-      "before_mi": 73.2,
-      "after_mi": 122.0,
-      "worsened_mi": 48.8
     },
     {
       "from": "panama_city_fl_us",
@@ -817,6 +637,15 @@
       "worsened_mi": 45.0
     },
     {
+      "from": "norfolk_ne_us",
+      "to": "omaha_ne_us",
+      "highway": "US-275",
+      "miles": 113.0,
+      "before_mi": 28.3,
+      "after_mi": 73.0,
+      "worsened_mi": 44.7
+    },
+    {
       "from": "waterloo_ia_us",
       "to": "dubuque_ia_us",
       "highway": "US-20",
@@ -1024,6 +853,24 @@
       "worsened_mi": 40.5
     },
     {
+      "from": "crestview_fl_us",
+      "to": "dothan_al_us",
+      "highway": "FL-85",
+      "miles": 111.0,
+      "before_mi": 55.4,
+      "after_mi": 95.5,
+      "worsened_mi": 40.1
+    },
+    {
+      "from": "selma_al_us",
+      "to": "meridian_ms_us",
+      "highway": "US-80",
+      "miles": 107.0,
+      "before_mi": 53.5,
+      "after_mi": 93.5,
+      "worsened_mi": 40.0
+    },
+    {
       "from": "grand_forks_nd_us",
       "to": "fargo_nd_us",
       "highway": "I-29",
@@ -1033,6 +880,15 @@
       "worsened_mi": 40.0
     },
     {
+      "from": "charleston_sc_us",
+      "to": "savannah_ga_us",
+      "highway": "US-17",
+      "miles": 108.0,
+      "before_mi": 53.0,
+      "after_mi": 92.5,
+      "worsened_mi": 39.5
+    },
+    {
       "from": "albany_ga_us",
       "to": "valdosta_ga_us",
       "highway": "US-82",
@@ -1040,6 +896,15 @@
       "before_mi": 39.5,
       "after_mi": 79.0,
       "worsened_mi": 39.5
+    },
+    {
+      "from": "cedar_rapids_ia_us",
+      "to": "des_moines_ia_us",
+      "highway": "US-30",
+      "miles": 122.0,
+      "before_mi": 73.2,
+      "after_mi": 112.5,
+      "worsened_mi": 39.3
     },
     {
       "from": "parkersburg_wv_us",
@@ -1231,15 +1096,6 @@
       "worsened_mi": 35.0
     },
     {
-      "from": "wenatchee_wa_us",
-      "to": "everett_wa_us",
-      "highway": "I-90",
-      "miles": 169.0,
-      "before_mi": 134.2,
-      "after_mi": 169.0,
-      "worsened_mi": 34.8
-    },
-    {
       "from": "grants_pass_or_us",
       "to": "roseburg_or_us",
       "highway": "I-5",
@@ -1301,6 +1157,15 @@
       "before_mi": 32.0,
       "after_mi": 66.0,
       "worsened_mi": 34.0
+    },
+    {
+      "from": "duluth_mn_us",
+      "to": "minneapolis_mn_us",
+      "highway": "I-35",
+      "miles": 152.0,
+      "before_mi": 50.7,
+      "after_mi": 84.2,
+      "worsened_mi": 33.5
     },
     {
       "from": "denver_co_us",
@@ -1447,6 +1312,15 @@
       "worsened_mi": 31.5
     },
     {
+      "from": "dallas_tx_us",
+      "to": "wichita_falls_tx_us",
+      "highway": "US-287",
+      "miles": 138.0,
+      "before_mi": 54.2,
+      "after_mi": 85.5,
+      "worsened_mi": 31.3
+    },
+    {
       "from": "pikeville_ky_us",
       "to": "hazard_ky_us",
       "highway": "KY-80",
@@ -1528,24 +1402,6 @@
       "worsened_mi": 30.5
     },
     {
-      "from": "hibbing_mn_us",
-      "to": "minneapolis_mn_us",
-      "highway": "US-169",
-      "miles": 212.0,
-      "before_mi": 181.7,
-      "after_mi": 212.0,
-      "worsened_mi": 30.3
-    },
-    {
-      "from": "toledo_oh_us",
-      "to": "columbus_oh_us",
-      "highway": "US-23",
-      "miles": 146.0,
-      "before_mi": 115.8,
-      "after_mi": 146.0,
-      "worsened_mi": 30.2
-    },
-    {
       "from": "laredo_tx_us",
       "to": "mcallen_tx_us",
       "highway": "US-83",
@@ -1600,24 +1456,6 @@
       "worsened_mi": 29.5
     },
     {
-      "from": "portland_me_us",
-      "to": "montpelier_vt_us",
-      "highway": "US-302",
-      "miles": 171.0,
-      "before_mi": 141.5,
-      "after_mi": 171.0,
-      "worsened_mi": 29.5
-    },
-    {
-      "from": "parkersburg_wv_us",
-      "to": "morgantown_wv_us",
-      "highway": "US-50",
-      "miles": 114.0,
-      "before_mi": 84.5,
-      "after_mi": 114.0,
-      "worsened_mi": 29.5
-    },
-    {
       "from": "lamar_co_us",
       "to": "limon_co_us",
       "highway": "US-287",
@@ -1658,18 +1496,9 @@
       "to": "hays_ks_us",
       "highway": "US-183",
       "miles": 147.0,
-      "before_mi": 88.2,
-      "after_mi": 117.6,
+      "before_mi": 76.2,
+      "after_mi": 105.6,
       "worsened_mi": 29.4
-    },
-    {
-      "from": "wichita_ks_us",
-      "to": "tulsa_ok_us",
-      "highway": "US-400",
-      "miles": 176.0,
-      "before_mi": 146.7,
-      "after_mi": 176.0,
-      "worsened_mi": 29.3
     },
     {
       "from": "austin_tx_us",
@@ -1681,21 +1510,30 @@
       "worsened_mi": 29.2
     },
     {
+      "from": "tulsa_ok_us",
+      "to": "fayetteville_ar_us",
+      "highway": "US-412",
+      "miles": 117.0,
+      "before_mi": 50.3,
+      "after_mi": 79.5,
+      "worsened_mi": 29.2
+    },
+    {
+      "from": "toledo_oh_us",
+      "to": "columbus_oh_us",
+      "highway": "US-23",
+      "miles": 146.0,
+      "before_mi": 45.3,
+      "after_mi": 74.5,
+      "worsened_mi": 29.2
+    },
+    {
       "from": "lewiston_id_us",
       "to": "coeur_d_alene_id_us",
       "highway": "US-95",
       "miles": 116.0,
       "before_mi": 87.0,
       "after_mi": 116.0,
-      "worsened_mi": 29.0
-    },
-    {
-      "from": "twin_falls_id_us",
-      "to": "wells_nv_us",
-      "highway": "US-93",
-      "miles": 116.0,
-      "before_mi": 86.0,
-      "after_mi": 115.0,
       "worsened_mi": 29.0
     },
     {
@@ -1724,33 +1562,6 @@
       "before_mi": 28.0,
       "after_mi": 57.0,
       "worsened_mi": 29.0
-    },
-    {
-      "from": "little_rock_ar_us",
-      "to": "texarkana_ar_us",
-      "highway": "I-30",
-      "miles": 144.0,
-      "before_mi": 114.2,
-      "after_mi": 143.0,
-      "worsened_mi": 28.8
-    },
-    {
-      "from": "green_bay_wi_us",
-      "to": "madison_wi_us",
-      "highway": "I-41",
-      "miles": 144.0,
-      "before_mi": 86.4,
-      "after_mi": 115.2,
-      "worsened_mi": 28.8
-    },
-    {
-      "from": "indianapolis_in_us",
-      "to": "south_bend_in_us",
-      "highway": "US-31",
-      "miles": 148.0,
-      "before_mi": 88.8,
-      "after_mi": 117.4,
-      "worsened_mi": 28.6
     },
     {
       "from": "douglas_az_us",
@@ -1784,8 +1595,8 @@
       "to": "billings_mt_us",
       "highway": "I-90",
       "miles": 142.0,
-      "before_mi": 113.6,
-      "after_mi": 142.0,
+      "before_mi": 72.1,
+      "after_mi": 100.5,
       "worsened_mi": 28.4
     },
     {
@@ -1879,13 +1690,13 @@
       "worsened_mi": 27.8
     },
     {
-      "from": "kansas_city_mo_us",
-      "to": "springfield_mo_us",
-      "highway": "MO-13",
-      "miles": 166.0,
-      "before_mi": 110.6,
-      "after_mi": 138.3,
-      "worsened_mi": 27.7
+      "from": "tallahassee_fl_us",
+      "to": "lake_city_fl_us",
+      "highway": "I-10",
+      "miles": 111.0,
+      "before_mi": 39.2,
+      "after_mi": 67.0,
+      "worsened_mi": 27.8
     },
     {
       "from": "escanaba_mi_us",
@@ -1969,15 +1780,6 @@
       "worsened_mi": 27.2
     },
     {
-      "from": "las_vegas_nm_us",
-      "to": "raton_nm_us",
-      "highway": "I-25",
-      "miles": 109.0,
-      "before_mi": 80.8,
-      "after_mi": 108.0,
-      "worsened_mi": 27.2
-    },
-    {
       "from": "aberdeen_sd_us",
       "to": "pierre_sd_us",
       "highway": "US-83",
@@ -1991,8 +1793,8 @@
       "to": "rock_springs_wy_us",
       "highway": "I-80",
       "miles": 108.0,
-      "before_mi": 80.0,
-      "after_mi": 107.0,
+      "before_mi": 41.5,
+      "after_mi": 68.5,
       "worsened_mi": 27.0
     },
     {
@@ -2014,30 +1816,12 @@
       "worsened_mi": 27.0
     },
     {
-      "from": "chicago_il_us",
-      "to": "champaign_il_us",
-      "highway": "I-57",
-      "miles": 139.0,
-      "before_mi": 111.2,
-      "after_mi": 138.0,
-      "worsened_mi": 26.8
-    },
-    {
       "from": "durango_co_us",
       "to": "montrose_co_us",
       "highway": "US-550",
       "miles": 107.0,
       "before_mi": 80.2,
       "after_mi": 107.0,
-      "worsened_mi": 26.8
-    },
-    {
-      "from": "jacksonville_fl_us",
-      "to": "ocala_fl_us",
-      "highway": "US-301",
-      "miles": 103.0,
-      "before_mi": 76.2,
-      "after_mi": 103.0,
       "worsened_mi": 26.8
     },
     {
@@ -2108,8 +1892,8 @@
       "to": "minneapolis_mn_us",
       "highway": "I-90",
       "miles": 236.0,
-      "before_mi": 209.7,
-      "after_mi": 236.0,
+      "before_mi": 207.7,
+      "after_mi": 234.0,
       "worsened_mi": 26.3
     },
     {
@@ -2120,15 +1904,6 @@
       "before_mi": 52.5,
       "after_mi": 78.8,
       "worsened_mi": 26.3
-    },
-    {
-      "from": "jackson_tn_us",
-      "to": "nashville_tn_us",
-      "highway": "I-40",
-      "miles": 130.0,
-      "before_mi": 78.0,
-      "after_mi": 104.0,
-      "worsened_mi": 26.0
     },
     {
       "from": "rocky_mount_nc_us",
@@ -2165,15 +1940,6 @@
       "before_mi": 74.1,
       "after_mi": 100.0,
       "worsened_mi": 25.9
-    },
-    {
-      "from": "lake_havasu_city_az_us",
-      "to": "yuma_az_us",
-      "highway": "US-95",
-      "miles": 155.0,
-      "before_mi": 128.2,
-      "after_mi": 154.0,
-      "worsened_mi": 25.8
     },
     {
       "from": "knoxville_tn_us",
@@ -2225,8 +1991,8 @@
       "to": "yakima_wa_us",
       "highway": "US-12",
       "miles": 156.0,
-      "before_mi": 130.0,
-      "after_mi": 155.0,
+      "before_mi": 92.5,
+      "after_mi": 117.5,
       "worsened_mi": 25.0
     },
     {
@@ -2464,13 +2230,13 @@
       "worsened_mi": 24.0
     },
     {
-      "from": "milwaukee_wi_us",
-      "to": "minneapolis_mn_us",
-      "highway": "I-94",
-      "miles": 337.0,
-      "before_mi": 168.5,
-      "after_mi": 192.2,
-      "worsened_mi": 23.7
+      "from": "salinas_ca_us",
+      "to": "san_luis_obispo_ca_us",
+      "highway": "US-101",
+      "miles": 127.0,
+      "before_mi": 67.6,
+      "after_mi": 91.5,
+      "worsened_mi": 23.9
     },
     {
       "from": "wilmington_nc_us",
@@ -2671,12 +2437,30 @@
       "worsened_mi": 22.1
     },
     {
+      "from": "parkersburg_wv_us",
+      "to": "morgantown_wv_us",
+      "highway": "US-50",
+      "miles": 114.0,
+      "before_mi": 84.5,
+      "after_mi": 106.5,
+      "worsened_mi": 22.0
+    },
+    {
       "from": "wichita_falls_tx_us",
       "to": "fort_worth_tx_us",
       "highway": "US-287",
       "miles": 115.0,
       "before_mi": 69.0,
       "after_mi": 91.0,
+      "worsened_mi": 22.0
+    },
+    {
+      "from": "waco_tx_us",
+      "to": "tyler_tx_us",
+      "highway": "TX-31",
+      "miles": 130.0,
+      "before_mi": 52.0,
+      "after_mi": 74.0,
       "worsened_mi": 22.0
     },
     {
@@ -2777,6 +2561,15 @@
       "before_mi": 18.5,
       "after_mi": 39.0,
       "worsened_mi": 20.5
+    },
+    {
+      "from": "jacksonville_fl_us",
+      "to": "ocala_fl_us",
+      "highway": "US-301",
+      "miles": 103.0,
+      "before_mi": 54.7,
+      "after_mi": 75.0,
+      "worsened_mi": 20.3
     },
     {
       "from": "dothan_al_us",
@@ -2975,6 +2768,15 @@
       "before_mi": 18.8,
       "after_mi": 37.5,
       "worsened_mi": 18.7
+    },
+    {
+      "from": "ardmore_ok_us",
+      "to": "dallas_tx_us",
+      "highway": "I-35",
+      "miles": 109.0,
+      "before_mi": 54.5,
+      "after_mi": 73.0,
+      "worsened_mi": 18.5
     },
     {
       "from": "cedar_rapids_ia_us",
@@ -3850,6 +3652,24 @@
       "worsened_mi": 10.7
     },
     {
+      "from": "tulsa_ok_us",
+      "to": "enid_ok_us",
+      "highway": "US-412",
+      "miles": 115.0,
+      "before_mi": 56.5,
+      "after_mi": 67.0,
+      "worsened_mi": 10.5
+    },
+    {
+      "from": "dothan_al_us",
+      "to": "tallahassee_fl_us",
+      "highway": "US-84",
+      "miles": 109.0,
+      "before_mi": 43.5,
+      "after_mi": 54.0,
+      "worsened_mi": 10.5
+    },
+    {
       "from": "madison_wi_us",
       "to": "chicago_il_us",
       "highway": "I-90",
@@ -3920,6 +3740,15 @@
       "before_mi": 19.0,
       "after_mi": 28.5,
       "worsened_mi": 9.5
+    },
+    {
+      "from": "memphis_tn_us",
+      "to": "grenada_ms_us",
+      "highway": "I-55",
+      "miles": 101.0,
+      "before_mi": 33.0,
+      "after_mi": 42.0,
+      "worsened_mi": 9.0
     },
     {
       "from": "norfolk_va_us",
@@ -4066,6 +3895,24 @@
       "worsened_mi": 6.0
     },
     {
+      "from": "hibbing_mn_us",
+      "to": "minneapolis_mn_us",
+      "highway": "US-169",
+      "miles": 212.0,
+      "before_mi": 181.7,
+      "after_mi": 187.5,
+      "worsened_mi": 5.8
+    },
+    {
+      "from": "saint_joseph_mo_us",
+      "to": "omaha_ne_us",
+      "highway": "I-29",
+      "miles": 132.0,
+      "before_mi": 78.2,
+      "after_mi": 84.0,
+      "worsened_mi": 5.8
+    },
+    {
       "from": "cottonwood_az_us",
       "to": "sedona_az_us",
       "highway": "US-89A",
@@ -4073,6 +3920,15 @@
       "before_mi": 13.2,
       "after_mi": 19.0,
       "worsened_mi": 5.8
+    },
+    {
+      "from": "indianapolis_in_us",
+      "to": "south_bend_in_us",
+      "highway": "US-31",
+      "miles": 148.0,
+      "before_mi": 37.9,
+      "after_mi": 43.5,
+      "worsened_mi": 5.6
     },
     {
       "from": "montrose_co_us",
@@ -4093,12 +3949,12 @@
       "worsened_mi": 3.8
     },
     {
-      "from": "pierre_sd_us",
-      "to": "mitchell_sd_us",
-      "highway": "US-281",
-      "miles": 171.0,
-      "before_mi": 169.0,
-      "after_mi": 171.0,
+      "from": "duluth_mn_us",
+      "to": "fargo_nd_us",
+      "highway": "US-10",
+      "miles": 256.0,
+      "before_mi": 254.0,
+      "after_mi": 256.0,
       "worsened_mi": 2.0
     },
     {
@@ -4108,15 +3964,6 @@
       "miles": 163.0,
       "before_mi": 161.0,
       "after_mi": 163.0,
-      "worsened_mi": 2.0
-    },
-    {
-      "from": "san_angelo_tx_us",
-      "to": "del_rio_tx_us",
-      "highway": "US-277",
-      "miles": 157.0,
-      "before_mi": 155.0,
-      "after_mi": 157.0,
       "worsened_mi": 2.0
     },
     {
@@ -4309,39 +4156,12 @@
       "worsened_mi": 2.0
     },
     {
-      "from": "twin_falls_id_us",
-      "to": "ogden_ut_us",
-      "highway": "I-84",
-      "miles": 188.0,
-      "before_mi": 186.0,
-      "after_mi": 187.0,
-      "worsened_mi": 1.0
-    },
-    {
-      "from": "spokane_wa_us",
-      "to": "wenatchee_wa_us",
-      "highway": "I-90",
-      "miles": 169.0,
-      "before_mi": 168.0,
-      "after_mi": 169.0,
-      "worsened_mi": 1.0
-    },
-    {
       "from": "ely_nv_us",
       "to": "tonopah_nv_us",
       "highway": "US-6",
       "miles": 168.0,
       "before_mi": 166.0,
       "after_mi": 167.0,
-      "worsened_mi": 1.0
-    },
-    {
-      "from": "san_angelo_tx_us",
-      "to": "fort_stockton_tx_us",
-      "highway": "US-67",
-      "miles": 164.0,
-      "before_mi": 162.0,
-      "after_mi": 163.0,
       "worsened_mi": 1.0
     },
     {
@@ -4363,21 +4183,12 @@
       "worsened_mi": 1.0
     },
     {
-      "from": "billings_mt_us",
-      "to": "sheridan_wy_us",
-      "highway": "I-90",
-      "miles": 129.0,
-      "before_mi": 128.0,
-      "after_mi": 129.0,
-      "worsened_mi": 1.0
-    },
-    {
-      "from": "bakersfield_ca_us",
-      "to": "barstow_ca_us",
-      "highway": "CA-58",
-      "miles": 129.0,
-      "before_mi": 127.0,
-      "after_mi": 128.0,
+      "from": "williston_nd_us",
+      "to": "minot_nd_us",
+      "highway": "US-2",
+      "miles": 125.0,
+      "before_mi": 123.0,
+      "after_mi": 124.0,
       "worsened_mi": 1.0
     },
     {
@@ -4385,17 +4196,8 @@
       "to": "winslow_az_us",
       "highway": "AZ-260",
       "miles": 153.0,
-      "before_mi": 126.5,
-      "after_mi": 127.5,
-      "worsened_mi": 1.0
-    },
-    {
-      "from": "williston_nd_us",
-      "to": "minot_nd_us",
-      "highway": "US-2",
-      "miles": 125.0,
-      "before_mi": 123.0,
-      "after_mi": 124.0,
+      "before_mi": 122.5,
+      "after_mi": 123.5,
       "worsened_mi": 1.0
     },
     {
@@ -4408,39 +4210,12 @@
       "worsened_mi": 1.0
     },
     {
-      "from": "wausau_wi_us",
-      "to": "madison_wi_us",
-      "highway": "I-39",
-      "miles": 145.0,
-      "before_mi": 115.0,
-      "after_mi": 116.0,
-      "worsened_mi": 1.0
-    },
-    {
-      "from": "scottsbluff_ne_us",
-      "to": "cheyenne_wy_us",
-      "highway": "US-85",
-      "miles": 115.0,
-      "before_mi": 113.0,
-      "after_mi": 114.0,
-      "worsened_mi": 1.0
-    },
-    {
-      "from": "missoula_mt_us",
-      "to": "helena_mt_us",
-      "highway": "US-12",
-      "miles": 113.0,
-      "before_mi": 112.0,
-      "after_mi": 113.0,
-      "worsened_mi": 1.0
-    },
-    {
-      "from": "moab_ut_us",
-      "to": "grand_junction_co_us",
-      "highway": "US-191",
-      "miles": 113.0,
-      "before_mi": 112.0,
-      "after_mi": 113.0,
+      "from": "wenatchee_wa_us",
+      "to": "everett_wa_us",
+      "highway": "I-90",
+      "miles": 169.0,
+      "before_mi": 113.5,
+      "after_mi": 114.5,
       "worsened_mi": 1.0
     },
     {
@@ -4462,12 +4237,21 @@
       "worsened_mi": 1.0
     },
     {
-      "from": "wenatchee_wa_us",
-      "to": "yakima_wa_us",
-      "highway": "US-97",
-      "miles": 107.0,
-      "before_mi": 106.0,
-      "after_mi": 107.0,
+      "from": "wausau_wi_us",
+      "to": "madison_wi_us",
+      "highway": "I-39",
+      "miles": 145.0,
+      "before_mi": 108.0,
+      "after_mi": 109.0,
+      "worsened_mi": 1.0
+    },
+    {
+      "from": "scottsbluff_ne_us",
+      "to": "cheyenne_wy_us",
+      "highway": "US-85",
+      "miles": 115.0,
+      "before_mi": 107.5,
+      "after_mi": 108.5,
       "worsened_mi": 1.0
     },
     {
@@ -4489,30 +4273,21 @@
       "worsened_mi": 1.0
     },
     {
+      "from": "moab_ut_us",
+      "to": "grand_junction_co_us",
+      "highway": "US-191",
+      "miles": 113.0,
+      "before_mi": 105.0,
+      "after_mi": 106.0,
+      "worsened_mi": 1.0
+    },
+    {
       "from": "aberdeen_sd_us",
       "to": "watertown_sd_us",
       "highway": "US-12",
       "miles": 105.0,
       "before_mi": 104.0,
       "after_mi": 105.0,
-      "worsened_mi": 1.0
-    },
-    {
-      "from": "dickinson_nd_us",
-      "to": "williston_nd_us",
-      "highway": "US-85",
-      "miles": 131.0,
-      "before_mi": 103.8,
-      "after_mi": 104.8,
-      "worsened_mi": 1.0
-    },
-    {
-      "from": "quincy_il_us",
-      "to": "springfield_il_us",
-      "highway": "I-72",
-      "miles": 105.0,
-      "before_mi": 103.0,
-      "after_mi": 104.0,
       "worsened_mi": 1.0
     },
     {
@@ -4525,21 +4300,21 @@
       "worsened_mi": 1.0
     },
     {
+      "from": "pierre_sd_us",
+      "to": "mitchell_sd_us",
+      "highway": "US-281",
+      "miles": 171.0,
+      "before_mi": 101.5,
+      "after_mi": 102.5,
+      "worsened_mi": 1.0
+    },
+    {
       "from": "shelby_mt_us",
       "to": "havre_mt_us",
       "highway": "US-2",
       "miles": 103.0,
       "before_mi": 101.0,
       "after_mi": 102.0,
-      "worsened_mi": 1.0
-    },
-    {
-      "from": "grand_junction_co_us",
-      "to": "green_river_ut_us",
-      "highway": "I-70",
-      "miles": 102.0,
-      "before_mi": 100.0,
-      "after_mi": 101.0,
       "worsened_mi": 1.0
     },
     {
@@ -4576,6 +4351,15 @@
       "miles": 95.0,
       "before_mi": 93.0,
       "after_mi": 94.0,
+      "worsened_mi": 1.0
+    },
+    {
+      "from": "san_angelo_tx_us",
+      "to": "del_rio_tx_us",
+      "highway": "US-277",
+      "miles": 157.0,
+      "before_mi": 90.5,
+      "after_mi": 91.5,
       "worsened_mi": 1.0
     },
     {
@@ -4696,12 +4480,30 @@
       "worsened_mi": 1.0
     },
     {
+      "from": "quincy_il_us",
+      "to": "springfield_il_us",
+      "highway": "I-72",
+      "miles": 105.0,
+      "before_mi": 70.0,
+      "after_mi": 71.0,
+      "worsened_mi": 1.0
+    },
+    {
       "from": "eureka_nv_us",
       "to": "austin_nv_us",
       "highway": "US-50",
       "miles": 70.0,
       "before_mi": 69.0,
       "after_mi": 70.0,
+      "worsened_mi": 1.0
+    },
+    {
+      "from": "wenatchee_wa_us",
+      "to": "yakima_wa_us",
+      "highway": "US-97",
+      "miles": 107.0,
+      "before_mi": 68.0,
+      "after_mi": 69.0,
       "worsened_mi": 1.0
     },
     {
@@ -4831,12 +4633,30 @@
       "worsened_mi": 1.0
     },
     {
+      "from": "sacramento_ca_us",
+      "to": "redding_ca_us",
+      "highway": "I-5",
+      "miles": 162.0,
+      "before_mi": 51.0,
+      "after_mi": 52.0,
+      "worsened_mi": 1.0
+    },
+    {
       "from": "pendleton_or_us",
       "to": "la_grande_or_us",
       "highway": "I-84",
       "miles": 52.0,
       "before_mi": 50.0,
       "after_mi": 51.0,
+      "worsened_mi": 1.0
+    },
+    {
+      "from": "savannah_ga_us",
+      "to": "florence_sc_us",
+      "highway": "I-95",
+      "miles": 176.0,
+      "before_mi": 49.3,
+      "after_mi": 50.3,
       "worsened_mi": 1.0
     },
     {
@@ -5092,12 +4912,12 @@
       "worsened_mi": 1.0
     },
     {
-      "from": "rapid_city_sd_us",
-      "to": "sioux_falls_sd_us",
-      "highway": "I-90",
-      "miles": 349.0,
-      "before_mi": 348.0,
-      "after_mi": 348.0,
+      "from": "lubbock_tx_us",
+      "to": "dallas_tx_us",
+      "highway": "US-82",
+      "miles": 324.0,
+      "before_mi": 323.0,
+      "after_mi": 323.0,
       "worsened_mi": 0.0
     },
     {
@@ -5105,26 +4925,8 @@
       "to": "salt_lake_city_ut_us",
       "highway": "I-15",
       "miles": 554.0,
-      "before_mi": 345.0,
-      "after_mi": 345.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "billings_mt_us",
-      "to": "fort_collins_co_us",
-      "highway": "I-25",
-      "miles": 497.0,
-      "before_mi": 334.1,
-      "after_mi": 334.1,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "lubbock_tx_us",
-      "to": "dallas_tx_us",
-      "highway": "US-82",
-      "miles": 324.0,
-      "before_mi": 323.0,
-      "after_mi": 323.0,
+      "before_mi": 304.0,
+      "after_mi": 304.0,
       "worsened_mi": 0.0
     },
     {
@@ -5137,21 +4939,12 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "spokane_wa_us",
-      "to": "boise_id_us",
-      "highway": "I-84",
-      "miles": 421.0,
-      "before_mi": 302.1,
-      "after_mi": 302.1,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "mitchell_sd_us",
-      "to": "rapid_city_sd_us",
-      "highway": "I-90",
-      "miles": 278.0,
-      "before_mi": 277.0,
-      "after_mi": 277.0,
+      "from": "billings_mt_us",
+      "to": "fort_collins_co_us",
+      "highway": "I-25",
+      "miles": 497.0,
+      "before_mi": 291.6,
+      "after_mi": 291.6,
       "worsened_mi": 0.0
     },
     {
@@ -5159,53 +4952,8 @@
       "to": "billings_mt_us",
       "highway": "I-25",
       "miles": 277.0,
-      "before_mi": 276.0,
-      "after_mi": 276.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "rapid_city_sd_us",
-      "to": "billings_mt_us",
-      "highway": "US-212",
-      "miles": 322.0,
-      "before_mi": 274.4,
-      "after_mi": 274.4,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "duluth_mn_us",
-      "to": "fargo_nd_us",
-      "highway": "US-10",
-      "miles": 256.0,
-      "before_mi": 256.0,
-      "after_mi": 256.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "las_cruces_nm_us",
-      "to": "midland_tx_us",
-      "highway": "I-10",
-      "miles": 350.0,
-      "before_mi": 248.7,
-      "after_mi": 248.7,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "kansas_city_mo_us",
-      "to": "denver_co_us",
-      "highway": "I-70",
-      "miles": 603.0,
-      "before_mi": 248.0,
-      "after_mi": 248.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "elko_nv_us",
-      "to": "boise_id_us",
-      "highway": "I-84",
-      "miles": 293.0,
-      "before_mi": 244.6,
-      "after_mi": 244.6,
+      "before_mi": 271.5,
+      "after_mi": 271.5,
       "worsened_mi": 0.0
     },
     {
@@ -5213,8 +4961,8 @@
       "to": "tonopah_nv_us",
       "highway": "US-95",
       "miles": 233.0,
-      "before_mi": 232.0,
-      "after_mi": 232.0,
+      "before_mi": 225.0,
+      "after_mi": 225.0,
       "worsened_mi": 0.0
     },
     {
@@ -5222,35 +4970,17 @@
       "to": "salt_lake_city_ut_us",
       "highway": "US-40",
       "miles": 490.0,
-      "before_mi": 229.0,
-      "after_mi": 229.0,
+      "before_mi": 220.0,
+      "after_mi": 220.0,
       "worsened_mi": 0.0
     },
     {
-      "from": "bangor_me_us",
-      "to": "manchester_nh_us",
-      "highway": "I-95",
-      "miles": 228.0,
-      "before_mi": 228.0,
-      "after_mi": 228.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "san_francisco_ca_us",
-      "to": "salt_lake_city_ut_us",
-      "highway": "I-80",
-      "miles": 737.0,
-      "before_mi": 217.2,
-      "after_mi": 217.2,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "atlanta_ga_us",
-      "to": "dallas_tx_us",
-      "highway": "I-20",
-      "miles": 783.0,
-      "before_mi": 212.8,
-      "after_mi": 212.8,
+      "from": "rapid_city_sd_us",
+      "to": "billings_mt_us",
+      "highway": "US-212",
+      "miles": 322.0,
+      "before_mi": 218.4,
+      "after_mi": 218.4,
       "worsened_mi": 0.0
     },
     {
@@ -5263,105 +4993,6 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "charleston_wv_us",
-      "to": "richmond_va_us",
-      "highway": "I-64",
-      "miles": 317.0,
-      "before_mi": 206.3,
-      "after_mi": 206.3,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "provo_ut_us",
-      "to": "fort_collins_co_us",
-      "highway": "I-80",
-      "miles": 471.0,
-      "before_mi": 202.7,
-      "after_mi": 202.7,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "portland_or_us",
-      "to": "salt_lake_city_ut_us",
-      "highway": "I-84",
-      "miles": 767.0,
-      "before_mi": 201.8,
-      "after_mi": 201.8,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "rock_springs_wy_us",
-      "to": "cheyenne_wy_us",
-      "highway": "I-80",
-      "miles": 258.0,
-      "before_mi": 199.7,
-      "after_mi": 199.7,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "kingman_az_us",
-      "to": "barstow_ca_us",
-      "highway": "I-40",
-      "miles": 205.0,
-      "before_mi": 199.0,
-      "after_mi": 199.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "sacramento_ca_us",
-      "to": "portland_or_us",
-      "highway": "I-5",
-      "miles": 578.0,
-      "before_mi": 190.7,
-      "after_mi": 190.7,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "albuquerque_nm_us",
-      "to": "phoenix_az_us",
-      "highway": "I-40",
-      "miles": 455.0,
-      "before_mi": 190.2,
-      "after_mi": 190.2,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "charleston_wv_us",
-      "to": "pittsburgh_pa_us",
-      "highway": "I-79",
-      "miles": 219.0,
-      "before_mi": 187.7,
-      "after_mi": 187.7,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "yuma_az_us",
-      "to": "phoenix_az_us",
-      "highway": "I-8",
-      "miles": 186.0,
-      "before_mi": 185.0,
-      "after_mi": 185.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "tonopah_nv_us",
-      "to": "las_vegas_nv_us",
-      "highway": "US-95",
-      "miles": 211.0,
-      "before_mi": 184.7,
-      "after_mi": 184.7,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "fargo_nd_us",
-      "to": "minneapolis_mn_us",
-      "highway": "I-94",
-      "miles": 235.0,
-      "before_mi": 182.8,
-      "after_mi": 182.8,
-      "worsened_mi": 0.0
-    },
-    {
       "from": "butte_mt_us",
       "to": "idaho_falls_id_us",
       "highway": "I-15",
@@ -5371,10 +5002,19 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "cheyenne_wy_us",
-      "to": "casper_wy_us",
-      "highway": "I-25",
-      "miles": 178.0,
+      "from": "tonopah_nv_us",
+      "to": "las_vegas_nv_us",
+      "highway": "US-95",
+      "miles": 211.0,
+      "before_mi": 182.2,
+      "after_mi": 182.2,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "sacramento_ca_us",
+      "to": "portland_or_us",
+      "highway": "I-5",
+      "miles": 578.0,
       "before_mi": 177.0,
       "after_mi": 177.0,
       "worsened_mi": 0.0
@@ -5389,48 +5029,30 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "dallas_tx_us",
-      "to": "albuquerque_nm_us",
-      "highway": "US-287",
-      "miles": 646.0,
-      "before_mi": 176.0,
-      "after_mi": 176.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "harrisburg_pa_us",
-      "to": "pittsburgh_pa_us",
-      "highway": "I-76",
-      "miles": 205.0,
-      "before_mi": 175.8,
-      "after_mi": 175.8,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "missoula_mt_us",
-      "to": "billings_mt_us",
-      "highway": "I-90",
-      "miles": 343.0,
-      "before_mi": 174.9,
-      "after_mi": 174.9,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "san_francisco_ca_us",
-      "to": "portland_or_us",
-      "highway": "I-5",
-      "miles": 633.0,
-      "before_mi": 171.2,
-      "after_mi": 171.2,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "albuquerque_nm_us",
-      "to": "tucumcari_nm_us",
+      "from": "kingman_az_us",
+      "to": "barstow_ca_us",
       "highway": "I-40",
-      "miles": 176.0,
-      "before_mi": 171.0,
-      "after_mi": 171.0,
+      "miles": 205.0,
+      "before_mi": 175.5,
+      "after_mi": 175.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "cheyenne_wy_us",
+      "to": "casper_wy_us",
+      "highway": "I-25",
+      "miles": 178.0,
+      "before_mi": 174.5,
+      "after_mi": 174.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "yuma_az_us",
+      "to": "phoenix_az_us",
+      "highway": "I-8",
+      "miles": 186.0,
+      "before_mi": 172.5,
+      "after_mi": 172.5,
       "worsened_mi": 0.0
     },
     {
@@ -5443,28 +5065,10 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "visalia_ca_us",
-      "to": "santa_maria_ca_us",
-      "highway": "CA-41",
-      "miles": 167.0,
-      "before_mi": 167.0,
-      "after_mi": 167.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "rochester_ny_us",
-      "to": "new_york_ny_us",
-      "highway": "I-90",
-      "miles": 333.0,
-      "before_mi": 166.5,
-      "after_mi": 166.5,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "topeka_ks_us",
-      "to": "lincoln_ne_us",
-      "highway": "US-75",
-      "miles": 167.0,
+      "from": "fargo_nd_us",
+      "to": "minneapolis_mn_us",
+      "highway": "I-94",
+      "miles": 235.0,
       "before_mi": 166.0,
       "after_mi": 166.0,
       "worsened_mi": 0.0
@@ -5479,21 +5083,30 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "idaho_falls_id_us",
-      "to": "twin_falls_id_us",
-      "highway": "I-86",
-      "miles": 164.0,
-      "before_mi": 164.0,
-      "after_mi": 164.0,
-      "worsened_mi": 0.0
-    },
-    {
       "from": "beaumont_tx_us",
       "to": "college_station_tx_us",
       "highway": "TX-99",
       "miles": 165.0,
       "before_mi": 164.0,
       "after_mi": 164.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "provo_ut_us",
+      "to": "fort_collins_co_us",
+      "highway": "I-80",
+      "miles": 471.0,
+      "before_mi": 163.0,
+      "after_mi": 163.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "missoula_mt_us",
+      "to": "billings_mt_us",
+      "highway": "I-90",
+      "miles": 343.0,
+      "before_mi": 162.4,
+      "after_mi": 162.4,
       "worsened_mi": 0.0
     },
     {
@@ -5515,66 +5128,21 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "carlsbad_nm_us",
-      "to": "odessa_tx_us",
-      "highway": "US-285",
-      "miles": 162.0,
-      "before_mi": 160.0,
-      "after_mi": 160.0,
+      "from": "visalia_ca_us",
+      "to": "santa_maria_ca_us",
+      "highway": "CA-41",
+      "miles": 167.0,
+      "before_mi": 159.5,
+      "after_mi": 159.5,
       "worsened_mi": 0.0
     },
     {
-      "from": "memphis_tn_us",
-      "to": "nashville_tn_us",
-      "highway": "I-40",
-      "miles": 212.0,
-      "before_mi": 159.0,
-      "after_mi": 159.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "provo_ut_us",
-      "to": "boise_id_us",
-      "highway": "I-84",
-      "miles": 384.0,
-      "before_mi": 159.0,
-      "after_mi": 159.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "burlington_vt_us",
-      "to": "albany_ny_us",
-      "highway": "I-87",
-      "miles": 158.0,
-      "before_mi": 158.0,
-      "after_mi": 158.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "tampa_fl_us",
-      "to": "miami_fl_us",
-      "highway": "I-75",
-      "miles": 265.0,
-      "before_mi": 157.3,
-      "after_mi": 157.3,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "san_antonio_tx_us",
-      "to": "dallas_tx_us",
-      "highway": "I-35",
-      "miles": 274.0,
-      "before_mi": 156.9,
-      "after_mi": 156.9,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "pocatello_id_us",
-      "to": "provo_ut_us",
-      "highway": "I-15",
-      "miles": 209.0,
-      "before_mi": 155.8,
-      "after_mi": 155.8,
+      "from": "san_francisco_ca_us",
+      "to": "salt_lake_city_ut_us",
+      "highway": "I-80",
+      "miles": 737.0,
+      "before_mi": 157.6,
+      "after_mi": 157.6,
       "worsened_mi": 0.0
     },
     {
@@ -5582,33 +5150,6 @@
       "to": "boise_id_us",
       "highway": "I-84",
       "miles": 280.0,
-      "before_mi": 155.5,
-      "after_mi": 155.5,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "charleston_wv_us",
-      "to": "roanoke_va_us",
-      "highway": "I-64",
-      "miles": 181.0,
-      "before_mi": 155.1,
-      "after_mi": 155.1,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "barstow_ca_us",
-      "to": "las_vegas_nv_us",
-      "highway": "I-15",
-      "miles": 156.0,
-      "before_mi": 152.0,
-      "after_mi": 152.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "savannah_ga_us",
-      "to": "atlanta_ga_us",
-      "highway": "I-16",
-      "miles": 248.0,
       "before_mi": 151.0,
       "after_mi": 151.0,
       "worsened_mi": 0.0
@@ -5623,12 +5164,21 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "omaha_ne_us",
-      "to": "cheyenne_wy_us",
-      "highway": "I-80",
-      "miles": 497.0,
-      "before_mi": 148.8,
-      "after_mi": 148.8,
+      "from": "portland_or_us",
+      "to": "salt_lake_city_ut_us",
+      "highway": "I-84",
+      "miles": 767.0,
+      "before_mi": 150.8,
+      "after_mi": 150.8,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "kansas_city_mo_us",
+      "to": "denver_co_us",
+      "highway": "I-70",
+      "miles": 603.0,
+      "before_mi": 149.7,
+      "after_mi": 149.7,
       "worsened_mi": 0.0
     },
     {
@@ -5641,39 +5191,30 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "corpus_christi_tx_us",
-      "to": "mcallen_tx_us",
-      "highway": "US-281",
-      "miles": 160.0,
-      "before_mi": 148.5,
-      "after_mi": 148.5,
+      "from": "charleston_wv_us",
+      "to": "richmond_va_us",
+      "highway": "I-64",
+      "miles": 317.0,
+      "before_mi": 147.0,
+      "after_mi": 147.0,
       "worsened_mi": 0.0
     },
     {
-      "from": "flagstaff_az_us",
-      "to": "kingman_az_us",
-      "highway": "I-40",
-      "miles": 151.0,
+      "from": "spokane_wa_us",
+      "to": "boise_id_us",
+      "highway": "I-84",
+      "miles": 421.0,
       "before_mi": 146.0,
       "after_mi": 146.0,
       "worsened_mi": 0.0
     },
     {
-      "from": "las_vegas_nv_us",
-      "to": "phoenix_az_us",
-      "highway": "US-93",
-      "miles": 292.0,
-      "before_mi": 145.6,
-      "after_mi": 145.6,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "reno_nv_us",
-      "to": "las_vegas_nv_us",
-      "highway": "US-95",
-      "miles": 444.0,
-      "before_mi": 145.2,
-      "after_mi": 145.2,
+      "from": "topeka_ks_us",
+      "to": "lincoln_ne_us",
+      "highway": "US-75",
+      "miles": 167.0,
+      "before_mi": 145.5,
+      "after_mi": 145.5,
       "worsened_mi": 0.0
     },
     {
@@ -5686,12 +5227,21 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "phoenix_az_us",
-      "to": "los_angeles_ca_us",
-      "highway": "I-10",
-      "miles": 372.0,
-      "before_mi": 144.6,
-      "after_mi": 144.6,
+      "from": "albuquerque_nm_us",
+      "to": "phoenix_az_us",
+      "highway": "I-40",
+      "miles": 455.0,
+      "before_mi": 145.0,
+      "after_mi": 145.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "charleston_wv_us",
+      "to": "roanoke_va_us",
+      "highway": "I-64",
+      "miles": 181.0,
+      "before_mi": 144.1,
+      "after_mi": 144.1,
       "worsened_mi": 0.0
     },
     {
@@ -5704,60 +5254,6 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "pocatello_id_us",
-      "to": "salt_lake_city_ut_us",
-      "highway": "I-15",
-      "miles": 165.0,
-      "before_mi": 143.0,
-      "after_mi": 143.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "cheyenne_wy_us",
-      "to": "salt_lake_city_ut_us",
-      "highway": "I-80",
-      "miles": 441.0,
-      "before_mi": 142.8,
-      "after_mi": 142.8,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "eugene_or_us",
-      "to": "tri_cities_wa_us",
-      "highway": "I-84",
-      "miles": 327.0,
-      "before_mi": 142.6,
-      "after_mi": 142.6,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "meridian_ms_us",
-      "to": "tupelo_ms_us",
-      "highway": "US-45",
-      "miles": 142.0,
-      "before_mi": 141.0,
-      "after_mi": 141.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "moses_lake_wa_us",
-      "to": "seattle_wa_us",
-      "highway": "I-90",
-      "miles": 177.0,
-      "before_mi": 140.6,
-      "after_mi": 140.6,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "clarksville_tn_us",
-      "to": "louisville_ky_us",
-      "highway": "I-65",
-      "miles": 195.0,
-      "before_mi": 140.5,
-      "after_mi": 140.5,
-      "worsened_mi": 0.0
-    },
-    {
       "from": "traverse_city_mi_us",
       "to": "grand_rapids_mi_us",
       "highway": "US-131",
@@ -5767,12 +5263,21 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "burlington_co_us",
-      "to": "denver_co_us",
-      "highway": "I-70",
-      "miles": 167.0,
-      "before_mi": 138.1,
-      "after_mi": 138.1,
+      "from": "mitchell_sd_us",
+      "to": "rapid_city_sd_us",
+      "highway": "I-90",
+      "miles": 278.0,
+      "before_mi": 140.0,
+      "after_mi": 140.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "charleston_wv_us",
+      "to": "pittsburgh_pa_us",
+      "highway": "I-79",
+      "miles": 219.0,
+      "before_mi": 138.7,
+      "after_mi": 138.7,
       "worsened_mi": 0.0
     },
     {
@@ -5803,48 +5308,12 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "binghamton_ny_us",
-      "to": "albany_ny_us",
-      "highway": "I-88",
-      "miles": 138.0,
-      "before_mi": 137.0,
-      "after_mi": 137.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "los_angeles_ca_us",
-      "to": "san_francisco_ca_us",
-      "highway": "I-5",
-      "miles": 384.0,
-      "before_mi": 134.7,
-      "after_mi": 134.7,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "columbia_sc_us",
-      "to": "savannah_ga_us",
-      "highway": "US-321",
-      "miles": 147.0,
-      "before_mi": 131.9,
-      "after_mi": 131.9,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "kansas_city_mo_us",
-      "to": "joplin_mo_us",
-      "highway": "I-49",
-      "miles": 157.0,
-      "before_mi": 130.8,
-      "after_mi": 130.8,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "colorado_springs_co_us",
+      "from": "dallas_tx_us",
       "to": "albuquerque_nm_us",
-      "highway": "I-25",
-      "miles": 378.0,
-      "before_mi": 130.7,
-      "after_mi": 130.7,
+      "highway": "US-287",
+      "miles": 646.0,
+      "before_mi": 133.5,
+      "after_mi": 133.5,
       "worsened_mi": 0.0
     },
     {
@@ -5857,48 +5326,12 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "birmingham_al_us",
-      "to": "new_orleans_la_us",
-      "highway": "I-59",
-      "miles": 343.0,
-      "before_mi": 130.1,
-      "after_mi": 130.1,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "laredo_tx_us",
-      "to": "san_antonio_tx_us",
-      "highway": "I-35",
-      "miles": 156.0,
-      "before_mi": 130.0,
-      "after_mi": 130.0,
-      "worsened_mi": 0.0
-    },
-    {
       "from": "montpelier_vt_us",
       "to": "manchester_nh_us",
       "highway": "I-89",
       "miles": 130.0,
       "before_mi": 130.0,
       "after_mi": 130.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "buffalo_ny_us",
-      "to": "new_york_ny_us",
-      "highway": "I-90",
-      "miles": 396.0,
-      "before_mi": 129.9,
-      "after_mi": 129.9,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "jacksonville_fl_us",
-      "to": "miami_fl_us",
-      "highway": "I-95",
-      "miles": 346.0,
-      "before_mi": 129.3,
-      "after_mi": 129.3,
       "worsened_mi": 0.0
     },
     {
@@ -5911,15 +5344,6 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "bangor_me_us",
-      "to": "portland_me_us",
-      "highway": "I-95",
-      "miles": 129.0,
-      "before_mi": 129.0,
-      "after_mi": 129.0,
-      "worsened_mi": 0.0
-    },
-    {
       "from": "casper_wy_us",
       "to": "gillette_wy_us",
       "highway": "WY-59",
@@ -5929,75 +5353,30 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "green_bay_wi_us",
-      "to": "grand_rapids_mi_us",
-      "highway": "I-94",
-      "miles": 382.0,
-      "before_mi": 128.7,
-      "after_mi": 128.7,
+      "from": "rapid_city_sd_us",
+      "to": "sioux_falls_sd_us",
+      "highway": "I-90",
+      "miles": 349.0,
+      "before_mi": 127.5,
+      "after_mi": 127.5,
       "worsened_mi": 0.0
     },
     {
-      "from": "twin_falls_id_us",
-      "to": "boise_id_us",
-      "highway": "I-84",
-      "miles": 128.0,
-      "before_mi": 127.0,
-      "after_mi": 127.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "grand_rapids_mi_us",
-      "to": "chicago_il_us",
-      "highway": "I-196",
-      "miles": 180.0,
-      "before_mi": 126.5,
-      "after_mi": 126.5,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "detroit_mi_us",
-      "to": "cleveland_oh_us",
-      "highway": "I-75",
-      "miles": 168.0,
-      "before_mi": 126.0,
-      "after_mi": 126.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "abilene_tx_us",
-      "to": "fort_worth_tx_us",
-      "highway": "I-20",
-      "miles": 151.0,
-      "before_mi": 125.9,
-      "after_mi": 125.9,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "amarillo_tx_us",
-      "to": "dallas_tx_us",
-      "highway": "US-287",
-      "miles": 362.0,
-      "before_mi": 125.9,
-      "after_mi": 125.9,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "dallas_tx_us",
-      "to": "st_louis_mo_us",
-      "highway": "I-44",
-      "miles": 664.0,
-      "before_mi": 125.8,
-      "after_mi": 125.8,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "savannah_ga_us",
-      "to": "florence_sc_us",
+      "from": "bangor_me_us",
+      "to": "manchester_nh_us",
       "highway": "I-95",
-      "miles": 176.0,
-      "before_mi": 124.7,
-      "after_mi": 124.7,
+      "miles": 228.0,
+      "before_mi": 125.5,
+      "after_mi": 125.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "columbia_sc_us",
+      "to": "savannah_ga_us",
+      "highway": "US-321",
+      "miles": 147.0,
+      "before_mi": 125.4,
+      "after_mi": 125.4,
       "worsened_mi": 0.0
     },
     {
@@ -6010,21 +5389,12 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "san_jose_ca_us",
-      "to": "fresno_ca_us",
-      "highway": "CA-152",
-      "miles": 150.0,
-      "before_mi": 124.0,
-      "after_mi": 124.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "santa_maria_ca_us",
-      "to": "valencia_ca_us",
-      "highway": "CA-166",
-      "miles": 155.0,
-      "before_mi": 124.0,
-      "after_mi": 124.0,
+      "from": "jacksonville_fl_us",
+      "to": "miami_fl_us",
+      "highway": "I-95",
+      "miles": 346.0,
+      "before_mi": 123.0,
+      "after_mi": 123.0,
       "worsened_mi": 0.0
     },
     {
@@ -6037,39 +5407,30 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "west_palm_beach_fl_us",
-      "to": "cape_coral_fl_us",
-      "highway": "I-75",
+      "from": "binghamton_ny_us",
+      "to": "albany_ny_us",
+      "highway": "I-88",
       "miles": 138.0,
       "before_mi": 122.0,
       "after_mi": 122.0,
       "worsened_mi": 0.0
     },
     {
-      "from": "augusta_ga_us",
-      "to": "macon_ga_us",
-      "highway": "GA-540",
-      "miles": 123.0,
-      "before_mi": 122.0,
-      "after_mi": 122.0,
+      "from": "atlanta_ga_us",
+      "to": "dallas_tx_us",
+      "highway": "I-20",
+      "miles": 783.0,
+      "before_mi": 121.5,
+      "after_mi": 121.5,
       "worsened_mi": 0.0
     },
     {
-      "from": "astoria_or_us",
-      "to": "olympia_wa_us",
-      "highway": "US-101",
-      "miles": 122.0,
-      "before_mi": 122.0,
-      "after_mi": 122.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "allentown_pa_us",
-      "to": "bridgeport_ct_us",
-      "highway": "I-78",
-      "miles": 157.0,
-      "before_mi": 121.1,
-      "after_mi": 121.1,
+      "from": "harrisburg_pa_us",
+      "to": "pittsburgh_pa_us",
+      "highway": "I-76",
+      "miles": 205.0,
+      "before_mi": 121.5,
+      "after_mi": 121.5,
       "worsened_mi": 0.0
     },
     {
@@ -6082,48 +5443,12 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "greenville_sc_us",
-      "to": "atlanta_ga_us",
-      "highway": "I-85",
-      "miles": 145.0,
-      "before_mi": 120.9,
-      "after_mi": 120.9,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "detroit_mi_us",
-      "to": "chicago_il_us",
-      "highway": "I-94",
-      "miles": 285.0,
-      "before_mi": 120.1,
-      "after_mi": 120.1,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "pocatello_id_us",
-      "to": "twin_falls_id_us",
-      "highway": "I-86",
-      "miles": 120.0,
-      "before_mi": 119.0,
-      "after_mi": 119.0,
-      "worsened_mi": 0.0
-    },
-    {
       "from": "seattle_wa_us",
       "to": "wenatchee_wa_us",
       "highway": "US-2",
       "miles": 148.0,
       "before_mi": 118.4,
       "after_mi": 118.4,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "cape_coral_fl_us",
-      "to": "lakeland_fl_us",
-      "highway": "I-75",
-      "miles": 118.0,
-      "before_mi": 118.0,
-      "after_mi": 118.0,
       "worsened_mi": 0.0
     },
     {
@@ -6154,48 +5479,30 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "baltimore_md_us",
-      "to": "richmond_va_us",
-      "highway": "I-95",
-      "miles": 154.0,
-      "before_mi": 117.2,
-      "after_mi": 117.2,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "midland_tx_us",
-      "to": "amarillo_tx_us",
-      "highway": "I-27",
-      "miles": 240.0,
-      "before_mi": 117.2,
-      "after_mi": 117.2,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "missoula_mt_us",
-      "to": "butte_mt_us",
-      "highway": "I-90",
-      "miles": 118.0,
-      "before_mi": 117.0,
-      "after_mi": 117.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "el_paso_tx_us",
-      "to": "van_horn_tx_us",
-      "highway": "I-10",
-      "miles": 121.0,
-      "before_mi": 117.0,
-      "after_mi": 117.0,
-      "worsened_mi": 0.0
-    },
-    {
       "from": "fort_stockton_tx_us",
       "to": "van_horn_tx_us",
       "highway": "I-10",
       "miles": 119.0,
       "before_mi": 117.0,
       "after_mi": 117.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "allentown_pa_us",
+      "to": "bridgeport_ct_us",
+      "highway": "I-78",
+      "miles": 157.0,
+      "before_mi": 116.6,
+      "after_mi": 116.6,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "idaho_falls_id_us",
+      "to": "twin_falls_id_us",
+      "highway": "I-86",
+      "miles": 164.0,
+      "before_mi": 116.5,
+      "after_mi": 116.5,
       "worsened_mi": 0.0
     },
     {
@@ -6217,15 +5524,6 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "syracuse_ny_us",
-      "to": "albany_ny_us",
-      "highway": "I-90",
-      "miles": 145.0,
-      "before_mi": 116.0,
-      "after_mi": 116.0,
-      "worsened_mi": 0.0
-    },
-    {
       "from": "midland_tx_us",
       "to": "lubbock_tx_us",
       "highway": "US-87",
@@ -6235,21 +5533,21 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "baton_rouge_la_us",
-      "to": "shreveport_la_us",
-      "highway": "I-49",
-      "miles": 235.0,
-      "before_mi": 115.7,
-      "after_mi": 115.7,
+      "from": "reno_nv_us",
+      "to": "las_vegas_nv_us",
+      "highway": "US-95",
+      "miles": 444.0,
+      "before_mi": 115.8,
+      "after_mi": 115.8,
       "worsened_mi": 0.0
     },
     {
-      "from": "twin_falls_id_us",
-      "to": "elko_nv_us",
-      "highway": "I-80",
-      "miles": 166.0,
-      "before_mi": 115.3,
-      "after_mi": 115.3,
+      "from": "san_francisco_ca_us",
+      "to": "portland_or_us",
+      "highway": "I-5",
+      "miles": 633.0,
+      "before_mi": 115.5,
+      "after_mi": 115.5,
       "worsened_mi": 0.0
     },
     {
@@ -6262,39 +5560,12 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "los_angeles_ca_us",
-      "to": "fresno_ca_us",
-      "highway": "CA-99",
-      "miles": 220.0,
-      "before_mi": 115.0,
-      "after_mi": 115.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "las_vegas_nv_us",
-      "to": "los_angeles_ca_us",
-      "highway": "I-15",
-      "miles": 270.0,
-      "before_mi": 115.0,
-      "after_mi": 115.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "las_cruces_nm_us",
-      "to": "tucson_az_us",
-      "highway": "I-10",
-      "miles": 275.0,
-      "before_mi": 114.9,
-      "after_mi": 114.9,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "port_saint_lucie_fl_us",
-      "to": "miami_fl_us",
-      "highway": "I-95",
-      "miles": 115.0,
-      "before_mi": 114.0,
-      "after_mi": 114.0,
+      "from": "grand_rapids_mi_us",
+      "to": "chicago_il_us",
+      "highway": "I-196",
+      "miles": 180.0,
+      "before_mi": 114.2,
+      "after_mi": 114.2,
       "worsened_mi": 0.0
     },
     {
@@ -6307,39 +5578,12 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "yakima_wa_us",
-      "to": "seattle_wa_us",
-      "highway": "I-90",
-      "miles": 142.0,
-      "before_mi": 113.6,
-      "after_mi": 113.6,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "houston_tx_us",
-      "to": "lake_charles_la_us",
-      "highway": "I-10",
-      "miles": 143.0,
-      "before_mi": 113.4,
-      "after_mi": 113.4,
-      "worsened_mi": 0.0
-    },
-    {
       "from": "great_falls_mt_us",
       "to": "havre_mt_us",
       "highway": "US-87",
       "miles": 114.0,
       "before_mi": 113.0,
       "after_mi": 113.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "salinas_ca_us",
-      "to": "fresno_ca_us",
-      "highway": "CA-156",
-      "miles": 141.0,
-      "before_mi": 112.8,
-      "after_mi": 112.8,
       "worsened_mi": 0.0
     },
     {
@@ -6352,10 +5596,28 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "kalamazoo_mi_us",
-      "to": "detroit_mi_us",
-      "highway": "I-94",
-      "miles": 140.0,
+      "from": "missoula_mt_us",
+      "to": "butte_mt_us",
+      "highway": "I-90",
+      "miles": 118.0,
+      "before_mi": 112.5,
+      "after_mi": 112.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "midland_tx_us",
+      "to": "amarillo_tx_us",
+      "highway": "I-27",
+      "miles": 240.0,
+      "before_mi": 112.5,
+      "after_mi": 112.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "las_vegas_nv_us",
+      "to": "los_angeles_ca_us",
+      "highway": "I-15",
+      "miles": 270.0,
       "before_mi": 112.0,
       "after_mi": 112.0,
       "worsened_mi": 0.0
@@ -6388,28 +5650,10 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "boise_id_us",
-      "to": "portland_or_us",
-      "highway": "I-84",
-      "miles": 430.0,
-      "before_mi": 110.7,
-      "after_mi": 110.7,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "st_louis_mo_us",
-      "to": "kansas_city_mo_us",
-      "highway": "I-70",
-      "miles": 248.0,
-      "before_mi": 110.6,
-      "after_mi": 110.6,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "fort_collins_co_us",
-      "to": "colorado_springs_co_us",
-      "highway": "I-25",
-      "miles": 133.0,
+      "from": "tampa_fl_us",
+      "to": "miami_fl_us",
+      "highway": "I-75",
+      "miles": 265.0,
       "before_mi": 109.5,
       "after_mi": 109.5,
       "worsened_mi": 0.0
@@ -6424,21 +5668,30 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "boise_id_us",
-      "to": "salt_lake_city_ut_us",
-      "highway": "I-84",
-      "miles": 341.0,
-      "before_mi": 109.2,
-      "after_mi": 109.2,
+      "from": "burlington_vt_us",
+      "to": "albany_ny_us",
+      "highway": "I-87",
+      "miles": 158.0,
+      "before_mi": 109.0,
+      "after_mi": 109.0,
       "worsened_mi": 0.0
     },
     {
-      "from": "big_spring_tx_us",
-      "to": "abilene_tx_us",
-      "highway": "I-20",
-      "miles": 110.0,
-      "before_mi": 109.0,
-      "after_mi": 109.0,
+      "from": "las_vegas_nv_us",
+      "to": "phoenix_az_us",
+      "highway": "US-93",
+      "miles": 292.0,
+      "before_mi": 108.6,
+      "after_mi": 108.6,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "little_rock_ar_us",
+      "to": "texarkana_ar_us",
+      "highway": "I-30",
+      "miles": 144.0,
+      "before_mi": 108.0,
+      "after_mi": 108.0,
       "worsened_mi": 0.0
     },
     {
@@ -6451,10 +5704,10 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "portland_me_us",
-      "to": "boston_ma_us",
-      "highway": "I-95",
-      "miles": 108.0,
+      "from": "missoula_mt_us",
+      "to": "helena_mt_us",
+      "highway": "US-12",
+      "miles": 113.0,
       "before_mi": 108.0,
       "after_mi": 108.0,
       "worsened_mi": 0.0
@@ -6469,93 +5722,30 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "tucumcari_nm_us",
-      "to": "amarillo_tx_us",
-      "highway": "I-40",
-      "miles": 114.0,
-      "before_mi": 108.0,
-      "after_mi": 108.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "pittsburgh_pa_us",
-      "to": "carlisle_pa_us",
-      "highway": "I-76",
-      "miles": 189.0,
-      "before_mi": 108.0,
-      "after_mi": 108.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "spokane_wa_us",
-      "to": "seattle_wa_us",
-      "highway": "I-90",
-      "miles": 279.0,
-      "before_mi": 108.0,
-      "after_mi": 108.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "salt_lake_city_ut_us",
+      "from": "barstow_ca_us",
       "to": "las_vegas_nv_us",
       "highway": "I-15",
-      "miles": 420.0,
-      "before_mi": 107.8,
-      "after_mi": 107.8,
+      "miles": 156.0,
+      "before_mi": 107.5,
+      "after_mi": 107.5,
       "worsened_mi": 0.0
     },
     {
-      "from": "provo_ut_us",
-      "to": "las_vegas_nv_us",
-      "highway": "I-15",
-      "miles": 377.0,
-      "before_mi": 107.7,
-      "after_mi": 107.7,
+      "from": "santa_maria_ca_us",
+      "to": "valencia_ca_us",
+      "highway": "CA-166",
+      "miles": 155.0,
+      "before_mi": 107.5,
+      "after_mi": 107.5,
       "worsened_mi": 0.0
     },
     {
-      "from": "idaho_falls_id_us",
-      "to": "salt_lake_city_ut_us",
-      "highway": "I-15",
-      "miles": 214.0,
+      "from": "augusta_ga_us",
+      "to": "macon_ga_us",
+      "highway": "GA-540",
+      "miles": 123.0,
       "before_mi": 107.0,
       "after_mi": 107.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "lafayette_la_us",
-      "to": "new_orleans_la_us",
-      "highway": "I-10",
-      "miles": 135.0,
-      "before_mi": 107.0,
-      "after_mi": 107.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "mckinney_tx_us",
-      "to": "tyler_tx_us",
-      "highway": "US-69",
-      "miles": 108.0,
-      "before_mi": 107.0,
-      "after_mi": 107.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "jackson_ms_us",
-      "to": "new_orleans_la_us",
-      "highway": "I-55",
-      "miles": 186.0,
-      "before_mi": 106.3,
-      "after_mi": 106.3,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "tuscaloosa_al_us",
-      "to": "montgomery_al_us",
-      "highway": "US-82",
-      "miles": 106.0,
-      "before_mi": 106.0,
-      "after_mi": 106.0,
       "worsened_mi": 0.0
     },
     {
@@ -6568,30 +5758,12 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "fort_wayne_in_us",
-      "to": "gary_in_us",
-      "highway": "US-30",
-      "miles": 133.0,
-      "before_mi": 105.4,
-      "after_mi": 105.4,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "new_orleans_la_us",
-      "to": "houston_tx_us",
-      "highway": "I-10",
-      "miles": 348.0,
-      "before_mi": 105.3,
-      "after_mi": 105.3,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "indianapolis_in_us",
-      "to": "nashville_tn_us",
-      "highway": "I-65",
-      "miles": 287.0,
-      "before_mi": 104.8,
-      "after_mi": 104.8,
+      "from": "wichita_ks_us",
+      "to": "tulsa_ok_us",
+      "highway": "US-400",
+      "miles": 176.0,
+      "before_mi": 106.0,
+      "after_mi": 106.0,
       "worsened_mi": 0.0
     },
     {
@@ -6604,66 +5776,12 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "lafayette_la_us",
-      "to": "beaumont_tx_us",
-      "highway": "I-10",
-      "miles": 132.0,
-      "before_mi": 104.6,
-      "after_mi": 104.6,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "ann_arbor_mi_us",
-      "to": "fort_wayne_in_us",
-      "highway": "I-69",
-      "miles": 146.0,
-      "before_mi": 104.6,
-      "after_mi": 104.6,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "rock_springs_wy_us",
-      "to": "salt_lake_city_ut_us",
-      "highway": "I-80",
-      "miles": 184.0,
-      "before_mi": 104.1,
-      "after_mi": 104.1,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "kingman_az_us",
-      "to": "las_vegas_nv_us",
-      "highway": "US-93",
-      "miles": 107.0,
-      "before_mi": 104.0,
-      "after_mi": 104.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "newport_ri_us",
-      "to": "new_haven_ct_us",
-      "highway": "I-95",
-      "miles": 104.0,
-      "before_mi": 104.0,
-      "after_mi": 104.0,
-      "worsened_mi": 0.0
-    },
-    {
       "from": "fernley_nv_us",
       "to": "winnemucca_nv_us",
       "highway": "I-80",
       "miles": 131.0,
       "before_mi": 103.8,
       "after_mi": 103.8,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "san_diego_ca_us",
-      "to": "phoenix_az_us",
-      "highway": "I-8",
-      "miles": 355.0,
-      "before_mi": 103.7,
-      "after_mi": 103.7,
       "worsened_mi": 0.0
     },
     {
@@ -6676,12 +5794,12 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "tri_cities_wa_us",
-      "to": "portland_or_us",
-      "highway": "I-84",
-      "miles": 219.0,
-      "before_mi": 103.3,
-      "after_mi": 103.3,
+      "from": "pocatello_id_us",
+      "to": "provo_ut_us",
+      "highway": "I-15",
+      "miles": 209.0,
+      "before_mi": 103.5,
+      "after_mi": 103.5,
       "worsened_mi": 0.0
     },
     {
@@ -6694,51 +5812,6 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "greenville_sc_us",
-      "to": "columbia_sc_us",
-      "highway": "I-26",
-      "miles": 103.0,
-      "before_mi": 103.0,
-      "after_mi": 103.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "provo_ut_us",
-      "to": "cedar_city_ut_us",
-      "highway": "I-15",
-      "miles": 208.0,
-      "before_mi": 103.0,
-      "after_mi": 103.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "spokane_wa_us",
-      "to": "moses_lake_wa_us",
-      "highway": "I-90",
-      "miles": 104.0,
-      "before_mi": 103.0,
-      "after_mi": 103.0,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "memphis_tn_us",
-      "to": "st_louis_mo_us",
-      "highway": "I-55",
-      "miles": 285.0,
-      "before_mi": 102.7,
-      "after_mi": 102.7,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "los_angeles_ca_us",
-      "to": "indio_ca_us",
-      "highway": "I-10",
-      "miles": 128.0,
-      "before_mi": 102.4,
-      "after_mi": 102.4,
-      "worsened_mi": 0.0
-    },
-    {
       "from": "winnemucca_nv_us",
       "to": "fallon_nv_us",
       "highway": "US-95",
@@ -6748,48 +5821,30 @@
       "worsened_mi": 0.0
     },
     {
-      "from": "des_moines_ia_us",
-      "to": "omaha_ne_us",
-      "highway": "I-80",
-      "miles": 134.0,
-      "before_mi": 101.7,
-      "after_mi": 101.7,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "el_paso_tx_us",
-      "to": "tucson_az_us",
-      "highway": "I-10",
-      "miles": 317.0,
-      "before_mi": 101.7,
-      "after_mi": 101.7,
-      "worsened_mi": 0.0
-    },
-    {
-      "from": "manchester_nh_us",
-      "to": "providence_ri_us",
-      "highway": "I-495",
-      "miles": 101.0,
+      "from": "mckinney_tx_us",
+      "to": "tyler_tx_us",
+      "highway": "US-69",
+      "miles": 108.0,
       "before_mi": 101.0,
       "after_mi": 101.0,
       "worsened_mi": 0.0
     },
     {
-      "from": "tulsa_ok_us",
-      "to": "kansas_city_mo_us",
-      "highway": "US-69",
-      "miles": 272.0,
-      "before_mi": 100.1,
-      "after_mi": 100.1,
+      "from": "omaha_ne_us",
+      "to": "cheyenne_wy_us",
+      "highway": "I-80",
+      "miles": 497.0,
+      "before_mi": 100.0,
+      "after_mi": 100.0,
       "worsened_mi": 0.0
     },
     {
-      "from": "sidney_ne_us",
-      "to": "cheyenne_wy_us",
-      "highway": "I-80",
-      "miles": 102.0,
-      "before_mi": 100.0,
-      "after_mi": 100.0,
+      "from": "indianapolis_in_us",
+      "to": "nashville_tn_us",
+      "highway": "I-65",
+      "miles": 287.0,
+      "before_mi": 99.3,
+      "after_mi": 99.3,
       "worsened_mi": 0.0
     },
     {
@@ -6802,10 +5857,28 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "tuscaloosa_al_us",
+      "to": "montgomery_al_us",
+      "highway": "US-82",
+      "miles": 106.0,
+      "before_mi": 99.0,
+      "after_mi": 99.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "santa_rosa_ca_us",
       "to": "san_jose_ca_us",
       "highway": "I-880",
       "miles": 100.0,
+      "before_mi": 99.0,
+      "after_mi": 99.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "provo_ut_us",
+      "to": "cedar_city_ut_us",
+      "highway": "I-15",
+      "miles": 208.0,
       "before_mi": 99.0,
       "after_mi": 99.0,
       "worsened_mi": 0.0
@@ -6820,12 +5893,48 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "el_paso_tx_us",
+      "to": "van_horn_tx_us",
+      "highway": "I-10",
+      "miles": 121.0,
+      "before_mi": 98.5,
+      "after_mi": 98.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "houston_tx_us",
+      "to": "lake_charles_la_us",
+      "highway": "I-10",
+      "miles": 143.0,
+      "before_mi": 98.5,
+      "after_mi": 98.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "los_angeles_ca_us",
+      "to": "san_francisco_ca_us",
+      "highway": "I-5",
+      "miles": 384.0,
+      "before_mi": 98.3,
+      "after_mi": 98.3,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "amarillo_tx_us",
       "to": "albuquerque_nm_us",
       "highway": "I-40",
       "miles": 288.0,
       "before_mi": 98.2,
       "after_mi": 98.2,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "portland_me_us",
+      "to": "montpelier_vt_us",
+      "highway": "US-302",
+      "miles": 171.0,
+      "before_mi": 98.0,
+      "after_mi": 98.0,
       "worsened_mi": 0.0
     },
     {
@@ -6856,12 +5965,39 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "detroit_mi_us",
+      "to": "chicago_il_us",
+      "highway": "I-94",
+      "miles": 285.0,
+      "before_mi": 97.7,
+      "after_mi": 97.7,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "las_cruces_nm_us",
+      "to": "midland_tx_us",
+      "highway": "I-10",
+      "miles": 350.0,
+      "before_mi": 97.5,
+      "after_mi": 97.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "west_wendover_nv_us",
       "to": "salt_lake_city_ut_us",
       "highway": "I-80",
       "miles": 123.0,
       "before_mi": 97.4,
       "after_mi": 97.4,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "flagstaff_az_us",
+      "to": "kingman_az_us",
+      "highway": "I-40",
+      "miles": 151.0,
+      "before_mi": 97.0,
+      "after_mi": 97.0,
       "worsened_mi": 0.0
     },
     {
@@ -6874,6 +6010,24 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "salt_lake_city_ut_us",
+      "to": "las_vegas_nv_us",
+      "highway": "I-15",
+      "miles": 420.0,
+      "before_mi": 96.5,
+      "after_mi": 96.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "dallas_tx_us",
+      "to": "st_louis_mo_us",
+      "highway": "I-44",
+      "miles": 664.0,
+      "before_mi": 96.1,
+      "after_mi": 96.1,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "indio_ca_us",
       "to": "blythe_ca_us",
       "highway": "I-10",
@@ -6883,12 +6037,30 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "amarillo_tx_us",
+      "to": "dallas_tx_us",
+      "highway": "US-287",
+      "miles": 362.0,
+      "before_mi": 95.6,
+      "after_mi": 95.6,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "athens_ga_us",
       "to": "chattanooga_tn_us",
       "highway": "I-75",
       "miles": 177.0,
       "before_mi": 95.1,
       "after_mi": 95.1,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "grand_junction_co_us",
+      "to": "green_river_ut_us",
+      "highway": "I-70",
+      "miles": 102.0,
+      "before_mi": 94.5,
+      "after_mi": 94.5,
       "worsened_mi": 0.0
     },
     {
@@ -6905,6 +6077,15 @@
       "to": "oklahoma_city_ok_us",
       "highway": "I-40",
       "miles": 339.0,
+      "before_mi": 94.2,
+      "after_mi": 94.2,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "colorado_springs_co_us",
+      "to": "albuquerque_nm_us",
+      "highway": "I-25",
+      "miles": 378.0,
       "before_mi": 94.2,
       "after_mi": 94.2,
       "worsened_mi": 0.0
@@ -6946,10 +6127,37 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "san_diego_ca_us",
+      "to": "phoenix_az_us",
+      "highway": "I-8",
+      "miles": 355.0,
+      "before_mi": 93.7,
+      "after_mi": 93.7,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "milwaukee_wi_us",
+      "to": "minneapolis_mn_us",
+      "highway": "I-94",
+      "miles": 337.0,
+      "before_mi": 93.5,
+      "after_mi": 93.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "des_moines_ia_us",
       "to": "chicago_il_us",
       "highway": "I-80",
       "miles": 334.0,
+      "before_mi": 93.0,
+      "after_mi": 93.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "san_angelo_tx_us",
+      "to": "fort_stockton_tx_us",
+      "highway": "US-67",
+      "miles": 164.0,
       "before_mi": 93.0,
       "after_mi": 93.0,
       "worsened_mi": 0.0
@@ -6970,6 +6178,24 @@
       "miles": 106.0,
       "before_mi": 92.8,
       "after_mi": 92.8,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "cheyenne_wy_us",
+      "to": "salt_lake_city_ut_us",
+      "highway": "I-80",
+      "miles": 441.0,
+      "before_mi": 92.3,
+      "after_mi": 92.3,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "provo_ut_us",
+      "to": "las_vegas_nv_us",
+      "highway": "I-15",
+      "miles": 377.0,
+      "before_mi": 92.2,
+      "after_mi": 92.2,
       "worsened_mi": 0.0
     },
     {
@@ -7000,6 +6226,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "meridian_ms_us",
+      "to": "tupelo_ms_us",
+      "highway": "US-45",
+      "miles": 142.0,
+      "before_mi": 92.0,
+      "after_mi": 92.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "sioux_falls_sd_us",
       "to": "omaha_ne_us",
       "highway": "I-29",
@@ -7018,12 +6253,39 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "rock_springs_wy_us",
+      "to": "cheyenne_wy_us",
+      "highway": "I-80",
+      "miles": 258.0,
+      "before_mi": 91.7,
+      "after_mi": 91.7,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "laredo_tx_us",
+      "to": "san_antonio_tx_us",
+      "highway": "I-35",
+      "miles": 156.0,
+      "before_mi": 91.5,
+      "after_mi": 91.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "pueblo_co_us",
       "to": "fort_collins_co_us",
       "highway": "I-25",
       "miles": 178.0,
       "before_mi": 91.2,
       "after_mi": 91.2,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "san_antonio_tx_us",
+      "to": "dallas_tx_us",
+      "highway": "I-35",
+      "miles": 274.0,
+      "before_mi": 91.1,
+      "after_mi": 91.1,
       "worsened_mi": 0.0
     },
     {
@@ -7045,6 +6307,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "memphis_tn_us",
+      "to": "st_louis_mo_us",
+      "highway": "I-55",
+      "miles": 285.0,
+      "before_mi": 90.5,
+      "after_mi": 90.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "wilmington_de_us",
       "to": "salisbury_md_us",
       "highway": "US-13",
@@ -7054,10 +6325,28 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "ann_arbor_mi_us",
+      "to": "fort_wayne_in_us",
+      "highway": "I-69",
+      "miles": 146.0,
+      "before_mi": 89.5,
+      "after_mi": 89.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "dodge_city_ks_us",
       "to": "wichita_ks_us",
       "highway": "US-50",
       "miles": 167.0,
+      "before_mi": 89.0,
+      "after_mi": 89.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "astoria_or_us",
+      "to": "olympia_wa_us",
+      "highway": "US-101",
+      "miles": 122.0,
       "before_mi": 89.0,
       "after_mi": 89.0,
       "worsened_mi": 0.0
@@ -7072,12 +6361,39 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "cape_coral_fl_us",
+      "to": "lakeland_fl_us",
+      "highway": "I-75",
+      "miles": 118.0,
+      "before_mi": 88.5,
+      "after_mi": 88.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "rochester_ny_us",
+      "to": "new_york_ny_us",
+      "highway": "I-90",
+      "miles": 333.0,
+      "before_mi": 88.5,
+      "after_mi": 88.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "killeen_tx_us",
       "to": "fort_worth_tx_us",
       "highway": "I-35",
       "miles": 147.0,
       "before_mi": 88.2,
       "after_mi": 88.2,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "tri_cities_wa_us",
+      "to": "portland_or_us",
+      "highway": "I-84",
+      "miles": 219.0,
+      "before_mi": 87.8,
+      "after_mi": 87.8,
       "worsened_mi": 0.0
     },
     {
@@ -7096,6 +6412,15 @@
       "miles": 175.0,
       "before_mi": 87.5,
       "after_mi": 87.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "eugene_or_us",
+      "to": "tri_cities_wa_us",
+      "highway": "I-84",
+      "miles": 327.0,
+      "before_mi": 87.2,
+      "after_mi": 87.2,
       "worsened_mi": 0.0
     },
     {
@@ -7126,10 +6451,28 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "boise_id_us",
+      "to": "portland_or_us",
+      "highway": "I-84",
+      "miles": 430.0,
+      "before_mi": 87.0,
+      "after_mi": 87.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "asheville_nc_us",
       "to": "winston_salem_nc_us",
       "highway": "I-40",
       "miles": 145.0,
+      "before_mi": 87.0,
+      "after_mi": 87.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "elko_nv_us",
+      "to": "boise_id_us",
+      "highway": "I-84",
+      "miles": 293.0,
       "before_mi": 87.0,
       "after_mi": 87.0,
       "worsened_mi": 0.0
@@ -7198,6 +6541,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "baltimore_md_us",
+      "to": "richmond_va_us",
+      "highway": "I-95",
+      "miles": 154.0,
+      "before_mi": 86.0,
+      "after_mi": 86.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "killeen_tx_us",
       "to": "college_station_tx_us",
       "highway": "US-190",
@@ -7213,6 +6565,33 @@
       "miles": 122.0,
       "before_mi": 85.5,
       "after_mi": 85.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "pocatello_id_us",
+      "to": "salt_lake_city_ut_us",
+      "highway": "I-15",
+      "miles": 165.0,
+      "before_mi": 85.5,
+      "after_mi": 85.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "corpus_christi_tx_us",
+      "to": "mcallen_tx_us",
+      "highway": "US-281",
+      "miles": 160.0,
+      "before_mi": 85.5,
+      "after_mi": 85.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "boise_id_us",
+      "to": "salt_lake_city_ut_us",
+      "highway": "I-84",
+      "miles": 341.0,
+      "before_mi": 85.4,
+      "after_mi": 85.4,
       "worsened_mi": 0.0
     },
     {
@@ -7243,6 +6622,24 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "memphis_tn_us",
+      "to": "nashville_tn_us",
+      "highway": "I-40",
+      "miles": 212.0,
+      "before_mi": 85.0,
+      "after_mi": 85.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "phoenix_az_us",
+      "to": "los_angeles_ca_us",
+      "highway": "I-10",
+      "miles": 372.0,
+      "before_mi": 84.8,
+      "after_mi": 84.8,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "grenada_ms_us",
       "to": "jackson_ms_us",
       "highway": "I-55",
@@ -7265,6 +6662,15 @@
       "to": "sacramento_ca_us",
       "highway": "CA-99",
       "miles": 169.0,
+      "before_mi": 84.5,
+      "after_mi": 84.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "newport_ri_us",
+      "to": "new_haven_ct_us",
+      "highway": "I-95",
+      "miles": 104.0,
       "before_mi": 84.5,
       "after_mi": 84.5,
       "worsened_mi": 0.0
@@ -7297,6 +6703,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "savannah_ga_us",
+      "to": "atlanta_ga_us",
+      "highway": "I-16",
+      "miles": 248.0,
+      "before_mi": 84.0,
+      "after_mi": 84.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "butte_mt_us",
       "to": "bozeman_mt_us",
       "highway": "I-90",
@@ -7310,6 +6725,15 @@
       "to": "worcester_ma_us",
       "highway": "I-90",
       "miles": 131.0,
+      "before_mi": 84.0,
+      "after_mi": 84.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "syracuse_ny_us",
+      "to": "albany_ny_us",
+      "highway": "I-90",
+      "miles": 145.0,
       "before_mi": 84.0,
       "after_mi": 84.0,
       "worsened_mi": 0.0
@@ -7333,10 +6757,55 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "buffalo_ny_us",
+      "to": "new_york_ny_us",
+      "highway": "I-90",
+      "miles": 396.0,
+      "before_mi": 83.9,
+      "after_mi": 83.9,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "billings_mt_us",
+      "to": "sheridan_wy_us",
+      "highway": "I-90",
+      "miles": 129.0,
+      "before_mi": 83.5,
+      "after_mi": 83.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "sidney_ne_us",
+      "to": "cheyenne_wy_us",
+      "highway": "I-80",
+      "miles": 102.0,
+      "before_mi": 83.5,
+      "after_mi": 83.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "philadelphia_pa_us",
       "to": "pittsburgh_pa_us",
       "highway": "I-76",
       "miles": 305.0,
+      "before_mi": 83.2,
+      "after_mi": 83.2,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "el_paso_tx_us",
+      "to": "tucson_az_us",
+      "highway": "I-10",
+      "miles": 317.0,
+      "before_mi": 83.2,
+      "after_mi": 83.2,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "green_bay_wi_us",
+      "to": "grand_rapids_mi_us",
+      "highway": "I-94",
+      "miles": 382.0,
       "before_mi": 83.2,
       "after_mi": 83.2,
       "worsened_mi": 0.0
@@ -7366,6 +6835,15 @@
       "miles": 119.0,
       "before_mi": 82.7,
       "after_mi": 82.7,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "las_cruces_nm_us",
+      "to": "tucson_az_us",
+      "highway": "I-10",
+      "miles": 275.0,
+      "before_mi": 82.5,
+      "after_mi": 82.5,
       "worsened_mi": 0.0
     },
     {
@@ -7456,6 +6934,15 @@
       "miles": 186.0,
       "before_mi": 81.6,
       "after_mi": 81.6,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "lake_havasu_city_az_us",
+      "to": "yuma_az_us",
+      "highway": "US-95",
+      "miles": 155.0,
+      "before_mi": 81.5,
+      "after_mi": 81.5,
       "worsened_mi": 0.0
     },
     {
@@ -7558,6 +7045,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "albuquerque_nm_us",
+      "to": "tucumcari_nm_us",
+      "highway": "I-40",
+      "miles": 176.0,
+      "before_mi": 80.0,
+      "after_mi": 80.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "wichita_falls_tx_us",
       "to": "mckinney_tx_us",
       "highway": "US-287",
@@ -7594,10 +7090,28 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "birmingham_al_us",
+      "to": "new_orleans_la_us",
+      "highway": "I-59",
+      "miles": 343.0,
+      "before_mi": 79.5,
+      "after_mi": 79.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "gulfport_ms_us",
       "to": "jackson_ms_us",
       "highway": "US-49",
       "miles": 161.0,
+      "before_mi": 79.5,
+      "after_mi": 79.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "rock_springs_wy_us",
+      "to": "salt_lake_city_ut_us",
+      "highway": "I-80",
+      "miles": 184.0,
       "before_mi": 79.5,
       "after_mi": 79.5,
       "worsened_mi": 0.0
@@ -7634,6 +7148,15 @@
       "to": "san_francisco_ca_us",
       "highway": "I-80",
       "miles": 88.0,
+      "before_mi": 79.0,
+      "after_mi": 79.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "bangor_me_us",
+      "to": "portland_me_us",
+      "highway": "I-95",
+      "miles": 129.0,
       "before_mi": 79.0,
       "after_mi": 79.0,
       "worsened_mi": 0.0
@@ -7684,6 +7207,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "new_orleans_la_us",
+      "to": "houston_tx_us",
+      "highway": "I-10",
+      "miles": 348.0,
+      "before_mi": 78.6,
+      "after_mi": 78.6,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "rolla_mo_us",
       "to": "st_louis_mo_us",
       "highway": "I-44",
@@ -7697,6 +7229,15 @@
       "to": "colby_ks_us",
       "highway": "US-83",
       "miles": 106.0,
+      "before_mi": 78.5,
+      "after_mi": 78.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "greenville_sc_us",
+      "to": "atlanta_ga_us",
+      "highway": "I-85",
+      "miles": 145.0,
       "before_mi": 78.5,
       "after_mi": 78.5,
       "worsened_mi": 0.0
@@ -7756,6 +7297,24 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "green_bay_wi_us",
+      "to": "madison_wi_us",
+      "highway": "I-41",
+      "miles": 144.0,
+      "before_mi": 77.7,
+      "after_mi": 77.7,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "burlington_co_us",
+      "to": "denver_co_us",
+      "highway": "I-70",
+      "miles": 167.0,
+      "before_mi": 77.5,
+      "after_mi": 77.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "ogden_ut_us",
       "to": "pocatello_id_us",
       "highway": "I-15",
@@ -7771,6 +7330,15 @@
       "miles": 180.0,
       "before_mi": 77.2,
       "after_mi": 77.2,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "kansas_city_mo_us",
+      "to": "springfield_mo_us",
+      "highway": "MO-13",
+      "miles": 166.0,
+      "before_mi": 76.5,
+      "after_mi": 76.5,
       "worsened_mi": 0.0
     },
     {
@@ -7801,6 +7369,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "chicago_il_us",
+      "to": "champaign_il_us",
+      "highway": "I-57",
+      "miles": 139.0,
+      "before_mi": 76.0,
+      "after_mi": 76.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "lansing_mi_us",
       "to": "kalamazoo_mi_us",
       "highway": "I-94",
@@ -7816,6 +7393,15 @@
       "miles": 128.0,
       "before_mi": 75.8,
       "after_mi": 75.8,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "pocatello_id_us",
+      "to": "twin_falls_id_us",
+      "highway": "I-86",
+      "miles": 120.0,
+      "before_mi": 75.5,
+      "after_mi": 75.5,
       "worsened_mi": 0.0
     },
     {
@@ -7882,10 +7468,28 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "fort_smith_ar_us",
+      "to": "little_rock_ar_us",
+      "highway": "I-40",
+      "miles": 159.0,
+      "before_mi": 74.0,
+      "after_mi": 74.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "valencia_ca_us",
       "to": "bakersfield_ca_us",
       "highway": "I-5",
       "miles": 75.0,
+      "before_mi": 74.0,
+      "after_mi": 74.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "abilene_tx_us",
+      "to": "fort_worth_tx_us",
+      "highway": "I-20",
+      "miles": 151.0,
       "before_mi": 74.0,
       "after_mi": 74.0,
       "worsened_mi": 0.0
@@ -7897,6 +7501,15 @@
       "miles": 123.0,
       "before_mi": 73.8,
       "after_mi": 73.8,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "las_vegas_nm_us",
+      "to": "raton_nm_us",
+      "highway": "I-25",
+      "miles": 109.0,
+      "before_mi": 73.5,
+      "after_mi": 73.5,
       "worsened_mi": 0.0
     },
     {
@@ -7922,6 +7535,15 @@
       "to": "new_york_ny_us",
       "highway": "I-95",
       "miles": 73.0,
+      "before_mi": 73.0,
+      "after_mi": 73.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "west_palm_beach_fl_us",
+      "to": "cape_coral_fl_us",
+      "highway": "I-75",
+      "miles": 138.0,
       "before_mi": 73.0,
       "after_mi": 73.0,
       "worsened_mi": 0.0
@@ -7963,6 +7585,24 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "clarksville_tn_us",
+      "to": "louisville_ky_us",
+      "highway": "I-65",
+      "miles": 195.0,
+      "before_mi": 73.0,
+      "after_mi": 73.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "spokane_wa_us",
+      "to": "seattle_wa_us",
+      "highway": "I-90",
+      "miles": 279.0,
+      "before_mi": 73.0,
+      "after_mi": 73.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "victorville_ca_us",
       "to": "los_angeles_ca_us",
       "highway": "I-15",
@@ -7978,6 +7618,33 @@
       "miles": 121.0,
       "before_mi": 72.6,
       "after_mi": 72.6,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "moses_lake_wa_us",
+      "to": "seattle_wa_us",
+      "highway": "I-90",
+      "miles": 177.0,
+      "before_mi": 72.6,
+      "after_mi": 72.6,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "twin_falls_id_us",
+      "to": "ogden_ut_us",
+      "highway": "I-84",
+      "miles": 188.0,
+      "before_mi": 72.5,
+      "after_mi": 72.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "baton_rouge_la_us",
+      "to": "shreveport_la_us",
+      "highway": "I-49",
+      "miles": 235.0,
+      "before_mi": 72.5,
+      "after_mi": 72.5,
       "worsened_mi": 0.0
     },
     {
@@ -8003,6 +7670,15 @@
       "to": "alamo_nv_us",
       "highway": "US-93",
       "miles": 96.0,
+      "before_mi": 72.0,
+      "after_mi": 72.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "provo_ut_us",
+      "to": "boise_id_us",
+      "highway": "I-84",
+      "miles": 384.0,
       "before_mi": 72.0,
       "after_mi": 72.0,
       "worsened_mi": 0.0
@@ -8089,6 +7765,24 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "twin_falls_id_us",
+      "to": "boise_id_us",
+      "highway": "I-84",
+      "miles": 128.0,
+      "before_mi": 70.5,
+      "after_mi": 70.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "yakima_wa_us",
+      "to": "seattle_wa_us",
+      "highway": "I-90",
+      "miles": 142.0,
+      "before_mi": 70.5,
+      "after_mi": 70.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "lancaster_ca_us",
       "to": "barstow_ca_us",
       "highway": "CA-58",
@@ -8102,6 +7796,15 @@
       "to": "boston_ma_us",
       "highway": "MA-3",
       "miles": 70.0,
+      "before_mi": 70.0,
+      "after_mi": 70.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "st_louis_mo_us",
+      "to": "kansas_city_mo_us",
+      "highway": "I-70",
+      "miles": 248.0,
       "before_mi": 70.0,
       "after_mi": 70.0,
       "worsened_mi": 0.0
@@ -8156,6 +7859,15 @@
       "to": "new_york_ny_us",
       "highway": "I-95",
       "miles": 111.0,
+      "before_mi": 69.5,
+      "after_mi": 69.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "idaho_falls_id_us",
+      "to": "salt_lake_city_ut_us",
+      "highway": "I-15",
+      "miles": 214.0,
       "before_mi": 69.5,
       "after_mi": 69.5,
       "worsened_mi": 0.0
@@ -8260,6 +7972,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "twin_falls_id_us",
+      "to": "wells_nv_us",
+      "highway": "US-93",
+      "miles": 116.0,
+      "before_mi": 67.0,
+      "after_mi": 67.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "mount_vernon_il_us",
       "to": "effingham_il_us",
       "highway": "I-57",
@@ -8284,6 +8005,15 @@
       "miles": 68.0,
       "before_mi": 67.0,
       "after_mi": 67.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "twin_falls_id_us",
+      "to": "elko_nv_us",
+      "highway": "I-80",
+      "miles": 166.0,
+      "before_mi": 66.8,
+      "after_mi": 66.8,
       "worsened_mi": 0.0
     },
     {
@@ -8395,6 +8125,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "spokane_wa_us",
+      "to": "wenatchee_wa_us",
+      "highway": "I-90",
+      "miles": 169.0,
+      "before_mi": 66.0,
+      "after_mi": 66.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "augusta_ga_us",
       "to": "atlanta_ga_us",
       "highway": "I-20",
@@ -8408,6 +8147,15 @@
       "to": "stockton_ca_us",
       "highway": "I-5",
       "miles": 131.0,
+      "before_mi": 65.5,
+      "after_mi": 65.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "carlsbad_nm_us",
+      "to": "odessa_tx_us",
+      "highway": "US-285",
+      "miles": 162.0,
       "before_mi": 65.5,
       "after_mi": 65.5,
       "worsened_mi": 0.0
@@ -8476,10 +8224,28 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "fort_wayne_in_us",
+      "to": "gary_in_us",
+      "highway": "US-30",
+      "miles": 133.0,
+      "before_mi": 64.0,
+      "after_mi": 64.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "enid_ok_us",
       "to": "wichita_ks_us",
       "highway": "US-81",
       "miles": 123.0,
+      "before_mi": 64.0,
+      "after_mi": 64.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "big_spring_tx_us",
+      "to": "abilene_tx_us",
+      "highway": "I-20",
+      "miles": 110.0,
       "before_mi": 64.0,
       "after_mi": 64.0,
       "worsened_mi": 0.0
@@ -8521,10 +8287,28 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "port_saint_lucie_fl_us",
+      "to": "miami_fl_us",
+      "highway": "I-95",
+      "miles": 115.0,
+      "before_mi": 63.0,
+      "after_mi": 63.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "springfield_ma_us",
       "to": "new_haven_ct_us",
       "highway": "I-91",
       "miles": 64.0,
+      "before_mi": 63.0,
+      "after_mi": 63.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "kansas_city_mo_us",
+      "to": "joplin_mo_us",
+      "highway": "I-49",
+      "miles": 157.0,
       "before_mi": 63.0,
       "after_mi": 63.0,
       "worsened_mi": 0.0
@@ -8554,6 +8338,15 @@
       "miles": 99.0,
       "before_mi": 61.6,
       "after_mi": 61.6,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "los_angeles_ca_us",
+      "to": "indio_ca_us",
+      "highway": "I-10",
+      "miles": 128.0,
+      "before_mi": 61.4,
+      "after_mi": 61.4,
       "worsened_mi": 0.0
     },
     {
@@ -8620,12 +8413,30 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "des_moines_ia_us",
+      "to": "omaha_ne_us",
+      "highway": "I-80",
+      "miles": 134.0,
+      "before_mi": 60.2,
+      "after_mi": 60.2,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "cleveland_oh_us",
       "to": "toledo_oh_us",
       "highway": "I-90",
       "miles": 114.0,
       "before_mi": 60.1,
       "after_mi": 60.1,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "salinas_ca_us",
+      "to": "fresno_ca_us",
+      "highway": "CA-156",
+      "miles": 141.0,
+      "before_mi": 60.0,
+      "after_mi": 60.0,
       "worsened_mi": 0.0
     },
     {
@@ -8764,6 +8575,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "lafayette_la_us",
+      "to": "new_orleans_la_us",
+      "highway": "I-10",
+      "miles": 135.0,
+      "before_mi": 57.0,
+      "after_mi": 57.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "hagerstown_md_us",
       "to": "harrisburg_pa_us",
       "highway": "I-81",
@@ -8786,6 +8606,15 @@
       "to": "allentown_pa_us",
       "highway": "I-476",
       "miles": 58.0,
+      "before_mi": 57.0,
+      "after_mi": 57.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "jackson_tn_us",
+      "to": "nashville_tn_us",
+      "highway": "I-40",
+      "miles": 130.0,
       "before_mi": 57.0,
       "after_mi": 57.0,
       "worsened_mi": 0.0
@@ -8854,6 +8683,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "kalamazoo_mi_us",
+      "to": "detroit_mi_us",
+      "highway": "I-94",
+      "miles": 140.0,
+      "before_mi": 56.0,
+      "after_mi": 56.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "rolla_mo_us",
       "to": "springfield_mo_us",
       "highway": "I-44",
@@ -8896,6 +8734,24 @@
       "miles": 111.0,
       "before_mi": 55.5,
       "after_mi": 55.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "los_angeles_ca_us",
+      "to": "fresno_ca_us",
+      "highway": "CA-99",
+      "miles": 220.0,
+      "before_mi": 55.0,
+      "after_mi": 55.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "san_jose_ca_us",
+      "to": "fresno_ca_us",
+      "highway": "CA-152",
+      "miles": 150.0,
+      "before_mi": 55.0,
+      "after_mi": 55.0,
       "worsened_mi": 0.0
     },
     {
@@ -8953,10 +8809,37 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "fort_collins_co_us",
+      "to": "colorado_springs_co_us",
+      "highway": "I-25",
+      "miles": 133.0,
+      "before_mi": 54.5,
+      "after_mi": 54.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "tulsa_ok_us",
+      "to": "kansas_city_mo_us",
+      "highway": "US-69",
+      "miles": 272.0,
+      "before_mi": 54.4,
+      "after_mi": 54.4,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "salinas_ca_us",
       "to": "san_francisco_ca_us",
       "highway": "US-101",
       "miles": 110.0,
+      "before_mi": 54.0,
+      "after_mi": 54.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "pittsburgh_pa_us",
+      "to": "carlisle_pa_us",
+      "highway": "I-76",
+      "miles": 189.0,
       "before_mi": 54.0,
       "after_mi": 54.0,
       "worsened_mi": 0.0
@@ -8989,6 +8872,33 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "lafayette_la_us",
+      "to": "beaumont_tx_us",
+      "highway": "I-10",
+      "miles": 132.0,
+      "before_mi": 53.0,
+      "after_mi": 53.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "portland_me_us",
+      "to": "boston_ma_us",
+      "highway": "I-95",
+      "miles": 108.0,
+      "before_mi": 53.0,
+      "after_mi": 53.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "detroit_mi_us",
+      "to": "cleveland_oh_us",
+      "highway": "I-75",
+      "miles": 168.0,
+      "before_mi": 53.0,
+      "after_mi": 53.0,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "carlisle_pa_us",
       "to": "hagerstown_md_us",
       "highway": "I-81",
@@ -9004,6 +8914,15 @@
       "miles": 106.0,
       "before_mi": 53.0,
       "after_mi": 53.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "dickinson_nd_us",
+      "to": "williston_nd_us",
+      "highway": "US-85",
+      "miles": 131.0,
+      "before_mi": 52.8,
+      "after_mi": 52.8,
       "worsened_mi": 0.0
     },
     {
@@ -9031,6 +8950,15 @@
       "miles": 70.0,
       "before_mi": 52.4,
       "after_mi": 52.4,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "jackson_ms_us",
+      "to": "new_orleans_la_us",
+      "highway": "I-55",
+      "miles": 186.0,
+      "before_mi": 52.2,
+      "after_mi": 52.2,
       "worsened_mi": 0.0
     },
     {
@@ -9191,6 +9119,15 @@
       "to": "st_louis_mo_us",
       "highway": "I-70",
       "miles": 101.0,
+      "before_mi": 50.5,
+      "after_mi": 50.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "spokane_wa_us",
+      "to": "moses_lake_wa_us",
+      "highway": "I-90",
+      "miles": 104.0,
       "before_mi": 50.5,
       "after_mi": 50.5,
       "worsened_mi": 0.0
@@ -9475,6 +9412,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "bakersfield_ca_us",
+      "to": "barstow_ca_us",
+      "highway": "CA-58",
+      "miles": 129.0,
+      "before_mi": 47.5,
+      "after_mi": 47.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "portland_me_us",
       "to": "manchester_nh_us",
       "highway": "I-95",
@@ -9655,6 +9601,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "baton_rouge_la_us",
+      "to": "gulfport_ms_us",
+      "highway": "I-12",
+      "miles": 136.0,
+      "before_mi": 45.5,
+      "after_mi": 45.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "college_station_tx_us",
       "to": "temple_tx_us",
       "highway": "US-190",
@@ -9772,12 +9727,30 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "new_york_ny_us",
+      "to": "albany_ny_us",
+      "highway": "I-87",
+      "miles": 145.0,
+      "before_mi": 44.5,
+      "after_mi": 44.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "wheatland_wy_us",
       "to": "lusk_wy_us",
       "highway": "I-25",
       "miles": 89.0,
       "before_mi": 44.5,
       "after_mi": 44.5,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "manchester_nh_us",
+      "to": "providence_ri_us",
+      "highway": "I-495",
+      "miles": 101.0,
+      "before_mi": 44.0,
+      "after_mi": 44.0,
       "worsened_mi": 0.0
     },
     {
@@ -9835,6 +9808,15 @@
       "worsened_mi": 0.0
     },
     {
+      "from": "kingman_az_us",
+      "to": "las_vegas_nv_us",
+      "highway": "US-93",
+      "miles": 107.0,
+      "before_mi": 42.5,
+      "after_mi": 42.5,
+      "worsened_mi": 0.0
+    },
+    {
       "from": "trinidad_co_us",
       "to": "pueblo_co_us",
       "highway": "I-25",
@@ -9884,6 +9866,15 @@
       "to": "greenville_nc_us",
       "highway": "US-264",
       "miles": 84.0,
+      "before_mi": 42.0,
+      "after_mi": 42.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "greenville_sc_us",
+      "to": "columbia_sc_us",
+      "highway": "I-26",
+      "miles": 103.0,
       "before_mi": 42.0,
       "after_mi": 42.0,
       "worsened_mi": 0.0
@@ -10064,6 +10055,15 @@
       "to": "omaha_ne_us",
       "highway": "US-30",
       "miles": 80.0,
+      "before_mi": 39.0,
+      "after_mi": 39.0,
+      "worsened_mi": 0.0
+    },
+    {
+      "from": "tucumcari_nm_us",
+      "to": "amarillo_tx_us",
+      "highway": "I-40",
+      "miles": 114.0,
       "before_mi": 39.0,
       "after_mi": 39.0,
       "worsened_mi": 0.0

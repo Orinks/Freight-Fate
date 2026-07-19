@@ -2675,6 +2675,26 @@
           "lat": 37.94724,
           "lon": -119.11315,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Crestview Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 128.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 37.7307596,
+          "lon": -118.9690159,
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "corridor": {
@@ -4597,6 +4617,75 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 116.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.9821707,
+          "lon": -114.671324,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Love's",
+          "type": "travel_center",
+          "at_mi": 203.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.9251931,
+          "lon": -114.940749,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 248.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.1419207,
+          "lon": -115.6634536,
           "vehicle_access": "tractor_trailer"
         },
         {
@@ -9786,6 +9875,26 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Blue Jay Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 103.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 38.3693611,
+          "lon": -116.2283733,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Saulsbury Wash Rest Area",
           "type": "public_rest_area",
           "at_mi": 140.0,
@@ -12258,6 +12367,26 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Trinity Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 35.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 39.940113,
+          "lon": -118.7498451,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "TA Travel Center",
           "type": "service_plaza",
           "at_mi": 104.8,
@@ -13040,6 +13169,46 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Valley Wells Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 68.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 35.4350674,
+          "lon": -115.7007191,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Clyde V. Kane Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 121.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 35.0331873,
+          "lon": -116.4706042,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "EddieWorld Yermo",
           "type": "travel_center",
           "at_mi": 155.0,
@@ -13062,6 +13231,29 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 160.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 34.8548404,
+          "lon": -117.0869877,
           "vehicle_access": "tractor_trailer"
         }
       ],
@@ -17272,6 +17464,49 @@
           "parking": "confirmed",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Hassayampa Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 241.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 33.9085448,
+          "lon": -112.6752262,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 255.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 33.7654141,
+          "lon": -112.5140344,
+          "vehicle_access": "tractor_trailer"
         }
       ]
     },
@@ -21369,6 +21604,29 @@
       },
       "stops": [
         {
+          "name": "Petro Stopping Centers",
+          "type": "service_plaza",
+          "at_mi": 7.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.5239604,
+          "lon": -119.7086365,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Hawthorne Shell",
           "type": "truck_stop",
           "at_mi": 123.3,
@@ -21415,6 +21673,49 @@
           ],
           "parking": "likely",
           "curation": "curated",
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Goldfield Truck Stop",
+          "type": "travel_center",
+          "at_mi": 260.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 37.7012651,
+          "lon": -117.2338896,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Amargosa Valley Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 355.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 36.6430741,
+          "lon": -116.3996093,
           "vehicle_access": "tractor_trailer"
         },
         {
@@ -23419,6 +23720,29 @@
       },
       "stops": [
         {
+          "name": "Petro Stopping Centers",
+          "type": "service_plaza",
+          "at_mi": 7.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.5239604,
+          "lon": -119.7086365,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Love's Travel Stop",
           "type": "service_plaza",
           "at_mi": 232.0,
@@ -24677,6 +25001,49 @@
           ],
           "lat": 37.70127,
           "lon": -117.23389,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Amargosa Valley Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 122.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 36.6430741,
+          "lon": -116.3996093,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Morton's Travel Plaza",
+          "type": "travel_center",
+          "at_mi": 208.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 36.2183166,
+          "lon": -115.1274579,
           "vehicle_access": "tractor_trailer"
         }
       ]
@@ -27766,6 +28133,26 @@
           ],
           "lat": 40.6928,
           "lon": -118.0566,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Trinity Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 95.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 39.940113,
+          "lon": -118.7498451,
           "vehicle_access": "tractor_trailer"
         }
       ]

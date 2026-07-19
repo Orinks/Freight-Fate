@@ -7167,6 +7167,49 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "TA",
+          "type": "service_plaza",
+          "at_mi": 13.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 39.1646796,
+          "lon": -76.7821706,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Dale City Car-Only Safety Rest Area North",
+          "type": "public_rest_area",
+          "at_mi": 73.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 38.5960592,
+          "lon": -77.3143625,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Dale City Car-Only Safety Rest Area South",
           "type": "public_rest_area",
           "at_mi": 77.0,
@@ -7184,6 +7227,29 @@
           ],
           "lat": 38.5965,
           "lon": -77.31596,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Quarles Fleet Fueling",
+          "type": "travel_center",
+          "at_mi": 99.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 38.2900401,
+          "lon": -77.546437,
           "vehicle_access": "tractor_trailer"
         },
         {

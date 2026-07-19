@@ -6693,6 +6693,26 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "James Jeffords Welcome Center Bennington",
+          "type": "public_rest_area",
+          "at_mi": 37.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 42.9041494,
+          "lon": -73.2041169,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Citgo",
           "type": "fuel_station",
           "at_mi": 79.0,
@@ -10804,6 +10824,29 @@
       },
       "stops": [
         {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 4.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.1015702,
+          "lon": -75.8350387,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "East Worcester Rest Area",
           "type": "public_rest_area",
           "at_mi": 82.8,
@@ -10820,6 +10863,29 @@
             "restrooms"
           ],
           "parking_spaces": 9,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Guilderland Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 126.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.744265,
+          "lon": -73.9184666,
           "vehicle_access": "tractor_trailer"
         },
         {
@@ -21011,6 +21077,52 @@
           "parking": "likely",
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Ulster Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 305.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.01401,
+          "lon": -73.9999637,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Modena Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 333.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.5936169,
+          "lon": -74.0878485,
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "route_via": [
@@ -25841,6 +25953,29 @@
           "vehicle_access": "tractor_trailer"
         },
         {
+          "name": "Modena Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 69.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 41.5936169,
+          "lon": -74.0878485,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Speedway",
           "type": "fuel_station",
           "at_mi": 87.0,
@@ -25859,6 +25994,29 @@
           "lat": 41.94228,
           "lon": -73.98708,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Ulster Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 99.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.01401,
+          "lon": -73.9999637,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Plaza 23 Truck Stop",
@@ -36834,6 +36992,75 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 184.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.7815391,
+          "lon": -74.029215,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Guilderland Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 190.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.744265,
+          "lon": -73.9184666,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Ulster Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 244.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.01401,
+          "lon": -73.9999637,
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "route_via": [
@@ -36860,6 +37087,75 @@
       "highway": "I-90",
       "miles": 145,
       "stops": [
+        {
+          "name": "DeWitt Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 3.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.0910935,
+          "lon": -76.1007333,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Chittenango Travel Plaza",
+          "type": "service_plaza",
+          "at_mi": 18.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.0961006,
+          "lon": -75.8417635,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Pilot Travel Center",
+          "type": "service_plaza",
+          "at_mi": 102.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.9463726,
+          "lon": -74.3563336,
+          "vehicle_access": "tractor_trailer"
+        },
         {
           "name": "Pattersonville Travel Plaza",
           "type": "service_plaza",

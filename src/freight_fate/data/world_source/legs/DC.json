@@ -3316,6 +3316,26 @@
       },
       "stops": [
         {
+          "name": "Manassas Safety/Rest Area West",
+          "type": "public_rest_area",
+          "at_mi": 34.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 38.8091456,
+          "lon": -77.49418,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Sunoco",
           "type": "fuel_station",
           "at_mi": 58.0,

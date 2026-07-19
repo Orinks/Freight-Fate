@@ -1644,7 +1644,7 @@
           "name": "Love's",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ada_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: OpenStreetMap tags hgv=no on the mapped feature at this location, accessed 2026-07-19: no truck admitted.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ada_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: Love's location #80 Ada is a Love's Country Store (524 West Main Street, Ada), not a Travel Stop: the operator's own location page lists no diesel lanes, truck parking, showers, or scales, and OpenStreetMap tags the site hgv=no. Verified against loves.com 2026-07-19.",
           "parking": "limited",
           "actions": [
             "park",
@@ -2615,7 +2615,7 @@
           "name": "Love's",
           "type": "fuel_station",
           "at_mi": 1.0,
-          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ada_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: OpenStreetMap tags hgv=no on the mapped feature at this location, accessed 2026-07-19: no truck admitted.",
+          "source": "OpenStreetMap/Overpass development-time amenity query centered on the ada_ok_us endpoint city's own coordinates; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: Love's location #80 Ada is a Love's Country Store (524 West Main Street, Ada), not a Travel Stop: the operator's own location page lists no diesel lanes, truck parking, showers, or scales, and OpenStreetMap tags the site hgv=no. Verified against loves.com 2026-07-19.",
           "parking": "limited",
           "actions": [
             "park",
@@ -5755,6 +5755,29 @@
           ],
           "lat": 33.77137,
           "lon": -97.13324,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Road Ranger",
+          "type": "service_plaza",
+          "at_mi": 36.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 33.6697877,
+          "lon": -97.1528869,
           "vehicle_access": "tractor_trailer"
         },
         {
@@ -15256,7 +15279,7 @@
           "name": "Love's",
           "type": "fuel_station",
           "at_mi": 35.0,
-          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: OpenStreetMap tags hgv=no on the mapped feature at this location, accessed 2026-07-19: no truck admitted.",
+          "source": "OpenStreetMap/Overpass development-time corridor amenity query, accessed 2026-06-21; curated into a gameplay POI (clean name, normalized category) without raw OSM IDs. Truck access: Love's location #120 is a Love's Country Store at 706 South Thornton Street, Vian: the operator's own location page lists RV hookups and retail services but no truck parking, showers, or scales, and OpenStreetMap tags the site hgv=no. Verified against loves.com 2026-07-19.",
           "parking": "limited",
           "actions": [
             "park",
@@ -28648,6 +28671,29 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "Lone Chimney Concessions Plaza",
+          "type": "service_plaza",
+          "at_mi": 47.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 36.2248071,
+          "lon": -96.7963808,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Phillips 66",
           "type": "fuel_station",
           "at_mi": 57.5,
@@ -30253,6 +30299,29 @@
           "vehicle_access": "bobtail_only"
         },
         {
+          "name": "Flying J Travel Center",
+          "type": "service_plaza",
+          "at_mi": 9.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 36.1624259,
+          "lon": -95.8314322,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Stone Creek",
           "type": "fuel_station",
           "at_mi": 29.2,
@@ -30271,6 +30340,29 @@
           "lat": 36.17088,
           "lon": -95.43962,
           "vehicle_access": "bobtail_only"
+        },
+        {
+          "name": "Love's Travel Stop",
+          "type": "service_plaza",
+          "at_mi": 37.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 36.1633629,
+          "lon": -95.3431456,
+          "vehicle_access": "tractor_trailer"
         },
         {
           "name": "Citgo",
@@ -32497,6 +32589,52 @@
           ],
           "lat": 36.56604,
           "lon": -95.22083,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Petro Stopping Centers",
+          "type": "service_plaza",
+          "at_mi": 107.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 37.0067844,
+          "lon": -94.5544865,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "QuikTrip",
+          "type": "service_plaza",
+          "at_mi": 116.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 37.0553417,
+          "lon": -94.4233276,
           "vehicle_access": "tractor_trailer"
         },
         {

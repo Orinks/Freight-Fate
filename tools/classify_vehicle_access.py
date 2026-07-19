@@ -120,6 +120,32 @@ CURATED_ACCESS: dict[str, tuple[str, str]] = {
         "OpenStreetMap also tags this site hgv=no. Owner-confirmed "
         f"{ACCESSED_DATE}.",
     ),
+    # Love's #80 in Ada is a Country Store at 524 W Main Street -- a downtown
+    # convenience store whose published amenities are an ATM, propane
+    # exchange, and a pizza counter. No diesel lanes, truck parking, showers,
+    # or scales, and OSM tags it hgv=no. The brand runs both formats, which is
+    # exactly why the name cannot be the verdict. Serves two legs out of Ada.
+    "34.77693,-96.66961": (
+        "none",
+        "Love's location #80 Ada is a Love's Country Store (524 West Main "
+        "Street, Ada), not a Travel Stop: the operator's own location page "
+        "lists no diesel lanes, truck parking, showers, or scales, and "
+        "OpenStreetMap tags the site hgv=no. Verified against loves.com "
+        f"{ACCESSED_DATE}.",
+    ),
+    # US-64 at Vian, not Sallisaw -- the OSM element carries the operator's own
+    # location URL (loves.com/locations/120), which settles both the town and
+    # the format. Country Store again: RV hookups and a pizza counter, no
+    # showers, CAT scale, or truck parking. Third Love's in a row where the
+    # brand promised a truck stop and the site is not one.
+    "35.49085,-94.97134": (
+        "none",
+        "Love's location #120 is a Love's Country Store at 706 South Thornton "
+        "Street, Vian: the operator's own location page lists RV hookups and "
+        "retail services but no truck parking, showers, or scales, and "
+        "OpenStreetMap tags the site hgv=no. Verified against loves.com "
+        f"{ACCESSED_DATE}.",
+    ),
 }
 
 

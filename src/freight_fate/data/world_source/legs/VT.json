@@ -2054,6 +2054,49 @@
       },
       "stops": [
         {
+          "name": "Exxon",
+          "type": "travel_center",
+          "at_mi": 109.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 43.2386562,
+          "lon": -73.6866449,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Clifton Park Rest Area",
+          "type": "public_rest_area",
+          "at_mi": 138.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 42.8768511,
+          "lon": -73.7766736,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Clifton Park",
           "type": "public_rest_area",
           "at_mi": 148.0,
@@ -2073,6 +2116,29 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Plaza 23 Truck Stop",
+          "type": "travel_center",
+          "at_mi": 157.9,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.6349919,
+          "lon": -73.7547675,
           "vehicle_access": "tractor_trailer"
         }
       ]
@@ -4448,6 +4514,26 @@
       },
       "stops": [
         {
+          "name": "Rest Area I-89 (North Bound)",
+          "type": "public_rest_area",
+          "at_mi": 8.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 44.4361364,
+          "lon": -73.0784655,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Vermont Welcome Center - Sharon",
           "type": "public_rest_area",
           "at_mi": 83.0,
@@ -4464,6 +4550,26 @@
             "restrooms"
           ],
           "parking_spaces": 7,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Rest Area I-91 (South Bound)",
+          "type": "public_rest_area",
+          "at_mi": 92.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 43.6211795,
+          "lon": -72.3482392,
           "vehicle_access": "tractor_trailer"
         },
         {
@@ -7092,6 +7198,26 @@
         "restrictions": []
       },
       "stops": [
+        {
+          "name": "Vermont Welcome Center - Sharon",
+          "type": "public_rest_area",
+          "at_mi": 45.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "limited",
+          "actions": [
+            "park",
+            "save",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "parking",
+            "restrooms"
+          ],
+          "lat": 43.7273024,
+          "lon": -72.4261542,
+          "vehicle_access": "tractor_trailer"
+        },
         {
           "name": "Lebanon Rest Area",
           "type": "public_rest_area",

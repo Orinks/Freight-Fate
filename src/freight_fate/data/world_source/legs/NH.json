@@ -4465,6 +4465,29 @@
       "miles": 101,
       "stops": [
         {
+          "name": "Mobil",
+          "type": "travel_center",
+          "at_mi": 4.5,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.9382522,
+          "lon": -71.4268854,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
           "name": "Rest Area NB",
           "type": "public_rest_area",
           "at_mi": 34.1,
@@ -4484,6 +4507,52 @@
           ],
           "parking": "confirmed",
           "curation": "curated",
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Lexington Service Plaza Northbound",
+          "type": "service_plaza",
+          "at_mi": 48.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.4399696,
+          "lon": -71.2573328,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "Newton Service Plaza",
+          "type": "service_plaza",
+          "at_mi": 57.0,
+          "source": "OpenStreetMap/Overpass dense in-gap corridor amenity query, accessed 2026-07-19; added to close a stretch with no truck-accessible service after the truck-accessibility sweep. Curated into a gameplay POI (clean name, normalized category) without raw OSM IDs.",
+          "parking": "likely",
+          "actions": [
+            "park",
+            "save",
+            "fuel",
+            "food",
+            "break",
+            "sleep"
+          ],
+          "services": [
+            "diesel",
+            "food",
+            "parking"
+          ],
+          "lat": 42.3303416,
+          "lon": -71.2547139,
           "vehicle_access": "tractor_trailer"
         }
       ],
