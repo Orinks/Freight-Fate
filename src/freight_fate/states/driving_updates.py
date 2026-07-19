@@ -539,7 +539,8 @@ class DrivingUpdateMixin:
             if excess > 15 and not self._curve_slip_active:
                 self._curve_slip_active = True
                 self.ctx.say_event(
-                    f"{active.spoken_phrase}: too fast, drifting to the outside.",
+                    f"{self._pacenote_phrase(active)}: too fast, "
+                    "drifting to the outside.",
                     interrupt=True,
                 )
         else:

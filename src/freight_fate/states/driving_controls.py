@@ -547,6 +547,9 @@ class DrivingControlsMixin:
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
         safe = min(limit, self.weather.effects.safe_speed_mph)
         context = ""
+        # The bend under the wheels, or the next one close ahead: whichever
+        # binds, its advisory is the number that keeps the truck on the
+        # road. Connector arcs count when the truck is inside one.
         curve = self.trip.curve_at(self.trip.position_mi)
         if curve is None:
             upcoming = self.trip.curves_within(SAFE_SPEED_CURVE_MI)
@@ -564,19 +567,6 @@ class DrivingControlsMixin:
         if getattr(self, "_ramp_mi", None) is not None or exit_armed:
             safe = min(safe, RAMP_MAX_MPH)
             context = " for the ramp"
-        # Curve advisory: if the truck is approaching a sharp curve, the
-        # safe speed includes the advisory so the player knows to slow
-        # before the bend.
-        next_curve = self.trip._next_curve_approach()
-        if next_curve is not None:
-            safe = min(safe, next_curve.advisory_mph)
-            if not context:
-                context = f" for the {next_curve.spoken_phrase}"
-        # Active curve: if the truck is already in a curve, respect its
-        # advisory speed even without the approaching callout.
-        active_curve = self.trip.curve_at(self.trip.position_mi)
-        if active_curve is not None and not active_curve.connector:
-            safe = min(safe, active_curve.advisory_mph)
         self.ctx.say(f"Safe speed {self.ctx.settings.speed_text(safe)}{context}.")
 
     def _speak_last_announcement(self) -> None:

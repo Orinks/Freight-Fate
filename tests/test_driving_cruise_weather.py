@@ -30,6 +30,7 @@ def test_cruise_control_holds_the_set_speed(monkeypatch):
         quiet_trip(driving)
         driving.trip.zones = []
         driving.trip.traffic_pressures = []
+        driving.trip.curves = []  # a real bend rightly cancels cruise; not this test
         driving._destination_exit_taken = True  # isolate cruise from exit setup
         open_limits(driving)  # isolate hold from the limit cap
         t = driving.truck

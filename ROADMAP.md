@@ -123,6 +123,36 @@ terminal becomes the anchor of that week instead of a spawn point.
       curves, with missed or unsignaled turns costing a reroute or
       strike. Natural interaction layer for per-turn trailer
       off-tracking.
+- [ ] **Map sharding: split the two 58 MB JSON files before GitHub's
+      100 MB wall (Josh's ask, 2026-07-18; plan agreed).** world.json
+      (build-tool source) and world_data/us/legs.json are both past the
+      50 MB warning line. Plan: tools/world_source.py load/save helper
+      returning the same merged dict every build tool sees today, writing
+      deterministic per-state shards; index_world.py emits sharded legs;
+      world_loader globs them up; --check stays. No git-lfs (breaks plain
+      clones, costs Josh quotas), no history rewrite (Josh's call,
+      someday). Lands FIRST so data sweeps commit small diffs, not 58 MB
+      blobs.
+- [ ] **Truck-accessibility sweep: car-only stops leave the truck's
+      world (Josh's design, owner concurs, 2026-07-18).** Wawa/Exxon-class
+      stops where a rig physically cannot park get truck_accessible:
+      false -- gone from exit-stop announcements, U readouts, route
+      planning fuel/sleep counts, GPS cues, and the tablet list; kept in
+      the data as roadside texture (and a future bobtail escape valve).
+      Classify via amenities.classify_brand + OSM tags (hgv=no, no truck
+      parking) on our Overpass. OWNER'S EXCEPTION: on a service-desert
+      leg where the car-only stop is the ONLY service for a long
+      stretch, it keeps a degraded truck offering ("rough parking, tight
+      lot, no amenities") instead of the flag -- real drivers use the
+      lone gravel-lot gas station, and a route must never become
+      undrivable. TWO FLAGS, not one (owner, 2026-07-18): physically
+      impossible (truck_accessible: false -- geometry, no pass ever
+      helps) vs policy-banned (big_rig_banned: true -- the lot fits a
+      rig but the venue forbids it), because the Big Buck's GOLDEN
+      ANTLER pass waives policy bans per visit, never physics. The
+      sweep records the distinction now so the pass mechanic hooks in
+      without a re-sweep. Oatis sweep AFTER sharding lands;
+      announcement-layer filter is game-side.
 - [ ] **Real construction zones from state 511 APIs.** When real-time
       traffic is enabled, construction zones should be generated from actual
       state DOT work zone data instead of simulated zones. Requires:
