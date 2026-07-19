@@ -72,3 +72,24 @@ waives per visit; the pass never overrides vehicle_access.
 Sharded-format world edits only; `uv run python tools/index_world.py
 --check`; world/route/overlay test suites; refresh_map_data.py lint
 zero; spoken-text invariants (no raw OSM text) hold.
+
+## Completion protocol (the Phil handshake)
+
+Work in your own worktree (never the main checkout), branch
+`map/truck-access-sweep`, START ONLY after the sharding commit is on
+`fork/feat/career-1.9`. When the sweep is done and gates are green:
+
+1. Commit and push `map/truck-access-sweep` to the fork.
+2. Write the completion marker to the MAIN checkout's git-ignored logs
+   dir: `C:/dev/Freight-Fate/logs/oatis-sweep-done.json` --
+   `{"branch": "map/truck-access-sweep", "commit": "<sha>",
+   "counts": {"tractor_trailer": n, "bobtail_only": n, "none": n},
+   "gap_report": "<path in the branch>", "notes": "<anything Phil
+   must read first>"}`.
+
+Phil's overnight loop watches for that marker; on arrival he fetches
+the branch, re-runs the gates, reviews flags and the gap report
+against this brief, merges into feat/career-1.9, and records the
+verdict in STATUS.md. If anything fails review, he writes
+`logs/oatis-sweep-feedback.md` instead of merging -- check for it
+before assuming the merge landed.
