@@ -560,7 +560,7 @@ def _plan_hos_for_drive_hours(drive_h: float, route: Route | None = None) -> Hos
         drive_this_shift += step
     break_stops = sleep_stops = 0
     if route is not None:
-        for stop in route.stop_details:
+        for stop in route.accessible_stop_details():
             actions = set(stop.actions)
             break_stops += "break" in actions or "food" in actions
             sleep_stops += "sleep" in actions

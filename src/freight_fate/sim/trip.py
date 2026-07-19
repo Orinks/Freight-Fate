@@ -33,12 +33,45 @@ PACENOTE_GENTLE_MARGIN_MPH = 8.0
 PACENOTE_MIN_LEAD_MI = 0.33
 PACENOTE_MAX_LEAD_MI = 1.5
 
+# Speed-limit lookahead (the co-driver warns before a big posted drop, the
+# same way she calls a curve): only drops of at least this size get a
+# warning -- a 65-to-60 step needs no braking plan, a village 30 does.
+LIMIT_DROP_WARN_MIN_DELTA_MPH = 10.0
+# A newly entered lower limit that ends within this span has its length
+# spoken ("for the next half a mile"), so a short village zone reads as a
+# passing event, not a new cruising speed.
+LIMIT_SHORT_ZONE_MI = 2.5
+LIMIT_SCAN_STRIDE_MI = 0.1
+LIMIT_SCAN_MAX_MI = 3.0
+
 
 def _spoken_distance(value: float, unit: str) -> str:
     """A whole-number distance with the unit pluralized for speech, so a
     screen reader never hears "in 1 miles"."""
     rounded = round(value)
     return f"{rounded:.0f} {unit if rounded == 1 else unit + 's'}"
+
+
+def _spoken_short_miles(miles: float, imperial: bool) -> str:
+    """Colloquial short distance, mirroring ``Settings.short_distance_text``
+    (quarter-mile steps, 100-meter steps) so the co-driver's limit calls
+    sound like her curve calls in either unit. The phrasing source of truth
+    stays in settings; keep the two in step."""
+    if imperial:
+        if miles > 1.125:
+            return _spoken_distance(miles, "mile")
+        quarters = max(1, round(miles * 4))
+        return {
+            1: "a quarter mile",
+            2: "half a mile",
+            3: "three quarters of a mile",
+            4: "one mile",
+        }.get(quarters, _spoken_distance(miles, "mile"))
+    km = miles * 1.609344
+    if km >= 0.95:
+        return _spoken_distance(km, "kilometer")
+    meters = max(1, round(km * 10)) * 100
+    return f"{meters} meters"
 
 
 def _cue_direction(text: str) -> str:
@@ -74,6 +107,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         career_hours: float | None = None,
         traffic_provider=None,
         parking_provider=None,
+        bobtail: bool = False,
     ) -> None:
         self.route = route
         self.truck = truck
@@ -88,6 +122,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._imperial = imperial
         self.traffic_provider = traffic_provider
         self.parking_provider = parking_provider
+        # Running tractor-only opens stops a combination vehicle cannot enter.
+        # Fixed for the run: it is a property of the job, not of the moment.
+        # Defaults to False, the cautious read -- an unclassified caller never
+        # gets promised a stop it might not fit into.
+        self.bobtail = bobtail
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
@@ -142,6 +181,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._charged_tolls: set[str] = set()
         self._active_zone: Zone | None = None
         self._announced_speed_limit: float | None = None
+        self._warned_limit_drops: set[float] = set()
         self._announced_zone_warnings: set[str] = set()
         self._announced_traffic_pressures: set[str] = set()
         self._announced_npc_traffic: set[str] = set()
@@ -315,6 +355,21 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         remaining = deadline_game_h - self.game_minutes / 60.0
         return appointment_text(now, remaining, zone or self.destination_timezone)
 
+    def _stop_is_real(self, stop, forward: bool) -> bool:
+        """Whether this stop belongs on the run at all.
+
+        One gate for the two places that read a leg's stops -- the placed
+        road stops and the navigation cues -- so a stop can never be
+        announced by one path after the other has ruled it out. A stop is
+        real when it is curated, faces the direction of travel, and the rig
+        being driven can physically get into it.
+        """
+        return (
+            stop.curated
+            and stop.applies_to_direction(forward)
+            and stop.accessible_to(bobtail=self.bobtail)
+        )
+
     def _place_stops(self) -> list[RoadStop]:
         out: list[RoadStop] = []
         for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
@@ -326,7 +381,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 ),
             )
             for stop in leg_stops:
-                if not stop.curated or not stop.applies_to_direction(from_city == leg.a):
+                if not self._stop_is_real(stop, from_city == leg.a):
                     continue
                 offset = _stop_offset_for_direction(stop.at_mi, leg.miles, from_city == leg.a)
                 at = start + offset
@@ -341,6 +396,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         stop.parking,
                         exit_label,
                         parking_spaces=stop.parking_spaces,
+                        vehicle_access=stop.vehicle_access,
                     )
                 )
         return out
@@ -503,7 +559,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                     )
                 )
             for stop in leg.stops:
-                if not stop.curated or not stop.applies_to_direction(forward):
+                if not self._stop_is_real(stop, forward):
                     continue
                 offset = _stop_offset_for_direction(stop.at_mi, leg.miles, forward)
                 exit_label = _nearest_exit_label(leg, stop.at_mi)
@@ -1401,6 +1457,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._check_zones()
         self._check_chain_law()
         self._check_speed_limit()
+        self._check_limit_drop_ahead()
         # Navigation before stop notices: when both fire on the same tick --
         # departure is the big one, where the onramp merge cue and a nearby
         # travel plaza announce together -- the actionable instruction must
@@ -1594,9 +1651,83 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             verb = "reduced to" if lowered else "raised to"
             city = self._nearest_urban_city(self.position_mi) if lowered else None
             where = f" approaching {get_world().spoken_city(city)}" if city else ""
+            # A short lower zone (a village main street) is a passing event,
+            # not a new cruising speed: say how long it lasts so the player
+            # is not left guessing when the road opens back up.
+            span = ""
+            if lowered:
+                length = self._limit_zone_length(limit)
+                if length is not None and length <= LIMIT_SHORT_ZONE_MI:
+                    span = f" for {_spoken_short_miles(length, self.imperial)}"
             self._emit(
-                TripEventKind.GPS_CUE, f"Speed limit {verb} {self._speed_value(limit)}{where}."
+                TripEventKind.GPS_CUE,
+                f"Speed limit {verb} {self._speed_value(limit)}{where}{span}.",
             )
+
+    def _limit_zone_length(self, limit: float) -> float | None:
+        """How far the just-entered corridor limit holds from the current
+        position, or ``None`` when it outlasts the scan cap."""
+        mi = self.position_mi
+        end = min(self.total_miles, mi + LIMIT_SCAN_MAX_MI)
+        while mi < end:
+            mi = min(end, mi + LIMIT_SCAN_STRIDE_MI)
+            if self._corridor_limit_at(mi) != limit:
+                return mi - self.position_mi
+        return None
+
+    def _next_limit_drop(self) -> tuple[float, float] | None:
+        """The next corridor limit change ahead, when it is a warn-worthy drop.
+
+        Returns ``(boundary_mi, new_limit)`` for the FIRST change inside the
+        pacenote window -- never warning across an intermediate change -- and
+        only when the drop is big enough to need a braking plan. The boundary
+        is refined to a fine stride so its dedup key stays stable no matter
+        where inside a tick the scan starts."""
+        current = self._corridor_limit_at(self.position_mi)
+        prev = self.position_mi
+        end = min(self.total_miles, self.position_mi + PACENOTE_MAX_LEAD_MI)
+        while prev < end:
+            mi = min(end, prev + LIMIT_SCAN_STRIDE_MI)
+            limit = self._corridor_limit_at(mi)
+            if limit != current:
+                if current - limit < LIMIT_DROP_WARN_MIN_DELTA_MPH:
+                    return None
+                boundary = mi
+                probe = prev
+                while probe < mi:
+                    probe += 0.01
+                    if self._corridor_limit_at(probe) != current:
+                        boundary = probe
+                        break
+                return round(boundary, 2), limit
+            prev = mi
+        return None
+
+    def _check_limit_drop_ahead(self) -> None:
+        """Warn before a big posted-limit drop, like a curve pacenote: far
+        enough out to brake a loaded rig comfortably, silent when already
+        slow enough that the sign is no event."""
+        if self._active_zone is not None or self._is_facility_approach_route():
+            return
+        nxt = self._next_limit_drop()
+        if nxt is None:
+            return
+        boundary_mi, limit = nxt
+        key = boundary_mi
+        if key in self._warned_limit_drops:
+            return
+        speed = self.truck.speed_mph
+        if speed <= limit + PACENOTE_MARGIN_MPH:
+            return
+        ahead = boundary_mi - self.position_mi
+        if ahead > self._curve_pacenote_lead_mi(speed, limit):
+            return
+        self._warned_limit_drops.add(key)
+        self._emit(
+            TripEventKind.GPS_CUE,
+            f"Speed limit drops to {self._speed_value(limit)} in "
+            f"{_spoken_short_miles(ahead, self.imperial)}.",
+        )
 
     def _check_stops(self) -> None:
         for stop in self.stops:

@@ -363,6 +363,12 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
             f"{from_city} to {to_city} stop {name!r} has implausible "
             f"parking_spaces {parking_spaces}"
         )
+    vehicle_access = str(raw.get("vehicle_access", "")).strip() or DEFAULT_VEHICLE_ACCESS
+    if vehicle_access not in VEHICLE_ACCESS_LEVELS:
+        raise ValueError(
+            f"{from_city} to {to_city} stop {name!r} has unknown "
+            f"vehicle_access {vehicle_access!r}"
+        )
     curation = str(raw.get("curation", "")).strip() or _infer_stop_curation(name, source)
     if curation not in STOP_CURATION_LEVELS:
         raise ValueError(
@@ -393,6 +399,7 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
         directions,
         curation,
         parking_spaces=parking_spaces,
+        vehicle_access=vehicle_access,
     )
 
 
@@ -452,9 +459,14 @@ def _parse_speed_limit(raw, leg_miles: float, from_city: str, to_city: str) -> S
     if not isinstance(raw, dict):
         raise ValueError(f"{from_city} to {to_city} speed limit must be an object")
     at_mi = _parse_at_mi(raw, leg_miles, from_city, to_city, "speed limit", allow_endpoints=True)
-    mph = float(raw["mph"])
-    if not 5.0 <= mph <= 85.0:
-        raise ValueError(f"{from_city} to {to_city} speed limit has unrealistic mph {mph}")
+    if raw["mph"] is None:
+        # Coverage-gap marker: OSM tagging ends here; the runtime reverts to
+        # the highway/region heuristic instead of holding the last posting.
+        mph = None
+    else:
+        mph = float(raw["mph"])
+        if not 5.0 <= mph <= 85.0:
+            raise ValueError(f"{from_city} to {to_city} speed limit has unrealistic mph {mph}")
     source = str(raw.get("source", "")).strip()
     return SpeedLimitSample(at_mi, mph, source, bool(raw.get("hgv", False)))
 

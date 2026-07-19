@@ -151,6 +151,18 @@ class Stop:
     # Truck-parking spot count from an official inventory (FHWA Jason's Law
     # via BTS NTAD); 0 means unsurveyed and capacity stays out of speech.
     parking_spaces: int = 0
+    # Whether a combination vehicle can physically get in here. Defaults to
+    # tractor_trailer so unclassified data keeps behaving as it always has.
+    vehicle_access: str = DEFAULT_VEHICLE_ACCESS
+
+    def accessible_to(self, *, bobtail: bool) -> bool:
+        """Can the rig the player is driving right now actually use this stop?
+
+        In an audio-first game, announcing a stop is a promise the player can
+        take it. A stop a rig cannot enter is worse than no stop at all: it
+        burns driving hours and can strand someone with no legal alternative.
+        """
+        return vehicle_access_allows(self.vehicle_access, bobtail=bobtail)
 
     @property
     def label(self) -> str:
@@ -208,10 +220,16 @@ class SpeedLimitSample:
     ``tools/enrich_routes.py``) and stored already normalized to mph, so the
     runtime never sees a raw OSM string. The samples form a step function along
     the leg: the limit at any mile is the last sample whose ``at_mi`` is at or
-    before it. ``hgv`` marks a truck-specific limit (``maxspeed:hgv``)."""
+    before it. ``hgv`` marks a truck-specific limit (``maxspeed:hgv``).
+
+    ``mph`` of ``None`` is a coverage-gap marker: OSM tagging ends here, so
+    the runtime reverts to the highway/region heuristic instead of holding
+    the previous posting -- without it a village 30 baked just before a tag
+    hole ruled miles of open highway (NY-12 out of Norwich, owner-relayed
+    2026-07-19)."""
 
     at_mi: float
-    mph: float
+    mph: float | None
     source: str = ""
     hgv: bool = False
 
@@ -584,6 +602,16 @@ class Route:
     @property
     def raw_stop_details(self) -> list[Stop]:
         return [s for leg in self.legs for s in leg.stops]
+
+    def accessible_stop_details(self, *, bobtail: bool = False) -> list[Stop]:
+        """Curated stops the rig can physically use, for pre-trip planning.
+
+        Dispatch and the route briefing speak these counts while the player
+        decides whether a run is survivable, so a stop that would turn a rig
+        away must not pad them. Defaults to the trailer case, the cautious
+        read and the one nearly every job is.
+        """
+        return [s for s in self.stop_details if s.accessible_to(bobtail=bobtail)]
 
     @property
     def state_crossings(self) -> list[StateCrossing]:

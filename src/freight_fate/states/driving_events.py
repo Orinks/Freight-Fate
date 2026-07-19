@@ -833,6 +833,7 @@ class DrivingEventMixin:
             imperial=old.imperial,
             hazard_scale=0.0,  # no random hazards on the last city miles
             career_hours=old.career_hours,
+            bobtail=old.bobtail,
         )
         surface.game_minutes = old.game_minutes  # deadline and clock continuity
         surface.toll_charges = old.toll_charges  # settlement reads the live trip
@@ -890,6 +891,7 @@ class DrivingEventMixin:
             imperial=highway.imperial,
             hazard_scale=0.0,  # no random hazards on the first city miles
             career_hours=highway.career_hours,
+            bobtail=highway.bobtail,
         )
         self._highway_trip = highway
         self.trip = surface

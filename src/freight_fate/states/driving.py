@@ -82,6 +82,7 @@ class DrivingState(
             career_hours=profile.game_hours,
             traffic_provider=ctx.real_traffic_provider(),
             parking_provider=ctx.truck_parking_provider(),
+            bobtail=job.bobtail,
         )
         if phase == DRIVE_PHASE_DELIVERY:
             # The destination exit, ramp terminal, and street chain own the

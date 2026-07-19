@@ -21,6 +21,29 @@ STOP_CURATION_LEVELS = {"curated", "placeholder"}
 
 STOP_DIRECTIONS = {"both", "forward", "reverse"}
 
+# Can the rig physically get in? A separate axis from parking certainty above:
+# parking says whether there is room to STOP, this says whether a combination
+# vehicle can enter the lot at all. A car-scale convenience store may sell
+# diesel and still have no way for a 70-foot rig to turn around in it.
+#   tractor_trailer -- announced and usable normally
+#   bobtail_only    -- on the map, but only reachable running tractor-only;
+#                      an empty trailer is still a trailer
+#   none            -- landmark only, never a stop
+VEHICLE_ACCESS_LEVELS = {"tractor_trailer", "bobtail_only", "none"}
+DEFAULT_VEHICLE_ACCESS = "tractor_trailer"
+
+
+def vehicle_access_allows(access: str, *, bobtail: bool) -> bool:
+    """Whether a stop with this access level is usable by the current rig.
+
+    One rule, shared by the world data model and the runtime road stop, so
+    announcements, exit arming, HOS planning, and the tablet can never
+    disagree about whether a stop is real for this player.
+    """
+    if access == "bobtail_only":
+        return bobtail
+    return access != "none"
+
 # Alternate routes should feel like real dispatch choices, not graph leftovers.
 # A little extra mileage is fine for traffic, weather, grades, or avoiding a
 # metro corridor; hundreds of out-of-direction miles on a short lane are not.

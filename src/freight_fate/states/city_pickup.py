@@ -37,8 +37,9 @@ def pickup_snapshot(
 
 def route_planning_summary(route: Route) -> str:
     hos_summary = plan_hos(route.miles, route).summary()
-    fuel_stops = sum("fuel" in stop.actions for stop in route.stop_details)
-    sleep_stops = sum("sleep" in stop.actions for stop in route.stop_details)
+    usable = route.accessible_stop_details()
+    fuel_stops = sum("fuel" in stop.actions for stop in usable)
+    sleep_stops = sum("sleep" in stop.actions for stop in usable)
     toll_text = (
         f"Estimated carrier-paid toll exposure {route.estimated_tolls:,.0f} dollars."
         if route.estimated_tolls > 0
