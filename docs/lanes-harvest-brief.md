@@ -67,16 +67,33 @@ Josh) will need. Bake now, wire later.
 6. **destination:lanes** raw strings, stored verbatim per transition
    where present (future gantry speech; no processing this job, and
    never player-facing raw — OSM tag text must not leak into speech).
-7. **`destination` and `destination:ref` on the `motorway_link` ways
-   themselves** (added 2026-07-20, owner design session). These are the
-   guide-sign legend — `destination=Nashville`,
-   `destination:ref=I-40 West` — and they are what turns an interchange
-   callout into "stay left for I-40 toward Nashville" rather than a bare
-   exit number. Item 6 alone does not buy this: `destination:lanes` says
-   which lane, `destination` says the city, and the sentence the owner
-   asked for needs both. US interstate coverage of these tags is good.
-   Harvest per interchange, per direction of travel, under the same
+7. **Lane-to-destination mapping** (added 2026-07-20; scope corrected
+   after checking what is already baked).
+
+   **We already have the destinations.** `Leg.interchanges` carries
+   18,011 records harvested 2026-06-23 from `highway=motorway_junction`
+   sign tags: `destinations` on **91.5%**, `exit_ref` on **92.6%**,
+   `via` on 68.8%, both ref and destinations on 84.1%. A real record:
+
+   ```
+   at_mi 1.4  exit_ref '126A'  via 'US 31 South;US 280'
+   destinations ('Hoover', 'Homewood', 'Carraway Boulevard')
+   ```
+
+   So "toward Nashville" is **not** blocked on this job — that half of
+   the owner's sentence can be spoken today. My earlier framing of this
+   item as "harvest the destination tags" was wrong; they are harvested.
+
+   What is genuinely missing is the **lane** half: which lane serves
+   which destination. That needs `turn:lanes` and `destination:lanes` on
+   the approach ways, joined to the interchange records above by exit
+   ref. Harvest that join, per direction of travel, under the same
    verbatim-storage and never-raw-in-speech rule as item 6.
+
+   Practical consequence for sequencing: **"stay left for I-40 toward
+   Nashville" needs only the side**, which ramp geometry can often prove
+   without `turn:lanes`. **"Take the second lane" needs this item.** Ship
+   the first without waiting on the second.
 
 ## Storage
 
@@ -169,7 +186,86 @@ The restriction above then narrows usefully: it governs the lane
 *ordinal* ("second lane"), which needs harvested `turn:lanes`, not the
 side, which we can already prove.
 
+## Exit recovery: bake the way back, do not route it
+
+Owner asked (2026-07-20) for *some* surface streets — just around exits
+and critical interchanges, enough that a wrong-lane mistake can be
+recovered — and whether the RAM ceiling allows it.
+
+**On memory: the ceiling does not apply to this.** The limit is on the
+Overpass and ORS *servers*, which hold indexed graphs in RAM. Offline
+pyosmium streams the PBF and is bounded by disk and wall-clock, not
+memory — the village sweep harvested 26,894 places that way on the
+current hardware, at a moment when the Overpass extract contained zero
+`place` nodes. So the geometry harvest can start before the 96 GB kit
+lands.
+
+**But routing is the wrong shape for this problem.** A general surface
+router needs ORS to build a much larger graph, which *is* RAM-bound, and
+it would make recovery non-deterministic — against the data rules, which
+require the world to load offline and behave identically every run.
+
+Take the exit at Hoover the wrong way and there is **one obvious way back
+on**. That is not a routing problem; it is a fact about that
+interchange, and facts get baked:
+
+- Per interchange, bake a **recovery path**: the short sequence back to
+  the mainline in the intended direction, with the turns spoken as
+  instructions ("right at the light, then right onto the ramp").
+- Store the ramp/street names it traverses so the speech is real, not
+  synthesized geometry.
+- Deterministic, offline, and small — on the order of a few hundred
+  bytes across 18,011 interchanges, against a 60 MB world.
+- **No runtime routing, no ORS dependency, no memory question.**
+
+Scope suggestion: start with **interchange splits** (interstate-to-
+interstate, where a wrong lane commits you to another highway and the
+consequence is real) rather than every service exit. Those are the cases
+the owner named, and they are a small fraction of the 18,011.
+
+Absence policy as everywhere else: an interchange whose recovery cannot
+be established from real ways bakes **nothing**, and the wrong-lane
+consequence stays disabled there rather than stranding the driver.
+
 ## Sequencing
 
 Worktree, per the no-parallel-world-data rule. Not alongside any other
 bake job. Overpass health first if the extracts prove insufficient.
+
+**Order set by the owner, 2026-07-20:**
+
+1. Phil folds the shipped work (villages merge, snapping fix, the
+   `[[docs/nav-phrasing-brief]]` mainline phrasing, stub-checkpoint
+   deletion).
+2. The truck speed-limit audit lands (see
+   `[[project-truck-speed-limit-audit]]` — proposal written, three owner
+   decisions outstanding).
+3. Then this job: lanes, interchanges, and exit recovery.
+4. The Overpass extract rebuild rides with step 3, widened to include
+   `place` so `tools/extract_osm_places.py` retires.
+
+## Fold this into the map utility, not just this job
+
+Owner, 2026-07-20: everything here — lane scanning, interchange
+harvesting, recovery paths, place sweeps — belongs in the reusable map
+tooling (`tools/refresh_map_data.py` and the enrichment recipe), not as
+one-off scripts, **because North America is next.** When the 96 GB kit
+lands and Canadian and Mexican corridors come in, these passes must be
+runnable against a new region by pointing them at a different extract,
+not by rewriting them.
+
+Concretely, each pass this job adds should be:
+
+- **Region-parameterized**, not US-hardcoded — no embedded state lists,
+  no `_us` slug assumptions, no mph-only storage.
+- **Reported by the refresh tool** the way `--radio`, `--limits-lint`,
+  and `--stops` already report: coverage in, gaps out, curation left to
+  a human.
+- **Documented in the recipe** as a per-region step, alongside the
+  jurisdiction truck-limit check added 2026-07-20 — which is the same
+  lesson in a different domain: the thing that breaks on a new continent
+  is the assumption nobody wrote down.
+
+See the recipe's *Taking this off the US grid* section for the specific
+US-isms already identified (state-name keying, mph storage, a flat
+jurisdiction table with no national-default layer).
