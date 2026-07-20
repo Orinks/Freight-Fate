@@ -174,18 +174,11 @@ terminal becomes the anchor of that week instead of a spawn point.
       must sit on mountain segments), and the handshake:
       docs/terrain-audit-brief.md. Oatis's next map job after the
       access sweep merges.
-- [ ] **Name the villages a leg passes through (owner-approved sweep,
-      2026-07-20).** Ship as a Settings toggle, OFF by default:
-      "Village callouts" speaks "Entering Strawberry" style lines so a
-      town's 35 zone arrives with its reason attached. Sweep planned
-      for 2026-07-20. Camp Verde-Payson drives straight through
-      Strawberry and Pine -- their 35 mph zones are baked and now end
-      honestly -- but no callout speaks their names: the landmark list
-      has the forests and the East Verde River, not the towns. Bake
-      pass-through localities (OSM place=village/town on or near the
-      corridor) as roadside callouts, and pair each with its speed
-      zone so "Entering Strawberry" and "limit 35" arrive as one
-      story. Map-wide sweep, same machinery as the landmark bake.
+- [x] **Name the villages a leg passes through (landed 2026-07-20).**
+      Swept and spoken: "Entering Strawberry" arrives just before the
+      35 it explains, on every leg that has such a town. Governed by
+      the Place callouts ladder (see the map workstream section for
+      the bake details and the ladder design).
 - [ ] **Guard the real world source during tests.** save_world()
       defaults to the checked-in source, so a stray call from a test or
       ad-hoc script silently rewrites the map (same class as the
@@ -972,8 +965,29 @@ section below and the Unreleased changelog; the release-line view:
       places within 1.5 miles of the road, 390 of them positioned just ahead
       of the speed zone they explain; the wider set waits for the planned
       "where am I" key, which needs to answer "Winslow, eleven miles ahead".
-      No hamlets. A Settings switch, Speak town and village names, is on by
-      default. Follow-ups below.
+      No hamlets. Spoken through the Place callouts ladder (below).
+      Follow-ups below.
+- [x] **Place callouts ladder: one setting for every place name (owner
+      design session, 2026-07-20).** The one-day-old village chatter bool and
+      the never-built checkpoint sparse mode (2026-07-09 design) collapsed
+      into a single three-tier setting, because the split between "curated
+      place markers" and "swept villages" is data provenance, not anything a
+      player can hear. "Place callouts: off / sparse / all", sparse the
+      default: sparse speaks only names that explain a speed limit change
+      (probed from the baked corridor limits at trip build, deterministic,
+      never from random work zones); all adds the pass-through towns and, on
+      worlds that carry them, the curated route markers; the two-mile advance
+      cue for places is dead at every tier -- a town is not actionable the way
+      an exit is. Limit-explaining villages are seated before spacing thins
+      the rest, so Strawberry and Pine both survive their shared window. The
+      1.9 world carries zero legacy checkpoint markers (discovered in this
+      pass -- the checkpoint speech only ever fires on dev's world), so the
+      same code governs both lines with no version awareness.
+- [ ] **Extract the place-callouts ladder to dev as a small PR.** The
+      checkpoint-chattiness complaint lives on the 1.8 line, whose world still
+      carries curated checkpoint markers ~5 miles apart. The speech-side
+      gating (settings ladder, advance-cue removal, CHECKPOINT tier gate)
+      ports without the village bake and relieves it there.
 - [ ] **Village bake: per-leg cap and the wide catchment.** 569 of 1,280 legs
       hit the 30-places-per-leg cap, so their far field (5 to 12 miles off the
       road) is truncated. Harmless for the ride-along, which never reaches

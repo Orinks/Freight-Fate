@@ -635,6 +635,10 @@ class RoadsideCallout:
     at_mi: float
     category: str
     spoken: str
+    # True when this place name explains a speed limit change just ahead
+    # (a village whose 35 zone starts within the pairing window). Sparse
+    # place callouts speak exactly these and nothing else.
+    explains_limit: bool = False
 
 
 # Ambient roadside lines keep their distance so river clusters and museum
@@ -658,6 +662,11 @@ VILLAGE_PASS_OFF_MI = 1.5
 # it deleted Strawberry, which sits under three miles from Pine and is half the
 # reason the feature exists. Real towns are allowed to be close together.
 VILLAGE_MIN_SPACING_MI = LANDMARK_MIN_SPACING_MI
+# A village "explains" a limit change when a town-scale limit (<= the max
+# below) takes effect within this window past the callout. Mirrors the bake
+# rule that placed paired callouts just before their zone start.
+VILLAGE_PAIR_WINDOW_MI = 1.5
+VILLAGE_PAIR_MAX_LIMIT_MPH = 45.0
 BILLBOARD_MIN_GAP_MI = 35.0
 BILLBOARD_MAX_GAP_MI = 65.0
 BILLBOARD_LEAD_IN_MI = 15.0

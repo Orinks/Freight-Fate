@@ -4,15 +4,17 @@
 
 ### Added
 
-- **The road now names the towns you drive through.** When the route
-  runs into a small town or village, you hear it just before you get
-  there -- "Entering Strawberry" -- and where the highway only skirts a
-  place, you hear that you are passing it instead. The name lands right
-  before the speed limit drops, so a sudden 35 in the middle of a
-  mountain highway finally has a reason attached to it instead of
-  arriving out of nowhere. Every name is a real place taken from the
-  map, never invented, so a leg with nothing on it stays quiet. You can
-  turn this off under Settings, Speak town and village names.
+- **The road now names the towns that change your speed limit.** When a
+  limit is about to drop for a small town, you hear the town first --
+  "Entering Strawberry" -- so a sudden 35 in the middle of a mountain
+  highway finally has a reason attached to it instead of arriving out
+  of nowhere. Every name is a real place taken from the map, never
+  invented. A new Place callouts setting controls how much you hear:
+  sparse, the default, speaks only the names that explain a limit
+  change; all adds the towns the route passes through or skirts; off
+  silences place names entirely. No setting ever reads out every place
+  on the map -- the rest of that data waits quietly to answer
+  orientation questions on demand.
 
 - **Every stop the game announces is now one your rig can actually
   enter.** Every fuel stop, rest area, and truck stop on the map was

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import random
+from dataclasses import replace
 
 from ..data.curves import RouteCurve, route_curves
 from ..data.world import Leg, Route, get_world
@@ -629,6 +630,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 if landmark.category == "village":
                     if landmark.off_mi > VILLAGE_PASS_OFF_MI:
                         continue
+                    if self._village_explains_drop(callout.at_mi):
+                        callout = replace(callout, explains_limit=True)
                     villages.append((callout.at_mi, landmark.off_mi, callout))
                     continue
                 callouts.append(callout)
@@ -653,13 +656,40 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         Ordering by distance-off-route rather than by mile is what makes the
         choice honest: in a cluster of five, the one the highway actually runs
         through is the one a driver would use to place themselves, and it beats
-        whichever happened to come first."""
+        whichever happened to come first.
+
+        A village that explains a limit change is never thinned away: its name
+        is the reason the feature exists (Strawberry and Pine sit 2.7 miles
+        apart, inside one spacing window, and both own a 35), so limit
+        explainers are seated first and spacing applies to the rest."""
         chosen: list[tuple[float, RoadsideCallout]] = []
         for at_mi, _off_mi, callout in sorted(villages, key=lambda v: (v[1], v[0])):
+            if callout.explains_limit:
+                chosen.append((at_mi, callout))
+        for at_mi, _off_mi, callout in sorted(villages, key=lambda v: (v[1], v[0])):
+            if callout.explains_limit:
+                continue
             if any(abs(at_mi - taken) < VILLAGE_MIN_SPACING_MI for taken, _ in chosen):
                 continue
             chosen.append((at_mi, callout))
         return [callout for _, callout in sorted(chosen, key=lambda c: c[0])]
+
+    def _village_explains_drop(self, at_mi: float) -> bool:
+        """Whether a town-scale limit takes effect just past this callout.
+
+        Probes the baked corridor limit only -- random work zones must not
+        promote a village to limit-explainer on one trip and not the next.
+        Mirrors the bake rule that placed paired callouts shortly before
+        their zone starts."""
+        here = self._corridor_limit_at(at_mi)
+        mi = at_mi + LIMIT_SCAN_STRIDE_MI
+        end = min(at_mi + VILLAGE_PAIR_WINDOW_MI, self.total_miles)
+        while mi <= end:
+            there = self._corridor_limit_at(mi)
+            if there < here and there <= VILLAGE_PAIR_MAX_LIMIT_MPH:
+                return True
+            mi += LIMIT_SCAN_STRIDE_MI
+        return False
 
     def _place_billboards(self) -> list[RoadsideCallout]:
         """Schedule parody billboards along the highway, seeded per trip.
@@ -813,7 +843,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             # jump) is stale scenery; note it silently rather than narrate
             # the past.
             if behind <= 1.0:
-                self._emit(kind, callout.spoken, category=callout.category)
+                self._emit(
+                    kind,
+                    callout.spoken,
+                    category=callout.category,
+                    explains_limit=callout.explains_limit,
+                )
 
     def _place_zones(self) -> list[Zone]:
         zones: list[Zone] = []

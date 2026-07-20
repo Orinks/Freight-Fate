@@ -208,68 +208,169 @@ def test_trip_withholds_villages_the_route_never_reaches(world):
         assert match.off_mi <= VILLAGE_PASS_OFF_MI
 
 
-# -- the toggle -------------------------------------------------------------
+# -- the place-callouts ladder ----------------------------------------------
 
 
-def test_village_callouts_are_on_by_default_and_switchable():
+def test_place_callouts_default_sparse_and_outside_chatter():
     settings = Settings()
-    assert settings.chatter_villages is True
-    assert CHATTER_CATEGORY_FIELDS["village"] == "chatter_villages"
+    assert settings.place_callouts == "sparse"
+    # Towns left the chatter family: the ladder is their only gate, so the
+    # category check must not silently veto what the ladder allows.
+    assert "village" not in CHATTER_CATEGORY_FIELDS
     assert settings.chatter_enabled("village") is True
-    settings.chatter_villages = False
-    assert settings.chatter_enabled("village") is False
-    # The village switch is its own: silencing towns leaves the scenery alone.
-    assert settings.chatter_enabled("river") is True
+    # The chatter master governs scenery only; the ladder survives it.
+    settings.set_all_chatter(False)
+    assert settings.place_callouts == "sparse"
 
 
-def test_driving_speaks_and_silences_a_village_callout(monkeypatch):
-    """In-engine: the switch decides whether the name reaches the player."""
-    from freight_fate.app import App
+def test_rim_towns_are_marked_as_limit_explainers(world):
+    """Strawberry and Pine each own a 35 just past their callout, so the trip
+    marks them sparse-worthy; the pairing probe reads baked limits only."""
+    trip = _trip(world, "Camp Verde", "Payson")
+    villages = [c for c in trip.landmarks if c.category == "village"]
+    assert [c.spoken for c in villages] == ["Entering Strawberry.", "Entering Pine."]
+    assert all(c.explains_limit for c in villages)
+
+
+def _driving_state(app):
     from freight_fate.models.jobs import CARGO_CATALOG, Job
-    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.models.profile import Profile
     from freight_fate.states.driving import DrivingState
+
+    app.ctx.profile = Profile(name="Villages", current_city="Buffalo")
+    route = app.ctx.world.supported_route("Buffalo", "Rochester")
+    job = Job(
+        CARGO_CATALOG["general"],
+        12.0,
+        "Buffalo",
+        "company yard",
+        "Rochester",
+        route.miles,
+        1000.0,
+        12.0,
+        destination_location="Rochester freight market",
+    )
+    return DrivingState(app.ctx, job, route, phase="delivery")
+
+
+def test_driving_serves_villages_by_ladder_tier(monkeypatch):
+    """In-engine: sparse speaks limit explainers only, all adds the rest,
+    off silences both -- and a mid-trip settings change applies at once."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
 
     app = App()
     try:
-        from freight_fate.models.profile import Profile
-
-        app.ctx.profile = Profile(name="Villages", current_city="Buffalo")
-        route = app.ctx.world.supported_route("Buffalo", "Rochester")
-        job = Job(
-            CARGO_CATALOG["general"],
-            12.0,
-            "Buffalo",
-            "company yard",
-            "Rochester",
-            route.miles,
-            1000.0,
-            12.0,
-            destination_location="Rochester freight market",
-        )
-        driving = DrivingState(app.ctx, job, route, phase="delivery")
+        driving = _driving_state(app)
         calls = []
         monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: calls.append(text))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
-        village = TripEvent(
-            TripEventKind.LANDMARK, "Entering Strawberry.", {"category": "village"}
-        )
 
-        driving._handle_trip_event(village)
+        def serve(spoken, explains):
+            driving._ambient_event_cooldown_s = 0.0
+            driving._pending_ambient_event = None
+            driving._handle_trip_event(
+                TripEvent(
+                    TripEventKind.LANDMARK,
+                    spoken,
+                    {"category": "village", "explains_limit": explains},
+                )
+            )
+
+        app.ctx.settings.place_callouts = "sparse"
+        serve("Entering Strawberry.", True)
         assert calls[-1] == "Entering Strawberry."
+        serve("Passing Wishram.", False)
+        assert "Passing Wishram." not in calls
 
-        app.ctx.settings.chatter_villages = False
-        driving._ambient_event_cooldown_s = 0.0
-        driving._pending_ambient_event = None
-        driving._handle_trip_event(village)
-        assert len(calls) == 1  # filtered, not repeated
+        app.ctx.settings.place_callouts = "all"
+        serve("Passing Wishram.", False)
+        assert calls[-1] == "Passing Wishram."
+
+        app.ctx.settings.place_callouts = "off"
+        serve("Entering Pine.", True)
+        assert "Entering Pine." not in calls
     finally:
         app.shutdown()
 
 
-def test_all_chatter_switch_covers_villages():
-    settings = Settings()
-    settings.set_all_chatter(False)
-    assert settings.chatter_villages is False
-    assert settings.chatter_enabled("village") is False
-    settings.set_all_chatter(True)
-    assert settings.chatter_villages is True
+def test_driving_serves_route_town_markers_only_on_all(monkeypatch):
+    """Curated place markers ("Passing X on I-40") are the loudest tier only,
+    and their two-mile advance cue is dead at every tier."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.sim.trip_models import NavigationCue
+
+    app = App()
+    try:
+        driving = _driving_state(app)
+        calls = []
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: calls.append(text))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        near = TripEvent(TripEventKind.CHECKPOINT, "Passing Tucumcari, NM on I-40.", {})
+        cue = NavigationCue(
+            "checkpoint:0:12.0:Tucumcari",
+            "checkpoint",
+            12.0,
+            "Tucumcari, NM on I-40",
+            "Passing Tucumcari, NM on I-40.",
+        )
+        advance = TripEvent(
+            TripEventKind.GPS_CUE, "In 2 miles, Tucumcari, NM on I-40.", {"cue": cue}
+        )
+
+        app.ctx.settings.place_callouts = "sparse"
+        driving._handle_trip_event(near)
+        driving._handle_trip_event(advance)
+        assert calls == []
+
+        app.ctx.settings.place_callouts = "all"
+        driving._handle_trip_event(near)
+        assert calls[-1] == "Passing Tucumcari, NM on I-40."
+        driving._handle_trip_event(advance)
+        assert "In 2 miles, Tucumcari, NM on I-40." not in calls
+    finally:
+        app.shutdown()
+
+
+def test_settings_menu_cycles_place_callouts():
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    app = App()
+    try:
+        menu = SettingsCategoryState(app.ctx, "speech")
+        menu.items = menu.build_items()
+        labels = [item.text for item in menu.items]
+        row = labels.index("Place callouts: sparse")
+        menu.index = row
+        menu._adjust(1)
+        menu.items = menu.build_items()
+        assert menu.items[row].text == "Place callouts: all"
+        menu._adjust(1)
+        menu.items = menu.build_items()
+        assert menu.items[row].text == "Place callouts: off"
+        menu._adjust(1)
+        menu.items = menu.build_items()
+        assert menu.items[row].text == "Place callouts: sparse"
+    finally:
+        app.shutdown()
+
+
+def test_one_alpha_day_village_bool_migrates():
+    """The village switch shipped briefly as a chatter bool: an explicit off
+    carries over as silence, an untouched on takes the new default."""
+    import json
+
+    s = Settings()
+    s.path.parent.mkdir(parents=True, exist_ok=True)
+    s.path.write_text(json.dumps({"chatter_villages": False}), encoding="utf-8")
+    assert Settings.load().place_callouts == "off"
+    s.path.write_text(json.dumps({"chatter_villages": True}), encoding="utf-8")
+    assert Settings.load().place_callouts == "sparse"
+    s.path.write_text(json.dumps({"place_callouts": "junk"}), encoding="utf-8")
+    assert Settings.load().place_callouts == "sparse"
+    s.path.write_text(
+        json.dumps({"chatter_villages": False, "place_callouts": "all"}), encoding="utf-8"
+    )
+    assert Settings.load().place_callouts == "all"

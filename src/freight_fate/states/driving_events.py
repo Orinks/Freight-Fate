@@ -62,6 +62,25 @@ class DrivingEventMixin:
             category = str(event.data.get("category", ""))
             if self._terse_speech() or not self.ctx.settings.chatter_enabled(category):
                 return
+            # Town and village names answer to the place-callouts ladder, not
+            # the chatter switches: sparse keeps only the names that explain
+            # a speed limit change, all adds the towns the route passes.
+            if category == "village":
+                mode = self.ctx.settings.place_callouts
+                if mode == "off":
+                    return
+                if mode == "sparse" and not event.data.get("explains_limit"):
+                    return
+        if kind == TripEventKind.CHECKPOINT and self.ctx.settings.place_callouts != "all":
+            # Curated route-town markers ("Passing X on I-40") are places,
+            # not safety -- only the loudest place tier speaks them.
+            return
+        if kind == TripEventKind.GPS_CUE:
+            cue = event.data.get("cue")
+            if getattr(cue, "kind", "") == "checkpoint":
+                # The two-mile advance for a place earns nothing at any tier:
+                # a town is not actionable the way an exit or toll is.
+                return
         if event.message:
             self._last_event_message = event.message  # replayable with A
         if kind == TripEventKind.HAZARD:

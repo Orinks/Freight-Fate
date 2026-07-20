@@ -29,10 +29,10 @@ CHATTER_CATEGORY_FIELDS = {
     # Placed roadside billboards baked as leg landmarks (billboard spider); ride
     # the same switch as the random-pool billboards so one toggle governs both.
     "billboard_sign": "chatter_billboards",
-    # Small towns and villages the route runs through or skirts. Its own switch
-    # because it does a different job from scenery: the name explains a speed
-    # limit drop rather than adding colour.
-    "village": "chatter_villages",
+    # "village" is deliberately absent: town and village names are not
+    # chatter. They are governed by the place_callouts ladder instead,
+    # because the name that explains a speed limit drop must survive a
+    # player turning the ambient colour off.
 }
 
 # The player-facing chatter switches, in menu order.
@@ -42,8 +42,12 @@ CHATTER_FIELDS = (
     "chatter_passes",
     "chatter_museums",
     "chatter_billboards",
-    "chatter_villages",
 )
+
+# How much the ride-along says about the places along the road, whatever
+# place data the world carries (curated route towns on one line, the baked
+# village layer on another -- the player never needs to know which).
+PLACE_CALLOUT_MODES = ("off", "sparse", "all")
 
 DRIVING_ASSIST_FIELDS = (
     "automatic_emergency_braking",
@@ -150,7 +154,12 @@ class Settings:
     chatter_passes: bool = True  # mountain passes and scenic highway markers
     chatter_museums: bool = True  # museums and roadside attractions
     chatter_billboards: bool = True  # parody billboards
-    chatter_villages: bool = True  # small towns and villages along the route
+    # Place names along the road. "sparse" speaks only the names that explain
+    # a speed limit change ("Entering Strawberry" right before the 35);
+    # "all" adds the towns the route passes; "off" silences place names
+    # entirely. The full baked place layer is never read aloud at any tier --
+    # it exists to answer on-demand orientation questions.
+    place_callouts: str = "sparse"
     announce_menu_position: bool = True  # speak "N of M" position in menus
     sapi_events: bool = True  # driving events on a separate voice
     event_backend: str = "SAPI"  # which voice that is (e.g. SAPI/OneCore)
@@ -273,6 +282,17 @@ class Settings:
         for attr in CHATTER_FIELDS:
             if not isinstance(getattr(s, attr), bool):
                 setattr(s, attr, True)
+        # The village switch shipped for one alpha day as a chatter bool. An
+        # explicit off carries over as silence; an untouched on takes the new
+        # default ladder rather than pinning that player to the loudest tier.
+        if (
+            isinstance(data, dict)
+            and "place_callouts" not in data
+            and data.get("chatter_villages") is False
+        ):
+            s.place_callouts = "off"
+        if s.place_callouts not in PLACE_CALLOUT_MODES:
+            s.place_callouts = "sparse"
         if not isinstance(s.cloud_saves, bool):
             s.cloud_saves = False
         if not isinstance(s.live_weather_controls_calendar, bool):
