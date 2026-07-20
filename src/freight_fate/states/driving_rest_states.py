@@ -67,13 +67,21 @@ class TrafficStopState(MenuState):
     )
 
     def __init__(
-        self, ctx, driving: DrivingState, *, signaled: bool, over: float, limit: float
+        self,
+        ctx,
+        driving: DrivingState,
+        *,
+        signaled: bool,
+        over: float,
+        limit: float,
+        clean_stop: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.driving = driving
         self.signaled = signaled
         self.over = over
         self.limit = limit
+        self.clean_stop = clean_stop
         self._outcome_text = ""
         self._resolve()
 
@@ -108,6 +116,15 @@ class TrafficStopState(MenuState):
             self._outcome_text = (
                 f"You were {over_text} over the {limit_text} limit. The "
                 "trooper lets you off with a warning this time. Keep it down."
+            )
+            return
+        # A prompt, fully-compliant stop earns a small chance the trooper lets a
+        # ticket slide with a warning instead.
+        if self.clean_stop and d._patrol_rng.random() < PULL_OVER_CLEAN_STOP_WARN_CHANCE:
+            self._outcome_text = (
+                f"You were {over_text} over the {limit_text} limit. I was gonna "
+                "give you a ticket, but since you pulled over promptly, I'll let "
+                "it go this time. Keep it down."
             )
             return
         fine = SPEEDING_TICKET_FINES[min(d.speeding_tickets, len(SPEEDING_TICKET_FINES) - 1)]

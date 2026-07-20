@@ -616,6 +616,45 @@
   missed attempt now loops you back far enough to hear the exit, signal, and
   slow down again instead of leaving the route stuck at zero miles remaining.
 
+- **Getting pulled over now judges whether you are actually stopping, not how
+  far you rolled.** A loaded truck at highway speed cannot halt on a dime, and
+  the old rule could flag a felony stop even when you braked correctly the whole
+  way. Now, once the lights come on, the trooper watches your behavior: signal
+  and brake down to a stop and you get the ordinary roadside check, and pulling
+  over promptly and cleanly gives a small chance a ticket is waived to a warning.
+  Keep accelerating, coast along without slowing, or ignore the lights and it
+  still ends in a felony stop. You no longer have to hold the emergency brake
+  the entire time; braking steadily is enough.
+
+- **Taking your planned stop's exit no longer warns that you drove past it.**
+  When you signal a planned stop and brake down the exit ramp, the game used to
+  announce that you had driven past it and cancelled the plan, even though you
+  were stopping there. Now the warning only speaks when the stop is truly out of
+  reach: if you drive past the exit without signaling, if you signal but are
+  going too fast to make the ramp, or if you take the exit but never stop and
+  roll on past the end of the ramp.
+- **Taking an exit and never stopping no longer strands you on the ramp.**
+  If you took an exit but kept driving without ever coming to a stop, the game
+  would quietly wait forever -- speed enforcement stayed off and, miles later,
+  stopping would still open that stop's menu. Now, once you roll well past the
+  end of the ramp without stopping, the game tells you that you never stopped
+  and hands the highway back.
+- **The trip mile marker holds while you are on an exit ramp.** The ramp is off
+  the highway, so your progress along the route no longer ticks up while you
+  brake down it; the highway picks back up where you left it once you rejoin.
+- **Live weather no longer announces a simulated forecast while loading.**
+  Pressing V before the first live observation arrives now says that live
+  weather is still loading instead of describing an invented forecast. This
+  also works when Live weather controls calendar is turned off. Route weather
+  now names cities whose observations are loading or unavailable instead of
+  silently skipping them, and weather-change announcements identify live
+  observations and simulated fallback conditions.
+- **Live weather no longer flips between rain and freezing rain on its own.**
+  When your career keeps its own calendar apart from the live feed, real rain
+  is matched to the career season once when it arrives -- so a cold-season
+  shower can come in as freezing rain -- and then holds. It no longer switches
+  back and forth as the day warms and cools, only changing when the real report
+  or the town it is for changes.
 - **Cloud Backup works again on test builds.** Careers from a recent test
   build were being turned away with a message about the backup being
   unreadable. Nothing was wrong with those careers: the game had changed what

@@ -1706,8 +1706,12 @@ reset instead of only a fine.
   against patrol intensity (`DrivingState._trooper_catches_speeder`); a hit lights
   you up (`events/police_siren`), you signal with X and brake to a stop, and
   `TrafficStopState` runs a spoken license/logbook check ending in an immediate
-  on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning. Ignoring
-  the lights past `PULL_OVER_IGNORE_MI` is logged as evasion. Disabled in the
+  on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning; a prompt,
+  fully-compliant stop has a small chance a ticket is waived to a warning. A
+  behavior-based compliance tracker (seeded at `PULL_OVER_START_COMPLIANCE`,
+  raised by braking, lowered by accelerating/coasting/failing to signal) judges
+  the stop -- refusing to comply zeroes it out and is logged as an evasion/felony
+  rather than the old distance rule. Disabled in the
   debug HOS bypass. Uncaught speeding still accrues the silent settlement strike.
   CB chatter now warns a few miles before drivers are talking about a bear or
   work-zone enforcement, plays `events/cb_radio_chatter.ogg`, remains

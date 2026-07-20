@@ -1336,7 +1336,34 @@ class DrivingEventMixin:
                     self._open_facility_arrival()
                 else:
                     self._open_poi_stop(stop, settle=True)
-            elif not self._ramp_end_said:
+                return
+            stop = self._ramp_stop
+            # Rolled clear past the end of the ramp without ever stopping. A
+            # destination exit keeps waiting (missing it drives its own reroute);
+            # a route POI is blown, so give the highway back instead of leaving a
+            # stuck, unpatrolled ramp lingering for miles.
+            if stop.type != "delivery_destination" and self._ramp_mi <= -RAMP_OVERSHOOT_MI:
+                self._ramp_mi = None
+                self._ramp_stop = None
+                self._ramp_end_said = False
+                planned = self.trip.is_planned(stop)
+                if planned:
+                    self.trip.planned_stop_name = None
+                exit_ref = (
+                    f"{stop.exit_label} for {stop.spoken_name}"
+                    if stop.exit_label
+                    else f"the exit for {stop.spoken_name}"
+                )
+                line = (
+                    f"Drove past {stop.spoken_name}; you never stopped."
+                    if self._terse_speech()
+                    else f"You never stopped and drove past {exit_ref}."
+                )
+                if planned:
+                    line += " Plan cancelled."
+                self.ctx.say_event(line, interrupt=True)
+                return
+            if not self._ramp_end_said:
                 self._ramp_end_said = True
                 place = (
                     self._ramp_stop.name
@@ -1441,10 +1468,14 @@ class DrivingEventMixin:
             self.ctx.say_event(message, interrupt=True)
         else:
             missed = self._missed_exit_phrase(stop)
-            self.ctx.say_event(
-                f"You were going too fast for the ramp and missed {missed}.",
-                interrupt=True,
-            )
+            line = f"You were going too fast for the ramp and missed {missed}."
+            if self.trip.is_planned(stop):
+                # Fold the plan cancellation into this one line so the driver
+                # hears a single cue, and clear it here so _check_stops doesn't
+                # also emit a "drove past your planned stop" warning next tick.
+                self.trip.planned_stop_name = None
+                line += " Plan cancelled."
+            self.ctx.say_event(line, interrupt=True)
             self._exit_signal_on = False
             self._reset_exit_lane_state()
 

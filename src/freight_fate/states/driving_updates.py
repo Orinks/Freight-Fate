@@ -226,12 +226,22 @@ class DrivingUpdateMixin:
         # Same-lane traffic checks and spoken relative lanes follow the
         # player's discrete lane, so mirror it before the trip advances.
         self.trip.traffic_manager.player_lane = self.lane.lane
+        # Tell the trip model which stop's exit is signaled or on the ramp so its
+        # plan-cancelled warning can tell a driver who is taking the exit from one
+        # who blew past it. Set before trip.update (which runs _check_stops) and
+        # before _update_exit (which clears _exit_stop on a miss), so on the exact
+        # crossing tick the flag still reflects the armed exit.
+        active_exit = self._ramp_stop or self._exit_stop
+        self.trip._exit_in_progress = active_exit.name if active_exit else None
+        # On the ramp the highway odometer holds and the ramp consumes the
+        # movement instead; the trip records how far the truck rolled either way.
+        self.trip.on_ramp = self._ramp_mi is not None
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
         self._check_weigh_station_enforcement(pos_before)
         self._check_unsafe_damage_enforcement()
         self._check_destination_exit()
-        self._update_exit(self.trip.position_mi - pos_before)
+        self._update_exit(self.trip.last_moved_mi)
 
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)
@@ -243,7 +253,7 @@ class DrivingUpdateMixin:
         self._update_microsleep(keys, dt)
         self._update_overrev(dt)
         self._update_speeding(dt, accelerator_held=accel_held)
-        self._update_pull_over(dt)
+        self._update_pull_over(dt, service_braking=braking or emergency)
         self._update_brake_heat_cue(dt)
         self._update_traction_cues()
         self._update_chain_law()
@@ -1423,6 +1433,9 @@ class DrivingUpdateMixin:
         self._pull_over_reputation_hit = 0.0
         self._pull_over_return = "Back on the highway. Watch your speed."
         self._pull_over_warning_level = 0
+        self._reset_pull_over_tracker()
+        self._pull_over_compliance = PULL_OVER_START_COMPLIANCE
+        self._pull_over_prev_mph = self.truck.speed_mph
         patrol = self.trip.active_patrol_at(self.trip.position_mi)
         where = patrol.reason if patrol is not None else "patrol"
         self.ctx.audio.play("events/police_siren")
@@ -1535,6 +1548,9 @@ class DrivingUpdateMixin:
         self._pull_over_reputation_hit = reputation_hit
         self._pull_over_return = return_message
         self._pull_over_warning_level = 0
+        self._reset_pull_over_tracker()
+        self._pull_over_compliance = PULL_OVER_START_COMPLIANCE
+        self._pull_over_prev_mph = self.truck.speed_mph
         self.ctx.audio.play("events/police_siren")
         self.ctx.say_event(lights_message, interrupt=True)
 
@@ -1543,6 +1559,13 @@ class DrivingUpdateMixin:
         if self._pull_over == "lights":
             self._pull_over = "stopping"
             self._pull_over_signaled = True
+            # A one-time compliance bump for signaling. Guarded so that if an
+            # unsignal is ever added, toggling can never re-earn the boost.
+            if not self._pull_over_signal_boost:
+                self._pull_over_signal_boost = True
+                self._pull_over_compliance = min(
+                    1.0, self._pull_over_compliance + PULL_OVER_SIGNAL_BOOST
+                )
             self.ctx.audio.play("vehicle/turn_signal", volume=0.7)
             self.ctx.say("Signaling and easing onto the shoulder. Brake to a full stop.")
         else:
@@ -1635,7 +1658,24 @@ class DrivingUpdateMixin:
             f"You have {p.money:,.0f} dollars."
         )
 
-    def _update_pull_over(self, dt: float) -> None:
+    def _reset_pull_over_tracker(self) -> None:
+        """Clear the compliance tracker on every stop-ending path so the next
+        stop starts clean."""
+        self._pull_over_compliance = 0.0
+        self._pull_over_elapsed = 0.0
+        self._pull_over_prev_mph = 0.0
+        self._pull_over_coast_s = 0.0
+        self._pull_over_signal_boost = False
+        self._pull_over_nosignal_hit = False
+
+    def _update_pull_over(self, dt: float, *, service_braking: bool = False) -> None:
+        """Judge the stop by behavior, and warn by distance. A compliance
+        tracker (0..1) rises with braking and falls with accelerating,
+        coasting, and failing to signal (deductions stack); a full stop opens
+        the roadside stop and zeroing it out ends in a felony. On top of that,
+        the staged failure-to-stop warnings still speak as the miles roll by,
+        and simply driving miles on with the lights behind you is a felony
+        regardless of the tracker."""
         if self._pull_over is None:
             return
         if self._enforcement_bypassed():
@@ -1644,8 +1684,39 @@ class DrivingUpdateMixin:
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
             self._open_traffic_stop()
             return
+        self._pull_over_elapsed += dt
+        speed = self.truck.speed_mph
+        accel_mph_s = (speed - self._pull_over_prev_mph) / dt if dt > 0 else 0.0
+        self._pull_over_prev_mph = speed
+        delta = 0.0
+        if service_braking:
+            # Compliant deceleration. Method-agnostic: service, emergency, or
+            # engine+service brake all read the same, and stacking earns no extra.
+            delta += PULL_OVER_BRAKE_RATE * dt
+            self._pull_over_coast_s = 0.0
+        elif accel_mph_s > PULL_OVER_ACCEL_EPS_MPH_S:
+            # Genuinely speeding up (not jitter, not throttle-held-steady).
+            delta -= PULL_OVER_ACCEL_RATE * dt
+            self._pull_over_coast_s = 0.0
+        else:
+            # Coasting, holding a steady speed, or slowing on the engine brake /
+            # grade alone -- all treated the same, and only after a 3 s grace.
+            self._pull_over_coast_s += dt
+            if self._pull_over_coast_s >= PULL_OVER_COAST_GRACE_S:
+                delta -= PULL_OVER_COAST_RATE * dt
+        # Failing to signal past the grace: a one-time 1/4 hit, then a small
+        # periodic drain. Stacks with any accelerating/coasting deduction above.
+        if self._pull_over_elapsed > PULL_OVER_SIGNAL_GRACE_S and not self._pull_over_signaled:
+            if not self._pull_over_nosignal_hit:
+                self._pull_over_nosignal_hit = True
+                delta -= PULL_OVER_NOSIGNAL_HIT
+            delta -= PULL_OVER_NOSIGNAL_RATE * dt
+        self._pull_over_compliance = max(0.0, min(1.0, self._pull_over_compliance + delta))
+        # Behavior ends the stop -- a zeroed tracker -- but rolling on for miles
+        # with the lights behind you is a felony on its own, and the staged
+        # warnings still speak by how far you have travelled.
         distance = self.trip.position_mi - self._pull_over_start_mi
-        if distance >= PULL_OVER_IGNORE_MI:
+        if self._pull_over_compliance <= 0.0 or distance >= PULL_OVER_IGNORE_MI:
             self._evade_pull_over()
         elif distance >= FAILURE_TO_STOP_FINAL_WARNING_MI:
             self._warn_failure_to_stop(final=True)
@@ -1683,7 +1754,10 @@ class DrivingUpdateMixin:
         fine = self._pull_over_fine
         reputation_hit = self._pull_over_reputation_hit
         return_message = self._pull_over_return
+        # Read the tracker before the reset zeroes it.
+        clean_stop = self._pull_over_compliance >= PULL_OVER_FULL_COMPLIANCE
         self._pull_over = None
+        self._reset_pull_over_tracker()
         if kind != "speeding":
             self.ctx.push_state(
                 EnforcementStopState(
@@ -1699,12 +1773,16 @@ class DrivingUpdateMixin:
             )
             return
         self.ctx.push_state(
-            TrafficStopState(self.ctx, self, signaled=signaled, over=over, limit=limit)
+            TrafficStopState(
+                self.ctx, self, signaled=signaled, over=over, limit=limit, clean_stop=clean_stop
+            )
         )
 
     def _evade_pull_over(self) -> None:
-        """Drove on with the lights behind: spike strips end it, logged as a
+        """Drove on with the lights behind, or let the compliance tracker zero
+        out by accelerating or never slowing: spike strips end it, logged as a
         felony stop with a heavy fine, reputation hit, and load consequences."""
         self._pull_over = None
+        self._reset_pull_over_tracker()
         self.ctx.audio.play("events/spike_strip")
         self.ctx.push_state(FelonyStopState(self.ctx, self))

@@ -191,6 +191,14 @@ class DrivingState(
         self.failure_to_stop_count = 0
         self._weigh_station_notice_key = ""
         self._unsafe_damage_stop_key = ""
+        # Compliance tracker for the active stop: 0..1, judged from behavior
+        # (signaling and slowing), not distance. Reset on every stop-ending path.
+        self._pull_over_compliance = 0.0  # seeded on begin
+        self._pull_over_elapsed = 0.0  # s since the lights came on (signal grace)
+        self._pull_over_prev_mph = 0.0  # last-tick speed, to classify accel vs decel
+        self._pull_over_coast_s = 0.0  # consecutive s with no braking and no accel
+        self._pull_over_signal_boost = False  # the one-time signal bump has fired
+        self._pull_over_nosignal_hit = False  # the one-time no-signal 1/4 hit has fired
         # Deterministic, save-safe stream for "did a patrol catch you" rolls, kept
         # apart from the trip's hazard/zone/inspection streams.
         self._patrol_rng = random.Random(None if trip_seed is None else trip_seed ^ 0xB0A1)
