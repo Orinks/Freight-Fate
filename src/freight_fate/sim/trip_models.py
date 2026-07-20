@@ -642,6 +642,22 @@ class RoadsideCallout:
 LANDMARK_MIN_SPACING_MI = 2.0
 # Billboards pace like the real interstate genre: one every half hour or so
 # of highway driving, never in the first miles of a trip.
+# Villages are baked out to a wide catchment so the map can answer "what is
+# near me" at any distance, but the ride-along names only the ones the driver
+# genuinely reaches: "Entering" where the road runs through the place, and
+# "Passing" out to the width of a town an interstate skirts rather than enters.
+# Anything farther is real data that would be a false promise spoken aloud.
+VILLAGE_ENTER_OFF_MI = 0.5
+VILLAGE_PASS_OFF_MI = 1.5
+# Villages thin on the same spacing as the rest of the roadside, but by a
+# different rule: within a window the place nearest the road wins, so a town the
+# route runs through outranks one it only skirts. The northeast corridor really
+# does string a named place along every mile (the Wilmington approach to
+# Philadelphia passes thirty), and reading that list aloud is a chant rather
+# than orientation. Widening this instead was tried and rejected: at five miles
+# it deleted Strawberry, which sits under three miles from Pine and is half the
+# reason the feature exists. Real towns are allowed to be close together.
+VILLAGE_MIN_SPACING_MI = LANDMARK_MIN_SPACING_MI
 BILLBOARD_MIN_GAP_MI = 35.0
 BILLBOARD_MAX_GAP_MI = 65.0
 BILLBOARD_LEAD_IN_MI = 15.0

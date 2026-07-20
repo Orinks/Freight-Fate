@@ -874,7 +874,8 @@ Speech and weather settings include:
 | Setting | Purpose |
 | --- | --- |
 | Speech verbosity | Controls how often driving status reminders run. |
-| Roadside chatter | The ambient color spoken between navigation cues: entering parks and forests, named river crossings, mountain passes, museums and attractions, and parody billboards. One master switch turns it all on or off, and each kind has its own switch below it. Safety and navigation speech is never affected. |
+| Roadside chatter | The ambient color spoken between navigation cues: entering parks and forests, named river crossings, mountain passes, museums and attractions, parody billboards, and the names of the small towns you drive through. One master switch turns it all on or off, and each kind has its own switch below it. Safety and navigation speech is never affected. |
+| Speak town and village names | Names the small towns and villages the route runs through, just before you reach them. This is usually what explains a speed limit drop, so leaving it on tells you why the limit fell. On by default. |
 | Menu position announcements | When on, menus say the position, like 3 of 10, after each option. Turn off to hear only the option. |
 | Driving event voice | Routes road events through the main voice or a separate software voice when available. |
 | Speech rate | Appears only when the current voice source supports rate changes. |

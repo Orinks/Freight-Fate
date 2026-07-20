@@ -29,6 +29,10 @@ CHATTER_CATEGORY_FIELDS = {
     # Placed roadside billboards baked as leg landmarks (billboard spider); ride
     # the same switch as the random-pool billboards so one toggle governs both.
     "billboard_sign": "chatter_billboards",
+    # Small towns and villages the route runs through or skirts. Its own switch
+    # because it does a different job from scenery: the name explains a speed
+    # limit drop rather than adding colour.
+    "village": "chatter_villages",
 }
 
 # The player-facing chatter switches, in menu order.
@@ -38,6 +42,7 @@ CHATTER_FIELDS = (
     "chatter_passes",
     "chatter_museums",
     "chatter_billboards",
+    "chatter_villages",
 )
 
 DRIVING_ASSIST_FIELDS = (
@@ -145,6 +150,7 @@ class Settings:
     chatter_passes: bool = True  # mountain passes and scenic highway markers
     chatter_museums: bool = True  # museums and roadside attractions
     chatter_billboards: bool = True  # parody billboards
+    chatter_villages: bool = True  # small towns and villages along the route
     announce_menu_position: bool = True  # speak "N of M" position in menus
     sapi_events: bool = True  # driving events on a separate voice
     event_backend: str = "SAPI"  # which voice that is (e.g. SAPI/OneCore)

@@ -217,11 +217,182 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Russell",
+            "at_mi": 0.5,
+            "off_mi": 3.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154049447, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Russell"
+          },
+          {
+            "name": "Ironton",
+            "at_mi": 0.5,
+            "off_mi": 4.23,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153957430, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Ironton"
+          },
+          {
+            "name": "Flatwoods",
+            "at_mi": 0.5,
+            "off_mi": 4.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154110462, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Flatwoods"
+          },
+          {
+            "name": "Raceland",
+            "at_mi": 0.5,
+            "off_mi": 5.96,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153830421, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Raceland"
+          },
+          {
+            "name": "Worthington",
+            "at_mi": 0.5,
+            "off_mi": 6.24,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153858862, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Worthington"
+          },
+          {
+            "name": "Hanging Rock",
+            "at_mi": 0.5,
+            "off_mi": 6.71,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153831154, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hanging Rock"
+          },
+          {
+            "name": "Wurtland",
+            "at_mi": 0.5,
+            "off_mi": 8.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154374268, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wurtland"
+          },
+          {
+            "name": "Summit",
+            "at_mi": 0.6,
+            "off_mi": 4.28,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153853573, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Summit"
+          },
+          {
+            "name": "Cannonsburg",
+            "at_mi": 0.8,
+            "off_mi": 7.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154035597, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cannonsburg"
+          },
+          {
+            "name": "Lawrence",
+            "at_mi": 1.3,
+            "off_mi": 11.13,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153849682, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lawrence"
+          },
+          {
+            "name": "Aid",
+            "at_mi": 3.3,
+            "off_mi": 10.56,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153925037, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Aid"
+          },
+          {
+            "name": "South Point",
+            "at_mi": 6.7,
+            "off_mi": 0.79,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154044864, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing South Point"
+          },
+          {
             "name": "Big Sandy River",
             "category": "river",
             "kind": "point",
             "at_mi": 7.1,
             "spoken": "Crossing the Big Sandy River"
+          },
+          {
+            "name": "Catlettsburg",
+            "at_mi": 7.4,
+            "off_mi": 1.94,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154311566, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Catlettsburg"
+          },
+          {
+            "name": "Ceredo",
+            "at_mi": 8.6,
+            "off_mi": 0.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9968207180, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Ceredo"
+          },
+          {
+            "name": "Prichard",
+            "at_mi": 8.6,
+            "off_mi": 11.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153851552, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Prichard"
+          },
+          {
+            "name": "Burlington",
+            "at_mi": 9.7,
+            "off_mi": 0.33,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153891781, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Burlington"
+          },
+          {
+            "name": "Rome",
+            "at_mi": 15.0,
+            "off_mi": 4.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154317122, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rome"
+          },
+          {
+            "name": "Barboursville",
+            "at_mi": 15.0,
+            "off_mi": 8.18,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154094464, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Barboursville"
+          },
+          {
+            "name": "Athalia",
+            "at_mi": 15.0,
+            "off_mi": 10.1,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154192194, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Athalia"
           }
         ],
         "speed_limits": [
@@ -1150,11 +1321,218 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Russell",
+            "at_mi": 0.0,
+            "off_mi": 4.19,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154049447, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Russell"
+          },
+          {
+            "name": "Summit",
+            "at_mi": 0.0,
+            "off_mi": 4.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153853573, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Summit"
+          },
+          {
+            "name": "Ironton",
+            "at_mi": 0.0,
+            "off_mi": 4.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153957430, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Ironton"
+          },
+          {
+            "name": "Flatwoods",
+            "at_mi": 0.0,
+            "off_mi": 5.25,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154110462, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Flatwoods"
+          },
+          {
+            "name": "Raceland",
+            "at_mi": 0.0,
+            "off_mi": 6.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153830421, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Raceland"
+          },
+          {
+            "name": "Worthington",
+            "at_mi": 0.0,
+            "off_mi": 6.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153858862, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Worthington"
+          },
+          {
+            "name": "Hanging Rock",
+            "at_mi": 0.0,
+            "off_mi": 7.19,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153831154, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hanging Rock"
+          },
+          {
+            "name": "Wurtland",
+            "at_mi": 0.0,
+            "off_mi": 9.05,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154374268, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wurtland"
+          },
+          {
+            "name": "Lawrence",
+            "at_mi": 0.0,
+            "off_mi": 11.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153849682, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lawrence"
+          },
+          {
+            "name": "Aid",
+            "at_mi": 0.9,
+            "off_mi": 11.12,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153925037, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Aid"
+          },
+          {
+            "name": "South Point",
+            "at_mi": 5.0,
+            "off_mi": 0.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154044864, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing South Point"
+          },
+          {
+            "name": "Burlington",
+            "at_mi": 5.4,
+            "off_mi": 3.77,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153891781, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Burlington"
+          },
+          {
+            "name": "Catlettsburg",
+            "at_mi": 5.9,
+            "off_mi": 0.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154311566, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Catlettsburg"
+          },
+          {
+            "name": "Ceredo",
+            "at_mi": 6.4,
+            "off_mi": 2.29,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9968207180, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Ceredo"
+          },
+          {
+            "name": "Cannonsburg",
+            "at_mi": 7.4,
+            "off_mi": 5.1,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154035597, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cannonsburg"
+          },
+          {
+            "name": "Wayne",
+            "at_mi": 17.0,
+            "off_mi": 8.07,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153885250, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wayne"
+          },
+          {
+            "name": "Prichard",
+            "at_mi": 19.1,
+            "off_mi": 0.42,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153851552, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Prichard"
+          },
+          {
             "name": "Big Sandy River",
             "category": "river",
             "kind": "point",
             "at_mi": 23.2,
             "spoken": "Crossing the Big Sandy River"
+          },
+          {
+            "name": "Fort Gay",
+            "at_mi": 29.6,
+            "off_mi": 1.65,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154292854, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fort Gay"
+          },
+          {
+            "name": "Inez",
+            "at_mi": 42.9,
+            "off_mi": 9.14,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153869749, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Inez"
+          },
+          {
+            "name": "Blaine",
+            "at_mi": 48.9,
+            "off_mi": 9.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154158940, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Blaine"
+          },
+          {
+            "name": "Van Lear",
+            "at_mi": 58.9,
+            "off_mi": 4.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154359528, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Van Lear"
+          },
+          {
+            "name": "Auxier",
+            "at_mi": 59.0,
+            "off_mi": 5.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154015240, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Auxier"
+          },
+          {
+            "name": "Prestonsburg",
+            "at_mi": 59.0,
+            "off_mi": 10.33,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154053132, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Prestonsburg"
           }
         ],
         "speed_limits": [
@@ -1807,11 +2185,83 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Plum Springs",
+            "at_mi": 0.0,
+            "off_mi": 6.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153512635, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Plum Springs"
+          },
+          {
+            "name": "Woodburn",
+            "at_mi": 12.3,
+            "off_mi": 3.43,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153509992, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Woodburn"
+          },
+          {
+            "name": "Franklin",
+            "at_mi": 21.1,
+            "off_mi": 3.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153604185, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Franklin"
+          },
+          {
             "name": "Red River",
             "category": "river",
             "kind": "point",
             "at_mi": 24.3,
             "spoken": "Crossing the Red River"
+          },
+          {
+            "name": "Mitchellville",
+            "at_mi": 26.9,
+            "off_mi": 1.76,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153785746, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mitchellville"
+          },
+          {
+            "name": "Portland",
+            "at_mi": 29.1,
+            "off_mi": 4.06,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153656124, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Portland"
+          },
+          {
+            "name": "Orlinda",
+            "at_mi": 33.4,
+            "off_mi": 5.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153535578, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Orlinda"
+          },
+          {
+            "name": "Cross Plains",
+            "at_mi": 35.3,
+            "off_mi": 3.24,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153344782, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cross Plains"
+          },
+          {
+            "name": "White House",
+            "at_mi": 40.2,
+            "off_mi": 1.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153728446, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing White House"
           },
           {
             "name": "White House Inn Museum",
@@ -1828,11 +2278,101 @@
             "spoken": "Crossing the South Fork Red River"
           },
           {
+            "name": "Springfield",
+            "at_mi": 43.3,
+            "off_mi": 11.1,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153475294, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Springfield"
+          },
+          {
+            "name": "Greenbrier",
+            "at_mi": 45.1,
+            "off_mi": 4.69,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153704740, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Greenbrier"
+          },
+          {
+            "name": "Ridgetop",
+            "at_mi": 45.4,
+            "off_mi": 2.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153701015, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Ridgetop"
+          },
+          {
+            "name": "Millersville",
+            "at_mi": 48.0,
+            "off_mi": 0.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153599114, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Millersville"
+          },
+          {
+            "name": "Hendersonville",
+            "at_mi": 52.3,
+            "off_mi": 4.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153635063, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hendersonville"
+          },
+          {
+            "name": "Lakewood",
+            "at_mi": 53.7,
+            "off_mi": 5.77,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153549407, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lakewood"
+          },
+          {
             "name": "Cumberland River",
             "category": "river",
             "kind": "point",
             "at_mi": 57.2,
             "spoken": "Crossing the Cumberland River"
+          },
+          {
+            "name": "Oak Hill",
+            "at_mi": 65.0,
+            "off_mi": 5.18,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153672881, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Oak Hill"
+          },
+          {
+            "name": "Belle Meade",
+            "at_mi": 65.0,
+            "off_mi": 6.25,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153426830, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Belle Meade"
+          },
+          {
+            "name": "Forest Hills",
+            "at_mi": 65.0,
+            "off_mi": 7.41,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153461279, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Forest Hills"
+          },
+          {
+            "name": "Brentwood",
+            "at_mi": 65.0,
+            "off_mi": 8.99,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153802028, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Brentwood"
           }
         ],
         "speed_limits": [
@@ -2815,11 +3355,92 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Lebanon Junction",
+            "at_mi": 0.0,
+            "off_mi": 11.94,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153705633, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lebanon Junction"
+          },
+          {
+            "name": "Cecilia",
+            "at_mi": 0.9,
+            "off_mi": 4.96,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153433551, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cecilia"
+          },
+          {
+            "name": "Rineyville",
+            "at_mi": 0.9,
+            "off_mi": 6.86,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153393342, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rineyville"
+          },
+          {
+            "name": "Vine Grove",
+            "at_mi": 0.9,
+            "off_mi": 10.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153700003, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Vine Grove"
+          },
+          {
+            "name": "Radcliff",
+            "at_mi": 0.9,
+            "off_mi": 11.08,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153377035, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Radcliff"
+          },
+          {
+            "name": "Glendale",
+            "at_mi": 8.9,
+            "off_mi": 2.05,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153422988, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Glendale"
+          },
+          {
             "name": "Nolin River",
             "category": "river",
             "kind": "point",
             "at_mi": 9.1,
             "spoken": "Crossing the Nolin River"
+          },
+          {
+            "name": "Hodgenville",
+            "at_mi": 9.2,
+            "off_mi": 7.2,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153563166, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hodgenville"
+          },
+          {
+            "name": "Sonora",
+            "at_mi": 13.9,
+            "off_mi": 0.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153597739, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Sonora"
+          },
+          {
+            "name": "Bonnieville",
+            "at_mi": 24.3,
+            "off_mi": 0.76,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153587305, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bonnieville"
           },
           {
             "name": "Green River",
@@ -2829,6 +3450,42 @@
             "spoken": "Crossing the Green River"
           },
           {
+            "name": "Munfordville",
+            "at_mi": 31.3,
+            "off_mi": 1.18,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153343428, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Munfordville"
+          },
+          {
+            "name": "Horse Cave",
+            "at_mi": 37.5,
+            "off_mi": 2.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153559476, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Horse Cave"
+          },
+          {
+            "name": "Glasgow",
+            "at_mi": 43.3,
+            "off_mi": 9.92,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153800686, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Glasgow"
+          },
+          {
+            "name": "Park City",
+            "at_mi": 47.0,
+            "off_mi": 0.52,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153352394, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Park City"
+          },
+          {
             "name": "National Cave Museum and Library",
             "category": "museum",
             "kind": "point",
@@ -2836,11 +3493,47 @@
             "spoken": "National Cave Museum and Library ahead"
           },
           {
+            "name": "Brownsville",
+            "at_mi": 57.4,
+            "off_mi": 10.76,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153516819, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Brownsville"
+          },
+          {
+            "name": "Oakland",
+            "at_mi": 58.7,
+            "off_mi": 0.75,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153460849, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Oakland"
+          },
+          {
             "name": "Barren River",
             "category": "river",
             "kind": "point",
             "at_mi": 66.2,
             "spoken": "Crossing the Barren River"
+          },
+          {
+            "name": "Plum Springs",
+            "at_mi": 66.4,
+            "off_mi": 1.1,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153512635, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Plum Springs"
+          },
+          {
+            "name": "Woodburn",
+            "at_mi": 74.2,
+            "off_mi": 8.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153509992, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Woodburn"
           }
         ],
         "speed_limits": [
@@ -4301,6 +4994,123 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Hodgenville",
+            "at_mi": 0.2,
+            "off_mi": 10.5,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153563166, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hodgenville"
+          },
+          {
+            "name": "Sonora",
+            "at_mi": 0.5,
+            "off_mi": 11.52,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153597739, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sonora"
+          },
+          {
+            "name": "Glendale",
+            "at_mi": 0.7,
+            "off_mi": 6.44,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153422988, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Glendale"
+          },
+          {
+            "name": "Cecilia",
+            "at_mi": 1.6,
+            "off_mi": 4.72,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153433551, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cecilia"
+          },
+          {
+            "name": "Lebanon Junction",
+            "at_mi": 8.1,
+            "off_mi": 10.33,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153705633, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lebanon Junction"
+          },
+          {
+            "name": "Rineyville",
+            "at_mi": 9.6,
+            "off_mi": 3.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153393342, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rineyville"
+          },
+          {
+            "name": "Radcliff",
+            "at_mi": 12.5,
+            "off_mi": 1.61,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153377035, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Radcliff"
+          },
+          {
+            "name": "Vine Grove",
+            "at_mi": 13.3,
+            "off_mi": 1.04,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153700003, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Vine Grove"
+          },
+          {
+            "name": "Flaherty",
+            "at_mi": 17.9,
+            "off_mi": 0.42,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153379368, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Flaherty"
+          },
+          {
+            "name": "West Point",
+            "at_mi": 21.6,
+            "off_mi": 11.4,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 4232936792, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing West Point"
+          },
+          {
+            "name": "Brandenburg",
+            "at_mi": 24.5,
+            "off_mi": 7.66,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153778640, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Brandenburg"
+          },
+          {
+            "name": "Ekron",
+            "at_mi": 25.4,
+            "off_mi": 3.0,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153516170, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Ekron"
+          },
+          {
+            "name": "Cloverport",
+            "at_mi": 59.3,
+            "off_mi": 0.58,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153673959, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cloverport"
+          },
+          {
             "name": "Ohio River",
             "category": "river",
             "kind": "point",
@@ -4313,6 +5123,141 @@
             "kind": "point",
             "at_mi": 67.6,
             "spoken": "Perry County Museum ahead"
+          },
+          {
+            "name": "Hawesville",
+            "at_mi": 68.6,
+            "off_mi": 0.07,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153797542, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Hawesville"
+          },
+          {
+            "name": "Cannelton",
+            "at_mi": 68.7,
+            "off_mi": 1.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153443017, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cannelton"
+          },
+          {
+            "name": "Tell City",
+            "at_mi": 70.9,
+            "off_mi": 2.59,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153365026, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tell City"
+          },
+          {
+            "name": "Troy",
+            "at_mi": 73.4,
+            "off_mi": 4.8,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153594220, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Troy"
+          },
+          {
+            "name": "Lewisport",
+            "at_mi": 76.9,
+            "off_mi": 0.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153743040, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lewisport"
+          },
+          {
+            "name": "Chrisney",
+            "at_mi": 88.1,
+            "off_mi": 7.2,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153710595, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Chrisney"
+          },
+          {
+            "name": "Grandview",
+            "at_mi": 88.3,
+            "off_mi": 3.51,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153452976, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Grandview"
+          },
+          {
+            "name": "Rockport",
+            "at_mi": 89.7,
+            "off_mi": 0.58,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153455747, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rockport"
+          },
+          {
+            "name": "Hatfield",
+            "at_mi": 99.3,
+            "off_mi": 0.31,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153768639, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Hatfield"
+          },
+          {
+            "name": "Newburgh",
+            "at_mi": 108.9,
+            "off_mi": 1.47,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153411715, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Newburgh"
+          },
+          {
+            "name": "Boonville",
+            "at_mi": 111.0,
+            "off_mi": 7.91,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153560274, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Boonville"
+          },
+          {
+            "name": "Chandler",
+            "at_mi": 111.3,
+            "off_mi": 4.65,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153532704, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Chandler"
+          },
+          {
+            "name": "Highland",
+            "at_mi": 120.5,
+            "off_mi": 4.69,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153803101, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Highland"
+          },
+          {
+            "name": "Darmstadt",
+            "at_mi": 120.5,
+            "off_mi": 8.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153758417, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Darmstadt"
+          },
+          {
+            "name": "Armstrong",
+            "at_mi": 120.5,
+            "off_mi": 10.3,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153526368, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Armstrong"
           }
         ],
         "speed_limits": [
@@ -5252,6 +6197,15 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Vicco",
+            "at_mi": 0.2,
+            "off_mi": 7.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154174477, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Vicco"
+          },
+          {
             "name": "North Fork Kentucky River",
             "category": "river",
             "kind": "point",
@@ -5266,11 +6220,137 @@
             "spoken": "Crossing the Middle Fork Kentucky River"
           },
           {
+            "name": "Buckhorn",
+            "at_mi": 16.1,
+            "off_mi": 10.14,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154349975, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Buckhorn"
+          },
+          {
+            "name": "Hyden",
+            "at_mi": 17.8,
+            "off_mi": 3.0,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154321372, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hyden"
+          },
+          {
             "name": "Red Bird River",
             "category": "river",
             "kind": "point",
             "at_mi": 21.3,
             "spoken": "Crossing the Red Bird River"
+          },
+          {
+            "name": "Oneida",
+            "at_mi": 32.9,
+            "off_mi": 5.93,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154375724, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Oneida"
+          },
+          {
+            "name": "Burning Springs",
+            "at_mi": 46.0,
+            "off_mi": 7.33,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154357091, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Burning Springs"
+          },
+          {
+            "name": "Bush",
+            "at_mi": 50.3,
+            "off_mi": 2.31,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154207689, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bush"
+          },
+          {
+            "name": "Gray",
+            "at_mi": 56.7,
+            "off_mi": 11.42,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154132745, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Gray"
+          },
+          {
+            "name": "McWhorter",
+            "at_mi": 59.8,
+            "off_mi": 8.06,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153962943, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing McWhorter"
+          },
+          {
+            "name": "Greenmount",
+            "at_mi": 59.8,
+            "off_mi": 8.39,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153830473, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Greenmount"
+          },
+          {
+            "name": "Lily",
+            "at_mi": 61.4,
+            "off_mi": 5.97,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154304345, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lily"
+          },
+          {
+            "name": "Hopewell",
+            "at_mi": 61.4,
+            "off_mi": 8.28,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154309384, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hopewell"
+          },
+          {
+            "name": "Keavy",
+            "at_mi": 61.4,
+            "off_mi": 9.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154132769, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Keavy"
+          },
+          {
+            "name": "Corbin",
+            "at_mi": 61.4,
+            "off_mi": 11.32,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153883934, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Corbin"
+          },
+          {
+            "name": "East Bernstadt",
+            "at_mi": 63.0,
+            "off_mi": 4.58,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153905017, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing East Bernstadt"
+          },
+          {
+            "name": "Bernstadt",
+            "at_mi": 63.0,
+            "off_mi": 6.39,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154359483, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bernstadt"
           }
         ],
         "speed_limits": [
@@ -6453,11 +7533,281 @@
         ],
         "landmarks": [
           {
+            "name": "Stamping Ground",
+            "at_mi": 18.9,
+            "off_mi": 6.97,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154331175, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Stamping Ground"
+          },
+          {
+            "name": "Sadieville",
+            "at_mi": 25.9,
+            "off_mi": 1.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153990344, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sadieville"
+          },
+          {
+            "name": "Dry Ridge",
+            "at_mi": 47.8,
+            "off_mi": 0.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154364809, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Dry Ridge"
+          },
+          {
+            "name": "Crittenden",
+            "at_mi": 54.9,
+            "off_mi": 0.21,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154111592, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Crittenden"
+          },
+          {
+            "name": "Walton",
+            "at_mi": 61.6,
+            "off_mi": 0.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154349961, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Walton"
+          },
+          {
+            "name": "Independence",
+            "at_mi": 65.7,
+            "off_mi": 4.73,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154109152, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Independence"
+          },
+          {
+            "name": "Union",
+            "at_mi": 66.9,
+            "off_mi": 2.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154075381, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Union"
+          },
+          {
+            "name": "Burlington",
+            "at_mi": 70.5,
+            "off_mi": 4.5,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154400206, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Burlington"
+          },
+          {
+            "name": "Hebron",
+            "at_mi": 70.9,
+            "off_mi": 5.26,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153954664, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hebron"
+          },
+          {
+            "name": "Elsmere",
+            "at_mi": 72.6,
+            "off_mi": 0.91,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154039098, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Elsmere"
+          },
+          {
             "name": "Ohio River",
             "category": "river",
             "kind": "point",
             "at_mi": 72.8,
             "spoken": "Crossing the Ohio River"
+          },
+          {
+            "name": "Erlanger",
+            "at_mi": 73.0,
+            "off_mi": 0.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153995231, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Erlanger"
+          },
+          {
+            "name": "Edgewood",
+            "at_mi": 74.1,
+            "off_mi": 1.43,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153969271, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Edgewood"
+          },
+          {
+            "name": "Crestview Hills",
+            "at_mi": 74.5,
+            "off_mi": 0.85,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154352178, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Crestview Hills"
+          },
+          {
+            "name": "Lakeside Park",
+            "at_mi": 75.2,
+            "off_mi": 0.77,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154031861, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lakeside Park"
+          },
+          {
+            "name": "Crescent Springs",
+            "at_mi": 75.3,
+            "off_mi": 0.5,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153876294, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Crescent Springs"
+          },
+          {
+            "name": "Villa Hills",
+            "at_mi": 75.7,
+            "off_mi": 1.51,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154395635, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Villa Hills"
+          },
+          {
+            "name": "Latonia Lakes",
+            "at_mi": 76.9,
+            "off_mi": 6.43,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153964846, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Latonia Lakes"
+          },
+          {
+            "name": "Taylor Mill",
+            "at_mi": 78.4,
+            "off_mi": 4.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154079396, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Taylor Mill"
+          },
+          {
+            "name": "Fairview",
+            "at_mi": 78.4,
+            "off_mi": 4.82,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153870970, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fairview"
+          },
+          {
+            "name": "Highland Heights",
+            "at_mi": 78.8,
+            "off_mi": 4.31,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154102040, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Highland Heights"
+          },
+          {
+            "name": "Cold Spring",
+            "at_mi": 78.8,
+            "off_mi": 5.29,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154047781, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cold Spring"
+          },
+          {
+            "name": "Crestview",
+            "at_mi": 78.8,
+            "off_mi": 6.21,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154098563, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Crestview"
+          },
+          {
+            "name": "Silver Grove",
+            "at_mi": 78.9,
+            "off_mi": 7.34,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154194487, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Silver Grove"
+          },
+          {
+            "name": "Cheviot",
+            "at_mi": 81.5,
+            "off_mi": 6.25,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154204350, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cheviot"
+          },
+          {
+            "name": "Saint Bernard",
+            "at_mi": 81.9,
+            "off_mi": 4.42,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154120112, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Saint Bernard"
+          },
+          {
+            "name": "Norwood",
+            "at_mi": 81.9,
+            "off_mi": 4.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154013475, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Norwood"
+          },
+          {
+            "name": "Elmwood Place",
+            "at_mi": 81.9,
+            "off_mi": 5.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153852932, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Elmwood Place"
+          },
+          {
+            "name": "Golf Manor",
+            "at_mi": 81.9,
+            "off_mi": 6.75,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154049837, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Golf Manor"
+          },
+          {
+            "name": "Fairfax",
+            "at_mi": 81.9,
+            "off_mi": 6.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153937179, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fairfax"
+          },
+          {
+            "name": "Mariemont",
+            "at_mi": 81.9,
+            "off_mi": 7.92,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154021850, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mariemont"
           }
         ],
         "restrictions": [
@@ -7403,11 +8753,47 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Nicholasville",
+            "at_mi": 4.5,
+            "off_mi": 11.3,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154331140, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Nicholasville"
+          },
+          {
+            "name": "Midway",
+            "at_mi": 10.2,
+            "off_mi": 7.16,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153840159, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Midway"
+          },
+          {
             "name": "Kentucky River",
             "category": "river",
             "kind": "point",
             "at_mi": 10.8,
             "spoken": "Crossing the Kentucky River"
+          },
+          {
+            "name": "Wilmore",
+            "at_mi": 15.7,
+            "off_mi": 11.57,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 3189554548, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wilmore"
+          },
+          {
+            "name": "Lawrenceburg",
+            "at_mi": 21.8,
+            "off_mi": 4.27,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153849611, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lawrenceburg"
           },
           {
             "name": "Salt River",
@@ -7424,11 +8810,146 @@
             "spoken": "Crossing the Chaplin River"
           },
           {
+            "name": "Mackville",
+            "at_mi": 39.7,
+            "off_mi": 10.5,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153675761, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mackville"
+          },
+          {
+            "name": "Willisburg",
+            "at_mi": 39.8,
+            "off_mi": 4.57,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153783103, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Willisburg"
+          },
+          {
+            "name": "Taylorsville",
+            "at_mi": 47.5,
+            "off_mi": 11.18,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 2693057982, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Taylorsville"
+          },
+          {
+            "name": "Bloomfield",
+            "at_mi": 47.7,
+            "off_mi": 2.76,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153745685, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bloomfield"
+          },
+          {
+            "name": "Bardstown",
+            "at_mi": 57.8,
+            "off_mi": 2.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153524816, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bardstown"
+          },
+          {
             "name": "Bardstown Civil War Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 59.1,
             "spoken": "Bardstown Civil War Museum ahead"
+          },
+          {
+            "name": "Loretto",
+            "at_mi": 59.2,
+            "off_mi": 10.27,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153787762, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Loretto"
+          },
+          {
+            "name": "New Haven",
+            "at_mi": 67.1,
+            "off_mi": 7.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153540499, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing New Haven"
+          },
+          {
+            "name": "Lebanon Junction",
+            "at_mi": 72.2,
+            "off_mi": 6.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153705633, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lebanon Junction"
+          },
+          {
+            "name": "Hodgenville",
+            "at_mi": 77.2,
+            "off_mi": 10.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153563166, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hodgenville"
+          },
+          {
+            "name": "Radcliff",
+            "at_mi": 82.5,
+            "off_mi": 10.88,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153377035, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Radcliff"
+          },
+          {
+            "name": "Vine Grove",
+            "at_mi": 83.4,
+            "off_mi": 10.3,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153700003, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Vine Grove"
+          },
+          {
+            "name": "Cecilia",
+            "at_mi": 84.0,
+            "off_mi": 5.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153433551, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cecilia"
+          },
+          {
+            "name": "Glendale",
+            "at_mi": 84.0,
+            "off_mi": 6.86,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153422988, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Glendale"
+          },
+          {
+            "name": "Rineyville",
+            "at_mi": 84.0,
+            "off_mi": 7.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153393342, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rineyville"
+          },
+          {
+            "name": "Sonora",
+            "at_mi": 84.0,
+            "off_mi": 11.88,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153597739, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sonora"
           }
         ],
         "speed_limits": [
@@ -8739,6 +10260,276 @@
             "kind": "point",
             "at_mi": 28.2,
             "spoken": "Crossing the Kentucky River"
+          },
+          {
+            "name": "Simpsonville",
+            "at_mi": 53.8,
+            "off_mi": 0.92,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153413411, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Simpsonville"
+          },
+          {
+            "name": "Woodland Hills",
+            "at_mi": 63.1,
+            "off_mi": 1.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153492136, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Woodland Hills"
+          },
+          {
+            "name": "Middletown",
+            "at_mi": 63.9,
+            "off_mi": 1.47,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153563666, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Middletown"
+          },
+          {
+            "name": "Douglass Hills",
+            "at_mi": 64.6,
+            "off_mi": 0.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153592594, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Douglass Hills"
+          },
+          {
+            "name": "Blue Ridge Manor",
+            "at_mi": 65.0,
+            "off_mi": 1.38,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153670413, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Blue Ridge Manor"
+          },
+          {
+            "name": "Sycamore",
+            "at_mi": 65.0,
+            "off_mi": 1.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153592607, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sycamore"
+          },
+          {
+            "name": "Forest Hills",
+            "at_mi": 66.1,
+            "off_mi": 0.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153371562, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Forest Hills"
+          },
+          {
+            "name": "Wildwood",
+            "at_mi": 66.3,
+            "off_mi": 1.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153383781, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wildwood"
+          },
+          {
+            "name": "Hurstbourne Acres",
+            "at_mi": 66.6,
+            "off_mi": 0.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153707459, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Hurstbourne Acres"
+          },
+          {
+            "name": "Hurstbourne",
+            "at_mi": 66.9,
+            "off_mi": 0.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153350935, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hurstbourne"
+          },
+          {
+            "name": "Bellemeade",
+            "at_mi": 67.4,
+            "off_mi": 1.57,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153675007, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bellemeade"
+          },
+          {
+            "name": "Houston Acres",
+            "at_mi": 67.6,
+            "off_mi": 1.31,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153793642, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Houston Acres"
+          },
+          {
+            "name": "Cambridge",
+            "at_mi": 67.9,
+            "off_mi": 0.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153656190, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cambridge"
+          },
+          {
+            "name": "Lincolnshire",
+            "at_mi": 68.2,
+            "off_mi": 0.91,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153780675, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lincolnshire"
+          },
+          {
+            "name": "Lyndon",
+            "at_mi": 68.2,
+            "off_mi": 1.65,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153493209, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lyndon"
+          },
+          {
+            "name": "Norwood",
+            "at_mi": 68.5,
+            "off_mi": 1.13,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153725797, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Norwood"
+          },
+          {
+            "name": "Beechwood Village",
+            "at_mi": 68.9,
+            "off_mi": 1.16,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153767857, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Beechwood Village"
+          },
+          {
+            "name": "Woodlawn Park",
+            "at_mi": 68.9,
+            "off_mi": 1.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153438909, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Woodlawn Park"
+          },
+          {
+            "name": "Richlawn",
+            "at_mi": 69.1,
+            "off_mi": 1.3,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153592855, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Richlawn"
+          },
+          {
+            "name": "Meadowview Estates",
+            "at_mi": 69.4,
+            "off_mi": 0.95,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153569018, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Meadowview Estates"
+          },
+          {
+            "name": "Norbourne Estates",
+            "at_mi": 70.0,
+            "off_mi": 0.72,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153650989, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Norbourne Estates"
+          },
+          {
+            "name": "Wellington",
+            "at_mi": 70.7,
+            "off_mi": 1.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153762032, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wellington"
+          },
+          {
+            "name": "Bellewood",
+            "at_mi": 71.1,
+            "off_mi": 1.38,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153642414, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bellewood"
+          },
+          {
+            "name": "Druid Hills",
+            "at_mi": 71.2,
+            "off_mi": 1.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153657759, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Druid Hills"
+          },
+          {
+            "name": "Kingsley",
+            "at_mi": 71.3,
+            "off_mi": 1.18,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11286167736, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Kingsley"
+          },
+          {
+            "name": "Brownsboro Village",
+            "at_mi": 71.3,
+            "off_mi": 1.71,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153471069, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Brownsboro Village"
+          },
+          {
+            "name": "Seneca Gardens",
+            "at_mi": 71.5,
+            "off_mi": 0.73,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153343393, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Seneca Gardens"
+          },
+          {
+            "name": "Strathmoor Village",
+            "at_mi": 71.5,
+            "off_mi": 1.13,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153524831, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Strathmoor Village"
+          },
+          {
+            "name": "Strathmoor Manor",
+            "at_mi": 71.6,
+            "off_mi": 1.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153349386, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Strathmoor Manor"
+          },
+          {
+            "name": "Rolling Fields",
+            "at_mi": 72.1,
+            "off_mi": 1.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153367658, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rolling Fields"
           }
         ],
         "restrictions": []
@@ -9228,11 +11019,65 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Nicholasville",
+            "at_mi": 0.1,
+            "off_mi": 11.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154331140, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Nicholasville"
+          },
+          {
             "name": "Bluegrass Heritage Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 20.7,
             "spoken": "Bluegrass Heritage Museum ahead"
+          },
+          {
+            "name": "North Middletown",
+            "at_mi": 29.0,
+            "off_mi": 7.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154052167, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing North Middletown"
+          },
+          {
+            "name": "Sharpsburg",
+            "at_mi": 34.4,
+            "off_mi": 8.72,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154352208, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sharpsburg"
+          },
+          {
+            "name": "Owingsville",
+            "at_mi": 34.4,
+            "off_mi": 11.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154397100, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Owingsville"
+          },
+          {
+            "name": "Camargo",
+            "at_mi": 35.9,
+            "off_mi": 5.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154100835, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Camargo"
+          },
+          {
+            "name": "Jeffersonville",
+            "at_mi": 35.9,
+            "off_mi": 7.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153864312, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jeffersonville"
           }
         ],
         "speed_limits": [
@@ -9762,6 +11607,24 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
+          {
+            "name": "Nicholasville",
+            "at_mi": 6.1,
+            "off_mi": 10.71,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154331140, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Nicholasville"
+          },
+          {
+            "name": "Winchester",
+            "at_mi": 12.9,
+            "off_mi": 11.34,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153998923, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Winchester"
+          },
           {
             "name": "Kentucky River",
             "category": "river",
@@ -11131,6 +12994,132 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Lily",
+            "at_mi": 0.0,
+            "off_mi": 7.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154304345, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lily"
+          },
+          {
+            "name": "Hopewell",
+            "at_mi": 0.0,
+            "off_mi": 9.43,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154309384, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hopewell"
+          },
+          {
+            "name": "Keavy",
+            "at_mi": 0.0,
+            "off_mi": 9.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154132769, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Keavy"
+          },
+          {
+            "name": "Greenmount",
+            "at_mi": 1.5,
+            "off_mi": 7.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153830473, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Greenmount"
+          },
+          {
+            "name": "McWhorter",
+            "at_mi": 1.5,
+            "off_mi": 8.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153962943, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing McWhorter"
+          },
+          {
+            "name": "East Bernstadt",
+            "at_mi": 3.0,
+            "off_mi": 2.72,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153905017, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing East Bernstadt"
+          },
+          {
+            "name": "Bernstadt",
+            "at_mi": 6.9,
+            "off_mi": 0.13,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154359483, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Bernstadt"
+          },
+          {
+            "name": "Livingston",
+            "at_mi": 8.8,
+            "off_mi": 9.35,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153909771, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Livingston"
+          },
+          {
+            "name": "Eubank",
+            "at_mi": 27.5,
+            "off_mi": 11.43,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154087760, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Eubank"
+          },
+          {
+            "name": "Ferguson",
+            "at_mi": 34.1,
+            "off_mi": 2.21,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154303543, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Ferguson"
+          },
+          {
+            "name": "Burnside",
+            "at_mi": 34.3,
+            "off_mi": 7.31,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154286817, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Burnside"
+          },
+          {
+            "name": "Science Hill",
+            "at_mi": 37.2,
+            "off_mi": 4.99,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153943076, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Science Hill"
+          },
+          {
+            "name": "Jamestown",
+            "at_mi": 61.5,
+            "off_mi": 4.59,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153649705, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jamestown"
+          },
+          {
+            "name": "Edmonton",
+            "at_mi": 94.0,
+            "off_mi": 1.44,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153371609, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Edmonton"
+          },
+          {
             "name": "South Fork Little Barren River",
             "category": "river",
             "kind": "point",
@@ -11145,11 +13134,83 @@
             "spoken": "Crossing the East Fork Little Barren River"
           },
           {
+            "name": "Glasgow",
+            "at_mi": 109.2,
+            "off_mi": 1.29,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153800686, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Glasgow"
+          },
+          {
+            "name": "Cave City",
+            "at_mi": 120.2,
+            "off_mi": 8.91,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153373095, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cave City"
+          },
+          {
+            "name": "Park City",
+            "at_mi": 121.0,
+            "off_mi": 3.7,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153352394, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Park City"
+          },
+          {
+            "name": "Smiths Grove",
+            "at_mi": 128.9,
+            "off_mi": 0.72,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153767869, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Smiths Grove"
+          },
+          {
+            "name": "Brownsville",
+            "at_mi": 129.4,
+            "off_mi": 10.76,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153516819, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Brownsville"
+          },
+          {
+            "name": "Oakland",
+            "at_mi": 130.7,
+            "off_mi": 0.75,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153460849, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Oakland"
+          },
+          {
             "name": "Barren River",
             "category": "river",
             "kind": "point",
             "at_mi": 133.0,
             "spoken": "Crossing the Barren River"
+          },
+          {
+            "name": "Plum Springs",
+            "at_mi": 138.4,
+            "off_mi": 1.1,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153512635, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Plum Springs"
+          },
+          {
+            "name": "Woodburn",
+            "at_mi": 146.2,
+            "off_mi": 8.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153509992, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Woodburn"
           }
         ],
         "speed_limits": [
@@ -12417,11 +14478,119 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "East Bernstadt",
+            "at_mi": 0.0,
+            "off_mi": 4.58,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153905017, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing East Bernstadt"
+          },
+          {
+            "name": "Greenmount",
+            "at_mi": 0.0,
+            "off_mi": 8.44,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153830473, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Greenmount"
+          },
+          {
+            "name": "McWhorter",
+            "at_mi": 0.0,
+            "off_mi": 8.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153962943, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing McWhorter"
+          },
+          {
+            "name": "Bernstadt",
+            "at_mi": 1.9,
+            "off_mi": 5.95,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154359483, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bernstadt"
+          },
+          {
+            "name": "Lily",
+            "at_mi": 7.9,
+            "off_mi": 1.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154304345, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lily"
+          },
+          {
+            "name": "Keavy",
+            "at_mi": 9.8,
+            "off_mi": 3.0,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154132769, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Keavy"
+          },
+          {
+            "name": "Hopewell",
+            "at_mi": 9.9,
+            "off_mi": 0.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154309384, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hopewell"
+          },
+          {
+            "name": "Gray",
+            "at_mi": 11.8,
+            "off_mi": 6.04,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154132745, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Gray"
+          },
+          {
             "name": "Laurel River",
             "category": "river",
             "kind": "point",
             "at_mi": 13.6,
             "spoken": "Crossing the Laurel River"
+          },
+          {
+            "name": "Woodbine",
+            "at_mi": 15.7,
+            "off_mi": 2.4,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154296682, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Woodbine"
+          },
+          {
+            "name": "Rockholds",
+            "at_mi": 22.0,
+            "off_mi": 2.66,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154365738, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rockholds"
+          },
+          {
+            "name": "Emlyn",
+            "at_mi": 31.6,
+            "off_mi": 0.32,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154397089, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Emlyn"
+          },
+          {
+            "name": "Pleasant View",
+            "at_mi": 33.6,
+            "off_mi": 0.24,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154110557, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Pleasant View"
           },
           {
             "name": "Cumberland River",
@@ -12431,11 +14600,110 @@
             "spoken": "Crossing the Cumberland River"
           },
           {
+            "name": "Jellico",
+            "at_mi": 41.2,
+            "off_mi": 1.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154195635, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jellico"
+          },
+          {
+            "name": "Huntsville",
+            "at_mi": 56.0,
+            "off_mi": 11.06,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154324607, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Huntsville"
+          },
+          {
+            "name": "LaFollette",
+            "at_mi": 62.1,
+            "off_mi": 6.43,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154371247, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing LaFollette"
+          },
+          {
+            "name": "Jacksboro",
+            "at_mi": 64.8,
+            "off_mi": 2.39,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153928166, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jacksboro"
+          },
+          {
+            "name": "Rocky Top",
+            "at_mi": 74.0,
+            "off_mi": 0.41,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153952618, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Rocky Top"
+          },
+          {
             "name": "Norris Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 77.9,
             "spoken": "Norris Museum ahead"
+          },
+          {
+            "name": "Norris",
+            "at_mi": 78.3,
+            "off_mi": 1.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154069453, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Norris"
+          },
+          {
+            "name": "Clinton",
+            "at_mi": 80.7,
+            "off_mi": 4.96,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154013998, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Clinton"
+          },
+          {
+            "name": "Halls",
+            "at_mi": 87.8,
+            "off_mi": 4.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154153464, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Halls"
+          },
+          {
+            "name": "Powell",
+            "at_mi": 91.0,
+            "off_mi": 1.61,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153916135, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Powell"
+          },
+          {
+            "name": "Rockford",
+            "at_mi": 98.0,
+            "off_mi": 9.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153864816, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rockford"
+          },
+          {
+            "name": "Louisville",
+            "at_mi": 98.0,
+            "off_mi": 11.92,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154165404, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Louisville"
           }
         ],
         "speed_limits": [
@@ -13420,11 +15688,263 @@
         ],
         "landmarks": [
           {
+            "name": "Shively",
+            "at_mi": 0.0,
+            "off_mi": 5.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153708193, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Shively"
+          },
+          {
+            "name": "Seneca Gardens",
+            "at_mi": 0.3,
+            "off_mi": 4.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153343393, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Seneca Gardens"
+          },
+          {
+            "name": "Strathmoor Manor",
+            "at_mi": 0.3,
+            "off_mi": 4.5,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153349386, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Strathmoor Manor"
+          },
+          {
+            "name": "Strathmoor Village",
+            "at_mi": 0.3,
+            "off_mi": 4.61,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153524831, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Strathmoor Village"
+          },
+          {
+            "name": "Kingsley",
+            "at_mi": 0.3,
+            "off_mi": 4.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11286167736, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Kingsley"
+          },
+          {
+            "name": "Wellington",
+            "at_mi": 0.3,
+            "off_mi": 5.24,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153762032, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wellington"
+          },
+          {
+            "name": "Watterson Park",
+            "at_mi": 0.3,
+            "off_mi": 5.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153702867, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Watterson Park"
+          },
+          {
+            "name": "Lynnview",
+            "at_mi": 0.3,
+            "off_mi": 5.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153725460, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lynnview"
+          },
+          {
+            "name": "Brownsboro Village",
+            "at_mi": 1.8,
+            "off_mi": 4.58,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153471069, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Brownsboro Village"
+          },
+          {
+            "name": "Bellewood",
+            "at_mi": 1.8,
+            "off_mi": 4.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153642414, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bellewood"
+          },
+          {
+            "name": "Mockingbird Valley",
+            "at_mi": 1.9,
+            "off_mi": 3.61,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153785389, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mockingbird Valley"
+          },
+          {
+            "name": "Rolling Fields",
+            "at_mi": 1.9,
+            "off_mi": 4.21,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153367658, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rolling Fields"
+          },
+          {
+            "name": "Indian Hills",
+            "at_mi": 1.9,
+            "off_mi": 4.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153343447, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Indian Hills"
+          },
+          {
+            "name": "Riverwood",
+            "at_mi": 1.9,
+            "off_mi": 4.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153787227, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Riverwood"
+          },
+          {
+            "name": "Druid Hills",
+            "at_mi": 1.9,
+            "off_mi": 4.79,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153657759, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Druid Hills"
+          },
+          {
+            "name": "Maryhill Estates",
+            "at_mi": 1.9,
+            "off_mi": 5.37,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153604233, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Maryhill Estates"
+          },
+          {
+            "name": "New Albany",
+            "at_mi": 3.1,
+            "off_mi": 3.63,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153628992, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing New Albany"
+          },
+          {
+            "name": "Glenview",
+            "at_mi": 4.4,
+            "off_mi": 5.51,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153399588, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Glenview"
+          },
+          {
+            "name": "Goose Creek",
+            "at_mi": 4.6,
+            "off_mi": 5.62,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153707336, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Goose Creek"
+          },
+          {
+            "name": "Utica",
+            "at_mi": 6.1,
+            "off_mi": 5.42,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153380012, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Utica"
+          },
+          {
             "name": "Ohio River",
             "category": "river",
             "kind": "point",
             "at_mi": 9.2,
             "spoken": "Crossing the Ohio River"
+          },
+          {
+            "name": "Sellersburg",
+            "at_mi": 10.2,
+            "off_mi": 0.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153512491, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Sellersburg"
+          },
+          {
+            "name": "Charlestown",
+            "at_mi": 12.9,
+            "off_mi": 5.58,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153509404, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Charlestown"
+          },
+          {
+            "name": "Henryville",
+            "at_mi": 20.0,
+            "off_mi": 0.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153670270, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Henryville"
+          },
+          {
+            "name": "Vienna",
+            "at_mi": 27.4,
+            "off_mi": 0.79,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153799471, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Vienna"
+          },
+          {
+            "name": "Scottsburg",
+            "at_mi": 29.7,
+            "off_mi": 0.95,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153542243, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Scottsburg"
+          },
+          {
+            "name": "Little York",
+            "at_mi": 33.6,
+            "off_mi": 5.34,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153516432, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Little York"
+          },
+          {
+            "name": "Austin",
+            "at_mi": 33.8,
+            "off_mi": 0.71,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153479782, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Austin"
+          },
+          {
+            "name": "Crothersville",
+            "at_mi": 38.4,
+            "off_mi": 1.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153618665, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Crothersville"
           },
           {
             "name": "Muscatatuck River",
@@ -13439,6 +15959,24 @@
             "kind": "point",
             "at_mi": 46.1,
             "spoken": "Crossing the Vernon Fork Muscatatuck River"
+          },
+          {
+            "name": "Seymour",
+            "at_mi": 49.6,
+            "off_mi": 2.52,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153409525, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Seymour"
+          },
+          {
+            "name": "Jonesville",
+            "at_mi": 57.1,
+            "off_mi": 1.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153639626, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jonesville"
           },
           {
             "name": "East Fork White River",
@@ -14137,11 +16675,281 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "New Albany",
+            "at_mi": 0.0,
+            "off_mi": 4.2,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153628992, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing New Albany"
+          },
+          {
+            "name": "Mockingbird Valley",
+            "at_mi": 0.4,
+            "off_mi": 4.04,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153785389, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mockingbird Valley"
+          },
+          {
+            "name": "Rolling Fields",
+            "at_mi": 0.4,
+            "off_mi": 4.5,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153367658, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rolling Fields"
+          },
+          {
+            "name": "Brownsboro Village",
+            "at_mi": 0.4,
+            "off_mi": 4.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153471069, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Brownsboro Village"
+          },
+          {
+            "name": "Druid Hills",
+            "at_mi": 0.4,
+            "off_mi": 4.97,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153657759, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Druid Hills"
+          },
+          {
+            "name": "Indian Hills",
+            "at_mi": 0.4,
+            "off_mi": 5.08,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153343447, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Indian Hills"
+          },
+          {
+            "name": "Riverwood",
+            "at_mi": 0.4,
+            "off_mi": 5.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153787227, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Riverwood"
+          },
+          {
+            "name": "Maryhill Estates",
+            "at_mi": 0.4,
+            "off_mi": 5.62,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153604233, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Maryhill Estates"
+          },
+          {
+            "name": "Bellewood",
+            "at_mi": 0.5,
+            "off_mi": 5.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153642414, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bellewood"
+          },
+          {
+            "name": "Shively",
+            "at_mi": 3.4,
+            "off_mi": 3.84,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153708193, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Shively"
+          },
+          {
+            "name": "Strathmoor Manor",
+            "at_mi": 4.6,
+            "off_mi": 3.04,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153349386, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Strathmoor Manor"
+          },
+          {
+            "name": "Strathmoor Village",
+            "at_mi": 4.6,
+            "off_mi": 3.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153524831, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Strathmoor Village"
+          },
+          {
+            "name": "Kingsley",
+            "at_mi": 4.6,
+            "off_mi": 3.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11286167736, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Kingsley"
+          },
+          {
+            "name": "Seneca Gardens",
+            "at_mi": 4.6,
+            "off_mi": 3.69,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153343393, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Seneca Gardens"
+          },
+          {
+            "name": "Wellington",
+            "at_mi": 5.9,
+            "off_mi": 3.71,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153762032, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wellington"
+          },
+          {
+            "name": "Meadowview Estates",
+            "at_mi": 6.0,
+            "off_mi": 5.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153569018, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Meadowview Estates"
+          },
+          {
+            "name": "Watterson Park",
+            "at_mi": 6.3,
+            "off_mi": 2.2,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153702867, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Watterson Park"
+          },
+          {
+            "name": "West Buechel",
+            "at_mi": 6.3,
+            "off_mi": 3.33,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153441163, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing West Buechel"
+          },
+          {
+            "name": "Lynnview",
+            "at_mi": 6.4,
+            "off_mi": 0.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153725460, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lynnview"
+          },
+          {
+            "name": "Poplar Hills",
+            "at_mi": 6.5,
+            "off_mi": 1.44,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153717745, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Poplar Hills"
+          },
+          {
+            "name": "Hollow Creek",
+            "at_mi": 9.9,
+            "off_mi": 4.55,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153680361, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hollow Creek"
+          },
+          {
+            "name": "Spring Mill",
+            "at_mi": 10.0,
+            "off_mi": 4.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153586761, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Spring Mill"
+          },
+          {
+            "name": "Minor Lane Heights",
+            "at_mi": 10.3,
+            "off_mi": 0.95,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153515352, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Minor Lane Heights"
+          },
+          {
+            "name": "Hollyvilla",
+            "at_mi": 12.5,
+            "off_mi": 2.42,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153443265, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hollyvilla"
+          },
+          {
+            "name": "Hunters Hollow",
+            "at_mi": 13.6,
+            "off_mi": 0.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153474367, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Hunters Hollow"
+          },
+          {
+            "name": "Hillview",
+            "at_mi": 14.1,
+            "off_mi": 0.79,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153627868, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hillview"
+          },
+          {
+            "name": "Pioneer Village",
+            "at_mi": 14.8,
+            "off_mi": 1.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153624288, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pioneer Village"
+          },
+          {
+            "name": "Fox Chase",
+            "at_mi": 15.8,
+            "off_mi": 0.26,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153678078, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Fox Chase"
+          },
+          {
+            "name": "Hebron Estates",
+            "at_mi": 15.8,
+            "off_mi": 1.73,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153680541, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hebron Estates"
+          },
+          {
             "name": "Salt River",
             "category": "river",
             "kind": "point",
             "at_mi": 16.4,
             "spoken": "Crossing the Salt River"
+          },
+          {
+            "name": "Shepherdsville",
+            "at_mi": 19.4,
+            "off_mi": 0.69,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153781147, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Shepherdsville"
           }
         ],
         "speed_limits": [
@@ -15163,11 +17971,182 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Lakeview Heights",
+            "at_mi": 2.4,
+            "off_mi": 2.85,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154336940, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lakeview Heights"
+          },
+          {
+            "name": "Salt Lick",
+            "at_mi": 3.0,
+            "off_mi": 8.83,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153900058, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Salt Lick"
+          },
+          {
+            "name": "Olive Hill",
+            "at_mi": 24.8,
+            "off_mi": 1.53,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154066741, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Olive Hill"
+          },
+          {
             "name": "Little Sandy River",
             "category": "river",
             "kind": "point",
             "at_mi": 42.6,
             "spoken": "Crossing the Little Sandy River"
+          },
+          {
+            "name": "Cannonsburg",
+            "at_mi": 52.4,
+            "off_mi": 1.41,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154035597, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cannonsburg"
+          },
+          {
+            "name": "Prichard",
+            "at_mi": 57.1,
+            "off_mi": 9.55,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153851552, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Prichard"
+          },
+          {
+            "name": "Ceredo",
+            "at_mi": 58.5,
+            "off_mi": 2.29,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9968207180, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Ceredo"
+          },
+          {
+            "name": "Catlettsburg",
+            "at_mi": 59.0,
+            "off_mi": 0.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154311566, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Catlettsburg"
+          },
+          {
+            "name": "Burlington",
+            "at_mi": 59.5,
+            "off_mi": 3.76,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153891781, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Burlington"
+          },
+          {
+            "name": "South Point",
+            "at_mi": 59.9,
+            "off_mi": 0.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154044864, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing South Point"
+          },
+          {
+            "name": "Aid",
+            "at_mi": 64.1,
+            "off_mi": 11.12,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153925037, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Aid"
+          },
+          {
+            "name": "Russell",
+            "at_mi": 65.0,
+            "off_mi": 4.19,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154049447, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Russell"
+          },
+          {
+            "name": "Summit",
+            "at_mi": 65.0,
+            "off_mi": 4.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153853573, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Summit"
+          },
+          {
+            "name": "Ironton",
+            "at_mi": 65.0,
+            "off_mi": 4.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153957430, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Ironton"
+          },
+          {
+            "name": "Flatwoods",
+            "at_mi": 65.0,
+            "off_mi": 5.25,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154110462, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Flatwoods"
+          },
+          {
+            "name": "Raceland",
+            "at_mi": 65.0,
+            "off_mi": 6.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153830421, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Raceland"
+          },
+          {
+            "name": "Worthington",
+            "at_mi": 65.0,
+            "off_mi": 6.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153858862, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Worthington"
+          },
+          {
+            "name": "Hanging Rock",
+            "at_mi": 65.0,
+            "off_mi": 7.19,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153831154, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hanging Rock"
+          },
+          {
+            "name": "Wurtland",
+            "at_mi": 65.0,
+            "off_mi": 9.05,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154374268, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wurtland"
+          },
+          {
+            "name": "Lawrence",
+            "at_mi": 65.0,
+            "off_mi": 11.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153849682, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lawrence"
           }
         ],
         "speed_limits": [
@@ -16449,11 +19428,101 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Sharpsburg",
+            "at_mi": 0.0,
+            "off_mi": 10.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154352208, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sharpsburg"
+          },
+          {
+            "name": "North Middletown",
+            "at_mi": 0.0,
+            "off_mi": 10.97,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154052167, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing North Middletown"
+          },
+          {
+            "name": "Owingsville",
+            "at_mi": 0.0,
+            "off_mi": 11.51,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154397100, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Owingsville"
+          },
+          {
+            "name": "Camargo",
+            "at_mi": 3.4,
+            "off_mi": 3.51,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154100835, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Camargo"
+          },
+          {
+            "name": "Jeffersonville",
+            "at_mi": 3.4,
+            "off_mi": 6.35,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153864312, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jeffersonville"
+          },
+          {
+            "name": "Winchester",
+            "at_mi": 8.1,
+            "off_mi": 10.35,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153998923, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Winchester"
+          },
+          {
             "name": "Red River",
             "category": "river",
             "kind": "point",
             "at_mi": 10.6,
             "spoken": "Crossing the Red River"
+          },
+          {
+            "name": "Clay City",
+            "at_mi": 17.7,
+            "off_mi": 0.75,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154037778, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Clay City"
+          },
+          {
+            "name": "Irvine",
+            "at_mi": 19.7,
+            "off_mi": 10.12,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154399203, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Irvine"
+          },
+          {
+            "name": "Ravenna",
+            "at_mi": 19.9,
+            "off_mi": 10.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154149873, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Ravenna"
+          },
+          {
+            "name": "Frenchburg",
+            "at_mi": 29.9,
+            "off_mi": 10.3,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154158517, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Frenchburg"
           },
           {
             "name": "South Fork Red River",
@@ -16463,11 +19532,47 @@
             "spoken": "Crossing the South Fork Red River"
           },
           {
+            "name": "Campton",
+            "at_mi": 43.5,
+            "off_mi": 0.2,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153941440, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Campton"
+          },
+          {
             "name": "North Fork Kentucky River",
             "category": "river",
             "kind": "point",
             "at_mi": 57.7,
             "spoken": "Crossing the North Fork Kentucky River"
+          },
+          {
+            "name": "Buckhorn",
+            "at_mi": 75.3,
+            "off_mi": 11.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154349975, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Buckhorn"
+          },
+          {
+            "name": "Hyden",
+            "at_mi": 92.1,
+            "off_mi": 11.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154321372, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hyden"
+          },
+          {
+            "name": "Vicco",
+            "at_mi": 92.8,
+            "off_mi": 7.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154174477, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Vicco"
           }
         ],
         "state_miles": [
@@ -16938,11 +20043,65 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Camargo",
+            "at_mi": 0.1,
+            "off_mi": 5.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154100835, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Camargo"
+          },
+          {
+            "name": "Jeffersonville",
+            "at_mi": 0.1,
+            "off_mi": 7.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153864312, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jeffersonville"
+          },
+          {
+            "name": "North Middletown",
+            "at_mi": 1.6,
+            "off_mi": 9.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154052167, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing North Middletown"
+          },
+          {
+            "name": "Sharpsburg",
+            "at_mi": 4.1,
+            "off_mi": 8.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154352208, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sharpsburg"
+          },
+          {
             "name": "Licking River",
             "category": "river",
             "kind": "point",
             "at_mi": 21.0,
             "spoken": "Crossing the Licking River"
+          },
+          {
+            "name": "Salt Lick",
+            "at_mi": 21.4,
+            "off_mi": 2.44,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153900058, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Salt Lick"
+          },
+          {
+            "name": "Lakeview Heights",
+            "at_mi": 27.9,
+            "off_mi": 2.37,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154336940, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lakeview Heights"
           }
         ],
         "speed_limits": [
@@ -17552,6 +20711,51 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
+          {
+            "name": "Camargo",
+            "at_mi": 0.1,
+            "off_mi": 5.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154100835, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Camargo"
+          },
+          {
+            "name": "Jeffersonville",
+            "at_mi": 0.1,
+            "off_mi": 7.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153864312, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jeffersonville"
+          },
+          {
+            "name": "Sharpsburg",
+            "at_mi": 1.7,
+            "off_mi": 8.58,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154352208, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sharpsburg"
+          },
+          {
+            "name": "Owingsville",
+            "at_mi": 1.7,
+            "off_mi": 11.06,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154397100, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Owingsville"
+          },
+          {
+            "name": "North Middletown",
+            "at_mi": 7.1,
+            "off_mi": 7.0,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154052167, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing North Middletown"
+          },
           {
             "name": "Bluegrass Heritage Museum",
             "category": "museum",
@@ -18242,11 +21446,83 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Rockport",
+            "at_mi": 0.0,
+            "off_mi": 8.32,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153455747, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rockport"
+          },
+          {
+            "name": "Hatfield",
+            "at_mi": 0.0,
+            "off_mi": 10.88,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153768639, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hatfield"
+          },
+          {
+            "name": "Whitesville",
+            "at_mi": 14.1,
+            "off_mi": 7.44,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153738679, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Whitesville"
+          },
+          {
+            "name": "Livermore",
+            "at_mi": 18.6,
+            "off_mi": 11.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153656470, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Livermore"
+          },
+          {
             "name": "Rough River",
             "category": "river",
             "kind": "point",
             "at_mi": 26.5,
             "spoken": "Crossing the Rough River"
+          },
+          {
+            "name": "Centertown",
+            "at_mi": 27.2,
+            "off_mi": 6.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153397320, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Centertown"
+          },
+          {
+            "name": "McHenry",
+            "at_mi": 29.7,
+            "off_mi": 5.37,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153525809, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing McHenry"
+          },
+          {
+            "name": "Beaver Dam",
+            "at_mi": 32.5,
+            "off_mi": 2.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153814932, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Beaver Dam"
+          },
+          {
+            "name": "Rochester",
+            "at_mi": 45.4,
+            "off_mi": 8.69,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153420604, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rochester"
           },
           {
             "name": "Green River",
@@ -18256,11 +21532,38 @@
             "spoken": "Crossing the Green River"
           },
           {
+            "name": "Morgantown",
+            "at_mi": 49.2,
+            "off_mi": 1.7,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153436843, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Morgantown"
+          },
+          {
             "name": "Gasper River",
             "category": "river",
             "kind": "point",
             "at_mi": 64.8,
             "spoken": "Crossing the Gasper River"
+          },
+          {
+            "name": "Woodburn",
+            "at_mi": 71.7,
+            "off_mi": 8.04,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153509992, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Woodburn"
+          },
+          {
+            "name": "Plum Springs",
+            "at_mi": 73.0,
+            "off_mi": 6.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153512635, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Plum Springs"
           }
         ],
         "speed_limits": [
@@ -18688,6 +21991,87 @@
             "kind": "point",
             "at_mi": 4.8,
             "spoken": "Crossing the Ohio River"
+          },
+          {
+            "name": "Rockport",
+            "at_mi": 7.9,
+            "off_mi": 3.29,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153455747, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rockport"
+          },
+          {
+            "name": "Grandview",
+            "at_mi": 9.2,
+            "off_mi": 7.34,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153452976, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Grandview"
+          },
+          {
+            "name": "Chrisney",
+            "at_mi": 9.2,
+            "off_mi": 8.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153710595, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Chrisney"
+          },
+          {
+            "name": "Lewisport",
+            "at_mi": 9.2,
+            "off_mi": 11.56,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153743040, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lewisport"
+          },
+          {
+            "name": "Boonville",
+            "at_mi": 27.0,
+            "off_mi": 7.91,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153560274, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Boonville"
+          },
+          {
+            "name": "Chandler",
+            "at_mi": 27.3,
+            "off_mi": 4.65,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153532704, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Chandler"
+          },
+          {
+            "name": "Highland",
+            "at_mi": 36.5,
+            "off_mi": 4.69,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153803101, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Highland"
+          },
+          {
+            "name": "Darmstadt",
+            "at_mi": 36.5,
+            "off_mi": 8.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153758417, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Darmstadt"
+          },
+          {
+            "name": "Armstrong",
+            "at_mi": 36.5,
+            "off_mi": 10.3,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153526368, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Armstrong"
           }
         ],
         "speed_limits": [
@@ -19578,6 +22962,33 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Lone Oak",
+            "at_mi": 0.0,
+            "off_mi": 4.8,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153592793, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lone Oak"
+          },
+          {
+            "name": "Metropolis",
+            "at_mi": 0.1,
+            "off_mi": 8.57,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153490026, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Metropolis"
+          },
+          {
+            "name": "Reidland",
+            "at_mi": 6.8,
+            "off_mi": 0.24,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153759298, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Reidland"
+          },
+          {
             "name": "Ohio River",
             "category": "river",
             "kind": "point",
@@ -19592,6 +23003,51 @@
             "spoken": "Crossing the Tennessee River"
           },
           {
+            "name": "Benton",
+            "at_mi": 17.5,
+            "off_mi": 9.15,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153561394, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Benton"
+          },
+          {
+            "name": "Calvert City",
+            "at_mi": 20.3,
+            "off_mi": 2.4,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153630089, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Calvert City"
+          },
+          {
+            "name": "Smithland",
+            "at_mi": 20.6,
+            "off_mi": 10.04,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153473792, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Smithland"
+          },
+          {
+            "name": "Grand Rivers",
+            "at_mi": 23.4,
+            "off_mi": 3.16,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153371594, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Grand Rivers"
+          },
+          {
+            "name": "Kuttawa",
+            "at_mi": 31.3,
+            "off_mi": 1.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153797958, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Kuttawa"
+          },
+          {
             "name": "Cumberland River",
             "category": "river",
             "kind": "point",
@@ -19599,11 +23055,74 @@
             "spoken": "Crossing the Cumberland River"
           },
           {
+            "name": "Fredonia",
+            "at_mi": 34.5,
+            "off_mi": 9.55,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153476517, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fredonia"
+          },
+          {
+            "name": "Princeton",
+            "at_mi": 41.4,
+            "off_mi": 8.4,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153800073, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Princeton"
+          },
+          {
+            "name": "Cadiz",
+            "at_mi": 54.4,
+            "off_mi": 4.55,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153365357, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cadiz"
+          },
+          {
             "name": "Muddy Fork Little River",
             "category": "river",
             "kind": "point",
             "at_mi": 57.5,
             "spoken": "Crossing the Muddy Fork Little River"
+          },
+          {
+            "name": "LaFayette",
+            "at_mi": 72.2,
+            "off_mi": 7.07,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153691064, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing LaFayette"
+          },
+          {
+            "name": "Pembroke",
+            "at_mi": 79.0,
+            "off_mi": 7.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153551770, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pembroke"
+          },
+          {
+            "name": "Trenton",
+            "at_mi": 80.3,
+            "off_mi": 10.69,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153344291, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Trenton"
+          },
+          {
+            "name": "Oak Grove",
+            "at_mi": 81.6,
+            "off_mi": 0.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153539581, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Oak Grove"
           },
           {
             "name": "Little River",
@@ -21051,6 +24570,33 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Lone Oak",
+            "at_mi": 0.0,
+            "off_mi": 4.8,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153592793, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lone Oak"
+          },
+          {
+            "name": "Metropolis",
+            "at_mi": 0.1,
+            "off_mi": 8.57,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153490026, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Metropolis"
+          },
+          {
+            "name": "Reidland",
+            "at_mi": 6.1,
+            "off_mi": 0.71,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153759298, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Reidland"
+          },
+          {
             "name": "Ohio River",
             "category": "river",
             "kind": "point",
@@ -21058,11 +24604,209 @@
             "spoken": "Crossing the Ohio River"
           },
           {
+            "name": "Calvert City",
+            "at_mi": 14.0,
+            "off_mi": 4.83,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153630089, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Calvert City"
+          },
+          {
+            "name": "Grand Rivers",
+            "at_mi": 15.0,
+            "off_mi": 11.29,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153371594, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Grand Rivers"
+          },
+          {
+            "name": "Smithland",
+            "at_mi": 18.7,
+            "off_mi": 0.06,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153473792, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Smithland"
+          },
+          {
+            "name": "Golconda",
+            "at_mi": 27.3,
+            "off_mi": 10.87,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153737390, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Golconda"
+          },
+          {
+            "name": "Rosiclare",
+            "at_mi": 31.6,
+            "off_mi": 11.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153525067, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rosiclare"
+          },
+          {
+            "name": "Elizabethtown",
+            "at_mi": 40.0,
+            "off_mi": 11.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153626866, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Elizabethtown"
+          },
+          {
+            "name": "Fredonia",
+            "at_mi": 45.2,
+            "off_mi": 8.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153476517, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fredonia"
+          },
+          {
+            "name": "Cave-in-Rock",
+            "at_mi": 53.3,
+            "off_mi": 9.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153740311, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cave-in-Rock"
+          },
+          {
+            "name": "Providence",
+            "at_mi": 57.8,
+            "off_mi": 11.16,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153533476, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Providence"
+          },
+          {
+            "name": "Wheatcroft",
+            "at_mi": 60.6,
+            "off_mi": 4.52,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153620277, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wheatcroft"
+          },
+          {
+            "name": "Clay",
+            "at_mi": 60.6,
+            "off_mi": 7.0,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153538808, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Clay"
+          },
+          {
+            "name": "Sturgis",
+            "at_mi": 64.8,
+            "off_mi": 0.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153725564, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Sturgis"
+          },
+          {
             "name": "Tradewater River",
             "category": "river",
             "kind": "point",
             "at_mi": 72.9,
             "spoken": "Crossing the Tradewater River"
+          },
+          {
+            "name": "Morganfield",
+            "at_mi": 74.6,
+            "off_mi": 0.88,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153434453, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Morganfield"
+          },
+          {
+            "name": "Uniontown",
+            "at_mi": 77.5,
+            "off_mi": 6.2,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153480765, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Uniontown"
+          },
+          {
+            "name": "Waverly",
+            "at_mi": 81.9,
+            "off_mi": 0.08,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153729771, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Waverly"
+          },
+          {
+            "name": "Corydon",
+            "at_mi": 88.9,
+            "off_mi": 0.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153397281, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Corydon"
+          },
+          {
+            "name": "Robards",
+            "at_mi": 98.9,
+            "off_mi": 8.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153741883, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Robards"
+          },
+          {
+            "name": "Newburgh",
+            "at_mi": 111.8,
+            "off_mi": 7.5,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 153411715, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Newburgh"
+          },
+          {
+            "name": "Chandler",
+            "at_mi": 113.2,
+            "off_mi": 10.66,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153532704, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Chandler"
+          },
+          {
+            "name": "Highland",
+            "at_mi": 114.0,
+            "off_mi": 4.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153803101, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Highland"
+          },
+          {
+            "name": "Darmstadt",
+            "at_mi": 114.0,
+            "off_mi": 8.7,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153758417, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Darmstadt"
+          },
+          {
+            "name": "Armstrong",
+            "at_mi": 114.0,
+            "off_mi": 10.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153526368, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Armstrong"
           }
         ],
         "interchanges": [
@@ -21975,7 +25719,135 @@
             "hgv": false
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "landmarks": [
+          {
+            "name": "Van Lear",
+            "at_mi": 2.6,
+            "off_mi": 2.14,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154359528, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Van Lear"
+          },
+          {
+            "name": "Auxier",
+            "at_mi": 7.3,
+            "off_mi": 1.66,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154015240, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Auxier"
+          },
+          {
+            "name": "Prestonsburg",
+            "at_mi": 12.3,
+            "off_mi": 0.75,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154053132, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Prestonsburg"
+          },
+          {
+            "name": "Dwale",
+            "at_mi": 16.4,
+            "off_mi": 1.47,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153852008, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Dwale"
+          },
+          {
+            "name": "Allen",
+            "at_mi": 16.5,
+            "off_mi": 1.51,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153954096, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Allen"
+          },
+          {
+            "name": "Martin",
+            "at_mi": 20.5,
+            "off_mi": 0.26,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154003085, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Martin"
+          },
+          {
+            "name": "Betsy Layne",
+            "at_mi": 20.5,
+            "off_mi": 6.95,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154304323, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Betsy Layne"
+          },
+          {
+            "name": "Langley",
+            "at_mi": 24.1,
+            "off_mi": 0.2,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154355764, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Langley"
+          },
+          {
+            "name": "McDowell",
+            "at_mi": 28.0,
+            "off_mi": 5.24,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154032354, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing McDowell"
+          },
+          {
+            "name": "Wayland",
+            "at_mi": 28.4,
+            "off_mi": 2.88,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153998920, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wayland"
+          },
+          {
+            "name": "Wheelwright",
+            "at_mi": 30.0,
+            "off_mi": 11.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153958142, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wheelwright"
+          },
+          {
+            "name": "Pippa Passes",
+            "at_mi": 40.7,
+            "off_mi": 5.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154342261, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pippa Passes"
+          },
+          {
+            "name": "Hyden",
+            "at_mi": 62.1,
+            "off_mi": 11.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154321372, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hyden"
+          },
+          {
+            "name": "Vicco",
+            "at_mi": 62.8,
+            "off_mi": 7.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154174477, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Vicco"
+          }
+        ]
       },
       "stops": [
         {
@@ -22570,7 +26442,89 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "landmarks": [],
+        "landmarks": [
+          {
+            "name": "Van Lear",
+            "at_mi": 2.6,
+            "off_mi": 2.14,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154359528, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Van Lear"
+          },
+          {
+            "name": "Auxier",
+            "at_mi": 7.4,
+            "off_mi": 1.66,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154015240, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Auxier"
+          },
+          {
+            "name": "Dwale",
+            "at_mi": 17.5,
+            "off_mi": 0.12,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153852008, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Dwale"
+          },
+          {
+            "name": "Allen",
+            "at_mi": 18.0,
+            "off_mi": 0.5,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153954096, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Allen"
+          },
+          {
+            "name": "Langley",
+            "at_mi": 18.1,
+            "off_mi": 6.91,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154355764, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Langley"
+          },
+          {
+            "name": "Martin",
+            "at_mi": 18.2,
+            "off_mi": 3.39,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154003085, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Martin"
+          },
+          {
+            "name": "Betsy Layne",
+            "at_mi": 26.7,
+            "off_mi": 0.07,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154304323, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Betsy Layne"
+          },
+          {
+            "name": "Wayland",
+            "at_mi": 28.1,
+            "off_mi": 11.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153998920, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wayland"
+          },
+          {
+            "name": "McDowell",
+            "at_mi": 28.2,
+            "off_mi": 7.94,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154032354, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing McDowell"
+          }
+        ],
         "speed_limits": [
           {
             "at_mi": 0.0,
@@ -23402,7 +27356,107 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "landmarks": [],
+        "landmarks": [
+          {
+            "name": "Dwale",
+            "at_mi": 11.9,
+            "off_mi": 7.57,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153852008, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Dwale"
+          },
+          {
+            "name": "Prestonsburg",
+            "at_mi": 11.9,
+            "off_mi": 11.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154053132, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Prestonsburg"
+          },
+          {
+            "name": "Allen",
+            "at_mi": 12.0,
+            "off_mi": 7.08,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153954096, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Allen"
+          },
+          {
+            "name": "Wheelwright",
+            "at_mi": 18.8,
+            "off_mi": 9.25,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153958142, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wheelwright"
+          },
+          {
+            "name": "McDowell",
+            "at_mi": 19.9,
+            "off_mi": 1.15,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154032354, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing McDowell"
+          },
+          {
+            "name": "Wayland",
+            "at_mi": 22.5,
+            "off_mi": 2.29,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153998920, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wayland"
+          },
+          {
+            "name": "Langley",
+            "at_mi": 25.5,
+            "off_mi": 2.41,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154355764, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Langley"
+          },
+          {
+            "name": "Martin",
+            "at_mi": 25.5,
+            "off_mi": 5.87,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154003085, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Martin"
+          },
+          {
+            "name": "Pippa Passes",
+            "at_mi": 39.9,
+            "off_mi": 5.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154342261, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pippa Passes"
+          },
+          {
+            "name": "Hyden",
+            "at_mi": 61.1,
+            "off_mi": 11.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154321372, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hyden"
+          },
+          {
+            "name": "Vicco",
+            "at_mi": 61.8,
+            "off_mi": 7.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154174477, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Vicco"
+          }
+        ],
         "speed_limits": [
           {
             "at_mi": 0.0,
@@ -24094,6 +28148,24 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Crab Orchard",
+            "at_mi": 23.6,
+            "off_mi": 9.24,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154074608, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Crab Orchard"
+          },
+          {
+            "name": "Brodhead",
+            "at_mi": 24.9,
+            "off_mi": 4.05,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153840553, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Brodhead"
+          },
+          {
             "name": "Kentucky Music Hall of Fame and Museum",
             "category": "museum",
             "kind": "point",
@@ -24101,11 +28173,101 @@
             "spoken": "Kentucky Music Hall of Fame and Museum ahead"
           },
           {
+            "name": "Mount Vernon",
+            "at_mi": 28.4,
+            "off_mi": 1.71,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 154039894, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mount Vernon"
+          },
+          {
+            "name": "Livingston",
+            "at_mi": 36.0,
+            "off_mi": 2.62,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153909771, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Livingston"
+          },
+          {
+            "name": "Letterbox",
+            "at_mi": 44.0,
+            "off_mi": 9.81,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 2395825640, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Letterbox"
+          },
+          {
             "name": "Rockcastle River",
             "category": "river",
             "kind": "point",
             "at_mi": 44.6,
             "spoken": "Crossing the Rockcastle River"
+          },
+          {
+            "name": "Bernstadt",
+            "at_mi": 45.6,
+            "off_mi": 3.62,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154359483, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bernstadt"
+          },
+          {
+            "name": "East Bernstadt",
+            "at_mi": 46.2,
+            "off_mi": 1.12,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153905017, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing East Bernstadt"
+          },
+          {
+            "name": "Greenmount",
+            "at_mi": 46.2,
+            "off_mi": 7.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153830473, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Greenmount"
+          },
+          {
+            "name": "McWhorter",
+            "at_mi": 47.8,
+            "off_mi": 8.08,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 153962943, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing McWhorter"
+          },
+          {
+            "name": "Lily",
+            "at_mi": 51.0,
+            "off_mi": 7.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154304345, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lily"
+          },
+          {
+            "name": "Hopewell",
+            "at_mi": 51.0,
+            "off_mi": 9.43,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154309384, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hopewell"
+          },
+          {
+            "name": "Keavy",
+            "at_mi": 51.0,
+            "off_mi": 9.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 154132769, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Keavy"
           }
         ],
         "speed_limits": [
