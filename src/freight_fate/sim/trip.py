@@ -835,9 +835,15 @@ class Trip:
         self.weather.set_city(target.key, target.lat, target.lon)
         changed = self.weather.update(game_min)
         if changed is not None:
+            if self.weather.live:
+                source = f"Live weather near {target.spoken_qualified}"
+            elif self.weather.provider is not None:
+                source = "Simulated fallback weather"
+            else:
+                source = "Weather"
             self._emit(
                 TripEventKind.WEATHER_CHANGE,
-                f"Weather changing: {self.weather.describe(self.imperial)}",
+                f"{source} changing: {self.weather.describe(self.imperial)}",
                 weather=changed,
             )
         self.truck.grip = self.weather.effects.grip

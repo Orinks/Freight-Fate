@@ -417,6 +417,11 @@ class WeatherSystem:
         except Exception:  # pragma: no cover - defensive
             return False
 
+    @property
+    def live_weather_loading(self) -> bool:
+        """Whether live weather is selected but no observation is ready yet."""
+        return self.provider is not None and not self.live and not self._provider_offline()
+
     def _poll_provider(self) -> WeatherKind | None:
         """Apply real-world conditions when a provider is attached.
 
