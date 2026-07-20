@@ -638,3 +638,37 @@ def test_whole_float_profile_signature_round_trips():
     payload = download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
     assert payload is not None
     assert payload["profile"]["money"] == 77_000.0
+
+
+def test_server_absolution_clears_the_modified_mark_on_restore():
+    """A career marked only because it moved computers gets released.
+
+    The server grants this on a revision it signed and fully validated, so
+    honest machine-movers stop carrying the mark forever. A profile that
+    really was edited fails validation and never gets the signal.
+    """
+    marked = Profile(name="Road Star", money=77_000.0)
+    marked.integrity_modified = True
+    marked.integrity_notice_pending = True
+    reply = make_cloud_reply(marked.to_dict(), revision=4)
+    reply["clearIntegrityFlag"] = True
+    payload = download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
+
+    path = restore_to_disk(payload, SyncState())
+    restored = Profile.load(path)
+
+    assert restored.integrity_modified is False
+    assert restored.integrity_notice_pending is False
+    assert restored.money == 77_000.0
+
+
+def test_a_restore_without_absolution_leaves_the_mark_alone():
+    """Absence of the signal is not permission to clear the mark."""
+    marked = Profile(name="Road Star", money=77_000.0)
+    marked.integrity_modified = True
+    reply = make_cloud_reply(marked.to_dict(), revision=4)
+    payload = download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
+
+    path = restore_to_disk(payload, SyncState())
+
+    assert Profile.load(path).integrity_modified is True

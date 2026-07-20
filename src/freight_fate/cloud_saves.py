@@ -357,6 +357,12 @@ def download_save(
         "keyId": reply.get("keyId"),
         "signedAt": reply.get("signedAt"),
         "validatorVersion": reply.get("validatorVersion"),
+        # Absolution from the server, carried only on a reply whose revision
+        # signature just verified above. The flag rides outside that signature,
+        # so it is not proof of anything on its own -- but the worst a forged
+        # one can do is clear a local advisory mark, and shared features read
+        # the server's verdict rather than this flag.
+        "clearIntegrityFlag": reply.get("clearIntegrityFlag") is True,
         "profile": profile_dict,
     }
 
@@ -378,6 +384,15 @@ def restore_to_disk(payload: dict, sync_state: SyncState | None = None) -> Path:
     )
 
     profile = verify_cloud_revision(payload["profile"], payload)
+    # Absolution. The server grants this only on a revision it signed and
+    # fully validated, so a career that was marked purely for moving between
+    # computers stops carrying the mark. The signature is verified above,
+    # before this is read -- an unsigned or failed reply never gets here, and
+    # a career that really was edited fails validation instead of arriving
+    # with the flag set.
+    if payload.get("clearIntegrityFlag") is True:
+        profile.integrity_modified = False
+        profile.integrity_notice_pending = False
     signed_data = profile.to_dict()
     name = save_slot_name(profile.name)
     path = save_path_for(name)

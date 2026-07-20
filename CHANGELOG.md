@@ -86,6 +86,17 @@
 
 ### Fixed
 
+- **Cloud Backup works again on test builds.** Careers from a recent test
+  build were being turned away with a message about the backup being
+  unreadable. Nothing was wrong with those careers: the game had changed what
+  it records about each truck, and the backup service was still expecting the
+  older shape. Both sides now agree, and they are kept in step automatically
+  so this cannot drift apart again. Released builds were never affected.
+- **A career carried between computers can lose its "modified" mark.** Moving
+  a save to another machine marks it as changed outside the game, because the
+  new machine cannot recognise the old one's signature. When you restore that
+  career from Cloud Backup and everything about it checks out, the mark is
+  now cleared instead of following you forever.
 - **Finishing a delivery no longer risks losing what it reported online.**
   A settlement can report the delivery, a level up, and several badges at
   once, and the game was sending them all at the same moment. They could
