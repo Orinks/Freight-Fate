@@ -126,6 +126,10 @@ class DrivingState(
         self._radio_elapsed_s = 0.0
         self._radio_tracks_since_host = 0
         self._radio_playing_host = False
+        # Personal M3U stations: where each playlist left off this drive,
+        # and a short hold between files so a fade-in never reads as ended.
+        self._playlist_positions: dict[str, int] = {}
+        self._playlist_wait_s = 0.0
         # Reception: signal re-checked on a slow cadence while driving so
         # ranged stations fade with distance and drop past their contour.
         self._radio_signal_timer = 0.0

@@ -4,6 +4,22 @@
 
 ### Added
 
+- **Your own music can play on the in-cab radio.** Drop M3U playlist
+  files into the new Playlists folder next to your saves and each one
+  becomes a station on the dial, under Your playlists, named from the
+  playlist. Files can live anywhere your computer can reach, including
+  a network drive, and the usual formats all play. The station picks up
+  where it left off when you tune away and back during a drive, and a
+  file that will not open is skipped instead of stopping the music.
+  Like real public streams, your playlists play only when streamer-safe
+  mode is off.
+
+- **The radio dial now jumps by category.** Control with a bracket key
+  leaps to the previous or next section of the dial -- route playlist,
+  Freight Fate stations, your playlists, terrestrial, AFN, satellite --
+  and announces where you landed. No more tuning through twenty-five
+  AFN stations one by one to reach the local dial.
+
 - **The road now names the towns that change your speed limit.** When a
   limit is about to drop for a small town, you hear the town first --
   "Entering Strawberry" -- so a sudden 35 in the middle of a mountain

@@ -933,26 +933,28 @@ section below and the Unreleased changelog; the release-line view:
       when anything needs attention, so a scheduled run can alert.
       Curation stays with the recipes. Future: fold in landmark and
       interchange drift.
-- [ ] **Personal playlist stations from M3U files (owner idea
-      2026-07-20).** Drop `.m3u`/`.m3u8` files into a Playlists folder in
-      the game's data directory and each becomes a station on the dial,
-      named from the playlist tag or filename. Entries may point anywhere
-      the OS can read, including NAS paths; playback runs through the
-      game's own BASS mixer so speech ducking, radio volume, and the
-      pause-menu music rules all apply. The bundled BASS stack already
-      decodes mp3, ogg, opus, flac, aac, alac, and wma, so no new codec
-      work. A drop-in folder, not a file picker: screen-reader users
-      manage folders in Explorer far more comfortably than in an in-game
-      browse dialog. Personal files default to streamer-unsafe since the
-      game cannot know their licensing.
-- [ ] **Radio dial categories with a jump key (owner ask 2026-07-20).**
-      The catalog already carries the data (`source_type`:
-      local/afn/regional/built_in/satellite, plus `always_available` and
-      `safe_for_streaming`); the dial just scans linearly, and 25 AFN
-      entries in a row buried the terrestrial section (owner got stuck
-      scanning AFN wanting local). Ctrl+Left/Right jumps to the first
-      station of the previous/next category and speaks the category name,
-      with Playlists joining as its own category when M3U stations land.
+- [x] **Personal playlist stations from M3U files (landed 2026-07-20).**
+      Drop `.m3u`/`.m3u8` files into the Playlists folder next to the
+      saves (created on first run) and each becomes a dial station under
+      Your playlists, named from the `#PLAYLIST` tag or filename.
+      Entries resolve relative to the M3U and may point anywhere the OS
+      reads, NAS included; playback rides the music channel, so ducking,
+      radio volume, and pause-menu continuity all apply, and the bundled
+      BASS stack decodes mp3/ogg/opus/flac/aac/alac/wma with no new
+      codec work. Unreadable files skip at play time (a sleeping NAS
+      must not erase the station); each station remembers its place for
+      the drive. A drop-in folder, never a file picker -- screen-reader
+      users manage folders in Explorer. Personal media rides the
+      streamer-safe gate like real streams; stream URLs inside an M3U
+      are ignored (curated catalog only). Follow-up: consider shuffle
+      and a cross-session resume position if playtests want them.
+- [x] **Radio dial categories with a jump key (landed 2026-07-20).**
+      Ctrl+bracket (the owner's binding -- plain brackets already tune)
+      leaps to the first station of the previous/next dial category and
+      leads with the category name: route playlist, Freight Fate
+      stations, your playlists, terrestrial, AFN, satellite. AFN got its
+      own category so its 25-station block never buries the local dial
+      again; the dial sort and the jump share one grouping.
 - [ ] **Fictional call signs must not squat real stations (owner catch
       2026-07-20).** Our fictional Phoenix classic-rock station is
       "KDRT Desert Rock 101.5" -- but KDRT-LP is a real community station

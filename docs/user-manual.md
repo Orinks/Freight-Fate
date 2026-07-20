@@ -738,6 +738,7 @@ Use these keys when you need status without leaving the road:
 | V | Weather and forecast. |
 | M | Toggle the in-cab radio. |
 | [ / ] | Tune the radio down or up. |
+| Ctrl+[ / Ctrl+] | Jump to the previous or next radio category: route playlist, Freight Fate stations, your playlists, terrestrial, AFN, satellite. |
 | Y | Speak radio station, source, signal or fallback state, volume, and streamer-safe status. |
 | Tab | Grouped driving status screens. |
 
@@ -950,6 +951,22 @@ Real public stream stations, including AFN choices, are hidden unless you turn o
 real streams and turn off streamer-safe mode. When the BASS audio backend is
 available, those stations play from their public stream URLs. If a selected
 station cannot play, the radio falls back safely instead of blocking the drive.
+
+You can put your own music on the dial. Drop M3U or M3U8 playlist files into
+the Playlists folder next to your saves (the game creates it on first run) and
+each file becomes a station under Your playlists, named from the playlist. The
+entries can point at files anywhere your computer can read, including network
+drives, and the usual formats all play: mp3, ogg, opus, flac, aac, and wma.
+The station remembers its place while you tune away during a drive, and a file
+that will not open is skipped rather than stopping the music. Personal
+playlists play only when streamer-safe mode is off, because the game cannot
+vouch for what your files are licensed for. Ctrl+Right bracket jumps straight
+to the category.
+
+The dial is grouped into categories -- route playlist, Freight Fate stations,
+your playlists, terrestrial, AFN, and satellite -- and Ctrl with a bracket key
+jumps between them, so twenty-five AFN stations never again stand between you
+and the local dial.
 
 Useful accessibility patterns:
 

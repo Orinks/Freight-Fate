@@ -108,9 +108,17 @@ class DrivingControlsMixin:
         elif key == pygame.K_m:
             self._toggle_radio()
         elif key == pygame.K_LEFTBRACKET:
-            self._tune_radio(-1)
+            # Brackets walk the dial; Ctrl+brackets leap a whole category
+            # (25 AFN stations in a row buried terrestrial for a linear tune).
+            if event.mod & pygame.KMOD_CTRL:
+                self._jump_radio_category(-1)
+            else:
+                self._tune_radio(-1)
         elif key == pygame.K_RIGHTBRACKET:
-            self._tune_radio(1)
+            if event.mod & pygame.KMOD_CTRL:
+                self._jump_radio_category(1)
+            else:
+                self._tune_radio(1)
         elif key == pygame.K_y:
             self._speak_radio_status()
         elif key == pygame.K_F1:

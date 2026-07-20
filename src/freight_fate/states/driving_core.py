@@ -47,6 +47,7 @@ from ..music import (
     select_station_playlist,
 )
 from ..radio import (
+    PERSONAL_PLAYLIST_SOURCE_TYPE,
     SAFE_ROUTE_PLAYLIST,
     STATIC_SIGNAL_THRESHOLD,
     RadioPlaybackError,
@@ -385,6 +386,10 @@ class _DrivingRadioBackend:
         radio = getattr(self.driving, "radio", None)
         if radio is not None:
             self.driving._radio_signal_factor = signal_volume_factor(radio.current_reception())
+        if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
+            self.driving._apply_radio_volume()
+            self.driving._start_playlist_station(station, fade_ms=900)
+            return
         if station.real_stream:
             if not station.stream_url:
                 raise RadioPlaybackError("station has no stream URL")

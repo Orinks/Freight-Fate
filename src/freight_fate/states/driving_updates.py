@@ -961,6 +961,9 @@ class DrivingUpdateMixin:
         station = self.radio.current_station()
         if station.real_stream or station.fallback:
             return
+        if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
+            self._update_playlist_playback(station, dt)
+            return
         if not station.playlist and not station.track_key:
             return
         if station.id != self._radio_station_id or (
@@ -996,6 +999,58 @@ class DrivingUpdateMixin:
     def _play_station_track(self, fade_ms: int) -> None:
         key = self._radio_playlist[self._radio_track_index % len(self._radio_playlist)]
         self.ctx.audio.play_music(key, fade_ms=fade_ms)
+
+    def _start_playlist_station(
+        self, station, fade_ms: int = 900, advance: bool = False
+    ) -> None:
+        """Play a personal M3U station from its remembered position.
+
+        Unreadable entries are skipped at play time rather than pruned at
+        load: a NAS that was asleep when the drive started should not erase
+        the tracks behind it. Raises RadioPlaybackError only when nothing in
+        the whole playlist opens, so the radio's existing fallback machinery
+        speaks the failure the same way it does a dead stream."""
+        files = station.playlist_files
+        if not files:
+            raise RadioPlaybackError("playlist is empty")
+        start = self._playlist_positions.get(station.id, 0)
+        if advance:
+            start = (start + 1) % len(files)
+        for attempt in range(len(files)):
+            index = (start + attempt) % len(files)
+            try:
+                self.ctx.audio.play_music_file(files[index], fade_ms=fade_ms)
+            except RuntimeError:
+                continue
+            self._playlist_positions[station.id] = index
+            self._radio_station_id = station.id
+            self._radio_playlist = []
+            self._radio_hosts = []
+            # The fade-in window would read as "finished" to music_playing
+            # on some backends; hold the advance check off briefly.
+            self._playlist_wait_s = 1.5
+            return
+        raise RadioPlaybackError("no playable file in this playlist")
+
+    def _update_playlist_playback(self, station, dt: float) -> None:
+        """Advance a personal playlist when the current file ends."""
+        if station.id != self._radio_station_id:
+            self._playlist_wait_s = 0.0
+            try:
+                self._start_playlist_station(station, fade_ms=2500)
+            except RadioPlaybackError:
+                self.ctx.audio.stop_music(600)
+                self._radio_station_id = station.id
+                self._playlist_wait_s = 30.0  # retry the folder occasionally
+            return
+        self._playlist_wait_s = max(0.0, self._playlist_wait_s - max(0.0, dt))
+        if self._playlist_wait_s > 0.0 or self.ctx.audio.music_playing():
+            return
+        try:
+            self._start_playlist_station(station, fade_ms=1200, advance=True)
+        except RadioPlaybackError:
+            self.ctx.audio.stop_music(600)
+            self._playlist_wait_s = 30.0
 
     def _sync_radio_settings(self) -> None:
         station_before = self.radio.station_id
@@ -1033,6 +1088,11 @@ class DrivingUpdateMixin:
     def _tune_radio(self, direction: int) -> None:
         self._sync_radio_settings()
         action = self.radio.tune(direction, self._radio_backend)
+        self._finish_radio_action(action)
+
+    def _jump_radio_category(self, direction: int) -> None:
+        self._sync_radio_settings()
+        action = self.radio.tune_category(direction, self._radio_backend)
         self._finish_radio_action(action)
 
     def _speak_radio_status(self) -> None:
