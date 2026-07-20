@@ -459,6 +459,37 @@ class HosClock:
             f"duty window closes in {duty_left:.1f} hours.{suffix}"
         )
 
+    def arrival_note(self, mode: str, eta_min: float) -> str:
+        """One clause relating an ETA to the nearest HOS limit, or ''.
+
+        Used by the stop details screen: says whether the player would reach
+        the stop before the limit that matters most right now. Mirrors
+        ``summary``'s omission rule -- when the duty window closes before the
+        break is due, the break is irrelevant and never mentioned.
+        """
+        if mode in HOS_NON_ENFORCED_MODES or self.in_violation(mode):
+            return ""
+        drive_limit, duty_limit, break_after = LIMITS[mode]
+        drive_left = drive_limit - self.driving_min
+        duty_left = duty_limit - self.duty_min
+        break_left = break_after - self.since_break_min
+        candidates = [
+            ("drive", drive_left, "your driving time for this shift runs out"),
+            ("duty", duty_left, "your duty window closes"),
+        ]
+        if duty_left > break_left:
+            candidates.append(("break", break_left, "your 30-minute break is due"))
+        _kind, nearest_min, phrase = min(candidates, key=lambda item: item[1])
+        if eta_min < nearest_min:
+            return f" You would arrive before {phrase}."
+        gap_h = (eta_min - nearest_min) / 60.0
+        limit_name = {
+            "drive": "driving-time limit",
+            "duty": "duty window",
+            "break": "break",
+        }[_kind]
+        return f" Your {limit_name} comes about {gap_h:.1f} hours before you would reach it."
+
     def split_pending_summary(self) -> str | None:
         credited = self._credited_split_pair()
         if credited is not None and credited[1] is self._split_rest_events()[-1]:

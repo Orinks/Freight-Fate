@@ -159,20 +159,16 @@ def test_existing_profiles_never_see_the_picker():
         app.shutdown()
 
 
-def test_tampered_save_is_spoken_and_omitted_from_main_menu(monkeypatch):
-    import json
-
+def test_unreadable_save_is_spoken_and_omitted_from_main_menu(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.models.profile import Profile
+    from freight_fate.models.profile import SAVE_MAGIC, Profile
     from freight_fate.states.main_menu import MainMenuState
 
     good = Profile(name="Honest", current_city="Denver")
     good.save()
-    bad = Profile(name="Edited", current_city="Chicago")
+    bad = Profile(name="Damaged", current_city="Chicago")
     bad_path = bad.save()
-    data = json.loads(bad_path.read_text())
-    data["money"] = 1_000_000.0
-    bad_path.write_text(json.dumps(data))
+    bad_path.write_bytes(SAVE_MAGIC + b"\x81\x90 not a real save")
 
     app = App()
     spoken = []
@@ -181,9 +177,32 @@ def test_tampered_save_is_spoken_and_omitted_from_main_menu(monkeypatch):
         app.push_state(MainMenuState(app.ctx))
         labels = [item.text for item in app.state.items]
         assert labels[0].startswith("Continue latest career: Honest")
-        assert "failed its integrity check" in spoken[-1]
+        assert "could not be read" in spoken[-1]
         assert not bad_path.exists()
-        assert bad_path.with_suffix(".json.invalid").exists()
+        assert bad_path.with_suffix(".ffsave.invalid").exists()
+    finally:
+        app.shutdown()
+
+
+def test_edited_save_stays_listed_but_marked_modified(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile, _decode_save_bytes, encode_save_bytes
+    from freight_fate.states.main_menu import MainMenuState
+
+    edited = Profile(name="Edited", current_city="Chicago")
+    edited_path = edited.save()
+    data = _decode_save_bytes(edited_path.read_bytes())[0]
+    data["money"] = 1_000_000.0
+    edited_path.write_bytes(encode_save_bytes(data))
+
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        labels = [item.text for item in app.state.items]
+        assert labels[0].startswith("Continue latest career: Edited")
+        loaded = Profile.load(edited.path)
+        assert loaded.integrity_modified is True
     finally:
         app.shutdown()
 
@@ -195,7 +214,8 @@ def test_how_to_play_mentions_corrupted_save_recovery_without_prominent_page():
     help_text = " ".join(line for _title, lines in HELP_PAGES for line in lines).lower()
 
     assert "Saved careers" not in titles
-    assert "edited or corrupted career saves may be moved aside" in help_text
+    assert "corrupted career saves may be moved aside" in help_text
+    assert "marked as modified" in help_text
     assert "checked for integrity" not in help_text
     assert "older unsigned saves" not in help_text
 

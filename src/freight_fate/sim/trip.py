@@ -198,6 +198,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._announced_landmarks: set[str] = set()
         self._announced_billboards: set[str] = set()
         self._announced_stops: set[str] = set()
+        self.planned_stop_name: str | None = None
         self._announced_cities: set[int] = set()
         self._announced_navigation: set[str] = set()
         self._charged_tolls: set[str] = set()
@@ -1331,6 +1332,13 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 best = stop
         return best
 
+    def is_planned(self, stop: RoadStop) -> bool:
+        return self.planned_stop_name is not None and stop.name == self.planned_stop_name
+
+    def planned_prefix(self, stop: RoadStop) -> str:
+        """'Planned stop, ' when this is the stop the player planned for."""
+        return "Planned stop, " if self.is_planned(stop) else ""
+
     # below this the truck is parked or crawling: estimate at highway pace
     ETA_MIN_MPH = 15.0
 
@@ -1826,12 +1834,26 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         )
 
     def _check_stops(self) -> None:
+        if self.planned_stop_name is not None:
+            planned = next(
+                (stop for stop in self.stops if stop.name == self.planned_stop_name), None
+            )
+            if planned is None or planned.at_mi < self.position_mi - 0.25:
+                name = self.planned_stop_name
+                self.planned_stop_name = None
+                self._emit(
+                    TripEventKind.GPS_CUE,
+                    f"You drove past your planned stop, {name}. Plan cancelled.",
+                )
         for stop in self.stops:
             ahead = stop.at_mi - self.position_mi
             if 0 < ahead <= STOP_AHEAD_LOOKAHEAD_MI and stop.name not in self._announced_stops:
                 self._announced_stops.add(stop.name)
                 exit_part = f" at {stop.exit_label}" if stop.exit_label else ""
-                parts = [f"{stop.spoken_name}{exit_part} in {self._distance_text(ahead)}."]
+                parts = [
+                    f"{self.planned_prefix(stop)}{stop.spoken_name}{exit_part} "
+                    f"in {self._distance_text(ahead)}."
+                ]
                 if stop.parking_text:
                     parts.append(f"{stop.parking_text}.")
                 parts.append("Press X to signal for the exit.")

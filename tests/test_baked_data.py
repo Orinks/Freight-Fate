@@ -61,6 +61,11 @@ def test_no_direct_package_json_reads():
         "data_resources.py",  # the sanctioned reader
         "world.py",  # prefers _baked_world, file read is the source fallback
         "world_loader.py",  # only ever called on the source world_data tree
+        # Builds the catalog the cloud validator checks uploads against. It is
+        # imported only by tools/export_profile_integrity_invariants.py, never
+        # at runtime, and it must read the source tree rather than the bake --
+        # the export is what the bake is derived against.
+        "profile_integrity_invariants.py",
     }
     pattern = re.compile(r"\.jsonl?[\"']")
     read_pattern = re.compile(r"read_text|\.open\(")
@@ -69,10 +74,6 @@ def test_no_direct_package_json_reads():
         if path.name in allowed_files:
             continue
         for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            if (
-                pattern.search(line)
-                and read_pattern.search(line)
-                and "runtime-data-ok" not in line
-            ):
+            if pattern.search(line) and read_pattern.search(line) and "runtime-data-ok" not in line:
                 offenders.append(f"{path.relative_to(src)}:{i}: {line.strip()}")
     assert offenders == [], "direct package json reads: " + "; ".join(offenders[:5])

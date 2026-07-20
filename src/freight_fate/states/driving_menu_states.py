@@ -100,10 +100,8 @@ class DrivingStatusState(MenuState):
 class DrivingStatusScreenState(MenuState):
     """One screen of live driving status as a reviewable list of lines."""
 
-    intro_help = (
-        "Use up and down arrows to review each line. Enter repeats the current "
-        "line. Escape goes back to the status screens."
-    )
+    # The static intro_help this line carried is a property below now, so the
+    # Map screen can mention opening a stop's details. The radio screen stays.
     TITLES = {
         "route": "Route",
         "driver": "Driver",
@@ -120,23 +118,39 @@ class DrivingStatusScreenState(MenuState):
     def title(self) -> str:  # type: ignore[override]
         return self.TITLES.get(self.screen, "Status")
 
-    def build_items(self) -> list[MenuItem]:
-        items = [
-            MenuItem(
-                line,
-                lambda line=line: self.ctx.say(line),
-                help="Repeat this status line.",
+    @property
+    def intro_help(self) -> str:  # type: ignore[override]
+        if self.screen == "map":
+            return (
+                "Use up and down arrows to review each line. Enter repeats the "
+                "current line, or opens full details on a stop line. Escape "
+                "goes back to the status screens."
             )
-            for line in self._lines()
-        ]
+        return (
+            "Use up and down arrows to review each line. Enter repeats the current "
+            "line. Escape goes back to the status screens."
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        if self.screen == "map":
+            items = self._map_items()
+        else:
+            items = [
+                MenuItem(
+                    line,
+                    lambda line=line: self.ctx.say(line),
+                    help="Repeat this status line.",
+                )
+                for line in self._lines()
+            ]
         items.append(MenuItem("Back", self.go_back, help="Back to the status screens."))
         return items
 
     def _lines(self) -> list[str]:
         if self.screen == "driver":
             return self._driver_lines()
-        if self.screen == "map":
-            return self._map_lines()
+        # No map branch: build_items sends the Map screen through _map_items
+        # now, so its stop lines can open a details view.
         if self.screen == "radio":
             return self._radio_lines()
         return self.driving.status_lines()
@@ -177,27 +191,43 @@ class DrivingStatusScreenState(MenuState):
             time_line,
         ]
 
-    def _map_lines(self) -> list[str]:
+    def _map_items(self) -> list[MenuItem]:
         d = self.driving
         route = d.route
         settings = self.ctx.settings
-        lines = [
-            f"Route: {' to '.join(route.cities)}",
-            f"Highways: {_join_phrase(route.highways)}",
-            f"Progress: {settings.distance_text(d.trip.position_mi)} driven, "
-            f"{settings.distance_text(d.trip.remaining_miles)} remaining",
-            f"Guidance: {d.trip.next_navigation_context(settings.imperial_units)}",
+
+        def say_item(line: str) -> MenuItem:
+            return MenuItem(
+                line,
+                lambda line=line: self.ctx.say(line),
+                help="Repeat this status line.",
+            )
+
+        items = [
+            say_item(f"Route: {' to '.join(route.cities)}"),
+            say_item(f"Highways: {_join_phrase(route.highways)}"),
+            say_item(
+                f"Progress: {settings.distance_text(d.trip.position_mi)} driven, "
+                f"{settings.distance_text(d.trip.remaining_miles)} remaining"
+            ),
+            say_item(f"Guidance: {d.trip.next_navigation_context(settings.imperial_units)}"),
         ]
         upcoming = [stop for stop in d.trip.stops if stop.at_mi >= d.trip.position_mi - 0.05][:5]
         if upcoming:
             for stop in upcoming:
                 ahead = max(0.0, stop.at_mi - d.trip.position_mi)
-                lines.append(
-                    f"Stop in {settings.distance_text(ahead)}: {stop.spoken_name}; "
-                    f"{_poi_offers_text(stop)}."
+                items.append(
+                    MenuItem(
+                        f"Stop in {settings.distance_text(ahead)}: "
+                        f"{d.trip.planned_prefix(stop)}{stop.spoken_name}; "
+                        f"{_poi_offers_text(stop)}.",
+                        lambda stop=stop: self._open_stop(stop),
+                        help="Press Enter for full details, distance, "
+                        "estimated arrival, and stop planning.",
+                    )
                 )
         else:
-            lines.append("Stops: no more listed route stops before destination.")
+            items.append(say_item("Stops: no more listed route stops before destination."))
         next_cues = [
             cue
             for cue in d.trip.navigation_cues
@@ -206,12 +236,35 @@ class DrivingStatusScreenState(MenuState):
         for cue in next_cues:
             ahead = max(0.0, cue.at_mi - d.trip.position_mi)
             speed = f" at {settings.speed_text(cue.speed_mph)}" if cue.speed_mph is not None else ""
-            lines.append(f"Map point in {settings.distance_text(ahead)}: {cue.text}{speed}.")
-        if route.estimated_tolls > 0:
-            lines.append(
-                f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."
+            items.append(
+                say_item(f"Map point in {settings.distance_text(ahead)}: {cue.text}{speed}.")
             )
-        return lines
+        if route.estimated_tolls > 0:
+            items.append(
+                say_item(
+                    f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."
+                )
+            )
+        planned = d.trip.planned_stop_name
+        if planned is not None:
+            items.append(
+                MenuItem(
+                    f"Cancel planned stop at {planned}",
+                    self._cancel_planned_stop,
+                    help="Forget your planned stop. Announcements go back to normal.",
+                )
+            )
+        return items
+
+    def _open_stop(self, stop) -> None:
+        from .driving_stop_detail import StopDetailState
+
+        self.ctx.push_state(StopDetailState(self.ctx, self.driving, stop))
+
+    def _cancel_planned_stop(self) -> None:
+        self.driving.trip.planned_stop_name = None
+        self.refresh()
+        self.ctx.say("Planned stop canceled.")
 
     def _radio_lines(self) -> list[str]:
         d = self.driving
@@ -1095,6 +1148,13 @@ class ArrivalState(MenuState):
                 f"Owner-operator business costs: {business.business_charge_summary}."
             )
         net_pay = business.net_before_advance
+        # What the load earned the driver, before any advance comes back out of
+        # it -- which is exactly what the business settlement already calls
+        # net_before_advance. An advance is those same dollars paid early, so
+        # lifetime earnings book the whole settlement; book only the remainder
+        # and the advanced money becomes cash the career cannot account for,
+        # which reads as an edited save to cloud upload screening.
+        settled_pay = net_pay
         advance_repaid = round(min(p.pay_advance, net_pay), 2)
         if advance_repaid > 0:
             net_pay = round(net_pay - advance_repaid, 2)
@@ -1123,7 +1183,8 @@ class ArrivalState(MenuState):
         previous_level = p.career.level
         announcements = p.career.record_delivery(
             job.distance_mi,
-            net_pay,
+            # The whole settlement, not what survived the advance repayment.
+            settled_pay,
             on_time,
             trip_damage,
             cargo_class_mult=xp_class_multiplier(job.cargo),

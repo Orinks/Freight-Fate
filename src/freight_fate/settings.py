@@ -113,10 +113,10 @@ class Settings:
     destination_approach_assist: bool = False
     curve_speed_assist: bool = True
     route_transition_assist: bool = True
-    # Holds a gentle speed through low-speed zones where adaptive cruise is
-    # unavailable, so nobody has to keep the accelerator key held down. An
-    # input-accessibility aid, kept while the wider assistance framework
-    # ships with 1.9 instead of this line.
+    # Lets an armed speed-control session cover low-speed zones without a held
+    # accelerator, then hand back to adaptive cruise on open roads. This input
+    # accessibility aid stays independent of the assistance preset above:
+    # presets never touch it.
     speed_keeper: bool = True
     # Double-tap-and-hold latches the accelerator or brake key so a long
     # pull or a steady snub needs no sustained hold; a fresh press of the

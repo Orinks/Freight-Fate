@@ -4,26 +4,26 @@ import pygame
 
 
 def key_event(key):
-    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode="")
+    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode="", mod=0)
 
 
-def _driving(app):
+def _driving(app, origin="Buffalo", destination="Rochester"):
     from freight_fate.models.jobs import CARGO_CATALOG, Job
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import DrivingState
 
-    app.ctx.profile = Profile(name="Info Keys", current_city="Buffalo")
-    route = app.ctx.world.supported_route("Buffalo", "Rochester")
+    app.ctx.profile = Profile(name="Info Keys", current_city=origin)
+    route = app.ctx.world.supported_route(origin, destination)
     job = Job(
         CARGO_CATALOG["general"],
         12.0,
-        "Buffalo",
+        origin,
         "company yard",
-        "Rochester",
+        destination,
         route.miles,
         1000.0,
         12.0,
-        destination_location="Rochester freight market",
+        destination_location=f"{destination} freight market",
     )
     return DrivingState(app.ctx, job, route, phase="delivery")
 
@@ -57,7 +57,25 @@ def test_speed_key_includes_cruise_set_speed_when_active(monkeypatch):
         d._cruise_mph = 55.0
         spoken = _capture(app, monkeypatch)
         d.handle_event(key_event(pygame.K_SPACE))
+        assert "automatic speed control" in spoken[-1]
         assert "cruise set at 55 miles per hour" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_speed_key_includes_speed_keeper_target_when_active(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d._keeper_mph = 15.0
+        d._speed_control_target_mph = 55.0
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_SPACE))
+        assert "automatic speed control" in spoken[-1]
+        assert "speed keeper holding 15 miles per hour" in spoken[-1]
+        assert "open-road target 55 miles per hour" in spoken[-1]
     finally:
         app.shutdown()
 
@@ -292,6 +310,32 @@ def test_safe_speed_key_speaks_one_number(monkeypatch):
         app.shutdown()
 
 
+def test_route_key_reports_current_road_place_progress_and_guidance(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import Zone
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 40.0
+        d.trip.zones = [Zone(35.0, 45.0, 45.0, "construction")]
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_r))
+
+        report = spoken[-1]
+        assert report.startswith("Route status: on I-90 East in New York")
+        assert "heading toward Rochester, New York" in report
+        assert "Near Batavia, New York" in report
+        assert "40 miles into the trip" in report
+        assert "34 miles remaining" in report
+        assert "You are in a construction zone" in report
+        assert "Current grade" in report
+        assert report.endswith(d.trip.next_navigation_context(True))
+    finally:
+        app.shutdown()
+
+
 def test_safe_speed_key_answers_for_the_ramp(monkeypatch):
     """On the ramp (or with an armed exit close ahead) the ramp speed rules."""
     from freight_fate.app import App
@@ -307,6 +351,25 @@ def test_safe_speed_key_answers_for_the_ramp(monkeypatch):
         spoken = _capture(app, monkeypatch)
         d.handle_event(key_event(pygame.K_d))
         assert spoken[-1] == "Safe speed 45 miles per hour for the ramp."
+    finally:
+        app.shutdown()
+
+
+def test_route_key_reports_reverse_route_direction(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app, "Rochester", "Buffalo")
+        d.trip.position_mi = 34.8
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_r))
+
+        report = spoken[-1]
+        assert report.startswith("Route status: on I-90 West in New York")
+        assert "heading toward Buffalo, New York" in report
+        assert "Near Batavia, New York" in report
     finally:
         app.shutdown()
 
@@ -344,5 +407,28 @@ def test_grade_key_reads_slope_and_verdict(monkeypatch):
         d.handle_event(key_event(pygame.K_g))
         assert "percent downhill" in spoken[-1]
         assert "set the jake" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_route_key_uses_metric_distances(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        app.ctx.settings.imperial_units = False
+        d = _driving(app)
+        d.trip.imperial = False
+        d.trip.position_mi = 20.0
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_r))
+
+        report = spoken[-1]
+        assert "Flying J Travel Center Corfu, 13 kilometers ahead" in report
+        assert "32 kilometers into the trip" in report
+        assert "87 kilometers remaining" in report
+        assert "119 kilometers" in report
+        assert " miles" not in report
     finally:
         app.shutdown()

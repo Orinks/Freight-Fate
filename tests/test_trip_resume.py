@@ -82,6 +82,35 @@ def test_active_drive_snapshot_restores_idling_engine():
         app.shutdown()
 
 
+def test_active_drive_snapshot_restores_paused_speed_control_session(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        driving._restore_speed_control_session(armed=True, target_mph=52.0)
+
+        resumed = DrivingState.from_snapshot(app.ctx, driving.snapshot())
+
+        assert resumed is not None
+        assert resumed._speed_control_armed
+        assert resumed._speed_control_target_mph == 52.0
+        assert resumed._keeper_mph is None
+        assert resumed._cruise_mph is None
+        resumed.enter()
+        resume_message = next(
+            text for text in spoken if "Automatic speed control is paused" in text
+        )
+        assert "open-road target 52 miles per hour" in resume_message
+        assert "resume once the truck is rolling" in resume_message
+        assert "Press K to cancel it" in resume_message
+    finally:
+        app.shutdown()
+
+
 def quit_to_menu(app):
     from freight_fate.states.driving import PauseMenuState
     from freight_fate.states.main_menu import MainMenuState

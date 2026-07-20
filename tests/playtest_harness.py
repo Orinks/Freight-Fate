@@ -17,7 +17,7 @@ from freight_fate.sim.trip_models import NPCVehicle, TrafficPressure
 
 
 def key_event(key: int, unicode: str = ""):
-    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
+    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode, mod=0)
 
 
 def _finish_timed_state(app) -> None:
@@ -41,6 +41,11 @@ class PlaytestResult:
     destination: str = ""
     current_city: str = ""
     remaining_miles: float = 0.0
+    speeding_strikes: int = 0
+    speeding_tickets: int = 0
+    speed_control_transitions: list[str] = field(default_factory=list)
+    max_speeding_timer_s: float = 0.0
+    destination_exit_speed_mph: float | None = None
 
     @property
     def transcript_text(self) -> str:
@@ -118,6 +123,7 @@ class PlaytestHarness:
         route_rank: int = 0,
         configure_profile=None,
         stop_at_pickup: bool = False,
+        arm_speed_control_on_deadhead: bool = False,
     ) -> PlaytestResult:
         from freight_fate.states.city import (
             CityMenuState,
@@ -164,8 +170,19 @@ class PlaytestHarness:
         assert isinstance(self.app.state, DrivingState)
         assert self.app.state.phase == "pickup"
 
+        if arm_speed_control_on_deadhead:
+            self.app.state.truck.start_engine()
+            self.app.state.truck.set_air_ready(parking_brake=False)
+            self.app.state.truck.velocity_mps = 5.0
+            self.app.state.handle_event(key_event(pygame.K_k))
+            assert self.app.state._speed_control_armed
+
         self.app.state.trip.position_mi = self.app.state.trip.total_miles
         self.app.state.trip.finished = True
+        if arm_speed_control_on_deadhead:
+            self.app.state.truck.velocity_mps = 26.8
+            self.app.state.update(1 / 60)
+            assert isinstance(self.app.state, DrivingState)
         self.app.state.truck.velocity_mps = 0.0
         self.app.state.update(1 / 60)
         _finish_timed_state(self.app)
@@ -195,6 +212,8 @@ class PlaytestHarness:
         profile_name: str = "Route Playtest",
         cargo: str = "general",
         tons: int = 18,
+        route_cities: list[str] | None = None,
+        trip_seed: int | None = None,
     ) -> PlaytestResult:
         """Set up a delivery on a specific supported route, skipping the menus.
 
@@ -208,9 +227,12 @@ class PlaytestHarness:
 
         assert self.app is not None
         self.app.ctx.profile = Profile(name=profile_name, current_city=origin)
-        route = self.app.ctx.world.route_from_cities([origin, destination])
+        city_path = route_cities or [origin, destination]
+        if city_path[0] != origin or city_path[-1] != destination:
+            raise ValueError("route_cities must start at origin and end at destination")
+        route = self.app.ctx.world.route_from_cities(city_path)
         if route is None:
-            raise SystemExit(f"No supported route {origin} -> {destination}")
+            raise SystemExit(f"No supported route {' -> '.join(city_path)}")
         miles = round(route.miles)
         job = Job(
             CARGO_CATALOG[cargo],
@@ -223,10 +245,203 @@ class PlaytestHarness:
             max(2.0, miles / 25.0),
             destination_location=f"{destination} Terminal",
         )
-        driving = DrivingState(self.app.ctx, job, route, phase="delivery")
+        driving = DrivingState(
+            self.app.ctx,
+            job,
+            route,
+            trip_seed=trip_seed,
+            phase="delivery",
+        )
         self.app.push_state(driving)
         self.driving = driving
         self._neutralize_random_trip_friction()
+        return self.result
+
+    def drive_speed_control_segment(
+        self,
+        *,
+        start_mi: float,
+        end_mi: float,
+        set_mph: float,
+    ) -> PlaytestResult:
+        """Run real automatic speed control through a targeted route segment."""
+        assert self.driving is not None
+        driving = self.driving
+        driving.tutorial = None
+        driving.trip.position_mi = start_mi
+        # Keep patrol randomness from converting the same overspeed incident
+        # into a traffic stop instead of the settlement strike measured here.
+        driving.trip.patrols = []
+        driving.truck.start_engine()
+        driving.truck.set_air_ready(parking_brake=False)
+        driving.truck.transmission.automatic = True
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = set_mph / 2.23694
+        driving.truck.throttle = 0.35
+        driving.handle_event(key_event(pygame.K_k))
+
+        last_mode = ""
+        for _frame in range(120_000):
+            driving.update(1 / 60)
+            mode = (
+                "keeper"
+                if driving._keeper_mph is not None
+                else "cruise"
+                if driving._cruise_mph is not None
+                else "off"
+            )
+            if mode != last_mode:
+                self.result.speed_control_transitions.append(mode)
+                last_mode = mode
+            self.result.max_speeding_timer_s = max(
+                self.result.max_speeding_timer_s,
+                driving._speeding_timer,
+            )
+            if driving.trip.position_mi >= end_mi:
+                break
+        else:
+            raise AssertionError(
+                f"speed-control segment never reached {end_mi:.1f} miles; "
+                f"stopped at {driving.trip.position_mi:.1f}"
+            )
+
+        self.result.speeding_strikes = driving.speeding_strikes
+        self.result.speeding_tickets = driving.speeding_tickets
+        return self.result
+
+    def settle_delivery_after_segment(self) -> PlaytestResult:
+        """Reach the spoken settlement without adding unrelated road events."""
+        from freight_fate.states.driving import ArrivalState, FacilityArrivalState
+
+        assert self.app is not None
+        assert self.driving is not None
+        driving = self.driving
+        driving.trip.position_mi = driving.trip.total_miles
+        driving.trip.finished = True
+        driving._destination_exit_taken = True
+        driving.truck.velocity_mps = 0.0
+        driving._handle_arrival_gate()
+        _finish_timed_state(self.app)
+        assert isinstance(self.app.state, FacilityArrivalState)
+        self.app.state.handle_event(key_event(pygame.K_RETURN))
+        _finish_timed_state(self.app)
+        assert isinstance(self.app.state, ArrivalState)
+
+        profile = self.app.ctx.profile
+        assert profile is not None
+        self.result.deliveries = profile.career.deliveries
+        self.result.destination = driving.job.destination
+        self.result.current_city = profile.current_city
+        self.result.remaining_miles = driving.trip.remaining_miles
+        return self.result
+
+    def drive_destination_exit_with_speed_control(
+        self,
+        *,
+        set_mph: float,
+        restricted_zone_reason: str | None = None,
+    ) -> PlaytestResult:
+        """Follow the spoken destination-exit path with K, X, and ramp braking."""
+        from freight_fate.sim.trip import Zone
+        from freight_fate.states.driving import (
+            RAMP_MAX_MPH,
+            ArrivalState,
+            FacilityArrivalState,
+        )
+
+        assert self.app is not None
+        assert self.driving is not None
+        driving = self.driving
+        driving.tutorial = None
+        driving.trip.patrols = []
+        driving.truck.start_engine()
+        driving.truck.set_air_ready(parking_brake=False)
+        driving.truck.transmission.automatic = True
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = set_mph / 2.23694
+        driving.truck.throttle = 0.35
+        destination = driving._destination_exit_stop()
+        if restricted_zone_reason is not None:
+            zone_end = destination.at_mi - 2.5
+            driving.trip.zones.append(
+                Zone(
+                    zone_end - 1.0,
+                    zone_end,
+                    RAMP_MAX_MPH,
+                    restricted_zone_reason,
+                )
+            )
+            driving.trip.zones.sort(key=lambda zone: zone.start_mi)
+        driving.trip.position_mi = max(
+            0.0,
+            destination.at_mi - driving._exit_window_mi() - 0.25,
+        )
+        driving.handle_event(key_event(pygame.K_k))
+
+        class ExitKeys:
+            def __getitem__(self, key: int) -> bool:
+                if driving._ramp_mi is None:
+                    return False
+                remaining = max(0.0, driving._ramp_mi)
+                target_mph = 0.0 if remaining == 0.0 else max(4.0, remaining * 70.0)
+                if key == pygame.K_DOWN:
+                    return driving.truck.speed_mph > target_mph + 1.0
+                if key == pygame.K_UP:
+                    return remaining > 0.0 and driving.truck.speed_mph < target_mph - 1.0
+                return False
+
+        self.monkeypatch.setattr(pygame.key, "get_pressed", lambda: ExitKeys())
+        signaled = False
+        last_mode = ""
+        for _frame in range(120_000):
+            driving.truck.air_pressure_psi = driving.truck.specs.air_governor_cut_out_psi
+            driving.truck.parking_brake = False
+            driving.update(1 / 60)
+            mode = (
+                "keeper"
+                if driving._keeper_mph is not None
+                else "cruise"
+                if driving._cruise_mph is not None
+                else "off"
+            )
+            if mode != last_mode:
+                self.result.speed_control_transitions.append(mode)
+                last_mode = mode
+            self.result.max_speeding_timer_s = max(
+                self.result.max_speeding_timer_s,
+                driving._speeding_timer,
+            )
+            if driving._destination_exit_announced_key and not signaled:
+                driving.handle_event(key_event(pygame.K_x))
+                signaled = True
+            if driving._ramp_mi is not None and self.result.destination_exit_speed_mph is None:
+                self.result.destination_exit_speed_mph = driving.truck.speed_mph
+            # Arrival runs a short spoken pull-in beat before the dock menu, so
+            # let it finish instead of driving frames at a state that is only
+            # counting down.
+            _finish_timed_state(self.app)
+            if isinstance(self.app.state, FacilityArrivalState):
+                break
+        else:
+            raise AssertionError(
+                "automatic speed control never completed the destination exit: "
+                f"state={type(self.app.state).__name__}, "
+                f"position={driving.trip.position_mi:.2f}, "
+                f"speed={driving.truck.speed_mph:.1f}, ramp={driving._ramp_mi}, "
+                f"signaled={signaled}\n{self.result.transcript_text}"
+            )
+
+        self.result.speeding_strikes = driving.speeding_strikes
+        self.result.speeding_tickets = driving.speeding_tickets
+        self.app.state.handle_event(key_event(pygame.K_RETURN))
+        _finish_timed_state(self.app)
+        assert isinstance(self.app.state, ArrivalState)
+        profile = self.app.ctx.profile
+        assert profile is not None
+        self.result.deliveries = profile.career.deliveries
+        self.result.destination = driving.job.destination
+        self.result.current_city = profile.current_city
+        self.result.remaining_miles = driving.trip.remaining_miles
         return self.result
 
     def drive_delivery_to_completion(self) -> PlaytestResult:

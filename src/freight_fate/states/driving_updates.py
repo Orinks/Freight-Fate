@@ -193,6 +193,7 @@ class DrivingUpdateMixin:
         clutch_disengaged = t.transmission.clutch > 0.5 or t.transmission.shifting
         self._update_lane(keys, dt)
         self._update_exit_preparation(keys, dt)
+        self._resume_speed_control_if_ready(braking=braking)
         self._update_cruise(dt, braking, accelerating, clutch_disengaged)
         self._update_keeper(dt, braking, accelerating, clutch_disengaged)
 
@@ -241,7 +242,7 @@ class DrivingUpdateMixin:
         self._update_hazard(dt)
         self._update_microsleep(keys, dt)
         self._update_overrev(dt)
-        self._update_speeding(dt)
+        self._update_speeding(dt, accelerator_held=accel_held)
         self._update_pull_over(dt)
         self._update_brake_heat_cue(dt)
         self._update_traction_cues()
@@ -581,8 +582,7 @@ class DrivingUpdateMixin:
             if excess > 15 and not self._curve_slip_active:
                 self._curve_slip_active = True
                 self.ctx.say_event(
-                    f"{self._pacenote_phrase(active)}: too fast, "
-                    "drifting to the outside.",
+                    f"{self._pacenote_phrase(active)}: too fast, drifting to the outside.",
                     interrupt=True,
                 )
         else:
@@ -1280,7 +1280,7 @@ class DrivingUpdateMixin:
         )
         self.ctx.say_event(message, interrupt=True)
 
-    def _update_speeding(self, dt: float) -> None:
+    def _update_speeding(self, dt: float, *, accelerator_held: bool = False) -> None:
         if self._ramp_mi is not None:
             return  # the ramp is off the highway and unpatrolled
         if self._missed_destination_exit_said and not self._destination_exit_taken:
@@ -1292,16 +1292,19 @@ class DrivingUpdateMixin:
         # A dropped limit earns braking time before strikes accrue: real
         # enforcement tickets sustained disregard, not the transition, and a
         # loaded truck cannot shed 15 mph the instant a sign changes. About
-        # 2 mph per second of comfortable braking sets the window.
+        # 2 mph per second of comfortable braking sets the window, capped so
+        # the grace cannot be used to coast through a whole restricted zone.
         if self._enforced_limit_prev is not None and limit < self._enforced_limit_prev:
             grace = (self.truck.speed_mph - limit) / 2.0
             self._limit_drop_grace_s = max(self._limit_drop_grace_s, min(15.0, grace))
         self._enforced_limit_prev = limit
         if self._limit_drop_grace_s > 0.0:
             self._limit_drop_grace_s = max(0.0, self._limit_drop_grace_s - dt)
-            if self.truck.throttle > 0.05:
-                # Staying on the throttle through the drop is disregard, not
-                # compliance: the grace collapses and the clock runs.
+            # Staying on the throttle through the drop is disregard, not
+            # compliance: the grace collapses and the clock runs. Read the
+            # current key/trigger position, not the smoothed truck throttle,
+            # which is still ramping down just after the driver lifts off.
+            if accelerator_held:
                 self._limit_drop_grace_s = 0.0
             else:
                 self._speeding_timer = 0.0

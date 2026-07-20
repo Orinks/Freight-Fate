@@ -73,8 +73,15 @@ def test_condition_edits_are_caught():
     p.tire_wear_pct = -20.0  # fresher than new
     p.truck_damage_pct = 250.0
     p.truck_fuel_gal = 9_000.0  # tanker, not a tank
-    found = codes(p)
-    assert {"tire_wear", "damage", "fuel_range"} <= found
+    violations = check_profile_invariants(p)
+    assert "fuel_range" in {v.code for v in violations}
+    # Out-of-range wear meters all report under one condition_range code, with
+    # the meter named in the detail, rather than a code per meter. Read the
+    # details so this still proves the tyre edit AND the damage edit were each
+    # caught, not merely that something was.
+    condition_details = " ".join(v.detail for v in violations if v.code == "condition_range")
+    assert "tire wear" in condition_details
+    assert "damage" in condition_details
 
 
 def test_counter_relations_are_caught():

@@ -57,6 +57,7 @@ def test_full_manual_converts_to_a_document():
     assert "<table>" in doc
     assert "Driving Controls" in doc
     assert "keypad Plus and Minus keys work too" in doc
-    assert "cruise set speed" in doc
+    assert "active speed-control mode" in doc
+    assert "open-road target" in doc
     # Balanced primary structure: every table is closed.
     assert doc.count("<table>") == doc.count("</table>")

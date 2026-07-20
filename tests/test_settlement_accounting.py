@@ -206,9 +206,9 @@ def test_pay_advance_is_repaid_from_settlement():
         assert app.ctx.profile.pay_advance_used_for_load is False
         # Net pay is reduced by the repaid advance; the bank reflects it.
         assert app.ctx.profile.money == pytest.approx(-200.0 + expected.net_before_advance - 500.0)
-        assert app.ctx.profile.career.total_earnings == pytest.approx(
-            expected.net_before_advance - 500.0
-        )
+        # Lifetime earnings still book the whole settlement: the advance was
+        # these same dollars drawn early, not a separate source of money.
+        assert app.ctx.profile.career.total_earnings == pytest.approx(expected.net_before_advance)
     finally:
         app.shutdown()
 
@@ -367,5 +367,51 @@ def test_toll_route_does_not_pay_more_than_equal_non_toll_route():
         assert "Carrier-paid or reimbursed charges 0 dollars" in non_toll_summary
         assert toll_money == pytest.approx(app.ctx.profile.money)
         assert toll_earnings == pytest.approx(app.ctx.profile.career.total_earnings)
+    finally:
+        app.shutdown()
+
+
+def test_repaid_advance_still_counts_as_lifetime_earnings():
+    """A pay advance must not leave the cloud money invariant unsatisfiable.
+
+    Cloud upload screening bounds money by what the career earned::
+
+        money + gear <= STARTING_MONEY + total_earnings + pay_advance
+
+    An advance hands the driver money now and repays it out of a later
+    settlement. If only the post-repayment remainder reaches
+    ``total_earnings``, those advanced dollars are money the career can
+    never account for and the driver is flagged as a save editor for
+    using a normal feature.
+    """
+    from freight_fate.app import App
+    from freight_fate.models.economy import PAY_ADVANCE_LIMIT
+    from freight_fate.models.profile import STARTING_MONEY
+
+    app = App()
+    try:
+        job = _job(origin="Chicago", destination="Indianapolis", pay=2500.0)
+        _settle(
+            app,
+            job,
+            ["Chicago", "Indianapolis"],
+            money=STARTING_MONEY + PAY_ADVANCE_LIMIT,
+            pay_advance=PAY_ADVANCE_LIMIT,
+            pay_advance_used_for_load=True,
+        )
+        profile = app.ctx.profile
+
+        # A company driver's settlement carries business charges on this line,
+        # so one delivery need not clear the whole advance -- the remainder is
+        # carried by design. The invariant below holds either way, because it
+        # counts whatever advance is still outstanding.
+        assert profile.pay_advance < PAY_ADVANCE_LIMIT, "settlement should repay what it can"
+        headroom = (
+            STARTING_MONEY + profile.career.total_earnings + profile.pay_advance
+        ) - profile.money
+        assert headroom >= -1.0, (
+            f"money {profile.money:,.0f} exceeds what the career can account for by "
+            f"{-headroom:,.0f} dollars; cloud screening would flag this driver"
+        )
     finally:
         app.shutdown()

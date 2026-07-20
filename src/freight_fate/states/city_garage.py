@@ -440,10 +440,7 @@ class GarageState(MenuState):
         if wear >= 1:
             if carrier:
                 return f"Replace snow chains: {wear:.0f} percent worn, carrier billed"
-            return (
-                f"Replace snow chains: {wear:.0f} percent worn, "
-                f"{CHAIN_SET_COST:,.0f} dollars"
-            )
+            return f"Replace snow chains: {wear:.0f} percent worn, {CHAIN_SET_COST:,.0f} dollars"
         return "Snow chains: aboard and fresh"
 
     def _buy_chains(self) -> None:

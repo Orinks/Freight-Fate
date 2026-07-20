@@ -176,6 +176,9 @@ class MenuItem:
     label: str | Callable[[], str]
     action: Callable[[], None]
     help: str = ""
+    # The click played when this item is activated. Set to None for items whose
+    # action plays its own confirmation sound, so the two do not stack.
+    select_sound: str | None = "ui/menu_select"
 
     @property
     def text(self) -> str:
@@ -248,8 +251,10 @@ class MenuState(State):
     def activate(self) -> None:
         if not self.items:
             return
-        self.ctx.audio.play("ui/menu_select")
-        self.items[self.index].action()
+        item = self.items[self.index]
+        if item.select_sound:
+            self.ctx.audio.play(item.select_sound)
+        item.action()
 
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")

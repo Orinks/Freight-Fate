@@ -26,6 +26,28 @@ class TruckModel:
     specs: TruckSpecs
 
 
+@dataclass
+class TruckCondition:
+    """One owned truck's persistent condition, keyed by catalog key on the profile."""
+
+    fuel_gal: float = 150.0
+    damage_pct: float = 0.0
+    tire_wear_pct: float = 0.0
+    grime_pct: float = 0.0
+
+    @classmethod
+    def fresh(cls, truck_key: str, upgrades: dict[str, int] | None = None) -> TruckCondition:
+        """A just-purchased truck: full tank for this model, everything else zero."""
+        return cls(fuel_gal=build_truck_specs(truck_key, upgrades or {}).fuel_tank_gal)
+
+    @classmethod
+    def from_dict(cls, data: object) -> TruckCondition:
+        if not isinstance(data, dict):
+            return cls()
+        known = set(cls.__dataclass_fields__)
+        return cls(**{k: v for k, v in data.items() if k in known})
+
+
 TRUCK_CATALOG: dict[str, TruckModel] = {
     "rig": TruckModel(
         "rig",

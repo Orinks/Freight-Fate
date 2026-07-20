@@ -34,6 +34,7 @@ successful restore is immediately HMAC-signed for this installation.
 from __future__ import annotations
 
 import base64
+import contextlib
 import gzip
 import hashlib
 import json
@@ -356,6 +357,12 @@ def download_save(
         "keyId": reply.get("keyId"),
         "signedAt": reply.get("signedAt"),
         "validatorVersion": reply.get("validatorVersion"),
+        # Absolution from the server, carried only on a reply whose revision
+        # signature just verified above. The flag rides outside that signature,
+        # so it is not proof of anything on its own -- but the worst a forged
+        # one can do is clear a local advisory mark, and shared features read
+        # the server's verdict rather than this flag.
+        "clearIntegrityFlag": reply.get("clearIntegrityFlag") is True,
         "profile": profile_dict,
     }
 
@@ -364,21 +371,36 @@ def restore_to_disk(payload: dict, sync_state: SyncState | None = None) -> Path:
     """Write a downloaded cloud save over the local profile file.
 
     Verification and construction happen before touching disk. The current
-    local file (if any) is kept beside it as ``.json.bak``. The replacement is
-    atomically installed with this machine's HMAC signature, and the old file
-    is put back if installation fails. Sync state changes only after success.
+    local file (if any) is kept beside it as ``.ffsave.bak``. The replacement
+    is atomically installed with this machine's HMAC signature, and the old
+    file is put back if installation fails. Sync state changes only after
+    success.
     """
-    from .models.profile import profiles_dir
+    from .models.profile import (
+        LEGACY_SAVE_SUFFIX,
+        SAVE_SUFFIX,
+        encode_save_bytes,
+        save_path_for,
+    )
 
     profile = verify_cloud_revision(payload["profile"], payload)
+    # Absolution. The server grants this only on a revision it signed and
+    # fully validated, so a career that was marked purely for moving between
+    # computers stops carrying the mark. The signature is verified above,
+    # before this is read -- an unsigned or failed reply never gets here, and
+    # a career that really was edited fails validation instead of arriving
+    # with the flag set.
+    if payload.get("clearIntegrityFlag") is True:
+        profile.integrity_modified = False
+        profile.integrity_notice_pending = False
     signed_data = profile.to_dict()
     name = save_slot_name(profile.name)
-    path = profiles_dir() / f"{name}.json"
-    tmp = path.with_suffix(".json.tmp")
-    backup = path.with_suffix(".json.bak")
+    path = save_path_for(name)
+    tmp = path.with_suffix(SAVE_SUFFIX + ".tmp")
+    backup = path.with_suffix(SAVE_SUFFIX + ".bak")
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(signed_data, f, indent=2)
+    with open(tmp, "wb") as f:
+        f.write(encode_save_bytes(signed_data))
     moved_old = False
     try:
         if path.exists():
@@ -391,6 +413,12 @@ def restore_to_disk(payload: dict, sync_state: SyncState | None = None) -> Path:
         if moved_old and backup.exists() and not path.exists():
             backup.replace(path)
         raise
+    # A leftover plain-JSON save for this career would shadow nothing (the
+    # packed file wins), but move it aside so only one live copy remains.
+    legacy = path.with_suffix(LEGACY_SAVE_SUFFIX)
+    if legacy.exists():
+        with contextlib.suppress(OSError):
+            legacy.replace(legacy.with_suffix(".json.bak"))
     if sync_state is not None and isinstance(payload.get("revision"), int):
         _, content_hash = cloud_content(payload["profile"])
         sync_state.record_synced(payload["saveName"], payload["revision"], content_hash)

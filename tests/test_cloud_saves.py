@@ -37,7 +37,7 @@ from freight_fate.cloud_saves import (
     upload_save,
 )
 from freight_fate.models import profile as profile_module
-from freight_fate.models.profile import SIGNATURE_FIELD, Profile
+from freight_fate.models.profile import SIGNATURE_FIELD, Profile, _decode_save_bytes
 from freight_fate.online_presence import OnlineIdentity, base_url
 from freight_fate.settings import Settings
 
@@ -432,12 +432,14 @@ def test_restore_verifies_then_writes_a_locally_signed_save():
 
     restored = Profile.load(path)
     assert restored.money == 77_000.0
-    assert SIGNATURE_FIELD in json.loads(path.read_text(encoding="utf-8"))
-    backup = path.with_suffix(".json.bak")
+    # Locally re-signed, and not flagged: a verified restore is not a tamper.
+    assert restored.integrity_modified is False
+    assert SIGNATURE_FIELD in _decode_save_bytes(path.read_bytes())[0]
+    backup = path.with_suffix(".ffsave.bak")
     assert backup.exists()
-    assert json.loads(backup.read_text(encoding="utf-8"))["money"] == 5.0
+    assert _decode_save_bytes(backup.read_bytes())[0]["money"] == 5.0
     # The fallback file must not appear in the careers list.
-    assert path.with_suffix(".json.bak") not in Profile.list_saves()
+    assert backup not in Profile.list_saves()
 
     # The restored revision is the next upload's parent, so continuing this
     # career does not immediately conflict with the copy just downloaded.
@@ -636,3 +638,37 @@ def test_whole_float_profile_signature_round_trips():
     payload = download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
     assert payload is not None
     assert payload["profile"]["money"] == 77_000.0
+
+
+def test_server_absolution_clears_the_modified_mark_on_restore():
+    """A career marked only because it moved computers gets released.
+
+    The server grants this on a revision it signed and fully validated, so
+    honest machine-movers stop carrying the mark forever. A profile that
+    really was edited fails validation and never gets the signal.
+    """
+    marked = Profile(name="Road Star", money=77_000.0)
+    marked.integrity_modified = True
+    marked.integrity_notice_pending = True
+    reply = make_cloud_reply(marked.to_dict(), revision=4)
+    reply["clearIntegrityFlag"] = True
+    payload = download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
+
+    path = restore_to_disk(payload, SyncState())
+    restored = Profile.load(path)
+
+    assert restored.integrity_modified is False
+    assert restored.integrity_notice_pending is False
+    assert restored.money == 77_000.0
+
+
+def test_a_restore_without_absolution_leaves_the_mark_alone():
+    """Absence of the signal is not permission to clear the mark."""
+    marked = Profile(name="Road Star", money=77_000.0)
+    marked.integrity_modified = True
+    reply = make_cloud_reply(marked.to_dict(), revision=4)
+    payload = download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
+
+    path = restore_to_disk(payload, SyncState())
+
+    assert Profile.load(path).integrity_modified is True

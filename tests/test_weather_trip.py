@@ -1,6 +1,7 @@
 """Weather system and trip simulation tests."""
 
 import itertools
+from dataclasses import replace
 
 import pytest
 
@@ -1238,8 +1239,37 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
     assert "traffic" in hazards[0].data
 
 
-def test_city_events_announce_state_crossings(world):
+@pytest.mark.xfail(
+    reason=(
+        "The city passing line still carries the crossing even when the leg has a "
+        "mapped boundary, deliberately. The mapped crossing is spoken as an ambient "
+        "message, and ambient messages wait in a single slot that the next critical "
+        "event discards and any later ambient message overwrites -- on an interstate "
+        "it never reaches the driver. Dropping this prefix would leave silence at a "
+        "state line rather than a repeat. Give ambient messages a queue that survives "
+        "both, then drop this marker and restore the suppression in "
+        "trip_road_events._check_cities."
+    ),
+    strict=True,
+)
+def test_city_events_do_not_repeat_mapped_state_crossings(world):
     route = world.route_from_cities(["Chicago", "Cleveland", "Pittsburgh"])
+    truck = TruckState()
+    weather = WeatherSystem("great_lakes", seed=1)
+    trip = Trip(route, truck, weather, seed=2)
+    trip.position_mi = route.legs[0].miles
+
+    events = trip.update(0.0)
+
+    city_events = [e.message for e in events if e.kind == TripEventKind.CITY_REACHED]
+    assert city_events == ["Passing Cleveland, Ohio. Continuing on I-76 toward Pittsburgh."]
+    state_events = [e.message for e in events if e.kind == TripEventKind.STATE_CROSSING]
+    assert any(message.startswith("Crossing into Ohio near ") for message in state_events)
+
+
+def test_city_events_keep_crossing_fallback_without_mapped_state_line(world):
+    route = world.route_from_cities(["Chicago", "Cleveland", "Pittsburgh"])
+    route.legs[0] = replace(route.legs[0], state_crossings=())
     truck = TruckState()
     weather = WeatherSystem("great_lakes", seed=1)
     trip = Trip(route, truck, weather, seed=2)
