@@ -909,6 +909,31 @@ def test_real_weather_starts_clear_with_no_simulated_warmup(monkeypatch):
         app.shutdown()
 
 
+def test_live_weather_calendar_off_does_not_announce_simulated_forecast_while_loading(
+    monkeypatch,
+):
+    """V must not invent a forecast while the selected live source is loading.
+
+    The calendar toggle changes seasonal plausibility, not the weather source.
+    """
+    from freight_fate.app import App
+
+    provider = _FakeWeatherProvider(kind=None)
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: provider)
+    app.ctx.settings.real_weather = True
+    app.ctx.settings.live_weather_controls_calendar = False
+    try:
+        driving = start_drive(app)
+        driving._speak_weather()
+        assert "Live weather is still loading" in spoken[-1]
+        assert "Ahead:" not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 def test_real_weather_applies_and_awards_live_condition(monkeypatch):
     """Once live conditions arrive, they take over from clear and award their
     achievement -- e.g. genuine live rain unlocks the rain achievement."""

@@ -98,6 +98,28 @@ def test_weather_eventually_changes():
     assert any(c is not None for c in changes)
 
 
+def test_offline_live_weather_change_is_identified_as_simulated_fallback(world):
+    class OfflineProvider:
+        def request(self, *args):
+            pass
+
+        def get(self, city):
+            return None
+
+        def unavailable(self, city):
+            return True
+
+    trip, _truck = make_trip(world)
+    trip.weather.provider = OfflineProvider()
+    trip.weather.minutes_until_change = 0.0
+    trip.weather._sample = lambda *args, **kwargs: WeatherKind.RAIN
+
+    events = trip.update(1.0)
+
+    change = next(event for event in events if event.kind is TripEventKind.WEATHER_CHANGE)
+    assert change.message.startswith("Simulated fallback weather changing: rain")
+
+
 def test_bad_weather_reduces_grip():
     assert EFFECTS[WeatherKind.SNOW].grip < EFFECTS[WeatherKind.CLEAR].grip
     assert EFFECTS[WeatherKind.HEAVY_RAIN].grip < EFFECTS[WeatherKind.RAIN].grip

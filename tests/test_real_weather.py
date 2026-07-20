@@ -198,6 +198,30 @@ def test_weather_system_applies_live_conditions():
     assert ws.current is WeatherKind.HEAVY_RAIN
 
 
+def test_live_conditions_do_not_evolve_simulated_weather_with_independent_calendar():
+    """The calendar toggle must not restart the simulated transition timer.
+
+    Live weather may change when the provider's observation or target city
+    changes, but it must not wander from rain to heavy rain or fog on its own.
+    """
+    p = SyncProvider(fetch=lambda lat, lon: ("Rain", 5.0, 18.0, 5.0))
+    ws = WeatherSystem(
+        "great_lakes",
+        seed=2,
+        provider=p,
+        game_hours=100.0,
+        live_weather_controls_calendar=False,
+    )
+    ws.set_city("Chicago", 41.88, -87.63)
+    ws.update(1.0)
+    assert ws.live
+    assert ws.current is WeatherKind.RAIN
+
+    for _ in range(200):
+        assert ws.update(30.0) is None
+    assert ws.current is WeatherKind.RAIN
+
+
 def test_weather_system_holds_clear_while_live_data_pending():
     """With a provider attached, weather starts clear and holds -- no simulated
     warm-up -- until live data (or a confirmed offline state) arrives."""

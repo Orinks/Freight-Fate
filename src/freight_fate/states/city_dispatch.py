@@ -753,36 +753,39 @@ class RouteSelectState(MenuState):
             for name in route.cities[1:][:5]:
                 city = self.ctx.world.cities[name]
                 kind = provider.get(city.key)
-                if kind is not None:
-                    from ..sim.season import (
-                        adjust_for_calendar,
-                        real_clock_game_hours,
-                        temperature_c,
+                spoken_city = self.ctx.world.spoken_city(name, qualified=True)
+                if kind is None:
+                    checker = getattr(provider, "unavailable", None)
+                    unavailable = checker is not None and checker(city.key)
+                    status = (
+                        "live weather unavailable; simulated fallback may apply"
+                        if unavailable
+                        else "live weather still loading"
                     )
+                    parts.append(f"{spoken_city}: {status}")
+                    continue
+                from ..sim.season import (
+                    adjust_for_calendar,
+                    real_clock_game_hours,
+                    temperature_c,
+                )
 
-                    hours = (
-                        real_clock_game_hours()
-                        if self.ctx.settings.live_weather_controls_calendar
-                        else self.ctx.profile.calendar_game_hours
-                    )
-                    observed = None
-                    getter = getattr(provider, "get_temperature", None)
-                    if getter is not None and self.ctx.settings.live_weather_controls_calendar:
-                        observed = getter(city.key)
-                    kind = adjust_for_calendar(
-                        kind,
-                        observed if observed is not None else temperature_c(city.region, hours),
-                        hours,
-                    )
-                    parts.append(
-                        f"{self.ctx.world.spoken_city(name, qualified=True)}: {kind.value}"
-                    )
-            if parts:
-                self.ctx.say("Live weather along the route. " + ". ".join(parts) + ".")
-                return
-            self.ctx.say(
-                "Live weather is still loading. Try again in a moment, or check V while driving."
-            )
+                hours = (
+                    real_clock_game_hours()
+                    if self.ctx.settings.live_weather_controls_calendar
+                    else self.ctx.profile.calendar_game_hours
+                )
+                observed = None
+                getter = getattr(provider, "get_temperature", None)
+                if getter is not None and self.ctx.settings.live_weather_controls_calendar:
+                    observed = getter(city.key)
+                kind = adjust_for_calendar(
+                    kind,
+                    observed if observed is not None else temperature_c(city.region, hours),
+                    hours,
+                )
+                parts.append(f"{spoken_city}: {kind.value}")
+            self.ctx.say("Weather along the route. " + ". ".join(parts) + ".")
             return
         regions: list[str] = []
         for city_name in route.cities:
