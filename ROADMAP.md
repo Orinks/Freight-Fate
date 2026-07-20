@@ -917,6 +917,36 @@ section below and the Unreleased changelog; the release-line view:
 
 ### World and narration
 
+- [x] **Village and small-town callouts (landed 2026-07-19).** The route now
+      names the small places it runs through -- "Entering Strawberry",
+      "Passing Kennebunk" -- so a speed limit dropping to 35 in the middle of
+      a mountain highway has a town attached to it instead of arriving from
+      nowhere. 26,894 real OSM `place=village|town` points across 1,280 legs
+      (`tools/bake_villages.py`), each projected onto the leg's real
+      OpenRouteService route with its distance off the road recorded. Baked
+      wide (12-mile catchment) and displayed tight: the ride-along speaks only
+      places within 1.5 miles of the road, 390 of them positioned just ahead
+      of the speed zone they explain; the wider set waits for the planned
+      "where am I" key, which needs to answer "Winslow, eleven miles ahead".
+      No hamlets. A Settings switch, Speak town and village names, is on by
+      default. Follow-ups below.
+- [ ] **Village bake: per-leg cap and the wide catchment.** 569 of 1,280 legs
+      hit the 30-places-per-leg cap, so their far field (5 to 12 miles off the
+      road) is truncated. Harmless for the ride-along, which never reaches
+      past 1.5 miles, but the "where am I" key will want the cap raised or
+      replaced with a distance-ranked store before it ships.
+- [ ] **Villages should carry their own state.** The bake reports counts by
+      the state the LEG starts in, not the state the village is in, so a place
+      in Washington on a Portland to Seattle leg counts as Oregon. Store the
+      real state per record when the orientation readout needs to speak it.
+- [ ] **Township and neighbourhood names in the OSM place layer.** OSM tags
+      some townships ("Deptford Township") and a few neighbourhoods ("Journal
+      Square") as `place=village|town`. They are real names and they read
+      aloud correctly, but they are not places a driver arrives at. Worth a
+      curated exclusion pass if they grate in play.
+- [ ] **Places across a river read as passing.** On the Columbia the route is
+      on the Oregon bank and a Washington town can sit under a mile away, so
+      it speaks as "Passing Wishram". True, but worth a look in play.
 - [x] **Official truck-parking capacity on rest stops (landed 2026-07-17).**
       The FHWA Jason's Law survey (USDOT BTS NTAD Truck Stop Parking, the
       dataset behind the national truck-parking inventory) now annotates

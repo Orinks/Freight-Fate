@@ -4,6 +4,16 @@
 
 ### Added
 
+- **The road now names the towns you drive through.** When the route
+  runs into a small town or village, you hear it just before you get
+  there -- "Entering Strawberry" -- and where the highway only skirts a
+  place, you hear that you are passing it instead. The name lands right
+  before the speed limit drops, so a sudden 35 in the middle of a
+  mountain highway finally has a reason attached to it instead of
+  arriving out of nowhere. Every name is a real place taken from the
+  map, never invented, so a leg with nothing on it stays quiet. You can
+  turn this off under Settings, Speak town and village names.
+
 - **Every stop the game announces is now one your rig can actually
   enter.** Every fuel stop, rest area, and truck stop on the map was
   checked against real-world truck access. Car-scale gas stations that

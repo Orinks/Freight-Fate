@@ -603,31 +603,62 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
 
         Direction-resolved to trip miles and thinned to the minimum spacing so
         a river cluster (three crossings in a mile is real geography) speaks
-        once instead of stacking. City-street approaches stay quiet."""
+        once instead of stacking. City-street approaches stay quiet.
+
+        Villages are baked wide and displayed tight: only the ones the route
+        actually runs through or skirts are scheduled here (see
+        ``VILLAGE_PASS_OFF_MI``), and they are thinned among themselves first
+        so a dense corridor names a few places instead of chanting every one.
+        The rest stay in the map for orientation answers rather than being
+        announced as places you arrived at."""
         if self._is_facility_approach_route():
             return []
         callouts: list[RoadsideCallout] = []
+        villages: list[tuple[float, float, RoadsideCallout]] = []
         for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
             forward = self.route.cities[i] == leg.a
             for landmark in leg.landmarks:
                 offset = _stop_offset_for_direction(landmark.at_mi, leg.miles, forward)
-                callouts.append(
-                    RoadsideCallout(
-                        f"landmark:{i}:{landmark.at_mi}:{landmark.name}",
-                        start + offset,
-                        landmark.category,
-                        f"{landmark.spoken}.",
-                    )
+                callout = RoadsideCallout(
+                    f"landmark:{i}:{landmark.at_mi}:{landmark.name}",
+                    start + offset,
+                    landmark.category,
+                    f"{landmark.spoken}.",
                 )
-        callouts.sort(key=lambda c: c.at_mi)
-        spaced: list[RoadsideCallout] = []
-        last = -LANDMARK_MIN_SPACING_MI
-        for callout in callouts:
-            if callout.at_mi - last < LANDMARK_MIN_SPACING_MI:
+                if landmark.category == "village":
+                    if landmark.off_mi > VILLAGE_PASS_OFF_MI:
+                        continue
+                    villages.append((callout.at_mi, landmark.off_mi, callout))
+                    continue
+                callouts.append(callout)
+        # Town names are placed first and scenery fills the gaps around them. A
+        # forest boundary and a village can land on the same mile (Tonto
+        # National Forest and Pine, Arizona both sit at mile 41.9), and the name
+        # of the town is the cue that orients the driver and explains the speed
+        # limit about to drop -- ambient colour should yield to it, not win by
+        # being first in the list.
+        spaced = self._thin_villages(villages)
+        for callout in sorted(callouts, key=lambda c: c.at_mi):
+            if any(abs(callout.at_mi - kept.at_mi) < LANDMARK_MIN_SPACING_MI for kept in spaced):
                 continue
             spaced.append(callout)
-            last = callout.at_mi
+            spaced.sort(key=lambda c: c.at_mi)
         return spaced
+
+    @staticmethod
+    def _thin_villages(villages) -> list[RoadsideCallout]:
+        """Keep one village per spacing window, nearest the road winning.
+
+        Ordering by distance-off-route rather than by mile is what makes the
+        choice honest: in a cluster of five, the one the highway actually runs
+        through is the one a driver would use to place themselves, and it beats
+        whichever happened to come first."""
+        chosen: list[tuple[float, RoadsideCallout]] = []
+        for at_mi, _off_mi, callout in sorted(villages, key=lambda v: (v[1], v[0])):
+            if any(abs(at_mi - taken) < VILLAGE_MIN_SPACING_MI for taken, _ in chosen):
+                continue
+            chosen.append((at_mi, callout))
+        return [callout for _, callout in sorted(chosen, key=lambda c: c[0])]
 
     def _place_billboards(self) -> list[RoadsideCallout]:
         """Schedule parody billboards along the highway, seeded per trip.

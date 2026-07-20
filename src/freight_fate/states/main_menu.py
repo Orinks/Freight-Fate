@@ -1053,7 +1053,8 @@ class SettingsCategoryState(MenuState):
                 lambda: f"Roadside chatter: {s.chatter_summary()}",
                 self._set_all_chatter,
                 "The ambient color spoken between navigation cues: parks, "
-                "rivers, mountain passes, museums, and billboards. Right "
+                "rivers, mountain passes, museums, billboards, and the small "
+                "towns you drive through. Right "
                 "arrow turns everything on, Left arrow turns everything "
                 "off, and the switches below fine-tune each kind. Safety "
                 "and navigation announcements are never affected.",
@@ -1085,6 +1086,13 @@ class SettingsCategoryState(MenuState):
                 lambda _d: self._toggle_chatter("chatter_billboards"),
                 "Occasional roadside billboards, read as you pass them. "
                 "Expect attorney ads and questionable tourist traps.",
+            ),
+            (
+                lambda: f"Speak town and village names: {'on' if s.chatter_villages else 'off'}",
+                lambda _d: self._toggle_chatter("chatter_villages"),
+                "Names the small towns and villages the route runs through, "
+                "just before you reach them. This is what explains a speed "
+                "limit drop, so leaving it on tells you why the limit fell.",
             ),
             (
                 lambda: (

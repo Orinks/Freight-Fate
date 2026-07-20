@@ -258,13 +258,21 @@ class Landmark:
     you pass); ``category`` is the finer bucket (``national_park``, ``river``,
     ``mountain_pass``, ``museum``, ...) that the roadside-chatter settings
     filter on. ``spoken`` is the finished ambient cue line, authored at bake
-    time so the runtime never composes from raw tags."""
+    time so the runtime never composes from raw tags.
+
+    ``off_mi`` is how far the feature sits off the road at ``at_mi``. Village
+    callouts are baked out to a wide catchment and displayed on a tight one:
+    the ride-along names only the towns the route actually runs through, while
+    the wider set stays available to answer "what is near me" at any distance
+    (a town eleven miles ahead is the honest answer on an empty interstate).
+    Zone and point landmarks are on the route by construction and leave it 0."""
 
     name: str
     at_mi: float
     category: str
     kind: str
     spoken: str
+    off_mi: float = 0.0
 
 
 @dataclass(frozen=True)
