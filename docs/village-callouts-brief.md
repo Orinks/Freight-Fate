@@ -62,3 +62,52 @@ Sharded world edits via tools/world_source.py only; `index_world.py
 `C:/dev/Freight-Fate/logs/oatis-villages-done.json` (branch, commit,
 villages added per state, paired-with-zone count, notes). Phil reviews
 against this brief and merges. NEVER work in the main checkout.
+
+## Follow-ups on the shipped bake (owner review, 2026-07-20)
+
+The sweep landed on `map/village-callouts` (26,894 places, 1,280 legs,
+2199 tests green). Two changes came out of reviewing it. Both are small
+and neither needs a re-bake.
+
+### 1. Pairing overrides radius
+
+The single 1.5 mi display radius does two jobs badly. Measured on the
+shipped bake:
+
+| radius | speakable | share |
+| --- | --- | --- |
+| 1.0 mi | 6,128 | 22.8% |
+| 1.5 mi | 7,899 | 29.4% |
+
+Tightening to 1.0 removes ~1,771 announcements but also silences ~49
+villages that sit right before the limit drop they explain -- the
+highest-value records in the bake. Trading an explanation away to save
+flavour is backwards, so **split the rule instead of moving the number**:
+
+- **Unpaired (flavour) village: 1.0 mi.** "Entering" should mean the
+  driver is actually in it; 1.5 was loose.
+- **Village paired with a speed-zone drop: out to ~2.0 mi.** It earns
+  its place by explaining something. The existing offset phrasing keeps
+  it honest -- "Passing Strawberry" where the road only skirts the town,
+  "Entering" where it runs through.
+
+Net: roughly 23% less chatter than today with **zero explanations lost**.
+One constant plus one condition.
+
+### 2. Fix endpoint snapping before "where am I" reads this data
+
+8.6% of records are pinned to a leg endpoint (`at_mi` exactly 0.0, or
+within 0.05 of leg end). This is legitimate clamping for places near the
+origin/destination city, and it is **harmless today** -- verified that
+zero endpoint-pinned records fall inside the display radius, so none of
+them speak.
+
+It stops being harmless the moment [[project-where-am-i-key]] reads the
+far field, because those are exactly the distant records the key exists
+to report, and their along-route distance is a clamp artifact rather
+than a measurement. **Fix the snap before the key ships, not after** --
+a key whose whole job is answering "where am I" must not answer with a
+distance the bake invented.
+
+Related: the per-leg cap of 30 truncates the far field on 569 legs.
+Nothing announceable was lost, but the key will want it raised.

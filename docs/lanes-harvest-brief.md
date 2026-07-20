@@ -26,6 +26,19 @@ Josh) will need. Bake now, wire later.
   escape-ramp harvest pattern); self-hosted Overpass (`ff-overpass`,
   port 12347) for anything the extracts lack. Health-check before
   relying on it; recovery runbook in project memory.
+- **The self-hosted Overpass extract is tag-filtered and is NOT a
+  general OSM mirror** (learned the hard way, 2026-07-20: the village
+  sweep found `node["place"]` returns zero nationwide because the
+  extract kept only roads, landmarks, and truck POIs). A healthy status
+  endpoint tells you the server is up, not that it holds the tags you
+  need — probe for an actual known feature before trusting a nil result.
+- **Rebuild the extract for this job, and widen it while you are in
+  there** (owner, 2026-07-20). If it is being rebuilt for lanes,
+  interchanges, and `destination:*`, include `place=village|town` in the
+  same pass: that retires the bespoke `tools/extract_osm_places.py`
+  written during the village sweep and leaves one query path instead of
+  two. Note this is gated on the Crucial RAM RMA — see
+  [[project-overpass-selfhost]].
 - Sample along each leg's real routed geometry like Job 2, but lane
   facts change at way boundaries, not continuously: record a step
   function of transitions, not dense samples.
@@ -54,6 +67,16 @@ Josh) will need. Bake now, wire later.
 6. **destination:lanes** raw strings, stored verbatim per transition
    where present (future gantry speech; no processing this job, and
    never player-facing raw — OSM tag text must not leak into speech).
+7. **`destination` and `destination:ref` on the `motorway_link` ways
+   themselves** (added 2026-07-20, owner design session). These are the
+   guide-sign legend — `destination=Nashville`,
+   `destination:ref=I-40 West` — and they are what turns an interchange
+   callout into "stay left for I-40 toward Nashville" rather than a bare
+   exit number. Item 6 alone does not buy this: `destination:lanes` says
+   which lane, `destination` says the city, and the sentence the owner
+   asked for needs both. US interstate coverage of these tags is good.
+   Harvest per interchange, per direction of travel, under the same
+   verbatim-storage and never-raw-in-speech rule as item 6.
 
 ## Storage
 
@@ -82,6 +105,34 @@ guessed count without an `estimated` flag.
 - `[skip changelog]` is correct for this job — data with no consumer is
   not player-facing yet; the wiring jobs carry the changelog entries.
   ROADMAP: check off the lane-counts bullet with what actually shipped.
+
+## For the wiring jobs: advisory may guess, punitive may not
+
+Recorded here because it constrains what this bake must flag, not just
+what it must collect (owner design session, 2026-07-20).
+
+The planned lane mechanic makes a wrong lane cost the player a wrong
+exit, with the GPS routing them back. That is the right call on realism
+and it is the first mechanic where **a gap in our data becomes a penalty
+against the player.** If `turn:lanes` is absent and we guess, a driver
+who did everything right gets pulled off the interstate — and a blind
+player has no way to tell our missing tag from their own mistake. The
+truck-access sweep drew this line already: a cue with no real referent
+is refused.
+
+So:
+
+- **Enforce wrong-lane consequences only where lane data is real
+  (non-`estimated`).** Everywhere else the guidance degrades to the side
+  it can prove — "stay left" — and costs nothing if ignored.
+- **Never speak a lane ordinal we did not harvest.** "Take the second
+  lane" requires a real `turn:lanes`/`destination:lanes`; with only a
+  count and a side, say the side.
+- This makes the `estimated` flag from item 1 load-bearing at runtime
+  rather than merely informational, so it must be baked accurately and
+  never defaulted to "real" for a tidier record.
+
+Advisory guidance may run on partial data. Punitive guidance may not.
 
 ## Sequencing
 
