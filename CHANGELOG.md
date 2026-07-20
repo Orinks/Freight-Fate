@@ -99,6 +99,10 @@
 - **Choose how much driving assistance the truck provides.** A new Driving assistance settings category offers Realistic, Balanced, All assists, and Custom presets for emergency braking, lane support, stop-and-go behavior, and interactive descent speed control. Adaptive cruise keeps its existing traffic, posted-limit, and weather behavior. Presets never change trip pacing, hours rules, transmission, weather, or hazard frequency. These assists lay the groundwork for the version 1.9 driving changes.
 
 - **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
+
+- **The route report now tells you where you are.** Press R, or D-pad up on a
+  controller, to hear the current road and direction, state, nearest named city,
+  checkpoint, or road stop, along with your progress and upcoming guidance.
 - **Live weather can now leave your career calendar running.** The new Live
   weather controls calendar setting keeps today's real date when on. Turn it
   off to keep live city conditions while your career date advances at midnight
@@ -107,7 +111,17 @@
   established career begins its independent calendar from today's date when
   you turn the setting off, avoiding a jump back to its old hidden date; a new
   career still begins on March 21.
-- **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default; turn it off in Settings, Gameplay.
+- **Map stops now open a full details view, and you can plan your next
+  stop.** On the driving Map screen, pressing Enter on a stop now opens its
+  details instead of repeating the line: the exit, distance, what it offers,
+  parking, and an estimate of how long it will take to reach at your pace,
+  including whether you would arrive before your next break, driving limit,
+  or duty window. From there, plan to stop at it: approach announcements and
+  the upcoming and clock readouts then call it your planned stop, so you know
+  exactly when to signal for the exit. Plans can be canceled or replaced any
+  time, survive saving and resuming, and clear themselves when you pull in or
+  drive past.
+- **Keep speed assistance active across the whole job.** Pressing K now starts one automatic speed-control session: the speed keeper handles facility roads, gate queues, work zones, and congestion, then adaptive cruise takes over on the open road. If started during the deadhead, it pauses through pickup check-in and loading, survives a save there, and resumes once the loaded truck is rolling. It restores your earlier cruise target or uses the new road's limit, and switches back to the keeper for the next restricted zone. Braking outside that planned pickup, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Plus and Minus adjust the remembered open-road target in either mode.
 
 ### Changed
 
@@ -117,6 +131,43 @@
   slow or metered connection. Fifteen tracks were rebuilt from their original
   studio recordings along the way, so those should sound a shade cleaner than
   before.
+
+- **The drivers board now checks in a little less often.** With online
+  presence on, the game reports you every ninety seconds instead of every
+  minute, and the board waits four minutes before it calls a driver gone. You
+  still appear the moment you go on duty; a driver who closes the game may sit
+  on the board about a minute longer than before.
+- **Career saves are now sealed files instead of plain text.** Saved careers
+  use a new packed format that ordinary text editors cannot open, and every
+  save is signed by your own installation. Your existing careers convert
+  automatically the first time they load, and a copy of the old file is kept
+  beside the new one in case you ever roll back to an older version of the
+  game. A save that was changed outside the game, or copied over from another
+  computer, still loads and plays normally, but the game tells you once and
+  marks that career as modified; shared features may not accept a modified
+  career. Thanks to nromey, [PR
+  #96](https://github.com/Orinks/Freight-Fate/pull/96).
+
+- **Moving a planned stop now asks first, and each stop only cancels its own
+  plan.** A stop's details screen shows the cancel option only when that stop
+  is the one you planned. Choosing "Plan to stop" while another stop is already
+  planned now tells you which stop is planned and how far ahead it is, and asks
+  whether to move your plan here before changing it.
+
+- **Air pressure now bleeds down while the truck is parked with its engine
+  off.** After a full night's sleep, you must start the engine and rebuild air
+  before releasing the parking brake instead of waking to fully charged tanks.
+
+- **Each truck you own now keeps its own fuel, damage, tire wear, and road
+  grime.** Refueling, repairing, or dirtying one truck no longer affects the
+  others, and a newly bought truck arrives with a full tank and a clean bill
+  of health. Switching trucks no longer moves fuel between them. Careers from
+  older versions are updated automatically the first time they load, and the
+  game tells you once that the updated save can no longer be opened by older
+  versions: the truck you were driving keeps its condition, and your other
+  trucks start fueled and fresh. Back up your career save before opening it in
+  this version. If the conversion causes a problem, include both the original
+  backup and the updated save with your issue report.
 
 - **On-time deliveries now pay a real bonus.** Delivering on time used to add
   only a sliver of extra pay unless you raced in absurdly far ahead of the
@@ -546,7 +597,60 @@
   remaining while you drove in circles. Every miss now loops you back
   onto a real approach with the exit announced fresh, on every kind of
   road.
+- **Missing the destination exit twice no longer strands the delivery.** Every
+  missed attempt now loops you back far enough to hear the exit, signal, and
+  slow down again instead of leaving the route stuck at zero miles remaining.
 
+- **Cloud Backup works again on test builds.** Careers from a recent test
+  build were being turned away with a message about the backup being
+  unreadable. Nothing was wrong with those careers: the game had changed what
+  it records about each truck, and the backup service was still expecting the
+  older shape. Both sides now agree, and they are kept in step automatically
+  so this cannot drift apart again. Released builds were never affected.
+- **A career carried between computers can lose its "modified" mark.** Moving
+  a save to another machine marks it as changed outside the game, because the
+  new machine cannot recognise the old one's signature. When you restore that
+  career from Cloud Backup and everything about it checks out, the mark is
+  now cleared instead of following you forever.
+- **Finishing a delivery no longer risks losing what it reported online.**
+  A settlement can report the delivery, a level up, and several badges at
+  once, and the game was sending them all at the same moment. They could
+  crowd each other out, be sent twice, or in one case be dropped entirely.
+  They now go out one after another, so your road journal records everything
+  the run earned.
+- **Taking a pay advance no longer makes your cloud backup look edited.** A
+  pay advance is money from your next load paid early, but your career was
+  only crediting the part of the settlement left after the advance came back
+  out. Those advanced dollars sat in your bank with nothing in your lifetime
+  earnings to account for them, so cloud backup upload could refuse the save
+  and mark the driver for review. Lifetime earnings now count the whole
+  settlement, and taking an advance no longer counts against you.
+- **Planning a stop now plays a single confirmation sound.** Choosing "Plan to
+  stop" from a stop's details no longer stacks a menu click and a confirmation
+  chime back to back; you hear just the confirmation.
+- **Back-to-back road alerts no longer crash the Windows event voice.** Urgent
+  hazards still interrupt the current event announcement immediately, without
+  making a separate redundant stop call that could crash inside SAPI.
+- **Lower speed zones now give you time to brake.** When a construction zone
+  or other posted limit drops, releasing the accelerator gives a loaded truck
+  a fair braking window before speeding enforcement begins. Staying on the
+  throttle forfeits that grace.
+- **Automatic speed control now slows you for the destination exit.** When the
+  signed delivery exit is announced, adaptive cruise eases the truck to ramp
+  speed instead of switching off at highway speed. Press X to take the exit;
+  automatic control releases as you enter the ramp, ready for you to brake to
+  the facility stop without collecting an unwanted speeding fine.
+- **State-line announcements no longer repeat at the next major city.** When
+  the GPS calls out the real state boundary, passing the next city now says
+  only the city and onward route instead of claiming that you crossed the same
+  state line again.
+- **The game no longer crashes when it is installed in a protected folder.**
+  If you put Freight Fate somewhere Windows guards, such as Program Files, the
+  game could not write next to itself and would crash the moment it tried to
+  save, often right as you reached a facility. Freight Fate now notices when
+  its own folder is read only and keeps your saves in your personal user
+  folder instead, so the game saves and plays normally wherever you install
+  it. Saves that are already beside the game are still used as before.
 - **The engine load now follows throttle smoothly.** Engine effort remains
   audible when you accelerate or ease off, while manual releases and
   adaptive-cruise corrections blend gradually instead of making the engine

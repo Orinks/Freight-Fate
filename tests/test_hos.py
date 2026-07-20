@@ -1072,6 +1072,7 @@ def test_sleeping_shuts_down_a_running_engine(monkeypatch):
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
     try:
         driving = start_drive(app)
+        driving.truck.set_air_ready(parking_brake=True)
         driving.truck.start_engine()
         sleeper = SimpleNamespace(
             name="Big Truck Stop",
@@ -1089,12 +1090,34 @@ def test_sleeping_shuts_down_a_running_engine(monkeypatch):
         select(app.state, "Sleep 10 hours")
 
         assert not driving.truck.engine_on
+        assert driving.truck.air_pressure_psi == pytest.approx(
+            driving.truck.specs.air_cold_start_psi
+        )
+        assert driving.truck.air_low_warning
+        assert not driving.truck.air_ready
         assert any("You shut down the engine." in text for text in spoken)
+        wake_text = next(text for text in spoken if "You slept 10 hours" in text)
+        assert "Air pressure 55 psi" in wake_text
+        assert "Choose Back to the road, then press E to start the engine" in wake_text
+        assert "Wait for air pressure ready" in wake_text
+        assert "press P to release the parking brake" in wake_text
 
         spoken.clear()
         select(app.state, "Sleep 10 hours")
 
         assert not any("shut down the engine" in text for text in spoken)
+
+        select(app.state, "Back to the road")
+        assert app.state is driving
+        app.state.handle_event(key_event(pygame.K_e))
+        assert driving.truck.engine_on
+        for _ in range(200):
+            app.state.update(0.2)
+            if driving.truck.air_ready:
+                break
+        assert driving.truck.air_ready
+        app.state.handle_event(key_event(pygame.K_p))
+        assert not driving.truck.parking_brake
     finally:
         app.shutdown()
 
@@ -1142,6 +1165,9 @@ def test_full_parking_offers_drive_on_and_shoulder(monkeypatch):
         assert app.ctx.profile.money == money_before - hos.SHOULDER_FINE
         assert driving.truck.damage_pct == pytest.approx(damage_before + hos.SHOULDER_DAMAGE_PCT)
         assert app.ctx.profile.active_trip is not None
+        wake_text = next(text for text in spoken if "sleep poorly on the shoulder" in text)
+        assert "Air pressure 55 psi. Press E to start the engine" in wake_text
+        assert "Back to the road" not in wake_text
     finally:
         app.shutdown()
 

@@ -26,21 +26,33 @@ Ranges — all numeric fields must be finite (no NaN, no infinity):
 
 - `money`: greater than -1,000,000 and below 1,000,000,000 (structural
   ceiling; the real judgment is rule 2.1).
-- `fatigue`, `road_grime_pct`: 0 to 100.
+- `fatigue`: 0 to 100.
 - `calendar_offset_days`: integer from 0 through 364.
-- `truck_damage_pct`, `tire_wear_pct`: 0 to 100.
-- `truck_fuel_gal`: 0 to the largest buildable tank (biggest catalog tank
-  plus the long-range upgrade's 50 extra gallons — 250 today).
+- Every `truck_conditions` record this line writes (save version 5, one
+  record per owned truck; the flat `truck_damage_pct`, `tire_wear_pct`,
+  `road_grime_pct`, `truck_fuel_gal` fields belong to version 4 and
+  earlier and are migrated into the active truck's record on load):
+  `damage_pct`, `tire_wear_pct`, `grime_pct` each 0 to 100; `fuel_gal`
+  0 to the largest buildable tank (biggest catalog tank plus the
+  long-range upgrade's 50 extra gallons — 250 today).
 - `pay_advance`: 0 to 1,000,000.
 - `career.xp`: 0 to 100,000,000 (structural; see 2.2).
 - `career.reputation`: 0 to 100.
 - `career.deliveries`, `on_time_deliveries`, `on_time_streak`,
   `dispatch_declines_used`: non-negative integers.
 - `career.total_miles`, `career.total_earnings`: non-negative.
-- Every `truck_conditions` record: `tire_wear_pct`, `brake_wear_pct`,
-  `engine_wear_pct`, `damage_pct`, `chain_wear_pct` each 0 to 100;
-  `fuel_gal` 0 to the largest buildable tank (biggest catalog tank plus
-  the long-range upgrade's 50 extra gallons — 250 today).
+- Every `truck_conditions` record **(1.9 alpha)**: `tire_wear_pct`,
+  `brake_wear_pct`, `engine_wear_pct`, `damage_pct`, `chain_wear_pct`
+  each 0 to 100; `fuel_gal` 0 to the largest buildable tank (biggest
+  catalog tank plus the long-range upgrade's 50 extra gallons — 250
+  today).
+- `integrity_modified`, `integrity_notice_pending`: real booleans. The
+  first is the client's sticky local-tamper mark (set when a save fails
+  its per-install signature; signed into every later save so it cannot be
+  quietly cleared). The server treats a `true` here as advisory evidence,
+  not proof — an honest cross-machine copy also trips it — and MAY clear
+  it on a profile that passes full validation (absolution), so honest
+  movers are not marked forever.
 
 Relations:
 
@@ -124,6 +136,15 @@ Every new collectible should land ledger-ready.
 `check_profile_invariants`; any violation raises with a spoken,
 jargon-free line built by `spoken_rejection` — "This profile fails the
 game's integrity checks and was not loaded. First problem: ..." — and the
-file is not restored. Local saves keep the existing per-install HMAC
-quarantine (`.invalid` rename); this layer is for anything that crossed
-the network.
+file is not restored. That path is for anything that crossed the network.
+
+Local saves are packed `.ffsave` containers (magic header plus
+zlib-deflated JSON) signed inside with the per-install HMAC key. A failed
+local signature no longer quarantines: the save loads, the player hears a
+one-time notice, and the profile carries the sticky `integrity_modified`
+mark from then on (mark, don't block — local play is the player's own;
+the mark is what shared features read). Quarantine (`.invalid` rename) is
+reserved for files too damaged to decode at all. Plain unsigned `.json`
+saves keep amnesty as the honest pre-signing legacy shape and convert to
+signed containers on load; an unsigned *container* is always a tamper,
+because the game never writes one.

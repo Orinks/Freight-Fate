@@ -65,16 +65,35 @@ def check_profile_invariants(profile: Profile) -> list[Violation]:
     out: list[Violation] = []
     _check_range(out, "money", "The bank balance", profile.money, MONEY_FLOOR, MONEY_CEILING)
     _check_range(out, "fatigue", "Fatigue", profile.fatigue, 0.0, 100.0)
-    _check_range(out, "road_grime", "Road grime", profile.road_grime_pct, 0.0, 100.0)
     _check_range(out, "pay_advance", "The pay advance", profile.pay_advance, 0.0, ADVANCE_CEILING)
     if not isinstance(profile.calendar_offset_days, int) or not (
         0 <= profile.calendar_offset_days < 365
     ):
         out.append(Violation("calendar_offset", "The calendar offset is not possible."))
-    _check_range(out, "damage", "Truck damage", profile.truck_damage_pct, 0.0, 100.0)
-    _check_range(out, "tire_wear", "Tire wear", profile.tire_wear_pct, 0.0, 100.0)
-    if not _finite(profile.truck_fuel_gal) or not (0.0 <= profile.truck_fuel_gal <= _MAX_FUEL_GAL):
-        out.append(Violation("fuel_range", "The truck carries an impossible amount of fuel."))
+    # Per-truck condition records. Unknown truck KEYS pass (a newer build may
+    # sell trucks this one has never heard of); impossible VALUES do not.
+    # Records are plain dicts on this line, and carry brake, engine and chain
+    # wear as well as tyres and damage; road grime stays on the profile.
+    for record in profile.truck_conditions.values():
+        if not isinstance(record, dict):
+            out.append(Violation("condition_shape", "A truck condition record is malformed."))
+            continue
+        for field_name, label in (
+            ("tire_wear_pct", "tire wear"),
+            ("brake_wear_pct", "brake wear"),
+            ("engine_wear_pct", "engine wear"),
+            ("damage_pct", "damage"),
+            ("chain_wear_pct", "chain wear"),
+        ):
+            value = record.get(field_name, 0.0)
+            if not _finite(value) or not (0.0 <= float(value) <= 100.0):
+                out.append(Violation("condition_range", f"A truck's {label} is outside 0 to 100."))
+        fuel = record.get("fuel_gal", 0.0)
+        if not _finite(fuel) or not (0.0 <= float(fuel) <= _MAX_FUEL_GAL):
+            out.append(Violation("fuel_range", "A truck carries an impossible amount of fuel."))
+        tire_type = record.get("tire_type", TIRE_ALL_SEASON)
+        if tire_type not in _TIRE_TYPES:
+            out.append(Violation("tire_type", "A tire compound that does not exist."))
 
     career = profile.career
     _check_range(out, "xp", "Career experience", career.xp, 0.0, XP_CEILING)
@@ -136,6 +155,14 @@ def check_profile_invariants(profile: Profile) -> list[Violation]:
         tire_type = record.get("tire_type", TIRE_ALL_SEASON)
         if tire_type not in _TIRE_TYPES:
             out.append(Violation("tire_type", "A tire compound that does not exist."))
+
+    # The local tamper mark must be a real boolean; anything else is an edit.
+    for flag_code, flag_value in (
+        ("integrity_modified", profile.integrity_modified),
+        ("integrity_notice_pending", profile.integrity_notice_pending),
+    ):
+        if not isinstance(flag_value, bool):
+            out.append(Violation(flag_code, "The save's integrity mark is not possible."))
 
     for key, tier in profile.upgrades.items():
         if not isinstance(tier, int) or tier < 1:

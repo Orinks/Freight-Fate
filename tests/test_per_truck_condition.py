@@ -12,14 +12,21 @@ from __future__ import annotations
 
 import json
 
-import pytest
-
 from freight_fate.models import profile as profmod
 from freight_fate.models.business import (
     COMPANY_DRIVER,
     LEASED_OWNER_OPERATOR,
 )
-from freight_fate.models.profile import Profile, ProfileIntegrityError
+from freight_fate.models.profile import Profile, _decode_save_bytes, encode_save_bytes
+
+
+def _read_save(path):
+    """The profile dict inside a save file, packed or legacy."""
+    return _decode_save_bytes(path.read_bytes())[0]
+
+
+def _write_packed(path, data):
+    path.write_bytes(encode_save_bytes(data))
 
 
 def _owner_operator_fleet() -> Profile:
@@ -172,19 +179,36 @@ def test_per_truck_conditions_round_trip_and_stay_signed():
     assert loaded.truck_conditions["heavy_hauler"]["engine_wear_pct"] == 5.0
 
 
-def test_tampering_per_truck_wear_is_rejected_and_quarantined():
+def test_tampering_per_truck_wear_marks_the_profile_modified():
+    """Scrubbing wear out of a packed save does not go unnoticed.
+
+    Per-truck conditions are inside the signed payload, so a hand-edited
+    container fails its signature. Such a save is no longer quarantined -- it
+    loads and carries a sticky ``integrity_modified`` mark instead.
+    """
     p = Profile(name="Cheater Fleet")
     p.tire_wear_pct = 50.0
     path = p.save()
 
-    data = json.loads(path.read_text())
+    data = _read_save(path)
     data["truck_conditions"]["rig"]["tire_wear_pct"] = 0.0  # scrub the wear
-    path.write_text(json.dumps(data))
+    _write_packed(path, data)
 
-    with pytest.raises(ProfileIntegrityError):
-        Profile.load(path)
-    assert not path.exists()
-    assert path.with_suffix(".json.invalid").exists()
+    loaded = Profile.load(path)
+    assert loaded.integrity_modified is True
+    assert loaded.integrity_notice_pending is True
+    assert path.exists()  # marked, not quarantined
+    assert not path.with_suffix(path.suffix + ".invalid").exists()
+
+    # The mark is signed into the rewritten save and survives a clean reload.
+    assert Profile.load(path).integrity_modified is True
+
+    # Stripping the signature instead of re-signing is caught the same way.
+    stripped = _read_save(path)
+    stripped["truck_conditions"]["rig"]["tire_wear_pct"] = 0.0
+    stripped.pop(profmod.SIGNATURE_FIELD)
+    _write_packed(path, stripped)
+    assert Profile.load(path).integrity_modified is True
 
 
 def test_v1_signed_legacy_save_loads_and_migrates_without_quarantine():
@@ -192,6 +216,8 @@ def test_v1_signed_legacy_save_loads_and_migrates_without_quarantine():
 
     v1 signed the flat condition fields; the current build must recognize that
     older field set from ``_signature_version`` and re-sign on the next save.
+    v1 saves were plain JSON on disk, so the fixture lives at the legacy
+    ``.json`` path and load converts it into the packed container.
     """
     p = Profile(name="V1 Signed", business_status=LEASED_OWNER_OPERATOR)
     p.truck = "rig"
@@ -207,21 +233,24 @@ def test_v1_signed_legacy_save_loads_and_migrates_without_quarantine():
     data["truck_fuel_gal"] = 70.0
     data[profmod.SIGNATURE_VERSION_FIELD] = 1
     data[profmod.SIGNATURE_FIELD] = profmod._signature_for(data, 1)
-    path = p.path
-    path.write_text(json.dumps(data))
+    legacy = p.path.with_suffix(profmod.LEGACY_SAVE_SUFFIX)
+    legacy.write_text(json.dumps(data))
 
-    loaded = Profile.load(path)  # must not raise ProfileIntegrityError
+    loaded = Profile.load(legacy)  # must not raise ProfileIntegrityError
 
     assert loaded.tire_wear_pct == 18.0
     assert loaded.brake_wear_pct == 7.0
     assert loaded.engine_wear_pct == 3.0
     assert loaded.truck_damage_pct == 9.0
     assert loaded.truck_fuel_gal == 70.0
-    assert path.exists()  # a valid legacy save is not quarantined
+    # A validly signed legacy save is neither quarantined nor flagged.
+    assert loaded.integrity_modified is False
+    assert not legacy.with_suffix(".json.invalid").exists()
 
-    # Saving it again upgrades both the on-disk shape and the signature.
-    loaded.save()
-    resaved = json.loads(path.read_text())
+    # The load upgraded both the on-disk shape and the signature version.
+    resaved = _read_save(p.path)
     assert resaved[profmod.SIGNATURE_VERSION_FIELD] == profmod.SIGNATURE_VERSION
     assert isinstance(resaved.get("truck_conditions"), dict)
-    assert Profile.load(path).tire_wear_pct == 18.0  # still valid under v2
+    reloaded = Profile.load(p.path)
+    assert reloaded.tire_wear_pct == 18.0  # still valid under v2
+    assert reloaded.integrity_modified is False

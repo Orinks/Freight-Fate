@@ -389,20 +389,20 @@ Driving controls are active while the road view is focused:
 | B, hold | Emergency brake. |
 | E | Start the engine. Stop the engine only below 5 miles per hour. |
 | P | Release or set the parking brake. |
-| K | Set or cancel adaptive cruise control. Braking also cancels it. |
-| Plus / Minus | Raise or lower the set cruise speed by 5 mph while cruise is engaged. The keypad Plus and Minus keys work too. |
+| K | Start or cancel automatic speed control. It uses adaptive cruise on open roads and speed keeper in low-speed zones. It pauses through the planned pickup and resumes once the loaded truck is rolling. Braking elsewhere also cancels it. |
+| Plus / Minus | Raise or lower the open-road cruise target by 5 mph while automatic speed control is active. The keypad Plus and Minus keys work too. |
 | X | Signal for or cancel the next announced route exit. The truck takes the ramp when speed, lane setup, and route intent are valid. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
 | J | Toggle the engine brake. |
 | H | Hold to sound the horn; release to stop it. |
-| Space | Report speed, gear, RPM, cruise set speed when cruise is on, air pressure, and brake state. |
+| Space | Report speed, gear, RPM, the active speed-control mode and open-road target when speed control is on, air pressure, and brake state. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. In bend country it adds the bend's advisory speed -- the posted limit and the yellow diamond are different numbers on a real road. On a delivery ramp that ends at a traffic light, S answers with the light and the distance to the stop bar instead, since the light is the law there. |
 | D | Report one safe-speed number for right now. Weather grip, an armed exit ramp, and the next bend are already baked into the number. |
 | G | Report the grade under the wheels and whether the truck is holding, pulling, or losing it. |
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
 | C | Report clock, deadline, estimated arrival, and hours of service. |
-| R | Report route progress and GPS context. |
+| R | Report the current road and direction, state, nearest named place, route progress, grade, and GPS context. |
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
 | L | Report which lane you are in and whether you are centered, drifting, or at an edge. |
@@ -458,14 +458,13 @@ highway acceleration.
 Repeated hard braking can use air faster than normal driving. If low air is
 reported, stop safely, set the parking brake, and let pressure build.
 
-Adaptive cruise requires the engine to be running and the truck to be moving at
-least 20 miles per hour. Press K to set cruise at your current speed. Once it is
-engaged, Plus and Minus raise and lower the set speed by 5 miles per hour, just
-like the accelerate and coast buttons on a real truck, so you can dial the
-target up to the speed you want without having to reach it manually first. The
-keypad Plus and Minus keys work too. Press Space while cruise is on to hear the
-current cruise set speed along with speed, gear, RPM, and air-brake state. The
-truck then accelerates up to a higher set speed on its own. Cruise looks ahead
+On an open road, automatic speed control requires the engine to be running and
+the truck to be moving at least 20 miles per hour. Press K to start adaptive
+cruise at your current speed. Plus and Minus raise and lower the open-road target
+by 5 miles per hour, just like the accelerate and coast buttons on a real truck.
+The keypad Plus and Minus keys work too. Press Space to hear the active mode and
+target along with speed, gear, RPM, and air-brake state. The truck accelerates up
+to a higher set speed on its own. Cruise looks ahead
 for sharp posted-limit drops so it can begin slowing before the lower-limit
 stretch. It will not hold more than 5 miles per hour over the posted limit, so
 it keeps you legal even if you set it higher. Weather can increase the following
@@ -588,8 +587,12 @@ you blow past at highway speed instead of slowing into the inspection lane, a
 scale officer can light you up for a roadside enforcement stop. A visibly
 unsafe truck can also draw a safety stop when you pass active enforcement, so
 repair severe damage before pushing through patrol corridors.
-Adaptive cruise will not engage on low-speed local roads such as facility
-access roads, construction, or heavy traffic; drive those manually.
+In low-speed local roads such as facility access, construction, or heavy
+traffic, automatic speed control uses the speed keeper instead. It switches
+back to adaptive cruise when the open road begins. If you start it during the
+deadhead, the planned pickup pauses the session while you check in and load.
+After departure, get the loaded truck rolling and speed control resumes on its
+own. The paused state is kept if you save at the pickup.
 
 Weather affects safe speed, traction, braking, visibility, traffic pressure,
 adaptive cruise following distance, and audio layers such as rain, wind,
@@ -642,11 +645,13 @@ Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
 and tells you to slow down and set up for the ramp. If lane drift is on, use X
 to signal and move right for the exit lane. With lane drift off, the GPS infers
-your destination-exit intent from the route. If
-adaptive cruise is set, the destination-exit callout cancels cruise so you can
-take manual speed control. If you miss the destination exit, the delivery does
-not complete; back up until the exit is ahead again, then set up and take the
-exit correctly.
+your destination-exit intent from the route. If automatic speed control is
+active, it eases the truck to 45 miles per hour or your lower cruise target so
+you can reach ramp speed without an abrupt handoff. Press X to take the exit;
+automatic speed control releases as you enter the ramp, then you brake to the
+stop. If you miss the destination exit, continue to the next safe turnaround.
+Dispatch loops you back onto the approach so you can hear the exit call again
+and press X to take it.
 
 Ordinary highway exits that do not lead to a current action are not announced
 during the drive. Press Shift+R if you want the next listed exit for route
@@ -816,7 +821,7 @@ Late delivery and cargo damage reduce pay.
 
 ## Settings
 
-### Speed keeper
+### Driving assistance and speed keeper
 
 Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds light lane centering and lets braking capture a lower descent target. All assists adds automatic safe descent targets and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
 
@@ -824,10 +829,9 @@ The individual controls are Automatic emergency braking, Lane-departure warning,
 
 Lane drift also lives in this category and, like the speed keeper, sits outside the presets. It chooses whether the lane-position task runs at all: Off keeps the truck centered with no lane work, Light drifts gently with centering help, and Realistic drifts like a real wheel. When lane drift is on, a short beep comes from the side you drift toward, so steer away from the beep; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. With lane drift on, taking an exit needs your turn signal set and the exit lane held. Choosing Light or Realistic turns the matching lane support on. The All assists preset switches lane drift off, so lanes are kept for you and a tap changes lanes; other presets never change it.
 
-One more control, Speed keeper, sits outside the presets. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K holds your current speed at or below the zone limit and creeps along behind queued traffic, so the accelerator does not need to stay held down. Any brake input, a hazard, or reaching the open road hands control back and says so. It is on by default and never changed by choosing a preset.
+One more control, Speed keeper, sits outside the presets and is never changed by choosing a preset. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K starts automatic speed control in speed-keeper mode. It holds your current speed at or below the zone limit and creeps behind queued traffic, so the accelerator does not need to stay held down. On the open road it automatically changes to adaptive cruise and accelerates toward the posted limit, or restores the cruise target you selected earlier. Entering another restricted zone changes back to the speed keeper. If you start it during the deadhead, the planned pickup pauses the session while you check in and load, keeps it through a save, and resumes it after departure once the truck is rolling. Plus and Minus adjust the remembered open-road cruise target in either mode. Any brake input outside that planned pickup, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Speed keeper is on by default and can be turned off in Settings, Gameplay.
 
 Latching pedals is the same kind of control: an input accommodation that sits outside the presets, on by default. Tap the accelerator or brake, then press again and hold for half a second, and a click plus a spoken confirmation latch that pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly, spoken. See the driving controls table for the full gesture.
-In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K engages the speed keeper: it holds your current speed at or below the zone limit and creeps along behind queued traffic, so the accelerator does not need to stay held down. Any brake input, a hazard, or reaching the open road hands control back and says so. It is on by default and can be turned off in Settings, Gameplay.
 
 Curve callouts also sit outside the presets, on by default. A co-driver
 calls the bends that demand slowing before they arrive -- "Sharp left,
@@ -853,7 +857,7 @@ Gameplay settings include:
 | Trip pacing | Choose relaxed, standard, or fast pacing. Pacing applies at highway speed; the clock eases toward real time while you accelerate, brake, or maneuver, so working up through the gears does not cost most of a game hour. Setting the parking brake while stopped means deliberate waiting: time then passes at double your pacing, letting weather and daylight move along. |
 | Hours of service | Choose realistic or relaxed hours rules. |
 | Lane drift | Choose whether lane drift is off, light, or realistic. When on, a short beep comes from the side you drift toward, so steer away from the beep. A dedicated centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. |
-| Speed keeper | Turn the K-key speed keeper for low-speed zones on or off. |
+| Speed keeper | Allow automatic speed control to use the speed keeper in low-speed zones and switch back to adaptive cruise on open roads. |
 
 Audio settings include:
 

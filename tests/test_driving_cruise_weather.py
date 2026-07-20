@@ -271,12 +271,18 @@ def test_speed_keeper_cancels_on_braking(monkeypatch):
         keys.pressed = {pygame.K_DOWN}  # brake
         driving.update(1 / 60)
         assert driving._keeper_mph is None
+        assert not driving._speed_control_armed
         assert any("Speed keeper canceled" in s for s in events)
+
+        driving.trip.speed_limit_at = lambda mile: (55.0, None)
+        keys.pressed = set()
+        driving.update(1 / 60)
+        assert driving._cruise_mph is None  # braking disarmed it; no surprise restart
     finally:
         app.shutdown()
 
 
-def test_speed_keeper_releases_on_the_open_road(monkeypatch):
+def test_speed_keeper_switches_to_cruise_on_the_open_road(monkeypatch):
     from freight_fate.app import App
 
     class NoKeys:
@@ -291,8 +297,8 @@ def test_speed_keeper_releases_on_the_open_road(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
-        zone = {"reason": "facility access road"}
-        driving.trip.speed_limit_at = lambda mile: (15.0, zone["reason"])
+        zone = {"limit": 15.0, "reason": "facility access road"}
+        driving.trip.speed_limit_at = lambda mile: (zone["limit"], zone["reason"])
         driving.trip.traffic_context = lambda: None
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 3
@@ -300,12 +306,12 @@ def test_speed_keeper_releases_on_the_open_road(monkeypatch):
         driving.handle_event(key_event(pygame.K_k))
         assert driving._keeper_mph is not None
 
-        zone["reason"] = None  # the access stretch ends
+        zone.update(limit=55.0, reason=None)  # the access stretch ends
         driving.update(1 / 60)
         assert driving._keeper_mph is None
-        assert any("Speed keeper released" in s for s in events)
-        # The truck no longer drives itself once control is handed back.
-        assert driving.truck.throttle == 0.0
+        assert driving._cruise_mph == pytest.approx(55.0)
+        assert driving._speed_control_armed
+        assert any("Open road. Adaptive cruise resuming" in s for s in events)
     finally:
         app.shutdown()
 
@@ -436,6 +442,31 @@ def test_cruise_control_requires_road_speed_and_cancels_on_hazard():
         hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 4.0})
         driving._handle_trip_event(hazard)
         assert driving._cruise_mph is None
+    finally:
+        app.shutdown()
+
+
+def test_hazard_announces_speed_control_cancellation_once(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 26.8
+        driving.handle_event(key_event(pygame.K_k))
+
+        hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 4.0})
+        driving._handle_trip_event(hazard)
+
+        assert not driving._speed_control_armed
+        assert events[-1].startswith("Brake now!")
+        assert events[-1].count("Automatic speed control canceled.") == 1
     finally:
         app.shutdown()
 
@@ -761,7 +792,7 @@ def test_adaptive_cruise_increases_gap_for_bad_weather(monkeypatch):
 
 
 @pytest.mark.smoke
-def test_adaptive_cruise_disables_before_restricted_zone(monkeypatch):
+def test_adaptive_cruise_stays_armed_before_restricted_zone(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
 
@@ -785,17 +816,14 @@ def test_adaptive_cruise_disables_before_restricted_zone(monkeypatch):
         )
         driving._handle_trip_event(event)
 
-        assert driving._cruise_mph is None
-        assert events[-1] == (
-            "In 2 miles, construction ahead. Speed limit 45. "
-            "Adaptive cruise disabled; take manual speed control."
-        )
+        assert driving._cruise_mph is not None
+        assert events[-1] == "In 2 miles, construction ahead. Speed limit 45."
     finally:
         app.shutdown()
 
 
 @pytest.mark.smoke
-def test_adaptive_cruise_disables_for_heavy_traffic_zone_entry(monkeypatch):
+def test_adaptive_cruise_switches_to_keeper_for_heavy_traffic(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
 
@@ -821,11 +849,75 @@ def test_adaptive_cruise_disables_for_heavy_traffic_zone_entry(monkeypatch):
         driving._handle_trip_event(event)
 
         assert driving._cruise_mph is None
+        assert driving._keeper_mph == pytest.approx(50.0)
+        assert driving._speed_control_target_mph == pytest.approx(60.0, abs=1.0)
+        assert driving._speed_control_armed
         assert events[-2] == (
-            "heavy traffic ahead. Speed limit 50. "
-            "Adaptive cruise disabled; take manual speed control."
+            "heavy traffic ahead. Speed limit 50. Speed keeper holding 50 miles per hour."
         )
         assert events[-1].startswith("New achievement! Bumper-to-Bumper Blues.")
+    finally:
+        app.shutdown()
+
+
+def test_speed_control_restores_cruise_target_after_zone(monkeypatch):
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        state = {"limit": 65.0, "reason": None}
+        driving.trip.speed_limit_at = lambda mile: (state["limit"], state["reason"])
+        driving.trip.traffic_context = lambda: None
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 26.8  # ~60 mph
+        driving.handle_event(key_event(pygame.K_k))
+        original_target = driving._cruise_mph
+
+        state.update(limit=25.0, reason="construction")
+        driving.update(1 / 60)
+        assert driving._cruise_mph is None
+        assert driving._keeper_mph == pytest.approx(25.0)
+
+        state.update(limit=65.0, reason=None)
+        driving.update(1 / 60)
+        assert driving._keeper_mph is None
+        assert driving._cruise_mph == pytest.approx(original_target)
+        assert sum("Speed keeper holding" in event for event in events) == 1
+        assert sum("Adaptive cruise resuming" in event for event in events) == 1
+    finally:
+        app.shutdown()
+
+
+def test_cruise_target_can_be_adjusted_while_keeper_is_active(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    said = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: said.append(text))
+        driving.trip.speed_limit_at = lambda mile: (15.0, "facility access road")
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 3
+        driving.truck.velocity_mps = 4.5
+        driving.handle_event(key_event(pygame.K_k))
+
+        driving.handle_event(key_event(pygame.K_EQUALS))
+
+        assert driving._keeper_mph == pytest.approx(10.0, abs=0.5)
+        assert driving._speed_control_target_mph == pytest.approx(25.0)
+        assert said[-1] == "Open-road cruise target 25 miles per hour."
     finally:
         app.shutdown()
 
@@ -1182,8 +1274,45 @@ def test_limit_drop_earns_braking_grace(monkeypatch):
         t.throttle = 1.0
         strikes = driving.speeding_strikes
         for _ in range(70):  # > SPEEDING_HOLD_S at 0.1 s steps
-            driving._update_speeding(0.1)
+            driving._update_speeding(0.1, accelerator_held=True)
         assert driving.speeding_strikes == strikes + 1
+    finally:
+        app.shutdown()
+
+
+def test_limit_drop_grace_uses_released_key_not_smoothed_throttle(monkeypatch):
+    """Releasing Up keeps grace even while applied throttle ramps down."""
+    from freight_fate.app import App
+
+    class Keys:
+        pressed = {pygame.K_UP}
+
+        def __getitem__(self, key):
+            return key in self.pressed
+
+    keys = Keys()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: keys)
+    app = App()
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        driving.trip.patrols = []
+        driving.truck.velocity_mps = 65.0 / 2.23694
+        driving.truck.throttle = 1.0
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (65.0, None))
+
+        driving.update(1 / 60)
+        assert driving.truck.throttle > 0.0
+
+        keys.pressed.clear()
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (50.0, None))
+        driving.update(1 / 60)
+
+        assert driving.truck.throttle > 0.0
+        assert driving._limit_drop_grace_s > 0.0
     finally:
         app.shutdown()
 

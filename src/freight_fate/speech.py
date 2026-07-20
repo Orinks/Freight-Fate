@@ -583,8 +583,10 @@ class Speech:
                 self.stop_main()
             self.say(text, interrupt=False)
             return
-        if interrupt:
-            self.stop_event()
+        # Let the backend perform the interruption as part of the new output
+        # call. Calling stop() immediately before output(..., interrupt=True)
+        # is redundant and could crash inside Prism's Windows SAPI stop path
+        # when urgent road events arrived back to back (issue #85).
         if not self._speak_with_backend(backend, text, interrupt):
             self._event_backend = None
             if interrupt:

@@ -360,10 +360,12 @@ class CloudSlotState(MenuState):
         if self._busy:
             self.ctx.say("Still working on the last choice.", interrupt=True)
             return
-        from ..models.profile import Profile, profiles_dir
+        from ..models.profile import Profile, find_save_path
 
-        path = profiles_dir() / f"{self.save_name}.json"
+        path = find_save_path(self.save_name)
         try:
+            if path is None:
+                raise FileNotFoundError(self.save_name)
             profile_dict = Profile.load(path).to_dict()
         except Exception:
             self.ctx.say(

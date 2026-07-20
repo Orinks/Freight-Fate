@@ -140,6 +140,17 @@ class TripRoadEventMixin:
                 world = get_world()
                 city_state = world.cities[city].state
                 prev_state = world.cities[prev].state
+                # Said even when the leg carries a mapped boundary that emitted
+                # its own STATE_CROSSING event, because in practice that event
+                # does not reach the driver: it is ambient, and an ambient
+                # message waits in a single slot that the next critical event
+                # discards and any later ambient message overwrites. On an
+                # interstate the checkpoint cues fire constantly, so the mapped
+                # crossing is lost every time. Suppressing this line would leave
+                # silence at a state line rather than a repeat, which is the
+                # worse outcome. Restore the suppression once an ambient message
+                # can survive both -- see the xfail on
+                # test_mapped_state_lines_are_authoritative_in_delivery_transcripts.
                 crossing = f"Crossing into {city_state}. " if city_state != prev_state else ""
                 self._emit(
                     TripEventKind.CITY_REACHED,

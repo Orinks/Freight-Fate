@@ -45,6 +45,14 @@ class JournalOutbox:
 
     def __post_init__(self) -> None:
         self._lock = threading.Lock()
+        # One sender at a time. A settlement can queue a delivery, a level up,
+        # and several achievements in the same breath, each asking to flush --
+        # left unguarded that is a thread per call, all walking the same due
+        # list, posting the same events twice and colliding on the server's
+        # per-driver write counter. Asking while a flush runs sets the rerun
+        # flag instead, so the last caller's items still go out.
+        self._flushing = False
+        self._flush_again = False
         self._load()
 
     def _load(self) -> None:
@@ -135,7 +143,32 @@ class JournalOutbox:
         return sent
 
     def flush_async(self) -> None:
-        threading.Thread(target=self.flush, name="online-journal", daemon=True).start()
+        """Ask for a flush without blocking, and without racing one already in
+        flight. Anything queued before this call still goes out: a request made
+        mid-flush schedules one more pass rather than a second sender."""
+        with self._lock:
+            if self._flushing:
+                self._flush_again = True
+                return
+            self._flushing = True
+        threading.Thread(target=self._flush_until_idle, name="online-journal", daemon=True).start()
+
+    def _flush_until_idle(self) -> None:
+        try:
+            while True:
+                self.flush()
+                with self._lock:
+                    if not self._flush_again:
+                        self._flushing = False
+                        return
+                    self._flush_again = False
+        except BaseException:
+            # Never strand the flag: a sender that died without clearing it
+            # would silence the journal for the rest of the session.
+            with self._lock:
+                self._flushing = False
+                self._flush_again = False
+            raise
 
 
 def queue_delivery(

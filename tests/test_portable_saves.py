@@ -185,6 +185,32 @@ def test_legacy_copy_migration_is_logged(monkeypatch, tmp_path, caplog):
     assert any("legacy saves" in record.message for record in caplog.records)
 
 
+def test_unwritable_game_dir_falls_back_to_user_dir(monkeypatch, tmp_path):
+    """A read-only install (for example Program Files) must not crash on save:
+    the save root falls back to the per-user data directory instead."""
+    _, legacy = _reset(monkeypatch, tmp_path)
+    monkeypatch.setattr(profile_mod, "_unwritable_warned", False)
+    monkeypatch.setattr(profile_mod, "_is_writable_dir", lambda path: False)
+    assert profile_mod.data_dir() == legacy
+
+
+def test_save_survives_unwritable_game_dir(monkeypatch, tmp_path):
+    """Saving works end to end when the game's own folder cannot be written."""
+    _, legacy = _reset(monkeypatch, tmp_path)
+    monkeypatch.setattr(profile_mod, "_unwritable_warned", False)
+    monkeypatch.setattr(profile_mod, "_is_writable_dir", lambda path: False)
+    saved = profile_mod.Profile(name="Ryan").save()
+    assert saved == legacy / "profiles" / "Ryan.ffsave"
+    assert saved.is_file()
+
+
+def test_writable_game_dir_still_saves_beside_the_game(monkeypatch, tmp_path):
+    """When the game folder is writable, the portable layout is unchanged."""
+    game, _ = _reset(monkeypatch, tmp_path)
+    monkeypatch.setattr(profile_mod, "_is_writable_dir", lambda path: True)
+    assert profile_mod.data_dir() == game / "saves"
+
+
 def test_macos_uses_application_support(monkeypatch, tmp_path):
     """macOS saves land in Application Support, never beside the app bundle."""
     monkeypatch.delenv("FREIGHT_FATE_DATA_DIR", raising=False)

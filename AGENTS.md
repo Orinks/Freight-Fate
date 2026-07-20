@@ -13,6 +13,9 @@ agent needs at authoring time.
   `.github/PULL_REQUEST_TEMPLATE.md` (the template is not applied
   automatically outside the web UI): what changed and why, what players will
   notice, tests run, accessibility impact, and the changelog checklist.
+- When reviewing and merging a contributor's PR, always credit the PR author
+  in the release notes for the first build that includes it. Use the
+  contributor's name and GitHub handle, and link to the PR.
 
 ## Changelog gate (CI-enforced)
 
