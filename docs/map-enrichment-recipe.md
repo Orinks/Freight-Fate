@@ -63,6 +63,15 @@ determinism contract). Read those first if you have not.
   `ORS_API_KEY=selfhosted`.
 - Overpass queries use the public endpoints (rate-limited, cached in
   `.route-cache/`; transient failures are skipped and retried on re-runs).
+- **The self-hosted Overpass DB holds only the tags its extract was filtered
+  to.** It carries roads, landmark polygons, and truck POIs -- and NO `place`
+  nodes at all, so `node["place"="village"]` returns zero rows nationwide.
+  That is a fact about the import filter, not about the world, and reading a
+  zero out of it as "there is nothing there" is the same trap as reading a
+  missing `maxspeed:hgv` as "no truck limit here". When a bake needs a tag the
+  extract lacks, source it from the full Geofabrik US extract instead
+  (`D:/ors/files/us-latest.osm.pbf`, scanned offline with pyosmium -- see
+  `tools/extract_osm_places.py`) rather than widening the DB.
 
 ## Finding the backlog
 

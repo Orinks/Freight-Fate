@@ -41,7 +41,9 @@ R_MI = 3958.8
 # the authored billboards from bake_billboards.py. This tool regenerates only the
 # OSM-derived features, so it must PRESERVE these when it overwrites a leg (else a
 # re-bake silently wipes the Loneliest Road marker and every placed billboard).
-CURATED_CATEGORIES = {"highway_marker", "billboard_sign"}
+# ``village`` joins them: bake_villages.py owns it and sources it from a local
+# OSM extract, not from this bbox query, so a landmark re-bake must not wipe it.
+CURATED_CATEGORIES = {"highway_marker", "billboard_sign", "village"}
 POINT_OFF_MI = 4.0  # keep a pass/museum/river crossing within this of the route
 SAMPLE_STEP_MI = 20.0  # bbox sample spacing along the corridor
 BBOX_RADIUS_M = 14000  # ~14 km half-box at each sample

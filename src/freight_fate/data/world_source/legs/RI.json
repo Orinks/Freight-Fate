@@ -1649,6 +1649,24 @@
         ],
         "landmarks": [
           {
+            "name": "Saunderstown",
+            "at_mi": 8.2,
+            "off_mi": 1.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158861144, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Saunderstown"
+          },
+          {
+            "name": "North Kingstown",
+            "at_mi": 10.0,
+            "off_mi": 1.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158871579, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing North Kingstown"
+          },
+          {
             "name": "Saugatucket River",
             "category": "river",
             "kind": "point",
@@ -1656,11 +1674,155 @@
             "spoken": "Crossing the Saugatucket River"
           },
           {
+            "name": "Peacedale",
+            "at_mi": 16.7,
+            "off_mi": 1.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158876034, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Peacedale"
+          },
+          {
+            "name": "Narragansett",
+            "at_mi": 17.0,
+            "off_mi": 1.29,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158846678, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Narragansett"
+          },
+          {
+            "name": "Narragansett Pier",
+            "at_mi": 17.0,
+            "off_mi": 1.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158801293, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Narragansett Pier"
+          },
+          {
+            "name": "Wakefield",
+            "at_mi": 18.1,
+            "off_mi": 0.61,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158813931, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wakefield"
+          },
+          {
+            "name": "Snug Harbor",
+            "at_mi": 21.3,
+            "off_mi": 1.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158859428, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Snug Harbor"
+          },
+          {
+            "name": "Jerusalem",
+            "at_mi": 21.4,
+            "off_mi": 2.0,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158839591, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jerusalem"
+          },
+          {
+            "name": "Matunuck",
+            "at_mi": 22.1,
+            "off_mi": 1.34,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158917649, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Matunuck"
+          },
+          {
+            "name": "Green Hill",
+            "at_mi": 24.5,
+            "off_mi": 1.89,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158815963, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Green Hill"
+          },
+          {
+            "name": "Charlestown",
+            "at_mi": 27.1,
+            "off_mi": 0.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158906053, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Charlestown"
+          },
+          {
+            "name": "Quonochontaug",
+            "at_mi": 31.7,
+            "off_mi": 1.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158901404, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Quonochontaug"
+          },
+          {
+            "name": "Weekapaug",
+            "at_mi": 33.5,
+            "off_mi": 1.31,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158818613, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Weekapaug"
+          },
+          {
             "name": "Mystic River",
             "category": "river",
             "kind": "point",
             "at_mi": 33.8,
             "spoken": "Crossing the Mystic River"
+          },
+          {
+            "name": "Clarks Village",
+            "at_mi": 36.9,
+            "off_mi": 1.93,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158855477, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Clarks Village"
+          },
+          {
+            "name": "Wequetequock",
+            "at_mi": 45.9,
+            "off_mi": 1.87,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158918913, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wequetequock"
+          },
+          {
+            "name": "Old Mystic",
+            "at_mi": 49.2,
+            "off_mi": 1.12,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158873345, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Old Mystic"
+          },
+          {
+            "name": "Mystic",
+            "at_mi": 49.9,
+            "off_mi": 1.23,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158813549, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mystic"
+          },
+          {
+            "name": "Center Groton",
+            "at_mi": 52.5,
+            "off_mi": 1.37,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158809231, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Center Groton"
           },
           {
             "name": "Poquonock River",
@@ -1703,6 +1865,114 @@
             "kind": "point",
             "at_mi": 60.4,
             "spoken": "Crossing the Connecticut River"
+          },
+          {
+            "name": "Flanders",
+            "at_mi": 62.9,
+            "off_mi": 0.25,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158919300, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Flanders"
+          },
+          {
+            "name": "East Lyme",
+            "at_mi": 63.8,
+            "off_mi": 0.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 6231800460, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing East Lyme"
+          },
+          {
+            "name": "Giants Neck",
+            "at_mi": 66.4,
+            "off_mi": 2.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158875132, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Giants Neck"
+          },
+          {
+            "name": "Point O'Woods",
+            "at_mi": 67.1,
+            "off_mi": 2.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158846724, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Point O'Woods"
+          },
+          {
+            "name": "Sound View",
+            "at_mi": 68.4,
+            "off_mi": 2.0,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158803700, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sound View"
+          },
+          {
+            "name": "Old Lyme",
+            "at_mi": 70.9,
+            "off_mi": 0.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158840106, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Old Lyme"
+          },
+          {
+            "name": "Old Saybrook",
+            "at_mi": 74.0,
+            "off_mi": 0.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158871299, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Old Saybrook"
+          },
+          {
+            "name": "Westbrook",
+            "at_mi": 77.5,
+            "off_mi": 0.42,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158844712, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Westbrook"
+          },
+          {
+            "name": "Clinton",
+            "at_mi": 81.8,
+            "off_mi": 0.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158837487, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Clinton"
+          },
+          {
+            "name": "Madison",
+            "at_mi": 85.5,
+            "off_mi": 0.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158868289, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Madison"
+          },
+          {
+            "name": "Guilford",
+            "at_mi": 89.6,
+            "off_mi": 0.8,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158912354, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Guilford"
+          },
+          {
+            "name": "Pine Orchard",
+            "at_mi": 94.9,
+            "off_mi": 1.72,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158800469, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pine Orchard"
           }
         ],
         "restrictions": []
@@ -2406,6 +2676,87 @@
         ],
         "landmarks": [
           {
+            "name": "Saunderstown",
+            "at_mi": 8.2,
+            "off_mi": 1.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158861144, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Saunderstown"
+          },
+          {
+            "name": "Narragansett",
+            "at_mi": 8.5,
+            "off_mi": 6.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158846678, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Narragansett"
+          },
+          {
+            "name": "Narragansett Pier",
+            "at_mi": 8.5,
+            "off_mi": 6.69,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158801293, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Narragansett Pier"
+          },
+          {
+            "name": "Peacedale",
+            "at_mi": 9.9,
+            "off_mi": 5.83,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158876034, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Peacedale"
+          },
+          {
+            "name": "Wakefield",
+            "at_mi": 9.9,
+            "off_mi": 6.79,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158813931, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wakefield"
+          },
+          {
+            "name": "Kingston",
+            "at_mi": 10.2,
+            "off_mi": 4.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158799202, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Kingston"
+          },
+          {
+            "name": "West Kingston",
+            "at_mi": 10.2,
+            "off_mi": 5.57,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158859649, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing West Kingston"
+          },
+          {
+            "name": "South Kingstown",
+            "at_mi": 10.2,
+            "off_mi": 6.55,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 2439158519, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing South Kingstown"
+          },
+          {
+            "name": "Slocum",
+            "at_mi": 11.7,
+            "off_mi": 2.13,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158853692, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Slocum"
+          },
+          {
             "name": "Hunt River",
             "category": "river",
             "kind": "point",
@@ -2413,11 +2764,155 @@
             "spoken": "Crossing the Hunt River"
           },
           {
+            "name": "Wickford",
+            "at_mi": 13.1,
+            "off_mi": 2.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158817673, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wickford"
+          },
+          {
+            "name": "Wickford Junction",
+            "at_mi": 13.7,
+            "off_mi": 0.38,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158859514, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Wickford Junction"
+          },
+          {
+            "name": "Exeter",
+            "at_mi": 14.3,
+            "off_mi": 1.77,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158855386, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Exeter"
+          },
+          {
+            "name": "Davisville",
+            "at_mi": 16.9,
+            "off_mi": 0.7,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158918520, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Davisville"
+          },
+          {
+            "name": "Potowomut",
+            "at_mi": 18.6,
+            "off_mi": 1.88,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 12850815893, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Potowomut"
+          },
+          {
+            "name": "Crompton",
+            "at_mi": 20.2,
+            "off_mi": 1.81,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158910808, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Crompton"
+          },
+          {
+            "name": "Anthony",
+            "at_mi": 20.2,
+            "off_mi": 3.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158857896, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Anthony"
+          },
+          {
+            "name": "Tiogue",
+            "at_mi": 20.2,
+            "off_mi": 3.81,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 12850905294, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tiogue"
+          },
+          {
+            "name": "East Greenwich",
+            "at_mi": 20.9,
+            "off_mi": 1.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158902941, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing East Greenwich"
+          },
+          {
+            "name": "Cowesett",
+            "at_mi": 21.7,
+            "off_mi": 1.32,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158844346, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cowesett"
+          },
+          {
+            "name": "West Warwick",
+            "at_mi": 22.7,
+            "off_mi": 2.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158903676, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing West Warwick"
+          },
+          {
+            "name": "Apponaug",
+            "at_mi": 23.1,
+            "off_mi": 0.73,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158825271, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Apponaug"
+          },
+          {
             "name": "Warwick Museum of Art",
             "category": "museum",
             "kind": "point",
             "at_mi": 23.4,
             "spoken": "Warwick Museum of Art ahead"
+          },
+          {
+            "name": "Hope",
+            "at_mi": 24.0,
+            "off_mi": 4.88,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158838308, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hope"
+          },
+          {
+            "name": "Fiskeville",
+            "at_mi": 24.1,
+            "off_mi": 4.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158842122, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fiskeville"
+          },
+          {
+            "name": "Barrington",
+            "at_mi": 27.9,
+            "off_mi": 6.51,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158813296, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Barrington"
+          },
+          {
+            "name": "Pawtuxet",
+            "at_mi": 28.9,
+            "off_mi": 2.0,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158868953, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pawtuxet"
           },
           {
             "name": "Pawtuxet River",
@@ -2432,6 +2927,51 @@
             "kind": "point",
             "at_mi": 30.0,
             "spoken": "Crossing the Pocasset River"
+          },
+          {
+            "name": "Johnston",
+            "at_mi": 32.0,
+            "off_mi": 5.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 2440685822, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Johnston"
+          },
+          {
+            "name": "Saylesville",
+            "at_mi": 33.5,
+            "off_mi": 5.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158846132, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Saylesville"
+          },
+          {
+            "name": "Lonsdale",
+            "at_mi": 33.8,
+            "off_mi": 5.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158815348, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lonsdale"
+          },
+          {
+            "name": "North Seekonk",
+            "at_mi": 33.9,
+            "off_mi": 6.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158904070, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing North Seekonk"
+          },
+          {
+            "name": "Seekonk",
+            "at_mi": 34.0,
+            "off_mi": 4.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158855372, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Seekonk"
           }
         ],
         "restrictions": []
@@ -3266,11 +3806,137 @@
             "spoken": "Crossing the Woonasquatucket River"
           },
           {
+            "name": "Johnston",
+            "at_mi": 8.6,
+            "off_mi": 0.04,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 2440685822, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Johnston"
+          },
+          {
+            "name": "Greenville",
+            "at_mi": 9.8,
+            "off_mi": 2.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158804286, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Greenville"
+          },
+          {
+            "name": "Chopmist",
+            "at_mi": 15.6,
+            "off_mi": 0.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158810649, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Chopmist"
+          },
+          {
+            "name": "Clayville",
+            "at_mi": 16.7,
+            "off_mi": 3.23,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158826401, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Clayville"
+          },
+          {
+            "name": "South Foster",
+            "at_mi": 17.3,
+            "off_mi": 0.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158919510, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering South Foster"
+          },
+          {
+            "name": "Foster",
+            "at_mi": 19.4,
+            "off_mi": 2.85,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158918194, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Foster"
+          },
+          {
+            "name": "North Foster",
+            "at_mi": 19.5,
+            "off_mi": 1.26,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158859274, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing North Foster"
+          },
+          {
             "name": "Moosup River",
             "category": "river",
             "kind": "point",
             "at_mi": 23.3,
             "spoken": "Crossing the Moosup River"
+          },
+          {
+            "name": "East Brooklyn",
+            "at_mi": 26.7,
+            "off_mi": 2.51,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158897795, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing East Brooklyn"
+          },
+          {
+            "name": "Sterling",
+            "at_mi": 29.0,
+            "off_mi": 3.4,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158910428, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sterling"
+          },
+          {
+            "name": "Wauregan",
+            "at_mi": 29.4,
+            "off_mi": 1.43,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158813560, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wauregan"
+          },
+          {
+            "name": "Central Village",
+            "at_mi": 30.3,
+            "off_mi": 0.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158804297, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Central Village"
+          },
+          {
+            "name": "Canterbury",
+            "at_mi": 32.7,
+            "off_mi": 3.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158822346, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Canterbury"
+          },
+          {
+            "name": "Plainfield Village",
+            "at_mi": 33.5,
+            "off_mi": 0.88,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 8918239907, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Plainfield Village"
+          },
+          {
+            "name": "Pachaug",
+            "at_mi": 39.0,
+            "off_mi": 1.51,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158861336, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pachaug"
           },
           {
             "name": "Little River",
@@ -3292,6 +3958,150 @@
             "kind": "point",
             "at_mi": 39.4,
             "spoken": "Crossing the Shetucket River"
+          },
+          {
+            "name": "Jewett City",
+            "at_mi": 40.0,
+            "off_mi": 1.05,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158813708, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jewett City"
+          },
+          {
+            "name": "Lisbon",
+            "at_mi": 42.6,
+            "off_mi": 1.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 2590646032, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lisbon"
+          },
+          {
+            "name": "Versailles",
+            "at_mi": 44.2,
+            "off_mi": 1.0,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158807117, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Versailles"
+          },
+          {
+            "name": "Taftville",
+            "at_mi": 44.3,
+            "off_mi": 1.07,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158803741, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Taftville"
+          },
+          {
+            "name": "Occum",
+            "at_mi": 44.4,
+            "off_mi": 0.71,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158863320, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Occum"
+          },
+          {
+            "name": "Sprague",
+            "at_mi": 44.4,
+            "off_mi": 2.06,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 6235864395, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sprague"
+          },
+          {
+            "name": "Baltic",
+            "at_mi": 45.2,
+            "off_mi": 2.57,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 178206334, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Baltic"
+          },
+          {
+            "name": "Bean Hill",
+            "at_mi": 48.0,
+            "off_mi": 0.18,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 359279083, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Bean Hill"
+          },
+          {
+            "name": "Yantic",
+            "at_mi": 48.0,
+            "off_mi": 1.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158915783, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Yantic"
+          },
+          {
+            "name": "Fitchville",
+            "at_mi": 48.2,
+            "off_mi": 2.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158816709, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fitchville"
+          },
+          {
+            "name": "Bozrah",
+            "at_mi": 49.6,
+            "off_mi": 3.04,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 2590657524, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bozrah"
+          },
+          {
+            "name": "Laurel Hill",
+            "at_mi": 51.7,
+            "off_mi": 2.05,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 13056282998, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Laurel Hill"
+          },
+          {
+            "name": "Mohegan",
+            "at_mi": 53.6,
+            "off_mi": 0.88,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158863358, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mohegan"
+          },
+          {
+            "name": "Oakdale",
+            "at_mi": 54.1,
+            "off_mi": 2.15,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158813714, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Oakdale"
+          },
+          {
+            "name": "Montville",
+            "at_mi": 55.7,
+            "off_mi": 0.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 2590660715, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Montville"
+          },
+          {
+            "name": "Gales Ferry",
+            "at_mi": 58.2,
+            "off_mi": 1.55,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158918112, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Gales Ferry"
           }
         ],
         "interchanges": [
@@ -6160,11 +6970,47 @@
         ],
         "landmarks": [
           {
+            "name": "Johnston",
+            "at_mi": 8.6,
+            "off_mi": 0.04,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 2440685822, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Johnston"
+          },
+          {
+            "name": "North Scituate",
+            "at_mi": 11.0,
+            "off_mi": 0.41,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158810798, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering North Scituate"
+          },
+          {
             "name": "Woonasquatucket River",
             "category": "river",
             "kind": "point",
             "at_mi": 14.0,
             "spoken": "Crossing the Woonasquatucket River"
+          },
+          {
+            "name": "Chopmist",
+            "at_mi": 15.6,
+            "off_mi": 0.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158810649, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Chopmist"
+          },
+          {
+            "name": "South Foster",
+            "at_mi": 17.4,
+            "off_mi": 0.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158919510, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering South Foster"
           },
           {
             "name": "Moosup River",
@@ -6188,6 +7034,51 @@
             "spoken": "Crossing the Oxoboxo River"
           },
           {
+            "name": "Bean Hill",
+            "at_mi": 48.2,
+            "off_mi": 0.18,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 359279083, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Bean Hill"
+          },
+          {
+            "name": "Montville",
+            "at_mi": 55.8,
+            "off_mi": 0.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 2590660715, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Montville"
+          },
+          {
+            "name": "Flanders",
+            "at_mi": 63.5,
+            "off_mi": 0.25,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158919300, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Flanders"
+          },
+          {
+            "name": "East Lyme",
+            "at_mi": 64.4,
+            "off_mi": 0.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 6231800460, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing East Lyme"
+          },
+          {
+            "name": "Old Lyme",
+            "at_mi": 71.6,
+            "off_mi": 0.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158840106, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Old Lyme"
+          },
+          {
             "name": "Hammonasset River",
             "category": "river",
             "kind": "point",
@@ -6202,6 +7093,33 @@
             "spoken": "Crossing the Menunketesuck River"
           },
           {
+            "name": "Westbrook",
+            "at_mi": 78.2,
+            "off_mi": 0.42,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158844712, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Westbrook"
+          },
+          {
+            "name": "Clinton",
+            "at_mi": 82.4,
+            "off_mi": 0.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158837487, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Clinton"
+          },
+          {
+            "name": "Madison",
+            "at_mi": 86.2,
+            "off_mi": 0.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158868289, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Madison"
+          },
+          {
             "name": "East River",
             "category": "river",
             "kind": "point",
@@ -6214,6 +7132,168 @@
             "kind": "point",
             "at_mi": 101.5,
             "spoken": "Crossing the West River"
+          },
+          {
+            "name": "Devon",
+            "at_mi": 116.2,
+            "off_mi": 0.31,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158845669, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Devon"
+          },
+          {
+            "name": "Fairfield",
+            "at_mi": 126.6,
+            "off_mi": 0.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158814151, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Fairfield"
+          },
+          {
+            "name": "Southport",
+            "at_mi": 127.9,
+            "off_mi": 0.27,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158811795, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Southport"
+          },
+          {
+            "name": "Saugatuck",
+            "at_mi": 132.7,
+            "off_mi": 0.06,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 12833631123, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Saugatuck"
+          },
+          {
+            "name": "East Norwalk",
+            "at_mi": 134.8,
+            "off_mi": 0.35,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158875244, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering East Norwalk"
+          },
+          {
+            "name": "Darien",
+            "at_mi": 138.8,
+            "off_mi": 0.26,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158840860, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Darien"
+          },
+          {
+            "name": "Tokeneke",
+            "at_mi": 139.1,
+            "off_mi": 0.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158809392, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tokeneke"
+          },
+          {
+            "name": "Noroton",
+            "at_mi": 140.2,
+            "off_mi": 0.58,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158876188, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Noroton"
+          },
+          {
+            "name": "Noroton Heights",
+            "at_mi": 140.3,
+            "off_mi": 0.15,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158799897, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Noroton Heights"
+          },
+          {
+            "name": "Riverside",
+            "at_mi": 145.8,
+            "off_mi": 0.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158897093, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Riverside"
+          },
+          {
+            "name": "Mianus",
+            "at_mi": 146.0,
+            "off_mi": 0.44,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158854093, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Mianus"
+          },
+          {
+            "name": "Greenwich",
+            "at_mi": 148.4,
+            "off_mi": 0.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158857952, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Greenwich"
+          },
+          {
+            "name": "Port Chester",
+            "at_mi": 150.8,
+            "off_mi": 0.56,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158842978, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Port Chester"
+          },
+          {
+            "name": "Rye",
+            "at_mi": 152.6,
+            "off_mi": 0.24,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158839869, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Rye"
+          },
+          {
+            "name": "Harrison",
+            "at_mi": 154.2,
+            "off_mi": 0.43,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158826938, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Harrison"
+          },
+          {
+            "name": "Mamaroneck",
+            "at_mi": 156.5,
+            "off_mi": 0.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158851629, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mamaroneck"
+          },
+          {
+            "name": "Larchmont",
+            "at_mi": 158.4,
+            "off_mi": 0.58,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158853913, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Larchmont"
+          },
+          {
+            "name": "Pelham Manor",
+            "at_mi": 161.9,
+            "off_mi": 0.44,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158798327, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Pelham Manor"
           }
         ],
         "restrictions": []
@@ -6806,6 +7886,24 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Seekonk",
+            "at_mi": 0.1,
+            "off_mi": 4.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158855372, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Seekonk"
+          },
+          {
+            "name": "Pawtuxet",
+            "at_mi": 0.2,
+            "off_mi": 4.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158868953, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pawtuxet"
+          },
+          {
             "name": "Woonasquatucket River",
             "category": "river",
             "kind": "point",
@@ -6813,11 +7911,173 @@
             "spoken": "Crossing the Woonasquatucket River"
           },
           {
+            "name": "Saylesville",
+            "at_mi": 5.3,
+            "off_mi": 1.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158846132, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Saylesville"
+          },
+          {
+            "name": "Lonsdale",
+            "at_mi": 5.4,
+            "off_mi": 2.18,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158815348, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lonsdale"
+          },
+          {
+            "name": "Ashton",
+            "at_mi": 7.9,
+            "off_mi": 1.71,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158853356, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Ashton"
+          },
+          {
+            "name": "Albion",
+            "at_mi": 8.9,
+            "off_mi": 1.24,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158837260, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Albion"
+          },
+          {
+            "name": "Cumberland",
+            "at_mi": 9.2,
+            "off_mi": 2.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158919155, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cumberland"
+          },
+          {
+            "name": "Diamond Hill",
+            "at_mi": 9.4,
+            "off_mi": 4.53,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158827161, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Diamond Hill"
+          },
+          {
+            "name": "Manville",
+            "at_mi": 10.9,
+            "off_mi": 1.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158803555, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Manville"
+          },
+          {
+            "name": "Smithfield",
+            "at_mi": 13.1,
+            "off_mi": 3.8,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158903543, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Smithfield"
+          },
+          {
+            "name": "North Smithfield",
+            "at_mi": 13.5,
+            "off_mi": 0.99,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158816155, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing North Smithfield"
+          },
+          {
+            "name": "Union Village",
+            "at_mi": 14.2,
+            "off_mi": 0.59,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158907007, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Union Village"
+          },
+          {
             "name": "Branch River",
             "category": "river",
             "kind": "point",
             "at_mi": 14.9,
             "spoken": "Crossing the Branch River"
+          },
+          {
+            "name": "Forestdale",
+            "at_mi": 15.1,
+            "off_mi": 0.37,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158826160, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Forestdale"
+          },
+          {
+            "name": "Blackstone",
+            "at_mi": 15.6,
+            "off_mi": 1.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158835157, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Blackstone"
+          },
+          {
+            "name": "Slatersville",
+            "at_mi": 16.4,
+            "off_mi": 0.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158860266, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Slatersville"
+          },
+          {
+            "name": "Oakland",
+            "at_mi": 17.3,
+            "off_mi": 4.97,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158912839, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Oakland"
+          },
+          {
+            "name": "Millville",
+            "at_mi": 17.5,
+            "off_mi": 1.0,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158811452, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Millville"
+          },
+          {
+            "name": "Uxbridge",
+            "at_mi": 21.2,
+            "off_mi": 1.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158805451, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Uxbridge"
+          },
+          {
+            "name": "Linwood",
+            "at_mi": 23.0,
+            "off_mi": 2.32,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158809166, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Linwood"
+          },
+          {
+            "name": "Douglas",
+            "at_mi": 24.4,
+            "off_mi": 1.41,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158843632, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Douglas"
           },
           {
             "name": "Mumford River",
@@ -6834,11 +8094,101 @@
             "spoken": "Massachusetts State Police Museum and Learning Center ahead"
           },
           {
+            "name": "Northbridge",
+            "at_mi": 26.6,
+            "off_mi": 2.59,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158853855, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Northbridge"
+          },
+          {
+            "name": "Rockdale",
+            "at_mi": 28.1,
+            "off_mi": 2.95,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 12836717079, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rockdale"
+          },
+          {
+            "name": "Farnumsville",
+            "at_mi": 29.8,
+            "off_mi": 2.83,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158851992, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Farnumsville"
+          },
+          {
+            "name": "Grafton",
+            "at_mi": 30.4,
+            "off_mi": 4.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158916172, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Grafton"
+          },
+          {
+            "name": "Wilkinsonville",
+            "at_mi": 30.6,
+            "off_mi": 1.31,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158810828, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wilkinsonville"
+          },
+          {
+            "name": "Sutton",
+            "at_mi": 31.1,
+            "off_mi": 1.42,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158804720, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sutton"
+          },
+          {
+            "name": "Millbury",
+            "at_mi": 33.0,
+            "off_mi": 0.4,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158871429, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Millbury"
+          },
+          {
             "name": "Blackstone River",
             "category": "river",
             "kind": "point",
             "at_mi": 34.2,
             "spoken": "Crossing the Blackstone River"
+          },
+          {
+            "name": "Auburn",
+            "at_mi": 35.2,
+            "off_mi": 2.99,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158844157, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Auburn"
+          },
+          {
+            "name": "North Grafton",
+            "at_mi": 36.0,
+            "off_mi": 4.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 158866890, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing North Grafton"
+          },
+          {
+            "name": "Shrewsbury",
+            "at_mi": 38.7,
+            "off_mi": 4.99,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 158862939, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Shrewsbury"
           }
         ],
         "speed_limits": [
