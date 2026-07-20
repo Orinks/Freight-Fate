@@ -97,6 +97,14 @@ def check_profile_invariants(profile: Profile) -> list[Violation]:
     if len(profile.achievements) != len(set(profile.achievements)):
         out.append(Violation("achievement_dupes", "The same achievement recorded twice."))
 
+    # The local tamper mark must be a real boolean; anything else is an edit.
+    for flag_code, flag_value in (
+        ("integrity_modified", profile.integrity_modified),
+        ("integrity_notice_pending", profile.integrity_notice_pending),
+    ):
+        if not isinstance(flag_value, bool):
+            out.append(Violation(flag_code, "The save's integrity mark is not possible."))
+
     for key, tier in profile.upgrades.items():
         if not isinstance(tier, int) or tier < 1:
             out.append(Violation("upgrade_tier", "An upgrade tier that is not possible."))

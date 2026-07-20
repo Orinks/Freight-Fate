@@ -1,4 +1,10 @@
-"""Player profile with atomic JSON save/load.
+"""Player profile with atomic packed-container save/load.
+
+Saves are ``.ffsave`` files: a magic header plus zlib-compressed JSON, signed
+inside with this install's HMAC key. The container keeps casual hand-editing
+out of career state; the signature is the actual tamper check, and a failed
+check marks the profile as modified rather than refusing to load it. Plain
+``.json`` saves from older versions still load and are converted in place.
 
 On Windows and Linux, Freight Fate is portable: profiles and settings live
 in a ``saves`` directory inside the game's own main directory — next to the
@@ -36,6 +42,7 @@ import os
 import secrets
 import shutil
 import sys
+import zlib
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -55,6 +62,15 @@ SIGNATURE_FIELD = "_signature"
 SIGNATURE_VERSION_FIELD = "_signature_version"
 SIGNATURE_VERSION = 1
 SECRET_FILE = "profile.key"
+
+# Packed save container: this magic header, then zlib-deflated profile JSON.
+# The container stops accidental and casual hand-editing; the HMAC signature
+# inside the JSON remains the actual tamper check. Legacy plain-JSON saves
+# still load and are converted on their next save (the old file is kept as
+# ``.json.bak`` so an older game version can still be rolled back to).
+SAVE_MAGIC = b"FFSAVE1\x00"
+SAVE_SUFFIX = ".ffsave"
+LEGACY_SAVE_SUFFIX = ".json"
 
 # Called with the profile after every successful save. The app points this at
 # the cloud backup service so every save site -- deliveries, achievements,
@@ -336,6 +352,57 @@ def _is_signature_valid(data: dict) -> bool:
     return hmac.compare_digest(signature, _signature_for(data))
 
 
+def encode_save_bytes(data: dict) -> bytes:
+    """Pack an already-signed profile dict into the on-disk container form."""
+    text = json.dumps(data, indent=2)
+    return SAVE_MAGIC + zlib.compress(text.encode("utf-8"))
+
+
+def _decode_save_bytes(raw: bytes) -> tuple[dict, bool]:
+    """Parse container or legacy plain-JSON save bytes.
+
+    Returns the profile dict and whether the bytes were a packed container.
+    Raises ProfileIntegrityError for bytes that cannot be decoded at all.
+    """
+    packed = raw.startswith(SAVE_MAGIC)
+    if packed:
+        try:
+            text = zlib.decompress(raw[len(SAVE_MAGIC) :]).decode("utf-8")
+        except (zlib.error, UnicodeDecodeError) as e:
+            raise ProfileIntegrityError("Save file is damaged and could not be read.") from e
+    else:
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError as e:
+            raise ProfileIntegrityError("Save file is damaged and could not be read.") from e
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as e:
+        raise ProfileIntegrityError("Save file is damaged and could not be read.") from e
+    if not isinstance(data, dict):
+        raise ProfileIntegrityError("Save file is not a profile object.")
+    return data, packed
+
+
+def _sanitized_stem(name: str) -> str:
+    safe = "".join(c if c.isalnum() or c in " -_" else "_" for c in name).strip()
+    return safe or "Driver"
+
+
+def save_path_for(name: str) -> Path:
+    """The canonical packed save path for a profile or cloud slot name."""
+    return profiles_dir() / f"{_sanitized_stem(name)}{SAVE_SUFFIX}"
+
+
+def find_save_path(name: str) -> Path | None:
+    """The existing save file for a slot name: packed preferred, legacy accepted."""
+    packed = save_path_for(name)
+    if packed.exists():
+        return packed
+    legacy = packed.with_suffix(LEGACY_SAVE_SUFFIX)
+    return legacy if legacy.exists() else None
+
+
 def _signing_checks_disabled() -> bool:
     """Dev escape hatch: ``FREIGHT_FATE_SKIP_SAVE_SIGNING=1`` loads any save
     regardless of its signature, so arbitrary files can be tested. Honored
@@ -365,6 +432,13 @@ class Profile:
     # An old save was converted to the per-truck format; the player has not yet
     # heard the one-time notice. Cleared when they dismiss it.
     migration_notice_pending: bool = False
+    # The save failed its local signature check (edited outside the game, or
+    # copied from another machine, whose signing key differs). Sticky: it is
+    # signed into every later save, so clearing it by hand just trips the
+    # signature again. Local play continues; shared features read this flag.
+    integrity_modified: bool = False
+    # The player has not yet heard the one-time spoken notice about the flag.
+    integrity_notice_pending: bool = False
     game_hours: float = 6.0  # in-game clock, hours since career start
     # Whole-day offset used only by the spoken calendar and seasonal weather.
     # Existing careers can anchor their independent calendar to today's date
@@ -506,15 +580,20 @@ class Profile:
 
     @property
     def path(self) -> Path:
-        safe = "".join(c if c.isalnum() or c in " -_" else "_" for c in self.name).strip()
-        return profiles_dir() / f"{safe or 'Driver'}.json"
+        return save_path_for(self.name)
 
     def save(self) -> Path:
         path = self.path
-        tmp = path.with_suffix(".json.tmp")
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(self.to_dict(), f, indent=2)
+        tmp = path.with_suffix(SAVE_SUFFIX + ".tmp")
+        with open(tmp, "wb") as f:
+            f.write(encode_save_bytes(self.to_dict()))
         os.replace(tmp, path)
+        # A converted legacy save keeps one plain-JSON copy as .json.bak so an
+        # older game version can be rolled back to; the live file is packed.
+        legacy = path.with_suffix(LEGACY_SAVE_SUFFIX)
+        if legacy.exists():
+            with contextlib.suppress(OSError):
+                os.replace(legacy, legacy.with_suffix(".json.bak"))
         if save_listener is not None:
             try:
                 save_listener(self)
@@ -524,30 +603,48 @@ class Profile:
 
     @classmethod
     def load(cls, path: Path) -> Profile:
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
-        if not isinstance(data, dict):
-            raise ProfileIntegrityError("Save file is not a profile object.")
+        try:
+            data, packed = _decode_save_bytes(path.read_bytes())
+        except ProfileIntegrityError:
+            # Unreadable beyond repair: move it aside so the picker's spoken
+            # warning stays truthful and the file is not re-tried every visit.
+            _quarantine(path)
+            raise
         signed = SIGNATURE_FIELD in data
         resign = False
+        tampered = False
         if signed and not _is_signature_valid(data):
-            if not _signing_checks_disabled():
-                _quarantine(path)
-                raise ProfileIntegrityError(
-                    "Save file failed its integrity check and was quarantined."
+            if _signing_checks_disabled():
+                # Re-save below so the file gets a valid local signature and
+                # keeps loading once the dev flag is off again.
+                log.warning(
+                    "Signature check skipped for %s (FREIGHT_FATE_SKIP_SAVE_SIGNING)", path
                 )
-            # Re-save below so the file gets a valid local signature and
-            # keeps loading once the dev flag is off again.
-            log.warning("Signature check skipped for %s (FREIGHT_FATE_SKIP_SAVE_SIGNING)", path)
-            resign = True
+                resign = True
+            else:
+                tampered = True
+        elif not signed and packed and not _signing_checks_disabled():
+            # The game only ever writes packed saves signed; a packed save
+            # with no signature was unpacked, edited, and repacked. Plain
+            # unsigned JSON, by contrast, is how every save from before
+            # signing looks, so that legacy shape keeps its amnesty (it is
+            # re-signed and packed by the resave below).
+            tampered = True
         profile = cls.from_dict(data)
-        if profile.needs_migration_resave or resign or not signed:
+        if tampered and not profile.integrity_modified:
+            profile.integrity_modified = True
+            profile.integrity_notice_pending = True
+        if profile.needs_migration_resave or resign or not signed or tampered or not packed:
             profile.save()
         return profile
 
     @staticmethod
     def list_saves() -> list[Path]:
-        return sorted(profiles_dir().glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+        found = {p.stem: p for p in profiles_dir().glob(f"*{LEGACY_SAVE_SUFFIX}")}
+        # A packed save shadows a leftover legacy twin of the same career.
+        found.update({p.stem: p for p in profiles_dir().glob(f"*{SAVE_SUFFIX}")})
+        return sorted(found.values(), key=lambda p: p.stat().st_mtime, reverse=True)
 
     def delete(self) -> None:
         self.path.unlink(missing_ok=True)
+        self.path.with_suffix(LEGACY_SAVE_SUFFIX).unlink(missing_ok=True)

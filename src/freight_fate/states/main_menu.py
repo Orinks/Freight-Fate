@@ -28,14 +28,22 @@ from .update import UpdateChecker, UpdateCheckState, UpdatePromptState
 _last_invalid_saves: list[Path] = []
 
 
-def enter_world(ctx) -> None:
-    """Resume a saved mid-trip delivery if there is one, else the terminal hub."""
+def pending_notice_state(ctx) -> State | None:
+    """The next one-time save notice the player has not heard yet, if any."""
     if ctx.profile.migration_notice_pending:
         from .save_notice import SaveMigrationNoticeState
 
-        ctx.push_state(SaveMigrationNoticeState(ctx))
-        return
-    ctx.push_state(_world_entry_state(ctx))
+        return SaveMigrationNoticeState(ctx)
+    if ctx.profile.integrity_notice_pending:
+        from .save_notice import SaveModifiedNoticeState
+
+        return SaveModifiedNoticeState(ctx)
+    return None
+
+
+def enter_world(ctx) -> None:
+    """Resume a saved mid-trip delivery if there is one, else the terminal hub."""
+    ctx.push_state(pending_notice_state(ctx) or _world_entry_state(ctx))
 
 
 def _world_entry_state(ctx) -> State:
@@ -62,11 +70,15 @@ def _loadable_saves() -> list[tuple[Path, Profile]]:
     saves = []
     for path in Profile.list_saves():
         try:
-            saves.append((path, Profile.load(path)))
+            profile = Profile.load(path)
         except ProfileIntegrityError:
             _last_invalid_saves.append(path)
         except Exception:
             continue
+        else:
+            # Loading may have converted a legacy file in place; report the
+            # path the career actually lives at now.
+            saves.append((profile.path, profile))
     return saves
 
 
@@ -174,9 +186,9 @@ class MainMenuState(MenuState):
         if _last_invalid_saves:
             count = len(_last_invalid_saves)
             warning = (
-                f"{count} saved career failed its integrity check and was moved aside. "
+                f"{count} saved career could not be read and was moved aside. "
                 if count == 1
-                else f"{count} saved careers failed integrity checks and were moved aside. "
+                else f"{count} saved careers could not be read and were moved aside. "
             )
         self.ctx.say(
             f"Welcome to Freight Fate, version {__version__}. "
@@ -438,12 +450,7 @@ class LoadDriverState(MenuState):
     def _pick(self, profile: Profile) -> None:
         self.ctx.profile = profile
         self.ctx.say(f"Welcome back, {profile.name}.")
-        if profile.migration_notice_pending:
-            from .save_notice import SaveMigrationNoticeState
-
-            self.ctx.replace_state(SaveMigrationNoticeState(self.ctx))
-            return
-        self.ctx.replace_state(_world_entry_state(self.ctx))
+        self.ctx.replace_state(pending_notice_state(self.ctx) or _world_entry_state(self.ctx))
 
 
 class ManageCareersState(MenuState):
