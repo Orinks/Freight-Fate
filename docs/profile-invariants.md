@@ -84,17 +84,30 @@ always knows the current content set, SHOULD reject unknown keys.
 
 ## 2. Plausibility rules (server-side; tighten freely, bump the version)
 
-2.1 **Money against career history.** Gross lifetime pay is bounded by
-`career.total_earnings`; a balance far above
-`starting money (5,000) + total_earnings` cannot be honest. Flag anything
-above that sum plus a modest allowance for bonuses; hard-reject multiples
-of it. A level-2 driver with nine million dollars fails.
+2.1 **Money against career history.** Cash is bounded by
+`startingMoney + career.total_earnings + pay_advance`. Every way the game
+adds money also books lifetime earnings, and spending only ever lowers the
+balance, so this holds for any honest career. A level-2 driver with nine
+million dollars fails.
+
+Do **not** add the price of owned trucks and upgrades to the left side. The
+game grants equipment it never charged list price for — an owner-operator
+buys out a carrier tractor worth far more than the buy-in — so pricing gear
+as if it had been bought reads as roughly $150,000 of invented money and
+rejects the backup of every driver who took that step. A career that
+launders invented money through the garage is left to offline forensics.
 
 2.2 **XP against the curve and the miles.** Level thresholds are the
-`LEVEL_XP` table in `models/career.py` (0, 1,000, 2,500, 4,500, 7,000,
-10,000 ... 572,000 at the top). XP accrues from deliveries; profiles with
-huge XP over tiny `deliveries`/`total_miles` fail. Rough honest shape:
-XP on the order of miles driven times single-digit multipliers.
+`LEVEL_XP` table in `models/career.py`. The ceiling is
+`deliveries * xpFlatPerDelivery + total_miles * xpPerMileMax`, both
+exported in the invariants, plus a slack of a dollar or so for rounding.
+
+Take those two figures from the export, never from a number copied into
+the server. The rate they describe is what a spotless career actually
+earns, so a career that delivers every mile on time sits exactly on the
+ceiling rather than under it: a copied value that falls even slightly
+behind a balance pass convicts the drivers who played best, which is what
+happened when a hardcoded 1.2 per mile met the 1.9 arc's higher rates.
 
 2.3 **Endorsements.** Earned endorsements come free at levels 2/3/4
 (refrigerated/heavy_haul/high_value) — they are DERIVED from level, never
