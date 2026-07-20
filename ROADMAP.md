@@ -250,6 +250,50 @@ terminal becomes the anchor of that week instead of a spawn point.
       redistribution, and user-reported availability cannot go in a
       deterministic offline game that must answer every player identically
       forever.
+- [ ] **"Where am I": an on-demand orientation key (owner, 2026-07-19).**
+      A sighted driver answers this with a glance at a sign. A blind driver
+      cannot, and no amount of automatic chatter answers it at the moment
+      somebody actually wonders. It joins the existing on-demand family (S
+      speed, D details, U upcoming, X exit), so the pattern is already
+      familiar. Speaks what the map already knows and currently keeps to
+      itself: nearest town and its distance and direction ("Pine, one mile
+      ahead; Strawberry, four back"), the road and state, the nearest baked
+      landmark, the next route city.
+      **Nearest truck service belongs here too, and MUST honour
+      `vehicle_access`** -- naming a bobtail-only stop as "nearest service"
+      to a driver pulling a trailer is exactly the false promise the
+      truck-access sweep just removed from announcements.
+      This also reframes the village sweep: the bake becomes the DATA LAYER
+      this key reads, and the automatic half stops being a separate callout
+      at all. The town name RIDES the limit announcement the game already
+      makes -- "Entering Strawberry. Speed limit drops to 35." -- so it adds
+      no new event, only the context that stops the drop reading as
+      arbitrary. That is why it belongs ON by default (owner's call, and the
+      right one): defaulting it off would suppress the explanation for
+      something the game announces regardless. The toggle stays for anyone
+      who wants the bare limit call.
+      Push and pull answer different questions and neither substitutes for
+      the other: the ride-along answers "why is this happening", the key
+      answers "where am I on I-40 at three in the morning", which never
+      arrives on a schedule.
+      **Bake WIDE, display TIGHT.** The 0.5 mi rule is what makes "entering"
+      true, but the key's honest answer is whatever is nearest at whatever
+      distance -- on I-40 that may be "Winslow, eleven miles ahead", and
+      refusing to say it would make the key useless exactly where it is
+      wanted. So collect a 10-15 mi catchment, store each place's offset and
+      whether it is on-route, and let the tight radius govern the callout
+      only. Two or three places at most, along-the-road direction rather
+      than compass.
+      **Low priority and interruptible (owner, safety).** Speak it with
+      `interrupt=False` so it never purges anything; the existing safety
+      path then preempts it for free, since an interrupting line already
+      purges the channel. Keep it short -- a long recital holds the channel
+      long enough that even correct preemption feels laggy.
+      **Big Buck's stays hidden.** A readout that gives its distance hands
+      away the discovery. Let the key speak it only after the player has
+      found one, or surface it as CB rumour -- the button reports what the
+      driver would plausibly KNOW, not what the database contains. That
+      rule keeps it an orientation aid rather than an oracle.
 - [ ] **Warn the driver before an under-served route, instead of faking a
       stop on it (owner, 2026-07-19).** After the access sweep, 21 legs over
       100 miles carry no stop a combination vehicle can enter. Designating an
@@ -974,6 +1018,37 @@ section below and the Unreleased changelog; the release-line view:
       take the fallback this sweep would upgrade. Regen should run
       offline from the cached PBFs like the overlay pipeline, targeting
       trunk/primary junction nodes on the 533 unlabeled legs.
+- [x] **State truck speed limits audited against statute -- FIXED
+      2026-07-20 (traced from a player report of "wrong" limits in
+      California).** The reported limits were correct -- CVC 22406 caps
+      three-axle rigs at 55 statewide -- but the table behind them came
+      from a single aggregator and proved wrong on 4 of its 10 rows.
+      All 50 states rechecked against statute text
+      (`docs/truck-speed-limit-audit.md`): Arizona added at 65 (A.R.S.
+      28-709) where it had been MISSING and 33 legs served the 75 car
+      number; Oregon corrected 65 -> 55 (ORS 811.111(1)(b)); Idaho
+      removed (repealed by H664, effective 2026-07-01); Nevada and North
+      Dakota removed (never had a split -- their numbers had been lifted
+      from the aggregator's *general* limit column).
+      The table is now keyed by **road class** with a `default`, because
+      Montana's 70-interstate/65-elsewhere split cannot be written as one
+      number, and an explicit `maxspeed:hgv` tag outranks the statewide
+      default but is trusted only as far as the statute permits -- that
+      is how Oregon's tagged eastern corridors keep their real 65 while
+      I-5 stays 55, without a stray 60 mph tag eleven miles inside
+      California licensing an illegal speed.
+      Deliberately NOT encoded, each for a stated reason: Illinois
+      (real, but scoped to six Chicago-area counties and no county data
+      is baked), Virginia (real, but secondary-roads-only -- a flat entry
+      would cap I-81 at 45), and Arkansas's 50 mph off the
+      controlled-access network (live law, but it uses a different
+      vehicle test than the 70 provision and contradicts observed posting
+      practice; needs ground truth from a driver who runs it).
+- [ ] **Arkansas non-freeway truck limit: resolve the 50 mph question.**
+      Ark. Code 27-51-201(c)(2) (Act 784 of 2019) reads 50 for trucks
+      "in other locations", a 20 mph gap from what the game serves on
+      Arkansas US routes. Not encodable from the statute alone -- ask a
+      driver who runs Arkansas whether it is enforced.
 - [x] **Interstate speed limits polluted by city-street samples at leg
       endpoints -- FIXED 2026-07-14 (found live by the owner on I-10).**
       The maxspeed bake's shield-match guard cannot fire when the

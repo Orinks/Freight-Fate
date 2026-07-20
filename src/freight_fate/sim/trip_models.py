@@ -53,21 +53,71 @@ INTERSTATE_RURAL_LIMIT_MPH: dict[str, float] = {
     "california": 65.0,
 }
 
-# States where heavy trucks have a lower maximum open-road limit than the
-# general posted limit commonly tagged in OSM. Source checked against Trucker
-# Country's state speed-limit table, accessed 2026-06-30.
-STATE_TRUCK_MAX_MPH: dict[str, float] = {
-    "Arkansas": 70.0,
-    "California": 55.0,
-    "Idaho": 70.0,
-    "Indiana": 65.0,
-    "Michigan": 65.0,
-    "Montana": 70.0,
-    "Nevada": 75.0,
-    "North Dakota": 75.0,
-    "Oregon": 65.0,
-    "Washington": 60.0,
+# Jurisdictions whose statute holds heavy trucks below the general posted
+# limit. Keyed by road class (from _highway_class) with a "default" fallback,
+# because several splits are class-scoped and a flat number cannot say so.
+# "max" is the highest truck speed the statute permits ANYWHERE in the state;
+# it bounds how far a baked maxspeed:hgv tag may raise the limit (see
+# _truck_capped_speed_limit). Omit "max" and it is inferred from the entries.
+#
+# Every entry verified against statute text 2026-07-19, replacing an aggregator
+# table that proved wrong on 4 of its 10 rows. Full audit, per-state sources,
+# and the states checked and found to have NO split are recorded in
+# docs/truck-speed-limit-audit.md. DO NOT edit a number here without a citation
+# and an access date -- the game speaks the state's name aloud when this table
+# binds, so a stale row is the game attributing a false law to a real place.
+STATE_TRUCK_MAX_MPH: dict[str, dict[str, float]] = {
+    # A.R.S. 28-709: >26,000 lb declared GW, statewide. The general limit is 75
+    # on rural interstates, so this binds hard and was MISSING before the audit
+    # -- 33 Arizona legs were serving the car number.
+    "Arizona": {"default": 65.0},
+    # Ark. Code 27-51-201(b): CMV >=26,001 lb GVWR on rural divided
+    # controlled-access highways.
+    # NOTE: 27-51-201(c)(2) (Act 784 of 2019) reads 50 mph for trucks "in other
+    # locations", i.e. every non-controlled-access road. Deliberately NOT
+    # encoded: it uses a different vehicle test than (b), and it contradicts
+    # observed practice on Arkansas US routes posted 65 for all traffic. The
+    # audit could not resolve whether enforcement is discretionary or the
+    # posted-limit path in (b)(3) supersedes. A 20 mph drop spoken with the
+    # state's name attached needs better ground truth than a statute read cold
+    # -- ask a driver who runs Arkansas.
+    "Arkansas": {"default": 70.0},
+    # CVC 22406: three or more axles, or any vehicle towing. Statewide, every
+    # highway -- the widest split in the country, and the one players report as
+    # a bug because the sign says 65.
+    "California": {"default": 55.0},
+    # IC 9-21-5-2(a)(4): declared GVW >26,000 lb, buses excluded. Rural
+    # interstates and the Toll Road.
+    "Indiana": {"default": 65.0},
+    # MCL 257.627(4): GVW >=10,000 lb or any truck-tractor, on freeways and
+    # state trunk lines.
+    "Michigan": {"default": 65.0},
+    # MCA 61-8-312: >1 ton rated capacity. 70 on interstates, 65 on all other
+    # public highways -- a clean, sourced class split, and the reason this
+    # table is keyed by class at all.
+    "Montana": {"interstate": 70.0, "default": 65.0},
+    # ORS 811.111(1)(b): >10,000 lb GVWR. 55 on ANY highway by default; 60 and
+    # 65 are named-corridor exceptions in eastern Oregon (I-84 east, I-82,
+    # US-95), which OSM already carries as maxspeed:hgv on 144 samples. Rather
+    # than maintain a corridor list, the default holds I-5 at 55 and "max"
+    # lets those tagged corridors run their real 65.
+    "Oregon": {"default": 55.0, "max": 65.0},
+    # RCW 46.61.410: >10,000 lb GVW and all combinations, statewide, while the
+    # general limit may be posted as high as 75.
+    "Washington": {"default": 60.0},
 }
+# Removed by the 2026-07-19 audit, each with a reason:
+#   Idaho 70    -- REPEALED. Idaho Code 49-654(3) as amended by H664 (2026
+#                  ch. 108, effective 2026-07-01) gives 5+ axle heavy vehicles
+#                  the same limits as light vehicles.
+#   Nevada 75   -- no split ever existed. NRS 484B.600 caps everyone at 80.
+#   N. Dakota 75-- no split. NDCC 39-09-02(1)(i) is 80 for all traffic.
+# Deliberately absent (real splits the state-keyed table must not flatten):
+#   Illinois    -- 60/55 for >=8,001 lb, but ONLY in six Chicago-area counties.
+#                  No county data is baked; approximating that boundary would
+#                  be inventing a legal line, and this one gets enforced.
+#   Virginia    -- a real 45/55 split, but on SECONDARY roads only. A flat
+#                  entry would cap trucks at 45 on I-81.
 
 
 def leg_lane_count(leg: Leg | None) -> int:
@@ -145,14 +195,44 @@ def _posted_sample_at(leg: Leg, offset_mi: float) -> SpeedLimitSample | None:
     return chosen
 
 
+def _statutory_truck_caps(state: str, highway: str) -> tuple[float, float] | None:
+    """(cap for this road class, highest cap the state permits anywhere), or
+    None where the state holds trucks to the general limit."""
+    table = STATE_TRUCK_MAX_MPH.get(state)
+    if not table:
+        return None
+    classed = {k: v for k, v in table.items() if k != "max"}
+    cap = classed.get(_highway_class(highway), classed.get("default"))
+    if cap is None:
+        return None
+    # "max" defaults to this class's own cap, NOT the highest entry in the
+    # table: a class-scoped split (Montana's 70 interstate / 65 elsewhere) must
+    # not let a stray hgv tag license the interstate number on a back highway.
+    # Only a state whose statute has genuine corridor exceptions above its
+    # default -- Oregon -- declares "max" and opens that door.
+    return cap, table.get("max", cap)
+
+
 def _truck_capped_speed_limit(leg: Leg, offset_mi: float) -> float | None:
     chosen = _posted_sample_at(leg, offset_mi)
     if chosen is None or chosen.mph is None:
         # Inside a coverage gap: no posting is known here, so the caller's
         # highway/region heuristic answers, not the last town limit.
         return None
-    cap = STATE_TRUCK_MAX_MPH.get(_leg_state_at(leg, offset_mi))
-    return min(chosen.mph, cap) if cap is not None else chosen.mph
+    caps = _statutory_truck_caps(_leg_state_at(leg, offset_mi), leg.highway)
+    if caps is None:
+        return chosen.mph
+    cap, permitted = caps
+    if chosen.hgv:
+        # An explicit maxspeed:hgv is better evidence than a statewide default
+        # -- it is how Oregon's eastern corridors carry their real 65 while
+        # I-5 stays 55 -- but it is trusted only as far as the statute allows.
+        # A stray tag CANNOT license an illegal speed: I-5 in California
+        # carries a 60 mph hgv tag eleven miles south of the Oregon line, and
+        # honouring it would have the game telling a driver they may do 60
+        # where CVC 22406 says 55.
+        return min(chosen.mph, permitted)
+    return min(chosen.mph, cap)
 
 
 def truck_limit_at(leg: Leg, offset_mi: float) -> tuple[bool, str | None]:
@@ -174,14 +254,14 @@ def truck_limit_at(leg: Leg, offset_mi: float) -> tuple[bool, str | None]:
     if chosen is None or chosen.mph is None:
         return False, None
     state = _leg_state_at(leg, offset_mi)
-    cap = STATE_TRUCK_MAX_MPH.get(state)
-    if cap is not None and cap < chosen.mph:
+    caps = _statutory_truck_caps(state, leg.highway)
+    if caps is not None and caps[0] < chosen.mph:
         return True, state
     if chosen.hgv:
-        # Tagged truck-specific. Credit the state only where its statutory
-        # maximum is what the tag reflects; a one-off local truck posting is
-        # still a truck limit but not the state's doing.
-        return True, state if cap is not None and cap >= chosen.mph else None
+        # Tagged truck-specific. Credit the state only where it actually has a
+        # statutory split; a one-off local truck posting is still a truck limit
+        # but not the state's doing.
+        return True, state if caps is not None else None
     return False, None
 
 

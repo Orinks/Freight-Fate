@@ -111,6 +111,18 @@
 
 ### Changed
 
+- **Truck speed limits now match what each state's law actually says.**
+  Every state was checked against its own statute, and the results moved
+  in both directions. Arizona holds trucks to 65 where the signs say 75,
+  and the game had been letting you run the car speed -- that is fixed.
+  Oregon's default drops to 55, though the eastern corridors that are
+  genuinely posted higher for trucks still run their real limit. Idaho
+  repealed its truck limit outright this month, and Nevada and North
+  Dakota never had one, so all three now match the posted signs. Montana
+  correctly runs 70 on the interstates and 65 everywhere else. If a
+  stretch you drive got slower, the sign was never the whole story
+  there.
+
 - **The co-driver now says when a speed limit is a truck limit.** In states
   that hold heavy rigs below the number on the sign, pressing S says "Truck
   limit 55. California holds trucks to this" instead of just reading the
