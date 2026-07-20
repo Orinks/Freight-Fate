@@ -175,7 +175,7 @@ class DrivingUpdateMixin:
         self._update_microsleep(keys, dt)
         self._update_overrev(dt)
         self._update_speeding(dt, accelerator_held=accel_held)
-        self._update_pull_over(dt)
+        self._update_pull_over(dt, service_braking=braking or emergency)
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
@@ -865,6 +865,9 @@ class DrivingUpdateMixin:
         self._pull_over_signaled = False
         self._pull_over_limit = limit
         self._pull_over_over = max(0.0, self.truck.speed_mph - limit)
+        self._reset_pull_over_tracker()
+        self._pull_over_compliance = PULL_OVER_START_COMPLIANCE
+        self._pull_over_prev_mph = self.truck.speed_mph
         patrol = self.trip.active_patrol_at(self.trip.position_mi)
         where = patrol.reason if patrol is not None else "patrol"
         self.ctx.audio.play("events/police_siren")
@@ -882,32 +885,87 @@ class DrivingUpdateMixin:
         if self._pull_over == "lights":
             self._pull_over = "stopping"
             self._pull_over_signaled = True
+            # A one-time compliance bump for signaling. Guarded so that if an
+            # unsignal is ever added, toggling can never re-earn the boost.
+            if not self._pull_over_signal_boost:
+                self._pull_over_signal_boost = True
+                self._pull_over_compliance = min(
+                    1.0, self._pull_over_compliance + PULL_OVER_SIGNAL_BOOST
+                )
             self.ctx.audio.play("ui/notify", volume=0.5)
             self.ctx.say("Signaling and easing onto the shoulder. Brake to a full stop.")
         else:
             self.ctx.say("Pulling over. Brake to a full stop on the shoulder.")
 
-    def _update_pull_over(self, dt: float) -> None:
+    def _reset_pull_over_tracker(self) -> None:
+        """Clear the compliance tracker on every stop-ending path so the next
+        stop starts clean."""
+        self._pull_over_compliance = 0.0
+        self._pull_over_elapsed = 0.0
+        self._pull_over_prev_mph = 0.0
+        self._pull_over_coast_s = 0.0
+        self._pull_over_signal_boost = False
+        self._pull_over_nosignal_hit = False
+
+    def _update_pull_over(self, dt: float, *, service_braking: bool = False) -> None:
+        """Advance the compliance tracker. Braking raises it; accelerating,
+        coasting, and failing to signal lower it (deductions stack). A full stop
+        opens the roadside stop; hitting zero triggers the felony stop. No speech
+        on any change -- stop means stop, and players know it."""
         if self._pull_over is None:
             return
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
             self._open_traffic_stop()
             return
-        if self.trip.position_mi - self._pull_over_start_mi >= PULL_OVER_IGNORE_MI:
+        self._pull_over_elapsed += dt
+        speed = self.truck.speed_mph
+        accel_mph_s = (speed - self._pull_over_prev_mph) / dt if dt > 0 else 0.0
+        self._pull_over_prev_mph = speed
+        delta = 0.0
+        if service_braking:
+            # Compliant deceleration. Method-agnostic: service, emergency, or
+            # engine+service brake all read the same, and stacking earns no extra.
+            delta += PULL_OVER_BRAKE_RATE * dt
+            self._pull_over_coast_s = 0.0
+        elif accel_mph_s > PULL_OVER_ACCEL_EPS_MPH_S:
+            # Genuinely speeding up (not jitter, not throttle-held-steady).
+            delta -= PULL_OVER_ACCEL_RATE * dt
+            self._pull_over_coast_s = 0.0
+        else:
+            # Coasting, holding a steady speed, or slowing on the engine brake /
+            # grade alone -- all treated the same, and only after a 3 s grace.
+            self._pull_over_coast_s += dt
+            if self._pull_over_coast_s >= PULL_OVER_COAST_GRACE_S:
+                delta -= PULL_OVER_COAST_RATE * dt
+        # Failing to signal past the grace: a one-time 1/4 hit, then a small
+        # periodic drain. Stacks with any accelerating/coasting deduction above.
+        if self._pull_over_elapsed > PULL_OVER_SIGNAL_GRACE_S and not self._pull_over_signaled:
+            if not self._pull_over_nosignal_hit:
+                self._pull_over_nosignal_hit = True
+                delta -= PULL_OVER_NOSIGNAL_HIT
+            delta -= PULL_OVER_NOSIGNAL_RATE * dt
+        self._pull_over_compliance = max(0.0, min(1.0, self._pull_over_compliance + delta))
+        if self._pull_over_compliance <= 0.0:
             self._evade_pull_over()
 
     def _open_traffic_stop(self) -> None:
         signaled = self._pull_over_signaled
         over, limit = self._pull_over_over, self._pull_over_limit
+        clean_stop = self._pull_over_compliance >= PULL_OVER_FULL_COMPLIANCE
         self._pull_over = None
+        self._reset_pull_over_tracker()
         self.ctx.push_state(
-            TrafficStopState(self.ctx, self, signaled=signaled, over=over, limit=limit)
+            TrafficStopState(
+                self.ctx, self, signaled=signaled, over=over, limit=limit, clean_stop=clean_stop
+            )
         )
 
     def _evade_pull_over(self) -> None:
-        """Drove on with the lights behind: spike strips end it, logged as a
-        felony stop with a heavy fine and reputation hit."""
+        """Refused to comply -- accelerating away or never slowing until the
+        tracker zeroed out. Ends as a felony stop with a heavy fine and
+        reputation hit."""
         self._pull_over = None
+        self._reset_pull_over_tracker()
         p = self.ctx.profile
         fine = SPEEDING_TICKET_FINES[-1] * 1.5
         self.speeding_tickets += 1
@@ -916,8 +974,8 @@ class DrivingUpdateMixin:
         p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT * 2.0)
         self.ctx.audio.play("events/spike_strip")
         self.ctx.say_event(
-            f"You ran from the traffic stop, so troopers laid spike strips across "
-            f"the lane. That is a felony stop: a {fine:,.0f} dollar fine and a "
+            f"You would not pull over, so troopers laid spike strips across the "
+            f"lane. That is a felony stop: a {fine:,.0f} dollar fine and a "
             "serious reputation hit.",
             interrupt=True,
         )
