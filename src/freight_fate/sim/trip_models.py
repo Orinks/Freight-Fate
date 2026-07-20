@@ -11,6 +11,7 @@ from ..data.world import (
     DEFAULT_VEHICLE_ACCESS,
     STOP_TYPE_LABELS,
     Leg,
+    SpeedLimitSample,
     TollEvent,
     vehicle_access_allows,
 )
@@ -130,7 +131,8 @@ def _leg_state_at(leg: Leg, offset_mi: float) -> str:
     return state
 
 
-def _truck_capped_speed_limit(leg: Leg, offset_mi: float) -> float | None:
+def _posted_sample_at(leg: Leg, offset_mi: float) -> SpeedLimitSample | None:
+    """The last posting at or before a leg offset, or None where none is baked."""
     samples = leg.speed_limits
     if not samples:
         return None
@@ -140,12 +142,47 @@ def _truck_capped_speed_limit(leg: Leg, offset_mi: float) -> float | None:
             chosen = sample
         else:
             break
-    if chosen.mph is None:
+    return chosen
+
+
+def _truck_capped_speed_limit(leg: Leg, offset_mi: float) -> float | None:
+    chosen = _posted_sample_at(leg, offset_mi)
+    if chosen is None or chosen.mph is None:
         # Inside a coverage gap: no posting is known here, so the caller's
         # highway/region heuristic answers, not the last town limit.
         return None
     cap = STATE_TRUCK_MAX_MPH.get(_leg_state_at(leg, offset_mi))
     return min(chosen.mph, cap) if cap is not None else chosen.mph
+
+
+def truck_limit_at(leg: Leg, offset_mi: float) -> tuple[bool, str | None]:
+    """Whether the limit in force here is truck-specific, and the state to
+    credit for it. ``(False, None)`` where the posting is simply the posting.
+
+    Split-limit states are the most reported "wrong speed limit" in the map
+    (California, 2026-07-19): the driver remembers a 65 shield and hears 55,
+    because 65 is the car number and CVC 22406 caps three-axle rigs at 55. The
+    data was right and said so silently, which is why it read as a bug.
+
+    A stretch reaches 55 by either of two routes, and the driver must not be
+    able to tell them apart: OSM carries an explicit ``maxspeed:hgv`` (US-395,
+    the reported road) or it carries only the car number and the statutory cap
+    pulls it down (I-80). Keying off the cap alone would stay silent on
+    exactly the tagged roads, so the same 55 would explain itself on one mile
+    and not the next."""
+    chosen = _posted_sample_at(leg, offset_mi)
+    if chosen is None or chosen.mph is None:
+        return False, None
+    state = _leg_state_at(leg, offset_mi)
+    cap = STATE_TRUCK_MAX_MPH.get(state)
+    if cap is not None and cap < chosen.mph:
+        return True, state
+    if chosen.hgv:
+        # Tagged truck-specific. Credit the state only where its statutory
+        # maximum is what the tag reflects; a one-off local truck posting is
+        # still a truck limit but not the state's doing.
+        return True, state if cap is not None and cap >= chosen.mph else None
+    return False, None
 
 
 FACILITY_ACCESS_LIMIT_MPH = 25.0

@@ -302,3 +302,55 @@ def test_baked_limit_wins_near_city(world):
     # Real posted data is authoritative; the city cap is only a fallback when
     # the route lacks baked speed samples.
     assert trip._corridor_limit_at(0.0) == 75.0
+
+
+def _split_limit_trip(state: str, mph: float, hgv: bool, highway: str = "I-80") -> Trip:
+    leg = Leg(
+        "A",
+        "B",
+        100.0,
+        highway,
+        "flat",
+        (),
+        state_miles=(StateMileage(state, 100.0),),
+        speed_limits=(SpeedLimitSample(0.0, mph, hgv=hgv),),
+    )
+    return Trip(
+        Route(["A", "B"], [leg]), TruckState(), WeatherSystem("california", seed=1), seed=2
+    )
+
+
+def test_split_limit_reported_whether_the_cap_or_the_tag_produced_it():
+    """A California 55 arrives two ways -- an explicit maxspeed:hgv (US-395)
+    or the statutory cap pulling a 65 car posting down (I-80) -- and the
+    driver must not be able to tell them apart. Keying off the cap alone
+    stayed silent on the tagged roads, so the same 55 explained itself on one
+    mile and not the next (player report, 2026-07-19)."""
+    tagged = _split_limit_trip("California", 55.0, hgv=True, highway="US-395")
+    capped = _split_limit_trip("California", 65.0, hgv=False)
+    assert tagged.speed_limit_at(50.0)[0] == capped.speed_limit_at(50.0)[0] == 55.0
+    assert tagged.truck_limit_at(50.0) == (True, "California")
+    assert capped.truck_limit_at(50.0) == (True, "California")
+
+
+def test_plain_posting_is_not_reported_as_a_truck_limit():
+    # Nevada caps trucks at 75, so a posted 65 is simply the posted 65 -- the
+    # cap never binds and nothing truck-specific should be claimed.
+    assert _split_limit_trip("Nevada", 65.0, hgv=False).truck_limit_at(50.0) == (False, None)
+    assert _split_limit_trip("Arizona", 75.0, hgv=False).truck_limit_at(50.0) == (False, None)
+
+
+def test_zone_owns_the_reason_over_a_split_limit():
+    """Inside construction the cone is why the number dropped, not the state
+    line; crediting California there would explain the wrong thing."""
+    trip = _split_limit_trip("California", 65.0, hgv=False)
+    zone = trip.zones[0] if trip.zones else None
+    if zone is None:
+        pytest.skip("no zone generated for this seed")
+    assert trip.truck_limit_at((zone.start_mi + zone.end_mi) / 2.0) == (False, None)
+
+
+def test_local_truck_posting_is_a_truck_limit_without_crediting_the_state():
+    # A truck-tagged posting in a state with no statutory split is still a
+    # truck limit, but no state law explains it.
+    assert _split_limit_trip("Arizona", 45.0, hgv=True).truck_limit_at(50.0) == (True, None)

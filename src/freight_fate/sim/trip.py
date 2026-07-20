@@ -1187,6 +1187,22 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             return zone.limit_mph, zone.reason
         return self._corridor_limit_at(mile), None
 
+    def truck_limit_at(self, mile: float) -> tuple[bool, str | None]:
+        """Whether a truck-specific limit is in force here, and the state to
+        credit for it.
+
+        A zone answers first: inside construction the cone is the reason the
+        number dropped, not the state line, and saying otherwise would explain
+        the wrong thing."""
+        if self._active_zone_at(mile) is not None:
+            return False, None
+        leg_i, leg_start = self._leg_at_mile(mile)
+        leg = self.route.legs[leg_i]
+        forward = self.route.cities[leg_i] == leg.a
+        route_offset = mile - leg_start
+        leg_offset = route_offset if forward else leg.miles - route_offset
+        return truck_limit_at(leg, leg_offset)
+
     def _region_at(self, mile: float) -> str:
         leg_i, _ = self._leg_at_mile(mile)
         city = self.route.cities[min(leg_i + 1, len(self.route.cities) - 1)]

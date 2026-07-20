@@ -111,6 +111,14 @@
 
 ### Changed
 
+- **The co-driver now says when a speed limit is a truck limit.** In states
+  that hold heavy rigs below the number on the sign, pressing S says "Truck
+  limit 55. California holds trucks to this" instead of just reading the
+  figure. Nothing about how fast you may drive has changed -- those limits
+  were already being enforced -- but hearing 55 on a road signed 65 no longer
+  sounds like the map got it wrong. It is the law for anything with three
+  axles, and now the game tells you so.
+
 - **The game is about a third smaller to download.** The music now uses a
   newer, more efficient audio format, cutting the download from roughly 282
   to 191 megabytes without changing how anything sounds -- welcome news on a

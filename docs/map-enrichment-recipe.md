@@ -41,6 +41,12 @@ determinism contract). Read those first if you have not.
 - **Data stays deterministic and offline.** All queries here are build-time.
   After any world-source edit: regenerate (`uv run python tools/index_world.py`),
   verify (`--check`), and run the world tests.
+- **A new jurisdiction owes a truck-limit check.** Before the first leg in a
+  state, province, or country goes live, settle whether heavy vehicles are
+  held below the general limit there and record it (see *Jurisdiction truck
+  limits* below). OSM tagging is too uneven to discover this per-leg, and the
+  failure is silent: the map serves the car number and the game confidently
+  speaks a limit no legal rig may drive.
 - **Go through `tools/world_source.py`.** The source is per-state shards under
   `src/freight_fate/data/world_source/`, not one file. `load_world()` hands you
   the whole world as one dict and `save_world(data)` writes it back, so the
@@ -237,6 +243,76 @@ everything added (read each new name and state aloud). Commit the batch with
 real source notes in the message; data-only batches that change nothing
 player-visible take `[skip changelog]`, but a batch that adds audible places
 to legs players can drive deserves a changelog entry under `Added`.
+
+## Jurisdiction truck limits (once per state/province/country)
+
+Many jurisdictions post one limit for cars and a lower one for heavy vehicles.
+A rig's limit therefore reaches the player by two independent routes, and
+**both must be handled or the map lies in one direction or the other**:
+
+1. **Tagged.** OSM carries `maxspeed:hgv` on the way. The baked sample records
+   it with `hgv: true` and it is already truck-correct.
+2. **Statutory.** OSM carries only the general `maxspeed`. Nothing in the data
+   says trucks are held lower, so `STATE_TRUCK_MAX_MPH`
+   (`src/freight_fate/sim/trip_models.py`) pulls it down at runtime.
+
+Route 2 exists because **OSM tagging coverage is not a fact about the law.**
+California I-80 alternates mile by mile between tagged and untagged; the
+statutory cap is what makes the whole corridor read 55 instead of flickering.
+Never conclude "this road has no truck limit" from missing tags.
+
+**Both routes must speak identically.** `truck_limit_at()` reports a
+truck-specific limit whichever way it arose, so S says "Truck limit 55.
+California holds trucks to this." on tagged and untagged miles alike. Keying
+off the cap alone silences the tagged roads — that regression shipped and was
+caught by a player on US-395 (2026-07-19); `tests/test_maxspeed.py` locks it.
+
+**Source the number, don't infer it.** Cite the statute or the DOT table, with
+the access date, in the comment above the entry. These laws move — several US
+states repealed their splits in the last decade — so a stale table is worse
+than none now that the game names the jurisdiction out loud.
+
+**Verify in-engine, never from the baked file.** The file holds the car
+number on untagged stretches by design; reading it and concluding the limit is
+wrong is a mistake that has been made twice. Build a `Trip` and call
+`speed_limit_at()`:
+
+```sh
+uv run python - <<'PY'
+from freight_fate.data.world import get_world
+from freight_fate.sim.trip import Trip
+from freight_fate.sim.vehicle import TruckState
+from freight_fate.sim.weather import WeatherSystem
+route = get_world().route_options("Sacramento", "Reno")[0]
+trip = Trip(route, TruckState(), WeatherSystem("california", seed=1), seed=2)
+for m in (5, 20, 50, 90, 110, 125):
+    print(m, trip.speed_limit_at(m)[0], trip.truck_limit_at(m))
+PY
+```
+
+### Taking this off the US grid
+
+`STATE_TRUCK_MAX_MPH` is keyed by US state name in mph, matched against
+`Leg.state_miles`/`state_crossings`. Canada, Mexico, and Europe all need the
+same mechanic and none of them fit that shape, so expanding the map means
+generalizing it rather than adding rows:
+
+- **Key by jurisdiction, not state.** Provinces, Länder, and national defaults
+  all set truck limits; the lookup wants a jurisdiction code that a leg can
+  carry regardless of country.
+- **Store canonical units.** Most of the world posts km/h and caps heavy
+  vehicles nationally (commonly 80–90 km/h). Storing mph and converting at the
+  edges will round wrongly and speak numbers no sign shows.
+- **National default, jurisdiction override.** Outside the US the cap is
+  usually a country-level rule a region may tighten — the opposite of the flat
+  state table here.
+- **The speech must stay honest.** "California holds trucks to this" becomes
+  whatever names the real authority; do not attribute a national rule to a
+  province.
+
+Until that lands, a non-US corridor with a statutory truck limit **cannot be
+served correctly** and should be flagged rather than quietly shipped on car
+numbers.
 
 ## Capturing alternate routes during a scrub
 

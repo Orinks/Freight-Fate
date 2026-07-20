@@ -529,6 +529,12 @@ class DrivingControlsMixin:
         comparison = (
             f" You are about {self.ctx.settings.speed_text(over)} over." if over >= 1 else ""
         )
+        # Split-limit states post one number for cars and a lower one for
+        # rigs, so S saying only the truck figure reads as a wrong map to
+        # anyone who remembers the shield (player report, 2026-07-19).
+        # Name the state once and the 55 under a 65 sign explains itself.
+        is_truck_limit, cap_state = self.trip.truck_limit_at(self.trip.position_mi)
+        split = f" {cap_state} holds trucks to this." if cap_state else ""
         # A posted 55 through hairpin country is honest -- the yellow
         # diamond is advisory, not the limit -- but S saying only "55"
         # mid-canyon reads as nonsense, so name the bend's number too.
@@ -541,8 +547,10 @@ class DrivingControlsMixin:
             advisory = (
                 f" The bend here advises {self.ctx.settings.speed_text(curve.advisory_mph)}."
             )
+        lead = "Truck limit" if is_truck_limit else "Speed limit"
         self.ctx.say(
-            f"Speed limit {self.ctx.settings.speed_text(limit)}{zone}.{comparison}{advisory}"
+            f"{lead} {self.ctx.settings.speed_text(limit)}{zone}."
+            f"{split}{comparison}{advisory}"
         )
 
     def _speak_safe_speed(self) -> None:
