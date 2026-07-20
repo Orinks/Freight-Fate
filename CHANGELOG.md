@@ -525,6 +525,21 @@
   couple of seconds later, with a fresh distance -- unless you have
   already slowed for the bend, in which case it respects the silence.
 
+- **Chained bends are one call now, not a flood.** In S-bend country
+  every "then right" tail was followed seconds later by that same
+  bend's own full call, so linked curves talked over the steering they
+  were describing. A bend covered by a "then" tail no longer gets its
+  own call -- and the tail tells you what it is when it matters:
+  "Sharp left, half a mile. Advise 35. Then hairpin right, advise 25."
+  One chain, one read, like a proper co-driver.
+
+- **Driving to a local dock no longer sounds like driving to town.**
+  On the road out to a pickup or delivery in your own city, the route
+  readout said "toward Camp Verde" while you were pulling out of Camp
+  Verde -- technically true, thoroughly confusing. Local facility runs
+  now name where you are actually going: "toward dry warehouse Camp
+  Verde Dry Warehouse," with the destination line to match.
+
 - **Speed-limit calls now know which way the town is.** A limit drop
   just past a city used to say you were approaching it while it shrank
   in your mirrors. If the town is behind you, the call now says

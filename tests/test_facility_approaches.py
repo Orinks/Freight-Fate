@@ -189,3 +189,33 @@ def test_build_tool_routes_tiny_facility_fixture(tmp_path, monkeypatch):
         "Terminal Road",
         "Warehouse Drive",
     ]
+
+
+def test_facility_approach_status_names_the_dock_not_the_town():
+    # Owner playtest 2026-07-19: 14 miles of "toward Camp Verde" while
+    # pulling out of Camp Verde for its own warehouse read as a wrong turn.
+    from freight_fate.data.world import Leg
+    from freight_fate.data.world_models import Route, StateMileage
+    from freight_fate.sim import Trip, TruckState, WeatherSystem
+
+    leg = Leg(
+        "camp_verde_az_us",
+        "camp_verde_az_us",
+        14.0,
+        "South Quarterhorse Lane",
+        "flat",
+        (),
+        state_miles=(StateMileage("Arizona", 14.0),),
+    )
+    route = Route(["camp_verde_az_us", "camp_verde_az_us"], [leg])
+    trip = Trip(
+        route,
+        TruckState(),
+        WeatherSystem("desert_southwest", seed=1),
+        seed=2,
+        destination_label="dry warehouse Camp Verde Dry Warehouse",
+    )
+    status = trip.progress_summary()
+    assert "toward dry warehouse Camp Verde Dry Warehouse" in status
+    assert "toward Camp Verde," not in status
+    assert "Destination dry warehouse Camp Verde Dry Warehouse ahead." in status

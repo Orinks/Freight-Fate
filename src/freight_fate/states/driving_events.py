@@ -1132,7 +1132,10 @@ class DrivingEventMixin:
         self._ramp_bar_tick_timer += dt
         if self._ramp_bar_tick_timer >= period:
             self._ramp_bar_tick_timer = 0.0
-            self.ctx.audio.play("ui/tick", volume=0.5)
+            # Full volume: at 0.5 the owner judged it missable by someone
+            # not listening for it (2026-07-19). A dedicated short beep is
+            # on the sound-hunt list; until then the tick carries the job.
+            self.ctx.audio.play("ui/tick", volume=0.9)
 
     def _ramp_light_query_text(self) -> str | None:
         """Light phase and bar distance on demand, for the info keys.

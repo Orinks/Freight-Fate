@@ -174,11 +174,51 @@ terminal becomes the anchor of that week instead of a spawn point.
       must sit on mountain segments), and the handshake:
       docs/terrain-audit-brief.md. Oatis's next map job after the
       access sweep merges.
+- [ ] **Name the villages a leg passes through (owner-found,
+      2026-07-19).** Camp Verde-Payson drives straight through
+      Strawberry and Pine -- their 35 mph zones are baked and now end
+      honestly -- but no callout speaks their names: the landmark list
+      has the forests and the East Verde River, not the towns. Bake
+      pass-through localities (OSM place=village/town on or near the
+      corridor) as roadside callouts, and pair each with its speed
+      zone so "Entering Strawberry" and "limit 35" arrive as one
+      story. Map-wide sweep, same machinery as the landmark bake.
 - [ ] **Guard the real world source during tests.** save_world()
       defaults to the checked-in source, so a stray call from a test or
       ad-hoc script silently rewrites the map (same class as the
       FREIGHT_FATE_DATA_DIR rule for saves). Add a loud failure when
       tests write the real source without explicitly opting in.
+- [ ] **Toll sweep: every leg, real published rates, and a transponder to
+      buy (owner, 2026-07-19).** The map prices 46 toll events across 16
+      authorities -- broad coverage of the tolled interstates, since those
+      are the only toll roads the router uses (I-4, I-35, I-10, I-25 and
+      friends are free; SH-130, Florida's Turnpike and E-470 are
+      alternatives we never route onto). Two gaps, both real:
+      every amount is `estimated: true` -- plausible, never sourced to a
+      published tariff -- and some tolled legs carry nothing at all
+      (New Hampshire's I-95 Hampton plaza, and the Portsmouth->Portland leg
+      that crosses the Maine Turnpike's York barrier we toll elsewhere).
+      `tools/toll_scan.py` finds the rest by evidence: it walks each leg's
+      geometry and asks OpenStreetMap what carries `toll=yes`, classifying
+      a sighting as ON-ROUTE only when the tolled way's own `ref` names the
+      leg's highway. Proximity is not use -- I-30 runs within two miles of
+      the George Bush Turnpike and a truck on I-30 pays neither, so a
+      parallel tollway is reported for review and never billed.
+      Then price the confirmed set against each authority's published
+      5-axle commercial tariff, storing BOTH the transponder and the
+      pay-by-plate amount per event.
+      **The transponder mechanic that pays for:** company drivers get one
+      from the carrier (the toll model already assumes settlement
+      accounting, so nothing changes for them); an owner-operator buys a
+      generic "toll transponder" ONCE, or pays plate rates at every gantry
+      until they do. A single device rather than E-ZPass plus K-TAG plus
+      PikePass plus SunPass: real national drivers carry several, but
+      modelling five networks is buying the same decision five times --
+      tedium, not depth. The trade-off survives the compression, since
+      skipping it still costs real money every mile of turnpike.
+      Note for the pricing pass: `$0.00` events are NOT bugs. They are the
+      documented ticket-system entry markers (see `docs/route-stop-data.md`)
+      that settle at the exit gantry.
 - [ ] **More first-party truck-stop locators, and public parking feeds
       (owner approved, 2026-07-19).** `curate_route_pois.py` queries only
       Love's and Pilot/Flying J today (730 + 877 locations). Pointed at the

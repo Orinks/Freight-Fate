@@ -42,6 +42,12 @@ PACENOTE_MAX_LEAD_MI = 1.5
 # travel at the current speed. A fixed minimum distance shrinks, in time,
 # exactly when speed makes the warning matter most.
 PACENOTE_LEAD_FLOOR_S = 30.0
+# A follower starting within this gap after a called curve rides that
+# call's "then left/right" tail INSTEAD of getting its own call -- one
+# read per S-chain, like a rally co-driver. Without the suppression every
+# link also fired alone and chained bends flooded the driver with full
+# calls seconds apart (owner's Payson run, 2026-07-19).
+PACENOTE_LINK_GAP_MI = 0.3
 
 # Speed-limit lookahead (the co-driver warns before a big posted drop, the
 # same way she calls a curve): only drops of at least this size get a
@@ -118,6 +124,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         traffic_provider=None,
         parking_provider=None,
         bobtail: bool = False,
+        destination_label: str = "",
     ) -> None:
         self.route = route
         self.truck = truck
@@ -137,6 +144,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         # Defaults to False, the cautious read -- an unclassified caller never
         # gets promised a stop it might not fit into.
         self.bobtail = bobtail
+        # On a facility-approach route the destination is a dock, not a town:
+        # "toward Camp Verde" while pulling out of Camp Verde for its own
+        # warehouse read as a wrong turn (owner playtest, 2026-07-19). The
+        # spoken facility name replaces the city in the status line there.
+        self.destination_label = destination_label
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
@@ -724,6 +736,21 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         if key in self._announced_curves:
             return
         self._announced_curves.add(key)
+        # The immediate follower rides this call's "then ..." tail; marking
+        # it announced here is what makes the tail a replacement instead of
+        # a preview of a second full call three seconds later.
+        linked = next(
+            (
+                c
+                for c in self.curves
+                if not c.connector
+                and c.start_mi > cr.end_mi
+                and c.start_mi <= cr.end_mi + PACENOTE_LINK_GAP_MI
+            ),
+            None,
+        )
+        if linked is not None:
+            self._announced_curves.add(f"curve:{linked.start_mi:.3f}:{linked.direction}")
         # Build pacenote: "sharp curve left, half mile, advisory 35"
         direction = "left" if cr.direction == "L" else "right"
         prefix = "sharp " if cr.severity in ("hairpin", "sharp") else ""
@@ -1284,16 +1311,16 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 f"remaining of {self.total_miles * 1.609:.0f}"
             )
         leg = self.route.legs[self.current_leg_index]
-        toward = self.route.cities[self.current_leg_index + 1]
-        world = get_world()
-        toward_name = world.spoken_city(toward, qualified=False)
-        state = world.cities[toward].state
         next_context = self.next_navigation_context(imperial)
         terrain_text = self._current_grade_text()
-        return (
-            f"{dist}. On {leg.highway} toward {toward_name}, {state}. "
-            f"{terrain_text}. {next_context}"
-        )
+        if self._is_facility_approach_route() and self.destination_label:
+            toward_text = self.destination_label
+        else:
+            toward = self.route.cities[self.current_leg_index + 1]
+            world = get_world()
+            toward_name = world.spoken_city(toward, qualified=False)
+            toward_text = f"{toward_name}, {world.cities[toward].state}"
+        return f"{dist}. On {leg.highway} toward {toward_text}. {terrain_text}. {next_context}"
 
     def _current_grade_text(self) -> str:
         grade_pct = self.grade_at(self.position_mi) * 100.0
@@ -1307,6 +1334,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
     def next_navigation_context(self, imperial: bool = True) -> str:
         cue = self.next_navigation_cue()
         if cue is None:
+            if self._is_facility_approach_route() and self.destination_label:
+                return f"Destination {self.destination_label} ahead."
             return f"Destination {get_world().spoken_city(self.route.cities[-1])} ahead."
         ahead = max(0.0, cue.at_mi - self.position_mi)
         ahead_text = (

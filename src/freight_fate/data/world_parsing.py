@@ -649,6 +649,35 @@ def _parse_toll_event(
     amount = float(raw["amount"])
     if amount < 0.0 or amount > 500.0:
         raise ValueError(f"{from_city} to {to_city} toll event {name!r} has invalid amount")
+    amount_plate = float(raw.get("amount_plate", 0.0))
+    if amount_plate < 0.0 or amount_plate > 500.0:
+        raise ValueError(f"{from_city} to {to_city} toll event {name!r} has invalid amount_plate")
+    # Paying by plate is never MEANINGFULLY cheaper than running a transponder,
+    # so a real gap the wrong way is a transcription error. A few cents is not:
+    # the Indiana Toll Road's published table rounds cash a hair under E-ZPass
+    # (91.30 against 91.37 full length), which is genuine and must parse.
+    if 0.0 < amount_plate < amount - 0.25:
+        raise ValueError(
+            f"{from_city} to {to_city} toll event {name!r} has a plate rate "
+            f"({amount_plate}) well below its transponder rate ({amount})"
+        )
+    directions = tuple(
+        str(direction).strip()
+        for direction in raw.get("directions", ("both",))
+        if str(direction).strip()
+    )
+    if not directions:
+        raise ValueError(f"{from_city} to {to_city} toll event {name!r} has no directions")
+    unknown = sorted(set(directions) - STOP_DIRECTIONS)
+    if unknown:
+        raise ValueError(
+            f"{from_city} to {to_city} toll event {name!r} has unknown directions {unknown}"
+        )
+    if "both" in directions and len(directions) > 1:
+        raise ValueError(
+            f"{from_city} to {to_city} toll event {name!r} mixes 'both' with "
+            "direction-specific applicability"
+        )
     if not source:
         raise ValueError(f"{from_city} to {to_city} toll event {name!r} has no source")
     return TollEvent(
@@ -660,6 +689,8 @@ def _parse_toll_event(
         amount=amount,
         estimated=bool(raw.get("estimated", True)),
         source=source,
+        amount_plate=amount_plate,
+        directions=directions,
     )
 
 
