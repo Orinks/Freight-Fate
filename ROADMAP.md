@@ -933,6 +933,54 @@ section below and the Unreleased changelog; the release-line view:
       when anything needs attention, so a scheduled run can alert.
       Curation stays with the recipes. Future: fold in landmark and
       interchange drift.
+- [ ] **Personal playlist stations from M3U files (owner idea
+      2026-07-20).** Drop `.m3u`/`.m3u8` files into a Playlists folder in
+      the game's data directory and each becomes a station on the dial,
+      named from the playlist tag or filename. Entries may point anywhere
+      the OS can read, including NAS paths; playback runs through the
+      game's own BASS mixer so speech ducking, radio volume, and the
+      pause-menu music rules all apply. The bundled BASS stack already
+      decodes mp3, ogg, opus, flac, aac, alac, and wma, so no new codec
+      work. A drop-in folder, not a file picker: screen-reader users
+      manage folders in Explorer far more comfortably than in an in-game
+      browse dialog. Personal files default to streamer-unsafe since the
+      game cannot know their licensing.
+- [ ] **Radio dial categories with a jump key (owner ask 2026-07-20).**
+      The catalog already carries the data (`source_type`:
+      local/afn/regional/built_in/satellite, plus `always_available` and
+      `safe_for_streaming`); the dial just scans linearly, and 25 AFN
+      entries in a row buried the terrestrial section (owner got stuck
+      scanning AFN wanting local). Ctrl+Left/Right jumps to the first
+      station of the previous/next category and speaks the category name,
+      with Playlists joining as its own category when M3U stations land.
+- [ ] **Fictional call signs must not squat real stations (owner catch
+      2026-07-20).** Our fictional Phoenix classic-rock station is
+      "KDRT Desert Rock 101.5" -- but KDRT-LP is a real community station
+      in Davis, California. Rename it, and audit all 15 fictional call
+      signs against the FCC database (WDLT and WSOL look suspect too);
+      fictional stations should hold call signs no real broadcaster owns.
+- [ ] **Community and college radio sweep, and an NPR coverage audit
+      (owner ask 2026-07-20).** There is no policy against real
+      terrestrial stations -- 63 already stream in-game; the limits were
+      streamer-safety flags and URL rot. Add the freeform and community
+      institutions (WFMU Jersey City, KABF Little Rock, college stations
+      with reliable streams), and audit NPR-member coverage per market so
+      the dial finds local news most places a route goes. Direct station
+      stream URLs with source notes, as the desert-Southwest sweep did;
+      Radio Browser as the finding aid, never a runtime dependency.
+      TuneIn is partner-gated API-wise and stays out.
+- [ ] **Spotify and Apple Music: research only, parked (owner idea
+      2026-07-20).** In-game playback of either is off the table --
+      both wrap streams in DRM their licenses forbid unwrapping, official
+      playback SDKs are browser or Apple-framework only, and storing a
+      login to fetch audio directly would break their terms and put the
+      project at legal risk. The honest middle path if ever wanted:
+      Spotify Connect remote control (game OAuths, starts the player's
+      chosen playlist on their own Premium client, mutes in-game radio) --
+      audio would bypass the game mixer, so speech ducking degrades to
+      crude API volume nudges. The M3U playlist feature above covers the
+      underlying need -- your own library on the dial -- without any of
+      this. Rides the online-enhancement determinism boundary if built.
 - [ ] **Stream URLs rot fast -- fold a dial health check into the
       map-refresh tool.** One day after the 57-station sweep, seven
       streams were already dead (KJZZ, KCRW, KUNM, KUTX, KERA, KCUR,
