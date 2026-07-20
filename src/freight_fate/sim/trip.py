@@ -72,6 +72,17 @@ class Trip:
         self.patrols = self._place_patrols()
         self._announced_stops: set[str] = set()
         self.planned_stop_name: str | None = None
+        # Name of the stop whose exit is currently signaled or being descended,
+        # published each tick by the driving state. Lets _check_stops tell a
+        # driver who is taking the exit from one who blew past it. Recomputed
+        # every frame, so it is never persisted.
+        self._exit_in_progress: str | None = None
+        # While on an exit ramp the truck is off the highway: the ramp consumes
+        # its movement instead of the highway odometer, so the mile marker holds
+        # and highway events pause. Both are republished every frame by the
+        # driving state (on_ramp) or recomputed here (last_moved_mi), never saved.
+        self.on_ramp: bool = False
+        self.last_moved_mi: float = 0.0
         self._announced_cities: set[int] = set()
         self._announced_navigation: set[str] = set()
         self._charged_tolls: set[str] = set()
@@ -846,6 +857,13 @@ class Trip:
         self.truck.fuel_burn_mult = scale
 
         moved_mi = self.truck.velocity_mps * dt * scale / 1609.344
+        self.last_moved_mi = moved_mi
+        if self.on_ramp:
+            # Off the highway on the exit ramp: hand this movement to the ramp
+            # (DrivingState._update_exit) rather than the highway odometer, and
+            # pause highway events until the truck rejoins the road. Weather and
+            # the game clock above still advance while the driver brakes to a stop.
+            return self._events
         self.position_mi += moved_mi
         if self.position_mi < 0.0:
             self.position_mi = 0.0
@@ -964,7 +982,14 @@ class Trip:
             planned = next(
                 (stop for stop in self.stops if stop.name == self.planned_stop_name), None
             )
-            if planned is None or planned.at_mi < self.position_mi - 0.25:
+            if self._exit_in_progress == self.planned_stop_name:
+                # Signaled and taking the exit (armed or on the ramp): the plan
+                # is fulfilled quietly when the stop opens, or the too-fast miss
+                # cancels it with its own line. Either way, don't warn here.
+                pass
+            elif planned is None or planned.at_mi < self.position_mi:
+                # Past the exit marker with no exit in progress: the ramp is no
+                # longer takeable, so the planned stop is genuinely missed.
                 name = self.planned_stop_name
                 self.planned_stop_name = None
                 self._emit(

@@ -86,6 +86,22 @@
 
 ### Fixed
 
+- **Taking your planned stop's exit no longer warns that you drove past it.**
+  When you signal a planned stop and brake down the exit ramp, the game used to
+  announce that you had driven past it and cancelled the plan, even though you
+  were stopping there. Now the warning only speaks when the stop is truly out of
+  reach: if you drive past the exit without signaling, if you signal but are
+  going too fast to make the ramp, or if you take the exit but never stop and
+  roll on past the end of the ramp.
+- **Taking an exit and never stopping no longer strands you on the ramp.**
+  If you took an exit but kept driving without ever coming to a stop, the game
+  would quietly wait forever -- speed enforcement stayed off and, miles later,
+  stopping would still open that stop's menu. Now, once you roll well past the
+  end of the ramp without stopping, the game tells you that you never stopped
+  and hands the highway back.
+- **The trip mile marker holds while you are on an exit ramp.** The ramp is off
+  the highway, so your progress along the route no longer ticks up while you
+  brake down it; the highway picks back up where you left it once you rejoin.
 - **Cloud Backup works again on test builds.** Careers from a recent test
   build were being turned away with a message about the backup being
   unreadable. Nothing was wrong with those careers: the game had changed what

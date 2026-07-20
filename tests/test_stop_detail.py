@@ -304,3 +304,142 @@ def test_plan_clears_when_passed_or_taken_and_survives_saves():
         assert d.trip.planned_stop_name is None
     finally:
         app.shutdown()
+
+
+def test_plan_survives_while_descending_ramp():
+    """Signaling and braking down the ramp past the marker must not fire the
+    'you drove past your planned stop' warning."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEventKind
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.stops = _stops(d.trip.position_mi)
+        stop = d.trip.stops[0]
+        d.trip.planned_stop_name = stop.name
+
+        # On the ramp: the driving loop publishes the in-progress exit to the
+        # trip before _check_stops runs, and the truck has rolled past the marker.
+        d._exit_stop = stop
+        d.trip._exit_in_progress = stop.name
+        d.trip.position_mi = stop.at_mi + 0.4
+        d.trip._events.clear()
+        d.trip._check_stops()
+
+        assert d.trip.planned_stop_name == stop.name
+        cues = [e for e in d.trip._events if e.kind == TripEventKind.GPS_CUE]
+        assert not any("drove past your planned stop" in e.message for e in cues)
+
+        # The plan clears quietly when the stop finally opens.
+        d._open_poi_stop(stop)
+        assert d.trip.planned_stop_name is None
+    finally:
+        app.shutdown()
+
+
+def test_too_fast_miss_cancels_plan_once(monkeypatch):
+    """A signaled exit missed for being too fast cancels the plan in a single
+    spoken line -- no separate 'drove past' cue the following tick."""
+    from freight_fate.app import App
+
+    app = App()
+    said = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    try:
+        d = _driving(app)
+        d.trip.stops = _stops(d.trip.position_mi)
+        stop = d.trip.stops[0]
+        d.trip.planned_stop_name = stop.name
+
+        # Signaled, but blowing past the marker too fast to make the ramp.
+        d._exit_stop = stop
+        d.trip.position_mi = stop.at_mi
+        d.truck.velocity_mps = 29.0
+        d._update_exit(0.0)
+
+        assert "missed" in said[-1]
+        assert "Plan cancelled." in said[-1]
+        assert d.trip.planned_stop_name is None
+
+        # The exit is cleared, so a follow-up check emits no second cue.
+        d.trip._exit_in_progress = None
+        d.trip.position_mi = stop.at_mi + 0.1
+        d.trip._events.clear()
+        d.trip._check_stops()
+        assert not any("drove past your planned stop" in e.message for e in d.trip._events)
+    finally:
+        app.shutdown()
+
+
+def test_taken_exit_blown_when_never_stopping(monkeypatch):
+    """Taking the ramp but never stopping cancels the plan and gives the highway
+    back once past the ramp end, instead of waiting stuck for miles."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import RAMP_LENGTH_MI, RAMP_OVERSHOOT_MI
+
+    app = App()
+    said = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    try:
+        d = _driving(app)
+        d.trip.stops = _stops(d.trip.position_mi)
+        stop = d.trip.stops[0]
+        d.trip.planned_stop_name = stop.name
+
+        # Signal and make the ramp: slow enough at the marker, but never stop.
+        d._exit_stop = stop
+        d.trip.position_mi = stop.at_mi
+        d.truck.velocity_mps = 18.0  # ~40 mph, under RAMP_MAX but well over docking
+        d._update_exit(0.0)
+        assert d._ramp_mi == RAMP_LENGTH_MI
+        assert d._ramp_stop is stop
+
+        # Roll to the ramp end (nudge) then past it without ever slowing.
+        d._update_exit(RAMP_LENGTH_MI)
+        assert d.trip.planned_stop_name == stop.name  # still nudging, not blown
+        d._update_exit(RAMP_OVERSHOOT_MI)
+
+        assert d._ramp_mi is None
+        assert d._ramp_stop is None
+        assert d.trip.planned_stop_name is None
+        assert "never stopped" in said[-1]
+        assert "Plan cancelled." in said[-1]
+    finally:
+        app.shutdown()
+
+
+def test_highway_odometer_holds_on_the_ramp():
+    """While on the exit ramp the truck is off the highway: the mile marker holds
+    and the ramp consumes the movement instead of the highway odometer."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.stops = _stops(d.trip.position_mi)
+        stop = d.trip.stops[0]
+
+        # On the ramp, moving at speed.
+        d._exit_stop = stop
+        d.trip.position_mi = stop.at_mi
+        d.truck.velocity_mps = 18.0
+        d._update_exit(0.0)
+        assert d._ramp_mi is not None
+
+        marker = d.trip.position_mi
+        ramp_before = d._ramp_mi
+        rolled = False
+        for _ in range(20):
+            if d._ramp_mi is None:  # docked or blown -- back on the highway
+                break
+            d.update(1 / 60)
+            # The highway marker holds for every tick the ramp is active...
+            assert d.trip.position_mi == marker
+            rolled = rolled or d.trip.last_moved_mi > 0.0
+
+        # ...while the truck's movement fed the ramp instead.
+        assert rolled
+        assert d._ramp_mi is None or d._ramp_mi < ramp_before
+    finally:
+        app.shutdown()
