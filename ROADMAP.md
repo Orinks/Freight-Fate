@@ -174,8 +174,11 @@ terminal becomes the anchor of that week instead of a spawn point.
       must sit on mountain segments), and the handshake:
       docs/terrain-audit-brief.md. Oatis's next map job after the
       access sweep merges.
-- [ ] **Name the villages a leg passes through (owner-found,
-      2026-07-19).** Camp Verde-Payson drives straight through
+- [ ] **Name the villages a leg passes through (owner-approved sweep,
+      2026-07-20).** Ship as a Settings toggle, OFF by default:
+      "Village callouts" speaks "Entering Strawberry" style lines so a
+      town's 35 zone arrives with its reason attached. Sweep planned
+      for 2026-07-20. Camp Verde-Payson drives straight through
       Strawberry and Pine -- their 35 mph zones are baked and now end
       honestly -- but no callout speaks their names: the landmark list
       has the forests and the East Verde River, not the towns. Bake
