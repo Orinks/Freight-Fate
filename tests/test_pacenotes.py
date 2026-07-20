@@ -299,3 +299,29 @@ def test_silenced_curve_call_respeaks_once_refreshed(monkeypatch):
         assert len(spoken2) == 1
     finally:
         app.shutdown()
+
+
+def test_linked_follower_rides_the_tail_not_its_own_call(monkeypatch):
+    # Owner's Payson run (2026-07-19): "Then right" was a preview, not a
+    # replacement -- every linked bend also fired its own full call and
+    # chained S-bends flooded the driver. One chain, one call.
+    app_module = pytest.importorskip("freight_fate.app")
+    app = app_module.App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        pos = driving.trip.position_mi
+        first = _curve(pos + 0.3, "L", advisory=35)
+        follower = _curve(pos + 0.45, "R", advisory=25, deflection=170.0)
+        spoken = _spoken_pacenotes(app, driving, monkeypatch, [first, follower], 60.0)
+        assert len(spoken) == 1
+        # The tail carries the follower's severity and tighter advisory.
+        assert "Then hairpin right, advise 25 miles per hour." in spoken[0]
+
+        # The follower stays suppressed on later frames too.
+        for event in driving.trip.update(0):
+            if event.kind == TripEventKind.CURVE:
+                driving._handle_trip_event(event)
+        assert len(spoken) == 1
+    finally:
+        app.shutdown()

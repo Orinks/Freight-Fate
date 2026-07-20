@@ -314,6 +314,31 @@ class TollEvent:
     amount: float
     estimated: bool = True
     source: str = ""
+    # What the same crossing costs without a transponder. Authorities charge a
+    # pay-by-plate rate that runs from identical (Delaware's I-95 plaza, the
+    # Chesapeake Bay Bridge-Tunnel) to double (Pennsylvania, Kansas, Oklahoma),
+    # so the gap is a real decision rather than a flat surcharge. Defaults to
+    # ``amount`` -- no penalty -- because "we have not researched the plate
+    # rate" must not silently invent one.
+    amount_plate: float = 0.0
+    # Which way you have to be going to be charged. Many crossings collect in
+    # one direction only and let the other side through free -- the Carquinez
+    # and Benicia-Martinez bridges, the Chesapeake Bay Bridge, the Delaware
+    # Memorial Bridge, Maryland's JFK Highway. A leg is driven both ways, so
+    # billing a one-way bridge in both directions doubles what the road really
+    # costs. Defaults to both, which is right for turnpikes and mainline
+    # barriers.
+    directions: tuple[str, ...] = ("both",)
+
+    @property
+    def plate_amount(self) -> float:
+        """The pay-by-plate charge, falling back to the transponder rate."""
+        return self.amount_plate if self.amount_plate > 0.0 else self.amount
+
+    def applies_to_direction(self, forward: bool) -> bool:
+        if "both" in self.directions:
+            return True
+        return ("forward" if forward else "reverse") in self.directions
 
     @property
     def method_label(self) -> str:

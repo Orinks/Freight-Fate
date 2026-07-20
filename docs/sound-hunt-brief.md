@@ -41,7 +41,10 @@ browse the tree.
    curve-entry and back-to-center tones (owner's discrete tone ladder,
    docs/steering-sound-rfc.md section 1b). Grep seeds: `blip, chime,
    ping, sonar, indicator, marimba, woodblock, xylophone, bell.?tree,
-   click.?tone, beep`.
+   click.?tone, beep`. Same family, new customer (2026-07-19): the
+   stop-bar proximity tick (parking-sensor rate ramp, shipped on
+   ui/tick at full volume) wants a VERY short, bright beep that stays
+   audible to someone not listening for it -- owner's spec.
 2. **Rumble strip + gravel shoulder (edge textures).** Loopable or
    loop-cuttable road textures: `rumble, gravel, shoulder, washboard,
    corrugat, dirt.?road, cattle.?guard`.

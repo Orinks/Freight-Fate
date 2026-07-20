@@ -51,7 +51,15 @@ class DrivingPacenoteMixin:
             call += f" Advise {s.speed_text(curve.advisory_mph)}."
         linked = self._pacenote_linked(curve)
         if linked is not None:
-            call += f" Then {_DIRECTION_WORD[linked.direction]}."
+            # The tail is the follower's ONLY call (the trip suppresses its
+            # own), so a sharper follower must say so: "then right" hiding a
+            # hairpin undersells the road, and a tighter advisory rides along.
+            tail = _DIRECTION_WORD[linked.direction]
+            if linked.severity in ("hairpin", "sharp"):
+                tail = f"{linked.severity} {tail}"
+            if linked.advisory_mph < curve.advisory_mph:
+                tail += f", advise {s.speed_text(linked.advisory_mph)}"
+            call += f" Then {tail}."
         return call
 
     def _pacenote_linked(self, curve):

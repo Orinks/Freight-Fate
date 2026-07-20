@@ -89,6 +89,11 @@ class DrivingState(
             traffic_provider=ctx.real_traffic_provider(),
             parking_provider=ctx.truck_parking_provider(),
             bobtail=job.bobtail,
+            destination_label=(
+                job.origin_facility_text()
+                if phase == DRIVE_PHASE_PICKUP
+                else job.destination_facility_text()
+            ),
         )
         if phase == DRIVE_PHASE_DELIVERY:
             # The destination exit, ramp terminal, and street chain own the
