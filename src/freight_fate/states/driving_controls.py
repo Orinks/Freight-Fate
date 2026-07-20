@@ -706,8 +706,15 @@ class DrivingControlsMixin:
         return "No route stop is nearby. You can pull over and rest on the shoulder."
 
     def _speak_weather(self) -> None:
-        source = "Live conditions" if self.weather.live else "Currently"
         safe_speed = self.ctx.settings.speed_text(self.weather.effects.safe_speed_mph)
+        if self.weather.live_weather_loading:
+            self.ctx.say(
+                f"It is {time_of_day(self.trip.local_hour)}. "
+                "Live weather is still loading. "
+                f"Safe speed about {safe_speed}."
+            )
+            return
+        source = "Live conditions" if self.weather.live else "Currently"
         parts = [
             f"It is {time_of_day(self.trip.local_hour)}.",
             f"{source} {self.weather.describe(self.ctx.settings.imperial_units)}.",

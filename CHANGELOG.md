@@ -86,6 +86,13 @@
 
 ### Fixed
 
+- **Live weather no longer announces a simulated forecast while loading.**
+  Pressing V before the first live observation arrives now says that live
+  weather is still loading instead of describing an invented forecast. This
+  also works when Live weather controls calendar is turned off. Route weather
+  now names cities whose observations are loading or unavailable instead of
+  silently skipping them, and weather-change announcements identify live
+  observations and simulated fallback conditions.
 - **Cloud Backup works again on test builds.** Careers from a recent test
   build were being turned away with a message about the backup being
   unreadable. Nothing was wrong with those careers: the game had changed what
