@@ -75,6 +75,12 @@
 
 ### Fixed
 
+- **Finishing a delivery no longer risks losing what it reported online.**
+  A settlement can report the delivery, a level up, and several badges at
+  once, and the game was sending them all at the same moment. They could
+  crowd each other out, be sent twice, or in one case be dropped entirely.
+  They now go out one after another, so your road journal records everything
+  the run earned.
 - **Taking a pay advance no longer makes your cloud backup look edited.** A
   pay advance is money from your next load paid early, but your career was
   only crediting the part of the settlement left after the advance came back
