@@ -23,6 +23,9 @@ htmlcov/
 .idea/
 *.swp
 
+# Claude Code local overrides (per-machine, not for commit)
+.claude/settings.local.json
+
 # OS
 .DS_Store
 Thumbs.db
