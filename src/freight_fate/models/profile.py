@@ -465,6 +465,7 @@ def _fresh_condition(fuel_gal: float = DEFAULT_FUEL_GAL) -> dict:
         "brake_wear_pct": 0.0,
         "engine_wear_pct": 0.0,
         "damage_pct": 0.0,
+        "grime_pct": 0.0,
         "fuel_gal": fuel_gal,
         "tire_type": "all_season",
         "chains_owned": False,
@@ -521,6 +522,8 @@ def _migrate_flat_conditions(data: dict) -> dict:
     active_tank = _truck_tank_gal(active, upgrades)
     fuel = max(0.0, min(active_tank, float(data.get("truck_fuel_gal", DEFAULT_FUEL_GAL))))
 
+    grime = _pct("road_grime_pct")
+
     conditions: dict[str, dict] = {}
     for key in keys:
         conditions[key] = {
@@ -528,9 +531,40 @@ def _migrate_flat_conditions(data: dict) -> dict:
             "brake_wear_pct": brake,
             "engine_wear_pct": engine,
             "damage_pct": damage,
+            "grime_pct": grime,
             "fuel_gal": fuel if key == active else _truck_tank_gal(key, upgrades),
         }
     return conditions
+
+
+def _migrate_profile_wide_grime(data: dict) -> bool:
+    """Move a profile-wide ``road_grime_pct`` into each truck's record.
+
+    Grime followed the driver on this line while every other kind of wear had
+    already moved onto the truck -- an alpha-only gap left when the mainline's
+    per-truck accessors were dropped as duplicates during a merge. A save
+    written before this fix carries the flat field and condition records with
+    no ``grime_pct``, so match on that shape rather than on a save version:
+    the records were already fanned out, so there is no version to key off.
+
+    Every truck inherits the one saved figure, the same rule the original
+    fan-out uses -- a parked truck was as dirty as the career said it was, and
+    handing out clean spares would wash a fleet for free.
+    """
+    flat = data.pop("road_grime_pct", None)
+    conditions = data.get("truck_conditions")
+    if not isinstance(conditions, dict):
+        return flat is not None
+    try:
+        grime = max(0.0, min(100.0, float(flat if flat is not None else 0.0)))
+    except (TypeError, ValueError):
+        grime = 0.0
+    moved = False
+    for record in conditions.values():
+        if isinstance(record, dict) and "grime_pct" not in record:
+            record["grime_pct"] = grime
+            moved = True
+    return moved or flat is not None
 
 
 @dataclass
@@ -538,9 +572,9 @@ class Profile:
     name: str = "Driver"
     money: float = STARTING_MONEY
     current_city: str = DEFAULT_CITY
-    # Road grime stays profile-wide on this line; the per-truck record carries
-    # tire, brake and engine wear, which the physics earns per tractor.
-    road_grime_pct: float = 0.0
+    # road_grime_pct is a property over the active truck's record (below), not
+    # a field: grime belongs to the tractor that got dirty, same as every other
+    # kind of wear.
     # truck_conditions is declared above -- this line's records are plain dicts
     # holding traction gear as well as wear, so the mainline's typed record is
     # not repeated here.
@@ -621,6 +655,12 @@ class Profile:
         # each owned tractor keeps its own wear, damage, and fuel from here on.
         if not isinstance(d.get("truck_conditions"), dict):
             d["truck_conditions"] = _migrate_flat_conditions(d)
+        # Grime moved onto the truck after those records already existed, so an
+        # alpha save can be fanned out yet still carry the flat field. Matched
+        # on shape rather than save version for exactly that reason, and run
+        # after the fan-out so both paths land on the same records.
+        if _migrate_profile_wide_grime(d):
+            migrated = True
         career = Career(**_known_fields(Career, d.pop("career", {})))
         market = Market(**_known_fields(Market, d.pop("market", {})))
         hos = HosClock.from_dict(d.pop("hos", None))  # absent in v2 saves: fresh clock
@@ -761,6 +801,14 @@ class Profile:
     @truck_fuel_gal.setter
     def truck_fuel_gal(self, value: float) -> None:
         self._condition()["fuel_gal"] = float(value)
+
+    @property
+    def road_grime_pct(self) -> float:
+        return float(self._condition().get("grime_pct", 0.0))
+
+    @road_grime_pct.setter
+    def road_grime_pct(self, value: float) -> None:
+        self._condition()["grime_pct"] = float(value)
 
     @property
     def tire_type(self) -> str:

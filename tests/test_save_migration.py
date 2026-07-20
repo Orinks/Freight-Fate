@@ -115,11 +115,11 @@ def test_v4_save_is_rewritten_to_disk_on_load():
     on_disk = _decode_save_bytes(path.read_bytes())[0]
     assert on_disk["version"] == SAVE_VERSION
     assert "truck_conditions" in on_disk
-    for legacy in ("truck_fuel_gal", "truck_damage_pct", "tire_wear_pct"):
+    for legacy in ("truck_fuel_gal", "truck_damage_pct", "tire_wear_pct", "road_grime_pct"):
         assert legacy not in on_disk
-    # road_grime_pct is not a legacy leftover on this line: grime stays a
-    # profile-wide field, so it is written out with its migrated value.
-    assert on_disk["road_grime_pct"] == 60.0
+    # Grime rides on the truck that got dirty, like every other kind of wear,
+    # so the migrated figure lands in the records rather than on the profile.
+    assert on_disk["truck_conditions"]["heavy_hauler"]["grime_pct"] == 60.0
     # The rewritten save loads cleanly, is validly signed, and migrates no more.
     again = Profile.load(path)
     assert again.needs_migration_resave is False
@@ -290,9 +290,9 @@ def test_bought_truck_starts_fresh_and_each_keeps_its_own_condition(monkeypatch)
         assert p.truck_fuel_gal == TRUCK_CATALOG["heavy_hauler"].specs.fuel_tank_gal
         assert p.truck_damage_pct == 0.0
         assert p.tire_wear_pct == 0.0
-        # Road grime is profile-wide here, not part of a truck's record, so a
-        # purchase does not wash it off the driver's career.
-        assert p.road_grime_pct == 55.0
+        # Grime belongs to the truck that earned it, so a tractor off the lot
+        # is clean no matter how filthy the one it replaces was.
+        assert p.road_grime_pct == 0.0
 
         # The rig kept its own condition and gets it back on switch.
         select_shop_item(shop, "Standard rig")
@@ -301,10 +301,14 @@ def test_bought_truck_starts_fresh_and_each_keeps_its_own_condition(monkeypatch)
         assert p.truck_fuel_gal == 40.0
         assert p.truck_damage_pct == 30.0
         assert p.tire_wear_pct == 12.0
+        # ...including the grime it was parked with.
+        assert p.road_grime_pct == 55.0
 
         loaded = Profile.load(p.path)
         assert loaded.truck_conditions["rig"]["fuel_gal"] == 40.0
+        assert loaded.truck_conditions["rig"]["grime_pct"] == 55.0
         assert loaded.truck_conditions["heavy_hauler"]["damage_pct"] == 0.0
+        assert loaded.truck_conditions["heavy_hauler"]["grime_pct"] == 0.0
     finally:
         app.shutdown()
 

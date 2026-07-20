@@ -49,3 +49,20 @@ def test_exported_xp_ceiling_bounds_every_honest_career():
 def test_exported_starting_money_matches_a_fresh_career():
     """The money rule's floor is this figure; a new profile must equal it."""
     assert invariant_data()["startingMoney"] == Profile().money
+
+
+def test_exported_condition_fields_match_a_real_record():
+    """The export must describe the record the game actually writes.
+
+    The server checks every truck_conditions record against this list and
+    rejects a save carrying a key it does not know. The list used to come off
+    the TruckCondition dataclass, which this line stopped using -- records are
+    plain dicts, and they grew brake wear, engine wear and traction gear while
+    the dataclass kept four fields. That gap would have failed every 1.9 save
+    on the exact-field check the first time a 1.9 build reached the server.
+    """
+    profile = Profile()
+    profile.provision_truck_condition("rig")
+    written = sorted(profile.truck_conditions["rig"])
+
+    assert invariant_data()["truckConditionFields"] == written

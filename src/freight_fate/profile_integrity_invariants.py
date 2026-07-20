@@ -17,8 +17,8 @@ from .models.career import (
 )
 from .models.economy import PAY_ADVANCE_LIMIT
 from .models.market import MARKET_CARGO_KEYS
-from .models.profile import SAVE_VERSION, STARTING_MONEY, Profile
-from .models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckCondition
+from .models.profile import SAVE_VERSION, STARTING_MONEY, Profile, _fresh_condition
+from .models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG
 
 # Signature keys ride inside the saved file but never inside a cloud upload --
 # the upload strips them and the server signs its own revision instead.
@@ -74,8 +74,16 @@ def _truck_condition_fields() -> list[str]:
     record against an exact list, and this record is where new per-truck state
     lands (brake and engine wear, traction gear). A hand-kept copy on the
     server would reject the next build's saves the moment one is added.
+
+    Read from the record the game actually writes, not from the TruckCondition
+    dataclass. On this line the records are plain dicts built by
+    ``_fresh_condition``, and they outgrew that dataclass when the physics arc
+    added brake wear, engine wear, and traction gear -- it kept four fields
+    while a real record carries nine. Exporting the dataclass therefore told
+    the server that five legitimate keys were unknown, which would have failed
+    every 1.9 save on the exact-field check the moment the two sides met.
     """
-    return sorted(TruckCondition.__dataclass_fields__)
+    return sorted(_fresh_condition())
 
 
 def invariant_data() -> dict:
