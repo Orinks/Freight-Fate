@@ -134,6 +134,41 @@ So:
 
 Advisory guidance may run on partial data. Punitive guidance may not.
 
+### The owner's closed loop resolves this (2026-07-20)
+
+Owner pushed back: a sighted driver who misses an exit also has to get
+back on, so why is a consequence unfair? He is right, and the objection
+above was aimed slightly wrong. The issue is not that a penalty exists —
+it is **information parity**. A sighted driver had signs, lane arrows,
+and the traffic around them; they were told and did not act. Our player
+has only what we speak. A penalty is fair exactly when we told them.
+
+His design supplies the telling, and it is better than what ships today.
+Current exits announce the required lane once, several miles out, and
+never say whether the driver is actually **in** it — the one fact a
+blind driver cannot check. Modern lane-level GPS closes that loop, and
+so should we:
+
+- Announce the exit and required lane once, at distance.
+- Then compare **required lane against the lane the truck is actually
+  in** — the sim already models this, so it needs no harvested data.
+- Speak again only when the driver is **wrong**, escalating as the exit
+  closes ("still need the right lane" → "right lane now").
+- Confirm once at the commit point when they are right, then go quiet.
+
+Establish the contract explicitly in the manual: **the game will tell you
+if you are in the wrong lane, so silence means you are fine.** Silence is
+only usable as information when the player knows it would have been
+broken. That is the same contract the rest of the warning layer already
+keeps, and it is what a real co-driver does — nothing when you are set,
+insistent when you are not ([[feedback-amplify-real-cues-never-invent]]).
+
+With that loop running, missing the exit **is** the driver's doing, and
+the reroute is honest consequence rather than a penalty for our silence.
+The restriction above then narrows usefully: it governs the lane
+*ordinal* ("second lane"), which needs harvested `turn:lanes`, not the
+side, which we can already prove.
+
 ## Sequencing
 
 Worktree, per the no-parallel-world-data rule. Not alongside any other
