@@ -9,7 +9,7 @@ from .achievements import ACHIEVEMENTS
 from .models.career import LEVEL_XP, Career
 from .models.market import MARKET_CARGO_KEYS
 from .models.profile import SAVE_VERSION, Profile
-from .models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG
+from .models.trucks import TRUCK_CATALOG, UPGRADE_CATALOG, TruckCondition
 
 # Signature keys ride inside the saved file but never inside a cloud upload --
 # the upload strips them and the server signs its own revision instead.
@@ -32,6 +32,17 @@ def _profile_fields() -> list[str]:
     return sorted((set(Profile.__dataclass_fields__) | {"version"}) - _LOCAL_ONLY_FIELDS)
 
 
+def _truck_condition_fields() -> list[str]:
+    """Keys inside one owned truck's condition record.
+
+    Same reason as _profile_fields, one level down: the validator checks each
+    record against an exact list, and this record is where new per-truck state
+    lands (brake and engine wear, traction gear). A hand-kept copy on the
+    server would reject the next build's saves the moment one is added.
+    """
+    return sorted(TruckCondition.__dataclass_fields__)
+
+
 def invariant_data() -> dict:
     data_root = Path(__file__).resolve().parent / "data" / "world_data"
     cities = json.loads((data_root / "us" / "cities.json").read_text(encoding="utf-8"))["cities"]
@@ -50,6 +61,7 @@ def invariant_data() -> dict:
         "marketCargoKeys": sorted(MARKET_CARGO_KEYS),
         "profileFields": _profile_fields(),
         "careerFields": sorted(Career.__dataclass_fields__),
+        "truckConditionFields": _truck_condition_fields(),
         "sourceSaveVersion": SAVE_VERSION,
         "truckLabels": {key: truck.label for key, truck in TRUCK_CATALOG.items()},
         "truckPrices": {key: _json_number(truck.price) for key, truck in TRUCK_CATALOG.items()},
