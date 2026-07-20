@@ -153,11 +153,20 @@ class DrivingUpdateMixin:
         # Keep the trip's spoken-distance units in step with a live settings
         # change; the setter only re-renders cues when the choice actually flips.
         self.trip.imperial = self.ctx.settings.imperial_units
-        pos_before = self.trip.position_mi
+        # Tell the trip model which stop's exit is signaled or on the ramp so its
+        # plan-cancelled warning can tell a driver who is taking the exit from one
+        # who blew past it. Set before trip.update (which runs _check_stops) and
+        # before _update_exit (which clears _exit_stop on a miss), so on the exact
+        # crossing tick the flag still reflects the armed exit.
+        active_exit = self._ramp_stop or self._exit_stop
+        self.trip._exit_in_progress = active_exit.name if active_exit else None
+        # On the ramp the highway odometer holds and the ramp consumes the
+        # movement instead; the trip records how far the truck rolled either way.
+        self.trip.on_ramp = self._ramp_mi is not None
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
         self._check_destination_exit()
-        self._update_exit(self.trip.position_mi - pos_before)
+        self._update_exit(self.trip.last_moved_mi)
 
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)

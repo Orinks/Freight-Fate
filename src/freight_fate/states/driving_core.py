@@ -66,6 +66,11 @@ EXIT_WARNING_REAL_S = 25.0  # target real seconds from callout to the ramp
 EXIT_WINDOW_MAX_MI = 20.0
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
+# Grace past the end of the ramp before a taken-but-never-stopped exit counts
+# as blown. The driver gets the "come to a complete stop" nudge at the ramp
+# end; roll this much further without stopping and the exit is missed, so the
+# stuck ramp doesn't linger for miles (unpatrolled, off the plan) once passed.
+RAMP_OVERSHOOT_MI = 0.5
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
 # A real interchange counts as the destination exit only inside this final
 # approach window. Routes that finish on rural highways carry no baked
