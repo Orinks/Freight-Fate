@@ -86,6 +86,16 @@
 
 ### Fixed
 
+- **Getting pulled over now judges whether you are actually stopping, not how
+  far you rolled.** A loaded truck at highway speed cannot halt on a dime, and
+  the old rule could flag a felony stop even when you braked correctly the whole
+  way. Now, once the lights come on, the trooper watches your behavior: signal
+  and brake down to a stop and you get the ordinary roadside check, and pulling
+  over promptly and cleanly gives a small chance a ticket is waived to a warning.
+  Keep accelerating, coast along without slowing, or ignore the lights and it
+  still ends in a felony stop. You no longer have to hold the emergency brake
+  the entire time; braking steadily is enough.
+
 - **Taking your planned stop's exit no longer warns that you drove past it.**
   When you signal a planned stop and brake down the exit ramp, the game used to
   announce that you had driven past it and cancelled the plan, even though you

@@ -224,7 +224,17 @@ def test_first_marginal_stop_is_a_warning(monkeypatch):
         app.shutdown()
 
 
-def test_ignoring_the_lights_is_logged_as_evasion(monkeypatch):
+class _Roll:
+    """A stand-in RNG with a fixed .random() value for deterministic rolls."""
+
+    def __init__(self, value):
+        self.value = value
+
+    def random(self):
+        return self.value
+
+
+def test_accelerating_away_zeroes_compliance_and_evades(monkeypatch):
     from freight_fate.app import App
 
     app = App()
@@ -235,13 +245,107 @@ def test_ignoring_the_lights_is_logged_as_evasion(monkeypatch):
         assert d._pull_over == "lights"
         p = app.ctx.profile
         money_before = p.money
-        # Keep driving past the ignore distance without stopping.
-        d.truck.velocity_mps = (limit + 25.0) / 2.23694
-        d.trip.position_mi = d._pull_over_start_mi + 3.0
-        d._update_pull_over(1.0)
+        # Keep accelerating after the lights: compliance drains to zero -> felony.
+        base = (limit + 25.0) / 2.23694
+        for i in range(6):
+            d.truck.velocity_mps = base + (i + 1) * 1.0 / 2.23694
+            d._update_pull_over(1.0)
+            if d._pull_over is None:
+                break
         assert d._pull_over is None
         assert d.speeding_tickets == 1
         assert p.money < money_before
+    finally:
+        app.shutdown()
+
+
+def test_braking_to_a_stop_reaches_the_roadside_stop(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import (
+        PULL_OVER_FULL_COMPLIANCE,
+        TrafficStopState,
+    )
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        _speed_for(d, over=25.0)
+        d._signal_pull_over()  # signal, then brake steadily
+        for _ in range(4):
+            d._update_pull_over(1.0, service_braking=True)
+        assert d._pull_over_compliance >= PULL_OVER_FULL_COMPLIANCE
+        d._patrol_rng = _Roll(1.0)  # do not roll the clean-stop leniency
+        d.truck.velocity_mps = 0.0
+        d._update_pull_over(1.0)
+        assert isinstance(app.state, TrafficStopState)
+        assert app.state.clean_stop is True
+        assert d.speeding_tickets == 1  # over 25 -> a ticket, not waived here
+    finally:
+        app.shutdown()
+
+
+def test_clean_stop_can_waive_a_ticket_to_a_warning(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import TrafficStopState
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        _speed_for(d, over=25.0)
+        d._signal_pull_over()
+        for _ in range(4):
+            d._update_pull_over(1.0, service_braking=True)
+        d._patrol_rng = _Roll(0.0)  # force the leniency roll to succeed
+        p = app.ctx.profile
+        money_before = p.money
+        d.truck.velocity_mps = 0.0
+        d._update_pull_over(1.0)
+        assert isinstance(app.state, TrafficStopState)
+        assert d.speeding_tickets == 0
+        assert p.money == money_before
+        assert "let it go" in app.state._outcome_text
+    finally:
+        app.shutdown()
+
+
+def test_failing_to_signal_takes_a_one_time_deduction(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        _speed_for(d, over=25.0)
+        # Brake steadily but never signal: compliance climbs until the 5 s
+        # signal grace lapses, when a one-time deduction drops it.
+        comp = []
+        for _ in range(7):
+            d._update_pull_over(1.0, service_braking=True)
+            comp.append(d._pull_over_compliance)
+        assert d._pull_over_nosignal_hit is True
+        # The tick that crosses the grace dips below the prior tick.
+        assert comp[5] < comp[4]
+    finally:
+        app.shutdown()
+
+
+def test_continuous_coasting_slowly_drains_compliance(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        _speed_for(d, over=25.0)
+        d._signal_pull_over()  # signal so only coasting is in play
+        before = d._pull_over_compliance
+        # Hold a steady speed (neither braking nor accelerating) for 5 s.
+        for _ in range(5):
+            d._update_pull_over(1.0)
+        assert d._pull_over is not None  # coasting drains, but not instantly
+        assert d._pull_over_compliance < before
     finally:
         app.shutdown()
 
