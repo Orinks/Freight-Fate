@@ -386,7 +386,20 @@ class TruckState:
         progressive = PROGRESSIVE_UPSHIFT_RPM[current_gear - 1]
         load_raise = 150.0 * load_fraction
         grade_raise = min(200.0, max(0.0, self.grade) * 3000.0)
-        upshift_rpm = min(self.specs.max_rpm * 0.9, progressive + load_raise + grade_raise)
+        # Under power, hold the LOW gears toward peak power before upshifting.
+        # Without this the box short-shifted at ~1000 rpm even at full throttle,
+        # so an empty truck on the flat banged up through the gears without ever
+        # revving -- "shifting way too fast, not natural". The boost is largest in
+        # 1st and fades out by the cruise gears (gone by 8th), so the truck still
+        # reaches top gear and a calm RPM at highway speed. Light throttle keeps
+        # the low, economy-minded progression, so gentle driving still upshifts
+        # early and quietly.
+        launch_taper = max(0.0, 1.0 - (current_gear - 1) / 7.0)
+        throttle_raise = 600.0 * max(0.0, self.throttle - 0.15) * launch_taper
+        upshift_rpm = min(
+            self.specs.max_rpm * 0.9,
+            progressive + load_raise + grade_raise + throttle_raise,
+        )
         upshift_steps = 1
         if 0 < tr.gear < tr.num_gears and load_fraction <= 0.2 and self.grade <= 0.01:
             skip_gear = min(tr.num_gears, tr.gear + 2)

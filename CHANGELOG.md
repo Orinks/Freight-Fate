@@ -153,6 +153,15 @@
 
 ### Changed
 
+- **The truck revs each gear out when you accelerate hard.** Flooring
+  it from a stop used to shift almost the instant it moved, banging up
+  through the gears without ever really revving, so it never sounded
+  like it was working for you. Now hard acceleration holds each lower
+  gear toward its power before shifting, and you hear the engine climb
+  and pull through the gears the way a loaded truck should. Easy
+  driving still shifts early and quietly to save fuel, and the truck
+  still settles into top gear at a calm, believable cruise.
+
 - **Truck speed limits now match what each state's law actually says.**
   Every state was checked against its own statute, and the results moved
   in both directions. Arizona holds trucks to 65 where the signs say 75,
