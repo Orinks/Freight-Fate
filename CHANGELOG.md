@@ -37,10 +37,12 @@
 ### Changed
 
 - **The drivers board now checks in a little less often.** With online
-  presence on, the game reports you every ninety seconds instead of every
-  minute, and the board waits four minutes before it calls a driver gone. You
-  still appear the moment you go on duty; a driver who closes the game may sit
-  on the board about a minute longer than before.
+  presence on, the game reports you every two and a half minutes instead of
+  every minute, and the board waits six minutes before it calls a driver gone.
+  You still appear the moment you go on duty, and going off duty, pulling
+  over, or starting a new leg still reaches the board within seconds; it is
+  only the quiet keep-alive that slowed down. A driver who closes the game may
+  sit on the board a few minutes longer than before.
 - **Career saves are now sealed files instead of plain text.** Saved careers
   use a new packed format that ordinary text editors cannot open, and every
   save is signed by your own installation. Your existing careers convert
