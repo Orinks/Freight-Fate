@@ -161,6 +161,15 @@
   speed instead of switching off at highway speed. Press X to take the exit;
   automatic control releases as you enter the ramp, ready for you to brake to
   the facility stop without collecting an unwanted speeding fine.
+- **A planned stop is no longer cancelled by a different stop with the same
+  name.** Plans were remembered by name only, so on a route with four Love's
+  Travel Stops, driving past the first one told you that you had driven past
+  your planned stop and cancelled the plan -- even when the stop you actually
+  planned was three hundred miles further on. Every same-name stop also
+  announced itself as your planned stop, and pulling into any of them counted
+  as arriving at your plan. Your plan now follows the one stop you chose.
+  Plans saved by an earlier version still load, pointing at the soonest stop
+  of that name you can still reach.
 - **Every stop on your route is announced now, not just the first of each
   name.** Chains repeat -- a run from New York to Miami passes four different
   Love's Travel Stops -- and the game only ever called out the first one,

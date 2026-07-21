@@ -239,7 +239,7 @@ class DrivingEventMixin:
         self.truck.set_parking_brake()
         if self.trip.is_planned(stop):
             # Plan fulfilled; the stop menu announces itself.
-            self.trip.planned_stop_name = None
+            self.trip.planned_stop_key = None
         can_sleep = "sleep" in stop.actions
         if can_sleep and hos.parking_is_full(self.trip_seed, stop.at_mi, self.trip.local_hour):
             self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
@@ -493,7 +493,7 @@ class DrivingEventMixin:
                 self._ramp_end_said = False
                 planned = self.trip.is_planned(stop)
                 if planned:
-                    self.trip.planned_stop_name = None
+                    self.trip.planned_stop_key = None
                 exit_ref = (
                     f"{stop.exit_label} for {stop.spoken_name}"
                     if stop.exit_label
@@ -571,7 +571,7 @@ class DrivingEventMixin:
                 # Fold the plan cancellation into this one line so the driver
                 # hears a single cue, and clear it here so _check_stops doesn't
                 # also emit a "drove past your planned stop" warning next tick.
-                self.trip.planned_stop_name = None
+                self.trip.planned_stop_key = None
                 line += " Plan cancelled."
             self.ctx.say_event(line, interrupt=True)
 

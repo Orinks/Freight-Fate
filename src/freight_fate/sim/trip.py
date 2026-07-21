@@ -71,7 +71,7 @@ class Trip:
         self.zones = self._place_zones()
         self.patrols = self._place_patrols()
         self._announced_stops: set[str] = set()  # RoadStop.key, never the name
-        self.planned_stop_name: str | None = None
+        self.planned_stop_key: str | None = None  # RoadStop.key, never the name
         # Name of the stop whose exit is currently signaled or being descended,
         # published each tick by the driving state. Lets _check_stops tell a
         # driver who is taking the exit from one who blew past it. Recomputed
@@ -672,8 +672,37 @@ class Trip:
                 best = stop
         return best
 
+    @property
+    def planned_stop(self) -> RoadStop | None:
+        """The stop the player planned for, or None if the plan is stale."""
+        key = self.planned_stop_key
+        if key is None:
+            return None
+        return next((stop for stop in self.stops if stop.key == key), None)
+
+    @property
+    def planned_stop_label(self) -> str:
+        """The planned stop's spoken name, even if the stop itself is gone."""
+        key = self.planned_stop_key
+        if key is None:
+            return ""
+        stop = self.planned_stop
+        return stop.name if stop is not None else RoadStop.name_from_key(key)
+
+    def resolve_stop_key(self, name: str) -> str | None:
+        """The key of the first stop with this name at or ahead of the truck.
+
+        Only for restoring a save written before plans carried a key; a bare
+        name cannot say which of a route's four Love's Travel Stops was meant,
+        so take the soonest one the driver could still reach.
+        """
+        ahead = [s for s in self.stops if s.name == name and s.at_mi >= self.position_mi]
+        if ahead:
+            return min(ahead, key=lambda s: s.at_mi).key
+        return next((s.key for s in self.stops if s.name == name), None)
+
     def is_planned(self, stop: RoadStop) -> bool:
-        return self.planned_stop_name is not None and stop.name == self.planned_stop_name
+        return self.planned_stop_key is not None and stop.key == self.planned_stop_key
 
     def planned_prefix(self, stop: RoadStop) -> str:
         """'Planned stop, ' when this is the stop the player planned for."""
@@ -990,11 +1019,9 @@ class Trip:
             )
 
     def _check_stops(self) -> None:
-        if self.planned_stop_name is not None:
-            planned = next(
-                (stop for stop in self.stops if stop.name == self.planned_stop_name), None
-            )
-            if self._exit_in_progress == self.planned_stop_name:
+        if self.planned_stop_key is not None:
+            planned = self.planned_stop
+            if planned is not None and self._exit_in_progress == planned.name:
                 # Signaled and taking the exit (armed or on the ramp): the plan
                 # is fulfilled quietly when the stop opens, or the too-fast miss
                 # cancels it with its own line. Either way, don't warn here.
@@ -1002,8 +1029,8 @@ class Trip:
             elif planned is None or planned.at_mi < self.position_mi:
                 # Past the exit marker with no exit in progress: the ramp is no
                 # longer takeable, so the planned stop is genuinely missed.
-                name = self.planned_stop_name
-                self.planned_stop_name = None
+                name = self.planned_stop_label
+                self.planned_stop_key = None
                 self._emit(
                     TripEventKind.GPS_CUE,
                     f"You drove past your planned stop, {name}. Plan cancelled.",

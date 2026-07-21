@@ -423,6 +423,11 @@ class RoadStop:
         """
         return f"{self.at_mi:.2f}:{self.name}"
 
+    @staticmethod
+    def name_from_key(key: str) -> str:
+        """The speakable name back out of a key, for a plan whose stop is gone."""
+        return key.split(":", 1)[-1]
+
     @property
     def label(self) -> str:
         return STOP_TYPE_LABELS.get(self.type, "stop")

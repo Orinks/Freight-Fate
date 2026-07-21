@@ -443,6 +443,39 @@ def test_pickup_deadhead_route_uses_local_facility_limits(world):
     assert reason == "facility gate"
 
 
+def test_a_plan_survives_passing_a_stop_that_shares_its_name(world):
+    """Plans used to be held as a bare name. Passing any namesake of the
+    planned stop -- one of the other three Love's Travel Stops on this route --
+    cancelled a plan for a stop still three hundred miles ahead."""
+    route = world.shortest_route(
+        world.resolve_city_key("New York"), world.resolve_city_key("Miami")
+    )
+    trip = Trip(route, TruckState(), WeatherSystem("southeast", seed=1), seed=7)
+    namesakes = sorted(
+        (s for s in trip.stops if s.name == "Love's Travel Stop"), key=lambda s: s.at_mi
+    )
+    assert len(namesakes) >= 2
+    target, earlier = namesakes[-1], namesakes[0]
+    trip.planned_stop_key = target.key
+
+    # Only the stop actually planned counts as planned.
+    assert [s.key for s in trip.stops if trip.is_planned(s)] == [target.key]
+
+    # Roll past an earlier namesake: the plan is untouched and stays quiet.
+    trip.position_mi = earlier.at_mi + 1.0
+    trip._events = []
+    trip._check_stops()
+    assert not any("planned stop" in e.message for e in trip._events)
+    assert trip.planned_stop_key == target.key
+
+    # Past the planned stop itself, it cancels as before.
+    trip.position_mi = target.at_mi + 1.0
+    trip._events = []
+    trip._check_stops()
+    assert any("drove past your planned stop" in e.message for e in trip._events)
+    assert trip.planned_stop_key is None
+
+
 def test_every_stop_announces_even_when_names_repeat(world):
     """Stop names repeat -- New York to Miami carries four stops called
     "Love's Travel Stop" -- and announcements used to be remembered by name, so
