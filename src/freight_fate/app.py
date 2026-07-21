@@ -33,6 +33,19 @@ log = logging.getLogger(__name__)
 # what the player heard -- the most faithful record for an audio-first game.
 transcript = logging.getLogger("freight_fate.transcript")
 
+# Where this session's log actually ended up, or None when nothing is being
+# written to disk (a source checkout with no explicit log file, or a folder the
+# game could not write to). Recorded by _configure_logging rather than derived
+# again later, so the settings screen reports the real file instead of the one
+# the game meant to open.
+_log_file: Path | None = None
+
+
+def active_log_path() -> Path | None:
+    """The log file this session is writing, or None when there is none."""
+    return _log_file
+
+
 WINDOW_SIZE = (900, 640)
 FPS = 60
 
@@ -534,6 +547,7 @@ def _configure_logging() -> None:
     (logs/game.log) where a player can find and share it without mixing it
     with durable saves.
     """
+    global _log_file
     from . import updater
 
     packaged = updater.is_frozen()
@@ -568,6 +582,7 @@ def _configure_logging() -> None:
             # without ever reaching Python logging; faulthandler writes the
             # tracebacks straight to the log file as the process dies.
             faulthandler.enable(file=handlers[0].stream)
+            _log_file = log_path
         except OSError:
             pass  # unwritable disk: console-only is the best we can do
     logging.basicConfig(

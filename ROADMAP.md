@@ -54,9 +54,10 @@ From a batch of player reports:
 - [ ] Unresolved half of that report: stop lines on the Map screen "make the
   sound but not letting me fully read" under NVDA. Not reproducible from the
   code -- the list is built once, nothing under the menu updates, and no path
-  interrupts or drops an utterance. Needs a `FREIGHT_FATE_LOG_FILE` transcript
-  from the reporter on a snapshot newer than 2026-07-21 to tell "the game
-  never spoke it" from "NVDA never spoke it".
+  interrupts or drops an utterance. Needs the reporter's `logs/game.log` from a
+  snapshot newer than 2026-07-21 to tell "the game never spoke it" from "NVDA
+  never spoke it"; packaged builds have always written that transcript, and
+  Settings, Problem reports now tells a player where to find it.
 - [x] **Destination exit offered a state early on rural-highway finishes --
   FIXED 2026-07-16 (player transcripts).** The destination-exit scan accepted
   the last labeled interchange anywhere on the route, so routes whose final

@@ -4,6 +4,13 @@
 
 ### Added
 
+- **The game can now tell you where its log file is.** Settings has a new
+  Problem reports category, and Where the game log is saved reads out the full
+  path and shows it in the window. The game has always kept a log of the
+  session, including everything it said out loud, but nothing ever pointed you
+  at it. Attaching it to a bug report shows exactly what you heard. The
+  previous session is kept beside it, so restarting the game to check something
+  does not lose it, and both files stay on your computer.
 - **The route report now tells you where you are.** Press R, or D-pad up on a
   controller, to hear the current road and direction, state, nearest named city,
   checkpoint, or road stop, along with your progress and upcoming guidance.
