@@ -161,6 +161,15 @@
   speed instead of switching off at highway speed. Press X to take the exit;
   automatic control releases as you enter the ramp, ready for you to brake to
   the facility stop without collecting an unwanted speeding fine.
+- **Entering a slower zone no longer sounds exactly like the warning for
+  it.** Both announcements said the same thing -- "facility gate ahead, speed
+  limit 15" -- so on the run in to a delivery you heard the gate limit two
+  miles out, found the limit had not actually changed, and had no way to tell
+  that one was a heads-up and the other was the change itself. The warning
+  still says how far ahead the zone is; entering it now says "Entering
+  facility gate zone, speed limit 15 now," matching the "End of" call you
+  already hear on the way out. Construction, heavy traffic, and destination
+  approach zones all read the same way.
 - **Signaling for any exit now slows the truck, not just the delivery one.**
   Pressing X told you to slow to ramp speed, but adaptive cruise kept holding
   highway speed, so a truck stop or rest area exit went by at seventy while

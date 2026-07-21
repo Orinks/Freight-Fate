@@ -926,9 +926,15 @@ class Trip:
             if zone is not None:
                 if zone.reason == "construction":
                     self._construction_zone_grace_start[_zone_key(zone)] = zone.start_mi
+                # Say you are *in* it, not that it is ahead: the advance
+                # warning above already used "ahead" with the same limit, so
+                # identical wording here left the driver hearing "speed limit
+                # 15" twice, miles apart, with no way to tell which one had
+                # actually taken effect. Pairs with the "End of ... zone" exit.
                 self._emit(
                     TripEventKind.ZONE_ENTER,
-                    f"{zone.reason} ahead. Speed limit {self._speed_value(zone.limit_mph)}.",
+                    f"Entering {zone.reason} zone. "
+                    f"Speed limit {self._speed_value(zone.limit_mph)} now.",
                     zone=zone,
                 )
             elif self._active_zone is not None:
