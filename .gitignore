@@ -57,3 +57,8 @@ data/spider/signsheets/*.zip
 
 # local scratch status (not for commit)
 STATUS.md
+
+# Claude Code per-machine state. A shared .claude/settings.json or agent
+# definition can still be committed; only the local-only bits are ignored.
+.claude/settings.local.json
+.claude/worktrees/
