@@ -161,6 +161,18 @@
   speed instead of switching off at highway speed. Press X to take the exit;
   automatic control releases as you enter the ramp, ready for you to brake to
   the facility stop without collecting an unwanted speeding fine.
+- **The delivery run no longer warns about a 15 mile per hour limit you
+  never reach.** On the way in to a receiver you were told a facility gate
+  was coming with a 15 limit, then that limit never arrived, because the gate
+  sits in the last half mile of the highway while your destination exit comes
+  a mile or more before it -- you left the road before the sign existed.
+  Delivery runs now only warn about slower zones you will actually drive
+  into. Pickups and facility approach roads still drive to the gate, and
+  still get the warning.
+- **Signaling for the destination exit no longer says the same thing twice.**
+  When the exit callout had already announced adaptive cruise easing to ramp
+  speed, pressing X repeated the whole sentence. It now just confirms the
+  exit.
 - **Entering a slower zone no longer sounds exactly like the warning for
   it.** Both announcements said the same thing -- "facility gate ahead, speed
   limit 15" -- so on the run in to a delivery you heard the gate limit two

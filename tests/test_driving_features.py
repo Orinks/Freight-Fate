@@ -1355,6 +1355,84 @@ def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
         app.shutdown()
 
 
+def test_a_zone_past_the_destination_exit_is_never_announced(monkeypatch):
+    """The facility gate covers the last half mile, but a delivery leaves the
+    highway at least a mile before that, so its 15 mph limit was announced and
+    then never took effect. Warn only for zones the truck will drive into."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        total = driving.trip.total_miles
+        exit_stop = driving._destination_exit_stop()
+        assert exit_stop is not None
+        gate = Zone(total - 0.5, total, 15.0, "facility gate")
+        assert gate.start_mi >= exit_stop.at_mi  # the delivery is gone by then
+        gate_cue = TripEvent(
+            TripEventKind.GPS_CUE,
+            "In 2 miles, facility gate ahead. Speed limit 15.",
+            {"zone": gate},
+        )
+
+        driving._handle_trip_event(gate_cue)
+        assert events == []
+
+        # A zone the truck really does reach still gets its heads-up.
+        reachable = Zone(exit_stop.at_mi - 2.0, exit_stop.at_mi - 1.0, 35.0, "destination approach")
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.GPS_CUE,
+                "In 2 miles, destination approach ahead. Speed limit 35.",
+                {"zone": reachable},
+            )
+        )
+        assert events[-1].startswith("In 2 miles, destination approach")
+
+        # A pickup leg drives all the way to the gate, so it keeps the warning.
+        driving.phase = "pickup"
+        events.clear()
+        driving._handle_trip_event(gate_cue)
+        assert events[-1].startswith("In 2 miles, facility gate")
+    finally:
+        app.shutdown()
+
+
+def test_taking_the_announced_exit_does_not_repeat_the_ramp_cap(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    said = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        monkeypatch.setattr(driving, "_upcoming_exit_stop", lambda: stop)
+        driving.trip.position_mi = stop.at_mi - 3.0
+        driving.truck.engine_on = True
+        driving.truck.velocity_mps = 60.0 / 2.23694
+        driving._engage_cruise(60.0)
+
+        driving._check_destination_exit()  # announces the exit and caps cruise
+        assert driving._cruise_exit_mph == 45.0
+        assert "Adaptive cruise easing to 45 miles per hour for the ramp" in said[-1]
+
+        said.clear()
+        driving._take_exit()
+
+        assert "Signaling for" in said[-1]
+        assert "Adaptive cruise" not in said[-1]  # already said, and already capped
+        assert driving._cruise_exit_mph == 45.0
+    finally:
+        app.shutdown()
+
+
 def test_signaling_for_an_exit_eases_cruise_to_ramp_speed(monkeypatch):
     """Pressing X is the commitment to leave the highway, so adaptive cruise
     has to come down to ramp speed with it -- for a truck stop exit just as
@@ -2355,7 +2433,9 @@ def test_live_route_weather_accounts_for_loading_and_unavailable_cities(monkeypa
             f"{world.spoken_city(second, qualified=True)}: live weather unavailable; "
             "simulated fallback may apply"
         ) in spoken[-1]
-        assert f"{world.spoken_city(third, qualified=True)}: live weather still loading" in spoken[-1]
+        assert (
+            f"{world.spoken_city(third, qualified=True)}: live weather still loading" in spoken[-1]
+        )
     finally:
         app.shutdown()
 

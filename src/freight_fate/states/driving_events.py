@@ -10,6 +10,8 @@ class DrivingEventMixin:
     def _handle_trip_event(self, event) -> None:
         if self._should_ignore_destination_exit_gps_cue(event):
             return
+        if self._should_ignore_unreachable_zone_cue(event):
+            return
         kind = event.kind
         sound = _route_event_sound(event)
         if event.message:
@@ -92,6 +94,24 @@ class DrivingEventMixin:
         if stop is None:
             return False
         return abs(float(getattr(cue, "at_mi", -9999.0)) - stop.at_mi) <= 0.15
+
+    def _should_ignore_unreachable_zone_cue(self, event) -> bool:
+        """Drop the heads-up for a zone the delivery will never drive into.
+
+        The facility gate zone covers the last half mile of the route, but a
+        delivery leaves the highway at the destination exit at least a mile
+        before that, so its 15 mile per hour limit was announced two miles out
+        and then never took effect -- the driver slowed for a sign that never
+        came (playtest transcript, 2026-07-20). Pickup legs and facility
+        approach chains do drive to the gate, and keep their warning.
+        """
+        if self.phase != DRIVE_PHASE_DELIVERY or event.kind != TripEventKind.GPS_CUE:
+            return False
+        zone = event.data.get("zone")
+        if zone is None:
+            return False
+        stop = self._destination_exit_stop()
+        return stop is not None and zone.start_mi >= stop.at_mi
 
     def _is_critical_event(self, event) -> bool:
         """Safety announcements that must preempt ambient chatter on the event
@@ -278,7 +298,12 @@ class DrivingEventMixin:
             if self._speed_control_armed and self._speed_control_target_mph is not None:
                 self._cruise_exit_mph = min(self._speed_control_target_mph, RAMP_MAX_MPH)
             return ""
-        self._cruise_exit_mph = min(self._cruise_mph, RAMP_MAX_MPH)
+        capped = min(self._cruise_mph, RAMP_MAX_MPH)
+        if self._cruise_exit_mph is not None and self._cruise_exit_mph <= capped:
+            # The destination-exit announcement already capped cruise and said
+            # so; pressing X right after must not repeat the whole sentence.
+            return ""
+        self._cruise_exit_mph = capped
         action = "easing to" if self.truck.speed_mph > self._cruise_exit_mph + 1.0 else "holding"
         return (
             f" Adaptive cruise {action} "
