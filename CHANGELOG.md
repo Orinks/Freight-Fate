@@ -161,6 +161,12 @@
   speed instead of switching off at highway speed. Press X to take the exit;
   automatic control releases as you enter the ramp, ready for you to brake to
   the facility stop without collecting an unwanted speeding fine.
+- **Every stop on your route is announced now, not just the first of each
+  name.** Chains repeat -- a run from New York to Miami passes four different
+  Love's Travel Stops -- and the game only ever called out the first one,
+  then went quiet for the rest of the trip. On that route six of its
+  twenty-five stops were never mentioned at all. Each stop is now tracked by
+  where it actually sits, so all of them announce as you approach.
 - **The delivery run no longer warns about a 15 mile per hour limit you
   never reach.** On the way in to a receiver you were told a facility gate
   was coming with a 15 limit, then that limit never arrived, because the gate

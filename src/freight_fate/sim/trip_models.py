@@ -413,6 +413,17 @@ class RoadStop:
     exit_label: str = ""  # "exit 7" when a real OSM interchange sits here
 
     @property
+    def key(self) -> str:
+        """Identity of this stop on this route, for tracking rather than speech.
+
+        Names repeat constantly -- a coast-to-coast route carries six stops
+        called "Love's Travel Stop" -- so anything that remembers *which* stop
+        (announced already, planned, exit in progress) has to key on the
+        milepost too, or one stop stands in for all its namesakes.
+        """
+        return f"{self.at_mi:.2f}:{self.name}"
+
+    @property
     def label(self) -> str:
         return STOP_TYPE_LABELS.get(self.type, "stop")
 

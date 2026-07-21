@@ -443,6 +443,30 @@ def test_pickup_deadhead_route_uses_local_facility_limits(world):
     assert reason == "facility gate"
 
 
+def test_every_stop_announces_even_when_names_repeat(world):
+    """Stop names repeat -- New York to Miami carries four stops called
+    "Love's Travel Stop" -- and announcements used to be remembered by name, so
+    only the first of each chain was ever spoken and the rest passed in
+    silence."""
+    route = world.shortest_route(
+        world.resolve_city_key("New York"), world.resolve_city_key("Miami")
+    )
+    trip = Trip(route, TruckState(), WeatherSystem("southeast", seed=1), seed=7)
+    repeated = {s.name for s in trip.stops if sum(1 for o in trip.stops if o.name == s.name) > 1}
+    assert repeated, "route no longer exercises repeated stop names; pick another"
+
+    announced = set()
+    for stop in sorted(trip.stops, key=lambda s: s.at_mi):
+        trip.position_mi = stop.at_mi - 1.0
+        trip._events = []
+        trip._check_stops()
+        for event in trip._events:
+            if event.kind == TripEventKind.STOP_AHEAD:
+                announced.add(event.data["stop"].key)
+
+    assert len(announced) == len(trip.stops)
+
+
 def test_facility_gate_warns_before_final_low_speed_zone(world):
     route = world.facility_approach_route("Chicago", world.city("Chicago").locations[0].name)
     truck = TruckState()

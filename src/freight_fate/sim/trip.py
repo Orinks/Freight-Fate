@@ -70,7 +70,7 @@ class Trip:
         self.toll_charges: list[TollCharge] = []
         self.zones = self._place_zones()
         self.patrols = self._place_patrols()
-        self._announced_stops: set[str] = set()
+        self._announced_stops: set[str] = set()  # RoadStop.key, never the name
         self.planned_stop_name: str | None = None
         # Name of the stop whose exit is currently signaled or being descended,
         # published each tick by the driving state. Lets _check_stops tell a
@@ -790,7 +790,7 @@ class Trip:
             # Seed passed stops AND stops already inside the "stop ahead" window;
             # both were announced before the save, so a resume must not re-fire them.
             if stop.at_mi <= self.position_mi + STOP_AHEAD_LOOKAHEAD_MI:
-                self._announced_stops.add(stop.name)
+                self._announced_stops.add(stop.key)
         for cue in self.navigation_cues:
             if cue.at_mi <= self.position_mi:
                 self._announced_navigation.add(f"{cue.key}:advance")
@@ -1010,8 +1010,8 @@ class Trip:
                 )
         for stop in self.stops:
             ahead = stop.at_mi - self.position_mi
-            if 0 < ahead <= STOP_AHEAD_LOOKAHEAD_MI and stop.name not in self._announced_stops:
-                self._announced_stops.add(stop.name)
+            if 0 < ahead <= STOP_AHEAD_LOOKAHEAD_MI and stop.key not in self._announced_stops:
+                self._announced_stops.add(stop.key)
                 exit_part = f" at {stop.exit_label}" if stop.exit_label else ""
                 parts = [
                     f"{self.planned_prefix(stop)}{stop.spoken_name}{exit_part} "
