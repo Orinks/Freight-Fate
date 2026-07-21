@@ -267,7 +267,33 @@ class Trip:
                         exit_label,
                     )
                 )
-        return out
+        return self._merge_shared_city_stops(out)
+
+    def _merge_shared_city_stops(self, stops: list[RoadStop]) -> list[RoadStop]:
+        """One entry per facility, not one per leg that lists it.
+
+        Driving through a city picks its stops up twice, once from the leg
+        arriving and once from the leg leaving, two miles apart -- the truck
+        passes a single building, so announcing it twice sounds like a stutter
+        and makes "which one did I plan?" meaningless. Keep the one reached
+        first and let it borrow the twin's exit label if it has none.
+        """
+        merged: list[RoadStop] = []
+        for stop in stops:
+            twin = next(
+                (
+                    kept
+                    for kept in reversed(merged)
+                    if kept.name == stop.name
+                    and abs(stop.at_mi - kept.at_mi) <= SHARED_CITY_STOP_MERGE_MI
+                ),
+                None,
+            )
+            if twin is None:
+                merged.append(stop)
+            elif not twin.exit_label and stop.exit_label:
+                twin.exit_label = stop.exit_label
+        return merged
 
     def _build_navigation_cues(self) -> list[NavigationCue]:
         cues: list[NavigationCue] = []

@@ -161,6 +161,12 @@
   speed instead of switching off at highway speed. Press X to take the exit;
   automatic control releases as you enter the ramp, ready for you to brake to
   the facility stop without collecting an unwanted speeding fine.
+- **Driving through a city no longer announces the same truck stop twice.**
+  A city's stops were counted once for the road coming in and once for the
+  road going out, so passing through called out a single Pilot or Love's
+  twice, two miles apart, as though they were two places. On a Chicago to Los
+  Angeles run that was eight doubled stops. Each facility is now listed once,
+  keeping whichever exit number was recorded for it.
 - **Signaling for one stop no longer hides that you missed a same-named
   one.** The game works out whether you are taking a stop's exit or blowing
   past it. It compared stops by name, so signaling for any Love's Travel Stop

@@ -443,6 +443,44 @@ def test_pickup_deadhead_route_uses_local_facility_limits(world):
     assert reason == "facility gate"
 
 
+def test_driving_through_a_city_lists_its_stops_once(world):
+    """A city's stops hang off every leg that meets it, a mile out from the
+    endpoint, so passing through collected the same facility twice -- once a
+    mile before, once a mile after. Both then announced, two miles apart."""
+    from freight_fate.sim.trip_models import SHARED_CITY_STOP_MERGE_MI
+
+    route = world.shortest_route(
+        world.resolve_city_key("Chicago"), world.resolve_city_key("Los Angeles")
+    )
+    trip = Trip(route, TruckState(), WeatherSystem("midwest", seed=1), seed=7)
+    stops = sorted(trip.stops, key=lambda s: s.at_mi)
+    per_leg = sum(
+        1
+        for i, leg in enumerate(route.legs)
+        for s in leg.stops
+        if s.curated and s.applies_to_direction(route.cities[i] == leg.a)
+    )
+    assert len(stops) < per_leg, "route no longer exercises shared-city stops"
+
+    for a, b in zip(stops, stops[1:], strict=False):
+        if b.at_mi - a.at_mi <= SHARED_CITY_STOP_MERGE_MI:
+            assert a.name != b.name, f"{a.name} listed twice {b.at_mi - a.at_mi:.2f} mi apart"
+
+
+def test_a_merged_city_stop_keeps_an_exit_label(world):
+    """The two copies of a shared-city stop can disagree on which exit serves
+    it -- one often has no label at all. The survivor must not lose it."""
+    trip, _ = make_trip(world)
+    kept = RoadStop("Pilot", 100.0, "travel_center", ("fuel",), exit_label="")
+    twin = RoadStop("Pilot", 102.0, "travel_center", ("fuel",), exit_label="exit 2A")
+    far = RoadStop("Pilot", 140.0, "travel_center", ("fuel",), exit_label="exit 60")
+
+    merged = trip._merge_shared_city_stops([kept, twin, far])
+
+    assert [s.at_mi for s in merged] == [100.0, 140.0]  # twin folded in, far kept
+    assert merged[0].exit_label == "exit 2A"
+
+
 def test_signaling_for_a_namesake_does_not_pass_as_taking_the_planned_exit(world):
     """_exit_in_progress is matched against the plan to tell a driver taking
     the exit from one who blew past it. Held as a name, signaling for any
