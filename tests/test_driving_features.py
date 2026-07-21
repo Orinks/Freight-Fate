@@ -1333,18 +1333,18 @@ def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
         driving._check_destination_exit()
 
         assert driving._cruise_mph == 60.0
-        assert driving._cruise_exit_mph == 45.0
+        assert driving._cruise_exit_mph == 40.0
         message, interrupt = events[-1]
         assert interrupt is True
         assert "exit " in message
         assert "toward" in message
         assert "destination exit" in message
         assert "Press X to take it" in message
-        assert "Adaptive cruise easing to 45 miles per hour for the ramp" in message
+        assert "Adaptive cruise easing to 40 miles per hour for the ramp" in message
 
         driving._adjust_cruise(-5.0)
         assert said[-1] == (
-            "Open-road cruise target 55 miles per hour. Ramp approach target 45 miles per hour."
+            "Open-road cruise target 55 miles per hour. Ramp approach target 40 miles per hour."
         )
         for _tap in range(3):
             driving._adjust_cruise(-5.0)
@@ -1420,15 +1420,15 @@ def test_taking_the_announced_exit_does_not_repeat_the_ramp_cap(monkeypatch):
         driving._engage_cruise(60.0)
 
         driving._check_destination_exit()  # announces the exit and caps cruise
-        assert driving._cruise_exit_mph == 45.0
-        assert "Adaptive cruise easing to 45 miles per hour for the ramp" in said[-1]
+        assert driving._cruise_exit_mph == 40.0
+        assert "Adaptive cruise easing to 40 miles per hour for the ramp" in said[-1]
 
         said.clear()
         driving._take_exit()
 
         assert "Signaling for" in said[-1]
         assert "Adaptive cruise" not in said[-1]  # already said, and already capped
-        assert driving._cruise_exit_mph == 45.0
+        assert driving._cruise_exit_mph == 40.0
     finally:
         app.shutdown()
 
@@ -1457,8 +1457,8 @@ def test_signaling_for_an_exit_eases_cruise_to_ramp_speed(monkeypatch):
 
         driving._take_exit()
 
-        assert driving._cruise_exit_mph == 45.0
-        assert "Adaptive cruise easing to 45 miles per hour for the ramp" in said[-1]
+        assert driving._cruise_exit_mph == 40.0
+        assert "Adaptive cruise easing to 40 miles per hour for the ramp" in said[-1]
         # And cruise actually acts on it: throttle off, brakes on.
         driving._update_cruise(0.5, braking=False, accelerating=False, clutch_disengaged=False)
         assert driving.truck.throttle == 0.0

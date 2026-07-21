@@ -95,6 +95,11 @@
 
 ### Fixed
 
+- **Automatic cruise now leaves enough speed in hand for an exit.** After you
+  signal for an exit, cruise aims for 40 miles per hour instead of balancing on
+  the 45-mile-per-hour ramp limit. It now stays safely under that limit on a
+  downhill approach instead of creeping up to 46 and missing the exit.
+
 - **Distances and speeds no longer say "1 miles".** Anything that comes out to
   exactly one is now read as "1 mile" or "1 kilometer", on map points, stop
   distances, speed readouts, and everywhere else the game speaks a measurement.

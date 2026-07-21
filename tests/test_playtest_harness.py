@@ -212,7 +212,7 @@ def test_realistic_cruise_eases_for_destination_exit_without_speeding_fine(
     assert result.speeding_tickets == 0, result.transcript_text
     assert result.max_speeding_timer_s < SPEEDING_HOLD_S
     assert "destination exit" in result.transcript_text
-    assert "Adaptive cruise easing to 45 miles per hour for the ramp" in result.transcript_text
+    assert "Adaptive cruise easing to 40 miles per hour for the ramp" in result.transcript_text
     assert "Signaling for" in result.transcript_text
     assert "You take" in result.transcript_text
     assert "missed the destination exit" not in result.transcript_text.lower()
@@ -222,8 +222,56 @@ def test_realistic_cruise_eases_for_destination_exit_without_speeding_fine(
     if restricted_zone_reason is not None:
         assert "Speed keeper holding 45 miles per hour" in result.transcript_text
         assert (
-            "Adaptive cruise resuming at 45 miles per hour for the ramp" in result.transcript_text
+            "Adaptive cruise resuming at 40 miles per hour for the ramp" in result.transcript_text
         )
+
+
+@pytest.mark.smoke
+def test_signaled_downhill_exit_keeps_cruise_below_ramp_limit(monkeypatch):
+    import pygame
+
+    from freight_fate.states.driving import RAMP_MAX_MPH
+    from freight_fate.states.driving_core import RoadStop
+
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.ctx.settings.automatic_transmission = True
+        harness.app.ctx.settings.time_scale = 10.0
+        harness.start_route("Chicago", "Indianapolis", trip_seed=0)
+        driving = harness.driving
+        assert driving is not None
+        driving.tutorial = None
+        driving.trip.position_mi = 35.0
+        driving.trip.patrols = []
+        driving.truck.start_engine()
+        driving.truck.set_air_ready(parking_brake=False)
+        driving.truck.transmission.automatic = True
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 70.0 / 2.23694
+        driving.truck.throttle = 0.35
+
+        stop = RoadStop("Downhill Travel Plaza", 40.0, "truck_stop", ("fuel", "sleep"))
+        monkeypatch.setattr(driving, "_upcoming_exit_stop", lambda: stop)
+        monkeypatch.setattr(driving.trip, "speed_limit_at", lambda _mile: (70.0, None))
+        monkeypatch.setattr(driving.trip, "grade_at", lambda _mile: -0.02)
+        driving.truck.grade = -0.02
+
+        driving.handle_event(key_event(pygame.K_k))
+        driving.handle_event(key_event(pygame.K_x))
+
+        for _frame in range(20_000):
+            driving.truck.air_pressure_psi = driving.truck.specs.air_governor_cut_out_psi
+            driving.update(1 / 60)
+            if driving._ramp_mi is not None or driving._exit_stop is None:
+                break
+
+        entry_speed = driving.truck.speed_mph
+
+    assert driving._ramp_mi is not None, harness.result.transcript_text
+    assert entry_speed <= RAMP_MAX_MPH
+    assert "Adaptive cruise easing to 40 miles per hour for the ramp" in (
+        harness.result.transcript_text
+    )
+    assert "going too fast for the ramp" not in harness.result.transcript_text
 
 
 @pytest.mark.smoke

@@ -296,9 +296,13 @@ class DrivingEventMixin:
             # Remember the cap so cruise resumes at ramp speed, but say
             # nothing: the keeper is already holding a low zone speed.
             if self._speed_control_armed and self._speed_control_target_mph is not None:
-                self._cruise_exit_mph = min(self._speed_control_target_mph, RAMP_MAX_MPH)
+                self._cruise_exit_mph = min(self._speed_control_target_mph, RAMP_CRUISE_TARGET_MPH)
             return ""
-        capped = min(self._cruise_mph, RAMP_MAX_MPH)
+        # The ramp accepts 45 mph or less, but the cruise loop deliberately
+        # targets 40. Its normal two-mph brake deadband, downhill acceleration,
+        # and frame timing must not leave the truck hovering just above the
+        # hard acceptance boundary at the gore point.
+        capped = min(self._cruise_mph, RAMP_CRUISE_TARGET_MPH)
         if self._cruise_exit_mph is not None and self._cruise_exit_mph <= capped:
             # The destination-exit announcement already capped cruise and said
             # so; pressing X right after must not repeat the whole sentence.
