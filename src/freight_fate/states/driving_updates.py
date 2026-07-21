@@ -159,7 +159,7 @@ class DrivingUpdateMixin:
         # before _update_exit (which clears _exit_stop on a miss), so on the exact
         # crossing tick the flag still reflects the armed exit.
         active_exit = self._ramp_stop or self._exit_stop
-        self.trip._exit_in_progress = active_exit.name if active_exit else None
+        self.trip._exit_in_progress = active_exit.key if active_exit else None
         # On the ramp the highway odometer holds and the ramp consumes the
         # movement instead; the trip records how far the truck rolled either way.
         self.trip.on_ramp = self._ramp_mi is not None

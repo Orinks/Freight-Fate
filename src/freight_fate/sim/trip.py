@@ -72,10 +72,12 @@ class Trip:
         self.patrols = self._place_patrols()
         self._announced_stops: set[str] = set()  # RoadStop.key, never the name
         self.planned_stop_key: str | None = None  # RoadStop.key, never the name
-        # Name of the stop whose exit is currently signaled or being descended,
-        # published each tick by the driving state. Lets _check_stops tell a
-        # driver who is taking the exit from one who blew past it. Recomputed
-        # every frame, so it is never persisted.
+        # RoadStop.key of the stop whose exit is currently signaled or being
+        # descended, published each tick by the driving state. Lets _check_stops
+        # tell a driver who is taking the exit from one who blew past it. A key,
+        # not a name: signaling for one Love's must not read as taking the exit
+        # for the Love's you planned 300 miles further on. Recomputed every
+        # frame, so it is never persisted.
         self._exit_in_progress: str | None = None
         # While on an exit ramp the truck is off the highway: the ramp consumes
         # its movement instead of the highway odometer, so the mile marker holds
@@ -1021,7 +1023,7 @@ class Trip:
     def _check_stops(self) -> None:
         if self.planned_stop_key is not None:
             planned = self.planned_stop
-            if planned is not None and self._exit_in_progress == planned.name:
+            if self._exit_in_progress == self.planned_stop_key:
                 # Signaled and taking the exit (armed or on the ramp): the plan
                 # is fulfilled quietly when the stop opens, or the too-fast miss
                 # cancels it with its own line. Either way, don't warn here.

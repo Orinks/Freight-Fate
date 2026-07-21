@@ -161,6 +161,11 @@
   speed instead of switching off at highway speed. Press X to take the exit;
   automatic control releases as you enter the ramp, ready for you to brake to
   the facility stop without collecting an unwanted speeding fine.
+- **Signaling for one stop no longer hides that you missed a same-named
+  one.** The game works out whether you are taking a stop's exit or blowing
+  past it. It compared stops by name, so signaling for any Love's Travel Stop
+  counted as taking the exit for the Love's you had planned, and driving past
+  your real planned stop went unmentioned. It now checks the actual stop.
 - **A planned stop is no longer cancelled by a different stop with the same
   name.** Plans were remembered by name only, so on a route with four Love's
   Travel Stops, driving past the first one told you that you had driven past

@@ -443,6 +443,36 @@ def test_pickup_deadhead_route_uses_local_facility_limits(world):
     assert reason == "facility gate"
 
 
+def test_signaling_for_a_namesake_does_not_pass_as_taking_the_planned_exit(world):
+    """_exit_in_progress is matched against the plan to tell a driver taking
+    the exit from one who blew past it. Held as a name, signaling for any
+    same-name stop silenced the warning for the planned one."""
+    route = world.shortest_route(
+        world.resolve_city_key("New York"), world.resolve_city_key("Miami")
+    )
+    trip = Trip(route, TruckState(), WeatherSystem("southeast", seed=1), seed=7)
+    namesakes = sorted(
+        (s for s in trip.stops if s.name == "Love's Travel Stop"), key=lambda s: s.at_mi
+    )
+    planned, other = namesakes[0], namesakes[1]
+    trip.planned_stop_key = planned.key
+
+    # Signaling for a *different* Love's must not cover a blown planned stop.
+    trip._exit_in_progress = other.key
+    trip.position_mi = planned.at_mi + 1.0
+    trip._events = []
+    trip._check_stops()
+    assert any("drove past your planned stop" in e.message for e in trip._events)
+
+    # Signaling for the planned one itself still stays quiet.
+    trip.planned_stop_key = planned.key
+    trip._exit_in_progress = planned.key
+    trip._events = []
+    trip._check_stops()
+    assert not any("drove past your planned stop" in e.message for e in trip._events)
+    assert trip.planned_stop_key == planned.key
+
+
 def test_a_plan_survives_passing_a_stop_that_shares_its_name(world):
     """Plans used to be held as a bare name. Passing any namesake of the
     planned stop -- one of the other three Love's Travel Stops on this route --

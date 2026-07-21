@@ -335,7 +335,7 @@ def test_plan_survives_while_descending_ramp():
         # On the ramp: the driving loop publishes the in-progress exit to the
         # trip before _check_stops runs, and the truck has rolled past the marker.
         d._exit_stop = stop
-        d.trip._exit_in_progress = stop.name
+        d.trip._exit_in_progress = stop.key
         d.trip.position_mi = stop.at_mi + 0.4
         d.trip._events.clear()
         d.trip._check_stops()
