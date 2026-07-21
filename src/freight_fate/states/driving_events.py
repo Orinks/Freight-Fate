@@ -233,6 +233,7 @@ class DrivingEventMixin:
             return
         if self._exit_stop is not None:
             self._exit_stop = None
+            self._cruise_exit_mph = None
             self.ctx.say("Exit canceled. Staying on the highway.")
             return
         stop = self._upcoming_exit_stop()
@@ -256,7 +257,32 @@ class DrivingEventMixin:
         else:
             head = f"Signaling for the {stop.spoken_name} exit,"
         self.ctx.say(
-            f"{head} {ahead:.1f} miles ahead. Slow to {RAMP_MAX_MPH:.0f} or less for the ramp."
+            f"{head} {ahead:.1f} miles ahead. Slow to "
+            f"{self.ctx.settings.speed_text(RAMP_MAX_MPH)} or less for the ramp."
+            + self._cap_cruise_for_ramp()
+        )
+
+    def _cap_cruise_for_ramp(self) -> str:
+        """Bring automatic speed control down to ramp speed for an armed exit.
+
+        Arming an exit commits the truck to leaving the highway, so the cruise
+        target has to come down with it. Otherwise automatic control holds
+        highway speed straight through the gore point and the driver loses the
+        exit without ever touching a control. Returns the spoken addition, or
+        an empty string when there is nothing to say.
+        """
+        if self._cruise_mph is None:
+            # Paused mid-session -- a zone keeper, or a planned-stop pause.
+            # Remember the cap so cruise resumes at ramp speed, but say
+            # nothing: the keeper is already holding a low zone speed.
+            if self._speed_control_armed and self._speed_control_target_mph is not None:
+                self._cruise_exit_mph = min(self._speed_control_target_mph, RAMP_MAX_MPH)
+            return ""
+        self._cruise_exit_mph = min(self._cruise_mph, RAMP_MAX_MPH)
+        action = "easing to" if self.truck.speed_mph > self._cruise_exit_mph + 1.0 else "holding"
+        return (
+            f" Adaptive cruise {action} "
+            f"{self.ctx.settings.speed_text(self._cruise_exit_mph)} for the ramp."
         )
 
     def _exit_window_mi(self) -> float:
@@ -345,16 +371,7 @@ class DrivingEventMixin:
         if key == self._destination_exit_announced_key:
             return
         self._destination_exit_announced_key = key
-        message = self._destination_exit_announcement(stop, ahead)
-        if self._cruise_mph is not None:
-            self._cruise_exit_mph = min(self._cruise_mph, RAMP_MAX_MPH)
-            action = (
-                "easing to" if self.truck.speed_mph > self._cruise_exit_mph + 1.0 else "holding"
-            )
-            message += (
-                f" Adaptive cruise {action} "
-                f"{self.ctx.settings.speed_text(self._cruise_exit_mph)} for the ramp."
-            )
+        message = self._destination_exit_announcement(stop, ahead) + self._cap_cruise_for_ramp()
         self.ctx.audio.play("ui/notify", volume=0.7)
         self.ctx.say_event(message, interrupt=True)
 
@@ -484,6 +501,10 @@ class DrivingEventMixin:
         if stop is None or self.trip.position_mi < stop.at_mi:
             return
         self._exit_stop = None
+        # The exit is settled either way now, so the ramp cap comes off: taking
+        # it cancels cruise outright, and missing it must not leave automatic
+        # control crawling at ramp speed down the open highway.
+        self._cruise_exit_mph = None
         if self.truck.speed_mph <= RAMP_MAX_MPH:
             self._ramp_mi = RAMP_LENGTH_MI
             self._ramp_stop = stop
@@ -776,7 +797,10 @@ class DrivingEventMixin:
         cap_mph = posted + ACC_LIMIT_OFFSET_MPH
         limit_capped = cap_mph < self._cruise_mph
         if limit_capped:
-            target_mph = cap_mph
+            # Take the lower of the two caps. A posted limit above ramp speed
+            # must not undo an armed exit's cap and send the truck past its
+            # ramp at the corridor limit.
+            target_mph = min(target_mph, cap_mph)
             if not self._acc_limit_capped:
                 self.ctx.say_event(
                     "Posted limit lower; adaptive cruise easing to "

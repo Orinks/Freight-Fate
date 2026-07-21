@@ -5,6 +5,7 @@ import pytest
 from driving_feature_helpers import (
     key_event,
     mark_destination_exit_taken,
+    open_limits,
     open_status_screen,
     quiet_trip,
     start_drive,
@@ -1350,6 +1351,43 @@ def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
         assert said[-1] == (
             "Open-road cruise target 40 miles per hour. Ramp approach target 40 miles per hour."
         )
+    finally:
+        app.shutdown()
+
+
+def test_signaling_for_an_exit_eases_cruise_to_ramp_speed(monkeypatch):
+    """Pressing X is the commitment to leave the highway, so adaptive cruise
+    has to come down to ramp speed with it -- for a truck stop exit just as
+    much as for the destination, and it has to let go again on a cancel."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import RoadStop
+
+    app = App()
+    said = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        open_limits(driving)
+        stop = RoadStop("Petro Knoxville", 40.0, "truck_stop", ("fuel", "sleep"), exit_label="")
+        monkeypatch.setattr(driving, "_upcoming_exit_stop", lambda: stop)
+        driving.trip.position_mi = 37.0
+        driving.truck.engine_on = True
+        driving.truck.velocity_mps = 65.0 / 2.23694
+        driving._engage_cruise(65.0)
+        said.clear()
+
+        driving._take_exit()
+
+        assert driving._cruise_exit_mph == 45.0
+        assert "Adaptive cruise easing to 45 miles per hour for the ramp" in said[-1]
+        # And cruise actually acts on it: throttle off, brakes on.
+        driving._update_cruise(0.5, braking=False, accelerating=False, clutch_disengaged=False)
+        assert driving.truck.throttle == 0.0
+        assert driving.truck.brake > 0.0
+
+        driving._take_exit()  # X again cancels
+        assert driving._cruise_exit_mph is None
     finally:
         app.shutdown()
 

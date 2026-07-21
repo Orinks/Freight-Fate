@@ -161,6 +161,13 @@
   speed instead of switching off at highway speed. Press X to take the exit;
   automatic control releases as you enter the ramp, ready for you to brake to
   the facility stop without collecting an unwanted speeding fine.
+- **Signaling for any exit now slows the truck, not just the delivery one.**
+  Pressing X told you to slow to ramp speed, but adaptive cruise kept holding
+  highway speed, so a truck stop or rest area exit went by at seventy while
+  automatic control did nothing. Signaling now eases cruise to ramp speed for
+  every exit, and a posted limit above ramp speed no longer cancels that out.
+  Pressing X again to stay on the highway hands the open-road speed straight
+  back.
 - **State-line announcements no longer repeat at the next major city.** When
   the GPS calls out the real state boundary, passing the next city now says
   only the city and onward route instead of claiming that you crossed the same
