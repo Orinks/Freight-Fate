@@ -43,6 +43,20 @@ milestone below (speeding consequences especially).
 
 From a batch of player reports:
 
+- [x] **Map screen read raw data keys for the route -- FIXED 2026-07-21
+  (NVDA player report).** Its first line joined the world's city slugs, so an
+  east-coast run opened with "new underscore york underscore n y underscore u
+  s" for all thirteen cities; every other screen already composed spoken names.
+  Same pass singularized spoken measurements ("1 mile", not "1 miles") on one
+  shared helper. The reporter's snapshot also predated 36a7f8e, which is why
+  the map listed the same shared-city facility twice and pushed real stops off
+  the five-item list.
+- [ ] Unresolved half of that report: stop lines on the Map screen "make the
+  sound but not letting me fully read" under NVDA. Not reproducible from the
+  code -- the list is built once, nothing under the menu updates, and no path
+  interrupts or drops an utterance. Needs a `FREIGHT_FATE_LOG_FILE` transcript
+  from the reporter on a snapshot newer than 2026-07-21 to tell "the game
+  never spoke it" from "NVDA never spoke it".
 - [x] **Destination exit offered a state early on rural-highway finishes --
   FIXED 2026-07-16 (player transcripts).** The destination-exit scan accepted
   the last labeled interchange anywhere on the route, so routes whose final

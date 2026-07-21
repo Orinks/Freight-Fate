@@ -145,7 +145,8 @@ class DrivingStatusScreenState(MenuState):
             )
 
         items = [
-            say_item(f"Route: {' to '.join(route.cities)}"),
+            # route.cities holds slug keys; speak the composed names instead.
+            say_item(f"Route: {' to '.join(self.ctx.world.spoken_city(c) for c in route.cities)}"),
             say_item(f"Highways: {_join_phrase(route.highways)}"),
             say_item(
                 f"Progress: {settings.distance_text(d.trip.position_mi)} driven, "

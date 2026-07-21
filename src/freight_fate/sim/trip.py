@@ -6,6 +6,7 @@ from __future__ import annotations
 import random
 
 from ..data.world import Leg, Route, get_world
+from ..units import spoken_distance
 from .hos import clock_text, is_night
 from .timezones import appointment_text, city_zone, zone_for
 from .trip_models import *
@@ -21,11 +22,9 @@ from .weather import WeatherKind, WeatherSystem
 STOP_AHEAD_LOOKAHEAD_MI = 5.0
 
 
-def _spoken_distance(value: float, unit: str) -> str:
-    """A whole-number distance with the unit pluralized for speech, so a
-    screen reader never hears "in 1 miles"."""
-    rounded = round(value)
-    return f"{rounded:.0f} {unit if rounded == 1 else unit + 's'}"
+# One pluralization rule for every spoken distance in the game: the trip's own
+# readouts and Settings.distance_text/speed_text all go through this.
+_spoken_distance = spoken_distance
 
 
 class Trip:

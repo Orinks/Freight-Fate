@@ -86,6 +86,16 @@
 
 ### Fixed
 
+- **Distances and speeds no longer say "1 miles".** Anything that comes out to
+  exactly one is now read as "1 mile" or "1 kilometer", on map points, stop
+  distances, speed readouts, and everywhere else the game speaks a measurement.
+
+- **The Map screen now names the cities on your route.** Its first line read
+  the internal data names aloud, so a run down the east coast opened with
+  "new underscore york underscore n y underscore u s" and kept going for every
+  city on the route. It now says "New York to Philadelphia to Washington", the
+  same way the delivery summary and the dispatch board already did.
+
 - **Getting pulled over now judges whether you are actually stopping, not how
   far you rolled.** A loaded truck at highway speed cannot halt on a dime, and
   the old rule could flag a felony stop even when you braked correctly the whole

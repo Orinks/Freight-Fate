@@ -82,6 +82,35 @@ def test_enter_on_map_stop_opens_structured_detail_view():
         app.shutdown()
 
 
+def test_map_screen_speaks_city_names_never_slug_keys():
+    """The Map screen's route line reads city names, not world data keys.
+
+    ``route.cities`` holds slugs (``new_york_ny_us``); every other screen wraps
+    them in ``world.spoken_city``. This one did not, so the first line a player
+    heard on the Map screen was a string of underscored keys spelled out.
+    """
+    import re
+
+    from freight_fate.app import App
+    from freight_fate.states.driving_menu_states import DrivingStatusScreenState
+
+    slug = re.compile(r"\b[a-z0-9]+(?:_[a-z0-9]+)+\b")
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.stops = _stops(d.trip.position_mi)
+        screen = DrivingStatusScreenState(app.ctx, d, "map")
+        texts = [item.text for item in screen.build_items()]
+
+        # Both names are shared with cities in other states, so the spoken
+        # layer qualifies them; either way, no underscores.
+        assert texts[0] == "Route: Buffalo, New York to Rochester, New York"
+        for text in texts:
+            assert not slug.search(text), f"slug key leaked into spoken text: {text!r}"
+    finally:
+        app.shutdown()
+
+
 def test_eta_line_mirrors_eld_pace_rules():
     from freight_fate.app import App
     from freight_fate.states.driving_stop_detail import StopDetailState
