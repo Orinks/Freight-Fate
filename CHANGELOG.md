@@ -34,6 +34,16 @@
   of build is talking. Stable releases sound the same as before, and version
   numbers no longer skip when a stable release comes out.
 
+### Fixed
+
+- **The road tells you the truth about the terrain.** Stretches that were
+  quietly called mountain in flat country -- the East Texas piney woods, the
+  Hill Country's gentle dips -- now read as the flat or rolling ground they
+  really are, so the status readout no longer puts you in the mountains where
+  no Texan would. The real climbs you brace for still call out as mountain
+  grades, and every famous grade -- the Grapevine, Monteagle, the Siskiyous,
+  the run up to the Continental Divide -- keeps its name.
+
 ## 1.8.5 - 2026-07-22
 
 ### Added
