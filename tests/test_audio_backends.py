@@ -94,6 +94,25 @@ def test_engine_freq_mult_mapping():
     assert abs(mid - (1.0 + ENGINE_FREQ_MAX_MULT) / 2) < 1e-9
 
 
+def test_engine_band_weights_edges_and_blend():
+    natives = tuple(rpm for _key, rpm in audio.ENGINE_BANDS)
+    # Outside the ring the nearest band carries alone.
+    assert audio.engine_band_weights(0, natives) == (1.0, 0.0, 0.0, 0.0)
+    assert audio.engine_band_weights(natives[0], natives) == (1.0, 0.0, 0.0, 0.0)
+    assert audio.engine_band_weights(natives[-1], natives) == (0.0, 0.0, 0.0, 1.0)
+    assert audio.engine_band_weights(9999, natives) == (0.0, 0.0, 0.0, 1.0)
+    # Between neighbours exactly two bands blend, equal-power (sum of squares 1).
+    mid = (natives[1] + natives[2]) / 2
+    w = audio.engine_band_weights(mid, natives)
+    assert w[0] == 0.0 and w[3] == 0.0
+    assert w[1] > 0.0 and w[2] > 0.0
+    assert sum(x * x for x in w) == pytest.approx(1.0)
+    # The handoff is monotonic: rising rpm moves weight up the ring.
+    lo = audio.engine_band_weights(natives[1] + 10, natives)
+    hi = audio.engine_band_weights(natives[2] - 10, natives)
+    assert lo[1] > hi[1] and lo[2] < hi[2]
+
+
 def test_engine_load_gain_keeps_audible_load_contour():
     # Floor raised off the old 0.55 so coasting is not too quiet, but the span
     # stays wide enough to hear effort changes and the automatic-shift unload.
@@ -260,22 +279,61 @@ def test_bass_radio_stream_uses_url_stream(monkeypatch):
     assert slides[-1][-1] == 321
 
 
-def test_bass_engine_uses_single_pitched_loop(monkeypatch):
+def test_bass_engine_model_matches_available_cuts(monkeypatch):
+    # With the licensed multisample cuts installed the engine comes up as the
+    # crossfade ring; a clean clone (synthesized engine/idle only) falls back
+    # to the single pitched loop. Either way rpm tracking must be safe.
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
     if a.backend_name != "bass":
         pytest.skip("BASS backend unavailable")
     impl = a._impl
+    have_all_cuts = all(
+        audio._asset_bytes(key, ("ogg", "wav")) is not None for key, _rpm in audio.ENGINE_BANDS
+    )
     a.engine_start()
     assert a.engine_running
-    assert impl._engine_stream is not None
-    assert impl._engine_base_freq > 0
+    if have_all_cuts:
+        assert len(impl._engine_bands) == len(audio.ENGINE_BANDS)
+        assert impl._engine_stream is None
+    else:
+        assert impl._engine_bands == []
+        assert impl._engine_stream is not None
+        assert impl._engine_base_freq > 0
     # frequency targets follow RPM; repeated slides must be safe
     for rpm in (600, 1100, 1800, 2200, 900):
         a.set_engine_rpm(rpm, throttle=0.7)
     a.engine_stop()
     assert not a.engine_running
     assert impl._engine_stream is None
+    assert impl._engine_bands == []
+    a.shutdown()
+
+
+def test_bass_engine_falls_back_to_pitched_loop_without_cuts(monkeypatch):
+    # A clean clone carries only the synthesized engine/idle: the ring cannot
+    # form, and the legacy single pitched loop must come up instead.
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    impl = a._impl
+    original = impl._sfx_stream
+
+    def only_idle(key, looping=False):
+        if key in ("engine/low", "engine/mid", "engine/high"):
+            return None
+        return original(key, looping)
+
+    monkeypatch.setattr(impl, "_sfx_stream", only_idle)
+    a.engine_start()
+    assert a.engine_running
+    assert impl._engine_bands == []
+    assert impl._engine_stream is not None
+    assert impl._engine_base_freq > 0
+    for rpm in (600, 1500, 2200):
+        a.set_engine_rpm(rpm, throttle=0.5)
+    a.engine_stop()
     a.shutdown()
 
 
@@ -302,7 +360,9 @@ def test_silent_engine_start_skips_the_ignition_crank(monkeypatch):
     a.engine_start(play_start_sound=False)  # resume / menu-return path
     assert a.engine_running
     assert "engine/start" not in keys  # the crank must not replay
-    assert impl._engine_stream is not None  # the loop still comes up
+    # The engine voice still comes up: the ring when the cuts are installed,
+    # the legacy loop otherwise.
+    assert impl._engine_bands or impl._engine_stream is not None
     a.engine_stop()
     a.shutdown()
 
