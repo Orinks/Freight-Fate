@@ -995,6 +995,45 @@ def test_fast_idle_builds_air_then_settles_to_drive_idle():
     assert t.rpm == pytest.approx(t.specs.idle_rpm, rel=0.05)
 
 
+def test_high_idle_holds_setpoint_and_cancels_on_brake_release():
+    from freight_fate.sim.vehicle import HIGH_IDLE_DEFAULT_RPM
+
+    t = TruckState()
+    t.set_air_ready(parking_brake=True)
+    t.start_engine()
+    t.high_idle_rpm = HIGH_IDLE_DEFAULT_RPM
+
+    drive(t, 3.0)
+    assert t.rpm == pytest.approx(HIGH_IDLE_DEFAULT_RPM, rel=0.05)
+
+    # Throttle still revs above the latched floor.
+    t.throttle = 1.0
+    drive(t, 3.0)
+    assert t.rpm > HIGH_IDLE_DEFAULT_RPM * 1.5
+    t.throttle = 0.0
+
+    # Releasing the parking brake cancels the latch, like real fast idle.
+    assert t.release_parking_brake()
+    drive(t, 3.0)
+    assert t.high_idle_rpm is None
+    assert t.rpm == pytest.approx(t.specs.idle_rpm, rel=0.05)
+
+
+def test_high_idle_burns_more_parked_fuel_than_plain_idle():
+    idle = TruckState()
+    idle.set_air_ready(parking_brake=True)
+    idle.start_engine()
+    high = TruckState()
+    high.set_air_ready(parking_brake=True)
+    high.start_engine()
+    high.high_idle_rpm = 1500.0
+
+    drive(idle, 30.0)
+    drive(high, 30.0)
+
+    assert high.fuel_gal < idle.fuel_gal < high.specs.fuel_tank_gal
+
+
 def test_fast_idle_never_engages_while_rolling():
     t = TruckState()
     t.set_air_ready(parking_brake=False)

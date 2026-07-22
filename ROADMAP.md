@@ -109,12 +109,12 @@ terminal becomes the anchor of that week instead of a spawn point.
       map re-bake brief.
 - [ ] **Hand throttle, parked high-idle, and equipment by model era
       (owner idea 2026-07-22, sparked by the 896 take's rev-and-hold).**
-      Two features on the per-truck-spec pattern. (1) PARKED HIGH-IDLE,
-      the small one, buildable now: latch an rpm setpoint while the
-      parking brake is set (arrow keys or cruise-button style), engine
-      holds it -- building air genuinely faster, per the sim -- and
-      drops to idle the moment the brake releases or a gear engages,
-      exactly like real fast-idle/PTO modes. (2) EQUIPMENT BY ERA:
+      Two features on the per-truck-spec pattern. (1) PARKED HIGH-IDLE
+      -- SHIPPED 2026-07-22 (sound/engine-integration): K latches it
+      while the parking brake holds (controller: Y), plus/minus step
+      the setpoint 800-1500, air genuinely builds faster, parked
+      revving burns real fuel, and releasing the brake cancels it like
+      a real ECM. (2) EQUIPMENT BY ERA:
       cruise control only exists on electronic engines (~1990-on), so a
       genuinely vintage mechanical rig -- marketplace/classic material,
       the 896 Mack's era -- gets NO cruise, a HAND THROTTLE that also

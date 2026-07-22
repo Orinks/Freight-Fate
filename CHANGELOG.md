@@ -17,6 +17,14 @@
   that settling is your cue the parking brake can release. Revving while
   parked really does charge the tanks faster.
 
+- **Parked high idle, on the cruise button -- rev it like a boss.** With
+  the parking brake set, K latches a fast idle just like a real
+  electronic truck: the engine holds a raised rpm to warm up and build
+  air sooner, plus and minus step the setpoint up or down, and you hear
+  the compressor charge faster the higher you hold it. Releasing the
+  parking brake drops it back to idle on its own, and holding a high
+  idle burns real fuel. On a controller it is the Y button.
+
 - **Brakes and gear changes sound like the real mechanisms now.** Pressing
   the brake gives the valve's mechanical clunk, louder the harder you
   press, and letting off releases the air back out -- a hiss that runs
