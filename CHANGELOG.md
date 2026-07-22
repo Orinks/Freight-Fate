@@ -4,6 +4,19 @@
 
 ### Added
 
+- **The truck now sounds like a real truck.** The engine voice is built
+  from a real cab recording and follows the rpm through its range --
+  idle, pulling away, cruising, working up high -- instead of one loop
+  stretched faster and slower. You will hear the difference the moment
+  the engine settles into idle.
+
+- **Cold starts build their air out loud.** Start the engine with low
+  tanks and it holds a fast idle while the compressor charges the air
+  system, with a soft fill hiss underneath. When the air comes ready the
+  hiss stops, the dryer gives its purge pop, and the idle settles down --
+  that settling is your cue the parking brake can release. Revving while
+  parked really does charge the tanks faster.
+
 - **The engine brake grew its real cylinder selector.** J is now the
   dash switch: it turns the engine brake on at whatever stage you last
   selected, and while it is on, 1, 2, and 3 pick two, four, or six
