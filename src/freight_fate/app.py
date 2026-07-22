@@ -263,6 +263,7 @@ class GameContext:
             engine=self.settings.engine_volume,
             ui=self.settings.ui_volume,
         )
+        self.audio.set_engine_voice(self.settings.engine_voice == "classic")
 
     def apply_presence(self) -> None:
         """Reflect the Discord presence setting (e.g. after a settings change)."""

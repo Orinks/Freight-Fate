@@ -788,6 +788,9 @@ class _BassBackend:
         # Multisample ring: (native_rpm, stream, base_freq) per resolved band.
         # Empty when running on the legacy single pitched loop.
         self._engine_bands: list[tuple[float, object, float]] = []
+        # Player preference: True forces the legacy pitched loop even when
+        # the multisample cuts are installed (Settings, "classic").
+        self.engine_voice_classic = False
         self._engine_intro_stream = None  # ignition one-shot, kept for the crossfade
         self._engine_intro_gain = 1.0  # crossfade multiplier on the engine loop
         self._engine_intro_load = 0.0  # ignition load boost: 1.0 forces full load
@@ -1103,17 +1106,18 @@ class _BassBackend:
                 )
             )
         self._engine_bands = []
-        for key, native in ENGINE_BANDS:
-            band_stream = self._sfx_stream(key, looping=True)
-            if band_stream is None:
-                continue
-            try:
-                base_freq = band_stream.get_frequency()
-                band_stream.set_volume(0.0)
-                band_stream.play()
-            except self._BassError:
-                continue
-            self._engine_bands.append((native, band_stream, base_freq))
+        if not self.engine_voice_classic:
+            for key, native in ENGINE_BANDS:
+                band_stream = self._sfx_stream(key, looping=True)
+                if band_stream is None:
+                    continue
+                try:
+                    base_freq = band_stream.get_frequency()
+                    band_stream.set_volume(0.0)
+                    band_stream.play()
+                except self._BassError:
+                    continue
+                self._engine_bands.append((native, band_stream, base_freq))
         if len(self._engine_bands) < 2:
             # Not enough cuts for a crossfade ring (a clean clone carries only
             # the synthesized engine/idle): legacy single pitched loop.
@@ -1616,6 +1620,27 @@ class AudioEngine:
     def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
         """Play a one-shot. ``pan`` -1.0 = full left, 0 = center, 1.0 = right."""
         self._impl.play(key, volume, pan)
+
+    def set_engine_voice(self, classic: bool) -> None:
+        """Pick the engine voice: the recorded multisample ring or the
+        classic single pitched loop (BASS backend; pygame has one model).
+
+        Applies live -- a running engine re-voices in place at its current
+        rpm without replaying the ignition crank, so the Settings toggle is
+        an instant A/B.
+        """
+        impl = self._impl
+        if getattr(impl, "engine_voice_classic", None) in (None, classic):
+            if hasattr(impl, "engine_voice_classic"):
+                impl.engine_voice_classic = classic
+            return
+        impl.engine_voice_classic = classic
+        if self.engine_running:
+            rpm = getattr(impl, "_engine_last_rpm", ENGINE_RPM_IDLE)
+            throttle = getattr(impl, "_engine_last_throttle", 0.0)
+            impl.engine_stop(shutdown_sound=False)
+            impl.engine_start(play_start_sound=False)
+            impl.set_engine_rpm(rpm, throttle)
 
     def has_asset(self, key: str) -> bool:
         """Whether a sound key resolves (pack, licensed overlay, or loose).

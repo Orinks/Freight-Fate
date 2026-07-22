@@ -8,7 +8,9 @@
   from a real cab recording and follows the rpm through its range --
   idle, pulling away, cruising, working up high -- instead of one loop
   stretched faster and slower. You will hear the difference the moment
-  the engine settles into idle.
+  the engine settles into idle. Prefer the old sound? A new Engine
+  voice setting under Settings, Audio switches between real and
+  classic, and it applies instantly, even while driving.
 
 - **Cold starts build their air out loud.** Start the engine with low
   tanks and it holds a fast idle while the compressor charges the air

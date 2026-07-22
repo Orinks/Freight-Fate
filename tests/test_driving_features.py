@@ -2488,6 +2488,85 @@ def test_engine_audio_load_eases_without_dropping_out_during_automatic_shift(mon
         app.shutdown()
 
 
+def test_shift_holds_engine_voice_at_preshift_rpm(monkeypatch):
+    # A real shift is a gap and a re-entry: the voice must not glissando
+    # down with the falling physics rpm during the torque interrupt, but
+    # speak at the newly engaged rpm when the shift completes.
+    from freight_fate.app import App
+
+    app = App()
+    samples = []
+    monkeypatch.setattr(
+        app.ctx.audio, "set_engine_rpm", lambda rpm, throttle=0.0: samples.append(rpm)
+    )
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.transmission.automatic = True
+        t.transmission.gear = 4
+        t.rpm = 1400.0
+        t.transmission._shift_timer = 0.5  # mid-shift
+
+        driving._update_audio(0.0)
+        t.rpm = 950.0  # physics rpm falls through the interrupt
+        driving._update_audio(0.0)
+        assert samples[-1] == 1400.0  # held at the pre-shift rpm
+
+        t.transmission._shift_timer = 0.0  # clutch back in
+        driving._update_audio(0.0)
+        assert samples[-1] == 950.0  # re-entry at the engaged rpm
+    finally:
+        app.shutdown()
+
+
+def test_manual_clutch_out_ducks_load_but_keeps_live_revs(monkeypatch):
+    # Manual shifting: the player owns the engine while the clutch is out --
+    # a throttle blip must stay audible (rev-matching is a skill) -- but the
+    # engine unloads to the shift cap and swells back on engagement.
+    from freight_fate.app import App
+    from freight_fate.states.driving_updates import SHIFT_LOAD_CAP
+
+    app = App()
+    samples = []
+    monkeypatch.setattr(
+        app.ctx.audio, "set_engine_rpm", lambda rpm, throttle=0.0: samples.append((rpm, throttle))
+    )
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.transmission.automatic = False
+        t.transmission.gear = 5
+        t.transmission.clutch = 1.0  # pedal down
+        t.throttle = 1.0  # a blip while the clutch is out
+        t.rpm = 1400.0
+
+        driving._update_audio(0.0)
+        assert samples[-1] == (1400.0, SHIFT_LOAD_CAP)  # live revs, ducked load
+        t.rpm = 1650.0  # the blip climbs; the voice must follow, not hold
+        driving._update_audio(0.0)
+        assert samples[-1] == (1650.0, SHIFT_LOAD_CAP)
+
+        t.transmission.clutch = 0.0  # hooked back up
+        driving._update_audio(0.1)  # recovery ramps with real time, not a sync
+        rpm, load = samples[-1]
+        assert rpm == 1650.0
+        assert load > SHIFT_LOAD_CAP  # the engine speaks under load again
+    finally:
+        app.shutdown()
+
+
 def test_engine_audio_load_tracks_manual_throttle_smoothly(monkeypatch):
     from freight_fate.app import App
 
@@ -2594,6 +2673,59 @@ def test_air_fill_loop_plays_until_governor_release(monkeypatch):
 
         driving._update_audio(0.0)  # ready and quiet: no further calls
         assert loops[-1] == ("stop", CH_AIR)
+
+        # Routine braking dips just under the 100 psi line constantly; the
+        # fill hiss must NOT flutter back in for those (hysteresis).
+        loops.clear()
+        driving.truck.air_pressure_psi = 97.0
+        driving._update_audio(0.0)
+        assert loops == []
+
+        # A genuinely low air system still brings the fill loop back.
+        driving.truck.air_pressure_psi = 88.0
+        driving._update_audio(0.0)
+        assert loops == [("start", CH_AIR, "vehicle/air_pressurize")]
+    finally:
+        app.shutdown()
+
+
+def test_cold_start_buzzer_waits_out_the_crank(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.audio import AudioEngine
+
+    app = App()
+    played = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(
+            app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append(key)
+        )
+        t = driving.truck
+        t.set_cold_air_start()
+        t.start_engine()
+        driving._pending_low_air_buzzer = True  # what the E-key start path arms
+
+        # While the ignition crank still plays, the buzzer must hold.
+        monkeypatch.setattr(AudioEngine, "engine_starting", property(lambda self: True))
+        driving._update_audio(0.0)
+        assert "vehicle/low_air_buzzer" not in played
+        assert driving._pending_low_air_buzzer
+
+        # Crank handed off with the air still low (55 psi): now it may sound.
+        monkeypatch.setattr(AudioEngine, "engine_starting", property(lambda self: False))
+        driving._update_audio(0.0)
+        assert "vehicle/low_air_buzzer" in played
+        assert not driving._pending_low_air_buzzer
+
+        # And if the compressor had already built past the warning line,
+        # the pending buzzer dissolves silently.
+        played.clear()
+        driving._pending_low_air_buzzer = True
+        t.air_pressure_psi = 80.0  # above the 60 psi warning
+        driving._update_audio(0.0)
+        assert "vehicle/low_air_buzzer" not in played
+        assert not driving._pending_low_air_buzzer
     finally:
         app.shutdown()
 
