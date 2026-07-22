@@ -220,6 +220,7 @@ def test_mastodon_toggle_flips_and_discloses_when_linked(monkeypatch):
     _identity().save()
     app = App()
     try:
+        app.ctx.settings.mastodon_linked = True
         app.ctx.settings.mastodon_linked_handle = "@roadstar@mastodon.example"
         spoken: list[str] = []
         monkeypatch.setattr(app.ctx, "say", lambda text, **_kw: spoken.append(text))
@@ -235,6 +236,52 @@ def test_mastodon_toggle_flips_and_discloses_when_linked(monkeypatch):
         assert app.mastodon.enabled is False
     finally:
         app.shutdown()
+
+
+def test_mastodon_toggle_works_when_linked_without_a_handle(monkeypatch):
+    # Regression: a link can exist with no readable handle (the server could
+    # not fetch the account name). The toggle must gate on the linked flag,
+    # not the display handle, or the player hears "linked" from the status
+    # check while the switch keeps refusing.
+    from freight_fate.app import App
+
+    _identity().save()
+    app = App()
+    try:
+        app.ctx.settings.mastodon_linked = True
+        app.ctx.settings.mastodon_linked_handle = ""
+        monkeypatch.setattr(app.ctx, "say", lambda *_a, **_kw: None)
+        cat = _open_online_settings(app)
+        while not cat.items[cat.index].text.startswith("Share notable deliveries"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        assert cat.items[cat.index].text.endswith("off")
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.mastodon_sharing is True
+    finally:
+        app.shutdown()
+
+
+def test_status_check_records_linked_flag_even_without_handle():
+    from types import SimpleNamespace
+
+    from freight_fate.settings import Settings
+    from freight_fate.states.online_states import MastodonLinkState
+
+    settings = Settings()
+    said: list[str] = []
+    ctx = SimpleNamespace(
+        settings=settings,
+        say=lambda text, interrupt=True: said.append(text),
+        audio=SimpleNamespace(play=lambda *_a, **_kw: None),
+    )
+    state = MastodonLinkState(ctx)
+    state.items = state.build_items()
+    state._checking = True
+    state._outcome = {"linked": True, "handle": ""}
+    state.update(0)
+    assert settings.mastodon_linked is True
+    assert settings.mastodon_linked_handle == ""
+    assert any(text.startswith("Linked: your Mastodon account") for text in said)
 
 
 def test_online_adjust_rows_still_line_up(monkeypatch):

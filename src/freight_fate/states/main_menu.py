@@ -1012,7 +1012,7 @@ class SettingsCategoryState(MenuState):
                         (
                             f"Share notable deliveries to Mastodon: "
                             f"{'on' if s.mastodon_sharing else 'off'}"
-                            if s.mastodon_linked_handle
+                            if s.mastodon_linked
                             else "Share notable deliveries to Mastodon: not linked"
                         )
                         if OnlineIdentity.load() is not None
@@ -1027,8 +1027,12 @@ class SettingsCategoryState(MenuState):
                 ),
                 MenuItem(
                     lambda: (
-                        f"Mastodon account: linked as {s.mastodon_linked_handle}"
-                        if s.mastodon_linked_handle
+                        (
+                            f"Mastodon account: linked as {s.mastodon_linked_handle}"
+                            if s.mastodon_linked_handle
+                            else "Mastodon account: linked"
+                        )
+                        if s.mastodon_linked
                         else "Link a Mastodon account"
                     ),
                     self._mastodon_account,
@@ -1354,7 +1358,7 @@ class SettingsCategoryState(MenuState):
                 interrupt=True,
             )
             return
-        if not s.mastodon_linked_handle and not s.mastodon_sharing:
+        if not s.mastodon_linked and not s.mastodon_sharing:
             # No known link: the switch would be inert, so point at the link
             # item instead of flipping it (same shape as cloud backup).
             self.ctx.say(

@@ -672,18 +672,19 @@ class MastodonLinkState(MenuState):
     def _status_label(self) -> str:
         if self._checking:
             return "Checking the Mastodon link"
-        handle = self.ctx.settings.mastodon_linked_handle
-        if handle:
-            return f"Check link status. Last known: linked as {handle}"
+        s = self.ctx.settings
+        if s.mastodon_linked:
+            spoken = f" as {s.mastodon_linked_handle}" if s.mastodon_linked_handle else ""
+            return f"Check link status. Last known: linked{spoken}"
         return "Check link status"
 
     def announce_entry(self) -> None:
-        handle = self.ctx.settings.mastodon_linked_handle
-        known = (
-            f"Last I checked, your Mastodon account {handle} was linked."
-            if handle
-            else "No Mastodon account is linked yet, as far as this computer knows."
-        )
+        s = self.ctx.settings
+        if s.mastodon_linked:
+            spoken = s.mastodon_linked_handle or "a Mastodon account"
+            known = f"Last I checked, {spoken} was linked."
+        else:
+            known = "No Mastodon account is linked yet, as far as this computer knows."
         self.ctx.say(
             f"{self.title}. Linking happens in your browser on orinks.net, "
             f"using the same sign-in as driver setup. {known} "
@@ -780,6 +781,7 @@ class MastodonLinkState(MenuState):
             return
         s = self.ctx.settings
         linked = bool(outcome.get("linked"))
+        s.mastodon_linked = linked
         s.mastodon_linked_handle = str(outcome.get("handle") or "") if linked else ""
         s.save()
         self.refresh()

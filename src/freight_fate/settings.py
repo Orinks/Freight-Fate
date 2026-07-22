@@ -76,9 +76,12 @@ class Settings:
     # orinks.net. Off by default, separate from Profile sharing, and inert
     # until a Mastodon account is linked on the site.
     mastodon_sharing: bool = False
-    # Spoken-label cache of the linked Mastodon handle, refreshed on every
-    # status check. The server stays the authority; this only keeps the
+    # Last-known link state and handle, refreshed on every status check. Two
+    # fields because a link can exist without a handle (the server could not
+    # read the account name): linked gates the toggle, the handle is only
+    # spoken. The server stays the authority; this cache only keeps the
     # settings menu from needing the network to read a label.
+    mastodon_linked: bool = False
     mastodon_linked_handle: str = ""
     controller_enabled: bool = True  # accept game-controller input alongside the keyboard
     haptics_enabled: bool = True  # rumble/vibration feedback on the controller
@@ -134,6 +137,8 @@ class Settings:
             s.cloud_saves = False
         if not isinstance(s.mastodon_sharing, bool):
             s.mastodon_sharing = False
+        if not isinstance(s.mastodon_linked, bool):
+            s.mastodon_linked = False
         if not isinstance(s.mastodon_linked_handle, str):
             s.mastodon_linked_handle = ""
         if not isinstance(s.live_weather_controls_calendar, bool):
