@@ -45,6 +45,7 @@ HISS_SRC = LV / "SemiTruckAirBrake_BWU.95.wav"     # real air spectrum to resynt
 PUMP_SRC = IND / "BantamBrakeMach_S08IN.62.wav"    # rhythmic pneumatic pump
 LOOP_S = 2.5
 SEED = 20260721   # deterministic phase, so the render reproduces
+PUMP_WHISPER = 0.08   # compressor pump mixed UNDER the hiss, ~-22 dB: a faint tick
 
 
 def hp(x: np.ndarray, fc: float) -> np.ndarray:
@@ -134,27 +135,37 @@ def tiled(loop: np.ndarray, secs: float) -> np.ndarray:
     return out
 
 
+def rms(x: np.ndarray) -> float:
+    return float(np.sqrt(np.mean(x ** 2))) or 1.0
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
+    n = int(LOOP_S * C.SR)
+    xf = int(0.12 * C.SR)
 
     # 1) Continuous fill: resynthesize the de-whistled air spectrum as a
     #    perfectly periodic loop -- no whine, no seam, constant level.
     f, mag = air_shape(C.load_wav(HISS_SRC))
-    hiss_loop = synth_loop(f, mag, LOOP_S)
-    write("pressurize_hiss.wav", hiss_loop)
-    write("pressurize_hiss_11s.wav", tiled(hiss_loop, 11.0))
+    hiss_loop = synth_loop(f, mag, LOOP_S)                       # exactly n samples
 
-    # 2) Pump variant: a steady Bantam stretch, macro-level flattened (so it
-    #    does not seam) then crossfade-looped; the pulse rhythm survives.
+    # 2) Compressor pump, crossfade-looped to exactly n samples so it aligns
+    #    with the hiss (take n+xf, the crossfade drops back to n).
     pump = hp(C.load_wav(PUMP_SRC), 160.0)
     pump = flatten(steady_window(pump, LOOP_S + 0.4), w_s=0.35)
-    pump_loop = loop_xfade(pump[:int(LOOP_S * C.SR)], xfade_s=0.12)
-    write("pressurize_pump.wav", pump_loop)
-    write("pressurize_pump_11s.wav", tiled(pump_loop, 11.0))
+    pump_loop = loop_xfade(pump[:n + xf], xfade_s=0.12)          # -> n samples
 
-    print(f"  pressurize_hiss.wav (resynth, whine-free, seamless) / "
-          f"pressurize_pump.wav  ({LOOP_S:.1f}s loops)")
-    print("  + _11s demos (game fires air_dryer_purge at the end)")
+    # Mix the pump UNDER the hiss at a whisper: a real build is a smooth air
+    # hiss with a faint mechanical compressor tick beneath it.
+    m = min(len(hiss_loop), len(pump_loop))
+    fill = hiss_loop[:m] + pump_loop[:m] * (PUMP_WHISPER * rms(hiss_loop) / rms(pump_loop))
+    write("pressurize_hiss.wav", fill)                           # keeper: hiss + whisper pump
+    write("pressurize_hiss_11s.wav", tiled(fill, 11.0))
+    write("pressurize_pump.wav", pump_loop)                      # standalone, reference only
+
+    print(f"  pressurize_hiss.wav = de-whistled hiss + whisper pump "
+          f"({PUMP_WHISPER:.0%} under), seamless {LOOP_S:.1f}s")
+    print("  + pressurize_hiss_11s demo (game fires air_dryer_purge at ready)")
     print(f"  wrote to {OUT}")
 
 
