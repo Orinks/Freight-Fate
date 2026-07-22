@@ -204,14 +204,19 @@ class DrivingUpdateMixin:
             self._brake_peak_application = max(self._brake_peak_application, t.brake)
         elif t.brake < 0.02:
             peak = self._brake_peak_application
+            # Locked spec levels (0.07-0.12 mix, "all quiet under the
+            # engine"): a light release is a barely-there sigh below the
+            # road bed, not a foreground pssht -- shipped 4x hot at first
+            # and the owner heard every tap on a twisty descent. Feather
+            # releases under the floor stay silent entirely.
             if (
                 self._brake_air_hissed
-                and peak > 0.0
+                and peak >= 0.15
                 and not emergency
                 and self.ctx.audio.has_asset("vehicle/brake_hiss_bed")
             ):
                 self.ctx.audio.start_loop(
-                    CH_BRAKE, "vehicle/brake_hiss_bed", volume=0.30 + 0.40 * peak, fade_ms=0
+                    CH_BRAKE, "vehicle/brake_hiss_bed", volume=0.10 + 0.15 * peak, fade_ms=0
                 )
                 self.ctx.audio.stop_loop(CH_BRAKE, fade_ms=int(160 + 800 * peak))
             self._brake_air_hissed = False
