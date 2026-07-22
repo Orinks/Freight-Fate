@@ -996,6 +996,14 @@ section below and the Unreleased changelog; the release-line view:
       BASS), the far Montana Hi-Line, the Texas border west of the Valley,
       and interior US-50 Nevada -- genuinely thin country, left dark rather
       than faked.
+- [ ] **Montana Hi-Line via translators (owner lead, 2026-07-22).** The
+      Hi-Line gap may not be as dark as the license map suggests: Montana
+      Public Radio and Yellowstone Public Radio blanket the state through
+      low-power FM translators, and the parent streams are real, licensed,
+      and likely BASS-friendly. Next radio pass: map which translator
+      (parent network) actually covers each Hi-Line dispatch city and seat
+      the parent stream there under the local translator's dial position,
+      the same honest-coverage rule as everywhere else.
 - [x] **Fictional call signs de-squatted (2026-07-22).** An FCC license
       audit found eleven of the twelve invented regional call signs
       collide with real licensed stations (only KRWL was clear). Each was
