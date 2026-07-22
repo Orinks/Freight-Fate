@@ -876,6 +876,16 @@ class SettingsCategoryState(MenuState):
                     help="Engine start, shutdown, and running engine sounds.",
                 ),
                 MenuItem(
+                    lambda: f"Engine voice: {s.engine_voice}",
+                    lambda: self._toggle_engine_voice(1),
+                    help=(
+                        "Real plays the engine recorded from a working truck cab, "
+                        "following the rpm through its range. Classic keeps the "
+                        "original engine sound. Changes apply immediately, even "
+                        "while driving."
+                    ),
+                ),
+                MenuItem(
                     lambda: f"Music volume: {round(s.music_volume * 100)} percent",
                     lambda: self._volume("music_volume", 0.1),
                     help="Menu and facility background music volume.",
@@ -1049,6 +1059,7 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("sfx_volume", 0.1 * d),
                     lambda d: self._volume("weather_volume", 0.1 * d),
                     lambda d: self._volume("engine_volume", 0.1 * d),
+                    self._toggle_engine_voice,
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("radio_volume", 0.1 * d),
                     self._toggle_radio_streamer_safe,
@@ -1441,6 +1452,13 @@ class SettingsCategoryState(MenuState):
     def _toggle_speed_keeper(self, _d: int = 1) -> None:
         """Toggle the speed keeper setting."""
         self.ctx.settings.speed_keeper = not self.ctx.settings.speed_keeper
+        self._announce()
+
+    def _toggle_engine_voice(self, _d: int = 1) -> None:
+        """Flip between the recorded engine and the classic loop, live."""
+        s = self.ctx.settings
+        s.engine_voice = "classic" if s.engine_voice == "real" else "real"
+        self.ctx.apply_volumes()  # re-voices a running engine in place
         self._announce()
 
     def _toggle_online_services(self, _d: int) -> None:

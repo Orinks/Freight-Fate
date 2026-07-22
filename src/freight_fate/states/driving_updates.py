@@ -32,6 +32,13 @@ _shift_recovery_curve = _resolve_curve(SHIFT_LOAD_RECOVERY_CURVE)
 # Low-pass raw throttle before it reaches the audible engine-load envelope.
 ENGINE_LOAD_SMOOTH_S = 0.45
 
+# The air-fill loop re-arms only this far below governor release. air_ready
+# flips at exactly 100 psi and normal service braking dips the reservoirs a
+# few psi, so without hysteresis the fill hiss would flutter on and off every
+# few seconds all drive long. A cold start (55) or a real low-air situation
+# still brings it in; once playing it runs until the air is ready again.
+AIR_FILL_REARM_PSI = 8.0
+
 
 class DrivingUpdateMixin:
     def _update_critical_respeak(self, dt: float) -> None:
@@ -900,9 +907,14 @@ class DrivingUpdateMixin:
             self._reverse_cue_active = False
         # Air-fill overlay: the compressor charging the tanks below governor
         # release, whatever idle or drive state plays over it. Ends -- with the
-        # fast idle settling -- at the park_idle -> ready_idle flip.
+        # fast idle settling -- at the park_idle -> ready_idle flip. Hysteresis
+        # (AIR_FILL_REARM_PSI) keeps routine brake dips just under the 100 psi
+        # line from fluttering the hiss; a genuine low-air build still plays.
         voice = engine_audio.classify(engine_audio.reading_from_truck(t))
-        if t.engine_on and voice.pressurizing:
+        deep_fill = (
+            t.air_pressure_psi <= t.specs.air_parking_release_psi - AIR_FILL_REARM_PSI
+        )
+        if t.engine_on and voice.pressurizing and (self._air_cue_active or deep_fill):
             if not self._air_cue_active:
                 audio.start_loop(CH_AIR, "vehicle/air_pressurize", fade_ms=400)
                 self._air_cue_active = True

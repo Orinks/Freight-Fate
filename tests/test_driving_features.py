@@ -2594,6 +2594,18 @@ def test_air_fill_loop_plays_until_governor_release(monkeypatch):
 
         driving._update_audio(0.0)  # ready and quiet: no further calls
         assert loops[-1] == ("stop", CH_AIR)
+
+        # Routine braking dips just under the 100 psi line constantly; the
+        # fill hiss must NOT flutter back in for those (hysteresis).
+        loops.clear()
+        driving.truck.air_pressure_psi = 97.0
+        driving._update_audio(0.0)
+        assert loops == []
+
+        # A genuinely low air system still brings the fill loop back.
+        driving.truck.air_pressure_psi = 88.0
+        driving._update_audio(0.0)
+        assert loops == [("start", CH_AIR, "vehicle/air_pressurize")]
     finally:
         app.shutdown()
 

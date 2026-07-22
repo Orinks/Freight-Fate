@@ -533,6 +533,14 @@ terminal becomes the anchor of that week instead of a spawn point.
       driver/yawn.ogg, ambient/night.ogg (Splice); the engine-voice
       rebuild retires idle/start/shutdown, gear_shift, and both
       parking-brake cues.
+- [ ] **Automatics should skip-shift when lightly loaded (owner playtest
+      2026-07-22).** An empty rig at full throttle machine-guns through
+      the low gears -- audible as shift after shift in the first seconds
+      of every launch. Real AMTs skip gears under light load (start in
+      3rd or 4th, take two at a time) precisely to avoid this; ours
+      upshifts one at a time regardless of weight. Skip-shifting by
+      load is the honest fix and quiets the launch soundscape for free.
+      Pairs with the bobtail-tare bullet below.
 - [ ] **Bobtail means no trailer at all (forum report, SRD625
       2026-07-17).** The physics models every unloaded state as tractor
       plus EMPTY TRAILER (`tare_kg`, vehicle.py: "Tractor plus empty

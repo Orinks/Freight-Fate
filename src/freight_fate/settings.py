@@ -79,6 +79,10 @@ class Settings:
     # player can turn the master back on without reconfiguring each service.
     online_services: bool = True
     imperial_units: bool = True
+    # The engine voice: "real" plays the multisample recorded-cab ring
+    # (release builds carry the licensed cuts); "classic" keeps the original
+    # single pitched loop for players who prefer the familiar sound.
+    engine_voice: str = "real"  # real / classic
     automatic_transmission: bool = True  # friendlier default for new players
     # Simple keeps the familiar hold-through-stop behavior. Deliberate requires
     # a release and second press before an automatic changes direction.
