@@ -1419,11 +1419,29 @@ From a batch of player reports:
   were cash the career could not account for and cloud upload screening
   refused the save and stamped a sticky integrity flag. Lifetime earnings
   now book the whole settlement.
-- [ ] **Review integrity flags stamped before that fix.** Drivers flagged by
-  the advance accounting bug are legitimate; a save carrying the old
-  shortfall keeps failing upload until the driver spends the difference on
-  fuel or repairs. Decide whether to clear those flags by hand or repair
-  the earnings figure on load, and confirm no honest driver is stuck.
+- [x] **Review integrity flags stamped before that fix.** All five production
+  flags were cleared by hand on 2026-07-20. One (a level 2 career, four
+  deliveries) was a false positive with no sign of an edit; the other four
+  had been confirmed separately by offline forensics and were cleared as a
+  deliberate amnesty.
+- [x] **Stop screening from branding accounts on arithmetic alone.** A failed
+  money or XP check now rejects the upload and keeps the payload for review
+  instead of stamping a sticky flag that hid the driver until a human
+  cleared it. Flags are still available by hand, from evidence. Both rules
+  were wrong in the accusing direction: the XP ceiling was a copied 1.2 per
+  mile sitting exactly on what a spotless career earns, and the money check
+  priced owned equipment as if it had all been bought.
+- [x] **Cloud screening reads the economy from the game.** Starting cash, the
+  advance cap, and the XP rates ship in the exported invariants rather than
+  being kept by hand on the server, so a balance pass cannot silently turn
+  the rules against honest drivers.
+- [ ] **Carry the same fixes onto the 1.9 line.** The career arc changes the
+  XP model (flat per-delivery XP plus class, streak, and condition
+  multipliers) and adds the owner-operator buy-in, where a driver takes
+  title to a carrier tractor worth far more than the buy-in. Regenerate the
+  exported invariants for save version 11 before 1.9 ships — the server
+  gate matches on exact save version, so an un-regenerated export rejects
+  every 1.9 backup.
 
 ### Fatigue and driver responsibility
 
@@ -1857,8 +1875,12 @@ reset instead of only a fine.
   against patrol intensity (`DrivingState._trooper_catches_speeder`); a hit lights
   you up (`events/police_siren`), you signal with X and brake to a stop, and
   `TrafficStopState` runs a spoken license/logbook check ending in an immediate
-  on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning. Ignoring
-  the lights past `PULL_OVER_IGNORE_MI` is logged as evasion. Disabled in the
+  on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning; a prompt,
+  fully-compliant stop has a small chance a ticket is waived to a warning. A
+  behavior-based compliance tracker (seeded at `PULL_OVER_START_COMPLIANCE`,
+  raised by braking, lowered by accelerating/coasting/failing to signal) judges
+  the stop -- refusing to comply zeroes it out and is logged as an evasion/felony
+  rather than the old distance rule. Disabled in the
   debug HOS bypass. Uncaught speeding still accrues the silent settlement strike.
   CB chatter now warns a few miles before drivers are talking about a bear or
   work-zone enforcement, plays `events/cb_radio_chatter.ogg`, remains

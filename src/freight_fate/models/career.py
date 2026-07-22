@@ -72,6 +72,11 @@ ENDORSEMENT_LABELS_SPOKEN = {
 # bringing the cargo in undamaged proves the lesson stuck. Every settled
 # load also teaches a flat slice of the trade -- docks, paperwork, people --
 # so short early hauls still move the career.
+#
+# Cloud-save screening re-derives the highest XP an honest career could hold
+# from these, via profile_integrity_invariants. Change any of them and the
+# export must be regenerated: the server once kept its own 1.2 per mile,
+# which these rates outgrew, and honest drivers had backups refused for it.
 XP_SPECIALTY_MULT = 1.5
 XP_PREMIUM_MULT = 1.25
 XP_STREAK_STEP = 0.05  # extra share per consecutive on-time delivery

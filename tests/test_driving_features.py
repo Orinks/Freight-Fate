@@ -2784,6 +2784,54 @@ def test_route_planning_labels_name_through_cities_with_states():
         app.shutdown()
 
 
+def test_live_route_weather_accounts_for_loading_and_unavailable_cities(monkeypatch):
+    """A partial live response must not sound like a complete route outlook."""
+    from freight_fate.app import App
+    from freight_fate.models import JobBoard, Profile
+    from freight_fate.sim.weather import WeatherKind
+    from freight_fate.states.city import RouteSelectState
+
+    app = App()
+    spoken = []
+    try:
+        world = app.ctx.world
+        job = next(
+            j
+            for j in JobBoard(world, seed=3).offers("Chicago", endorsements=set(), level=2)
+            if len(world.supported_route_options(j.origin, j.destination)[0].cities) > 3
+        )
+        route = world.supported_route_options(job.origin, job.destination)[0]
+        first, second, third = route.cities[1:4]
+
+        class PartialProvider:
+            def request(self, *args):
+                pass
+
+            def get(self, city):
+                return WeatherKind.CLOUDY if city == first else None
+
+            def unavailable(self, city):
+                return city == second
+
+        app.ctx.profile = Profile(name="Route Weather Driver")
+        monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: PartialProvider())
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+
+        state = RouteSelectState(app.ctx, job, [route])
+        state._speak_forecast(route)
+
+        assert f"{world.spoken_city(first, qualified=True)}: cloudy" in spoken[-1]
+        assert (
+            f"{world.spoken_city(second, qualified=True)}: live weather unavailable; "
+            "simulated fallback may apply"
+        ) in spoken[-1]
+        assert (
+            f"{world.spoken_city(third, qualified=True)}: live weather still loading" in spoken[-1]
+        )
+    finally:
+        app.shutdown()
+
+
 def test_destination_exit_scan_stays_on_the_final_approach():
     """Routes that finish on rural highways carry no baked interchanges, and
     the scan used to crown the last labeled exit anywhere on the route as the
