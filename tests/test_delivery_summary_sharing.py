@@ -51,7 +51,7 @@ def test_notable_share_carries_allowlisted_facts_and_posts_once(tmp_path):
     profile.career.deliveries = 1
     reasons = [
         {"type": "level", "level": 2},
-        {"type": "badges", "names": ["Signed On"]},
+        {"type": "achievements", "names": ["Signed On"]},
     ]
     assert queue_mastodon_share(
         box,
@@ -154,10 +154,10 @@ def test_first_delivery_queues_a_mastodon_share_when_enabled(monkeypatch):
 
         _complete_first_delivery(app)
 
-        assert app.mastodon.items, "the first delivery earns badges, so it is notable"
+        assert app.mastodon.items, "the first delivery earns achievements, so it is notable"
         inner = app.mastodon.items[0].payload["payload"]
-        badge_reason = next(r for r in inner["reasons"] if r["type"] == "badges")
-        assert badge_reason["names"]
+        achievement_reason = next(r for r in inner["reasons"] if r["type"] == "achievements")
+        assert achievement_reason["names"]
         assert flushed
     finally:
         app.shutdown()

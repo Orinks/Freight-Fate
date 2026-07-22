@@ -11,7 +11,7 @@
   clipboard, and tells you if the copy did not take.
 - **Share notable deliveries to your own Mastodon account.** A new Settings,
   Online option posts a short public summary, with the FreightFate hashtag,
-  when a delivery earns you a badge, a level, or a perfect streak milestone.
+  when a delivery earns you an achievement, a level, or a perfect streak milestone.
   Routine runs are never posted. It is off until you turn it on, and linking
   your Mastodon account happens in your browser on orinks.net using the same
   sign-in as driver setup; the Mastodon account item walks you through it

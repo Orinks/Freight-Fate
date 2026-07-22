@@ -1019,7 +1019,7 @@ class SettingsCategoryState(MenuState):
                         else "Share notable deliveries to Mastodon: not set up"
                     ),
                     lambda: self._toggle_mastodon_sharing(1),
-                    help="When on, finishing a delivery that earns a badge, a "
+                    help="When on, finishing a delivery that earns an achievement, a "
                     "level, or a perfect streak posts a short public summary "
                     "to your own Mastodon account with the FreightFate "
                     "hashtag. Routine deliveries are never posted. Link a "
@@ -1374,7 +1374,7 @@ class SettingsCategoryState(MenuState):
         if s.mastodon_sharing:
             # The label said "on"; this says what "on" means, every time.
             self.ctx.say(
-                "Only deliveries that earn a badge, a level, or a perfect "
+                "Only deliveries that earn an achievement, a level, or a perfect "
                 "streak are posted. Posts are public on your own Mastodon "
                 "account and carry the FreightFate hashtag.",
                 interrupt=False,

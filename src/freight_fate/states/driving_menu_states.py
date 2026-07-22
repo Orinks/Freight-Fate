@@ -625,7 +625,7 @@ class ArrivalState(MenuState):
         self.driving = driving
         self.summary_parts: list[str] = []
         self._achievement_messages: list[str] = []
-        self._new_badge_names: list[str] = []
+        self._new_achievement_names: list[str] = []
         self._announcements: list[str] = []
         self.summary_lines: list[str] = []
         self.terminal = ctx.world.home_terminal(driving.job.destination)
@@ -850,7 +850,7 @@ class ArrivalState(MenuState):
         self, *, on_time: bool, previous_level: int, occurred_at_ms: int
     ) -> None:
         """Offer this delivery to the player's Mastodon account when it earned
-        something worth telling: a new badge, a level, or a streak milestone.
+        something worth telling: a new achievement, a level, or a streak milestone.
         Routine runs stay quiet, and the outbox itself is inert unless the
         player turned Mastodon sharing on and linked an account."""
         from ..online_journal import queue_mastodon_share
@@ -860,8 +860,8 @@ class ArrivalState(MenuState):
         reasons: list[dict] = []
         if p.career.level > previous_level:
             reasons.append({"type": "level", "level": int(p.career.level)})
-        if self._new_badge_names:
-            reasons.append({"type": "badges", "names": self._new_badge_names[:10]})
+        if self._new_achievement_names:
+            reasons.append({"type": "achievements", "names": self._new_achievement_names[:10]})
         stats = p.achievement_stats if isinstance(p.achievement_stats, dict) else {}
         streak = int(stats.get("perfect_streak", 0))
         if streak in (5, 10, 25, 50, 100):
@@ -1012,7 +1012,7 @@ class ArrivalState(MenuState):
             result = self.ctx.award_achievement(achievement_id, announce=False)
             if result is not None:
                 self._achievement_messages.append(result.message)
-                self._new_badge_names.append(result.achievement.name)
+                self._new_achievement_names.append(result.achievement.name)
         self.ctx.save_profile()
 
     def enter(self) -> None:

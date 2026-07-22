@@ -221,7 +221,7 @@ def queue_mastodon_share(
 ) -> bool:
     """Queue a notable delivery for the player's own Mastodon account.
 
-    ``reasons`` is what made the run notable -- new badges, a level up, a
+    ``reasons`` is what made the run notable -- new achievements, a level up, a
     perfect-streak milestone. An empty list means the delivery was routine,
     and routine runs are never posted: the server refuses reason-free shares
     too, so the quiet path is enforced on both ends. The server composes the
