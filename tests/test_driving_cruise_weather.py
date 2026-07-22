@@ -843,7 +843,7 @@ def test_adaptive_cruise_switches_to_keeper_for_heavy_traffic(monkeypatch):
         zone = Zone(10.0, 15.0, 50.0, "heavy traffic")
         event = TripEvent(
             TripEventKind.ZONE_ENTER,
-            "heavy traffic ahead. Speed limit 50.",
+            "Entering heavy traffic zone. Speed limit 50 now.",
             {"zone": zone},
         )
         driving._handle_trip_event(event)
@@ -853,7 +853,8 @@ def test_adaptive_cruise_switches_to_keeper_for_heavy_traffic(monkeypatch):
         assert driving._speed_control_target_mph == pytest.approx(60.0, abs=1.0)
         assert driving._speed_control_armed
         assert events[-2] == (
-            "heavy traffic ahead. Speed limit 50. Speed keeper holding 50 miles per hour."
+            "Entering heavy traffic zone. Speed limit 50 now. "
+            "Speed keeper holding 50 miles per hour."
         )
         assert events[-1].startswith("New achievement! Bumper-to-Bumper Blues.")
     finally:
@@ -1210,6 +1211,31 @@ def test_real_weather_starts_clear_with_no_simulated_warmup(monkeypatch):
             driving.update(1 / 60)
         assert driving.weather.current is WeatherKind.CLEAR
         assert "rain_driver" not in driving.ctx.profile.achievements
+    finally:
+        app.shutdown()
+
+
+def test_live_weather_calendar_off_does_not_announce_simulated_forecast_while_loading(
+    monkeypatch,
+):
+    """V must not invent a forecast while the selected live source is loading.
+
+    The calendar toggle changes seasonal plausibility, not the weather source.
+    """
+    from freight_fate.app import App
+
+    provider = _FakeWeatherProvider(kind=None)
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: provider)
+    app.ctx.settings.real_weather = True
+    app.ctx.settings.live_weather_controls_calendar = False
+    try:
+        driving = start_drive(app)
+        driving._speak_weather()
+        assert "Live weather is still loading" in spoken[-1]
+        assert "Ahead:" not in spoken[-1]
     finally:
         app.shutdown()
 

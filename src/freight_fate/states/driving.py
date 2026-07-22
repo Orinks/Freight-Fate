@@ -170,6 +170,10 @@ class DrivingState(
         self._brake_squeal_cooldown_s = 0.0  # hot-brake squeal cue spacing
         self._hydro_active = False  # spoken hydroplane warning edge tracking
         self._jake_slip_active = False  # spoken jake-slip warning edge tracking
+        # The cylinder selector's position, like the real dash switch: J
+        # engages at whatever stage was last chosen. Full retard by default
+        # -- the setting every driver leaves it on until ice says otherwise.
+        self._jake_selected_stage = JAKE_STAGES
         self._chains_fast_active = False  # spoken chains-over-speed warning edge tracking
         self._chain_law_warned: set[tuple[int, int]] = set()  # (area, level) spoken warnings
         self._chain_law_cited: set[tuple[int, int]] = set()  # checkpoint rolls already taken
@@ -195,6 +199,14 @@ class DrivingState(
         self.failure_to_stop_count = 0
         self._weigh_station_notice_key = ""
         self._unsafe_damage_stop_key = ""
+        # Compliance tracker for the active stop: 0..1, judged from behavior
+        # (signaling and slowing), not distance. Reset on every stop-ending path.
+        self._pull_over_compliance = 0.0  # seeded on begin
+        self._pull_over_elapsed = 0.0  # s since the lights came on (signal grace)
+        self._pull_over_prev_mph = 0.0  # last-tick speed, to classify accel vs decel
+        self._pull_over_coast_s = 0.0  # consecutive s with no braking and no accel
+        self._pull_over_signal_boost = False  # the one-time signal bump has fired
+        self._pull_over_nosignal_hit = False  # the one-time no-signal 1/4 hit has fired
         # Deterministic, save-safe stream for "did a patrol catch you" rolls, kept
         # apart from the trip's hazard/zone/inspection streams.
         self._patrol_rng = random.Random(None if trip_seed is None else trip_seed ^ 0xB0A1)
@@ -405,7 +417,9 @@ class DrivingState(
             "surface_chain": self._surface_chain,
             # Mid-departure-chain saves resume on the origin's streets.
             "departure_chain": self._departure_chain,
-            "planned_stop": self.trip.planned_stop_name,
+            "planned_stop_key": self.trip.planned_stop_key,
+            # Kept for a save opened by an older build, which knows only the name.
+            "planned_stop": self.trip.planned_stop_label or None,
         }
 
     @classmethod
@@ -472,7 +486,13 @@ class DrivingState(
                 target_mph=None if target is None else float(target),
             )
             state.trip.restore(position_mi, game_minutes)
-            state.trip.planned_stop_name = data.get("planned_stop") or None
+            planned_key = data.get("planned_stop_key") or None
+            if planned_key is None:
+                # Saved before plans carried a stop identity: a bare name cannot
+                # say which namesake was meant, so take the soonest reachable.
+                legacy_name = data.get("planned_stop") or None
+                planned_key = state.trip.resolve_stop_key(legacy_name) if legacy_name else None
+            state.trip.planned_stop_key = planned_key
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
             if bool(data.get("surface_chain", False)):
                 # The save was made on the facility's street chain: re-enter

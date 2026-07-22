@@ -43,9 +43,10 @@ terminal becomes the anchor of that week instead of a spawn point.
 - [x] **Per-truck condition.** Wear, damage, and fuel moved off the profile into `truck_conditions`, keyed by truck, so each owned tractor keeps its own state and swapping trucks no longer teleports condition. Legacy saves migrate (all owned trucks inherit current wear; no pristine spare), per-truck wear is under the save signature, and the field is scoped by truck *model* key -- true per-instance trucks are still the rental feature's job.
 - [ ] Truck selling / trade-in at the dealer: no sell path exists today, so `truck_conditions` never needs to drop a record. When selling lands, drop the sold truck's condition record (and decide salvage value from its wear).
 - [ ] Transmission as a per-truck purchase spec (rides the dealer/sell path above): a gearbox is bought with the truck, never swapped in later. Carrier-spec company tractors run automatics like real fleets; owner-operators choose at the dealer, and the cheap old rigs of the lease-to-start onramp skew manual -- cheap entry costs shifting skill. Gear count (10/13/18-speed) can join as a spec later. The global Transmission setting survives as the player's accessibility override, and dispatch respects it.
+- [ ] **ATS-style in-city facility fronts (community ask via Josh, 2026-07-21).** A player asked for "city services like in American Truck Simulator" -- the drivable in-city facility buildings: truck dealer, service shop, purchasable home garage, recruitment agency, truck wash. Nearly all of it maps onto features already planned here (dealer/sell path and transmission spec above; player truck marketplace; multi-truck logistics with a per-truck home city; the AI driver fleet IS the recruitment agency; truck-stop repair bays shipped). Recommended shape, relayed to the owner for Josh: do NOT hard-gate the district to owner-operators -- facilities answer honestly by role instead. A company driver browses the dealer (window-shopping is the aspiration loop, and the lease-to-start onramp is the dealer's answer to a broke driver), repairs stay carrier-billed at terminals, and only the recruitment agency waits naturally on owner-operator status plus a second truck. Physical access rides the facility-approach machinery: each facility is an endpoint on a baked surface-street chain, the same way docks and errand destinations connect today -- also the answer to "how do we connect parking to the surface streets": mint the spot as an endpoint in the same bake. Note the naming collision: Freight Fate's existing "city services" are the in-town errand drives, a different feature.
 - [x] **Jake brake realism.** The jake is now retarding torque through the gearing -- three stages, scaling with RPM and gear ratio -- so gear discipline decides descents: stage 3 in 7th holds a loaded rig on a 6 percent grade with zero service brake, stage 1 makes the shoes work, and overdrive gives almost nothing. Automatics pre-select down into the retard band with the jake on and upshift past the RPM ceiling to protect the engine (the realistic runaway spiral). Bench-solved anchors: jake-only holds up to ~26 tonnes of payload on the 6 percent; past that you snub or run away. The on/off key still works; a staged in-cab control is open follow-up below.
 - [x] **Brake thermal realism.** Drum heat is now real energy accounting: dissipated brake power soaks a drum thermal mass, cooling is convective (square root of speed -- outrunning your brakes no longer air-conditions them), and faded shoes grip less so they also heat less. The six-mile 6 percent drag now peaks at 466 C with miles ridden past fade, while jake-and-snub finishes cool -- the drag-vs-snub lesson finally has teeth. Overspeed realism came with it: the road can drive the engine past the governor (that wears it; governed running is safe), and brake wear is now charged per megajoule actually dissipated in the shoes.
-- [ ] Staged jake in-cab control: the physics supports stages 1-3 but the J key still toggles off/full. Add a spoken stage cycle (and gamepad binding) so drivers can pick partial retard on purpose.
+- [x] Staged jake in-cab control (landed 2026-07-21, owner control scheme): J is the dash enable switch and re-engages at the last-selected stage; 1/2/3 select two/four/six cylinders while the jake is on (spoken), and do nothing while it is off so the number keys stay free for other contexts. Controller: modifier + jake button cycles stages. Automatic descent control still manages the full jake itself.
 - [x] **Traction deep-dive: freezing rain, hydroplaning, jake grip cap.** `WeatherKind.ICE` (grip 0.15, a third of snow) forms physically -- rain sampled in the 1 to -4 C band glazes, and the live NWS feed maps freezing rain/sleet/ice to it instead of snow -- with its own hazards, spoken "ice on the road" status, and a bench `stop-ice` anchor (880 ft from 40 mph vs 329 dry from 60). Hydroplaning follows the Horne relation: onset ~106 mph on fresh tread (trucks at highway pressure basically never plane), pulled down by tread wear and standing-water depth (`WeatherEffects.water_mm` -> `truck.water_mm`) -- 80 percent worn rubber planes at ~59 in heavy rain, grip collapsing toward a 0.3 floor over a 12 mph band, with a spoken onset warning and hydro-aware conditions incidents. The jake is now capped by drive-axle grip (42.5 percent of gross, half usable before lockup): dry never binds, glare ice breaks stage 3 loose in a low gear while stage 1 stays hooked up, `jake_slipping` speaks a warning, and the bench `grade-jake-ice` run shows the capped jake losing ground on a 4 percent it would hold dry.
 - [ ] Jake-slip and hydroplane consequences beyond the warning: sustained sliding should be able to escalate into a real incident (trolley jackknife / spin) through the event system, which needs a "release the jake / ease off" resolution verb rather than the brake-to-answer hazard contract.
 - [ ] **Curve management as a difficulty tier (owner idea 2026-07-15;
@@ -215,6 +216,30 @@ terminal becomes the anchor of that week instead of a spawn point.
       Note for the pricing pass: `$0.00` events are NOT bugs. They are the
       documented ticket-system entry markers (see `docs/route-stop-data.md`)
       that settle at the exit gantry.
+      **State 2026-07-21: groundwork landed, data NOT yet baked.** The old
+      46 estimated events are gone; the world currently carries ZERO toll
+      events, only per-leg `tollway_detected` scan flags. `tools/toll_scan.py`
+      (evidence scanner), `tools/toll_rates.py` (the researched 5-axle
+      tariff table), and `tools/toll_review_sheet.py` all shipped in
+      fcd846a; the remaining work is reviewing the sheet and running the
+      bake. Until then the game bills no tolls at all -- upstream's
+      "prices seem off" report (Josh, 2026-07-21) is right on both lines.
+- [ ] **Interactive toll plazas: stop, window down, pay cash (Josh ask,
+      owner approved, 2026-07-21).** Real toll points split two ways and
+      the bake should record which is which per event: all-electronic
+      gantries have nothing to stop at -- no transponder there means
+      pay-by-plate at the higher stored rate, spoken honestly as you pass
+      -- while conventional plazas with cash lanes get the mechanic: an
+      approach call ("Toll plaza ahead, cash lanes right"), X to take the
+      cash lane (the same verb as exits and pull-overs), then the ramp
+      stop-bar machinery runs the booth -- rolling countdown, the
+      parking-sensor tick to the window, stop, window down, the spoken
+      amount, pay, barrier, go. Costs real clock time versus the
+      transponder lane. Rides the stoppable-stop spine with chain-up
+      areas and Big Buck's; per-operator cash acceptance is researchable
+      in the same pass that bakes the tariffs. Josh's in-progress traffic
+      and API work could someday feed cash-lane queue lengths as an
+      optional live layer (determinism boundary applies).
 - [ ] **More first-party truck-stop locators, and public parking feeds
       (owner approved, 2026-07-19).** `curate_route_pois.py` queries only
       Love's and Pilot/Flying J today (730 + 877 locations). Pointed at the
@@ -452,11 +477,15 @@ terminal becomes the anchor of that week instead of a spawn point.
       sample is the known library gap), and the service-brake RELEASE
       should breathe its little air sigh, not just the apply.
       vehicle/brake_release.ogg already ships -- check the wiring.
-      Sourcing ladder (owner 2026-07-16): NAS library first, then
-      freesound CC0/CC-BY, then ElevenLabs generation, then field
-      recording (a community call for truck recordings is an option),
-      then CC-licensed YouTube only, with attribution -- never ordinary
-      YouTube rips; CREDITS.md tracks provenance for every asset.
+      Sourcing ladder (owner, REVISED 2026-07-22): Splice first (both
+      maintainers hold licenses), then freesound CC0/CC-BY, then
+      ElevenLabs generation (character sounds only, never
+      timing-critical transients), then field recording (a community
+      call for truck recordings is an option), then CC-licensed YouTube
+      only, with attribution -- never ordinary YouTube rips. The NAS
+      library has NO KNOWN PROVENANCE and is reference/measurement
+      material only -- nothing cut from it may ship. CREDITS.md tracks
+      provenance for every asset.
       NAS SWEEP DONE 2026-07-18: `docs/sound-shortlist.md` lists
       unauditioned candidates for all seven needs plus ready-to-run
       ElevenLabs prompts. Three findings change the plan. (a) The
@@ -472,6 +501,20 @@ terminal becomes the anchor of that week instead of a spawn point.
       thin (no wastegate, no blow-off, no diesel turbo anywhere), so
       the shift sound gets built from a GMC 6000 gear clunk plus a
       pitched-down transmission clunk plus an air release.
+- [ ] **Provenance audit of shipped sound assets (owner, 2026-07-22).**
+      The Duff-shared cues cannot ship -- he holds no license for the
+      material he passed along (owner ruling, 2026-07-22), so every
+      Duff row is a replacement, not a check. Audit ran 2026-07-22
+      (git history of every unlabeled row): the 2026-06-18 batch
+      (weather, event cues, POI/ambience loops) is all project-clean
+      ElevenLabs/procedural work, never swapped since -- weather
+      re-sourcing from Splice is now a quality upgrade, not a
+      compliance fix. One mislabel found and corrected:
+      `ambient/night.ogg` was credited "original" but came from
+      Darren's sound pack. Replacements owed: vehicle/horn.ogg,
+      driver/yawn.ogg, ambient/night.ogg (Splice); the engine-voice
+      rebuild retires idle/start/shutdown, gear_shift, and both
+      parking-brake cues.
 - [ ] **Bobtail means no trailer at all (forum report, SRD625
       2026-07-17).** The physics models every unloaded state as tractor
       plus EMPTY TRAILER (`tare_kg`, vehicle.py: "Tractor plus empty
@@ -1033,11 +1076,12 @@ section below and the Unreleased changelog; the release-line view:
       1.9 world carries zero legacy checkpoint markers (discovered in this
       pass -- the checkpoint speech only ever fires on dev's world), so the
       same code governs both lines with no version awareness.
-- [ ] **Extract the place-callouts ladder to dev as a small PR.** The
-      checkpoint-chattiness complaint lives on the 1.8 line, whose world still
-      carries curated checkpoint markers ~5 miles apart. The speech-side
-      gating (settings ladder, advance-cue removal, CHECKPOINT tier gate)
-      ports without the village bake and relieves it there.
+- [ ] ~~Extract the place-callouts ladder to dev as a small PR.~~
+      Investigated 2026-07-22 and deferred: dev's monolith world carries no
+      positioned corridor limits, so the sparse tier's limit probe would find
+      nothing and the default tier would speak nothing. A faithful port drags
+      the dense-limits sweep along -- bulk, not a small PR. Dev gets the
+      ladder with the 1.9 world at the release merge.
 - [ ] **Village bake: per-leg cap and the wide catchment.** 569 of 1,280 legs
       hit the 30-places-per-leg cap, so their far field (5 to 12 miles off the
       road) is truncated. Harmless for the ride-along, which never reaches
@@ -1324,6 +1368,21 @@ milestone below (speeding consequences especially).
 
 From a batch of player reports:
 
+- [x] **Map screen read raw data keys for the route -- FIXED 2026-07-21
+  (NVDA player report).** Its first line joined the world's city slugs, so an
+  east-coast run opened with "new underscore york underscore n y underscore u
+  s" for all thirteen cities; every other screen already composed spoken names.
+  Same pass singularized spoken measurements ("1 mile", not "1 miles") on one
+  shared helper. The reporter's snapshot also predated 36a7f8e, which is why
+  the map listed the same shared-city facility twice and pushed real stops off
+  the five-item list.
+- [ ] Unresolved half of that report: stop lines on the Map screen "make the
+  sound but not letting me fully read" under NVDA. Not reproducible from the
+  code -- the list is built once, nothing under the menu updates, and no path
+  interrupts or drops an utterance. Needs the reporter's `logs/game.log` from a
+  snapshot newer than 2026-07-21 to tell "the game never spoke it" from "NVDA
+  never spoke it"; packaged builds have always written that transcript, and
+  Settings, Problem reports now tells a player where to find it.
 - [x] **Destination exit offered a state early on rural-highway finishes --
   FIXED 2026-07-16 (player transcripts).** The destination-exit scan accepted
   the last labeled interchange anywhere on the route, so routes whose final
@@ -1419,11 +1478,29 @@ From a batch of player reports:
   were cash the career could not account for and cloud upload screening
   refused the save and stamped a sticky integrity flag. Lifetime earnings
   now book the whole settlement.
-- [ ] **Review integrity flags stamped before that fix.** Drivers flagged by
-  the advance accounting bug are legitimate; a save carrying the old
-  shortfall keeps failing upload until the driver spends the difference on
-  fuel or repairs. Decide whether to clear those flags by hand or repair
-  the earnings figure on load, and confirm no honest driver is stuck.
+- [x] **Review integrity flags stamped before that fix.** All five production
+  flags were cleared by hand on 2026-07-20. One (a level 2 career, four
+  deliveries) was a false positive with no sign of an edit; the other four
+  had been confirmed separately by offline forensics and were cleared as a
+  deliberate amnesty.
+- [x] **Stop screening from branding accounts on arithmetic alone.** A failed
+  money or XP check now rejects the upload and keeps the payload for review
+  instead of stamping a sticky flag that hid the driver until a human
+  cleared it. Flags are still available by hand, from evidence. Both rules
+  were wrong in the accusing direction: the XP ceiling was a copied 1.2 per
+  mile sitting exactly on what a spotless career earns, and the money check
+  priced owned equipment as if it had all been bought.
+- [x] **Cloud screening reads the economy from the game.** Starting cash, the
+  advance cap, and the XP rates ship in the exported invariants rather than
+  being kept by hand on the server, so a balance pass cannot silently turn
+  the rules against honest drivers.
+- [ ] **Carry the same fixes onto the 1.9 line.** The career arc changes the
+  XP model (flat per-delivery XP plus class, streak, and condition
+  multipliers) and adds the owner-operator buy-in, where a driver takes
+  title to a carrier tractor worth far more than the buy-in. Regenerate the
+  exported invariants for save version 11 before 1.9 ships — the server
+  gate matches on exact save version, so an un-regenerated export rejects
+  every 1.9 backup.
 
 ### Fatigue and driver responsibility
 
@@ -1857,8 +1934,12 @@ reset instead of only a fine.
   against patrol intensity (`DrivingState._trooper_catches_speeder`); a hit lights
   you up (`events/police_siren`), you signal with X and brake to a stop, and
   `TrafficStopState` runs a spoken license/logbook check ending in an immediate
-  on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning. Ignoring
-  the lights past `PULL_OVER_IGNORE_MI` is logged as evasion. Disabled in the
+  on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning; a prompt,
+  fully-compliant stop has a small chance a ticket is waived to a warning. A
+  behavior-based compliance tracker (seeded at `PULL_OVER_START_COMPLIANCE`,
+  raised by braking, lowered by accelerating/coasting/failing to signal) judges
+  the stop -- refusing to comply zeroes it out and is logged as an evasion/felony
+  rather than the old distance rule. Disabled in the
   debug HOS bypass. Uncaught speeding still accrues the silent settlement strike.
   CB chatter now warns a few miles before drivers are talking about a bear or
   work-zone enforcement, plays `events/cb_radio_chatter.ogg`, remains
@@ -2295,5 +2376,7 @@ fit for an audio-first game.
 - [x] Profile integrity, client half: `profile_invariants.py` runs the hard, version-stable sanity rules (ranges, counter relations, upgrade tiers) as defense in depth behind the Ed25519 signature on every cloud restore, refusing with a plain spoken reason; `docs/profile-invariants.md` is the maintained validation list for the server gate. Follow-up: the append-only event ledger that upgrades server validation from plausibility to recomputation
 - [x] Packed save container: careers live in signed `.ffsave` files (magic header + deflated JSON) that text editors cannot open; legacy plain-JSON saves convert on load with a `.json.bak` rollback copy. A failed local signature now marks the profile `integrity_modified` (sticky, signed-in, spoken once) instead of quarantining — local play continues, shared features read the mark. `tools/dump_save.py` prints the JSON inside a save for bug reports.
 - [ ] Retire legacy plain-JSON save loading (and its unsigned amnesty) once converted installs are the norm — one or two releases after the container ships; the amnesty is the last casual editing door
+- [ ] Ship a stable release carrying the packed save container, so players are not split across two save formats. Until one exists, a career backed up from a developer snapshot cannot be restored onto 1.8.3: the snapshot writes the newer format, and the stable build drops the fields it does not recognise. Moving forward (stable career onto a snapshot) is fine. Fixing the backwards direction in the client was considered and deliberately declined — too many edge cases for the value; the stable release is the fix. Told players so on issue #97, without naming a date.
+- [x] Cloud backup accepts every shipped save shape, not just the newest build's: the orinks.net validator matches uploads against a superset allow-list and a supported version range, and only requires the fields it actually reads. It had demanded an exact match with whichever build the invariants export was last generated from, which refused newer and older saves in turn — most recently every save from 1.8.3, the stable release, leaving those players unable to back up at all (issue #97)
 - [ ] Server absolution for `integrity_modified`: a profile that passes full server validation may have the client mark cleared on the next verified restore, so honest cross-machine movers are not marked forever (`docs/server-integrity-handoff.md`)
 - [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)

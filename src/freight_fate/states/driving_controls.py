@@ -49,6 +49,8 @@ class DrivingControlsMixin:
             self._manual_shift(tr.gear - 1)
         elif key == pygame.K_j:
             self._toggle_engine_brake()
+        elif key in (pygame.K_1, pygame.K_2, pygame.K_3):
+            self._select_jake_stage(key - pygame.K_0)
         elif key == pygame.K_p:
             self._toggle_parking_brake()
         elif key == pygame.K_h:
@@ -327,12 +329,42 @@ class DrivingControlsMixin:
             f"{self._objective_help()}"
         )
 
+    # Spoken the way a driver says it (owner phrasing, 2026-07-21). The
+    # cylinder counts live in the manual and F1 help, not in every press.
+    _JAKE_STAGE_WORD = {1: "one", 2: "two", 3: "three"}
+
     def _toggle_engine_brake(self) -> None:
-        if self.truck.throttle > 0.05 and not self.truck.engine_brake:
-            self.ctx.say("Release the accelerator before turning the engine brake on.")
+        """J is the dash enable switch of a real Jacobs setup: it engages at
+        whatever stage the selector was left on, never surprising an icy
+        descent with full retard the driver dialed back an hour ago."""
+        t = self.truck
+        if t.throttle > 0.05 and not t.engine_brake:
+            self.ctx.say("Release the accelerator before turning the jake on.")
             return
-        self.truck.engine_brake = not self.truck.engine_brake
-        self.ctx.say("Engine brake on." if self.truck.engine_brake else "Engine brake off.")
+        if t.engine_brake:
+            t.engine_brake_stage = 0
+            self.ctx.say("Jake off.")
+            return
+        t.engine_brake_stage = self._jake_selected_stage
+        self.ctx.say(f"Jake on, stage {self._JAKE_STAGE_WORD[t.engine_brake_stage]}.")
+
+    def _select_jake_stage(self, stage: int) -> None:
+        """1, 2, 3: the cylinder selector, live only while the jake is on.
+
+        With the jake off the number keys do nothing here, so they stay
+        free for other bindings in other contexts (owner, 2026-07-21)."""
+        t = self.truck
+        if not t.engine_brake:
+            return
+        self._jake_selected_stage = stage
+        t.engine_brake_stage = stage
+        self.ctx.say(f"Jake stage {self._JAKE_STAGE_WORD[stage]} selected.")
+
+    def _cycle_jake_stage(self) -> None:
+        """Controller: modifier plus the jake button walks 1 -> 2 -> 3 -> 1."""
+        if not self.truck.engine_brake:
+            return
+        self._select_jake_stage(self.truck.engine_brake_stage % JAKE_STAGES + 1)
 
     def _shift_relative(self, delta: int) -> None:
         """Controller next/previous gear: step one gear from the current one."""
@@ -402,6 +434,8 @@ class DrivingControlsMixin:
             self._speak_fuel()
         elif button == pygame.CONTROLLER_BUTTON_Y:
             self._toggle_parking_brake()
+        elif button == pygame.CONTROLLER_BUTTON_RIGHTSTICK:
+            self._cycle_jake_stage()
         elif button == pygame.CONTROLLER_BUTTON_START:
             self.ctx.push_state(DrivingStatusState(self.ctx, self))
 
@@ -1034,8 +1068,15 @@ class DrivingControlsMixin:
         return "No route stop is nearby. You can pull over and rest on the shoulder."
 
     def _speak_weather(self) -> None:
-        source = "Live conditions" if self.weather.live else "Currently"
         safe_speed = self.ctx.settings.speed_text(self.weather.effects.safe_speed_mph)
+        if self.weather.live_weather_loading:
+            self.ctx.say(
+                f"It is {time_of_day(self.trip.local_hour)}. "
+                "Live weather is still loading. "
+                f"Safe speed about {safe_speed}."
+            )
+            return
+        source = "Live conditions" if self.weather.live else "Currently"
         parts = [
             f"It is {time_of_day(self.trip.local_hour)}.",
             f"{source} {self.weather.describe(self.ctx.settings.imperial_units)}.",

@@ -269,6 +269,12 @@ class WeatherSystem:
         self.city: str | None = None
         self.city_coords: tuple[float, float] = (0.0, 0.0)
         self.live = False  # True while real-world data is driving conditions
+        # The last raw live observation and the city it was for, plus the
+        # season-reconciled condition it produced. Held so live weather is
+        # reconciled once per observation instead of re-evaluated every tick.
+        self._live_raw: WeatherKind | None = None
+        self._live_city: str | None = None
+        self._live_kind: WeatherKind | None = None
         # With real weather enabled, start neutral and wait for live data rather
         # than showing a simulated warm-up condition that the real data would
         # immediately replace. Simulated weather only appears if the provider
@@ -430,6 +436,11 @@ class WeatherSystem:
         except Exception:  # pragma: no cover - defensive
             return False
 
+    @property
+    def live_weather_loading(self) -> bool:
+        """Whether live weather is selected but no observation is ready yet."""
+        return self.provider is not None and not self.live and not self._provider_offline()
+
     def _poll_provider(self) -> WeatherKind | None:
         """Apply real-world conditions when a provider is attached.
 
@@ -443,9 +454,25 @@ class WeatherSystem:
         kind = self.provider.get(self.city)
         if kind is None:
             self.live = False
+            self._live_raw = None
+            self._live_city = None
+            self._live_kind = None
             return None
         self.live = True
+        # Reconcile the raw observation to the career season once, when the
+        # observation (or the city it is for) changes -- not every tick. The
+        # season temperature swings across freezing on a diurnal cycle, so
+        # re-reconciling each tick would flip live precipitation between rain
+        # and freezing rain on its own, which live weather must never do.
+        if kind == self._live_raw and self.city == self._live_city:
+            if self._live_kind is not None and self.current != self._live_kind:
+                self.current = self._live_kind
+                return self._live_kind
+            return None
+        self._live_raw = kind
+        self._live_city = self.city
         guarded = self._seasonal(kind)
+        self._live_kind = guarded
         if guarded != self.current:
             self.current = guarded
             return guarded

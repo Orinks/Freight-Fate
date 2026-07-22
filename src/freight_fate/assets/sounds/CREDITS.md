@@ -89,7 +89,7 @@ current idle, start, and shutdown cues.
 | Dock and deliver | `poi/dock_and_deliver.ogg` | Destination docking action cue |
 | Truck stop by day | `ambient/truck_stop.ogg` | ElevenLabs-generated daytime truck-stop lot ambience loop |
 | Warehouse interior | `ambient/warehouse.ogg` | ElevenLabs-generated warehouse dock interior ambience loop |
-| Night driving | `ambient/night.ogg` | Original night-driving ambience loop |
+| Night driving | `ambient/night.ogg` | In-cab night ambience loop, shared by Darren Duff |
 
 ## Music
 

@@ -23,6 +23,9 @@ htmlcov/
 .idea/
 *.swp
 
+# Claude Code local overrides (per-machine, not for commit)
+.claude/settings.local.json
+
 # OS
 .DS_Store
 Thumbs.db
@@ -92,3 +95,7 @@ FF*.ps1
 # Windows null device artifact
 nul
 
+# Claude Code per-machine state. A shared .claude/settings.json or agent
+# definition can still be committed; only the local-only bits are ignored.
+.claude/settings.local.json
+.claude/worktrees/

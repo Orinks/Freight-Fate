@@ -66,6 +66,7 @@ from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.trip_models import leg_lane_count
 from ..sim.vehicle import (
     CHAIN_SAFE_MPH,
+    JAKE_STAGES,
     KG_PER_TON,
     REFERENCE_CARGO_KG,
     TIRE_WINTER,
@@ -144,6 +145,7 @@ AEB_BUDGET_MARGIN = 1.2  # emergency braking leads the physics budget by this fa
 AEB_LEAD_S = 0.5  # plus this flat lead, covering brake heat added during the stop
 RAMP_CREEP_MI = 0.04  # within ~200 ft of the bar, "creep"; farther is a drive
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
+RAMP_CRUISE_TARGET_MPH = 40.0  # leave control-loop headroom below the hard ramp limit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 # Ramp terminals: where the off-ramp meets the surface road there is usually
 # a light or a stop sign (diamond interchanges), occasionally free flow
@@ -185,6 +187,11 @@ STOP_ROLL_DAMAGE = 0.2  # lighter clip for blowing the stop sign
 # weights; the remainder is free flow. Urban terminals are mostly signalized.
 RAMP_CONTROL_URBAN_WEIGHTS = (0.70, 0.95)
 RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)
+# Grace past the end of the ramp before a taken-but-never-stopped exit counts
+# as blown. The driver gets the "come to a complete stop" nudge at the ramp
+# end; roll this much further without stopping and the exit is missed, so the
+# stuck ramp doesn't linger for miles (unpatrolled, off the plan) once passed.
+RAMP_OVERSHOOT_MI = 0.5
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
 # A real interchange counts as the destination exit only inside this final
 # approach window. Routes that finish on rural highways carry no baked
@@ -445,6 +452,24 @@ WEIGH_STATION_BYPASS_FINE = 750.0
 UNSAFE_DAMAGE_STOP_PCT = 65.0
 UNSAFE_DAMAGE_FINE = 900.0
 AMBIENT_EVENT_SPACING_S = 2.5  # keep low-priority chatter from stacking
+# Once the lights come on, a compliance tracker (0..1) judges whether you are
+# actually pulling over -- signaling and slowing -- rather than how far you
+# rolled. It seeds at PULL_OVER_START_COMPLIANCE, rises with braking, falls with
+# accelerating/coasting/ignoring, and a felony stop fires the instant it hits 0.
+# Disobedient rates outpace the compliant one so it always zeroes faster than it
+# fills, and their deductions stack when several apply at once.
+PULL_OVER_START_COMPLIANCE = 0.5
+PULL_OVER_ACCEL_RATE = 0.34  # per s of rising speed; full 1.0 -> 0.0 in ~3 s
+PULL_OVER_ACCEL_EPS_MPH_S = 0.4  # speed must genuinely rise (past jitter) to count
+PULL_OVER_COAST_RATE = 0.12  # per s of coasting; lighter than accelerating
+PULL_OVER_BRAKE_RATE = 0.15  # per s of braking; the only thing that raises it
+PULL_OVER_SIGNAL_GRACE_S = 5.0  # plenty of time to react before the no-signal drain
+PULL_OVER_COAST_GRACE_S = 3.0  # coasting is only flagged after this many s
+PULL_OVER_SIGNAL_BOOST = 0.20  # one-time bump the first time you signal
+PULL_OVER_NOSIGNAL_HIT = 0.25  # one-time 1/4 hit once past the signal grace unsignaled
+PULL_OVER_NOSIGNAL_RATE = 0.03  # per s small drain while still unsignaled past grace
+PULL_OVER_FULL_COMPLIANCE = 0.95  # at/above this a stop counts as prompt and clean
+PULL_OVER_CLEAN_STOP_WARN_CHANCE = 0.25  # chance a clean stop downgrades a ticket to a warning
 
 
 class Tutorial:
