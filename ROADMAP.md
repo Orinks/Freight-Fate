@@ -107,6 +107,24 @@ terminal becomes the anchor of that week instead of a spawn point.
       LANE DROPS: where three lanes become two, that is a genuine merge
       event with a real location, not a scripted taper. Goes in the next
       map re-bake brief.
+- [ ] **Hand throttle, parked high-idle, and equipment by model era
+      (owner idea 2026-07-22, sparked by the 896 take's rev-and-hold).**
+      Two features on the per-truck-spec pattern. (1) PARKED HIGH-IDLE,
+      the small one, buildable now: latch an rpm setpoint while the
+      parking brake is set (arrow keys or cruise-button style), engine
+      holds it -- building air genuinely faster, per the sim -- and
+      drops to idle the moment the brake releases or a gear engages,
+      exactly like real fast-idle/PTO modes. (2) EQUIPMENT BY ERA:
+      cruise control only exists on electronic engines (~1990-on), so a
+      genuinely vintage mechanical rig -- marketplace/classic material,
+      the 896 Mack's era -- gets NO cruise, a HAND THROTTLE that also
+      holds rolling (throttle, not speed: rpm sags audibly on grades),
+      manual box only, and NO ABS (pre-1997), which couples straight
+      into the traction physics. Lease-fleet "old" trucks (2000s-2010s)
+      keep cruise and ABS but not adaptive extras. Same accessibility
+      rule as the gearbox spec: realism default per truck, Settings
+      override stays. On-road hand throttle must cancel instantly on
+      brake, like cruise.
 - [ ] **A turn signal you actually operate (owner idea 2026-07-16).**
       Today lane-change taps click the signal for you; give the player
       the stalk: signal before a lane change, and unsignaled changes
