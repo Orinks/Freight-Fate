@@ -1006,6 +1006,41 @@ class SettingsCategoryState(MenuState):
                     "and bring one onto this computer.",
                 ),
                 MenuItem(
+                    # Same freshness rule as Profile sharing: the identity and
+                    # linked-handle checks live inside the label.
+                    lambda: (
+                        (
+                            f"Share notable deliveries to Mastodon: "
+                            f"{'on' if s.mastodon_sharing else 'off'}"
+                            if s.mastodon_linked
+                            else "Share notable deliveries to Mastodon: not linked"
+                        )
+                        if OnlineIdentity.load() is not None
+                        else "Share notable deliveries to Mastodon: not set up"
+                    ),
+                    lambda: self._toggle_mastodon_sharing(1),
+                    help="When on, finishing a delivery that earns an achievement, a "
+                    "level, or a perfect streak posts a short public summary "
+                    "to your own Mastodon account with the FreightFate "
+                    "hashtag. Routine deliveries are never posted. Link a "
+                    "Mastodon account first with the Mastodon account item.",
+                ),
+                MenuItem(
+                    lambda: (
+                        (
+                            f"Mastodon account: linked as {s.mastodon_linked_handle}"
+                            if s.mastodon_linked_handle
+                            else "Mastodon account: linked"
+                        )
+                        if s.mastodon_linked
+                        else "Link a Mastodon account"
+                    ),
+                    self._mastodon_account,
+                    help="Opens a page on orinks.net where you authorize your "
+                    "own Mastodon server, using the same orinks.net sign-in "
+                    "as driver setup. Unlinking also happens there.",
+                ),
+                MenuItem(
                     lambda: f"Discord presence: {'on' if s.discord_presence else 'off'}",
                     lambda: self._toggle_discord_presence(1),
                     help="Show broad activity in Discord, like the main menu, "
@@ -1086,6 +1121,8 @@ class SettingsCategoryState(MenuState):
                     lambda _d: None,
                     self._toggle_online_presence,
                     self._toggle_cloud_saves,
+                    lambda _d: None,
+                    self._toggle_mastodon_sharing,
                     lambda _d: None,
                     self._toggle_discord_presence,
                 ],
@@ -1308,6 +1345,53 @@ class SettingsCategoryState(MenuState):
         s.save()
         self.ctx.apply_cloud_saves()
         self._announce()
+
+    def _toggle_mastodon_sharing(self, _d: int = 1) -> None:
+        from ..online_presence import OnlineIdentity
+
+        s = self.ctx.settings
+        if OnlineIdentity.load() is None:
+            self.ctx.say(
+                "Sharing to Mastodon uses your orinks.net account. Choose "
+                "Set up orinks.net account on this menu first, then link a "
+                "Mastodon account.",
+                interrupt=True,
+            )
+            return
+        if not s.mastodon_linked and not s.mastodon_sharing:
+            # No known link: the switch would be inert, so point at the link
+            # item instead of flipping it (same shape as cloud backup).
+            self.ctx.say(
+                "Sharing to Mastodon needs a linked Mastodon account. Choose "
+                "Link a Mastodon account on this menu first, then turn "
+                "sharing on.",
+                interrupt=True,
+            )
+            return
+        s.mastodon_sharing = not s.mastodon_sharing
+        self.ctx.apply_mastodon_sharing()
+        self._announce()
+        if s.mastodon_sharing:
+            # The label said "on"; this says what "on" means, every time.
+            self.ctx.say(
+                "Only deliveries that earn an achievement, a level, or a perfect "
+                "streak are posted. Posts are public on your own Mastodon "
+                "account and carry the FreightFate hashtag.",
+                interrupt=False,
+            )
+
+    def _mastodon_account(self) -> None:
+        from ..online_presence import OnlineIdentity
+        from .online_states import MastodonLinkState
+
+        if OnlineIdentity.load() is None:
+            self.ctx.say(
+                "Linking Mastodon uses your orinks.net sign-in. Choose Set "
+                "up orinks.net account on this menu first.",
+                interrupt=True,
+            )
+            return
+        self.ctx.push_state(MastodonLinkState(self.ctx))
 
     def _online_account_setup(self) -> None:
         from .online_states import OnlineSetupState
