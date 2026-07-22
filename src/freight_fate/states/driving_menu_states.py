@@ -514,6 +514,7 @@ class PauseMenuState(MenuState):
         self.ctx.audio.play("ui/pause")
         self.ctx.audio.stop_world()
         self.driving._reverse_cue_active = False
+        self.driving._air_cue_active = False
         super().enter()
 
     def presence(self):

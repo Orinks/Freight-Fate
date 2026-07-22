@@ -69,7 +69,8 @@ CH_WEATHER_B = 6
 CH_AMBIENT = 7
 CH_HORN = 8
 CH_REVERSE = 9
-RESERVED = 9
+CH_AIR = 10  # compressor charging the tanks below governor release
+RESERVED = 10
 NUM_CHANNELS = 32
 
 # Horn sustain loop points (samples, at the asset's 44100 Hz). The horn is an
@@ -1732,7 +1733,7 @@ class AudioEngine:
     def stop_world(self) -> None:
         """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
         self.engine_stop(shutdown_sound=False)
-        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_HORN):
+        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_HORN, CH_AIR):
             self.stop_loop(ch, fade_ms=400)
 
     # -- music ----------------------------------------------------------------

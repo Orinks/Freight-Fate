@@ -2560,6 +2560,44 @@ def test_reverse_audio_cue_loops_while_reverse_is_engaged(monkeypatch):
         app.shutdown()
 
 
+def test_air_fill_loop_plays_until_governor_release(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.audio import CH_AIR
+
+    app = App()
+    loops = []
+    monkeypatch.setattr(app.ctx.audio, "set_engine_rpm", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(
+        app.ctx.audio, "start_loop", lambda ch, key, **k: loops.append(("start", ch, key))
+    )
+    monkeypatch.setattr(app.ctx.audio, "stop_loop", lambda ch, **k: loops.append(("stop", ch)))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.set_cold_air_start()
+        driving.truck.start_engine()
+        driving.truck.velocity_mps = 0.0
+        loops.clear()
+
+        driving._update_audio(0.0)
+        driving._update_audio(0.0)  # still building: the loop must not restack
+        assert loops == [("start", CH_AIR, "vehicle/air_pressurize")]
+
+        driving.truck.set_air_ready(parking_brake=True)  # governor release
+        driving._update_audio(0.0)
+        assert loops[-1] == ("stop", CH_AIR)
+
+        driving._update_audio(0.0)  # ready and quiet: no further calls
+        assert loops[-1] == ("stop", CH_AIR)
+    finally:
+        app.shutdown()
+
+
 def test_reverse_audio_loop_restarts_after_pause_resume(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.transmission import REVERSE

@@ -141,6 +141,7 @@ class TruckSpecs:
     wheel_radius_m: float = 0.5
     max_torque_nm: float = 2_400.0  # ~1770 lb-ft
     idle_rpm: float = 600.0
+    fast_idle_rpm: float = 900.0  # parked high idle while the compressor builds air
     max_rpm: float = 2_200.0
     peak_torque_rpm: float = 1_300.0
     driveline_efficiency: float = 0.85
@@ -680,6 +681,23 @@ class TruckState:
     def air_brakes_holding(self) -> bool:
         return self.parking_brake or self.spring_brakes_active
 
+    @property
+    def fast_idle_active(self) -> bool:
+        """Parked high idle while the air system is still building.
+
+        A cold-started truck holds a raised idle until the governor releases
+        the parking brake air; the higher rpm also spins the compressor
+        faster (see ``_update_air_system``), so the truck genuinely charges
+        sooner. Settles back to the drive idle when the air comes ready --
+        the audible flip the engine voice keys off.
+        """
+        return (
+            self.engine_on
+            and not self.air_ready
+            and abs(self.velocity_mps) < 0.3
+            and (self.transmission.in_neutral or self.parking_brake)
+        )
+
     def set_cold_air_start(self) -> None:
         """Parked trip start: low air, spring/parking brakes set."""
         self._set_all_air_reservoirs(self.specs.air_cold_start_psi)
@@ -835,7 +853,8 @@ class TruckState:
                 # instead of lugging against the held brake or stalling; the
                 # brake, not the driveline, is what keeps the truck stopped.
                 if self.parking_brake and abs(self.velocity_mps) < 0.1:
-                    target = s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle
+                    floor = s.fast_idle_rpm if self.fast_idle_active else s.idle_rpm
+                    target = max(floor, s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle)
                     self.rpm += (target - self.rpm) * min(1.0, 4.0 * dt)
                     return
                 # Launch regime: in a low gear the clutch slips and the engine
@@ -859,7 +878,8 @@ class TruckState:
                 # engine. An automatic upshifts to protect itself first.
                 self.rpm = min(s.max_rpm * ROAD_OVERSPEED_RPM_MULT, road_rpm)
         else:
-            target = s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle
+            floor = s.fast_idle_rpm if self.fast_idle_active else s.idle_rpm
+            target = max(floor, s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle)
             self.rpm += (target - self.rpm) * min(1.0, 4.0 * dt)
 
     def stall(self) -> None:

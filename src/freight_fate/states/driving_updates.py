@@ -1,6 +1,8 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from .. import engine_audio
+from ..audio import CH_AIR
 from ..audio_fades import curve as _resolve_curve
 from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
@@ -870,6 +872,17 @@ class DrivingUpdateMixin:
         elif self._reverse_cue_active:
             audio.reverse_stop()
             self._reverse_cue_active = False
+        # Air-fill overlay: the compressor charging the tanks below governor
+        # release, whatever idle or drive state plays over it. Ends -- with the
+        # fast idle settling -- at the park_idle -> ready_idle flip.
+        voice = engine_audio.classify(engine_audio.reading_from_truck(t))
+        if t.engine_on and voice.pressurizing:
+            if not self._air_cue_active:
+                audio.start_loop(CH_AIR, "vehicle/air_pressurize", fade_ms=400)
+                self._air_cue_active = True
+        elif self._air_cue_active:
+            audio.stop_loop(CH_AIR, fade_ms=700)
+            self._air_cue_active = False
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)

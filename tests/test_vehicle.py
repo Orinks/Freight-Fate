@@ -975,6 +975,36 @@ def test_compressor_builds_all_reservoirs_before_cutout():
     assert not t.air_compressor_active
 
 
+def test_fast_idle_builds_air_then_settles_to_drive_idle():
+    # A cold-started parked truck holds the raised idle until the governor
+    # releases the parking-brake air, then settles back -- the audible flip
+    # the engine voice keys off. The higher rpm also spins the compressor
+    # faster, so the charge genuinely arrives sooner.
+    t = TruckState()
+    t.set_cold_air_start()
+    t.start_engine()
+
+    assert t.fast_idle_active
+    drive(t, 3.0)
+    assert t.rpm == pytest.approx(t.specs.fast_idle_rpm, rel=0.05)
+    assert not t.air_ready
+
+    drive(t, 15.0)  # the air comes ready along the way
+    assert t.air_ready
+    assert not t.fast_idle_active
+    assert t.rpm == pytest.approx(t.specs.idle_rpm, rel=0.05)
+
+
+def test_fast_idle_never_engages_while_rolling():
+    t = TruckState()
+    t.set_air_ready(parking_brake=False)
+    t.start_engine()
+    t.air_pressure_psi = t.specs.air_governor_cut_in_psi - 5.0  # rebuilding on the move
+    t.velocity_mps = 15.0
+
+    assert not t.fast_idle_active
+
+
 def test_parking_brake_release_requires_ready_air_pressure():
     t = TruckState()
     t.set_cold_air_start()
