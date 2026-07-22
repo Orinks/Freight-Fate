@@ -35,6 +35,15 @@
   long event. Every shift, manual or automatic, is a real recorded shift,
   and no two in a row sound identical.
 
+- **Real stations reach a lot more of the map.** With streamer-safe mode
+  off, the in-cab radio now picks up public, community, and college
+  stations in dozens more places -- the Rio Grande Valley, Savannah,
+  Amarillo, the Iowa corridor, the northern Plains, the high Rockies, the
+  Carolinas coast, the Florida panhandle, and more -- so wherever a load
+  takes you, there is a far better chance of catching local news or music
+  instead of an empty band. A couple of stations whose streams had gone
+  quiet are back on the air as well.
+
 - **The engine brake grew its real cylinder selector.** J is now the
   dash switch: it turns the engine brake on at whatever stage you last
   selected, and while it is on, 1, 2, and 3 pick two, four, or six
