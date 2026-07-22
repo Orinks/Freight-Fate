@@ -160,9 +160,27 @@ def _api_get(path: str):
 
 
 def parse_version(text: str) -> tuple[int, ...]:
-    """'v1.6.0' -> (1, 6, 0). Unparseable text compares lowest."""
-    nums = re.findall(r"\d+", text)
-    return tuple(int(n) for n in nums) if nums else (0,)
+    """'v1.6.0' -> (1, 6, 0, 0); '1.8.6.dev0' -> (1, 8, 6, -1, 0).
+
+    The trailing sentinel orders a ``.devN`` pre-release below the release
+    it works toward and above the previous stable, so dev checkouts and
+    nightlies are offered the stable they were promoted into. Unparseable
+    text compares lowest."""
+    base, sep, dev = text.partition(".dev")
+    nums = re.findall(r"\d+", base)
+    if not nums:
+        return (0,)
+    parts = tuple(int(n) for n in nums)
+    if sep:
+        return parts + (-1, *(int(n) for n in re.findall(r"\d+", dev)))
+    return parts + (0,)
+
+
+def spoken_version(version: str) -> str:
+    """Player-facing wording for a version: '1.8.6.dev0' becomes
+    '1.8.6 development build' so spoken menus never read packaging jargon."""
+    base, sep, _ = version.partition(".dev")
+    return f"{base} development build" if sep else version
 
 
 def _platform_suffix() -> str:

@@ -191,7 +191,7 @@ class MainMenuState(MenuState):
                 else f"{count} saved careers could not be read and were moved aside. "
             )
         self.ctx.say(
-            f"Welcome to Freight Fate, version {__version__}. "
+            f"Welcome to Freight Fate, version {updater.spoken_version(__version__)}. "
             f"An audio trucking adventure across America. {warning}"
             f"{self.current_text()}",
         )

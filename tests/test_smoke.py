@@ -45,7 +45,7 @@ def test_garage_offers_partial_fuel_and_repairs_when_cash_is_short():
 
 @pytest.mark.smoke
 def test_full_game_flow_headless(monkeypatch):
-    from freight_fate import __version__
+    from freight_fate import __version__, updater
     from freight_fate.app import App
     from freight_fate.states.city import (
         CityMenuState,
@@ -68,7 +68,8 @@ def test_full_game_flow_headless(monkeypatch):
         menu = app.state
         assert isinstance(menu, MainMenuState)
         assert menu.lines()[0] == "Freight Fate"
-        assert any(f"Welcome to Freight Fate, version {__version__}." in line for line in spoken)
+        welcome = f"Welcome to Freight Fate, version {updater.spoken_version(__version__)}."
+        assert any(welcome in line for line in spoken)
 
         # navigate to "New career" and select it
         while menu.items[menu.index].text != "New career":

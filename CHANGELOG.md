@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Changed
+
+- **Test builds now introduce themselves as development builds.** The main
+  menu welcome and the update screen used to read a bare version number that
+  looked like a stable release. A nightly or source build now says, for
+  example, "version 1.8.6 development build", so you always know which kind
+  of build is talking. Stable releases sound the same as before, and version
+  numbers no longer skip when a stable release comes out.
+
 ## 1.8.5 - 2026-07-22
 
 ### Added
