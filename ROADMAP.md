@@ -1074,11 +1074,12 @@ section below and the Unreleased changelog; the release-line view:
       1.9 world carries zero legacy checkpoint markers (discovered in this
       pass -- the checkpoint speech only ever fires on dev's world), so the
       same code governs both lines with no version awareness.
-- [ ] **Extract the place-callouts ladder to dev as a small PR.** The
-      checkpoint-chattiness complaint lives on the 1.8 line, whose world still
-      carries curated checkpoint markers ~5 miles apart. The speech-side
-      gating (settings ladder, advance-cue removal, CHECKPOINT tier gate)
-      ports without the village bake and relieves it there.
+- [ ] ~~Extract the place-callouts ladder to dev as a small PR.~~
+      Investigated 2026-07-22 and deferred: dev's monolith world carries no
+      positioned corridor limits, so the sparse tier's limit probe would find
+      nothing and the default tier would speak nothing. A faithful port drags
+      the dense-limits sweep along -- bulk, not a small PR. Dev gets the
+      ladder with the 1.9 world at the release merge.
 - [ ] **Village bake: per-leg cap and the wide catchment.** 569 of 1,280 legs
       hit the 30-places-per-leg cap, so their far field (5 to 12 miles off the
       road) is truncated. Harmless for the ride-along, which never reaches
