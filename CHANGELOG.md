@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.5 - 2026-07-22
+
 ### Added
 
 - **The game can now tell you where its log file is.** Settings has a new
@@ -21,7 +23,8 @@
   season so summer snow and cold-season thunderstorms do not slip through. An
   established career begins its independent calendar from today's date when
   you turn the setting off, avoiding a jump back to its old hidden date; a new
-  career still begins on March 21.
+  career still begins on March 21. Thanks to TowerAlphaTheta15,
+  [PR #88](https://github.com/Orinks/Freight-Fate/pull/88).
 - **Map stops now open a full details view, and you can plan your next
   stop.** On the driving Map screen, pressing Enter on a stop now opens its
   details instead of repeating the line: the exit, distance, what it offers,
@@ -31,7 +34,8 @@
   the upcoming and clock readouts then call it your planned stop, so you know
   exactly when to signal for the exit. Plans can be canceled or replaced any
   time, survive saving and resuming, and clear themselves when you pull in or
-  drive past.
+  drive past. Thanks to ironcross32,
+  [PR #94](https://github.com/Orinks/Freight-Fate/pull/94).
 - **Keep speed assistance active across the whole job.** Pressing K now starts one automatic speed-control session: the speed keeper handles facility roads, gate queues, work zones, and congestion, then adaptive cruise takes over on the open road. If started during the deadhead, it pauses through pickup check-in and loading, survives a save there, and resumes once the loaded truck is rolling. It restores your earlier cruise target or uses the new road's limit, and switches back to the keeper for the next restricted zone. Braking outside that planned pickup, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Plus and Minus adjust the remembered open-road target in either mode.
 
 ### Changed
@@ -73,7 +77,8 @@
   versions: the truck you were driving keeps its condition, and your other
   trucks start fueled and fresh. Back up your career save before opening it in
   this version. If the conversion causes a problem, include both the original
-  backup and the updated save with your issue report.
+  backup and the updated save with your issue report. Thanks to ironcross32,
+  [PR #91](https://github.com/Orinks/Freight-Fate/pull/91).
 
 - **On-time deliveries now pay a real bonus.** Delivering on time used to add
   only a sliver of extra pay unless you raced in absurdly far ahead of the
@@ -118,7 +123,8 @@
   over promptly and cleanly gives a small chance a ticket is waived to a warning.
   Keep accelerating, coast along without slowing, or ignore the lights and it
   still ends in a felony stop. You no longer have to hold the emergency brake
-  the entire time; braking steadily is enough.
+  the entire time; braking steadily is enough. Thanks to ironcross32,
+  [PR #103](https://github.com/Orinks/Freight-Fate/pull/103).
 
 - **Taking your planned stop's exit no longer warns that you drove past it.**
   When you signal a planned stop and brake down the exit ramp, the game used to
@@ -126,7 +132,8 @@
   were stopping there. Now the warning only speaks when the stop is truly out of
   reach: if you drive past the exit without signaling, if you signal but are
   going too fast to make the ramp, or if you take the exit but never stop and
-  roll on past the end of the ramp.
+  roll on past the end of the ramp. Thanks to ironcross32,
+  [PR #102](https://github.com/Orinks/Freight-Fate/pull/102).
 - **Taking an exit and never stopping no longer strands you on the ramp.**
   If you took an exit but kept driving without ever coming to a stop, the game
   would quietly wait forever -- speed enforcement stayed off and, miles later,
@@ -142,7 +149,8 @@
   also works when Live weather controls calendar is turned off. Route weather
   now names cities whose observations are loading or unavailable instead of
   silently skipping them, and weather-change announcements identify live
-  observations and simulated fallback conditions.
+  observations and simulated fallback conditions. Thanks to TowerAlphaTheta15,
+  [PR #99](https://github.com/Orinks/Freight-Fate/pull/99).
 - **Cloud Backup works again on test builds.** Careers from a recent test
   build were being turned away with a message about the backup being
   unreadable. Nothing was wrong with those careers: the game had changed what
@@ -249,11 +257,14 @@
   save, often right as you reached a facility. Freight Fate now notices when
   its own folder is read only and keeps your saves in your personal user
   folder instead, so the game saves and plays normally wherever you install
-  it. Saves that are already beside the game are still used as before.
+  it. Saves that are already beside the game are still used as before. Thanks
+  to ryanb96, [PR #92](https://github.com/Orinks/Freight-Fate/pull/92).
 - **The engine load now follows throttle smoothly.** Engine effort remains
   audible when you accelerate or ease off, while manual releases and
   adaptive-cruise corrections blend gradually instead of making the engine
   volume jump. Automatic shifts retain a brief, gentle unload and recovery.
+  Thanks to TowerAlphaTheta15,
+  [PR #89](https://github.com/Orinks/Freight-Fate/pull/89).
 - **Terminal weather now agrees with the live report on the road.** Time and
   weather uses the real station temperature even when live weather does not
   control the career calendar. If the first observation is still loading, the
@@ -266,7 +277,8 @@
   the open interstate and enforcement would treat highway speed as
   speeding. Every such sample is gone (no US interstate mainline posts
   below 45), and an automatic check now keeps them from ever coming back.
-  Small-town limits on US and state highways are real and unchanged.
+  Small-town limits on US and state highways are real and unchanged. Thanks
+  to nromey, [PR #86](https://github.com/Orinks/Freight-Fate/pull/86).
 
 - **The destination exit can no longer show up a state early.** On routes
   that finish on rural highways, the game could announce the destination
@@ -291,7 +303,8 @@
   you to thirty miles per hour for miles of open road. Those stray
   readings are gone: the limit you hear at the wheel now matches the
   road you are actually on, and speeding enforcement judges you against
-  that honest number.
+  that honest number. Thanks to nromey,
+  [PR #82](https://github.com/Orinks/Freight-Fate/pull/82).
 - **Careers from older versions now trade every cargo type at real market
   prices.** A career started before the cargo list grew to sixteen classes
   kept freight-market prices only for the original eight, so pay for the
