@@ -4,6 +4,35 @@
 
 ### Added
 
+- **The truck now sounds like a real truck.** The engine voice is built
+  from a real cab recording and follows the rpm through its range --
+  idle, pulling away, cruising, working up high -- instead of one loop
+  stretched faster and slower. You will hear the difference the moment
+  the engine settles into idle.
+
+- **Cold starts build their air out loud.** Start the engine with low
+  tanks and it holds a fast idle while the compressor charges the air
+  system, with a soft fill hiss underneath. When the air comes ready the
+  hiss stops, the dryer gives its purge pop, and the idle settles down --
+  that settling is your cue the parking brake can release. Revving while
+  parked really does charge the tanks faster.
+
+- **Parked high idle, on the cruise button -- rev it like a boss.** With
+  the parking brake set, K latches a fast idle just like a real
+  electronic truck: the engine holds a raised rpm to warm up and build
+  air sooner, plus and minus step the setpoint up or down, and you hear
+  the compressor charge faster the higher you hold it. Releasing the
+  parking brake drops it back to idle on its own, and holding a high
+  idle burns real fuel. On a controller it is the Y button.
+
+- **Brakes and gear changes sound like the real mechanisms now.** Pressing
+  the brake gives the valve's mechanical clunk, louder the harder you
+  press, and letting off releases the air back out -- a hiss that runs
+  longer and louder the harder you were braking, including the big pssht
+  when you stop and let off. The emergency brake dumps its air in one
+  long event. Every shift, manual or automatic, is a real recorded shift,
+  and no two in a row sound identical.
+
 - **The engine brake grew its real cylinder selector.** J is now the
   dash switch: it turns the engine brake on at whatever stage you last
   selected, and while it is on, 1, 2, and 3 pick two, four, or six

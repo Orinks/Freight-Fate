@@ -33,8 +33,15 @@ TARGET_SR = 44100   # match the existing pack (engine/idle.ogg is 44.1 kHz Vorbi
 # render (under C:\temp\ffsound) -> asset key (path under sounds-licensed/).
 # Single files map one-to-one; RR banks map a glob to a numbered key family.
 SINGLES: list[tuple[str, str]] = [
-    ("896/idle_680.wav", "engine/idle"),            # band idle  (~620 rpm)
-    ("896/cruise_neutral.wav", "engine/low"),       # band low   (~1000 rpm)
+    ("896/idle_680.wav", "engine/idle"),            # band idle  (~680 rpm)
+    # low = the 896 mid cut pitched to 950 (engine_low_950.py). The 60624
+    # neutral hold is RETIRED: it measures ~1125 rpm (not the labeled ~1000,
+    # 30 rpm under the mid cut) and is likely a different truck.
+    ("896/engine_low_950.wav", "engine/low"),       # band low   (950 rpm)
+    ("896/cruise_mid_1150.wav", "engine/mid"),      # band mid   (~1150 rpm)
+    ("896/cruise_high_1800.wav", "engine/high"),    # band high  (~1800 rpm)
+    ("896/rev_launch.wav", "engine/rev_launch"),    # short pull: launch from a stop
+    ("896/rev_load.wav", "engine/rev_load"),        # long pull: digging in under load
     ("brakes/brake_hiss_bed.wav", "vehicle/brake_hiss_bed"),
     ("brakes/ebrake_full.wav", "vehicle/ebrake"),
     ("air/pressurize_hiss.wav", "vehicle/air_pressurize"),
@@ -44,8 +51,9 @@ BANKS: list[tuple[str, str]] = [
     ("shifts/shift_manual_*.wav", "vehicle/shift_manual"),
     ("shifts/shift_auto_*.wav", "vehicle/shift_auto"),
 ]
-# Not yet cut -- steady band loops for the engine crossfade ring:
-PENDING = ["engine/mid (~1500 rpm)", "engine/high (~2100 rpm)  (cut from 60624)"]
+# Everything for the engine ring is now cut 896-native (one donor, one voice);
+# the old plan to pull mid/high from 60624 is retired.
+PENDING: list[str] = []
 
 
 def encode(src: Path, key: str) -> tuple[int, int]:
@@ -105,8 +113,25 @@ def main() -> None:
         print(f"\n  total {total_wav/1024/1024:.1f} MB WAV -> {total_ogg/1024/1024:.1f} MB "
               f"OGG Vorbis  ({total_ogg/total_wav:.0%} of original)")
     print(f"  staged under {OUT}  (mirror of sounds-licensed/)")
-    print("  PENDING (steady band loops still to cut): " + "; ".join(PENDING))
+    if PENDING:
+        print("  PENDING (still to cut): " + "; ".join(PENDING))
+
+
+def _run_with_deep_stack() -> None:
+    """Run main() on a thread with a 64 MB stack.
+
+    soundfile 0.14 + libsndfile 1.2.2 on Windows blows the default 1 MB main-
+    thread stack inside the Vorbis encoder on multi-second buffers (silent
+    exit 127/253, faulthandler says stack overflow in _cdata_io). A worker
+    thread with an explicit big stack sidesteps it.
+    """
+    import threading
+
+    threading.stack_size(64 * 1024 * 1024)
+    t = threading.Thread(target=main)
+    t.start()
+    t.join()
 
 
 if __name__ == "__main__":
-    main()
+    _run_with_deep_stack()

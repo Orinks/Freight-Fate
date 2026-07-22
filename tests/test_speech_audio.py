@@ -736,7 +736,14 @@ def test_audio_engine_headless_noops():
 
 
 def test_all_referenced_assets_exist():
-    """Every sound key used in the codebase must exist on disk."""
+    """Every sound key used in the codebase must exist on disk.
+
+    Keys named inside ``play_bank(...)`` (the bank base) or ``has_asset(...)``
+    are exempt: they live only in the gitignored licensed overlay, and every
+    such call site degrades on a clean clone -- ``play_bank`` to its fallback
+    key (which this test still requires to exist) and ``has_asset`` guards to
+    the committed cue or the old silence.
+    """
     import re
     from pathlib import Path
 
@@ -744,11 +751,17 @@ def test_all_referenced_assets_exist():
     pattern = re.compile(
         r"""["']((?:ui|engine|vehicle|weather|ambient|driver|events|facility|poi)/[a-z_]+)["']"""
     )
+    optional_pattern = re.compile(
+        r"""(?:play_bank|has_asset)\(\s*["']((?:ui|engine|vehicle|weather|ambient|driver|events|facility|poi)/[a-z_]+)["']"""
+    )
     keys: set[str] = set()
+    optional: set[str] = set()
     for py in src.rglob("*.py"):
-        keys |= set(pattern.findall(py.read_text(encoding="utf-8")))
+        text = py.read_text(encoding="utf-8")
+        keys |= set(pattern.findall(text))
+        optional |= set(optional_pattern.findall(text))
     assert keys, "expected to find sound keys in source"
-    missing = [k for k in keys if not asset_exists(ASSETS, k)]
+    missing = [k for k in keys - optional if not asset_exists(ASSETS, k)]
     assert not missing, f"missing sound files: {missing}"
 
 

@@ -1550,6 +1550,21 @@ class DrivingEventMixin:
 
     def _toggle_cruise(self) -> None:
         t = self.truck
+        # Parked with the brake set, the cruise button is the fast-idle
+        # switch, exactly like a real electronic truck: latch a high idle
+        # (warm-up, faster air build), press again to drop it. It also
+        # cancels on its own the moment the parking brake releases.
+        if t.high_idle_allowed:
+            if t.high_idle_rpm is None:
+                t.high_idle_rpm = HIGH_IDLE_DEFAULT_RPM
+                self.ctx.say(
+                    f"High idle, {t.high_idle_rpm:.0f} RPM. "
+                    "Plus and minus adjust it; releasing the parking brake cancels."
+                )
+            else:
+                t.high_idle_rpm = None
+                self.ctx.say("High idle off.")
+            return
         if (
             self._speed_control_armed
             or self._keeper_mph is not None
@@ -1606,7 +1621,16 @@ class DrivingEventMixin:
         """Raise or lower the cruise set point -- the Accel/Coast (+/-) buttons.
 
         While the speed keeper is handling a restricted zone, the same buttons
-        adjust the open-road target that adaptive cruise will resume."""
+        adjust the open-road target that adaptive cruise will resume. Parked
+        with high idle latched, they step the idle setpoint instead."""
+        t = self.truck
+        if t.high_idle_rpm is not None and t.high_idle_allowed:
+            step = HIGH_IDLE_STEP_RPM if delta_mph > 0 else -HIGH_IDLE_STEP_RPM
+            t.high_idle_rpm = max(
+                HIGH_IDLE_MIN_RPM, min(HIGH_IDLE_MAX_RPM, t.high_idle_rpm + step)
+            )
+            self.ctx.say(f"High idle {t.high_idle_rpm:.0f} RPM.")
+            return
         if self._cruise_mph is None and self._keeper_mph is None:
             self.ctx.say("Adaptive cruise is off. Press K to set it first.")
             return

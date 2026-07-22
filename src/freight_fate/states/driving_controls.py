@@ -36,7 +36,7 @@ class DrivingControlsMixin:
         elif key == pygame.K_n and not tr.automatic:
             result = tr.request_gear(0)
             if result.ok:
-                self.ctx.audio.play("vehicle/gear_shift")
+                self.ctx.audio.play_bank("vehicle/shift_manual", "vehicle/gear_shift")
                 self.ctx.say("Neutral.")
         elif key == pygame.K_BACKSPACE and not tr.automatic:
             self._manual_shift(REVERSE)
@@ -224,6 +224,9 @@ class DrivingControlsMixin:
             "Plus and minus, including the keypad keys, raise and lower the "
             "remembered open-road target by five, so you can dial it up to the "
             "speed you want; it will not hold above the posted limit. "
+            "Parked with the brake set, K latches a high idle instead -- the "
+            "engine holds a faster idle to warm up and build air sooner, plus "
+            "and minus adjust it, and releasing the parking brake drops it. "
             "X signals for the next announced route exit, called out by its "
             "number when known, or cancels that signal. Prepare early: slow "
             "to 45 for the ramp, hold the exit "
@@ -314,7 +317,8 @@ class DrivingControlsMixin:
             "adaptive cruise and the low-speed keeper as needed. Hold the right "
             "bumper and press D-pad left or right to lower or raise the open-road "
             "cruise target by five. It pauses through the planned pickup and "
-            "resumes once the loaded truck is rolling. "
+            "resumes once the loaded truck is rolling. Parked with the brake "
+            "set, the Y button latches a high idle instead. "
             "D-pad down signals for the next announced exit, or signals a "
             "pull-over when a trooper lights you up. "
             "D-pad up reads your route and current location, D-pad left the "
@@ -536,7 +540,7 @@ class DrivingControlsMixin:
     def _manual_shift(self, gear: int) -> None:
         result = self.truck.transmission.request_gear(gear)
         if result.ok:
-            self.ctx.audio.play("vehicle/gear_shift")
+            self.ctx.audio.play_bank("vehicle/shift_manual", "vehicle/gear_shift")
             self.ctx.say(result.message)
             if self.tutorial:
                 self.tutorial.on_gear_engaged()

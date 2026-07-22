@@ -292,6 +292,7 @@ class DrivingState(
         self._spring_brake_said = self.truck.spring_brakes_active
         self._brake_lockout_cue_timer = 0.0
         self._brake_air_hissed = False  # rising-edge guard for the brake-apply hiss
+        self._brake_peak_application = 0.0  # hardest press this application, shapes the release
         self._overrev_s = 0.0  # continuous seconds at damaging RPM
         self._overrev_warn_due = OVERREV_GRACE_S  # repeats push it out further
         self._lane_rumble_timer = 0.0
@@ -309,6 +310,7 @@ class DrivingState(
         self._pending_ambient_event: tuple[str, str | None] | None = None
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
+        self._air_cue_active = False  # compressor fill loop below governor release
         self._shift_recover_t = 1.0  # 0->1 recovery progress after an automatic shift ends
         # Smooth only the audible engine load. Physics keeps the raw throttle,
         # while small controller and cruise changes blend into the engine bed.

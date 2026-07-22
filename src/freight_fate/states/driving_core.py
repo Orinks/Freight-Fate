@@ -66,6 +66,10 @@ from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.trip_models import leg_lane_count
 from ..sim.vehicle import (
     CHAIN_SAFE_MPH,
+    HIGH_IDLE_DEFAULT_RPM,
+    HIGH_IDLE_MAX_RPM,
+    HIGH_IDLE_MIN_RPM,
+    HIGH_IDLE_STEP_RPM,
     JAKE_STAGES,
     KG_PER_TON,
     REFERENCE_CARGO_KG,

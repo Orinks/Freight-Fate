@@ -63,6 +63,15 @@ LUG_RPM_FRACTION = 0.7  # of peak-torque RPM
 JAKE_STAGES = 3
 JAKE_RPM_FLOOR = 0.3  # fraction of full retard left near idle speed
 
+# -- parked high idle -------------------------------------------------------------
+# Fast-idle/PTO mode: a parked driver latches an rpm setpoint on the cruise
+# buttons (exactly how electronic trucks do it) -- warm-up, faster air build,
+# hearing the engine out. It cancels the instant the parking brake releases.
+HIGH_IDLE_DEFAULT_RPM = 1000.0
+HIGH_IDLE_MIN_RPM = 800.0
+HIGH_IDLE_MAX_RPM = 1500.0
+HIGH_IDLE_STEP_RPM = 100.0
+
 # A hill can drive the engine past the governor through the wheels; power
 # alone cannot. Sitting AT governed speed is safe -- overspeed wear starts
 # just beyond it, which is what actually hurts a diesel.
@@ -141,6 +150,7 @@ class TruckSpecs:
     wheel_radius_m: float = 0.5
     max_torque_nm: float = 2_400.0  # ~1770 lb-ft
     idle_rpm: float = 600.0
+    fast_idle_rpm: float = 900.0  # parked high idle while the compressor builds air
     max_rpm: float = 2_200.0
     peak_torque_rpm: float = 1_300.0
     driveline_efficiency: float = 0.85
@@ -216,6 +226,10 @@ class TruckState:
     engine_wear_buff_mult: float = 1.0  # driver-care buff on duty-cycle engine wear
 
     stalled: bool = False
+    # Driver-latched parked high idle (fast-idle/PTO mode, on the cruise
+    # buttons like a real electronic truck). None = off. Not persisted:
+    # a real ECM drops fast idle at the key cycle.
+    high_idle_rpm: float | None = None
     _last_service_air_application: float = field(default=0.0, repr=False)
 
     def __post_init__(self) -> None:
@@ -680,6 +694,37 @@ class TruckState:
     def air_brakes_holding(self) -> bool:
         return self.parking_brake or self.spring_brakes_active
 
+    @property
+    def fast_idle_active(self) -> bool:
+        """Parked high idle while the air system is still building.
+
+        A cold-started truck holds a raised idle until the governor releases
+        the parking brake air; the higher rpm also spins the compressor
+        faster (see ``_update_air_system``), so the truck genuinely charges
+        sooner. Settles back to the drive idle when the air comes ready --
+        the audible flip the engine voice keys off.
+        """
+        return (
+            self.engine_on
+            and not self.air_ready
+            and abs(self.velocity_mps) < 0.3
+            and (self.transmission.in_neutral or self.parking_brake)
+        )
+
+    @property
+    def high_idle_allowed(self) -> bool:
+        """Whether the latched parked high idle may hold (or be set)."""
+        return self.engine_on and self.parking_brake and abs(self.velocity_mps) < 0.3
+
+    def _idle_floor_rpm(self) -> float:
+        """The parked idle target: drive idle, air-building fast idle, or the
+        driver's latched high idle, whichever asks for more."""
+        s = self.specs
+        floor = s.fast_idle_rpm if self.fast_idle_active else s.idle_rpm
+        if self.high_idle_rpm is not None:
+            floor = max(floor, self.high_idle_rpm)
+        return floor
+
     def set_cold_air_start(self) -> None:
         """Parked trip start: low air, spring/parking brakes set."""
         self._set_all_air_reservoirs(self.specs.air_cold_start_psi)
@@ -813,6 +858,10 @@ class TruckState:
     def _update_rpm(self, dt: float) -> None:
         s = self.specs
         tr = self.transmission
+        # Latched high idle drops the instant its conditions break -- the
+        # parking brake releasing is the real fast-idle cancel.
+        if self.high_idle_rpm is not None and not self.high_idle_allowed:
+            self.high_idle_rpm = None
         if not self.engine_on:
             self.rpm = max(0.0, self.rpm - 1500 * dt)
             return
@@ -835,7 +884,8 @@ class TruckState:
                 # instead of lugging against the held brake or stalling; the
                 # brake, not the driveline, is what keeps the truck stopped.
                 if self.parking_brake and abs(self.velocity_mps) < 0.1:
-                    target = s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle
+                    floor = self._idle_floor_rpm()
+                    target = max(floor, s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle)
                     self.rpm += (target - self.rpm) * min(1.0, 4.0 * dt)
                     return
                 # Launch regime: in a low gear the clutch slips and the engine
@@ -859,7 +909,8 @@ class TruckState:
                 # engine. An automatic upshifts to protect itself first.
                 self.rpm = min(s.max_rpm * ROAD_OVERSPEED_RPM_MULT, road_rpm)
         else:
-            target = s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle
+            floor = self._idle_floor_rpm()
+            target = max(floor, s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle)
             self.rpm += (target - self.rpm) * min(1.0, 4.0 * dt)
 
     def stall(self) -> None:
@@ -873,7 +924,14 @@ class TruckState:
             return
         # ~0.8 gal/h at idle; load burn calibrated for ~6.5-7 mpg at 60 mph cruise
         power_kw = abs(self.drive_force()) * abs(self.velocity_mps) / 1000.0
-        burn = (0.00022 + power_kw * 1.5e-5) * self.specs.fuel_burn_factor
+        base = 0.00022
+        if abs(self.velocity_mps) < 0.3:
+            # Standing still the wheel-power term is zero, so an unloaded rev
+            # would burn nothing extra: scale the base burn with rpm instead.
+            # High idle and parked revving cost real fuel; the moving-truck
+            # calibration above is untouched.
+            base *= max(1.0, self.rpm / self.specs.idle_rpm)
+        burn = (base + power_kw * 1.5e-5) * self.specs.fuel_burn_factor
         # A tired engine burns more fuel for the power it still makes.
         burn *= 1.0 + ENGINE_WEAR_FUEL_PENALTY * self.engine_wear_pct / 100.0
         self.fuel_gal = max(0.0, self.fuel_gal - burn * dt * self.fuel_burn_mult)

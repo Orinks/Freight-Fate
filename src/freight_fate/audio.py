@@ -3,11 +3,13 @@
 Two interchangeable backends sit behind the :class:`AudioEngine` facade:
 
 * **BASS** (via ``sound_lib``) — the preferred backend. The truck engine is a
-  single loop whose playback frequency tracks RPM in real time, smoothed with
-  BASS attribute slides. With no audio device (headless CI) it initializes
-  BASS's "no sound" device, so the full code path still runs silently.
+  multisample ring: one real cab loop per rpm band, crossfaded equal-power
+  with per-band playback-rate tracking (BASS attribute slides). When the
+  licensed cuts are absent it falls back to the single idle loop pitched up
+  with RPM. With no audio device (headless CI) it initializes BASS's
+  "no sound" device, so the full code path still runs silently.
 * **pygame.mixer** — automatic fallback when sound_lib/BASS cannot
-  initialize. Uses the classic four-band engine loop crossfade.
+  initialize. Crossfades the same four bands at their native pitch.
 
 Set ``FREIGHT_FATE_AUDIO_BACKEND=pygame`` to skip BASS entirely.
 
@@ -24,7 +26,9 @@ from __future__ import annotations
 import contextlib
 import io
 import logging
+import math
 import os
+import random
 import sys
 from pathlib import Path
 
@@ -37,6 +41,11 @@ from .audio_loops import SustainLoop, to_seconds
 log = logging.getLogger(__name__)
 
 ASSETS = Path(__file__).parent / "assets" / "sounds"
+# Licensed sound-library overlay (gitignored, never committed). A machine that
+# owns the purchased libraries drops encoded assets here under the same keys;
+# they take precedence over the committed tree, so a clean clone still runs on
+# the synthesized fallbacks. Release builds bake the overlay into sounds.pak.
+ASSETS_LICENSED = Path(__file__).parent / "assets" / "sounds-licensed"
 
 # BASS addon plugins shipped with the game. BASSHLS teaches BASS to open
 # HTTP Live Streaming radio URLs (the AFN 360 Global channels); core BASS
@@ -61,7 +70,9 @@ CH_WEATHER_B = 6
 CH_AMBIENT = 7
 CH_HORN = 8
 CH_REVERSE = 9
-RESERVED = 9
+CH_AIR = 10  # compressor charging the tanks below governor release
+CH_BRAKE = 11  # brake-release air bleed: the hiss bed shaped per release
+RESERVED = 11
 NUM_CHANNELS = 32
 
 # Horn sustain loop points (samples, at the asset's 44100 Hz). The horn is an
@@ -70,15 +81,25 @@ NUM_CHANNELS = 32
 HORN_LOOP_START = 11816
 HORN_LOOP_END = 12379
 
-# RPM centers for the pygame engine loop crossfade.
+# The multisample engine voice: one steady cab loop per band, cut from the
+# real 896 recording at these native rpms. Both backends crossfade the ring
+# with ``engine_band_weights``; the BASS backend additionally slides each
+# band's playback rate to track rpm inside the band (see ENGINE_BAND_RATE_*).
 ENGINE_BANDS = (
-    ("engine/idle", 620),
-    ("engine/low", 1000),
-    ("engine/mid", 1500),
-    ("engine/high", 2100),
+    ("engine/idle", 680.0),
+    ("engine/low", 950.0),
+    ("engine/mid", 1150.0),
+    ("engine/high", 1800.0),
 )
+# A cut may only be repitched this far from the speed it was recorded at --
+# beyond that the cab character falls apart and the neighbour band carries it.
+# 1.30 up lets the 1800 cut reach redline (2200/1800 = 1.22).
+ENGINE_BAND_RATE_MIN = 0.85
+ENGINE_BAND_RATE_MAX = 1.30
 
-# BASS engine model: one idle loop, pitched up with RPM.
+# Legacy BASS engine model: one idle loop, pitched up with RPM. Still the
+# fallback when the licensed multisample cuts are absent (a clean clone has
+# only the synthesized engine/idle).
 ENGINE_LOOP_KEY = "engine/idle"
 ENGINE_RPM_IDLE = 600.0
 ENGINE_RPM_MAX = 2200.0
@@ -109,10 +130,11 @@ BASS_NO_SOUND_DEVICE = 0
 
 def _asset_path(key: str, extensions: tuple[str, ...]) -> Path | None:
     """Loose-file lookup; source checkouts and asset tooling only."""
-    for ext in extensions:
-        path = ASSETS / f"{key}.{ext}"
-        if path.exists():
-            return path
+    for root in (ASSETS_LICENSED, ASSETS):
+        for ext in extensions:
+            path = root / f"{key}.{ext}"
+            if path.exists():
+                return path
     return None
 
 
@@ -156,6 +178,29 @@ def engine_freq_mult(rpm: float) -> float:
     """
     t = (rpm - ENGINE_RPM_IDLE) / (ENGINE_RPM_MAX - ENGINE_RPM_IDLE)
     return max(1.0, min(ENGINE_FREQ_MAX_MULT, 1.0 + t * (ENGINE_FREQ_MAX_MULT - 1.0)))
+
+
+def engine_band_weights(rpm: float, natives: tuple[float, ...]) -> tuple[float, ...]:
+    """Crossfade weights for the engine band ring at ``rpm``.
+
+    Below the first native rpm the first band carries alone, above the last
+    the last does; between neighbours the pair blends equal-power (the loops
+    are uncorrelated recordings, so cos/sin keeps the summed level flat).
+    """
+    n = len(natives)
+    weights = [0.0] * n
+    if rpm <= natives[0]:
+        weights[0] = 1.0
+    elif rpm >= natives[-1]:
+        weights[-1] = 1.0
+    else:
+        for i in range(n - 1):
+            if rpm <= natives[i + 1]:
+                t = (rpm - natives[i]) / (natives[i + 1] - natives[i])
+                weights[i] = math.cos(t * math.pi / 2.0)
+                weights[i + 1] = math.sin(t * math.pi / 2.0)
+                break
+    return tuple(weights)
 
 
 # Facility docks: big-room interiors get the warehouse loop, yards the gate.
@@ -571,9 +616,8 @@ class _PygameBackend:
         # During the ignition handoff, boost load toward full so the loop meets
         # the crank tail; the boost eases back to 0 afterward.
         load_gain += self._engine_intro_load * (1.0 - load_gain)
-        for i, (_key, center) in enumerate(ENGINE_BANDS):
-            # triangular weight, 1.0 at band center, 0 beyond ~600 rpm away
-            w = max(0.0, 1.0 - abs(rpm - center) / 620.0)
+        weights = engine_band_weights(rpm, tuple(native for _key, native in ENGINE_BANDS))
+        for i, w in enumerate(weights):
             self.set_loop_volume(
                 CH_ENGINE[i], ENGINE_LOOP_GAIN * w * load_gain * self._engine_intro_gain
             )
@@ -741,11 +785,15 @@ class _BassBackend:
         self._engine_running = False
         self._engine_stream = None
         self._engine_base_freq = 0.0
+        # Multisample ring: (native_rpm, stream, base_freq) per resolved band.
+        # Empty when running on the legacy single pitched loop.
+        self._engine_bands: list[tuple[float, object, float]] = []
         self._engine_intro_stream = None  # ignition one-shot, kept for the crossfade
         self._engine_intro_gain = 1.0  # crossfade multiplier on the engine loop
         self._engine_intro_load = 0.0  # ignition load boost: 1.0 forces full load
         self._engine_starting = False  # True only during the ignition crossfade
         self._engine_last_rpm = ENGINE_RPM_IDLE
+        self._engine_last_throttle = 0.0
         self._fades = FadeScheduler()
 
         if os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
@@ -1054,15 +1102,34 @@ class _BassBackend:
                     curve=ENGINE_START_FADE_IN_CURVE,
                 )
             )
-        stream = self._sfx_stream(ENGINE_LOOP_KEY, looping=True)
-        if stream is not None:
+        self._engine_bands = []
+        for key, native in ENGINE_BANDS:
+            band_stream = self._sfx_stream(key, looping=True)
+            if band_stream is None:
+                continue
             try:
-                self._engine_base_freq = stream.get_frequency()
-                stream.set_volume(0.0)
-                stream.play()
+                base_freq = band_stream.get_frequency()
+                band_stream.set_volume(0.0)
+                band_stream.play()
             except self._BassError:
-                stream = None
-        self._engine_stream = stream
+                continue
+            self._engine_bands.append((native, band_stream, base_freq))
+        if len(self._engine_bands) < 2:
+            # Not enough cuts for a crossfade ring (a clean clone carries only
+            # the synthesized engine/idle): legacy single pitched loop.
+            for _native, band_stream, _freq in self._engine_bands:
+                with contextlib.suppress(self._BassError):
+                    band_stream.stop()
+            self._engine_bands = []
+            stream = self._sfx_stream(ENGINE_LOOP_KEY, looping=True)
+            if stream is not None:
+                try:
+                    self._engine_base_freq = stream.get_frequency()
+                    stream.set_volume(0.0)
+                    stream.play()
+                except self._BassError:
+                    stream = None
+            self._engine_stream = stream
         self.set_engine_rpm(ENGINE_RPM_IDLE, throttle=0.0)
 
     def _begin_engine_start_crossfade(self) -> None:
@@ -1152,11 +1219,11 @@ class _BassBackend:
 
     def _set_engine_intro_gain(self, gain: float) -> None:
         self._engine_intro_gain = max(0.0, min(1.0, gain))
-        self.set_engine_rpm(self._engine_last_rpm)
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
 
     def _set_engine_intro_load(self, value: float) -> None:
         self._engine_intro_load = max(0.0, min(1.0, value))
-        self.set_engine_rpm(self._engine_last_rpm)
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
 
     def _end_engine_starting(self) -> None:
         self._engine_starting = False
@@ -1174,6 +1241,9 @@ class _BassBackend:
         self._engine_intro_load = 0.0
         self._engine_starting = False
         self._engine_intro_stream = None
+        for _native, stream, _freq in self._engine_bands:
+            self._fade_out(stream, 250)
+        self._engine_bands = []
         if self._engine_stream is not None:
             self._fade_out(self._engine_stream, 250)
             self._engine_stream = None
@@ -1181,16 +1251,21 @@ class _BassBackend:
             self.play("engine/shutdown")
 
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None:
-        """Slide the engine loop's playback frequency to track RPM."""
-        if not (self._engine_running and self._engine_stream is not None):
+        """Track RPM: crossfade the multisample ring, or pitch the legacy loop.
+
+        With the ring, each band's playback rate also slides toward
+        ``rpm / native_rpm`` (clamped) so the pitch is continuous through a
+        crossfade instead of stepping between the cuts' recorded speeds.
+        """
+        if not (self._engine_running and (self._engine_bands or self._engine_stream)):
             return
         self._engine_last_rpm = rpm
-        target = self._engine_base_freq * engine_freq_mult(rpm)
+        self._engine_last_throttle = throttle
         load_gain = engine_load_gain(throttle)
         # During the ignition handoff, boost load toward full so the loop meets
         # the crank tail; the boost eases back to 0 afterward.
         load_gain += self._engine_intro_load * (1.0 - load_gain)
-        vol = max(
+        level = max(
             0.0,
             min(
                 1.0,
@@ -1201,11 +1276,30 @@ class _BassBackend:
                 * self._engine_intro_gain,
             ),
         )
+        if self._engine_bands:
+            natives = tuple(native for native, _stream, _freq in self._engine_bands)
+            weights = engine_band_weights(rpm, natives)
+            for (native, stream, base_freq), w in zip(self._engine_bands, weights, strict=True):
+                rate = max(ENGINE_BAND_RATE_MIN, min(ENGINE_BAND_RATE_MAX, rpm / native))
+                try:
+                    self._bass_call(
+                        self._slide,
+                        stream.handle,
+                        self._ATTRIB_FREQ,
+                        base_freq * rate,
+                        ENGINE_SLIDE_MS,
+                    )
+                    stream.set_volume(level * w)
+                except self._BassError:
+                    self._engine_bands = []
+                    return
+            return
+        target = self._engine_base_freq * engine_freq_mult(rpm)
         try:
             self._bass_call(
                 self._slide, self._engine_stream.handle, self._ATTRIB_FREQ, target, ENGINE_SLIDE_MS
             )
-            self._engine_stream.set_volume(vol)
+            self._engine_stream.set_volume(level)
         except self._BassError:
             self._engine_stream = None
 
@@ -1361,22 +1455,9 @@ class _BassBackend:
             self.ui_volume = max(0.0, min(1.0, ui))
         for ch in list(self._loops):
             self._apply_loop_volume(ch)
-        if self._engine_stream is not None:
-            try:
-                self._engine_stream.set_volume(
-                    max(
-                        0.0,
-                        min(
-                            1.0,
-                            ENGINE_LOOP_GAIN
-                            * self.engine_volume
-                            * self.master_volume
-                            * self._engine_intro_gain,
-                        ),
-                    )
-                )
-            except self._BassError:
-                self._engine_stream = None
+        # Reapply engine volume through the rpm path: it knows the current
+        # model (multisample ring or legacy loop) and keeps the load contour.
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
         if self._music_stream is not None:
             try:
                 self._music_stream.set_volume(
@@ -1477,6 +1558,10 @@ class AudioEngine:
 
     def __init__(self) -> None:
         self._impl = self._pick_backend()
+        self._banks: dict[str, list[str]] = {}  # base -> discovered numbered keys
+        self._bank_order: dict[str, list[str]] = {}  # base -> remaining shuffled cuts
+        self._last_bank_key: dict[str, str] = {}  # base -> cut played last
+        self._asset_known: dict[str, bool] = {}  # key -> resolves anywhere
         log.info("Audio backend: %s", self._impl.name)
 
     @staticmethod
@@ -1531,6 +1616,57 @@ class AudioEngine:
     def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
         """Play a one-shot. ``pan`` -1.0 = full left, 0 = center, 1.0 = right."""
         self._impl.play(key, volume, pan)
+
+    def has_asset(self, key: str) -> bool:
+        """Whether a sound key resolves (pack, licensed overlay, or loose).
+
+        Cached; call sites use it to prefer a licensed cue and fall back to
+        the committed one -- or to stay silent where silence was the old
+        behavior -- on a clean clone.
+        """
+        cached = self._asset_known.get(key)
+        if cached is None:
+            cached = _asset_bytes(key, ("ogg", "wav")) is not None
+            self._asset_known[key] = cached
+        return cached
+
+    def _bank_keys(self, base: str) -> list[str]:
+        """Discover a numbered round-robin bank (``base_01``..) once, cached."""
+        keys = self._banks.get(base)
+        if keys is None:
+            keys = []
+            for i in range(1, 100):
+                key = f"{base}_{i:02d}"
+                if _asset_bytes(key, ("ogg", "wav")) is None:
+                    break
+                keys.append(key)
+            self._banks[base] = keys
+        return keys
+
+    def play_bank(self, base: str, fallback: str, volume: float = 1.0, pan: float = 0.0) -> None:
+        """Play one cut from a round-robin bank, or ``fallback`` if none exist.
+
+        Real mechanical events never sound twice the same, so banked cuts
+        (``base_01``..``base_NN``, the licensed overlay) play in a shuffled
+        cycle -- every cut once before any repeats, never the same cut twice
+        in a row. A clean clone without the bank keeps the single classic cue.
+        """
+        keys = self._bank_keys(base)
+        if not keys:
+            self.play(fallback, volume, pan)
+            return
+        order = self._bank_order.get(base)
+        if not order:
+            order = random.sample(keys, len(keys))
+            # A fresh shuffle may lead with the cut that just played; swap it
+            # to the back so no cut ever sounds twice in a row.
+            if len(order) > 1 and order[0] == self._last_bank_key.get(base):
+                order[0], order[-1] = order[-1], order[0]
+            self._bank_order[base] = order
+        key = order.pop(0)
+        self._last_bank_key[base] = key
+        # Per-trigger level jitter, ~±1.4 dB: no two clunks land identically.
+        self.play(key, volume * random.uniform(0.85, 1.17), pan)
 
     def start_loop(self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300) -> None:
         self._impl.start_loop(channel, key, volume, fade_ms)
@@ -1654,7 +1790,7 @@ class AudioEngine:
     def stop_world(self) -> None:
         """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
         self.engine_stop(shutdown_sound=False)
-        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_HORN):
+        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_HORN, CH_AIR):
             self.stop_loop(ch, fade_ms=400)
 
     # -- music ----------------------------------------------------------------
