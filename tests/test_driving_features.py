@@ -174,7 +174,9 @@ def test_passing_hazard_plays_clear_sound(monkeypatch):
     app = App()
     played = []
     events = []
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
+    )
     monkeypatch.setattr(
         app.ctx,
         "say_event",
@@ -908,7 +910,9 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
         "say",
         lambda text, interrupt=True: spoken.append((text, interrupt)),
     )
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1761,6 +1765,8 @@ def test_taking_the_announced_exit_does_not_repeat_the_ramp_cap(monkeypatch):
         said.clear()
         driving._take_exit()
 
+        # The exit key is a turn signal now: "Signal on for ..." replaced the
+        # older "Signaling for ..." callout when the cancel/confirm model landed.
         assert "Signal on for" in said[-1]
         assert "Adaptive cruise" not in said[-1]  # already said, and already capped
         assert driving._cruise_exit_mph == 40.0
@@ -2060,7 +2066,9 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
     spoken = []
     monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)

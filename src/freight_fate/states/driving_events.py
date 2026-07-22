@@ -513,8 +513,7 @@ class DrivingEventMixin:
         self.ctx.say(
             f"{head} {ahead_text} ahead.{lane_hint} "
             "Move right for the exit lane, then slow to "
-            f"{RAMP_MAX_MPH:.0f} or less for the ramp.{ending}"
-            + self._cap_cruise_for_ramp()
+            f"{RAMP_MAX_MPH:.0f} or less for the ramp.{ending}" + self._cap_cruise_for_ramp()
         )
 
     def _cap_cruise_for_ramp(self) -> str:
@@ -822,6 +821,8 @@ class DrivingEventMixin:
         key = self._destination_exit_key(stop)
         if key != self._destination_exit_announced_key:
             self._destination_exit_announced_key = key
+            # Cruise stays engaged down the ramp approach, capped at the ramp
+            # target, rather than handing the pedal back cold.
             message = self._destination_exit_announcement(stop, ahead) + self._cap_cruise_for_ramp()
             self.ctx.audio.play("ui/notify", volume=0.7)
             self.ctx.say_event(message, interrupt=False)
@@ -1626,9 +1627,7 @@ class DrivingEventMixin:
         t = self.truck
         if t.high_idle_rpm is not None and t.high_idle_allowed:
             step = HIGH_IDLE_STEP_RPM if delta_mph > 0 else -HIGH_IDLE_STEP_RPM
-            t.high_idle_rpm = max(
-                HIGH_IDLE_MIN_RPM, min(HIGH_IDLE_MAX_RPM, t.high_idle_rpm + step)
-            )
+            t.high_idle_rpm = max(HIGH_IDLE_MIN_RPM, min(HIGH_IDLE_MAX_RPM, t.high_idle_rpm + step))
             self.ctx.say(f"High idle {t.high_idle_rpm:.0f} RPM.")
             return
         if self._cruise_mph is None and self._keeper_mph is None:

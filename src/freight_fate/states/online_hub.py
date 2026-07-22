@@ -31,6 +31,12 @@ class OnlineHubState(MenuState):
     def build_items(self) -> list[MenuItem]:
         s = self.ctx.settings
         return [
+            MenuItem(
+                "Drivers board",
+                self._drivers_board,
+                help="Hear who is hauling right now on the public orinks.net "
+                "drivers board. Viewing the board shares nothing about you.",
+            ),
             # This line's online-enhancement master switch survives the move
             # into the hub: one row that stands every live service down (or
             # back up) without losing the individual consents beneath it.
@@ -39,14 +45,8 @@ class OnlineHubState(MenuState):
                 lambda: self._toggle_online_services(1),
                 help="Master switch for all online/live-data features. "
                 "When off, real-time weather, traffic, parking, Discord "
-                "presence, and cloud backup all behave as disabled "
-                "without losing their individual settings.",
-            ),
-            MenuItem(
-                "Drivers board",
-                self._drivers_board,
-                help="Hear who is hauling right now on the public orinks.net "
-                "drivers board. Viewing the board shares nothing about you.",
+                "presence, Mastodon sharing, and cloud backup all behave as "
+                "disabled without losing their individual settings.",
             ),
             MenuItem(
                 lambda: (
@@ -160,8 +160,8 @@ class OnlineHubState(MenuState):
         # actions, so left/right does nothing there instead of changing a
         # nearby toggle.
         actions = [
-            self._toggle_online_services,
             lambda _d: None,
+            self._toggle_online_services,
             lambda _d: None,
             self._toggle_online_presence,
             self._toggle_cloud_saves,
@@ -179,25 +179,28 @@ class OnlineHubState(MenuState):
         self.ctx.audio.play("ui/menu_select")
         self.speak_current()
 
-    def _toggle_online_services(self, _d: int) -> None:
-        """Toggle the master online services switch.
-
-        Individual toggle values are preserved so re-enabling restores the
-        previous configuration without re-consenting to each service.
-        """
-        s = self.ctx.settings
-        s.online_services = not s.online_services
-        s.save()
-        # Whichever way it flipped, every live service re-reads the gate.
-        self.ctx.apply_presence()
-        self.ctx.apply_online_presence()
-        self.ctx.apply_cloud_saves()
-        self._announce()
-
     def _drivers_board(self) -> None:
         from .online_states import DriversOnlineState
 
         self.ctx.push_state(DriversOnlineState(self.ctx))
+
+    def _toggle_online_services(self, _d: int) -> None:
+        """Toggle the master online services switch.
+
+        When turned off all online features stop immediately. Individual
+        toggle values are preserved so re-enabling restores the previous
+        configuration without re-setting each service.
+        """
+        s = self.ctx.settings
+        s.online_services = not s.online_services
+        s.save()
+        # Both directions walk the same list: every live service re-reads the
+        # master switch and stands down or reconnects to match.
+        self.ctx.apply_presence()
+        self.ctx.apply_online_presence()
+        self.ctx.apply_cloud_saves()
+        self.ctx.apply_mastodon_sharing()
+        self._announce()
 
     def _online_account_setup(self) -> None:
         from .online_states import OnlineSetupState

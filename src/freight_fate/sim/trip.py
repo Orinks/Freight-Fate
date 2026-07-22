@@ -1782,10 +1782,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         # "ahead" with the same limit, and identical wording here left the
         # driver hearing "speed limit 15" twice, miles apart, with no way to
         # tell which one had taken effect. Pairs with the "End of ... zone" exit.
-        return (
-            f"Entering {zone.reason} zone. "
-            f"Speed limit {self._speed_value(zone.limit_mph)} now."
-        )
+        return f"Entering {zone.reason} zone. Speed limit {self._speed_value(zone.limit_mph)} now."
 
     def _check_zones(self) -> None:
         lookahead = self._zone_warning_lookahead_mi()

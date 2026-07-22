@@ -24,10 +24,10 @@ def test_main_menu_online_item_opens_the_hub():
         menu.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, OnlineHubState)
         hub = app.state
-        # This line keeps the online-enhancement master switch at the top of
-        # the hub; the board sits right under it.
-        assert hub.items[0].text == "Online services: on"
-        assert hub.items[1].text == "Drivers board"
+        # The board leads because viewing it shares nothing; the
+        # online-enhancement master switch sits right under it.
+        assert hub.items[0].text == "Drivers board"
+        assert hub.items[1].text == "Online services: on"
         for item in hub.items[:-1]:  # every row but Back explains itself
             assert item.help
     finally:
@@ -46,7 +46,6 @@ def test_hub_drivers_board_item_opens_the_board(monkeypatch):
     try:
         hub = OnlineHubState(app.ctx)
         app.push_state(hub)
-        hub.handle_event(key_event(pygame.K_DOWN))  # past the master switch
         assert hub.items[hub.index].text == "Drivers board"
         hub.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, DriversOnlineState)

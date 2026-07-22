@@ -284,7 +284,7 @@ class GameContext:
 
     def apply_mastodon_sharing(self) -> None:
         """Reflect the Mastodon sharing setting (e.g. after a settings change)."""
-        self._app.mastodon.set_enabled(self.settings.mastodon_sharing)
+        self._app.mastodon.set_enabled(self._online_enabled(self.settings.mastodon_sharing))
 
     def cloud_saves_service(self) -> CloudSaves:
         """The backup service, for the Cloud backup menu."""

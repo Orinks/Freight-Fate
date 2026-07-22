@@ -691,6 +691,15 @@ def test_facility_gate_warns_before_final_low_speed_zone(world):
     assert "In 2 miles, facility gate ahead. Speed limit 15." in warnings
 
 
+def _closure_part(zone) -> str:
+    """The lane-closure sentence the construction warning carries, if any."""
+    if zone.closed_lane is None:
+        return "All lanes stay open through the work; hold your lane. "
+    shut = "right" if zone.closed_lane == 0 else "left"
+    keep = "left" if zone.closed_lane == 0 else "right"
+    return f"The {shut} lane is closed; merge {keep} at the taper. "
+
+
 def test_zone_entry_is_worded_apart_from_its_advance_warning(world):
     """The heads-up and the change itself must not sound alike. Both used to
     say "<zone> ahead. Speed limit 15.", so a driver heard the gate limit two
@@ -700,12 +709,12 @@ def test_zone_entry_is_worded_apart_from_its_advance_warning(world):
     gate = next(z for z in trip.zones if z.reason == "facility gate")
 
     trip.position_mi = gate.start_mi - 2.0
-    # The 1.9 street chain also speaks navigation cues here; pick the gate's.
-    warning = [
+    # The street chain speaks navigation cues too; pick the gate warning out.
+    warning = next(
         e.message
         for e in trip.update(0.0)
         if e.kind == TripEventKind.GPS_CUE and "facility gate" in e.message
-    ][-1]
+    )
     # Two miles out: a heads-up, and the gate limit is not in force yet.
     assert warning == "In 2 miles, facility gate ahead. Speed limit 15."
     assert trip.speed_limit_at(trip.position_mi)[0] != 15.0
@@ -715,15 +724,6 @@ def test_zone_entry_is_worded_apart_from_its_advance_warning(world):
     assert entry == "Entering facility gate zone. Speed limit 15 now."
     assert entry != warning.split(", ", 1)[1]
     assert trip.speed_limit_at(trip.position_mi) == (15.0, "facility gate")
-
-
-def _closure_part(zone) -> str:
-    """The lane-closure sentence the construction warning carries, if any."""
-    if zone.closed_lane is None:
-        return "All lanes stay open through the work; hold your lane. "
-    shut = "right" if zone.closed_lane == 0 else "left"
-    keep = "left" if zone.closed_lane == 0 else "right"
-    return f"The {shut} lane is closed; merge {keep} at the taper. "
 
 
 def test_construction_zone_warns_before_entry(world):
