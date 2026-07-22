@@ -38,6 +38,27 @@ src/freight_fate/data/_baked_world.py
 src/freight_fate/data/_baked_data.py
 src/freight_fate/sounds.pak
 
+# Licensed sound-library material. NEVER COMMIT THESE.
+#
+# Purchased SFX libraries (Big Fish Audio / Pro Sound Effects and similar)
+# grant synchronization rights -- the right to use the audio inside a finished
+# production. That covers shipping them inside the game. It does not cover
+# redistributing the source files, and a public repo does exactly that. The
+# licence is also per-seat and non-transferable, so a file in this tree would
+# be handing a copy to everyone who clones.
+#
+# Drop purchased material in assets/sounds-licensed/ and it stays local. The
+# release packer overlays it on top of assets/sounds/, so a build made on a
+# machine that owns the library gets the licensed audio while a clean clone
+# still builds and runs on the synthesized fallbacks.
+src/freight_fate/assets/sounds-licensed/
+sound-source/
+*.wav
+
+# Prototype/audition renders (regenerate from sound-test/*.py, all deterministic)
+sound-test/*.wav
+sound-test/__pycache__/
+
 # Portable save data (lives in the game directory)
 saves/
 
