@@ -828,6 +828,16 @@ class TruckState:
             wheel_rps = abs(self.velocity_mps) / (2 * math.pi * s.wheel_radius_m)
             road_rpm = wheel_rps * 60.0 * abs(ratio)
             if road_rpm < s.idle_rpm:
+                # Standing still with the parking brake holding the rig: the
+                # driver is revving in place -- warming the engine, building
+                # air, or (for a blind player) listening to confirm the engine
+                # answers the throttle. Let it free-rev like an idle-in-neutral
+                # instead of lugging against the held brake or stalling; the
+                # brake, not the driveline, is what keeps the truck stopped.
+                if self.parking_brake and abs(self.velocity_mps) < 0.1:
+                    target = s.idle_rpm + (s.max_rpm - s.idle_rpm) * self.throttle
+                    self.rpm += (target - self.rpm) * min(1.0, 4.0 * dt)
+                    return
                 # Launch regime: in a low gear the clutch slips and the engine
                 # holds idle-or-better. In a high gear the engine lugs.
                 if tr.gear >= 4 and road_rpm < s.idle_rpm * 0.5:
