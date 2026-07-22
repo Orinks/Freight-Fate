@@ -553,6 +553,14 @@
 
 ### Fixed
 
+- **The engine revs freely when you sit with the parking brake set.**
+  Blipping the throttle while parked used to drag the engine up to a
+  weak, half-hearted rev and then stall it, with the game repeating that
+  you must release the parking brake. Now, whenever the parking brake is
+  holding you still, the engine answers the throttle across its whole
+  range -- so you can warm it up, build air faster, or just listen to it
+  come alive -- and it settles back to a steady idle when you let off.
+
 - **Curve calls arrive on time and tell the truth about distance.**
   A curve warning could get stuck in line behind scenery chatter and
   reach your ears with the bend seconds away while still saying "a
