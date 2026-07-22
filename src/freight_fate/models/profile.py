@@ -66,7 +66,7 @@ DEFAULT_CITY = "chicago_il_us"
 DEFAULT_FUEL_GAL = 150.0
 SIGNATURE_FIELD = "_signature"
 SIGNATURE_VERSION_FIELD = "_signature_version"
-SIGNATURE_VERSION = 2
+SIGNATURE_VERSION = 3
 SECRET_FILE = "profile.key"
 
 # Condition fields that were stored flat on the profile before per-truck
@@ -355,7 +355,24 @@ def _signed_payload(data: dict, signature_version: int) -> dict:
     # The mainline kept a flat _LEGACY_SIGNED_FIELDS allow-list for the same
     # job; this line versions the signature instead, so the older field set is
     # consulted only for the saves that were actually signed over it.
+    #
+    # v3 signs every key the file actually carries, so a code-side field
+    # rename or removal can never invalidate a stored signature again. The
+    # older versions signed the dataclass field set of their day and must be
+    # validated against that day's set, not today's: dropping road_grime_pct
+    # from the class (2026-07-20) silently changed the v2 payload and falsely
+    # flagged every save signed before it. Removing a field while any v2
+    # saves remain in the wild means adding it to the v2 set below.
+    if signature_version >= 3:
+        return {
+            key: data[key]
+            for key in sorted(data)
+            if key not in (SIGNATURE_FIELD, SIGNATURE_VERSION_FIELD)
+        }
     allowed = set(Profile.__dataclass_fields__) | {"version"}
+    if signature_version == 2:
+        # Fields signed by v2-era code that have since left the dataclass.
+        allowed |= {"road_grime_pct"}
     if signature_version < 2:
         # v1 saves signed the flat condition fields, before per-truck
         # conditions replaced them. Validate against that older field set so a

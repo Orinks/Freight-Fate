@@ -566,6 +566,12 @@
 
 ### Fixed
 
+- **Updating the game no longer flags your save as changed outside the game.**
+  A save written by an earlier version could be wrongly marked as modified the
+  first time a newer version loaded it, even though nobody touched the file.
+  The check now recognizes saves from earlier versions for what they are, so
+  an update never puts that mark on an untouched career.
+
 - **The engine revs freely when you sit with the parking brake set.**
   Blipping the throttle while parked used to drag the engine up to a
   weak, half-hearted rev and then stall it, with the game repeating that

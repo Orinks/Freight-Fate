@@ -23,8 +23,10 @@ from freight_fate.models.profile import (
     SAVE_MAGIC,
     SAVE_VERSION,
     SIGNATURE_FIELD,
+    SIGNATURE_VERSION_FIELD,
     ProfileIntegrityError,
     _decode_save_bytes,
+    _signature_for,
     encode_save_bytes,
 )
 from freight_fate.settings import Settings
@@ -422,8 +424,9 @@ def test_profile_ignores_unknown_fields():
     _write_packed(path, data)
     loaded = Profile.load(path)
     assert loaded.name == "Future"
-    # Unknown fields are outside the signed payload, so this is not a tamper.
-    assert loaded.integrity_modified is False
+    # v3 signs every key the file carries, so a hand-added unknown field is
+    # an out-of-game edit like any other: the save still loads, but marks.
+    assert loaded.integrity_modified is True
 
 
 def test_tampered_money_loads_but_marks_profile_modified():
@@ -456,6 +459,38 @@ def test_modified_flag_is_sticky_against_hand_clearing():
     _write_packed(path, data)  # stale signature again
 
     assert Profile.load(path).integrity_modified is True
+
+
+def test_v2_save_signed_over_a_since_removed_field_still_validates():
+    # Saves from before 2026-07-20 carry road_grime_pct, which later left the
+    # dataclass. v2 validation must use the field set those saves were signed
+    # over, not today's -- recomputing without the departed field is how every
+    # pre-grime-migration save got falsely flagged as changed outside the game.
+    p = Profile(name="Grime Era")
+    path = p.save()
+    data = _read_save(path)
+    data.pop(SIGNATURE_FIELD)
+    data["road_grime_pct"] = 12.5
+    data[SIGNATURE_VERSION_FIELD] = 2
+    data[SIGNATURE_FIELD] = _signature_for(data)
+    _write_packed(path, data)
+
+    assert Profile.load(path).integrity_modified is False
+
+
+def test_v3_signature_survives_future_field_removal():
+    # v3 signs what the file carries, so a key the current dataclass no longer
+    # knows (a save written by a build whose field was since removed) can
+    # never invalidate the signature again.
+    p = Profile(name="Extinct Field")
+    path = p.save()
+    data = _read_save(path)
+    data.pop(SIGNATURE_FIELD)
+    data["some_retired_field"] = "kept"
+    data[SIGNATURE_FIELD] = _signature_for(data)
+    _write_packed(path, data)
+
+    assert Profile.load(path).integrity_modified is False
 
 
 def test_packed_save_with_stripped_signature_is_marked_modified():
