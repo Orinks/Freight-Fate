@@ -18,6 +18,20 @@ def open_settings_category(app, label):
     return app.state
 
 
+def open_online_hub_from_settings(app):
+    """The Settings picker keeps an Online pointer that opens the hub."""
+    from freight_fate.states.main_menu import SettingsState
+    from freight_fate.states.online_hub import OnlineHubState
+
+    picker = SettingsState(app.ctx)
+    app.push_state(picker)
+    while picker.items[picker.index].text != "Online":
+        picker.handle_event(key_event(pygame.K_DOWN))
+    picker.handle_event(key_event(pygame.K_RETURN))
+    assert isinstance(app.state, OnlineHubState)
+    return app.state
+
+
 @pytest.mark.smoke
 def test_settings_menu_cycles_hours_of_service():
     from freight_fate.app import App
@@ -491,7 +505,7 @@ def test_online_sharing_label_tracks_identity_freshness():
 
     app = App()
     try:
-        cat = open_settings_category(app, "Online")
+        cat = open_online_hub_from_settings(app)
         while not cat.items[cat.index].text.startswith("Profile sharing"):
             cat.handle_event(key_event(pygame.K_DOWN))
         item = cat.items[cat.index]
@@ -518,10 +532,11 @@ def test_online_menu_keeps_profile_sharing_and_private_cloud_backup_separate():
     spoken: list[str] = []
     app.ctx.say = lambda text, interrupt=True: spoken.append(text)
     try:
-        menu = open_settings_category(app, "Online")
+        menu = open_online_hub_from_settings(app)
         labels = [item.text for item in menu.items]
         assert labels == [
             "Online services: on",
+            "Drivers board",
             "Set up orinks.net account",
             "Profile sharing: not set up",
             "Back up saves to your orinks.net account: not set up",

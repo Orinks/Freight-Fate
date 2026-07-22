@@ -136,8 +136,8 @@ AUTH_HELP = (
     "orinks.net no longer accepts this computer's sign-in. This usually "
     "means this computer was signed out from the computer list on your "
     "orinks.net driver setup page. On that page, choose Add computer to get "
-    "a fresh token, then paste it under Set up orinks.net account in "
-    "Settings, Online."
+    "a fresh token, then paste it under Set up orinks.net account on the "
+    "Online menu."
 )
 
 
@@ -685,7 +685,7 @@ class CloudSaves:
             # can only fix it by reconnecting.
             self._set_status(
                 "Backups are paused: orinks.net no longer accepts this "
-                "computer's sign-in. Reconnect under Settings, Online."
+                "computer's sign-in. Reconnect from the Online menu."
             )
             self._done_with(name, snapshot)
             return
