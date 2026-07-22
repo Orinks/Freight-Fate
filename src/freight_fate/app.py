@@ -33,6 +33,19 @@ log = logging.getLogger(__name__)
 # what the player heard -- the most faithful record for an audio-first game.
 transcript = logging.getLogger("freight_fate.transcript")
 
+# Where this session's log actually ended up, or None when nothing is being
+# written to disk (a source checkout with no explicit log file, or a folder the
+# game could not write to). Recorded by _configure_logging rather than derived
+# again later, so the settings screen reports the real file instead of the one
+# the game meant to open.
+_log_file: Path | None = None
+
+
+def active_log_path() -> Path | None:
+    """The log file this session is writing, or None when there is none."""
+    return _log_file
+
+
 WINDOW_SIZE = (900, 640)
 FPS = 60
 
@@ -268,6 +281,10 @@ class GameContext:
         """Reflect the cloud backup setting (e.g. after a settings change)."""
         self._app.cloud.set_enabled(self._online_enabled(self.settings.cloud_saves))
 
+    def apply_mastodon_sharing(self) -> None:
+        """Reflect the Mastodon sharing setting (e.g. after a settings change)."""
+        self._app.mastodon.set_enabled(self._online_enabled(self.settings.mastodon_sharing))
+
     def cloud_saves_service(self) -> CloudSaves:
         """The backup service, for the Cloud backup menu."""
         return self._app.cloud
@@ -278,6 +295,7 @@ class GameContext:
         self._app.online.set_identity(identity)
         self._app.cloud.set_identity(identity)
         self._app.journal.set_identity(identity)
+        self._app.mastodon.set_identity(identity)
 
     def apply_controller(self) -> None:
         """Reflect the controller setting (e.g. after a settings change)."""
@@ -441,6 +459,14 @@ class App:
             identity=identity,
             enabled=self.settings.online_presence,
             path=OnlineIdentity.path().with_name("online-outbox.json"),
+        )
+        # Mastodon shares ride the same durable-outbox machinery but keep
+        # their own file and enabled flag: posting to the player's own
+        # Mastodon account is a separate consent from public Profile sharing.
+        self.mastodon = JournalOutbox(
+            identity=identity,
+            enabled=self.settings.mastodon_sharing,
+            path=OnlineIdentity.path().with_name("online-mastodon-outbox.json"),
         )
         # Every profile save, wherever it happens, queues a cloud backup.
         from .models import profile as profile_module
@@ -637,6 +663,7 @@ def _configure_logging() -> None:
     (logs/game.log) where a player can find and share it without mixing it
     with durable saves.
     """
+    global _log_file
     from . import updater
 
     packaged = updater.is_frozen()
@@ -671,6 +698,7 @@ def _configure_logging() -> None:
             # without ever reaching Python logging; faulthandler writes the
             # tracebacks straight to the log file as the process dies.
             faulthandler.enable(file=handlers[0].stream)
+            _log_file = log_path
         except OSError:
             pass  # unwritable disk: console-only is the best we can do
     logging.basicConfig(

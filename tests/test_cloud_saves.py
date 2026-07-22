@@ -595,7 +595,7 @@ def test_upload_with_retired_token_pauses_backups_with_reconnect_status():
     service.queue_backup(Profile(name="Road Star"))
     drain(service, clock)
 
-    assert "Reconnect under Settings, Online" in service.status
+    assert "Reconnect from the Online menu" in service.status
     # Not transient: the snapshot is dropped instead of retried forever.
     drain(service, clock)
     assert len(transport.posts) == 1

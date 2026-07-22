@@ -18,6 +18,20 @@ def open_settings_category(app, label):
     return app.state
 
 
+def open_online_hub_from_settings(app):
+    """The Settings picker keeps an Online pointer that opens the hub."""
+    from freight_fate.states.main_menu import SettingsState
+    from freight_fate.states.online_hub import OnlineHubState
+
+    picker = SettingsState(app.ctx)
+    app.push_state(picker)
+    while picker.items[picker.index].text != "Online":
+        picker.handle_event(key_event(pygame.K_DOWN))
+    picker.handle_event(key_event(pygame.K_RETURN))
+    assert isinstance(app.state, OnlineHubState)
+    return app.state
+
+
 @pytest.mark.smoke
 def test_settings_menu_cycles_hours_of_service():
     from freight_fate.app import App
@@ -239,7 +253,7 @@ def test_settings_menu_f1_has_help_for_every_item():
             text = picker.current_help()
             assert text == (item.help or f"{item.text}.")
             assert picker.intro_help not in text
-        for category in ("gameplay", "audio", "speech", "updates"):
+        for category in ("gameplay", "audio", "speech", "updates", "reports"):
             cat = SettingsCategoryState(app.ctx, category)
             cat.items = cat.build_items()
             for i, item in enumerate(cat.items):
@@ -269,6 +283,7 @@ def test_settings_menu_uses_category_submenus():
             "Speech and weather",
             "Online",
             "Updates",
+            "Problem reports",
             "Back",
         ]
 
@@ -490,7 +505,7 @@ def test_online_sharing_label_tracks_identity_freshness():
 
     app = App()
     try:
-        cat = open_settings_category(app, "Online")
+        cat = open_online_hub_from_settings(app)
         while not cat.items[cat.index].text.startswith("Profile sharing"):
             cat.handle_event(key_event(pygame.K_DOWN))
         item = cat.items[cat.index]
@@ -517,14 +532,17 @@ def test_online_menu_keeps_profile_sharing_and_private_cloud_backup_separate():
     spoken: list[str] = []
     app.ctx.say = lambda text, interrupt=True: spoken.append(text)
     try:
-        menu = open_settings_category(app, "Online")
+        menu = open_online_hub_from_settings(app)
         labels = [item.text for item in menu.items]
         assert labels == [
+            "Drivers board",
             "Online services: on",
             "Set up orinks.net account",
             "Profile sharing: not set up",
             "Back up saves to your orinks.net account: not set up",
             "Restore a cloud backup",
+            "Share notable deliveries to Mastodon: not set up",
+            "Link a Mastodon account",
             "Discord presence: on",
             "Back",
         ]
@@ -537,5 +555,65 @@ def test_online_menu_keeps_profile_sharing_and_private_cloud_backup_separate():
         assert any(
             "Back up saves to your orinks.net account: not set up" in text for text in spoken
         )
+    finally:
+        app.shutdown()
+
+
+def test_problem_reports_reads_out_the_active_log_file(tmp_path, monkeypatch):
+    """The log already records every spoken line; this screen is the only thing
+    that tells a player it exists and where to find it."""
+    from freight_fate import app as app_module
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    log_path = tmp_path / "logs" / "game.log"
+    log_path.parent.mkdir()
+    log_path.write_text("session", encoding="utf-8")
+    (tmp_path / "logs" / "game.prev.log").write_text("previous", encoding="utf-8")
+    monkeypatch.setattr(app_module, "_log_file", log_path)
+
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+    try:
+        cat = SettingsCategoryState(app.ctx, "reports")
+        app.push_state(cat)
+        assert cat.title == "Problem reports"
+        assert [item.text for item in cat.items] == ["Where the game log is saved", "Back"]
+
+        spoken.clear()
+        cat.handle_event(key_event(pygame.K_RETURN))
+        said = " ".join(spoken)
+        assert str(log_path) in said
+        assert "game.prev.log" in said
+        assert "never sends them anywhere" in said  # local-only is stated, not implied
+
+        # A low-vision player reading the window sees the same path.
+        assert any(str(log_path) in line for line in cat.lines())
+
+        # Left and right are for stepping values; this row has none to step.
+        cat.handle_event(key_event(pygame.K_RIGHT))
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert cat.items[cat.index].text == "Where the game log is saved"
+    finally:
+        app.shutdown()
+
+
+def test_problem_reports_is_honest_when_no_log_is_being_written():
+    """A source checkout writes no file; the screen must not name one anyway."""
+    from freight_fate import app as app_module
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    app = App()
+    try:
+        original = app_module._log_file
+        app_module._log_file = None
+        try:
+            said = " ".join(SettingsCategoryState(app.ctx, "reports")._log_location_lines())
+        finally:
+            app_module._log_file = original
+        assert "not writing a log file" in said
+        assert "Packaged downloads always write one" in said
     finally:
         app.shutdown()

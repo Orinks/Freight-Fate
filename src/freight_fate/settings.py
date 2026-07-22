@@ -7,6 +7,7 @@ import logging
 from dataclasses import asdict, dataclass
 
 from .models.profile import data_dir
+from .units import spoken_distance
 
 log = logging.getLogger(__name__)
 
@@ -170,6 +171,18 @@ class Settings:
     # Off by default and separate from public Profile sharing. It needs its
     # own explicit yes even though it reuses the same account credentials.
     cloud_saves: bool = False
+    # Post short public summaries of notable deliveries (new badges, level
+    # ups, perfect streaks) to the player's own Mastodon account through
+    # orinks.net. Off by default, separate from Profile sharing, and inert
+    # until a Mastodon account is linked on the site.
+    mastodon_sharing: bool = False
+    # Last-known link state and handle, refreshed on every status check. Two
+    # fields because a link can exist without a handle (the server could not
+    # read the account name): linked gates the toggle, the handle is only
+    # spoken. The server stays the authority; this cache only keeps the
+    # settings menu from needing the network to read a label.
+    mastodon_linked: bool = False
+    mastodon_linked_handle: str = ""
     controller_enabled: bool = True  # accept game-controller input alongside the keyboard
     haptics_enabled: bool = True  # rumble/vibration feedback on the controller
 
@@ -269,6 +282,12 @@ class Settings:
                 setattr(s, attr, True)
         if not isinstance(s.cloud_saves, bool):
             s.cloud_saves = False
+        if not isinstance(s.mastodon_sharing, bool):
+            s.mastodon_sharing = False
+        if not isinstance(s.mastodon_linked, bool):
+            s.mastodon_linked = False
+        if not isinstance(s.mastodon_linked_handle, str):
+            s.mastodon_linked_handle = ""
         if not isinstance(s.live_weather_controls_calendar, bool):
             s.live_weather_controls_calendar = True
         for attr in (
@@ -311,8 +330,8 @@ class Settings:
 
     def speed_text(self, mph: float) -> str:
         if self.imperial_units:
-            return f"{mph:.0f} miles per hour"
-        return f"{mph * 1.609344:.0f} kilometers per hour"
+            return f"{spoken_distance(mph, 'mile')} per hour"
+        return f"{spoken_distance(mph * 1.609344, 'kilometer')} per hour"
 
     def distance_text(self, miles: float, precise: bool = False) -> str:
         """Spoken distance in the player's unit. ``precise`` keeps one

@@ -204,7 +204,8 @@ class DrivingStatusScreenState(MenuState):
             )
 
         items = [
-            say_item(f"Route: {' to '.join(route.cities)}"),
+            # route.cities holds slug keys; speak the composed names instead.
+            say_item(f"Route: {' to '.join(self.ctx.world.spoken_city(c) for c in route.cities)}"),
             say_item(f"Highways: {_join_phrase(route.highways)}"),
             say_item(
                 f"Progress: {settings.distance_text(d.trip.position_mi)} driven, "
@@ -245,8 +246,8 @@ class DrivingStatusScreenState(MenuState):
                     f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."
                 )
             )
-        planned = d.trip.planned_stop_name
-        if planned is not None:
+        planned = d.trip.planned_stop_label
+        if planned:
             items.append(
                 MenuItem(
                     f"Cancel planned stop at {planned}",
@@ -262,7 +263,7 @@ class DrivingStatusScreenState(MenuState):
         self.ctx.push_state(StopDetailState(self.ctx, self.driving, stop))
 
     def _cancel_planned_stop(self) -> None:
-        self.driving.trip.planned_stop_name = None
+        self.driving.trip.planned_stop_key = None
         self.refresh()
         self.ctx.say("Planned stop canceled.")
 
@@ -1033,6 +1034,7 @@ class ArrivalState(MenuState):
         self.driving = driving
         self.summary_parts: list[str] = []
         self._achievement_messages: list[str] = []
+        self._new_achievement_names: list[str] = []
         self._announcements: list[str] = []
         self.summary_lines: list[str] = []
         self.terminal = ctx.world.home_terminal(driving.job.destination)
@@ -1291,6 +1293,9 @@ class ArrivalState(MenuState):
             gross_pay=gross_pay,
         )
         self.summary_parts.extend(self._achievement_messages)
+        self._queue_notable_share(
+            on_time=on_time, previous_level=previous_level, occurred_at_ms=occurred_at_ms
+        )
         timing = "On time" if on_time else "Late"
         bonus_lines = []
         if on_time_bonus_paid >= 1.0:
@@ -1376,6 +1381,38 @@ class ArrivalState(MenuState):
             if result is not None:
                 self._achievement_messages.append(result.message)
         return [fleet_upgrade_announcement(p)]
+
+    def _queue_notable_share(
+        self, *, on_time: bool, previous_level: int, occurred_at_ms: int
+    ) -> None:
+        """Offer this delivery to the player's Mastodon account when it earned
+        something worth telling: a new achievement, a level, or a streak milestone.
+        Routine runs stay quiet, and the outbox itself is inert unless the
+        player turned Mastodon sharing on and linked an account."""
+        from ..online_journal import queue_mastodon_share
+
+        p = self.ctx.profile
+        job = self.driving.job
+        reasons: list[dict] = []
+        if p.career.level > previous_level:
+            reasons.append({"type": "level", "level": int(p.career.level)})
+        if self._new_achievement_names:
+            reasons.append({"type": "achievements", "names": self._new_achievement_names[:10]})
+        stats = p.achievement_stats if isinstance(p.achievement_stats, dict) else {}
+        streak = int(stats.get("perfect_streak", 0))
+        if streak in (5, 10, 25, 50, 100):
+            reasons.append({"type": "streak", "count": streak})
+        if queue_mastodon_share(
+            self.ctx._app.mastodon,
+            p,
+            job,
+            origin=self.ctx.world.spoken_city(job.origin),
+            destination=self.ctx.world.spoken_city(job.destination),
+            on_time=on_time,
+            occurred_at_ms=occurred_at_ms,
+            reasons=reasons,
+        ):
+            self.ctx._app.mastodon.flush_async()
 
     def _award_arrival_achievements(
         self,
@@ -1661,6 +1698,7 @@ class ArrivalState(MenuState):
             result = self.ctx.award_achievement(achievement_id, announce=False)
             if result is not None:
                 self._achievement_messages.append(result.message)
+                self._new_achievement_names.append(result.achievement.name)
         self.ctx.save_profile()
 
     def enter(self) -> None:
@@ -1686,8 +1724,32 @@ class ArrivalState(MenuState):
             )
             for line in self.summary_lines
         ]
+        items.append(
+            MenuItem(
+                "Copy delivery summary to clipboard",
+                self._copy_summary,
+                help="Copies the settlement lines above as plain text, so you "
+                "can paste them into a post or message.",
+                select_sound=None,
+            )
+        )
         items.append(MenuItem("Continue to " + self.terminal.name, self._continue))
         return items
+
+    def _copy_summary(self) -> None:
+        from .online_states import write_clipboard_text
+
+        text = "\n".join([f"Freight Fate: {self.title}.", *self.summary_lines])
+        if write_clipboard_text(text):
+            self.ctx.audio.play("ui/menu_select")
+            self.ctx.say("Delivery summary copied to clipboard.", interrupt=True)
+        else:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                "I could not copy to the clipboard. The summary lines above "
+                "can still be read one at a time.",
+                interrupt=True,
+            )
 
     def go_back(self) -> None:
         self._continue()

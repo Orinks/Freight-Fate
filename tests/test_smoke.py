@@ -54,7 +54,7 @@ def test_garage_offers_partial_fuel_and_repairs_when_cash_is_short():
 
 @pytest.mark.smoke
 def test_full_game_flow_headless(monkeypatch):
-    from freight_fate import __version__
+    from freight_fate import __version__, updater
     from freight_fate.app import App
     from freight_fate.states.city import (
         CityMenuState,
@@ -78,7 +78,8 @@ def test_full_game_flow_headless(monkeypatch):
         menu = app.state
         assert isinstance(menu, MainMenuState)
         assert menu.lines()[0] == "Freight Fate"
-        assert any(f"Welcome to Freight Fate, version {__version__}." in line for line in spoken)
+        welcome = f"Welcome to Freight Fate, version {updater.spoken_version(__version__)}."
+        assert any(welcome in line for line in spoken)
 
         # navigate to "New career" and select it
         while menu.items[menu.index].text != "New career":
@@ -335,7 +336,7 @@ def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
     constructed dormant (never started) so it touches nothing until the game
     loop runs."""
     from freight_fate.app import App
-    from freight_fate.states.main_menu import SettingsCategoryState
+    from freight_fate.states.online_hub import OnlineHubState
 
     app = App()
     try:
@@ -344,7 +345,7 @@ def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
         toggles: list[bool] = []
         monkeypatch.setattr(app.presence, "set_enabled", toggles.append)
 
-        app.push_state(SettingsCategoryState(app.ctx, "online"))
+        app.push_state(OnlineHubState(app.ctx))
         menu = app.state
         idx = next(
             i for i, item in enumerate(menu.items) if item.text.startswith("Discord presence")

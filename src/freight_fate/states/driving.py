@@ -409,7 +409,9 @@ class DrivingState(
             "surface_chain": self._surface_chain,
             # Mid-departure-chain saves resume on the origin's streets.
             "departure_chain": self._departure_chain,
-            "planned_stop": self.trip.planned_stop_name,
+            "planned_stop_key": self.trip.planned_stop_key,
+            # Kept for a save opened by an older build, which knows only the name.
+            "planned_stop": self.trip.planned_stop_label or None,
         }
 
     @classmethod
@@ -476,7 +478,13 @@ class DrivingState(
                 target_mph=None if target is None else float(target),
             )
             state.trip.restore(position_mi, game_minutes)
-            state.trip.planned_stop_name = data.get("planned_stop") or None
+            planned_key = data.get("planned_stop_key") or None
+            if planned_key is None:
+                # Saved before plans carried a stop identity: a bare name cannot
+                # say which namesake was meant, so take the soonest reachable.
+                legacy_name = data.get("planned_stop") or None
+                planned_key = state.trip.resolve_stop_key(legacy_name) if legacy_name else None
+            state.trip.planned_stop_key = planned_key
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
             if bool(data.get("surface_chain", False)):
                 # The save was made on the facility's street chain: re-enter

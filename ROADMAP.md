@@ -1155,6 +1155,21 @@ milestone below (speeding consequences especially).
 
 From a batch of player reports:
 
+- [x] **Map screen read raw data keys for the route -- FIXED 2026-07-21
+  (NVDA player report).** Its first line joined the world's city slugs, so an
+  east-coast run opened with "new underscore york underscore n y underscore u
+  s" for all thirteen cities; every other screen already composed spoken names.
+  Same pass singularized spoken measurements ("1 mile", not "1 miles") on one
+  shared helper. The reporter's snapshot also predated 36a7f8e, which is why
+  the map listed the same shared-city facility twice and pushed real stops off
+  the five-item list.
+- [ ] Unresolved half of that report: stop lines on the Map screen "make the
+  sound but not letting me fully read" under NVDA. Not reproducible from the
+  code -- the list is built once, nothing under the menu updates, and no path
+  interrupts or drops an utterance. Needs the reporter's `logs/game.log` from a
+  snapshot newer than 2026-07-21 to tell "the game never spoke it" from "NVDA
+  never spoke it"; packaged builds have always written that transcript, and
+  Settings, Problem reports now tells a player where to find it.
 - [x] **Destination exit offered a state early on rural-highway finishes --
   FIXED 2026-07-16 (player transcripts).** The destination-exit scan accepted
   the last labeled interchange anywhere on the route, so routes whose final
@@ -2148,5 +2163,12 @@ fit for an audio-first game.
 - [x] Profile integrity, client half: `profile_invariants.py` runs the hard, version-stable sanity rules (ranges, counter relations, upgrade tiers) as defense in depth behind the Ed25519 signature on every cloud restore, refusing with a plain spoken reason; `docs/profile-invariants.md` is the maintained validation list for the server gate. Follow-up: the append-only event ledger that upgrades server validation from plausibility to recomputation
 - [x] Packed save container: careers live in signed `.ffsave` files (magic header + deflated JSON) that text editors cannot open; legacy plain-JSON saves convert on load with a `.json.bak` rollback copy. A failed local signature now marks the profile `integrity_modified` (sticky, signed-in, spoken once) instead of quarantining — local play continues, shared features read the mark. `tools/dump_save.py` prints the JSON inside a save for bug reports.
 - [ ] Retire legacy plain-JSON save loading (and its unsigned amnesty) once converted installs are the norm — one or two releases after the container ships; the amnesty is the last casual editing door
+- [ ] Ship a stable release carrying the packed save container, so players are not split across two save formats. Until one exists, a career backed up from a developer snapshot cannot be restored onto 1.8.3: the snapshot writes the newer format, and the stable build drops the fields it does not recognise. Moving forward (stable career onto a snapshot) is fine. Fixing the backwards direction in the client was considered and deliberately declined — too many edge cases for the value; the stable release is the fix. Told players so on issue #97, without naming a date.
+- [x] Cloud backup accepts every shipped save shape, not just the newest build's: the orinks.net validator matches uploads against a superset allow-list and a supported version range, and only requires the fields it actually reads. It had demanded an exact match with whichever build the invariants export was last generated from, which refused newer and older saves in turn — most recently every save from 1.8.3, the stable release, leaving those players unable to back up at all (issue #97)
 - [ ] Server absolution for `integrity_modified`: a profile that passes full server validation may have the client mark cleared on the next verified restore, so honest cross-machine movers are not marked forever (`docs/server-integrity-handoff.md`)
 - [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)
+- [x] Copy the delivery summary to the clipboard from the delivery complete screen (verified by read-back before the game says "copied")
+- [x] Opt-in Mastodon sharing of notable deliveries: the player links their own Mastodon account on orinks.net (any instance, dynamic app registration, `read:accounts write:statuses` scope), and the game offers deliveries that earned an achievement, level, or streak milestone; the server composes the public post from allowlisted facts and adds the #FreightFate hashtag. Off by default, separate consent from Profile sharing, durable outbox client-side
+- [ ] Mastodon sharing follow-ups: unlink from inside the game (today the orinks.net page is the only unlink), and consider per-post visibility choice (public vs unlisted) if players ask
+- [x] Online hub: the drivers board, orinks.net account, cloud backup and restore, and all sharing toggles moved from Settings into one Online menu on the main menu (`states/online_hub.py`); Settings keeps an Online pointer that opens the same menu for a release or two
+- [ ] Remove the Settings Online pointer once players have had a release or two to relearn the location

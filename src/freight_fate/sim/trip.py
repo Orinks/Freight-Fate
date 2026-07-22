@@ -7,6 +7,7 @@ import random
 
 from ..data.curves import RouteCurve, route_curves
 from ..data.world import Leg, Route, get_world
+from ..units import spoken_distance
 from .hos import clock_text, is_night
 from .season import is_weekend
 from .timezones import appointment_text, city_zone, zone_for
@@ -61,11 +62,9 @@ LIMIT_SCAN_STRIDE_MI = 0.1
 LIMIT_SCAN_MAX_MI = 3.0
 
 
-def _spoken_distance(value: float, unit: str) -> str:
-    """A whole-number distance with the unit pluralized for speech, so a
-    screen reader never hears "in 1 miles"."""
-    rounded = round(value)
-    return f"{rounded:.0f} {unit if rounded == 1 else unit + 's'}"
+# One pluralization rule for every spoken distance in the game: the trip's own
+# readouts and Settings.distance_text/speed_text all go through this.
+_spoken_distance = spoken_distance
 
 
 def _spoken_short_miles(miles: float, imperial: bool) -> str:
@@ -197,12 +196,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._announced_curves: set[str] = set()
         self._announced_landmarks: set[str] = set()
         self._announced_billboards: set[str] = set()
-        self._announced_stops: set[str] = set()
-        self.planned_stop_name: str | None = None
-        # Name of the stop whose exit is currently signaled or being descended,
-        # published each tick by the driving state. Lets _check_stops tell a
-        # driver who is taking the exit from one who blew past it. Recomputed
-        # every frame, so it is never persisted.
+        self._announced_stops: set[str] = set()  # RoadStop.key, never the name
+        self.planned_stop_key: str | None = None  # RoadStop.key, never the name
+        # RoadStop.key of the stop whose exit is currently signaled or being
+        # descended, published each tick by the driving state. Lets _check_stops
+        # tell a driver who is taking the exit from one who blew past it. A key,
+        # not a name: signaling for one Love's must not read as taking the exit
+        # for the Love's you planned 300 miles further on. Recomputed every
+        # frame, so it is never persisted.
         self._exit_in_progress: str | None = None
         # While on an exit ramp the truck is off the highway: the ramp consumes
         # its movement instead of the highway odometer, so the mile marker holds
@@ -433,7 +434,33 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         vehicle_access=stop.vehicle_access,
                     )
                 )
-        return out
+        return self._merge_shared_city_stops(out)
+
+    def _merge_shared_city_stops(self, stops: list[RoadStop]) -> list[RoadStop]:
+        """One entry per facility, not one per leg that lists it.
+
+        Driving through a city picks its stops up twice, once from the leg
+        arriving and once from the leg leaving, two miles apart -- the truck
+        passes a single building, so announcing it twice sounds like a stutter
+        and makes "which one did I plan?" meaningless. Keep the one reached
+        first and let it borrow the twin's exit label if it has none.
+        """
+        merged: list[RoadStop] = []
+        for stop in stops:
+            twin = next(
+                (
+                    kept
+                    for kept in reversed(merged)
+                    if kept.name == stop.name
+                    and abs(stop.at_mi - kept.at_mi) <= SHARED_CITY_STOP_MERGE_MI
+                ),
+                None,
+            )
+            if twin is None:
+                merged.append(stop)
+            elif not twin.exit_label and stop.exit_label:
+                twin.exit_label = stop.exit_label
+        return merged
 
     def _surface_distance_tail(self, miles: float) -> str:
         """Distance phrase for a surface segment: city blocks never say
@@ -1296,8 +1323,37 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 best = stop
         return best
 
+    @property
+    def planned_stop(self) -> RoadStop | None:
+        """The stop the player planned for, or None if the plan is stale."""
+        key = self.planned_stop_key
+        if key is None:
+            return None
+        return next((stop for stop in self.stops if stop.key == key), None)
+
+    @property
+    def planned_stop_label(self) -> str:
+        """The planned stop's spoken name, even if the stop itself is gone."""
+        key = self.planned_stop_key
+        if key is None:
+            return ""
+        stop = self.planned_stop
+        return stop.name if stop is not None else RoadStop.name_from_key(key)
+
+    def resolve_stop_key(self, name: str) -> str | None:
+        """The key of the first stop with this name at or ahead of the truck.
+
+        Only for restoring a save written before plans carried a key; a bare
+        name cannot say which of a route's four Love's Travel Stops was meant,
+        so take the soonest one the driver could still reach.
+        """
+        ahead = [s for s in self.stops if s.name == name and s.at_mi >= self.position_mi]
+        if ahead:
+            return min(ahead, key=lambda s: s.at_mi).key
+        return next((s.key for s in self.stops if s.name == name), None)
+
     def is_planned(self, stop: RoadStop) -> bool:
-        return self.planned_stop_name is not None and stop.name == self.planned_stop_name
+        return self.planned_stop_key is not None and stop.key == self.planned_stop_key
 
     def planned_prefix(self, stop: RoadStop) -> str:
         """'Planned stop, ' when this is the stop the player planned for."""
@@ -1418,7 +1474,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             # Seed passed stops AND stops already inside the "stop ahead" window;
             # both were announced before the save, so a resume must not re-fire them.
             if stop.at_mi <= self.position_mi + STOP_AHEAD_LOOKAHEAD_MI:
-                self._announced_stops.add(stop.name)
+                self._announced_stops.add(stop.key)
         for cue in self.navigation_cues:
             if cue.at_mi <= self.position_mi:
                 self._announced_navigation.add(f"{cue.key}:advance")
@@ -1640,7 +1696,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 f"{self._congestion_phrase().capitalize()}. Traffic slowing to "
                 f"{self._speed_value(zone.limit_mph)}; hold your gap."
             )
-        return f"{zone.reason} ahead. Speed limit {self._speed_value(zone.limit_mph)}."
+        # Say you are *in* it, not that it is ahead: the advance warning
+        # already used "ahead" with the same limit, so identical wording here
+        # left the driver hearing "speed limit 15" twice, miles apart, with no
+        # way to tell which one had actually taken effect. Pairs with the
+        # "End of ... zone" exit.
+        return f"Entering {zone.reason} zone. Speed limit {self._speed_value(zone.limit_mph)} now."
 
     def _check_zones(self) -> None:
         lookahead = self._zone_warning_lookahead_mi()
@@ -1811,11 +1872,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         )
 
     def _check_stops(self) -> None:
-        if self.planned_stop_name is not None:
-            planned = next(
-                (stop for stop in self.stops if stop.name == self.planned_stop_name), None
-            )
-            if self._exit_in_progress == self.planned_stop_name:
+        if self.planned_stop_key is not None:
+            planned = self.planned_stop
+            if self._exit_in_progress == self.planned_stop_key:
                 # Signaled and taking the exit (armed or on the ramp): the plan
                 # is fulfilled quietly when the stop opens, or the too-fast miss
                 # cancels it with its own line. Either way, don't warn here.
@@ -1823,16 +1882,16 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             elif planned is None or planned.at_mi < self.position_mi:
                 # Past the exit marker with no exit in progress: the ramp is no
                 # longer takeable, so the planned stop is genuinely missed.
-                name = self.planned_stop_name
-                self.planned_stop_name = None
+                name = self.planned_stop_label
+                self.planned_stop_key = None
                 self._emit(
                     TripEventKind.GPS_CUE,
                     f"You drove past your planned stop, {name}. Plan cancelled.",
                 )
         for stop in self.stops:
             ahead = stop.at_mi - self.position_mi
-            if 0 < ahead <= STOP_AHEAD_LOOKAHEAD_MI and stop.name not in self._announced_stops:
-                self._announced_stops.add(stop.name)
+            if 0 < ahead <= STOP_AHEAD_LOOKAHEAD_MI and stop.key not in self._announced_stops:
+                self._announced_stops.add(stop.key)
                 exit_part = f" at {stop.exit_label}" if stop.exit_label else ""
                 parts = [
                     f"{self.planned_prefix(stop)}{stop.spoken_name}{exit_part} "

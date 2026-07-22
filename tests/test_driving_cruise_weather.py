@@ -843,7 +843,7 @@ def test_adaptive_cruise_switches_to_keeper_for_heavy_traffic(monkeypatch):
         zone = Zone(10.0, 15.0, 50.0, "heavy traffic")
         event = TripEvent(
             TripEventKind.ZONE_ENTER,
-            "heavy traffic ahead. Speed limit 50.",
+            "Entering heavy traffic zone. Speed limit 50 now.",
             {"zone": zone},
         )
         driving._handle_trip_event(event)
@@ -853,7 +853,8 @@ def test_adaptive_cruise_switches_to_keeper_for_heavy_traffic(monkeypatch):
         assert driving._speed_control_target_mph == pytest.approx(60.0, abs=1.0)
         assert driving._speed_control_armed
         assert events[-2] == (
-            "heavy traffic ahead. Speed limit 50. Speed keeper holding 50 miles per hour."
+            "Entering heavy traffic zone. Speed limit 50 now. "
+            "Speed keeper holding 50 miles per hour."
         )
         assert events[-1].startswith("New achievement! Bumper-to-Bumper Blues.")
     finally:

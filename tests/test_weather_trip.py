@@ -553,6 +553,131 @@ def test_pickup_deadhead_route_uses_local_facility_limits(world):
     assert reason == "facility gate"
 
 
+def test_driving_through_a_city_lists_its_stops_once(world):
+    """A city's stops hang off every leg that meets it, a mile out from the
+    endpoint, so passing through collected the same facility twice -- once a
+    mile before, once a mile after. Both then announced, two miles apart."""
+    from freight_fate.sim.trip_models import SHARED_CITY_STOP_MERGE_MI
+
+    route = world.shortest_route(
+        world.resolve_city_key("Chicago"), world.resolve_city_key("Los Angeles")
+    )
+    trip = Trip(route, TruckState(), WeatherSystem("midwest", seed=1), seed=7)
+    stops = sorted(trip.stops, key=lambda s: s.at_mi)
+    per_leg = sum(
+        1
+        for i, leg in enumerate(route.legs)
+        for s in leg.stops
+        if s.curated and s.applies_to_direction(route.cities[i] == leg.a)
+    )
+    assert len(stops) < per_leg, "route no longer exercises shared-city stops"
+
+    for a, b in zip(stops, stops[1:], strict=False):
+        if b.at_mi - a.at_mi <= SHARED_CITY_STOP_MERGE_MI:
+            assert a.name != b.name, f"{a.name} listed twice {b.at_mi - a.at_mi:.2f} mi apart"
+
+
+def test_a_merged_city_stop_keeps_an_exit_label(world):
+    """The two copies of a shared-city stop can disagree on which exit serves
+    it -- one often has no label at all. The survivor must not lose it."""
+    trip, _ = make_trip(world)
+    kept = RoadStop("Pilot", 100.0, "travel_center", ("fuel",), exit_label="")
+    twin = RoadStop("Pilot", 102.0, "travel_center", ("fuel",), exit_label="exit 2A")
+    far = RoadStop("Pilot", 140.0, "travel_center", ("fuel",), exit_label="exit 60")
+
+    merged = trip._merge_shared_city_stops([kept, twin, far])
+
+    assert [s.at_mi for s in merged] == [100.0, 140.0]  # twin folded in, far kept
+    assert merged[0].exit_label == "exit 2A"
+
+
+def test_signaling_for_a_namesake_does_not_pass_as_taking_the_planned_exit(world):
+    """_exit_in_progress is matched against the plan to tell a driver taking
+    the exit from one who blew past it. Held as a name, signaling for any
+    same-name stop silenced the warning for the planned one."""
+    route = world.shortest_route(
+        world.resolve_city_key("New York"), world.resolve_city_key("Miami")
+    )
+    trip = Trip(route, TruckState(), WeatherSystem("southeast", seed=1), seed=7)
+    namesakes = sorted(
+        (s for s in trip.stops if s.name == "Love's Travel Stop"), key=lambda s: s.at_mi
+    )
+    planned, other = namesakes[0], namesakes[1]
+    trip.planned_stop_key = planned.key
+
+    # Signaling for a *different* Love's must not cover a blown planned stop.
+    trip._exit_in_progress = other.key
+    trip.position_mi = planned.at_mi + 1.0
+    trip._events = []
+    trip._check_stops()
+    assert any("drove past your planned stop" in e.message for e in trip._events)
+
+    # Signaling for the planned one itself still stays quiet.
+    trip.planned_stop_key = planned.key
+    trip._exit_in_progress = planned.key
+    trip._events = []
+    trip._check_stops()
+    assert not any("drove past your planned stop" in e.message for e in trip._events)
+    assert trip.planned_stop_key == planned.key
+
+
+def test_a_plan_survives_passing_a_stop_that_shares_its_name(world):
+    """Plans used to be held as a bare name. Passing any namesake of the
+    planned stop -- one of the other three Love's Travel Stops on this route --
+    cancelled a plan for a stop still three hundred miles ahead."""
+    route = world.shortest_route(
+        world.resolve_city_key("New York"), world.resolve_city_key("Miami")
+    )
+    trip = Trip(route, TruckState(), WeatherSystem("southeast", seed=1), seed=7)
+    namesakes = sorted(
+        (s for s in trip.stops if s.name == "Love's Travel Stop"), key=lambda s: s.at_mi
+    )
+    assert len(namesakes) >= 2
+    target, earlier = namesakes[-1], namesakes[0]
+    trip.planned_stop_key = target.key
+
+    # Only the stop actually planned counts as planned.
+    assert [s.key for s in trip.stops if trip.is_planned(s)] == [target.key]
+
+    # Roll past an earlier namesake: the plan is untouched and stays quiet.
+    trip.position_mi = earlier.at_mi + 1.0
+    trip._events = []
+    trip._check_stops()
+    assert not any("planned stop" in e.message for e in trip._events)
+    assert trip.planned_stop_key == target.key
+
+    # Past the planned stop itself, it cancels as before.
+    trip.position_mi = target.at_mi + 1.0
+    trip._events = []
+    trip._check_stops()
+    assert any("drove past your planned stop" in e.message for e in trip._events)
+    assert trip.planned_stop_key is None
+
+
+def test_every_stop_announces_even_when_names_repeat(world):
+    """Stop names repeat -- New York to Miami carries four stops called
+    "Love's Travel Stop" -- and announcements used to be remembered by name, so
+    only the first of each chain was ever spoken and the rest passed in
+    silence."""
+    route = world.shortest_route(
+        world.resolve_city_key("New York"), world.resolve_city_key("Miami")
+    )
+    trip = Trip(route, TruckState(), WeatherSystem("southeast", seed=1), seed=7)
+    repeated = {s.name for s in trip.stops if sum(1 for o in trip.stops if o.name == s.name) > 1}
+    assert repeated, "route no longer exercises repeated stop names; pick another"
+
+    announced = set()
+    for stop in sorted(trip.stops, key=lambda s: s.at_mi):
+        trip.position_mi = stop.at_mi - 1.0
+        trip._events = []
+        trip._check_stops()
+        for event in trip._events:
+            if event.kind == TripEventKind.STOP_AHEAD:
+                announced.add(event.data["stop"].key)
+
+    assert len(announced) == len(trip.stops)
+
+
 def test_facility_gate_warns_before_final_low_speed_zone(world):
     route = world.facility_approach_route("Chicago", world.city("Chicago").locations[0].name)
     truck = TruckState()
@@ -573,6 +698,32 @@ def _closure_part(zone) -> str:
     shut = "right" if zone.closed_lane == 0 else "left"
     keep = "left" if zone.closed_lane == 0 else "right"
     return f"The {shut} lane is closed; merge {keep} at the taper. "
+
+
+def test_zone_entry_is_worded_apart_from_its_advance_warning(world):
+    """The heads-up and the change itself must not sound alike. Both used to
+    say "<zone> ahead. Speed limit 15.", so a driver heard the gate limit two
+    miles out, found the limit unchanged, and reported it as broken."""
+    route = world.facility_approach_route("Chicago", world.city("Chicago").locations[0].name)
+    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
+    gate = next(z for z in trip.zones if z.reason == "facility gate")
+
+    trip.position_mi = gate.start_mi - 2.0
+    # The street chain speaks navigation cues too; pick the gate warning out.
+    warning = next(
+        e.message
+        for e in trip.update(0.0)
+        if e.kind == TripEventKind.GPS_CUE and "facility gate" in e.message
+    )
+    # Two miles out: a heads-up, and the gate limit is not in force yet.
+    assert warning == "In 2 miles, facility gate ahead. Speed limit 15."
+    assert trip.speed_limit_at(trip.position_mi)[0] != 15.0
+
+    trip.position_mi = gate.start_mi + 0.05
+    entry = [e.message for e in trip.update(0.0) if e.kind == TripEventKind.ZONE_ENTER][-1]
+    assert entry == "Entering facility gate zone. Speed limit 15 now."
+    assert entry != warning.split(", ", 1)[1]
+    assert trip.speed_limit_at(trip.position_mi) == (15.0, "facility gate")
 
 
 def test_construction_zone_warns_before_entry(world):

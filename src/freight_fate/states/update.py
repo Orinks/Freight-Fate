@@ -68,7 +68,9 @@ class UpdateCheckState(State):
         if c.error:
             self.message = c.error + " Try again in a little while."
         elif c.result is None:
-            self.message = f"You are up to date. Freight Fate version {__version__}."
+            self.message = (
+                f"You are up to date. Freight Fate version {updater.spoken_version(__version__)}."
+            )
         else:
             self.ctx.replace_state(UpdatePromptState(self.ctx, c.result))
             return
@@ -107,7 +109,7 @@ class UpdatePromptState(MenuState):
         size = f" The download is {mb:.0f} megabytes." if mb else ""
         self.ctx.say(
             f"Update available. {self.info.title} is ready to "
-            f"install. You are running version {__version__}.{size} "
+            f"install. You are running version {updater.spoken_version(__version__)}.{size} "
             f"{self.current_text()}"
         )
 

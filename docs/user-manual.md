@@ -75,6 +75,7 @@ The main menu can include:
 | Manage careers | Opens reset and delete actions with confirmation. |
 | New career | Starts name entry, career start choice, and home-terminal selection. |
 | Achievements | Reviews earned and locked achievements for a saved career. |
+| Online | The public drivers board, your orinks.net account, cloud backup and restore, and sharing choices like Mastodon and Discord, all in one place. |
 | How to play | Opens the built-in help reader. |
 | Settings | Opens gameplay, audio, speech and weather, and update settings. |
 | Quit | Exits the game. |
@@ -888,18 +889,28 @@ Speech and weather settings include:
 | Weather source | Switches between simulated weather and live city conditions when available. |
 | Live weather controls calendar | When on, live weather uses today's real date and season. When off, live conditions continue while the career date advances at midnight and its seasons pass. |
 
-Online settings include:
+Online features live in their own Online menu on the main menu rather than
+inside Settings. Choosing Online inside Settings opens that same menu, so
+the old path still works. The Online menu gathers the public drivers board,
+your orinks.net account, cloud backup, and every sharing choice in one place:
 
-| Setting | Purpose |
+| Item | Purpose |
 | --- | --- |
+| Drivers board | Reads the public board: each driver's name, what they are doing, and how fresh the report is. Viewing the board shares nothing about you and does not require sharing to be on. |
+| Online services | The master switch for every online and live-data feature. When off, real-time weather, traffic, parking, Discord presence, Mastodon sharing, and cloud backup all behave as disabled, and each keeps its own setting for when you turn the master switch back on. |
+| Set up orinks.net account | Connects the game to your orinks.net account without turning on Profile sharing or Cloud backup. Everything below uses this one sign-in. |
 | Profile sharing | One optional public setting covers the drivers board, eligible profile details, official achievements, automatic road-journal posts, and the updates feed. It is off until you connect your orinks.net driver and turn it on. The game never publishes the full save, money, coordinates, active cargo details, real name, or precise live location. Detailed career statistics appear only after orinks.net accepts a validated private cloud backup; without one, the public profile remains available but omits those statistics. Turning Profile sharing off stops local posting immediately and hides the public profile independently of Cloud backup. |
 | Back up saves to your orinks.net account | After each game save, upload that career to your own orinks.net account so you can restore it on another computer or after losing this one. Off until you turn it on, and separate from Profile sharing: backups are private to your account and never become public downloads. orinks.net validates each revision before accepting and signing it. It uses the same one-time sign-in as your driver profile, so set that up first. The last ten accepted backups of each career are kept. |
 | Restore a cloud backup | Lists the careers backed up to your account, newest first, and brings one onto this computer. Freight Fate verifies the server signature before replacing anything. A missing, altered, or unsupported signature leaves the local save untouched. A successful restore keeps the replaced save beside it as a fallback file and signs the restored copy for this computer. If the same career was played on two computers, this menu is also where you choose which accepted copy wins. |
+| Share notable deliveries to Mastodon | When on, finishing a delivery that earns an achievement, a level, or a perfect streak posts a short public summary to your own Mastodon account with the FreightFate hashtag. Routine deliveries are never posted. Off until you link a Mastodon account. |
+| Link a Mastodon account | Opens a page on orinks.net where you authorize your own Mastodon server, using the same orinks.net sign-in as driver setup. Unlinking happens on the same page. |
 | Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. Works without a driver profile. |
 
-The main menu also has a Drivers online item that reads the same public board:
-each driver's name, what they are doing, and how fresh the report is. Viewing
-the board shares nothing about you and does not require sharing to be on.
+Problem reports settings include:
+
+| Setting | Purpose |
+| --- | --- |
+| Where the game log is saved | Reads out the full path of this session's log file and shows it in the window. Packaged downloads always keep a log; it records the session including everything the game said out loud, so attaching it to a bug report shows exactly what you heard. The session before this one is kept beside it, so restarting the game to check something does not lose it. Both files stay on your computer; the game never sends them anywhere. |
 
 ## Audio, Speech, And Accessibility
 
@@ -974,7 +985,10 @@ release archive from the releases page and play from that folder.
 
 If an update cannot reach the server, check your internet connection and try
 again later. The game writes packaged-build logs to `logs/game.log`, which can
-help when reporting update or startup problems.
+help when reporting update or startup problems. That log also records every
+line the game spoke, so it is the most useful thing to attach to any bug
+report. Settings, Problem reports, Where the game log is saved reads out its
+exact location; the previous session is kept beside it as `logs/game.prev.log`.
 
 If your save is missing after extracting or updating, look for another nearby
 `saves` folder and copy or move the whole `saves` folder into the active

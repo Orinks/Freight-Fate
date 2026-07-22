@@ -449,7 +449,7 @@ wheels = [
 
 [[package]]
 name = "freight-fate"
-version = "1.9.0"
+version = "1.9.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "certifi" },

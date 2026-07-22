@@ -78,6 +78,48 @@ def test_non_mac_still_uses_tk_fallback(monkeypatch):
     assert online_states._clipboard_once() == "ffd_token"
 
 
+def test_mac_write_uses_pbcopy_and_never_creates_tk(monkeypatch):
+    _no_scrap(monkeypatch)
+    monkeypatch.setattr(online_states.sys, "platform", "darwin")
+    sent: list[bytes] = []
+
+    def fake_run(cmd, **kwargs):
+        if cmd == ["pbcopy"]:
+            sent.append(kwargs["input"])
+            return SimpleNamespace(returncode=0)
+        if cmd == ["pbpaste"]:
+            return SimpleNamespace(returncode=0, stdout=sent[-1] if sent else b"")
+        raise AssertionError(cmd)
+
+    monkeypatch.setattr(online_states.subprocess, "run", fake_run)
+    created: list[int] = []
+    monkeypatch.setitem(sys.modules, "tkinter", SimpleNamespace(Tk=lambda: created.append(1)))
+    assert online_states.write_clipboard_text("summary line one\nline two")
+    assert sent == [b"summary line one\nline two"]
+    assert created == []
+
+
+def test_write_reports_failure_when_read_back_disagrees(monkeypatch):
+    # "Copied" must never be optimistic: a write that claims success while
+    # the clipboard holds something else is reported as a failure.
+    _no_scrap(monkeypatch)
+    monkeypatch.setattr(online_states.sys, "platform", "darwin")
+
+    def fake_run(cmd, **kwargs):
+        if cmd == ["pbcopy"]:
+            return SimpleNamespace(returncode=0)
+        return SimpleNamespace(returncode=0, stdout=b"something else entirely")
+
+    monkeypatch.setattr(online_states.subprocess, "run", fake_run)
+    monkeypatch.setattr(online_states.time, "sleep", lambda _s: None)
+    assert not online_states.write_clipboard_text("expected text")
+
+
+def test_read_back_forgives_windows_crlf(monkeypatch):
+    monkeypatch.setattr(online_states, "_clipboard_once", lambda: "line one\r\nline two")
+    assert online_states._clipboard_holds("line one\nline two")
+
+
 def test_token_paste_requires_the_site_prefix():
     # Site tokens are always "ffd_" plus 64 hex characters. Issue 63: an
     # 87-character wrong paste used to pass this check and reach the server,

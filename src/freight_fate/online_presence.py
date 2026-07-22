@@ -46,13 +46,18 @@ log = logging.getLogger(__name__)
 # redirect -- so heartbeats against the apex fail with HTTPError 307.
 DEFAULT_BASE_URL = "https://www.orinks.net"
 
-# Presence is by far the biggest source of backend writes -- a driver on a
-# long haul beats for hours -- so beat every ninety seconds rather than every
-# sixty. The board drops a driver four minutes after their last beat, which
-# still absorbs one dropped request before anyone is called gone; keep this
-# and PRESENCE_TTL_MS on the server in step, or a single lost beat will blink
-# a driver off the board.
-HEARTBEAT_INTERVAL_S = 90.0
+# Presence is by far the biggest source of backend reads and writes -- a
+# driver on a long haul beats for hours, and it is the single largest line in
+# the site's database usage -- so beat every two and a half minutes. The board
+# drops a driver six minutes after their last beat, which still absorbs one
+# dropped request before anyone is called gone; keep this and PRESENCE_TTL_MS
+# on the server in step, and widen the server's window first, or a single lost
+# beat will blink a driver off the board.
+#
+# Only the keep-alive slows down. A change of activity still pushes within
+# MIN_CHANGE_INTERVAL_S, so going on duty, pulling over, or starting a new leg
+# still reaches the board in seconds.
+HEARTBEAT_INTERVAL_S = 150.0
 
 # When the activity changes (new leg, pulled over, back on the road), push
 # the update sooner than the next heartbeat -- but never more often than this.
@@ -215,6 +220,27 @@ def set_profile_sharing(
         log.warning("Profile sharing update failed: %s", e)
         return "error"
     return "ok" if reply.get("ok") and reply.get("enabled") is enabled else "error"
+
+
+def fetch_mastodon_status(
+    identity: OnlineIdentity, *, transport: Transport = _http_json
+) -> dict | None:
+    """The server's word on whether a Mastodon account is linked.
+
+    Returns ``{"linked": bool, "handle": str}`` on a good answer, or ``None``
+    when nothing was learned (network trouble or refused credentials)."""
+    try:
+        reply = transport(
+            f"{base_url()}/api/freight-fate/mastodon/status?driverId={identity.driver_id}",
+            None,
+            {"Authorization": f"Bearer {identity.driver_token}"},
+        )
+    except Exception as e:
+        log.warning("Mastodon status check failed: %s", e)
+        return None
+    if not reply.get("ok"):
+        return None
+    return {"linked": bool(reply.get("linked")), "handle": str(reply.get("handle") or "")}
 
 
 # -- presence service ---------------------------------------------------------
