@@ -41,6 +41,46 @@ def test_pack_is_not_a_plain_zip_after_renaming(tmp_path):
     assert b"menu_select" not in raw  # entry names are masked too
 
 
+def test_pack_overlay_replaces_and_adds(tmp_path):
+    sounds = _write_fixture_sounds(tmp_path)
+    overlay = tmp_path / "licensed"
+    (overlay / "ui").mkdir(parents=True)
+    (overlay / "engine").mkdir()
+    (overlay / "ui" / "menu_select.ogg").write_bytes(b"licensed menu select")
+    (overlay / "engine" / "low.ogg").write_bytes(b"licensed engine low")
+    out = assets_pack.write_pack(sounds, tmp_path / "sounds.pak", overlay_dir=overlay)
+    pack = assets_pack.SoundPack(out)
+    assert pack.read("ui/menu_select.ogg") == b"licensed menu select"  # replaced
+    assert pack.read("engine/low.ogg") == b"licensed engine low"  # added
+    assert pack.read("music/open_road.wav") == b"fake wav for open road"  # untouched
+
+
+def test_pack_missing_overlay_dir_is_fine(tmp_path):
+    sounds = _write_fixture_sounds(tmp_path)
+    out = assets_pack.write_pack(
+        sounds, tmp_path / "sounds.pak", overlay_dir=tmp_path / "not_there"
+    )
+    assert sorted(assets_pack.SoundPack(out).names()) == [
+        "music/open_road.wav",
+        "ui/menu_select.ogg",
+    ]
+
+
+def test_asset_path_prefers_licensed_overlay(tmp_path, monkeypatch):
+    base = _write_fixture_sounds(tmp_path)
+    overlay = tmp_path / "licensed"
+    (overlay / "ui").mkdir(parents=True)
+    # Overlay wins even across the extension preference order: its .wav beats
+    # the base tree's .ogg for the same key.
+    (overlay / "ui" / "menu_select.wav").write_bytes(b"licensed wav")
+    monkeypatch.setattr(audio, "ASSETS", base)
+    monkeypatch.setattr(audio, "ASSETS_LICENSED", overlay)
+    found = audio._asset_path("ui/menu_select", ("ogg", "wav"))
+    assert found == overlay / "ui" / "menu_select.wav"
+    # Keys the overlay does not carry still resolve from the base tree.
+    assert audio._asset_path("music/open_road", ("ogg", "wav")) is not None
+
+
 def test_pack_is_deterministic(tmp_path):
     sounds = _write_fixture_sounds(tmp_path)
     first = assets_pack.write_pack(sounds, tmp_path / "a.pak").read_bytes()

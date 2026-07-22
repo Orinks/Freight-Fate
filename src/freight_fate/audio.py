@@ -37,6 +37,11 @@ from .audio_loops import SustainLoop, to_seconds
 log = logging.getLogger(__name__)
 
 ASSETS = Path(__file__).parent / "assets" / "sounds"
+# Licensed sound-library overlay (gitignored, never committed). A machine that
+# owns the purchased libraries drops encoded assets here under the same keys;
+# they take precedence over the committed tree, so a clean clone still runs on
+# the synthesized fallbacks. Release builds bake the overlay into sounds.pak.
+ASSETS_LICENSED = Path(__file__).parent / "assets" / "sounds-licensed"
 
 # BASS addon plugins shipped with the game. BASSHLS teaches BASS to open
 # HTTP Live Streaming radio URLs (the AFN 360 Global channels); core BASS
@@ -109,10 +114,11 @@ BASS_NO_SOUND_DEVICE = 0
 
 def _asset_path(key: str, extensions: tuple[str, ...]) -> Path | None:
     """Loose-file lookup; source checkouts and asset tooling only."""
-    for ext in extensions:
-        path = ASSETS / f"{key}.{ext}"
-        if path.exists():
-            return path
+    for root in (ASSETS_LICENSED, ASSETS):
+        for ext in extensions:
+            path = root / f"{key}.{ext}"
+            if path.exists():
+                return path
     return None
 
 
