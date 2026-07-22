@@ -71,6 +71,15 @@ class Settings:
     # Off by default and separate from public Profile sharing. It needs its
     # own explicit yes even though it reuses the same account credentials.
     cloud_saves: bool = False
+    # Post short public summaries of notable deliveries (new badges, level
+    # ups, perfect streaks) to the player's own Mastodon account through
+    # orinks.net. Off by default, separate from Profile sharing, and inert
+    # until a Mastodon account is linked on the site.
+    mastodon_sharing: bool = False
+    # Spoken-label cache of the linked Mastodon handle, refreshed on every
+    # status check. The server stays the authority; this only keeps the
+    # settings menu from needing the network to read a label.
+    mastodon_linked_handle: str = ""
     controller_enabled: bool = True  # accept game-controller input alongside the keyboard
     haptics_enabled: bool = True  # rumble/vibration feedback on the controller
 
@@ -123,6 +132,10 @@ class Settings:
             s.haptics_enabled = True
         if not isinstance(s.cloud_saves, bool):
             s.cloud_saves = False
+        if not isinstance(s.mastodon_sharing, bool):
+            s.mastodon_sharing = False
+        if not isinstance(s.mastodon_linked_handle, str):
+            s.mastodon_linked_handle = ""
         if not isinstance(s.live_weather_controls_calendar, bool):
             s.live_weather_controls_calendar = True
         for attr in (

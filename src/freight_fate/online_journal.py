@@ -208,6 +208,51 @@ def queue_delivery(
     return outbox.enqueue("/api/freight-fate/events/delivery", payload, event_id)
 
 
+def queue_mastodon_share(
+    outbox: JournalOutbox,
+    profile,
+    job,
+    *,
+    origin: str,
+    destination: str,
+    on_time: bool,
+    occurred_at_ms: int,
+    reasons: list[dict],
+) -> bool:
+    """Queue a notable delivery for the player's own Mastodon account.
+
+    ``reasons`` is what made the run notable -- new badges, a level up, a
+    perfect-streak milestone. An empty list means the delivery was routine,
+    and routine runs are never posted: the server refuses reason-free shares
+    too, so the quiet path is enforced on both ends. The server composes the
+    actual post text from these allowlisted facts and adds the FreightFate
+    hashtag; nothing free-form leaves the game."""
+    if not reasons:
+        return False
+    event_id = stable_event_id(
+        "mastodon",
+        profile.name,
+        profile.career.deliveries,
+        job.cargo.key,
+        job.origin,
+        job.destination,
+    )
+    payload = {
+        "eventId": event_id,
+        "occurredAt": occurred_at_ms,
+        "payload": {
+            "version": 1,
+            "cargo": job.cargo.label,
+            "origin": origin,
+            "destination": destination,
+            "distanceMiles": round(job.distance_mi, 1),
+            "onTime": bool(on_time),
+            "reasons": reasons,
+        },
+    }
+    return outbox.enqueue("/api/freight-fate/mastodon/share", payload, event_id)
+
+
 def queue_achievement(outbox: JournalOutbox, achievement, *, earned_at_ms: int) -> bool:
     event_id = stable_event_id("achievement", achievement.id)
     return outbox.enqueue(
