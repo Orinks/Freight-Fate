@@ -170,6 +170,10 @@ class DrivingState(
         self._brake_squeal_cooldown_s = 0.0  # hot-brake squeal cue spacing
         self._hydro_active = False  # spoken hydroplane warning edge tracking
         self._jake_slip_active = False  # spoken jake-slip warning edge tracking
+        # The cylinder selector's position, like the real dash switch: J
+        # engages at whatever stage was last chosen. Full retard by default
+        # -- the setting every driver leaves it on until ice says otherwise.
+        self._jake_selected_stage = JAKE_STAGES
         self._chains_fast_active = False  # spoken chains-over-speed warning edge tracking
         self._chain_law_warned: set[tuple[int, int]] = set()  # (area, level) spoken warnings
         self._chain_law_cited: set[tuple[int, int]] = set()  # checkpoint rolls already taken

@@ -4,6 +4,16 @@
 
 ### Added
 
+- **The engine brake grew its real cylinder selector.** J is now the
+  dash switch: it turns the engine brake on at whatever stage you last
+  selected, and while it is on, 1, 2, and 3 pick two, four, or six
+  cylinders of retard, spoken as you change them. Partial stages are
+  the icy-descent tool -- stage one stays hooked up on glare ice where
+  full retard breaks the drive wheels loose -- and the selector
+  remembering your choice means switching the jake back on can never
+  surprise you with more braking than you dialed in. On a controller,
+  the modifier with the engine brake button steps through the stages.
+
 - **Your own music can play on the in-cab radio.** Drop M3U playlist
   files into the new Playlists folder next to your saves and each one
   becomes a station on the dial, under Your playlists, named from the

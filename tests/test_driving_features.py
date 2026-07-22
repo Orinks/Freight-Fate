@@ -2094,6 +2094,56 @@ def test_engine_brake_cannot_be_enabled_while_accelerating(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_jake_engages_at_last_selected_stage(monkeypatch):
+    """J is the dash switch; 1/2/3 the cylinder selector it remembers."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.throttle = 0.0
+
+        driving.handle_event(key_event(pygame.K_j))
+        assert driving.truck.engine_brake_stage == 3
+        assert any(text == "Jake on, stage three." for text in spoken)
+
+        driving.handle_event(key_event(pygame.K_1))
+        assert driving.truck.engine_brake_stage == 1
+        assert any(text == "Jake stage one selected." for text in spoken)
+
+        # Off and back on: the selector held stage one, so the icy descent
+        # is never surprised by full retard it dialed away earlier.
+        driving.handle_event(key_event(pygame.K_j))
+        assert driving.truck.engine_brake_stage == 0
+        driving.handle_event(key_event(pygame.K_j))
+        assert driving.truck.engine_brake_stage == 1
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_jake_stage_keys_do_nothing_while_the_jake_is_off(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.engine_brake_stage = 0
+
+        driving.handle_event(key_event(pygame.K_2))
+        assert driving.truck.engine_brake_stage == 0
+        assert not any(text.startswith("Jake stage") for text in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_accelerating_turns_engine_brake_off(monkeypatch):
     from freight_fate.app import App
 
@@ -2115,7 +2165,7 @@ def test_accelerating_turns_engine_brake_off(monkeypatch):
 
         assert not driving.truck.engine_brake
         assert driving.truck.throttle > 0.0
-        assert "Engine brake off." in events
+        assert "Jake off." in events
     finally:
         app.shutdown()
 

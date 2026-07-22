@@ -66,6 +66,7 @@ from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.trip_models import leg_lane_count
 from ..sim.vehicle import (
     CHAIN_SAFE_MPH,
+    JAKE_STAGES,
     KG_PER_TON,
     REFERENCE_CARGO_KG,
     TIRE_WINTER,

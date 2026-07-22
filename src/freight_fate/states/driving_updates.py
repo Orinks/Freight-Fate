@@ -127,7 +127,7 @@ class DrivingUpdateMixin:
         if key_up and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
-                self.ctx.say_event("Engine brake off.", interrupt=False)
+                self.ctx.say_event("Jake off.", interrupt=False)
             t.throttle = min(1.0, t.throttle + ramp)
         elif backing:
             t.throttle = min(0.45, t.throttle + ramp)
@@ -136,7 +136,7 @@ class DrivingUpdateMixin:
         if pad_throttle > 0.05 and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
-                self.ctx.say_event("Engine brake off.", interrupt=False)
+                self.ctx.say_event("Jake off.", interrupt=False)
             t.throttle = max(t.throttle, pad_throttle)
         # Keyboard ramps the brake up and down; the analog trigger sets a direct
         # held floor on top of that.
