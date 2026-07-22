@@ -6,16 +6,22 @@ build (faster when you rev, per the sim) and hears it stop. The game already
 owns the cutout: `vehicle/air_dryer_purge.ogg` fires the "pshht" at ready, so
 this loop only has to be the continuous fill that precedes it.
 
-896's own build (0-14.5 s) is real but very faint (rms ~0.01, buried under
-idle), so it can't carry the layer. Instead take a REAL air-brake release hiss,
-flatten its decay into a steady level, and crossfade-loop it -- real pneumatic
-timbre, constant level, seamless tiling for however long the sim takes to reach
-100 psi (~11 s idle, ~6 s revving). A Bantam-pump variant is offered too, since
-a compressor pumps rhythmically. Norm's ear picks the fill.
+First attempt looped a real air-brake release directly. Two artifacts (Norm's
+ear): a ~half-second WHINE (a real air whistle at ~2.7 kHz in the sample) and a
+glaring SEAM (the release decays, so the level dropped at the loop point). Both
+come from looping a real, decaying, whistling recording.
+
+Fix: resynthesize instead of loop. Take the real air-brake spectrum, median-
+smooth it across frequency to remove the tonal whistle (no whine), then build a
+loop directly in the frequency domain -- target magnitude, random phase over
+exactly the loop length. An inverse FFT of that is one period of a periodic
+signal: constant level, ZERO seam, no crossfade, and the same real air timbre.
+Deterministic (seeded), so it regenerates. A rhythmic Bantam-pump variant is
+offered too (a compressor pumps); its macro level is flattened so it does not
+seam either.
 
 Outputs to C:\\temp\\ffsound\\air as pressurize_hiss / pressurize_pump, plus
-pressurize_hiss_11s / pressurize_pump_11s demos (tiled to a full idle build,
-ending where the game would fire the dryer purge).
+pressurize_hiss_11s / pressurize_pump_11s demos.
 
 Usage: uv run --with numpy --with soundfile --with scipy python sound-test/pressurize.py
 """
@@ -27,7 +33,7 @@ import wave
 from pathlib import Path
 
 import numpy as np
-from scipy.signal import butter, filtfilt
+from scipy.signal import butter, filtfilt, medfilt
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cand_common as C  # noqa: E402
@@ -35,9 +41,10 @@ import cand_common as C  # noqa: E402
 OUT = Path(r"C:\temp\ffsound\air")
 LV = Path(r"C:\temp\ffsound\splice\Samples\packs\Large Vehicles")
 IND = Path(r"C:\temp\ffsound\splice\Samples\packs\Industry Vol. 1")
-HISS_SRC = LV / "SemiTruckAirBrake_BWU.95.wav"     # long release hiss to flatten
+HISS_SRC = LV / "SemiTruckAirBrake_BWU.95.wav"     # real air spectrum to resynthesize
 PUMP_SRC = IND / "BantamBrakeMach_S08IN.62.wav"    # rhythmic pneumatic pump
 LOOP_S = 2.5
+SEED = 20260721   # deterministic phase, so the render reproduces
 
 
 def hp(x: np.ndarray, fc: float) -> np.ndarray:
@@ -58,21 +65,47 @@ def write(name: str, x: np.ndarray, target_rms: float = 0.045) -> None:
         fh.writeframes((x * 32767).astype("<i2").tobytes())
 
 
-def smooth_env(x: np.ndarray, w_s: float = 0.02) -> np.ndarray:
+def smooth_env(x: np.ndarray, w_s: float) -> np.ndarray:
     w = max(4, int(w_s * C.SR))
     return np.convolve(np.abs(x), np.ones(w) / w, "same")
 
 
-def flatten(x: np.ndarray, floor_frac: float = 0.25) -> np.ndarray:
-    """Divide out the decay so a real hiss becomes a steady, loopable fill."""
-    env = smooth_env(x)
+def air_shape(x: np.ndarray, nfft: int = 8192) -> tuple[np.ndarray, np.ndarray]:
+    """Average magnitude spectrum of the real air, de-whistled by a frequency
+    median filter (narrow tonal peaks removed, broadband air shape kept)."""
+    x = hp(x, 220.0)
+    frames = [np.abs(np.fft.rfft(x[i:i + nfft] * np.hanning(nfft)))
+              for i in range(0, len(x) - nfft, nfft // 2)]
+    mag = np.mean(frames, axis=0)
+    mag = medfilt(mag, 41)                     # kill narrow whistles (~2.7 kHz)
+    f = np.fft.rfftfreq(nfft, 1.0 / C.SR)
+    return f, mag
+
+
+def synth_loop(f_src: np.ndarray, mag_src: np.ndarray, len_s: float) -> np.ndarray:
+    """One period of periodic noise with the target spectrum: constant level,
+    seamless by construction (random phase over exactly the loop length)."""
+    n = int(len_s * C.SR)
+    f = np.fft.rfftfreq(n, 1.0 / C.SR)
+    mag = np.interp(f, f_src, mag_src)
+    rng = np.random.default_rng(SEED)
+    phase = rng.uniform(0.0, 2.0 * np.pi, len(mag))
+    phase[0] = 0.0                              # DC real
+    if n % 2 == 0:
+        phase[-1] = 0.0                         # Nyquist real
+    y = np.fft.irfft(mag * np.exp(1j * phase), n)
+    return hp(y, 200.0)                         # drop any sub-bass rumble
+
+
+def flatten(x: np.ndarray, w_s: float, floor_frac: float = 0.3) -> np.ndarray:
+    """Even out the macro level so a decaying source does not seam; a wide
+    window keeps pump pulses faster than w_s intact."""
+    env = smooth_env(x, w_s)
     env = np.maximum(env, floor_frac * (env.max() or 1.0))
     return x / env
 
 
-def loop_hiss(x: np.ndarray, xfade_s: float = 0.2) -> np.ndarray:
-    """Crossfade the tail into the head so the segment tiles seamlessly. Long
-    equal-power crossfade is safe here -- hiss is stochastic, so no combing."""
+def loop_xfade(x: np.ndarray, xfade_s: float = 0.2) -> np.ndarray:
     xf = int(xfade_s * C.SR)
     if len(x) < 2 * xf:
         return x
@@ -83,7 +116,6 @@ def loop_hiss(x: np.ndarray, xfade_s: float = 0.2) -> np.ndarray:
 
 
 def steady_window(x: np.ndarray, len_s: float) -> np.ndarray:
-    """The loudest sustained stretch -- where the hiss is fullest, past onset."""
     n = int(len_s * C.SR)
     if len(x) <= n:
         return x
@@ -96,7 +128,7 @@ def steady_window(x: np.ndarray, len_s: float) -> np.ndarray:
 def tiled(loop: np.ndarray, secs: float) -> np.ndarray:
     reps = int(np.ceil(secs * C.SR / len(loop)))
     out = np.tile(loop, reps)[:int(secs * C.SR)]
-    fade = int(0.15 * C.SR)                       # ease in/out for the demo
+    fade = int(0.15 * C.SR)
     out[:fade] *= np.linspace(0, 1, fade)
     out[-fade:] *= np.linspace(1, 0, fade)
     return out
@@ -105,23 +137,24 @@ def tiled(loop: np.ndarray, secs: float) -> np.ndarray:
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
 
-    # 1) Continuous fill: flatten a real release hiss, high-pass the hum, loop.
-    hiss = C.load_wav(HISS_SRC)
-    hiss = hp(hiss, 220.0)
-    hiss = flatten(steady_window(hiss, LOOP_S + 0.6))
-    hiss_loop = loop_hiss(hiss[:int(LOOP_S * C.SR)])
+    # 1) Continuous fill: resynthesize the de-whistled air spectrum as a
+    #    perfectly periodic loop -- no whine, no seam, constant level.
+    f, mag = air_shape(C.load_wav(HISS_SRC))
+    hiss_loop = synth_loop(f, mag, LOOP_S)
     write("pressurize_hiss.wav", hiss_loop)
     write("pressurize_hiss_11s.wav", tiled(hiss_loop, 11.0))
 
-    # 2) Pump variant: a steady stretch of the Bantam, softened and looped.
-    pump = C.load_wav(PUMP_SRC)
-    pump = hp(pump, 160.0)
-    pump_loop = loop_hiss(steady_window(pump, LOOP_S), xfade_s=0.12)
+    # 2) Pump variant: a steady Bantam stretch, macro-level flattened (so it
+    #    does not seam) then crossfade-looped; the pulse rhythm survives.
+    pump = hp(C.load_wav(PUMP_SRC), 160.0)
+    pump = flatten(steady_window(pump, LOOP_S + 0.4), w_s=0.35)
+    pump_loop = loop_xfade(pump[:int(LOOP_S * C.SR)], xfade_s=0.12)
     write("pressurize_pump.wav", pump_loop)
     write("pressurize_pump_11s.wav", tiled(pump_loop, 11.0))
 
-    print(f"  pressurize_hiss.wav / pressurize_pump.wav  ({LOOP_S:.1f}s seamless loops)")
-    print("  + _11s demos (full idle build; game fires air_dryer_purge at the end)")
+    print(f"  pressurize_hiss.wav (resynth, whine-free, seamless) / "
+          f"pressurize_pump.wav  ({LOOP_S:.1f}s loops)")
+    print("  + _11s demos (game fires air_dryer_purge at the end)")
     print(f"  wrote to {OUT}")
 
 
