@@ -2402,3 +2402,4 @@ fit for an audio-first game.
 - [ ] Mastodon sharing follow-ups: unlink from inside the game (today the orinks.net page is the only unlink), and consider per-post visibility choice (public vs unlisted) if players ask
 - [x] Online hub: the drivers board, orinks.net account, cloud backup and restore, and all sharing toggles moved from Settings into one Online menu on the main menu (`states/online_hub.py`); Settings keeps an Online pointer that opens the same menu for a release or two
 - [ ] Remove the Settings Online pointer once players have had a release or two to relearn the location
+- [ ] 1.9.0 release-notes credit sweep: nromey's Unreleased bullets (engine audio arc, physics realism, playlists, place callouts, speed-limit audits, signature v3) carry no "Thanks to" attribution yet -- credit them with the PR link when the 1.9.0 notes are cut, per the contributor-credit rule in AGENTS.md
