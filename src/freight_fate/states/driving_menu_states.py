@@ -204,7 +204,8 @@ class DrivingStatusScreenState(MenuState):
             )
 
         items = [
-            say_item(f"Route: {' to '.join(route.cities)}"),
+            # route.cities holds slug keys; speak the composed names instead.
+            say_item(f"Route: {' to '.join(self.ctx.world.spoken_city(c) for c in route.cities)}"),
             say_item(f"Highways: {_join_phrase(route.highways)}"),
             say_item(
                 f"Progress: {settings.distance_text(d.trip.position_mi)} driven, "
@@ -245,8 +246,8 @@ class DrivingStatusScreenState(MenuState):
                     f"Estimated carrier-paid toll exposure: {route.estimated_tolls:,.0f} dollars."
                 )
             )
-        planned = d.trip.planned_stop_name
-        if planned is not None:
+        planned = d.trip.planned_stop_label
+        if planned:
             items.append(
                 MenuItem(
                     f"Cancel planned stop at {planned}",
@@ -262,7 +263,7 @@ class DrivingStatusScreenState(MenuState):
         self.ctx.push_state(StopDetailState(self.ctx, self.driving, stop))
 
     def _cancel_planned_stop(self) -> None:
-        self.driving.trip.planned_stop_name = None
+        self.driving.trip.planned_stop_key = None
         self.refresh()
         self.ctx.say("Planned stop canceled.")
 

@@ -54,8 +54,8 @@ class StopDetailState(MenuState):
             )
             for line in self._detail_lines()
         ]
-        planned = trip.planned_stop_name
-        if planned == self.stop.name:
+        planned = trip.planned_stop_key
+        if trip.is_planned(self.stop):
             items.append(
                 MenuItem(
                     f"Cancel planned stop at {self.stop.name}",
@@ -123,15 +123,15 @@ class StopDetailState(MenuState):
         return f"Estimated time to reach it: {eta_h:.1f} hours {basis}.{hos_note}"
 
     def _plan(self) -> None:
-        planned = self.driving.trip.planned_stop_name
-        if planned is not None and planned != self.stop.name:
+        trip = self.driving.trip
+        if trip.planned_stop_key is not None and not trip.is_planned(self.stop):
             # A different stop is already planned: confirm before moving it.
             self.ctx.push_state(ConfirmMovePlanState(self.ctx, self.driving, self.stop))
             return
         self._set_planned_stop()
 
     def _set_planned_stop(self) -> None:
-        self.driving.trip.planned_stop_name = self.stop.name
+        self.driving.trip.planned_stop_key = self.stop.key
         self.ctx.audio.play("ui/notify")
         self.refresh()
         self.ctx.say(
@@ -140,7 +140,7 @@ class StopDetailState(MenuState):
         )
 
     def _cancel(self) -> None:
-        self.driving.trip.planned_stop_name = None
+        self.driving.trip.planned_stop_key = None
         self.refresh()
         self.ctx.say("Planned stop canceled.")
 
@@ -165,8 +165,7 @@ class ConfirmMovePlanState(MenuState):
         self.stop = stop
 
     def _planned_stop(self) -> RoadStop | None:
-        name = self.driving.trip.planned_stop_name
-        return next((s for s in self.driving.trip.stops if s.name == name), None)
+        return self.driving.trip.planned_stop
 
     def _ahead_text(self, stop: RoadStop) -> str:
         ahead = max(0.0, stop.at_mi - self.driving.trip.position_mi)
@@ -177,7 +176,7 @@ class ConfirmMovePlanState(MenuState):
         where = (
             f"{current.spoken_name}, {self._ahead_text(current)} ahead"
             if current is not None
-            else str(self.driving.trip.planned_stop_name)
+            else self.driving.trip.planned_stop_label
         )
         self.ctx.say(
             f"{self.title} You already have a planned stop at {where}. "
@@ -188,7 +187,7 @@ class ConfirmMovePlanState(MenuState):
     def build_items(self) -> list[MenuItem]:
         current = self._planned_stop()
         keep_name = (
-            current.spoken_name if current is not None else self.driving.trip.planned_stop_name
+            current.spoken_name if current is not None else self.driving.trip.planned_stop_label
         )
         return [
             MenuItem(
@@ -204,7 +203,7 @@ class ConfirmMovePlanState(MenuState):
         ]
 
     def _confirm(self) -> None:
-        self.driving.trip.planned_stop_name = self.stop.name
+        self.driving.trip.planned_stop_key = self.stop.key
         # Popping re-enters the detail screen, which now shows the Cancel button.
         self.ctx.pop_state()
         self.ctx.audio.play("ui/notify")

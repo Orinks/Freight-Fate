@@ -900,6 +900,12 @@ Online settings include:
 | Restore a cloud backup | Lists the careers backed up to your account, newest first, and brings one onto this computer. Freight Fate verifies the server signature before replacing anything. A missing, altered, or unsupported signature leaves the local save untouched. A successful restore keeps the replaced save beside it as a fallback file and signs the restored copy for this computer. If the same career was played on two computers, this menu is also where you choose which accepted copy wins. |
 | Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. Works without a driver profile. |
 
+Problem reports settings include:
+
+| Setting | Purpose |
+| --- | --- |
+| Where the game log is saved | Reads out the full path of this session's log file and shows it in the window. Packaged downloads always keep a log; it records the session including everything the game said out loud, so attaching it to a bug report shows exactly what you heard. The session before this one is kept beside it, so restarting the game to check something does not lose it. Both files stay on your computer; the game never sends them anywhere. |
+
 The main menu also has a Drivers online item that reads the same public board:
 each driver's name, what they are doing, and how fresh the report is. Viewing
 the board shares nothing about you and does not require sharing to be on.
@@ -993,7 +999,10 @@ release archive from the releases page and play from that folder.
 
 If an update cannot reach the server, check your internet connection and try
 again later. The game writes packaged-build logs to `logs/game.log`, which can
-help when reporting update or startup problems.
+help when reporting update or startup problems. That log also records every
+line the game spoke, so it is the most useful thing to attach to any bug
+report. Settings, Problem reports, Where the game log is saved reads out its
+exact location; the previous session is kept beside it as `logs/game.prev.log`.
 
 If your save is missing after extracting or updating, look for another nearby
 `saves` folder and copy or move the whole `saves` folder into the active

@@ -138,30 +138,15 @@
 
 - **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
 
-- **The route report now tells you where you are.** Press R, or D-pad up on a
-  controller, to hear the current road and direction, state, nearest named city,
-  checkpoint, or road stop, along with your progress and upcoming guidance.
-- **Live weather can now leave your career calendar running.** The new Live
-  weather controls calendar setting keeps today's real date when on. Turn it
-  off to keep live city conditions while your career date advances at midnight
-  and the seasons pass normally. Live conditions are adjusted to the career
-  season so summer snow and cold-season thunderstorms do not slip through. An
-  established career begins its independent calendar from today's date when
-  you turn the setting off, avoiding a jump back to its old hidden date; a new
-  career still begins on March 21.
-- **Map stops now open a full details view, and you can plan your next
-  stop.** On the driving Map screen, pressing Enter on a stop now opens its
-  details instead of repeating the line: the exit, distance, what it offers,
-  parking, and an estimate of how long it will take to reach at your pace,
-  including whether you would arrive before your next break, driving limit,
-  or duty window. From there, plan to stop at it: approach announcements and
-  the upcoming and clock readouts then call it your planned stop, so you know
-  exactly when to signal for the exit. Plans can be canceled or replaced any
-  time, survive saving and resuming, and clear themselves when you pull in or
-  drive past.
-- **Keep speed assistance active across the whole job.** Pressing K now starts one automatic speed-control session: the speed keeper handles facility roads, gate queues, work zones, and congestion, then adaptive cruise takes over on the open road. If started during the deadhead, it pauses through pickup check-in and loading, survives a save there, and resumes once the loaded truck is rolling. It restores your earlier cruise target or uses the new road's limit, and switches back to the keeper for the next restricted zone. Braking outside that planned pickup, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Plus and Minus adjust the remembered open-road target in either mode.
-
 ### Changed
+
+
+- **Test builds now introduce themselves as development builds.** The main
+  menu welcome and the update screen used to read a bare version number that
+  looked like a stable release. A nightly or source build now says, for
+  example, "version 1.8.6 development build", so you always know which kind
+  of build is talking. Stable releases sound the same as before, and version
+  numbers no longer skip when a stable release comes out.
 
 - **The truck revs each gear out when you accelerate hard.** Flooring
   it from a stop used to shift almost the instant it moved, banging up
@@ -198,61 +183,6 @@
   slow or metered connection. Fifteen tracks were rebuilt from their original
   studio recordings along the way, so those should sound a shade cleaner than
   before.
-
-- **The drivers board now checks in a little less often.** With online
-  presence on, the game reports you every ninety seconds instead of every
-  minute, and the board waits four minutes before it calls a driver gone. You
-  still appear the moment you go on duty; a driver who closes the game may sit
-  on the board about a minute longer than before.
-- **Career saves are now sealed files instead of plain text.** Saved careers
-  use a new packed format that ordinary text editors cannot open, and every
-  save is signed by your own installation. Your existing careers convert
-  automatically the first time they load, and a copy of the old file is kept
-  beside the new one in case you ever roll back to an older version of the
-  game. A save that was changed outside the game, or copied over from another
-  computer, still loads and plays normally, but the game tells you once and
-  marks that career as modified; shared features may not accept a modified
-  career. Thanks to nromey, [PR
-  #96](https://github.com/Orinks/Freight-Fate/pull/96).
-
-- **Moving a planned stop now asks first, and each stop only cancels its own
-  plan.** A stop's details screen shows the cancel option only when that stop
-  is the one you planned. Choosing "Plan to stop" while another stop is already
-  planned now tells you which stop is planned and how far ahead it is, and asks
-  whether to move your plan here before changing it.
-
-- **Air pressure now bleeds down while the truck is parked with its engine
-  off.** After a full night's sleep, you must start the engine and rebuild air
-  before releasing the parking brake instead of waking to fully charged tanks.
-
-- **Each truck you own now keeps its own fuel, damage, tire wear, and road
-  grime.** Refueling, repairing, or dirtying one truck no longer affects the
-  others, and a newly bought truck arrives with a full tank and a clean bill
-  of health. Switching trucks no longer moves fuel between them. Careers from
-  older versions are updated automatically the first time they load, and the
-  game tells you once that the updated save can no longer be opened by older
-  versions: the truck you were driving keeps its condition, and your other
-  trucks start fueled and fresh. Back up your career save before opening it in
-  this version. If the conversion causes a problem, include both the original
-  backup and the updated save with your issue report.
-
-- **On-time deliveries now pay a real bonus.** Delivering on time used to add
-  only a sliver of extra pay unless you raced in absurdly far ahead of the
-  deadline, so the bonus line at settlement rarely felt like one. Pay now
-  works the way real shipper scorecards do: hit the delivery window and you
-  earn a flat ten percent on-time bonus every time, and arriving hours early
-  pays no more than making the appointment. The settlement summary now calls
-  it an on-time delivery bonus. Late and damaged deliveries still pay less,
-  exactly as before.
-
-- **You can sleep at turnpike service plazas now.** Service plazas used to
-  offer fuel, food, and a short break but never a proper rest, so a tired
-  driver had to push on to the next truck stop even while parked at a big
-  Thruway or Turnpike plaza with overnight truck parking. Every service
-  plaza's stop menu now offers sleep like truck stops and travel centers do,
-  and route planning counts them as places you can end your day.
-
-- **The driving assistance presets have been set aside for version 1.9.** Recent developer snapshots briefly offered a Driving assistance settings category with emergency braking, lane support, stop-and-go, and descent control presets. That work now ships complete with version 1.9 instead. The speed keeper stays, now under Settings, Gameplay, and your other settings are untouched.
 
 - **Dispatch stops handing you the same run over and over.** Assigned
   dispatch now remembers your last few delivered routes and leads with a
@@ -560,13 +490,6 @@
 
 ### Changed
 
-- **You can sleep at turnpike service plazas now.** Service plazas used to
-  offer fuel, food, and a short break but never a proper rest, so a tired
-  driver had to push on to the next truck stop even while parked at a big
-  Thruway or Turnpike plaza with overnight truck parking. Every service
-  plaza's stop menu now offers sleep like truck stops and travel centers do,
-  and route planning counts them as places you can end your day.
-
 - **The All assists preset now switches lane drift off.** The easiest preset
   used to leave whatever lane drift level you had chosen running, so a player
   who wanted the fully assisted ride could still be stuck holding the wheel
@@ -679,116 +602,12 @@
   remaining while you drove in circles. Every miss now loops you back
   onto a real approach with the exit announced fresh, on every kind of
   road.
-- **Missing the destination exit twice no longer strands the delivery.** Every
-  missed attempt now loops you back far enough to hear the exit, signal, and
-  slow down again instead of leaving the route stuck at zero miles remaining.
-
-- **Getting pulled over now judges whether you are actually stopping, not how
-  far you rolled.** A loaded truck at highway speed cannot halt on a dime, and
-  the old rule could flag a felony stop even when you braked correctly the whole
-  way. Now, once the lights come on, the trooper watches your behavior: signal
-  and brake down to a stop and you get the ordinary roadside check, and pulling
-  over promptly and cleanly gives a small chance a ticket is waived to a warning.
-  Keep accelerating, coast along without slowing, or ignore the lights and it
-  still ends in a felony stop. You no longer have to hold the emergency brake
-  the entire time; braking steadily is enough.
-
-- **Taking your planned stop's exit no longer warns that you drove past it.**
-  When you signal a planned stop and brake down the exit ramp, the game used to
-  announce that you had driven past it and cancelled the plan, even though you
-  were stopping there. Now the warning only speaks when the stop is truly out of
-  reach: if you drive past the exit without signaling, if you signal but are
-  going too fast to make the ramp, or if you take the exit but never stop and
-  roll on past the end of the ramp.
-- **Taking an exit and never stopping no longer strands you on the ramp.**
-  If you took an exit but kept driving without ever coming to a stop, the game
-  would quietly wait forever -- speed enforcement stayed off and, miles later,
-  stopping would still open that stop's menu. Now, once you roll well past the
-  end of the ramp without stopping, the game tells you that you never stopped
-  and hands the highway back.
-- **The trip mile marker holds while you are on an exit ramp.** The ramp is off
-  the highway, so your progress along the route no longer ticks up while you
-  brake down it; the highway picks back up where you left it once you rejoin.
-- **Live weather no longer announces a simulated forecast while loading.**
-  Pressing V before the first live observation arrives now says that live
-  weather is still loading instead of describing an invented forecast. This
-  also works when Live weather controls calendar is turned off. Route weather
-  now names cities whose observations are loading or unavailable instead of
-  silently skipping them, and weather-change announcements identify live
-  observations and simulated fallback conditions.
 - **Live weather no longer flips between rain and freezing rain on its own.**
   When your career keeps its own calendar apart from the live feed, real rain
   is matched to the career season once when it arrives -- so a cold-season
   shower can come in as freezing rain -- and then holds. It no longer switches
   back and forth as the day warms and cools, only changing when the real report
   or the town it is for changes.
-- **Cloud Backup works again on test builds.** Careers from a recent test
-  build were being turned away with a message about the backup being
-  unreadable. Nothing was wrong with those careers: the game had changed what
-  it records about each truck, and the backup service was still expecting the
-  older shape. Both sides now agree, and they are kept in step automatically
-  so this cannot drift apart again. Released builds were never affected.
-- **A career carried between computers can lose its "modified" mark.** Moving
-  a save to another machine marks it as changed outside the game, because the
-  new machine cannot recognise the old one's signature. When you restore that
-  career from Cloud Backup and everything about it checks out, the mark is
-  now cleared instead of following you forever.
-- **Finishing a delivery no longer risks losing what it reported online.**
-  A settlement can report the delivery, a level up, and several badges at
-  once, and the game was sending them all at the same moment. They could
-  crowd each other out, be sent twice, or in one case be dropped entirely.
-  They now go out one after another, so your road journal records everything
-  the run earned.
-- **Taking a pay advance no longer makes your cloud backup look edited.** A
-  pay advance is money from your next load paid early, but your career was
-  only crediting the part of the settlement left after the advance came back
-  out. Those advanced dollars sat in your bank with nothing in your lifetime
-  earnings to account for them, so cloud backup upload could refuse the save
-  and mark the driver for review. Lifetime earnings now count the whole
-  settlement, and taking an advance no longer counts against you.
-- **Planning a stop now plays a single confirmation sound.** Choosing "Plan to
-  stop" from a stop's details no longer stacks a menu click and a confirmation
-  chime back to back; you hear just the confirmation.
-- **Back-to-back road alerts no longer crash the Windows event voice.** Urgent
-  hazards still interrupt the current event announcement immediately, without
-  making a separate redundant stop call that could crash inside SAPI.
-- **Lower speed zones now give you time to brake.** When a construction zone
-  or other posted limit drops, releasing the accelerator gives a loaded truck
-  a fair braking window before speeding enforcement begins. Staying on the
-  throttle forfeits that grace.
-- **Automatic speed control now slows you for the destination exit.** When the
-  signed delivery exit is announced, adaptive cruise eases the truck to ramp
-  speed instead of switching off at highway speed. Press X to take the exit;
-  automatic control releases as you enter the ramp, ready for you to brake to
-  the facility stop without collecting an unwanted speeding fine.
-- **State-line announcements no longer repeat at the next major city.** When
-  the GPS calls out the real state boundary, passing the next city now says
-  only the city and onward route instead of claiming that you crossed the same
-  state line again.
-- **The game no longer crashes when it is installed in a protected folder.**
-  If you put Freight Fate somewhere Windows guards, such as Program Files, the
-  game could not write next to itself and would crash the moment it tried to
-  save, often right as you reached a facility. Freight Fate now notices when
-  its own folder is read only and keeps your saves in your personal user
-  folder instead, so the game saves and plays normally wherever you install
-  it. Saves that are already beside the game are still used as before.
-- **The engine load now follows throttle smoothly.** Engine effort remains
-  audible when you accelerate or ease off, while manual releases and
-  adaptive-cruise corrections blend gradually instead of making the engine
-  volume jump. Automatic shifts retain a brief, gentle unload and recovery.
-- **Terminal weather now agrees with the live report on the road.** Time and
-  weather uses the real station temperature even when live weather does not
-  control the career calendar. If the first observation is still loading, the
-  terminal says so instead of announcing a modeled temperature that may change
-  when you start driving.
-- **Interstates stop enforcing a side street's speed limit mid-route.** A
-  handful of highway legs still carried a 25 to 40 mile per hour sample in
-  the middle of the corridor, picked up from a nearby city street or ramp
-  during the map sweep -- so the GPS would suddenly announce a 35 limit on
-  the open interstate and enforcement would treat highway speed as
-  speeding. Every such sample is gone (no US interstate mainline posts
-  below 45), and an automatic check now keeps them from ever coming back.
-  Small-town limits on US and state highways are real and unchanged.
 - **Downloaded builds no longer crash when you continue a career.** The
   packaged game was missing several data files that the source version
   reads straight from disk: continuing a career crashed on the missing
@@ -797,15 +616,6 @@
   could be silently absent from a downloaded build. All of that data now
   ships sealed inside the game itself, and the build check now refuses
   to package a game that cannot load its own career.
-
-- **The destination exit can no longer show up a state early.** On routes
-  that finish on rural highways, the game could announce the destination
-  exit at the last big interchange anywhere along the way -- one delivery to
-  Havre, Montana offered its "destination exit" in Wisconsin, over a
-  thousand miles out, and taking it ended the trip and paid the load right
-  there. The destination exit now only appears within the final miles of
-  your route; where the last stretch has no signed interchange, you get the
-  normal final approach to the facility instead.
 
 - **Taking an exit no longer talks you out of it.** With lane drift on, the
   exit slowdown used to say "confirm the exit when ready" -- but there is no
@@ -864,14 +674,6 @@
   hear the callout, signal, and brake -- a full approach window instead of a
   few compressed seconds.
 
-- **Live weather no longer turns light haze into thick fog.** With real-world
-  weather on, weather stations report haze or mist whenever they can see less
-  than about seven miles, and the game treated every such report as dense fog:
-  fog horns, a forty mile per hour safe speed, and near-zero visibility, often
-  for an entire route on a humid summer night. The game now checks how far the
-  station can actually see, and only genuinely low visibility becomes fog;
-  ordinary haze plays as an overcast sky instead.
-
 - **The driving event voice no longer narrates the past.** With the
   separate event voice enabled, a busy stretch could queue announcements
   faster than the voice speaks, so you would arrive at the dock and sit
@@ -906,21 +708,6 @@
   set speed until you are genuinely closing in, eases down smoothly to
   follow at the set gap, and speaks the traffic warning once, not on
   repeat.
-
-- **Highways no longer inherit city-street speed limits near their start
-  and end.** On six hundred eighty routes, the posted limit spoken and
-  enforced at the edges of a drive could come from a city street beside
-  the highway instead of the highway itself, so an interstate might hold
-  you to thirty miles per hour for miles of open road. Those stray
-  readings are gone: the limit you hear at the wheel now matches the
-  road you are actually on, and speeding enforcement judges you against
-  that honest number.
-- **Careers from older versions now trade every cargo type at real market
-  prices.** A career started before the cargo list grew to sixteen classes
-  kept freight-market prices only for the original eight, so pay for the
-  newer cargo types never rose or fell. Loading such a career now fills in
-  the missing market prices, which also keeps cloud backups of these older
-  careers in step with orinks.net.
 
 - **Braking to a stop no longer drops the truck into reverse -- and
   neither does tapping the brake to check you are stopped.** Holding
@@ -985,6 +772,316 @@
   And four real Great Lakes ports the old map missed -- Toledo, Detroit,
   Chicago, and Green Bay -- now have working docks of their own.
 
+
+## 1.8.5 - 2026-07-22
+
+### Added
+
+- **The game can now tell you where its log file is.** Settings has a new
+  Problem reports category, and Where the game log is saved reads out the full
+  path and shows it in the window. The game has always kept a log of the
+  session, including everything it said out loud, but nothing ever pointed you
+  at it. Attaching it to a bug report shows exactly what you heard. The
+  previous session is kept beside it, so restarting the game to check something
+  does not lose it, and both files stay on your computer.
+- **The route report now tells you where you are.** Press R, or D-pad up on a
+  controller, to hear the current road and direction, state, nearest named city,
+  checkpoint, or road stop, along with your progress and upcoming guidance.
+- **Live weather can now leave your career calendar running.** The new Live
+  weather controls calendar setting keeps today's real date when on. Turn it
+  off to keep live city conditions while your career date advances at midnight
+  and the seasons pass normally. Live conditions are adjusted to the career
+  season so summer snow and cold-season thunderstorms do not slip through. An
+  established career begins its independent calendar from today's date when
+  you turn the setting off, avoiding a jump back to its old hidden date; a new
+  career still begins on March 21. Thanks to TowerAlphaTheta15,
+  [PR #88](https://github.com/Orinks/Freight-Fate/pull/88).
+- **Map stops now open a full details view, and you can plan your next
+  stop.** On the driving Map screen, pressing Enter on a stop now opens its
+  details instead of repeating the line: the exit, distance, what it offers,
+  parking, and an estimate of how long it will take to reach at your pace,
+  including whether you would arrive before your next break, driving limit,
+  or duty window. From there, plan to stop at it: approach announcements and
+  the upcoming and clock readouts then call it your planned stop, so you know
+  exactly when to signal for the exit. Plans can be canceled or replaced any
+  time, survive saving and resuming, and clear themselves when you pull in or
+  drive past. Thanks to ironcross32,
+  [PR #94](https://github.com/Orinks/Freight-Fate/pull/94).
+- **Keep speed assistance active across the whole job.** Pressing K now starts one automatic speed-control session: the speed keeper handles facility roads, gate queues, work zones, and congestion, then adaptive cruise takes over on the open road. If started during the deadhead, it pauses through pickup check-in and loading, survives a save there, and resumes once the loaded truck is rolling. It restores your earlier cruise target or uses the new road's limit, and switches back to the keeper for the next restricted zone. Braking outside that planned pickup, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Plus and Minus adjust the remembered open-road target in either mode.
+
+### Changed
+
+- **The drivers board now checks in a little less often.** With online
+  presence on, the game reports you every two and a half minutes instead of
+  every minute, and the board waits six minutes before it calls a driver gone.
+  You still appear the moment you go on duty, and going off duty, pulling
+  over, or starting a new leg still reaches the board within seconds; it is
+  only the quiet keep-alive that slowed down. A driver who closes the game may
+  sit on the board a few minutes longer than before.
+- **Career saves are now sealed files instead of plain text.** Saved careers
+  use a new packed format that ordinary text editors cannot open, and every
+  save is signed by your own installation. Your existing careers convert
+  automatically the first time they load, and a copy of the old file is kept
+  beside the new one in case you ever roll back to an older version of the
+  game. A save that was changed outside the game, or copied over from another
+  computer, still loads and plays normally, but the game tells you once and
+  marks that career as modified; shared features may not accept a modified
+  career. Thanks to nromey, [PR
+  #96](https://github.com/Orinks/Freight-Fate/pull/96).
+
+- **Moving a planned stop now asks first, and each stop only cancels its own
+  plan.** A stop's details screen shows the cancel option only when that stop
+  is the one you planned. Choosing "Plan to stop" while another stop is already
+  planned now tells you which stop is planned and how far ahead it is, and asks
+  whether to move your plan here before changing it.
+
+- **Air pressure now bleeds down while the truck is parked with its engine
+  off.** After a full night's sleep, you must start the engine and rebuild air
+  before releasing the parking brake instead of waking to fully charged tanks.
+
+- **Each truck you own now keeps its own fuel, damage, tire wear, and road
+  grime.** Refueling, repairing, or dirtying one truck no longer affects the
+  others, and a newly bought truck arrives with a full tank and a clean bill
+  of health. Switching trucks no longer moves fuel between them. Careers from
+  older versions are updated automatically the first time they load, and the
+  game tells you once that the updated save can no longer be opened by older
+  versions: the truck you were driving keeps its condition, and your other
+  trucks start fueled and fresh. Back up your career save before opening it in
+  this version. If the conversion causes a problem, include both the original
+  backup and the updated save with your issue report. Thanks to ironcross32,
+  [PR #91](https://github.com/Orinks/Freight-Fate/pull/91).
+
+- **On-time deliveries now pay a real bonus.** Delivering on time used to add
+  only a sliver of extra pay unless you raced in absurdly far ahead of the
+  deadline, so the bonus line at settlement rarely felt like one. Pay now
+  works the way real shipper scorecards do: hit the delivery window and you
+  earn a flat ten percent on-time bonus every time, and arriving hours early
+  pays no more than making the appointment. The settlement summary now calls
+  it an on-time delivery bonus. Late and damaged deliveries still pay less,
+  exactly as before.
+
+- **You can sleep at turnpike service plazas now.** Service plazas used to
+  offer fuel, food, and a short break but never a proper rest, so a tired
+  driver had to push on to the next truck stop even while parked at a big
+  Thruway or Turnpike plaza with overnight truck parking. Every service
+  plaza's stop menu now offers sleep like truck stops and travel centers do,
+  and route planning counts them as places you can end your day.
+
+- **The driving assistance presets have been set aside for version 1.9.** Recent developer snapshots briefly offered a Driving assistance settings category with emergency braking, lane support, stop-and-go, and descent control presets. That work now ships complete with version 1.9 instead. The speed keeper stays, now under Settings, Gameplay, and your other settings are untouched.
+
+### Fixed
+
+- **Automatic cruise now leaves enough speed in hand for an exit.** After you
+  signal for an exit, cruise aims for 40 miles per hour instead of balancing on
+  the 45-mile-per-hour ramp limit. It now stays safely under that limit on a
+  downhill approach instead of creeping up to 46 and missing the exit.
+
+- **Distances and speeds no longer say "1 miles".** Anything that comes out to
+  exactly one is now read as "1 mile" or "1 kilometer", on map points, stop
+  distances, speed readouts, and everywhere else the game speaks a measurement.
+
+- **The Map screen now names the cities on your route.** Its first line read
+  the internal data names aloud, so a run down the east coast opened with
+  "new underscore york underscore n y underscore u s" and kept going for every
+  city on the route. It now says "New York to Philadelphia to Washington", the
+  same way the delivery summary and the dispatch board already did.
+
+- **Getting pulled over now judges whether you are actually stopping, not how
+  far you rolled.** A loaded truck at highway speed cannot halt on a dime, and
+  the old rule could flag a felony stop even when you braked correctly the whole
+  way. Now, once the lights come on, the trooper watches your behavior: signal
+  and brake down to a stop and you get the ordinary roadside check, and pulling
+  over promptly and cleanly gives a small chance a ticket is waived to a warning.
+  Keep accelerating, coast along without slowing, or ignore the lights and it
+  still ends in a felony stop. You no longer have to hold the emergency brake
+  the entire time; braking steadily is enough. Thanks to ironcross32,
+  [PR #103](https://github.com/Orinks/Freight-Fate/pull/103).
+
+- **Taking your planned stop's exit no longer warns that you drove past it.**
+  When you signal a planned stop and brake down the exit ramp, the game used to
+  announce that you had driven past it and cancelled the plan, even though you
+  were stopping there. Now the warning only speaks when the stop is truly out of
+  reach: if you drive past the exit without signaling, if you signal but are
+  going too fast to make the ramp, or if you take the exit but never stop and
+  roll on past the end of the ramp. Thanks to ironcross32,
+  [PR #102](https://github.com/Orinks/Freight-Fate/pull/102).
+- **Taking an exit and never stopping no longer strands you on the ramp.**
+  If you took an exit but kept driving without ever coming to a stop, the game
+  would quietly wait forever -- speed enforcement stayed off and, miles later,
+  stopping would still open that stop's menu. Now, once you roll well past the
+  end of the ramp without stopping, the game tells you that you never stopped
+  and hands the highway back.
+- **The trip mile marker holds while you are on an exit ramp.** The ramp is off
+  the highway, so your progress along the route no longer ticks up while you
+  brake down it; the highway picks back up where you left it once you rejoin.
+- **Live weather no longer announces a simulated forecast while loading.**
+  Pressing V before the first live observation arrives now says that live
+  weather is still loading instead of describing an invented forecast. This
+  also works when Live weather controls calendar is turned off. Route weather
+  now names cities whose observations are loading or unavailable instead of
+  silently skipping them, and weather-change announcements identify live
+  observations and simulated fallback conditions. Thanks to TowerAlphaTheta15,
+  [PR #99](https://github.com/Orinks/Freight-Fate/pull/99).
+- **Cloud Backup works again on test builds.** Careers from a recent test
+  build were being turned away with a message about the backup being
+  unreadable. Nothing was wrong with those careers: the game had changed what
+  it records about each truck, and the backup service was still expecting the
+  older shape. Both sides now agree, and they are kept in step automatically
+  so this cannot drift apart again. Released builds were never affected.
+- **A career carried between computers can lose its "modified" mark.** Moving
+  a save to another machine marks it as changed outside the game, because the
+  new machine cannot recognise the old one's signature. When you restore that
+  career from Cloud Backup and everything about it checks out, the mark is
+  now cleared instead of following you forever.
+- **Finishing a delivery no longer risks losing what it reported online.**
+  A settlement can report the delivery, a level up, and several badges at
+  once, and the game was sending them all at the same moment. They could
+  crowd each other out, be sent twice, or in one case be dropped entirely.
+  They now go out one after another, so your road journal records everything
+  the run earned.
+- **Taking a pay advance no longer makes your cloud backup look edited.** A
+  pay advance is money from your next load paid early, but your career was
+  only crediting the part of the settlement left after the advance came back
+  out. Those advanced dollars sat in your bank with nothing in your lifetime
+  earnings to account for them, so cloud backup upload could refuse the save
+  and mark the driver for review. Lifetime earnings now count the whole
+  settlement, and taking an advance no longer counts against you.
+- **Planning a stop now plays a single confirmation sound.** Choosing "Plan to
+  stop" from a stop's details no longer stacks a menu click and a confirmation
+  chime back to back; you hear just the confirmation.
+- **Back-to-back road alerts no longer crash the Windows event voice.** Urgent
+  hazards still interrupt the current event announcement immediately, without
+  making a separate redundant stop call that could crash inside SAPI.
+- **Lower speed zones now give you time to brake.** When a construction zone
+  or other posted limit drops, releasing the accelerator gives a loaded truck
+  a fair braking window before speeding enforcement begins. Staying on the
+  throttle forfeits that grace.
+- **Missing the destination exit twice no longer strands the delivery.** Every
+  missed attempt now loops you back far enough to hear the exit, signal, and
+  slow down again instead of leaving the route stuck at zero miles remaining.
+- **Automatic speed control now slows you for the destination exit.** When the
+  signed delivery exit is announced, adaptive cruise eases the truck to ramp
+  speed instead of switching off at highway speed. Press X to take the exit;
+  automatic control releases as you enter the ramp, ready for you to brake to
+  the facility stop without collecting an unwanted speeding fine.
+- **Driving through a city no longer announces the same truck stop twice.**
+  A city's stops were counted once for the road coming in and once for the
+  road going out, so passing through called out a single Pilot or Love's
+  twice, two miles apart, as though they were two places. On a Chicago to Los
+  Angeles run that was eight doubled stops. Each facility is now listed once,
+  keeping whichever exit number was recorded for it.
+- **Signaling for one stop no longer hides that you missed a same-named
+  one.** The game works out whether you are taking a stop's exit or blowing
+  past it. It compared stops by name, so signaling for any Love's Travel Stop
+  counted as taking the exit for the Love's you had planned, and driving past
+  your real planned stop went unmentioned. It now checks the actual stop.
+- **A planned stop is no longer cancelled by a different stop with the same
+  name.** Plans were remembered by name only, so on a route with four Love's
+  Travel Stops, driving past the first one told you that you had driven past
+  your planned stop and cancelled the plan -- even when the stop you actually
+  planned was three hundred miles further on. Every same-name stop also
+  announced itself as your planned stop, and pulling into any of them counted
+  as arriving at your plan. Your plan now follows the one stop you chose.
+  Plans saved by an earlier version still load, pointing at the soonest stop
+  of that name you can still reach.
+- **Every stop on your route is announced now, not just the first of each
+  name.** Chains repeat -- a run from New York to Miami passes four different
+  Love's Travel Stops -- and the game only ever called out the first one,
+  then went quiet for the rest of the trip. On that route six of its
+  twenty-five stops were never mentioned at all. Each stop is now tracked by
+  where it actually sits, so all of them announce as you approach.
+- **The delivery run no longer warns about a 15 mile per hour limit you
+  never reach.** On the way in to a receiver you were told a facility gate
+  was coming with a 15 limit, then that limit never arrived, because the gate
+  sits in the last half mile of the highway while your destination exit comes
+  a mile or more before it -- you left the road before the sign existed.
+  Delivery runs now only warn about slower zones you will actually drive
+  into. Pickups and facility approach roads still drive to the gate, and
+  still get the warning.
+- **Signaling for the destination exit no longer says the same thing twice.**
+  When the exit callout had already announced adaptive cruise easing to ramp
+  speed, pressing X repeated the whole sentence. It now just confirms the
+  exit.
+- **Entering a slower zone no longer sounds exactly like the warning for
+  it.** Both announcements said the same thing -- "facility gate ahead, speed
+  limit 15" -- so on the run in to a delivery you heard the gate limit two
+  miles out, found the limit had not actually changed, and had no way to tell
+  that one was a heads-up and the other was the change itself. The warning
+  still says how far ahead the zone is; entering it now says "Entering
+  facility gate zone, speed limit 15 now," matching the "End of" call you
+  already hear on the way out. Construction, heavy traffic, and destination
+  approach zones all read the same way.
+- **Signaling for any exit now slows the truck, not just the delivery one.**
+  Pressing X told you to slow to ramp speed, but adaptive cruise kept holding
+  highway speed, so a truck stop or rest area exit went by at seventy while
+  automatic control did nothing. Signaling now eases cruise to ramp speed for
+  every exit, and a posted limit above ramp speed no longer cancels that out.
+  Pressing X again to stay on the highway hands the open-road speed straight
+  back.
+- **State-line announcements no longer repeat at the next major city.** When
+  the GPS calls out the real state boundary, passing the next city now says
+  only the city and onward route instead of claiming that you crossed the same
+  state line again.
+- **The game no longer crashes when it is installed in a protected folder.**
+  If you put Freight Fate somewhere Windows guards, such as Program Files, the
+  game could not write next to itself and would crash the moment it tried to
+  save, often right as you reached a facility. Freight Fate now notices when
+  its own folder is read only and keeps your saves in your personal user
+  folder instead, so the game saves and plays normally wherever you install
+  it. Saves that are already beside the game are still used as before. Thanks
+  to ryanb96, [PR #92](https://github.com/Orinks/Freight-Fate/pull/92).
+- **The engine load now follows throttle smoothly.** Engine effort remains
+  audible when you accelerate or ease off, while manual releases and
+  adaptive-cruise corrections blend gradually instead of making the engine
+  volume jump. Automatic shifts retain a brief, gentle unload and recovery.
+  Thanks to TowerAlphaTheta15,
+  [PR #89](https://github.com/Orinks/Freight-Fate/pull/89).
+- **Terminal weather now agrees with the live report on the road.** Time and
+  weather uses the real station temperature even when live weather does not
+  control the career calendar. If the first observation is still loading, the
+  terminal says so instead of announcing a modeled temperature that may change
+  when you start driving.
+- **Interstates stop enforcing a side street's speed limit mid-route.** A
+  handful of highway legs still carried a 25 to 40 mile per hour sample in
+  the middle of the corridor, picked up from a nearby city street or ramp
+  during the map sweep -- so the GPS would suddenly announce a 35 limit on
+  the open interstate and enforcement would treat highway speed as
+  speeding. Every such sample is gone (no US interstate mainline posts
+  below 45), and an automatic check now keeps them from ever coming back.
+  Small-town limits on US and state highways are real and unchanged. Thanks
+  to nromey, [PR #86](https://github.com/Orinks/Freight-Fate/pull/86).
+
+- **The destination exit can no longer show up a state early.** On routes
+  that finish on rural highways, the game could announce the destination
+  exit at the last big interchange anywhere along the way -- one delivery to
+  Havre, Montana offered its "destination exit" in Wisconsin, over a
+  thousand miles out, and taking it ended the trip and paid the load right
+  there. The destination exit now only appears within the final miles of
+  your route; where the last stretch has no signed interchange, you get the
+  normal final approach to the facility instead.
+
+- **Live weather no longer turns light haze into thick fog.** With real-world
+  weather on, weather stations report haze or mist whenever they can see less
+  than about seven miles, and the game treated every such report as dense fog:
+  fog horns, a forty mile per hour safe speed, and near-zero visibility, often
+  for an entire route on a humid summer night. The game now checks how far the
+  station can actually see, and only genuinely low visibility becomes fog;
+  ordinary haze plays as an overcast sky instead.
+- **Highways no longer inherit city-street speed limits near their start
+  and end.** On six hundred eighty routes, the posted limit spoken and
+  enforced at the edges of a drive could come from a city street beside
+  the highway instead of the highway itself, so an interstate might hold
+  you to thirty miles per hour for miles of open road. Those stray
+  readings are gone: the limit you hear at the wheel now matches the
+  road you are actually on, and speeding enforcement judges you against
+  that honest number. Thanks to nromey,
+  [PR #82](https://github.com/Orinks/Freight-Fate/pull/82).
+- **Careers from older versions now trade every cargo type at real market
+  prices.** A career started before the cargo list grew to sixteen classes
+  kept freight-market prices only for the original eight, so pay for the
+  newer cargo types never rose or fell. Loading such a career now fills in
+  the missing market prices, which also keeps cloud backups of these older
+  careers in step with orinks.net.
 
 ## 1.8.3 - 2026-07-14
 
@@ -1257,57 +1354,6 @@
   making them do something -- rest, showers, repairs, and buffs -- comes in a
   later update. Thanks to nromey.
 
-- **The map keeps filling in -- twenty more cities across seven new corridors.**
-  Since the big update above, the network grew city by city: Interstate 80 across
-  western Nebraska (Kearney, Lexington, Ogallala, and Sidney), Interstate 70 over
-  the Kansas high plains into Colorado (Hays, Colby, Junction City, and
-  Burlington), Interstate 10 through the West Texas desert (Fort Stockton, Ozona,
-  and Junction), Interstate 25 over Raton Pass into New Mexico (Raton and
-  Trinidad), Interstate 5 over the Siskiyou Mountains (Mount Shasta and Yreka),
-  Interstate 29 up the Dakota plains (Watertown), and the full Willamette Valley
-  run from Portland down to Eugene -- Woodburn and Albany on Interstate 5, plus a
-  wine-country alternate through Newberg and McMinnville. Each new city is a real
-  place to pick up and deliver, wired to its neighbors on truck-routed roads with
-  real named stops to fuel and park along the way, and grades that rise and fall
-  with the real terrain.
-
-- **Nevada's Great Basin opens up -- six new cities on three high-desert
-  corridors.** The empty interior between the interstates fills in: US-93 up the
-  eastern Great Basin from Las Vegas through Alamo and Ely to Wells; US-50 -- "the
-  Loneliest Road in America" -- across the middle through Eureka, Austin, and
-  Fallon; and US-6 tying Ely to Tonopah. These are long, quiet, climbing hauls
-  over real mountain grades (the run to Wells tops seven percent over Pequop
-  Summit), and every leg points you to a real diesel pump so you never run dry on
-  the lonely stretches. Ely, Fallon, and Wells are new places to pick up and
-  deliver -- and Wells now splits the old Elko run, so Interstate 80 freight
-  passes through the real town instead of leaping it.
-
-- **New: real roadside landmarks as you drive.** Routes now call out the world
-  going by -- entering a national forest, crossing a named river, approaching a
-  mountain pass, a roadside museum ahead -- over 2,800 of them, drawn from real
-  map data so a long haul has a sense of place instead of silence. The callouts
-  ride the quiet background voice: they wait their turn behind navigation and
-  never talk over a safety warning. Thanks to nromey.
-
-- **Billboards line the highway now, and they have opinions.** Every long run
-  passes the occasional billboard, read aloud as you go by: earnest church
-  signs, truck-wreck attorneys, mystery spots, and the world's largest
-  several things. Some routes get their own real roadside culture -- free ice
-  water on Interstate 90, alien jerky on Interstate 15 -- and no sign repeats
-  itself on the same trip.
-
-- **You choose the roadside chatter you want to hear.** A new Roadside
-  chatter group in Settings, Speech and weather, has one master switch and
-  separate switches for parks and forests, river crossings, mountain passes,
-  museums and attractions, and billboards -- so you can keep the geography
-  and lose the jokes, or the other way around. Terse speech verbosity mutes
-  all of it, and safety and navigation announcements are never affected.
-
-- **Name-brand truck stops now tell you what they are good at.** Pulling up
-  the details on a branded stop adds its specialty -- tire care and a quick
-  lube at a Love's, the sit-down restaurant at a Petro -- to the spoken
-  rundown at the stop and in the en-route stop listings.
-
 - **Some hauls now offer more than one way to drive them.** Where two real truck
   routes reach the same place, the map keeps both, so a run can offer a choice --
   a faster interstate or a shorter back road -- instead of a single fixed path.
@@ -1417,272 +1463,7 @@
   prices, freight market flavor, and road hazards, so a winter run out of
   Duluth no longer sounds like a summer haul into Cincinnati.
 
-
-- **The world got five new sounds, and every shipped sound now earns its
-  keep.** Rest stops sound different by daylight: a new daytime truck-stop
-  lot ambience (idling diesels, air brakes, a highway pass-by) plays at
-  stops before dusk, with the familiar night loop after dark. Warehouse,
-  cold-storage, and distribution docks now wrap you in a big reverberant
-  warehouse interior instead of the generic gate loop. Signaling for an
-  exit or a pull-over clicks like a real indicator stalk, overworked
-  brakes squeal once they pass their fade temperature, and a microsleep
-  forced stop ends in a proper tire screech. All five are ElevenLabs
-  generations added to the `tools/generate_sounds.py` catalog (which now
-  supports seamless-loop requests), and the last orphaned synthesizer-era
-  asset is gone.
-- **54 new achievements -- the badge wall passes one hundred.** The catalog
-  grows from 60 to 114 badges: new state, region, and city arrivals (Virginia
-  ridges, bluegrass country, the Jersey Turnpike, Waco, the Mississippi coast,
-  Nashville, El Paso, Laredo, Baton Rouge, and more), compass runs north and
-  south, cargo firsts (refrigerated, heavy-haul, high-value, farm freight, and
-  max-gross loads), career milestones out to 200 deliveries and 100,000 miles,
-  season and calendar badges (including one for a certain day in early April),
-  close-call deliveries (deadline squeakers, empty fuel tanks, midnight and
-  pre-dawn docks), citation mishaps, congestion, inspections, deep repairs,
-  roadside rescues, bobtail repositions, and a fully optioned rig. As always,
-  every badge quietly tips its hat to a country or trucking song -- this round
-  adds nods to a heap of underground country artists alongside the classics.
-- **The career economy now pays like a real one.** Company drivers fuel and
-  repair on the carrier account on the road, not just at terminals -- an
-  out-of-fuel rescue dings the service record instead of the wallet, while
-  owner-operators keep paying their own way. Demanding freight teaches more:
-  specialty and premium cargo earn bonus experience and on-time streaks
-  compound it, so the mid-career grind rewards exactly the freight dispatch
-  recommends. Reputation now pays continuously through a dispatch trust
-  bonus on company settlements. And personal money has real uses: pay for
-  endorsement courses to unlock specialty freight before the carrier
-  sponsors the training, or take a motel room for full-quality rest where
-  truck parking is poor or full.
-- **How to play now teaches the current game.** The in-game help reader
-  gained a dedicated radio page (stations, hosts, signal ranges, and the
-  streamer-safe rules), The goal and Deliveries pages explain earned dispatch
-  freedom -- assigned loads and routes for new hires, declines, the level-8
-  board unlock, F1 job details, and hours warnings -- and terminal, board,
-  and early-career guidance text no longer tells assigned new hires to
-  browse and pick freight.
-- **The in-cab radio now has hosts, regional stations, and real signal
-  ranges.** The Freight Fate Roadhouse and the Night Line each have a live
-  host who breaks in between songs, and twelve fictional regional stations --
-  country, classic rock, and blues and soul, each with newly composed songs --
-  cover markets from Seattle to New Orleans. Stations behave like real FM
-  signals: full and clear near their market, thinner with static crackle at
-  the fringe, and gone past their range, with a spoken fallback to the
-  Roadhouse when the signal drops. Three more Radio Browser-checked AFN 360
-  channels (Global Fans, Global Holiday, and Mach 5) join the catalog for the
-  real-streams opt-in.
-- **Every career level band now has its own voice.** Levels 8 and 9 celebrate
-  the load-choice unlock, and level 30 gets distinct top-of-the-ladder
-  guidance for company drivers, leased-on owner-operators, and independent
-  authority instead of repeating the level-25 text.
-- **Haul length now progresses through the whole company arc.** Dispatch
-  distance caps used to grow 500 miles per level and blow past every real
-  U.S. route by level 12; they now grow gradually and top out at a real
-  coast-to-coast run, so longer freight keeps unlocking into the late teens.
-- **Old saves load cleanly on snapshot builds.** Careers saved by earlier
-  stable and nightly builds (back through the version 4 schema) load with
-  sensible defaults for everything added since -- business status, hours
-  clock, duty log, tire wear -- and a save touched by a newer snapshot no
-  longer crashes an older-schema load with unknown fields.
-- **Freight and route freedom is now earned, not given.** Reaching level 8 is
-  announced as the load-choice unlock, career guidance for levels 8 and 9
-  celebrates picking your own freight, and a declined load stays declined:
-  leaving the dispatch board and coming back re-offers it only after the
-  fresh candidates run out. New company hires
-  run the load and lane dispatch assigns: the dispatch board offers a single
-  assignment with accept or decline, declining draws another load but costs
-  reputation and comes from a small budget that refills at your next
-  promotion, and departure runs dispatch's routing with no route menu. Load
-  choice from the full board opens at level 8, and choosing your own routes
-  is the owner-operator and own-authority reward, matching how forced
-  dispatch works at real starter carriers.
-- **New-career first day has a stronger handoff.** After choosing a start and
-  home terminal, the terminal repeats a first-day briefing until the first
-  dispatch is accepted. It names the carrier or owner-operator setup, the
-  terminal, who pays equipment costs, and why the first dispatch matters.
-- **Career terminals now name the next practical step.** After the first
-  dispatch, the terminal adds a Career plan item and the dispatch board frames
-  realistic next moves such as probation loads, dispatcher trust, cash
-  reserves, owner-operator preparation, and direct-freight margins.
-- **CB chatter sounds more like drivers talking.** Road radio warnings now use
-  vague bear and work-zone enforcement chatter instead of pinpoint enforcement
-  language.
-- **Career progression now stretches to 30 levels.** The company-driver path
-  grows through senior company ranks before a level-18 leased-on
-  owner-operator gate, level-21 authority prep, level-25 own authority, and
-  established independent owner-operator ranks through level 30.
-- **Local turns now say and sound which way to steer.** Turn-by-turn cues on
-  local streets say "Turn left onto" or "Turn right onto" instead of just
-  "Turn onto", and each turn plays a soft chime from the side you are about
-  to steer toward: a falling chime on the left, a rising chime on the right,
-  and a single steady tone for continuing straight. Gentle bends where the
-  street just changes name are spoken as "Continue onto" so a turn cue always
-  means a real turn. Spoken GPS instructions with road names remain the main
-  guidance.
-- **The traffic light at the end of an exit ramp has its own sound.** A firm
-  low two-tone cue means the light is red and you should brake; a bright go
-  chime means green. You hear them when the light is first called out, when
-  it changes ahead of you, and when a wait at the stop bar ends, alongside
-  the spoken callouts.
-- **Loaded runs now pull out of the gate onto real streets.** Leaving a
-  shipper that has turn-level street data, the drive starts at the facility
-  gate and follows the same named streets you arrived by, with every turn
-  mirrored for the outbound direction, then merges up the on-ramp onto the
-  highway. A save made on the outbound streets resumes there, and facilities
-  without street data keep the usual highway start.
-- **Dispatch rows now preview trailer fit and take-home.** Company drivers keep
-  carrier-provided trailer support, while owner-operators and own-authority
-  drivers hear when a load needs a missing trailer program or owned trailer.
-  Rows also include a short estimated driver-pay or take-home preview before
-  pay advances, using the current business status and trailer setup.
-- **In-cab radio now follows the map.** Press M to toggle the radio, bracket
-  keys to tune receivable stations, Y for spoken station status, and Tab for a
-  Radio status screen. The checked-in catalog now includes regional public
-  stations across the game map plus multiple AFN choices. Streamer-safe mode
-  stays on by default, real public streams stay hidden unless explicitly opted
-  in, and external streams fall back safely until live stream playback is added.
-- **Highway exits now require a real setup.** X signals for the next announced
-  exit instead of magically taking it. The GPS now stages the maneuver, asks for
-  the right-side exit lane, checks that you are slowed to ramp speed at the
-  gore, and explains missed exits when you are too fast or in the wrong lane.
-- **Destination exits now follow the route setup.** The delivery ramp is taken
-  when speed, lane setup, and route intent are valid. Lane-drift modes require
-  a signal; with lane drift off, the GPS infers destination intent from the
-  route unless you explicitly cancel the signal.
-- **Merge and exit traffic now puts pressure on the maneuver.** The route can
-  call out traffic building near exits, highway merges, construction tapers,
-  and lead-traffic packs. Relaxed mode keeps those cues calmer, and missed
-  exits now distinguish being boxed out by traffic from simply missing the lane.
-- **Law enforcement now watches scales and unsafe trucks.** Open weigh stations
-  warn you before the scale; blow past one at highway speed and a scale officer
-  can light you up for a roadside enforcement stop. Severe visible truck damage
-  can also trigger a safety stop when you pass active enforcement. Both
-  stops use spoken warnings, X to signal, a full stop on the shoulder, an
-  on-the-spot fine, and a reputation hit.
-- **Running from a stop now escalates before it ends badly.** If you keep
-  driving with lights behind you, the game gives a failure-to-stop warning and
-  a final warning before spike strips. A felony stop now means a major fine,
-  reputation damage, truck damage, processing time, and cancellation of the
-  active loaded run, with a clear return to the terminal afterward.
-- **Local approaches now name real streets almost everywhere.** The road
-  snap used to let a nameless service way beat a named street a few meters
-  farther, so 39 percent of deadheads and facility approaches said "unnamed
-  public road." The snap now prefers the nearest named road inside the same
-  search radius, and the regenerated data names a real street for every
-  road-snapped target -- "Deadhead 2.1 miles on North Meridian Street"
-  instead of an unnamed mystery road.
-- **Tuning the radio no longer says the station name twice.** "Tuned to"
-  announcements already name the station, so the station line that follows
-  now skips the repeat, and the doubled period between them is gone.
-- **Route cues no longer say "In 0 miles."** When you are already on top of
-  a cue, the redundant advance warning is skipped; the arrival announcement
-  that follows carries the news. State-line and hours-of-service readouts
-  also gained a missing sentence break, so the duty window no longer runs
-  into the rest-stop advice.
-- **Construction-zone warnings give you room to react.** The warning now comes
-  earlier at highway speed and starts with "Brake now!", and troopers wait a
-  little longer inside the zone before clocking you, so normal braking from the
-  warning is fair and the emergency brake can still save a late reaction.
-- **Route chatter no longer stacks into a wall of speech.** Low-priority road
-  chatter now has a short spacing window and keeps only the newest pending cue,
-  so weather, toll, state-line, CB, and similar ambient lines do not all pile up
-  in one burst. Safety cues and actionable GPS distances still speak immediately.
-- **More freight destinations use real map-backed endpoints.** The offline map
-  data now includes source-backed freight facility endpoints where local OSM
-  data supports them, while facilities without a confident match stay clearly
-  marked as representative fallbacks. The game does not claim gates, yards,
-  docks, or truck-legal turn-by-turn facility routing from this layer yet.
-- **Some freight facility approaches now use real local road turns.** A bounded
-  Midwest map pass snaps 71 high-confidence source-backed freight facilities to
-  public-road context, with 6 long enough to use checked-in turn-level approach
-  geometry. Other facilities keep explicit fallback road context.
-- **Own-authority drivers can now buy trailers.** The garage sells dry van,
-  reefer, flatbed, and bulk trailers after own authority is active. Direct
-  freight rows say when an owned trailer fits, and settlement uses an
-  owned-trailer reserve instead of the trailer-program charge.
-- **Authority prep now leads to a first own-authority mode.** Qualified
-  owner-operators can pay the startup cost from Business status, unlock direct
-  freight on the dispatch board, and see insurance, compliance, trailer, truck,
-  and factoring costs in settlement without turning the game into a compliance
-  simulator.
-- **Trailer fit now matters for owner-operators.** Company drivers still use
-  carrier-provided trailers, while leased-on owner-operators start with dry van
-  access and can add reefer, flatbed, or bulk trailer programs from the garage.
-  Dispatch now tells you when specialty cargo needs a trailer program.
-- **Carrier choice now shapes the dispatch board.** Starter carriers still stay
-  grounded, but they now change how often you see short, regional, long-haul,
-  grain or bulk, and high-value jobs. Some training loads also have more
-  forgiving deadlines.
-- **Owner-operators now have an authority prep milestone.** Qualified
-  level-21 owner-operators can set aside a reserve from Business status before
-  taking the later own-authority step.
-- **New careers now offer grounded start choices.** Pick from several
-  fictional company-driver carriers with assigned equipment and modest wage or
-  freight tradeoffs, or choose a higher-risk owner-operator start with owned
-  starter equipment and operating costs active from day one.
-- **Busy corridors now feel busier beyond rush hour.** Random road-hazard checks
-  now use corridor busyness: dense metro/checkpoint interstates check sooner,
-  while sparse open-country corridors leave more breathing room. Relaxed mode
-  still keeps random hazards rare overall.
-- **Construction zones now stage the slowdown.** Work zones add a merge/flagger
-  taper before the barrels, with spoken guidance to slow first for the taper and
-  then for the lower work-zone limit. The taper shows up in speed-limit and
-  upcoming-road readouts, while ticket enforcement still waits until the main
-  work zone after the fair braking window.
-- **Loaded trucks pull away more like loaded trucks.** Low-speed drive force now
-  ramps in from a stop instead of hitting the full rolling traction cap
-  immediately, and the automatic holds the first few gears a little longer, so a
-  heavy tractor-trailer launch has weight without losing highway acceleration.
-- **Career progression now has a 30-level business arc.** New drivers start
-  with fictional carrier Northstar Freight Lines, move through company-driver
-  and owner-operator preparation ranks, and unlock the leased-on
-  owner-operator buy-in later in the ladder instead of jumping there at level 5.
-- **Company-driver equipment now reads like company equipment.** New drivers
-  use an assigned carrier tractor with carrier-paid fuel and routine repairs;
-  buying, switching, and upgrading owned tractors waits until the leased-on
-  owner-operator path.
-- **City service drives use sourced local service names across the map.** The
-  garage, freight/logistics office, and truck dealer drives now prefer
-  checked-in source-backed local service data for every supported city, with
-  representative fallbacks only where no suitable sourced role is available.
-- **Local service and facility drives use checked-in road context.** GPS and
-  route summaries now prefer source-backed nearby road names for city-service
-  drives and pickup/delivery facility approaches, while simplified fallbacks
-  remain clearly marked in the data.
-- **Some city service drives now have real local turns.** Where local OSM data
-  supports it, service drives can use checked-in street-by-street approach
-  geometry with spoken local turn cues. Other services and representative
-  facility approaches still fall back to simpler road context.
-- **Rush hour makes traffic feel busier.** Starting a trip during morning or
-  afternoon commute windows now raises modeled traffic density, especially near
-  metro/checkpoint corridors, and can slow lead traffic with commuter or merge
-  callouts.
-- **Loading, unloading, and pulling in now take a beat.** Pickup loading and
-  destination unloading now give a short spoken wait and advance the in-game
-  clock as on-duty work. Pulling into pickup gates, destination gates, and route
-  stops also gives the first menu option a moment to speak, so holding Down
-  Arrow to brake no longer skips past it.
-- **Coffee helps alertness a little longer.** Food-and-coffee stops now ease
-  fatigue more than before, but they still do not satisfy the 30-minute break
-  rule and remain much weaker than a full break or proper sleep.
-- **In-cab logbook.** The game now records a rolling Record of Duty Status as
-  you drive, fuel, repair, load, take breaks, sleep, or get placed out of
-  service. You can review it from the terminal or the driving status menu, and
-  traffic stops now read the recent logbook entries instead of only pretending
-  to check them.
-- **CB radio enforcement chatter.** CB chatter can now warn you a few miles
-  before drivers are talking about a bear ahead or enforcement near a work
-  zone, with a radio squelch cue and a clear "check your speed" line. The cue
-  stays secondary to hazards and construction warnings, and the U upcoming key
-  can review that chatter alongside stops, speed zones, and exits.
-
 ### Fixed
-
-- **City services no longer send you across the county.** Driving to a
-  city's freight market, garage, or truck dealer could route you ten to
-  thirty-five miles to a look-alike business in a neighboring town -- an
-  hour-plus round trip just to run an errand. Now every city's services
-  point at a real facility within a short drive, and hundreds more cities
-  carry real, source-backed services instead of a generic stand-in.
 
 - **A few routes now name the right highway.** On the runs from Denver to Salt
   Lake City, Santa Rosa to Stockton, and Clarksville to Huntsville, the game
@@ -2250,9 +2031,9 @@
 - **Dispatcher pay advances (no more soft lock).** A broke driver who can no
   longer afford fuel can now draw a cash advance against the next load -- from
   the terminal hub or any in-trip rest stop -- and it is repaid automatically
-  out of the next delivery settlement. The advance is offered only when cash is
-  nearly gone and is capped, so it stays a recovery line rather than free
-  money. A negative balance is no longer a dead end.
+  out of the next delivery settlement. The advance is offered only while cash
+  is low and is capped, so it stays a recovery line rather than free money. A
+  negative balance is no longer a dead end.
 - **Discord Rich Presence (optional).** When Discord is running, your profile
   can show broad game activity -- the main menu, the terminal, driving a route,
   resting, or delivering -- with high-level route and cargo context. Only

@@ -200,7 +200,7 @@ class MainMenuState(MenuState):
                 else f"{count} saved careers could not be read and were moved aside. "
             )
         self.ctx.say(
-            f"Welcome to Freight Fate, version {__version__}. "
+            f"Welcome to Freight Fate, version {updater.spoken_version(__version__)}. "
             f"An audio trucking adventure across America. {warning}"
             f"{self.current_text()}",
         )
@@ -678,6 +678,7 @@ class SettingsState(MenuState):
         ("Speech and weather", "speech"),
         ("Online", "online"),
         ("Updates", "updates"),
+        ("Problem reports", "reports"),
     )
 
     def build_items(self) -> list[MenuItem]:
@@ -720,6 +721,7 @@ class SettingsCategoryState(MenuState):
         "speech": "Speech and weather",
         "online": "Online",
         "updates": "Updates",
+        "reports": "Problem reports",
     }
 
     def __init__(self, ctx, category: str) -> None:
@@ -978,6 +980,17 @@ class SettingsCategoryState(MenuState):
                 ),
                 MenuItem("Back", self.go_back),
             ]
+        if self.category == "reports":
+            return [
+                MenuItem(
+                    "Where the game log is saved",
+                    self._say_log_location,
+                    help="The game keeps a log of the session, including "
+                    "everything it said out loud. Sending it with a bug "
+                    "report shows exactly what you heard.",
+                ),
+                MenuItem("Back", self.go_back),
+            ]
         return [
             MenuItem(
                 lambda: (
@@ -1053,6 +1066,9 @@ class SettingsCategoryState(MenuState):
                     self._toggle_discord_presence,
                 ],
                 "updates": [self._toggle_update_channel],
+                # Reading the log's location is an action, not a value to
+                # step through, so left/right does nothing on that row.
+                "reports": [lambda _d: None],
             }[self.category]
         if self.index < len(actions):
             actions[self.index](direction)
@@ -1632,6 +1648,52 @@ class SettingsCategoryState(MenuState):
 
     def _check_updates(self) -> None:
         self.ctx.push_state(UpdateCheckState(self.ctx))
+
+    def _log_location_lines(self) -> list[str]:
+        """Where this session's log is, in words a player can act on.
+
+        The log already records every spoken line, so it is the most useful
+        thing a player can attach to a bug report -- but nothing in the game
+        ever mentioned it, so nobody sent one. Read from the path logging
+        actually opened, so a folder the game could not write to reports
+        honestly instead of naming a file that is not there.
+        """
+        from ..app import active_log_path
+
+        path = active_log_path()
+        if path is None:
+            return [
+                "This copy of the game is not writing a log file. Packaged "
+                "downloads always write one; a copy run from the source code "
+                "prints to its console window instead."
+            ]
+        out = [
+            f"The game log is saved as {path}.",
+            "It records this session, including everything the game said out loud, "
+            "so attaching it to a bug report shows exactly what you heard.",
+        ]
+        previous = path.with_name(f"{path.stem}.prev{path.suffix}")
+        if previous.exists():
+            out.append(
+                f"The session before this one was kept beside it as {previous.name}, "
+                "so restarting the game to check something does not lose it."
+            )
+        out.append(
+            "Both files stay on this computer. The game never sends them anywhere, "
+            "so attach one yourself when you report a problem."
+        )
+        return out
+
+    def _say_log_location(self) -> None:
+        self.ctx.say(" ".join(self._log_location_lines()))
+
+    def lines(self) -> list[str]:
+        # Spoken-only information would be invisible to a low-vision player
+        # reading the window, so the log's location is mirrored on screen.
+        out = super().lines()
+        if self.category == "reports":
+            out += ["", *self._log_location_lines()]
+        return out
 
     def go_back(self) -> None:
         # Settings are saved as each change is made; just return to the

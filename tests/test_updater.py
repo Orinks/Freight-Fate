@@ -81,6 +81,19 @@ def test_parse_version_orders_semver():
     assert parse_version("garbage") == (0,)
 
 
+def test_parse_version_orders_dev_prereleases():
+    # A dev checkout sits between the previous stable and the release it
+    # works toward, so promoting dev to stable is offered as an update.
+    assert parse_version("1.8.6.dev0") < parse_version("v1.8.6")
+    assert parse_version("1.8.6.dev0") > parse_version("v1.8.5")
+    assert parse_version("1.8.6.dev1") > parse_version("1.8.6.dev0")
+
+
+def test_spoken_version_translates_dev_suffix():
+    assert updater.spoken_version("1.8.6.dev0") == "1.8.6 development build"
+    assert updater.spoken_version("1.8.5") == "1.8.5"
+
+
 def test_resolve_channel_prefers_explicit_setting():
     nightly = BuildInfo(tag="nightly-20260610", channel="dev", built_at="2026-06-10")
     assert resolve_channel("stable", nightly) == "stable"

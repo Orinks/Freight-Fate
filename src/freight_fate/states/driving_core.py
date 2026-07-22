@@ -145,6 +145,7 @@ AEB_BUDGET_MARGIN = 1.2  # emergency braking leads the physics budget by this fa
 AEB_LEAD_S = 0.5  # plus this flat lead, covering brake heat added during the stop
 RAMP_CREEP_MI = 0.04  # within ~200 ft of the bar, "creep"; farther is a drive
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
+RAMP_CRUISE_TARGET_MPH = 40.0  # leave control-loop headroom below the hard ramp limit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 # Ramp terminals: where the off-ramp meets the surface road there is usually
 # a light or a stop sign (diamond interchanges), occasionally free flow

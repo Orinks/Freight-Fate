@@ -11,6 +11,7 @@ from driving_feature_helpers import (
     mark_destination_exit_taken,
     open_driver_app,
     open_driver_apps,
+    open_limits,
     open_status_screen,
     quiet_trip,
     start_drive,
@@ -1662,7 +1663,7 @@ def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
         driving._check_destination_exit()
 
         assert driving._cruise_mph == 60.0
-        assert driving._cruise_exit_mph == 45.0
+        assert driving._cruise_exit_mph == 40.0
         message, interrupt = events[-1]
         assert interrupt is False
         assert "exit " in message
@@ -1671,17 +1672,135 @@ def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
         assert "slow down" in message.lower()
         assert "Press X" not in message
         assert "X takes" not in message
-        assert "Adaptive cruise easing to 45 miles per hour for the ramp" in message
+        assert "Adaptive cruise easing to 40 miles per hour for the ramp" in message
 
         driving._adjust_cruise(-5.0)
         assert said[-1] == (
-            "Open-road cruise target 55 miles per hour. Ramp approach target 45 miles per hour."
+            "Open-road cruise target 55 miles per hour. Ramp approach target 40 miles per hour."
         )
         for _tap in range(3):
             driving._adjust_cruise(-5.0)
         assert said[-1] == (
             "Open-road cruise target 40 miles per hour. Ramp approach target 40 miles per hour."
         )
+    finally:
+        app.shutdown()
+
+
+def test_a_zone_past_the_destination_exit_is_never_announced(monkeypatch):
+    """The facility gate covers the last half mile, but a delivery leaves the
+    highway at least a mile before that, so its 15 mph limit was announced and
+    then never took effect. Warn only for zones the truck will drive into."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        total = driving.trip.total_miles
+        exit_stop = driving._destination_exit_stop()
+        assert exit_stop is not None
+        gate = Zone(total - 0.5, total, 15.0, "facility gate")
+        assert gate.start_mi >= exit_stop.at_mi  # the delivery is gone by then
+        gate_cue = TripEvent(
+            TripEventKind.GPS_CUE,
+            "In 2 miles, facility gate ahead. Speed limit 15.",
+            {"zone": gate},
+        )
+
+        driving._handle_trip_event(gate_cue)
+        assert events == []
+
+        # A zone the truck really does reach still gets its heads-up. (On the
+        # 1.9 line the facility-family reasons are suppressed until the exit
+        # is taken and replayed on the street chain, so reachability is
+        # tested with a highway-side reason.)
+        reachable = Zone(exit_stop.at_mi - 2.0, exit_stop.at_mi - 1.0, 35.0, "construction")
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.GPS_CUE,
+                "In 2 miles, construction ahead. Speed limit 35.",
+                {"zone": reachable},
+            )
+        )
+        assert events[-1].startswith("In 2 miles, construction")
+
+        # A pickup leg drives all the way to the gate, so it keeps the warning.
+        driving.phase = "pickup"
+        events.clear()
+        driving._handle_trip_event(gate_cue)
+        assert events[-1].startswith("In 2 miles, facility gate")
+    finally:
+        app.shutdown()
+
+
+def test_taking_the_announced_exit_does_not_repeat_the_ramp_cap(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    said = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        monkeypatch.setattr(driving, "_upcoming_exit_stop", lambda: stop)
+        driving.trip.position_mi = stop.at_mi - 3.0
+        driving.truck.engine_on = True
+        driving.truck.velocity_mps = 60.0 / 2.23694
+        driving._engage_cruise(60.0)
+
+        driving._check_destination_exit()  # announces the exit and caps cruise
+        assert driving._cruise_exit_mph == 40.0
+        assert "Adaptive cruise easing to 40 miles per hour for the ramp" in said[-1]
+
+        said.clear()
+        driving._take_exit()
+
+        assert "Signal on for" in said[-1]
+        assert "Adaptive cruise" not in said[-1]  # already said, and already capped
+        assert driving._cruise_exit_mph == 40.0
+    finally:
+        app.shutdown()
+
+
+def test_signaling_for_an_exit_eases_cruise_to_ramp_speed(monkeypatch):
+    """Pressing X is the commitment to leave the highway, so adaptive cruise
+    has to come down to ramp speed with it -- for a truck stop exit just as
+    much as for the destination, and it has to let go again on a cancel."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import RoadStop
+
+    app = App()
+    said = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        open_limits(driving)
+        stop = RoadStop("Petro Knoxville", 40.0, "truck_stop", ("fuel", "sleep"), exit_label="")
+        monkeypatch.setattr(driving, "_upcoming_exit_stop", lambda: stop)
+        driving.trip.position_mi = 37.0
+        driving.truck.engine_on = True
+        driving.truck.velocity_mps = 65.0 / 2.23694
+        driving._engage_cruise(65.0)
+        said.clear()
+
+        driving._take_exit()
+
+        assert driving._cruise_exit_mph == 40.0
+        assert "Adaptive cruise easing to 40 miles per hour for the ramp" in said[-1]
+        # And cruise actually acts on it: throttle off, brakes on.
+        driving._update_cruise(0.5, braking=False, accelerating=False, clutch_disengaged=False)
+        assert driving.truck.throttle == 0.0
+        assert driving.truck.brake > 0.0
+
+        driving._take_exit()  # X again cancels
+        assert driving._cruise_exit_mph is None
     finally:
         app.shutdown()
 

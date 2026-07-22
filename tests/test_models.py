@@ -628,6 +628,21 @@ def test_unit_formatting():
     assert s.speed_text(60) == "97 kilometers per hour"
 
 
+def test_spoken_units_are_singular_at_one():
+    """Distances and speeds are read aloud, so exactly one is "1 mile", never
+    "1 miles". Anything that rounds to one counts, in both unit systems."""
+    s = Settings()
+    assert s.distance_text(1.0) == "1 mile"
+    assert s.distance_text(0.6) == "1 mile"  # rounds to one
+    assert s.distance_text(0.0) == "0 miles"
+    assert s.distance_text(2.0) == "2 miles"
+    assert s.speed_text(1.0) == "1 mile per hour"
+    s.imperial_units = False
+    assert s.distance_text(0.62) == "1 kilometer"
+    assert s.distance_text(1.0) == "2 kilometers"
+    assert s.speed_text(0.62) == "1 kilometer per hour"
+
+
 def test_job_spoken_names_always_carry_the_state(world):
     """Dispatch offers name places a player may never have heard of; the
     state must always ride along ("McCall, Idaho"), not only when two
