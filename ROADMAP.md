@@ -942,13 +942,27 @@ section below and the Unreleased changelog; the release-line view:
       geo-blocks those mounts outside overseas military regions (HTTP 403
       from US IPs on every URL form, HLS included); revisit only if AFN
       opens access.
-- [ ] **Regional stream gaps to re-sweep.** Community stations KDHX
-      (St. Louis) and KPFT (Houston) had no working stream endpoint (the
-      markets are covered by KWMU and KUHF instead); the Rio Grande Valley
-      (Brownsville, McAllen, Laredo), Savannah (GPB not listed on Radio
-      Browser), and Amarillo still have no receivable real station -- try
-      again in a later sweep. WABE Atlanta joined the dark list
-      2026-07-14 (every known mount refused; supported:false with notes).
+- [x] **Community/college/NPR coverage sweep (2026-07-22).** Fifty-one
+      real stations joined the dial, each gated on the BASS live check,
+      lifting real-station reach from 78% to 93% of the 623 dispatchable
+      cities. KPFT (Houston) came back with its Pacifica mount; the Rio
+      Grande Valley (UTRGV), Savannah (GPB WSVH), and Amarillo (KACV) are
+      on the air; WFMU and KABF joined by name; and public-radio networks
+      filled the Iowa corridor, the Plains, the Rockies, the Southeast
+      coast, and the Florida panhandle. jpr-redding was repointed to JPR's
+      new Zeno mount. Honest remaining gaps: WABE Atlanta (every mount,
+      including its Zeno relay, still refuses BASS -- supported:false with
+      notes), KDHX St. Louis (defunct on air; 88.1 sold, no successor
+      stream yet; market covered by KWMU), WFSU Tallahassee (mount refuses
+      BASS), the far Montana Hi-Line, the Texas border west of the Valley,
+      and interior US-50 Nevada -- genuinely thin country, left dark rather
+      than faked.
+- [x] **Fictional call signs de-squatted (2026-07-22).** An FCC license
+      audit found eleven of the twelve invented regional call signs
+      collide with real licensed stations (only KRWL was clear). Each was
+      renamed to an FCC-unassigned sign with the brand and dial position
+      unchanged; the old->new list is filed for Josh's final word before
+      the release cut.
 - [x] **Full music rotations for the fictional stations.** A 52-track
       Suno-composed batch (via the Zero CLI) grows the format pools to
       radio-scale: country 15 songs, classic rock 17 (including a Saltwake
