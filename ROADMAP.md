@@ -215,6 +215,30 @@ terminal becomes the anchor of that week instead of a spawn point.
       Note for the pricing pass: `$0.00` events are NOT bugs. They are the
       documented ticket-system entry markers (see `docs/route-stop-data.md`)
       that settle at the exit gantry.
+      **State 2026-07-21: groundwork landed, data NOT yet baked.** The old
+      46 estimated events are gone; the world currently carries ZERO toll
+      events, only per-leg `tollway_detected` scan flags. `tools/toll_scan.py`
+      (evidence scanner), `tools/toll_rates.py` (the researched 5-axle
+      tariff table), and `tools/toll_review_sheet.py` all shipped in
+      fcd846a; the remaining work is reviewing the sheet and running the
+      bake. Until then the game bills no tolls at all -- upstream's
+      "prices seem off" report (Josh, 2026-07-21) is right on both lines.
+- [ ] **Interactive toll plazas: stop, window down, pay cash (Josh ask,
+      owner approved, 2026-07-21).** Real toll points split two ways and
+      the bake should record which is which per event: all-electronic
+      gantries have nothing to stop at -- no transponder there means
+      pay-by-plate at the higher stored rate, spoken honestly as you pass
+      -- while conventional plazas with cash lanes get the mechanic: an
+      approach call ("Toll plaza ahead, cash lanes right"), X to take the
+      cash lane (the same verb as exits and pull-overs), then the ramp
+      stop-bar machinery runs the booth -- rolling countdown, the
+      parking-sensor tick to the window, stop, window down, the spoken
+      amount, pay, barrier, go. Costs real clock time versus the
+      transponder lane. Rides the stoppable-stop spine with chain-up
+      areas and Big Buck's; per-operator cash acceptance is researchable
+      in the same pass that bakes the tariffs. Josh's in-progress traffic
+      and API work could someday feed cash-lane queue lengths as an
+      optional live layer (determinism boundary applies).
 - [ ] **More first-party truck-stop locators, and public parking feeds
       (owner approved, 2026-07-19).** `curate_route_pois.py` queries only
       Love's and Pilot/Flying J today (730 + 877 locations). Pointed at the
