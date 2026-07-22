@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from enrich_routes_base import *
+from terrain_rules import RANK, terrain_for
 
 
 _TRUCK_POI_KEYWORDS = (
@@ -585,11 +586,14 @@ def _grade_segments(
         grades.append(grade)
     avg = sum(grades) / len(grades)
     max_abs = max(abs(grade) for grade in grades)
+    # Relief in context, not the bare steepest number: a flat leg with a lone
+    # 3% blip carries almost no relief and stays flat, where a real climb does.
+    relief_ft = (max(elevations_ft) - min(elevations_ft)) if elevations_ft else 0.0
+    derived = terrain_for(max_abs, relief_ft)
+    # Never quietly downgrade a hand-set curated label; only ever firm it up.
     terrain = str(leg.get("terrain", "flat"))
-    if max_abs > 3.0:
-        terrain = "mountain"
-    elif max_abs > 0.8 and terrain == "flat":
-        terrain = "hills"
+    if RANK[derived] > RANK[terrain]:
+        terrain = derived
     return [
         {
             "start_mi": 0.0,

@@ -2,6 +2,12 @@
 from __future__ import annotations
 
 from enrich_routes_base import *
+from terrain_rules import terrain_for
+
+# +/- window over the sampled elevation profile for the relief context that
+# tells a steep pitch on a mountain (real relief nearby) from a lone creek-
+# crossing roller on the flat (none). Matches the offline reclassifier.
+TERRAIN_RELIEF_WINDOW_MI = 5.0
 
 
 def ors_api_key() -> str | None:
@@ -303,12 +309,17 @@ def _ors_sample_count(miles: float) -> int:
     return max(5, min(25, int(miles // 30) + 2))
 
 
-def _terrain_for_grade(abs_grade_pct: float) -> str:
-    if abs_grade_pct > 3.0:
-        return "mountain"
-    if abs_grade_pct > 0.8:
-        return "hills"
-    return "flat"
+def _window_relief_ft(
+    samples: list[dict[str, float]], elevations_ft: list[float], lo_mi: float, hi_mi: float
+) -> float:
+    """Rise-and-fall of the ground within [lo_mi, hi_mi] of the sampled profile.
+
+    An interval's own endpoints always fall in its window, so even a sparsely
+    sampled leg gets a real relief number (a 20-mile bin climbing 5,000 ft
+    reads its 5,000 ft), while a dense one gets true local relief.
+    """
+    elevs = [e for s, e in zip(samples, elevations_ft, strict=False) if lo_mi <= s["at_mi"] <= hi_mi]
+    return (max(elevs) - min(elevs)) if elevs else 0.0
 
 
 def grade_segments_from_samples(
@@ -330,7 +341,13 @@ def grade_segments_from_samples(
     ):
         run_mi = max(0.1, end["at_mi"] - start["at_mi"])
         grade = (elev_b - elev_a) / (run_mi * 5280.0) * 100.0
-        intervals.append((start["at_mi"], end["at_mi"], grade, _terrain_for_grade(abs(grade))))
+        relief = _window_relief_ft(
+            samples,
+            elevations_ft,
+            start["at_mi"] - TERRAIN_RELIEF_WINDOW_MI,
+            end["at_mi"] + TERRAIN_RELIEF_WINDOW_MI,
+        )
+        intervals.append((start["at_mi"], end["at_mi"], grade, terrain_for(abs(grade), relief)))
     segments: list[dict[str, Any]] = []
     seg_start, seg_end, grades, terrain = (
         intervals[0][0],
