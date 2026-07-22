@@ -878,17 +878,31 @@ class DrivingUpdateMixin:
         # -- ease the cap back to full over SHIFT_LOAD_RECOVERY_S along the
         # recovery curve, so the return "under load" is a shaped glide rather
         # than a single-frame snap.
-        if t.transmission.automatic and t.transmission.shifting:
+        # A real shift is a gap and a re-entry: the unloaded engine falls
+        # away, then SOUNDS again at the newly engaged rpm -- never a loaded
+        # glissando sliding down through the change (the formant smear the
+        # owner heard). Automatic: hold the voice at the pre-shift rpm
+        # through the torque interrupt and jump at engagement. Manual: the
+        # player owns the revs while the clutch is out (blips and
+        # rev-matching stay audible, and the physics already sinks toward
+        # idle), so only the load ducks -- the engine falls back unloaded
+        # and swells back in when the clutch hooks up.
+        manual_clutch_out = not t.transmission.automatic and t.transmission.clutch > 0.5
+        if (t.transmission.automatic and t.transmission.shifting) or manual_clutch_out:
             self._shift_recover_t = 0.0
             cap = SHIFT_LOAD_CAP
+            if t.transmission.automatic and self._shift_hold_rpm is None:
+                self._shift_hold_rpm = t.rpm
         elif self._shift_recover_t < 1.0:
             step = dt / SHIFT_LOAD_RECOVERY_S if SHIFT_LOAD_RECOVERY_S > 0 else 1.0
             self._shift_recover_t = min(1.0, self._shift_recover_t + step)
             cap = SHIFT_LOAD_CAP + (1.0 - SHIFT_LOAD_CAP) * _shift_recovery_curve(
                 self._shift_recover_t
             )
+            self._shift_hold_rpm = None  # shift done: re-enter at the engaged rpm
         else:
             cap = 1.0
+            self._shift_hold_rpm = None
         target_load = max(0.0, min(1.0, t.throttle))
         if dt <= 0.0:
             # Direct callers and tests use a zero-length update to request an
@@ -898,7 +912,9 @@ class DrivingUpdateMixin:
             blend = min(1.0, dt / ENGINE_LOAD_SMOOTH_S)
             self._engine_audio_throttle += (target_load - self._engine_audio_throttle) * blend
         engine_load = min(self._engine_audio_throttle, cap)
-        audio.set_engine_rpm(t.rpm, engine_load)
+        audio.set_engine_rpm(
+            t.rpm if self._shift_hold_rpm is None else self._shift_hold_rpm, engine_load
+        )
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:
             if not self._reverse_cue_active:
