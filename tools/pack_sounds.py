@@ -18,6 +18,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = ROOT / "src"
 SOUNDS_DIR = SRC_DIR / "freight_fate" / "assets" / "sounds"
+# Licensed overlay (gitignored): packed over the committed tree when present.
+LICENSED_DIR = SRC_DIR / "freight_fate" / "assets" / "sounds-licensed"
 DEFAULT_OUTPUT = ROOT / "build" / "sounds.pak"
 
 
@@ -33,7 +35,7 @@ def _load_assets_pack():
 
 def pack(sounds_dir: Path = SOUNDS_DIR, output: Path = DEFAULT_OUTPUT) -> Path:
     """Write the sound pack and return its path."""
-    return _load_assets_pack().write_pack(sounds_dir, output)
+    return _load_assets_pack().write_pack(sounds_dir, output, overlay_dir=LICENSED_DIR)
 
 
 def main() -> int:

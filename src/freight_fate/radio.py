@@ -5,7 +5,9 @@ from __future__ import annotations
 import contextlib
 import json
 import math
+import re
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Protocol
 
 from .data.data_resources import read_data_text
@@ -14,6 +16,12 @@ SAFE_ROUTE_PLAYLIST = "route_playlist"
 SAFE_FALLBACK_STATION_ID = "ff-safety-satellite"
 RADIO_CATALOG_RESOURCE = "radio_catalog.json"
 EARTH_RADIUS_MI = 3958.8
+# Personal M3U playlists: files dropped into the Playlists folder become
+# stations on the dial. A folder, not a file picker, on purpose -- screen
+# reader users manage folders in their file manager far more comfortably
+# than in any in-game browse dialog.
+PERSONAL_PLAYLIST_SOURCE_TYPE = "playlist"
+PLAYLISTS_DIR_NAME = "Playlists"
 
 
 @dataclass(frozen=True)
@@ -42,6 +50,9 @@ class RadioStation:
     playlist: str = ""  # music.STATION_PLAYLISTS pool for built-in rotation
     host: str = ""  # music.STATION_HOST_SEGMENTS voice between songs
     notes: str = ""
+    # Personal playlist stations only: the resolved media file paths from the
+    # player's M3U file, in playlist order.
+    playlist_files: tuple[str, ...] = ()
 
     @property
     def display_name(self) -> str:
@@ -143,6 +154,119 @@ def _optional_float(value) -> float | None:
 
 
 DEFAULT_RADIO_CATALOG: tuple[RadioStation, ...] = load_radio_catalog()
+
+
+def personal_playlists_dir() -> Path:
+    from .models.profile import data_dir
+
+    return data_dir() / PLAYLISTS_DIR_NAME
+
+
+def _parse_m3u(path: Path) -> tuple[tuple[str, ...], str]:
+    """Media file paths and the optional #PLAYLIST title from one M3U file.
+
+    Relative entries resolve against the M3U's own folder, so a playlist
+    exported next to its music keeps working when the folder moves. Stream
+    URLs are skipped: internet radio stays in the curated catalog, where it
+    carries source notes and streamer-safety review."""
+    try:
+        text = path.read_text(encoding="utf-8-sig", errors="replace")
+    except OSError:
+        return (), ""
+    title = ""
+    files: list[str] = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        if line.startswith("#"):
+            if line.upper().startswith("#PLAYLIST:"):
+                title = line.split(":", 1)[1].strip()
+            continue
+        if line.lower().startswith(("http://", "https://")):
+            continue
+        entry = Path(line)
+        if not entry.is_absolute():
+            entry = path.parent / entry
+        files.append(str(entry))
+    return tuple(files), title
+
+
+def load_personal_playlists(directory: Path | None = None) -> tuple[RadioStation, ...]:
+    """One dial station per M3U file in the player's Playlists folder.
+
+    Creating the folder here is the feature's discoverability: an empty
+    Playlists directory next to the saves invites dropping files in.
+    Missing media is skipped at play time, not here -- a NAS that is asleep
+    when the drive starts should not erase the station."""
+    base = directory if directory is not None else personal_playlists_dir()
+    try:
+        base.mkdir(parents=True, exist_ok=True)
+        candidates = sorted(base.glob("*.m3u")) + sorted(base.glob("*.m3u8"))
+    except OSError:
+        return ()
+    stations: list[RadioStation] = []
+    used: set[str] = set()
+    for path in candidates:
+        files, title = _parse_m3u(path)
+        if not files:
+            continue
+        name = title or path.stem
+        slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "playlist"
+        sid = f"playlist-{slug}"
+        n = 2
+        while sid in used:
+            sid = f"playlist-{slug}-{n}"
+            n += 1
+        used.add(sid)
+        stations.append(
+            RadioStation(
+                id=sid,
+                name=name,
+                call_sign="Playlist",
+                format="personal playlist",
+                source=f"your playlist file {path.name}",
+                source_type=PERSONAL_PLAYLIST_SOURCE_TYPE,
+                # The streamer-safe promise is that nothing licensed can
+                # reach the speakers; the game cannot vouch for personal
+                # media, so these ride the same gate as real streams.
+                safe_for_streaming=False,
+                always_available=True,
+                playlist_files=files,
+            )
+        )
+    return tuple(stations)
+
+
+def _dial_group(station: RadioStation) -> int:
+    """Dial order and category identity, shared by sort and category jump."""
+    if station.id == SAFE_ROUTE_PLAYLIST:
+        return 0
+    if station.source_type == "built_in":
+        return 1
+    if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
+        return 2
+    if station.fallback:
+        return 6
+    if station.source_type in {"local", "regional"}:
+        return 3
+    if station.source_type == "afn":
+        return 4
+    if station.source_type == "satellite":
+        return 5
+    return 7
+
+
+DIAL_CATEGORY_NAMES = {
+    0: "Route playlist",
+    1: "Freight Fate stations",
+    2: "Your playlists",
+    3: "Terrestrial",
+    4: "AFN",
+    5: "Satellite",
+    6: "Fallback",
+    7: "Other stations",
+}
 
 
 def station_distance_miles(
@@ -272,6 +396,7 @@ class RadioState:
     @classmethod
     def from_settings(cls, settings) -> RadioState:
         return cls(
+            catalog=DEFAULT_RADIO_CATALOG + load_personal_playlists(),
             enabled=bool(getattr(settings, "radio_enabled", True)),
             station_id=str(getattr(settings, "radio_station_id", SAFE_ROUTE_PLAYLIST)),
             volume=float(getattr(settings, "radio_volume", 0.25)),
@@ -400,6 +525,41 @@ class RadioState:
             )
         return self.play(backend, prefix=f"Tuned to {reception.station.display_name}.")
 
+    def tune_category(
+        self, direction: int, backend: RadioPlaybackBackend | None = None
+    ) -> RadioAction:
+        """Jump to the first station of the previous/next dial category.
+
+        Twenty-five AFN entries in a row buried the terrestrial section for
+        anyone tuning linearly (owner, 2026-07-20); this is the escape. Only
+        categories with a receivable station exist to jump to, and the spoken
+        line leads with the category so the landing is oriented."""
+        receptions = self.receivable_stations()
+        groups: list[int] = []
+        for reception in receptions:
+            group = _dial_group(reception.station)
+            if group not in groups:
+                groups.append(group)
+        current_group = _dial_group(self.current_station())
+        if current_group in groups:
+            index = groups.index(current_group)
+            target = groups[(index + direction) % len(groups)]
+        else:
+            target = groups[0]
+        reception = next(r for r in receptions if _dial_group(r.station) == target)
+        self.station_id = reception.station.id
+        label = DIAL_CATEGORY_NAMES.get(target, "Radio")
+        if not self.enabled:
+            return RadioAction(
+                f"Radio off. {label}. Selected {self._station_phrase(reception)}.",
+                reception.station,
+                enabled=False,
+                reception=reception,
+            )
+        return self.play(
+            backend, prefix=f"{label}. Tuned to {reception.station.display_name}."
+        )
+
     def select_station(
         self,
         station_id: str,
@@ -461,6 +621,11 @@ class RadioState:
     def _station_allowed(self, station: RadioStation) -> bool:
         if not station.supported:
             return False
+        if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
+            # Personal media rides the streamer-safe gate like real streams
+            # do (the game cannot vouch for its licensing), but not the
+            # real-streams switch -- your own files need no internet.
+            return not self.streamer_safe
         if not station.real_stream:
             return True
         return self.real_streams_enabled and not self.streamer_safe
@@ -509,19 +674,7 @@ class RadioState:
     @staticmethod
     def _reception_sort_key(reception: RadioReception) -> tuple[int, str]:
         station = reception.station
-        if station.id == SAFE_ROUTE_PLAYLIST:
-            group = 0
-        elif station.source_type == "built_in":
-            group = 1
-        elif station.fallback:
-            group = 4
-        elif station.source_type in {"local", "regional"}:
-            group = 2
-        elif station.satellite:
-            group = 3
-        else:
-            group = 5
-        return (group, station.call_sign)
+        return (_dial_group(station), station.call_sign)
 
     @staticmethod
     def _stop(backend: RadioPlaybackBackend | None) -> None:

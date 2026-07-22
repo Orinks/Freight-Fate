@@ -50,6 +50,51 @@ def test_cruise_control_holds_the_set_speed(monkeypatch):
         app.shutdown()
 
 
+def test_parked_cruise_button_latches_high_idle(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.vehicle import HIGH_IDLE_DEFAULT_RPM, HIGH_IDLE_STEP_RPM
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    spoken = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say", lambda text, **k: spoken.append(text))
+        t = driving.truck
+        t.set_air_ready(parking_brake=True)
+        t.start_engine()
+        t.velocity_mps = 0.0
+
+        driving.handle_event(key_event(pygame.K_k))  # parked: fast-idle switch
+        assert t.high_idle_rpm == HIGH_IDLE_DEFAULT_RPM
+        assert driving._cruise_mph is None  # not a cruise session
+        assert any("High idle" in text for text in spoken)
+
+        driving.handle_event(key_event(pygame.K_KP_PLUS))
+        assert t.high_idle_rpm == HIGH_IDLE_DEFAULT_RPM + HIGH_IDLE_STEP_RPM
+        driving.handle_event(key_event(pygame.K_KP_MINUS))
+        assert t.high_idle_rpm == HIGH_IDLE_DEFAULT_RPM
+
+        driving.handle_event(key_event(pygame.K_k))  # press again: off
+        assert t.high_idle_rpm is None
+        assert any("High idle off" in text for text in spoken)
+
+        # Latch it, then release the parking brake: the sim cancels it.
+        driving.handle_event(key_event(pygame.K_k))
+        assert t.high_idle_rpm is not None
+        t.release_parking_brake()
+        driving.update(1 / 60)
+        assert t.high_idle_rpm is None
+    finally:
+        app.shutdown()
+
+
 def test_players_brake_press_cancels_cruise(monkeypatch):
     from freight_fate.app import App
 
@@ -407,7 +452,7 @@ def test_automatic_shift_uses_shift_cue_not_brake_air(monkeypatch):
         quiet_trip(driving)
         monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
         monkeypatch.setattr(
-            app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume))
+            app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
         )
         driving.truck.start_engine()
         driving.truck.transmission.gear = 3
@@ -415,7 +460,15 @@ def test_automatic_shift_uses_shift_cue_not_brake_air(monkeypatch):
 
         driving.update(0.0)
 
-        assert ("vehicle/gear_shift", 0.65) in played
+        # The shift cue is the auto-shift bank when the licensed cuts are
+        # installed (volume carries a small per-trigger jitter around 0.65),
+        # the classic gear_shift on a clean clone.
+        shifts = [
+            (key, vol)
+            for key, vol in played
+            if key == "vehicle/gear_shift" or key.startswith("vehicle/shift_auto")
+        ]
+        assert shifts and all(0.5 <= vol <= 0.8 for _key, vol in shifts)
         assert all(key != "vehicle/brake_air" for key, _volume in played)
     finally:
         app.shutdown()

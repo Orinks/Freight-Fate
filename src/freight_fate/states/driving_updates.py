@@ -1,6 +1,8 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from .. import engine_audio
+from ..audio import CH_AIR, CH_BRAKE
 from ..audio_fades import curve as _resolve_curve
 from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
@@ -127,7 +129,7 @@ class DrivingUpdateMixin:
         if key_up and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
-                self.ctx.say_event("Engine brake off.", interrupt=False)
+                self.ctx.say_event("Jake off.", interrupt=False)
             t.throttle = min(1.0, t.throttle + ramp)
         elif backing:
             t.throttle = min(0.45, t.throttle + ramp)
@@ -136,7 +138,7 @@ class DrivingUpdateMixin:
         if pad_throttle > 0.05 and not backing and not t.transmission.in_reverse:
             if t.engine_brake:
                 t.engine_brake = False
-                self.ctx.say_event("Engine brake off.", interrupt=False)
+                self.ctx.say_event("Jake off.", interrupt=False)
             t.throttle = max(t.throttle, pad_throttle)
         # Keyboard ramps the brake up and down; the analog trigger sets a direct
         # held floor on top of that.
@@ -158,7 +160,11 @@ class DrivingUpdateMixin:
         if emergency:
             # no ramp: slams to full application instantly, plus spring brakes
             if not t.emergency_brake and abs(t.velocity_mps) > 1:
-                self.ctx.audio.play("vehicle/brake_air", volume=1.0)
+                if self.ctx.audio.has_asset("vehicle/ebrake"):
+                    # The licensed cut: one big sustained air event.
+                    self.ctx.audio.play("vehicle/ebrake", volume=0.9)
+                else:
+                    self.ctx.audio.play("vehicle/brake_air", volume=1.0)
             t.throttle = 0.0
             t.brake = 1.0
         t.emergency_brake = emergency
@@ -169,16 +175,38 @@ class DrivingUpdateMixin:
         # drive, and that must not read as a hard stop and buzz the whole time.
         if t.velocity_mps > 1 and (emergency or t.brake >= 0.85):
             self.ctx.controller.rumble.hard_brake(1.0 if emergency else t.brake)
-        # Air hiss only on the rising edge of applying the brake. A hysteresis
-        # flag (arm at 0.05, release below 0.02) keeps a steady analog trigger --
-        # or a held key -- from retriggering the sound frame after frame. The
-        # emergency brake plays its own louder cue, so it only arms the flag.
+        # Brake sounds ride the application edges. A hysteresis flag (arm at
+        # 0.05, release below 0.02) keeps a steady analog trigger -- or a held
+        # key -- from retriggering frame after frame. The emergency brake
+        # plays its own louder cue, so it only arms the flag.
+        # PRESS: the mechanical clunk of the valve, leveled by press force
+        # (locked spec 2026-07-21; the classic air chirp is the fallback).
+        # RELEASE: the air bleeding back out -- the hiss bed held for a
+        # length, and at a level, set by how hard the brakes were applied.
+        # The release plays at any speed: braking to a halt then letting off
+        # is exactly when a real rig gives its loudest pssht.
         if t.brake >= 0.05:
             if not self._brake_air_hissed and not emergency and abs(t.velocity_mps) > 1:
-                self.ctx.audio.play("vehicle/brake_air", volume=0.6)
+                force = max(0.0, min(1.0, t.brake))
+                self.ctx.audio.play_bank(
+                    "vehicle/brake_clunk", "vehicle/brake_air", volume=0.35 + 0.35 * force
+                )
             self._brake_air_hissed = True
+            self._brake_peak_application = max(self._brake_peak_application, t.brake)
         elif t.brake < 0.02:
+            peak = self._brake_peak_application
+            if (
+                self._brake_air_hissed
+                and peak > 0.0
+                and not emergency
+                and self.ctx.audio.has_asset("vehicle/brake_hiss_bed")
+            ):
+                self.ctx.audio.start_loop(
+                    CH_BRAKE, "vehicle/brake_hiss_bed", volume=0.30 + 0.40 * peak, fade_ms=0
+                )
+                self.ctx.audio.stop_loop(CH_BRAKE, fade_ms=int(160 + 800 * peak))
             self._brake_air_hissed = False
+            self._brake_peak_application = 0.0
         desired_automatic = self.ctx.settings.automatic_transmission
         if t.transmission.automatic != desired_automatic:
             t.transmission.automatic = desired_automatic
@@ -200,7 +228,7 @@ class DrivingUpdateMixin:
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
             if new_gear is not None:
-                self.ctx.audio.play("vehicle/gear_shift", volume=0.65)
+                self.ctx.audio.play_bank("vehicle/shift_auto", "vehicle/gear_shift", volume=0.65)
 
         was_on = t.engine_on
         was_air_ready = t.air_ready
@@ -457,7 +485,7 @@ class DrivingUpdateMixin:
                 self._direction_armed = ""
                 self._direction_hold_s = 0.0
                 tr._shift_timer = 0.0
-                self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
+                self.ctx.audio.play_bank("vehicle/shift_manual", "vehicle/gear_shift", volume=0.55)
                 if want == "forward":
                     tr.gear = 1
                     self._set_status("Forward gear selected.")
@@ -870,6 +898,17 @@ class DrivingUpdateMixin:
         elif self._reverse_cue_active:
             audio.reverse_stop()
             self._reverse_cue_active = False
+        # Air-fill overlay: the compressor charging the tanks below governor
+        # release, whatever idle or drive state plays over it. Ends -- with the
+        # fast idle settling -- at the park_idle -> ready_idle flip.
+        voice = engine_audio.classify(engine_audio.reading_from_truck(t))
+        if t.engine_on and voice.pressurizing:
+            if not self._air_cue_active:
+                audio.start_loop(CH_AIR, "vehicle/air_pressurize", fade_ms=400)
+                self._air_cue_active = True
+        elif self._air_cue_active:
+            audio.stop_loop(CH_AIR, fade_ms=700)
+            self._air_cue_active = False
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)
@@ -971,6 +1010,9 @@ class DrivingUpdateMixin:
         station = self.radio.current_station()
         if station.real_stream or station.fallback:
             return
+        if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
+            self._update_playlist_playback(station, dt)
+            return
         if not station.playlist and not station.track_key:
             return
         if station.id != self._radio_station_id or (
@@ -1006,6 +1048,58 @@ class DrivingUpdateMixin:
     def _play_station_track(self, fade_ms: int) -> None:
         key = self._radio_playlist[self._radio_track_index % len(self._radio_playlist)]
         self.ctx.audio.play_music(key, fade_ms=fade_ms)
+
+    def _start_playlist_station(
+        self, station, fade_ms: int = 900, advance: bool = False
+    ) -> None:
+        """Play a personal M3U station from its remembered position.
+
+        Unreadable entries are skipped at play time rather than pruned at
+        load: a NAS that was asleep when the drive started should not erase
+        the tracks behind it. Raises RadioPlaybackError only when nothing in
+        the whole playlist opens, so the radio's existing fallback machinery
+        speaks the failure the same way it does a dead stream."""
+        files = station.playlist_files
+        if not files:
+            raise RadioPlaybackError("playlist is empty")
+        start = self._playlist_positions.get(station.id, 0)
+        if advance:
+            start = (start + 1) % len(files)
+        for attempt in range(len(files)):
+            index = (start + attempt) % len(files)
+            try:
+                self.ctx.audio.play_music_file(files[index], fade_ms=fade_ms)
+            except RuntimeError:
+                continue
+            self._playlist_positions[station.id] = index
+            self._radio_station_id = station.id
+            self._radio_playlist = []
+            self._radio_hosts = []
+            # The fade-in window would read as "finished" to music_playing
+            # on some backends; hold the advance check off briefly.
+            self._playlist_wait_s = 1.5
+            return
+        raise RadioPlaybackError("no playable file in this playlist")
+
+    def _update_playlist_playback(self, station, dt: float) -> None:
+        """Advance a personal playlist when the current file ends."""
+        if station.id != self._radio_station_id:
+            self._playlist_wait_s = 0.0
+            try:
+                self._start_playlist_station(station, fade_ms=2500)
+            except RadioPlaybackError:
+                self.ctx.audio.stop_music(600)
+                self._radio_station_id = station.id
+                self._playlist_wait_s = 30.0  # retry the folder occasionally
+            return
+        self._playlist_wait_s = max(0.0, self._playlist_wait_s - max(0.0, dt))
+        if self._playlist_wait_s > 0.0 or self.ctx.audio.music_playing():
+            return
+        try:
+            self._start_playlist_station(station, fade_ms=1200, advance=True)
+        except RadioPlaybackError:
+            self.ctx.audio.stop_music(600)
+            self._playlist_wait_s = 30.0
 
     def _sync_radio_settings(self) -> None:
         station_before = self.radio.station_id
@@ -1043,6 +1137,11 @@ class DrivingUpdateMixin:
     def _tune_radio(self, direction: int) -> None:
         self._sync_radio_settings()
         action = self.radio.tune(direction, self._radio_backend)
+        self._finish_radio_action(action)
+
+    def _jump_radio_category(self, direction: int) -> None:
+        self._sync_radio_settings()
+        action = self.radio.tune_category(direction, self._radio_backend)
         self._finish_radio_action(action)
 
     def _speak_radio_status(self) -> None:

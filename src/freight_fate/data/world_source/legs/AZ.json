@@ -517,11 +517,83 @@
         ],
         "landmarks": [
           {
+            "name": "Waddell",
+            "at_mi": 17.0,
+            "off_mi": 7.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150947217, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Waddell"
+          },
+          {
+            "name": "Litchfield Park",
+            "at_mi": 21.9,
+            "off_mi": 2.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150979227, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Litchfield Park"
+          },
+          {
             "name": "Agua Fria River",
             "category": "river",
             "kind": "point",
             "at_mi": 24.3,
             "spoken": "Crossing the Agua Fria River"
+          },
+          {
+            "name": "El Mirage",
+            "at_mi": 25.4,
+            "off_mi": 10.63,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150951742, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing El Mirage"
+          },
+          {
+            "name": "Youngtown",
+            "at_mi": 25.5,
+            "off_mi": 9.18,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150949887, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Youngtown"
+          },
+          {
+            "name": "Sun City",
+            "at_mi": 26.4,
+            "off_mi": 11.59,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150974590, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sun City"
+          },
+          {
+            "name": "Tolleson",
+            "at_mi": 27.5,
+            "off_mi": 0.83,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 331862912, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tolleson"
+          },
+          {
+            "name": "Paradise Valley",
+            "at_mi": 38.6,
+            "off_mi": 8.24,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150940217, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Paradise Valley"
+          },
+          {
+            "name": "Guadalupe",
+            "at_mi": 39.5,
+            "off_mi": 8.35,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150970836, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Guadalupe"
           }
         ],
         "speed_limits": [
@@ -1274,6 +1346,60 @@
         ],
         "landmarks": [
           {
+            "name": "Oatman",
+            "at_mi": 6.6,
+            "off_mi": 11.72,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150967140, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Oatman"
+          },
+          {
+            "name": "Fort Mohave",
+            "at_mi": 8.5,
+            "off_mi": 0.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 11036308566, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Fort Mohave"
+          },
+          {
+            "name": "Willow Valley",
+            "at_mi": 13.9,
+            "off_mi": 1.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959793, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Willow Valley"
+          },
+          {
+            "name": "Mohave Valley",
+            "at_mi": 15.3,
+            "off_mi": 0.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150940167, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Mohave Valley"
+          },
+          {
+            "name": "Arizona Village",
+            "at_mi": 17.9,
+            "off_mi": 0.76,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150979035, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Arizona Village"
+          },
+          {
+            "name": "Needles",
+            "at_mi": 18.9,
+            "off_mi": 0.35,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150941687, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
+            "spoken": "Entering Needles"
+          },
+          {
             "name": "Needles Regional Museum",
             "category": "museum",
             "kind": "point",
@@ -1281,11 +1407,29 @@
             "spoken": "Needles Regional Museum ahead"
           },
           {
+            "name": "Golden Shores",
+            "at_mi": 30.2,
+            "off_mi": 4.31,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 6186810171, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Golden Shores"
+          },
+          {
             "name": "Colorado River",
             "category": "river",
             "kind": "point",
             "at_mi": 35.9,
             "spoken": "Crossing the Colorado River"
+          },
+          {
+            "name": "Desert Hills",
+            "at_mi": 49.6,
+            "off_mi": 0.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959713, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Desert Hills"
           }
         ],
         "speed_limits": [
@@ -1722,6 +1866,15 @@
         ],
         "landmarks": [
           {
+            "name": "Lake Montezuma",
+            "at_mi": 0.2,
+            "off_mi": 6.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150980291, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lake Montezuma"
+          },
+          {
             "name": "Verde River",
             "category": "river",
             "kind": "point",
@@ -1734,6 +1887,24 @@
             "kind": "zone",
             "at_mi": 3.6,
             "spoken": "Entering Prescott National Forest"
+          },
+          {
+            "name": "Cornville",
+            "at_mi": 12.0,
+            "off_mi": 3.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150951488, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cornville"
+          },
+          {
+            "name": "Jerome",
+            "at_mi": 16.0,
+            "off_mi": 5.94,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150981802, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jerome"
           }
         ],
         "speed_limits": [
@@ -2710,11 +2881,101 @@
             "spoken": "Crossing the Verde River"
           },
           {
+            "name": "Cornville",
+            "at_mi": 7.5,
+            "off_mi": 7.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150951488, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cornville"
+          },
+          {
+            "name": "Lake Montezuma",
+            "at_mi": 9.5,
+            "off_mi": 1.75,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150980291, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lake Montezuma"
+          },
+          {
             "name": "Coconino National Forest",
             "category": "national_forest",
             "kind": "zone",
             "at_mi": 14.5,
             "spoken": "Entering Coconino National Forest"
+          },
+          {
+            "name": "Munds Park",
+            "at_mi": 37.6,
+            "off_mi": 0.73,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150947079, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Munds Park"
+          },
+          {
+            "name": "Mountainaire",
+            "at_mi": 48.9,
+            "off_mi": 1.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150938032, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mountainaire"
+          },
+          {
+            "name": "Kachina Village",
+            "at_mi": 49.3,
+            "off_mi": 0.5,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959063, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Kachina Village"
+          },
+          {
+            "name": "Bellemont",
+            "at_mi": 54.0,
+            "off_mi": 9.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150933177, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bellemont"
+          },
+          {
+            "name": "Doney Park",
+            "at_mi": 58.0,
+            "off_mi": 5.72,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590972, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Doney Park"
+          },
+          {
+            "name": "Mountain View Ranches",
+            "at_mi": 58.0,
+            "off_mi": 8.47,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590971, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mountain View Ranches"
+          },
+          {
+            "name": "Timberline-Fernwood",
+            "at_mi": 58.0,
+            "off_mi": 9.37,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590973, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Timberline-Fernwood"
+          },
+          {
+            "name": "Fort Valley",
+            "at_mi": 60.0,
+            "off_mi": 6.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590970, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fort Valley"
           }
         ],
         "speed_limits": [
@@ -3467,11 +3728,38 @@
         ],
         "landmarks": [
           {
+            "name": "Lake Montezuma",
+            "at_mi": 0.0,
+            "off_mi": 6.43,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150980291, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lake Montezuma"
+          },
+          {
+            "name": "Cornville",
+            "at_mi": 0.0,
+            "off_mi": 11.32,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150951488, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cornville"
+          },
+          {
             "name": "Coconino National Forest",
             "category": "national_forest",
             "kind": "zone",
             "at_mi": 15.2,
             "spoken": "Entering Coconino National Forest"
+          },
+          {
+            "name": "Strawberry",
+            "at_mi": 39.2,
+            "off_mi": 0.12,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150933970, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
+            "spoken": "Entering Strawberry"
           },
           {
             "name": "Tonto National Forest",
@@ -3481,11 +3769,38 @@
             "spoken": "Entering Tonto National Forest"
           },
           {
+            "name": "Pine",
+            "at_mi": 41.9,
+            "off_mi": 0.06,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150950766, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
+            "spoken": "Entering Pine"
+          },
+          {
             "name": "East Verde River",
             "category": "river",
             "kind": "point",
             "at_mi": 49.9,
             "spoken": "Crossing the East Verde River"
+          },
+          {
+            "name": "Beaver Valley Estates",
+            "at_mi": 53.9,
+            "off_mi": 4.14,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150940072, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Beaver Valley Estates"
+          },
+          {
+            "name": "Mesa Del Caballo",
+            "at_mi": 54.8,
+            "off_mi": 1.66,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150952341, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mesa Del Caballo"
           }
         ],
         "speed_limits": [
@@ -4113,11 +4428,65 @@
         ],
         "landmarks": [
           {
+            "name": "Arizona City",
+            "at_mi": 10.7,
+            "off_mi": 2.99,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150939207, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Arizona City"
+          },
+          {
+            "name": "Red Rock",
+            "at_mi": 35.1,
+            "off_mi": 0.94,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150981771, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Red Rock"
+          },
+          {
+            "name": "Avra Valley",
+            "at_mi": 42.3,
+            "off_mi": 5.66,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150946688, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Avra Valley"
+          },
+          {
+            "name": "Picture Rocks",
+            "at_mi": 51.2,
+            "off_mi": 7.13,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150954056, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Picture Rocks"
+          },
+          {
+            "name": "Oro Valley",
+            "at_mi": 58.8,
+            "off_mi": 7.72,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150961044, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Oro Valley"
+          },
+          {
             "name": "Santa Cruz River",
             "category": "river",
             "kind": "point",
             "at_mi": 59.5,
             "spoken": "Crossing the Santa Cruz River"
+          },
+          {
+            "name": "Pascua Pueblo",
+            "at_mi": 67.6,
+            "off_mi": 9.14,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9435835019, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pascua Pueblo"
           }
         ],
         "speed_limits": [
@@ -4497,6 +4866,15 @@
         ],
         "landmarks": [
           {
+            "name": "Jerome",
+            "at_mi": 0.0,
+            "off_mi": 5.94,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150981802, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Jerome"
+          },
+          {
             "name": "Verde River",
             "category": "river",
             "kind": "point",
@@ -4504,11 +4882,29 @@
             "spoken": "Crossing the Verde River"
           },
           {
+            "name": "Cornville",
+            "at_mi": 3.1,
+            "off_mi": 3.19,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150951488, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cornville"
+          },
+          {
             "name": "Coconino National Forest",
             "category": "national_forest",
             "kind": "zone",
             "at_mi": 10.3,
             "spoken": "Entering Coconino National Forest"
+          },
+          {
+            "name": "Munds Park",
+            "at_mi": 19.0,
+            "off_mi": 8.61,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150947079, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Munds Park"
           }
         ],
         "speed_limits": [
@@ -5064,11 +5460,74 @@
         ],
         "landmarks": [
           {
+            "name": "Naco",
+            "at_mi": 25.5,
+            "off_mi": 7.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151965470, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Naco"
+          },
+          {
+            "name": "Tombstone",
+            "at_mi": 43.5,
+            "off_mi": 11.65,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150935673, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tombstone"
+          },
+          {
+            "name": "Miracle Valley",
+            "at_mi": 46.4,
+            "off_mi": 11.27,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150974045, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Miracle Valley"
+          },
+          {
             "name": "San Pedro River",
             "category": "river",
             "kind": "point",
             "at_mi": 48.2,
             "spoken": "Crossing the San Pedro River"
+          },
+          {
+            "name": "Huachuca City",
+            "at_mi": 54.2,
+            "off_mi": 6.05,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150950608, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Huachuca City"
+          },
+          {
+            "name": "Whetstone",
+            "at_mi": 54.2,
+            "off_mi": 10.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150978173, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Whetstone"
+          },
+          {
+            "name": "Sierra Vista Estates",
+            "at_mi": 55.0,
+            "off_mi": 4.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150981085, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sierra Vista Estates"
+          },
+          {
+            "name": "Nicksville",
+            "at_mi": 55.0,
+            "off_mi": 7.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150937806, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Nicksville"
           }
         ],
         "speed_limits": [
@@ -6264,6 +6723,51 @@
         ],
         "landmarks": [
           {
+            "name": "Naco",
+            "at_mi": 22.1,
+            "off_mi": 7.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151965470, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Naco"
+          },
+          {
+            "name": "Bisbee",
+            "at_mi": 24.0,
+            "off_mi": 0.05,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 151408617, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Bisbee"
+          },
+          {
+            "name": "Tombstone",
+            "at_mi": 37.8,
+            "off_mi": 11.65,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150935673, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tombstone"
+          },
+          {
+            "name": "Miracle Valley",
+            "at_mi": 40.3,
+            "off_mi": 11.27,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150974045, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Miracle Valley"
+          },
+          {
+            "name": "Nicksville",
+            "at_mi": 45.1,
+            "off_mi": 8.07,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150937806, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Nicksville"
+          },
+          {
             "name": "San Pedro River",
             "category": "river",
             "kind": "point",
@@ -6278,6 +6782,33 @@
             "spoken": "Crossing the Babacomari River"
           },
           {
+            "name": "Sierra Vista Estates",
+            "at_mi": 45.7,
+            "off_mi": 4.92,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150981085, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sierra Vista Estates"
+          },
+          {
+            "name": "Huachuca City",
+            "at_mi": 53.9,
+            "off_mi": 0.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150950608, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Huachuca City"
+          },
+          {
+            "name": "Whetstone",
+            "at_mi": 58.3,
+            "off_mi": 0.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150978173, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Whetstone"
+          },
+          {
             "name": "Lone Pine Saddle",
             "category": "mountain_pass",
             "kind": "point",
@@ -6290,6 +6821,42 @@
             "kind": "point",
             "at_mi": 72.7,
             "spoken": "Approaching Burro Gap"
+          },
+          {
+            "name": "Benson",
+            "at_mi": 75.6,
+            "off_mi": 2.97,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150933986, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Benson"
+          },
+          {
+            "name": "Corona de Tucson",
+            "at_mi": 97.0,
+            "off_mi": 5.81,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150934158, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Corona de Tucson"
+          },
+          {
+            "name": "Vail",
+            "at_mi": 98.3,
+            "off_mi": 1.35,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150937823, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Vail"
+          },
+          {
+            "name": "Pascua Pueblo",
+            "at_mi": 115.4,
+            "off_mi": 7.93,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9435835019, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pascua Pueblo"
           }
         ],
         "speed_limits": [
@@ -7950,6 +8517,69 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Timberline-Fernwood",
+            "at_mi": 1.4,
+            "off_mi": 9.41,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590973, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Timberline-Fernwood"
+          },
+          {
+            "name": "Doney Park",
+            "at_mi": 1.9,
+            "off_mi": 5.82,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590972, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Doney Park"
+          },
+          {
+            "name": "Mountain View Ranches",
+            "at_mi": 1.9,
+            "off_mi": 8.63,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590971, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mountain View Ranches"
+          },
+          {
+            "name": "Mountainaire",
+            "at_mi": 4.4,
+            "off_mi": 5.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150938032, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mountainaire"
+          },
+          {
+            "name": "Kachina Village",
+            "at_mi": 4.6,
+            "off_mi": 5.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959063, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Kachina Village"
+          },
+          {
+            "name": "Fort Valley",
+            "at_mi": 11.7,
+            "off_mi": 4.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590970, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fort Valley"
+          },
+          {
+            "name": "Bellemont",
+            "at_mi": 14.8,
+            "off_mi": 0.1,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150933177, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Bellemont"
+          },
+          {
             "name": "Kaibab National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -7957,11 +8587,92 @@
             "spoken": "Entering Kaibab National Forest"
           },
           {
+            "name": "Parks",
+            "at_mi": 22.2,
+            "off_mi": 0.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150961458, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Parks"
+          },
+          {
+            "name": "Red Lake",
+            "at_mi": 34.9,
+            "off_mi": 6.95,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590974, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Red Lake"
+          },
+          {
+            "name": "Williams",
+            "at_mi": 36.6,
+            "off_mi": 0.66,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 1402601531, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Williams"
+          },
+          {
+            "name": "Kaibab Estates West",
+            "at_mi": 53.6,
+            "off_mi": 3.61,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590975, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Kaibab Estates West"
+          },
+          {
+            "name": "Ash Fork",
+            "at_mi": 54.3,
+            "off_mi": 0.35,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150964804, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Ash Fork"
+          },
+          {
             "name": "Grand Canyon Caverns",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 95.0,
             "spoken": "Billboard: Grand Canyon Caverns ahead, near Peach Springs. The largest dry cavern in the country, two hundred feet down, with a single motel room at the very bottom for the very brave."
+          },
+          {
+            "name": "Pine Lake",
+            "at_mi": 137.8,
+            "off_mi": 7.15,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11476806218, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pine Lake"
+          },
+          {
+            "name": "New Kingman-Butler",
+            "at_mi": 145.9,
+            "off_mi": 2.53,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11476737069, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing New Kingman-Butler"
+          },
+          {
+            "name": "Golden Valley",
+            "at_mi": 149.6,
+            "off_mi": 8.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150954481, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Golden Valley"
+          },
+          {
+            "name": "Walnut Creek",
+            "at_mi": 150.1,
+            "off_mi": 5.12,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 10832432940, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Walnut Creek"
           },
           {
             "name": "Coyote Pass",
@@ -9692,11 +10403,74 @@
         ],
         "landmarks": [
           {
+            "name": "Fort Valley",
+            "at_mi": 0.0,
+            "off_mi": 6.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590970, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fort Valley"
+          },
+          {
+            "name": "Bellemont",
+            "at_mi": 0.0,
+            "off_mi": 9.93,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150933177, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bellemont"
+          },
+          {
+            "name": "Kachina Village",
+            "at_mi": 0.4,
+            "off_mi": 7.37,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959063, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Kachina Village"
+          },
+          {
+            "name": "Mountainaire",
+            "at_mi": 0.9,
+            "off_mi": 7.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150938032, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mountainaire"
+          },
+          {
+            "name": "Doney Park",
+            "at_mi": 7.4,
+            "off_mi": 0.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590972, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Doney Park"
+          },
+          {
+            "name": "Mountain View Ranches",
+            "at_mi": 8.0,
+            "off_mi": 4.16,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590971, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mountain View Ranches"
+          },
+          {
             "name": "Fremont Saddle",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 8.1,
             "spoken": "Approaching Fremont Saddle"
+          },
+          {
+            "name": "Timberline-Fernwood",
+            "at_mi": 11.4,
+            "off_mi": 0.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590973, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Timberline-Fernwood"
           },
           {
             "name": "Coconino National Forest",
@@ -9720,11 +10494,47 @@
             "spoken": "Museum ahead: old Cameron Trading Post"
           },
           {
+            "name": "Moenkopi",
+            "at_mi": 69.6,
+            "off_mi": 9.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150971424, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Moenkopi"
+          },
+          {
+            "name": "Tuba City",
+            "at_mi": 69.8,
+            "off_mi": 8.66,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150965489, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tuba City"
+          },
+          {
+            "name": "Bitter Springs",
+            "at_mi": 108.5,
+            "off_mi": 0.14,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150968143, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Bitter Springs"
+          },
+          {
             "name": "Antelope Pass",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 113.9,
             "spoken": "Approaching Antelope Pass"
+          },
+          {
+            "name": "Greenehaven",
+            "at_mi": 133.6,
+            "off_mi": 6.75,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11586069703, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Greenehaven"
           }
         ],
         "speed_limits": [
@@ -10538,6 +11348,69 @@
           }
         ],
         "landmarks": [
+          {
+            "name": "Fort Valley",
+            "at_mi": 0.0,
+            "off_mi": 6.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590970, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fort Valley"
+          },
+          {
+            "name": "Bellemont",
+            "at_mi": 0.0,
+            "off_mi": 9.93,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150933177, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bellemont"
+          },
+          {
+            "name": "Kachina Village",
+            "at_mi": 0.4,
+            "off_mi": 7.37,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959063, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Kachina Village"
+          },
+          {
+            "name": "Mountainaire",
+            "at_mi": 0.9,
+            "off_mi": 7.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150938032, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mountainaire"
+          },
+          {
+            "name": "Doney Park",
+            "at_mi": 6.0,
+            "off_mi": 2.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590972, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Doney Park"
+          },
+          {
+            "name": "Timberline-Fernwood",
+            "at_mi": 6.2,
+            "off_mi": 6.58,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590973, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Timberline-Fernwood"
+          },
+          {
+            "name": "Mountain View Ranches",
+            "at_mi": 10.3,
+            "off_mi": 2.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590971, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mountain View Ranches"
+          },
           {
             "name": "Coconino National Forest",
             "category": "national_forest",
@@ -11590,6 +12463,24 @@
         ],
         "landmarks": [
           {
+            "name": "Miami",
+            "at_mi": 0.1,
+            "off_mi": 4.83,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150968910, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Miami"
+          },
+          {
+            "name": "Wheatfields",
+            "at_mi": 8.5,
+            "off_mi": 7.77,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 13154178722, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wheatfields"
+          },
+          {
             "name": "Tonto National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -11602,6 +12493,33 @@
             "kind": "point",
             "at_mi": 32.0,
             "spoken": "Crossing the Salt River"
+          },
+          {
+            "name": "Lake of the Woods",
+            "at_mi": 81.6,
+            "off_mi": 6.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11586019224, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lake of the Woods"
+          },
+          {
+            "name": "Pinetop-Lakeside",
+            "at_mi": 83.2,
+            "off_mi": 8.12,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151812520, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pinetop-Lakeside"
+          },
+          {
+            "name": "Wagon Wheel",
+            "at_mi": 84.0,
+            "off_mi": 3.73,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11586019228, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wagon Wheel"
           }
         ],
         "speed_limits": [
@@ -12632,6 +13550,15 @@
         ],
         "landmarks": [
           {
+            "name": "Joseph City",
+            "at_mi": 0.6,
+            "off_mi": 10.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150935954, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Joseph City"
+          },
+          {
             "name": "Petrified Forest National Park",
             "category": "national_park",
             "kind": "zone",
@@ -12644,6 +13571,114 @@
             "kind": "point",
             "at_mi": 37.5,
             "spoken": "Crossing the Puerco River"
+          },
+          {
+            "name": "Nahata Dziil",
+            "at_mi": 51.3,
+            "off_mi": 8.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9417218806, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Nahata Dziil"
+          },
+          {
+            "name": "Sanders",
+            "at_mi": 53.0,
+            "off_mi": 0.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151912019, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Sanders"
+          },
+          {
+            "name": "Houck",
+            "at_mi": 61.4,
+            "off_mi": 0.18,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151355442, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Houck"
+          },
+          {
+            "name": "Chi Chil Tah",
+            "at_mi": 71.2,
+            "off_mi": 11.05,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9427236211, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Chi Chil Tah"
+          },
+          {
+            "name": "Lupton",
+            "at_mi": 72.3,
+            "off_mi": 0.1,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151480715, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Lupton"
+          },
+          {
+            "name": "Oak Springs",
+            "at_mi": 77.4,
+            "off_mi": 8.69,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151332480, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Oak Springs"
+          },
+          {
+            "name": "Manuelito",
+            "at_mi": 79.9,
+            "off_mi": 0.75,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151809294, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Manuelito"
+          },
+          {
+            "name": "Hunters Point",
+            "at_mi": 81.6,
+            "off_mi": 10.85,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151351290, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Hunters Point"
+          },
+          {
+            "name": "Red Rock",
+            "at_mi": 92.5,
+            "off_mi": 4.91,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151813300, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Red Rock"
+          },
+          {
+            "name": "Yah-ta-hey",
+            "at_mi": 93.9,
+            "off_mi": 6.93,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 6685254023, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Yah-ta-hey"
+          },
+          {
+            "name": "Church Rock",
+            "at_mi": 95.0,
+            "off_mi": 7.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151738072, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Church Rock"
+          },
+          {
+            "name": "Bread Springs",
+            "at_mi": 95.0,
+            "off_mi": 9.92,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151423267, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bread Springs"
           }
         ],
         "speed_limits": [
@@ -13966,6 +15001,42 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "New Kingman-Butler",
+            "at_mi": 0.0,
+            "off_mi": 5.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11476737069, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing New Kingman-Butler"
+          },
+          {
+            "name": "Golden Valley",
+            "at_mi": 4.2,
+            "off_mi": 8.94,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150954481, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Golden Valley"
+          },
+          {
+            "name": "Walnut Creek",
+            "at_mi": 6.2,
+            "off_mi": 0.77,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 10832432940, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Walnut Creek"
+          },
+          {
+            "name": "Yucca",
+            "at_mi": 24.0,
+            "off_mi": 0.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150946626, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Yucca"
+          },
+          {
             "name": "Colorado River",
             "category": "river",
             "kind": "point",
@@ -13973,11 +15044,56 @@
             "spoken": "Crossing the Colorado River"
           },
           {
+            "name": "Golden Shores",
+            "at_mi": 49.0,
+            "off_mi": 4.3,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 6186810171, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Golden Shores"
+          },
+          {
             "name": "Needles Regional Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 56.9,
             "spoken": "Needles Regional Museum ahead"
+          },
+          {
+            "name": "Arizona Village",
+            "at_mi": 62.4,
+            "off_mi": 1.32,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150979035, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Arizona Village"
+          },
+          {
+            "name": "Mohave Valley",
+            "at_mi": 64.2,
+            "off_mi": 3.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150940167, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mohave Valley"
+          },
+          {
+            "name": "Willow Valley",
+            "at_mi": 65.8,
+            "off_mi": 4.13,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959793, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Willow Valley"
+          },
+          {
+            "name": "Fort Mohave",
+            "at_mi": 66.6,
+            "off_mi": 10.16,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 11036308566, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fort Mohave"
           },
           {
             "name": "Mojave Trails National Monument",
@@ -13999,6 +15115,33 @@
             "kind": "point",
             "at_mi": 189.8,
             "spoken": "Crossing the Mojave River"
+          },
+          {
+            "name": "Yermo",
+            "at_mi": 193.4,
+            "off_mi": 4.2,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150941437, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Yermo"
+          },
+          {
+            "name": "Daggett",
+            "at_mi": 196.9,
+            "off_mi": 0.58,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150949205, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Daggett"
+          },
+          {
+            "name": "Lenwood",
+            "at_mi": 204.9,
+            "off_mi": 5.14,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150970070, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lenwood"
           }
         ],
         "speed_limits": [
@@ -14772,6 +15915,24 @@
         ],
         "landmarks": [
           {
+            "name": "New Kingman-Butler",
+            "at_mi": 0.0,
+            "off_mi": 5.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11476737069, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing New Kingman-Butler"
+          },
+          {
+            "name": "Walnut Creek",
+            "at_mi": 1.0,
+            "off_mi": 5.1,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 10832432940, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Walnut Creek"
+          },
+          {
             "name": "Coyote Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -14779,11 +15940,38 @@
             "spoken": "Approaching Coyote Pass"
           },
           {
+            "name": "Golden Valley",
+            "at_mi": 10.7,
+            "off_mi": 0.06,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150954481, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Golden Valley"
+          },
+          {
             "name": "Union Pass",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 22.3,
             "spoken": "Approaching Union Pass"
+          },
+          {
+            "name": "Oatman",
+            "at_mi": 22.9,
+            "off_mi": 11.69,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150967140, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Oatman"
+          },
+          {
+            "name": "Fort Mohave",
+            "at_mi": 35.0,
+            "off_mi": 9.15,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 11036308566, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fort Mohave"
           }
         ],
         "speed_limits": [
@@ -15422,11 +16610,65 @@
         ],
         "landmarks": [
           {
+            "name": "New Kingman-Butler",
+            "at_mi": 0.0,
+            "off_mi": 5.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11476737069, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing New Kingman-Butler"
+          },
+          {
             "name": "Coyote Pass",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 0.1,
             "spoken": "Approaching Coyote Pass"
+          },
+          {
+            "name": "Golden Valley",
+            "at_mi": 4.2,
+            "off_mi": 8.94,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150954481, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Golden Valley"
+          },
+          {
+            "name": "Walnut Creek",
+            "at_mi": 6.1,
+            "off_mi": 0.77,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 10832432940, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Walnut Creek"
+          },
+          {
+            "name": "Yucca",
+            "at_mi": 23.8,
+            "off_mi": 0.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150946626, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Yucca"
+          },
+          {
+            "name": "Golden Shores",
+            "at_mi": 39.6,
+            "off_mi": 9.95,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 6186810171, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Golden Shores"
+          },
+          {
+            "name": "Desert Hills",
+            "at_mi": 53.7,
+            "off_mi": 0.64,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959713, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Desert Hills"
           }
         ],
         "speed_limits": [
@@ -16450,11 +17692,74 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "New Kingman-Butler",
+            "at_mi": 0.0,
+            "off_mi": 5.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11476737069, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing New Kingman-Butler"
+          },
+          {
+            "name": "Walnut Creek",
+            "at_mi": 1.0,
+            "off_mi": 5.1,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 10832432940, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Walnut Creek"
+          },
+          {
+            "name": "Golden Valley",
+            "at_mi": 7.4,
+            "off_mi": 4.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150954481, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Golden Valley"
+          },
+          {
+            "name": "Chloride",
+            "at_mi": 18.9,
+            "off_mi": 3.55,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150981226, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Chloride"
+          },
+          {
+            "name": "Dolan Springs",
+            "at_mi": 31.0,
+            "off_mi": 5.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150962243, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Dolan Springs"
+          },
+          {
+            "name": "White Hills",
+            "at_mi": 40.2,
+            "off_mi": 8.4,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150972791, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing White Hills"
+          },
+          {
             "name": "Colorado River",
             "category": "river",
             "kind": "point",
             "at_mi": 70.5,
             "spoken": "Crossing the Colorado River"
+          },
+          {
+            "name": "Boulder City",
+            "at_mi": 74.7,
+            "off_mi": 2.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150963302, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Boulder City"
           },
           {
             "name": "Boulder City-Hoover Dam Museum",
@@ -16469,6 +17774,78 @@
             "kind": "point",
             "at_mi": 86.3,
             "spoken": "Approaching Railroad Pass"
+          },
+          {
+            "name": "Whitney",
+            "at_mi": 97.5,
+            "off_mi": 0.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150980172, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Whitney"
+          },
+          {
+            "name": "Enterprise",
+            "at_mi": 99.1,
+            "off_mi": 7.3,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150960745, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Enterprise"
+          },
+          {
+            "name": "Paradise",
+            "at_mi": 99.6,
+            "off_mi": 3.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 3139480510, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Paradise"
+          },
+          {
+            "name": "Sunrise Manor",
+            "at_mi": 104.0,
+            "off_mi": 3.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 2715787233, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sunrise Manor"
+          },
+          {
+            "name": "Nellis Air Force Base",
+            "at_mi": 104.1,
+            "off_mi": 6.05,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 13148502466, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Nellis Air Force Base"
+          },
+          {
+            "name": "Spring Valley",
+            "at_mi": 106.9,
+            "off_mi": 7.15,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150981470, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Spring Valley"
+          },
+          {
+            "name": "Summerlin South",
+            "at_mi": 106.9,
+            "off_mi": 10.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 2948186067, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Summerlin South"
+          },
+          {
+            "name": "Summerlin Centre",
+            "at_mi": 106.9,
+            "off_mi": 10.83,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11155370309, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Summerlin Centre"
           }
         ],
         "speed_limits": [
@@ -17635,11 +19012,101 @@
         ],
         "landmarks": [
           {
+            "name": "Desert Hills",
+            "at_mi": 0.2,
+            "off_mi": 4.97,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959713, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Desert Hills"
+          },
+          {
             "name": "Colorado River",
             "category": "river",
             "kind": "point",
             "at_mi": 11.0,
             "spoken": "Crossing the Colorado River"
+          },
+          {
+            "name": "Parker Strip",
+            "at_mi": 22.5,
+            "off_mi": 0.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 12244723920, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Parker Strip"
+          },
+          {
+            "name": "Cienega Springs",
+            "at_mi": 33.7,
+            "off_mi": 0.29,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150947418, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Cienega Springs"
+          },
+          {
+            "name": "Bluewater",
+            "at_mi": 36.4,
+            "off_mi": 0.51,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150960169, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bluewater"
+          },
+          {
+            "name": "Big River",
+            "at_mi": 38.1,
+            "off_mi": 4.99,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959157, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Big River"
+          },
+          {
+            "name": "Parker",
+            "at_mi": 38.2,
+            "off_mi": 0.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150973148, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Parker"
+          },
+          {
+            "name": "La Paz Valley",
+            "at_mi": 78.9,
+            "off_mi": 1.43,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150962547, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing La Paz Valley"
+          },
+          {
+            "name": "Fortuna Foothills",
+            "at_mi": 142.7,
+            "off_mi": 3.41,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150959809, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fortuna Foothills"
+          },
+          {
+            "name": "Somerton",
+            "at_mi": 152.2,
+            "off_mi": 9.26,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150967494, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Somerton"
+          },
+          {
+            "name": "Cocopah",
+            "at_mi": 152.5,
+            "off_mi": 10.73,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9441094944, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cocopah"
           }
         ],
         "speed_limits": [
@@ -19443,6 +20910,24 @@
             "spoken": "Entering Tonto National Forest"
           },
           {
+            "name": "Mesa Del Caballo",
+            "at_mi": 3.2,
+            "off_mi": 2.55,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150952341, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mesa Del Caballo"
+          },
+          {
+            "name": "Beaver Valley Estates",
+            "at_mi": 5.1,
+            "off_mi": 5.86,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150940072, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Beaver Valley Estates"
+          },
+          {
             "name": "Apache-Sitgreaves National Forests",
             "category": "protected_area",
             "kind": "zone",
@@ -19450,11 +20935,29 @@
             "spoken": "Entering Apache-Sitgreaves National Forests"
           },
           {
+            "name": "Taylor",
+            "at_mi": 88.8,
+            "off_mi": 0.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150950180, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
+            "spoken": "Entering Taylor"
+          },
+          {
             "name": "Little Colorado River",
             "category": "river",
             "kind": "point",
             "at_mi": 113.0,
             "spoken": "Crossing the Little Colorado River"
+          },
+          {
+            "name": "Joseph City",
+            "at_mi": 131.4,
+            "off_mi": 0.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150935954, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Joseph City"
           }
         ],
         "speed_limits": [
@@ -20948,6 +22451,87 @@
         ],
         "landmarks": [
           {
+            "name": "Guadalupe",
+            "at_mi": 0.0,
+            "off_mi": 8.71,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150970836, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Guadalupe"
+          },
+          {
+            "name": "Paradise Valley",
+            "at_mi": 0.7,
+            "off_mi": 8.75,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150940217, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Paradise Valley"
+          },
+          {
+            "name": "Tolleson",
+            "at_mi": 3.6,
+            "off_mi": 8.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 331862912, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tolleson"
+          },
+          {
+            "name": "Youngtown",
+            "at_mi": 12.0,
+            "off_mi": 10.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150949887, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Youngtown"
+          },
+          {
+            "name": "El Mirage",
+            "at_mi": 13.3,
+            "off_mi": 11.97,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150951742, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing El Mirage"
+          },
+          {
+            "name": "Sun City",
+            "at_mi": 14.3,
+            "off_mi": 9.52,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150974590, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sun City"
+          },
+          {
+            "name": "Cave Creek",
+            "at_mi": 26.9,
+            "off_mi": 10.85,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150964694, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cave Creek"
+          },
+          {
+            "name": "Desert Hills",
+            "at_mi": 27.3,
+            "off_mi": 0.59,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9237180808, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Desert Hills"
+          },
+          {
+            "name": "Anthem",
+            "at_mi": 30.6,
+            "off_mi": 0.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150960280, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Anthem"
+          },
+          {
             "name": "New River",
             "category": "river",
             "kind": "point",
@@ -20960,6 +22544,60 @@
             "kind": "point",
             "at_mi": 35.6,
             "spoken": "Crossing the Agua Fria River"
+          },
+          {
+            "name": "Black Canyon City",
+            "at_mi": 45.7,
+            "off_mi": 0.56,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150932977, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Black Canyon City"
+          },
+          {
+            "name": "Spring Valley",
+            "at_mi": 66.0,
+            "off_mi": 2.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959432, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Spring Valley"
+          },
+          {
+            "name": "Mayer",
+            "at_mi": 67.4,
+            "off_mi": 7.25,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150946858, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mayer"
+          },
+          {
+            "name": "Dewey-Humboldt",
+            "at_mi": 71.7,
+            "off_mi": 11.71,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9564960302, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Dewey-Humboldt"
+          },
+          {
+            "name": "Cornville",
+            "at_mi": 89.7,
+            "off_mi": 9.99,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150951488, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cornville"
+          },
+          {
+            "name": "Lake Montezuma",
+            "at_mi": 91.8,
+            "off_mi": 6.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150980291, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lake Montezuma"
           }
         ],
         "speed_limits": [
@@ -21557,6 +23195,15 @@
         ],
         "landmarks": [
           {
+            "name": "Tolleson",
+            "at_mi": 0.2,
+            "off_mi": 10.62,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 331862912, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tolleson"
+          },
+          {
             "name": "Salt River",
             "category": "river",
             "kind": "point",
@@ -21564,11 +23211,56 @@
             "spoken": "Crossing the Salt River"
           },
           {
+            "name": "Paradise Valley",
+            "at_mi": 7.5,
+            "off_mi": 8.56,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150940217, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Paradise Valley"
+          },
+          {
+            "name": "Guadalupe",
+            "at_mi": 11.0,
+            "off_mi": 0.37,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150970836, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Guadalupe"
+          },
+          {
+            "name": "Sun Lakes",
+            "at_mi": 24.0,
+            "off_mi": 1.91,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150981505, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sun Lakes"
+          },
+          {
             "name": "Gila River",
             "category": "river",
             "kind": "point",
             "at_mi": 29.6,
             "spoken": "Crossing the Gila River"
+          },
+          {
+            "name": "Stotonic",
+            "at_mi": 29.6,
+            "off_mi": 3.73,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150942277, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Stotonic"
+          },
+          {
+            "name": "Arizona City",
+            "at_mi": 48.0,
+            "off_mi": 9.91,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150939207, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Arizona City"
           }
         ],
         "speed_limits": [
@@ -22660,6 +24352,33 @@
         ],
         "landmarks": [
           {
+            "name": "Tolleson",
+            "at_mi": 0.2,
+            "off_mi": 10.62,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 331862912, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tolleson"
+          },
+          {
+            "name": "Paradise Valley",
+            "at_mi": 7.7,
+            "off_mi": 8.56,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150940217, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Paradise Valley"
+          },
+          {
+            "name": "Guadalupe",
+            "at_mi": 10.2,
+            "off_mi": 1.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150970836, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Guadalupe"
+          },
+          {
             "name": "Salt River",
             "category": "river",
             "kind": "point",
@@ -22674,11 +24393,56 @@
             "spoken": "Mesa Contemporary Arts Museum ahead"
           },
           {
+            "name": "Queen Creek",
+            "at_mi": 28.8,
+            "off_mi": 9.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150955568, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Queen Creek"
+          },
+          {
+            "name": "Gold Canyon",
+            "at_mi": 40.0,
+            "off_mi": 0.14,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 13154152440, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Gold Canyon"
+          },
+          {
+            "name": "Queen Valley",
+            "at_mi": 53.4,
+            "off_mi": 2.61,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150933020, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Queen Valley"
+          },
+          {
             "name": "Tonto National Forest",
             "category": "national_forest",
             "kind": "zone",
             "at_mi": 67.1,
             "spoken": "Entering Tonto National Forest"
+          },
+          {
+            "name": "Miami",
+            "at_mi": 80.9,
+            "off_mi": 0.06,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150968910, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
+            "spoken": "Entering Miami"
+          },
+          {
+            "name": "Wheatfields",
+            "at_mi": 84.7,
+            "off_mi": 5.5,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 13154178722, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wheatfields"
           }
         ],
         "speed_limits": [
@@ -24324,6 +26088,42 @@
         ],
         "landmarks": [
           {
+            "name": "Tolleson",
+            "at_mi": 11.6,
+            "off_mi": 0.84,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 331862912, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tolleson"
+          },
+          {
+            "name": "Litchfield Park",
+            "at_mi": 17.4,
+            "off_mi": 2.44,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150979227, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Litchfield Park"
+          },
+          {
+            "name": "Brenda",
+            "at_mi": 111.0,
+            "off_mi": 1.75,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150968346, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Brenda"
+          },
+          {
+            "name": "Ehrenberg",
+            "at_mi": 145.2,
+            "off_mi": 0.36,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150964102, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
+            "spoken": "Entering Ehrenberg"
+          },
+          {
             "name": "Palo Verde Historical Museum",
             "category": "museum",
             "kind": "point",
@@ -24343,6 +26143,33 @@
             "kind": "zone",
             "at_mi": 202.8,
             "spoken": "Entering Chuckwalla National Monument"
+          },
+          {
+            "name": "Bermuda Dunes",
+            "at_mi": 249.7,
+            "off_mi": 0.86,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150979487, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bermuda Dunes"
+          },
+          {
+            "name": "Desert Palms",
+            "at_mi": 250.7,
+            "off_mi": 0.92,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 2255544505, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Desert Palms"
+          },
+          {
+            "name": "Thousand Palms",
+            "at_mi": 257.8,
+            "off_mi": 0.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150937945, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Thousand Palms"
           },
           {
             "name": "Whitewater River",
@@ -24366,6 +26193,60 @@
             "spoken": "Approaching San Gorgonio Pass"
           },
           {
+            "name": "Banning",
+            "at_mi": 287.8,
+            "off_mi": 0.08,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150960179, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Banning"
+          },
+          {
+            "name": "Calimesa",
+            "at_mi": 301.0,
+            "off_mi": 0.15,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150966449, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Calimesa"
+          },
+          {
+            "name": "Yucaipa",
+            "at_mi": 301.7,
+            "off_mi": 2.19,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150979634, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Yucaipa"
+          },
+          {
+            "name": "Mentone",
+            "at_mi": 308.1,
+            "off_mi": 1.96,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150936244, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mentone"
+          },
+          {
+            "name": "Redlands",
+            "at_mi": 309.4,
+            "off_mi": 0.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 92261014, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Redlands"
+          },
+          {
+            "name": "Loma Linda",
+            "at_mi": 314.1,
+            "off_mi": 0.73,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 111124306, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Loma Linda"
+          },
+          {
             "name": "Little Pigeon Pass",
             "category": "mountain_pass",
             "kind": "point",
@@ -24373,11 +26254,164 @@
             "spoken": "Approaching Little Pigeon Pass"
           },
           {
+            "name": "Grand Terrace",
+            "at_mi": 317.0,
+            "off_mi": 2.15,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150949260, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Grand Terrace"
+          },
+          {
+            "name": "Colton",
+            "at_mi": 317.6,
+            "off_mi": 0.06,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150958819, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Colton"
+          },
+          {
+            "name": "Bloomington",
+            "at_mi": 321.7,
+            "off_mi": 0.1,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150950291, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Bloomington"
+          },
+          {
             "name": "Santa Ana River",
             "category": "river",
             "kind": "point",
             "at_mi": 329.3,
             "spoken": "Crossing the Santa Ana River"
+          },
+          {
+            "name": "Upland",
+            "at_mi": 336.6,
+            "off_mi": 0.7,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150943871, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Upland"
+          },
+          {
+            "name": "Montclair",
+            "at_mi": 339.2,
+            "off_mi": 0.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150979318, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Montclair"
+          },
+          {
+            "name": "Claremont",
+            "at_mi": 340.7,
+            "off_mi": 1.03,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150954021, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Claremont"
+          },
+          {
+            "name": "La Verne",
+            "at_mi": 344.1,
+            "off_mi": 1.98,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150939146, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing La Verne"
+          },
+          {
+            "name": "Diamond Bar",
+            "at_mi": 346.5,
+            "off_mi": 2.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150969611, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Diamond Bar"
+          },
+          {
+            "name": "Covina",
+            "at_mi": 350.9,
+            "off_mi": 1.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 1837335207, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Covina"
+          },
+          {
+            "name": "Irwindale",
+            "at_mi": 353.5,
+            "off_mi": 2.39,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150966208, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Irwindale"
+          },
+          {
+            "name": "Baldwin Park",
+            "at_mi": 355.0,
+            "off_mi": 1.04,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150966416, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Baldwin Park"
+          },
+          {
+            "name": "South El Monte",
+            "at_mi": 359.9,
+            "off_mi": 1.19,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150968614, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing South El Monte"
+          },
+          {
+            "name": "Temple City",
+            "at_mi": 360.6,
+            "off_mi": 2.47,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 1837339300, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Temple City"
+          },
+          {
+            "name": "Rosemead",
+            "at_mi": 361.6,
+            "off_mi": 0.59,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 1694984557, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rosemead"
+          },
+          {
+            "name": "San Gabriel",
+            "at_mi": 363.5,
+            "off_mi": 1.87,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 26850966, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing San Gabriel"
+          },
+          {
+            "name": "Alhambra",
+            "at_mi": 364.7,
+            "off_mi": 1.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 1837339298, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Alhambra"
+          },
+          {
+            "name": "Monterey Park",
+            "at_mi": 364.9,
+            "off_mi": 1.39,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 1837339827, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Monterey Park"
           }
         ],
         "restrictions": []
@@ -25272,11 +27306,56 @@
         ],
         "landmarks": [
           {
+            "name": "Tolleson",
+            "at_mi": 0.3,
+            "off_mi": 10.69,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 331862912, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tolleson"
+          },
+          {
+            "name": "Paradise Valley",
+            "at_mi": 6.5,
+            "off_mi": 5.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150940217, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Paradise Valley"
+          },
+          {
+            "name": "Guadalupe",
+            "at_mi": 8.9,
+            "off_mi": 5.07,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150970836, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Guadalupe"
+          },
+          {
             "name": "River Of Time Museum",
             "category": "museum",
             "kind": "point",
             "at_mi": 27.8,
             "spoken": "River Of Time Museum ahead"
+          },
+          {
+            "name": "Fountain Hills",
+            "at_mi": 29.0,
+            "off_mi": 2.9,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150936407, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fountain Hills"
+          },
+          {
+            "name": "Fort McDowell",
+            "at_mi": 30.6,
+            "off_mi": 3.83,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150943188, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fort McDowell"
           },
           {
             "name": "Verde River",
@@ -25291,6 +27370,33 @@
             "kind": "zone",
             "at_mi": 44.7,
             "spoken": "Entering Tonto National Forest"
+          },
+          {
+            "name": "Rio Verde",
+            "at_mi": 46.3,
+            "off_mi": 9.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150941323, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Rio Verde"
+          },
+          {
+            "name": "Mesa Del Caballo",
+            "at_mi": 89.0,
+            "off_mi": 4.15,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150952341, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mesa Del Caballo"
+          },
+          {
+            "name": "Beaver Valley Estates",
+            "at_mi": 89.0,
+            "off_mi": 7.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150940072, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Beaver Valley Estates"
           }
         ],
         "speed_limits": [
@@ -26506,6 +28612,42 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Wilhoit",
+            "at_mi": 0.0,
+            "off_mi": 10.44,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150972785, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wilhoit"
+          },
+          {
+            "name": "Williamson",
+            "at_mi": 0.1,
+            "off_mi": 11.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150966853, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Williamson"
+          },
+          {
+            "name": "Dewey-Humboldt",
+            "at_mi": 16.3,
+            "off_mi": 1.84,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9564960302, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Dewey-Humboldt"
+          },
+          {
+            "name": "Mayer",
+            "at_mi": 17.1,
+            "off_mi": 9.1,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150946858, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mayer"
+          },
+          {
             "name": "Prescott National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -26520,11 +28662,101 @@
             "spoken": "Crossing the Verde River"
           },
           {
+            "name": "Cornville",
+            "at_mi": 45.5,
+            "off_mi": 7.78,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150951488, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cornville"
+          },
+          {
+            "name": "Lake Montezuma",
+            "at_mi": 47.4,
+            "off_mi": 1.75,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150980291, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lake Montezuma"
+          },
+          {
             "name": "Coconino National Forest",
             "category": "national_forest",
             "kind": "zone",
             "at_mi": 50.6,
             "spoken": "Entering Coconino National Forest"
+          },
+          {
+            "name": "Munds Park",
+            "at_mi": 75.6,
+            "off_mi": 0.73,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150947079, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Munds Park"
+          },
+          {
+            "name": "Mountainaire",
+            "at_mi": 86.9,
+            "off_mi": 1.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150938032, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mountainaire"
+          },
+          {
+            "name": "Kachina Village",
+            "at_mi": 87.3,
+            "off_mi": 0.5,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959063, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Kachina Village"
+          },
+          {
+            "name": "Bellemont",
+            "at_mi": 92.0,
+            "off_mi": 9.74,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150933177, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Bellemont"
+          },
+          {
+            "name": "Doney Park",
+            "at_mi": 96.0,
+            "off_mi": 5.72,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590972, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Doney Park"
+          },
+          {
+            "name": "Mountain View Ranches",
+            "at_mi": 96.0,
+            "off_mi": 8.47,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590971, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Mountain View Ranches"
+          },
+          {
+            "name": "Timberline-Fernwood",
+            "at_mi": 96.0,
+            "off_mi": 9.37,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590973, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Timberline-Fernwood"
+          },
+          {
+            "name": "Fort Valley",
+            "at_mi": 98.0,
+            "off_mi": 6.49,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11709590970, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Fort Valley"
           }
         ],
         "speed_limits": [
@@ -27844,6 +30076,60 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Wilhoit",
+            "at_mi": 0.0,
+            "off_mi": 10.44,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150972785, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wilhoit"
+          },
+          {
+            "name": "Williamson",
+            "at_mi": 0.1,
+            "off_mi": 11.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150966853, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Williamson"
+          },
+          {
+            "name": "Dewey-Humboldt",
+            "at_mi": 18.3,
+            "off_mi": 0.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9564960302, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Dewey-Humboldt"
+          },
+          {
+            "name": "Spring Valley",
+            "at_mi": 32.3,
+            "off_mi": 0.22,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150959432, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Spring Valley"
+          },
+          {
+            "name": "Cordes Lakes",
+            "at_mi": 35.9,
+            "off_mi": 1.13,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150980736, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cordes Lakes"
+          },
+          {
+            "name": "Black Canyon City",
+            "at_mi": 54.3,
+            "off_mi": 0.54,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150932977, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Black Canyon City"
+          },
+          {
             "name": "New River",
             "category": "river",
             "kind": "point",
@@ -27856,6 +30142,87 @@
             "kind": "point",
             "at_mi": 60.4,
             "spoken": "Crossing the Agua Fria River"
+          },
+          {
+            "name": "Anthem",
+            "at_mi": 69.5,
+            "off_mi": 1.0,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150960280, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Anthem"
+          },
+          {
+            "name": "Desert Hills",
+            "at_mi": 72.8,
+            "off_mi": 0.6,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9237180808, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Desert Hills"
+          },
+          {
+            "name": "Cave Creek",
+            "at_mi": 73.1,
+            "off_mi": 10.87,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150964694, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cave Creek"
+          },
+          {
+            "name": "Sun City",
+            "at_mi": 85.7,
+            "off_mi": 9.51,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150974590, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sun City"
+          },
+          {
+            "name": "El Mirage",
+            "at_mi": 86.8,
+            "off_mi": 11.95,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150951742, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing El Mirage"
+          },
+          {
+            "name": "Youngtown",
+            "at_mi": 88.2,
+            "off_mi": 10.72,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150949887, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Youngtown"
+          },
+          {
+            "name": "Tolleson",
+            "at_mi": 96.5,
+            "off_mi": 8.59,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 331862912, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tolleson"
+          },
+          {
+            "name": "Guadalupe",
+            "at_mi": 101.1,
+            "off_mi": 8.19,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150970836, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Guadalupe"
+          },
+          {
+            "name": "Paradise Valley",
+            "at_mi": 101.9,
+            "off_mi": 9.12,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150940217, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Paradise Valley"
           }
         ],
         "speed_limits": [
@@ -28622,11 +30989,65 @@
         ],
         "landmarks": [
           {
+            "name": "Wagon Wheel",
+            "at_mi": 0.0,
+            "off_mi": 4.56,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11586019228, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Wagon Wheel"
+          },
+          {
+            "name": "Lake of the Woods",
+            "at_mi": 0.1,
+            "off_mi": 7.17,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 11586019224, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Lake of the Woods"
+          },
+          {
+            "name": "Pinetop-Lakeside",
+            "at_mi": 0.7,
+            "off_mi": 8.48,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 151812520, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pinetop-Lakeside"
+          },
+          {
+            "name": "Taylor",
+            "at_mi": 16.1,
+            "off_mi": 0.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150950180, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Taylor"
+          },
+          {
+            "name": "Snowflake",
+            "at_mi": 19.4,
+            "off_mi": 0.04,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150953575, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Snowflake"
+          },
+          {
             "name": "Little Colorado River",
             "category": "river",
             "kind": "point",
             "at_mi": 41.2,
             "spoken": "Crossing the Little Colorado River"
+          },
+          {
+            "name": "Joseph City",
+            "at_mi": 47.0,
+            "off_mi": 10.61,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150935954, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Joseph City"
           }
         ],
         "speed_limits": [
@@ -29571,11 +31992,65 @@
         ],
         "landmarks": [
           {
+            "name": "Sierra Vista Estates",
+            "at_mi": 0.0,
+            "off_mi": 4.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150981085, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sierra Vista Estates"
+          },
+          {
+            "name": "Nicksville",
+            "at_mi": 0.0,
+            "off_mi": 7.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150937806, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Nicksville"
+          },
+          {
             "name": "Babacomari River",
             "category": "river",
             "kind": "point",
             "at_mi": 5.8,
             "spoken": "Crossing the Babacomari River"
+          },
+          {
+            "name": "Huachuca City",
+            "at_mi": 6.1,
+            "off_mi": 0.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150950608, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
+            "spoken": "Entering Huachuca City"
+          },
+          {
+            "name": "Whetstone",
+            "at_mi": 10.7,
+            "off_mi": 0.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150978173, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
+            "spoken": "Entering Whetstone"
+          },
+          {
+            "name": "Sonoita",
+            "at_mi": 25.7,
+            "off_mi": 0.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150966256, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
+            "spoken": "Entering Sonoita"
+          },
+          {
+            "name": "Patagonia",
+            "at_mi": 36.1,
+            "off_mi": 0.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9989930352, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
+            "spoken": "Entering Patagonia"
           },
           {
             "name": "Santa Cruz River",
@@ -30366,6 +32841,33 @@
             "kind": "point",
             "at_mi": 8.3,
             "spoken": "Crossing the Santa Cruz River"
+          },
+          {
+            "name": "Pascua Pueblo",
+            "at_mi": 8.7,
+            "off_mi": 4.59,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9435835019, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pascua Pueblo"
+          },
+          {
+            "name": "Sahuarita",
+            "at_mi": 18.9,
+            "off_mi": 1.88,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150963861, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sahuarita"
+          },
+          {
+            "name": "Green Valley",
+            "at_mi": 25.8,
+            "off_mi": 0.02,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150948841, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Green Valley"
           }
         ],
         "interchanges": [
@@ -31412,6 +33914,42 @@
         ],
         "landmarks": [
           {
+            "name": "Pascua Pueblo",
+            "at_mi": 2.2,
+            "off_mi": 8.14,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9435835019, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Pascua Pueblo"
+          },
+          {
+            "name": "Vail",
+            "at_mi": 19.4,
+            "off_mi": 1.45,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150937823, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Vail"
+          },
+          {
+            "name": "Corona de Tucson",
+            "at_mi": 19.9,
+            "off_mi": 5.76,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150934158, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Corona de Tucson"
+          },
+          {
+            "name": "Benson",
+            "at_mi": 41.2,
+            "off_mi": 2.97,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150933986, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Benson"
+          },
+          {
             "name": "Burro Gap",
             "category": "mountain_pass",
             "kind": "point",
@@ -31433,11 +33971,47 @@
             "spoken": "Approaching Lone Pine Saddle"
           },
           {
+            "name": "Whetstone",
+            "at_mi": 58.0,
+            "off_mi": 0.01,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150978173, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Whetstone"
+          },
+          {
             "name": "Babacomari River",
             "category": "river",
             "kind": "point",
             "at_mi": 61.4,
             "spoken": "Crossing the Babacomari River"
+          },
+          {
+            "name": "Huachuca City",
+            "at_mi": 62.3,
+            "off_mi": 0.09,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150950608, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Huachuca City"
+          },
+          {
+            "name": "Sierra Vista Estates",
+            "at_mi": 70.0,
+            "off_mi": 4.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150981085, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sierra Vista Estates"
+          },
+          {
+            "name": "Nicksville",
+            "at_mi": 70.0,
+            "off_mi": 7.67,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150937806, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Nicksville"
           }
         ],
         "speed_limits": [
@@ -32634,11 +35208,38 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Cocopah",
+            "at_mi": 2.6,
+            "off_mi": 10.68,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 9441094944, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Cocopah"
+          },
+          {
+            "name": "Somerton",
+            "at_mi": 2.9,
+            "off_mi": 9.13,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150967494, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Somerton"
+          },
+          {
             "name": "Telegraph Pass",
             "category": "mountain_pass",
             "kind": "point",
             "at_mi": 17.0,
             "spoken": "Approaching Telegraph Pass"
+          },
+          {
+            "name": "Tacna",
+            "at_mi": 42.4,
+            "off_mi": 0.35,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150964483, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Entering Tacna"
           },
           {
             "name": "Gila River",
@@ -32648,11 +35249,83 @@
             "spoken": "Crossing the Gila River"
           },
           {
+            "name": "Waddell",
+            "at_mi": 162.7,
+            "off_mi": 7.11,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150947217, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Waddell"
+          },
+          {
+            "name": "Litchfield Park",
+            "at_mi": 167.7,
+            "off_mi": 2.46,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150979227, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Litchfield Park"
+          },
+          {
+            "name": "El Mirage",
+            "at_mi": 171.2,
+            "off_mi": 10.63,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150951742, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing El Mirage"
+          },
+          {
+            "name": "Youngtown",
+            "at_mi": 171.4,
+            "off_mi": 9.18,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150949887, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Youngtown"
+          },
+          {
+            "name": "Sun City",
+            "at_mi": 172.2,
+            "off_mi": 11.59,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150974590, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Sun City"
+          },
+          {
             "name": "Agua Fria River",
             "category": "river",
             "kind": "point",
             "at_mi": 172.7,
             "spoken": "Crossing the Agua Fria River"
+          },
+          {
+            "name": "Tolleson",
+            "at_mi": 173.3,
+            "off_mi": 0.83,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 331862912, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Tolleson"
+          },
+          {
+            "name": "Paradise Valley",
+            "at_mi": 184.6,
+            "off_mi": 8.24,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=town node 150940217, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Paradise Valley"
+          },
+          {
+            "name": "Guadalupe",
+            "at_mi": 185.5,
+            "off_mi": 8.35,
+            "category": "village",
+            "kind": "point",
+            "source": "OpenStreetMap place=village node 150970836, projected onto the leg's OpenRouteService driving-hgv route",
+            "spoken": "Passing Guadalupe"
           }
         ],
         "speed_limits": [

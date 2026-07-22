@@ -13,7 +13,12 @@ from ..models.profile import Profile, ProfileIntegrityError
 from ..models.start_options import apply_start_option, option_for_profile
 from ..music import select_menu_music_sequence
 from ..playtest_levers import apply_continue_levers
-from ..settings import DRIVING_ASSIST_FIELDS, DRIVING_ASSIST_PRESETS, TIME_SCALES
+from ..settings import (
+    DRIVING_ASSIST_FIELDS,
+    DRIVING_ASSIST_PRESETS,
+    PLACE_CALLOUT_MODES,
+    TIME_SCALES,
+)
 from .base import MenuItem, MenuState, State
 from .main_menu_help import (
     HELP_PAGES as HELP_PAGES,
@@ -683,6 +688,8 @@ class SettingsState(MenuState):
         ]
         # The Online items moved to the main menu; this stays in the old spot
         # for a release or two so muscle memory still lands somewhere useful.
+        # This line's old spot was after Speech and weather (dev's index 3
+        # predates the Driving assistance category).
         items.insert(
             4,
             MenuItem(
@@ -1023,7 +1030,8 @@ class SettingsCategoryState(MenuState):
                 "rivers, mountain passes, museums, and billboards. Right "
                 "arrow turns everything on, Left arrow turns everything "
                 "off, and the switches below fine-tune each kind. Safety "
-                "and navigation announcements are never affected.",
+                "and navigation announcements are never affected, and town "
+                "names have their own Place callouts setting below.",
             ),
             (
                 lambda: f"Speak parks and forests: {'on' if s.chatter_parks else 'off'}",
@@ -1052,6 +1060,16 @@ class SettingsCategoryState(MenuState):
                 lambda _d: self._toggle_chatter("chatter_billboards"),
                 "Occasional roadside billboards, read as you pass them. "
                 "Expect attorney ads and questionable tourist traps.",
+            ),
+            (
+                lambda: f"Place callouts: {s.place_callouts}",
+                self._cycle_place_callouts,
+                "How much the co-driver says about places along the road. "
+                "Sparse speaks only the town names that explain a speed "
+                "limit change, like Entering Strawberry right before its 35. "
+                "All adds the towns the route passes. Off silences place "
+                "names entirely; speed limit announcements themselves are "
+                "never affected.",
             ),
             (
                 lambda: (
@@ -1381,6 +1399,12 @@ class SettingsCategoryState(MenuState):
 
     def _cycle_verbosity(self, d: int) -> None:
         self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 3
+        self._announce()
+
+    def _cycle_place_callouts(self, d: int) -> None:
+        s = self.ctx.settings
+        i = PLACE_CALLOUT_MODES.index(s.place_callouts)
+        s.place_callouts = PLACE_CALLOUT_MODES[(i + d) % len(PLACE_CALLOUT_MODES)]
         self._announce()
 
     def _set_all_chatter(self, d: int) -> None:

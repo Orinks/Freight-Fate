@@ -64,6 +64,25 @@ class DrivingEventMixin:
             category = str(event.data.get("category", ""))
             if self._terse_speech() or not self.ctx.settings.chatter_enabled(category):
                 return
+            # Town and village names answer to the place-callouts ladder, not
+            # the chatter switches: sparse keeps only the names that explain
+            # a speed limit change, all adds the towns the route passes.
+            if category == "village":
+                mode = self.ctx.settings.place_callouts
+                if mode == "off":
+                    return
+                if mode == "sparse" and not event.data.get("explains_limit"):
+                    return
+        if kind == TripEventKind.CHECKPOINT and self.ctx.settings.place_callouts != "all":
+            # Curated route-town markers ("Passing X on I-40") are places,
+            # not safety -- only the loudest place tier speaks them.
+            return
+        if kind == TripEventKind.GPS_CUE:
+            cue = event.data.get("cue")
+            if getattr(cue, "kind", "") == "checkpoint":
+                # The two-mile advance for a place earns nothing at any tier:
+                # a town is not actionable the way an exit or toll is.
+                return
         if event.message:
             self._last_event_message = event.message  # replayable with A
         if kind == TripEventKind.HAZARD:
@@ -450,8 +469,8 @@ class DrivingEventMixin:
             self._exit_signal_on = False
             self._exit_cancel_armed = False
             self._exit_signal_canceled = True
-            # Staying on the highway: release the ramp cap so cruise can
-            # climb back to the corridor target instead of crawling at 40.
+            # Letting the cap linger would leave automatic control crawling
+            # at ramp speed down the open highway after the driver begged off.
             self._cruise_exit_mph = None
             self.ctx.say("Signal canceled. Keep following the highway.")
             return
@@ -1532,6 +1551,21 @@ class DrivingEventMixin:
 
     def _toggle_cruise(self) -> None:
         t = self.truck
+        # Parked with the brake set, the cruise button is the fast-idle
+        # switch, exactly like a real electronic truck: latch a high idle
+        # (warm-up, faster air build), press again to drop it. It also
+        # cancels on its own the moment the parking brake releases.
+        if t.high_idle_allowed:
+            if t.high_idle_rpm is None:
+                t.high_idle_rpm = HIGH_IDLE_DEFAULT_RPM
+                self.ctx.say(
+                    f"High idle, {t.high_idle_rpm:.0f} RPM. "
+                    "Plus and minus adjust it; releasing the parking brake cancels."
+                )
+            else:
+                t.high_idle_rpm = None
+                self.ctx.say("High idle off.")
+            return
         if (
             self._speed_control_armed
             or self._keeper_mph is not None
@@ -1588,7 +1622,14 @@ class DrivingEventMixin:
         """Raise or lower the cruise set point -- the Accel/Coast (+/-) buttons.
 
         While the speed keeper is handling a restricted zone, the same buttons
-        adjust the open-road target that adaptive cruise will resume."""
+        adjust the open-road target that adaptive cruise will resume. Parked
+        with high idle latched, they step the idle setpoint instead."""
+        t = self.truck
+        if t.high_idle_rpm is not None and t.high_idle_allowed:
+            step = HIGH_IDLE_STEP_RPM if delta_mph > 0 else -HIGH_IDLE_STEP_RPM
+            t.high_idle_rpm = max(HIGH_IDLE_MIN_RPM, min(HIGH_IDLE_MAX_RPM, t.high_idle_rpm + step))
+            self.ctx.say(f"High idle {t.high_idle_rpm:.0f} RPM.")
+            return
         if self._cruise_mph is None and self._keeper_mph is None:
             self.ctx.say("Adaptive cruise is off. Press K to set it first.")
             return

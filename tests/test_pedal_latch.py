@@ -131,7 +131,7 @@ def test_latched_throttle_drives_the_truck_hands_free(monkeypatch):
         app.ctx, "say_event", lambda text, interrupt=True: events.append(text)
     )
     monkeypatch.setattr(
-        app.ctx.audio, "play", lambda key, volume=1.0: played.append(key)
+        app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append(key)
     )
     try:
         driving = start_drive(app)

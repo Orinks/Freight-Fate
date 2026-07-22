@@ -174,7 +174,9 @@ def test_passing_hazard_plays_clear_sound(monkeypatch):
     app = App()
     played = []
     events = []
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
+    )
     monkeypatch.setattr(
         app.ctx,
         "say_event",
@@ -289,7 +291,7 @@ def test_sustained_redline_speaks_a_damage_warning(monkeypatch):
     app = App()
     events = []
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append(key))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append(key))
     monkeypatch.setattr(
         app.ctx,
         "say_event",
@@ -908,7 +910,9 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
         "say",
         lambda text, interrupt=True: spoken.append((text, interrupt)),
     )
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1714,18 +1718,19 @@ def test_a_zone_past_the_destination_exit_is_never_announced(monkeypatch):
         driving._handle_trip_event(gate_cue)
         assert events == []
 
-        # A zone the truck really does reach still gets its heads-up. A
-        # neutral reason here: facility-flavored zones are dropped separately
-        # until the destination exit is taken, which is not what this pins.
-        reachable = Zone(exit_stop.at_mi - 2.0, exit_stop.at_mi - 1.0, 35.0, "village")
+        # A zone the truck really does reach still gets its heads-up. (On the
+        # 1.9 line the facility-family reasons are suppressed until the exit
+        # is taken and replayed on the street chain, so reachability is
+        # tested with a highway-side reason.)
+        reachable = Zone(exit_stop.at_mi - 2.0, exit_stop.at_mi - 1.0, 35.0, "construction")
         driving._handle_trip_event(
             TripEvent(
                 TripEventKind.GPS_CUE,
-                "In 2 miles, village ahead. Speed limit 35.",
+                "In 2 miles, construction ahead. Speed limit 35.",
                 {"zone": reachable},
             )
         )
-        assert events[-1].startswith("In 2 miles, village")
+        assert events[-1].startswith("In 2 miles, construction")
 
         # A pickup leg drives all the way to the gate, so it keeps the warning.
         driving.phase = "pickup"
@@ -2061,7 +2066,9 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
     spoken = []
     monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -2214,6 +2221,56 @@ def test_engine_brake_cannot_be_enabled_while_accelerating(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_jake_engages_at_last_selected_stage(monkeypatch):
+    """J is the dash switch; 1/2/3 the cylinder selector it remembers."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.throttle = 0.0
+
+        driving.handle_event(key_event(pygame.K_j))
+        assert driving.truck.engine_brake_stage == 3
+        assert any(text == "Jake on, stage three." for text in spoken)
+
+        driving.handle_event(key_event(pygame.K_1))
+        assert driving.truck.engine_brake_stage == 1
+        assert any(text == "Jake stage one selected." for text in spoken)
+
+        # Off and back on: the selector held stage one, so the icy descent
+        # is never surprised by full retard it dialed away earlier.
+        driving.handle_event(key_event(pygame.K_j))
+        assert driving.truck.engine_brake_stage == 0
+        driving.handle_event(key_event(pygame.K_j))
+        assert driving.truck.engine_brake_stage == 1
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_jake_stage_keys_do_nothing_while_the_jake_is_off(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.engine_brake_stage = 0
+
+        driving.handle_event(key_event(pygame.K_2))
+        assert driving.truck.engine_brake_stage == 0
+        assert not any(text.startswith("Jake stage") for text in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_accelerating_turns_engine_brake_off(monkeypatch):
     from freight_fate.app import App
 
@@ -2235,7 +2292,7 @@ def test_accelerating_turns_engine_brake_off(monkeypatch):
 
         assert not driving.truck.engine_brake
         assert driving.truck.throttle > 0.0
-        assert "Engine brake off." in events
+        assert "Jake off." in events
     finally:
         app.shutdown()
 
@@ -2507,6 +2564,44 @@ def test_reverse_audio_cue_loops_while_reverse_is_engaged(monkeypatch):
         driving.truck.transmission.gear = REVERSE
         driving._update_audio(0.0)
         assert starts == ["start", "start"]
+    finally:
+        app.shutdown()
+
+
+def test_air_fill_loop_plays_until_governor_release(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.audio import CH_AIR
+
+    app = App()
+    loops = []
+    monkeypatch.setattr(app.ctx.audio, "set_engine_rpm", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(
+        app.ctx.audio, "start_loop", lambda ch, key, **k: loops.append(("start", ch, key))
+    )
+    monkeypatch.setattr(app.ctx.audio, "stop_loop", lambda ch, **k: loops.append(("stop", ch)))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.set_cold_air_start()
+        driving.truck.start_engine()
+        driving.truck.velocity_mps = 0.0
+        loops.clear()
+
+        driving._update_audio(0.0)
+        driving._update_audio(0.0)  # still building: the loop must not restack
+        assert loops == [("start", CH_AIR, "vehicle/air_pressurize")]
+
+        driving.truck.set_air_ready(parking_brake=True)  # governor release
+        driving._update_audio(0.0)
+        assert loops[-1] == ("stop", CH_AIR)
+
+        driving._update_audio(0.0)  # ready and quiet: no further calls
+        assert loops[-1] == ("stop", CH_AIR)
     finally:
         app.shutdown()
 

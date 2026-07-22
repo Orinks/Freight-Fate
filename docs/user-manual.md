@@ -394,7 +394,8 @@ Driving controls are active while the road view is focused:
 | Plus / Minus | Raise or lower the open-road cruise target by 5 mph while automatic speed control is active. The keypad Plus and Minus keys work too. |
 | X | Signal for or cancel the next announced route exit. The truck takes the ramp when speed, lane setup, and route intent are valid. |
 | T | Open the route point-of-interest menu when stopped at a supported stop. |
-| J | Toggle the engine brake. |
+| J | Toggle the engine brake. It engages at the stage you last selected, like a real dash switch. |
+| 1 / 2 / 3 | Select the engine brake stage -- two, four, or six cylinders of retard -- while it is on. With the engine brake off these keys do nothing. |
 | H | Hold to sound the horn; release to stop it. |
 | Space | Report speed, gear, RPM, the active speed-control mode and open-road target when speed control is on, air pressure, and brake state. |
 | S | Report the posted speed limit here, the zone if any, and how far over you are. In bend country it adds the bend's advisory speed -- the posted limit and the yellow diamond are different numbers on a real road. On a delivery ramp that ends at a traffic light, S answers with the light and the distance to the stop bar instead, since the light is the law there. |
@@ -739,6 +740,7 @@ Use these keys when you need status without leaving the road:
 | V | Weather and forecast. |
 | M | Toggle the in-cab radio. |
 | [ / ] | Tune the radio down or up. |
+| Ctrl+[ / Ctrl+] | Jump to the previous or next radio category: route playlist, Freight Fate stations, your playlists, terrestrial, AFN, satellite. |
 | Y | Speak radio station, source, signal or fallback state, volume, and streamer-safe status. |
 | Tab | Grouped driving status screens. |
 
@@ -879,7 +881,8 @@ Speech and weather settings include:
 | Setting | Purpose |
 | --- | --- |
 | Speech verbosity | Controls how often driving status reminders run. |
-| Roadside chatter | The ambient color spoken between navigation cues: entering parks and forests, named river crossings, mountain passes, museums and attractions, and parody billboards. One master switch turns it all on or off, and each kind has its own switch below it. Safety and navigation speech is never affected. |
+| Roadside chatter | The ambient color spoken between navigation cues: entering parks and forests, named river crossings, mountain passes, museums and attractions, and parody billboards. One master switch turns it all on or off, and each kind has its own switch below it. Safety and navigation speech is never affected, and town names have their own Place callouts setting. |
+| Place callouts | How much the co-driver says about places along the road. Sparse, the default, speaks only the town names that explain a speed limit change, like Entering Strawberry right before its 35. All adds the towns the route passes through or skirts. Off silences place names entirely. Speed limit announcements themselves are never affected, and no tier ever reads out every place on the map. |
 | Menu position announcements | When on, menus say the position, like 3 of 10, after each option. Turn off to hear only the option. |
 | Driving event voice | Routes road events through the main voice or a separate software voice when available. |
 | Speech rate | Appears only when the current voice source supports rate changes. |
@@ -960,6 +963,22 @@ Real public stream stations, including AFN choices, are hidden unless you turn o
 real streams and turn off streamer-safe mode. When the BASS audio backend is
 available, those stations play from their public stream URLs. If a selected
 station cannot play, the radio falls back safely instead of blocking the drive.
+
+You can put your own music on the dial. Drop M3U or M3U8 playlist files into
+the Playlists folder next to your saves (the game creates it on first run) and
+each file becomes a station under Your playlists, named from the playlist. The
+entries can point at files anywhere your computer can read, including network
+drives, and the usual formats all play: mp3, ogg, opus, flac, aac, and wma.
+The station remembers its place while you tune away during a drive, and a file
+that will not open is skipped rather than stopping the music. Personal
+playlists play only when streamer-safe mode is off, because the game cannot
+vouch for what your files are licensed for. Ctrl+Right bracket jumps straight
+to the category.
+
+The dial is grouped into categories -- route playlist, Freight Fate stations,
+your playlists, terrestrial, AFN, and satellite -- and Ctrl with a bracket key
+jumps between them, so twenty-five AFN stations never again stand between you
+and the local dial.
 
 Useful accessibility patterns:
 

@@ -4,7 +4,7 @@ import pytest
 
 from freight_fate.sim import TruckState
 from freight_fate.sim.transmission import REVERSE
-from freight_fate.sim.vehicle import REFERENCE_CARGO_KG
+from freight_fate.sim.vehicle import REFERENCE_CARGO_KG, TRAILER_TARE_KG
 
 
 def drive(truck: TruckState, seconds: float, dt: float = 1 / 60) -> None:
@@ -975,6 +975,75 @@ def test_compressor_builds_all_reservoirs_before_cutout():
     assert not t.air_compressor_active
 
 
+def test_fast_idle_builds_air_then_settles_to_drive_idle():
+    # A cold-started parked truck holds the raised idle until the governor
+    # releases the parking-brake air, then settles back -- the audible flip
+    # the engine voice keys off. The higher rpm also spins the compressor
+    # faster, so the charge genuinely arrives sooner.
+    t = TruckState()
+    t.set_cold_air_start()
+    t.start_engine()
+
+    assert t.fast_idle_active
+    drive(t, 3.0)
+    assert t.rpm == pytest.approx(t.specs.fast_idle_rpm, rel=0.05)
+    assert not t.air_ready
+
+    drive(t, 15.0)  # the air comes ready along the way
+    assert t.air_ready
+    assert not t.fast_idle_active
+    assert t.rpm == pytest.approx(t.specs.idle_rpm, rel=0.05)
+
+
+def test_high_idle_holds_setpoint_and_cancels_on_brake_release():
+    from freight_fate.sim.vehicle import HIGH_IDLE_DEFAULT_RPM
+
+    t = TruckState()
+    t.set_air_ready(parking_brake=True)
+    t.start_engine()
+    t.high_idle_rpm = HIGH_IDLE_DEFAULT_RPM
+
+    drive(t, 3.0)
+    assert t.rpm == pytest.approx(HIGH_IDLE_DEFAULT_RPM, rel=0.05)
+
+    # Throttle still revs above the latched floor.
+    t.throttle = 1.0
+    drive(t, 3.0)
+    assert t.rpm > HIGH_IDLE_DEFAULT_RPM * 1.5
+    t.throttle = 0.0
+
+    # Releasing the parking brake cancels the latch, like real fast idle.
+    assert t.release_parking_brake()
+    drive(t, 3.0)
+    assert t.high_idle_rpm is None
+    assert t.rpm == pytest.approx(t.specs.idle_rpm, rel=0.05)
+
+
+def test_high_idle_burns_more_parked_fuel_than_plain_idle():
+    idle = TruckState()
+    idle.set_air_ready(parking_brake=True)
+    idle.start_engine()
+    high = TruckState()
+    high.set_air_ready(parking_brake=True)
+    high.start_engine()
+    high.high_idle_rpm = 1500.0
+
+    drive(idle, 30.0)
+    drive(high, 30.0)
+
+    assert high.fuel_gal < idle.fuel_gal < high.specs.fuel_tank_gal
+
+
+def test_fast_idle_never_engages_while_rolling():
+    t = TruckState()
+    t.set_air_ready(parking_brake=False)
+    t.start_engine()
+    t.air_pressure_psi = t.specs.air_governor_cut_in_psi - 5.0  # rebuilding on the move
+    t.velocity_mps = 15.0
+
+    assert not t.fast_idle_active
+
+
 def test_parking_brake_release_requires_ready_air_pressure():
     t = TruckState()
     t.set_cold_air_start()
@@ -1032,3 +1101,68 @@ def test_old_air_brake_snapshot_restores_all_reservoirs_from_pressure():
     assert t.trailer_air_psi == pytest.approx(88.0)
     assert t.air_pressure_psi == pytest.approx(88.0)
     assert not t.parking_brake
+
+
+def test_bobtail_tare_drops_the_trailer_share():
+    hitched = TruckState(cargo_kg=0.0)
+    bobtail = TruckState(cargo_kg=0.0, trailer_attached=False)
+    assert bobtail.tare_kg == pytest.approx(hitched.tare_kg - TRAILER_TARE_KG)
+    assert bobtail.gross_mass_kg < hitched.gross_mass_kg
+
+
+def test_bobtail_outruns_the_deadhead_off_the_line():
+    marks = {}
+    for name, attached in (("deadhead", True), ("bobtail", False)):
+        truck = make_auto_truck()
+        truck.set_air_ready(parking_brake=False)
+        truck.cargo_kg = 0.0
+        truck.trailer_attached = attached
+        truck.throttle = 1.0
+        marks[name] = time_to_speed(truck, 45.0)
+    assert marks["bobtail"] is not None and marks["deadhead"] is not None
+    assert marks["bobtail"] < marks["deadhead"]
+
+
+def test_bobtail_air_gauge_ignores_the_trailer_line():
+    truck = TruckState(trailer_attached=False)
+    truck.trailer_air_psi = 0.0
+    assert truck.air_pressure_psi == pytest.approx(
+        min(truck.primary_air_psi, truck.secondary_air_psi)
+    )
+    assert not truck.spring_brakes_active
+
+
+def _gear_steps(truck: TruckState, seconds: float) -> list[int]:
+    steps = []
+    previous = truck.transmission.gear
+    for _ in range(int(seconds * 60)):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        gear = truck.transmission.gear
+        if gear > previous:
+            steps.append(gear - previous)
+        if gear != previous:
+            previous = gear
+    return steps
+
+
+def test_light_truck_skip_shifts_at_moderate_throttle():
+    # The machine-gun report: empty at part throttle, the box used to grab
+    # every single gear about a second apart because the skip's landing floor
+    # was tuned for a loaded rig. Light trucks should skip holes like a real
+    # driver does.
+    truck = make_auto_truck()
+    truck.set_air_ready(parking_brake=False)
+    truck.cargo_kg = 0.0
+    truck.throttle = 0.45
+    steps = _gear_steps(truck, 60.0)
+    assert 2 in steps
+
+
+def test_loaded_truck_never_skip_shifts():
+    truck = make_auto_truck()
+    truck.set_air_ready(parking_brake=False)
+    truck.cargo_kg = REFERENCE_CARGO_KG
+    truck.throttle = 0.45
+    steps = _gear_steps(truck, 60.0)
+    assert steps and all(step == 1 for step in steps)

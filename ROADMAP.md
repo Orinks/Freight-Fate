@@ -43,9 +43,10 @@ terminal becomes the anchor of that week instead of a spawn point.
 - [x] **Per-truck condition.** Wear, damage, and fuel moved off the profile into `truck_conditions`, keyed by truck, so each owned tractor keeps its own state and swapping trucks no longer teleports condition. Legacy saves migrate (all owned trucks inherit current wear; no pristine spare), per-truck wear is under the save signature, and the field is scoped by truck *model* key -- true per-instance trucks are still the rental feature's job.
 - [ ] Truck selling / trade-in at the dealer: no sell path exists today, so `truck_conditions` never needs to drop a record. When selling lands, drop the sold truck's condition record (and decide salvage value from its wear).
 - [ ] Transmission as a per-truck purchase spec (rides the dealer/sell path above): a gearbox is bought with the truck, never swapped in later. Carrier-spec company tractors run automatics like real fleets; owner-operators choose at the dealer, and the cheap old rigs of the lease-to-start onramp skew manual -- cheap entry costs shifting skill. Gear count (10/13/18-speed) can join as a spec later. The global Transmission setting survives as the player's accessibility override, and dispatch respects it.
+- [ ] **ATS-style in-city facility fronts (community ask via Josh, 2026-07-21).** A player asked for "city services like in American Truck Simulator" -- the drivable in-city facility buildings: truck dealer, service shop, purchasable home garage, recruitment agency, truck wash. Nearly all of it maps onto features already planned here (dealer/sell path and transmission spec above; player truck marketplace; multi-truck logistics with a per-truck home city; the AI driver fleet IS the recruitment agency; truck-stop repair bays shipped). Recommended shape, relayed to the owner for Josh: do NOT hard-gate the district to owner-operators -- facilities answer honestly by role instead. A company driver browses the dealer (window-shopping is the aspiration loop, and the lease-to-start onramp is the dealer's answer to a broke driver), repairs stay carrier-billed at terminals, and only the recruitment agency waits naturally on owner-operator status plus a second truck. Physical access rides the facility-approach machinery: each facility is an endpoint on a baked surface-street chain, the same way docks and errand destinations connect today -- also the answer to "how do we connect parking to the surface streets": mint the spot as an endpoint in the same bake. Note the naming collision: Freight Fate's existing "city services" are the in-town errand drives, a different feature.
 - [x] **Jake brake realism.** The jake is now retarding torque through the gearing -- three stages, scaling with RPM and gear ratio -- so gear discipline decides descents: stage 3 in 7th holds a loaded rig on a 6 percent grade with zero service brake, stage 1 makes the shoes work, and overdrive gives almost nothing. Automatics pre-select down into the retard band with the jake on and upshift past the RPM ceiling to protect the engine (the realistic runaway spiral). Bench-solved anchors: jake-only holds up to ~26 tonnes of payload on the 6 percent; past that you snub or run away. The on/off key still works; a staged in-cab control is open follow-up below.
 - [x] **Brake thermal realism.** Drum heat is now real energy accounting: dissipated brake power soaks a drum thermal mass, cooling is convective (square root of speed -- outrunning your brakes no longer air-conditions them), and faded shoes grip less so they also heat less. The six-mile 6 percent drag now peaks at 466 C with miles ridden past fade, while jake-and-snub finishes cool -- the drag-vs-snub lesson finally has teeth. Overspeed realism came with it: the road can drive the engine past the governor (that wears it; governed running is safe), and brake wear is now charged per megajoule actually dissipated in the shoes.
-- [ ] Staged jake in-cab control: the physics supports stages 1-3 but the J key still toggles off/full. Add a spoken stage cycle (and gamepad binding) so drivers can pick partial retard on purpose.
+- [x] Staged jake in-cab control (landed 2026-07-21, owner control scheme): J is the dash enable switch and re-engages at the last-selected stage; 1/2/3 select two/four/six cylinders while the jake is on (spoken), and do nothing while it is off so the number keys stay free for other contexts. Controller: modifier + jake button cycles stages. Automatic descent control still manages the full jake itself.
 - [x] **Traction deep-dive: freezing rain, hydroplaning, jake grip cap.** `WeatherKind.ICE` (grip 0.15, a third of snow) forms physically -- rain sampled in the 1 to -4 C band glazes, and the live NWS feed maps freezing rain/sleet/ice to it instead of snow -- with its own hazards, spoken "ice on the road" status, and a bench `stop-ice` anchor (880 ft from 40 mph vs 329 dry from 60). Hydroplaning follows the Horne relation: onset ~106 mph on fresh tread (trucks at highway pressure basically never plane), pulled down by tread wear and standing-water depth (`WeatherEffects.water_mm` -> `truck.water_mm`) -- 80 percent worn rubber planes at ~59 in heavy rain, grip collapsing toward a 0.3 floor over a 12 mph band, with a spoken onset warning and hydro-aware conditions incidents. The jake is now capped by drive-axle grip (42.5 percent of gross, half usable before lockup): dry never binds, glare ice breaks stage 3 loose in a low gear while stage 1 stays hooked up, `jake_slipping` speaks a warning, and the bench `grade-jake-ice` run shows the capped jake losing ground on a 4 percent it would hold dry.
 - [ ] Jake-slip and hydroplane consequences beyond the warning: sustained sliding should be able to escalate into a real incident (trolley jackknife / spin) through the event system, which needs a "release the jake / ease off" resolution verb rather than the brake-to-answer hazard contract.
 - [ ] **Curve management as a difficulty tier (owner idea 2026-07-15;
@@ -106,6 +107,24 @@ terminal becomes the anchor of that week instead of a spawn point.
       LANE DROPS: where three lanes become two, that is a genuine merge
       event with a real location, not a scripted taper. Goes in the next
       map re-bake brief.
+- [ ] **Hand throttle, parked high-idle, and equipment by model era
+      (owner idea 2026-07-22, sparked by the 896 take's rev-and-hold).**
+      Two features on the per-truck-spec pattern. (1) PARKED HIGH-IDLE
+      -- SHIPPED 2026-07-22 (sound/engine-integration): K latches it
+      while the parking brake holds (controller: Y), plus/minus step
+      the setpoint 800-1500, air genuinely builds faster, parked
+      revving burns real fuel, and releasing the brake cancels it like
+      a real ECM. (2) EQUIPMENT BY ERA:
+      cruise control only exists on electronic engines (~1990-on), so a
+      genuinely vintage mechanical rig -- marketplace/classic material,
+      the 896 Mack's era -- gets NO cruise, a HAND THROTTLE that also
+      holds rolling (throttle, not speed: rpm sags audibly on grades),
+      manual box only, and NO ABS (pre-1997), which couples straight
+      into the traction physics. Lease-fleet "old" trucks (2000s-2010s)
+      keep cruise and ABS but not adaptive extras. Same accessibility
+      rule as the gearbox spec: realism default per truck, Settings
+      override stays. On-road hand throttle must cancel instantly on
+      brake, like cruise.
 - [ ] **A turn signal you actually operate (owner idea 2026-07-16).**
       Today lane-change taps click the signal for you; give the player
       the stalk: signal before a lane change, and unsignaled changes
@@ -174,18 +193,11 @@ terminal becomes the anchor of that week instead of a spawn point.
       must sit on mountain segments), and the handshake:
       docs/terrain-audit-brief.md. Oatis's next map job after the
       access sweep merges.
-- [ ] **Name the villages a leg passes through (owner-approved sweep,
-      2026-07-20).** Ship as a Settings toggle, OFF by default:
-      "Village callouts" speaks "Entering Strawberry" style lines so a
-      town's 35 zone arrives with its reason attached. Sweep planned
-      for 2026-07-20. Camp Verde-Payson drives straight through
-      Strawberry and Pine -- their 35 mph zones are baked and now end
-      honestly -- but no callout speaks their names: the landmark list
-      has the forests and the East Verde River, not the towns. Bake
-      pass-through localities (OSM place=village/town on or near the
-      corridor) as roadside callouts, and pair each with its speed
-      zone so "Entering Strawberry" and "limit 35" arrive as one
-      story. Map-wide sweep, same machinery as the landmark bake.
+- [x] **Name the villages a leg passes through (landed 2026-07-20).**
+      Swept and spoken: "Entering Strawberry" arrives just before the
+      35 it explains, on every leg that has such a town. Governed by
+      the Place callouts ladder (see the map workstream section for
+      the bake details and the ladder design).
 - [ ] **Guard the real world source during tests.** save_world()
       defaults to the checked-in source, so a stray call from a test or
       ad-hoc script silently rewrites the map (same class as the
@@ -222,6 +234,30 @@ terminal becomes the anchor of that week instead of a spawn point.
       Note for the pricing pass: `$0.00` events are NOT bugs. They are the
       documented ticket-system entry markers (see `docs/route-stop-data.md`)
       that settle at the exit gantry.
+      **State 2026-07-21: groundwork landed, data NOT yet baked.** The old
+      46 estimated events are gone; the world currently carries ZERO toll
+      events, only per-leg `tollway_detected` scan flags. `tools/toll_scan.py`
+      (evidence scanner), `tools/toll_rates.py` (the researched 5-axle
+      tariff table), and `tools/toll_review_sheet.py` all shipped in
+      fcd846a; the remaining work is reviewing the sheet and running the
+      bake. Until then the game bills no tolls at all -- upstream's
+      "prices seem off" report (Josh, 2026-07-21) is right on both lines.
+- [ ] **Interactive toll plazas: stop, window down, pay cash (Josh ask,
+      owner approved, 2026-07-21).** Real toll points split two ways and
+      the bake should record which is which per event: all-electronic
+      gantries have nothing to stop at -- no transponder there means
+      pay-by-plate at the higher stored rate, spoken honestly as you pass
+      -- while conventional plazas with cash lanes get the mechanic: an
+      approach call ("Toll plaza ahead, cash lanes right"), X to take the
+      cash lane (the same verb as exits and pull-overs), then the ramp
+      stop-bar machinery runs the booth -- rolling countdown, the
+      parking-sensor tick to the window, stop, window down, the spoken
+      amount, pay, barrier, go. Costs real clock time versus the
+      transponder lane. Rides the stoppable-stop spine with chain-up
+      areas and Big Buck's; per-operator cash acceptance is researchable
+      in the same pass that bakes the tariffs. Josh's in-progress traffic
+      and API work could someday feed cash-lane queue lengths as an
+      optional live layer (determinism boundary applies).
 - [ ] **More first-party truck-stop locators, and public parking feeds
       (owner approved, 2026-07-19).** `curate_route_pois.py` queries only
       Love's and Pilot/Flying J today (730 + 877 locations). Pointed at the
@@ -250,6 +286,50 @@ terminal becomes the anchor of that week instead of a spawn point.
       redistribution, and user-reported availability cannot go in a
       deterministic offline game that must answer every player identically
       forever.
+- [ ] **"Where am I": an on-demand orientation key (owner, 2026-07-19).**
+      A sighted driver answers this with a glance at a sign. A blind driver
+      cannot, and no amount of automatic chatter answers it at the moment
+      somebody actually wonders. It joins the existing on-demand family (S
+      speed, D details, U upcoming, X exit), so the pattern is already
+      familiar. Speaks what the map already knows and currently keeps to
+      itself: nearest town and its distance and direction ("Pine, one mile
+      ahead; Strawberry, four back"), the road and state, the nearest baked
+      landmark, the next route city.
+      **Nearest truck service belongs here too, and MUST honour
+      `vehicle_access`** -- naming a bobtail-only stop as "nearest service"
+      to a driver pulling a trailer is exactly the false promise the
+      truck-access sweep just removed from announcements.
+      This also reframes the village sweep: the bake becomes the DATA LAYER
+      this key reads, and the automatic half stops being a separate callout
+      at all. The town name RIDES the limit announcement the game already
+      makes -- "Entering Strawberry. Speed limit drops to 35." -- so it adds
+      no new event, only the context that stops the drop reading as
+      arbitrary. That is why it belongs ON by default (owner's call, and the
+      right one): defaulting it off would suppress the explanation for
+      something the game announces regardless. The toggle stays for anyone
+      who wants the bare limit call.
+      Push and pull answer different questions and neither substitutes for
+      the other: the ride-along answers "why is this happening", the key
+      answers "where am I on I-40 at three in the morning", which never
+      arrives on a schedule.
+      **Bake WIDE, display TIGHT.** The 0.5 mi rule is what makes "entering"
+      true, but the key's honest answer is whatever is nearest at whatever
+      distance -- on I-40 that may be "Winslow, eleven miles ahead", and
+      refusing to say it would make the key useless exactly where it is
+      wanted. So collect a 10-15 mi catchment, store each place's offset and
+      whether it is on-route, and let the tight radius govern the callout
+      only. Two or three places at most, along-the-road direction rather
+      than compass.
+      **Low priority and interruptible (owner, safety).** Speak it with
+      `interrupt=False` so it never purges anything; the existing safety
+      path then preempts it for free, since an interrupting line already
+      purges the channel. Keep it short -- a long recital holds the channel
+      long enough that even correct preemption feels laggy.
+      **Big Buck's stays hidden.** A readout that gives its distance hands
+      away the discovery. Let the key speak it only after the player has
+      found one, or surface it as CB rumour -- the button reports what the
+      driver would plausibly KNOW, not what the database contains. That
+      rule keeps it an orientation aid rather than an oracle.
 - [ ] **Warn the driver before an under-served route, instead of faking a
       stop on it (owner, 2026-07-19).** After the access sweep, 21 legs over
       100 miles carry no stop a combination vehicle can enter. Designating an
@@ -415,11 +495,15 @@ terminal becomes the anchor of that week instead of a spawn point.
       sample is the known library gap), and the service-brake RELEASE
       should breathe its little air sigh, not just the apply.
       vehicle/brake_release.ogg already ships -- check the wiring.
-      Sourcing ladder (owner 2026-07-16): NAS library first, then
-      freesound CC0/CC-BY, then ElevenLabs generation, then field
-      recording (a community call for truck recordings is an option),
-      then CC-licensed YouTube only, with attribution -- never ordinary
-      YouTube rips; CREDITS.md tracks provenance for every asset.
+      Sourcing ladder (owner, REVISED 2026-07-22): Splice first (both
+      maintainers hold licenses), then freesound CC0/CC-BY, then
+      ElevenLabs generation (character sounds only, never
+      timing-critical transients), then field recording (a community
+      call for truck recordings is an option), then CC-licensed YouTube
+      only, with attribution -- never ordinary YouTube rips. The NAS
+      library has NO KNOWN PROVENANCE and is reference/measurement
+      material only -- nothing cut from it may ship. CREDITS.md tracks
+      provenance for every asset.
       NAS SWEEP DONE 2026-07-18: `docs/sound-shortlist.md` lists
       unauditioned candidates for all seven needs plus ready-to-run
       ElevenLabs prompts. Three findings change the plan. (a) The
@@ -435,15 +519,31 @@ terminal becomes the anchor of that week instead of a spawn point.
       thin (no wastegate, no blow-off, no diesel turbo anywhere), so
       the shift sound gets built from a GMC 6000 gear clunk plus a
       pitched-down transmission clunk plus an air release.
-- [ ] **Bobtail means no trailer at all (forum report, SRD625
-      2026-07-17).** The physics models every unloaded state as tractor
-      plus EMPTY TRAILER (`tare_kg`, vehicle.py: "Tractor plus empty
-      trailer"), but bobtail city-service and fly-to-board drives are
-      the tractor alone -- five to six tonnes lighter, quicker off the
-      line, shorter stops, different handling. Give the bobtail flag a
-      real tare (drop the trailer's share), bench-verify acceleration
-      and braking anchors, and let deadhead-with-empty-trailer keep the
-      current number. Community-confirmed realism gap.
+- [ ] **Provenance audit of shipped sound assets (owner, 2026-07-22).**
+      The Duff-shared cues cannot ship -- he holds no license for the
+      material he passed along (owner ruling, 2026-07-22), so every
+      Duff row is a replacement, not a check. Audit ran 2026-07-22
+      (git history of every unlabeled row): the 2026-06-18 batch
+      (weather, event cues, POI/ambience loops) is all project-clean
+      ElevenLabs/procedural work, never swapped since -- weather
+      re-sourcing from Splice is now a quality upgrade, not a
+      compliance fix. One mislabel found and corrected:
+      `ambient/night.ogg` was credited "original" but came from
+      Darren's sound pack. Replacements owed: vehicle/horn.ogg,
+      driver/yawn.ogg, ambient/night.ogg (Splice); the engine-voice
+      rebuild retires idle/start/shutdown, gear_shift, and both
+      parking-brake cues.
+- [x] **Bobtail means no trailer at all (forum report, SRD625
+      2026-07-17).** Shipped 2026-07-22: `trailer_attached` on the truck
+      drops the dry van's 6.4 t from the tare on reposition and
+      city-service drives, and the air gauge stops waiting on the
+      disconnected trailer line. Deadhead-with-empty-trailer keeps the
+      old number. Shipped alongside the load-aware shift scheduling the
+      same investigation exposed: the lug guard now scales with load
+      (empty rigs pull up from 800 rpm instead of bouncing every
+      skip-shift), and the stopped-gear reset honors the light start
+      gear. Bench anchors, 45 mph from rest: bobtail 15.7 s, deadhead
+      20.3 s, loaded 38.7 s.
 - [ ] **Dispatch board first-visit hitch (forum lead, Draq via Claude
       2026-07-17).** JobBoard._candidates() walks all 623 cities with
       supported_route() on the first board build in each city --
@@ -451,32 +551,29 @@ terminal becomes the anchor of that week instead of a spawn point.
       session cache already fixed the old multi-second lag, as SRD625
       reported). Polish: warm the cache off-thread on city arrival so
       even the first board opens instantly on slow hardware.
-- [ ] **Engine and shift audio tells the truth at low speed --
-      DIAGNOSED 2026-07-16 (Fable, overnight).** The physics is honest;
-      the audio map flattens it. BASS (the default backend) voices the
-      engine as ONE idle loop whose playback frequency runs linear from
-      1.0x at 600 RPM to only 1.75x at 2200 (`engine_freq_mult`,
-      audio.py) -- but real engine pitch is PROPORTIONAL to RPM, so the
-      600-to-1000 launch pull that should rise 67 percent in pitch
-      rises 11. Progressive shifting (realistic!) upshifts the low
-      gears at 1000/1300/1400 RPM, so every launch pull lives entirely
-      inside the crushed band; each pull lasts 1-2 s, then SHIFT_TIME
-      (1.0 s, transmission.py) of torque interrupt with RPM gliding
-      down under the 0.45 audio load cap, and the gear click fires at
-      shift START with nothing at engagement. Net: "click, click,
-      click, half a second of rev" -- exactly the owner's report.
-      FIX OPTIONS, owner's ear required before shipping any: (1)
-      RECOMMENDED port the pygame backend's 4-band crossfade
-      (idle/low/mid/high loops at 620/1000/1500/2100 centers -- assets
-      already shipped) to BASS with per-band frequency slides of
-      rpm/band_center, so pitch tracks RPM proportionally everywhere
-      with at most ~30 percent stretch per loop (no chipmunk); (2)
-      quick tweak: piecewise freq map, proportional to ~1100 RPM
-      (~1.8x) then flattening to ~2.1x at redline; (3) a soft
-      engagement clunk at shift END so the rhythm reads
-      pull-interrupt-engage-pull; (4) separately decide whether
-      SHIFT_TIME 1.0 s eases to ~0.7 s -- that one is PHYSICS (torque
-      gap on grades) and needs the bench re-run, not just ears.
+- [x] **Engine and shift audio tells the truth at low speed -- SHIPPED
+      2026-07-22 (sound/engine-integration), owner's ear audition
+      owed.** The diagnosed fix option 1 landed, upgraded: BASS now
+      voices the engine as a multisample ring of four REAL 896 cab
+      cuts at their recorded rpms (680/1000/1150/1800), crossfaded
+      equal-power with per-band playback-rate slides of rpm/native
+      (clamped 0.85-1.30), so pitch tracks RPM proportionally through
+      every launch pull. Shifts play real recorded cuts from the same
+      cab (manual and automatic round-robin banks; the gear click is
+      retired in overlay builds). Cold starts fast-idle at 900 while
+      the compressor builds air (physics change, vehicle.py), with the
+      fill hiss and the settle as the drive-ready flip. Brake press
+      plays the clunk bank leveled by force; release breathes the air
+      back out, scaled by how hard you braked. All licensed cuts live
+      in the gitignored sounds-licensed/ overlay; a clean clone keeps
+      the old synthesized cues everywhere. STILL OPEN from the
+      diagnosis: (3) an engagement clunk at shift END (the banks fire
+      at shift start), and (4) whether SHIFT_TIME 1.0 s eases to
+      ~0.7 s -- that one is PHYSICS and needs the bench re-run. Also
+      open: launch/load rev one-shots (engine/rev_launch, rev_load are
+      encoded and staged but not yet wired -- mixing them over the
+      ring needs the owner's ear) and per-trigger pitch jitter on the
+      banks (needs a playback-rate parameter on one-shots).
 - [ ] **Audible traffic -- hear the vehicle you overtake (owner idea
       2026-07-16).** Traffic already exists as modeled vehicles with
       lanes and speeds; give the near ones voices: continuous positional
@@ -896,6 +993,56 @@ section below and the Unreleased changelog; the release-line view:
       when anything needs attention, so a scheduled run can alert.
       Curation stays with the recipes. Future: fold in landmark and
       interchange drift.
+- [x] **Personal playlist stations from M3U files (landed 2026-07-20).**
+      Drop `.m3u`/`.m3u8` files into the Playlists folder next to the
+      saves (created on first run) and each becomes a dial station under
+      Your playlists, named from the `#PLAYLIST` tag or filename.
+      Entries resolve relative to the M3U and may point anywhere the OS
+      reads, NAS included; playback rides the music channel, so ducking,
+      radio volume, and pause-menu continuity all apply, and the bundled
+      BASS stack decodes mp3/ogg/opus/flac/aac/alac/wma with no new
+      codec work. Unreadable files skip at play time (a sleeping NAS
+      must not erase the station); each station remembers its place for
+      the drive. A drop-in folder, never a file picker -- screen-reader
+      users manage folders in Explorer. Personal media rides the
+      streamer-safe gate like real streams; stream URLs inside an M3U
+      are ignored (curated catalog only). Follow-up: consider shuffle
+      and a cross-session resume position if playtests want them.
+- [x] **Radio dial categories with a jump key (landed 2026-07-20).**
+      Ctrl+bracket (the owner's binding -- plain brackets already tune)
+      leaps to the first station of the previous/next dial category and
+      leads with the category name: route playlist, Freight Fate
+      stations, your playlists, terrestrial, AFN, satellite. AFN got its
+      own category so its 25-station block never buries the local dial
+      again; the dial sort and the jump share one grouping.
+- [ ] **Fictional call signs must not squat real stations (owner catch
+      2026-07-20).** Our fictional Phoenix classic-rock station is
+      "KDRT Desert Rock 101.5" -- but KDRT-LP is a real community station
+      in Davis, California. Rename it, and audit all 15 fictional call
+      signs against the FCC database (WDLT and WSOL look suspect too);
+      fictional stations should hold call signs no real broadcaster owns.
+- [ ] **Community and college radio sweep, and an NPR coverage audit
+      (owner ask 2026-07-20).** There is no policy against real
+      terrestrial stations -- 63 already stream in-game; the limits were
+      streamer-safety flags and URL rot. Add the freeform and community
+      institutions (WFMU Jersey City, KABF Little Rock, college stations
+      with reliable streams), and audit NPR-member coverage per market so
+      the dial finds local news most places a route goes. Direct station
+      stream URLs with source notes, as the desert-Southwest sweep did;
+      Radio Browser as the finding aid, never a runtime dependency.
+      TuneIn is partner-gated API-wise and stays out.
+- [ ] **Spotify and Apple Music: research only, parked (owner idea
+      2026-07-20).** In-game playback of either is off the table --
+      both wrap streams in DRM their licenses forbid unwrapping, official
+      playback SDKs are browser or Apple-framework only, and storing a
+      login to fetch audio directly would break their terms and put the
+      project at legal risk. The honest middle path if ever wanted:
+      Spotify Connect remote control (game OAuths, starts the player's
+      chosen playlist on their own Premium client, mutes in-game radio) --
+      audio would bypass the game mixer, so speech ducking degrades to
+      crude API volume nudges. The M3U playlist feature above covers the
+      underlying need -- your own library on the dial -- without any of
+      this. Rides the online-enhancement determinism boundary if built.
 - [ ] **Stream URLs rot fast -- fold a dial health check into the
       map-refresh tool.** One day after the 57-station sweep, seven
       streams were already dead (KJZZ, KCRW, KUNM, KUTX, KERA, KCUR,
@@ -917,6 +1064,58 @@ section below and the Unreleased changelog; the release-line view:
 
 ### World and narration
 
+- [x] **Village and small-town callouts (landed 2026-07-19).** The route now
+      names the small places it runs through -- "Entering Strawberry",
+      "Passing Kennebunk" -- so a speed limit dropping to 35 in the middle of
+      a mountain highway has a town attached to it instead of arriving from
+      nowhere. 26,894 real OSM `place=village|town` points across 1,280 legs
+      (`tools/bake_villages.py`), each projected onto the leg's real
+      OpenRouteService route with its distance off the road recorded. Baked
+      wide (12-mile catchment) and displayed tight: the ride-along speaks only
+      places within 1.5 miles of the road, 390 of them positioned just ahead
+      of the speed zone they explain; the wider set waits for the planned
+      "where am I" key, which needs to answer "Winslow, eleven miles ahead".
+      No hamlets. Spoken through the Place callouts ladder (below).
+      Follow-ups below.
+- [x] **Place callouts ladder: one setting for every place name (owner
+      design session, 2026-07-20).** The one-day-old village chatter bool and
+      the never-built checkpoint sparse mode (2026-07-09 design) collapsed
+      into a single three-tier setting, because the split between "curated
+      place markers" and "swept villages" is data provenance, not anything a
+      player can hear. "Place callouts: off / sparse / all", sparse the
+      default: sparse speaks only names that explain a speed limit change
+      (probed from the baked corridor limits at trip build, deterministic,
+      never from random work zones); all adds the pass-through towns and, on
+      worlds that carry them, the curated route markers; the two-mile advance
+      cue for places is dead at every tier -- a town is not actionable the way
+      an exit is. Limit-explaining villages are seated before spacing thins
+      the rest, so Strawberry and Pine both survive their shared window. The
+      1.9 world carries zero legacy checkpoint markers (discovered in this
+      pass -- the checkpoint speech only ever fires on dev's world), so the
+      same code governs both lines with no version awareness.
+- [ ] ~~Extract the place-callouts ladder to dev as a small PR.~~
+      Investigated 2026-07-22 and deferred: dev's monolith world carries no
+      positioned corridor limits, so the sparse tier's limit probe would find
+      nothing and the default tier would speak nothing. A faithful port drags
+      the dense-limits sweep along -- bulk, not a small PR. Dev gets the
+      ladder with the 1.9 world at the release merge.
+- [ ] **Village bake: per-leg cap and the wide catchment.** 569 of 1,280 legs
+      hit the 30-places-per-leg cap, so their far field (5 to 12 miles off the
+      road) is truncated. Harmless for the ride-along, which never reaches
+      past 1.5 miles, but the "where am I" key will want the cap raised or
+      replaced with a distance-ranked store before it ships.
+- [ ] **Villages should carry their own state.** The bake reports counts by
+      the state the LEG starts in, not the state the village is in, so a place
+      in Washington on a Portland to Seattle leg counts as Oregon. Store the
+      real state per record when the orientation readout needs to speak it.
+- [ ] **Township and neighbourhood names in the OSM place layer.** OSM tags
+      some townships ("Deptford Township") and a few neighbourhoods ("Journal
+      Square") as `place=village|town`. They are real names and they read
+      aloud correctly, but they are not places a driver arrives at. Worth a
+      curated exclusion pass if they grate in play.
+- [ ] **Places across a river read as passing.** On the Columbia the route is
+      on the Oregon bank and a Washington town can sit under a mile away, so
+      it speaks as "Passing Wishram". True, but worth a look in play.
 - [x] **Official truck-parking capacity on rest stops (landed 2026-07-17).**
       The FHWA Jason's Law survey (USDOT BTS NTAD Truck Stop Parking, the
       dataset behind the national truck-parking inventory) now annotates
@@ -974,6 +1173,37 @@ section below and the Unreleased changelog; the release-line view:
       take the fallback this sweep would upgrade. Regen should run
       offline from the cached PBFs like the overlay pipeline, targeting
       trunk/primary junction nodes on the 533 unlabeled legs.
+- [x] **State truck speed limits audited against statute -- FIXED
+      2026-07-20 (traced from a player report of "wrong" limits in
+      California).** The reported limits were correct -- CVC 22406 caps
+      three-axle rigs at 55 statewide -- but the table behind them came
+      from a single aggregator and proved wrong on 4 of its 10 rows.
+      All 50 states rechecked against statute text
+      (`docs/truck-speed-limit-audit.md`): Arizona added at 65 (A.R.S.
+      28-709) where it had been MISSING and 33 legs served the 75 car
+      number; Oregon corrected 65 -> 55 (ORS 811.111(1)(b)); Idaho
+      removed (repealed by H664, effective 2026-07-01); Nevada and North
+      Dakota removed (never had a split -- their numbers had been lifted
+      from the aggregator's *general* limit column).
+      The table is now keyed by **road class** with a `default`, because
+      Montana's 70-interstate/65-elsewhere split cannot be written as one
+      number, and an explicit `maxspeed:hgv` tag outranks the statewide
+      default but is trusted only as far as the statute permits -- that
+      is how Oregon's tagged eastern corridors keep their real 65 while
+      I-5 stays 55, without a stray 60 mph tag eleven miles inside
+      California licensing an illegal speed.
+      Deliberately NOT encoded, each for a stated reason: Illinois
+      (real, but scoped to six Chicago-area counties and no county data
+      is baked), Virginia (real, but secondary-roads-only -- a flat entry
+      would cap I-81 at 45), and Arkansas's 50 mph off the
+      controlled-access network (live law, but it uses a different
+      vehicle test than the 70 provision and contradicts observed posting
+      practice; needs ground truth from a driver who runs it).
+- [ ] **Arkansas non-freeway truck limit: resolve the 50 mph question.**
+      Ark. Code 27-51-201(c)(2) (Act 784 of 2019) reads 50 for trucks
+      "in other locations", a 20 mph gap from what the game serves on
+      Arkansas US routes. Not encodable from the statute alone -- ask a
+      driver who runs Arkansas whether it is enforced.
 - [x] **Interstate speed limits polluted by city-street samples at leg
       endpoints -- FIXED 2026-07-14 (found live by the owner on I-10).**
       The maxspeed bake's shield-match guard cannot fire when the

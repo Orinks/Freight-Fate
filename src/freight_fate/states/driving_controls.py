@@ -36,7 +36,7 @@ class DrivingControlsMixin:
         elif key == pygame.K_n and not tr.automatic:
             result = tr.request_gear(0)
             if result.ok:
-                self.ctx.audio.play("vehicle/gear_shift")
+                self.ctx.audio.play_bank("vehicle/shift_manual", "vehicle/gear_shift")
                 self.ctx.say("Neutral.")
         elif key == pygame.K_BACKSPACE and not tr.automatic:
             self._manual_shift(REVERSE)
@@ -49,6 +49,8 @@ class DrivingControlsMixin:
             self._manual_shift(tr.gear - 1)
         elif key == pygame.K_j:
             self._toggle_engine_brake()
+        elif key in (pygame.K_1, pygame.K_2, pygame.K_3):
+            self._select_jake_stage(key - pygame.K_0)
         elif key == pygame.K_p:
             self._toggle_parking_brake()
         elif key == pygame.K_h:
@@ -108,9 +110,17 @@ class DrivingControlsMixin:
         elif key == pygame.K_m:
             self._toggle_radio()
         elif key == pygame.K_LEFTBRACKET:
-            self._tune_radio(-1)
+            # Brackets walk the dial; Ctrl+brackets leap a whole category
+            # (25 AFN stations in a row buried terrestrial for a linear tune).
+            if event.mod & pygame.KMOD_CTRL:
+                self._jump_radio_category(-1)
+            else:
+                self._tune_radio(-1)
         elif key == pygame.K_RIGHTBRACKET:
-            self._tune_radio(1)
+            if event.mod & pygame.KMOD_CTRL:
+                self._jump_radio_category(1)
+            else:
+                self._tune_radio(1)
         elif key == pygame.K_y:
             self._speak_radio_status()
         elif key == pygame.K_F1:
@@ -214,6 +224,9 @@ class DrivingControlsMixin:
             "Plus and minus, including the keypad keys, raise and lower the "
             "remembered open-road target by five, so you can dial it up to the "
             "speed you want; it will not hold above the posted limit. "
+            "Parked with the brake set, K latches a high idle instead -- the "
+            "engine holds a faster idle to warm up and build air sooner, plus "
+            "and minus adjust it, and releasing the parking brake drops it. "
             "X signals for the next announced route exit, called out by its "
             "number when known, or cancels that signal. Prepare early: slow "
             "to 45 for the ramp, hold the exit "
@@ -304,7 +317,8 @@ class DrivingControlsMixin:
             "adaptive cruise and the low-speed keeper as needed. Hold the right "
             "bumper and press D-pad left or right to lower or raise the open-road "
             "cruise target by five. It pauses through the planned pickup and "
-            "resumes once the loaded truck is rolling. "
+            "resumes once the loaded truck is rolling. Parked with the brake "
+            "set, the Y button latches a high idle instead. "
             "D-pad down signals for the next announced exit, or signals a "
             "pull-over when a trooper lights you up. "
             "D-pad up reads your route and current location, D-pad left the "
@@ -319,12 +333,42 @@ class DrivingControlsMixin:
             f"{self._objective_help()}"
         )
 
+    # Spoken the way a driver says it (owner phrasing, 2026-07-21). The
+    # cylinder counts live in the manual and F1 help, not in every press.
+    _JAKE_STAGE_WORD = {1: "one", 2: "two", 3: "three"}
+
     def _toggle_engine_brake(self) -> None:
-        if self.truck.throttle > 0.05 and not self.truck.engine_brake:
-            self.ctx.say("Release the accelerator before turning the engine brake on.")
+        """J is the dash enable switch of a real Jacobs setup: it engages at
+        whatever stage the selector was left on, never surprising an icy
+        descent with full retard the driver dialed back an hour ago."""
+        t = self.truck
+        if t.throttle > 0.05 and not t.engine_brake:
+            self.ctx.say("Release the accelerator before turning the jake on.")
             return
-        self.truck.engine_brake = not self.truck.engine_brake
-        self.ctx.say("Engine brake on." if self.truck.engine_brake else "Engine brake off.")
+        if t.engine_brake:
+            t.engine_brake_stage = 0
+            self.ctx.say("Jake off.")
+            return
+        t.engine_brake_stage = self._jake_selected_stage
+        self.ctx.say(f"Jake on, stage {self._JAKE_STAGE_WORD[t.engine_brake_stage]}.")
+
+    def _select_jake_stage(self, stage: int) -> None:
+        """1, 2, 3: the cylinder selector, live only while the jake is on.
+
+        With the jake off the number keys do nothing here, so they stay
+        free for other bindings in other contexts (owner, 2026-07-21)."""
+        t = self.truck
+        if not t.engine_brake:
+            return
+        self._jake_selected_stage = stage
+        t.engine_brake_stage = stage
+        self.ctx.say(f"Jake stage {self._JAKE_STAGE_WORD[stage]} selected.")
+
+    def _cycle_jake_stage(self) -> None:
+        """Controller: modifier plus the jake button walks 1 -> 2 -> 3 -> 1."""
+        if not self.truck.engine_brake:
+            return
+        self._select_jake_stage(self.truck.engine_brake_stage % JAKE_STAGES + 1)
 
     def _shift_relative(self, delta: int) -> None:
         """Controller next/previous gear: step one gear from the current one."""
@@ -394,6 +438,8 @@ class DrivingControlsMixin:
             self._speak_fuel()
         elif button == pygame.CONTROLLER_BUTTON_Y:
             self._toggle_parking_brake()
+        elif button == pygame.CONTROLLER_BUTTON_RIGHTSTICK:
+            self._cycle_jake_stage()
         elif button == pygame.CONTROLLER_BUTTON_START:
             self.ctx.push_state(DrivingStatusState(self.ctx, self))
 
@@ -494,7 +540,7 @@ class DrivingControlsMixin:
     def _manual_shift(self, gear: int) -> None:
         result = self.truck.transmission.request_gear(gear)
         if result.ok:
-            self.ctx.audio.play("vehicle/gear_shift")
+            self.ctx.audio.play_bank("vehicle/shift_manual", "vehicle/gear_shift")
             self.ctx.say(result.message)
             if self.tutorial:
                 self.tutorial.on_gear_engaged()
@@ -553,6 +599,12 @@ class DrivingControlsMixin:
         comparison = (
             f" You are about {self.ctx.settings.speed_text(over)} over." if over >= 1 else ""
         )
+        # Split-limit states post one number for cars and a lower one for
+        # rigs, so S saying only the truck figure reads as a wrong map to
+        # anyone who remembers the shield (player report, 2026-07-19).
+        # Name the state once and the 55 under a 65 sign explains itself.
+        is_truck_limit, cap_state = self.trip.truck_limit_at(self.trip.position_mi)
+        split = f" {cap_state} holds trucks to this." if cap_state else ""
         # A posted 55 through hairpin country is honest -- the yellow
         # diamond is advisory, not the limit -- but S saying only "55"
         # mid-canyon reads as nonsense, so name the bend's number too.
@@ -562,9 +614,13 @@ class DrivingControlsMixin:
             curve = upcoming[0] if upcoming else None
         advisory = ""
         if curve is not None and curve.advisory_mph < limit:
-            advisory = f" The bend here advises {self.ctx.settings.speed_text(curve.advisory_mph)}."
+            advisory = (
+                f" The bend here advises {self.ctx.settings.speed_text(curve.advisory_mph)}."
+            )
+        lead = "Truck limit" if is_truck_limit else "Speed limit"
         self.ctx.say(
-            f"Speed limit {self.ctx.settings.speed_text(limit)}{zone}.{comparison}{advisory}"
+            f"{lead} {self.ctx.settings.speed_text(limit)}{zone}."
+            f"{split}{comparison}{advisory}"
         )
 
     def _speak_safe_speed(self) -> None:

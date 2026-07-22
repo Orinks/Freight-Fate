@@ -111,6 +111,7 @@ class Transmission:
         upshift_steps: int = 1,
         downshift_target: int | None = None,
         engine_braking: bool = False,
+        downshift_rpm: float = AUTO_DOWNSHIFT_RPM,
     ) -> int | None:
         """Pick a gear in automatic mode. Returns the new gear when it changes.
 
@@ -130,11 +131,15 @@ class Transmission:
                 self._gear_hold_timer = 0.0
                 return self.gear
             return None
-        if not moving and self.gear > 1:
+        restart_gear = max(1, min(self.num_gears, start_gear))
+        if not moving and self.gear > restart_gear:
             # Stopped (or knocked to a crawl by a collision) in a high gear:
-            # a real automatic returns to first instead of lugging until the
-            # engine dies on every restart.
-            self.gear = 1
+            # a real automatic returns to its starting gear -- first when
+            # grossed out, third when light -- instead of lugging until the
+            # engine dies on every restart. Snapping all the way to first
+            # regardless used to throw away the light rig's start gear
+            # before the truck had rolled a foot.
+            self.gear = restart_gear
             self._shift_timer = SHIFT_TIME
             self._gear_hold_timer = 0.0
             return self.gear
@@ -165,7 +170,7 @@ class Transmission:
                 self._shift_timer = SHIFT_TIME
                 self._gear_hold_timer = 0.0
                 return self.gear
-        if rpm < AUTO_DOWNSHIFT_RPM and self.gear > 1 and moving:
+        if rpm < downshift_rpm and self.gear > 1 and moving:
             target = self.gear - 1 if downshift_target is None else downshift_target
             self.gear = max(1, min(self.gear - 1, target))
             self._shift_timer = SHIFT_TIME

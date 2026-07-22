@@ -37,6 +37,9 @@ class OnlineHubState(MenuState):
                 help="Hear who is hauling right now on the public orinks.net "
                 "drivers board. Viewing the board shares nothing about you.",
             ),
+            # This line's online-enhancement master switch survives the move
+            # into the hub: one row that stands every live service down (or
+            # back up) without losing the individual consents beneath it.
             MenuItem(
                 lambda: f"Online services: {'on' if s.online_services else 'off'}",
                 lambda: self._toggle_online_services(1),

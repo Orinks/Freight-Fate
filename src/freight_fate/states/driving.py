@@ -47,6 +47,9 @@ class DrivingState(
         # empty bobtail repositions run light. Gross weight drives the physics,
         # so a heavy load pulls away gently and lugs on grades.
         self.truck.cargo_kg = job.weight_tons * KG_PER_TON if phase == DRIVE_PHASE_DELIVERY else 0.0
+        # A reposition run and city-service driving are the tractor alone --
+        # nothing on the fifth wheel. Pickup deadheads haul their empty box.
+        self.truck.trailer_attached = not (job.bobtail or phase == DRIVE_PHASE_CITY_SERVICE)
         self.truck.transmission.automatic = ctx.settings.automatic_transmission
         profile.load_truck_condition(self.truck)
         self.truck.set_cold_air_start()
@@ -126,6 +129,10 @@ class DrivingState(
         self._radio_elapsed_s = 0.0
         self._radio_tracks_since_host = 0
         self._radio_playing_host = False
+        # Personal M3U stations: where each playlist left off this drive,
+        # and a short hold between files so a fade-in never reads as ended.
+        self._playlist_positions: dict[str, int] = {}
+        self._playlist_wait_s = 0.0
         # Reception: signal re-checked on a slow cadence while driving so
         # ranged stations fade with distance and drop past their contour.
         self._radio_signal_timer = 0.0
@@ -166,6 +173,10 @@ class DrivingState(
         self._brake_squeal_cooldown_s = 0.0  # hot-brake squeal cue spacing
         self._hydro_active = False  # spoken hydroplane warning edge tracking
         self._jake_slip_active = False  # spoken jake-slip warning edge tracking
+        # The cylinder selector's position, like the real dash switch: J
+        # engages at whatever stage was last chosen. Full retard by default
+        # -- the setting every driver leaves it on until ice says otherwise.
+        self._jake_selected_stage = JAKE_STAGES
         self._chains_fast_active = False  # spoken chains-over-speed warning edge tracking
         self._chain_law_warned: set[tuple[int, int]] = set()  # (area, level) spoken warnings
         self._chain_law_cited: set[tuple[int, int]] = set()  # checkpoint rolls already taken
@@ -284,6 +295,7 @@ class DrivingState(
         self._spring_brake_said = self.truck.spring_brakes_active
         self._brake_lockout_cue_timer = 0.0
         self._brake_air_hissed = False  # rising-edge guard for the brake-apply hiss
+        self._brake_peak_application = 0.0  # hardest press this application, shapes the release
         self._overrev_s = 0.0  # continuous seconds at damaging RPM
         self._overrev_warn_due = OVERREV_GRACE_S  # repeats push it out further
         self._lane_rumble_timer = 0.0
@@ -301,6 +313,7 @@ class DrivingState(
         self._pending_ambient_event: tuple[str, str | None] | None = None
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
+        self._air_cue_active = False  # compressor fill loop below governor release
         self._shift_recover_t = 1.0  # 0->1 recovery progress after an automatic shift ends
         # Smooth only the audible engine load. Physics keeps the raw throttle,
         # while small controller and cruise changes blend into the engine bed.

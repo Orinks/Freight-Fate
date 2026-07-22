@@ -545,6 +545,7 @@ LANDMARK_CATEGORIES = frozenset(
         "protected_area",
         "highway_marker",
         "billboard_sign",
+        "village",
     }
 )
 
@@ -572,7 +573,15 @@ def _parse_landmark(raw, leg_miles: float, from_city: str, to_city: str) -> Land
     blob = f"{name} {spoken}".lower()
     if any(marker in blob for marker in RAW_POI_TEXT_MARKERS):
         raise ValueError(f"{from_city} to {to_city} landmark {name!r} exposes raw OSM/source text")
-    return Landmark(name, at_mi, category, kind, spoken)
+    try:
+        off_mi = float(raw.get("off_mi", 0.0))
+    except (TypeError, ValueError):
+        raise ValueError(
+            f"{from_city} to {to_city} landmark {name!r} has a non-numeric off_mi"
+        ) from None
+    if off_mi < 0:
+        raise ValueError(f"{from_city} to {to_city} landmark {name!r} has a negative off_mi")
+    return Landmark(name, at_mi, category, kind, spoken, off_mi)
 
 
 def _parse_landmarks(raw_landmarks, leg_miles: float, from_city: str, to_city: str):

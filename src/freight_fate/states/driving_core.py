@@ -47,6 +47,7 @@ from ..music import (
     select_station_playlist,
 )
 from ..radio import (
+    PERSONAL_PLAYLIST_SOURCE_TYPE,
     SAFE_ROUTE_PLAYLIST,
     STATIC_SIGNAL_THRESHOLD,
     RadioPlaybackError,
@@ -65,6 +66,11 @@ from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.trip_models import leg_lane_count
 from ..sim.vehicle import (
     CHAIN_SAFE_MPH,
+    HIGH_IDLE_DEFAULT_RPM,
+    HIGH_IDLE_MAX_RPM,
+    HIGH_IDLE_MIN_RPM,
+    HIGH_IDLE_STEP_RPM,
+    JAKE_STAGES,
     KG_PER_TON,
     REFERENCE_CARGO_KG,
     TIRE_WINTER,
@@ -391,6 +397,10 @@ class _DrivingRadioBackend:
         radio = getattr(self.driving, "radio", None)
         if radio is not None:
             self.driving._radio_signal_factor = signal_volume_factor(radio.current_reception())
+        if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
+            self.driving._apply_radio_volume()
+            self.driving._start_playlist_station(station, fade_ms=900)
+            return
         if station.real_stream:
             if not station.stream_url:
                 raise RadioPlaybackError("station has no stream URL")

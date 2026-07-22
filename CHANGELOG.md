@@ -112,6 +112,80 @@
   sign-in as driver setup; the Mastodon account item walks you through it
   and can check whether the link took.
 
+- **The truck now sounds like a real truck.** The engine voice is built
+  from a real cab recording and follows the rpm through its range --
+  idle, pulling away, cruising, working up high -- instead of one loop
+  stretched faster and slower. You will hear the difference the moment
+  the engine settles into idle.
+
+- **Cold starts build their air out loud.** Start the engine with low
+  tanks and it holds a fast idle while the compressor charges the air
+  system, with a soft fill hiss underneath. When the air comes ready the
+  hiss stops, the dryer gives its purge pop, and the idle settles down --
+  that settling is your cue the parking brake can release. Revving while
+  parked really does charge the tanks faster.
+
+- **Parked high idle, on the cruise button -- rev it like a boss.** With
+  the parking brake set, K latches a fast idle just like a real
+  electronic truck: the engine holds a raised rpm to warm up and build
+  air sooner, plus and minus step the setpoint up or down, and you hear
+  the compressor charge faster the higher you hold it. Releasing the
+  parking brake drops it back to idle on its own, and holding a high
+  idle burns real fuel. On a controller it is the Y button.
+
+- **Brakes and gear changes sound like the real mechanisms now.** Pressing
+  the brake gives the valve's mechanical clunk, louder the harder you
+  press, and letting off releases the air back out -- a hiss that runs
+  longer and louder the harder you were braking, including the big pssht
+  when you stop and let off. The emergency brake dumps its air in one
+  long event. Every shift, manual or automatic, is a real recorded shift,
+  and no two in a row sound identical.
+
+- **The engine brake grew its real cylinder selector.** J is now the
+  dash switch: it turns the engine brake on at whatever stage you last
+  selected, and while it is on, 1, 2, and 3 pick two, four, or six
+  cylinders of retard, spoken as you change them. Partial stages are
+  the icy-descent tool -- stage one stays hooked up on glare ice where
+  full retard breaks the drive wheels loose -- and the selector
+  remembering your choice means switching the jake back on can never
+  surprise you with more braking than you dialed in. On a controller,
+  the modifier with the engine brake button steps through the stages.
+
+- **Your own music can play on the in-cab radio.** Drop M3U playlist
+  files into the new Playlists folder next to your saves and each one
+  becomes a station on the dial, under Your playlists, named from the
+  playlist. Files can live anywhere your computer can reach, including
+  a network drive, and the usual formats all play. The station picks up
+  where it left off when you tune away and back during a drive, and a
+  file that will not open is skipped instead of stopping the music.
+  Like real public streams, your playlists play only when streamer-safe
+  mode is off.
+
+- **The radio dial now jumps by category.** Control with a bracket key
+  leaps to the previous or next section of the dial -- route playlist,
+  Freight Fate stations, your playlists, terrestrial, AFN, satellite --
+  and announces where you landed. No more tuning through twenty-five
+  AFN stations one by one to reach the local dial.
+
+- **The road now names the towns that change your speed limit.** When a
+  limit is about to drop for a small town, you hear the town first --
+  "Entering Strawberry" -- so a sudden 35 in the middle of a mountain
+  highway finally has a reason attached to it instead of arriving out
+  of nowhere. Every name is a real place taken from the map, never
+  invented. A new Place callouts setting controls how much you hear:
+  sparse, the default, speaks only the names that explain a limit
+  change; all adds the towns the route passes through or skirts; off
+  silences place names entirely. No setting ever reads out every place
+  on the map -- the rest of that data waits quietly to answer
+  orientation questions on demand.
+
+- **A bobtail truck is finally just the tractor.** Reposition runs and
+  city-service drives now drop the trailer's five-plus tonnes for real: the
+  truck jumps off the line, stops shorter, and the dash air gauge no longer
+  waits on a trailer line that is not connected. Deadheading to a pickup
+  still hauls your empty trailer, and a loaded run still weighs what the
+  freight weighs.
+
 ### Changed
 
 - **The game is about a third smaller to download.** The music now uses a
@@ -501,6 +575,35 @@
   of build is talking. Stable releases sound the same as before, and version
   numbers no longer skip when a stable release comes out.
 
+- **The truck revs each gear out when you accelerate hard.** Flooring
+  it from a stop used to shift almost the instant it moved, banging up
+  through the gears without ever really revving, so it never sounded
+  like it was working for you. Now hard acceleration holds each lower
+  gear toward its power before shifting, and you hear the engine climb
+  and pull through the gears the way a loaded truck should. Easy
+  driving still shifts early and quietly to save fuel, and the truck
+  still settles into top gear at a calm, believable cruise.
+
+- **Truck speed limits now match what each state's law actually says.**
+  Every state was checked against its own statute, and the results moved
+  in both directions. Arizona holds trucks to 65 where the signs say 75,
+  and the game had been letting you run the car speed -- that is fixed.
+  Oregon's default drops to 55, though the eastern corridors that are
+  genuinely posted higher for trucks still run their real limit. Idaho
+  repealed its truck limit outright this month, and Nevada and North
+  Dakota never had one, so all three now match the posted signs. Montana
+  correctly runs 70 on the interstates and 65 everywhere else. If a
+  stretch you drive got slower, the sign was never the whole story
+  there.
+
+- **The co-driver now says when a speed limit is a truck limit.** In states
+  that hold heavy rigs below the number on the sign, pressing S says "Truck
+  limit 55. California holds trucks to this" instead of just reading the
+  figure. Nothing about how fast you may drive has changed -- those limits
+  were already being enforced -- but hearing 55 on a road signed 65 no longer
+  sounds like the map got it wrong. It is the law for anything with three
+  axles, and now the game tells you so.
+
 ### Fixed
 
 - **Curve calls arrive on time and tell the truth about distance.**
@@ -730,6 +833,27 @@
   offers, accepting it politely pulls the load instead of misbehaving.
   And four real Great Lakes ports the old map missed -- Toledo, Detroit,
   Chicago, and Green Bay -- now have working docks of their own.
+
+- **An empty truck no longer machine-guns up through the gears.** Running
+  light, the transmission used to grab every single gear about a second
+  apart, and sometimes bounce straight back down, because it judged lugging
+  as if the truck were fully loaded. A light rig now skip-shifts the way a
+  real driver does, starts out in a higher gear, and keeps that launch gear
+  at a stop instead of snapping back to first.
+
+- **Updating the game no longer flags your save as changed outside the game.**
+  A save written by an earlier version could be wrongly marked as modified the
+  first time a newer version loaded it, even though nobody touched the file.
+  The check now recognizes saves from earlier versions for what they are, so
+  an update never puts that mark on an untouched career.
+
+- **The engine revs freely when you sit with the parking brake set.**
+  Blipping the throttle while parked used to drag the engine up to a
+  weak, half-hearted rev and then stall it, with the game repeating that
+  you must release the parking brake. Now, whenever the parking brake is
+  holding you still, the engine answers the throttle across its whole
+  range -- so you can warm it up, build air faster, or just listen to it
+  come alive -- and it settles back to a steady idle when you let off.
 ## 1.8.5 - 2026-07-22
 
 ### Added
