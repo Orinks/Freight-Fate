@@ -743,7 +743,7 @@ class MastodonLinkState(MenuState):
         if identity is None:
             self.ctx.say(
                 "This needs your orinks.net account first. Choose Set up "
-                "orinks.net account on the Online settings menu.",
+                "orinks.net account on the Online menu.",
                 interrupt=True,
             )
             return
@@ -789,7 +789,7 @@ class MastodonLinkState(MenuState):
             spoken = s.mastodon_linked_handle or "your Mastodon account"
             self.ctx.say(
                 f"Linked: {spoken}. You can now turn on Share notable "
-                "deliveries to Mastodon in the Online settings.",
+                "deliveries to Mastodon on the Online menu.",
                 interrupt=True,
             )
         else:

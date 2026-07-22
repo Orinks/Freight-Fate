@@ -184,14 +184,16 @@ def test_sharing_off_queues_nothing(monkeypatch):
 
 
 def _open_online_settings(app):
-    from freight_fate.states.main_menu import SettingsCategoryState, SettingsState
+    """Walk Settings to the Online pointer, which opens the Online hub."""
+    from freight_fate.states.main_menu import SettingsState
+    from freight_fate.states.online_hub import OnlineHubState
 
     picker = SettingsState(app.ctx)
     app.push_state(picker)
     while picker.items[picker.index].text != "Online":
         picker.handle_event(key_event(pygame.K_DOWN))
     picker.handle_event(key_event(pygame.K_RETURN))
-    assert isinstance(app.state, SettingsCategoryState)
+    assert isinstance(app.state, OnlineHubState)
     return app.state
 
 

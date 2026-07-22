@@ -327,7 +327,7 @@ def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
     constructed dormant (never started) so it touches nothing until the game
     loop runs."""
     from freight_fate.app import App
-    from freight_fate.states.main_menu import SettingsCategoryState
+    from freight_fate.states.online_hub import OnlineHubState
 
     app = App()
     try:
@@ -336,7 +336,7 @@ def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
         toggles: list[bool] = []
         monkeypatch.setattr(app.presence, "set_enabled", toggles.append)
 
-        app.push_state(SettingsCategoryState(app.ctx, "online"))
+        app.push_state(OnlineHubState(app.ctx))
         menu = app.state
         idx = next(
             i for i, item in enumerate(menu.items) if item.text.startswith("Discord presence")
