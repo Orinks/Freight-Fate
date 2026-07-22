@@ -477,11 +477,15 @@ terminal becomes the anchor of that week instead of a spawn point.
       sample is the known library gap), and the service-brake RELEASE
       should breathe its little air sigh, not just the apply.
       vehicle/brake_release.ogg already ships -- check the wiring.
-      Sourcing ladder (owner 2026-07-16): NAS library first, then
-      freesound CC0/CC-BY, then ElevenLabs generation, then field
-      recording (a community call for truck recordings is an option),
-      then CC-licensed YouTube only, with attribution -- never ordinary
-      YouTube rips; CREDITS.md tracks provenance for every asset.
+      Sourcing ladder (owner, REVISED 2026-07-22): Splice first (both
+      maintainers hold licenses), then freesound CC0/CC-BY, then
+      ElevenLabs generation (character sounds only, never
+      timing-critical transients), then field recording (a community
+      call for truck recordings is an option), then CC-licensed YouTube
+      only, with attribution -- never ordinary YouTube rips. The NAS
+      library has NO KNOWN PROVENANCE and is reference/measurement
+      material only -- nothing cut from it may ship. CREDITS.md tracks
+      provenance for every asset.
       NAS SWEEP DONE 2026-07-18: `docs/sound-shortlist.md` lists
       unauditioned candidates for all seven needs plus ready-to-run
       ElevenLabs prompts. Three findings change the plan. (a) The
@@ -497,6 +501,18 @@ terminal becomes the anchor of that week instead of a spawn point.
       thin (no wastegate, no blow-off, no diesel turbo anywhere), so
       the shift sound gets built from a GMC 6000 gear clunk plus a
       pitched-down transmission clunk plus an air release.
+- [ ] **Provenance audit of shipped sound assets (owner, 2026-07-22).**
+      The Duff-shared cues cannot ship -- he holds no license for the
+      material he passed along (owner ruling, 2026-07-22), so every
+      Duff row is a replacement, not a check. The engine-voice rebuild
+      already retires idle/start/shutdown, gear_shift, and both
+      parking-brake cues with Splice-cut replacements; still owed:
+      vehicle/horn.ogg and driver/yawn.ogg. Weather loops are credited
+      ElevenLabs (verify) and get re-sourced from Splice anyway; the
+      unlabeled ambience rows (poi/rest_stop_night.ogg,
+      poi/weigh_station_lane.ogg) need their source pinned. Work the
+      CREDITS.md table top to bottom until every row names a source we
+      can ship.
 - [ ] **Bobtail means no trailer at all (forum report, SRD625
       2026-07-17).** The physics models every unloaded state as tractor
       plus EMPTY TRAILER (`tare_kg`, vehicle.py: "Tractor plus empty
