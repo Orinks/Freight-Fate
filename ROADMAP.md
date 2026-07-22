@@ -533,15 +533,17 @@ terminal becomes the anchor of that week instead of a spawn point.
       driver/yawn.ogg, ambient/night.ogg (Splice); the engine-voice
       rebuild retires idle/start/shutdown, gear_shift, and both
       parking-brake cues.
-- [ ] **Bobtail means no trailer at all (forum report, SRD625
-      2026-07-17).** The physics models every unloaded state as tractor
-      plus EMPTY TRAILER (`tare_kg`, vehicle.py: "Tractor plus empty
-      trailer"), but bobtail city-service and fly-to-board drives are
-      the tractor alone -- five to six tonnes lighter, quicker off the
-      line, shorter stops, different handling. Give the bobtail flag a
-      real tare (drop the trailer's share), bench-verify acceleration
-      and braking anchors, and let deadhead-with-empty-trailer keep the
-      current number. Community-confirmed realism gap.
+- [x] **Bobtail means no trailer at all (forum report, SRD625
+      2026-07-17).** Shipped 2026-07-22: `trailer_attached` on the truck
+      drops the dry van's 6.4 t from the tare on reposition and
+      city-service drives, and the air gauge stops waiting on the
+      disconnected trailer line. Deadhead-with-empty-trailer keeps the
+      old number. Shipped alongside the load-aware shift scheduling the
+      same investigation exposed: the lug guard now scales with load
+      (empty rigs pull up from 800 rpm instead of bouncing every
+      skip-shift), and the stopped-gear reset honors the light start
+      gear. Bench anchors, 45 mph from rest: bobtail 15.7 s, deadhead
+      20.3 s, loaded 38.7 s.
 - [ ] **Dispatch board first-visit hitch (forum lead, Draq via Claude
       2026-07-17).** JobBoard._candidates() walks all 623 cities with
       supported_route() on the first board build in each city --

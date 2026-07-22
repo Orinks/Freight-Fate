@@ -47,6 +47,9 @@ class DrivingState(
         # empty bobtail repositions run light. Gross weight drives the physics,
         # so a heavy load pulls away gently and lugs on grades.
         self.truck.cargo_kg = job.weight_tons * KG_PER_TON if phase == DRIVE_PHASE_DELIVERY else 0.0
+        # A reposition run and city-service driving are the tractor alone --
+        # nothing on the fifth wheel. Pickup deadheads haul their empty box.
+        self.truck.trailer_attached = not (job.bobtail or phase == DRIVE_PHASE_CITY_SERVICE)
         self.truck.transmission.automatic = ctx.settings.automatic_transmission
         profile.load_truck_condition(self.truck)
         self.truck.set_cold_air_start()

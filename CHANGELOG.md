@@ -167,6 +167,13 @@
 
 - **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
 
+- **A bobtail truck is finally just the tractor.** Reposition runs and
+  city-service drives now drop the trailer's five-plus tonnes for real: the
+  truck jumps off the line, stops shorter, and the dash air gauge no longer
+  waits on a trailer line that is not connected. Deadheading to a pickup
+  still hauls your empty trailer, and a loaded run still weighs what the
+  freight weighs.
+
 - **Copy your delivery summary to the clipboard.** The delivery complete
   screen has a new item, just before Continue, that copies every settlement
   line as plain text so you can paste the whole run into a message or a
@@ -594,6 +601,13 @@
   chatter instead of being interrupted.
 
 ### Fixed
+
+- **An empty truck no longer machine-guns up through the gears.** Running
+  light, the transmission used to grab every single gear about a second
+  apart, and sometimes bounce straight back down, because it judged lugging
+  as if the truck were fully loaded. A light rig now skip-shifts the way a
+  real driver does, starts out in a higher gear, and keeps that launch gear
+  at a stop instead of snapping back to first.
 
 - **Updating the game no longer flags your save as changed outside the game.**
   A save written by an earlier version could be wrongly marked as modified the

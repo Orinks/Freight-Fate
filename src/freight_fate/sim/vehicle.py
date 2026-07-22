@@ -12,7 +12,12 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
-from .transmission import PROGRESSIVE_UPSHIFT_RPM, SHIFT_TIME, Transmission
+from .transmission import (
+    AUTO_DOWNSHIFT_RPM,
+    PROGRESSIVE_UPSHIFT_RPM,
+    SHIFT_TIME,
+    Transmission,
+)
 
 G = 9.81
 AIR_DENSITY = 1.225
@@ -28,6 +33,10 @@ KG_PER_TON = 1000.0  # game cargo "tons" are treated as metric tonnes
 # this reference payload, so an unconfigured truck keeps the original loaded
 # behavior; lighter loads (and empty deadheads) weigh proportionally less.
 REFERENCE_CARGO_KG = 21_500.0
+# A dry van's empty weight (~14,100 lb). Dropping the trailer takes this much
+# off the tare, so a true bobtail runs five-plus tonnes lighter than a
+# deadhead hauling an empty box.
+TRAILER_TARE_KG = 6_400.0
 LAUNCH_TRACTION_LOW_SPEED_MPH = 25.0
 LAUNCH_TRACTION_START_G = 0.12
 LAUNCH_TRACTION_ROLLING_G = 0.33
@@ -214,6 +223,10 @@ class TruckState:
     chains_just_snapped: bool = False  # one-shot event flag, consumed by the cue layer
     odometer_mi: float = 0.0
     cargo_kg: float = REFERENCE_CARGO_KG  # payload aboard; default = full reference load
+    # False = true bobtail: the tractor alone, nothing on the fifth wheel.
+    # Deadheading with an empty box keeps this True; the difference is the
+    # trailer's tare, its air line, and how a light box gets shifted.
+    trailer_attached: bool = True
 
     # environment, set each frame by the trip/weather layer
     grade: float = 0.0  # +uphill, e.g. 0.06 = 6%
@@ -355,8 +368,11 @@ class TruckState:
 
     @property
     def tare_kg(self) -> float:
-        """Tractor plus empty trailer: gross weight carrying no payload."""
-        return max(0.0, self.specs.mass_kg - REFERENCE_CARGO_KG)
+        """Unloaded weight: the tractor, plus the empty trailer when hitched."""
+        base = max(0.0, self.specs.mass_kg - REFERENCE_CARGO_KG)
+        if self.trailer_attached:
+            return base
+        return max(0.0, base - TRAILER_TARE_KG)
 
     @property
     def gross_mass_kg(self) -> float:
@@ -391,8 +407,10 @@ class TruckState:
         # blip to keep the target speed must not release the hold and grab a
         # taller gear that guts the retarder mid-descent.
         jaking = jaking or (self.engine_brake and self.engine_on and self.grade < -0.01)
+        bobtail = not self.trailer_attached
         load_fraction = min(1.0, max(0.0, self.cargo_kg / REFERENCE_CARGO_KG))
-        minimum_shift_interval_s = 1.75 if braking else 1.25 + 0.35 * load_fraction
+        base_interval = 1.1 if bobtail else 1.25
+        minimum_shift_interval_s = 1.75 if braking else base_interval + 0.35 * load_fraction
         start_gear = 1 if self.grade >= 0.02 or load_fraction >= 0.75 else 2
         if load_fraction <= 0.2 and self.grade <= 0.01:
             start_gear = 3
@@ -416,8 +434,16 @@ class TruckState:
         )
         upshift_steps = 1
         if 0 < tr.gear < tr.num_gears and load_fraction <= 0.2 and self.grade <= 0.01:
+            # Real drivers skip gears when light instead of machine-gunning
+            # every hole in the box. At a 900 floor the skip almost never
+            # cleared in the low range at moderate throttle (shift near 1400,
+            # land near 780), so an empty truck still rattled up through
+            # every single gear a second apart. The floor is about where the
+            # engine pulls, not what is behind the tractor: dropping it
+            # further for a bobtail just lands the skip in the weak end of
+            # the torque curve and bogs away the weight advantage.
             skip_gear = min(tr.num_gears, tr.gear + 2)
-            if skip_gear > tr.gear + 1 and self.coupled_rpm(skip_gear) >= 900.0:
+            if skip_gear > tr.gear + 1 and self.coupled_rpm(skip_gear) >= 780.0:
                 upshift_steps = 2
         can_upshift = True
         target_gear = min(tr.num_gears, max(1, tr.gear) + upshift_steps)
@@ -456,6 +482,12 @@ class TruckState:
             ]
             if candidates:
                 downshift_target = max(candidates)
+        # The lug guard scales with the load. Grossed out, falling under 1050
+        # under power really is lugging and earns the downshift. Empty, the
+        # engine pulls up happily from 800 -- holding the loaded threshold
+        # bounced every skip-shift straight back down a gear, and the launch
+        # churned through torque interruptions instead of accelerating.
+        downshift_rpm = AUTO_DOWNSHIFT_RPM - 300.0 * (1.0 - load_fraction)
         return tr.auto_update(
             rpm_est,
             self.throttle,
@@ -468,6 +500,7 @@ class TruckState:
             upshift_steps,
             downshift_target,
             engine_braking=jaking,
+            downshift_rpm=downshift_rpm,
         )
 
     # -- forces -----------------------------------------------------------------
@@ -671,7 +704,13 @@ class TruckState:
 
     @property
     def air_pressure_psi(self) -> float:
-        """Compatibility view: the lowest available service/supply reservoir."""
+        """Compatibility view: the lowest available service/supply reservoir.
+
+        Bobtail there is no trailer line connected, so the trailer reservoir
+        never gates the gauge, the warnings, or the spring brakes.
+        """
+        if not self.trailer_attached:
+            return min(self.primary_air_psi, self.secondary_air_psi)
         return min(self.primary_air_psi, self.secondary_air_psi, self.trailer_air_psi)
 
     @air_pressure_psi.setter
