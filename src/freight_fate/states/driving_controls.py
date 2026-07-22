@@ -36,7 +36,7 @@ class DrivingControlsMixin:
         elif key == pygame.K_n and not tr.automatic:
             result = tr.request_gear(0)
             if result.ok:
-                self.ctx.audio.play("vehicle/gear_shift")
+                self.ctx.audio.play_bank("vehicle/shift_manual", "vehicle/gear_shift")
                 self.ctx.say("Neutral.")
         elif key == pygame.K_BACKSPACE and not tr.automatic:
             self._manual_shift(REVERSE)
@@ -536,7 +536,7 @@ class DrivingControlsMixin:
     def _manual_shift(self, gear: int) -> None:
         result = self.truck.transmission.request_gear(gear)
         if result.ok:
-            self.ctx.audio.play("vehicle/gear_shift")
+            self.ctx.audio.play_bank("vehicle/shift_manual", "vehicle/gear_shift")
             self.ctx.say(result.message)
             if self.tutorial:
                 self.tutorial.on_gear_engaged()

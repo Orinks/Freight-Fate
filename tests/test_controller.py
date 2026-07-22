@@ -375,11 +375,16 @@ def test_held_partial_trigger_does_not_machinegun_brake_sound(monkeypatch):
     driving.truck.velocity_mps = 15.0
     hisses = []
     real_play = app.ctx.audio.play
-    monkeypatch.setattr(
-        app.ctx.audio,
-        "play",
-        lambda key, volume=1.0: hisses.append(key) if key == "vehicle/brake_air" else real_play,
-    )
+
+    def spy_play(key, volume=1.0, pan=0.0):
+        # The press cue is the clunk bank when the licensed cuts are
+        # installed, the classic brake_air chirp on a clean clone.
+        if key == "vehicle/brake_air" or key.startswith("vehicle/brake_clunk"):
+            hisses.append(key)
+        else:
+            real_play(key, volume, pan)
+
+    monkeypatch.setattr(app.ctx.audio, "play", spy_play)
     # A light, steady trigger position (~30%) held for many frames.
     app._dispatch_controller(_axis(pygame.CONTROLLER_AXIS_TRIGGERLEFT, int(32767 * 0.30)))
     for _ in range(40):

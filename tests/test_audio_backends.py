@@ -574,6 +574,52 @@ def test_pygame_horn_sustain_phase_transitions(monkeypatch):
     a.shutdown()
 
 
+def _bank_facade(monkeypatch, present: set[str]):
+    """A facade with a fake asset universe, its plays recorded."""
+    a = AudioEngine.__new__(AudioEngine)
+    a._impl = audio._NullBackend()
+    a._banks = {}
+    a._bank_order = {}
+    a._last_bank_key = {}
+    a._asset_known = {}
+    monkeypatch.setattr(
+        audio, "_asset_bytes", lambda key, exts: (b"d", "ogg") if key in present else None
+    )
+    played: list[tuple[str, float]] = []
+    monkeypatch.setattr(a, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume)))
+    return a, played
+
+
+def test_play_bank_cycles_every_cut_without_immediate_repeats(monkeypatch):
+    cuts = {"vehicle/hit_01", "vehicle/hit_02", "vehicle/hit_03"}
+    a, played = _bank_facade(monkeypatch, cuts)
+    for _ in range(30):
+        a.play_bank("vehicle/hit", "vehicle/fallback")
+    keys = [key for key, _vol in played]
+    assert set(keys) == cuts
+    # Shuffled full cycles: every block of three is a permutation of the bank,
+    # and no cut ever lands twice in a row across cycle seams.
+    for i in range(0, 30, 3):
+        assert set(keys[i : i + 3]) == cuts
+    assert all(keys[i] != keys[i - 1] for i in range(1, 30))
+    # The per-trigger level jitter stays inside its band.
+    assert all(0.92 <= vol <= 1.08 for _key, vol in played)
+
+
+def test_play_bank_falls_back_to_the_classic_cue(monkeypatch):
+    a, played = _bank_facade(monkeypatch, set())
+    a.play_bank("vehicle/hit", "vehicle/fallback", volume=0.6)
+    assert played == [("vehicle/fallback", 0.6)]  # exact volume: no jitter on fallback
+
+
+def test_has_asset_caches_the_lookup(monkeypatch):
+    a, _played = _bank_facade(monkeypatch, {"vehicle/ebrake"})
+    assert a.has_asset("vehicle/ebrake")
+    assert not a.has_asset("vehicle/not_there")
+    monkeypatch.setattr(audio, "_asset_bytes", lambda key, exts: None)
+    assert a.has_asset("vehicle/ebrake")  # cached, not re-probed
+
+
 def test_pygame_backend_does_not_play_reverse_loop_through_mixer(monkeypatch):
     backend = audio._PygameBackend.__new__(audio._PygameBackend)
 

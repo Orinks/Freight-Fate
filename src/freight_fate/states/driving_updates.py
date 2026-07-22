@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from .. import engine_audio
-from ..audio import CH_AIR
+from ..audio import CH_AIR, CH_BRAKE
 from ..audio_fades import curve as _resolve_curve
 from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
@@ -160,7 +160,11 @@ class DrivingUpdateMixin:
         if emergency:
             # no ramp: slams to full application instantly, plus spring brakes
             if not t.emergency_brake and abs(t.velocity_mps) > 1:
-                self.ctx.audio.play("vehicle/brake_air", volume=1.0)
+                if self.ctx.audio.has_asset("vehicle/ebrake"):
+                    # The licensed cut: one big sustained air event.
+                    self.ctx.audio.play("vehicle/ebrake", volume=0.9)
+                else:
+                    self.ctx.audio.play("vehicle/brake_air", volume=1.0)
             t.throttle = 0.0
             t.brake = 1.0
         t.emergency_brake = emergency
@@ -171,16 +175,38 @@ class DrivingUpdateMixin:
         # drive, and that must not read as a hard stop and buzz the whole time.
         if t.velocity_mps > 1 and (emergency or t.brake >= 0.85):
             self.ctx.controller.rumble.hard_brake(1.0 if emergency else t.brake)
-        # Air hiss only on the rising edge of applying the brake. A hysteresis
-        # flag (arm at 0.05, release below 0.02) keeps a steady analog trigger --
-        # or a held key -- from retriggering the sound frame after frame. The
-        # emergency brake plays its own louder cue, so it only arms the flag.
+        # Brake sounds ride the application edges. A hysteresis flag (arm at
+        # 0.05, release below 0.02) keeps a steady analog trigger -- or a held
+        # key -- from retriggering frame after frame. The emergency brake
+        # plays its own louder cue, so it only arms the flag.
+        # PRESS: the mechanical clunk of the valve, leveled by press force
+        # (locked spec 2026-07-21; the classic air chirp is the fallback).
+        # RELEASE: the air bleeding back out -- the hiss bed held for a
+        # length, and at a level, set by how hard the brakes were applied.
+        # The release plays at any speed: braking to a halt then letting off
+        # is exactly when a real rig gives its loudest pssht.
         if t.brake >= 0.05:
             if not self._brake_air_hissed and not emergency and abs(t.velocity_mps) > 1:
-                self.ctx.audio.play("vehicle/brake_air", volume=0.6)
+                force = max(0.0, min(1.0, t.brake))
+                self.ctx.audio.play_bank(
+                    "vehicle/brake_clunk", "vehicle/brake_air", volume=0.35 + 0.35 * force
+                )
             self._brake_air_hissed = True
+            self._brake_peak_application = max(self._brake_peak_application, t.brake)
         elif t.brake < 0.02:
+            peak = self._brake_peak_application
+            if (
+                self._brake_air_hissed
+                and peak > 0.0
+                and not emergency
+                and self.ctx.audio.has_asset("vehicle/brake_hiss_bed")
+            ):
+                self.ctx.audio.start_loop(
+                    CH_BRAKE, "vehicle/brake_hiss_bed", volume=0.30 + 0.40 * peak, fade_ms=0
+                )
+                self.ctx.audio.stop_loop(CH_BRAKE, fade_ms=int(160 + 800 * peak))
             self._brake_air_hissed = False
+            self._brake_peak_application = 0.0
         desired_automatic = self.ctx.settings.automatic_transmission
         if t.transmission.automatic != desired_automatic:
             t.transmission.automatic = desired_automatic
@@ -202,7 +228,7 @@ class DrivingUpdateMixin:
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
             if new_gear is not None:
-                self.ctx.audio.play("vehicle/gear_shift", volume=0.65)
+                self.ctx.audio.play_bank("vehicle/shift_auto", "vehicle/gear_shift", volume=0.65)
 
         was_on = t.engine_on
         was_air_ready = t.air_ready
@@ -459,7 +485,7 @@ class DrivingUpdateMixin:
                 self._direction_armed = ""
                 self._direction_hold_s = 0.0
                 tr._shift_timer = 0.0
-                self.ctx.audio.play("vehicle/gear_shift", volume=0.55)
+                self.ctx.audio.play_bank("vehicle/shift_manual", "vehicle/gear_shift", volume=0.55)
                 if want == "forward":
                     tr.gear = 1
                     self._set_status("Forward gear selected.")

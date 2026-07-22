@@ -28,6 +28,7 @@ import io
 import logging
 import math
 import os
+import random
 import sys
 from pathlib import Path
 
@@ -70,7 +71,8 @@ CH_AMBIENT = 7
 CH_HORN = 8
 CH_REVERSE = 9
 CH_AIR = 10  # compressor charging the tanks below governor release
-RESERVED = 10
+CH_BRAKE = 11  # brake-release air bleed: the hiss bed shaped per release
+RESERVED = 11
 NUM_CHANNELS = 32
 
 # Horn sustain loop points (samples, at the asset's 44100 Hz). The horn is an
@@ -1556,6 +1558,10 @@ class AudioEngine:
 
     def __init__(self) -> None:
         self._impl = self._pick_backend()
+        self._banks: dict[str, list[str]] = {}  # base -> discovered numbered keys
+        self._bank_order: dict[str, list[str]] = {}  # base -> remaining shuffled cuts
+        self._last_bank_key: dict[str, str] = {}  # base -> cut played last
+        self._asset_known: dict[str, bool] = {}  # key -> resolves anywhere
         log.info("Audio backend: %s", self._impl.name)
 
     @staticmethod
@@ -1610,6 +1616,57 @@ class AudioEngine:
     def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
         """Play a one-shot. ``pan`` -1.0 = full left, 0 = center, 1.0 = right."""
         self._impl.play(key, volume, pan)
+
+    def has_asset(self, key: str) -> bool:
+        """Whether a sound key resolves (pack, licensed overlay, or loose).
+
+        Cached; call sites use it to prefer a licensed cue and fall back to
+        the committed one -- or to stay silent where silence was the old
+        behavior -- on a clean clone.
+        """
+        cached = self._asset_known.get(key)
+        if cached is None:
+            cached = _asset_bytes(key, ("ogg", "wav")) is not None
+            self._asset_known[key] = cached
+        return cached
+
+    def _bank_keys(self, base: str) -> list[str]:
+        """Discover a numbered round-robin bank (``base_01``..) once, cached."""
+        keys = self._banks.get(base)
+        if keys is None:
+            keys = []
+            for i in range(1, 100):
+                key = f"{base}_{i:02d}"
+                if _asset_bytes(key, ("ogg", "wav")) is None:
+                    break
+                keys.append(key)
+            self._banks[base] = keys
+        return keys
+
+    def play_bank(self, base: str, fallback: str, volume: float = 1.0, pan: float = 0.0) -> None:
+        """Play one cut from a round-robin bank, or ``fallback`` if none exist.
+
+        Real mechanical events never sound twice the same, so banked cuts
+        (``base_01``..``base_NN``, the licensed overlay) play in a shuffled
+        cycle -- every cut once before any repeats, never the same cut twice
+        in a row. A clean clone without the bank keeps the single classic cue.
+        """
+        keys = self._bank_keys(base)
+        if not keys:
+            self.play(fallback, volume, pan)
+            return
+        order = self._bank_order.get(base)
+        if not order:
+            order = random.sample(keys, len(keys))
+            # A fresh shuffle may lead with the cut that just played; swap it
+            # to the back so no cut ever sounds twice in a row.
+            if len(order) > 1 and order[0] == self._last_bank_key.get(base):
+                order[0], order[-1] = order[-1], order[0]
+            self._bank_order[base] = order
+        key = order.pop(0)
+        self._last_bank_key[base] = key
+        # Small per-trigger level jitter: no two clunks land identically.
+        self.play(key, volume * random.uniform(0.92, 1.08), pan)
 
     def start_loop(self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300) -> None:
         self._impl.start_loop(channel, key, volume, fade_ms)

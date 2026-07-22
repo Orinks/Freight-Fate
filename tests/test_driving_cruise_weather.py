@@ -407,7 +407,7 @@ def test_automatic_shift_uses_shift_cue_not_brake_air(monkeypatch):
         quiet_trip(driving)
         monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
         monkeypatch.setattr(
-            app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume))
+            app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
         )
         driving.truck.start_engine()
         driving.truck.transmission.gear = 3
@@ -415,7 +415,15 @@ def test_automatic_shift_uses_shift_cue_not_brake_air(monkeypatch):
 
         driving.update(0.0)
 
-        assert ("vehicle/gear_shift", 0.65) in played
+        # The shift cue is the auto-shift bank when the licensed cuts are
+        # installed (volume carries a small per-trigger jitter around 0.65),
+        # the classic gear_shift on a clean clone.
+        shifts = [
+            (key, vol)
+            for key, vol in played
+            if key == "vehicle/gear_shift" or key.startswith("vehicle/shift_auto")
+        ]
+        assert shifts and all(0.55 <= vol <= 0.75 for _key, vol in shifts)
         assert all(key != "vehicle/brake_air" for key, _volume in played)
     finally:
         app.shutdown()

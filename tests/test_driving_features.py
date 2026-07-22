@@ -174,7 +174,7 @@ def test_passing_hazard_plays_clear_sound(monkeypatch):
     app = App()
     played = []
     events = []
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume)))
     monkeypatch.setattr(
         app.ctx,
         "say_event",
@@ -289,7 +289,7 @@ def test_sustained_redline_speaks_a_damage_warning(monkeypatch):
     app = App()
     events = []
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append(key))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append(key))
     monkeypatch.setattr(
         app.ctx,
         "say_event",
@@ -908,7 +908,7 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
         "say",
         lambda text, interrupt=True: spoken.append((text, interrupt)),
     )
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume)))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -2060,7 +2060,7 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
     spoken = []
     monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume)))
     try:
         driving = start_drive(app)
         quiet_trip(driving)

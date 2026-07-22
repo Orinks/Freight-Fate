@@ -147,7 +147,7 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
     spoken = []
     monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume)))
     try:
         driving = accept_pickup_drive(app)
 
@@ -180,7 +180,7 @@ def test_loading_at_pickup_uses_dock_sound(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume)))
     try:
         accept_pickup_drive(app)
         pickup = arrive_at_pickup(app)
