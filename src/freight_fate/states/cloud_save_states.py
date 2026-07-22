@@ -1,6 +1,6 @@
 """The Cloud backup menu: restore cloud saves and resolve sync conflicts.
 
-Reached from Settings, Online. Everything network runs on daemon threads
+Reached from the Online menu. Everything network runs on daemon threads
 with the same mailbox-polling pattern as the drivers board menus: the game
 loop and speech stay responsive while orinks.net answers.
 """
@@ -99,7 +99,7 @@ class CloudBackupState(MenuState):
                 MenuItem(
                     "Cloud backup needs your orinks.net driver account",
                     self.speak_current,
-                    help="Set up the drivers board under Settings, Online "
+                    help="Set up your orinks.net account on the Online menu "
                     "first; cloud backup uses the same sign-in.",
                 ),
                 MenuItem("Back", self.go_back),

@@ -19,6 +19,14 @@
 
 ### Changed
 
+- **Everything online now lives in one Online menu on the main menu.** The
+  drivers board, orinks.net account setup, Profile sharing, cloud backup and
+  restore, Mastodon sharing, and Discord presence moved out of Settings into
+  a single Online menu, so restoring a save on a new computer or checking who
+  is hauling no longer means hunting through settings categories. The board
+  sits first because viewing it shares nothing about you. Choosing Online
+  inside Settings still works and opens the same menu, and every toggle keeps
+  the familiar Enter, Right, and Left arrow controls.
 - **Test builds now introduce themselves as development builds.** The main
   menu welcome and the update screen used to read a bare version number that
   looked like a stable release. A nightly or source build now says, for

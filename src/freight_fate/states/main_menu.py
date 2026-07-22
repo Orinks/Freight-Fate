@@ -231,10 +231,11 @@ class MainMenuState(MenuState):
         )
         items.append(
             MenuItem(
-                "Drivers online",
-                self._drivers_online,
-                help="Hear who is hauling right now on the public orinks.net "
-                "drivers board. Viewing the board shares nothing about you.",
+                "Online",
+                self._online_hub,
+                help="The public drivers board, your orinks.net account, "
+                "cloud backup and restore, and sharing choices like "
+                "Mastodon and Discord, all in one place.",
             )
         )
         items.append(
@@ -245,7 +246,7 @@ class MainMenuState(MenuState):
                 "Settings",
                 self._settings,
                 help="Units, transmission mode, volumes, weather, voices, "
-                "online sharing, update channel, and trip pacing.",
+                "update channel, and trip pacing.",
             )
         )
         items.append(
@@ -305,10 +306,10 @@ class MainMenuState(MenuState):
     def _settings(self) -> None:
         self.ctx.push_state(SettingsState(self.ctx))
 
-    def _drivers_online(self) -> None:
-        from .online_states import DriversOnlineState
+    def _online_hub(self) -> None:
+        from .online_hub import OnlineHubState
 
-        self.ctx.push_state(DriversOnlineState(self.ctx))
+        self.ctx.push_state(OnlineHubState(self.ctx))
 
     def _report_issue(self) -> None:
         import webbrowser
@@ -785,7 +786,6 @@ class SettingsState(MenuState):
         ("Gameplay", "gameplay"),
         ("Audio", "audio"),
         ("Speech and weather", "speech"),
-        ("Online", "online"),
         ("Updates", "updates"),
         ("Problem reports", "reports"),
     )
@@ -795,11 +795,27 @@ class SettingsState(MenuState):
             MenuItem(label, lambda key=key: self._open(key), help=f"Open {label.lower()} settings.")
             for label, key in self.CATEGORIES
         ]
+        # The Online items moved to the main menu; this stays in the old spot
+        # for a release or two so muscle memory still lands somewhere useful.
+        items.insert(
+            3,
+            MenuItem(
+                "Online",
+                self._open_online_hub,
+                help="Online options have moved to the Online menu on the "
+                "main menu. This opens that menu.",
+            ),
+        )
         items.append(MenuItem("Back", self.go_back))
         return items
 
     def _open(self, category: str) -> None:
         self.ctx.push_state(SettingsCategoryState(self.ctx, category))
+
+    def _open_online_hub(self) -> None:
+        from .online_hub import OnlineHubState
+
+        self.ctx.push_state(OnlineHubState(self.ctx))
 
     def go_back(self) -> None:
         self.ctx.settings.save()
@@ -827,7 +843,6 @@ class SettingsCategoryState(MenuState):
         "gameplay": "Gameplay",
         "audio": "Audio",
         "speech": "Speech and weather",
-        "online": "Online",
         "updates": "Updates",
         "reports": "Problem reports",
     }
@@ -953,104 +968,6 @@ class SettingsCategoryState(MenuState):
             ]
             items.append(MenuItem("Back", self.go_back))
             return items
-        if self.category == "online":
-            from ..online_presence import OnlineIdentity
-
-            return [
-                MenuItem(
-                    lambda: (
-                        "orinks.net account: connected"
-                        if OnlineIdentity.load() is not None
-                        else "Set up orinks.net account"
-                    ),
-                    self._online_account_setup,
-                    help="Connect the game to your orinks.net account without turning on Profile "
-                    "sharing or Cloud backup.",
-                ),
-                MenuItem(
-                    # The identity check lives INSIDE the label so it is
-                    # fresh on every read: a captured build-time value went
-                    # stale the moment setup completed (or the identity file
-                    # changed on disk) and misreported "on" while dormant.
-                    lambda: (
-                        (
-                            "Profile sharing: off requested"
-                            if s.profile_sharing_pending_off
-                            else f"Profile sharing: {'on' if s.online_presence else 'off'}"
-                        )
-                        if OnlineIdentity.load() is not None
-                        else "Profile sharing: not set up"
-                    ),
-                    lambda: self._toggle_online_presence(1),
-                    help="Profile sharing is one optional public setting for your driver profile, "
-                    "official achievements, automatic road-journal posts, updates feed, "
-                    "and on-duty board activity. Nothing is shared until you set it up: "
-                    "Set up the orinks.net account first. Cloud saves remain private and separate.",
-                ),
-                MenuItem(
-                    lambda: (
-                        f"Back up saves to your orinks.net account: {'on' if s.cloud_saves else 'off'}"
-                        if OnlineIdentity.load() is not None
-                        else "Back up saves to your orinks.net account: not set up"
-                    ),
-                    lambda: self._toggle_cloud_saves(1),
-                    help="After each game save, upload that career to your "
-                    "own orinks.net account so you can restore it on another "
-                    "computer. Backups are private to your account and never "
-                    "appear as public downloads. Uses the same orinks.net account sign-in.",
-                ),
-                MenuItem(
-                    "Restore a cloud backup",
-                    self._cloud_backup_menu,
-                    help="List the careers backed up to your orinks.net account "
-                    "and bring one onto this computer.",
-                ),
-                MenuItem(
-                    # Same freshness rule as Profile sharing: the identity and
-                    # linked-handle checks live inside the label.
-                    lambda: (
-                        (
-                            f"Share notable deliveries to Mastodon: "
-                            f"{'on' if s.mastodon_sharing else 'off'}"
-                            if s.mastodon_linked
-                            else "Share notable deliveries to Mastodon: not linked"
-                        )
-                        if OnlineIdentity.load() is not None
-                        else "Share notable deliveries to Mastodon: not set up"
-                    ),
-                    lambda: self._toggle_mastodon_sharing(1),
-                    help="When on, finishing a delivery that earns an achievement, a "
-                    "level, or a perfect streak posts a short public summary "
-                    "to your own Mastodon account with the FreightFate "
-                    "hashtag. Routine deliveries are never posted. Link a "
-                    "Mastodon account first with the Mastodon account item.",
-                ),
-                MenuItem(
-                    lambda: (
-                        (
-                            f"Mastodon account: linked as {s.mastodon_linked_handle}"
-                            if s.mastodon_linked_handle
-                            else "Mastodon account: linked"
-                        )
-                        if s.mastodon_linked
-                        else "Link a Mastodon account"
-                    ),
-                    self._mastodon_account,
-                    help="Opens a page on orinks.net where you authorize your "
-                    "own Mastodon server, using the same orinks.net sign-in "
-                    "as driver setup. Unlinking also happens there.",
-                ),
-                MenuItem(
-                    lambda: f"Discord presence: {'on' if s.discord_presence else 'off'}",
-                    lambda: self._toggle_discord_presence(1),
-                    help="Show broad activity in Discord, like the main menu, "
-                    "driving a route, or resting. Only general game status "
-                    "is shared, never your save files or personal details. "
-                    "Has no effect if Discord is not running. Works without "
-                    "a driver profile.",
-                ),
-                MenuItem("Back", self.go_back),
-            ]
         if self.category == "reports":
             return [
                 MenuItem(
@@ -1114,17 +1031,6 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("engine_volume", 0.1 * d),
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("ui_volume", 0.1 * d),
-                ],
-                # Account setup and restore are actions, so left/right does
-                # nothing on those rows instead of changing a nearby toggle.
-                "online": [
-                    lambda _d: None,
-                    self._toggle_online_presence,
-                    self._toggle_cloud_saves,
-                    lambda _d: None,
-                    self._toggle_mastodon_sharing,
-                    lambda _d: None,
-                    self._toggle_discord_presence,
                 ],
                 "updates": [self._toggle_update_channel],
                 # Reading the log's location is an action, not a value to
@@ -1302,106 +1208,6 @@ class SettingsCategoryState(MenuState):
             i = 0
         self.ctx.settings.steering_assist = modes[(i + d) % len(modes)]
         self._announce()
-
-    def _toggle_discord_presence(self, _d: int) -> None:
-        self.ctx.settings.discord_presence = not self.ctx.settings.discord_presence
-        self.ctx.apply_presence()
-        self._announce()
-
-    def _toggle_online_presence(self, _d: int) -> None:
-        from ..online_presence import OnlineIdentity
-        from .online_states import OnlineSetupState, ProfileSharingSyncState
-
-        s = self.ctx.settings
-        if OnlineIdentity.load() is None:
-            # Not set up yet: the spoken disclosure and browser confirmation
-            # happen in the setup state; it flips the setting on success.
-            # The setting alone shares nothing without an identity.
-            self.ctx.push_state(OnlineSetupState(self.ctx))
-            return
-        target = False if s.profile_sharing_pending_off else not s.online_presence
-        self.ctx.push_state(ProfileSharingSyncState(self.ctx, target))
-
-    def _toggle_cloud_saves(self, _d: int) -> None:
-        from ..online_presence import OnlineIdentity
-        from .cloud_save_states import CloudBackupConsentState
-
-        s = self.ctx.settings
-        if OnlineIdentity.load() is None:
-            # Cloud backup rides the same account credentials as the board;
-            # without them the setting would be inert, so point at the setup
-            # item instead of flipping a switch that does nothing.
-            self.ctx.say(
-                "Cloud backup uses the same orinks.net sign-in as your driver "
-                "profile. Choose Set up orinks.net account on this menu first, "
-                "then turn cloud backup on.",
-                interrupt=True,
-            )
-            return
-        if not s.cloud_saves:
-            self.ctx.push_state(CloudBackupConsentState(self.ctx))
-            return
-        s.cloud_saves = False
-        s.save()
-        self.ctx.apply_cloud_saves()
-        self._announce()
-
-    def _toggle_mastodon_sharing(self, _d: int = 1) -> None:
-        from ..online_presence import OnlineIdentity
-
-        s = self.ctx.settings
-        if OnlineIdentity.load() is None:
-            self.ctx.say(
-                "Sharing to Mastodon uses your orinks.net account. Choose "
-                "Set up orinks.net account on this menu first, then link a "
-                "Mastodon account.",
-                interrupt=True,
-            )
-            return
-        if not s.mastodon_linked and not s.mastodon_sharing:
-            # No known link: the switch would be inert, so point at the link
-            # item instead of flipping it (same shape as cloud backup).
-            self.ctx.say(
-                "Sharing to Mastodon needs a linked Mastodon account. Choose "
-                "Link a Mastodon account on this menu first, then turn "
-                "sharing on.",
-                interrupt=True,
-            )
-            return
-        s.mastodon_sharing = not s.mastodon_sharing
-        self.ctx.apply_mastodon_sharing()
-        self._announce()
-        if s.mastodon_sharing:
-            # The label said "on"; this says what "on" means, every time.
-            self.ctx.say(
-                "Only deliveries that earn an achievement, a level, or a perfect "
-                "streak are posted. Posts are public on your own Mastodon "
-                "account and carry the FreightFate hashtag.",
-                interrupt=False,
-            )
-
-    def _mastodon_account(self) -> None:
-        from ..online_presence import OnlineIdentity
-        from .online_states import MastodonLinkState
-
-        if OnlineIdentity.load() is None:
-            self.ctx.say(
-                "Linking Mastodon uses your orinks.net sign-in. Choose Set "
-                "up orinks.net account on this menu first.",
-                interrupt=True,
-            )
-            return
-        self.ctx.push_state(MastodonLinkState(self.ctx))
-
-    def _online_account_setup(self) -> None:
-        from .online_states import OnlineSetupState
-
-        self.ctx.push_state(OnlineSetupState(self.ctx))
-
-    def _cloud_backup_menu(self) -> None:
-        from .cloud_save_states import CloudBackupState
-
-        self.ctx.push_state(CloudBackupState(self.ctx))
 
     def _toggle_controller(self, _d: int) -> None:
         self.ctx.settings.controller_enabled = not self.ctx.settings.controller_enabled
