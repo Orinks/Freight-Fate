@@ -292,6 +292,7 @@ class DrivingState(
         self._spring_brake_said = self.truck.spring_brakes_active
         self._brake_lockout_cue_timer = 0.0
         self._brake_air_hissed = False  # rising-edge guard for the brake-apply hiss
+        self._pending_low_air_buzzer = False  # cold-start buzzer, held past the crank
         self._brake_peak_application = 0.0  # hardest press this application, shapes the release
         self._overrev_s = 0.0  # continuous seconds at damaging RPM
         self._overrev_warn_due = OVERREV_GRACE_S  # repeats push it out further

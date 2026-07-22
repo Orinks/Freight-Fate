@@ -2610,6 +2610,47 @@ def test_air_fill_loop_plays_until_governor_release(monkeypatch):
         app.shutdown()
 
 
+def test_cold_start_buzzer_waits_out_the_crank(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.audio import AudioEngine
+
+    app = App()
+    played = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(
+            app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append(key)
+        )
+        t = driving.truck
+        t.set_cold_air_start()
+        t.start_engine()
+        driving._pending_low_air_buzzer = True  # what the E-key start path arms
+
+        # While the ignition crank still plays, the buzzer must hold.
+        monkeypatch.setattr(AudioEngine, "engine_starting", property(lambda self: True))
+        driving._update_audio(0.0)
+        assert "vehicle/low_air_buzzer" not in played
+        assert driving._pending_low_air_buzzer
+
+        # Crank handed off with the air still low (55 psi): now it may sound.
+        monkeypatch.setattr(AudioEngine, "engine_starting", property(lambda self: False))
+        driving._update_audio(0.0)
+        assert "vehicle/low_air_buzzer" in played
+        assert not driving._pending_low_air_buzzer
+
+        # And if the compressor had already built past the warning line,
+        # the pending buzzer dissolves silently.
+        played.clear()
+        driving._pending_low_air_buzzer = True
+        t.air_pressure_psi = 80.0  # above the 60 psi warning
+        driving._update_audio(0.0)
+        assert "vehicle/low_air_buzzer" not in played
+        assert not driving._pending_low_air_buzzer
+    finally:
+        app.shutdown()
+
+
 def test_reverse_audio_loop_restarts_after_pause_resume(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.transmission import REVERSE

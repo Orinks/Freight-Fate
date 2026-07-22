@@ -38,6 +38,8 @@ ENGINE_LOAD_SMOOTH_S = 0.45
 # few seconds all drive long. A cold start (55) or a real low-air situation
 # still brings it in; once playing it runs until the air is ready again.
 AIR_FILL_REARM_PSI = 8.0
+# A bed under the idle, not a foreground event (owner's ear, 2026-07-22).
+AIR_FILL_VOLUME = 0.6
 
 
 class DrivingUpdateMixin:
@@ -916,11 +918,20 @@ class DrivingUpdateMixin:
         )
         if t.engine_on and voice.pressurizing and (self._air_cue_active or deep_fill):
             if not self._air_cue_active:
-                audio.start_loop(CH_AIR, "vehicle/air_pressurize", fade_ms=400)
+                audio.start_loop(
+                    CH_AIR, "vehicle/air_pressurize", volume=AIR_FILL_VOLUME, fade_ms=400
+                )
                 self._air_cue_active = True
         elif self._air_cue_active:
             audio.stop_loop(CH_AIR, fade_ms=700)
             self._air_cue_active = False
+        # The cold-start low-air buzzer waits out the ignition crank so the
+        # start itself stays audible; if the compressor has already built past
+        # the warning line by handoff, there is nothing left to warn about.
+        if self._pending_low_air_buzzer and not audio.engine_starting:
+            self._pending_low_air_buzzer = False
+            if t.engine_on and t.air_low_warning:
+                audio.play("vehicle/low_air_buzzer", volume=0.55)
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)
