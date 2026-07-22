@@ -310,6 +310,28 @@ def test_bass_engine_model_matches_available_cuts(monkeypatch):
     a.shutdown()
 
 
+def test_engine_voice_setting_switches_models_live(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    impl = a._impl
+    have_all_cuts = all(
+        audio._asset_bytes(key, ("ogg", "wav")) is not None for key, _rpm in audio.ENGINE_BANDS
+    )
+    a.set_engine_voice(True)  # classic
+    a.engine_start(play_start_sound=False)
+    assert impl._engine_bands == []
+    assert impl._engine_stream is not None  # the classic pitched loop
+    if have_all_cuts:
+        a.set_engine_voice(False)  # back to real, live, mid-run
+        assert a.engine_running
+        assert len(impl._engine_bands) == len(audio.ENGINE_BANDS)
+        assert impl._engine_stream is None
+    a.engine_stop()
+    a.shutdown()
+
+
 def test_bass_engine_falls_back_to_pitched_loop_without_cuts(monkeypatch):
     # A clean clone carries only the synthesized engine/idle: the ring cannot
     # form, and the legacy single pitched loop must come up instead.

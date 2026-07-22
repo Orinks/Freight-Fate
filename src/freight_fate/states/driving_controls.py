@@ -473,9 +473,14 @@ class DrivingControlsMixin:
             if t.start_engine():
                 self.ctx.audio.engine_start()
                 if t.air_low_warning:
-                    # Starting from a parked low-air state should always give an
-                    # immediate audible warning, independent of frame timing.
-                    self.ctx.audio.play("vehicle/low_air_buzzer", volume=0.7)
+                    # A cold start is low on air by definition, but sounding
+                    # the buzzer here buries the crank. Hold it until the
+                    # ignition hands off; by then the compressor has usually
+                    # pushed past the warning line and the buzzer honestly
+                    # has nothing left to say (the spoken air readout below
+                    # carries the state either way). The haptic alert still
+                    # lands immediately.
+                    self._pending_low_air_buzzer = True
                     self.ctx.controller.rumble.alert()
                     self._low_air_said = True
                 self._set_status("Engine running.")
