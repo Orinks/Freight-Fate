@@ -504,15 +504,17 @@ terminal becomes the anchor of that week instead of a spawn point.
 - [ ] **Provenance audit of shipped sound assets (owner, 2026-07-22).**
       The Duff-shared cues cannot ship -- he holds no license for the
       material he passed along (owner ruling, 2026-07-22), so every
-      Duff row is a replacement, not a check. The engine-voice rebuild
-      already retires idle/start/shutdown, gear_shift, and both
-      parking-brake cues with Splice-cut replacements; still owed:
-      vehicle/horn.ogg and driver/yawn.ogg. Weather loops are credited
-      ElevenLabs (verify) and get re-sourced from Splice anyway; the
-      unlabeled ambience rows (poi/rest_stop_night.ogg,
-      poi/weigh_station_lane.ogg) need their source pinned. Work the
-      CREDITS.md table top to bottom until every row names a source we
-      can ship.
+      Duff row is a replacement, not a check. Audit ran 2026-07-22
+      (git history of every unlabeled row): the 2026-06-18 batch
+      (weather, event cues, POI/ambience loops) is all project-clean
+      ElevenLabs/procedural work, never swapped since -- weather
+      re-sourcing from Splice is now a quality upgrade, not a
+      compliance fix. One mislabel found and corrected:
+      `ambient/night.ogg` was credited "original" but came from
+      Darren's sound pack. Replacements owed: vehicle/horn.ogg,
+      driver/yawn.ogg, ambient/night.ogg (Splice); the engine-voice
+      rebuild retires idle/start/shutdown, gear_shift, and both
+      parking-brake cues.
 - [ ] **Bobtail means no trailer at all (forum report, SRD625
       2026-07-17).** The physics models every unloaded state as tractor
       plus EMPTY TRAILER (`tare_kg`, vehicle.py: "Tractor plus empty
