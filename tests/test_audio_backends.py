@@ -94,23 +94,46 @@ def test_engine_freq_mult_mapping():
     assert abs(mid - (1.0 + ENGINE_FREQ_MAX_MULT) / 2) < 1e-9
 
 
-def test_engine_band_weights_edges_and_blend():
+def test_engine_band_weights_edges_blend_and_pure_zones():
+    import math
+
     natives = tuple(rpm for _key, rpm in audio.ENGINE_BANDS)
+    n = len(natives)
+
+    def solo(index):
+        expected = [0.0] * n
+        expected[index] = 1.0
+        return tuple(expected)
+
     # Outside the ring the nearest band carries alone.
-    assert audio.engine_band_weights(0, natives) == (1.0, 0.0, 0.0, 0.0)
-    assert audio.engine_band_weights(natives[0], natives) == (1.0, 0.0, 0.0, 0.0)
-    assert audio.engine_band_weights(natives[-1], natives) == (0.0, 0.0, 0.0, 1.0)
-    assert audio.engine_band_weights(9999, natives) == (0.0, 0.0, 0.0, 1.0)
-    # Between neighbours exactly two bands blend, equal-power (sum of squares 1).
-    mid = (natives[1] + natives[2]) / 2
+    assert audio.engine_band_weights(0, natives) == solo(0)
+    assert audio.engine_band_weights(natives[0], natives) == solo(0)
+    assert audio.engine_band_weights(natives[-1], natives) == solo(-1 % n)
+    assert audio.engine_band_weights(9999, natives) == solo(-1 % n)
+    # At the geometric midpoint of a gap exactly two bands blend equal-power.
+    mid = math.sqrt(natives[1] * natives[2])
     w = audio.engine_band_weights(mid, natives)
-    assert w[0] == 0.0 and w[3] == 0.0
     assert w[1] > 0.0 and w[2] > 0.0
+    assert sum(1 for x in w if x > 0.0) == 2
     assert sum(x * x for x in w) == pytest.approx(1.0)
-    # The handoff is monotonic: rising rpm moves weight up the ring.
-    lo = audio.engine_band_weights(natives[1] + 10, natives)
-    hi = audio.engine_band_weights(natives[2] - 10, natives)
-    assert lo[1] > hi[1] and lo[2] < hi[2]
+    # Just off a native rpm the band is PURE -- the crossfade windows are
+    # narrow, so a cut near its recorded speed never shares the mix (this is
+    # what kills both the formant smear and the two-pitch beat).
+    for i, native in enumerate(natives[:-1]):
+        assert audio.engine_band_weights(native + 10, natives) == solo(i)
+        if i > 0:
+            assert audio.engine_band_weights(native - 10, natives) == solo(i)
+    # A sweep never needs more than a bounded stretch from any sounding band:
+    # wherever a band has weight, rpm/native stays inside the safety clamps.
+    rpm = 300.0
+    while rpm < 2400.0:
+        for weight, native in zip(
+            audio.engine_band_weights(rpm, natives), natives, strict=True
+        ):
+            if weight > 1e-6 and natives[0] <= rpm <= natives[-1]:
+                ratio = rpm / native
+                assert audio.ENGINE_BAND_RATE_MIN <= ratio <= audio.ENGINE_BAND_RATE_MAX
+        rpm += 7.0
 
 
 def test_engine_load_gain_keeps_audible_load_contour():
@@ -343,7 +366,7 @@ def test_bass_engine_falls_back_to_pitched_loop_without_cuts(monkeypatch):
     original = impl._sfx_stream
 
     def only_idle(key, looping=False):
-        if key in ("engine/low", "engine/mid", "engine/high"):
+        if key in {band_key for band_key, _rpm in audio.ENGINE_BANDS} - {"engine/idle"}:
             return None
         return original(key, looping)
 

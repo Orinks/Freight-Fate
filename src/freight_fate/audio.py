@@ -63,16 +63,16 @@ def _bass_plugin_names() -> tuple[str, ...]:
 
 # Reserved loop slots. The pygame backend maps them onto mixer channels;
 # the BASS backend uses them as keys for its stream table.
-CH_ENGINE = (0, 1, 2, 3)  # idle, low, mid, high crossfade ring (pygame only)
-CH_ROAD = 4
-CH_WEATHER = 5
-CH_WEATHER_B = 6
-CH_AMBIENT = 7
-CH_HORN = 8
-CH_REVERSE = 9
-CH_AIR = 10  # compressor charging the tanks below governor release
-CH_BRAKE = 11  # brake-release air bleed: the hiss bed shaped per release
-RESERVED = 11
+CH_ENGINE = (0, 1, 2, 3, 4)  # the engine band crossfade ring (pygame only)
+CH_ROAD = 5
+CH_WEATHER = 6
+CH_WEATHER_B = 7
+CH_AMBIENT = 8
+CH_HORN = 9
+CH_REVERSE = 10
+CH_AIR = 11  # compressor charging the tanks below governor release
+CH_BRAKE = 12  # brake-release air bleed: the hiss bed shaped per release
+RESERVED = 12
 NUM_CHANNELS = 32
 
 # Horn sustain loop points (samples, at the asset's 44100 Hz). The horn is an
@@ -89,12 +89,21 @@ ENGINE_BANDS = (
     ("engine/idle", 680.0),
     ("engine/low", 950.0),
     ("engine/mid", 1150.0),
+    ("engine/midhigh", 1425.0),
     ("engine/high", 1800.0),
 )
-# A cut may only be repitched this far from the speed it was recorded at --
-# beyond that the cab character falls apart and the neighbour band carries it.
+# Crossfades live in a narrow window around each adjacent pair's GEOMETRIC
+# midpoint (log-space), this fraction of the gap wide. Two things follow:
+# a cut never plays far from its recorded speed (rate excursions stay under
+# ~16 percent -- past that the moving formants smear, the launch-pull
+# weirdness the owner heard), and the two members of a blend always track
+# the same rpm honestly, so there is no clamped-versus-tracking pitch clash
+# (the ~10 Hz "stop-start" beat at 1700-1800 under the old full-gap fade).
+ENGINE_XFADE_LOG_FRAC = 0.30
+# Safety clamp only -- the windows above keep normal tracking well inside.
+# 0.78 covers the widest pair's window edge (the 950 cut entering at ~764);
 # 1.30 up lets the 1800 cut reach redline (2200/1800 = 1.22).
-ENGINE_BAND_RATE_MIN = 0.85
+ENGINE_BAND_RATE_MIN = 0.78
 ENGINE_BAND_RATE_MAX = 1.30
 
 # Legacy BASS engine model: one idle loop, pitched up with RPM. Still the
@@ -184,8 +193,12 @@ def engine_band_weights(rpm: float, natives: tuple[float, ...]) -> tuple[float, 
     """Crossfade weights for the engine band ring at ``rpm``.
 
     Below the first native rpm the first band carries alone, above the last
-    the last does; between neighbours the pair blends equal-power (the loops
-    are uncorrelated recordings, so cos/sin keeps the summed level flat).
+    the last does. Between neighbours, one band carries alone until the rpm
+    enters the pair's narrow log-space window around their geometric
+    midpoint (ENGINE_XFADE_LOG_FRAC of the gap); inside it the pair blends
+    equal-power (the loops are uncorrelated recordings, so cos/sin keeps
+    the summed level flat). The pure zones either side of each window are
+    what keep every sounding cut close to its recorded speed.
     """
     n = len(natives)
     weights = [0.0] * n
@@ -196,9 +209,19 @@ def engine_band_weights(rpm: float, natives: tuple[float, ...]) -> tuple[float, 
     else:
         for i in range(n - 1):
             if rpm <= natives[i + 1]:
-                t = (rpm - natives[i]) / (natives[i + 1] - natives[i])
-                weights[i] = math.cos(t * math.pi / 2.0)
-                weights[i + 1] = math.sin(t * math.pi / 2.0)
+                # Position within the gap in log space, remapped through the
+                # centered window: below it the lower band is pure, above it
+                # the upper band is pure.
+                t = math.log(rpm / natives[i]) / math.log(natives[i + 1] / natives[i])
+                half = ENGINE_XFADE_LOG_FRAC / 2.0
+                s = (t - (0.5 - half)) / ENGINE_XFADE_LOG_FRAC
+                if s <= 0.0:
+                    weights[i] = 1.0
+                elif s >= 1.0:
+                    weights[i + 1] = 1.0
+                else:
+                    weights[i] = math.cos(s * math.pi / 2.0)
+                    weights[i + 1] = math.sin(s * math.pi / 2.0)
                 break
     return tuple(weights)
 
