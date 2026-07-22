@@ -34,7 +34,10 @@ TARGET_SR = 44100   # match the existing pack (engine/idle.ogg is 44.1 kHz Vorbi
 # Single files map one-to-one; RR banks map a glob to a numbered key family.
 SINGLES: list[tuple[str, str]] = [
     ("896/idle_680.wav", "engine/idle"),            # band idle  (~680 rpm)
-    ("896/cruise_neutral.wav", "engine/low"),       # band low   (~1000 rpm)
+    # low = the 896 mid cut pitched to 950 (engine_low_950.py). The 60624
+    # neutral hold is RETIRED: it measures ~1125 rpm (not the labeled ~1000,
+    # 30 rpm under the mid cut) and is likely a different truck.
+    ("896/engine_low_950.wav", "engine/low"),       # band low   (950 rpm)
     ("896/cruise_mid_1150.wav", "engine/mid"),      # band mid   (~1150 rpm)
     ("896/cruise_high_1800.wav", "engine/high"),    # band high  (~1800 rpm)
     ("896/rev_launch.wav", "engine/rev_launch"),    # short pull: launch from a stop

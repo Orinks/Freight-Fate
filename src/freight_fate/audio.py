@@ -87,7 +87,7 @@ HORN_LOOP_END = 12379
 # band's playback rate to track rpm inside the band (see ENGINE_BAND_RATE_*).
 ENGINE_BANDS = (
     ("engine/idle", 680.0),
-    ("engine/low", 1000.0),
+    ("engine/low", 950.0),
     ("engine/mid", 1150.0),
     ("engine/high", 1800.0),
 )
