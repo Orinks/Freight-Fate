@@ -17,6 +17,14 @@
   that settling is your cue the parking brake can release. Revving while
   parked really does charge the tanks faster.
 
+- **Brakes and gear changes sound like the real mechanisms now.** Pressing
+  the brake gives the valve's mechanical clunk, louder the harder you
+  press, and letting off releases the air back out -- a hiss that runs
+  longer and louder the harder you were braking, including the big pssht
+  when you stop and let off. The emergency brake dumps its air in one
+  long event. Every shift, manual or automatic, is a real recorded shift,
+  and no two in a row sound identical.
+
 - **The engine brake grew its real cylinder selector.** J is now the
   dash switch: it turns the engine brake on at whatever stage you last
   selected, and while it is on, 1, 2, and 3 pick two, four, or six
