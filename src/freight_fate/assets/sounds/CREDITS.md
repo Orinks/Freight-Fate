@@ -2,10 +2,14 @@
 
 Sound effects in this directory come from a few sources, documented per file in
 the tables below: original effects created for Freight Fate (no third-party
-recordings or samples), authorized in-cab truck sounds Darren Duff found and
-shared for selected vehicle cues, and weather and road loops produced with ElevenLabs
-sound effects tooling. The main menu, Open Road, and Night Haul themes are Suno
-remakes created by the project owner. The July 2026 radio-station batch
+recordings or samples), weather and road loops produced with ElevenLabs sound
+effects tooling, and -- in release builds only -- driving sounds cut from
+commercially licensed sample libraries (see "Licensed Driving Sounds" below).
+A number of in-cab cues were shared by Darren Duff early in the project; he
+holds no license for that material (owner ruling 2026-07-22), so every Duff
+row below is scheduled for replacement, not attribution -- most are already
+superseded in release builds by the licensed overlay. The main menu, Open
+Road, and Night Haul themes are Suno remakes created by the project owner. The July 2026 radio-station batch
 (fifty-two tracks marked "2026-07 Zero batch" below) was composed with Suno V5
 through the
 Zero capability marketplace, with original lyrics written for Freight Fate;
@@ -52,6 +56,26 @@ current idle, start, and shutdown cues.
 | Turn signal | `vehicle/turn_signal.ogg` | ElevenLabs-generated in-cab indicator clicks for exit and pull-over signaling |
 | Tire screech | `vehicle/tire_screech.ogg` | ElevenLabs-generated emergency-braking skid for microsleep forced stops |
 | Brake squeal | `vehicle/brake_squeal.ogg` | ElevenLabs-generated overheated-brake squeal past the fade temperature |
+| Air pressurization fill | `vehicle/air_pressurize.ogg` | Original parametric DSP loop (seeded frequency-domain synthesis, `sound-test/air_fallback.py`); superseded in release builds by the licensed overlay version |
+
+## Licensed Driving Sounds (release builds only)
+
+These assets ship inside release builds via the local `sounds-licensed/`
+overlay and are never committed to the repository: they are cut from
+commercially licensed sample-library recordings (Splice subscriptions held by
+the project maintainers) whose license covers synchronized use in the finished
+game but is per-seat and non-transferable, so the source samples cannot be
+redistributed. A source checkout falls back to the committed cues above.
+
+| Game file(s) | Built from | Source pack |
+| --- | --- | --- |
+| `engine/idle`, `engine/mid`, `engine/high`, `engine/rev_launch`, `engine/rev_load` | Steady holds and real acceleration pulls cut from the `SemiTruckMac_S08IN.896` interior driving take | Splice -- Large Vehicles |
+| `engine/low` | The 896 mid cut pitched 1150 to 950 rpm by resampling (`sound-test/engine_low_950.py`) | Splice -- Large Vehicles |
+| `vehicle/shift_manual_01`..`15`, `vehicle/shift_auto_01`..`15` | Real gear changes (manual: clutch squeaks; automatic: shorter disengage) cut from `SemiTruck_S08IN.854/.855/.859` and `SemiTruckMac_S08IN.896` | Splice -- Large Vehicles |
+| `vehicle/brake_clunk_01`..`14` | Percussive valve/actuation onsets from `SemiTruckBrake_S08IN.913`-`.917` and `BantamBrakeMach_S08IN.62` (`sound-test/brake_banks.py`) | Splice -- Large Vehicles / Industry Vol. 1 |
+| `vehicle/ebrake` | The full sustained Bantam air event, `BantamBrakeMach_S08IN.62` | Splice -- Industry Vol. 1 |
+| `vehicle/brake_hiss_bed` | Resynthesized (frequency-domain, seeded phase) from the de-whistled averaged spectra of `SemiTruckBrake_S08IN.917`, `SemiTruckAirBrake_BWU.95`, `AirBrake_BW.20321` (`sound-test/brake_hiss_synth.py`) | Splice -- Large Vehicles / Industry Vol. 1 |
+| `vehicle/air_pressurize` | Resynthesized air-fill hiss from a licensed air-release spectrum with a compressor-pump whisper (`sound-test/pressurize.py`) | Splice -- Large Vehicles / Industry Vol. 1 |
 
 ## Weather
 
