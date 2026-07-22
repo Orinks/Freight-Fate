@@ -603,7 +603,7 @@ def test_play_bank_cycles_every_cut_without_immediate_repeats(monkeypatch):
         assert set(keys[i : i + 3]) == cuts
     assert all(keys[i] != keys[i - 1] for i in range(1, 30))
     # The per-trigger level jitter stays inside its band.
-    assert all(0.92 <= vol <= 1.08 for _key, vol in played)
+    assert all(0.85 <= vol <= 1.17 for _key, vol in played)
 
 
 def test_play_bank_falls_back_to_the_classic_cue(monkeypatch):

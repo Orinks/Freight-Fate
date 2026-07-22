@@ -1665,8 +1665,8 @@ class AudioEngine:
             self._bank_order[base] = order
         key = order.pop(0)
         self._last_bank_key[base] = key
-        # Small per-trigger level jitter: no two clunks land identically.
-        self.play(key, volume * random.uniform(0.92, 1.08), pan)
+        # Per-trigger level jitter, ~±1.4 dB: no two clunks land identically.
+        self.play(key, volume * random.uniform(0.85, 1.17), pan)
 
     def start_loop(self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300) -> None:
         self._impl.start_loop(channel, key, volume, fade_ms)

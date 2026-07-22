@@ -423,7 +423,7 @@ def test_automatic_shift_uses_shift_cue_not_brake_air(monkeypatch):
             for key, vol in played
             if key == "vehicle/gear_shift" or key.startswith("vehicle/shift_auto")
         ]
-        assert shifts and all(0.55 <= vol <= 0.75 for _key, vol in shifts)
+        assert shifts and all(0.5 <= vol <= 0.8 for _key, vol in shifts)
         assert all(key != "vehicle/brake_air" for key, _volume in played)
     finally:
         app.shutdown()
