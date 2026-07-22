@@ -76,6 +76,35 @@ def test_active_drive_snapshot_restores_idling_engine():
         app.shutdown()
 
 
+def test_active_drive_snapshot_restores_paused_speed_control_session(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        driving = start_drive(app)
+        driving._restore_speed_control_session(armed=True, target_mph=52.0)
+
+        resumed = DrivingState.from_snapshot(app.ctx, driving.snapshot())
+
+        assert resumed is not None
+        assert resumed._speed_control_armed
+        assert resumed._speed_control_target_mph == 52.0
+        assert resumed._keeper_mph is None
+        assert resumed._cruise_mph is None
+        resumed.enter()
+        resume_message = next(
+            text for text in spoken if "Automatic speed control is paused" in text
+        )
+        assert "open-road target 52 miles per hour" in resume_message
+        assert "resume once the truck is rolling" in resume_message
+        assert "Press K to cancel it" in resume_message
+    finally:
+        app.shutdown()
+
+
 def quit_to_menu(app):
     from freight_fate.states.driving import PauseMenuState
     from freight_fate.states.main_menu import MainMenuState
@@ -286,8 +315,25 @@ def test_weather_source_change_applies_to_the_active_trip(monkeypatch):
         app.shutdown()
 
 
+def test_live_weather_calendar_change_applies_to_active_trip(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.season import date_text
+
+    app = App()
+    app.ctx.settings.real_weather = True
+    try:
+        driving = start_drive(app)
+        assert driving.weather.live_weather_controls_calendar is True
+        app.ctx.settings.live_weather_controls_calendar = False
+        driving.update(1 / 60)
+        assert driving.weather.live_weather_controls_calendar is False
+        assert driving.weather.date_text == date_text(driving.weather.game_hours)
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
-def test_arrival_summary_calls_out_early_delivery_bonus():
+def test_arrival_summary_calls_out_on_time_delivery_bonus():
     from freight_fate.app import App
     from freight_fate.states.driving import ArrivalState
 
@@ -296,7 +342,7 @@ def test_arrival_summary_calls_out_early_delivery_bonus():
         driving = start_drive(app)
         driving.trip.game_minutes = driving.job.deadline_game_h * 30.0
         arrival = ArrivalState(app.ctx, driving)
-        assert any("Early delivery bonus" in part for part in arrival.summary_parts)
+        assert any("On-time delivery bonus" in part for part in arrival.summary_parts)
     finally:
         app.shutdown()
 

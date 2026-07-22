@@ -1,4 +1,5 @@
 import json
+import time
 import urllib.error
 
 from freight_fate.achievements import ACHIEVEMENT_BY_ID
@@ -147,4 +148,50 @@ def test_first_delivery_and_level_up_queue_only_proven_milestones(tmp_path):
             box, profile, previous_level=profile.career.level, occurred_at_ms=456
         )
         == 0
+    )
+
+
+def test_one_sender_at_a_time_even_when_several_events_ask_at_once(tmp_path):
+    """A settlement queues a delivery, a level up, and achievements together,
+    and each asks to flush. Sending them from a thread apiece posts the same
+    events twice and makes a driver's own writes collide on the server."""
+    import threading
+
+    in_flight = []
+    peak = [0]
+    posted = []
+    release = threading.Event()
+    guard = threading.Lock()
+
+    def transport(url, payload, headers):
+        with guard:
+            in_flight.append(payload["eventId"])
+            peak[0] = max(peak[0], len(in_flight))
+            posted.append(payload["eventId"])
+        # Hold the first post open long enough that any second sender would
+        # overlap it, so a regression shows up as overlap rather than timing.
+        release.wait(1.0)
+        with guard:
+            in_flight.remove(payload["eventId"])
+        return {"ok": True}
+
+    identity = OnlineIdentity("driver-1234", "ffd_" + "a" * 64)
+    box = JournalOutbox(identity, True, tmp_path / "outbox.json", transport=transport)
+    for index in range(4):
+        assert box.enqueue("/events", {"eventId": f"evt-{index}"}, f"evt-{index}")
+
+    for _ in range(4):
+        box.flush_async()
+    release.set()
+
+    deadline = time.time() + 5.0
+    while time.time() < deadline:
+        if not box.items:
+            break
+        time.sleep(0.01)
+
+    assert box.items == [], "every queued event should have gone out"
+    assert peak[0] == 1, f"{peak[0]} posts were in flight at once; senders raced"
+    assert sorted(posted) == ["evt-0", "evt-1", "evt-2", "evt-3"], (
+        f"events were posted more than once: {posted}"
     )

@@ -5,6 +5,7 @@ import pytest
 from driving_feature_helpers import (
     key_event,
     mark_destination_exit_taken,
+    open_limits,
     open_status_screen,
     quiet_trip,
     start_drive,
@@ -396,6 +397,7 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         driving._speak_keyboard_help()
         assert "simple direction changes" in spoken[-1]
         assert "keep holding the Down arrow" in spoken[-1]
+        assert "R route and current location" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_keyboard_help()
@@ -406,6 +408,7 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         driving._speak_controller_help()
         assert "simple direction changes" in spoken[-1]
         assert "keep holding the left trigger" in spoken[-1]
+        assert "D-pad up reads your route and current location" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_controller_help()
@@ -530,7 +533,8 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "three second clear-weather gap" in help_text
     assert "increase the following gap" in help_text
     assert "keypad keys" in help_text
-    assert "cruise set speed" in help_text
+    assert "active speed-control mode" in help_text
+    assert "open-road target" in help_text
     assert "sharp posted-limit drops" in help_text
     assert "highway stops use clear place names" in help_text
     assert "list the actions available there" in help_text
@@ -567,7 +571,7 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "low visibility shortens" in help_text
     assert "career runs on a calendar that starts in spring" in help_text
     assert "state troopers patrol" in help_text
-    assert "will not engage on low-speed local roads" in help_text
+    assert "speed keeper handles low-speed local roads" in help_text
 
 
 def test_dispatch_board_keeps_route_planning_out_of_load_offer():
@@ -1289,15 +1293,21 @@ def test_terse_destination_exit_omits_press_x_instruction(monkeypatch):
         app.shutdown()
 
 
-def test_destination_exit_announces_and_disables_cruise(monkeypatch):
+def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
     from freight_fate.app import App
 
     app = App()
     events = []
+    said = []
     monkeypatch.setattr(
         app.ctx,
         "say_event",
         lambda text, interrupt=True: events.append((text, interrupt)),
+    )
+    monkeypatch.setattr(
+        app.ctx,
+        "say",
+        lambda text, interrupt=True: said.append(text),
     )
     try:
         driving = start_drive(app)
@@ -1316,18 +1326,146 @@ def test_destination_exit_announces_and_disables_cruise(monkeypatch):
         )
         destination = driving._destination_exit_stop()
         driving.trip.position_mi = destination.at_mi - 4.0
+        driving.truck.velocity_mps = 60.0 / 2.23694
         driving._cruise_mph = 60.0
+        driving._speed_control_target_mph = 60.0
 
         driving._check_destination_exit()
 
-        assert driving._cruise_mph is None
+        assert driving._cruise_mph == 60.0
+        assert driving._cruise_exit_mph == 40.0
         message, interrupt = events[-1]
         assert interrupt is True
         assert "exit " in message
         assert "toward" in message
         assert "destination exit" in message
         assert "Press X to take it" in message
-        assert "Adaptive cruise disabled" in message
+        assert "Adaptive cruise easing to 40 miles per hour for the ramp" in message
+
+        driving._adjust_cruise(-5.0)
+        assert said[-1] == (
+            "Open-road cruise target 55 miles per hour. Ramp approach target 40 miles per hour."
+        )
+        for _tap in range(3):
+            driving._adjust_cruise(-5.0)
+        assert said[-1] == (
+            "Open-road cruise target 40 miles per hour. Ramp approach target 40 miles per hour."
+        )
+    finally:
+        app.shutdown()
+
+
+def test_a_zone_past_the_destination_exit_is_never_announced(monkeypatch):
+    """The facility gate covers the last half mile, but a delivery leaves the
+    highway at least a mile before that, so its 15 mph limit was announced and
+    then never took effect. Warn only for zones the truck will drive into."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        total = driving.trip.total_miles
+        exit_stop = driving._destination_exit_stop()
+        assert exit_stop is not None
+        gate = Zone(total - 0.5, total, 15.0, "facility gate")
+        assert gate.start_mi >= exit_stop.at_mi  # the delivery is gone by then
+        gate_cue = TripEvent(
+            TripEventKind.GPS_CUE,
+            "In 2 miles, facility gate ahead. Speed limit 15.",
+            {"zone": gate},
+        )
+
+        driving._handle_trip_event(gate_cue)
+        assert events == []
+
+        # A zone the truck really does reach still gets its heads-up.
+        reachable = Zone(exit_stop.at_mi - 2.0, exit_stop.at_mi - 1.0, 35.0, "destination approach")
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.GPS_CUE,
+                "In 2 miles, destination approach ahead. Speed limit 35.",
+                {"zone": reachable},
+            )
+        )
+        assert events[-1].startswith("In 2 miles, destination approach")
+
+        # A pickup leg drives all the way to the gate, so it keeps the warning.
+        driving.phase = "pickup"
+        events.clear()
+        driving._handle_trip_event(gate_cue)
+        assert events[-1].startswith("In 2 miles, facility gate")
+    finally:
+        app.shutdown()
+
+
+def test_taking_the_announced_exit_does_not_repeat_the_ramp_cap(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    said = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        monkeypatch.setattr(driving, "_upcoming_exit_stop", lambda: stop)
+        driving.trip.position_mi = stop.at_mi - 3.0
+        driving.truck.engine_on = True
+        driving.truck.velocity_mps = 60.0 / 2.23694
+        driving._engage_cruise(60.0)
+
+        driving._check_destination_exit()  # announces the exit and caps cruise
+        assert driving._cruise_exit_mph == 40.0
+        assert "Adaptive cruise easing to 40 miles per hour for the ramp" in said[-1]
+
+        said.clear()
+        driving._take_exit()
+
+        assert "Signaling for" in said[-1]
+        assert "Adaptive cruise" not in said[-1]  # already said, and already capped
+        assert driving._cruise_exit_mph == 40.0
+    finally:
+        app.shutdown()
+
+
+def test_signaling_for_an_exit_eases_cruise_to_ramp_speed(monkeypatch):
+    """Pressing X is the commitment to leave the highway, so adaptive cruise
+    has to come down to ramp speed with it -- for a truck stop exit just as
+    much as for the destination, and it has to let go again on a cancel."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import RoadStop
+
+    app = App()
+    said = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        open_limits(driving)
+        stop = RoadStop("Petro Knoxville", 40.0, "truck_stop", ("fuel", "sleep"), exit_label="")
+        monkeypatch.setattr(driving, "_upcoming_exit_stop", lambda: stop)
+        driving.trip.position_mi = 37.0
+        driving.truck.engine_on = True
+        driving.truck.velocity_mps = 65.0 / 2.23694
+        driving._engage_cruise(65.0)
+        said.clear()
+
+        driving._take_exit()
+
+        assert driving._cruise_exit_mph == 40.0
+        assert "Adaptive cruise easing to 40 miles per hour for the ramp" in said[-1]
+        # And cruise actually acts on it: throttle off, brakes on.
+        driving._update_cruise(0.5, braking=False, accelerating=False, clutch_disengaged=False)
+        assert driving.truck.throttle == 0.0
+        assert driving.truck.brake > 0.0
+
+        driving._take_exit()  # X again cancels
+        assert driving._cruise_exit_mph is None
     finally:
         app.shutdown()
 
@@ -1369,7 +1507,7 @@ def test_destination_exit_suppresses_matching_interchange_gps_cue(monkeypatch):
         app.shutdown()
 
 
-def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch):
+def test_missed_destination_exit_reroutes_every_time(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import DrivingState
 
@@ -1379,19 +1517,39 @@ def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch)
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        driving.trip.position_mi = driving.trip.total_miles
-        driving.trip.finished = True
-        driving.truck.velocity_mps = 0.0
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        reroute_distances = []
 
-        driving.update(1 / 60)
+        for _ in range(2):
+            driving.trip.position_mi = driving.trip.total_miles
+            driving.trip.finished = True
+            driving.truck.velocity_mps = 20.0
 
-        assert isinstance(app.state, DrivingState)
-        assert not driving.trip.finished
-        assert driving.trip.position_mi < driving.trip.total_miles
-        assert driving._destination_exit_stop() is not None
-        assert "missed the destination exit" in events[-1].lower()
-        assert "safe turnaround" in events[-1].lower()
-        assert "back up" not in events[-1].lower()
+            driving.update(1 / 60)
+
+            assert isinstance(app.state, DrivingState)
+            assert not driving.trip.finished
+            assert driving.trip.position_mi < stop.at_mi
+            reroute_distances.append(stop.at_mi - driving.trip.position_mi)
+
+            driving.trip.position_mi = stop.at_mi - 1.0
+            driving._check_destination_exit()
+            assert "destination exit" in events[-1].lower()
+            driving.handle_event(key_event(pygame.K_x))
+            assert driving._exit_stop is not None
+            assert driving._exit_stop.type == "delivery_destination"
+            driving.handle_event(key_event(pygame.K_x))
+            assert driving._exit_stop is None
+
+        missed_events = [
+            event for event in events if "missed the destination exit" in event.lower()
+        ]
+        assert len(missed_events) == 2
+        assert len([event for event in events if "destination exit" in event.lower()]) >= 4
+        assert "safe turnaround" in missed_events[-1].lower()
+        assert "back up" not in missed_events[-1].lower()
+        assert min(reroute_distances) >= 5.0
     finally:
         app.shutdown()
 
@@ -1821,6 +1979,39 @@ def test_engine_audio_load_eases_without_dropping_out_during_automatic_shift(mon
         app.shutdown()
 
 
+def test_engine_audio_load_tracks_manual_throttle_smoothly(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    samples = []
+    monkeypatch.setattr(
+        app.ctx.audio, "set_engine_rpm", lambda rpm, throttle=0.0: samples.append((rpm, throttle))
+    )
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.transmission._shift_timer = 0.0
+        driving._engine_audio_throttle = 0.5
+        driving.truck.throttle = 0.75
+        driving._update_audio(0.1)
+        rising = samples[-1][1]
+        driving.truck.throttle = 0.25
+        driving._update_audio(0.1)
+        falling = samples[-1][1]
+
+        # Raw throttle still controls audible load, but the 450-millisecond
+        # filter prevents an immediate gain step for a cruise correction.
+        assert rising == pytest.approx(0.5 + (0.75 - 0.5) * (0.1 / 0.45))
+        assert falling == pytest.approx(rising + (0.25 - rising) * (0.1 / 0.45))
+        assert 0.25 < falling < rising < 0.75
+    finally:
+        app.shutdown()
+
+
 def test_reverse_audio_cue_loops_while_reverse_is_engaged(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.transmission import REVERSE
@@ -2199,3 +2390,87 @@ def test_route_planning_labels_name_through_cities_with_states():
         assert world.city(job.destination).spoken_qualified == job.spoken_destination
     finally:
         app.shutdown()
+
+
+def test_live_route_weather_accounts_for_loading_and_unavailable_cities(monkeypatch):
+    """A partial live response must not sound like a complete route outlook."""
+    from freight_fate.app import App
+    from freight_fate.models import JobBoard, Profile
+    from freight_fate.sim.weather import WeatherKind
+    from freight_fate.states.city_dispatch import RouteSelectState
+
+    app = App()
+    spoken = []
+    try:
+        world = app.ctx.world
+        job = next(
+            j
+            for j in JobBoard(world, seed=3).offers("Chicago", endorsements=set(), level=2)
+            if len(world.supported_route_options(j.origin, j.destination)[0].cities) > 3
+        )
+        route = world.supported_route_options(job.origin, job.destination)[0]
+        first, second, third = route.cities[1:4]
+
+        class PartialProvider:
+            def request(self, *args):
+                pass
+
+            def get(self, city):
+                return WeatherKind.CLOUDY if city == first else None
+
+            def unavailable(self, city):
+                return city == second
+
+        app.ctx.profile = Profile(name="Route Weather Driver")
+        monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: PartialProvider())
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+
+        state = RouteSelectState(app.ctx, job, [route])
+        state._speak_forecast(route)
+
+        assert f"{world.spoken_city(first, qualified=True)}: cloudy" in spoken[-1]
+        assert (
+            f"{world.spoken_city(second, qualified=True)}: live weather unavailable; "
+            "simulated fallback may apply"
+        ) in spoken[-1]
+        assert (
+            f"{world.spoken_city(third, qualified=True)}: live weather still loading" in spoken[-1]
+        )
+    finally:
+        app.shutdown()
+
+
+def test_destination_exit_scan_stays_on_the_final_approach():
+    """Routes that finish on rural highways carry no baked interchanges, and
+    the scan used to crown the last labeled exit anywhere on the route as the
+    destination exit: player transcripts (2026-07-16) show a Lampasas run
+    settled from Wichita Falls, 224 miles out, and a Havre, Montana run
+    settled from I-39 in Wisconsin, 1,158 miles out. The scan must find an
+    exit on the final approach or report none, so the synthetic end-of-route
+    exit takes over."""
+    from types import SimpleNamespace
+
+    from freight_fate.data.world import get_world
+    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.driving_core import DESTINATION_EXIT_SCAN_WINDOW_MI
+
+    world = get_world()
+    for start, end in [
+        ("springfield_il_us", "lampasas_tx_us"),
+        ("jamestown_ny_us", "havre_mt_us"),
+    ]:
+        route = world.shortest_route(start, end, require_metadata=True)
+        assert route is not None
+        leg_starts: list[float] = []
+        total = 0.0
+        for leg in route.legs:
+            leg_starts.append(total)
+            total += leg.miles
+        driving = SimpleNamespace(
+            route=route,
+            trip=SimpleNamespace(_leg_starts=leg_starts, position_mi=0.0, total_miles=total),
+            ctx=SimpleNamespace(world=world),
+        )
+        details = DrivingState._scan_destination_exit_details(driving)
+        if details is not None:
+            assert details[0] >= total - DESTINATION_EXIT_SCAN_WINDOW_MI

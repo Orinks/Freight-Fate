@@ -42,7 +42,9 @@ visual display mirrors all speech for sighted players and helpers.
   "real world" and each city uses its live current conditions from the free
   [National Weather Service](https://www.weather.gov/documentation/services-web-api)
   API. If it is raining in Chicago right now, it is raining in your game. Works
-  without an API key and falls back to simulated weather offline.
+  without an API key and falls back to simulated weather offline. A separate
+  calendar setting lets career dates and seasons keep advancing while live
+  conditions remain enabled.
 - **Route planning** — route options per job with distance, highways, state
   context, grade/terrain, toll events, curated POIs, and weather forecasts.
   Geometry coverage is broad, while generated placeholder POIs are reported as
@@ -232,7 +234,7 @@ Gameplay → Controller if you prefer keyboard only.
 | Left bumper (LB) | Clutch (manual mode) |
 | A | Shift up a gear (manual mode) |
 | X | Shift down a gear (manual mode) |
-| Y | Adaptive cruise on / off |
+| Y | Automatic speed control on / off |
 | B | Speak speed, gear, RPM |
 | D-pad Up | Route progress |
 | D-pad Down | Take exit / signal a pull-over |
@@ -252,7 +254,7 @@ Hold the right bumper (RB) as a modifier for a second layer of driving bindings:
 | RB + Y | Release / set parking brake |
 | RB + D-pad Up | Next listed highway exit |
 | RB + D-pad Down | Refuel and rest (stopped at a rest stop) |
-| RB + D-pad Left / Right | Lower / raise cruise speed |
+| RB + D-pad Left / Right | Lower / raise the open-road cruise target |
 | RB + Start | Driving status menu |
 
 The left and right triggers are analog: hold them wherever you like for partial

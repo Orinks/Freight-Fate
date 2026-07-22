@@ -60,12 +60,19 @@ def check_profile_invariants(profile: Profile) -> list[Violation]:
     out: list[Violation] = []
     _check_range(out, "money", "The bank balance", profile.money, MONEY_FLOOR, MONEY_CEILING)
     _check_range(out, "fatigue", "Fatigue", profile.fatigue, 0.0, 100.0)
-    _check_range(out, "road_grime", "Road grime", profile.road_grime_pct, 0.0, 100.0)
     _check_range(out, "pay_advance", "The pay advance", profile.pay_advance, 0.0, ADVANCE_CEILING)
-    _check_range(out, "damage", "Truck damage", profile.truck_damage_pct, 0.0, 100.0)
-    _check_range(out, "tire_wear", "Tire wear", profile.tire_wear_pct, 0.0, 100.0)
-    if not _finite(profile.truck_fuel_gal) or not (0.0 <= profile.truck_fuel_gal <= _MAX_FUEL_GAL):
-        out.append(Violation("fuel_range", "The truck carries an impossible amount of fuel."))
+    if not isinstance(profile.calendar_offset_days, int) or not (
+        0 <= profile.calendar_offset_days < 365
+    ):
+        out.append(Violation("calendar_offset", "The calendar offset is not possible."))
+    # Per-truck condition records. Unknown truck KEYS pass (a newer build may
+    # sell trucks this one has never heard of); impossible VALUES do not.
+    for condition in profile.truck_conditions.values():
+        _check_range(out, "damage", "Truck damage", condition.damage_pct, 0.0, 100.0)
+        _check_range(out, "tire_wear", "Tire wear", condition.tire_wear_pct, 0.0, 100.0)
+        _check_range(out, "road_grime", "Road grime", condition.grime_pct, 0.0, 100.0)
+        if not _finite(condition.fuel_gal) or not (0.0 <= condition.fuel_gal <= _MAX_FUEL_GAL):
+            out.append(Violation("fuel_range", "A truck carries an impossible amount of fuel."))
 
     career = profile.career
     _check_range(out, "xp", "Career experience", career.xp, 0.0, XP_CEILING)
@@ -85,12 +92,18 @@ def check_profile_invariants(profile: Profile) -> list[Violation]:
         and isinstance(career.on_time_deliveries, int)
         and career.on_time_deliveries > career.deliveries >= 0
     ):
-        out.append(
-            Violation("on_time_exceeds", "More on-time deliveries than deliveries driven.")
-        )
+        out.append(Violation("on_time_exceeds", "More on-time deliveries than deliveries driven."))
 
     if len(profile.achievements) != len(set(profile.achievements)):
         out.append(Violation("achievement_dupes", "The same achievement recorded twice."))
+
+    # The local tamper mark must be a real boolean; anything else is an edit.
+    for flag_code, flag_value in (
+        ("integrity_modified", profile.integrity_modified),
+        ("integrity_notice_pending", profile.integrity_notice_pending),
+    ):
+        if not isinstance(flag_value, bool):
+            out.append(Violation(flag_code, "The save's integrity mark is not possible."))
 
     for key, tier in profile.upgrades.items():
         if not isinstance(tier, int) or tier < 1:

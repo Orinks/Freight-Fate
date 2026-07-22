@@ -127,6 +127,14 @@ def _truck_capped_speed_limit(leg: Leg, offset_mi: float) -> float | None:
     return min(chosen.mph, cap) if cap is not None else chosen.mph
 
 
+# A city's truck stops are baked onto every leg that meets that city, a mile
+# out from the endpoint, so a route driving *through* the city collects the
+# same facility twice -- a mile before and a mile after, exactly two miles
+# apart. Same-name stops closer together than this are that one facility.
+# Measured across eight coast-to-coast routes: every same-name pair within
+# twelve miles was exactly 2.00, so this has wide margin either way.
+SHARED_CITY_STOP_MERGE_MI = 3.0
+
 FACILITY_ACCESS_LIMIT_MPH = 25.0
 DESTINATION_APPROACH_LIMIT_MPH = 35.0
 FACILITY_GATE_LIMIT_MPH = 15.0
@@ -411,6 +419,22 @@ class RoadStop:
     services: tuple[str, ...] = ()
     parking: str = "unknown"
     exit_label: str = ""  # "exit 7" when a real OSM interchange sits here
+
+    @property
+    def key(self) -> str:
+        """Identity of this stop on this route, for tracking rather than speech.
+
+        Names repeat constantly -- a coast-to-coast route carries six stops
+        called "Love's Travel Stop" -- so anything that remembers *which* stop
+        (announced already, planned, exit in progress) has to key on the
+        milepost too, or one stop stands in for all its namesakes.
+        """
+        return f"{self.at_mi:.2f}:{self.name}"
+
+    @staticmethod
+    def name_from_key(key: str) -> str:
+        """The speakable name back out of a key, for a plan whose stop is gone."""
+        return key.split(":", 1)[-1]
 
     @property
     def label(self) -> str:

@@ -6,10 +6,21 @@ from __future__ import annotations
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from .driving_events import DrivingEventMixin
+from .driving_location import DrivingLocationMixin
+from .driving_pickup import DrivingPickupMixin
+from .driving_speed_control import SpeedControlStateMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 
 
-class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, State):
+class DrivingState(
+    DrivingControlsMixin,
+    DrivingUpdateMixin,
+    SpeedControlStateMixin,
+    DrivingLocationMixin,
+    DrivingPickupMixin,
+    DrivingEventMixin,
+    State,
+):
     def __init__(
         self,
         ctx,
@@ -41,9 +52,11 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             region,
             seed=self.trip_seed,
             provider=ctx.real_weather_provider(),
-            game_hours=profile.game_hours,
+            game_hours=profile.calendar_game_hours,
+            live_weather_controls_calendar=ctx.settings.live_weather_controls_calendar,
         )
         self._weather_source_real = ctx.settings.real_weather
+        self._live_weather_controls_calendar = ctx.settings.live_weather_controls_calendar
         trip_start_hour = profile.game_hours % 24.0 if start_hour is None else start_hour
         self.trip = Trip(
             route,
@@ -85,6 +98,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._last_announced_mph = 0.0
         self._speeding_timer = 0.0
         self.speeding_strikes = 0
+        # Give a slowing driver time to comply after a posted-limit drop.
+        self._enforced_limit_prev: float | None = None
+        self._limit_drop_grace_s = 0.0
         # Trooper pull-overs: a strike inside a patrol window may get you stopped
         # for an immediate ticket, separate from the silent at-delivery strikes.
         self.speeding_tickets = 0
@@ -94,6 +110,14 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._pull_over_signaled = False
         self._pull_over_over = 0.0  # mph over the limit when clocked
         self._pull_over_limit = 0.0  # posted limit when clocked
+        # Compliance tracker for the active stop: 0..1, judged from behavior
+        # (signaling and slowing), not distance. Reset on every stop-ending path.
+        self._pull_over_compliance = 0.0  # seeded on begin
+        self._pull_over_elapsed = 0.0  # s since the lights came on (signal grace)
+        self._pull_over_prev_mph = 0.0  # last-tick speed, to classify accel vs decel
+        self._pull_over_coast_s = 0.0  # consecutive s with no braking and no accel
+        self._pull_over_signal_boost = False  # the one-time signal bump has fired
+        self._pull_over_nosignal_hit = False  # the one-time no-signal 1/4 hit has fired
         # Deterministic, save-safe stream for "did a patrol catch you" rolls, kept
         # apart from the trip's hazard/zone/inspection streams.
         self._patrol_rng = random.Random(None if trip_seed is None else trip_seed ^ 0xB0A1)
@@ -111,9 +135,19 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._cruise_applied = 0.0
+        self._cruise_exit_mph: float | None = None
+        # K arms one continuous speed-control session. The active controller
+        # changes between adaptive cruise on open roads and the speed keeper in
+        # restricted zones, while this target remembers what cruise should
+        # resume at after the zone ends.
+        self._speed_control_armed = False
+        self._speed_control_target_mph: float | None = None
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
+        self._keeper_mph: float | None = None
+        self._keeper_throttle = 0.0
+        self._keeper_zone = ""
         self._arrival_stop_said = False
         self._arrival_full_stop_said = False
         self._arrival_menu_open = False
@@ -128,6 +162,10 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
         self._shift_recover_t = 1.0  # 0->1 recovery progress after an automatic shift ends
+        # Smoothed throttle sent to the engine audio. The physics always uses
+        # the raw control; this only prevents small controller/cruise changes
+        # from pumping the engine loop's gain.
+        self._engine_audio_throttle = 0.0
         # Prev-frame accel/brake state, so a forward<->reverse shift needs a
         # fresh press (release then press) rather than a held control.
         self._reverse_brake_held = False
@@ -164,6 +202,8 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             ],
             "start_damage": self.start_damage,
             "speeding_strikes": self.speeding_strikes,
+            "speed_control_armed": self._speed_control_armed,
+            "speed_control_target_mph": self._speed_control_target_mph,
             "air_brake": self.truck.air_brake_snapshot(),
             "engine_on": self.truck.engine_on,
             "hos": self.hos.to_dict(),
@@ -174,6 +214,9 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             "speeding_tickets": self.speeding_tickets,
             "ticket_fines_paid": self.ticket_fines_paid,
             "lane_offset": self.lane.offset,
+            "planned_stop_key": self.trip.planned_stop_key,
+            # Kept for a save opened by an older build, which knows only the name.
+            "planned_stop": self.trip.planned_stop_label or None,
         }
 
     @classmethod
@@ -212,7 +255,19 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             state.resumed = True
             state.start_damage = float(data["start_damage"])
             state.speeding_strikes = int(data["speeding_strikes"])
+            target = data.get("speed_control_target_mph")
+            state._restore_speed_control_session(
+                armed=bool(data.get("speed_control_armed", False)),
+                target_mph=None if target is None else float(target),
+            )
             state.trip.restore(position_mi, game_minutes)
+            planned_key = data.get("planned_stop_key") or None
+            if planned_key is None:
+                # Saved before plans carried a stop identity: a bare name cannot
+                # say which namesake was meant, so take the soonest reachable.
+                legacy_name = data.get("planned_stop") or None
+                planned_key = state.trip.resolve_stop_key(legacy_name) if legacy_name else None
+            state.trip.planned_stop_key = planned_key
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
             state.truck.restore_air_brake_snapshot(data.get("air_brake"), default_ready=True)
             if bool(data.get("engine_on", False)):
@@ -265,12 +320,13 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                 if self.phase == DRIVE_PHASE_PICKUP
                 else self.trip.progress_summary(self.ctx.settings.imperial_units)
             )
+            speed_control = self._resumed_speed_control_status()
             if self._terse_speech():
                 self.ctx.say(
                     f"Resuming {drive_name}: {destination}. {progress} "
                     f"{hours_used:.1f} of {self.job.deadline_game_h:.0f} hours used. "
                     f"{now}. {mode}. {self.weather.describe(self.ctx.settings.imperial_units)}. "
-                    f"{self._parked_entry_status()}",
+                    f"{speed_control}{self._parked_entry_status()}",
                     interrupt=False,
                 )
             else:
@@ -281,7 +337,7 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
                     f"{hours_used:.1f} hours used of {self.job.deadline_game_h:.0f}. "
                     f"It is {now}. Transmission is {mode}. "
                     f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}. "
-                    f"You are parked. {self._engine_entry_instruction()} "
+                    f"You are parked. {speed_control}{self._engine_entry_instruction()} "
                     "When air pressure is ready, press "
                     f"{self.ctx.control_hint('parking_brake')} to release the parking brake.",
                     interrupt=False,
@@ -320,6 +376,20 @@ class DrivingState(DrivingControlsMixin, DrivingUpdateMixin, DrivingEventMixin, 
             return "Engine idling; build air pressure if needed."
         return (
             f"Press {self.ctx.control_hint('engine')} to start the engine and build air pressure."
+        )
+
+    def _resumed_speed_control_status(self) -> str:
+        if not self._speed_control_armed:
+            return ""
+        target = (
+            self.ctx.settings.speed_text(self._speed_control_target_mph)
+            if self._speed_control_target_mph is not None
+            else "the posted limit when the open road begins"
+        )
+        return (
+            f"Automatic speed control is paused; open-road target {target}. "
+            "It will resume once the truck is rolling. Press "
+            f"{self.ctx.control_hint('cruise_set')} to cancel it. "
         )
 
     def _parked_entry_status(self) -> str:

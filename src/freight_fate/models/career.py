@@ -7,6 +7,14 @@ from dataclasses import dataclass
 # XP needed to go from level N to N+1 (then +1500 per level beyond the table)
 LEVEL_XP = [0, 1000, 2500, 4500, 7000, 10_000, 14_000, 19_000, 25_000]
 
+# What a mile of driving teaches, by whether the load landed on time. These are
+# named (not inline) because the cloud-save validator re-derives the highest XP
+# a career could honestly hold from them: a hand-copied ceiling on the server
+# drifts the moment these move, and the failure lands on the player as a
+# rejected backup. Export them via profile_integrity_invariants instead.
+XP_PER_MILE_ON_TIME = 1.2
+XP_PER_MILE_LATE = 0.8
+
 # Endorsements unlocked automatically at these levels.
 ENDORSEMENT_LEVELS = {
     "refrigerated": 2,
@@ -64,7 +72,7 @@ class Career:
         self.deliveries += 1
         self.total_miles += miles
         self.total_earnings += pay
-        gained = miles * (1.2 if on_time else 0.8)
+        gained = miles * (XP_PER_MILE_ON_TIME if on_time else XP_PER_MILE_LATE)
         self.xp += gained
         if on_time:
             self.on_time_deliveries += 1

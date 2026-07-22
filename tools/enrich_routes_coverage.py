@@ -262,7 +262,7 @@ def _stop_actions(stop: dict[str, Any]) -> tuple[str, ...]:
         "truck_stop": ("park", "save", "fuel", "food", "break", "sleep"),
         "travel_center": ("park", "save", "fuel", "food", "break", "sleep"),
         "fuel_station": ("park", "save", "fuel", "break"),
-        "service_plaza": ("park", "save", "fuel", "food", "break"),
+        "service_plaza": ("park", "save", "fuel", "food", "break", "sleep"),
         "public_rest_area": ("park", "save", "break", "sleep"),
         "truck_parking": ("park", "save", "break", "sleep"),
         "weigh_station": ("inspect",),

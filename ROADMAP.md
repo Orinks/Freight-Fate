@@ -16,8 +16,9 @@
       facility-aware job generation.
 - [x] Playable air-brake pressure mechanics: cold starts need a short air
       build before the parking brake can release, service-brake applications
-      consume air, low-air and spring-brake thresholds are spoken, and active
-      trip saves preserve the air-brake state.
+      consume air, parked engine-off time bleeds reservoir pressure (issue
+      #79), low-air and spring-brake thresholds are spoken, and active trip
+      saves preserve the air-brake state.
 - [x] Dedicated air-system audio assets: the compressor-ready cue now plays a
       real air-dryer purge (`vehicle/air_dryer_purge.ogg`) and the low-air /
       spring-brake warnings a low-air buzzer (`vehicle/low_air_buzzer.ogg`),
@@ -42,9 +43,69 @@ milestone below (speeding consequences especially).
 
 From a batch of player reports:
 
+- [x] **Map screen read raw data keys for the route -- FIXED 2026-07-21
+  (NVDA player report).** Its first line joined the world's city slugs, so an
+  east-coast run opened with "new underscore york underscore n y underscore u
+  s" for all thirteen cities; every other screen already composed spoken names.
+  Same pass singularized spoken measurements ("1 mile", not "1 miles") on one
+  shared helper. The reporter's snapshot also predated 36a7f8e, which is why
+  the map listed the same shared-city facility twice and pushed real stops off
+  the five-item list.
+- [ ] Unresolved half of that report: stop lines on the Map screen "make the
+  sound but not letting me fully read" under NVDA. Not reproducible from the
+  code -- the list is built once, nothing under the menu updates, and no path
+  interrupts or drops an utterance. Needs the reporter's `logs/game.log` from a
+  snapshot newer than 2026-07-21 to tell "the game never spoke it" from "NVDA
+  never spoke it"; packaged builds have always written that transcript, and
+  Settings, Problem reports now tells a player where to find it.
+- [x] **Destination exit offered a state early on rural-highway finishes --
+  FIXED 2026-07-16 (player transcripts).** The destination-exit scan accepted
+  the last labeled interchange anywhere on the route, so routes whose final
+  legs are unbaked rural highways (US-281 into Lampasas, US-2 across the
+  plains to Havre) crowned an exit hundreds of miles out -- worst case 1,158
+  miles, I-39 in Wisconsin for a Havre, Montana receiver -- and taking it
+  settled the delivery from there. The scan now only accepts exits within the
+  final 25 miles of the route and otherwise falls back to the synthetic
+  end-of-route exit. Regression test pinned on both transcript routes.
+- [ ] Bake labeled exits or junction cues for rural US-highway final
+  approaches so arrivals there can name a real exit instead of the generic
+  end-of-route fallback (follow-up to the 2026-07-16 destination-exit fix;
+  needs an OSM junction sweep over non-motorway trunk corridors). Scale,
+  measured 2026-07-16: 533 of 1,287 legs carry no labeled interchange, and
+  192 of 623 cities have none on any approach leg, so every arrival there
+  uses the generic fallback. A seeded 2,489-route sample of supported routes
+  found 44 percent previously misfired the destination exit by more than 25
+  miles (worst sampled: Payson, Arizona to Newport, Oregon, 1,152 miles
+  early on a 1,420-mile route); all of those now take the fallback this
+  sweep would upgrade. Regen should run offline from the cached PBFs like
+  the overlay pipeline, targeting trunk/primary junction nodes on the 533
+  unlabeled legs.
+- [x] **State lines repeated at intermediate cities -- FIXED 2026-07-19
+  (player transcript).** Mapped state-boundary cues are now authoritative, so
+  passing the next major city no longer claims that the truck crossed the same
+  state line again. City narration retains the old crossing wording only as a
+  fallback for legacy legs without mapped boundaries. Full harness regressions
+  cover Tennessee and Texas routes, reverse travel, and an all-Texas route.
+- [ ] Reconcile checkpoint positions with state-boundary positions on seven
+  corridor legs. A 24-route forward/reverse harness sweep found 13 places
+  spoken on the wrong side of a state line: Fort Oglethorpe on
+  Nashville--Atlanta; Peekskill, Newburgh, Kingston, Ravena, Rotterdam, and
+  Amsterdam on New York--Buffalo; North East and Conneaut on
+  Buffalo--Cleveland; Mesquite on Las Vegas--Salt Lake City; the Longview--
+  Portland corridor checkpoint; Ashland on Portland--San Francisco; and
+  Vernal on Denver--Salt Lake City. This is a route-data ordering issue, not
+  another city-narration composition bug.
 - [x] **Quick info keys.** S reads the posted speed limit (was buried in the
   Tab menu); A repeats the last route announcement; U reads what is coming
-  up (imposed limits, stops, exits ahead).
+  up (imposed limits, stops, exits ahead); R includes the current road, state,
+  direction, nearest named place, and trip progress in its route report.
+- [x] **Stop details and planned stops (1.8.x nightly).** Enter on a Map-screen
+  stop opens a job-details-style view (exit, distance, offers, parking, and an
+  ELD-rule ETA with an arrive-before-your-next-HOS-limit note), with plan /
+  cancel / supersede buttons. The planned stop is announced with a "Planned
+  stop" prefix at every surface that names stops (5-mile exit announcement,
+  U key, C-key next-legal-stop, Map screen), persists in the active-trip
+  snapshot, and clears itself when taken or passed.
 - [x] **Announcement priority and lead time.** Safety cues (zone entry,
   construction/traffic warnings, checkpoints) preempt ambient chatter on the
   event voice instead of queuing behind it; zone warnings lead by real time
@@ -79,6 +140,34 @@ From a batch of player reports:
   `Profile.pay_advance`; deterministic and save-compatible. Money still
   goes negative freely for fines/tows by design, but broke-and-empty is no
   longer a dead end.
+- [x] **Advances count toward lifetime earnings.** Settlement was crediting
+  `total_earnings` with the post-repayment remainder, so advanced dollars
+  were cash the career could not account for and cloud upload screening
+  refused the save and stamped a sticky integrity flag. Lifetime earnings
+  now book the whole settlement.
+- [x] **Review integrity flags stamped before that fix.** All five production
+  flags were cleared by hand on 2026-07-20. One (a level 2 career, four
+  deliveries) was a false positive with no sign of an edit; the other four
+  had been confirmed separately by offline forensics and were cleared as a
+  deliberate amnesty.
+- [x] **Stop screening from branding accounts on arithmetic alone.** A failed
+  money or XP check now rejects the upload and keeps the payload for review
+  instead of stamping a sticky flag that hid the driver until a human
+  cleared it. Flags are still available by hand, from evidence. Both rules
+  were wrong in the accusing direction: the XP ceiling was a copied 1.2 per
+  mile sitting exactly on what a spotless career earns, and the money check
+  priced owned equipment as if it had all been bought.
+- [x] **Cloud screening reads the economy from the game.** Starting cash, the
+  advance cap, and the XP rates ship in the exported invariants rather than
+  being kept by hand on the server, so a balance pass cannot silently turn
+  the rules against honest drivers.
+- [ ] **Carry the same fixes onto the 1.9 line.** The career arc changes the
+  XP model (flat per-delivery XP plus class, streak, and condition
+  multipliers) and adds the owner-operator buy-in, where a driver takes
+  title to a carrier tractor worth far more than the buy-in. Regenerate the
+  exported invariants for save version 11 before 1.9 ships — the server
+  gate matches on exact save version, so an un-regenerated export rejects
+  every 1.9 backup.
 
 ### Fatigue and driver responsibility
 
@@ -118,6 +207,16 @@ From a batch of player reports:
 
 ### Driving feel
 
+- [x] **Windows event-voice interruption crash (issue #85).** Urgent road
+  alerts now use the speech backend's atomic interrupt-and-speak operation
+  instead of issuing a separate SAPI stop immediately beforehand.
+- [x] **Fair enforcement after lower speed signs (issues #80 and #87).** A
+  driver who releases the accelerator now gets the braking time a loaded truck
+  needs before a lower posted limit can produce a speeding strike. Continuing
+  on the throttle forfeits the grace.
+- [x] **Repeat destination-exit recovery (issues #84 and #90).** Every missed
+  destination exit now reroutes the delivery back through a full approach
+  window; the second miss can no longer leave the trip pinned at zero miles.
 - [x] **Over-rev damage is now audible while it happens.** Sustained redline
   (easiest by backing up fast for a long stretch: the road-coupled RPM pins at
   `max_rpm`) silently ground the truck down 0.8%/s and only surfaced on the
@@ -202,6 +301,8 @@ From a batch of player reports:
   trooper milestone (below) remains the home for *visible, immediate*
   enforcement: getting pulled over and on-the-spot fines.
 
+- [x] **Speed keeper for low-speed zones.** Shipped: K starts a job-scoped speed-control session that uses the speed keeper on facility roads, in gate queues, work zones, and congestion, then automatically hands off to adaptive cruise on the open road. It pauses through the planned pickup, persists through pickup saves, and resumes once the loaded truck is rolling. It restores the chosen cruise target across zones, follows queued traffic, and eases to ramp speed when the destination exit is announced before releasing control on the ramp. It fully disarms on other braking or hazards so it cannot restart unexpectedly. On by default, toggleable in Settings, Gameplay.
+- [ ] **Driving assistance presets and descent control.** Built and then withdrawn from the 1.8 nightly line after playtesting (the underlying assists need the 1.9 driving arc around them); the work lives on feat/career-1.9 and ships with 1.9. Release-merge note: the withdrawal was a git revert of merge 9b406fe (plus 9f2dbff and b971684) on dev, so merging feat/career-1.9 back will NOT re-apply this content on its own -- the release merge must first revert the revert commit on dev, then merge.
 - [x] **Limit-aware adaptive cruise.** Shipped: once real OSM limits, zones,
   and trooper enforcement landed, plain "hold the set speed" cruise would carry
   the driver straight through an urban drop into strikes and pull-overs. Cruise
@@ -212,6 +313,19 @@ From a batch of player reports:
   Plus and Minus adjust the set point by `CRUISE_STEP_MPH` (the real
   Accel/Coast buttons), so you engage once rolling and dial the target up to the
   speed you want; the truck accelerates up to it, capped by the limit offset.
+
+- [x] **Window-model on-time bonus.** Shipped on the 1.8.x nightly line:
+  `Job.payout` used to scale its on-time bonus by unused deadline (max 15%
+  only for a near-instant delivery, a few percent in practice), which
+  rewarded racing the clock and paid almost nothing for normal on-time runs.
+  It now pays a flat 10% for any delivery inside the window, the way real
+  shipper scorecards (OTIF-style) pay for service; late/damage penalties are
+  unchanged. Compared against feat/career-1.9 before landing: 1.9's carrier
+  pay plans add their own flat on-time share (2-6% of gross) plus reputation
+  trust pay (max 6%) *on top of* gross, and its `Job.payout` is identical to
+  dev's, so this reshapes the shared gross curve and merges cleanly; watch
+  the combined stack (10% gross + carrier share + trust) when rebalancing
+  the 1.9 economy.
 
 ### Realism north star (ongoing)
 
@@ -233,8 +347,12 @@ Net-new realism candidates, roughly by area:
   (winter ice/squalls, summer hail). Seasons are opt-in via `WeatherSystem`'s
   `game_hours` so seed-based tests stay deterministic; real-weather mode keeps
   driving conditions (and thus hazard context) from live data, and with live
-  weather on the season follows the real-world calendar so it matches those
-  conditions. Real observation temperature is now extracted too (`_temp_to_c`
+  weather on the season follows the real-world calendar by default so it
+  matches those conditions. Players can now turn off **Live weather controls
+  calendar** to keep live conditions while the career date and seasons
+  advance; established careers anchor that independent calendar to today's
+  date at the handoff while new careers retain the March 21 start. A seasonal reconciliation guard prevents summer snow and
+  cold-season thunderstorms in that mode. Real observation temperature is now extracted too (`_temp_to_c`
   -> `RealWeatherProvider.get_temperature` -> `WeatherSystem._temperature`), so
   live mode reports the station's real degrees and falls back to the climate
   model only when a reading is missing. Weather also bites mechanically now,
@@ -244,7 +362,24 @@ Net-new realism candidates, roughly by area:
   (`_check_conditions_speed`), and low visibility shortens hazard reaction time
   (`_visibility_reaction_factor`). Remaining follow-ups: black-ice risk on clear
   cold mornings after wet roads (currently ice rides on active snow); steady
-  crosswind nudging the trailer; and seasonal daylight length.
+  crosswind nudging the trailer; and seasonal daylight length. Live-weather fog
+  is now gated on the station's measured visibility (NWS "Fog/Mist"/"Haze" at
+  6+ miles played as pea-soup fog before).
+- [ ] **Live-weather staleness fallback.** If the network drops mid-trip,
+  `RealWeatherProvider.unavailable()` still reports a city as available while
+  its cache entry is stale (>30 min), so `WeatherSystem.update()` holds the
+  last live condition indefinitely instead of falling back to simulated
+  weather. Treat a stale-only cache as offline (and consider a spoken note
+  when live weather falls back) so conditions can't silently freeze.
+- [x] **Per-truck condition tracking.** Every owned truck now keeps its own
+  fuel, damage, tire wear, and road grime (save version 5); newly bought
+  trucks arrive fueled and fresh, and switching trucks no longer carries or
+  loses fuel. Older saves are migrated automatically on load, with a one-time
+  spoken notice that the save is no longer readable by older versions.
+- [ ] **Teach the server-side validation gate and cloud-save consumers the
+  `truck_conditions` shape.** The client invariants and docs are updated for
+  save version 5, but the server plausibility rules still describe the flat
+  pre-v5 condition fields.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
   acceleration, grade lugging, fuel burn, and now braking: the foundation
   brakes have a fixed force ceiling sized for the rated gross, so loads over
@@ -331,8 +466,12 @@ reset instead of only a fine.
   against patrol intensity (`DrivingState._trooper_catches_speeder`); a hit lights
   you up (`events/police_siren`), you signal with X and brake to a stop, and
   `TrafficStopState` runs a spoken license/logbook check ending in an immediate
-  on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning. Ignoring
-  the lights past `PULL_OVER_IGNORE_MI` is logged as evasion. Disabled in the
+  on-the-spot ticket (`SPEEDING_TICKET_FINES`, paid now) or a warning; a prompt,
+  fully-compliant stop has a small chance a ticket is waived to a warning. A
+  behavior-based compliance tracker (seeded at `PULL_OVER_START_COMPLIANCE`,
+  raised by braking, lowered by accelerating/coasting/failing to signal) judges
+  the stop -- refusing to comply zeroes it out and is logged as an evasion/felony
+  rather than the old distance rule. Disabled in the
   debug HOS bypass. Uncaught speeding still accrues the silent settlement strike.
   Real ElevenLabs audio is in: `events/police_siren.ogg` (used now),
   `events/spike_strip.ogg` (felony-stop sound on evasion), and
@@ -598,4 +737,9 @@ fit for an audio-first game.
 - [x] Online posts carry the game's build identity (release tag or source checkout) so moderation can tell which version a driver runs
 - [x] Validated and server-signed private cloud revisions with verified public profile summaries
 - [x] Profile integrity, client half: `profile_invariants.py` runs the hard, version-stable sanity rules (ranges, counter relations, upgrade tiers) as defense in depth behind the Ed25519 signature on every cloud restore, refusing with a plain spoken reason; `docs/profile-invariants.md` is the maintained validation list for the server gate. Follow-up: the append-only event ledger that upgrades server validation from plausibility to recomputation
+- [x] Packed save container: careers live in signed `.ffsave` files (magic header + deflated JSON) that text editors cannot open; legacy plain-JSON saves convert on load with a `.json.bak` rollback copy. A failed local signature now marks the profile `integrity_modified` (sticky, signed-in, spoken once) instead of quarantining — local play continues, shared features read the mark. `tools/dump_save.py` prints the JSON inside a save for bug reports.
+- [ ] Retire legacy plain-JSON save loading (and its unsigned amnesty) once converted installs are the norm — one or two releases after the container ships; the amnesty is the last casual editing door
+- [ ] Ship a stable release carrying the packed save container, so players are not split across two save formats. Until one exists, a career backed up from a developer snapshot cannot be restored onto 1.8.3: the snapshot writes the newer format, and the stable build drops the fields it does not recognise. Moving forward (stable career onto a snapshot) is fine. Fixing the backwards direction in the client was considered and deliberately declined — too many edge cases for the value; the stable release is the fix. Told players so on issue #97, without naming a date.
+- [x] Cloud backup accepts every shipped save shape, not just the newest build's: the orinks.net validator matches uploads against a superset allow-list and a supported version range, and only requires the fields it actually reads. It had demanded an exact match with whichever build the invariants export was last generated from, which refused newer and older saves in turn — most recently every save from 1.8.3, the stable release, leaving those players unable to back up at all (issue #97)
+- [ ] Server absolution for `integrity_modified`: a profile that passes full server validation may have the client mark cleared on the next verified restore, so honest cross-machine movers are not marked forever (`docs/server-integrity-handoff.md`)
 - [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)

@@ -67,7 +67,7 @@ class DrivingControlsMixin:
             if event.mod & pygame.KMOD_SHIFT:
                 self.ctx.say(self.trip.next_exit_context())
             else:
-                self.ctx.say(self.trip.progress_summary(self.ctx.settings.imperial_units))
+                self._speak_route_status()
         elif key == pygame.K_v:
             self._speak_weather()
         elif key == pygame.K_l:
@@ -117,12 +117,15 @@ class DrivingControlsMixin:
             "Hold Up arrow to accelerate, Down arrow to brake. "
             + automatic_help
             + "Hold B for the emergency brake, the hardest possible stop. "
-            "K sets adaptive cruise at your current speed; bad weather "
-            "increases the following gap, sharp posted-limit drops make it "
-            "slow early, and braking cancels. Plus and minus, including "
-            "the keypad keys, raise and lower the cruise speed by five, so "
-            "you can dial it up to the speed you want; it will not hold "
-            "above the posted limit. "
+            "K starts automatic speed control. Adaptive cruise handles open "
+            "roads and the speed keeper handles low-speed zones, switching "
+            "automatically between them. Bad weather increases the following "
+            "gap, sharp posted-limit drops make it slow early, and braking "
+            "cancels the whole session. At the planned pickup, it pauses while "
+            "you check in and load, then resumes once you depart and get rolling. "
+            "Plus and minus, including the keypad "
+            "keys, change the remembered open-road target by five; it will not "
+            "hold above the posted limit. "
             "X takes the next announced exit, called out by its number "
             "when known: slow to 45 for the ramp, then brake to a stop for "
             "the rest stop menu. X also signals a pull-over if a trooper "
@@ -133,11 +136,12 @@ class DrivingControlsMixin:
             "Press P to release or set the parking brake; if pressure is "
             "below 100 psi, wait with the engine running. "
             f"{objective_help}"
-            "Space speed, and cruise set speed when cruise is on. "
+            "Space speed, active speed-control mode, and target. "
             "S posted speed limit. Tab status menu. F fuel. "
             "C clock, deadline, and hours of service. "
-            "R route. Shift R next listed highway exit. V weather. L lane position. "
-            "A repeats the last announcement. U reads what is coming up: "
+            "R route and current location. Shift R next listed highway exit. "
+            "V weather. L lane position. A repeats the last announcement. "
+            "U reads what is coming up: "
             "imposed limits, stops, and exits ahead. "
             "Left or Right Control stops the driving event voice. "
             "Left and Right arrows steer when lane drift is enabled. "
@@ -181,11 +185,14 @@ class DrivingControlsMixin:
             "trigger fully for the hardest stop. The left stick steers when lane "
             "drift is on. "
             f"{gears}"
-            "The Y button sets adaptive cruise; hold the right bumper and press "
-            "D-pad left or right to lower or raise the cruise speed by five. "
+            "The Y button starts automatic speed control, switching between "
+            "adaptive cruise and the low-speed keeper as needed. Hold the right "
+            "bumper and press D-pad left or right to lower or raise the open-road "
+            "cruise target by five. It pauses through the planned pickup and "
+            "resumes once the loaded truck is rolling. "
             "D-pad down takes the next announced exit, or signals a pull-over. "
-            "D-pad up reads your route, D-pad left the weather, D-pad right the "
-            "clock. The B button speaks your speed. Click the left stick to honk, "
+            "D-pad up reads your route and current location, D-pad left the weather, "
+            "D-pad right the clock. The B button speaks your speed. Click the left stick to honk, "
             "the right stick to toggle the engine brake. "
             "Hold the right bumper for the second layer: plus A starts or stops "
             "the engine, plus B reads fuel, plus Y sets or releases the parking "
@@ -238,7 +245,7 @@ class DrivingControlsMixin:
         elif button == pygame.CONTROLLER_BUTTON_RIGHTSTICK:
             self._toggle_engine_brake()
         elif button == pygame.CONTROLLER_BUTTON_DPAD_UP:
-            self.ctx.say(self.trip.progress_summary(self.ctx.settings.imperial_units))
+            self._speak_route_status()
         elif button == pygame.CONTROLLER_BUTTON_DPAD_DOWN:
             if self._pull_over is not None:
                 self._signal_pull_over()
@@ -384,10 +391,25 @@ class DrivingControlsMixin:
     def _speak_speed(self) -> None:
         t = self.truck
         gear = self._gear_text()
+        keeper_target = (
+            f", open-road target {self.ctx.settings.speed_text(self._speed_control_target_mph)}"
+            if self._speed_control_target_mph is not None
+            else ", open-road target will use the posted limit"
+        )
         cruise = (
-            f", cruise set at {self.ctx.settings.speed_text(self._cruise_mph)}"
+            ", automatic speed control, adaptive cruise set at "
+            f"{self.ctx.settings.speed_text(self._cruise_mph)}"
             if self._cruise_mph is not None
-            else ""
+            else (
+                ", automatic speed control, speed keeper holding "
+                f"{self.ctx.settings.speed_text(self._keeper_mph)}{keeper_target}"
+                if self._keeper_mph is not None
+                else (
+                    f", automatic speed control paused{keeper_target}"
+                    if self._speed_control_armed
+                    else ""
+                )
+            )
         )
         self.ctx.say(
             f"{self.ctx.settings.speed_text(t.speed_mph)}, {gear}, "
@@ -424,7 +446,10 @@ class DrivingControlsMixin:
             )
         stop = self.trip.upcoming_stop(within_mi)
         if stop is not None:
-            parts.append(f"{stop.spoken_name} in {s.distance_text(stop.at_mi - pos)}")
+            parts.append(
+                f"{self.trip.planned_prefix(stop)}{stop.spoken_name} "
+                f"in {s.distance_text(stop.at_mi - pos)}"
+            )
         cue = self.trip.next_exit_cue()
         if cue is not None and 0 < cue.at_mi - pos <= within_mi:
             parts.append(f"in {s.distance_text(cue.at_mi - pos)}, {cue.text}")
@@ -474,6 +499,26 @@ class DrivingControlsMixin:
                     f"{self.ctx.settings.distance_text(context.gap_mi)} ahead, "
                     f"{self.ctx.settings.speed_text(context.lead.speed_mph)}",
                 )
+        elif self._keeper_mph is not None:
+            lines.insert(
+                1,
+                f"Speed control: speed keeper holding "
+                f"{self.ctx.settings.speed_text(self._keeper_mph)}",
+            )
+            target = (
+                self.ctx.settings.speed_text(self._speed_control_target_mph)
+                if self._speed_control_target_mph is not None
+                else "posted limit when the open road begins"
+            )
+            lines.insert(2, f"Open-road target: {target}")
+        elif self._speed_control_armed:
+            lines.insert(1, "Speed control: paused; resumes when the truck is rolling")
+            target = (
+                self.ctx.settings.speed_text(self._speed_control_target_mph)
+                if self._speed_control_target_mph is not None
+                else "posted limit when the open road begins"
+            )
+            lines.insert(2, f"Open-road target: {target}")
         if t.damage_pct - self.start_damage > 1:
             lines.append(f"Damage: new damage {t.damage_pct - self.start_damage:.0f} percent")
         if self.ctx.settings.speech_verbosity >= 1:
@@ -604,7 +649,8 @@ class DrivingControlsMixin:
         ahead = max(0.0, next_stop.at_mi - self.trip.position_mi)
         verdict = "before" if ahead <= legal_miles else "after"
         stop_text = (
-            f"Next legal stop: {next_stop.spoken_name} in {self.ctx.settings.distance_text(ahead)}"
+            f"Next legal stop: {self.trip.planned_prefix(next_stop)}{next_stop.spoken_name} "
+            f"in {self.ctx.settings.distance_text(ahead)}"
         )
         if next_stop.parking_text:
             stop_text += f", {next_stop.parking_text}"
@@ -660,8 +706,15 @@ class DrivingControlsMixin:
         return "No route stop is nearby. You can pull over and rest on the shoulder."
 
     def _speak_weather(self) -> None:
-        source = "Live conditions" if self.weather.live else "Currently"
         safe_speed = self.ctx.settings.speed_text(self.weather.effects.safe_speed_mph)
+        if self.weather.live_weather_loading:
+            self.ctx.say(
+                f"It is {time_of_day(self.trip.local_hour)}. "
+                "Live weather is still loading. "
+                f"Safe speed about {safe_speed}."
+            )
+            return
+        source = "Live conditions" if self.weather.live else "Currently"
         parts = [
             f"It is {time_of_day(self.trip.local_hour)}.",
             f"{source} {self.weather.describe(self.ctx.settings.imperial_units)}.",

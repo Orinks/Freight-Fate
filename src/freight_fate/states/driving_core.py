@@ -65,9 +65,26 @@ EXIT_WINDOW_MI = 5.0  # how far out X can arm the upcoming exit, at minimum
 EXIT_WARNING_REAL_S = 25.0  # target real seconds from callout to the ramp
 EXIT_WINDOW_MAX_MI = 20.0
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
+RAMP_CRUISE_TARGET_MPH = 40.0  # leave control-loop headroom below the hard ramp limit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
+# Grace past the end of the ramp before a taken-but-never-stopped exit counts
+# as blown. The driver gets the "come to a complete stop" nudge at the ramp
+# end; roll this much further without stopping and the exit is missed, so the
+# stuck ramp doesn't linger for miles (unpatrolled, off the plan) once passed.
+RAMP_OVERSHOOT_MI = 0.5
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
+# A real interchange counts as the destination exit only inside this final
+# approach window. Routes that finish on rural highways carry no baked
+# interchanges, and without the floor the scan crowned the last labeled exit
+# anywhere on the route -- one playtest got its "destination exit" on I-39 in
+# Wisconsin, 1,158 miles from the Montana receiver, and taking it settled the
+# load from there (transcripts, 2026-07-16). Past the window the synthetic
+# end-of-route exit takes over.
+DESTINATION_EXIT_SCAN_WINDOW_MI = 25.0
 
+KEEPER_MIN_MPH = 2.0  # the speed keeper just needs the truck rolling
+KEEPER_MAX_THROTTLE = 0.5  # zone speeds never need more than half throttle
+KEEPER_GAP_SECONDS = 3.0  # follow queued traffic at this gap, down to a stop
 CRUISE_MIN_MPH = 20.0  # cruise control needs road speed to hold
 CRUISE_STEP_MPH = 5.0  # set-point change per Accel/Coast (+/-) tap
 CRUISE_MAX_MPH = 85.0  # highest cruise set point (top US posted limits)
@@ -163,9 +180,24 @@ SPEEDING_HOLD_S = 6.0
 # immediately when a trooper pulls you over (unlike the silent at-delivery
 # strikes, which stand in for the cost of speeding nobody caught).
 SPEEDING_TICKET_FINES = (150.0, 300.0, 600.0, 1200.0)
-# Travel this far still moving after the lights come on and it counts as
-# ignoring the stop -- a heavier fine and a bigger reputation hit.
-PULL_OVER_IGNORE_MI = 2.0
+# Once the lights come on, a compliance tracker (0..1) judges whether you are
+# actually pulling over -- signaling and slowing -- rather than how far you
+# rolled. It seeds at PULL_OVER_START_COMPLIANCE, rises with braking, falls with
+# accelerating/coasting/ignoring, and a felony stop fires the instant it hits 0.
+# Disobedient rates outpace the compliant one so it always zeroes faster than it
+# fills, and their deductions stack when several apply at once.
+PULL_OVER_START_COMPLIANCE = 0.5
+PULL_OVER_ACCEL_RATE = 0.34  # per s of rising speed; full 1.0 -> 0.0 in ~3 s
+PULL_OVER_ACCEL_EPS_MPH_S = 0.4  # speed must genuinely rise (past jitter) to count
+PULL_OVER_COAST_RATE = 0.12  # per s of coasting; lighter than accelerating
+PULL_OVER_BRAKE_RATE = 0.15  # per s of braking; the only thing that raises it
+PULL_OVER_SIGNAL_GRACE_S = 5.0  # plenty of time to react before the no-signal drain
+PULL_OVER_COAST_GRACE_S = 3.0  # coasting is only flagged after this many s
+PULL_OVER_SIGNAL_BOOST = 0.20  # one-time bump the first time you signal
+PULL_OVER_NOSIGNAL_HIT = 0.25  # one-time 1/4 hit once past the signal grace unsignaled
+PULL_OVER_NOSIGNAL_RATE = 0.03  # per s small drain while still unsignaled past grace
+PULL_OVER_FULL_COMPLIANCE = 0.95  # at/above this a stop counts as prompt and clean
+PULL_OVER_CLEAN_STOP_WARN_CHANCE = 0.25  # chance a clean stop downgrades a ticket to a warning
 
 
 class Tutorial:
@@ -290,6 +322,7 @@ class Tutorial:
 
 def _advance_rest_clock(driving: DrivingState, minutes: float) -> None:
     """Resting advances game time, so deadlines keep counting."""
+    driving.truck.advance_parked_time(minutes)
     driving.trip.game_minutes += minutes
     driving.weather.update(minutes)
 
@@ -305,6 +338,20 @@ def _shut_down_engine(driving: DrivingState) -> str:
     # made here (from a rest menu) would leave the loop playing forever.
     driving.ctx.audio.engine_stop()
     return "You shut down the engine. "
+
+
+def _wake_air_instruction(driving: DrivingState, *, from_rest_menu: bool = True) -> str:
+    """Describe the required keyboard/controller recovery after parked air loss."""
+    truck = driving.truck
+    if truck.air_ready:
+        return ""
+    road_step = "Choose Back to the road, then press" if from_rest_menu else "Press"
+    return (
+        f" Air pressure {truck.air_pressure_psi:.0f} psi. {road_step} "
+        f"{driving.ctx.control_hint('engine')} to start the engine. Wait "
+        f"for air pressure ready, then press "
+        f"{driving.ctx.control_hint('parking_brake')} to release the parking brake."
+    )
 
 
 def _deadline_appointment(driving: DrivingState) -> str:
@@ -337,6 +384,7 @@ def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
         f"{engine_off}You sleep poorly on the shoulder, woken again and again by "
         f"passing trucks. It is {clock_text(driving.trip.local_hour)}. "
         f"Hours of service reset, but you are still tired."
+        f"{_wake_air_instruction(driving, from_rest_menu=False)}"
     ]
     if hos.shoulder_fine_due(driving.trip_seed, anchor_mi):
         p.money -= hos.SHOULDER_FINE

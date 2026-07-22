@@ -7,6 +7,7 @@ import logging
 from dataclasses import asdict, dataclass
 
 from .models.profile import data_dir
+from .units import spoken_distance
 
 log = logging.getLogger(__name__)
 
@@ -26,10 +27,18 @@ class Settings:
     # step up to standard or fast in Settings, Gameplay.
     time_scale: float = 10.0
     real_weather: bool = False  # live conditions from the NWS API
+    # Preserve the historical behavior by default: live weather also follows
+    # the wall-clock date. Turn this off to let the career calendar advance
+    # while live conditions continue to come from the NWS.
+    live_weather_controls_calendar: bool = True
     hos_mode: str = (
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
     steering_assist: str = "off"  # off/light/realistic lane drift
+    # Lets an armed speed-control session cover low-speed zones without a held
+    # accelerator, then hand back to adaptive cruise on open roads. This input
+    # accessibility aid remains independent of the wider 1.9 assist framework.
+    speed_keeper: bool = True
     master_volume: float = 1.0
     sfx_volume: float = 0.8
     music_volume: float = 0.5
@@ -114,6 +123,8 @@ class Settings:
             s.haptics_enabled = True
         if not isinstance(s.cloud_saves, bool):
             s.cloud_saves = False
+        if not isinstance(s.live_weather_controls_calendar, bool):
+            s.live_weather_controls_calendar = True
         for attr in (
             "master_volume",
             "sfx_volume",
@@ -130,10 +141,10 @@ class Settings:
 
     def speed_text(self, mph: float) -> str:
         if self.imperial_units:
-            return f"{mph:.0f} miles per hour"
-        return f"{mph * 1.609344:.0f} kilometers per hour"
+            return f"{spoken_distance(mph, 'mile')} per hour"
+        return f"{spoken_distance(mph * 1.609344, 'kilometer')} per hour"
 
     def distance_text(self, miles: float) -> str:
         if self.imperial_units:
-            return f"{miles:.0f} miles"
-        return f"{miles * 1.609344:.0f} kilometers"
+            return spoken_distance(miles, "mile")
+        return spoken_distance(miles * 1.609344, "kilometer")

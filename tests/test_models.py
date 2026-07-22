@@ -7,7 +7,15 @@ import pytest
 from freight_fate.models import Career, Economy, JobBoard, Profile
 from freight_fate.models.career import level_for_xp
 from freight_fate.models.jobs import CARGO_CATALOG, plan_hos
-from freight_fate.models.profile import SIGNATURE_FIELD, ProfileIntegrityError
+from freight_fate.models.profile import (
+    LEGACY_SAVE_SUFFIX,
+    SAVE_MAGIC,
+    SAVE_VERSION,
+    SIGNATURE_FIELD,
+    ProfileIntegrityError,
+    _decode_save_bytes,
+    encode_save_bytes,
+)
 from freight_fate.settings import Settings
 
 # -- jobs ---------------------------------------------------------------------
@@ -176,14 +184,17 @@ def test_endorsement_gating(world):
     assert len(locked) <= 1
 
 
-def test_payout_on_time_beats_late():
+def test_payout_on_time_window_beats_late():
     from freight_fate.models.jobs import Job
 
     job = Job(CARGO_CATALOG["general"], 15, "A", "Loc", "B", 300, 700.0, 9.0)
     early = job.payout(hours_taken=5.0, damage_pct=0.0)
     on_dot = job.payout(hours_taken=9.0, damage_pct=0.0)
     late = job.payout(hours_taken=12.0, damage_pct=0.0)
-    assert early > on_dot >= late
+    # Window model: any on-time arrival earns the same flat bonus; racing in
+    # early pays no more than hitting the appointment.
+    assert early == on_dot
+    assert on_dot > 700.0 > late
     assert late >= 700.0 * 0.4
 
 
@@ -252,63 +263,153 @@ def test_reputation_moves_with_performance():
 # -- profile ---------------------------------------------------------------------
 
 
+def _read_save(path):
+    """The profile dict inside a save file, packed or legacy."""
+    return _decode_save_bytes(path.read_bytes())[0]
+
+
+def _write_packed(path, data):
+    path.write_bytes(encode_save_bytes(data))
+
+
 def test_profile_roundtrip():
     p = Profile(name="Roundtrip Test")
     p.money = 1234.5
     p.career.xp = 2600
+    p.calendar_offset_days = 147
     path = p.save()
     loaded = Profile.load(path)
     assert loaded.money == 1234.5
     assert loaded.career.level == 3
     assert loaded.name == "Roundtrip Test"
+    assert loaded.calendar_offset_days == 147
 
 
-def test_profile_save_is_atomic_and_versioned():
+def test_profile_save_is_packed_and_versioned():
     p = Profile(name="Atomic")
     path = p.save()
-    data = json.loads(path.read_text())
-    assert data["version"] == 4
+    assert path.suffix == ".ffsave"
+    assert path.read_bytes().startswith(SAVE_MAGIC)
+    data = _read_save(path)
+    assert data["version"] == SAVE_VERSION
     assert SIGNATURE_FIELD in data
-    assert not path.with_suffix(".json.tmp").exists()
+    assert not path.with_suffix(".ffsave.tmp").exists()
 
 
 def test_profile_ignores_unknown_fields():
     p = Profile(name="Future")
     path = p.save()
-    data = json.loads(path.read_text())
+    data = _read_save(path)
     data["mystery_field"] = 42
-    path.write_text(json.dumps(data))
+    _write_packed(path, data)
     loaded = Profile.load(path)
     assert loaded.name == "Future"
+    # Unknown fields are outside the signed payload, so this is not a tamper.
+    assert loaded.integrity_modified is False
 
 
-def test_profile_tampered_money_is_rejected_and_quarantined():
+def test_tampered_money_loads_but_marks_profile_modified():
     p = Profile(name="Tampered")
     path = p.save()
-    data = json.loads(path.read_text())
+    data = _read_save(path)
     data["money"] = 999_999.0
-    path.write_text(json.dumps(data))
+    _write_packed(path, data)
 
-    import pytest
+    loaded = Profile.load(path)
+    assert loaded.integrity_modified is True
+    assert loaded.integrity_notice_pending is True
+
+    # The flag is signed into the rewritten save and survives a clean reload.
+    again = Profile.load(path)
+    assert again.integrity_modified is True
+
+
+def test_modified_flag_is_sticky_against_hand_clearing():
+    p = Profile(name="Sticky")
+    path = p.save()
+    data = _read_save(path)
+    data["money"] = 999_999.0
+    _write_packed(path, data)
+    Profile.load(path)  # marks and re-signs
+
+    data = _read_save(path)
+    data["integrity_modified"] = False
+    data["integrity_notice_pending"] = False
+    _write_packed(path, data)  # stale signature again
+
+    assert Profile.load(path).integrity_modified is True
+
+
+def test_packed_save_with_stripped_signature_is_marked_modified():
+    p = Profile(name="Stripped")
+    path = p.save()
+    data = _read_save(path)
+    data.pop(SIGNATURE_FIELD)
+    _write_packed(path, data)
+
+    assert Profile.load(path).integrity_modified is True
+
+
+def test_undecodable_save_is_quarantined():
+    p = Profile(name="Corrupt")
+    path = p.save()
+    path.write_bytes(SAVE_MAGIC + b"not deflate data")
 
     with pytest.raises(ProfileIntegrityError):
         Profile.load(path)
     assert not path.exists()
-    assert path.with_suffix(".json.invalid").exists()
+    assert path.with_suffix(".ffsave.invalid").exists()
 
 
-def test_unsigned_profile_loads_once_and_is_signed():
+def test_skip_signing_flag_loads_tampered_save_from_source(monkeypatch):
+    p = Profile(name="Dev Tampered")
+    path = p.save()
+    data = _read_save(path)
+    data["money"] = 999_999.0
+    _write_packed(path, data)
+
+    monkeypatch.setenv("FREIGHT_FATE_SKIP_SAVE_SIGNING", "1")
+    loaded = Profile.load(path)
+    assert loaded.money == 999_999.0
+    assert loaded.integrity_modified is False
+
+    # The load re-signed the file, so it keeps working with the flag off.
+    monkeypatch.delenv("FREIGHT_FATE_SKIP_SAVE_SIGNING")
+    reloaded = Profile.load(path)
+    assert reloaded.money == 999_999.0
+    assert reloaded.integrity_modified is False
+
+
+def test_skip_signing_flag_is_ignored_in_frozen_builds(monkeypatch):
+    import freight_fate.models.profile as profile_module
+
+    p = Profile(name="Frozen Tampered")
+    path = p.save()
+    data = _read_save(path)
+    data["money"] = 999_999.0
+    _write_packed(path, data)
+
+    monkeypatch.setenv("FREIGHT_FATE_SKIP_SAVE_SIGNING", "1")
+    monkeypatch.setattr(profile_module, "is_frozen", lambda: True)
+    assert Profile.load(path).integrity_modified is True
+
+
+def test_legacy_unsigned_json_save_keeps_amnesty_and_converts():
     p = Profile(name="Unsigned")
     data = p.to_dict()
     data.pop(SIGNATURE_FIELD)
-    path = p.path
-    path.write_text(json.dumps(data))
+    legacy = p.path.with_suffix(LEGACY_SAVE_SUFFIX)
+    legacy.write_text(json.dumps(data))
 
-    loaded = Profile.load(path)
+    loaded = Profile.load(legacy)
 
     assert loaded.name == "Unsigned"
-    migrated = json.loads(path.read_text())
+    assert loaded.integrity_modified is False
+    # Converted in place: packed and signed, old file kept as a rollback copy.
+    migrated = _read_save(p.path)
     assert SIGNATURE_FIELD in migrated
+    assert not legacy.exists()
+    assert legacy.with_suffix(".json.bak").exists()
 
 
 def test_list_saves_and_delete():
@@ -388,6 +489,21 @@ def test_unit_formatting():
     assert "miles per hour" in s.speed_text(60)
     s.imperial_units = False
     assert s.speed_text(60) == "97 kilometers per hour"
+
+
+def test_spoken_units_are_singular_at_one():
+    """Distances and speeds are read aloud, so exactly one is "1 mile", never
+    "1 miles". Anything that rounds to one counts, in both unit systems."""
+    s = Settings()
+    assert s.distance_text(1.0) == "1 mile"
+    assert s.distance_text(0.6) == "1 mile"  # rounds to one
+    assert s.distance_text(0.0) == "0 miles"
+    assert s.distance_text(2.0) == "2 miles"
+    assert s.speed_text(1.0) == "1 mile per hour"
+    s.imperial_units = False
+    assert s.distance_text(0.62) == "1 kilometer"
+    assert s.distance_text(1.0) == "2 kilometers"
+    assert s.speed_text(0.62) == "1 kilometer per hour"
 
 
 def test_job_spoken_names_always_carry_the_state(world):

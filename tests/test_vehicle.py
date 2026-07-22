@@ -510,6 +510,28 @@ def test_air_pressure_builds_when_engine_running_and_stops_at_cutout():
     assert not t.air_compressor_active
 
 
+def test_engine_off_air_reservoirs_leak_during_parked_time():
+    t = TruckState()
+    t.set_air_ready(parking_brake=True)
+
+    t.advance_parked_time(10 * 60)
+
+    assert t.air_pressure_psi == pytest.approx(t.specs.air_cold_start_psi)
+    assert t.air_low_warning
+    assert not t.air_ready
+    assert not t.air_compressor_active
+
+
+def test_running_engine_prevents_parked_time_air_leak():
+    t = TruckState()
+    t.set_air_ready(parking_brake=True)
+    t.start_engine()
+
+    t.advance_parked_time(10 * 60)
+
+    assert t.air_pressure_psi == pytest.approx(t.specs.air_governor_cut_out_psi)
+
+
 def test_air_compressor_cuts_in_when_pressure_drops_below_cut_in():
     t = TruckState()
     t.set_air_ready(parking_brake=False)

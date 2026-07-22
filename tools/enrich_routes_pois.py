@@ -153,7 +153,11 @@ def add_overpass_pois(
         existing = {str(s.get("name", "")).lower() for s in stops}
         taken_mi = [float(s["at_mi"]) for s in stops]
         cands = _overpass_named_candidates(
-            leg, points, cache_dir, rate_limit_s, per_leg + len(existing) + 6,
+            leg,
+            points,
+            cache_dir,
+            rate_limit_s,
+            per_leg + len(existing) + 6,
             rural_fallback=rural_fallback,
         )
         fresh = []
@@ -444,7 +448,7 @@ def _actions_for_stop_type(stop_type: str) -> list[str]:
         "truck_stop": ["park", "save", "fuel", "food", "break", "sleep"],
         "travel_center": ["park", "save", "fuel", "food", "break", "sleep"],
         "fuel_station": ["park", "save", "fuel", "break"],
-        "service_plaza": ["park", "save", "fuel", "food", "break"],
+        "service_plaza": ["park", "save", "fuel", "food", "break", "sleep"],
         "public_rest_area": ["park", "save", "break", "sleep"],
         "truck_parking": ["park", "save", "break", "sleep"],
         "weigh_station": ["inspect"],

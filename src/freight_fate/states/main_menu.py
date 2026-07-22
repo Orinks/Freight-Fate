@@ -28,9 +28,22 @@ from .update import UpdateChecker, UpdateCheckState, UpdatePromptState
 _last_invalid_saves: list[Path] = []
 
 
+def pending_notice_state(ctx) -> State | None:
+    """The next one-time save notice the player has not heard yet, if any."""
+    if ctx.profile.migration_notice_pending:
+        from .save_notice import SaveMigrationNoticeState
+
+        return SaveMigrationNoticeState(ctx)
+    if ctx.profile.integrity_notice_pending:
+        from .save_notice import SaveModifiedNoticeState
+
+        return SaveModifiedNoticeState(ctx)
+    return None
+
+
 def enter_world(ctx) -> None:
     """Resume a saved mid-trip delivery if there is one, else the terminal hub."""
-    ctx.push_state(_world_entry_state(ctx))
+    ctx.push_state(pending_notice_state(ctx) or _world_entry_state(ctx))
 
 
 def _world_entry_state(ctx) -> State:
@@ -57,11 +70,15 @@ def _loadable_saves() -> list[tuple[Path, Profile]]:
     saves = []
     for path in Profile.list_saves():
         try:
-            saves.append((path, Profile.load(path)))
+            profile = Profile.load(path)
         except ProfileIntegrityError:
             _last_invalid_saves.append(path)
         except Exception:
             continue
+        else:
+            # Loading may have converted a legacy file in place; report the
+            # path the career actually lives at now.
+            saves.append((profile.path, profile))
     return saves
 
 
@@ -169,9 +186,9 @@ class MainMenuState(MenuState):
         if _last_invalid_saves:
             count = len(_last_invalid_saves)
             warning = (
-                f"{count} saved career failed its integrity check and was moved aside. "
+                f"{count} saved career could not be read and was moved aside. "
                 if count == 1
-                else f"{count} saved careers failed integrity checks and were moved aside. "
+                else f"{count} saved careers could not be read and were moved aside. "
             )
         self.ctx.say(
             f"Welcome to Freight Fate, version {__version__}. "
@@ -433,7 +450,7 @@ class LoadDriverState(MenuState):
     def _pick(self, profile: Profile) -> None:
         self.ctx.profile = profile
         self.ctx.say(f"Welcome back, {profile.name}.")
-        self.ctx.replace_state(_world_entry_state(self.ctx))
+        self.ctx.replace_state(pending_notice_state(self.ctx) or _world_entry_state(self.ctx))
 
 
 class ManageCareersState(MenuState):
@@ -770,6 +787,7 @@ class SettingsState(MenuState):
         ("Speech and weather", "speech"),
         ("Online", "online"),
         ("Updates", "updates"),
+        ("Problem reports", "reports"),
     )
 
     def build_items(self) -> list[MenuItem]:
@@ -811,6 +829,7 @@ class SettingsCategoryState(MenuState):
         "speech": "Speech and weather",
         "online": "Online",
         "updates": "Updates",
+        "reports": "Problem reports",
     }
 
     def __init__(self, ctx, category: str) -> None:
@@ -868,6 +887,14 @@ class SettingsCategoryState(MenuState):
                     lambda: f"Lane drift: {self._steering_label()}",
                     lambda: self._cycle_steering(1),
                     help="Choose whether lane drift is off, light, or realistic.",
+                ),
+                MenuItem(
+                    lambda: f"Speed keeper: {'on' if s.speed_keeper else 'off'}",
+                    lambda: self._toggle_speed_keeper(1),
+                    help="In low-speed zones where adaptive cruise is unavailable, "
+                    "such as facility roads, gates, and work zones, automatic "
+                    "speed control uses the keeper, then switches back to adaptive "
+                    "cruise on open roads. Braking cancels the whole session.",
                 ),
                 MenuItem(
                     lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",
@@ -989,6 +1016,17 @@ class SettingsCategoryState(MenuState):
                 ),
                 MenuItem("Back", self.go_back),
             ]
+        if self.category == "reports":
+            return [
+                MenuItem(
+                    "Where the game log is saved",
+                    self._say_log_location,
+                    help="The game keeps a log of the session, including "
+                    "everything it said out loud. Sending it with a bug "
+                    "report shows exactly what you heard.",
+                ),
+                MenuItem("Back", self.go_back),
+            ]
         return [
             MenuItem(
                 lambda: (
@@ -1030,6 +1068,7 @@ class SettingsCategoryState(MenuState):
                     self._cycle_pace,
                     self._cycle_hos,
                     self._cycle_steering,
+                    self._toggle_speed_keeper,
                     self._toggle_controller,
                     self._toggle_haptics,
                 ],
@@ -1051,6 +1090,9 @@ class SettingsCategoryState(MenuState):
                     self._toggle_discord_presence,
                 ],
                 "updates": [self._toggle_update_channel],
+                # Reading the log's location is an action, not a value to
+                # step through, so left/right does nothing on that row.
+                "reports": [lambda _d: None],
             }[self.category]
         if self.index < len(actions):
             actions[self.index](direction)
@@ -1123,7 +1165,23 @@ class SettingsCategoryState(MenuState):
                 "Real world uses live city conditions when available.",
             )
         )
+        specs.append(
+            (
+                lambda: (
+                    "Live weather controls calendar: "
+                    f"{'on' if s.live_weather_controls_calendar else 'off'}"
+                ),
+                self._toggle_live_weather_calendar,
+                "When on, live weather uses today's real date and season. When off, "
+                "the career date advances at midnight and seasons pass while weather "
+                "conditions still come from the real world.",
+            )
+        )
         return specs
+
+    def _toggle_speed_keeper(self, _d: int = 1) -> None:
+        self.ctx.settings.speed_keeper = not self.ctx.settings.speed_keeper
+        self._announce()
 
     def _pace_label(self) -> str:
         scale = self.ctx.settings.time_scale
@@ -1329,6 +1387,19 @@ class SettingsCategoryState(MenuState):
         self.ctx.settings.real_weather = not self.ctx.settings.real_weather
         self._announce()
 
+    def _toggle_live_weather_calendar(self, _d: int) -> None:
+        turning_off = self.ctx.settings.live_weather_controls_calendar
+        self.ctx.settings.live_weather_controls_calendar = (
+            not self.ctx.settings.live_weather_controls_calendar
+        )
+        profile = self.ctx.profile
+        if turning_off and profile is not None and profile.has_started_career():
+            from ..sim.season import real_clock_game_hours
+
+            profile.anchor_calendar_to(real_clock_game_hours())
+            profile.save()
+        self._announce()
+
     def _channel(self) -> str:
         return updater.resolve_channel(
             self.ctx.settings.update_channel, updater.load_build_info(__version__)
@@ -1340,6 +1411,52 @@ class SettingsCategoryState(MenuState):
 
     def _check_updates(self) -> None:
         self.ctx.push_state(UpdateCheckState(self.ctx))
+
+    def _log_location_lines(self) -> list[str]:
+        """Where this session's log is, in words a player can act on.
+
+        The log already records every spoken line, so it is the most useful
+        thing a player can attach to a bug report -- but nothing in the game
+        ever mentioned it, so nobody sent one. Read from the path logging
+        actually opened, so a folder the game could not write to reports
+        honestly instead of naming a file that is not there.
+        """
+        from ..app import active_log_path
+
+        path = active_log_path()
+        if path is None:
+            return [
+                "This copy of the game is not writing a log file. Packaged "
+                "downloads always write one; a copy run from the source code "
+                "prints to its console window instead."
+            ]
+        out = [
+            f"The game log is saved as {path}.",
+            "It records this session, including everything the game said out loud, "
+            "so attaching it to a bug report shows exactly what you heard.",
+        ]
+        previous = path.with_name(f"{path.stem}.prev{path.suffix}")
+        if previous.exists():
+            out.append(
+                f"The session before this one was kept beside it as {previous.name}, "
+                "so restarting the game to check something does not lose it."
+            )
+        out.append(
+            "Both files stay on this computer. The game never sends them anywhere, "
+            "so attach one yourself when you report a problem."
+        )
+        return out
+
+    def _say_log_location(self) -> None:
+        self.ctx.say(" ".join(self._log_location_lines()))
+
+    def lines(self) -> list[str]:
+        # Spoken-only information would be invisible to a low-vision player
+        # reading the window, so the log's location is mirrored on screen.
+        out = super().lines()
+        if self.category == "reports":
+            out += ["", *self._log_location_lines()]
+        return out
 
     def go_back(self) -> None:
         # Settings are saved as each change is made; just return to the

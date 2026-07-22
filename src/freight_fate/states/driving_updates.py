@@ -26,6 +26,11 @@ SHIFT_LOAD_RECOVERY_S = 0.032
 SHIFT_LOAD_RECOVERY_CURVE = "ease_out"
 _shift_recovery_curve = _resolve_curve(SHIFT_LOAD_RECOVERY_CURVE)
 
+# Low-pass raw throttle before it reaches the audible engine-load envelope.
+# This preserves engine effort while making small adaptive-cruise adjustments
+# blend together rather than sound like a succession of volume blips.
+ENGINE_LOAD_SMOOTH_S = 0.45
+
 
 class DrivingUpdateMixin:
     def update(self, dt: float) -> None:
@@ -119,7 +124,9 @@ class DrivingUpdateMixin:
         t.transmission.clutch = clutch_val if not t.transmission.automatic else 0.0
         clutch_disengaged = t.transmission.clutch > 0.5 or t.transmission.shifting
         self._update_lane(keys, dt)
+        self._resume_speed_control_if_ready(braking=braking)
         self._update_cruise(dt, braking, accelerating, clutch_disengaged)
+        self._update_keeper(dt, braking, accelerating, clutch_disengaged)
 
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
@@ -146,11 +153,20 @@ class DrivingUpdateMixin:
         # Keep the trip's spoken-distance units in step with a live settings
         # change; the setter only re-renders cues when the choice actually flips.
         self.trip.imperial = self.ctx.settings.imperial_units
-        pos_before = self.trip.position_mi
+        # Tell the trip model which stop's exit is signaled or on the ramp so its
+        # plan-cancelled warning can tell a driver who is taking the exit from one
+        # who blew past it. Set before trip.update (which runs _check_stops) and
+        # before _update_exit (which clears _exit_stop on a miss), so on the exact
+        # crossing tick the flag still reflects the armed exit.
+        active_exit = self._ramp_stop or self._exit_stop
+        self.trip._exit_in_progress = active_exit.key if active_exit else None
+        # On the ramp the highway odometer holds and the ramp consumes the
+        # movement instead; the trip records how far the truck rolled either way.
+        self.trip.on_ramp = self._ramp_mi is not None
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
         self._check_destination_exit()
-        self._update_exit(self.trip.position_mi - pos_before)
+        self._update_exit(self.trip.last_moved_mi)
 
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)
@@ -158,8 +174,8 @@ class DrivingUpdateMixin:
         self._update_hazard(dt)
         self._update_microsleep(keys, dt)
         self._update_overrev(dt)
-        self._update_speeding(dt)
-        self._update_pull_over(dt)
+        self._update_speeding(dt, accelerator_held=accel_held)
+        self._update_pull_over(dt, service_braking=braking or emergency)
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
@@ -505,7 +521,18 @@ class DrivingUpdateMixin:
             )
         else:
             cap = 1.0
-        engine_load = min(t.throttle, cap)
+        target_load = max(0.0, min(1.0, t.throttle))
+        if dt <= 0.0:
+            # Direct callers and tests use a zero-length update to request an
+            # immediate audio sync.
+            self._engine_audio_throttle = target_load
+        else:
+            blend = min(1.0, dt / ENGINE_LOAD_SMOOTH_S)
+            self._engine_audio_throttle += (target_load - self._engine_audio_throttle) * blend
+        # Keep normal engine-load response, then apply the separate automatic
+        # shift envelope. The narrow gain range in engine_load_gain makes the
+        # remaining load change audible without ducking the whole engine bed.
+        engine_load = min(self._engine_audio_throttle, cap)
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:
@@ -578,10 +605,22 @@ class DrivingUpdateMixin:
 
     def _sync_weather_source(self) -> None:
         real = self.ctx.settings.real_weather
-        if real == self._weather_source_real:
+        controls_calendar = self.ctx.settings.live_weather_controls_calendar
+        if (
+            real == self._weather_source_real
+            and controls_calendar == self._live_weather_controls_calendar
+        ):
             return
         self._weather_source_real = real
+        self._live_weather_controls_calendar = controls_calendar
         self.weather.provider = self.ctx.real_weather_provider() if real else None
+        self.weather.live_weather_controls_calendar = controls_calendar
+        if not controls_calendar:
+            # The setting may just have anchored an established profile to
+            # today's date. Include time already driven on this active trip.
+            self.weather.game_hours = (
+                self.ctx.profile.calendar_game_hours + self.trip.game_minutes / 60.0
+            )
         if not real:
             self.weather.live = False
         self.ctx.audio.set_weather(self.weather.effects.sound)
@@ -742,7 +781,7 @@ class DrivingUpdateMixin:
         )
         self.ctx.say_event(message, interrupt=True)
 
-    def _update_speeding(self, dt: float) -> None:
+    def _update_speeding(self, dt: float, *, accelerator_held: bool = False) -> None:
         if self._ramp_mi is not None:
             return  # the ramp is off the highway and unpatrolled
         if self._missed_destination_exit_said and not self._destination_exit_taken:
@@ -750,6 +789,24 @@ class DrivingUpdateMixin:
         if self._pull_over is not None:
             return  # already being pulled over; don't pile on strikes
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        # A loaded truck cannot shed speed the instant a lower-limit sign
+        # takes effect. A driver who releases the throttle gets roughly the
+        # comfortable braking time needed at 2 mph per second, capped so the
+        # grace cannot be used to coast through a whole restricted zone.
+        if self._enforced_limit_prev is not None and limit < self._enforced_limit_prev:
+            grace = (self.truck.speed_mph - limit) / 2.0
+            self._limit_drop_grace_s = max(self._limit_drop_grace_s, min(15.0, grace))
+        self._enforced_limit_prev = limit
+        if self._limit_drop_grace_s > 0.0:
+            self._limit_drop_grace_s = max(0.0, self._limit_drop_grace_s - dt)
+            # Use the current key/trigger position, not smoothed truck
+            # throttle. Immediately after releasing Up the applied throttle
+            # is still ramping down, but the driver has already begun coasting.
+            if accelerator_held:
+                self._limit_drop_grace_s = 0.0
+            else:
+                self._speeding_timer = 0.0
+                return
         if self.truck.speed_mph > limit + SPEEDING_LEEWAY_MPH:
             if (
                 self._cruise_mph is not None
@@ -808,6 +865,9 @@ class DrivingUpdateMixin:
         self._pull_over_signaled = False
         self._pull_over_limit = limit
         self._pull_over_over = max(0.0, self.truck.speed_mph - limit)
+        self._reset_pull_over_tracker()
+        self._pull_over_compliance = PULL_OVER_START_COMPLIANCE
+        self._pull_over_prev_mph = self.truck.speed_mph
         patrol = self.trip.active_patrol_at(self.trip.position_mi)
         where = patrol.reason if patrol is not None else "patrol"
         self.ctx.audio.play("events/police_siren")
@@ -825,32 +885,87 @@ class DrivingUpdateMixin:
         if self._pull_over == "lights":
             self._pull_over = "stopping"
             self._pull_over_signaled = True
+            # A one-time compliance bump for signaling. Guarded so that if an
+            # unsignal is ever added, toggling can never re-earn the boost.
+            if not self._pull_over_signal_boost:
+                self._pull_over_signal_boost = True
+                self._pull_over_compliance = min(
+                    1.0, self._pull_over_compliance + PULL_OVER_SIGNAL_BOOST
+                )
             self.ctx.audio.play("ui/notify", volume=0.5)
             self.ctx.say("Signaling and easing onto the shoulder. Brake to a full stop.")
         else:
             self.ctx.say("Pulling over. Brake to a full stop on the shoulder.")
 
-    def _update_pull_over(self, dt: float) -> None:
+    def _reset_pull_over_tracker(self) -> None:
+        """Clear the compliance tracker on every stop-ending path so the next
+        stop starts clean."""
+        self._pull_over_compliance = 0.0
+        self._pull_over_elapsed = 0.0
+        self._pull_over_prev_mph = 0.0
+        self._pull_over_coast_s = 0.0
+        self._pull_over_signal_boost = False
+        self._pull_over_nosignal_hit = False
+
+    def _update_pull_over(self, dt: float, *, service_braking: bool = False) -> None:
+        """Advance the compliance tracker. Braking raises it; accelerating,
+        coasting, and failing to signal lower it (deductions stack). A full stop
+        opens the roadside stop; hitting zero triggers the felony stop. No speech
+        on any change -- stop means stop, and players know it."""
         if self._pull_over is None:
             return
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
             self._open_traffic_stop()
             return
-        if self.trip.position_mi - self._pull_over_start_mi >= PULL_OVER_IGNORE_MI:
+        self._pull_over_elapsed += dt
+        speed = self.truck.speed_mph
+        accel_mph_s = (speed - self._pull_over_prev_mph) / dt if dt > 0 else 0.0
+        self._pull_over_prev_mph = speed
+        delta = 0.0
+        if service_braking:
+            # Compliant deceleration. Method-agnostic: service, emergency, or
+            # engine+service brake all read the same, and stacking earns no extra.
+            delta += PULL_OVER_BRAKE_RATE * dt
+            self._pull_over_coast_s = 0.0
+        elif accel_mph_s > PULL_OVER_ACCEL_EPS_MPH_S:
+            # Genuinely speeding up (not jitter, not throttle-held-steady).
+            delta -= PULL_OVER_ACCEL_RATE * dt
+            self._pull_over_coast_s = 0.0
+        else:
+            # Coasting, holding a steady speed, or slowing on the engine brake /
+            # grade alone -- all treated the same, and only after a 3 s grace.
+            self._pull_over_coast_s += dt
+            if self._pull_over_coast_s >= PULL_OVER_COAST_GRACE_S:
+                delta -= PULL_OVER_COAST_RATE * dt
+        # Failing to signal past the grace: a one-time 1/4 hit, then a small
+        # periodic drain. Stacks with any accelerating/coasting deduction above.
+        if self._pull_over_elapsed > PULL_OVER_SIGNAL_GRACE_S and not self._pull_over_signaled:
+            if not self._pull_over_nosignal_hit:
+                self._pull_over_nosignal_hit = True
+                delta -= PULL_OVER_NOSIGNAL_HIT
+            delta -= PULL_OVER_NOSIGNAL_RATE * dt
+        self._pull_over_compliance = max(0.0, min(1.0, self._pull_over_compliance + delta))
+        if self._pull_over_compliance <= 0.0:
             self._evade_pull_over()
 
     def _open_traffic_stop(self) -> None:
         signaled = self._pull_over_signaled
         over, limit = self._pull_over_over, self._pull_over_limit
+        clean_stop = self._pull_over_compliance >= PULL_OVER_FULL_COMPLIANCE
         self._pull_over = None
+        self._reset_pull_over_tracker()
         self.ctx.push_state(
-            TrafficStopState(self.ctx, self, signaled=signaled, over=over, limit=limit)
+            TrafficStopState(
+                self.ctx, self, signaled=signaled, over=over, limit=limit, clean_stop=clean_stop
+            )
         )
 
     def _evade_pull_over(self) -> None:
-        """Drove on with the lights behind: spike strips end it, logged as a
-        felony stop with a heavy fine and reputation hit."""
+        """Refused to comply -- accelerating away or never slowing until the
+        tracker zeroed out. Ends as a felony stop with a heavy fine and
+        reputation hit."""
         self._pull_over = None
+        self._reset_pull_over_tracker()
         p = self.ctx.profile
         fine = SPEEDING_TICKET_FINES[-1] * 1.5
         self.speeding_tickets += 1
@@ -859,8 +974,8 @@ class DrivingUpdateMixin:
         p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT * 2.0)
         self.ctx.audio.play("events/spike_strip")
         self.ctx.say_event(
-            f"You ran from the traffic stop, so troopers laid spike strips across "
-            f"the lane. That is a felony stop: a {fine:,.0f} dollar fine and a "
+            f"You would not pull over, so troopers laid spike strips across the "
+            f"lane. That is a felony stop: a {fine:,.0f} dollar fine and a "
             "serious reputation hit.",
             interrupt=True,
         )

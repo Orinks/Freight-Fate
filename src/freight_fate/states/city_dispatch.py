@@ -38,6 +38,8 @@ def pickup_snapshot(
     loaded: bool = False,
     air_brake: dict | None = None,
     engine_on: bool = False,
+    speed_control_armed: bool = False,
+    speed_control_target_mph: float | None = None,
 ) -> dict:
     data = {
         "kind": "pickup",
@@ -45,6 +47,8 @@ def pickup_snapshot(
         "checked_in": checked_in,
         "loaded": loaded,
         "engine_on": engine_on,
+        "speed_control_armed": speed_control_armed,
+        "speed_control_target_mph": speed_control_target_mph,
     }
     if air_brake is not None:
         data["air_brake"] = air_brake
@@ -359,14 +363,20 @@ class PickupFacilityState(MenuState):
         driving=None,
         air_brake=None,
         engine_on: bool = False,
+        speed_control_armed: bool = False,
+        speed_control_target_mph: float | None = None,
+        announce_speed_control_status: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.job = job
         self.checked_in = checked_in
         self.loaded = loaded
         self.driving = driving
+        self.announce_speed_control_status = announce_speed_control_status
         if driving is not None:
             self.truck = driving.truck
+            self.speed_control_armed = driving._speed_control_armed
+            self.speed_control_target_mph = driving._speed_control_target_mph
         else:
             self.truck = TruckState(specs=ctx.profile.truck_specs())
             self.truck.fuel_gal = min(ctx.profile.truck_fuel_gal, self.truck.specs.fuel_tank_gal)
@@ -374,10 +384,13 @@ class PickupFacilityState(MenuState):
             self.truck.restore_air_brake_snapshot(air_brake, default_ready=True)
             if engine_on:
                 self.truck.start_engine()
+            self.speed_control_armed = speed_control_armed
+            self.speed_control_target_mph = speed_control_target_mph
 
     @classmethod
     def from_snapshot(cls, ctx, data: dict) -> PickupFacilityState | None:
         try:
+            target = data.get("speed_control_target_mph")
             return cls(
                 ctx,
                 job_from_payload(data["job"]),
@@ -385,6 +398,9 @@ class PickupFacilityState(MenuState):
                 loaded=bool(data.get("loaded", False)),
                 air_brake=data.get("air_brake"),
                 engine_on=bool(data.get("engine_on", False)),
+                speed_control_armed=bool(data.get("speed_control_armed", False)),
+                speed_control_target_mph=None if target is None else float(target),
+                announce_speed_control_status=True,
             )
         except (KeyError, TypeError, ValueError):
             return None
@@ -423,7 +439,24 @@ class PickupFacilityState(MenuState):
                 f"Arrived at pickup: {self.facility}. Check in with the "
                 "shipping office before loading."
             )
-        self.ctx.say(f"{lead} {self.current_text()}")
+        speed_control = (
+            self._speed_control_pause_text() if self.announce_speed_control_status else ""
+        )
+        self.announce_speed_control_status = False
+        self.ctx.say(f"{lead}{speed_control} {self.current_text()}")
+
+    def _speed_control_pause_text(self) -> str:
+        if not self.speed_control_armed:
+            return ""
+        target = (
+            self.ctx.settings.speed_text(self.speed_control_target_mph)
+            if self.speed_control_target_mph is not None
+            else "the posted limit when the open road begins"
+        )
+        return (
+            " Automatic speed control is paused; open-road target "
+            f"{target}. It will resume after departure once the truck is rolling."
+        )
 
     def exit(self) -> None:
         self.ctx.audio.set_ambient(None)
@@ -476,6 +509,8 @@ class PickupFacilityState(MenuState):
             loaded=self.loaded,
             air_brake=self.truck.air_brake_snapshot(),
             engine_on=self.truck.engine_on,
+            speed_control_armed=self.speed_control_armed,
+            speed_control_target_mph=self.speed_control_target_mph,
         )
         self.ctx.save_profile()
 
@@ -540,6 +575,8 @@ class PickupFacilityState(MenuState):
                 back_label="Back to pickup facility",
                 air_brake=self.truck.air_brake_snapshot(),
                 engine_on=self.truck.engine_on,
+                speed_control_armed=self.speed_control_armed,
+                speed_control_target_mph=self.speed_control_target_mph,
             )
         )
 
@@ -561,6 +598,7 @@ class PickupFacilityState(MenuState):
             f"Destination is {self.job.destination_facility_text()}. "
             f"Current speed {self.ctx.settings.speed_text(self.truck.speed_mph)}. "
             f"Air pressure {self.truck.air_pressure_psi:.0f} psi, {brake}."
+            + self._speed_control_pause_text()
         )
 
     def _save_and_quit(self) -> None:
@@ -592,7 +630,7 @@ class PickupFacilityState(MenuState):
             if self.checked_in
             else "Check-in required"
         )
-        return [
+        lines = [
             self.title,
             f"Facility: {self.facility}",
             f"Cargo: {self.job.weight_tons:.0f} tons of {self.job.cargo.label}",
@@ -601,8 +639,18 @@ class PickupFacilityState(MenuState):
             f"Speed: {self.truck.speed_mph:.0f} mph",
             f"Air: {self.truck.air_pressure_psi:.0f} psi   "
             f"{'parking set' if self.truck.parking_brake else 'parking released'}",
-            "",
-        ] + [("> " if i == self.index else "  ") + item.text for i, item in enumerate(self.items)]
+        ]
+        if self.speed_control_armed:
+            target = (
+                self.ctx.settings.speed_text(self.speed_control_target_mph)
+                if self.speed_control_target_mph is not None
+                else "posted limit when the open road begins"
+            )
+            lines.append(f"Speed control: paused   Open-road target: {target}")
+        lines.append("")
+        return lines + [
+            ("> " if i == self.index else "  ") + item.text for i, item in enumerate(self.items)
+        ]
 
 
 class RouteSelectState(MenuState):
@@ -621,6 +669,8 @@ class RouteSelectState(MenuState):
         back_label: str = "Back to dispatch board",
         air_brake=None,
         engine_on: bool = False,
+        speed_control_armed: bool = False,
+        speed_control_target_mph: float | None = None,
     ) -> None:
         super().__init__(ctx)
         self.job = job
@@ -628,6 +678,8 @@ class RouteSelectState(MenuState):
         self.back_label = back_label
         self.air_brake = air_brake
         self.engine_on = engine_on
+        self.speed_control_armed = speed_control_armed
+        self.speed_control_target_mph = speed_control_target_mph
         provider = ctx.real_weather_provider()
         if provider is not None:
             for route in routes:
@@ -699,17 +751,41 @@ class RouteSelectState(MenuState):
         if provider is not None:
             parts = []
             for name in route.cities[1:][:5]:
-                kind = provider.get(name)
-                if kind is not None:
-                    parts.append(
-                        f"{self.ctx.world.spoken_city(name, qualified=True)}: {kind.value}"
+                city = self.ctx.world.cities[name]
+                kind = provider.get(city.key)
+                spoken_city = self.ctx.world.spoken_city(name, qualified=True)
+                if kind is None:
+                    checker = getattr(provider, "unavailable", None)
+                    unavailable = checker is not None and checker(city.key)
+                    status = (
+                        "live weather unavailable; simulated fallback may apply"
+                        if unavailable
+                        else "live weather still loading"
                     )
-            if parts:
-                self.ctx.say("Live weather along the route. " + ". ".join(parts) + ".")
-                return
-            self.ctx.say(
-                "Live weather is still loading. Try again in a moment, or check V while driving."
-            )
+                    parts.append(f"{spoken_city}: {status}")
+                    continue
+                from ..sim.season import (
+                    adjust_for_calendar,
+                    real_clock_game_hours,
+                    temperature_c,
+                )
+
+                hours = (
+                    real_clock_game_hours()
+                    if self.ctx.settings.live_weather_controls_calendar
+                    else self.ctx.profile.calendar_game_hours
+                )
+                observed = None
+                getter = getattr(provider, "get_temperature", None)
+                if getter is not None and self.ctx.settings.live_weather_controls_calendar:
+                    observed = getter(city.key)
+                kind = adjust_for_calendar(
+                    kind,
+                    observed if observed is not None else temperature_c(city.region, hours),
+                    hours,
+                )
+                parts.append(f"{spoken_city}: {kind.value}")
+            self.ctx.say("Weather along the route. " + ". ".join(parts) + ".")
             return
         regions: list[str] = []
         for city_name in route.cities:
@@ -729,6 +805,10 @@ class RouteSelectState(MenuState):
         driving.truck.restore_air_brake_snapshot(self.air_brake, default_ready=True)
         if self.engine_on:
             driving.truck.start_engine()
+        driving._restore_speed_control_session(
+            armed=self.speed_control_armed,
+            target_mph=self.speed_control_target_mph,
+        )
         self.ctx.profile.active_trip = driving.snapshot()
         self.ctx.save_profile()
         next_context = driving.trip.next_navigation_context()

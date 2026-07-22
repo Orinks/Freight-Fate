@@ -67,13 +67,21 @@ class TrafficStopState(MenuState):
     )
 
     def __init__(
-        self, ctx, driving: DrivingState, *, signaled: bool, over: float, limit: float
+        self,
+        ctx,
+        driving: DrivingState,
+        *,
+        signaled: bool,
+        over: float,
+        limit: float,
+        clean_stop: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.driving = driving
         self.signaled = signaled
         self.over = over
         self.limit = limit
+        self.clean_stop = clean_stop
         self._outcome_text = ""
         self._resolve()
 
@@ -108,6 +116,15 @@ class TrafficStopState(MenuState):
             self._outcome_text = (
                 f"You were {over_text} over the {limit_text} limit. The "
                 "trooper lets you off with a warning this time. Keep it down."
+            )
+            return
+        # A prompt, fully-compliant stop earns a small chance the trooper lets a
+        # ticket slide with a warning instead.
+        if self.clean_stop and d._patrol_rng.random() < PULL_OVER_CLEAN_STOP_WARN_CHANCE:
+            self._outcome_text = (
+                f"You were {over_text} over the {limit_text} limit. I was gonna "
+                "give you a ticket, but since you pulled over promptly, I'll let "
+                "it go this time. Keep it down."
             )
             return
         fine = SPEEDING_TICKET_FINES[min(d.speeding_tickets, len(SPEEDING_TICKET_FINES) - 1)]
@@ -436,6 +453,7 @@ class RestStopState(MenuState):
         self.ctx.say(
             f"{engine_off}You slept {hours} hours in the sleeper berth. "
             f"It is {clock_text(d.trip.local_hour)}. {status} {_deadline_text(d)}"
+            f"{_wake_air_instruction(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
         self.refresh()
@@ -454,6 +472,7 @@ class RestStopState(MenuState):
             f"{engine_off}You slept 10 hours and woke rested. "
             f"It is {clock_text(d.trip.local_hour)}. "
             f"Hours of service reset. {_deadline_text(d)}"
+            f"{_wake_air_instruction(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
         if before_fatigue < hos.FATIGUE_SEVERE:
@@ -475,7 +494,7 @@ class RestStopState(MenuState):
             f"{engine_off}You bed down in the cramped lot, off to the side. "
             f"It is {clock_text(d.trip.local_hour)}. Hours of service "
             f"reset, but the rest was poor and you wake still tired. "
-            f"{_deadline_text(d)}"
+            f"{_deadline_text(d)}{_wake_air_instruction(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
 
