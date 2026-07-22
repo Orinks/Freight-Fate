@@ -84,3 +84,29 @@ defaults to a much bigger, longer rail-yard release otherwise.
 3. "A small warm crowd applause, 3 seconds, twenty or thirty people
    clapping in a diner-sized room, starting immediately and fading
    naturally, no cheering, no whistles."
+
+## 8. Windshield rain (three-rate crossfade layer)
+
+Texture only -- lives under engine/road/wipers and a muffling cab, so it
+just has to read as "rain on glass." ElevenLabs, not Splice credits.
+
+1. "Light steady drizzle on a truck windshield, heard from inside the cab.
+   Fine delicate droplets lightly tapping and speckling the glass, soft and
+   sparse, even and continuous. No wipers, no thunder, no wind gusts, no
+   music -- a seamless, unchanging loop of gentle rain on the windshield."
+2. "Steady moderate rain on a truck windshield, heard from inside the cab.
+   A consistent patter of raindrops striking and running down the glass,
+   even and continuous, medium intensity. No wipers, no thunder, no wind,
+   no music -- a seamless, constant loop of rain on the windshield."
+3. "Heavy downpour drumming on a truck windshield, heard from inside the
+   cab. Dense insistent rain hammering the glass with running sheets of
+   water, loud and full but even and unchanging. No wipers, no thunder, no
+   wind, no music -- a seamless, constant loop of heavy rain on the
+   windshield."
+
+Loop/crossfade note: turn the Loop toggle ON, ~11s, and keep the STEADIEST
+take of 2-3 -- any gust, thunder crack, or volume swell breaks both the loop
+and the light->heavy crossfade. Keep the three tonally matched ("inside the
+cab, on the glass") so the crossfade stays in one space. Three rates is
+enough: driving into rain walks up the ladder; drive speed just nudges
+level/brightness on top. Wipers stay a separate layer (Norm has them).
