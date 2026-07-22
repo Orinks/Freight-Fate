@@ -138,6 +138,19 @@
 
 - **Hold a gentle speed without holding the accelerator.** In the low-speed stretches where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K now engages a speed keeper: it holds your current speed at or below the zone limit, creeps along behind queued traffic, and hands control back the moment you brake or reach the open road. Made for players who cannot keep a key held down, or whose fingers simply tire. On by default, and presets never change it.
 
+- **Copy your delivery summary to the clipboard.** The delivery complete
+  screen has a new item, just before Continue, that copies every settlement
+  line as plain text so you can paste the whole run into a message or a
+  forum post. The game confirms out loud once the text is really on the
+  clipboard, and tells you if the copy did not take.
+- **Share notable deliveries to your own Mastodon account.** A new Settings,
+  Online option posts a short public summary, with the FreightFate hashtag,
+  when a delivery earns you an achievement, a level, or a perfect streak milestone.
+  Routine runs are never posted. It is off until you turn it on, and linking
+  your Mastodon account happens in your browser on orinks.net using the same
+  sign-in as driver setup; the Mastodon account item walks you through it
+  and can check whether the link took.
+
 ### Changed
 
 

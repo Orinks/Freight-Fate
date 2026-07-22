@@ -222,6 +222,27 @@ def set_profile_sharing(
     return "ok" if reply.get("ok") and reply.get("enabled") is enabled else "error"
 
 
+def fetch_mastodon_status(
+    identity: OnlineIdentity, *, transport: Transport = _http_json
+) -> dict | None:
+    """The server's word on whether a Mastodon account is linked.
+
+    Returns ``{"linked": bool, "handle": str}`` on a good answer, or ``None``
+    when nothing was learned (network trouble or refused credentials)."""
+    try:
+        reply = transport(
+            f"{base_url()}/api/freight-fate/mastodon/status?driverId={identity.driver_id}",
+            None,
+            {"Authorization": f"Bearer {identity.driver_token}"},
+        )
+    except Exception as e:
+        log.warning("Mastodon status check failed: %s", e)
+        return None
+    if not reply.get("ok"):
+        return None
+    return {"linked": bool(reply.get("linked")), "handle": str(reply.get("handle") or "")}
+
+
 # -- presence service ---------------------------------------------------------
 
 

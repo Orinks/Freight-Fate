@@ -526,6 +526,8 @@ def test_online_menu_keeps_profile_sharing_and_private_cloud_backup_separate():
             "Profile sharing: not set up",
             "Back up saves to your orinks.net account: not set up",
             "Restore a cloud backup",
+            "Share notable deliveries to Mastodon: not set up",
+            "Link a Mastodon account",
             "Discord presence: on",
             "Back",
         ]

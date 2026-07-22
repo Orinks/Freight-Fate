@@ -281,6 +281,10 @@ class GameContext:
         """Reflect the cloud backup setting (e.g. after a settings change)."""
         self._app.cloud.set_enabled(self._online_enabled(self.settings.cloud_saves))
 
+    def apply_mastodon_sharing(self) -> None:
+        """Reflect the Mastodon sharing setting (e.g. after a settings change)."""
+        self._app.mastodon.set_enabled(self.settings.mastodon_sharing)
+
     def cloud_saves_service(self) -> CloudSaves:
         """The backup service, for the Cloud backup menu."""
         return self._app.cloud
@@ -291,6 +295,7 @@ class GameContext:
         self._app.online.set_identity(identity)
         self._app.cloud.set_identity(identity)
         self._app.journal.set_identity(identity)
+        self._app.mastodon.set_identity(identity)
 
     def apply_controller(self) -> None:
         """Reflect the controller setting (e.g. after a settings change)."""
@@ -454,6 +459,14 @@ class App:
             identity=identity,
             enabled=self.settings.online_presence,
             path=OnlineIdentity.path().with_name("online-outbox.json"),
+        )
+        # Mastodon shares ride the same durable-outbox machinery but keep
+        # their own file and enabled flag: posting to the player's own
+        # Mastodon account is a separate consent from public Profile sharing.
+        self.mastodon = JournalOutbox(
+            identity=identity,
+            enabled=self.settings.mastodon_sharing,
+            path=OnlineIdentity.path().with_name("online-mastodon-outbox.json"),
         )
         # Every profile save, wherever it happens, queues a cloud backup.
         from .models import profile as profile_module

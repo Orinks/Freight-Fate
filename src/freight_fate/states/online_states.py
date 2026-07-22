@@ -104,6 +104,67 @@ def read_clipboard_text() -> str | None:
     return _clipboard_once()
 
 
+def _clipboard_write_once(text: str) -> bool:
+    """One clipboard write attempt. Same ladder as reading: scrap first,
+    pbcopy on macOS (never Tk there -- see _clipboard_once), Tk elsewhere."""
+    try:
+        scrap = pygame.scrap
+        if hasattr(scrap, "put_text"):  # pygame-ce >= 2.2
+            scrap.put_text(text)
+            return True
+        if not scrap.get_init():
+            scrap.init()  # needs the display up; raises when called early
+        scrap.put(pygame.SCRAP_TEXT, text.encode("utf-8"))
+        return True
+    except Exception:
+        pass
+    if sys.platform == "darwin":
+        try:
+            result = subprocess.run(
+                ["pbcopy"], input=text.encode("utf-8"), timeout=2.0, check=False
+            )
+            return result.returncode == 0
+        except Exception:
+            return False
+    try:
+        import tkinter
+
+        root = tkinter.Tk()
+        root.withdraw()
+        try:
+            root.clipboard_clear()
+            root.clipboard_append(text)
+            # Flush ownership to the OS clipboard before the root dies, or
+            # Windows hands out an empty clipboard to the next reader.
+            root.update()
+        finally:
+            root.destroy()
+        return True
+    except Exception:
+        return False
+
+
+def _clipboard_holds(expected: str) -> bool:
+    """Read back and compare, forgiving the CRLF conversion Windows applies."""
+    read = _clipboard_once()
+    if read is None:
+        return False
+    return read.replace("\r\n", "\n").strip() == expected.replace("\r\n", "\n").strip()
+
+
+def write_clipboard_text(text: str) -> bool:
+    """Clipboard write, verified by reading back before anyone says "copied".
+
+    The verify pass is not paranoia: a Tk-set clipboard dies with its root on
+    X11, and scrap.put can claim success on a clipboard another app holds
+    open. Retries once, like reading, for that same contended-clipboard case.
+    """
+    if _clipboard_write_once(text) and _clipboard_holds(text):
+        return True
+    time.sleep(0.1)
+    return _clipboard_write_once(text) and _clipboard_holds(text)
+
+
 def looks_like_driver_id(text: str) -> bool:
     t = text.strip().lower()
     return 8 <= len(t) <= 64 and all(c in _ID_CHARS for c in t)
@@ -569,3 +630,171 @@ class DriversOnlineState(MenuState):
         else:
             count = f"{len(board)} driver" + ("s are" if len(board) != 1 else " is")
             self.ctx.say(f"{count} on duty. {self.current_text()}", interrupt=True)
+
+
+class MastodonLinkState(MenuState):
+    """Link the player's own Mastodon account through orinks.net.
+
+    The authorizing happens in the browser: the site is signed in with the
+    same orinks.net account as driver setup, so this menu only opens the
+    page and reports the server's word on the link. Unlinking lives on the
+    same page. The menu is STATIC for the same positional-memory reason as
+    OnlineSetupState; state rides in the labels.
+    """
+
+    title = "Mastodon account"
+
+    def __init__(self, ctx) -> None:
+        super().__init__(ctx)
+        self._checking = False
+        self._check_started = 0.0
+        self._still_checking_said = False
+        self._outcome: dict | str | None = None  # worker -> update() mailbox
+        self._opened_browser = False
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem(
+                "Open the Mastodon link page in my browser",
+                self._open_page,
+                help="Sign in on orinks.net if asked, enter your Mastodon "
+                "server, and authorize Freight Fate there. Then come back "
+                "here and check the link status.",
+            ),
+            MenuItem(
+                self._status_label,
+                self._check_status,
+                help="Asks orinks.net whether a Mastodon account is linked to your driver.",
+            ),
+            MenuItem("Back", self.go_back),
+        ]
+
+    def _status_label(self) -> str:
+        if self._checking:
+            return "Checking the Mastodon link"
+        s = self.ctx.settings
+        if s.mastodon_linked:
+            spoken = f" as {s.mastodon_linked_handle}" if s.mastodon_linked_handle else ""
+            return f"Check link status. Last known: linked{spoken}"
+        return "Check link status"
+
+    def announce_entry(self) -> None:
+        s = self.ctx.settings
+        if s.mastodon_linked:
+            spoken = s.mastodon_linked_handle or "a Mastodon account"
+            known = f"Last I checked, {spoken} was linked."
+        else:
+            known = "No Mastodon account is linked yet, as far as this computer knows."
+        self.ctx.say(
+            f"{self.title}. Linking happens in your browser on orinks.net, "
+            f"using the same sign-in as driver setup. {known} "
+            f"{self.current_text()}"
+        )
+
+    def _open_page(self) -> None:
+        url = f"{online_presence.base_url()}/freight-fate/online/mastodon"
+        copied = write_clipboard_text(url)
+        try:
+            webbrowser.open(url)
+        except Exception:
+            if copied:
+                self.ctx.say(
+                    "The browser could not be opened. The link is on your "
+                    "clipboard. Paste it into your browser's address bar.",
+                    interrupt=True,
+                )
+            else:
+                self.ctx.say(
+                    "The browser could not be opened and the clipboard did "
+                    "not take the link. In your browser, go to orinks.net, "
+                    "then Freight Fate, then Online, then Mastodon.",
+                    interrupt=True,
+                )
+            # The player may still get there by hand; keep the return
+            # re-orientation armed either way.
+            self._opened_browser = True
+            return
+        self._opened_browser = True
+        clipboard_note = (
+            " The link is also on your clipboard in case the browser did not open."
+            if copied
+            else ""
+        )
+        self.ctx.say(
+            "Opening the Mastodon link page in your browser."
+            + clipboard_note
+            + " Authorize there, then come back here.",
+            interrupt=True,
+        )
+
+    def handle_event(self, event) -> None:
+        # Re-orient after the browser round trip, and answer "did it take"
+        # without hunting: check the link the moment focus comes back.
+        if event.type == pygame.WINDOWFOCUSGAINED and self._opened_browser and not self._checking:
+            self.ctx.say("Back in Freight Fate. Checking your Mastodon link.")
+            self._check_status(announce=False)
+            return
+        super().handle_event(event)
+
+    def _check_status(self, announce: bool = True) -> None:
+        if self._checking:
+            return
+        identity = OnlineIdentity.load()
+        if identity is None:
+            self.ctx.say(
+                "This needs your orinks.net account first. Choose Set up "
+                "orinks.net account on the Online settings menu.",
+                interrupt=True,
+            )
+            return
+        self._checking = True
+        self._check_started = time.monotonic()
+        self._still_checking_said = False
+        self.refresh()
+        if announce:
+            self.ctx.say("Checking with orinks.net.", interrupt=True)
+
+        def worker() -> None:
+            self._outcome = online_presence.fetch_mastodon_status(identity) or "error"
+
+        threading.Thread(target=worker, name="mastodon-status", daemon=True).start()
+
+    def update(self, dt: float) -> None:
+        super().update(dt)
+        if (
+            self._checking
+            and not self._still_checking_said
+            and time.monotonic() - self._check_started > 5.0
+        ):
+            self._still_checking_said = True
+            self.ctx.say("Still checking.")
+        outcome, self._outcome = self._outcome, None
+        if outcome is None:
+            return
+        self._checking = False
+        if outcome == "error":
+            self.refresh()
+            self.ctx.say(
+                "I could not reach orinks.net to check the Mastodon link. Try again in a moment.",
+                interrupt=True,
+            )
+            return
+        s = self.ctx.settings
+        linked = bool(outcome.get("linked"))
+        s.mastodon_linked = linked
+        s.mastodon_linked_handle = str(outcome.get("handle") or "") if linked else ""
+        s.save()
+        self.refresh()
+        if linked:
+            spoken = s.mastodon_linked_handle or "your Mastodon account"
+            self.ctx.say(
+                f"Linked: {spoken}. You can now turn on Share notable "
+                "deliveries to Mastodon in the Online settings.",
+                interrupt=True,
+            )
+        else:
+            self.ctx.say(
+                "No Mastodon account is linked yet. Open the link page in "
+                "your browser, authorize there, then check again.",
+                interrupt=True,
+            )
