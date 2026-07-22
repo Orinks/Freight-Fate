@@ -531,32 +531,29 @@ terminal becomes the anchor of that week instead of a spawn point.
       session cache already fixed the old multi-second lag, as SRD625
       reported). Polish: warm the cache off-thread on city arrival so
       even the first board opens instantly on slow hardware.
-- [ ] **Engine and shift audio tells the truth at low speed --
-      DIAGNOSED 2026-07-16 (Fable, overnight).** The physics is honest;
-      the audio map flattens it. BASS (the default backend) voices the
-      engine as ONE idle loop whose playback frequency runs linear from
-      1.0x at 600 RPM to only 1.75x at 2200 (`engine_freq_mult`,
-      audio.py) -- but real engine pitch is PROPORTIONAL to RPM, so the
-      600-to-1000 launch pull that should rise 67 percent in pitch
-      rises 11. Progressive shifting (realistic!) upshifts the low
-      gears at 1000/1300/1400 RPM, so every launch pull lives entirely
-      inside the crushed band; each pull lasts 1-2 s, then SHIFT_TIME
-      (1.0 s, transmission.py) of torque interrupt with RPM gliding
-      down under the 0.45 audio load cap, and the gear click fires at
-      shift START with nothing at engagement. Net: "click, click,
-      click, half a second of rev" -- exactly the owner's report.
-      FIX OPTIONS, owner's ear required before shipping any: (1)
-      RECOMMENDED port the pygame backend's 4-band crossfade
-      (idle/low/mid/high loops at 620/1000/1500/2100 centers -- assets
-      already shipped) to BASS with per-band frequency slides of
-      rpm/band_center, so pitch tracks RPM proportionally everywhere
-      with at most ~30 percent stretch per loop (no chipmunk); (2)
-      quick tweak: piecewise freq map, proportional to ~1100 RPM
-      (~1.8x) then flattening to ~2.1x at redline; (3) a soft
-      engagement clunk at shift END so the rhythm reads
-      pull-interrupt-engage-pull; (4) separately decide whether
-      SHIFT_TIME 1.0 s eases to ~0.7 s -- that one is PHYSICS (torque
-      gap on grades) and needs the bench re-run, not just ears.
+- [x] **Engine and shift audio tells the truth at low speed -- SHIPPED
+      2026-07-22 (sound/engine-integration), owner's ear audition
+      owed.** The diagnosed fix option 1 landed, upgraded: BASS now
+      voices the engine as a multisample ring of four REAL 896 cab
+      cuts at their recorded rpms (680/1000/1150/1800), crossfaded
+      equal-power with per-band playback-rate slides of rpm/native
+      (clamped 0.85-1.30), so pitch tracks RPM proportionally through
+      every launch pull. Shifts play real recorded cuts from the same
+      cab (manual and automatic round-robin banks; the gear click is
+      retired in overlay builds). Cold starts fast-idle at 900 while
+      the compressor builds air (physics change, vehicle.py), with the
+      fill hiss and the settle as the drive-ready flip. Brake press
+      plays the clunk bank leveled by force; release breathes the air
+      back out, scaled by how hard you braked. All licensed cuts live
+      in the gitignored sounds-licensed/ overlay; a clean clone keeps
+      the old synthesized cues everywhere. STILL OPEN from the
+      diagnosis: (3) an engagement clunk at shift END (the banks fire
+      at shift start), and (4) whether SHIFT_TIME 1.0 s eases to
+      ~0.7 s -- that one is PHYSICS and needs the bench re-run. Also
+      open: launch/load rev one-shots (engine/rev_launch, rev_load are
+      encoded and staged but not yet wired -- mixing them over the
+      ring needs the owner's ear) and per-trigger pitch jitter on the
+      banks (needs a playback-rate parameter on one-shots).
 - [ ] **Audible traffic -- hear the vehicle you overtake (owner idea
       2026-07-16).** Traffic already exists as modeled vehicles with
       lanes and speeds; give the near ones voices: continuous positional
