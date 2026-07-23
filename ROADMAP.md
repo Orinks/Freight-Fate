@@ -36,6 +36,15 @@ terminal becomes the anchor of that week instead of a spawn point.
 
 - [x] Add one driving-assistance preset selector with independently adjustable emergency braking, lane, stop-and-go, descent, exit, destination, curve, and route-transition support while preserving player confirmation and control.
 - [ ] Add future individual yard-entry guidance and assisted docking; no current preset navigates a yard or completes a delivery.
+- [x] **Ramp-terminal light folded into route-transition assistance
+      (owner direction, 2026-07-22 playtest).** Positioning on the stop
+      bar blind under a live light cycle was damage-or-nothing (the
+      second playtest ended with cross traffic clipping the trailer on
+      a red the driver was still braking for). The assist now brakes
+      for red/dying-yellow, holds the stop at the bar until green, and
+      caps green crossings under the clean-roll speed; phase speech and
+      the pull-ahead stay the driver's. Assist off keeps the fully
+      manual bar for the realistic tier.
 - [x] **Facility-arrival overshoot trap (playtest 2026-07-22, Gary to
       Chicago) -- FIXED same day.** The gate warnings latched after one
       announcement, so rolling past a pickup, delivery, or city-service
