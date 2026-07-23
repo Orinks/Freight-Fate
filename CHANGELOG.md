@@ -35,6 +35,16 @@
   It goes quiet the moment you touch the throttle, because a real jake
   does.
 
+- **The automatic box now manages its own jake, like a real one.** With
+  an automatic transmission, J arms the engine brake in automatic mode:
+  it holds the speed you engaged at, stepping its stage up and down on
+  its own -- you hear the growl deepen and ease as it works -- and it
+  never selects more stage than the road surface can hold. Pressing 1,
+  2, or 3 takes manual control of the stage back at any time, and Alt J
+  turns the automatic mode off entirely for drivers who stage it by
+  hand. Alt T switches between automatic and manual shifting on the
+  road. Manual boxes keep the classic stalk exactly as it was.
+
 - **Low-gear shifts are quick now, like a real automated box.** Shifts
   through the bottom four gears take about half a second of torque
   interruption instead of a full second, ramping back up to the old

@@ -50,6 +50,15 @@ JAKE_LOOP_RPMS = (1200, 1400, 1600, 1800, 2000, 2200)
 JAKE_STAGE_GAIN = (0.25, 0.65, 1.0)
 JAKE_MIN_RPM = 950.0
 
+# Auto jake (automatic box, owner design 2026-07-22): J arms retarder
+# management the way a real AMT integrates it. The controller holds the
+# engagement speed (or the descent-control target) by stepping the stage,
+# rate-limited so the growl steps audibly like an ECU thinking, and never
+# selects a stage whose retard the drive axle cannot hold.
+AUTO_JAKE_STEP_S = 1.5  # seconds between stage steps
+AUTO_JAKE_OVER_MPH = 1.0  # this far above target: step up
+AUTO_JAKE_UNDER_MPH = 3.0  # this far below target: step down
+
 # The air-fill loop re-arms only this far below governor release. air_ready
 # flips at exactly 100 psi and normal service braking dips the reservoirs a
 # few psi, so without hysteresis the fill hiss would flutter on and off every
@@ -264,6 +273,7 @@ class DrivingUpdateMixin:
         self._update_cruise(dt, braking, accelerating, clutch_disengaged)
         self._update_keeper(dt, braking, accelerating, clutch_disengaged)
 
+        self._update_auto_jake(dt)
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
             if new_gear is not None:
@@ -921,6 +931,52 @@ class DrivingUpdateMixin:
             self.ctx.audio.play("vehicle/lane_drift", volume=0.45, pan=LANE_GUIDANCE_PAN)
         elif previous in {"left", "right"}:
             self.ctx.audio.play("vehicle/lane_centered", volume=0.45, pan=0.0)
+
+    def _auto_jake_max_stage(self) -> int:
+        """The highest stage the drive axle can hold right now (0..3).
+
+        Per-stage retard scales linearly with cylinders, so the cap divides
+        straight through the full-stage demand -- the same traction physics
+        the pre-select gate uses, applied to stage selection.
+        """
+        t = self.truck
+        stage_backup = t.engine_brake_stage
+        t.engine_brake_stage = JAKE_STAGES
+        full_demand = t._jake_force_demand()
+        t.engine_brake_stage = stage_backup
+        if full_demand <= 0.0:
+            return JAKE_STAGES
+        cap = t._jake_traction_cap()
+        return max(0, min(JAKE_STAGES, int(JAKE_STAGES * cap / full_demand)))
+
+    def _update_auto_jake(self, dt: float) -> None:
+        """AMT retarder management: hold the target by stepping the stage."""
+        t = self.truck
+        if not (self._auto_jake and t.engine_brake and t.transmission.automatic and t.engine_on):
+            return
+        if t.throttle > 0.05:
+            return  # a throttle blip cuts the retarder; hold the stage for the return
+        target = self._auto_jake_hold_mph or t.speed_mph
+        if self._descent_control_active and self._cruise_mph is not None:
+            target = self._cruise_mph  # descent control owns the number
+        self._auto_jake_cooldown_s = max(0.0, self._auto_jake_cooldown_s - dt)
+        max_stage = self._auto_jake_max_stage()
+        stage = t.engine_brake_stage
+        desired = stage
+        err = t.speed_mph - target
+        if err > AUTO_JAKE_OVER_MPH:
+            desired = stage + 1
+        elif err < -AUTO_JAKE_UNDER_MPH:
+            desired = stage - 1
+        desired = max(1, min(desired, max_stage if max_stage >= 1 else 1, JAKE_STAGES))
+        if desired != stage and self._auto_jake_cooldown_s <= 0.0:
+            t.engine_brake_stage = desired
+            self._auto_jake_cooldown_s = AUTO_JAKE_STEP_S
+        elif stage > max_stage >= 1 and self._auto_jake_cooldown_s <= 0.0:
+            # Traction shrank under the current stage (ice arrived): step
+            # down immediately rather than grinding the drives loose.
+            t.engine_brake_stage = max_stage
+            self._auto_jake_cooldown_s = AUTO_JAKE_STEP_S
 
     def _update_audio(self, dt: float = 0.0) -> None:
         t = self.truck
