@@ -43,6 +43,14 @@
 
 ### Fixed
 
+- **The updater no longer hides a developer snapshot released the same
+  day as a stable build.** On the developer snapshots channel, a stable
+  release published in the small hours used to mask that morning's
+  snapshot -- even when the snapshot carried newer fixes -- because the
+  two were compared by date alone. Updates now compare by the actual
+  publish moment, so whichever build is genuinely newest is the one
+  offered.
+
 - **Driving past a pickup or delivery entrance no longer goes silent.**
   Arriving at a facility used to announce itself once; if you rolled on --
   easy to do with cruise re-engaged -- the game said nothing more for the
