@@ -1099,6 +1099,10 @@ section below and the Unreleased changelog; the release-line view:
       horn replacement already owed (the current horn is Duff material):
       when the new Splice/synth horn is cut, cut it AS attack/sustain/
       release pieces so the hold behavior falls out of the asset design.
+      NOTE (owner, same night): the horn already sounds SHORTER than it
+      used to, but the shipped file is untouched since June -- so the
+      audio rework's playback path is probably cutting it early. Check
+      the play site before blaming the sample.
 - [ ] **Fringe reception should burst, not fade (owner spec, 2026-07-23,
       ham-ear ruling).** Today the edge of a station's range plays static
       at a volume scaled by signal -- a knob, not a radio. Real analog
