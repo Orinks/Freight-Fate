@@ -69,8 +69,9 @@ redistributed. A source checkout falls back to the committed cues above.
 
 | Game file(s) | Built from | Source pack |
 | --- | --- | --- |
-| `engine/idle`, `engine/mid`, `engine/high`, `engine/rev_launch`, `engine/rev_load` | Steady holds and real acceleration pulls cut from the `SemiTruckMac_S08IN.896` interior driving take | Splice -- Large Vehicles |
-| `engine/low` | The 896 mid cut pitched 1150 to 950 rpm by resampling (`sound-test/engine_low_950.py`) | Splice -- Large Vehicles |
+| `engine/idle`, `engine/mid`, `engine/rev_launch`, `engine/rev_load` | Steady holds and real acceleration pulls cut from the `SemiTruckMac_S08IN.896` interior driving take (mid ships envelope-flattened, `sound-test/engine_band_flatten.py`) | Splice -- Large Vehicles |
+| `engine/low`, `engine/midhigh` | The flattened 896 mid cut resampled to 950 and 1425 rpm (`sound-test/engine_low_950.py`, `engine_midhigh_1425.py`) | Splice -- Large Vehicles |
+| `engine/high` | Steady 1900 rpm hold cut from the `SemiTruckEngine_BW.60624` interior take (`sound-test/steady_scan.py`; 896 never holds a high rpm) | Splice -- Large Vehicles |
 | `vehicle/shift_manual_01`..`15`, `vehicle/shift_auto_01`..`15` | Real gear changes (manual: clutch squeaks; automatic: shorter disengage) cut from `SemiTruck_S08IN.854/.855/.859` and `SemiTruckMac_S08IN.896` | Splice -- Large Vehicles |
 | `vehicle/brake_clunk_01`..`14` | Percussive valve/actuation onsets from `SemiTruckBrake_S08IN.913`-`.917` and `BantamBrakeMach_S08IN.62` (`sound-test/brake_banks.py`) | Splice -- Large Vehicles / Industry Vol. 1 |
 | `vehicle/ebrake` | The full sustained Bantam air event, `BantamBrakeMach_S08IN.62` | Splice -- Industry Vol. 1 |

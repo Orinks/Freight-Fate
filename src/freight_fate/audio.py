@@ -90,7 +90,7 @@ ENGINE_BANDS = (
     ("engine/low", 950.0),
     ("engine/mid", 1150.0),
     ("engine/midhigh", 1425.0),
-    ("engine/high", 1800.0),
+    ("engine/high", 1900.0),
 )
 # Crossfades live in a narrow window around each adjacent pair's GEOMETRIC
 # midpoint (log-space), this fraction of the gap wide. Two things follow:
