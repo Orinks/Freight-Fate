@@ -19,8 +19,9 @@
   services -- the stations that read newspapers, magazines, and books
   aloud for blind and print-disabled listeners -- now appear as real
   stations in the cities that have them, from Memphis and New Orleans to
-  Phoenix, Chicago, Houston, Atlanta, and more. Wherever one is in range,
-  it is right there on the band with everything else.
+  Phoenix, Chicago, Houston, Atlanta, Nashville, Des Moines, Columbus,
+  and Gainesville, and more. Wherever one is in range, it is right there
+  on the band with everything else.
 
 - **The engine brake grew its real cylinder selector.** J is now the
   dash switch: it turns the engine brake on at whatever stage you last

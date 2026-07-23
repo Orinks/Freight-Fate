@@ -950,9 +950,9 @@ section below and the Unreleased changelog; the release-line view:
       on the air; WFMU and KABF joined by name; and public-radio networks
       filled the Iowa corridor, the Plains, the Rockies, the Southeast
       coast, and the Florida panhandle. jpr-redding was repointed to JPR's
-      new Zeno mount. Honest remaining gaps: WABE Atlanta (every mount,
-      including its Zeno relay, still refuses BASS -- supported:false with
-      notes), KDHX St. Louis (defunct on air; 88.1 sold, no successor
+      new Zeno mount. Honest remaining gaps at the time: WABE Atlanta (later
+      revived in the 2026-07-23 cleanup pass -- see below),
+      KDHX St. Louis (defunct on air; 88.1 sold, no successor
       stream yet; market covered by KWMU), WFSU Tallahassee (mount refuses
       BASS), the far Montana Hi-Line, the Texas border west of the Valley,
       and interior US-50 Nevada -- genuinely thin country, left dark rather
@@ -1054,6 +1054,20 @@ section below and the Unreleased changelog; the release-line view:
       Resources PA -- each tagged `reading_service: true`. Most of the
       category (per the IAAIS directory) is SCA-subcarrier only with no
       public stream, so those stay out honestly.
+- [x] **Holdout cleanup pass (2026-07-23).** A fresh-session pass that
+      cracked JS-locked / no-mount stations the big sweeps had to defer.
+      New finding aid: `onlineradiobox.com/json/us/<call>/play` 302-redirects
+      to a station's true upstream mount, so Brightspot and other JS players
+      give up their stream without a browser. Un-darked WABE Atlanta (its
+      StreamTheWorld HD1 mount plays cleanly once STW is not being hammered)
+      and added two net-new public markets, KWBU-FM Waco (NPR/Baylor) and
+      WLRH Huntsville; corrected VPM Richmond's call sign to WCVE-FM. Four
+      more reading services joined the dial -- Iowa (IRIS, Des Moines),
+      VOICEcorps (Columbus OH), the Nashville Talking Library, and the WUFT
+      Radio Reading Service (Gainesville) -- lifting the category from 12 to
+      16. Every stream BASS-gated 3/3 spaced from a clean session; Mississippi
+      RRS, Omaha RTBS, and Detroit DRIS stay out honestly (closed-circuit /
+      subcarrier / part-time only).
 - [ ] **Reading Services dial category with a "nearest" jump.** The data +
       tag are in; the feature is a new dial category whose bracket-jump
       tunes the geographically NEAREST reading service (not first-by-call),
