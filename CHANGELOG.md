@@ -35,6 +35,13 @@
   It goes quiet the moment you touch the throttle, because a real jake
   does.
 
+- **Low-gear shifts are quick now, like a real automated box.** Shifts
+  through the bottom four gears take about half a second of torque
+  interruption instead of a full second, ramping back up to the old
+  timing in the top gears where real boxes take their time too. A
+  loaded pull from a stop to 45 gets about three seconds quicker, and
+  the launch rhythm finally matches what you hear a real truck do.
+
 - **Curve assistance drives like a trucker now: jake first, brakes to
   trim.** When curve speed assistance needs to slow you and your engine
   brake is off, it switches the jake on at a stage sized to how hot you

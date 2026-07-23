@@ -867,7 +867,10 @@ def test_terse_air_brake_startup_omits_control_instructions(monkeypatch):
         assert all("press P" not in text for text in event_texts)
 
         driving.handle_event(key_event(pygame.K_p))
-        assert spoken[-1][0] == "Parking brake set. Air pressure 58 psi."
+        # The exact psi depends on how much rpm the first second of running
+        # banked (shift timing shifts it by one); terseness is the assertion.
+        assert spoken[-1][0].startswith("Parking brake set. Air pressure")
+        assert spoken[-1][0].endswith("psi.")
         assert "wait for" not in spoken[-1][0].lower()
 
         for _ in range(60 * 15):

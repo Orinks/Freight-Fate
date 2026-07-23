@@ -385,7 +385,7 @@ def test_automatic_shift_does_not_flare_engine_rpm():
 
     assert t.auto_shift() == 4
     rpm_before = t.rpm
-    t.update(0.5)
+    t.update(0.3)  # inside the low-box 0.45 s interrupt
 
     assert t.transmission.shifting
     assert t.rpm <= rpm_before
