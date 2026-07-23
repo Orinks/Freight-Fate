@@ -169,6 +169,19 @@ class GameContext:
         walk. Repeats ride the main channel and stay out of the transcript's
         way beyond a marker, so a replay never reads as a fresh game event."""
         step = self._speech_history.step_back()
+        self._speak_history_step(step)
+
+    def step_forward_spoken(self) -> None:
+        """Walk forward through recent speech (the period key).
+
+        The mirror of the comma walk, the same pairing screen-reader
+        players know from Civilization VI: comma steps older, period
+        steps back toward the newest line, and period out of the blue
+        simply re-speaks the newest line."""
+        step = self._speech_history.step_forward()
+        self._speak_history_step(step)
+
+    def _speak_history_step(self, step: tuple[int, str] | None) -> None:
         if step is None:
             return
         back, line = step
@@ -579,6 +592,11 @@ class App:
                                 self.state, "captures_text_input", False
                             ):
                                 self.ctx.repeat_last_spoken()
+                                continue
+                            if event.key == pygame.K_PERIOD and not getattr(
+                                self.state, "captures_text_input", False
+                            ):
+                                self.ctx.step_forward_spoken()
                                 continue
                         self.state.handle_event(event)
                 # Auto-repeat (held D-pad left/right) and analog smoothing.

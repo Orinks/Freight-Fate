@@ -146,3 +146,39 @@ def test_comma_walks_back_through_game_and_event_speech():
         assert spoken[-1] == "Chains are on."
     finally:
         app.shutdown()
+
+
+def test_period_steps_forward_toward_the_newest_line():
+    # Comma older, period newer -- the Civilization VI pairing (owner
+    # report 2026-07-23: period did nothing).
+    clock = _Clock()
+    h = SpeechHistory(clock=clock)
+    h.record("Fuel 62 gallons.")
+    h.record("Safe speed 45.")
+    h.record("Next exit 2 miles.")
+    h.step_back()  # newest
+    h.step_back()  # 1 back
+    h.step_back()  # 2 back
+    assert h.step_forward() == (1, "Safe speed 45.")
+    assert h.step_forward() == (0, "Next exit 2 miles.")
+    # At the newest line, period stays put instead of wrapping.
+    assert h.step_forward() == (0, "Next exit 2 miles.")
+
+
+def test_period_out_of_the_blue_answers_with_the_newest_line():
+    clock = _Clock()
+    h = SpeechHistory(clock=clock)
+    h.record("Fuel 62 gallons.")
+    h.record("Safe speed 45.")
+    assert h.step_forward() == (0, "Safe speed 45.")
+
+
+def test_period_after_the_window_snaps_to_newest():
+    clock = _Clock()
+    h = SpeechHistory(clock=clock)
+    h.record("Fuel 62 gallons.")
+    h.record("Safe speed 45.")
+    h.step_back()
+    h.step_back()  # 1 back, mid-walk
+    clock.now += SpeechHistory.STEP_WINDOW_S + 1
+    assert h.step_forward() == (0, "Safe speed 45.")

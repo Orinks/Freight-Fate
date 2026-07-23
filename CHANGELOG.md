@@ -737,6 +737,12 @@
 
 ### Fixed
 
+- **Period walks the speech history forward.** Comma has always stepped
+  back through recent speech; now Period steps forward again toward the
+  newest line, the same comma-and-period pairing screen-reader players
+  know from Civilization VI. Pressed on its own, Period simply re-reads
+  the newest line.
+
 - **The route report tells the truth on the facility approach.** After
   taking your destination exit, pressing R used to recite the highway you
   had already left, with a frozen miles-remaining count, while the truck

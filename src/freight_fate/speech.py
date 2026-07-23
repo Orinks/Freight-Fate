@@ -215,6 +215,25 @@ class SpeechHistory:
         self._pressed_at = now
         return self._cursor, self._lines[-1 - self._cursor]
 
+    def step_forward(self) -> tuple[int, str] | None:
+        """One press of the forward key: back toward the newest line.
+
+        The mirror of ``step_back`` (comma older, period newer -- the
+        convention screen-reader players know from Civilization VI).
+        Mid-walk it steps one line newer; at the newest line, or pressed
+        out of the blue, it answers with the newest line, so period is
+        always a safe "where is now?".
+        """
+        if not self._lines:
+            return None
+        now = self._clock()
+        if self._cursor <= 0 or now - self._pressed_at > self.STEP_WINDOW_S:
+            self._cursor = 0
+        else:
+            self._cursor -= 1
+        self._pressed_at = now
+        return self._cursor, self._lines[-1 - self._cursor]
+
 
 # Ranks the UIA backend below every other voice even while Narrator is
 # running. Prism's UIA backend raises all notifications with
