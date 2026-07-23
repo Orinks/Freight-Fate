@@ -94,6 +94,16 @@
   quiet new night beds joined the after-dark rotation, and the Night Line
   now slips in two late-night vocal ballads between its host breaks.
 
+- **Route-transition assistance now handles the light at the end of the
+  ramp.** Stopping a rig exactly on the stop bar, blind, while the light
+  cycles was the hardest ask in the game -- and getting it wrong meant
+  cross traffic in your trailer. With route-transition assistance on,
+  the assist brakes for a red or a dying yellow, stops the truck at the
+  bar, and holds the brakes until the green -- you hear every phase,
+  and pulling ahead is still yours. A green crossing is kept under a
+  safe rolling speed. Turn the assist off and the bar is all yours
+  again, exactly as before.
+
 - **Driving assistance reduces workload without driving for you.** One preset coordinates emergency braking, lane and descent support, stop-and-go traffic, curve and route-transition speed help, exit slowing, and stopping at the selected destination arrival point. You still steer, confirm routes and exits, leave long stops, and handle every yard and dock task.
 
 - **Choose how much driving assistance the truck provides.** A new Driving assistance settings category offers Realistic, Balanced, All assists, and Custom presets for emergency braking, lane support, stop-and-go behavior, and interactive descent speed control. Adaptive cruise keeps its existing traffic, posted-limit, and weather behavior. Presets never change trip pacing, hours rules, transmission, weather, or hazard frequency. These assists lay the groundwork for the version 1.9 driving changes.

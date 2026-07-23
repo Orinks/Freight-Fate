@@ -183,6 +183,13 @@ RED_STOP_MPH = 3.0  # at or under this you have honored a red or a stop sign
 # standstill: a confirm-tap on the brake must never grab reverse.
 DIRECTION_CHANGE_HOLD_S = 0.6
 RAMP_TERMINAL_GRACE_MI = 0.02  # rolling this far past the bar commits the violation
+# Route-transition assistance at the terminal: the assist starts braking when
+# stopping at the bar needs this much deceleration, maps needed deceleration
+# to brake application against the nominal full-service figure, and holds the
+# stop once the truck is within the hold window short of the bar.
+RAMP_ASSIST_DECEL_START_MPS2 = 0.6
+RAMP_ASSIST_FULL_DECEL_MPS2 = 3.0
+RAMP_ASSIST_HOLD_MI = 60.0 / 5280.0
 GREEN_ROLL_MPH = 25.0  # green lets you roll the terminal up to this
 STOP_ROLL_CLIP_MPH = 15.0  # blowing a stop sign this fast clips cross traffic
 RED_RUN_DAMAGE = 0.3  # collision severity for running the red

@@ -207,6 +207,119 @@ def test_still_braking_toward_the_bar_is_not_a_violation():
         app.shutdown()
 
 
+def test_transition_assist_brakes_for_the_red():
+    """With route-transition assistance on, a red ahead gets assist braking.
+
+    Regression for the 2026-07-22 playtest: positioning a rig blind inside
+    the bar's grace window was a damage-or-nothing task; the run ended with
+    cross traffic in the trailer. The assist now works the pedals."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        app.ctx.settings.route_transition_assist = True
+        _on_ramp(d, "signal", red=True, mph=35.0)
+        d._ramp_mi = RAMP_ACCESS_MI + 0.08  # ~420 feet short of the bar
+        d.truck.brake = 0.0
+        d.truck.throttle = 0.5
+
+        d._update_ramp_terminal_assist()
+
+        assert d.truck.brake > 0.0
+        assert d.truck.throttle == 0.0
+    finally:
+        app.shutdown()
+
+
+def test_transition_assist_holds_the_stop_at_the_bar():
+    from freight_fate.app import App
+    from freight_fate.states.driving import RAMP_ASSIST_HOLD_MI
+
+    app = App()
+    try:
+        d = _driving(app)
+        app.ctx.settings.route_transition_assist = True
+        _on_ramp(d, "signal", red=True, mph=1.0)
+        d._ramp_mi = RAMP_ACCESS_MI + RAMP_ASSIST_HOLD_MI / 2.0
+
+        d._update_ramp_terminal_assist()
+
+        assert d._ramp_waiting_at_light
+        assert d.truck.brake == 1.0
+        assert not d._ramp_terminal_done
+        assert d.truck.damage_pct == 0.0
+
+        # The green flip releases the wait exactly like a manual hold.
+        for _ in range(int(RAMP_LIGHT_RED_S * 10) + 5):
+            d._update_ramp_light(0.1)
+            if d._ramp_terminal_done:
+                break
+        assert d._ramp_terminal_done
+        assert d.truck.damage_pct == 0.0
+    finally:
+        app.shutdown()
+
+
+def test_transition_assist_completes_the_stop_sign():
+    from freight_fate.app import App
+    from freight_fate.states.driving import RAMP_ASSIST_HOLD_MI
+
+    app = App()
+    try:
+        d = _driving(app)
+        app.ctx.settings.route_transition_assist = True
+        _on_ramp(d, "stop", red=False, mph=1.0)
+        d._ramp_mi = RAMP_ACCESS_MI + RAMP_ASSIST_HOLD_MI / 2.0
+
+        d._update_ramp_terminal_assist()
+
+        assert d._ramp_terminal_done
+        assert d.truck.damage_pct == 0.0
+    finally:
+        app.shutdown()
+
+
+def test_transition_assist_caps_a_hot_green_crossing():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        app.ctx.settings.route_transition_assist = True
+        _on_ramp(d, "signal", red=False, mph=40.0)
+        d._ramp_mi = RAMP_ACCESS_MI + 0.03
+        d.truck.brake = 0.0
+
+        d._update_ramp_terminal_assist()
+
+        assert d.truck.brake > 0.0
+    finally:
+        app.shutdown()
+
+
+def test_transition_assist_off_leaves_the_pedals_alone():
+    """Realistic drivers who turned the assist off keep the manual bar."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        app.ctx.settings.route_transition_assist = False
+        _on_ramp(d, "signal", red=True, mph=35.0)
+        d._ramp_mi = RAMP_ACCESS_MI + 0.08
+        d.truck.brake = 0.0
+        d.truck.throttle = 0.5
+
+        d._update_ramp_terminal_assist()
+
+        assert d.truck.brake == 0.0
+        assert d.truck.throttle == 0.5
+        assert not d._ramp_waiting_at_light
+    finally:
+        app.shutdown()
+
+
 def test_stop_sign_full_stop_clears():
     from freight_fate.app import App
 

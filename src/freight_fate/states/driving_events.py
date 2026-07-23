@@ -1098,6 +1098,7 @@ class DrivingEventMixin:
         self._ramp_creep_prompt_said = False
         self._ramp_gap_milestones_said: set[int] = set()
         self._ramp_bar_tick_timer = 0.0
+        self._ramp_assist_said = False
 
     def _ramp_light_phase(self) -> str:
         cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
@@ -1309,6 +1310,79 @@ class DrivingEventMixin:
                 interrupt=False,
             )
 
+    def _update_ramp_terminal_assist(self) -> None:
+        """Route-transition assistance works the pedals for the terminal.
+
+        Stopping a rig blind inside the bar's grace window while the light
+        cycles in real time is a positioning task whose failure mode is
+        trailer damage -- the 2026-07-22 playtest ended a clean run with
+        cross traffic in the trailer. With route-transition assistance on,
+        the assist brakes for a red (or a yellow it cannot legally beat),
+        holds the stop at the bar, and keeps a green crossing under the
+        clean-roll speed. The phases still speak, and pulling ahead when
+        the light releases stays the driver's move.
+        """
+        if not self.ctx.settings.route_transition_assist:
+            return
+        if self._ramp_mi is None or self._ramp_terminal_done:
+            return
+        if self._ramp_control not in ("signal", "stop") or not self._ramp_light_announced:
+            return
+        if self._ramp_waiting_at_light:
+            # Holding for green: the assist keeps the brakes on.
+            self.truck.throttle = 0.0
+            self.truck.brake = 1.0
+            return
+        gap_mi = self._ramp_mi - RAMP_ACCESS_MI
+        speed = self.truck.speed_mph
+        if self._ramp_control == "signal":
+            phase = self._ramp_light_phase()
+            must_stop = phase == "red" or (phase == "yellow" and gap_mi > 0)
+            if not must_stop:
+                # A green (or a yellow already at the bar) is legal to roll,
+                # but not at speed: hold the crossing under the clean-roll
+                # threshold with room to spare.
+                if gap_mi <= RAMP_BAR_TICK_RANGE_MI and speed > GREEN_ROLL_MPH - 5:
+                    self.truck.throttle = 0.0
+                    self.truck.brake = max(self.truck.brake, 0.4)
+                return
+        if speed <= RED_STOP_MPH and gap_mi <= RAMP_ASSIST_HOLD_MI:
+            # At the bar with the truck stopped: the assist owns the hold.
+            self.truck.throttle = 0.0
+            self.truck.brake = 1.0
+            if self._ramp_control == "stop":
+                self._ramp_terminal_done = True
+                self.ctx.say_event(
+                    "Stopped at the sign. Clear; pull ahead to the entrance.",
+                    interrupt=False,
+                )
+            elif not self._ramp_waiting_at_light:
+                self._ramp_waiting_at_light = True
+                self.ctx.say_event(
+                    "Stopped at the red light. Assistance is holding the brakes for green.",
+                    interrupt=False,
+                )
+            return
+        # Brake down the approach: needed deceleration to stop at the bar,
+        # recomputed each tick, mapped onto brake application. As the gap
+        # closes the demand rises and the pedal follows.
+        gap_m = max(0.5, gap_mi * 1609.344)
+        v_mps = max(0.0, self.truck.velocity_mps)
+        needed = (v_mps * v_mps) / (2.0 * gap_m)
+        if needed < RAMP_ASSIST_DECEL_START_MPS2 and gap_m > 30.0:
+            return
+        self.truck.throttle = 0.0
+        self.truck.brake = max(
+            self.truck.brake, min(1.0, max(0.3, needed / RAMP_ASSIST_FULL_DECEL_MPS2))
+        )
+        if not self._ramp_assist_said:
+            self._ramp_assist_said = True
+            self._pause_speed_control()
+            what = "light" if self._ramp_control == "signal" else "stop sign"
+            self.ctx.say_event(
+                f"Route-transition assistance braking for the {what}.", interrupt=False
+            )
+
     def _update_ramp_terminal(self) -> None:
         """Crossing the terminal: honor the light or the sign, or pay for it.
 
@@ -1404,6 +1478,7 @@ class DrivingEventMixin:
             self._ramp_mi -= moved_mi
             if not self._ramp_light_announced and self._ramp_mi <= RAMP_CONTROL_ANNOUNCE_MI:
                 self._announce_ramp_terminal()
+            self._update_ramp_terminal_assist()
             if not self._ramp_terminal_done and self._ramp_mi <= RAMP_ACCESS_MI:
                 self._update_ramp_terminal()
             if self._ramp_mi > 0:
