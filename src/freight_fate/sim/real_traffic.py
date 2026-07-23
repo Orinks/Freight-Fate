@@ -125,12 +125,17 @@ STATE_APIS: dict[str, dict[str, str]] = {
         "name": "Idaho 511",
         "parser": "wzdx",
     },
+    # 511in.org serves its SPA shell for every REST-looking path (checked
+    # 2026-07-22: /api/events and /api/v2/get/event both return HTML); the
+    # real data rides a GraphQL endpoint we have no client for yet. no_api
+    # keeps Indiana silently on simulated traffic instead of warning-spamming
+    # every fetch cycle.
     "indiana": {
         "base_url": "https://511in.org",
-        "events_endpoint": "/api/events",
-        "construction_endpoint": "/api/wzdx",
+        "events_endpoint": "",
+        "construction_endpoint": "",
         "name": "Indiana 511IN",
-        "parser": "wzdx",
+        "parser": "no_api",
     },
     "maryland": {
         "base_url": "https://roads.maryland.gov",

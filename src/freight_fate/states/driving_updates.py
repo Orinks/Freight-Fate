@@ -640,20 +640,32 @@ class DrivingUpdateMixin:
         if active is None and self._curve_slip_active:
             self._curve_slip_active = False
         # Curve speed assist: use the real advisory speed when one is active
-        # instead of the old terrain heuristic.
+        # instead of the old terrain heuristic. Hysteresis both places:
+        # engage above advisory + 5, but once slowing, hold until the truck
+        # is within 2 of advisory. Deciding both ways at one threshold
+        # flip-flopped against cruise seven times a second (playtest
+        # 2026-07-22).
         curve_assisting = False
         if self.ctx.settings.curve_speed_assist:
             if active is not None and not active.connector:
-                # Approaching or inside a curve and going faster than advisory + margin
-                curve_assisting = self.truck.speed_mph > active.advisory_mph + 5
+                margin = 2 if self._curve_assist_active else 5
+                curve_assisting = self.truck.speed_mph > active.advisory_mph + margin
             elif curve != 0.0:
                 # Fallback: old terrain- or ramp-based heuristic
-                curve_assisting = self.truck.speed_mph > 50 - abs(curve) * 20
+                heuristic = 50 - abs(curve) * 20
+                if self._curve_assist_active:
+                    heuristic -= 3
+                curve_assisting = self.truck.speed_mph > heuristic
+        # The spoken cues get a cooldown on top: even a legitimate slow
+        # cycle (cruise pulling back up to the engage line) must not chant.
+        self._curve_assist_cue_s = max(0.0, self._curve_assist_cue_s - dt)
         if curve_assisting:
             self.truck.brake = max(self.truck.brake, min(0.35, abs(curve)))
-            if not self._curve_assist_active:
+            if not self._curve_assist_active and self._curve_assist_cue_s <= 0.0:
+                self._curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S
                 self.ctx.say_event("Curve speed assistance slowing.", interrupt=False)
-        elif self._curve_assist_active:
+        elif self._curve_assist_active and self._curve_assist_cue_s <= 0.0:
+            self._curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S
             self.ctx.say_event("Curve speed assistance released.", interrupt=False)
         self._curve_assist_active = curve_assisting
         transition_assisting = (

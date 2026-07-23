@@ -282,6 +282,7 @@ class DrivingState(
         self._descent_capture_active = False
         self._assist_exit_slowing_said = False
         self._curve_assist_active = False
+        self._curve_assist_cue_s = 0.0
         self._transition_assist_active = False
         self._keeper_mph: float | None = None
         self._keeper_throttle = 0.0

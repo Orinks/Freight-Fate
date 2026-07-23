@@ -1444,6 +1444,55 @@ def test_arrival_gate_repeats_after_overshoot(monkeypatch):
         driving._speak_speed_limit()
         assert "Stop to dock" in spoken[-1]
         assert "miles per hour" not in spoken[-1]
+
+        # R answers with the arrival too, not the abandoned highway route
+        # with its frozen "3 miles remaining".
+        driving._speak_route_status()
+        assert "you have arrived" in spoken[-1].lower()
+        assert "Stop to dock" in spoken[-1]
+        assert "remaining" not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_curve_assist_cues_do_not_thrash(monkeypatch):
+    """Speed hovering at the assist threshold speaks one cue, not a chant.
+
+    Regression for the 2026-07-22 playtest: cruise fighting the curve brake
+    crossed the single engage threshold every few frames, and each crossing
+    spoke -- 23 slowing/released cues in about four seconds."""
+    from collections import defaultdict
+
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.settings.curve_speed_assist = True
+        fake_curve = SimpleNamespace(
+            advisory_mph=35.0,
+            connector=False,
+            direction="L",
+            min_radius_ft=1000.0,
+            at_mi=driving.trip.position_mi,
+        )
+        monkeypatch.setattr(driving.trip, "curve_at", lambda mile: fake_curve)
+        keys = defaultdict(bool)
+        mps = 0.44704
+
+        # Two seconds of speed flapping across the old single threshold
+        # (advisory + 5 = 40): the old code spoke on every crossing.
+        for _ in range(60):
+            driving.truck.velocity_mps = 41.0 * mps
+            driving._update_lane(keys, 1 / 60)
+            driving.truck.velocity_mps = 39.5 * mps
+            driving._update_lane(keys, 1 / 60)
+
+        cues = [text for text in events if "Curve speed assistance" in text]
+        assert cues == ["Curve speed assistance slowing."]
     finally:
         app.shutdown()
 

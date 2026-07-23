@@ -8,6 +8,14 @@ from ..sim.trip_route_helpers import _leg_heading, _stop_offset_for_direction
 
 class DrivingLocationMixin:
     def _speak_route_status(self) -> None:
+        # Once the trip has ended at a facility gate, the leg readout below
+        # would recite the abandoned route with a frozen countdown -- "3
+        # miles remaining" that never move (playtest 2026-07-22). The only
+        # honest route status left is the gate.
+        gate = self._arrival_gate_query_text()
+        if gate is not None:
+            self.ctx.say(f"Route status: you have arrived. {gate}")
+            return
         trip = self.trip
         route = trip.route
         leg_index, leg_start = trip._leg_at_mile(trip.position_mi)

@@ -618,6 +618,18 @@
   "At Chicago Port Terminal. Stop to dock." -- instead of a speed limit
   that stopped mattering when the route ended.
 
+- **The route report knows when you have arrived.** Pressing R after
+  reaching a facility used to recite the highway route you had already
+  left -- "on I-90 West, 3 miles remaining" -- with a countdown that
+  never moved. At a facility it now says so: "You have arrived. At
+  Chicago Port Terminal. Stop to dock."
+
+- **Curve speed assistance stopped talking over itself.** When adaptive
+  cruise and the curve brake disagreed, the assist flipped between
+  "slowing" and "released" several times a second and said so every
+  time. It now holds its decision through the bend and speaks at most
+  once every fifteen seconds.
+
 - **Turning on real-time traffic no longer crashes the game.** With
   Traffic source set to real time under Settings, Speech and weather,
   the game closed with an error moments after any drive began. It now

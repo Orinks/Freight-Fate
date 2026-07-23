@@ -757,12 +757,14 @@ class TestWZDxParser:
 
     def test_wzdx_states_in_state_apis(self):
         """WZDx states are listed with parser='wzdx'."""
+        # Indiana left this list 2026-07-22: 511in.org answers every REST
+        # path with its SPA shell (the data is behind GraphQL), so it runs
+        # as no_api until a GraphQL client exists.
         wzdx_keys = (
             "california",
             "colorado",
             "florida",
             "idaho",
-            "indiana",
             "maryland",
             "michigan",
             "minnesota",
