@@ -61,12 +61,16 @@ STATE_APIS: dict[str, dict[str, str]] = {
         "parser": "ohgo",
     },
     # ── Iteris platform ──────────────────────────────────────────────────
+    # 511wi.gov's REST API is gone (checked 2026-07-23: /api/events and
+    # variants all 404; live playtests warning-logged every fetch cycle).
+    # no_api keeps Wisconsin silently on simulated traffic until a working
+    # endpoint is found -- same treatment as Indiana.
     "wisconsin": {
         "base_url": "https://511wi.gov",
-        "events_endpoint": "/api/events",
-        "construction_endpoint": "/api/events",
+        "events_endpoint": "",
+        "construction_endpoint": "",
         "name": "Wisconsin 511WI",
-        "parser": "iteris",
+        "parser": "no_api",
     },
     "new york": {
         "base_url": "https://511ny.org",

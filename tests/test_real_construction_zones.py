@@ -575,8 +575,12 @@ class TestIterisParser:
     """Shared Iteris-platform parser covers WI, NY, GA, AZ, CT."""
 
     def test_iteris_platform_states_in_state_apis(self):
-        """All 5 Iteris states are listed in STATE_APIS with parser='iteris'."""
-        for key in ("wisconsin", "new york", "georgia", "arizona", "connecticut"):
+        """Live Iteris states are listed in STATE_APIS with parser='iteris'.
+
+        Wisconsin left this list 2026-07-23: 511wi.gov's REST API is gone
+        (every path 404s), so it runs as no_api until a working endpoint
+        is found -- same treatment as Indiana."""
+        for key in ("new york", "georgia", "arizona", "connecticut"):
             assert key in STATE_APIS, f"Missing {key} in STATE_APIS"
             assert STATE_APIS[key]["parser"] == "iteris", f"{key} parser not iteris"
             assert "base_url" in STATE_APIS[key], f"{key} missing base_url"
@@ -736,9 +740,11 @@ class TestIterisParser:
         # Without network, should fall through to empty data.
         # The parser routing happens inside _fetch_construction_from_api which
         # is called by _fetch_construction_background.  What we can test:
-        # an Iteris state is recognised as supported.
-        data = provider.fetch_construction("wisconsin")
-        assert data.state == "wisconsin"
+        # an Iteris state is recognised as supported. (Wisconsin left the
+        # Iteris roster 2026-07-23 -- dead REST API -- so Georgia carries
+        # this check now.)
+        data = provider.fetch_construction("georgia")
+        assert data.state == "georgia"
         assert isinstance(data, TrafficData)
 
     def test_request_routes_to_iteris_parser(self):

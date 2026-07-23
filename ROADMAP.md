@@ -72,10 +72,13 @@ terminal becomes the anchor of that week instead of a spawn point.
       5, hold until within 2) and the spoken cues carry a 15-second
       cooldown, so a cruise-vs-curve-brake fight can no longer chant
       slowing/released seven times a second.
-- [ ] Indiana real-traffic coverage needs a GraphQL client: 511in.org
-      serves its SPA shell for every REST path (checked 2026-07-22), so
-      the state now runs as no_api -- silently simulated -- instead of
-      warning-spamming each fetch.
+- [ ] Indiana and Wisconsin real-traffic feeds are dead and need new
+      clients: 511in.org serves its SPA shell for every REST path
+      (checked 2026-07-22; data is behind GraphQL) and 511wi.gov's REST
+      API 404s on every path (checked 2026-07-23, warning-spammed two
+      live playtests). Both states now run as no_api -- silently
+      simulated. A sweep of the other 511 configs for the same rot is
+      probably worth an afternoon.
 - [x] Cruise vs. curve brake, the deeper fix -- SHIPPED 2026-07-22
       (owner direction, same-day playtest): a pacenote now caps the
       cruise working target to the bend's advisory (like the armed-exit
