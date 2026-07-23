@@ -7,7 +7,7 @@ from __future__ import annotations
 import pygame
 import pytest
 
-from freight_fate.data.world_models import Leg, Route, RoutePoint, StateMileage
+from freight_fate.data.world_models import Leg, Route, RoutePoint, StateCrossing, StateMileage
 from freight_fate.sim import Trip, TruckState, WeatherSystem
 from freight_fate.sim.timezones import (
     CENTRAL,
@@ -149,6 +149,46 @@ def test_trip_finds_the_boundary_from_route_geometry():
     assert [(c.at_mi, c.to_zone.key) for c in trip.timezone_crossings] == [(30.0, "central")]
     assert trip.timezone_at(20.0) is EASTERN
     assert trip.timezone_at(35.0) is CENTRAL
+
+
+def _desert_interstate_leg() -> Leg:
+    """A stylized Kingman-to-Barstow: sparse route points thirty miles apart
+    with the Arizona-California line carried as an exact state crossing --
+    the shape that put the real clock change ten miles past the Colorado
+    River when only route points were sampled."""
+    return Leg(
+        "A",
+        "B",
+        90.0,
+        "I-40",
+        "mountain",
+        (),
+        state_miles=(StateMileage("Arizona", 49.3), StateMileage("California", 40.7)),
+        state_crossings=(StateCrossing(49.3, "Arizona", "California", "the Colorado River"),),
+        route_points=(
+            RoutePoint(0.0, 35.19, -114.05),
+            RoutePoint(30.0, 34.80, -114.16),
+            RoutePoint(60.0, 34.80, -114.59),
+            RoutePoint(90.0, 34.83, -115.03),
+        ),
+    )
+
+
+def test_clock_changes_at_the_state_crossing_not_the_next_sparse_point():
+    trip = _trip(Route(["A", "B"], [_desert_interstate_leg()]))
+    assert [(c.at_mi, c.to_zone.key) for c in trip.timezone_crossings] == [(49.3, "pacific")]
+    assert trip.timezone_at(48.0).key == "mountain"
+    assert trip.timezone_at(50.0).key == "pacific"
+
+
+def test_clock_changes_at_the_state_crossing_reversed():
+    trip = _trip(Route(["B", "A"], [_desert_interstate_leg()]))
+    # Traversed the other way the border sits at 90 - 49.3 trip miles.
+    assert [(round(c.at_mi, 1), c.to_zone.key) for c in trip.timezone_crossings] == [
+        (40.7, "mountain")
+    ]
+    assert trip.timezone_at(39.0).key == "pacific"
+    assert trip.timezone_at(42.0).key == "mountain"
 
 
 def test_trip_reversed_route_mirrors_the_boundary():
