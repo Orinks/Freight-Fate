@@ -44,7 +44,10 @@ ENGINE_LOAD_SMOOTH_S = 0.45
 # through shifts and clutch (the stair-stepping signature: buzz, gap,
 # resume higher -- jake_v3.py's design notes, owner-approved 2026-07-18).
 JAKE_LOOP_RPMS = (1200, 1400, 1600, 1800, 2000, 2200)
-JAKE_STAGE_GAIN = (0.45, 0.75, 1.0)  # two, four, six cylinders
+# Two, four, six cylinders. Stage one stays modest twice over: the owner
+# heard 0.45 as still too loud (2026-07-22), and no one has a verified
+# recording of a real low stage -- do not dramatize what we cannot confirm.
+JAKE_STAGE_GAIN = (0.25, 0.65, 1.0)
 JAKE_MIN_RPM = 950.0
 
 # The air-fill loop re-arms only this far below governor release. air_ready
