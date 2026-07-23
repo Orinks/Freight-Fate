@@ -89,18 +89,36 @@ def test_migration_never_overwrites_portable_saves(monkeypatch, tmp_path):
     assert not (target / "profiles" / "Old.json").exists()
 
 
-def test_nested_install_moves_parent_portable_saves(monkeypatch, tmp_path):
+def test_parent_folder_saves_are_left_alone(monkeypatch, tmp_path):
+    """A saves folder in the parent directory belongs to someone else --
+    another install, another version -- and must never be pulled in."""
     game = tmp_path / "freightfate" / "FreightFate"
     game.mkdir(parents=True)
-    old_profile = tmp_path / "freightfate" / "saves" / "profiles" / "Driver.json"
-    old_profile.parent.mkdir(parents=True)
-    old_profile.write_text("{}", encoding="utf-8")
+    other_profile = tmp_path / "freightfate" / "saves" / "profiles" / "Driver.json"
+    other_profile.parent.mkdir(parents=True)
+    other_profile.write_text("{}", encoding="utf-8")
     _reset(monkeypatch, tmp_path, game_dir=game)
 
     target = profile_mod.data_dir()
     assert target == game / "saves"
-    assert (target / "profiles" / "Driver.json").is_file()
-    assert not (tmp_path / "freightfate" / "saves").exists()
+    assert not (target / "profiles" / "Driver.json").exists()
+    assert other_profile.is_file()  # the other install keeps its saves
+
+
+def test_sibling_install_saves_are_left_alone(monkeypatch, tmp_path):
+    """The reported bug: a 1.9 test build extracted next to a 1.8 install
+    must not steal the 1.8 saves through their shared parent folder."""
+    old_install_profile = tmp_path / "Games" / "FreightFate" / "saves" / "profiles" / "Driver.json"
+    old_install_profile.parent.mkdir(parents=True)
+    old_install_profile.write_text("{}", encoding="utf-8")
+    new_install = tmp_path / "Games" / "FreightFate-1.9"
+    new_install.mkdir(parents=True)
+    _reset(monkeypatch, tmp_path, game_dir=new_install)
+
+    target = profile_mod.data_dir()
+    assert target == new_install / "saves"
+    assert not (target / "profiles" / "Driver.json").exists()
+    assert old_install_profile.is_file()  # 1.8 keeps its careers
 
 
 def test_parent_install_moves_nested_portable_saves(monkeypatch, tmp_path):
@@ -117,13 +135,13 @@ def test_parent_install_moves_nested_portable_saves(monkeypatch, tmp_path):
     assert not (game / "FreightFate" / "saves").exists()
 
 
-def test_existing_active_saves_merge_parent_duplicate(monkeypatch, tmp_path):
-    game = tmp_path / "freightfate" / "FreightFate"
+def test_existing_active_saves_merge_nested_duplicate(monkeypatch, tmp_path):
+    game = tmp_path / "freightfate"
     game.mkdir(parents=True)
     active_profile = game / "saves" / "profiles" / "Current.json"
     active_profile.parent.mkdir(parents=True)
     active_profile.write_text("{}", encoding="utf-8")
-    duplicate_profile = tmp_path / "freightfate" / "saves" / "profiles" / "Old.json"
+    duplicate_profile = game / "FreightFate" / "saves" / "profiles" / "Old.json"
     duplicate_profile.parent.mkdir(parents=True)
     duplicate_profile.write_text("{}", encoding="utf-8")
     _reset(monkeypatch, tmp_path, game_dir=game)
@@ -131,15 +149,15 @@ def test_existing_active_saves_merge_parent_duplicate(monkeypatch, tmp_path):
     target = profile_mod.data_dir()
     assert (target / "profiles" / "Current.json").is_file()
     assert (target / "profiles" / "Old.json").is_file()
-    assert not (tmp_path / "freightfate" / "saves").exists()
+    assert not (game / "FreightFate" / "saves").exists()
 
 
 def test_moved_save_tree_leaves_breadcrumb_and_log(monkeypatch, tmp_path, caplog):
     import logging
 
-    game = tmp_path / "freightfate" / "FreightFate"
+    game = tmp_path / "freightfate"
     game.mkdir(parents=True)
-    old_profile = tmp_path / "freightfate" / "saves" / "profiles" / "Driver.json"
+    old_profile = game / "FreightFate" / "saves" / "profiles" / "Driver.json"
     old_profile.parent.mkdir(parents=True)
     old_profile.write_text("{}", encoding="utf-8")
     _reset(monkeypatch, tmp_path, game_dir=game)
@@ -149,26 +167,26 @@ def test_moved_save_tree_leaves_breadcrumb_and_log(monkeypatch, tmp_path, caplog
 
     # Where saves vanish from, a breadcrumb file says where they went --
     # and the log records the migration so a haunted save is one grep away.
-    marker = tmp_path / "freightfate" / "saves-moved.txt"
+    marker = game / "FreightFate" / "saves-moved.txt"
     assert marker.is_file()
     assert str(target) in marker.read_text(encoding="utf-8")
     assert any("Save migration" in record.message for record in caplog.records)
 
 
 def test_merged_save_tree_leaves_breadcrumb(monkeypatch, tmp_path):
-    game = tmp_path / "freightfate" / "FreightFate"
+    game = tmp_path / "freightfate"
     game.mkdir(parents=True)
     active = game / "saves" / "profiles"
     active.mkdir(parents=True)
     (active / "Current.json").write_text("{}", encoding="utf-8")
-    duplicate = tmp_path / "freightfate" / "saves" / "profiles" / "Old.json"
+    duplicate = game / "FreightFate" / "saves" / "profiles" / "Old.json"
     duplicate.parent.mkdir(parents=True)
     duplicate.write_text("{}", encoding="utf-8")
     _reset(monkeypatch, tmp_path, game_dir=game)
 
     profile_mod.data_dir()
 
-    marker = tmp_path / "freightfate" / "saves-moved.txt"
+    marker = game / "FreightFate" / "saves-moved.txt"
     assert marker.is_file()
 
 

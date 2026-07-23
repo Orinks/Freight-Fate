@@ -194,7 +194,9 @@
   from a real cab recording and follows the rpm through its range --
   idle, pulling away, cruising, working up high -- instead of one loop
   stretched faster and slower. You will hear the difference the moment
-  the engine settles into idle.
+  the engine settles into idle. Prefer the old sound? A new Engine
+  voice setting under Settings, Audio switches between real and
+  classic, and it applies instantly, even while driving.
 
 - **Cold starts build their air out loud.** Start the engine with low
   tanks and it holds a fast idle while the compressor charges the air
@@ -948,6 +950,16 @@
   holding you still, the engine answers the throttle across its whole
   range -- so you can warm it up, build air faster, or just listen to it
   come alive -- and it settles back to a steady idle when you let off.
+
+- **Each extracted copy of the game now keeps its saves strictly to itself.**
+  Previously, a copy of the game could look one folder up on its first run
+  and adopt the saves it found there, so keeping two versions side by side,
+  for example a stable install next to a test build, could make one copy
+  take over the other's careers, and deleting a save in one copy could make
+  it disappear from the other. A copy of the game now only ever reads and
+  writes the saves folder inside its own game folder, so you can test as
+  many extracted copies as you like without them touching each other.
+
 ## 1.8.5 - 2026-07-22
 
 ### Added
