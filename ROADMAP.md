@@ -1036,6 +1036,22 @@ section below and the Unreleased changelog; the release-line view:
       Now the reception tick quietly re-tunes a dead stream (spoken
       fallback if it is truly unreachable), and static only plays under
       an audible program.
+- [ ] **Terrain-aware FM propagation with honest fringe audio (owner
+      approved 2026-07-23).** Replace the flat distance-falloff with
+      line-of-sight over the elevation data we already carry: terrain
+      profile between truck and tower decides the signal, so a river
+      valley drops a station and a ridge crest brings it in.
+      Acceptance test from the owner's ham experience: from the
+      Mogollon Rim you receive Phoenix AND Flagstaff clearly at
+      distances the current radius model would refuse. Fringe audio is
+      synthesized, not sampled (FM has no static crashes -- the limiter
+      rejects impulse noise): a shaped white-noise hiss bed rising as
+      signal thins, blended UNDER the program instead of the current
+      6-second burst timer, plus picket-fence flutter at the physical
+      2v/lambda rate from truck speed and the station's dial frequency
+      -- it slows as you slow and stops when you park. Stations need a
+      real frequency field for that; tune the noise shaping by the
+      owner's ear.
 - [ ] **Tell "still buffering" from "stalled for good" on stream
       startup.** The reconnect loop recreates a silent stream every 9
       seconds; a slow HLS join that needed 10 could get interrupted.
