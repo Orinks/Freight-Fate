@@ -686,7 +686,6 @@
 
 ### Fixed
 
-<<<<<<< HEAD
 - **The road tells you the truth about the terrain.** Stretches that were
   quietly called mountain in flat country -- the East Texas piney woods, the
   Hill Country's gentle dips -- now read as the flat or rolling ground they
@@ -702,7 +701,7 @@
   holding you still, the engine answers the throttle across its whole
   range -- so you can warm it up, build air faster, or just listen to it
   come alive -- and it settles back to a steady idle when you let off.
-=======
+
 - **Turning on real-time traffic no longer crashes the game.** With
   Traffic source set to real time under Settings, Speech and weather,
   the game closed with an error moments after any drive began. It now
@@ -711,7 +710,6 @@
   where your truck actually is, in the state you are actually driving
   through, instead of a fixed spot in Ohio. Thanks to Stickbear for
   reporting the crash.
->>>>>>> origin/feat/career-1.9
 
 - **Curve calls arrive on time and tell the truth about distance.**
   A curve warning could get stuck in line behind scenery chatter and
