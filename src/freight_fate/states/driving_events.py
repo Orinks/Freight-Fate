@@ -947,6 +947,7 @@ class DrivingEventMixin:
             hazard_scale=0.0,  # no random hazards on the last city miles
             career_hours=old.career_hours,
             bobtail=old.bobtail,
+            destination_label=old.destination_label,
         )
         surface.game_minutes = old.game_minutes  # deadline and clock continuity
         surface.toll_charges = old.toll_charges  # settlement reads the live trip

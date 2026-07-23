@@ -45,12 +45,15 @@ terminal becomes the anchor of that week instead of a spawn point.
       instruction every ten seconds while the truck is still moving,
       cancel any re-armed cruise on each repeat, and the S key answers
       with the gate instead of the ended route's posted limit.
-- [ ] **Route status goes stale after the destination exit (same
-      playtest).** R still recites the abandoned highway route -- "on
-      I-90 West, 3 miles remaining, Destination Chicago ahead" -- with a
-      frozen countdown while the truck is on the facility approach. It
-      should describe the approach: distance to the gate, or the
-      entrance behind you.
+- [x] **Route status goes stale after the destination exit (same
+      playtest).** Fixed 2026-07-22: R now answers by phase -- on the
+      street chain it names the current street and the distance to the
+      gate; on a scripted approach it drops the highway framing for
+      "off the highway, on the facility approach"; and once the route
+      has ended it answers with the gate itself, agreeing with the S
+      key's override. The surface trip also learned the facility's
+      name, so its fallback cue names the gate instead of the bare
+      city.
 - [ ] **Curve speed assistance thrash (same playtest).** 23
       slowing/released flip-flops in ~4 seconds through the event voice
       after cruise resumed near a curve cluster. Needs hysteresis or a

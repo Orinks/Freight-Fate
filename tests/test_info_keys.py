@@ -432,3 +432,46 @@ def test_route_key_uses_metric_distances(monkeypatch):
         assert " miles" not in report
     finally:
         app.shutdown()
+
+
+def test_route_key_answers_with_the_gate_on_the_facility_approach(monkeypatch):
+    """After the destination exit, R describes the approach, not the dead
+    highway (playtest 2026-07-22: 'on I-90 West, 3 miles remaining' with a
+    frozen countdown while rolling city streets toward the gate)."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d._destination_exit_taken = True
+        d.trip.position_mi = d.trip.total_miles - 2.0
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_r))
+
+        report = spoken[-1]
+        assert report.startswith("Route status: off the highway, on the facility approach")
+        assert "I-90" not in report
+        assert "into the trip" not in report
+    finally:
+        app.shutdown()
+
+
+def test_route_key_answers_with_the_gate_when_the_route_has_ended(monkeypatch):
+    """Rolled past the gate: R agrees with the S key's gate override."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d._destination_exit_taken = True
+        d.trip.position_mi = d.trip.total_miles
+        d.trip.finished = True
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_r))
+
+        assert spoken[-1].startswith("Route status: At ")
+        assert "Stop to dock" in spoken[-1]
+    finally:
+        app.shutdown()

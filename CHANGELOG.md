@@ -686,6 +686,13 @@
 
 ### Fixed
 
+- **The route report tells the truth on the facility approach.** After
+  taking your destination exit, pressing R used to recite the highway you
+  had already left, with a frozen miles-remaining count, while the truck
+  rolled city streets toward the gate. Now it answers with the approach:
+  the street you are on and how far to the gate -- and once the route has
+  ended, it answers with the gate itself, the same answer the S key gives.
+
 - **The road tells you the truth about the terrain.** Stretches that were
   quietly called mountain in flat country -- the East Texas piney woods, the
   Hill Country's gentle dips -- now read as the flat or rolling ground they
