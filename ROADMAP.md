@@ -86,6 +86,30 @@ terminal becomes the anchor of that week instead of a spawn point.
       cruise drives the bend instead of fighting the assist brake.
       Manual handoff survives only for advisories under the 20 mph
       cruise floor.
+- [ ] **Air buzzer once after a shoulder rest (owner playtest, night of
+      2026-07-22, UNCLAIMED).** Sleeping on the shoulder then starting
+      the engine issued one low-air buzzer. Might be honest (parked
+      leak-down leaves the tanks low after a rest, and one buzzer while
+      pressure builds is what a real dash does) or the cold-start
+      buzzer-defer may not cover the rest-resume path the way it covers
+      first ignition. Read the owner's session log before deciding;
+      diagnosis first, no reflex fix.
+- [ ] **Cruise sags on a loaded pull instead of revving out (owner
+      playtest, night of 2026-07-22, UNCLAIMED).** Climbing under load
+      with cruise on, speed falls and the truck does not rev toward
+      power or take a downshift; the owner has to cancel cruise and
+      pedal it himself. Real cruise has full throttle authority and
+      holds the climb gear at power when speed is dropping. Suspect the
+      cruise controller's throttle ceiling or the shift schedule never
+      seeing full-throttle intent from cruise (progressive/throttle-
+      raise logic keys off the throttle value cruise sets).
+- [ ] **Speeding fine with cruise engaged (Josh report, 2026-07-22,
+      UNCLAIMED -- awaiting his log).** Likely a downgrade letting the
+      truck creep past the limit while cruise holds its set speed with
+      no brake authority. Candidate shape: cruise arms the auto jake
+      downhill (the stalk's AUTO mode already exists) or eases its
+      target when the road outruns it. Diagnose from Josh's log before
+      building; grade is the owner's guess.
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
 - [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
