@@ -1129,19 +1129,23 @@ section below and the Unreleased changelog; the release-line view:
       at the register, and let the tiered buffs ride the same purchase.
       The new loyalty program (owner likes it) gives the natural hook:
       paid purchases should earn points too, not just fuel gallons.
-- [ ] **Periodic "compressor" sound at highway cruise (owner report
-      2026-07-23, CLAIMED: ff-audio session).** Every few seconds at
-      steady cruise the owner hears the air compressor engaging.
+- [ ] **Long repeating hiss at highway cruise (owner report 2026-07-23,
+      CLAIMED: ff-audio session).** OWNER CORRECTION: not machinery
+      engaging -- a GENUINE LONG HISS that repeats at steady cruise.
       Evidence gathered: the sim is innocent (log shows psi pinned at
       125, compressor idle, no brake applications on that stretch) and
       the ring bands measure hiss-flat (no in-loop fill hiss -- the old
       bug is NOT back). Prime suspect: cruise rpm 1695-1767 sits inside
       the narrow midhigh(1425)<->high(1900) crossfade window, so ACC's
       small rpm wobble slides the mix across the seam cyclically.
-      Candidate fixes for the audio session's ear: widen or recenter
-      that one window, add mix-slew damping so sub-50-rpm wobble does
-      not move the blend, or reseat band anchors so common cruise rpms
-      sit inside a band instead of on a seam.
+      A long hiss fading in/out fits the seam IF one band carries a
+      hissier steady character than its neighbor (the swing scan only
+      rules out WITHIN-loop hiss spikes, not a uniformly hissy band --
+      measured means: idle .131, high .144, midhigh .149, mid .155,
+      low .159, all in 3-8 kHz ratio). Also re-check the long-hiss
+      assets themselves: brake_hiss_bed and air_pressurize triggering
+      at cruise despite the gates. Candidate fixes: de-hiss the guilty
+      band, widen/recenter the window, damp mix against rpm wobble.
       ALSO for the same session: the brake-release pssht goes missing at
       the final dock stop -- "Brakes set; dock menu opening" fires in the
       same beat and likely cuts the release sound before it plays (owner,
