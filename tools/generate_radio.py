@@ -238,7 +238,16 @@ def generate_hosts(key: str) -> None:
 
 
 def generate_static() -> None:
-    """Procedural AM-radio static burst; no API credits."""
+    """Procedural FM interstation hiss burst; no API credits.
+
+    FM fringe noise is not AM crackle -- the limiter rejects impulse
+    noise (owner's ham-ear ruling 2026-07-23). What a real receiver
+    plays between stations is the demodulator's triangular noise
+    spectrum (+6 dB/octave) rolled off by the 75 microsecond
+    de-emphasis network: a full, smooth frying hiss with body around
+    1-2 kHz, no pops. A slow, gentle level wander keeps it organic
+    without turning it back into crackle.
+    """
     import numpy as np
     import soundfile as sf
 
@@ -246,16 +255,27 @@ def generate_static() -> None:
     rate = 44100
     seconds = 2.4
     noise = rng.normal(0.0, 1.0, int(rate * seconds))
-    # crude band-limit: difference filter knocks out the deep rumble, a short
-    # moving average softens the hiss into AM-radio crackle
+    # FM demod noise rises 6 dB/octave: a differentiator is exactly that.
     noise = np.diff(noise, prepend=0.0)
-    kernel = np.ones(6) / 6.0
-    noise = np.convolve(noise, kernel, mode="same")
-    # crackle envelope: irregular bursts over a low bed
-    t = np.linspace(0.0, seconds, noise.size)
-    envelope = 0.35 + 0.65 * (rng.random(noise.size) ** 6)
+    # 75us de-emphasis (one-pole low-pass at ~2122 Hz), the receiver's own
+    # curve -- this is what gives FM hiss its rounded top end.
+    # A second gentle pole (~5 kHz) stands in for the receiver's audio
+    # stage: pure post-de-emphasis noise is rise-then-flat and reads thin
+    # and digital on full-range playback.
+    shaped = noise
+    for rc in (75e-6, 1.0 / (2.0 * np.pi * 5000.0)):
+        alpha = (1.0 / rate) / (rc + 1.0 / rate)
+        acc = 0.0
+        out_buf = np.empty_like(shaped)
+        for i, x in enumerate(shaped):
+            acc += alpha * (x - acc)
+            out_buf[i] = acc
+        shaped = out_buf
+    t = np.linspace(0.0, seconds, shaped.size)
+    # slow AGC-like wander, subtle: +/-20 percent over ~1 Hz, never impulsive
+    wander = 1.0 + 0.2 * np.sin(2.0 * np.pi * (0.7 * t + 0.3 * np.sin(2.0 * np.pi * 0.23 * t)))
     fade = np.minimum(1.0, np.minimum(t / 0.05, (seconds - t) / 0.4))
-    sample = noise * envelope * fade
+    sample = shaped * wander * fade
     sample = 0.8 * sample / np.max(np.abs(sample))
     out = ASSETS / "radio" / "static_burst.ogg"
     out.parent.mkdir(parents=True, exist_ok=True)

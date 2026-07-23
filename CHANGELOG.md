@@ -633,6 +633,12 @@
   station really cannot be reached, and never plays fringe static over
   a station you cannot hear.
 
+- **Fringe static finally sounds like FM.** The old crackle was really
+  an AM lightning-storm sound; an FM set between stations plays a
+  smooth frying hiss instead. The static you hear at the edge of a
+  station's range is now that hiss, shaped the way a real receiver
+  shapes it.
+
 - **The engine revs freely when you sit with the parking brake set.**
   Blipping the throttle while parked used to drag the engine up to a
   weak, half-hearted rev and then stall it, with the game repeating that

@@ -1055,6 +1055,16 @@ section below and the Unreleased changelog; the release-line view:
       complex noise at the Doppler cutoff, magnitude out). It slows as
       you slow and stops when you park. Stations need a real frequency
       field for that; tune the noise shaping by the owner's ear.
+      RUNTIME, not baked (owner call 2026-07-23): the flutter depends on
+      live speed so the bed must be synthesized in play -- hybrid shape:
+      a seamless committed hiss LOOP as the texture with fade depth and
+      the Rayleigh envelope computed per-frame as channel gain (the
+      engine ring's machinery); fast flutter near 18 Hz gets steppy at
+      frame-rate volume updates, so the BASS path likely wants a
+      push-stream or DSP callback, degrading to slow wander on pygame.
+      The 2026-07-23 static_burst regen (FM demod curve + de-emphasis in
+      tools/generate_radio.py) is the interim burst asset AND the
+      reference recipe for that loop.
 - [ ] **Tell "still buffering" from "stalled for good" on stream
       startup.** The reconnect loop recreates a silent stream every 9
       seconds; a slow HLS join that needed 10 could get interrupted.
