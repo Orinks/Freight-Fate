@@ -34,6 +34,17 @@
   of build is talking. Stable releases sound the same as before, and version
   numbers no longer skip when a stable release comes out.
 
+### Fixed
+
+- **Each extracted copy of the game now keeps its saves strictly to itself.**
+  Previously, a copy of the game could look one folder up on its first run
+  and adopt the saves it found there, so keeping two versions side by side,
+  for example a stable install next to a test build, could make one copy
+  take over the other's careers, and deleting a save in one copy could make
+  it disappear from the other. A copy of the game now only ever reads and
+  writes the saves folder inside its own game folder, so you can test as
+  many extracted copies as you like without them touching each other.
+
 ## 1.8.5 - 2026-07-22
 
 ### Added

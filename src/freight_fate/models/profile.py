@@ -21,7 +21,9 @@ data directory instead of failing on the first write and crashing mid-session.
 
 Override the location with the ``FREIGHT_FATE_DATA_DIR`` environment variable
 (which the tests use). Saves from older versions or misplaced layouts are
-migrated into the active location automatically on first run.
+migrated into the active location automatically on first run — but the
+search never leaves the game's own main directory, so a second extracted
+copy of the game (another version, a test build) is never touched.
 
 When running from source, ``FREIGHT_FATE_SKIP_SAVE_SIGNING=1`` skips the
 save-signature check (the file is re-signed locally on load) so arbitrary
@@ -188,9 +190,9 @@ def _migrate_legacy(target: Path) -> None:
 def _migrate_nearby_portable_saves(target: Path) -> bool:
     """Move earlier portable layouts into the current save root.
 
-    These folders are already user-owned portable save folders near the game,
-    so leaving them behind creates two plausible save locations. Per-user
-    legacy folders are still copied, not moved.
+    These folders are user-owned portable save folders inside the game's own
+    directory, so leaving them behind creates two plausible save locations.
+    Per-user legacy folders are still copied, not moved.
     """
     for source in _portable_migration_candidates():
         if not source.is_dir():
@@ -257,17 +259,20 @@ def _merge_save_tree(source: Path, target: Path) -> None:
 def _portable_migration_candidates() -> list[Path]:
     """Nearby save roots to fold into the active location.
 
-    Covers previous archive nesting layouts and, on macOS, the misplaced
-    ``saves`` folder beside the app bundle (or inside it) that earlier builds
-    created in ``/Applications``.
+    Covers a previous archive layout nested inside the game's own folder
+    and, on macOS, the misplaced ``saves`` folder beside the app bundle (or
+    inside it) that earlier builds created in ``/Applications``.
+
+    Candidates never leave the game's own main directory: a player may keep
+    several extracted copies of the game side by side (say, a 1.8 install
+    next to a 1.9 test build), and one copy scanning its parent folder would
+    steal — and then share — the saves of another. Each copy owns exactly
+    the saves inside its own folder.
     """
     root = game_root()
-    parent = root.parent
     candidates = [
         root / "saves",
         root / "FreightFate" / "saves",
-        parent / "saves",
-        parent / "FreightFate" / "saves",
     ]
     if is_frozen():
         candidates.append(_frozen_executable_dir() / "saves")
@@ -617,9 +622,7 @@ class Profile:
             if _signing_checks_disabled():
                 # Re-save below so the file gets a valid local signature and
                 # keeps loading once the dev flag is off again.
-                log.warning(
-                    "Signature check skipped for %s (FREIGHT_FATE_SKIP_SAVE_SIGNING)", path
-                )
+                log.warning("Signature check skipped for %s (FREIGHT_FATE_SKIP_SAVE_SIGNING)", path)
                 resign = True
             else:
                 tampered = True
