@@ -38,11 +38,14 @@ SINGLES: list[tuple[str, str]] = [
     # neutral hold is RETIRED: it measures ~1125 rpm (not the labeled ~1000,
     # 30 rpm under the mid cut) and is likely a different truck.
     ("896/engine_low_950.wav", "engine/low"),       # band low   (950 rpm)
-    ("896/cruise_mid_1150.wav", "engine/mid"),      # band mid   (~1150 rpm)
-    # mid-high = the mid cut pitched to 1425 (engine_midhigh_1425.py): splits
-    # the too-wide 1150->1800 gap so no band stretches into formant smear.
+    # mid/high ship envelope-FLATTENED (engine_band_flatten.py): the raw
+    # steady-hold windows carry the real driver's throttle surging (50-64%
+    # slow-RMS swing), which loops as an audible stop-start jutter.
+    ("896/cruise_mid_1150_flat.wav", "engine/mid"),  # band mid  (~1150 rpm)
+    # mid-high = the flattened mid pitched to 1425: splits the too-wide
+    # 1150->1800 gap so no band stretches into formant smear.
     ("896/engine_midhigh_1425.wav", "engine/midhigh"),  # band mid-high (1425 rpm)
-    ("896/cruise_high_1800.wav", "engine/high"),    # band high  (~1800 rpm)
+    ("896/cruise_high_1800_flat.wav", "engine/high"),  # band high  (~1800 rpm)
     ("896/rev_launch.wav", "engine/rev_launch"),    # short pull: launch from a stop
     ("896/rev_load.wav", "engine/rev_load"),        # long pull: digging in under load
     ("brakes/brake_hiss_bed.wav", "vehicle/brake_hiss_bed"),

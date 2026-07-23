@@ -215,8 +215,15 @@ class DrivingUpdateMixin:
                 and not emergency
                 and self.ctx.audio.has_asset("vehicle/brake_hiss_bed")
             ):
+                # Road noise masks the release at speed, exactly as in a real
+                # cab: rolling releases fade toward inaudible while the big
+                # pssht after braking to a stop keeps its full voice.
+                masking = max(0.25, 1.0 - abs(t.velocity_mps) / 20.0)
                 self.ctx.audio.start_loop(
-                    CH_BRAKE, "vehicle/brake_hiss_bed", volume=0.10 + 0.15 * peak, fade_ms=0
+                    CH_BRAKE,
+                    "vehicle/brake_hiss_bed",
+                    volume=(0.10 + 0.15 * peak) * masking,
+                    fade_ms=0,
                 )
                 self.ctx.audio.stop_loop(CH_BRAKE, fade_ms=int(160 + 800 * peak))
             self._brake_air_hissed = False
