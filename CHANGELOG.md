@@ -743,6 +743,14 @@
 
 ### Fixed
 
+- **The game no longer says you have arrived while handing you two miles
+  of streets.** Coming off the destination exit at a facility with a
+  street approach, the end of the ramp announced "You are at [the
+  facility], come to a complete stop" -- and then the turn-by-turn
+  street directions began. When streets follow the ramp, the arrival
+  announcement now waits for the actual gate; the "off the ramp and
+  onto city streets" callout owns that moment instead.
+
 - **No more "corridor between" announcements pretending to be towns.**
   Two hundred forty-six legs carried a leftover data placeholder named
   like "CA-99 corridor between Sacramento and Yuba City", and the place

@@ -1605,6 +1605,18 @@ class DrivingEventMixin:
                 return
             if not self._ramp_end_said:
                 self._ramp_end_said = True
+                if (
+                    self._ramp_stop.type == "delivery_destination"
+                    and not self._surface_chain
+                    and self._surface_chain_route() is not None
+                ):
+                    # The facility has a street chain, so "you are at X" here
+                    # is a lie by two miles: the driver was told they had
+                    # arrived and then handed turn-by-turn streets (owner
+                    # log, 2026-07-23, Sacramento Dry Warehouse). The chain's
+                    # own "off the ramp and onto city streets" line follows
+                    # and says it right.
+                    return
                 place = (
                     self._ramp_stop.name
                     if self._ramp_stop.type == "delivery_destination"
