@@ -1142,6 +1142,11 @@ section below and the Unreleased changelog; the release-line view:
       that one window, add mix-slew damping so sub-50-rpm wobble does
       not move the blend, or reseat band anchors so common cruise rpms
       sit inside a band instead of on a seam.
+      ALSO for the same session: the brake-release pssht goes missing at
+      the final dock stop -- "Brakes set; dock menu opening" fires in the
+      same beat and likely cuts the release sound before it plays (owner,
+      Merced delivery). The arrival pssht deserves to finish; it is the
+      punctuation on the whole drive.
 - [ ] **Lay on the horn (owner ask, 2026-07-23).** H plays one shortish
       horn sample today. Holding H should hold the horn -- attack, a
       seamless sustain loop for as long as the key is down, then the
