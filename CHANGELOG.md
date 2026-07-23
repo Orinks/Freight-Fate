@@ -737,6 +737,14 @@
 
 ### Fixed
 
+- **The updater no longer hides a developer snapshot released the same
+  day as a stable build.** On the developer snapshots channel, a stable
+  release published in the small hours used to mask that morning's
+  snapshot -- even when the snapshot carried newer fixes -- because the
+  two were compared by date alone. Updates now compare by the actual
+  publish moment, so whichever build is genuinely newest is the one
+  offered.
+
 - **The route report tells the truth on the facility approach.** After
   taking your destination exit, pressing R used to recite the highway you
   had already left, with a frozen miles-remaining count, while the truck
