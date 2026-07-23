@@ -418,6 +418,15 @@ class DrivingControlsMixin:
 
     def _speak_speed_limit(self) -> None:
         """S: the posted limit here, the zone if any, and how far over you are."""
+        # At a facility gate the posted limit stopped mattering when the
+        # route ended -- the only thing S can honestly answer is the gate
+        # and what to do about it. Without this, a driver rolling past the
+        # entrance heard "limit 45" and nothing about the delivery behind
+        # them (playtest 2026-07-22).
+        gate = self._arrival_gate_query_text()
+        if gate is not None:
+            self.ctx.say(gate)
+            return
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
         zone = f", in a {reason} zone" if reason else ""
         over = self.truck.speed_mph - limit

@@ -15,8 +15,14 @@ class DrivingPickupMixin:
             self._handle_pickup_creep()
             return
         if self._arrival_stop_said:
+            self._remind_arrival_gate(
+                "Pickup gate: stop to check in.",
+                f"Still at {self._pickup_facility_text()}. Slow down and stop to check in.",
+                pickup=True,
+            )
             return
         self._arrival_stop_said = True
+        self._gate_reminder_s = GATE_REMINDER_INTERVAL_S
         speed_control_paused = self._pause_speed_control()
         self.ctx.audio.play("ui/warning")
         self._set_status("Pickup ahead: slow down and come to a complete stop.")

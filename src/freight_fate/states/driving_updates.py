@@ -179,6 +179,7 @@ class DrivingUpdateMixin:
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
+            self._gate_reminder_s = max(0.0, self._gate_reminder_s - dt)
             if self.phase == DRIVE_PHASE_PICKUP:
                 self._handle_pickup_gate()
             elif self._ramp_mi is not None:

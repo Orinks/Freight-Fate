@@ -99,6 +99,12 @@ ACC_LIMIT_COMFORT_DECEL_MPS2 = 1.0
 ENGINE_SHUTDOWN_SAFE_MPH = 5.0  # prevent accidental kill-switch use at speed
 DELIVERY_PARK_MPH = 3.0  # within this, the gate prompts you to stop
 DOCKING_MAX_MPH = 0.5  # dock/settle/rest actions need a complete stop
+# How often a facility gate re-speaks its stop instruction while the truck is
+# still rolling past it. The one-shot warnings latch, so without a cadence a
+# player who overshot the gate at speed heard them once, minutes ago, and got
+# silence for the rest of the drive (playtest 2026-07-22: six minutes and the
+# on-time bonus lost three miles past a delivery entrance).
+GATE_REMINDER_INTERVAL_S = 10.0
 
 
 def terse_hazard_message(message: str) -> str:
