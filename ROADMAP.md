@@ -1140,6 +1140,15 @@ section below and the Unreleased changelog; the release-line view:
       used to, but the shipped file is untouched since June -- so the
       audio rework's playback path is probably cutting it early. Check
       the play site before blaming the sample.
+- [ ] **Refresh tool: periodic live-check of the whole radio catalog
+      (owner, 2026-07-23).** The station search had a first-match-wins
+      bug -- one hit per area and it moved on (one station in New York,
+      NPR forgotten) -- and the full re-search now running will grow the
+      catalog far past what a one-time BASS gate covered. Teach
+      tools/refresh_map_data.py's --radio pass to re-test every stream
+      on a cadence (streams die: KDHX did), report dead mounts for
+      re-pointing, and keep honest-coverage rules: a dead stream goes
+      dark or gets a verified replacement, never a fake.
 - [ ] **Fringe reception should burst, not fade (owner spec, 2026-07-23,
       ham-ear ruling).** Today the edge of a station's range plays static
       at a volume scaled by signal -- a knob, not a radio. Real analog
