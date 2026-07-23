@@ -16,7 +16,9 @@ from freight_fate.music import (
 )
 from freight_fate.radio import (
     DEFAULT_RADIO_CATALOG,
+    RadioReception,
     RadioState,
+    RadioStation,
     estimate_signal,
     signal_volume_factor,
 )
@@ -239,6 +241,68 @@ def test_fringe_signal_thins_radio_volume(denver_driving):
     volume = applied[-1]["music"]
     assert 0.0 < volume < driving.ctx.settings.radio_volume
     # fringe reception crackles
+    assert any(key == "radio/static_burst" for key, _v in played_effects)
+
+
+def _fringe_stream_station():
+    return RadioStation(
+        "kfog-test",
+        "Test FM",
+        "KFOG",
+        "music",
+        "fixture",
+        stream_url="https://example.test/live.aac",
+        real_stream=True,
+    )
+
+
+def test_dead_stream_reconnects_quietly_and_never_crackles(denver_driving, monkeypatch):
+    # A real stream the dock bed (or a network stall) killed: the reception
+    # tick re-tunes it silently and plays NO fringe static -- a silent radio
+    # has no program for static to sit under (the Merced ghost-hiss bug).
+    app, driving, _music, played_effects, _events = denver_driving
+    station = _fringe_stream_station()
+    reception = RadioReception(station, 90.0, 0.2, "in range")
+    driving.radio.enabled = True
+    monkeypatch.setattr(driving.radio, "current_station", lambda: station)
+    monkeypatch.setattr(driving.radio, "current_reception", lambda: reception)
+    monkeypatch.setattr(driving.ctx.audio, "music_playing", lambda: False)
+    streams = []
+    monkeypatch.setattr(
+        driving.ctx.audio, "play_radio_stream", lambda url, fade_ms=1500: streams.append(url)
+    )
+
+    driving._radio_static_timer = 0.0
+    driving._radio_signal_timer = 0.0
+    driving._update_radio_reception(1.0)
+
+    assert streams == [station.stream_url]
+    assert not any(key == "radio/static_burst" for key, _v in played_effects)
+
+    # retries back off instead of hammering the stream every tick
+    driving._radio_signal_timer = 0.0
+    driving._update_radio_reception(1.0)
+    assert streams == [station.stream_url]
+
+
+def test_live_fringe_stream_crackles_and_is_left_alone(denver_driving, monkeypatch):
+    app, driving, _music, played_effects, _events = denver_driving
+    station = _fringe_stream_station()
+    reception = RadioReception(station, 90.0, 0.2, "in range")
+    driving.radio.enabled = True
+    monkeypatch.setattr(driving.radio, "current_station", lambda: station)
+    monkeypatch.setattr(driving.radio, "current_reception", lambda: reception)
+    monkeypatch.setattr(driving.ctx.audio, "music_playing", lambda: True)
+    streams = []
+    monkeypatch.setattr(
+        driving.ctx.audio, "play_radio_stream", lambda url, fade_ms=1500: streams.append(url)
+    )
+
+    driving._radio_static_timer = 0.0
+    driving._radio_signal_timer = 0.0
+    driving._update_radio_reception(1.0)
+
+    assert streams == []
     assert any(key == "radio/static_burst" for key, _v in played_effects)
 
 

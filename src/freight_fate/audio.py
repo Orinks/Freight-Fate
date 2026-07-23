@@ -1410,7 +1410,10 @@ class _BassBackend:
         self._music_track = track
 
     def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
-        if self._music_track == url:
+        # Same URL only dedupes while the stream is actually producing audio;
+        # a stalled or dead connection must be torn down and recreated, or a
+        # re-tune to the same station silently does nothing.
+        if self._music_track == url and self.music_playing():
             return
         if self._music_stream is not None:
             self._fade_out(self._music_stream, 800)

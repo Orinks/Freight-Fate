@@ -1168,6 +1168,22 @@ class DrivingUpdateMixin:
             return
         self._radio_signal_factor = signal_volume_factor(reception)
         self._apply_radio_volume()
+        if reception.station.real_stream and not self.ctx.audio.music_playing():
+            # A dead stream is a silent radio, not a fringe one -- no program,
+            # so no crackle. Dock and menu beds borrow the music channel and
+            # nothing restarts the stream afterward (a network stall ends the
+            # same way), so quietly re-tune it here; if the station is truly
+            # unreachable the radio's own fallback machinery speaks the switch.
+            self._radio_reconnect_timer -= 1.5
+            if self._radio_reconnect_timer <= 0.0:
+                self._radio_reconnect_timer = 9.0
+                action = self.radio.play(self._radio_backend)
+                if action.fallback_used:
+                    self.radio.write_settings(self.ctx.settings)
+                    self.ctx.settings.save()
+                    self.ctx.say_event(action.message, interrupt=False)
+            return
+        self._radio_reconnect_timer = 0.0
         signal = reception.signal
         if 0.0 < signal < STATIC_SIGNAL_THRESHOLD and not reception.station.always_available:
             self._radio_static_timer -= 1.5

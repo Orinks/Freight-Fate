@@ -134,6 +134,9 @@ class DrivingState(
         # ranged stations fade with distance and drop past their contour.
         self._radio_signal_timer = 0.0
         self._radio_static_timer = 0.0
+        # Re-tune cadence for a real stream that went silent (a dock bed
+        # borrowed the music channel, or the connection stalled mid-drive).
+        self._radio_reconnect_timer = 0.0
         self._radio_signal_factor = 1.0
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 

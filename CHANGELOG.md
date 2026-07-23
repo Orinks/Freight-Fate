@@ -625,6 +625,14 @@
 
 ### Fixed
 
+- **The radio finds its station again after a stop.** A live station
+  used to go silent after a dock or terminal visit and stay that way --
+  all you got was a mysterious burst of static every few seconds, and
+  the only cure was tuning away and back. Now the radio reconnects the
+  stream by itself within a moment of rolling out, tells you if the
+  station really cannot be reached, and never plays fringe static over
+  a station you cannot hear.
+
 - **The engine revs freely when you sit with the parking brake set.**
   Blipping the throttle while parked used to drag the engine up to a
   weak, half-hearted rev and then stall it, with the game repeating that

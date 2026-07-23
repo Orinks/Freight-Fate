@@ -1027,6 +1027,20 @@ section below and the Unreleased changelog; the release-line view:
       stations, your playlists, terrestrial, AFN, satellite. AFN got its
       own category so its 25-station block never buries the local dial
       again; the dial sort and the jump share one grouping.
+- [x] **Streams reconnect themselves; a silent radio never crackles
+      (owner catch 2026-07-23).** The Merced ghost hiss: a live stream
+      killed by a dock-menu bed (or a network stall) stayed dead --
+      nothing restarted real streams, the same-URL guard blocked
+      re-tuning the same station, and fringe static bursts fired off
+      reception math alone every 6 seconds over a radio making no sound.
+      Now the reception tick quietly re-tunes a dead stream (spoken
+      fallback if it is truly unreachable), and static only plays under
+      an audible program.
+- [ ] **Tell "still buffering" from "stalled for good" on stream
+      startup.** The reconnect loop recreates a silent stream every 9
+      seconds; a slow HLS join that needed 10 could get interrupted.
+      Poll the BASS stalled/buffering channel state before tearing one
+      down.
 - [ ] **Fictional call signs must not squat real stations (owner catch
       2026-07-20).** Our fictional Phoenix classic-rock station is
       "KDRT Desert Rock 101.5" -- but KDRT-LP is a real community station
