@@ -166,14 +166,33 @@ class DrivingEventMixin:
             if curve is not None:
                 pan = -PACENOTE_CUE_PAN if curve.direction == "L" else PACENOTE_CUE_PAN
                 self.ctx.audio.play("ui/tick", volume=0.9, pan=pan)
-            # A curve well above the cruise set point: cancel and tell the
-            # driver why, so they don't wonder why cruise dropped mid-bend.
+            # A curve well above the cruise set point: with curve speed
+            # assistance on, the bend is cruise's job -- cap the working
+            # target to the advisory the way an armed exit caps for its
+            # ramp, and climb back silently past the bend. Cancel to manual
+            # only when the advisory sits below what cruise can hold at all
+            # (owner direction, 2026-07-22 playtest: all-assists drivers
+            # must not be dropped to the pedals for an ordinary bend).
             if self._cruise_mph is not None and self._cruise_mph > advisory + 5:
-                self._cancel_cruise()
-                self.ctx.say_event(
-                    message + " Adaptive cruise off; you need manual speed control.",
-                    interrupt=True,
+                assisted = (
+                    self.ctx.settings.curve_speed_assist
+                    and curve is not None
+                    and advisory >= CRUISE_MIN_MPH
                 )
+                if assisted:
+                    self._cruise_curve_mph = float(advisory)
+                    self._cruise_curve_end_mi = max(curve.start_mi, curve.end_mi)
+                    self.ctx.say_event(
+                        message + " Adaptive cruise easing to "
+                        f"{self.ctx.settings.speed_text(advisory)} for the bend.",
+                        interrupt=True,
+                    )
+                else:
+                    self._cancel_cruise()
+                    self.ctx.say_event(
+                        message + " Adaptive cruise off; you need manual speed control.",
+                        interrupt=True,
+                    )
             else:
                 # Interrupt, always: a pacenote queued behind landmark chatter
                 # arrived with the bend three seconds away instead of a
@@ -1862,6 +1881,17 @@ class DrivingEventMixin:
         exit_capped = self._cruise_exit_mph is not None and self._cruise_exit_mph < target_mph
         if exit_capped:
             target_mph = self._cruise_exit_mph
+        # A pacenote capped cruise for a bend: hold the advisory until the
+        # curve's footprint is behind the truck, then climb back silently --
+        # announcing every release would chant through a curve cluster.
+        if (
+            self._cruise_curve_end_mi is not None
+            and self.trip.position_mi > self._cruise_curve_end_mi
+        ):
+            self._cruise_curve_mph = None
+            self._cruise_curve_end_mi = None
+        if self._cruise_curve_mph is not None and self._cruise_curve_mph < target_mph:
+            target_mph = self._cruise_curve_mph
         # Predictive ACC: never carry the driver past the posted limit. With real
         # OSM limits baked per leg, a held set speed would otherwise sail through
         # urban drops and corridor limit changes straight into speeding strikes,

@@ -13,6 +13,8 @@ class SpeedControlStateMixin:
         self._cruise_applied = 0.0
         if not preserve_exit_cap:
             self._cruise_exit_mph = None
+        self._cruise_curve_mph = None
+        self._cruise_curve_end_mi = None
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False

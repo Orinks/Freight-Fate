@@ -61,10 +61,13 @@ terminal becomes the anchor of that week instead of a spawn point.
       serves its SPA shell for every REST path (checked 2026-07-22), so
       the state now runs as no_api -- silently simulated -- instead of
       warning-spamming each fetch.
-- [ ] Cruise vs. curve brake, the deeper fix: while curve assist is
-      braking, adaptive cruise should ease its target to the advisory
-      instead of pulling against the brake. The 2026-07-22 thrash fix
-      bounds the chatter, not the tug-of-war.
+- [x] Cruise vs. curve brake, the deeper fix -- SHIPPED 2026-07-22
+      (owner direction, same-day playtest): a pacenote now caps the
+      cruise working target to the bend's advisory (like the armed-exit
+      ramp cap) and releases silently past the curve footprint, so
+      cruise drives the bend instead of fighting the assist brake.
+      Manual handoff survives only for advisories under the 20 mph
+      cruise floor.
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
 - [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
