@@ -4,6 +4,11 @@
 
 ### Added
 
+- **An armed exit now counts itself down.** Once your signal is on, the
+  exit calls out again at two miles, one mile, and half a mile. No more
+  hearing about an exit once, five miles early, and never again until
+  you have missed it.
+
 - **Delete a career's cloud backups.** Each career in the Cloud backup menu
   now has a Delete item that removes every kept backup of that career from
   your orinks.net account, after a spoken confirmation. Your saves on this

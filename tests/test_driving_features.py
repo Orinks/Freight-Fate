@@ -1065,6 +1065,47 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
         app.shutdown()
 
 
+def test_armed_exit_counts_down(monkeypatch):
+    """An armed exit re-anchors itself at two miles, one mile, half a mile.
+
+    Backport of the 1.9-line countdown: a signal-on announcement miles out
+    was the last word before the miss -- 1.8 players kept losing exits
+    armed under scenery chatter."""
+    from types import SimpleNamespace
+
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = SimpleNamespace(
+            at_mi=driving.trip.position_mi + 3.0,
+            type="delivery_destination",
+            spoken_name="Test Plaza",
+            name="Test Receiver",
+            exit_label="",
+            exit_phrase="",
+        )
+        driving._exit_stop = stop
+        driving._exit_countdown_said = set()
+
+        for ahead in (2.5, 1.9, 1.9, 0.9, 0.4, 0.3):
+            driving.trip.position_mi = stop.at_mi - ahead
+            driving._update_exit(0.0)
+
+        calls = [t for t in events if t.startswith("Destination exit in")]
+        assert calls == [
+            "Destination exit in 2 miles.",
+            "Destination exit in 1 mile.",
+            "Destination exit in half a mile.",
+        ]
+    finally:
+        app.shutdown()
+
+
 def test_arrival_gate_repeats_after_overshoot(monkeypatch):
     """Rolling past the destination gate keeps the stop instruction alive.
 
