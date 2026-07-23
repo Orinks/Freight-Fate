@@ -103,6 +103,14 @@ terminal becomes the anchor of that week instead of a spawn point.
       cruise controller's throttle ceiling or the shift schedule never
       seeing full-throttle intent from cruise (progressive/throttle-
       raise logic keys off the throttle value cruise sets).
+- [ ] **I-5 speed limit changes for a few miles (owner observation,
+      night of 2026-07-22, verify only).** A short stretch of I-5 spoke
+      a different limit. Probably CORRECT -- the dense maxspeed sweep
+      baked real posted limits and short zones are exactly what it
+      added -- but confirm against the owner's session log which
+      stretch it was and check the baked segment against the real
+      posted limit there. Verify through a Trip readout, never the raw
+      data files.
 - [ ] **Speeding fine with cruise engaged (Josh report, 2026-07-22,
       UNCLAIMED -- awaiting his log).** Likely a downgrade letting the
       truck creep past the limit while cruise holds its set speed with
