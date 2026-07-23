@@ -67,9 +67,12 @@ OSRM_TIMEOUT_S = 12
 # Dispatch gates on routing completeness only. Curated POIs are an additive
 # quality layer (auto-sourced; reported via the non-blocking POI advisory), not a
 # dispatch requirement -- the runtime HOS fallbacks keep a stop-less leg playable.
+# Checkpoints are deliberately NOT required (speech-quality layer, same
+# class as POIs): the old requirement forced 246 fake "corridor between"
+# placeholder checkpoints into existence, which then spoke as places.
+# Mirrors Leg.metadata_complete (world_models.py).
 REQUIRED_METADATA_FIELDS = (
     "route_points",
-    "checkpoints",
     "state_miles",
     "elevation_samples",
     "grade_segments",
