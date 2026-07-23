@@ -46,22 +46,25 @@ terminal becomes the anchor of that week instead of a spawn point.
       cancel any re-armed cruise on each repeat, and the S key answers
       with the gate instead of the ended route's posted limit.
 - [x] **Route status goes stale after the destination exit (same
-      playtest).** Fixed 2026-07-22: R now answers by phase -- on the
+      playtest) -- FIXED same day.** R now answers by phase: on the
       street chain it names the current street and the distance to the
-      gate; on a scripted approach it drops the highway framing for
-      "off the highway, on the facility approach"; and once the route
-      has ended it answers with the gate itself, agreeing with the S
-      key's override. The surface trip also learned the facility's
-      name, so its fallback cue names the gate instead of the bare
-      city.
-- [ ] **Curve speed assistance thrash (same playtest).** 23
-      slowing/released flip-flops in ~4 seconds through the event voice
-      after cruise resumed near a curve cluster. Needs hysteresis or a
-      minimum hold time so the assist decides once, not seven times a
-      second.
-- [ ] Indiana 511 feed returns non-JSON (handled gracefully, but the
-      state silently has no real-traffic coverage); check the endpoint
-      or parser.
+      gate; on a scripted approach it drops the highway framing; at
+      the gate it says "You have arrived" plus the gate instruction,
+      agreeing with the S key. The surface trip also learned the
+      facility's name for its fallback cue.
+- [x] **Curve speed assistance thrash (same playtest) -- FIXED same
+      day.** Engage/release now has hysteresis (engage over advisory +
+      5, hold until within 2) and the spoken cues carry a 15-second
+      cooldown, so a cruise-vs-curve-brake fight can no longer chant
+      slowing/released seven times a second.
+- [ ] Indiana real-traffic coverage needs a GraphQL client: 511in.org
+      serves its SPA shell for every REST path (checked 2026-07-22), so
+      the state now runs as no_api -- silently simulated -- instead of
+      warning-spamming each fetch.
+- [ ] Cruise vs. curve brake, the deeper fix: while curve assist is
+      braking, adaptive cruise should ease its target to the advisory
+      instead of pulling against the brake. The 2026-07-22 thrash fix
+      bounds the chatter, not the tug-of-war.
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
 - [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.

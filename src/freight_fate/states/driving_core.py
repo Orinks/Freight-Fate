@@ -250,6 +250,10 @@ DOCKING_MAX_MPH = 0.5  # dock/settle/rest actions need a complete stop
 # silence for the rest of the drive (playtest 2026-07-22: six minutes and the
 # on-time bonus lost three miles past a delivery entrance).
 GATE_REMINDER_INTERVAL_S = 10.0
+# Minimum quiet time between curve-assist spoken cues. The assist state can
+# legitimately cycle when cruise fights the curve brake; the cues must not
+# (playtest 2026-07-22: 23 slowing/released flips in four seconds).
+CURVE_ASSIST_CUE_COOLDOWN_S = 15.0
 
 
 def terse_hazard_message(message: str) -> str:

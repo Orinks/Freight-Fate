@@ -471,7 +471,7 @@ def test_route_key_answers_with_the_gate_when_the_route_has_ended(monkeypatch):
 
         d.handle_event(key_event(pygame.K_r))
 
-        assert spoken[-1].startswith("Route status: At ")
+        assert spoken[-1].startswith("Route status: you have arrived")
         assert "Stop to dock" in spoken[-1]
     finally:
         app.shutdown()

@@ -8,13 +8,15 @@ from ..sim.trip_route_helpers import _leg_heading, _stop_offset_for_direction
 
 class DrivingLocationMixin:
     def _speak_route_status(self) -> None:
-        trip = self.trip
-        # A route that ended at a gate answers with the gate, not a highway
-        # that no longer exists (same precedent as the S key's override).
+        # Once the trip has ended at a facility gate, the leg readout below
+        # would recite the abandoned route with a frozen countdown -- "3
+        # miles remaining" that never move (playtest 2026-07-22). The only
+        # honest route status left is the gate.
         gate = self._arrival_gate_query_text()
         if gate is not None:
-            self.ctx.say(f"Route status: {gate}")
+            self.ctx.say(f"Route status: you have arrived. {gate}")
             return
+        trip = self.trip
         # On the facility approach, the highway framing is a lie: the driver
         # heard "on I-90 West, 3 miles remaining" with a frozen countdown
         # while rolling city streets toward the gate (playtest 2026-07-22).
