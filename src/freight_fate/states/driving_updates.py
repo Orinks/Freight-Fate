@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 from .. import engine_audio
-from ..audio import CH_AIR, CH_BRAKE, CH_JAKE
+from ..audio import CH_AIR, CH_BRAKE, CH_JAKE, CH_RADIO_FX
 from ..audio_fades import curve as _resolve_curve
+from ..radio import truck_elevation_ft
 from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
 from .driving_rest_states import EnforcementStopState, FelonyStopState, TrafficStopState
@@ -11,6 +12,21 @@ from .driving_rest_states import EnforcementStopState, FelonyStopState, TrafficS
 LANE_GUIDANCE_DRIFT_START = 0.3
 LANE_GUIDANCE_CENTER_MAX = 0.18
 LANE_GUIDANCE_PAN = 0.85
+
+# FM fringe rendering. The bed creeps in below full quieting (signal 0.6,
+# radio.SIGNAL_FULL_VOLUME) and deepens quadratically; pickets begin below
+# the old static threshold. PICKET_DUCK is the program level while a splash
+# owns the channel -- capture lost, near-silent, restored sharply.
+FRINGE_BED_SIGNAL = 0.6
+FRINGE_BED_MAX_VOLUME = 0.5
+PICKET_SIGNAL = 0.35
+PICKET_DUCK = 0.12
+# Flutter rate bounds: parked multipath barely moves (slow wander floor);
+# the ceiling is perceptual -- past ~9 events a second it just reads as
+# noise, and the one-shot mixer would thrash.
+PICKET_MIN_RATE_HZ = 0.4
+PICKET_MAX_RATE_HZ = 9.0
+FM_DEFAULT_MHZ = 98.0  # mid-band; wavelength varies ~10 percent over 88-108
 
 # Sustained redline quietly grinds the engine down (Truck._update_temps), so
 # the player must hear about it while it is happening, not at the end screen.
@@ -1128,6 +1144,9 @@ class DrivingUpdateMixin:
         if self.radio.enabled:
             self._update_radio_reception(dt)
             self._update_radio_playback(night, dt)
+            self._update_radio_fringe(dt)
+        else:
+            self._stop_radio_fringe()
         if self.weather.should_thunder():
             audio.play("weather/thunder")
 
@@ -1151,7 +1170,8 @@ class DrivingUpdateMixin:
         self._radio_signal_timer = 1.5
         before = self.radio.current_station()
         self.radio.update_position(
-            truck_position(self.route, self.trip.position_mi, self.ctx.world)
+            truck_position(self.route, self.trip.position_mi, self.ctx.world),
+            truck_elevation_ft(self.route, self.trip.position_mi),
         )
         reception = self.radio.current_reception()
         if reception.station.id != before.id:
@@ -1182,17 +1202,84 @@ class DrivingUpdateMixin:
                     self.radio.write_settings(self.ctx.settings)
                     self.ctx.settings.save()
                     self.ctx.say_event(action.message, interrupt=False)
+            self._radio_fringe_signal = None
             return
         self._radio_reconnect_timer = 0.0
+        # Cache what the per-frame fringe renderer needs: thinning signal and
+        # the dial frequency (for the picket flutter rate). Satellite and
+        # built-in stations have no fringe.
         signal = reception.signal
-        if 0.0 < signal < STATIC_SIGNAL_THRESHOLD and not reception.station.always_available:
-            self._radio_static_timer -= 1.5
-            if self._radio_static_timer <= 0.0:
-                self._radio_static_timer = 6.0
-                self.ctx.audio.play(
-                    "radio/static_burst",
-                    volume=0.08 + (STATIC_SIGNAL_THRESHOLD - signal) * 0.6,
-                )
+        if signal > 0.0 and not reception.station.always_available:
+            self._radio_fringe_signal = signal
+            self._radio_fringe_freq = reception.station.frequency_mhz
+        else:
+            self._radio_fringe_signal = None
+
+    # -- FM fringe: hiss bed + picket-fence flutter ---------------------------
+    #
+    # The hiss bed creeps in below full quieting and deepens with distance;
+    # pickets are sharp splashes of noise punching through the program (FM
+    # capture is a threshold, so the gating is abrupt -- owner ruling
+    # 2026-07-23). Their arrival is exponential around the physical Rayleigh
+    # rate 2v/lambda, never metronomic: a fixed 18 Hz tremolo sounds like a
+    # helicopter, not a fringe FM signal.
+
+    def _update_radio_fringe(self, dt: float) -> None:
+        audio = self.ctx.audio
+        signal = self._radio_fringe_signal
+        if signal is None or not audio.music_playing():
+            # No station, satellite/built-in, or a dead stream: a silent
+            # radio has no fringe (the Merced ghost-hiss lesson).
+            self._stop_radio_fringe()
+            return
+        depth = max(0.0, min(1.0, (FRINGE_BED_SIGNAL - signal) / FRINGE_BED_SIGNAL))
+        if depth <= 0.0:
+            self._stop_radio_fringe()
+            return
+        # start_loop dedupes on a running key, so this doubles as the volume
+        # update AND self-heals after anything stopped the channel. The radio
+        # knob scales the hiss along with the program it degrades.
+        audio.start_loop(
+            CH_RADIO_FX,
+            "radio/fm_hiss_loop",
+            volume=FRINGE_BED_MAX_VOLUME * depth * depth * self.ctx.settings.radio_volume,
+            fade_ms=600,
+        )
+        self._fringe_bed_active = True
+        if self._picket_duck_s > 0.0:
+            self._picket_duck_s -= dt
+            if self._picket_duck_s <= 0.0 and self._radio_picket_duck != 1.0:
+                self._radio_picket_duck = 1.0
+                self._apply_radio_volume()
+        if signal >= PICKET_SIGNAL:
+            return
+        picket_depth = (PICKET_SIGNAL - signal) / PICKET_SIGNAL
+        self._picket_wait_s -= dt
+        if self._picket_wait_s > 0.0:
+            return
+        freq = self._radio_fringe_freq or FM_DEFAULT_MHZ
+        wavelength_m = 299.792458 / freq
+        rate = 2.0 * abs(self.truck.velocity_mps) / wavelength_m
+        rate = min(PICKET_MAX_RATE_HZ, max(PICKET_MIN_RATE_HZ, rate))
+        rate *= 0.3 + 0.7 * picket_depth
+        self._picket_wait_s = self._fringe_rng.expovariate(rate)
+        audio.play_bank(
+            "radio/picket",
+            "radio/static_burst",
+            volume=(0.3 + 0.5 * picket_depth) * self.ctx.settings.radio_volume,
+        )
+        self._radio_picket_duck = PICKET_DUCK
+        self._picket_duck_s = 0.05 + 0.08 * self._fringe_rng.random()
+        self._apply_radio_volume()
+
+    def _stop_radio_fringe(self) -> None:
+        if self._fringe_bed_active:
+            self.ctx.audio.stop_loop(CH_RADIO_FX, fade_ms=400)
+            self._fringe_bed_active = False
+        if self._radio_picket_duck != 1.0:
+            self._radio_picket_duck = 1.0
+            self._picket_duck_s = 0.0
+            self._apply_radio_volume()
 
     def _station_rotation_pool(self, station: RadioStation, night: bool) -> tuple[str, ...]:
         if station.playlist == "route":
@@ -1316,7 +1403,8 @@ class DrivingUpdateMixin:
         station_before = self.radio.station_id
         self.radio.apply_settings(self.ctx.settings)
         self.radio.update_position(
-            truck_position(self.route, self.trip.position_mi, self.ctx.world)
+            truck_position(self.route, self.trip.position_mi, self.ctx.world),
+            truck_elevation_ft(self.route, self.trip.position_mi),
         )
         self.radio.current_station()
         if self.radio.station_id != station_before:
@@ -1325,7 +1413,8 @@ class DrivingUpdateMixin:
 
     def _apply_radio_volume(self) -> None:
         factor = getattr(self, "_radio_signal_factor", 1.0)
-        self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume * factor)
+        duck = getattr(self, "_radio_picket_duck", 1.0)
+        self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume * factor * duck)
 
     def _play_radio_current(self) -> None:
         self._sync_radio_settings()

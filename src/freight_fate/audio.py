@@ -73,7 +73,8 @@ CH_REVERSE = 10
 CH_AIR = 11  # compressor charging the tanks below governor release
 CH_BRAKE = 12  # brake-release air bleed: the hiss bed shaped per release
 CH_JAKE = 13  # engine-brake growl: synthesized loop, stage- and rpm-keyed
-RESERVED = 13
+CH_RADIO_FX = 14  # FM fringe hiss bed under a thinning station
+RESERVED = 14
 NUM_CHANNELS = 32
 
 # Horn sustain loop points (samples, at the asset's 44100 Hz). The horn is an
@@ -1887,7 +1888,16 @@ class AudioEngine:
     def stop_world(self) -> None:
         """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
         self.engine_stop(shutdown_sound=False)
-        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_HORN, CH_AIR, CH_JAKE):
+        for ch in (
+            CH_ROAD,
+            CH_WEATHER,
+            CH_WEATHER_B,
+            CH_AMBIENT,
+            CH_HORN,
+            CH_AIR,
+            CH_JAKE,
+            CH_RADIO_FX,
+        ):
             self.stop_loop(ch, fade_ms=400)
 
     # -- music ----------------------------------------------------------------

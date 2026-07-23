@@ -1036,8 +1036,17 @@ section below and the Unreleased changelog; the release-line view:
       Now the reception tick quietly re-tunes a dead stream (spoken
       fallback if it is truly unreachable), and static only plays under
       an audible program.
-- [ ] **Terrain-aware FM propagation with honest fringe audio (owner
-      approved 2026-07-23).** Replace the flat distance-falloff with
+- [x] **Terrain-aware FM propagation with honest fringe audio (owner
+      approved AND SHIPPED same day, 2026-07-23).** What shipped:
+      elevation-aware contours (truck elevation from the leg's samples
+      vs station site_elev_ft through the 4/3-earth radio horizon; the
+      Rim case is a regression test), the hiss-bed loop + sharp picket
+      splashes replacing the 6-second burst timer entirely, exponential
+      inter-arrival around 2v/lambda, program duck to 0.12 per splash,
+      frequency_mhz + site_elev_ft on all 12 regional stations, and NO
+      fringe over a dead stream. Original design notes kept below;
+      follow-ups split into the next bullet. Was: replace the flat
+      distance-falloff with
       line-of-sight over the elevation data we already carry: terrain
       profile between truck and tower decides the signal, so a river
       valley drops a station and a ridge crest brings it in.
@@ -1072,6 +1081,14 @@ section below and the Unreleased changelog; the release-line view:
       The 2026-07-23 static_burst regen (FM demod curve + de-emphasis in
       tools/generate_radio.py) is the interim burst asset AND the
       reference recipe for that loop.
+- [ ] **FM propagation follow-ups.** Backfill frequency_mhz and
+      site_elev_ft for the ~63 real terrestrial streams (real dial
+      facts -- fold into the community-radio sweep; unknown fields
+      degrade honestly to the flat model and a mid-band default).
+      Later: true path-profile occlusion if off-route terrain data
+      ever lands, and a BASS push-stream Rayleigh envelope if the
+      one-shot pickets feel too sparse at deep fringe (perceptual cap
+      9 per second now).
 - [ ] **Tell "still buffering" from "stalled for good" on stream
       startup.** The reconnect loop recreates a silent stream every 9
       seconds; a slow HLS join that needed 10 could get interrupted.

@@ -133,11 +133,20 @@ class DrivingState(
         # Reception: signal re-checked on a slow cadence while driving so
         # ranged stations fade with distance and drop past their contour.
         self._radio_signal_timer = 0.0
-        self._radio_static_timer = 0.0
         # Re-tune cadence for a real stream that went silent (a dock bed
         # borrowed the music channel, or the connection stalled mid-drive).
         self._radio_reconnect_timer = 0.0
         self._radio_signal_factor = 1.0
+        # FM fringe renderer state: cached signal/dial from the reception
+        # tick, the hiss-bed flag, and the picket scheduler (its own seeded
+        # rng -- flutter is cosmetic but must replay deterministically).
+        self._radio_fringe_signal: float | None = None
+        self._radio_fringe_freq = 0.0
+        self._fringe_bed_active = False
+        self._radio_picket_duck = 1.0
+        self._picket_duck_s = 0.0
+        self._picket_wait_s = 0.0
+        self._fringe_rng = random.Random(None if trip_seed is None else trip_seed ^ 0x46524D)
         self.tutorial = Tutorial(ctx) if not profile.tutorial_done else None
 
         self.hos = profile.hos  # shift clock lives on the profile
