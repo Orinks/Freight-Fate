@@ -36,6 +36,12 @@ terminal becomes the anchor of that week instead of a spawn point.
 
 - [x] Add one driving-assistance preset selector with independently adjustable emergency braking, lane, stop-and-go, descent, exit, destination, curve, and route-transition support while preserving player confirmation and control.
 - [ ] Add future individual yard-entry guidance and assisted docking; no current preset navigates a yard or completes a delivery.
+- [x] **Stop-sign terminals got the bar instruments (playtest
+      2026-07-22, third session) -- FIXED same day.** Every bar-position
+      instrument (countdown, closing tick, S query, stopped-short
+      guidance) was gated to signal terminals; a stop-sign ramp was one
+      announce line and then the damage message. All four now answer
+      for the sign, with sign-specific wording.
 - [x] **Ramp-terminal light folded into route-transition assistance
       (owner direction, 2026-07-22 playtest).** Positioning on the stop
       bar blind under a live light cycle was damage-or-nothing (the

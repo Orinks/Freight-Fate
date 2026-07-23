@@ -664,6 +664,57 @@ def test_rolling_countdown_speaks_each_milestone_once():
         app.shutdown()
 
 
+def test_stop_sign_bar_has_position():
+    """Countdown, ticks, S query, and stopped-short guidance all answer at
+    a stop-sign terminal.
+
+    Playtest 2026-07-22 (Milwaukee grain elevator): the sign announced
+    once, then nothing until "blew the stop sign, 15 percent" -- every bar
+    instrument was gated to signal terminals only."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import RAMP_GAP_MILESTONES_FT
+
+    app = App()
+    try:
+        d = _driving(app)
+        _on_ramp(d, "stop", red=False, mph=15.0)
+        spoken = []
+        app.ctx.say_event = lambda t, interrupt=True: spoken.append(t)
+
+        # Rolling countdown through the terminal update, same as a light.
+        for feet in (900, 450, 250, 100):
+            d._ramp_mi = RAMP_ACCESS_MI + feet / 5280.0
+            d._update_ramp_light(0.05)
+        bar_calls = [t for t in spoken if "to the bar" in t]
+        assert len(bar_calls) == len(RAMP_GAP_MILESTONES_FT)
+        assert bar_calls[0] == "1000 feet to the bar."
+
+        # Parking-sensor ticks run for the sign too.
+        played = []
+        d.ctx.audio.play = lambda *a, **k: played.append(a)
+        d._ramp_mi = RAMP_ACCESS_MI + 50 / 5280.0
+        d._ramp_bar_tick_timer = 0.0
+        for _ in range(40):
+            d._update_ramp_light(0.05)
+        assert played
+
+        # S answers with the sign and the gap.
+        d._ramp_mi = RAMP_ACCESS_MI + 0.1
+        text = d._ramp_light_query_text()
+        assert text is not None
+        assert "Stop sign" in text and "feet" in text and "stop bar" in text
+
+        # Stopped short: guidance names the sign, not a light.
+        spoken.clear()
+        d.truck.velocity_mps = 0.0
+        d._ramp_creep_prompt_said = False
+        d._update_ramp_light(0.05)
+        assert spoken and "stop sign" in spoken[0]
+        assert "light" not in spoken[0]
+    finally:
+        app.shutdown()
+
+
 def test_bar_ticks_speed_up_as_the_bar_closes():
     from freight_fate.app import App
 
