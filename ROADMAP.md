@@ -648,6 +648,10 @@ Deliver -> Earn and level up -> Repeat
       correct leg, and facility data should carry enough road name, distance,
       gate speed, and dock-approach detail to make warehouses, terminals,
       ports, and industrial yards feel distinct.
+- [ ] International expansion, beginning with research into Canada and the
+      United Kingdom: country profiles need driving side, units, currency,
+      local trucking terms, hours-of-service rules, weather fallbacks, legal
+      routing, and border-crossing behavior before routes can ship.
 
 ### In-cab radio (1.8 / 1.9 candidate)
 
