@@ -86,6 +86,13 @@ From a batch of player reports:
   state line again. City narration retains the old crossing wording only as a
   fallback for legacy legs without mapped boundaries. Full harness regressions
   cover Tennessee and Texas routes, reverse travel, and an all-Texas route.
+- [x] **Terrain labels read real relief -- LANDED 2026-07-22 (nromey,
+  PR #107).** Grade segments were labeled mountain from point steepness alone,
+  so a single creek-crossing roller in flat country read as mountains in the
+  status readout. Labels are now reclassified from the relief-aware sweep
+  computed on the 1.9 line (18,638 false-mountain segments corrected
+  network-wide, 166 leg summaries promoted, no curated corridor downgraded).
+  Labels only; `avg_grade_pct` and everything physics reads is untouched.
 - [ ] Reconcile checkpoint positions with state-boundary positions on seven
   corridor legs. A 24-route forward/reverse harness sweep found 13 places
   spoken on the wrong side of a state line: Fort Oglethorpe on

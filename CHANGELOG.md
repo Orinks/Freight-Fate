@@ -51,6 +51,14 @@
   it disappear from the other. A copy of the game now only ever reads and
   writes the saves folder inside its own game folder, so you can test as
   many extracted copies as you like without them touching each other.
+- **The road tells you the truth about the terrain.** Stretches that were
+  quietly called mountain in flat country -- the East Texas piney woods, the
+  Hill Country's gentle dips -- now read as the flat or rolling ground they
+  really are, so the status readout no longer puts you in the mountains where
+  no Texan would. The real climbs you brace for still call out as mountain
+  grades, and every famous grade -- the Grapevine, Monteagle, the Siskiyous,
+  the run up to the Continental Divide -- keeps its name. Thanks to nromey,
+  [PR #107](https://github.com/Orinks/Freight-Fate/pull/107).
 
 ## 1.8.5 - 2026-07-22
 
