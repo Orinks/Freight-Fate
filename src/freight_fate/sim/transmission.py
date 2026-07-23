@@ -182,13 +182,19 @@ class Transmission:
             current = GEAR_RATIOS[self.gear - 1]
             if rpm * lower / current <= JAKE_MAX_RPM:
                 self.gear -= 1
-                self._shift_timer = shift_time_for(self.gear)
+                # Downshifts stay deliberate at the full interruption: the
+                # quick low-box time is a POWER-shift feel. On a jake
+                # descent the box cycles preselect-down against
+                # engine-protect-up, and quick downshifts doubled that
+                # cycle rate -- enough extra jake-connected time to break
+                # a chained truck loose on ice (physics bench regression).
+                self._shift_timer = SHIFT_TIME
                 self._gear_hold_timer = 0.0
                 return self.gear
         if rpm < downshift_rpm and self.gear > 1 and moving:
             target = self.gear - 1 if downshift_target is None else downshift_target
             self.gear = max(1, min(self.gear - 1, target))
-            self._shift_timer = shift_time_for(self.gear)
+            self._shift_timer = SHIFT_TIME
             self._gear_hold_timer = 0.0
             return self.gear
         return None
