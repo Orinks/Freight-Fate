@@ -1129,6 +1129,19 @@ section below and the Unreleased changelog; the release-line view:
       at the register, and let the tiered buffs ride the same purchase.
       The new loyalty program (owner likes it) gives the natural hook:
       paid purchases should earn points too, not just fuel gallons.
+- [ ] **Periodic "compressor" sound at highway cruise (owner report
+      2026-07-23, CLAIMED: ff-audio session).** Every few seconds at
+      steady cruise the owner hears the air compressor engaging.
+      Evidence gathered: the sim is innocent (log shows psi pinned at
+      125, compressor idle, no brake applications on that stretch) and
+      the ring bands measure hiss-flat (no in-loop fill hiss -- the old
+      bug is NOT back). Prime suspect: cruise rpm 1695-1767 sits inside
+      the narrow midhigh(1425)<->high(1900) crossfade window, so ACC's
+      small rpm wobble slides the mix across the seam cyclically.
+      Candidate fixes for the audio session's ear: widen or recenter
+      that one window, add mix-slew damping so sub-50-rpm wobble does
+      not move the blend, or reseat band anchors so common cruise rpms
+      sit inside a band instead of on a seam.
 - [ ] **Lay on the horn (owner ask, 2026-07-23).** H plays one shortish
       horn sample today. Holding H should hold the horn -- attack, a
       seamless sustain loop for as long as the key is down, then the
