@@ -72,7 +72,10 @@ class DrivingControlsMixin:
             else:
                 self._take_exit()
         elif key == pygame.K_k:
-            self._toggle_cruise()
+            if getattr(event, "mod", 0) & pygame.KMOD_SHIFT:
+                self._resume_cruise()
+            else:
+                self._toggle_cruise()
         elif (
             key in (pygame.K_EQUALS, pygame.K_PLUS, pygame.K_KP_PLUS)
             or getattr(event, "unicode", "") == "+"
@@ -233,6 +236,8 @@ class DrivingControlsMixin:
             "Plus and minus, including the keypad keys, raise and lower the "
             "remembered open-road target by five, so you can dial it up to the "
             "speed you want; it will not hold above the posted limit. "
+            "Shift K resumes the last cruise speed after braking canceled it, "
+            "like a car's resume button. "
             "Parked with the brake set, K latches a high idle instead -- the "
             "engine holds a faster idle to warm up and build air sooner, plus "
             "and minus adjust it, and releasing the parking brake drops it. "

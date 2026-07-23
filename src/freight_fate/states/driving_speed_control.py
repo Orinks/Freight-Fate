@@ -25,10 +25,39 @@ class SpeedControlStateMixin:
         self._keeper_zone = ""
 
     def _disarm_speed_control(self) -> None:
+        # Remember the open-road target across the cancel, like a car's
+        # RESUME: braking drops the session, Shift+K brings the speed back.
+        # A keeper-only cancel carries no target and must not clobber a
+        # remembered one.
+        remembered = self._speed_control_target_mph or self._cruise_mph
+        if remembered:
+            self._resume_target_mph = remembered
         self._clear_cruise()
         self._clear_keeper()
         self._speed_control_armed = False
         self._speed_control_target_mph = None
+
+    def _resume_cruise(self) -> None:
+        """Shift+K: re-arm the session at the last remembered set speed."""
+        if (
+            self._speed_control_armed
+            or self._cruise_mph is not None
+            or self._keeper_mph is not None
+        ):
+            self.ctx.say("Automatic speed control is already on.")
+            return
+        target = self._resume_target_mph
+        if target is None:
+            self.ctx.say("No remembered cruise speed yet. K sets one.")
+            return
+        if not self.truck.engine_on:
+            self.ctx.say("Resume needs the engine running.")
+            return
+        self._restore_speed_control_session(armed=True, target_mph=target)
+        self.ctx.say(f"Resuming automatic speed control at {self.ctx.settings.speed_text(target)}.")
+        # The per-frame resume helper engages cruise or the keeper as soon
+        # as the truck is rolling and off the brakes -- pressing resume
+        # while still slowing arms it for the moment conditions clear.
 
     def _pause_speed_control(self) -> bool:
         """Pause an armed session at a planned stop without forgetting it."""

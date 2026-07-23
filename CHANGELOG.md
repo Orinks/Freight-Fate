@@ -35,6 +35,13 @@
   It goes quiet the moment you touch the throttle, because a real jake
   does.
 
+- **Cruise has a resume button now, like a car.** Braking still cancels
+  automatic speed control on the first tap -- but the set speed is
+  remembered, and Shift K brings it back: the truck accelerates to the
+  old target on its own, or waits until you are rolling and off the
+  brakes if you press it early. K by itself still sets a fresh target at
+  your current speed.
+
 - **The automatic box now manages its own jake, like a real one.** With
   an automatic transmission, J arms the engine brake in automatic mode:
   it holds the speed you engaged at, stepping its stage up and down on
