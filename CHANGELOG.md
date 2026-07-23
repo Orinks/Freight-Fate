@@ -31,6 +31,11 @@
 
 ### Changed
 
+- **Rest stops no longer let you sleep twice for nothing.** When you are
+  already fully rested at a rest stop, choosing a sleep option now warns you
+  that it would only move the clock and your deadline forward, and asks you to
+  press Enter again to confirm. This is the same safeguard the terminal bunk
+  room already had.
 - **Everything online now lives in one Online menu on the main menu.** The
   drivers board, orinks.net account setup, Profile sharing, cloud backup and
   restore, Mastodon sharing, and Discord presence moved out of Settings into
