@@ -64,6 +64,9 @@ OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
 EXIT_WINDOW_MI = 5.0  # how far out X can arm the upcoming exit, at minimum
 EXIT_WARNING_REAL_S = 25.0  # target real seconds from callout to the ramp
 EXIT_WINDOW_MAX_MI = 20.0
+# Spoken distance anchors for an armed exit; a signal-on announcement miles
+# out gets buried under limit changes and scenery chatter without them.
+EXIT_COUNTDOWN_MILESTONES_MI = (2.0, 1.0, 0.5)
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
 RAMP_CRUISE_TARGET_MPH = 40.0  # leave control-loop headroom below the hard ramp limit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
