@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import math
 import random
 from dataclasses import replace
 
@@ -1954,7 +1955,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 if current - limit < LIMIT_DROP_WARN_MIN_DELTA_MPH:
                     return None
                 boundary = mi
-                probe = prev
+                # Anchor the fine probe to ABSOLUTE hundredth-mile marks, not
+                # to wherever this tick's position landed: a position-anchored
+                # grid shifted every frame, the boundary rounded to a
+                # different hundredth, and the dedup key changed -- the same
+                # drop warned twice 16 ms apart (owner log, 2026-07-23).
+                probe = math.floor(prev * 100.0) / 100.0
                 while probe < mi:
                     probe += 0.01
                     if self._corridor_limit_at(probe) != current:

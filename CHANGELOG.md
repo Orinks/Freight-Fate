@@ -743,6 +743,10 @@
 
 ### Fixed
 
+- **Speed-limit drop warnings no longer double up.** The advance warning
+  before a big posted-limit drop could speak twice back to back. It
+  speaks once now.
+
 - **The game no longer says you have arrived while handing you two miles
   of streets.** Coming off the destination exit at a facility with a
   street approach, the end of the ramp announced "You are at [the
