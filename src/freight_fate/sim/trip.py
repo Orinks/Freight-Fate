@@ -222,6 +222,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._announced_traffic_pressures: set[str] = set()
         self._announced_npc_traffic: set[str] = set()
         self._announced_real_traffic: set[str] = set()
+        self._next_real_traffic_check_mi = 0.0
         self._construction_zone_grace_start: dict[str, float] = {}
         self._announced_patrols: set[str] = set()
         self._hazard_check_mi = 5.0

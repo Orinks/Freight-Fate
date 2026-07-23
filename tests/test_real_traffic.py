@@ -2,6 +2,8 @@
 
 import time
 
+from freight_fate.data.world import Leg, Route
+from freight_fate.data.world_models import RoutePoint, StateMileage
 from freight_fate.sim.real_traffic import (
     CACHE_TTL_S,
     RETRY_AFTER_S,
@@ -11,6 +13,9 @@ from freight_fate.sim.real_traffic import (
     TrafficData,
     TrafficEvent,
 )
+from freight_fate.sim.trip import Trip
+from freight_fate.sim.vehicle import TruckSpecs, TruckState
+from freight_fate.sim.weather import WeatherSystem
 
 
 def test_traffic_event_serialization():
@@ -336,3 +341,118 @@ def test_empty_data_creation():
     assert empty.state == "unsupported"
     assert empty.events == []
     assert empty.source == "empty"
+
+
+# --- Trip-level incident announcements ---------------------------------------
+
+
+def _incident_leg() -> Leg:
+    return Leg(
+        a="columbus_oh_us",
+        b="cincinnati_oh_us",
+        miles=100.0,
+        highway="I-71",
+        terrain="flat",
+        stops=(),
+        route_points=(
+            RoutePoint(0.0, 39.9612, -82.9988),  # Columbus
+            RoutePoint(50.0, 39.53, -83.65),
+            RoutePoint(100.0, 39.1031, -84.5120),  # Cincinnati
+        ),
+        state_miles=(StateMileage(state="Ohio", miles=100.0),),
+    )
+
+
+def _incident_trip(provider: RealTrafficProvider) -> Trip:
+    route = Route(
+        cities=["columbus_oh_us", "cincinnati_oh_us"],
+        legs=[_incident_leg()],
+    )
+    return Trip(
+        route=route,
+        truck=TruckState(TruckSpecs()),
+        weather=WeatherSystem(),
+        time_scale=1.0,
+        seed=42,
+        traffic_provider=provider,
+    )
+
+
+def _seed_ohio_cache(provider: RealTrafficProvider, *events: TrafficEvent) -> None:
+    now = time.time()
+    provider._cache["ohio"] = TrafficData(
+        state="ohio",
+        events=list(events),
+        last_updated=now,
+        cache_time=now,
+        source="test",
+    )
+    # Trip construction also queries construction zones; a fresh empty entry
+    # keeps these tests off the network.
+    provider._cache["ohio:construction"] = TrafficData(
+        state="ohio",
+        events=[],
+        last_updated=now,
+        cache_time=now,
+        source="test",
+    )
+
+
+def test_trip_announces_nearby_real_incident():
+    """An incident near the truck's actual position is spoken once.
+
+    Regression for the 1.9 crash: the checker called a nonexistent
+    Trip._leg_at, so any drive with Traffic source set to real time died
+    on the first simulation tick."""
+    provider = RealTrafficProvider()
+    _seed_ohio_cache(
+        provider,
+        TrafficEvent(
+            id="inc-1",
+            event_type="incident",
+            severity="high",
+            description="Jackknifed truck on I-71 southbound",
+            county="Franklin",
+            latitude=39.95,
+            longitude=-83.0,
+            lanes_affected="2 right lanes",
+        ),
+    )
+    trip = _incident_trip(provider)
+
+    trip._check_real_traffic_events()
+
+    messages = [e.message for e in trip._events]
+    assert any("Traffic alert" in m and "Jackknifed truck" in m for m in messages)
+    assert any("2 right lanes affected" in m for m in messages)
+
+    # A later check must not repeat the same incident.
+    trip._next_real_traffic_check_mi = 0.0
+    before = len(trip._events)
+    trip._check_real_traffic_events()
+    assert len(trip._events) == before
+
+
+def test_trip_skips_incident_beyond_radius():
+    """Incidents are filtered against the truck's position, not a fixed point.
+
+    The truck sits at Columbus (mile 0); an incident near Cincinnati is
+    about 100 miles away and must stay silent."""
+    provider = RealTrafficProvider()
+    _seed_ohio_cache(
+        provider,
+        TrafficEvent(
+            id="inc-2",
+            event_type="incident",
+            severity="high",
+            description="Bridge closure near Cincinnati",
+            county="Hamilton",
+            latitude=39.11,
+            longitude=-84.50,
+        ),
+    )
+    trip = _incident_trip(provider)
+
+    trip._check_real_traffic_events()
+
+    assert not any("Traffic alert" in e.message for e in trip._events)

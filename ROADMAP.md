@@ -36,6 +36,28 @@ terminal becomes the anchor of that week instead of a spawn point.
 
 - [x] Add one driving-assistance preset selector with independently adjustable emergency braking, lane, stop-and-go, descent, exit, destination, curve, and route-transition support while preserving player confirmation and control.
 - [ ] Add future individual yard-entry guidance and assisted docking; no current preset navigates a yard or completes a delivery.
+- [ ] **Facility-arrival overshoot trap (playtest 2026-07-22, Gary to
+      Chicago).** After the destination exit, the "At <facility>"
+      announcement speaks once; a player who rolls on (adaptive cruise
+      re-engages without complaint) gets no "entrance behind you" nudge
+      and no way to hear where the delivery went. Six minutes lost and
+      the on-time bonus with it; recovery (stop to get the dock screen
+      back) was only found by reading the session log. Needs a repeating
+      overshoot cue plus S-status awareness of the passed entrance.
+- [ ] **Route status goes stale after the destination exit (same
+      playtest).** R still recites the abandoned highway route -- "on
+      I-90 West, 3 miles remaining, Destination Chicago ahead" -- with a
+      frozen countdown while the truck is on the facility approach. It
+      should describe the approach: distance to the gate, or the
+      entrance behind you.
+- [ ] **Curve speed assistance thrash (same playtest).** 23
+      slowing/released flip-flops in ~4 seconds through the event voice
+      after cruise resumed near a curve cluster. Needs hysteresis or a
+      minimum hold time so the assist decides once, not seven times a
+      second.
+- [ ] Indiana 511 feed returns non-JSON (handled gracefully, but the
+      state silently has no real-traffic coverage); check the endpoint
+      or parser.
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
 - [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
@@ -392,7 +414,10 @@ terminal becomes the anchor of that week instead of a spawn point.
       real-data systems are optional settings with graceful fallback to
       simulated data. Amenities are data-only; loyalty is fully playable;
       traffic and parking are integrated as announcements and availability
-      checks.
+      checks. (2026-07-22: the incident-alert path had never actually run --
+      it crashed on a missing Trip helper and queried a hardcoded Ohio
+      point; fixed on the 1.9 line to use the truck's real state and
+      position, checked once per mile.)
 - [ ] **Route terrain browser (owner idea 2026-07-15).** A reviewable,
       navigable summary of what the route will demand: big climbs and
       descents with grade and length, sharp-curve clusters, chain-law
