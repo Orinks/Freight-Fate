@@ -608,6 +608,14 @@
 
 ### Fixed
 
+- **Turning on real-time traffic no longer crashes the game.** With
+  Traffic source set to real time under Settings, Speech and weather,
+  the game closed with an error moments after any drive began. It now
+  stays up, and the live incident alerts it was trying to speak work
+  properly for the first time: they report crashes and closures near
+  where your truck actually is, in the state you are actually driving
+  through, instead of a fixed spot in Ohio.
+
 - **Curve calls arrive on time and tell the truth about distance.**
   A curve warning could get stuck in line behind scenery chatter and
   reach your ears with the bend seconds away while still saying "a

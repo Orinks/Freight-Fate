@@ -392,7 +392,10 @@ terminal becomes the anchor of that week instead of a spawn point.
       real-data systems are optional settings with graceful fallback to
       simulated data. Amenities are data-only; loyalty is fully playable;
       traffic and parking are integrated as announcements and availability
-      checks.
+      checks. (2026-07-22: the incident-alert path had never actually run --
+      it crashed on a missing Trip helper and queried a hardcoded Ohio
+      point; fixed on the 1.9 line to use the truck's real state and
+      position, checked once per mile.)
 - [ ] **Route terrain browser (owner idea 2026-07-15).** A reviewable,
       navigable summary of what the route will demand: big climbs and
       descents with grade and length, sharp-curve clusters, chain-law

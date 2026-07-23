@@ -18,10 +18,16 @@ from .trip_models import (
     TrafficPressure,
     TripEventKind,
     Zone,
+    _leg_state_at,
 )
 from .trip_route_helpers import _nearest_mile_on_leg
 
 log = logging.getLogger(__name__)
+
+# Incident lookups filter the whole cached state feed by distance, so re-check
+# on a mile cadence rather than every simulation tick.
+REAL_TRAFFIC_CHECK_INTERVAL_MI = 1.0
+REAL_TRAFFIC_RADIUS_MI = 50.0
 
 
 class TripTrafficMixin:
@@ -112,41 +118,48 @@ class TripTrafficMixin:
         return max(active, key=lambda pressure: pressure.intensity)
 
     def _check_real_traffic_events(self) -> None:
-        """Check for real-time traffic events from state 511 APIs."""
+        """Announce nearby real-time incidents from the state 511 APIs."""
         if self.traffic_provider is None:
             return
-
-        # Get current state from the route
-        current_leg = self._leg_at(self.position_mi)
-        if current_leg is None:
+        if self.position_mi < self._next_real_traffic_check_mi:
             return
+        self._next_real_traffic_check_mi = self.position_mi + REAL_TRAFFIC_CHECK_INTERVAL_MI
 
-        # Try to determine state from the leg (this is a simplified approach)
-        # In production, we'd need proper state/region mapping
-        state = "ohio"  # Default to Ohio for now as reference implementation
+        leg_i, leg_start = self._leg_at_mile(self.position_mi)
+        leg = self.route.legs[leg_i]
+        if not leg.route_points:
+            return
+        forward = self.route.cities[leg_i] == leg.a
+        route_offset = self.position_mi - leg_start
+        leg_offset = route_offset if forward else leg.miles - route_offset
 
-        # Get nearby traffic events
+        state = _leg_state_at(leg, leg_offset)
+        if not state:
+            return
+        point = min(leg.route_points, key=lambda rp: abs(rp.at_mi - leg_offset))
+
         try:
             events = self.traffic_provider.get_events_near(
                 state,
-                latitude=40.0,  # Placeholder - need real coordinates
-                longitude=-83.0,
-                radius_mi=50.0,
+                latitude=point.lat,
+                longitude=point.lon,
+                radius_mi=REAL_TRAFFIC_RADIUS_MI,
             )
-
-            # Filter for high-severity events that haven't been announced
-            for event in events:
-                if event.severity in ("high", "medium"):
-                    event_key = f"real_traffic:{event.id}"
-                    if event_key not in self._announced_real_traffic:
-                        message = f"Traffic alert: {event.description}"
-                        if event.lanes_affected:
-                            message += f". {event.lanes_affected} affected."
-                        self._emit(TripEventKind.GPS_CUE, message, real_traffic_event=event)
-                        self._announced_real_traffic.add(event_key)
         except Exception:
             # Gracefully handle API failures - real traffic is optional
-            pass
+            return
+
+        for event in events:
+            if event.severity not in ("high", "medium"):
+                continue
+            event_key = f"real_traffic:{event.id}"
+            if event_key in self._announced_real_traffic:
+                continue
+            message = f"Traffic alert: {event.description}"
+            if event.lanes_affected:
+                message += f". {event.lanes_affected} affected."
+            self._emit(TripEventKind.GPS_CUE, message, real_traffic_event=event)
+            self._announced_real_traffic.add(event_key)
 
     def next_traffic_pressure_within(
         self, within_mi: float = TRAFFIC_PRESSURE_LOOKAHEAD_MI
