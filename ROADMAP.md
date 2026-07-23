@@ -171,7 +171,13 @@ terminal becomes the anchor of that week instead of a spawn point.
       keep cruise and ABS but not adaptive extras. Same accessibility
       rule as the gearbox spec: realism default per truck, Settings
       override stays. On-road hand throttle must cancel instantly on
-      brake, like cruise.
+      brake, like cruise. AUTO JAKE SHIPPED 2026-07-22 for automatic
+      boxes (J = auto retarder management, Volvo off/auto/1/2/3 stalk;
+      Alt+J for hand-stagers, Alt+T flips shift modes on the road) --
+      when the era ladder lands, vintage rigs simply lack the auto
+      position. Follow-up worth doing: true AMT manual-hold mode (pin a
+      gear without the clutch, like a real AMT's arrows) -- pairs with
+      driving-school descent lessons.
 - [ ] **A turn signal you actually operate (owner idea 2026-07-16).**
       Today lane-change taps click the signal for you; give the player
       the stalk: signal before a lane change, and unsignaled changes
