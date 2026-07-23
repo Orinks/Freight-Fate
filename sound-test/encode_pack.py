@@ -38,10 +38,12 @@ SINGLES: list[tuple[str, str]] = [
     # neutral hold is RETIRED: it measures ~1125 rpm (not the labeled ~1000,
     # 30 rpm under the mid cut) and is likely a different truck.
     ("896/engine_low_950.wav", "engine/low"),       # band low   (950 rpm)
-    # mid/high ship envelope-FLATTENED (engine_band_flatten.py): the raw
-    # steady-hold windows carry the real driver's throttle surging (50-64%
-    # slow-RMS swing), which loops as an audible stop-start jutter.
-    ("896/cruise_mid_1150_flat.wav", "engine/mid"),  # band mid  (~1150 rpm)
+    # The whole ring above idle builds from ONE clean anchor via the formant
+    # model (engine_ring_formant.py, owner's call): the flattened mid's
+    # hiss-free span re-looped -- the raw 7-14s window carries the real air-
+    # build hiss at 1.4-5.5s, which every derived band was inheriting (the
+    # in-game periodic hiss, once per loop pass per band).
+    ("896/cruise_mid_1150_clean.wav", "engine/mid"),  # band mid + THE anchor
     # mid-high = the flattened mid pitched to 1425: splits the too-wide
     # mid->high gap so no band stretches into formant smear.
     ("896/engine_midhigh_1425.wav", "engine/midhigh"),  # band mid-high (1425 rpm)

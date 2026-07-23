@@ -114,6 +114,12 @@ ENGINE_RPM_IDLE = 600.0
 ENGINE_RPM_MAX = 2200.0
 ENGINE_FREQ_MAX_MULT = 1.75
 ENGINE_SLIDE_MS = 120
+# A large rpm jump is a shift re-entry: the engine is ALREADY at the new
+# speed when the clutch hooks up, so the voice must step, not glide -- the
+# 120 ms slide across a 400 rpm drop reads as a little meow on every shift,
+# machine-gunned through a launch (owner's ear, 2026-07-22).
+ENGINE_SLIDE_SNAP_MS = 25
+ENGINE_SLIDE_SNAP_RPM = 150.0
 ENGINE_LOOP_GAIN = 1.0
 
 # Ignition crossfade. When the engine is deliberately started, the "engine/start"
@@ -1286,6 +1292,12 @@ class _BassBackend:
         """
         if not (self._engine_running and (self._engine_bands or self._engine_stream)):
             return
+        # A step-sized rpm change (shift re-entry) snaps; wander glides.
+        slide_ms = (
+            ENGINE_SLIDE_SNAP_MS
+            if abs(rpm - self._engine_last_rpm) > ENGINE_SLIDE_SNAP_RPM
+            else ENGINE_SLIDE_MS
+        )
         self._engine_last_rpm = rpm
         self._engine_last_throttle = throttle
         load_gain = engine_load_gain(throttle)
@@ -1314,7 +1326,7 @@ class _BassBackend:
                         stream.handle,
                         self._ATTRIB_FREQ,
                         base_freq * rate,
-                        ENGINE_SLIDE_MS,
+                        slide_ms,
                     )
                     stream.set_volume(level * w)
                 except self._BassError:
@@ -1324,7 +1336,7 @@ class _BassBackend:
         target = self._engine_base_freq * engine_freq_mult(rpm)
         try:
             self._bass_call(
-                self._slide, self._engine_stream.handle, self._ATTRIB_FREQ, target, ENGINE_SLIDE_MS
+                self._slide, self._engine_stream.handle, self._ATTRIB_FREQ, target, slide_ms
             )
             self._engine_stream.set_volume(level)
         except self._BassError:
