@@ -146,14 +146,26 @@ terminal becomes the anchor of that week instead of a spawn point.
       outside presets. Remaining slices: the required-slowdown
       consequence tier (hot entries pay physics), the pursuit guide and
       edge textures (audio assets), steering-input feel, cue previews.
-- [ ] **Real lane counts from OSM (owner ask 2026-07-16).** OSM tags
-      lanes directly (lanes=, lanes:forward=); bake per-mile lane counts
-      along every leg from the self-hosted Overpass/PBF harvest, the
-      exact pattern of the dense maxspeed sweep. Buys real widths (four
-      lanes through Albuquerque on I-40, two-plus-two rural) and REAL
-      LANE DROPS: where three lanes become two, that is a genuine merge
-      event with a real location, not a scripted taper. Goes in the next
-      map re-bake brief.
+- [x] **Real lane counts from OSM (owner ask 2026-07-16) -- DATA LAYER
+      BAKED 2026-07-23.** `corridor.lane_segments` now carries real OSM
+      lane counts (`lanes`, `lanes:forward`/`backward`, `oneway`) for every
+      leg OSM tags, matched to the archived route geometry against the
+      self-hosted Overpass -- the exact way-matching pattern of the dense
+      maxspeed sweep (`tools/bake_lane_segments.py`, reusing the Job 2
+      matcher). Honest absence where OSM has no tag (no guessed defaults);
+      the runtime can default by road class later. All 1,287 legs swept,
+      20,666 segments, 96.3% of route-miles covered (per-state 92-99%,
+      reported in `logs/oatis-lane-bake-done.json`); acceptance verified --
+      I-40 widens to 3+ lanes through Albuquerque and holds 2 rural.
+      Guarded by `tests/test_lane_data.py`. No mechanic reads it yet: the
+      wiring job below carries the player-facing changelog.
+- [ ] **Wire lane data into play (follows the bake above).** REAL LANE
+      DROPS as genuine merge events at real mileposts (three lanes become
+      two = a located merge, not a scripted taper), real widths spoken/
+      enforced, exit-lane guidance, and keep-right pressure that knows how
+      many lanes exist. Reads `corridor.lane_segments`; advisory guidance
+      may run on partial data, punitive consequences only where lane data
+      is real (see `docs/lanes-harvest-brief.md`).
 - [ ] **Assistance-mode assessment: accessibility features that drive the
       truck right (Josh's ask to the owner, 2026-07-22).** The automatic
       driving aids -- adaptive cruise, the speed keeper, curve speed
