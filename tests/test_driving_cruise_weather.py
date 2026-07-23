@@ -50,6 +50,53 @@ def test_cruise_control_holds_the_set_speed(monkeypatch):
         app.shutdown()
 
 
+def test_shift_k_resumes_the_braked_away_cruise_speed(monkeypatch):
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    spoken = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        driving.trip.traffic_pressures = []
+        driving.trip.curves = []
+        driving._destination_exit_taken = True
+        open_limits(driving)
+        monkeypatch.setattr(app.ctx, "say", lambda text, **k: spoken.append(text))
+        t = driving.truck
+        driving.handle_event(key_event(pygame.K_e))
+        t.transmission.gear = 10
+        t.velocity_mps = 26.8  # ~60 mph
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._cruise_mph == pytest.approx(60.0, abs=1.0)
+        set_speed = driving._speed_control_target_mph
+
+        # The player brakes: the session cancels but the speed is remembered.
+        driving._cancel_cruise()
+        assert driving._cruise_mph is None
+        assert driving._resume_target_mph == pytest.approx(set_speed, abs=1.0)
+
+        # Shift+K re-arms at the remembered target; the per-frame helper
+        # engages as soon as the truck is rolling and off the brakes.
+        shift_k = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_k, mod=pygame.KMOD_LSHIFT)
+        t.velocity_mps = 22.0  # slowed, still rolling
+        driving.handle_event(shift_k)
+        assert driving._speed_control_armed
+        assert driving._speed_control_target_mph == pytest.approx(set_speed, abs=1.0)
+        assert any("Resuming automatic speed control" in s for s in spoken)
+        driving.update(1 / 60)
+        assert driving._cruise_mph == pytest.approx(set_speed, abs=1.0)
+    finally:
+        app.shutdown()
+
+
 def test_parked_cruise_button_latches_high_idle(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.vehicle import HIGH_IDLE_DEFAULT_RPM, HIGH_IDLE_STEP_RPM

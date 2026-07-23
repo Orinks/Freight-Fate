@@ -316,6 +316,7 @@ class DrivingState(
         self._curve_assist_jake = False  # jake engaged BY the assist (not the player)
         self._auto_jake = False  # automatic-box retarder management (J on an AMT)
         self._auto_jake_enabled = True  # Alt+J: whether J arms auto mode on an AMT
+        self._resume_target_mph: float | None = None  # Shift+K brings this speed back
         self._auto_jake_hold_mph: float | None = None  # speed auto mode holds
         self._auto_jake_cooldown_s = 0.0  # rate limit between stage steps
         self._shift_recover_t = 1.0  # 0->1 recovery progress after an automatic shift ends
