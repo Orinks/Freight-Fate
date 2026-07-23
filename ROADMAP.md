@@ -1057,6 +1057,17 @@ section below and the Unreleased changelog; the release-line view:
       (parent network) actually covers each Hi-Line dispatch city and seat
       the parent stream there under the local translator's dial position,
       the same honest-coverage rule as everywhere else.
+- [ ] **Fringe reception should burst, not fade (owner spec, 2026-07-23,
+      ham-ear ruling).** Today the edge of a station's range plays static
+      at a volume scaled by signal -- a knob, not a radio. Real analog
+      fringe is BURSTY: random static bursts of differing lengths at
+      differing intervals, each slightly ducking the music (duck window
+      0 to a quarter second), with bursts getting louder and the quiet
+      gaps between them shorter as the truck drives further out, until
+      static wins. Randomize burst length and spacing (seeded, per trip)
+      so no two fades sound alike. If a digital/HD station ever joins the
+      dial its fringe is different and simpler -- it just drops out --
+      but analog static done right is the foundation.
 - [x] **Fictional call signs de-squatted (2026-07-22).** An FCC license
       audit found eleven of the twelve invented regional call signs
       collide with real licensed stations (only KRWL was clear). Each was
