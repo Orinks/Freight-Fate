@@ -35,9 +35,18 @@
 
 - **The radio dial now jumps by category.** Control with a bracket key
   leaps to the previous or next section of the dial -- route playlist,
-  Freight Fate stations, your playlists, terrestrial, AFN, satellite --
-  and announces where you landed. No more tuning through twenty-five
-  AFN stations one by one to reach the local dial.
+  Freight Fate stations, your playlists, terrestrial, AFN, satellite,
+  international -- and announces where you landed. No more tuning through
+  twenty-five AFN stations one by one to reach the local dial.
+
+- **International public broadcasters are always on the dial.** With
+  streamer-safe mode off, a new International section carries English-
+  language public radio you can catch anywhere, the way AFN already
+  works -- ABC from Australia (triple j, Jazz, Classic, and Double J),
+  RTÉ from Ireland (Radio 1, 2FM, and lyric fm), RNZ from New Zealand
+  (National and Concert), RFI English from France, and CBC Radio One and
+  CBC Music from Canada. Music, news, and classical all in the mix, so
+  there is always something to tune to no matter where a load leaves you.
 
 - **The road now names the towns that change your speed limit.** When a
   limit is about to drop for a small town, you hear the town first --
