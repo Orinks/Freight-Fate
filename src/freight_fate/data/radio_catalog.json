@@ -488,7 +488,7 @@
     },
     {
       "id": "krwl-dallas",
-      "call_sign": "KRWL",
+      "call_sign": "KRWZ",
       "name": "The Rawhide 98.1",
       "format": "country",
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
@@ -590,7 +590,7 @@
     },
     {
       "id": "kchm-los-angeles",
-      "call_sign": "KHRM",
+      "call_sign": "KHRZ",
       "name": "Chrome 106.3",
       "format": "classic rock",
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
@@ -2101,7 +2101,7 @@
     },
     {
       "id": "wdse-duluth",
-      "call_sign": "WDSE",
+      "call_sign": "WDSE-FM",
       "name": "Duluth",
       "format": "public radio adult album alternative",
       "source": "WDSE 'The North' 103.3 Duluth (formerly KUMD), StreamGuys mount",
@@ -2196,7 +2196,7 @@
     },
     {
       "id": "khne-hastings",
-      "call_sign": "KHNE",
+      "call_sign": "KHNE-FM",
       "name": "Hastings",
       "format": "public radio news",
       "source": "Nebraska Public Media statewide feed (nebraskapublicmedia.org), carried on KHNE 89.1",
@@ -2234,7 +2234,7 @@
     },
     {
       "id": "kdsd-aberdeen",
-      "call_sign": "KDSD",
+      "call_sign": "KDSD-FM",
       "name": "Aberdeen",
       "format": "public radio news",
       "source": "South Dakota Public Broadcasting statewide feed (sdpb.org), carried on KDSD 90.9 Aberdeen",
@@ -2253,7 +2253,7 @@
     },
     {
       "id": "ktsd-pierre",
-      "call_sign": "KTSD",
+      "call_sign": "KTSD-FM",
       "name": "Pierre",
       "format": "public radio news",
       "source": "South Dakota Public Broadcasting statewide feed (sdpb.org), carried on KTSD 91.1 Pierre",
@@ -2443,7 +2443,7 @@
     },
     {
       "id": "wmpn-jackson",
-      "call_sign": "WMPN",
+      "call_sign": "WMPN-FM",
       "name": "Jackson",
       "format": "public radio news",
       "source": "Mississippi Public Broadcasting Think Radio feed (mpbonline.org), carried on WMPN 91.3 Jackson",
@@ -2462,7 +2462,7 @@
     },
     {
       "id": "kisu-pocatello",
-      "call_sign": "KISU",
+      "call_sign": "KISU-FM",
       "name": "Pocatello",
       "format": "public radio news",
       "source": "KISU 91.1 Idaho State University / NPR, university Icecast mount (isu.edu)",
@@ -2557,7 +2557,7 @@
     },
     {
       "id": "will-champaign",
-      "call_sign": "WILL",
+      "call_sign": "WILL-FM",
       "name": "Champaign",
       "format": "public radio news",
       "source": "WILL 90.9 Illinois Public Media / NPR, university Icecast mount (will.illinois.edu)",
@@ -2785,7 +2785,7 @@
     },
     {
       "id": "wjct-jacksonville",
-      "call_sign": "WJCT",
+      "call_sign": "WJCT-FM",
       "name": "Jacksonville",
       "format": "public radio news",
       "source": "WJCT 89.9 Jacksonville FL / NPR, StreamTheWorld mount (wjct.org)",
@@ -2804,7 +2804,7 @@
     },
     {
       "id": "wuft-gainesville",
-      "call_sign": "WUFT",
+      "call_sign": "WUFT-FM",
       "name": "Gainesville",
       "format": "public radio news",
       "source": "WUFT 89.1 University of Florida / NPR, streamon.fm mount (wuft.org)",
@@ -2861,17 +2861,17 @@
     },
     {
       "id": "upr-cedar-city",
-      "call_sign": "UPR",
+      "call_sign": "K247AG",
       "name": "Cedar City",
       "format": "public radio news",
-      "source": "Utah Public Radio network feed (upr.org), carried on the USU Cedar City translator",
+      "source": "Utah Public Radio network feed (upr.org/where-to-listen), carried on FM translator K247AG 97.3 (licensed to Utah State University)",
       "source_type": "local",
       "stream_url": "http://uprxstreamer.usu.edu:8000/stream",
       "stream_format": "icecast",
       "codec": "mp3",
       "lat": 37.68,
       "lon": -113.06,
-      "range_miles": 40,
+      "range_miles": 22,
       "market": "Cedar City",
       "region": "great_basin",
       "safe_for_streaming": false,
@@ -2880,10 +2880,10 @@
     },
     {
       "id": "upr-richfield",
-      "call_sign": "UPR",
+      "call_sign": "KUSL",
       "name": "Richfield",
       "format": "public radio news",
-      "source": "Utah Public Radio network feed (upr.org), carried on the USU Richfield translator",
+      "source": "Utah Public Radio network feed (upr.org/where-to-listen), carried on full-power repeater KUSL 89.3 Richfield",
       "source_type": "local",
       "stream_url": "http://uprxstreamer.usu.edu:8000/stream",
       "stream_format": "icecast",
@@ -2918,7 +2918,7 @@
     },
     {
       "id": "kpne-north-platte",
-      "call_sign": "KPNE",
+      "call_sign": "KPNE-FM",
       "name": "North Platte",
       "format": "public radio news",
       "source": "Nebraska Public Media statewide feed (nebraskapublicmedia.org), carried on KPNE 91.7 North Platte",
@@ -2937,7 +2937,7 @@
     },
     {
       "id": "ktne-alliance",
-      "call_sign": "KTNE",
+      "call_sign": "KTNE-FM",
       "name": "Alliance",
       "format": "public radio news",
       "source": "Nebraska Public Media statewide feed (nebraskapublicmedia.org), carried on KTNE 91.1 Alliance",
@@ -2956,10 +2956,10 @@
     },
     {
       "id": "ypr-havre",
-      "call_sign": "YPR",
+      "call_sign": "K219FF",
       "name": "Havre",
       "format": "public radio news",
-      "source": "Yellowstone Public Radio network feed (ypradio.org), carried on the KNMC 90.1 Havre translator (short range)",
+      "source": "Yellowstone Public Radio network feed (ypradio.org/listening-area), carried on FM translator K219FF 91.7 Havre (short range; KNMC 90.1 is separate MSU-Northern college radio)",
       "source_type": "local",
       "stream_url": "http://ypr-sc.streamguys.net/live",
       "stream_format": "icecast",

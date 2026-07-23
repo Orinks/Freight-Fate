@@ -957,12 +957,15 @@ section below and the Unreleased changelog; the release-line view:
       BASS), the far Montana Hi-Line, the Texas border west of the Valley,
       and interior US-50 Nevada -- genuinely thin country, left dark rather
       than faked.
-- [x] **Fictional call signs de-squatted (2026-07-22).** An FCC license
-      audit found eleven of the twelve invented regional call signs
-      collide with real licensed stations (only KRWL was clear). Each was
-      renamed to an FCC-unassigned sign with the brand and dial position
-      unchanged; the old->new list is filed for Josh's final word before
-      the release cut.
+- [x] **Fictional call signs de-squatted (2026-07-22, Josh-approved).** An
+      FCC license audit found eleven of the twelve invented regional call
+      signs collide with real licensed stations; each was renamed to an
+      FCC-unassigned sign with the brand and dial position unchanged. A
+      second overnight pass against the FCC LPFM/translator databases (the
+      records Wikipedia misses) caught two more squats: the twelfth sign,
+      KRWL, is a real LPFM in Coquille, Oregon, and one replacement, KHRM,
+      collides with a Nevada station -- both swapped to verified-free signs
+      (KRWZ, KHRZ). Josh approved the full list.
 - [x] **Full music rotations for the fictional stations.** A 52-track
       Suno-composed batch (via the Zero CLI) grows the format pools to
       radio-scale: country 15 songs, classic rock 17 (including a Saltwake
@@ -1010,22 +1013,18 @@ section below and the Unreleased changelog; the release-line view:
       stations, your playlists, terrestrial, AFN, satellite. AFN got its
       own category so its 25-station block never buries the local dial
       again; the dial sort and the jump share one grouping.
-- [ ] **Fictional call signs must not squat real stations (owner catch
-      2026-07-20).** Our fictional Phoenix classic-rock station is
-      "KDRT Desert Rock 101.5" -- but KDRT-LP is a real community station
-      in Davis, California. Rename it, and audit all 15 fictional call
-      signs against the FCC database (WDLT and WSOL look suspect too);
-      fictional stations should hold call signs no real broadcaster owns.
-- [ ] **Community and college radio sweep, and an NPR coverage audit
-      (owner ask 2026-07-20).** There is no policy against real
-      terrestrial stations -- 63 already stream in-game; the limits were
-      streamer-safety flags and URL rot. Add the freeform and community
-      institutions (WFMU Jersey City, KABF Little Rock, college stations
-      with reliable streams), and audit NPR-member coverage per market so
-      the dial finds local news most places a route goes. Direct station
-      stream URLs with source notes, as the desert-Southwest sweep did;
-      Radio Browser as the finding aid, never a runtime dependency.
-      TuneIn is partner-gated API-wise and stays out.
+- [x] **Fictional call signs must not squat real stations (owner catch
+      2026-07-20).** Shipped 2026-07-22 -- see "Fictional call signs
+      de-squatted" above. KDRT and every other invented sign was audited
+      against the FCC database (including the LPFM/translator records) and
+      renamed to a verified-free sign; brands and dial positions unchanged.
+- [x] **Community and college radio sweep, and an NPR coverage audit
+      (owner ask 2026-07-20).** Shipped 2026-07-22 -- see "Community/
+      college/NPR coverage sweep" above. WFMU, KABF, college stations, and
+      public-radio networks joined via direct station stream URLs with
+      source notes, each gated on the BASS live check; real-station reach
+      went 78% -> 93% of the 623 cities. Radio Browser was the finding aid
+      only; TuneIn stayed out.
 - [ ] **Spotify and Apple Music: research only, parked (owner idea
       2026-07-20).** In-game playback of either is off the table --
       both wrap streams in DRM their licenses forbid unwrapping, official
