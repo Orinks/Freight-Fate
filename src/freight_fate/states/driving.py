@@ -312,6 +312,7 @@ class DrivingState(
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
         self._air_cue_active = False  # compressor fill loop below governor release
+        self._jake_cue_key: str | None = None  # jake growl loop currently playing
         self._shift_recover_t = 1.0  # 0->1 recovery progress after an automatic shift ends
         self._shift_hold_rpm: float | None = None  # engine voice held here through a shift
         # Smooth only the audible engine load. Physics keeps the raw throttle,

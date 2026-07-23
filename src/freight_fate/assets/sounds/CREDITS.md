@@ -57,6 +57,7 @@ current idle, start, and shutdown cues.
 | Tire screech | `vehicle/tire_screech.ogg` | ElevenLabs-generated emergency-braking skid for microsleep forced stops |
 | Brake squeal | `vehicle/brake_squeal.ogg` | ElevenLabs-generated overheated-brake squeal past the fade temperature |
 | Air pressurization fill | `vehicle/air_pressurize.ogg` | Original parametric DSP loop (seeded frequency-domain synthesis, `sound-test/air_fallback.py`); superseded in release builds by the licensed overlay version |
+| Jake brake growl | `engine/jake_1200.ogg` ... `engine/jake_2200.ogg` | Original synthesized engine-brake loops at six rpm points (deterministic pulse-train DSP, `sound-test/jake_v2.py` family; approved by ear 2026-07-18) |
 
 ## Licensed Driving Sounds (release builds only)
 

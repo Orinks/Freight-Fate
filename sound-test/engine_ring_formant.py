@@ -31,7 +31,6 @@ from pathlib import Path
 
 import numpy as np
 from scipy.ndimage import median_filter
-from scipy.signal import resample_poly
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cand_common as C  # noqa: E402
@@ -58,8 +57,27 @@ def envelope_db(x: np.ndarray, sr: int) -> tuple[np.ndarray, np.ndarray]:
     return freqs, smooth
 
 
+def circular_resample(x: np.ndarray, ratio: float) -> np.ndarray:
+    """Pitch-shift an exact loop by re-rendering its spectrum at a new length.
+
+    ``resample_poly`` pads the edges with silence, leaving a transient at the
+    loop join of every derived band -- the once-per-pass TICK the owner heard
+    (more noticeable at low speed where the road bed no longer masks it).
+    Re-rendering the same spectral coefficients into ``round(N / ratio)``
+    samples scales every harmonic by exactly ``ratio`` with no edges at all:
+    the result is periodic by construction.
+    """
+    n = len(x)
+    m = int(round(n / ratio))
+    spectrum = np.fft.rfft(x)
+    bins = min(len(spectrum), m // 2 + 1)
+    out = np.zeros(m // 2 + 1, dtype=complex)
+    out[:bins] = spectrum[:bins]
+    return np.fft.irfft(out, n=m) * (m / n)
+
+
 def formant_shift(x: np.ndarray, sr: int, native: float, target: float) -> np.ndarray:
-    shifted = resample_poly(x, int(native), int(target))
+    shifted = circular_resample(x, target / native)
     f_orig, env_orig = envelope_db(x, sr)
     f_shift, env_shift = envelope_db(shifted, sr)
     n = len(shifted)

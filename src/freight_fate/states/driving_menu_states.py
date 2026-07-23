@@ -515,6 +515,7 @@ class PauseMenuState(MenuState):
         self.ctx.audio.stop_world()
         self.driving._reverse_cue_active = False
         self.driving._air_cue_active = False
+        self.driving._jake_cue_key = None
         super().enter()
 
     def presence(self):

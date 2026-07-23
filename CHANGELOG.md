@@ -27,6 +27,14 @@
   parking brake drops it back to idle on its own, and holding a high
   idle burns real fuel. On a controller it is the Y button.
 
+- **The jake brake finally has its voice.** Switch the engine brake on
+  and you hear the growl -- deeper and stronger the more cylinders you
+  select and the higher the revs, exactly how the real retarder works.
+  It cuts out through every shift and comes back louder in the lower
+  gear: the stair-stepping bark every trucker knows from a long grade.
+  It goes quiet the moment you touch the throttle, because a real jake
+  does.
+
 - **Brakes and gear changes sound like the real mechanisms now.** Pressing
   the brake gives the valve's mechanical clunk, louder the harder you
   press, and letting off releases the air back out -- a hiss that runs

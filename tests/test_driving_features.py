@@ -2689,6 +2689,69 @@ def test_air_fill_loop_plays_until_governor_release(monkeypatch):
         app.shutdown()
 
 
+def test_jake_growl_follows_stage_rpm_and_cuts_through_shifts(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.audio import CH_JAKE
+
+    app = App()
+    loops = []
+    monkeypatch.setattr(app.ctx.audio, "set_engine_rpm", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(
+        app.ctx.audio,
+        "start_loop",
+        lambda ch, key, volume=1.0, fade_ms=300: loops.append(("start", ch, key, volume)),
+    )
+    monkeypatch.setattr(
+        app.ctx.audio, "set_loop_volume", lambda ch, volume: loops.append(("vol", ch, volume))
+    )
+    monkeypatch.setattr(
+        app.ctx.audio, "stop_loop", lambda ch, **k: loops.append(("stop", ch))
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.set_air_ready(parking_brake=False)
+        t.start_engine()
+        t.transmission.automatic = True
+        t.transmission.gear = 8
+        t.velocity_mps = 20.0
+        t.throttle = 0.0
+        t.engine_brake_stage = 3
+        t.rpm = 1850.0
+        loops.clear()
+
+        driving._update_audio(0.0)
+        jake = [entry for entry in loops if entry[0] == "start" and entry[1] == CH_JAKE]
+        assert jake and jake[0][2] == "engine/jake_1800"  # nearest loop to 1850
+
+        # Mid-shift the jake cuts out -- the stair-step signature.
+        t.transmission._shift_timer = 0.5
+        driving._update_audio(0.0)
+        assert ("stop", CH_JAKE) in loops
+
+        # Back in gear at higher revs: it resumes on the higher loop.
+        loops.clear()
+        t.transmission._shift_timer = 0.0
+        t.rpm = 2150.0
+        driving._update_audio(0.0)
+        jake = [entry for entry in loops if entry[0] == "start" and entry[1] == CH_JAKE]
+        assert jake and jake[0][2] == "engine/jake_2200"
+
+        # Throttle on: a jake never sounds under power.
+        loops.clear()
+        t.throttle = 0.5
+        driving._update_audio(0.0)
+        assert ("stop", CH_JAKE) in loops
+    finally:
+        app.shutdown()
+
+
 def test_cold_start_buzzer_waits_out_the_crank(monkeypatch):
     from freight_fate.app import App
     from freight_fate.audio import AudioEngine
