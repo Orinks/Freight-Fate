@@ -126,6 +126,7 @@ class Transmission:
         upshift_steps: int = 1,
         downshift_target: int | None = None,
         engine_braking: bool = False,
+        retarder_slipping: bool = False,
     ) -> int | None:
         """Pick a gear in automatic mode. Returns the new gear when it changes.
 
@@ -172,7 +173,16 @@ class Transmission:
             self._shift_timer = shift_time_for(self.gear)
             self._gear_hold_timer = 0.0
             return self.gear
-        if engine_braking and moving and self.gear > 1 and rpm < JAKE_PRESELECT_RPM:
+        if (
+            engine_braking
+            and moving
+            and self.gear > 1
+            and rpm < JAKE_PRESELECT_RPM
+            and not retarder_slipping
+        ):
+            # Never pre-select DEEPER while the drive axle is already breaking
+            # loose: a lower gear multiplies the retard torque that broke it.
+            # Real retarder management is traction-linked for the same reason.
             lower = GEAR_RATIOS[self.gear - 2]
             current = GEAR_RATIOS[self.gear - 1]
             if rpm * lower / current <= JAKE_MAX_RPM:
@@ -180,7 +190,11 @@ class Transmission:
                 self._shift_timer = shift_time_for(self.gear)
                 self._gear_hold_timer = 0.0
                 return self.gear
-        if rpm < AUTO_DOWNSHIFT_RPM and self.gear > 1 and moving:
+        if rpm < AUTO_DOWNSHIFT_RPM and self.gear > 1 and moving and not retarder_slipping:
+            # The anti-lugging downshift also respects traction while the
+            # retarder works: on a low-grip descent the road spins the
+            # engine, there is no stall to protect against, and the lower
+            # gear would multiply the retard past what the drives can hold.
             target = self.gear - 1 if downshift_target is None else downshift_target
             self.gear = max(1, min(self.gear - 1, target))
             self._shift_timer = shift_time_for(self.gear)
