@@ -319,6 +319,12 @@
 
 ### Changed
 
+- **Gear changes are quicker, like a modern automated box.** Power
+  upshifts now take a quarter second in the low gears and half a second
+  at the top, instead of dragging toward a full second. Downshifts keep
+  their deliberate rev-matched pace -- that slower beat is real, and it
+  is also what keeps the engine brake steady on a slick descent.
+
 - **The game is about a third smaller to download.** The music now uses a
   newer, more efficient audio format, cutting the download from roughly 282
   to 191 megabytes without changing how anything sounds -- welcome news on a

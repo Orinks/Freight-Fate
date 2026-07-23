@@ -22,11 +22,17 @@ AUTO_DOWNSHIFT_RPM = 1050
 # Torque-interrupt length. Real AMTs are quickest in the low box -- small
 # inertia steps and launch urgency -- and take the longest up top, so the
 # time scales with the gear being ENGAGED (owner's ear after the Camp
-# Verde-Kingman run: a one-second gap on a two-second low-gear pull reads
-# as a long, "shifty" hole). SHIFT_TIME stays as the top-gear ceiling and
-# the conservative figure the grade-loss estimate uses.
-SHIFT_TIME = 1.0  # seconds of torque interruption, 10th-gear ceiling
-SHIFT_TIME_LOW = 0.45  # through gear 4
+# Verde-Kingman run, then tightened to modern-AMT figures 2026-07-23:
+# power upshifts run 0.25 through the low box to 0.5 in 10th). Downshifts
+# keep their own full-second figure: a real box has to rev-match UP into
+# the lower gear, which is genuinely slower than a power upshift -- and
+# that deliberateness is also what keeps a jake descent from cycling the
+# retarder fast enough to break a chained truck loose (physics bench).
+# DOWNSHIFT_TIME is also the conservative figure the grade-loss estimate
+# uses.
+SHIFT_TIME = 0.5  # seconds of torque interruption, 10th-gear power-upshift ceiling
+SHIFT_TIME_LOW = 0.25  # through gear 4
+DOWNSHIFT_TIME = 1.0  # rev-matched downshifts, and the jake preselect
 # Manual shifts: the player's clutch is already the torque interruption, so
 # the box only charges the lever's own travel through neutral. Stacking the
 # AMT interrupt on top left up to 0.6 s of dead pedal AFTER the clutch was
@@ -203,7 +209,7 @@ class Transmission:
                 # engine-protect-up, and quick downshifts doubled that
                 # cycle rate -- enough extra jake-connected time to break
                 # a chained truck loose on ice (physics bench regression).
-                self._shift_timer = SHIFT_TIME
+                self._shift_timer = DOWNSHIFT_TIME
                 self._gear_hold_timer = 0.0
                 return self.gear
         if rpm < downshift_rpm and self.gear > 1 and moving and not retarder_slipping:
@@ -213,7 +219,7 @@ class Transmission:
             # gear would multiply the retard past what the drives can hold.
             target = self.gear - 1 if downshift_target is None else downshift_target
             self.gear = max(1, min(self.gear - 1, target))
-            self._shift_timer = SHIFT_TIME
+            self._shift_timer = DOWNSHIFT_TIME
             self._gear_hold_timer = 0.0
             return self.gear
         return None

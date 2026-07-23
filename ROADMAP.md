@@ -1092,6 +1092,13 @@ section below and the Unreleased changelog; the release-line view:
       (parent network) actually covers each Hi-Line dispatch city and seat
       the parent stream there under the local translator's dial position,
       the same honest-coverage rule as everywhere else.
+- [ ] **Lay on the horn (owner ask, 2026-07-23).** H plays one shortish
+      horn sample today. Holding H should hold the horn -- attack, a
+      seamless sustain loop for as long as the key is down, then the
+      release -- like a real air horn lever. Pairs perfectly with the
+      horn replacement already owed (the current horn is Duff material):
+      when the new Splice/synth horn is cut, cut it AS attack/sustain/
+      release pieces so the hold behavior falls out of the asset design.
 - [ ] **Fringe reception should burst, not fade (owner spec, 2026-07-23,
       ham-ear ruling).** Today the edge of a station's range plays static
       at a volume scaled by signal -- a knob, not a radio. Real analog

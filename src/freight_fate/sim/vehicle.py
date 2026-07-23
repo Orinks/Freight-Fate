@@ -14,8 +14,8 @@ from dataclasses import dataclass, field
 
 from .transmission import (
     AUTO_DOWNSHIFT_RPM,
+    DOWNSHIFT_TIME,
     PROGRESSIVE_UPSHIFT_RPM,
-    SHIFT_TIME,
     Transmission,
 )
 
@@ -449,13 +449,13 @@ class TruckState:
         target_gear = min(tr.num_gears, max(1, tr.gear) + upshift_steps)
         if 0 < tr.gear < tr.num_gears and self.throttle > 0.5 and self.grade > 0.02:
             next_gear = target_gear
-            # The shift itself costs SHIFT_TIME of torque interruption, and on
+            # The shift itself costs a torque interruption, and on
             # a grade gravity bleeds real speed through it -- so judge the new
             # gear at the speed the truck will actually have when the clutch
             # comes back, not the speed it has now. At crawl speeds on a steep
             # pull that keeps the box in the low gear all the way to the
             # governor instead of hunting across a boundary it cannot hold.
-            shift_loss_mps = G * max(0.0, self.grade) * SHIFT_TIME
+            shift_loss_mps = G * max(0.0, self.grade) * DOWNSHIFT_TIME
             v = max(0.1, abs(self.velocity_mps))
             landing_frac = max(0.1, (v - shift_loss_mps) / v)
             next_rpm = max(self.specs.idle_rpm, self.coupled_rpm(next_gear) * landing_frac)
