@@ -48,7 +48,10 @@ class DrivingControlsMixin:
         elif key == pygame.K_q and not tr.automatic and not tr.in_neutral and tr.gear > 1:
             self._manual_shift(tr.gear - 1)
         elif key == pygame.K_j:
-            self._toggle_engine_brake()
+            if getattr(event, "mod", 0) & pygame.KMOD_ALT:
+                self._toggle_auto_jake_enabled()
+            else:
+                self._toggle_engine_brake()
         elif key in (pygame.K_1, pygame.K_2, pygame.K_3):
             self._select_jake_stage(key - pygame.K_0)
         elif key == pygame.K_p:
@@ -56,7 +59,13 @@ class DrivingControlsMixin:
         elif key == pygame.K_h:
             self.ctx.audio.horn_start()
         elif key == pygame.K_t:
-            self._try_rest_stop()
+            if getattr(event, "mod", 0) & pygame.KMOD_ALT:
+                # The AMT's manual-mode button: flips the transmission
+                # setting; the existing manual shift controls take over.
+                s = self.ctx.settings
+                s.automatic_transmission = not s.automatic_transmission
+            else:
+                self._try_rest_stop()
         elif key == pygame.K_x:
             if self._pull_over is not None:
                 self._signal_pull_over()
@@ -273,7 +282,10 @@ class DrivingControlsMixin:
             "T route POI menu when already stopped "
             "at one: available actions may include fuel, break, sleep, "
             "inspect, roadside assistance, or save when source-backed. H horn. "
-            "J engine brake. Escape pause menu. "
+            "J engine brake; on an automatic it manages its own stage to hold "
+            "your speed, and 1, 2, 3 take manual control. Alt J chooses "
+            "whether J runs the automatic mode. Alt T switches between "
+            "automatic and manual shifting. Escape pause menu. "
             + (
                 ""
                 if self.truck.transmission.automatic
@@ -338,31 +350,64 @@ class DrivingControlsMixin:
     _JAKE_STAGE_WORD = {1: "one", 2: "two", 3: "three"}
 
     def _toggle_engine_brake(self) -> None:
-        """J is the dash enable switch of a real Jacobs setup: it engages at
-        whatever stage the selector was left on, never surprising an icy
-        descent with full retard the driver dialed back an hour ago."""
+        """J is the dash enable switch of a real Jacobs setup. On a manual
+        box it engages at whatever stage the selector was left on, never
+        surprising an icy descent with full retard the driver dialed back an
+        hour ago. On an automatic box the retarder is managed like a real
+        AMT integrates it: J arms AUTO mode, the controller picks and steps
+        the stage to hold the engagement speed (owner design, 2026-07-22),
+        and 1/2/3 take manual control back."""
         t = self.truck
         if t.throttle > 0.05 and not t.engine_brake:
             self.ctx.say("Release the accelerator before turning the jake on.")
             return
         if t.engine_brake:
             t.engine_brake_stage = 0
+            self._auto_jake = False
             self.ctx.say("Jake off.")
+            return
+        if t.transmission.automatic and self._auto_jake_enabled:
+            self._auto_jake = True
+            self._auto_jake_hold_mph = max(5.0, t.speed_mph)
+            self._auto_jake_cooldown_s = 0.0
+            t.engine_brake_stage = 1  # the controller climbs from here
+            self.ctx.say("Jake on, automatic.")
             return
         t.engine_brake_stage = self._jake_selected_stage
         self.ctx.say(f"Jake on, stage {self._JAKE_STAGE_WORD[t.engine_brake_stage]}.")
+
+    def _toggle_auto_jake_enabled(self) -> None:
+        """Alt+J: whether J arms retarder management on an automatic box.
+
+        Off, the jake stalk behaves like the manual-box selector even on an
+        AMT -- for the driver who wants to stage it by hand."""
+        self._auto_jake_enabled = not self._auto_jake_enabled
+        if not self._auto_jake_enabled and self._auto_jake:
+            # Managing right now: hand the current stage over to the driver.
+            self._auto_jake = False
+            stage = max(1, self.truck.engine_brake_stage)
+            self._jake_selected_stage = stage
+            self.ctx.say(
+                f"Automatic jake off; holding stage {self._JAKE_STAGE_WORD[stage]}."
+            )
+            return
+        self.ctx.say(f"Automatic jake {'on' if self._auto_jake_enabled else 'off'}.")
 
     def _select_jake_stage(self, stage: int) -> None:
         """1, 2, 3: the cylinder selector, live only while the jake is on.
 
         With the jake off the number keys do nothing here, so they stay
-        free for other bindings in other contexts (owner, 2026-07-21)."""
+        free for other bindings in other contexts (owner, 2026-07-21).
+        On an automatic box a manual pick takes over from auto mode."""
         t = self.truck
         if not t.engine_brake:
             return
+        was_auto = self._auto_jake
+        self._auto_jake = False
         self._jake_selected_stage = stage
         t.engine_brake_stage = stage
-        self.ctx.say(f"Jake stage {self._JAKE_STAGE_WORD[stage]} selected.")
+        suffix = ", manual" if was_auto else ""
+        self.ctx.say(f"Jake stage {self._JAKE_STAGE_WORD[stage]} selected{suffix}.")
 
     def _cycle_jake_stage(self) -> None:
         """Controller: modifier plus the jake button walks 1 -> 2 -> 3 -> 1."""

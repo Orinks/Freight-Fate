@@ -2333,6 +2333,9 @@ def test_jake_engages_at_last_selected_stage(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         driving.truck.throttle = 0.0
+        # The remembered-stage behavior is the manual-box stalk; an automatic
+        # box arms retarder management instead (its own test).
+        driving.truck.transmission.automatic = False
 
         driving.handle_event(key_event(pygame.K_j))
         assert driving.truck.engine_brake_stage == 3
@@ -2794,6 +2797,67 @@ def test_air_fill_loop_plays_until_governor_release(monkeypatch):
         driving.truck.air_pressure_psi = 88.0
         driving._update_audio(0.0)
         assert loops == [("start", CH_AIR, "vehicle/air_pressurize")]
+    finally:
+        app.shutdown()
+
+
+def test_auto_jake_manages_stages_on_an_automatic_box(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say", lambda text, **k: spoken.append(text))
+        t = driving.truck
+        t.set_air_ready(parking_brake=False)
+        t.start_engine()
+        t.transmission.automatic = True
+        t.transmission.gear = 8
+        t.velocity_mps = 55.0 / 2.23694
+        t.rpm = 1400.0
+        t.throttle = 0.0
+        t.grip = 1.0
+
+        driving._toggle_engine_brake()
+        assert driving._auto_jake
+        assert t.engine_brake_stage == 1
+        assert any("Jake on, automatic" in s for s in spoken)
+
+        # Gaining on the hold speed: the controller climbs the stages,
+        # one rate-limited step at a time.
+        t.velocity_mps = 60.0 / 2.23694
+        driving._update_auto_jake(2.0)
+        assert t.engine_brake_stage == 2
+        driving._update_auto_jake(2.0)
+        assert t.engine_brake_stage == 3
+
+        # Over-slowed: it steps back down.
+        t.velocity_mps = 48.0 / 2.23694
+        driving._update_auto_jake(2.0)
+        assert t.engine_brake_stage == 2
+
+        # Ice arrives: the stage collapses to what the drives can hold.
+        t.velocity_mps = 60.0 / 2.23694
+        t.grip = 0.15
+        t.transmission.gear = 5
+        t.rpm = 1900.0
+        driving._update_auto_jake(2.0)
+        assert t.engine_brake_stage <= driving._auto_jake_max_stage() or t.engine_brake_stage == 1
+
+        # A manual stage pick takes over from auto mode.
+        driving._select_jake_stage(2)
+        assert not driving._auto_jake
+        assert t.engine_brake_stage == 2
+        assert any("manual" in s for s in spoken)
+
+        # On a manual box, J keeps the classic selector behavior.
+        t.engine_brake_stage = 0
+        t.transmission.automatic = False
+        driving._toggle_engine_brake()
+        assert not driving._auto_jake
+        assert t.engine_brake_stage == driving._jake_selected_stage
     finally:
         app.shutdown()
 
