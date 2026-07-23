@@ -1253,6 +1253,15 @@ class DrivingEventMixin:
         for threshold in thresholds:
             if gap_mi <= threshold * unit_mi and threshold not in self._ramp_gap_milestones_said:
                 self._ramp_gap_milestones_said.add(threshold)
+                if self._terse_speech():
+                    # One compact line with everything a driver needs
+                    # (owner spec 2026-07-23): distance, target, limit.
+                    self.ctx.say_event(
+                        f"{threshold} {unit_word} to stop bar, "
+                        f"speed limit {self._approach_limit_text()}.",
+                        interrupt=False,
+                    )
+                    return
                 self.ctx.say_event(f"{threshold} {unit_word} to the bar.", interrupt=False)
                 return
 
@@ -1312,9 +1321,21 @@ class DrivingEventMixin:
         meters = max(20, int(round(miles * 1609.344 / 20.0)) * 20)
         return f"{meters} meters"
 
+    def _approach_limit_text(self) -> str:
+        """The enforced limit where the truck is right now, spoken.
+
+        The terminal callouts named the control but never the limit the
+        approach is driven at (owner report 2026-07-23), so a driver knew
+        where the bar was but not how fast they were allowed to reach it.
+        Same source of truth as the S key: the trip's limit at position.
+        """
+        limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        return self.ctx.settings.speed_text(limit)
+
     def _announce_ramp_terminal(self) -> None:
         """Mid-ramp callout naming the control at the terminal."""
         self._ramp_light_announced = True
+        limit_text = self._approach_limit_text()
         if self._ramp_control == "signal":
             phase = self._ramp_light_phase()
             self._ramp_light_last_phase = phase
@@ -1322,6 +1343,11 @@ class DrivingEventMixin:
                 "events/ramp_light_red" if phase == "red" else "events/ramp_light_green",
                 volume=0.8,
             )
+            if self._terse_speech():
+                self.ctx.say_event(
+                    f"Light at ramp end, {phase}. Limit {limit_text}.", interrupt=False
+                )
+                return
             # "Brake to a stop" alone invites stopping right here, a quarter
             # mile short of the bar; the stop belongs at the light.
             if phase == "red":
@@ -1336,11 +1362,19 @@ class DrivingEventMixin:
                 )
             else:
                 message = "Traffic light at the end of the ramp, currently green."
-            self.ctx.say_event(message, interrupt=False)
+            self.ctx.say_event(
+                f"{message} Speed limit {limit_text} on the approach.", interrupt=False
+            )
         elif self._ramp_control == "stop":
             self.ctx.audio.play("ui/notify", volume=0.7)
+            if self._terse_speech():
+                self.ctx.say_event(
+                    f"Stop sign at ramp end. Limit {limit_text}.", interrupt=False
+                )
+                return
             self.ctx.say_event(
-                "Stop sign at the end of the ramp. Brake to a full stop there.",
+                "Stop sign at the end of the ramp. Brake to a full stop there. "
+                f"Speed limit {limit_text} on the approach.",
                 interrupt=False,
             )
 

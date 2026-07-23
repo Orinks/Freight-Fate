@@ -737,6 +737,13 @@
 
 ### Fixed
 
+- **Ramp-end callouts now tell you the approach speed limit.** The stop
+  sign and traffic light announcements named the control but never how
+  fast you were allowed to approach it. They now end with the limit --
+  "Speed limit 25 on the approach" -- and on the lowest speech verbosity
+  the whole callout compresses to one line with everything a driver
+  needs: "400 feet to stop bar, speed limit 25."
+
 - **Manual shifting answers the moment the clutch comes out.** Shifting by
   hand used to leave the truck coasting for up to a second after you
   released the clutch, because the automatic gearbox's internal shift
