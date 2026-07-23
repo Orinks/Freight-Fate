@@ -325,9 +325,12 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
             22.0,
             70.0,
             # This segment runs through a bend advised well under the set
-            # point, and a curve that far below cruise hands speed control
-            # back to the driver rather than carrying 70 into it.
-            ["cruise", "off"],
+            # point. With curve speed assistance on (the default), cruise
+            # owns the bend: it eases its working target to the advisory
+            # and climbs back after, never handing the driver the pedals
+            # (owner direction, 2026-07-22). Manual handoff is reserved
+            # for advisories below what cruise can hold at all.
+            ["cruise"],
         ),
     ],
 )
@@ -376,7 +379,12 @@ def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
         # never has to guess why cruise dropped out from under them.
         assert "Adaptive cruise off; you need manual speed control" in result.transcript_text
     else:
-        assert "Posted limit lower; adaptive cruise easing" in result.transcript_text
+        # Cruise never left: it eased for whatever demanded less speed --
+        # a posted drop or a pacenote bend -- and said which.
+        assert (
+            "Posted limit lower; adaptive cruise easing" in result.transcript_text
+            or "for the bend" in result.transcript_text
+        )
 
 
 @pytest.mark.smoke

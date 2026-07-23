@@ -624,6 +624,15 @@
   never moved. At a facility it now says so: "You have arrived. At
   Chicago Port Terminal. Stop to dock."
 
+- **Adaptive cruise now drives the bends instead of quitting on them.**
+  With curve callouts and curve speed assistance on, a bend advised
+  well below your set speed used to shut cruise off entirely -- "you
+  need manual speed control" -- handing you the pedals mid-corner.
+  Cruise now eases its target to the bend's advisory speed, the same
+  way it eases for an exit ramp, and climbs back to your set speed once
+  the bend is behind you. You only get handed manual control when a
+  bend is genuinely too tight for cruise to hold at all.
+
 - **Curve speed assistance stopped talking over itself.** When adaptive
   cruise and the curve brake disagreed, the assist flipped between
   "slowing" and "released" several times a second and said so every
