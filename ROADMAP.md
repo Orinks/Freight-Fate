@@ -154,6 +154,23 @@ terminal becomes the anchor of that week instead of a spawn point.
       LANE DROPS: where three lanes become two, that is a genuine merge
       event with a real location, not a scripted taper. Goes in the next
       map re-bake brief.
+- [ ] **Assistance-mode assessment: accessibility features that drive the
+      truck right (Josh's ask to the owner, 2026-07-22).** The automatic
+      driving aids -- adaptive cruise, the speed keeper, curve speed
+      assist, route-transition assist, descent control, automatic
+      emergency braking, lane keeping -- are ACCESSIBILITY features, not
+      truck-spec upgrades: they exist for players who need them and stay
+      available on every truck regardless of the era/spec ladder (the
+      same override rule as the transmission setting). Their duty is to
+      operate the real truck the way a skilled driver would: engine
+      brake before service brakes, traction-linked, honest air and wear
+      costs, audible through the proper voices (jake growl versus brake
+      clunk) so a blind driver can hear WHICH system is acting. Curve
+      speed assist got jake-first on 2026-07-22; the keeper, transition
+      assist, descent-control interactive mode, and AEB still go
+      straight to the pedal. Owner to assess each mode in play and call
+      the fixes; auto jake and the traction-linked retarder gate are the
+      building blocks.
 - [ ] **Hand throttle, parked high-idle, and equipment by model era
       (owner idea 2026-07-22, sparked by the 896 take's rev-and-hold).**
       Two features on the per-truck-spec pattern. (1) PARKED HIGH-IDLE
