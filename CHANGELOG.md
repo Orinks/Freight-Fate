@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Delete a career's cloud backups.** Each career in the Cloud backup menu
+  now has a Delete item that removes every kept backup of that career from
+  your orinks.net account, after a spoken confirmation. Your saves on this
+  computer are never touched, and a career that is still on this computer
+  with cloud backup turned on simply starts a fresh backup the next time it
+  saves. Handy if a save was backed up by mistake, such as someone else's
+  career you had copied onto your computer.
 - **Copy your delivery summary to the clipboard.** The delivery complete
   screen has a new item, just before Continue, that copies every settlement
   line as plain text so you can paste the whole run into a message or a

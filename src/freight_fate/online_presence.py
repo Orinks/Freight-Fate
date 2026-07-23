@@ -103,14 +103,16 @@ def client_version() -> str:
 Transport = Callable[[str, dict | None, dict[str, str]], dict]
 
 
-def _http_json(url: str, payload: dict | None, headers: dict[str, str]) -> dict:
+def _http_json(
+    url: str, payload: dict | None, headers: dict[str, str], method: str | None = None
+) -> dict:
     data = None if payload is None else json.dumps(payload).encode("utf-8")
     all_headers = {
         "User-Agent": f"FreightFate/{client_version()}",
         "Content-Type": "application/json",
         **headers,
     }
-    req = urllib.request.Request(url, data=data, headers=all_headers)
+    req = urllib.request.Request(url, data=data, headers=all_headers, method=method)
     with urllib.request.urlopen(req, timeout=_REQUEST_TIMEOUT_S, context=ssl_context()) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
