@@ -1055,6 +1055,13 @@ section below and the Unreleased changelog; the release-line view:
       complex noise at the Doppler cutoff, magnitude out). It slows as
       you slow and stops when you park. Stations need a real frequency
       field for that; tune the noise shaping by the owner's ear.
+      PICKETS ARE SHARP, not crossfades (owner ear ruling 2026-07-23):
+      FM capture is a threshold, so render flutter as the Rayleigh
+      envelope GATING program vs hiss with abrupt edges -- brief hiss
+      splashes punching through clean audio, never a smooth linear
+      fade. Picket density and depth grow as signal thins with
+      distance (occasional single pickets at the strong edge,
+      machine-gun picketing deep in the fringe, then mostly noise).
       RUNTIME, not baked (owner call 2026-07-23): the flutter depends on
       live speed so the bed must be synthesized in play -- hybrid shape:
       a seamless committed hiss LOOP as the texture with fade depth and
