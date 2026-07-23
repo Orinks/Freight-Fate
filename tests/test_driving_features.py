@@ -1934,6 +1934,116 @@ def test_poi_menu_uses_curated_roadside_assistance_label():
 
 
 @pytest.mark.smoke
+def test_rest_stop_sleep_warns_before_redundant_double_sleep():
+    from freight_fate.app import App
+    from freight_fate.sim.trip import RoadStop
+    from freight_fate.states.career_stats import fully_rested
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = RoadStop(
+            "Example Turnpike Service Plaza",
+            driving.trip.position_mi,
+            "service_plaza",
+            ("park", "sleep", "save"),
+            ("parking",),
+        )
+        state = RestStopState(app.ctx, driving, stop)
+
+        # Force the driver fully rested: sleeping would gain nothing but time.
+        profile = app.ctx.profile
+        profile.hos.driving_min = 0.0
+        profile.hos.duty_min = 0.0
+        profile.fatigue = 0.0
+        assert fully_rested(profile)
+
+        def find(label):
+            for item in state.build_items():
+                text = item.text if isinstance(item.text, str) else item.text()
+                if text == label:
+                    return item.action
+            raise AssertionError(f"no {label!r} item")
+
+        sleep_10 = find("Sleep 10 hours")
+        before = driving.trip.game_minutes
+
+        # First press only warns; the clock must not move.
+        sleep_10()
+        assert driving.trip.game_minutes == before
+        assert state._confirm_sleep_rested is True
+
+        # Second consecutive press sleeps the full 10 hours.
+        sleep_10()
+        assert driving.trip.game_minutes == pytest.approx(before + 600.0)
+        assert state._confirm_sleep_rested is False
+
+        # The guard covers sleeper-split rests too: a fresh visit warns first.
+        state._confirm_sleep_rested = False
+        profile.hos.driving_min = 0.0
+        profile.hos.duty_min = 0.0
+        profile.fatigue = 0.0
+        split_before = driving.trip.game_minutes
+        find("Sleep 2 hours in sleeper berth")()
+        assert driving.trip.game_minutes == split_before
+        assert state._confirm_sleep_rested is True
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_lot_sleep_warns_before_redundant_double_sleep():
+    # A non-sleeper stop only offers the poor-rest lot sleep, which floors
+    # fatigue at the shoulder value -- so the guard must key off "hours fresh
+    # and no more rest to gain", not full restedness, or it never fires.
+    from freight_fate.app import App
+    from freight_fate.sim import hos
+    from freight_fate.sim.trip import RoadStop
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = RoadStop(
+            "Test Fuel Stop",
+            driving.trip.position_mi,
+            "fuel_stop",
+            ("park", "fuel", "break"),
+            ("parking",),
+        )
+        state = RestStopState(app.ctx, driving, stop)
+
+        # Simulate a drive, then a first lot sleep so hours are fresh but
+        # fatigue is stuck at the shoulder floor -- the state a driver is in
+        # right after bedding down once.
+        profile = app.ctx.profile
+        profile.hos.driving_min = 0.0
+        profile.hos.duty_min = 0.0
+        profile.fatigue = hos.FATIGUE_SHOULDER_FLOOR
+
+        lot_sleep = None
+        for item in state.build_items():
+            text = item.text if isinstance(item.text, str) else item.text()
+            if text == "Sleep 10 hours in the lot":
+                lot_sleep = item.action
+                break
+        assert lot_sleep is not None
+
+        before = driving.trip.game_minutes
+        lot_sleep()  # first press only warns
+        assert driving.trip.game_minutes == before
+        assert state._confirm_sleep_rested is True
+
+        lot_sleep()  # second press sleeps anyway
+        assert driving.trip.game_minutes == pytest.approx(before + 600.0)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_status_map_screen_describes_source_backed_poi_services():
     from freight_fate.app import App
     from freight_fate.models.jobs import CARGO_CATALOG, Job
