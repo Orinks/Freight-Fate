@@ -598,6 +598,15 @@ class DrivingControlsMixin:
         if light is not None:
             self.ctx.say(light)
             return
+        # Same idea at a facility gate: once the route has ended, the posted
+        # limit stopped mattering -- the only thing S can honestly answer is
+        # the gate and what to do about it. Without this, a driver rolling
+        # past the entrance heard "42 miles per hour, limit 45" and nothing
+        # about the delivery behind them (playtest 2026-07-22).
+        gate = self._arrival_gate_query_text()
+        if gate is not None:
+            self.ctx.say(gate)
+            return
         limit, reason = self.trip.speed_limit_at(self.trip.position_mi)
         zone = f", in a {reason} zone" if reason else ""
         over = self.truck.speed_mph - limit
@@ -619,13 +628,10 @@ class DrivingControlsMixin:
             curve = upcoming[0] if upcoming else None
         advisory = ""
         if curve is not None and curve.advisory_mph < limit:
-            advisory = (
-                f" The bend here advises {self.ctx.settings.speed_text(curve.advisory_mph)}."
-            )
+            advisory = f" The bend here advises {self.ctx.settings.speed_text(curve.advisory_mph)}."
         lead = "Truck limit" if is_truck_limit else "Speed limit"
         self.ctx.say(
-            f"{lead} {self.ctx.settings.speed_text(limit)}{zone}."
-            f"{split}{comparison}{advisory}"
+            f"{lead} {self.ctx.settings.speed_text(limit)}{zone}.{split}{comparison}{advisory}"
         )
 
     def _speak_safe_speed(self) -> None:

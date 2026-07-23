@@ -608,6 +608,16 @@
 
 ### Fixed
 
+- **Driving past a facility entrance no longer goes silent.** Arriving at
+  a pickup, delivery, or city service used to announce itself once; if
+  you rolled on -- easy to do with cruise re-engaged -- the game said
+  nothing more for the rest of the drive, and the delivery quietly went
+  late. Now the gate repeats its instruction every ten seconds while you
+  are still moving, cruise drops each time so the truck is never held at
+  speed past a dead end, and the S key answers with the gate itself --
+  "At Chicago Port Terminal. Stop to dock." -- instead of a speed limit
+  that stopped mattering when the route ended.
+
 - **Turning on real-time traffic no longer crashes the game.** With
   Traffic source set to real time under Settings, Speech and weather,
   the game closed with an error moments after any drive began. It now
