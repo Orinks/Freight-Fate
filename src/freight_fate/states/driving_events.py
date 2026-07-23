@@ -945,8 +945,18 @@ class DrivingEventMixin:
             self._handle_arrival_creep()
             return
         if self._arrival_stop_said:
+            self._remind_arrival_gate(
+                "Destination gate: stop to dock.",
+                f"At {self._destination_facility_text()}. Stop to dock."
+                if self._terse_speech()
+                else (
+                    f"Still at {self._destination_facility_text()}. The delivery "
+                    "is here, not ahead: slow down and stop to dock."
+                ),
+            )
             return
         self._arrival_stop_said = True
+        self._gate_reminder_s = GATE_REMINDER_INTERVAL_S
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
         self._set_status("Destination ahead: slow down and come to a complete stop.")
@@ -959,6 +969,41 @@ class DrivingEventMixin:
             )
         )
         self.ctx.say_event(message, interrupt=True)
+
+    def _remind_arrival_gate(self, status: str, message: str, *, pickup: bool = False) -> None:
+        """Repeat a gate's stop instruction while the truck rolls past it.
+
+        The gate warnings latch after speaking once, which is right for a
+        driver who is slowing -- but a driver who rolls on hears nothing
+        again for the rest of the drive, with any re-armed cruise happily
+        holding highway speed at a dead-end. Re-speak on a calm cadence and
+        drop the cruise each time; the reminder stops the moment the truck
+        slows into the gate's own creep-and-dock flow.
+        """
+        if self._gate_reminder_s > 0.0:
+            return
+        self._gate_reminder_s = GATE_REMINDER_INTERVAL_S
+        if pickup:
+            self._pause_speed_control()
+        else:
+            self._cancel_cruise()
+        self.ctx.audio.play("ui/warning")
+        self._set_status(status)
+        self.ctx.say_event(message, interrupt=True)
+
+    def _arrival_gate_query_text(self) -> str | None:
+        """The gate's instruction when the trip has ended at one, else None.
+
+        Mirrors the update loop's gate dispatch so the info keys agree with
+        what the gate handlers are actually waiting for.
+        """
+        if not self.trip.finished or self._arrival_menu_open:
+            return None
+        if self.phase == DRIVE_PHASE_PICKUP:
+            return f"At {self._pickup_facility_text()}. Stop to check in."
+        if self._ramp_mi is not None or not self._destination_exit_taken:
+            return None
+        return f"At {self._destination_facility_text()}. Stop to dock."
 
     def _handle_arrival_creep(self) -> None:
         if self._arrival_full_stop_said:

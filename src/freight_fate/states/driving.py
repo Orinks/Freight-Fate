@@ -151,6 +151,7 @@ class DrivingState(
         self._arrival_stop_said = False
         self._arrival_full_stop_said = False
         self._arrival_menu_open = False
+        self._gate_reminder_s = 0.0
         self._air_ready_said = self.truck.air_ready
         self._low_air_said = self.truck.air_low_warning
         self._spring_brake_said = self.truck.spring_brakes_active

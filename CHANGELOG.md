@@ -43,6 +43,16 @@
 
 ### Fixed
 
+- **Driving past a pickup or delivery entrance no longer goes silent.**
+  Arriving at a facility used to announce itself once; if you rolled on --
+  easy to do with cruise re-engaged -- the game said nothing more for the
+  rest of the drive, and the delivery quietly went late. Now the gate
+  repeats its instruction every ten seconds while you are still moving,
+  cruise drops each time so the truck is never held at speed past a dead
+  end, and the S key answers with the gate itself -- "At the receiver.
+  Stop to dock." -- instead of a speed limit that stopped mattering when
+  the route ended.
+
 - **Each extracted copy of the game now keeps its saves strictly to itself.**
   Previously, a copy of the game could look one folder up on its first run
   and adopt the saves it found there, so keeping two versions side by side,

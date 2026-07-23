@@ -1065,6 +1065,55 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
         app.shutdown()
 
 
+def test_arrival_gate_repeats_after_overshoot(monkeypatch):
+    """Rolling past the destination gate keeps the stop instruction alive.
+
+    Backport of the 1.9-line fix (playtest 2026-07-22): the gate warnings
+    latched after one announcement, so a driver who overshot the entrance
+    at speed -- with cruise re-armed -- heard silence for six minutes and
+    lost the on-time bonus, with S still answering speed limits for a
+    route that had already ended."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        mark_destination_exit_taken(driving)
+        driving.truck.velocity_mps = 26.8  # ~60 mph, blowing past the gate
+
+        driving.update(1 / 60)
+        assert isinstance(app.state, DrivingState)
+        assert "Destination ahead" in events[-1]
+        announced = len(events)
+
+        # Inside the reminder interval the gate stays quiet.
+        for _ in range(30):
+            driving.update(1 / 60)
+        assert len(events) == announced
+
+        # Interval elapsed and cruise re-armed: the reminder re-speaks the
+        # instruction and drops the cruise again.
+        driving._cruise_mph = 41.0
+        driving._gate_reminder_s = 0.0
+        driving.update(1 / 60)
+        assert "Still at" in events[-1]
+        assert "stop to dock" in events[-1].lower()
+        assert driving._cruise_mph is None
+
+        # S answers with the gate, not the posted limit of the ended route.
+        spoken = []
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        driving._speak_speed_limit()
+        assert "Stop to dock" in spoken[-1]
+        assert "Speed limit" not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 def test_cargo_mass_is_loaded_on_delivery_and_empty_on_pickup():
     from freight_fate.app import App
     from freight_fate.models.jobs import CARGO_CATALOG, Job
