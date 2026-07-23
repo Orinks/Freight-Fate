@@ -743,6 +743,14 @@
 
 ### Fixed
 
+- **The gear change comes at the top of the rev, not a second after.**
+  Above the launch gears, the transmission used to rev to its shift
+  point and then sit at the crest waiting out an internal timer before
+  taking the gear -- you heard the engine top out, then a long beat,
+  then the shift. Now the revs earn the shift: the moment the engine
+  crests the threshold on a hard pull, the gear comes. The deliberate
+  launch cadence through the low gears is unchanged.
+
 - **Ramp-end callouts now tell you the approach speed limit.** The stop
   sign and traffic light announcements named the control but never how
   fast you were allowed to approach it. They now end with the limit --

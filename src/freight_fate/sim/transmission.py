@@ -170,12 +170,27 @@ class Transmission:
             self._shift_timer = shift_time_for(self.gear)
             self._gear_hold_timer = 0.0
             return self.gear
-        # The comfort hold between shifts never delays engine protection:
-        # with the road driving the engine past the jake ceiling, the box
-        # upshifts NOW, timer or no timer. Under power the governor caps RPM,
-        # so the hold stays in charge and anti-hunting keeps its teeth.
-        if self._gear_hold_timer < minimum_shift_interval_s and not (
-            engine_braking and rpm > JAKE_MAX_RPM
+        # The comfort hold between shifts never delays engine protection
+        # (road past the jake ceiling upshifts NOW) -- and above the launch
+        # box it never delays an upshift the revs have already earned. Two
+        # owner rulings meet here: the hold IS part of the approved stately
+        # launch feel through the low gears (each gear revs out, then a
+        # beat), but past gear five the same hold left the engine hanging
+        # at the crest of the pull -- the driver heard the rev top out and
+        # then waited a second for the gear (owner report, 2026-07-23).
+        # After an upshift the rpm falls a whole ratio step, so up there
+        # the rev-out time is all the anti-hunt spacing the box needs.
+        earned_upshift = (
+            self.gear >= 5
+            and throttle > 0.2
+            and rpm > upshift_rpm
+            and can_upshift
+            and not braking
+        )
+        if (
+            self._gear_hold_timer < minimum_shift_interval_s
+            and not (engine_braking and rpm > JAKE_MAX_RPM)
+            and not earned_upshift
         ):
             return None
         # Braking or engine-braking holds the gear -- except that a real
