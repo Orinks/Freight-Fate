@@ -1104,6 +1104,14 @@ section below and the Unreleased changelog; the release-line view:
       (parent network) actually covers each Hi-Line dispatch city and seat
       the parent stream there under the local translator's dial position,
       the same honest-coverage rule as everywhere else.
+- [ ] **Food and coffee stops are free (owner catch, 2026-07-23, night
+      drive).** The short food-and-coffee break at a travel plaza speaks
+      its alertness effect but charges nothing -- a real stop costs real
+      money. Belongs to the truck-stop economy and buffs pass: price the
+      quick stops (coffee, meal, shower outside loyalty credits), charge
+      at the register, and let the tiered buffs ride the same purchase.
+      The new loyalty program (owner likes it) gives the natural hook:
+      paid purchases should earn points too, not just fuel gallons.
 - [ ] **Lay on the horn (owner ask, 2026-07-23).** H plays one shortish
       horn sample today. Holding H should hold the horn -- attack, a
       seamless sustain loop for as long as the key is down, then the

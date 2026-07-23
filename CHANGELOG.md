@@ -751,12 +751,14 @@
   crests the threshold on a hard pull, the gear comes. The deliberate
   launch cadence through the low gears is unchanged.
 
-- **Ramp-end callouts now tell you the approach speed limit.** The stop
-  sign and traffic light announcements named the control but never how
-  fast you were allowed to approach it. They now end with the limit --
-  "Speed limit 25 on the approach" -- and on the lowest speech verbosity
-  the whole callout compresses to one line with everything a driver
-  needs: "400 feet to stop bar, speed limit 25."
+- **Ramp-end callouts now tell you the approach speed limit -- the one
+  at the bar.** The stop sign and traffic light announcements named the
+  control but never how fast you were allowed to approach it. Every
+  callout that names the bar now carries the limit of the street you
+  are entering -- "Light red, about 800 feet to the stop bar, speed
+  limit 25" -- including the repeating status line, and on the lowest
+  speech verbosity the countdown compresses to one line with everything
+  a driver needs.
 
 - **Manual shifting answers the moment the clutch comes out.** Shifting by
   hand used to leave the truck coasting for up to a second after you

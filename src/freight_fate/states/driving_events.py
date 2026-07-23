@@ -1307,11 +1307,17 @@ class DrivingEventMixin:
         if self._ramp_control == "stop":
             if gap_mi <= 0:
                 return "At the stop bar. Stop sign; brake to a full stop."
-            return f"Stop sign, about {self._short_distance_text(gap_mi)} to the stop bar."
+            return (
+                f"Stop sign, about {self._short_distance_text(gap_mi)} to the "
+                f"stop bar, speed limit {self._approach_limit_text()}."
+            )
         phase = self._ramp_light_phase()
         if gap_mi <= 0:
             return f"At the stop bar. The light is {phase}."
-        return f"Light {phase}, about {self._short_distance_text(gap_mi)} to the stop bar."
+        return (
+            f"Light {phase}, about {self._short_distance_text(gap_mi)} to the "
+            f"stop bar, speed limit {self._approach_limit_text()}."
+        )
 
     def _short_distance_text(self, miles: float) -> str:
         """A short gap in round spoken units: feet or meters, never decimals."""
@@ -1322,14 +1328,20 @@ class DrivingEventMixin:
         return f"{meters} meters"
 
     def _approach_limit_text(self) -> str:
-        """The enforced limit where the truck is right now, spoken.
+        """The enforced limit AT THE STOP BAR, spoken.
 
         The terminal callouts named the control but never the limit the
-        approach is driven at (owner report 2026-07-23), so a driver knew
-        where the bar was but not how fast they were allowed to reach it.
-        Same source of truth as the S key: the trip's limit at position.
+        approach is driven at (owner report 2026-07-23). First cut read
+        the limit at the truck's position -- which mid-ramp still said 55,
+        the highway's number, useless for a light a quarter mile ahead
+        (owner's log, same night). The honest number is the zone at the
+        bar itself: the street being entered.
         """
-        limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        bar_mi = self.trip.position_mi
+        if self._ramp_mi is not None:
+            bar_mi += max(0.0, self._ramp_mi - RAMP_ACCESS_MI)
+        bar_mi = min(bar_mi, max(0.0, self.trip.total_miles - 0.01))
+        limit, _ = self.trip.speed_limit_at(bar_mi)
         return self.ctx.settings.speed_text(limit)
 
     def _announce_ramp_terminal(self) -> None:
