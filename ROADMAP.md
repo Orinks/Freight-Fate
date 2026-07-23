@@ -1025,6 +1025,58 @@ section below and the Unreleased changelog; the release-line view:
       source notes, each gated on the BASS live check; real-station reach
       went 78% -> 93% of the 623 cities. Radio Browser was the finding aid
       only; TuneIn stayed out.
+- [x] **Whole-market completeness sweep (owner ask 2026-07-23).** Shipped
+      2026-07-23. The dial no longer carries one station per town but the
+      market's full non-commercial roster: public news plus separate
+      classical/jazz sisters, community and college stations, and HD2/HD3
+      sub-channels (the HD3s are how BBC World Service reaches the dial --
+      WUKY, KWGS, KUT, KCND, Vermont Public). 396 real stations added
+      (167 -> 563), every one BASS-gated 3x, across all 48 continental
+      states + DC. Twelve parallel research agents sourced station-owned
+      "listen live" mounts only (no TuneIn/iHeart), with FCC call-sign
+      rigor and honest transmitter ranges; darkness stays honest where a
+      market has no streamable non-commercial station. Each new entry also
+      carries a `state` tag for the future main-menu Radio Player.
+- [x] **Always-available international public broadcasters (owner ask
+      2026-07-23).** Shipped 2026-07-23 (Phase 0, commit 61e79cbb). New
+      "International" dial category carrying 12 English-language public
+      streams verified from a US machine: ABC AU (triple j, Jazz, Classic,
+      Double J), RTE IE (Radio 1, 2FM, lyric fm), RNZ NZ (National,
+      Concert), RFI English, CBC (Radio One, Music). BBC World Service was
+      excluded direct (its CDN 403s US IPs) and reaches the dial via US HD3
+      sub-channels instead.
+- [x] **Radio reading services for blind listeners (owner ask
+      2026-07-23).** Shipped 2026-07-23. Twelve reading services (that read
+      newspapers/books aloud for blind and print-disabled listeners) now
+      ride the dial as real local stations -- WYPL Memphis, WRBH New
+      Orleans, Sun Sounds of Arizona, CRIS Chicago, Triangle and Down East
+      NC, Sight Into Sound Houston, GPB Reading Radio, WQCS FL, Vision
+      Resources PA -- each tagged `reading_service: true`. Most of the
+      category (per the IAAIS directory) is SCA-subcarrier only with no
+      public stream, so those stay out honestly.
+- [ ] **Reading Services dial category with a "nearest" jump.** The data +
+      tag are in; the feature is a new dial category whose bracket-jump
+      tunes the geographically NEAREST reading service (not first-by-call),
+      so the most useful content for blind players is always one jump away
+      from anywhere on the map.
+- [ ] **Main-menu Radio Player (browse-all utility).** A parked-only menu
+      to browse and play any catalog station free of range gating, states
+      as categories, reading services nested per state, International/AFN
+      their own groups. Needs `state` on the RadioStation dataclass +
+      backfill on pre-sweep locals. Accessibility-critical spoken menu.
+- [ ] **Radio cleanup pass: JS-locked holdouts + a real trucking station.**
+      Chase the stations the sweep flagged but could not extract a mount
+      for -- WABE Atlanta, KWBU Waco, the Richmond/Huntsville public and
+      reading stations, ~37 IAAIS "no-mount" services -- via the StreamGuys
+      sgplayer3 config.json trick and Chrome network inspection (proved on
+      GPB Radio Atlanta 2026-07-23). Also hunt a real free trucking-format
+      webcaster to put a genuine trucker station on the dial (SiriusXM Road
+      Dog is pay-only/DRM and cannot be tuned).
+- [ ] **AM news/talk sweep (next session -- needs fresh web budget).**
+      iHeart is tunable via its public revma HLS mounts; Audacy is app-
+      locked. Real-first so players lean less on the fictional fallback
+      stations. Overnight trucker talk (Red Eye Radio, Coast to Coast AM)
+      already rides free AM affiliates in the catalog.
 - [ ] **Spotify and Apple Music: research only, parked (owner idea
       2026-07-20).** In-game playback of either is off the table --
       both wrap streams in DRM their licenses forbid unwrapping, official

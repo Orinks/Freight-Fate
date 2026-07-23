@@ -4,14 +4,23 @@
 
 ### Added
 
-- **Real stations reach a lot more of the map.** With streamer-safe mode
-  off, the in-cab radio now picks up public, community, and college
-  stations in dozens more places -- the Rio Grande Valley, Savannah,
-  Amarillo, the Iowa corridor, the northern Plains, the high Rockies, the
-  Carolinas coast, the Florida panhandle, and more -- so wherever a load
-  takes you, there is a far better chance of catching local news or music
-  instead of an empty band. A couple of stations whose streams had gone
-  quiet are back on the air as well.
+- **The dial now fills out like a real city.** With streamer-safe mode
+  off, the in-cab radio no longer catches just one station per town -- it
+  picks up the whole non-commercial band a market really has: the public
+  news station and its separate classical or jazz sister, the community
+  and college stations, and the digital sub-channels that ride alongside
+  them, including the ones carrying BBC World Service. Hundreds of real
+  stations were added and checked one by one, so from Atlanta to Amarillo
+  to the Montana Hi-Line you can tune across a dial that sounds like the
+  place you are actually driving through. A few stations whose streams had
+  gone quiet are back on the air as well.
+
+- **Reading services for blind listeners are on the dial.** Radio reading
+  services -- the stations that read newspapers, magazines, and books
+  aloud for blind and print-disabled listeners -- now appear as real
+  stations in the cities that have them, from Memphis and New Orleans to
+  Phoenix, Chicago, Houston, Atlanta, and more. Wherever one is in range,
+  it is right there on the band with everything else.
 
 - **The engine brake grew its real cylinder selector.** J is now the
   dash switch: it turns the engine brake on at whatever stage you last
