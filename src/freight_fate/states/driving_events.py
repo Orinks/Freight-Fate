@@ -1340,6 +1340,12 @@ class DrivingEventMixin:
         bar_mi = self.trip.position_mi
         if self._ramp_mi is not None:
             bar_mi += max(0.0, self._ramp_mi - RAMP_ACCESS_MI)
+        # Probe just PAST the bar, not at it: the entered road's zone (the
+        # facility access 25, the street's 35) begins on the far side, so a
+        # probe at the bar itself still read the corridor's 55 -- the owner
+        # was told "speed limit 55 on the approach" at a stop sign whose far
+        # side was a 25 access road (log, 2026-07-23, Merced).
+        bar_mi += 0.05
         bar_mi = min(bar_mi, max(0.0, self.trip.total_miles - 0.01))
         limit, _ = self.trip.speed_limit_at(bar_mi)
         return self.ctx.settings.speed_text(limit)
