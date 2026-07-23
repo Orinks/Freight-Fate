@@ -27,10 +27,57 @@ terminal becomes the anchor of that week instead of a spawn point.
       the home terminal: short home-region runs, home every night, no
       cycle pressure, lower pay -- weighted toward new hires in the
       assigned-dispatch levels.
-- [ ] **ELD character events.** Daily log certification, carrier edit
-      approve/reject prompts, personal conveyance and yard-move duty
-      statuses, a rare ELD-malfunction paper-log day, and the
-      adverse-conditions +2-hour exception wired to live weather.
+
+### Personal conveyance and duty-purpose correction
+
+Regulatory baseline: [FMCSA personal-conveyance guidance](https://www.fmcsa.dot.gov/regulations/hours-service/personal-conveyance)
+and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/if-driver-permitted-use-commercial-motor-vehicle-cmv-personal-reasons-how-must).
+
+- [ ] **Correct today's bobtail classification before adding the ELD
+      choice.** Separate physical configuration (bobtail means tractor
+      without a trailer) from duty purpose. Driving empty to another
+      city's dispatch board improves commercial readiness, so it must
+      record as driving/on-duty repositioning rather than off-duty
+      personal conveyance. Deadhead with an empty trailer remains a
+      separate physical configuration.
+- [ ] **Personal-conveyance first slice.** Add spoken Start personal
+      conveyance and End personal conveyance actions to the ELD menu.
+      Ask for a valid purpose and nearby destination: food, shower,
+      lodging, or the nearest reasonable safe parking after a shipper or
+      receiver releases the driver. Record the movement as off duty with
+      a personal-conveyance annotation, reason, start and end locations,
+      and distance; preserve it through save/resume.
+- [ ] **Keep the clock and truck behavior honest.** Personal conveyance
+      still consumes fuel, accumulates fatigue, and keeps all driving
+      safety and enforcement active. It does not consume driving or
+      on-duty hours, but a short move does not pause or extend an already
+      running 14-hour window. Use a carrier policy distance limit rather
+      than presenting it as a federal mileage rule; loaded versus empty
+      is not the deciding test, though a carrier may set a stricter
+      policy.
+- [ ] **Reject commercial uses and handle the after-hours exception
+      narrowly.** Do not permit personal conveyance to approach the next
+      pickup, shop another dispatch board, return to a terminal after a
+      dispatched trip, or travel for maintenance. Running out of hours
+      alone does not qualify; the exception is leaving a shipper or
+      receiver for the first reasonable safe parking location and then
+      taking the required rest.
+- [ ] **Make misuse reviewable.** The logbook and traffic-stop inspection
+      must read the annotation and route evidence. A later enforcement
+      slice can question repeated maximum-distance use or other suspicious
+      patterns without turning legitimate personal trips into random
+      punishment.
+- [ ] **Yard moves are separate.** On-property facility movements record
+      as on-duty yard time, not personal conveyance or ordinary highway
+      driving.
+- [ ] **Verify the complete spoken path.** Cover keyboard reachability,
+      ELD start/end confirmations, logbook wording, save/resume, eligible
+      and rejected destinations, HOS/fatigue behavior, and traffic-stop
+      review with transcript-backed playtests. Update in-game help, the
+      user manual, and the changelog when the feature lands.
+- [ ] **Other ELD character events.** Daily log certification, carrier
+      edit approve/reject prompts, a rare ELD-malfunction paper-log day,
+      and the adverse-conditions +2-hour exception wired to live weather.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
