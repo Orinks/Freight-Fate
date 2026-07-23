@@ -1116,7 +1116,19 @@ class DrivingEventMixin:
 
     def _update_ramp_light(self, dt: float) -> None:
         """Advance the terminal light in real time and speak state changes."""
-        if self._ramp_mi is None or self._ramp_control != "signal" or self._ramp_terminal_done:
+        if self._ramp_mi is None or self._ramp_terminal_done:
+            return
+        if self._ramp_control == "stop":
+            # A stop sign has no phases, but its bar needs a position just
+            # as much as a light's: without the countdown, the ticks, and
+            # the stopped-short guidance, the sign was one announce line
+            # and then silence until the damage message (playtest
+            # 2026-07-22, Milwaukee grain elevator, 15 percent).
+            self._update_ramp_queue_guidance()
+            self._update_ramp_gap_countdown()
+            self._update_ramp_bar_ticks(dt)
+            return
+        if self._ramp_control != "signal":
             return
         self._ramp_light_timer += dt
         self._update_ramp_queue_guidance()
@@ -1182,6 +1194,19 @@ class DrivingEventMixin:
         # reads as a light stuck in a loop. Far back is a drive, and the red
         # phase is exactly the time to make it.
         gap_mi = self._ramp_mi - RAMP_ACCESS_MI
+        if self._ramp_control == "stop":
+            if gap_mi > RAMP_CREEP_MI:
+                gap = self._short_distance_text(gap_mi)
+                message = (
+                    f"You are stopped about {gap} short of the stop sign. "
+                    "Drive up and stop again at the bar."
+                )
+            else:
+                message = (
+                    "You are stopped short of the stop sign. Creep ahead and stop again at the bar."
+                )
+            self.ctx.say_event(message, interrupt=False)
+            return
         on_green = self._ramp_light_phase() == "green"
         if gap_mi > RAMP_CREEP_MI:
             gap = self._short_distance_text(gap_mi)
@@ -1262,10 +1287,18 @@ class DrivingEventMixin:
         "Stop at the bar" is only an instruction if the bar has a position;
         a sighted driver reads it off the windshield, so speech must answer
         the same question whenever the driver asks (owner ask, 2026-07-19)."""
-        if self._ramp_mi is None or self._ramp_control != "signal" or self._ramp_terminal_done:
+        if (
+            self._ramp_mi is None
+            or self._ramp_control not in ("signal", "stop")
+            or self._ramp_terminal_done
+        ):
             return None
-        phase = self._ramp_light_phase()
         gap_mi = self._ramp_mi - RAMP_ACCESS_MI
+        if self._ramp_control == "stop":
+            if gap_mi <= 0:
+                return "At the stop bar. Stop sign; brake to a full stop."
+            return f"Stop sign, about {self._short_distance_text(gap_mi)} to the stop bar."
+        phase = self._ramp_light_phase()
         if gap_mi <= 0:
             return f"At the stop bar. The light is {phase}."
         return f"Light {phase}, about {self._short_distance_text(gap_mi)} to the stop bar."

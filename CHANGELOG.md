@@ -618,6 +618,16 @@
 
 ### Fixed
 
+- **Stop signs at ramp ends finally tell you where to stop.** A
+  stop-sign ramp used to say "brake to a full stop there" once and then
+  go silent -- no countdown, no closing tick, no answer from the S key
+  -- so the first hint of the bar's position was cross traffic in your
+  trailer. The sign now gets everything the traffic light already had:
+  the distance countdown, the parking-sensor tick that speeds up as the
+  bar closes, S answering with the sign and the gap, and guidance when
+  you stop short. Route-transition assistance brakes and completes the
+  stop for you when it is on.
+
 - **Driving past a facility entrance no longer goes silent.** Arriving at
   a pickup, delivery, or city service used to announce itself once; if
   you rolled on -- easy to do with cruise re-engaged -- the game said
