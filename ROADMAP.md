@@ -1104,6 +1104,11 @@ section below and the Unreleased changelog; the release-line view:
       (parent network) actually covers each Hi-Line dispatch city and seat
       the parent stream there under the local translator's dial position,
       the same honest-coverage rule as everywhere else.
+- [ ] **Fine speed adjust: step cruise by 1, not just 5 (owner ask,
+      2026-07-23).** Plus and minus move the cruise set speed in 5 mph
+      jumps; there is no way to nudge by 1. Add a fine step -- e.g.
+      Shift+plus / Shift+minus for 1 mph (and the metric equivalent) --
+      for dialing exactly to a posted limit or a curve advisory.
 - [ ] **Food and coffee stops are free (owner catch, 2026-07-23, night
       drive).** The short food-and-coffee break at a travel plaza speaks
       its alertness effect but charges nothing -- a real stop costs real
