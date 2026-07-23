@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from .. import engine_audio
-from ..audio import CH_AIR, CH_BRAKE
+from ..audio import CH_AIR, CH_BRAKE, CH_JAKE
 from ..audio_fades import curve as _resolve_curve
 from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
@@ -20,6 +20,12 @@ OVERREV_REPEAT_S = 10.0
 
 # An automatic shift caps audible engine load so the bed doesn't duck out.
 SHIFT_LOAD_CAP = 0.45
+# ...but the load floor (0.68) keeps a capped engine at 82 percent of full
+# level -- the "undertone at the last rpm" the owner heard through every
+# shift. The disengage duck drops the whole bed below that floor through
+# the torque interrupt, then rides the same recovery curve back up: the
+# engine genuinely falls away and returns, like a clutch actually opening.
+SHIFT_DISENGAGE_DUCK = 0.35
 # When the shift completes the cap eases from SHIFT_LOAD_CAP back to full over
 # this window. The curve (a key into audio_fades.CURVES) shapes the return: an
 # ease-out leaves the shift level quickly -- so the engine doesn't sit soft --
@@ -31,6 +37,15 @@ _shift_recovery_curve = _resolve_curve(SHIFT_LOAD_RECOVERY_CURVE)
 
 # Low-pass raw throttle before it reaches the audible engine-load envelope.
 ENGINE_LOAD_SMOOTH_S = 0.45
+
+# The jake's voice: synthesized growl loops at fixed rpm points, picked by
+# nearest engine speed. Retarding power goes as cylinders x rpm, so the
+# level grows with both the selected stage and the revs; the loop cuts out
+# through shifts and clutch (the stair-stepping signature: buzz, gap,
+# resume higher -- jake_v3.py's design notes, owner-approved 2026-07-18).
+JAKE_LOOP_RPMS = (1200, 1400, 1600, 1800, 2000, 2200)
+JAKE_STAGE_GAIN = (0.45, 0.75, 1.0)  # two, four, six cylinders
+JAKE_MIN_RPM = 950.0
 
 # The air-fill loop re-arms only this far below governor release. air_ready
 # flips at exactly 100 psi and normal service braking dips the reservoirs a
@@ -215,8 +230,15 @@ class DrivingUpdateMixin:
                 and not emergency
                 and self.ctx.audio.has_asset("vehicle/brake_hiss_bed")
             ):
+                # Road noise masks the release at speed, exactly as in a real
+                # cab: rolling releases fade toward inaudible while the big
+                # pssht after braking to a stop keeps its full voice.
+                masking = max(0.25, 1.0 - abs(t.velocity_mps) / 20.0)
                 self.ctx.audio.start_loop(
-                    CH_BRAKE, "vehicle/brake_hiss_bed", volume=0.10 + 0.15 * peak, fade_ms=0
+                    CH_BRAKE,
+                    "vehicle/brake_hiss_bed",
+                    volume=(0.10 + 0.15 * peak) * masking,
+                    fade_ms=0,
                 )
                 self.ctx.audio.stop_loop(CH_BRAKE, fade_ms=int(160 + 800 * peak))
             self._brake_air_hissed = False
@@ -651,21 +673,56 @@ class DrivingUpdateMixin:
         # flip-flopped against cruise seven times a second (playtest
         # 2026-07-22).
         curve_assisting = False
+        excess_now = None
         if self.ctx.settings.curve_speed_assist:
             if active is not None and not active.connector:
                 margin = 2 if self._curve_assist_active else 5
                 curve_assisting = self.truck.speed_mph > active.advisory_mph + margin
+                excess_now = max(0.0, self.truck.speed_mph - active.advisory_mph)
             elif curve != 0.0:
                 # Fallback: old terrain- or ramp-based heuristic
                 heuristic = 50 - abs(curve) * 20
                 if self._curve_assist_active:
                     heuristic -= 3
                 curve_assisting = self.truck.speed_mph > heuristic
+        # Jake first (owner ruling 2026-07-22): a real driver -- and a real
+        # predictive retarder -- slows with the engine brake before the
+        # service brakes. At the start of an assist episode, if the player's
+        # jake is off and the truck can retard honestly (off throttle,
+        # coupled, revs up) on a surface that allows it (a full jake on low
+        # grip breaks the drives loose), the assist switches the jake on at
+        # a stage sized to the overspeed. The service brakes only trim when
+        # the truck is still well over the advisory or the jake cannot work.
+        t = self.truck
+        tr = t.transmission
+        if curve_assisting and not self._curve_assist_active:
+            jake_capable = (
+                t.engine_on
+                and t.throttle < 0.05
+                and not tr.in_neutral
+                and not tr.shifting
+                and tr.clutch <= 0.5
+                and t.grip >= 0.55
+                and t.rpm >= JAKE_MIN_RPM
+            )
+            if jake_capable and not t.engine_brake:
+                excess = excess_now if excess_now is not None else 10.0
+                t.engine_brake_stage = 3 if excess > 15 else (2 if excess > 8 else 1)
+                self._curve_assist_jake = True
+        elif not curve_assisting and self._curve_assist_jake:
+            # Release only the jake WE engaged; the player's own selection
+            # (or their mid-curve override) is never touched.
+            if t.engine_brake:
+                t.engine_brake_stage = 0
+            self._curve_assist_jake = False
+        jake_slowing = t.engine_brake and t.throttle < 0.05 and t.grip >= 0.55
+        needs_service = not jake_slowing or (excess_now is not None and excess_now > 10)
         # The spoken cues get a cooldown on top: even a legitimate slow
         # cycle (cruise pulling back up to the engage line) must not chant.
         self._curve_assist_cue_s = max(0.0, self._curve_assist_cue_s - dt)
-        if curve_assisting:
+        if curve_assisting and needs_service:
             self.truck.brake = max(self.truck.brake, min(0.35, abs(curve)))
+        if curve_assisting:
             if not self._curve_assist_active and self._curve_assist_cue_s <= 0.0:
                 self._curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S
                 self.ctx.say_event("Curve speed assistance slowing.", interrupt=False)
@@ -909,18 +966,21 @@ class DrivingUpdateMixin:
         if (t.transmission.automatic and t.transmission.shifting) or manual_clutch_out:
             self._shift_recover_t = 0.0
             cap = SHIFT_LOAD_CAP
+            duck = SHIFT_DISENGAGE_DUCK
             if t.transmission.automatic and self._shift_hold_rpm is None:
                 self._shift_hold_rpm = t.rpm
         elif self._shift_recover_t < 1.0:
             step = dt / SHIFT_LOAD_RECOVERY_S if SHIFT_LOAD_RECOVERY_S > 0 else 1.0
             self._shift_recover_t = min(1.0, self._shift_recover_t + step)
-            cap = SHIFT_LOAD_CAP + (1.0 - SHIFT_LOAD_CAP) * _shift_recovery_curve(
-                self._shift_recover_t
-            )
+            recovered = _shift_recovery_curve(self._shift_recover_t)
+            cap = SHIFT_LOAD_CAP + (1.0 - SHIFT_LOAD_CAP) * recovered
+            duck = SHIFT_DISENGAGE_DUCK + (1.0 - SHIFT_DISENGAGE_DUCK) * recovered
             self._shift_hold_rpm = None  # shift done: re-enter at the engaged rpm
         else:
             cap = 1.0
+            duck = 1.0
             self._shift_hold_rpm = None
+        audio.set_engine_duck(duck)
         target_load = max(0.0, min(1.0, t.throttle))
         if dt <= 0.0:
             # Direct callers and tests use a zero-length update to request an
@@ -957,6 +1017,35 @@ class DrivingUpdateMixin:
         elif self._air_cue_active:
             audio.stop_loop(CH_AIR, fade_ms=700)
             self._air_cue_active = False
+        # The jake's growl: only while it genuinely retards -- engine on, off
+        # throttle, coupled, rolling, revs up -- and never through a shift or
+        # a pressed clutch (the real jake cuts out and resumes higher).
+        tr = t.transmission
+        jake_active = (
+            t.engine_on
+            and t.engine_brake
+            and t.throttle < 0.05
+            and not tr.in_neutral
+            and not tr.shifting
+            and tr.clutch <= 0.5
+            and abs(t.velocity_mps) > 3.0
+            and t.rpm >= JAKE_MIN_RPM
+        )
+        if jake_active:
+            nearest = min(JAKE_LOOP_RPMS, key=lambda band: abs(band - t.rpm))
+            stage = max(1, min(len(JAKE_STAGE_GAIN), t.engine_brake_stage))
+            rpm_span = max(1.0, 2200.0 - JAKE_MIN_RPM)
+            growth = 0.5 + 0.5 * min(1.0, (t.rpm - JAKE_MIN_RPM) / rpm_span)
+            volume = JAKE_STAGE_GAIN[stage - 1] * growth
+            key = f"engine/jake_{nearest}"
+            if key != self._jake_cue_key:
+                audio.start_loop(CH_JAKE, key, volume=volume, fade_ms=120)
+                self._jake_cue_key = key
+            else:
+                audio.set_loop_volume(CH_JAKE, volume)
+        elif self._jake_cue_key is not None:
+            audio.stop_loop(CH_JAKE, fade_ms=150)
+            self._jake_cue_key = None
         # The cold-start low-air buzzer waits out the ignition crank so the
         # start itself stays audible; if the compressor has already built past
         # the warning line by handoff, there is nothing left to warn about.

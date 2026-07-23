@@ -160,14 +160,27 @@ def test_auto_drops_to_first_when_stopped_in_high_gear():
 
 
 def test_auto_waits_for_shift_to_finish():
+    from freight_fate.sim.transmission import shift_time_for
+
     tr = Transmission(automatic=True, gear=3)
     tr.auto_update(AUTO_UPSHIFT_RPM + 1, 0.8, True)
     assert tr.shifting
     assert tr.auto_update(1800, 0.8, True) is None
-    tr.update(0.8)
+    duration = shift_time_for(tr.gear)
+    tr.update(duration * 0.7)
     assert tr.shifting
-    tr.update(0.3)
+    tr.update(duration * 0.4)
     assert not tr.shifting
+
+
+def test_shift_time_scales_with_gear():
+    from freight_fate.sim.transmission import SHIFT_TIME, SHIFT_TIME_LOW, shift_time_for
+
+    # Real AMTs are quickest in the low box and slowest up top.
+    assert shift_time_for(1) == SHIFT_TIME_LOW
+    assert shift_time_for(4) == SHIFT_TIME_LOW
+    assert SHIFT_TIME_LOW < shift_time_for(7) < SHIFT_TIME
+    assert shift_time_for(10) == SHIFT_TIME
 
 
 def test_auto_respects_minimum_interval_between_shifts():

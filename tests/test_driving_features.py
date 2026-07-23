@@ -869,7 +869,10 @@ def test_terse_air_brake_startup_omits_control_instructions(monkeypatch):
         assert all("press P" not in text for text in event_texts)
 
         driving.handle_event(key_event(pygame.K_p))
-        assert spoken[-1][0] == "Parking brake set. Air pressure 58 psi."
+        # The exact psi depends on how much rpm the first second of running
+        # banked (shift timing shifts it by one); terseness is the assertion.
+        assert spoken[-1][0].startswith("Parking brake set. Air pressure")
+        assert spoken[-1][0].endswith("psi.")
         assert "wait for" not in spoken[-1][0].lower()
 
         for _ in range(60 * 15):
@@ -2791,6 +2794,129 @@ def test_air_fill_loop_plays_until_governor_release(monkeypatch):
         driving.truck.air_pressure_psi = 88.0
         driving._update_audio(0.0)
         assert loops == [("start", CH_AIR, "vehicle/air_pressurize")]
+    finally:
+        app.shutdown()
+
+
+def test_curve_assist_prefers_the_jake_before_service_brakes(monkeypatch):
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    class FakeCurve:
+        advisory_mph = 40.0
+        connector = False
+        direction = "L"
+        min_radius_ft = 800.0
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.set_air_ready(parking_brake=False)
+        t.start_engine()
+        t.transmission.automatic = True
+        t.transmission.gear = 9
+        t.rpm = 1500.0
+        t.throttle = 0.0
+        t.grip = 1.0
+        monkeypatch.setattr(driving.trip, "curve_at", lambda _pos: FakeCurve())
+
+        # Modest overspeed (7 over the advisory): the jake alone handles it.
+        t.velocity_mps = 21.0  # ~47 mph vs 40 advisory
+        t.brake = 0.0
+        driving._update_lane(NoKeys(), 1 / 60)
+        assert t.engine_brake_stage == 1  # assist engaged the jake, sized small
+        assert driving._curve_assist_jake
+        assert t.brake == 0.0  # ...and left the service brakes alone
+
+        # Low grip inverts the rule: a jake on ice breaks the drives loose.
+        driving._curve_assist_active = False
+        driving._curve_assist_jake = False
+        t.engine_brake_stage = 0
+        t.grip = 0.4
+        t.brake = 0.0
+        driving._update_lane(NoKeys(), 1 / 60)
+        assert not t.engine_brake  # no jake on ice
+        assert t.brake > 0.0  # gentle service braking instead
+
+        # When the assist's own jake episode ends, it releases the jake --
+        # but only the one IT engaged.
+        t.grip = 1.0
+        driving._curve_assist_active = False
+        t.brake = 0.0
+        driving._update_lane(NoKeys(), 1 / 60)
+        assert driving._curve_assist_jake
+        monkeypatch.setattr(driving.trip, "curve_at", lambda _pos: None)
+        driving._update_lane(NoKeys(), 1 / 60)
+        assert not driving._curve_assist_jake
+        assert not t.engine_brake
+    finally:
+        app.shutdown()
+
+
+def test_jake_growl_follows_stage_rpm_and_cuts_through_shifts(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.audio import CH_JAKE
+
+    app = App()
+    loops = []
+    monkeypatch.setattr(app.ctx.audio, "set_engine_rpm", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_wind", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(
+        app.ctx.audio,
+        "start_loop",
+        lambda ch, key, volume=1.0, fade_ms=300: loops.append(("start", ch, key, volume)),
+    )
+    monkeypatch.setattr(
+        app.ctx.audio, "set_loop_volume", lambda ch, volume: loops.append(("vol", ch, volume))
+    )
+    monkeypatch.setattr(
+        app.ctx.audio, "stop_loop", lambda ch, **k: loops.append(("stop", ch))
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.set_air_ready(parking_brake=False)
+        t.start_engine()
+        t.transmission.automatic = True
+        t.transmission.gear = 8
+        t.velocity_mps = 20.0
+        t.throttle = 0.0
+        t.engine_brake_stage = 3
+        t.rpm = 1850.0
+        loops.clear()
+
+        driving._update_audio(0.0)
+        jake = [entry for entry in loops if entry[0] == "start" and entry[1] == CH_JAKE]
+        assert jake and jake[0][2] == "engine/jake_1800"  # nearest loop to 1850
+
+        # Mid-shift the jake cuts out -- the stair-step signature.
+        t.transmission._shift_timer = 0.5
+        driving._update_audio(0.0)
+        assert ("stop", CH_JAKE) in loops
+
+        # Back in gear at higher revs: it resumes on the higher loop.
+        loops.clear()
+        t.transmission._shift_timer = 0.0
+        t.rpm = 2150.0
+        driving._update_audio(0.0)
+        jake = [entry for entry in loops if entry[0] == "start" and entry[1] == CH_JAKE]
+        assert jake and jake[0][2] == "engine/jake_2200"
+
+        # Throttle on: a jake never sounds under power.
+        loops.clear()
+        t.throttle = 0.5
+        driving._update_audio(0.0)
+        assert ("stop", CH_JAKE) in loops
     finally:
         app.shutdown()
 

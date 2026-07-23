@@ -57,6 +57,7 @@ current idle, start, and shutdown cues.
 | Tire screech | `vehicle/tire_screech.ogg` | ElevenLabs-generated emergency-braking skid for microsleep forced stops |
 | Brake squeal | `vehicle/brake_squeal.ogg` | ElevenLabs-generated overheated-brake squeal past the fade temperature |
 | Air pressurization fill | `vehicle/air_pressurize.ogg` | Original parametric DSP loop (seeded frequency-domain synthesis, `sound-test/air_fallback.py`); superseded in release builds by the licensed overlay version |
+| Jake brake growl | `engine/jake_1200.ogg` ... `engine/jake_2200.ogg` | Original synthesized engine-brake loops at six rpm points (deterministic pulse-train DSP, `sound-test/jake_v2.py` family; approved by ear 2026-07-18) |
 
 ## Licensed Driving Sounds (release builds only)
 
@@ -69,8 +70,9 @@ redistributed. A source checkout falls back to the committed cues above.
 
 | Game file(s) | Built from | Source pack |
 | --- | --- | --- |
-| `engine/idle`, `engine/mid`, `engine/high`, `engine/rev_launch`, `engine/rev_load` | Steady holds and real acceleration pulls cut from the `SemiTruckMac_S08IN.896` interior driving take | Splice -- Large Vehicles |
-| `engine/low` | The 896 mid cut pitched 1150 to 950 rpm by resampling (`sound-test/engine_low_950.py`) | Splice -- Large Vehicles |
+| `engine/idle`, `engine/rev_launch`, `engine/rev_load` | Real idle hold and acceleration pulls cut from the `SemiTruckMac_S08IN.896` interior driving take | Splice -- Large Vehicles |
+| `engine/mid` | The ring's anchor: the hiss-free span of the flattened 896 mid hold, re-looped (`sound-test/engine_band_flatten.py`, `engine_ring_formant.py`) | Splice -- Large Vehicles |
+| `engine/low`, `engine/midhigh`, `engine/high` | Formant-preserving resyntheses of the clean anchor at 950, 1425, and 1900 rpm (`sound-test/engine_ring_formant.py`; no take in the library holds a real steady high rpm) | Splice -- Large Vehicles |
 | `vehicle/shift_manual_01`..`15`, `vehicle/shift_auto_01`..`15` | Real gear changes (manual: clutch squeaks; automatic: shorter disengage) cut from `SemiTruck_S08IN.854/.855/.859` and `SemiTruckMac_S08IN.896` | Splice -- Large Vehicles |
 | `vehicle/brake_clunk_01`..`14` | Percussive valve/actuation onsets from `SemiTruckBrake_S08IN.913`-`.917` and `BantamBrakeMach_S08IN.62` (`sound-test/brake_banks.py`) | Splice -- Large Vehicles / Industry Vol. 1 |
 | `vehicle/ebrake` | The full sustained Bantam air event, `BantamBrakeMach_S08IN.62` | Splice -- Industry Vol. 1 |

@@ -72,7 +72,8 @@ CH_HORN = 9
 CH_REVERSE = 10
 CH_AIR = 11  # compressor charging the tanks below governor release
 CH_BRAKE = 12  # brake-release air bleed: the hiss bed shaped per release
-RESERVED = 12
+CH_JAKE = 13  # engine-brake growl: synthesized loop, stage- and rpm-keyed
+RESERVED = 13
 NUM_CHANNELS = 32
 
 # Horn sustain loop points (samples, at the asset's 44100 Hz). The horn is an
@@ -90,7 +91,7 @@ ENGINE_BANDS = (
     ("engine/low", 950.0),
     ("engine/mid", 1150.0),
     ("engine/midhigh", 1425.0),
-    ("engine/high", 1800.0),
+    ("engine/high", 1900.0),
 )
 # Crossfades live in a narrow window around each adjacent pair's GEOMETRIC
 # midpoint (log-space), this fraction of the gap wide. Two things follow:
@@ -114,6 +115,12 @@ ENGINE_RPM_IDLE = 600.0
 ENGINE_RPM_MAX = 2200.0
 ENGINE_FREQ_MAX_MULT = 1.75
 ENGINE_SLIDE_MS = 120
+# A large rpm jump is a shift re-entry: the engine is ALREADY at the new
+# speed when the clutch hooks up, so the voice must step, not glide -- the
+# 120 ms slide across a 400 rpm drop reads as a little meow on every shift,
+# machine-gunned through a launch (owner's ear, 2026-07-22).
+ENGINE_SLIDE_SNAP_MS = 25
+ENGINE_SLIDE_SNAP_RPM = 150.0
 ENGINE_LOOP_GAIN = 1.0
 
 # Ignition crossfade. When the engine is deliberately started, the "engine/start"
@@ -295,6 +302,8 @@ class _PygameBackend:
         self._engine_intro_load = 0.0  # ignition load boost: 1.0 forces full load
         self._engine_starting = False  # True only during the ignition crossfade
         self._engine_last_rpm = ENGINE_RPM_IDLE
+        self._engine_last_throttle = 0.0
+        self._engine_duck = 1.0  # shift-gap disengage: below the load floor
         self._fades = FadeScheduler()
         try:
             if not pygame.mixer.get_init():
@@ -631,10 +640,11 @@ class _PygameBackend:
             self.play("engine/shutdown")
 
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None:
-        """Crossfade the four engine loops around the current RPM."""
+        """Crossfade the engine band loops around the current RPM."""
         if not (self.enabled and self._engine_running):
             return
         self._engine_last_rpm = rpm
+        self._engine_last_throttle = throttle
         load_gain = engine_load_gain(throttle)
         # During the ignition handoff, boost load toward full so the loop meets
         # the crank tail; the boost eases back to 0 afterward.
@@ -642,8 +652,17 @@ class _PygameBackend:
         weights = engine_band_weights(rpm, tuple(native for _key, native in ENGINE_BANDS))
         for i, w in enumerate(weights):
             self.set_loop_volume(
-                CH_ENGINE[i], ENGINE_LOOP_GAIN * w * load_gain * self._engine_intro_gain
+                CH_ENGINE[i],
+                ENGINE_LOOP_GAIN * w * load_gain * self._engine_duck * self._engine_intro_gain,
             )
+
+    def set_engine_duck(self, duck: float) -> None:
+        """Shift-gap disengage: scale the engine bed below the load floor."""
+        duck = max(0.0, min(1.0, duck))
+        if duck == self._engine_duck:
+            return
+        self._engine_duck = duck
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
 
     @property
     def engine_running(self) -> bool:
@@ -820,6 +839,7 @@ class _BassBackend:
         self._engine_starting = False  # True only during the ignition crossfade
         self._engine_last_rpm = ENGINE_RPM_IDLE
         self._engine_last_throttle = 0.0
+        self._engine_duck = 1.0  # shift-gap disengage: below the load floor
         self._fades = FadeScheduler()
 
         if os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
@@ -1286,6 +1306,12 @@ class _BassBackend:
         """
         if not (self._engine_running and (self._engine_bands or self._engine_stream)):
             return
+        # A step-sized rpm change (shift re-entry) snaps; wander glides.
+        slide_ms = (
+            ENGINE_SLIDE_SNAP_MS
+            if abs(rpm - self._engine_last_rpm) > ENGINE_SLIDE_SNAP_RPM
+            else ENGINE_SLIDE_MS
+        )
         self._engine_last_rpm = rpm
         self._engine_last_throttle = throttle
         load_gain = engine_load_gain(throttle)
@@ -1298,6 +1324,7 @@ class _BassBackend:
                 1.0,
                 ENGINE_LOOP_GAIN
                 * load_gain
+                * self._engine_duck
                 * self.engine_volume
                 * self.master_volume
                 * self._engine_intro_gain,
@@ -1314,7 +1341,7 @@ class _BassBackend:
                         stream.handle,
                         self._ATTRIB_FREQ,
                         base_freq * rate,
-                        ENGINE_SLIDE_MS,
+                        slide_ms,
                     )
                     stream.set_volume(level * w)
                 except self._BassError:
@@ -1324,11 +1351,19 @@ class _BassBackend:
         target = self._engine_base_freq * engine_freq_mult(rpm)
         try:
             self._bass_call(
-                self._slide, self._engine_stream.handle, self._ATTRIB_FREQ, target, ENGINE_SLIDE_MS
+                self._slide, self._engine_stream.handle, self._ATTRIB_FREQ, target, slide_ms
             )
             self._engine_stream.set_volume(level)
         except self._BassError:
             self._engine_stream = None
+
+    def set_engine_duck(self, duck: float) -> None:
+        """Shift-gap disengage: scale the engine bed below the load floor."""
+        duck = max(0.0, min(1.0, duck))
+        if duck == self._engine_duck:
+            return
+        self._engine_duck = duck
+        self.set_engine_rpm(self._engine_last_rpm, self._engine_last_throttle)
 
     @property
     def engine_running(self) -> bool:
@@ -1644,6 +1679,17 @@ class AudioEngine:
         """Play a one-shot. ``pan`` -1.0 = full left, 0 = center, 1.0 = right."""
         self._impl.play(key, volume, pan)
 
+    def set_engine_duck(self, duck: float) -> None:
+        """Shift-gap disengage: scale the engine bed below the load floor.
+
+        1.0 is normal running; the drive loop drops it through a shift's
+        torque interrupt so the engine genuinely falls away, then eases it
+        back as the clutch hooks up.
+        """
+        impl_fn = getattr(self._impl, "set_engine_duck", None)
+        if impl_fn is not None:
+            impl_fn(duck)
+
     def set_engine_voice(self, classic: bool) -> None:
         """Pick the engine voice: the recorded multisample ring or the
         classic single pitched loop (BASS backend; pygame has one model).
@@ -1838,7 +1884,7 @@ class AudioEngine:
     def stop_world(self) -> None:
         """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
         self.engine_stop(shutdown_sound=False)
-        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_HORN, CH_AIR):
+        for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_HORN, CH_AIR, CH_JAKE):
             self.stop_loop(ch, fade_ms=400)
 
     # -- music ----------------------------------------------------------------

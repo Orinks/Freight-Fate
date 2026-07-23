@@ -38,11 +38,23 @@ SINGLES: list[tuple[str, str]] = [
     # neutral hold is RETIRED: it measures ~1125 rpm (not the labeled ~1000,
     # 30 rpm under the mid cut) and is likely a different truck.
     ("896/engine_low_950.wav", "engine/low"),       # band low   (950 rpm)
-    ("896/cruise_mid_1150.wav", "engine/mid"),      # band mid   (~1150 rpm)
-    # mid-high = the mid cut pitched to 1425 (engine_midhigh_1425.py): splits
-    # the too-wide 1150->1800 gap so no band stretches into formant smear.
+    # The whole ring above idle builds from ONE clean anchor via the formant
+    # model (engine_ring_formant.py, owner's call): the flattened mid's
+    # hiss-free span re-looped -- the raw 7-14s window carries the real air-
+    # build hiss at 1.4-5.5s, which every derived band was inheriting (the
+    # in-game periodic hiss, once per loop pass per band).
+    ("896/cruise_mid_1150_clean.wav", "engine/mid"),  # band mid + THE anchor
+    # mid-high = the flattened mid pitched to 1425: splits the too-wide
+    # mid->high gap so no band stretches into formant smear.
     ("896/engine_midhigh_1425.wav", "engine/midhigh"),  # band mid-high (1425 rpm)
-    ("896/cruise_high_1800.wav", "engine/high"),    # band high  (~1800 rpm)
+    # high is the FORMANT MODEL (owner's call, engine_high_formant.py): NO
+    # take in the library holds a real steady high rpm -- 896 is driven and
+    # never sits, 60624's "1900" windows are order-jumping sweeps or a 950
+    # fast idle (the owner's ear caught it), 904/905 only sweep through. So:
+    # the flattened 896 mid pitched to 1900 with one static envelope-
+    # correction filter restoring the cab's formants -- fixed formants,
+    # moving rate, same donor. HPS-verified at 1894 rpm.
+    ("896/engine_high_1900_formant.wav", "engine/high"),  # band high (1900 rpm)
     ("896/rev_launch.wav", "engine/rev_launch"),    # short pull: launch from a stop
     ("896/rev_load.wav", "engine/rev_load"),        # long pull: digging in under load
     ("brakes/brake_hiss_bed.wav", "vehicle/brake_hiss_bed"),

@@ -27,6 +27,30 @@
   parking brake drops it back to idle on its own, and holding a high
   idle burns real fuel. On a controller it is the Y button.
 
+- **The jake brake finally has its voice.** Switch the engine brake on
+  and you hear the growl -- deeper and stronger the more cylinders you
+  select and the higher the revs, exactly how the real retarder works.
+  It cuts out through every shift and comes back louder in the lower
+  gear: the stair-stepping bark every trucker knows from a long grade.
+  It goes quiet the moment you touch the throttle, because a real jake
+  does.
+
+- **Low-gear shifts are quick now, like a real automated box.** Shifts
+  through the bottom four gears take about half a second of torque
+  interruption instead of a full second, ramping back up to the old
+  timing in the top gears where real boxes take their time too. A
+  loaded pull from a stop to 45 gets about three seconds quicker, and
+  the launch rhythm finally matches what you hear a real truck do.
+
+- **Curve assistance drives like a trucker now: jake first, brakes to
+  trim.** When curve speed assistance needs to slow you and your engine
+  brake is off, it switches the jake on at a stage sized to how hot you
+  are coming in -- you hear the growl do the work -- and touches the
+  service brakes only when you are still well over the advisory. On
+  slick roads it does the opposite, exactly like a careful driver: no
+  jake on ice, just gentle braking. It releases only the jake it
+  engaged; your own selection is never touched.
+
 - **Brakes and gear changes sound like the real mechanisms now.** Pressing
   the brake gives the valve's mechanical clunk, louder the harder you
   press, and letting off releases the air back out -- a hiss that runs

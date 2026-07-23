@@ -19,7 +19,22 @@ NEUTRAL = 0
 
 AUTO_UPSHIFT_RPM = 1750
 AUTO_DOWNSHIFT_RPM = 1050
-SHIFT_TIME = 1.0  # seconds of torque interruption
+# Torque-interrupt length. Real AMTs are quickest in the low box -- small
+# inertia steps and launch urgency -- and take the longest up top, so the
+# time scales with the gear being ENGAGED (owner's ear after the Camp
+# Verde-Kingman run: a one-second gap on a two-second low-gear pull reads
+# as a long, "shifty" hole). SHIFT_TIME stays as the top-gear ceiling and
+# the conservative figure the grade-loss estimate uses.
+SHIFT_TIME = 1.0  # seconds of torque interruption, 10th-gear ceiling
+SHIFT_TIME_LOW = 0.45  # through gear 4
+
+
+def shift_time_for(gear: int) -> float:
+    """Seconds of torque interruption for a shift engaging ``gear``."""
+    g = max(1, min(10, gear))
+    if g <= 4:
+        return SHIFT_TIME_LOW
+    return SHIFT_TIME_LOW + (SHIFT_TIME - SHIFT_TIME_LOW) * (g - 4) / 6.0
 # With the engine brake working, a real automatic pre-selects a lower range
 # to put the engine where the retarder bites (high RPM) instead of upshifting
 # away from it. Downshift while below the target band, but never into a gear
@@ -87,7 +102,7 @@ class Transmission:
         if self.clutch < 0.8 and target != NEUTRAL:
             return ShiftResult(False, "Clutch not pressed", grind=True)
         self.gear = target
-        self._shift_timer = SHIFT_TIME
+        self._shift_timer = shift_time_for(self.gear)
         return ShiftResult(True, self._gear_name(target))
 
     def shift_up(self) -> ShiftResult:
@@ -127,7 +142,7 @@ class Transmission:
         if self.gear == NEUTRAL:
             if throttle > 0.05:
                 self.gear = max(1, min(self.num_gears, start_gear))
-                self._shift_timer = SHIFT_TIME
+                self._shift_timer = shift_time_for(self.gear)
                 self._gear_hold_timer = 0.0
                 return self.gear
             return None
@@ -140,7 +155,7 @@ class Transmission:
             # regardless used to throw away the light rig's start gear
             # before the truck had rolled a foot.
             self.gear = restart_gear
-            self._shift_timer = SHIFT_TIME
+            self._shift_timer = shift_time_for(self.gear)
             self._gear_hold_timer = 0.0
             return self.gear
         # The comfort hold between shifts never delays engine protection:
@@ -159,7 +174,7 @@ class Transmission:
         hold_gear = (braking or engine_braking) and rpm < JAKE_MAX_RPM
         if rpm > upshift_rpm and self.gear < self.num_gears and not hold_gear and can_upshift:
             self.gear = min(self.num_gears, self.gear + max(1, upshift_steps))
-            self._shift_timer = SHIFT_TIME
+            self._shift_timer = shift_time_for(self.gear)
             self._gear_hold_timer = 0.0
             return self.gear
         if engine_braking and moving and self.gear > 1 and rpm < JAKE_PRESELECT_RPM:
@@ -167,13 +182,13 @@ class Transmission:
             current = GEAR_RATIOS[self.gear - 1]
             if rpm * lower / current <= JAKE_MAX_RPM:
                 self.gear -= 1
-                self._shift_timer = SHIFT_TIME
+                self._shift_timer = shift_time_for(self.gear)
                 self._gear_hold_timer = 0.0
                 return self.gear
         if rpm < downshift_rpm and self.gear > 1 and moving:
             target = self.gear - 1 if downshift_target is None else downshift_target
             self.gear = max(1, min(self.gear - 1, target))
-            self._shift_timer = SHIFT_TIME
+            self._shift_timer = shift_time_for(self.gear)
             self._gear_hold_timer = 0.0
             return self.gear
         return None
@@ -186,7 +201,7 @@ class Transmission:
         if not self.automatic or self.gear <= 1:
             return None
         self.gear -= 1
-        self._shift_timer = SHIFT_TIME
+        self._shift_timer = shift_time_for(self.gear)
         self._gear_hold_timer = 0.0
         return self.gear
 
