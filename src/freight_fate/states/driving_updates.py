@@ -1012,7 +1012,10 @@ class DrivingUpdateMixin:
         voice = engine_audio.classify(engine_audio.reading_from_truck(t))
         deep_fill = t.air_pressure_psi <= t.specs.air_parking_release_psi - AIR_FILL_REARM_PSI
         if t.engine_on and voice.pressurizing and (self._air_cue_active or deep_fill):
-            if not self._air_cue_active:
+            # The compressor spins with the engine: the fill hiss waits out
+            # the ignition crank and starts once the engine is actually
+            # running at idle, not the instant E is pressed.
+            if not self._air_cue_active and not audio.engine_starting:
                 audio.start_loop(
                     CH_AIR, "vehicle/air_pressurize", volume=AIR_FILL_VOLUME, fade_ms=400
                 )

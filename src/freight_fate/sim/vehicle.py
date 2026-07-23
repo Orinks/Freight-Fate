@@ -488,6 +488,29 @@ class TruckState:
         # bounced every skip-shift straight back down a gear, and the launch
         # churned through torque interruptions instead of accelerating.
         downshift_rpm = AUTO_DOWNSHIFT_RPM - 300.0 * (1.0 - load_fraction)
+        # Traction-linked retarder management: refuse a jake pre-select into a
+        # gear whose retard demand would break the drive axle loose (predicted
+        # the same way the upshift path predicts tractive force). Without
+        # this, on glare ice the box lands one gear too deep and grinds the
+        # cap for the whole descent -- real automated retarders are slip-
+        # gated for exactly this reason.
+        retarder_slipping = self.jake_slipping
+        if jaking and not retarder_slipping and tr.gear > 1 and not tr.in_neutral:
+            s = self.specs
+            lower_rpm = min(s.max_rpm, self.coupled_rpm(tr.gear - 1))
+            rpm_frac = max(0.0, min(1.0, lower_rpm / s.max_rpm))
+            stage = min(JAKE_STAGES, self.engine_brake_stage) / JAKE_STAGES
+            lower_torque = s.engine_brake_torque_nm * stage * (
+                JAKE_RPM_FLOOR + (1.0 - JAKE_RPM_FLOOR) * rpm_frac
+            )
+            lower_demand = (
+                lower_torque
+                * abs(tr.ratio_for(tr.gear - 1))
+                * s.driveline_efficiency
+                / s.wheel_radius_m
+            )
+            if lower_demand > self._jake_traction_cap():
+                retarder_slipping = True
         return tr.auto_update(
             rpm_est,
             self.throttle,
@@ -501,6 +524,7 @@ class TruckState:
             downshift_target,
             engine_braking=jaking,
             downshift_rpm=downshift_rpm,
+            retarder_slipping=retarder_slipping,
         )
 
     # -- forces -----------------------------------------------------------------
