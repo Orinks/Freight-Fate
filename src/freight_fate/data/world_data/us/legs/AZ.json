@@ -343,16 +343,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-10 corridor between Buckeye and Phoenix",
-            "at_mi": 20.0,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "I-10",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -1450,16 +1441,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "AZ-95 corridor between Bullhead City and Lake Havasu City",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "AZ-95",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -2106,16 +2088,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "AZ-260 corridor between Camp Verde and Cottonwood",
-            "at_mi": 8.0,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "AZ-260",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -2955,16 +2928,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-17 corridor between Camp Verde and Flagstaff",
-            "at_mi": 30.0,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "I-17",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -4046,16 +4010,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "AZ-260 corridor between Camp Verde and Payson",
-            "at_mi": 29.0,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "AZ-260",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -5386,16 +5341,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-89A corridor between Cottonwood and Sedona",
-            "at_mi": 9.5,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "US-89A",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -7355,16 +7301,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "AZ-80 corridor between Douglas and Tucson",
-            "at_mi": 59.0,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "AZ-80",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -12211,16 +12148,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-40 corridor between Flagstaff and Winslow",
-            "at_mi": 29.0,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "I-40",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -13506,16 +13434,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-60 corridor between Globe and Show Low",
-            "at_mi": 44.0,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "US-60",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -17127,16 +17046,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "AZ-68 corridor between Kingman and Bullhead City",
-            "at_mi": 17.5,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "AZ-68",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -17878,16 +17788,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "AZ-95 corridor between Kingman and Lake Havasu City",
-            "at_mi": 30.0,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "AZ-95",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -24957,16 +24858,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-10 corridor between Phoenix and Casa Grande",
-            "at_mi": 24.0,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "I-10",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -33951,16 +33843,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "AZ-77 corridor between Show Low and Holbrook",
-            "at_mi": 23.5,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "AZ-77",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -35014,16 +34897,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "AZ-82 corridor between Sierra Vista and Nogales",
-            "at_mi": 26.0,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "AZ-82",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -35925,16 +35799,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-19 corridor between Tucson and Nogales",
-            "at_mi": 32.5,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "I-19",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",
@@ -37039,16 +36904,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "AZ-90 corridor between Tucson and Sierra Vista",
-            "at_mi": 35.0,
-            "type": "place",
-            "state": "Arizona",
-            "highway": "AZ-90",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arizona",

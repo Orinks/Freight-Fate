@@ -11116,16 +11116,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-287 corridor between Amarillo and Dumas",
-            "at_mi": 23.5,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-287",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -26798,16 +26789,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-20 corridor between Big Spring and Abilene",
-            "at_mi": 55.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "I-20",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -32849,16 +32831,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-84 corridor between Brownwood and Abilene",
-            "at_mi": 45.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-84",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -33831,16 +33804,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-183 corridor between Brownwood and Lampasas",
-            "at_mi": 32.5,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-183",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -35015,16 +34979,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-67 corridor between Brownwood and San Angelo",
-            "at_mi": 45.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-67",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -69153,16 +69108,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-277 corridor between Eagle Pass and Del Rio",
-            "at_mi": 28.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-277",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -69781,16 +69727,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-57 corridor between Eagle Pass and Uvalde",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-57",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -84464,16 +84401,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-60 corridor between Hereford and Amarillo",
-            "at_mi": 24.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-60",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -85159,16 +85087,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-60 corridor between Hereford and Clovis",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "New Mexico",
-            "highway": "US-60",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -95242,16 +95161,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-10 corridor between Kerrville and Junction",
-            "at_mi": 28.5,
-            "type": "place",
-            "state": "Texas",
-            "highway": "I-10",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -112361,16 +112271,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-27 corridor between Lubbock and Plainview",
-            "at_mi": 22.5,
-            "type": "place",
-            "state": "Texas",
-            "highway": "I-27",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -125553,16 +125454,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-20 corridor between Midland and Big Spring",
-            "at_mi": 20.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "I-20",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -127027,16 +126919,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-20 corridor between Midland and Odessa",
-            "at_mi": 10.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "I-20",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -129882,16 +129765,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-10 corridor between Ozona and Fort Stockton",
-            "at_mi": 53.5,
-            "type": "place",
-            "state": "Texas",
-            "highway": "I-10",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -131442,16 +131316,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "TX-21 corridor between Palestine and College Station",
-            "at_mi": 39.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "TX-21",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -132788,16 +132653,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-84 corridor between Palestine and Lufkin",
-            "at_mi": 30.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-84",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -133706,16 +133562,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-69 corridor between Palestine and Tyler",
-            "at_mi": 24.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-69",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -134311,16 +134158,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-60 corridor between Pampa and Amarillo",
-            "at_mi": 29.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-60",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -134938,16 +134776,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "TX-70 corridor between Pampa and Clarendon",
-            "at_mi": 24.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "TX-70",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -136923,16 +136752,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-27 corridor between Plainview and Amarillo",
-            "at_mi": 40.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "I-27",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -152837,16 +152657,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-281 corridor between Stephenville and Mineral Wells",
-            "at_mi": 21.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-281",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -153266,16 +153077,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-287 corridor between Stratford and Boise City",
-            "at_mi": 19.0,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "US-287",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",
@@ -159191,16 +158993,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-90 corridor between Uvalde and Del Rio",
-            "at_mi": 35.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-90",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Texas",

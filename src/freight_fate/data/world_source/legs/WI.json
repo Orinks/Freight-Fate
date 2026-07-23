@@ -468,16 +468,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-53 corridor between Chippewa Falls and Rice Lake",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "Wisconsin",
-            "highway": "US-53",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wisconsin",
@@ -6284,16 +6275,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-151 corridor between Fond du Lac and Madison",
-            "at_mi": 31.0,
-            "type": "place",
-            "state": "Wisconsin",
-            "highway": "US-151",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wisconsin",
@@ -7034,16 +7016,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-41 corridor between Fond du Lac and Oshkosh",
-            "at_mi": 10.0,
-            "type": "place",
-            "state": "Wisconsin",
-            "highway": "I-41",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wisconsin",
@@ -23390,16 +23363,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-41 corridor between Milwaukee and Fond du Lac",
-            "at_mi": 31.0,
-            "type": "place",
-            "state": "Wisconsin",
-            "highway": "I-41",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wisconsin",
@@ -30789,16 +30753,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-43 corridor between Milwaukee and Sheboygan",
-            "at_mi": 26.0,
-            "type": "place",
-            "state": "Wisconsin",
-            "highway": "I-43",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wisconsin",
@@ -31722,16 +31677,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-41 corridor between Oshkosh and Green Bay",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "Wisconsin",
-            "highway": "I-41",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wisconsin",
@@ -34301,16 +34247,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-43 corridor between Sheboygan and Green Bay",
-            "at_mi": 33.0,
-            "type": "place",
-            "state": "Wisconsin",
-            "highway": "I-43",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wisconsin",

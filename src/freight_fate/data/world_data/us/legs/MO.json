@@ -25742,16 +25742,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-63 corridor between Kirksville and Ottumwa",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Iowa",
-            "highway": "US-63",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Missouri",
@@ -26627,16 +26618,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-60 corridor between Poplar Bluff and Cape Girardeau",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Missouri",
-            "highway": "US-60",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Missouri",
@@ -27674,16 +27656,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-67 corridor between Poplar Bluff and Jonesboro",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Arkansas",
-            "highway": "US-67",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Missouri",
@@ -36713,16 +36686,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-50 corridor between Sedalia and Columbia",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "Missouri",
-            "highway": "US-50",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Missouri",

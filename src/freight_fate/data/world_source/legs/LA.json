@@ -7331,16 +7331,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-12 corridor between Hammond and Baton Rouge",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "Louisiana",
-            "highway": "I-12",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Louisiana",
@@ -8092,16 +8083,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-55 corridor between Hammond and New Orleans",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "Louisiana",
-            "highway": "I-55",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Louisiana",
@@ -15599,16 +15581,7 @@
       "highway": "I-49",
       "terrain": "flat",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "I-49 corridor between Natchitoches and Shreveport",
-            "at_mi": 38.0,
-            "type": "place",
-            "state": "Louisiana",
-            "highway": "I-49",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "tollway_detected": false,
         "route_points": [
           {
@@ -20265,16 +20238,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-20 corridor between Ruston and Monroe",
-            "at_mi": 16.5,
-            "type": "place",
-            "state": "Louisiana",
-            "highway": "I-20",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Louisiana",
@@ -23647,16 +23611,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-20 corridor between Shreveport and Ruston",
-            "at_mi": 34.0,
-            "type": "place",
-            "state": "Louisiana",
-            "highway": "I-20",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Louisiana",

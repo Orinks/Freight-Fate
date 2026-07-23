@@ -24565,16 +24565,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-29 corridor between Watertown and Brookings",
-            "at_mi": 25.5,
-            "type": "place",
-            "state": "South Dakota",
-            "highway": "I-29",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "South Dakota",

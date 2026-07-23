@@ -4300,16 +4300,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-19 corridor between Americus and Albany",
-            "at_mi": 17.5,
-            "type": "place",
-            "state": "Georgia",
-            "highway": "US-19",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Georgia",
@@ -5440,16 +5431,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-280 corridor between Americus and Columbus",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Georgia",
-            "highway": "US-280",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Georgia",
@@ -46886,16 +46868,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-16 corridor between Dublin and Savannah",
-            "at_mi": 56.0,
-            "type": "place",
-            "state": "Georgia",
-            "highway": "I-16",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Georgia",
@@ -48089,16 +48062,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-84 corridor between Hinesville and Brunswick",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Georgia",
-            "highway": "US-84",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Georgia",
@@ -50873,16 +50837,7 @@
       "highway": "I-185",
       "terrain": "hills",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "I-185 corridor between LaGrange and Columbus",
-            "at_mi": 23.0,
-            "type": "place",
-            "state": "Georgia",
-            "highway": "I-185",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "tollway_detected": false,
         "route_points": [
           {
@@ -55697,16 +55652,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-16 corridor between Macon and Dublin",
-            "at_mi": 26.5,
-            "type": "place",
-            "state": "Georgia",
-            "highway": "I-16",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Georgia",
@@ -64382,16 +64328,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-25 corridor between Statesboro and Augusta",
-            "at_mi": 37.5,
-            "type": "place",
-            "state": "Georgia",
-            "highway": "US-25",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Georgia",
@@ -65433,16 +65370,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-80 corridor between Statesboro and Savannah",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Georgia",
-            "highway": "US-80",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Georgia",

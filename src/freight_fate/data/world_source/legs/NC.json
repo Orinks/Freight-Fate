@@ -2293,16 +2293,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-40 corridor between Asheville and Hickory",
-            "at_mi": 30.0,
-            "type": "place",
-            "state": "North Carolina",
-            "highway": "I-40",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Carolina",
@@ -37808,16 +37799,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-17 corridor between Greenville and New Bern",
-            "at_mi": 17.5,
-            "type": "place",
-            "state": "North Carolina",
-            "highway": "US-17",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Carolina",
@@ -38850,16 +38832,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-40 corridor between Hickory and Charlotte",
-            "at_mi": 30.0,
-            "type": "place",
-            "state": "North Carolina",
-            "highway": "I-40",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Carolina",
@@ -39925,16 +39898,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-17 corridor between Jacksonville and Wilmington",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "North Carolina",
-            "highway": "US-17",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Carolina",
@@ -41210,16 +41174,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-17 corridor between New Bern and Jacksonville",
-            "at_mi": 20.0,
-            "type": "place",
-            "state": "North Carolina",
-            "highway": "US-17",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Carolina",
@@ -46866,16 +46821,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-264 corridor between Raleigh and Greenville",
-            "at_mi": 42.0,
-            "type": "place",
-            "state": "North Carolina",
-            "highway": "US-264",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Carolina",
@@ -49702,16 +49648,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-64 corridor between Rocky Mount and Greenville",
-            "at_mi": 17.5,
-            "type": "place",
-            "state": "North Carolina",
-            "highway": "US-64",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Carolina",
@@ -52229,16 +52166,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-64 corridor between Rocky Mount and Raleigh",
-            "at_mi": 26.0,
-            "type": "place",
-            "state": "North Carolina",
-            "highway": "US-64",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Carolina",

@@ -1942,16 +1942,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-94 corridor between Bismarck and Jamestown",
-            "at_mi": 50.0,
-            "type": "place",
-            "state": "North Dakota",
-            "highway": "I-94",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Dakota",
@@ -11865,16 +11856,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-94 corridor between Jamestown and Fargo",
-            "at_mi": 47.0,
-            "type": "place",
-            "state": "North Dakota",
-            "highway": "I-94",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Dakota",

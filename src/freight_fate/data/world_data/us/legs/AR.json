@@ -5535,16 +5535,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-40 corridor between Conway and Russellville",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Arkansas",
-            "highway": "I-40",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arkansas",
@@ -19873,16 +19864,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-70 corridor between Hot Springs and Little Rock",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Arkansas",
-            "highway": "US-70",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arkansas",
@@ -21532,16 +21514,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-70 corridor between Hot Springs and Texarkana",
-            "at_mi": 52.5,
-            "type": "place",
-            "state": "Arkansas",
-            "highway": "US-70",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arkansas",
@@ -39133,16 +39106,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-40 corridor between Russellville and Fort Smith",
-            "at_mi": 37.0,
-            "type": "place",
-            "state": "Arkansas",
-            "highway": "I-40",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Arkansas",

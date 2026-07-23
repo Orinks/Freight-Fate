@@ -5630,16 +5630,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-15 corridor between Barstow and Victorville",
-            "at_mi": 16.0,
-            "type": "place",
-            "state": "California",
-            "highway": "I-15",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "California",
@@ -21700,16 +21691,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-101 corridor between Fortuna and Eureka",
-            "at_mi": 9.0,
-            "type": "place",
-            "state": "California",
-            "highway": "US-101",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "California",
@@ -23704,16 +23686,7 @@
       "highway": "I-10",
       "terrain": "flat",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "I-10 corridor between Indio and Blythe",
-            "at_mi": 49.0,
-            "type": "place",
-            "state": "California",
-            "highway": "I-10",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "tollway_detected": false,
         "route_points": [
           {
@@ -29186,16 +29159,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-395 corridor between Lone Pine and Mojave",
-            "at_mi": 57.5,
-            "type": "place",
-            "state": "California",
-            "highway": "US-395",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "California",
@@ -40139,16 +40103,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-395 corridor between Mammoth Lakes and Bishop",
-            "at_mi": 21.0,
-            "type": "place",
-            "state": "California",
-            "highway": "US-395",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "California",
@@ -56831,16 +56786,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-395 corridor between Ridgecrest and Bishop",
-            "at_mi": 75.0,
-            "type": "place",
-            "state": "California",
-            "highway": "US-395",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "California",
@@ -57758,16 +57704,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "CA-14 corridor between Ridgecrest and Mojave",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "California",
-            "highway": "CA-14",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "California",
@@ -79093,16 +79030,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "CA-99 corridor between Sacramento and Yuba City",
-            "at_mi": 20.0,
-            "type": "place",
-            "state": "California",
-            "highway": "CA-99",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "California",
@@ -137482,16 +137410,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "CA-44 corridor between Susanville and Redding",
-            "at_mi": 52.5,
-            "type": "place",
-            "state": "California",
-            "highway": "CA-44",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "California",
@@ -138645,16 +138564,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-395 corridor between Susanville and Reno",
-            "at_mi": 42.5,
-            "type": "place",
-            "state": "Nevada",
-            "highway": "US-395",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "California",
@@ -142170,16 +142080,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-101 corridor between Ukiah and Willits",
-            "at_mi": 13.0,
-            "type": "place",
-            "state": "California",
-            "highway": "US-101",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "California",
@@ -153892,16 +153793,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "CA-99 corridor between Yuba City and Chico",
-            "at_mi": 24.0,
-            "type": "place",
-            "state": "California",
-            "highway": "CA-99",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "California",

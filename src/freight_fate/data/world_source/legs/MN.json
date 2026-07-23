@@ -282,16 +282,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-35 corridor between Albert Lea and Mason City",
-            "at_mi": 16.5,
-            "type": "place",
-            "state": "Iowa",
-            "highway": "I-35",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Minnesota",
@@ -1033,16 +1024,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-35 corridor between Albert Lea and Owatonna",
-            "at_mi": 17.5,
-            "type": "place",
-            "state": "Minnesota",
-            "highway": "I-35",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Minnesota",
@@ -17576,16 +17558,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-35 corridor between Owatonna and Minneapolis",
-            "at_mi": 31.0,
-            "type": "place",
-            "state": "Minnesota",
-            "highway": "I-35",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Minnesota",

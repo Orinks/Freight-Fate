@@ -7749,16 +7749,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "Garden State Parkway corridor between Toms River and Atlantic City",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "New Jersey",
-            "highway": "Garden State Parkway",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Jersey",
@@ -8911,16 +8902,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "Garden State Parkway corridor between Toms River and Newark",
-            "at_mi": 32.5,
-            "type": "place",
-            "state": "New Jersey",
-            "highway": "Garden State Parkway",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Jersey",
@@ -12189,16 +12171,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-40 corridor between Vineland and Atlantic City",
-            "at_mi": 17.5,
-            "type": "place",
-            "state": "New Jersey",
-            "highway": "US-40",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Jersey",
@@ -13061,16 +13034,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "NJ-55 corridor between Vineland and Philadelphia",
-            "at_mi": 20.0,
-            "type": "place",
-            "state": "Pennsylvania",
-            "highway": "NJ-55",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Jersey",

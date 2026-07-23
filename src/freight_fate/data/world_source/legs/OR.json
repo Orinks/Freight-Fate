@@ -7,16 +7,7 @@
       "highway": "US-20",
       "terrain": "hills",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "US-20 corridor between Albany and Corvallis",
-            "at_mi": 5.5,
-            "type": "place",
-            "state": "Oregon",
-            "highway": "US-20",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "landmarks": [
           {
             "name": "Tangent",
@@ -291,16 +282,7 @@
       "highway": "I-5",
       "terrain": "hills",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "I-5 corridor between Albany and Eugene",
-            "at_mi": 22.0,
-            "type": "place",
-            "state": "Oregon",
-            "highway": "I-5",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "landmarks": [
           {
             "name": "Adair Village",
@@ -9181,16 +9163,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "OR-99 corridor between Corvallis and Eugene",
-            "at_mi": 23.5,
-            "type": "place",
-            "state": "Oregon",
-            "highway": "OR-99",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oregon",
@@ -27980,16 +27953,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "US-20 corridor between Newport and Corvallis",
-            "at_mi": 24.5,
-            "type": "place",
-            "state": "Oregon",
-            "highway": "US-20",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oregon",
@@ -29901,16 +29865,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-84 corridor between Pendleton and La Grande",
-            "at_mi": 26.0,
-            "type": "place",
-            "state": "Oregon",
-            "highway": "I-84",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oregon",
@@ -49052,16 +49007,7 @@
       "highway": "I-5",
       "terrain": "mountain",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "I-5 corridor between Salem and Albany",
-            "at_mi": 13.0,
-            "type": "place",
-            "state": "Oregon",
-            "highway": "I-5",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "landmarks": [
           {
             "name": "Brooks",
@@ -53310,16 +53256,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-84 corridor between The Dalles and Pendleton",
-            "at_mi": 75.0,
-            "type": "place",
-            "state": "Oregon",
-            "highway": "I-84",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oregon",

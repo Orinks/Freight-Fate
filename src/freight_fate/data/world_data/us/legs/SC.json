@@ -19245,16 +19245,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-17 corridor between Myrtle Beach and Wilmington",
-            "at_mi": 36.0,
-            "type": "place",
-            "state": "North Carolina",
-            "highway": "US-17",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "South Carolina",
@@ -21442,16 +21433,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-378 corridor between Sumter and Columbia",
-            "at_mi": 22.5,
-            "type": "place",
-            "state": "South Carolina",
-            "highway": "US-378",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "South Carolina",
@@ -21977,16 +21959,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-76 corridor between Sumter and Florence",
-            "at_mi": 20.0,
-            "type": "place",
-            "state": "South Carolina",
-            "highway": "US-76",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "South Carolina",

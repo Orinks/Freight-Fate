@@ -743,6 +743,13 @@
 
 ### Fixed
 
+- **No more "corridor between" announcements pretending to be towns.**
+  Two hundred forty-six legs carried a leftover data placeholder named
+  like "CA-99 corridor between Sacramento and Yuba City", and the place
+  callouts and route report spoke them as if they were real places. The
+  placeholders are gone from the map data, and the routing rule that
+  forced them to exist is fixed so every affected road stays dispatchable.
+
 - **The gear change comes at the top of the rev, not a second after.**
   Above the launch gears, the transmission used to rev to its shift
   point and then sit at the crest waiting out an internal timer before

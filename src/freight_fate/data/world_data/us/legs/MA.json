@@ -765,16 +765,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "MA-3 corridor between Barnstable and Boston",
-            "at_mi": 35.0,
-            "type": "place",
-            "state": "Massachusetts",
-            "highway": "MA-3",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Massachusetts",
@@ -2257,16 +2248,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-6 corridor between Barnstable and Providence",
-            "at_mi": 37.5,
-            "type": "place",
-            "state": "Rhode Island",
-            "highway": "US-6",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Massachusetts",

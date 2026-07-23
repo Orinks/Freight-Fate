@@ -1298,16 +1298,7 @@
       "highway": "US-50",
       "terrain": "mountain",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "US-50 corridor between Austin and Fallon",
-            "at_mi": 55.0,
-            "type": "place",
-            "state": "Nevada",
-            "highway": "US-50",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "landmarks": [
           {
             "name": "Austin Summit",
@@ -8940,16 +8931,7 @@
       "highway": "US-50",
       "terrain": "mountain",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "US-50 corridor between Ely and Eureka",
-            "at_mi": 38.5,
-            "type": "place",
-            "state": "Nevada",
-            "highway": "US-50",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "landmarks": [
           {
             "name": "Ruth",
@@ -9820,16 +9802,7 @@
       "highway": "US-6",
       "terrain": "mountain",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "US-6 corridor between Ely and Tonopah",
-            "at_mi": 84.0,
-            "type": "place",
-            "state": "Nevada",
-            "highway": "US-6",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "landmarks": [
           {
             "name": "Ruth",
@@ -11746,16 +11719,7 @@
       "highway": "US-50",
       "terrain": "mountain",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "US-50 corridor between Eureka and Austin",
-            "at_mi": 35.0,
-            "type": "place",
-            "state": "Nevada",
-            "highway": "US-50",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "landmarks": [
           {
             "name": "The Loneliest Road in America",
@@ -12269,16 +12233,7 @@
       "highway": "US-95",
       "terrain": "hills",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "US-95 corridor between Fallon and Fernley",
-            "at_mi": 14.0,
-            "type": "place",
-            "state": "Nevada",
-            "highway": "US-95",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "landmarks": [
           {
             "name": "Fallon Station",
@@ -13677,16 +13632,7 @@
       "highway": "US-93",
       "terrain": "mountain",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "US-93 corridor between Las Vegas and Alamo",
-            "at_mi": 48.0,
-            "type": "place",
-            "state": "Nevada",
-            "highway": "US-93",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "landmarks": [
           {
             "name": "Spring Valley",
@@ -20360,16 +20306,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-395 corridor between Reno and Carson City",
-            "at_mi": 16.0,
-            "type": "place",
-            "state": "Nevada",
-            "highway": "US-395",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Nevada",
@@ -28700,16 +28637,7 @@
       "highway": "I-80",
       "terrain": "mountain",
       "corridor": {
-        "checkpoints": [
-          {
-            "name": "I-80 corridor between Wells and West Wendover",
-            "at_mi": 29.0,
-            "type": "place",
-            "state": "Nevada",
-            "highway": "I-80",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "landmarks": [
           {
             "name": "Moor Summit",
@@ -30458,16 +30386,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-80 corridor between West Wendover and Salt Lake City",
-            "at_mi": 73.8,
-            "type": "place",
-            "state": "Utah",
-            "highway": "I-80",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Nevada",

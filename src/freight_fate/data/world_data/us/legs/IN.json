@@ -128,16 +128,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "SR-32 corridor between Anderson and Muncie",
-            "at_mi": 12.5,
-            "type": "place",
-            "state": "Indiana",
-            "highway": "SR-32",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Indiana",
@@ -2257,16 +2248,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-65 corridor between Columbus and Indianapolis",
-            "at_mi": 22.0,
-            "type": "place",
-            "state": "Indiana",
-            "highway": "I-65",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Indiana",
@@ -17491,16 +17473,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-69 corridor between Indianapolis and Anderson",
-            "at_mi": 18.0,
-            "type": "place",
-            "state": "Indiana",
-            "highway": "I-69",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Indiana",
@@ -21420,16 +21393,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-31 corridor between Indianapolis and Kokomo",
-            "at_mi": 26.0,
-            "type": "place",
-            "state": "Indiana",
-            "highway": "US-31",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Indiana",
@@ -26118,16 +26082,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-70 corridor between Indianapolis and Richmond",
-            "at_mi": 34.0,
-            "type": "place",
-            "state": "Indiana",
-            "highway": "I-70",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Indiana",
@@ -32947,16 +32902,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "SR-26 corridor between Kokomo and Lafayette",
-            "at_mi": 18.5,
-            "type": "place",
-            "state": "Indiana",
-            "highway": "SR-26",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Indiana",
@@ -34998,16 +34944,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-69 corridor between Muncie and Fort Wayne",
-            "at_mi": 32.5,
-            "type": "place",
-            "state": "Indiana",
-            "highway": "I-69",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Indiana",
@@ -35974,16 +35911,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-35 corridor between Muncie and Richmond",
-            "at_mi": 20.0,
-            "type": "place",
-            "state": "Indiana",
-            "highway": "US-35",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Indiana",
@@ -36880,16 +36808,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-70 corridor between Richmond and Dayton",
-            "at_mi": 22.5,
-            "type": "place",
-            "state": "Ohio",
-            "highway": "I-70",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Indiana",
@@ -43543,16 +43462,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-41 corridor between Vincennes and Evansville",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "Indiana",
-            "highway": "US-41",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Indiana",
@@ -44299,16 +44209,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-41 corridor between Vincennes and Terre Haute",
-            "at_mi": 29.0,
-            "type": "place",
-            "state": "Indiana",
-            "highway": "US-41",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Indiana",

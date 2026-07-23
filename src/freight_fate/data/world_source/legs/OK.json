@@ -674,16 +674,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-177 corridor between Ada and Ardmore",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "US-177",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -1752,16 +1743,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "OK-3 corridor between Ada and McAlester",
-            "at_mi": 30.0,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "OK-3",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -2876,16 +2858,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-177 corridor between Ada and Oklahoma City",
-            "at_mi": 40.0,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "US-177",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -4004,16 +3977,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-62 corridor between Altus and Lawton",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "US-62",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -4991,16 +4955,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-283 corridor between Altus and Wichita Falls",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-283",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -9267,16 +9222,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-69 corridor between Atoka and McAlester",
-            "at_mi": 22.0,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "US-69",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -10007,16 +9953,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-75 corridor between Bartlesville and Coffeyville",
-            "at_mi": 19.5,
-            "type": "place",
-            "state": "Kansas",
-            "highway": "US-75",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -14680,16 +14617,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-75 corridor between Henryetta and Okmulgee",
-            "at_mi": 7.0,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "US-75",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -30292,16 +30220,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-60 corridor between Ponca City and Bartlesville",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "US-60",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -31162,16 +31081,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-177 corridor between Ponca City and Stillwater",
-            "at_mi": 20.0,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "US-177",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -32043,16 +31953,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "OK-51 corridor between Stillwater and Enid",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "OK-51",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -33011,16 +32912,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-177 corridor between Stillwater and Oklahoma City",
-            "at_mi": 32.5,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "US-177",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",
@@ -34099,16 +33991,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "OK-51 corridor between Stillwater and Tulsa",
-            "at_mi": 32.5,
-            "type": "place",
-            "state": "Oklahoma",
-            "highway": "OK-51",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Oklahoma",

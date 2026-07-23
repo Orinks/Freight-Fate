@@ -10523,16 +10523,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-99 corridor between Altoona and State College",
-            "at_mi": 17.5,
-            "type": "place",
-            "state": "Pennsylvania",
-            "highway": "I-99",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Pennsylvania",
@@ -15770,16 +15761,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-79 corridor between Erie and Meadville",
-            "at_mi": 20.0,
-            "type": "place",
-            "state": "Pennsylvania",
-            "highway": "I-79",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Pennsylvania",
@@ -30661,16 +30643,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-79 corridor between Meadville and Pittsburgh",
-            "at_mi": 44.0,
-            "type": "place",
-            "state": "Pennsylvania",
-            "highway": "I-79",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Pennsylvania",
@@ -55015,16 +54988,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-15 corridor between Williamsport and Binghamton",
-            "at_mi": 36.0,
-            "type": "place",
-            "state": "New York",
-            "highway": "US-15",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Pennsylvania",
@@ -56539,16 +56503,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-15 corridor between Williamsport and Harrisburg",
-            "at_mi": 42.5,
-            "type": "place",
-            "state": "Pennsylvania",
-            "highway": "US-15",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Pennsylvania",

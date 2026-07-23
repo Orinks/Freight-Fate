@@ -457,16 +457,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-11W corridor between Bristol and Kingsport",
-            "at_mi": 12.0,
-            "type": "place",
-            "state": "Tennessee",
-            "highway": "US-11W",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Virginia",
@@ -11742,16 +11733,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-24 corridor between Clarksville and Nashville",
-            "at_mi": 24.0,
-            "type": "place",
-            "state": "Tennessee",
-            "highway": "I-24",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Tennessee",
@@ -14124,16 +14106,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-412 corridor between Dyersburg and Jackson",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "Tennessee",
-            "highway": "US-412",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Tennessee",
@@ -15367,16 +15340,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-51 corridor between Dyersburg and Memphis",
-            "at_mi": 39.0,
-            "type": "place",
-            "state": "Tennessee",
-            "highway": "US-51",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Tennessee",
@@ -37234,16 +37198,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-40 corridor between Memphis and Nashville",
-            "at_mi": 106.0,
-            "type": "place",
-            "state": "Tennessee",
-            "highway": "I-40",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Tennessee",
@@ -52074,16 +52029,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-24 corridor between Nashville and Murfreesboro",
-            "at_mi": 17.5,
-            "type": "place",
-            "state": "Tennessee",
-            "highway": "I-24",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Tennessee",

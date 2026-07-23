@@ -34531,16 +34531,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-70 corridor between Wheeling and Pittsburgh",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Pennsylvania",
-            "highway": "I-70",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "West Virginia",

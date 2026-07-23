@@ -142,16 +142,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-30 corridor between Columbus and Grand Island",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Nebraska",
-            "highway": "US-30",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Nebraska",
@@ -972,16 +963,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-81 corridor between Columbus and Norfolk",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "Nebraska",
-            "highway": "US-81",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Nebraska",
@@ -1688,16 +1670,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-30 corridor between Columbus and Omaha",
-            "at_mi": 40.0,
-            "type": "place",
-            "state": "Nebraska",
-            "highway": "US-30",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Nebraska",
@@ -2444,16 +2417,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-80 corridor between Grand Island and Kearney",
-            "at_mi": 25.5,
-            "type": "place",
-            "state": "Nebraska",
-            "highway": "I-80",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Nebraska",
@@ -5777,16 +5741,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-80 corridor between Kearney and Lexington",
-            "at_mi": 20.0,
-            "type": "place",
-            "state": "Nebraska",
-            "highway": "I-80",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Nebraska",
@@ -14097,16 +14052,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-81 corridor between Norfolk and Grand Island",
-            "at_mi": 45.0,
-            "type": "place",
-            "state": "Nebraska",
-            "highway": "US-81",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Nebraska",
@@ -15416,16 +15362,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-275 corridor between Norfolk and Omaha",
-            "at_mi": 56.5,
-            "type": "place",
-            "state": "Nebraska",
-            "highway": "US-275",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Nebraska",
@@ -16896,16 +16833,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-20 corridor between Norfolk and Sioux City",
-            "at_mi": 32.5,
-            "type": "place",
-            "state": "Iowa",
-            "highway": "US-20",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Nebraska",

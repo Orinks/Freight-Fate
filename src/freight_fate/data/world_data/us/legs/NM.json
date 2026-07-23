@@ -464,16 +464,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-54 corridor between Alamogordo and El Paso",
-            "at_mi": 44.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "US-54",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Mexico",
@@ -13759,16 +13750,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-62 corridor between Carlsbad and Hobbs",
-            "at_mi": 34.0,
-            "type": "place",
-            "state": "New Mexico",
-            "highway": "US-62",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Mexico",
@@ -20470,16 +20452,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "NM-18 corridor between Hobbs and Lubbock",
-            "at_mi": 47.5,
-            "type": "place",
-            "state": "Texas",
-            "highway": "NM-18",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Mexico",
@@ -21738,16 +21711,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "NM-18 corridor between Hobbs and Odessa",
-            "at_mi": 36.0,
-            "type": "place",
-            "state": "Texas",
-            "highway": "NM-18",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Mexico",
@@ -22416,16 +22380,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-70 corridor between Las Cruces and Alamogordo",
-            "at_mi": 34.0,
-            "type": "place",
-            "state": "New Mexico",
-            "highway": "US-70",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Mexico",
@@ -30323,16 +30278,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-25 corridor between Raton and Trinidad",
-            "at_mi": 10.5,
-            "type": "place",
-            "state": "Colorado",
-            "highway": "I-25",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Mexico",

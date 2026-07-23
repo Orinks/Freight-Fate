@@ -12426,16 +12426,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-75 corridor between Lexington and Richmond",
-            "at_mi": 13.0,
-            "type": "place",
-            "state": "Kentucky",
-            "highway": "I-75",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Kentucky",
@@ -16702,16 +16693,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-65 corridor between Louisville and Columbus",
-            "at_mi": 35.0,
-            "type": "place",
-            "state": "Indiana",
-            "highway": "I-65",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Kentucky",

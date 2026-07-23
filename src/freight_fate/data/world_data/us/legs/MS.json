@@ -1090,16 +1090,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "MS-8 corridor between Clarksdale and Grenada",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Mississippi",
-            "highway": "MS-8",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Mississippi",
@@ -1638,16 +1629,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-61 corridor between Clarksdale and Memphis",
-            "at_mi": 37.5,
-            "type": "place",
-            "state": "Tennessee",
-            "highway": "US-61",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Mississippi",
@@ -6373,16 +6355,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-61 corridor between Greenville and Vicksburg",
-            "at_mi": 37.5,
-            "type": "place",
-            "state": "Mississippi",
-            "highway": "US-61",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Mississippi",
@@ -31514,16 +31487,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "MS-6 corridor between Oxford and Clarksdale",
-            "at_mi": 22.5,
-            "type": "place",
-            "state": "Mississippi",
-            "highway": "MS-6",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Mississippi",
@@ -32610,16 +32574,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "MS-7 corridor between Oxford and Memphis",
-            "at_mi": 37.5,
-            "type": "place",
-            "state": "Tennessee",
-            "highway": "MS-7",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Mississippi",
@@ -33639,16 +33594,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "US-278 corridor between Oxford and Tupelo",
-            "at_mi": 25.0,
-            "type": "place",
-            "state": "Mississippi",
-            "highway": "US-278",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Mississippi",

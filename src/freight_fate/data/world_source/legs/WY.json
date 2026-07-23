@@ -729,16 +729,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-90 corridor between Buffalo and Gillette",
-            "at_mi": 35.0,
-            "type": "place",
-            "state": "Wyoming",
-            "highway": "I-90",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wyoming",
@@ -17134,16 +17125,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-25 corridor between Cheyenne and Wheatland",
-            "at_mi": 35.0,
-            "type": "place",
-            "state": "Wyoming",
-            "highway": "I-25",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wyoming",
@@ -29388,16 +29370,7 @@
             "source": "OpenRouteService route elevation profile segmented by terrain (development-time)."
           }
         ],
-        "checkpoints": [
-          {
-            "name": "I-90 corridor between Sheridan and Buffalo",
-            "at_mi": 18.0,
-            "type": "place",
-            "state": "Wyoming",
-            "highway": "I-90",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wyoming",
@@ -30468,16 +30441,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-25 corridor between Wheatland and Lusk",
-            "at_mi": 44.5,
-            "type": "place",
-            "state": "Wyoming",
-            "highway": "I-25",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Wyoming",

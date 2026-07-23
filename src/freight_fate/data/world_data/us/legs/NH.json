@@ -912,16 +912,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "NH-101 corridor between Keene and Manchester",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "New Hampshire",
-            "highway": "NH-101",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Hampshire",
@@ -2421,16 +2412,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-91 corridor between Keene and Springfield",
-            "at_mi": 27.5,
-            "type": "place",
-            "state": "Massachusetts",
-            "highway": "I-91",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "New Hampshire",

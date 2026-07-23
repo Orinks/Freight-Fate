@@ -10402,16 +10402,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-90 corridor between Coeur d'Alene and Kellogg",
-            "at_mi": 18.5,
-            "type": "place",
-            "state": "Idaho",
-            "highway": "I-90",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "Idaho",
