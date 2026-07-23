@@ -1047,11 +1047,14 @@ section below and the Unreleased changelog; the release-line view:
       synthesized, not sampled (FM has no static crashes -- the limiter
       rejects impulse noise): a shaped white-noise hiss bed rising as
       signal thins, blended UNDER the program instead of the current
-      6-second burst timer, plus picket-fence flutter at the physical
-      2v/lambda rate from truck speed and the station's dial frequency
-      -- it slows as you slow and stops when you park. Stations need a
-      real frequency field for that; tune the noise shaping by the
-      owner's ear.
+      6-second burst timer, plus picket-fence flutter RANDOMIZED around
+      the physical 2v/lambda rate (owner's ear ruling 2026-07-23: a
+      metronomic 18 Hz tremolo sounds fake -- real flutter is a Rayleigh
+      fading envelope, irregular nulls whose average rate rides truck
+      speed and the station's dial frequency; synthesize as low-passed
+      complex noise at the Doppler cutoff, magnitude out). It slows as
+      you slow and stops when you park. Stations need a real frequency
+      field for that; tune the noise shaping by the owner's ear.
 - [ ] **Tell "still buffering" from "stalled for good" on stream
       startup.** The reconnect loop recreates a silent stream every 9
       seconds; a slow HLS join that needed 10 could get interrupted.
