@@ -45,13 +45,14 @@ SINGLES: list[tuple[str, str]] = [
     # mid-high = the flattened mid pitched to 1425: splits the too-wide
     # mid->high gap so no band stretches into formant smear.
     ("896/engine_midhigh_1425.wav", "engine/midhigh"),  # band mid-high (1425 rpm)
-    # high comes from the 60624 interior take, NOT 896: the steady_scan.py
-    # verdict is unambiguous -- 896 never holds a high rpm (best window
-    # wanders 40% in pitch, and the old 109-121s "cruise" cut carried a
-    # throttle-off sag plus a recorded air hiss, the owner's jutter), while
-    # 60624 holds 1900 at 0.0% spread. Different truck; owner's ear rules
-    # on whether the character matches the 896 family.
-    ("896/scan_high1800_60624_flat.wav", "engine/high"),  # band high (1900 rpm)
+    # high is the FORMANT MODEL (owner's call, engine_high_formant.py): NO
+    # take in the library holds a real steady high rpm -- 896 is driven and
+    # never sits, 60624's "1900" windows are order-jumping sweeps or a 950
+    # fast idle (the owner's ear caught it), 904/905 only sweep through. So:
+    # the flattened 896 mid pitched to 1900 with one static envelope-
+    # correction filter restoring the cab's formants -- fixed formants,
+    # moving rate, same donor. HPS-verified at 1894 rpm.
+    ("896/engine_high_1900_formant.wav", "engine/high"),  # band high (1900 rpm)
     ("896/rev_launch.wav", "engine/rev_launch"),    # short pull: launch from a stop
     ("896/rev_load.wav", "engine/rev_load"),        # long pull: digging in under load
     ("brakes/brake_hiss_bed.wav", "vehicle/brake_hiss_bed"),
