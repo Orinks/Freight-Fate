@@ -2689,6 +2689,66 @@ def test_air_fill_loop_plays_until_governor_release(monkeypatch):
         app.shutdown()
 
 
+def test_curve_assist_prefers_the_jake_before_service_brakes(monkeypatch):
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    class FakeCurve:
+        advisory_mph = 40.0
+        connector = False
+        direction = "L"
+        min_radius_ft = 800.0
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.set_air_ready(parking_brake=False)
+        t.start_engine()
+        t.transmission.automatic = True
+        t.transmission.gear = 9
+        t.rpm = 1500.0
+        t.throttle = 0.0
+        t.grip = 1.0
+        monkeypatch.setattr(driving.trip, "curve_at", lambda _pos: FakeCurve())
+
+        # Modest overspeed (7 over the advisory): the jake alone handles it.
+        t.velocity_mps = 21.0  # ~47 mph vs 40 advisory
+        t.brake = 0.0
+        driving._update_lane(NoKeys(), 1 / 60)
+        assert t.engine_brake_stage == 1  # assist engaged the jake, sized small
+        assert driving._curve_assist_jake
+        assert t.brake == 0.0  # ...and left the service brakes alone
+
+        # Low grip inverts the rule: a jake on ice breaks the drives loose.
+        driving._curve_assist_active = False
+        driving._curve_assist_jake = False
+        t.engine_brake_stage = 0
+        t.grip = 0.4
+        t.brake = 0.0
+        driving._update_lane(NoKeys(), 1 / 60)
+        assert not t.engine_brake  # no jake on ice
+        assert t.brake > 0.0  # gentle service braking instead
+
+        # When the assist's own jake episode ends, it releases the jake --
+        # but only the one IT engaged.
+        t.grip = 1.0
+        driving._curve_assist_active = False
+        t.brake = 0.0
+        driving._update_lane(NoKeys(), 1 / 60)
+        assert driving._curve_assist_jake
+        monkeypatch.setattr(driving.trip, "curve_at", lambda _pos: None)
+        driving._update_lane(NoKeys(), 1 / 60)
+        assert not driving._curve_assist_jake
+        assert not t.engine_brake
+    finally:
+        app.shutdown()
+
+
 def test_jake_growl_follows_stage_rpm_and_cuts_through_shifts(monkeypatch):
     from freight_fate.app import App
     from freight_fate.audio import CH_JAKE

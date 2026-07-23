@@ -668,15 +668,50 @@ class DrivingUpdateMixin:
         # Curve speed assist: use the real advisory speed when one is active
         # instead of the old terrain heuristic.
         curve_assisting = False
+        excess_now = None
         if self.ctx.settings.curve_speed_assist:
             if active is not None and not active.connector:
                 # Approaching or inside a curve and going faster than advisory + margin
                 curve_assisting = self.truck.speed_mph > active.advisory_mph + 5
+                excess_now = max(0.0, self.truck.speed_mph - active.advisory_mph)
             elif curve != 0.0:
                 # Fallback: old terrain- or ramp-based heuristic
                 curve_assisting = self.truck.speed_mph > 50 - abs(curve) * 20
-        if curve_assisting:
+        # Jake first (owner ruling 2026-07-22): a real driver -- and a real
+        # predictive retarder -- slows with the engine brake before the
+        # service brakes. At the start of an assist episode, if the player's
+        # jake is off and the truck can retard honestly (off throttle,
+        # coupled, revs up) on a surface that allows it (a full jake on low
+        # grip breaks the drives loose), the assist switches the jake on at
+        # a stage sized to the overspeed. The service brakes only trim when
+        # the truck is still well over the advisory or the jake cannot work.
+        t = self.truck
+        tr = t.transmission
+        if curve_assisting and not self._curve_assist_active:
+            jake_capable = (
+                t.engine_on
+                and t.throttle < 0.05
+                and not tr.in_neutral
+                and not tr.shifting
+                and tr.clutch <= 0.5
+                and t.grip >= 0.55
+                and t.rpm >= JAKE_MIN_RPM
+            )
+            if jake_capable and not t.engine_brake:
+                excess = excess_now if excess_now is not None else 10.0
+                t.engine_brake_stage = 3 if excess > 15 else (2 if excess > 8 else 1)
+                self._curve_assist_jake = True
+        elif not curve_assisting and self._curve_assist_jake:
+            # Release only the jake WE engaged; the player's own selection
+            # (or their mid-curve override) is never touched.
+            if t.engine_brake:
+                t.engine_brake_stage = 0
+            self._curve_assist_jake = False
+        jake_slowing = t.engine_brake and t.throttle < 0.05 and t.grip >= 0.55
+        needs_service = not jake_slowing or (excess_now is not None and excess_now > 10)
+        if curve_assisting and needs_service:
             self.truck.brake = max(self.truck.brake, min(0.35, abs(curve)))
+        if curve_assisting:
             if not self._curve_assist_active:
                 self.ctx.say_event("Curve speed assistance slowing.", interrupt=False)
         elif self._curve_assist_active:

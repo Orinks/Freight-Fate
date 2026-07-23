@@ -35,6 +35,15 @@
   It goes quiet the moment you touch the throttle, because a real jake
   does.
 
+- **Curve assistance drives like a trucker now: jake first, brakes to
+  trim.** When curve speed assistance needs to slow you and your engine
+  brake is off, it switches the jake on at a stage sized to how hot you
+  are coming in -- you hear the growl do the work -- and touches the
+  service brakes only when you are still well over the advisory. On
+  slick roads it does the opposite, exactly like a careful driver: no
+  jake on ice, just gentle braking. It releases only the jake it
+  engaged; your own selection is never touched.
+
 - **Brakes and gear changes sound like the real mechanisms now.** Pressing
   the brake gives the valve's mechanical clunk, louder the harder you
   press, and letting off releases the air back out -- a hiss that runs
