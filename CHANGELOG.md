@@ -737,6 +737,13 @@
 
 ### Fixed
 
+- **Manual shifting answers the moment the clutch comes out.** Shifting by
+  hand used to leave the truck coasting for up to a second after you
+  released the clutch, because the automatic gearbox's internal shift
+  delay was charged on top of your own clutch work. Your clutch is the
+  interruption now: the box only takes its quarter-second through
+  neutral, so a clean shift pulls again as soon as you let the pedal out.
+
 - **Period walks the speech history forward.** Comma has always stepped
   back through recent speech; now Period steps forward again toward the
   newest line, the same comma-and-period pairing screen-reader players

@@ -27,6 +27,11 @@ AUTO_DOWNSHIFT_RPM = 1050
 # the conservative figure the grade-loss estimate uses.
 SHIFT_TIME = 1.0  # seconds of torque interruption, 10th-gear ceiling
 SHIFT_TIME_LOW = 0.45  # through gear 4
+# Manual shifts: the player's clutch is already the torque interruption, so
+# the box only charges the lever's own travel through neutral. Stacking the
+# AMT interrupt on top left up to 0.6 s of dead pedal AFTER the clutch was
+# out in the top gears (Josh's "manual needs tuning", measured 2026-07-23).
+MANUAL_LEVER_TIME = 0.25
 
 
 def shift_time_for(gear: int) -> float:
@@ -102,7 +107,7 @@ class Transmission:
         if self.clutch < 0.8 and target != NEUTRAL:
             return ShiftResult(False, "Clutch not pressed", grind=True)
         self.gear = target
-        self._shift_timer = shift_time_for(self.gear)
+        self._shift_timer = MANUAL_LEVER_TIME
         return ShiftResult(True, self._gear_name(target))
 
     def shift_up(self) -> ShiftResult:
