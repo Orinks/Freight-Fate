@@ -616,6 +616,32 @@ def test_dev_on_promoted_stable_is_not_pulled_onto_equivalent_nightly():
     assert dev_update_from(releases, build, stable) is None
 
 
+def test_dev_offers_same_day_nightly_that_postdates_the_stable():
+    # The v1.8.5.1 morning, 2026-07-23: stable published 01:07 UTC, the
+    # 03:58 UTC cron nightly carried two fixes merged in between. The old
+    # date-granularity tie favored stable and hid the nightly from every
+    # dev-channel player (owner report, same day).
+    stable = release("v1.8.5.1", published="2026-07-23T01:07:34Z")
+    nightly = release("nightly-20260723", prerelease=True, published="2026-07-23T03:58:51Z")
+    build = BuildInfo(tag="v1.8.5.1", channel="stable", built_at="2026-07-23")
+    info = dev_update_from([stable, nightly], build, stable)
+    assert info is not None
+    assert info.tag == "nightly-20260723"
+
+
+def test_dev_morning_nightly_still_steered_to_same_day_afternoon_stable():
+    # Promotion day with real timestamps: the 04:00 UTC cron nightly
+    # predates the afternoon stable, so a player on that morning nightly
+    # converges onto the promoted stable -- the date tie used to block
+    # this direction too.
+    stable = release("v1.9.0", published="2026-08-01T15:00:00Z")
+    nightly = release("nightly-20260801", prerelease=True, published="2026-08-01T04:00:00Z")
+    build = BuildInfo(tag="nightly-20260801", channel="dev", built_at="2026-08-01")
+    info = dev_update_from([stable, nightly], build, stable)
+    assert info is not None
+    assert info.tag == "v1.9.0"
+
+
 def test_dev_resumes_nightlies_once_they_outpace_stable():
     # Days later dev advances past stable again; nightlies resume.
     stable = release("v1.7.0", published="2026-06-26T15:00:00Z")

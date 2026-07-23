@@ -286,26 +286,65 @@ def _build_date(build: BuildInfo | None) -> str:
     return _nightly_date(build.tag) or build.built_at.replace("-", "")
 
 
-def _stable_newer_than_build(release: dict, build: BuildInfo | None, build_date: str) -> bool:
+def _release_timestamp(release: dict | None) -> str:
+    """A release's full ``published_at`` (ISO 8601, sortable as text); ''
+    when unknown. Dates alone cannot order a same-day stable and nightly,
+    and both orderings really happen: the 04:00 UTC cron nightly precedes
+    an afternoon promotion, but a small-hours stable precedes that same
+    cron -- which then carries fixes merged in between (v1.8.5.1 day,
+    2026-07-23: stable 01:07, nightly 03:58 with two backports, and the
+    date tie hid the nightly from every dev-channel player)."""
+    if release is None:
+        return ""
+    return str(release.get("published_at") or "")
+
+
+def _build_timestamp(build: BuildInfo | None, releases: list[dict], stable: dict | None) -> str:
+    """The running build's publish moment, recovered from its own release.
+
+    build_info carries only a date, so the release list is the one source
+    of intra-day ordering for the copy the player is on."""
+    if build is None:
+        return ""
+    if stable is not None and stable.get("tag_name", "") == build.tag:
+        return _release_timestamp(stable)
+    for release in releases:
+        if release.get("tag_name", "") == build.tag:
+            return _release_timestamp(release)
+    return ""
+
+
+def _stable_newer_than_build(
+    release: dict, build: BuildInfo | None, build_date: str, build_ts: str = ""
+) -> bool:
     """Whether ``release`` (a stable build) is an upgrade for the running copy.
 
     A stable build compares by version (two builds can share a date but differ
-    in version); a nightly build compares by date, since the version number is
-    typically unchanged across the dev-to-stable promotion."""
+    in version); a nightly build compares by publish timestamp when both are
+    known, else by date, since the version number is typically unchanged
+    across the dev-to-stable promotion."""
     tag = release.get("tag_name", "")
     if build is not None and tag == build.tag:
         return False
     if build is not None and not _nightly_date(build.tag):
         return parse_version(tag) > parse_version(build.tag)
+    stable_ts = _release_timestamp(release)
+    if build_ts and stable_ts:
+        return stable_ts > build_ts
     stable_date = _release_date(release)
     return not (build_date and stable_date and stable_date <= build_date)
 
 
-def _nightly_newer_than_build(release: dict, build: BuildInfo | None, build_date: str) -> bool:
+def _nightly_newer_than_build(
+    release: dict, build: BuildInfo | None, build_date: str, build_ts: str = ""
+) -> bool:
     tag = release.get("tag_name", "")
     if build is not None:
         if tag == build.tag:
             return False
+        nightly_ts = _release_timestamp(release)
+        if build_ts and nightly_ts:
+            return nightly_ts > build_ts
         if build_date and _nightly_date(tag) <= build_date:
             return False
     return True
@@ -330,16 +369,29 @@ def dev_update_from(
         stable = _latest_stable_release(releases)
 
     build_date = _build_date(build)
+    build_ts = _build_timestamp(build, releases, stable)
     nightly_date = _release_date(latest_nightly)
     stable_date = _release_date(stable)
+    nightly_ts = _release_timestamp(latest_nightly)
+    stable_ts = _release_timestamp(stable)
 
-    if stable is not None and stable_date and stable_date >= nightly_date:
-        if _stable_newer_than_build(stable, build, build_date):
+    # Timestamps order a same-day stable and nightly; dates alone cannot,
+    # and a date tie wrongly favored a small-hours stable over the 04:00
+    # nightly that carried fixes merged between them (2026-07-23).
+    if nightly_ts and stable_ts:
+        stable_leads = stable_ts >= nightly_ts
+    else:
+        stable_leads = bool(stable_date) and stable_date >= nightly_date
+
+    if stable is not None and stable_leads:
+        if _stable_newer_than_build(stable, build, build_date, build_ts):
             tag = stable.get("tag_name", "")
             return _update_from_release(stable, f"Freight Fate version {tag.lstrip('v')}")
         return None  # already on the newest stable; nothing newer on dev
 
-    if latest_nightly is not None and _nightly_newer_than_build(latest_nightly, build, build_date):
+    if latest_nightly is not None and _nightly_newer_than_build(
+        latest_nightly, build, build_date, build_ts
+    ):
         date = _nightly_date(latest_nightly.get("tag_name", ""))
         spoken = f"{date[:4]}-{date[4:6]}-{date[6:]}"
         return _update_from_release(latest_nightly, f"Freight Fate developer snapshot {spoken}")
