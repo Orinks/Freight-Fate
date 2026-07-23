@@ -1104,6 +1104,18 @@ section below and the Unreleased changelog; the release-line view:
       (parent network) actually covers each Hi-Line dispatch city and seat
       the parent stream there under the local translator's dial position,
       the same honest-coverage rule as everywhere else.
+- [ ] **Rebalance speeding toward police encounters (owner design
+      question, 2026-07-23).** Today sustained speeding rolls against
+      patrol intensity: caught means a real pull-over and ticket;
+      NOT caught means a silent "strike" fine at delivery (the
+      insurance/safety framing). The owner questions the uncaught
+      branch: real life mostly punishes speeding through getting
+      caught. Options to weigh: drop or soften the silent fine (shift
+      it to a carrier safety score that affects job quality instead of
+      cash), raise patrol-encounter frequency to compensate so speeding
+      still carries real risk, and keep CB bear reports as the
+      counterplay. Ties into Josh's cruise-speeding ding finding --
+      whatever survives must never fire while assists hold the limit.
 - [ ] **Fine speed adjust: step cruise by 1, not just 5 (owner ask,
       2026-07-23).** Plus and minus move the cruise set speed in 5 mph
       jumps; there is no way to nudge by 1. Add a fine step -- e.g.
