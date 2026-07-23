@@ -208,7 +208,8 @@ class CloudBackupState(MenuState):
 
 class CloudSlotState(MenuState):
     """Actions for one cloud slot: restore the latest backup, restore an
-    older one, or resolve a conflict by choosing which copy wins.
+    older one, resolve a conflict by choosing which copy wins, or delete
+    every cloud backup of the career (the accidental-upload escape hatch).
 
     Restores overwrite the local save file for this career; the previous
     local file is kept beside it and the choice is confirmed before anything
@@ -284,6 +285,16 @@ class CloudSlotState(MenuState):
                         help="Replaces the local save with this older backup.",
                     )
                 )
+        if self.revisions:
+            items.append(
+                MenuItem(
+                    "Delete this career's cloud backups",
+                    self._confirm_delete,
+                    help="Removes every kept cloud backup of this career from "
+                    "your orinks.net account. The save on this computer is "
+                    "not touched.",
+                )
+            )
         items.append(MenuItem("Back", self.go_back))
         return items
 
@@ -356,6 +367,43 @@ class CloudSlotState(MenuState):
             return
         self.ctx.push_state(ConfirmKeepMineState(self.ctx, self))
 
+    def _confirm_delete(self) -> None:
+        if self._busy:
+            self.ctx.say("Still working on the last choice.", interrupt=True)
+            return
+        self.ctx.push_state(ConfirmDeleteCloudState(self.ctx, self))
+
+    def _has_local_save(self) -> bool:
+        from ..models.profile import find_save_path
+
+        return find_save_path(self.save_name) is not None
+
+    def start_delete(self) -> None:
+        """Called by the confirmation state after the player says yes."""
+        identity = OnlineIdentity.load()
+        if identity is None:
+            self.ctx.say("Cloud backup is not set up on this computer.", interrupt=True)
+            return
+        self._busy = True
+        self.refresh()
+        self.ctx.say("Deleting the cloud backups.", interrupt=True)
+
+        def worker() -> None:
+            try:
+                ok = cloud_saves.delete_save(identity, save_name=self.save_name)
+            except cloud_saves.CloudAuthError:
+                self._outcome = "delete_auth_failed"
+                return
+            if ok:
+                # Forget the slot (conflict included) so the next local save
+                # starts a fresh slot instead of naming a dead revision.
+                self.ctx.cloud_saves_service().sync_state.forget(self.save_name)
+                self._outcome = "deleted"
+            else:
+                self._outcome = "delete_failed"
+
+        threading.Thread(target=worker, name="cloud-saves-delete", daemon=True).start()
+
     def start_keep_mine(self) -> None:
         if self._busy:
             self.ctx.say("Still working on the last choice.", interrupt=True)
@@ -406,6 +454,30 @@ class CloudSlotState(MenuState):
             self.ctx.say(
                 "Done. The cloud copy now matches this computer's save, and "
                 "backups for this career are on again.",
+                interrupt=True,
+            )
+        elif outcome == "deleted":
+            self.revisions = []
+            self._status = "Cloud backups deleted for this career."
+            local = " Your save on this computer was not touched." if self._has_local_save() else ""
+            self.ctx.audio.play("ui/menu_select")
+            self.ctx.say(
+                f"Deleted. Every cloud backup of {self.save_name} was "
+                f"removed from your orinks.net account.{local}",
+                interrupt=True,
+            )
+        elif outcome == "delete_failed":
+            self._status = "Delete failed. The cloud backups were not changed."
+            self.ctx.say(
+                "The delete did not go through. Check your connection and "
+                "try again; the cloud backups were not changed.",
+                interrupt=True,
+            )
+        elif outcome == "delete_auth_failed":
+            self._status = "Reconnect needed. Nothing was deleted."
+            self.ctx.say(
+                f"{cloud_saves.AUTH_HELP} Nothing was deleted, and the cloud "
+                "backups were not changed.",
                 interrupt=True,
             )
         elif outcome == "keep_mine_failed":
@@ -528,6 +600,40 @@ class CloudBackupConsentState(MenuState):
         self.ctx.say(
             "Cloud backup is on. The next accepted save will be private and server-verified."
         )
+
+
+class ConfirmDeleteCloudState(MenuState):
+    """Safe-default gate before removing every cloud backup of one career."""
+
+    title = "Delete the cloud backups?"
+
+    def __init__(self, ctx, slot_state: CloudSlotState) -> None:
+        super().__init__(ctx)
+        self._slot_state = slot_state
+
+    def announce_entry(self) -> None:
+        if self._slot_state._has_local_save():
+            local = (
+                "Your save on this computer is not touched. While cloud "
+                "backup stays on, its next save will start a fresh backup."
+            )
+        else:
+            local = "This career has no save on this computer."
+        self.ctx.say(
+            f"Delete every cloud backup of {self._slot_state.save_name} "
+            "from your orinks.net account? The deleted backups cannot be "
+            f"brought back. {local} {self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem("No, keep the cloud backups", self.go_back),
+            MenuItem("Yes, delete every cloud backup of this career", self._yes),
+        ]
+
+    def _yes(self) -> None:
+        self.ctx.pop_state()
+        self._slot_state.start_delete()
 
 
 class ConfirmKeepMineState(MenuState):
