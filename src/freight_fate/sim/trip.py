@@ -297,11 +297,37 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             acc += leg.miles
         return starts
 
+    @staticmethod
+    def _leg_latlon_at(leg, at_mi: float) -> tuple[float, float]:
+        """Linear lat/lon along a leg's route points at an A-to-B offset."""
+        pts = leg.route_points
+        if not pts:
+            return 0.0, 0.0
+        prev = pts[0]
+        for pt in pts:
+            if pt.at_mi >= at_mi:
+                span = pt.at_mi - prev.at_mi
+                if span <= 0:
+                    return pt.lat, pt.lon
+                t = (at_mi - prev.at_mi) / span
+                return (
+                    prev.lat + (pt.lat - prev.lat) * t,
+                    prev.lon + (pt.lon - prev.lon) * t,
+                )
+            prev = pt
+        return prev.lat, prev.lon
+
     def _timezone_samples(self) -> list[tuple[float, TimeZone]]:
         """(trip mile, zone) along the route, from city and route-point geometry.
 
         City endpoints are sampled too, so a leg with no baked geometry still
-        lands its clock change somewhere between two cities in different zones.
+        lands its clock change somewhere between two cities in different
+        zones. State crossings are sampled AT their exact mileposts: route
+        points can sit thirty miles apart on a desert interstate, and
+        sampling only there put the Arizona-to-California clock change ten
+        miles past the Colorado River (owner caught it at the wheel,
+        2026-07-22). The border milepost the leg already carries pins the
+        flip to the line the welcome sign announces.
         """
         world = get_world()
         samples: list[tuple[float, TimeZone]] = []
@@ -314,6 +340,17 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 offset = _stop_offset_for_direction(pt.at_mi, leg.miles, forward)
                 zone = zone_for(pt.lat, pt.lon, _leg_state_at(leg, pt.at_mi))
                 samples.append((start + offset, zone))
+            for crossing in leg.state_crossings:
+                offset = _stop_offset_for_direction(crossing.at_mi, leg.miles, forward)
+                lat, lon = self._leg_latlon_at(leg, crossing.at_mi)
+                before = zone_for(lat, lon, crossing.from_state)
+                after = zone_for(lat, lon, crossing.state)
+                # Traversed backward, the truck meets the crossing from the
+                # other side: the A-to-B "to" state is what it is leaving.
+                if not forward:
+                    before, after = after, before
+                samples.append((max(0.0, start + offset - 0.05), before))
+                samples.append((start + offset, after))
         last = world.cities.get(self.route.cities[-1])
         if last is not None and (last.lat or last.lon):
             samples.append((self.total_miles, city_zone(last)))
