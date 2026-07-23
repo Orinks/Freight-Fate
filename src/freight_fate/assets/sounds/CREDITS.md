@@ -69,9 +69,9 @@ redistributed. A source checkout falls back to the committed cues above.
 
 | Game file(s) | Built from | Source pack |
 | --- | --- | --- |
-| `engine/idle`, `engine/mid`, `engine/rev_launch`, `engine/rev_load` | Steady holds and real acceleration pulls cut from the `SemiTruckMac_S08IN.896` interior driving take (mid ships envelope-flattened, `sound-test/engine_band_flatten.py`) | Splice -- Large Vehicles |
-| `engine/low`, `engine/midhigh` | The flattened 896 mid cut resampled to 950 and 1425 rpm (`sound-test/engine_low_950.py`, `engine_midhigh_1425.py`) | Splice -- Large Vehicles |
-| `engine/high` | Formant-preserving 1900 rpm resynthesis of the flattened 896 mid (`sound-test/engine_high_formant.py`; no take in the library holds a real steady high rpm) | Splice -- Large Vehicles |
+| `engine/idle`, `engine/rev_launch`, `engine/rev_load` | Real idle hold and acceleration pulls cut from the `SemiTruckMac_S08IN.896` interior driving take | Splice -- Large Vehicles |
+| `engine/mid` | The ring's anchor: the hiss-free span of the flattened 896 mid hold, re-looped (`sound-test/engine_band_flatten.py`, `engine_ring_formant.py`) | Splice -- Large Vehicles |
+| `engine/low`, `engine/midhigh`, `engine/high` | Formant-preserving resyntheses of the clean anchor at 950, 1425, and 1900 rpm (`sound-test/engine_ring_formant.py`; no take in the library holds a real steady high rpm) | Splice -- Large Vehicles |
 | `vehicle/shift_manual_01`..`15`, `vehicle/shift_auto_01`..`15` | Real gear changes (manual: clutch squeaks; automatic: shorter disengage) cut from `SemiTruck_S08IN.854/.855/.859` and `SemiTruckMac_S08IN.896` | Splice -- Large Vehicles |
 | `vehicle/brake_clunk_01`..`14` | Percussive valve/actuation onsets from `SemiTruckBrake_S08IN.913`-`.917` and `BantamBrakeMach_S08IN.62` (`sound-test/brake_banks.py`) | Splice -- Large Vehicles / Industry Vol. 1 |
 | `vehicle/ebrake` | The full sustained Bantam air event, `BantamBrakeMach_S08IN.62` | Splice -- Industry Vol. 1 |
