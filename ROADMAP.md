@@ -1061,8 +1061,8 @@ section below and the Unreleased changelog; the release-line view:
       audit found eleven of the twelve invented regional call signs
       collide with real licensed stations (only KRWL was clear). Each was
       renamed to an FCC-unassigned sign with the brand and dial position
-      unchanged; the old->new list is filed for Josh's final word before
-      the release cut.
+      unchanged; Josh accepted the old->new list 2026-07-23, closing the
+      audit -- nothing further owed before the release cut.
 - [x] **Full music rotations for the fictional stations.** A 52-track
       Suno-composed batch (via the Zero CLI) grows the format pools to
       radio-scale: country 15 songs, classic rock 17 (including a Saltwake
