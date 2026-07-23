@@ -302,6 +302,7 @@ class DrivingUpdateMixin:
         if self.tutorial:
             self.tutorial.update(dt, t)
         if self.trip.finished:
+            self._gate_reminder_s = max(0.0, self._gate_reminder_s - dt)
             if self._departure_chain:
                 # End of the origin's streets: merge onto the highway trip.
                 self._finish_departure_chain()
@@ -934,9 +935,7 @@ class DrivingUpdateMixin:
         # (AIR_FILL_REARM_PSI) keeps routine brake dips just under the 100 psi
         # line from fluttering the hiss; a genuine low-air build still plays.
         voice = engine_audio.classify(engine_audio.reading_from_truck(t))
-        deep_fill = (
-            t.air_pressure_psi <= t.specs.air_parking_release_psi - AIR_FILL_REARM_PSI
-        )
+        deep_fill = t.air_pressure_psi <= t.specs.air_parking_release_psi - AIR_FILL_REARM_PSI
         if t.engine_on and voice.pressurizing and (self._air_cue_active or deep_fill):
             if not self._air_cue_active:
                 audio.start_loop(
@@ -1093,9 +1092,7 @@ class DrivingUpdateMixin:
         key = self._radio_playlist[self._radio_track_index % len(self._radio_playlist)]
         self.ctx.audio.play_music(key, fade_ms=fade_ms)
 
-    def _start_playlist_station(
-        self, station, fade_ms: int = 900, advance: bool = False
-    ) -> None:
+    def _start_playlist_station(self, station, fade_ms: int = 900, advance: bool = False) -> None:
         """Play a personal M3U station from its remembered position.
 
         Unreadable entries are skipped at play time rather than pruned at

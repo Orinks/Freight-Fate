@@ -36,14 +36,15 @@ terminal becomes the anchor of that week instead of a spawn point.
 
 - [x] Add one driving-assistance preset selector with independently adjustable emergency braking, lane, stop-and-go, descent, exit, destination, curve, and route-transition support while preserving player confirmation and control.
 - [ ] Add future individual yard-entry guidance and assisted docking; no current preset navigates a yard or completes a delivery.
-- [ ] **Facility-arrival overshoot trap (playtest 2026-07-22, Gary to
-      Chicago).** After the destination exit, the "At <facility>"
-      announcement speaks once; a player who rolls on (adaptive cruise
-      re-engages without complaint) gets no "entrance behind you" nudge
-      and no way to hear where the delivery went. Six minutes lost and
-      the on-time bonus with it; recovery (stop to get the dock screen
-      back) was only found by reading the session log. Needs a repeating
-      overshoot cue plus S-status awareness of the passed entrance.
+- [x] **Facility-arrival overshoot trap (playtest 2026-07-22, Gary to
+      Chicago) -- FIXED same day.** The gate warnings latched after one
+      announcement, so rolling past a pickup, delivery, or city-service
+      entrance at speed meant silence for the rest of the drive (six
+      minutes and the on-time bonus lost; recovery only found by reading
+      the session log). All three gates now re-speak their stop
+      instruction every ten seconds while the truck is still moving,
+      cancel any re-armed cruise on each repeat, and the S key answers
+      with the gate instead of the ended route's posted limit.
 - [ ] **Route status goes stale after the destination exit (same
       playtest).** R still recites the abandoned highway route -- "on
       I-90 West, 3 miles remaining, Destination Chicago ahead" -- with a
