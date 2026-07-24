@@ -1832,6 +1832,19 @@ From a batch of player reports:
   the combined stack (10% gross + carrier share + trust) when rebalancing
   the 1.9 economy.
 
+- [x] **Tapered dispatch minimums.** The flat $700-1050 pay floors (clamped at
+  the level-3 values forever) paid a 50-mile hop ~$23 a mile — four to five
+  times any long haul — so grinding short hops was strictly optimal once load
+  choice unlocked. `minimum_pay_for_level` now guarantees a short-haul rate
+  premium ($4.70-5.50/mi by level, holding to 100 mi) that tapers linearly to
+  $3.20-3.50/mi at 600 mi, where the untouched long-haul minimums (levels 4+)
+  take over, plus a small $300-350 "worth rolling the truck" floor. Mid/long
+  totals stay within a few percent of the old floors; only sub-~200-mi pay
+  came down. Landed on dev and feat/career-1.9 together (1.9's
+  direct-freight multiplier stacks on top, unchanged). Watch early-career
+  cash pacing (rookie sub-150-mi jobs pay ~30-60% less; truck purchase
+  timing may shift) when tuning the 1.9 arc.
+
 ### Realism north star (ongoing)
 
 The guiding goal for 1.8 and beyond: make every system as true to real

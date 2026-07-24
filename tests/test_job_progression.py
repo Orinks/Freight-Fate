@@ -259,6 +259,19 @@ def test_long_haul_boards_have_rewarding_minimum_pay(world):
         assert job.pay / job.distance_mi >= 5.25
 
 
+def test_short_haul_premium_tapers_instead_of_cliffing():
+    # The old flat $700-1050 floors paid a 50-mile hop ~$23 a mile -- four to
+    # five times any long haul, at every level -- so grinding short hops was
+    # strictly optimal. The guaranteed rate must decline gently with distance
+    # and the shortest hops must stay within about twice the long-haul rate.
+    for level in (1, 3, 5, 12):
+        rates = [
+            minimum_pay_for_level(miles, level) / miles for miles in (50, 100, 200, 300, 500, 599)
+        ]
+        assert all(a >= b for a, b in zip(rates, rates[1:], strict=False)), rates
+        assert rates[0] <= 2.0 * 5.25  # short premium, not a jackpot
+
+
 def test_representative_boards_use_truck_plausible_locations(world):
     for city in ["Chicago", "Atlanta", "Philadelphia", "San Antonio", "Los Angeles"]:
         jobs = JobBoard(world, seed=3).offers(city, set(), level=2)
