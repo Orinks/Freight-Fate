@@ -6,8 +6,7 @@
 
 - **FM radio now behaves like FM radio.** Height is range: climb a grade
   and distant stations reach you from far beyond their normal coverage --
-  crest the Mogollon Rim and Phoenix comes in clear -- while dropping
-  into a valley can shadow a station you had. At the edge of coverage
+  crest the Mogollon Rim and Phoenix comes in clear. At the edge of coverage
   the station does not just get quieter: a smooth receiver hiss creeps
   in underneath, and at highway speed the signal flickers in quick,
   sharp splashes of noise -- the picket-fencing every driver has heard
