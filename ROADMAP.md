@@ -1165,6 +1165,15 @@ section below and the Unreleased changelog; the release-line view:
       pool as locked flavor entries ("Dispatch also posted: ...;
       assigned loads only until level 8"), so each level audibly widens
       the world and level 8 lands as a real payoff instead of a number.
+- [ ] **Real speed limits for facility approach streets (owner ask,
+      2026-07-24).** Street-chain legs carry defaults today -- 25 for
+      named streets, 15 for unnamed service ways -- but a real arterial
+      approach can be posted 35 or 45, and a blanket 25 for miles of it
+      is not cool. Bake OSM maxspeed over every facility approach
+      route's street legs (same sweep pattern as the corridor and lane
+      bakes, self-hosted Overpass, honest absence: keep the current
+      defaults only where OSM is untagged). A short 25 or 15 right at
+      the gate stays exactly as it is -- that part is true.
 - [ ] **Reefer rules for the reefer feature (owner spec, 2026-07-24).**
       Two rulings to build into the queued reefer-temp feature: (1) a
       refrigerated load means the engine NEVER shuts down at rests --
