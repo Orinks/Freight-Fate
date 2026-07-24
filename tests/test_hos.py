@@ -1646,10 +1646,24 @@ def test_serious_hos_inspection_orders_out_of_service_reset():
 
         driving._handle_inspection(event)
 
+        # A serious violation is a REAL stop now: lights come on and nothing
+        # is charged or reset until the truck is actually on the shoulder
+        # (the old instant path teleported the clock ten hours mid-drive).
+        assert driving._pull_over == "lights"
+        assert driving._pull_over_kind == "hos_out_of_service"
+        assert p.money == money
+        assert driving.trip.game_minutes == minutes
+        assert driving.out_of_service_count == 0
+
+        # The stop itself applies the fine, the ten hours, and the reset.
+        driving._pull_over_signaled = True
+        driving.truck.velocity_mps = 0.0
+        driving._open_traffic_stop()
         assert p.money == money - hos.HOS_FINES[0]
         assert driving.trip.game_minutes == minutes + hos.SLEEP_MIN
         assert driving.hos.driving_min == 0
         assert driving.out_of_service_count == 1
+        app.ctx.pop_state()
 
         driving._handle_inspection(event)
         assert p.money == money - hos.HOS_FINES[0]

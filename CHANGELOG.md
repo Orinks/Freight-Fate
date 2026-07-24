@@ -752,6 +752,13 @@
 
 ### Fixed
 
+- **A serious log-check violation now pulls you over for real.** Getting
+  caught over your hours used to play a tone, claim you were stopped,
+  and silently jump the clock ten hours while you kept driving. Now it
+  is a real roadside stop: lights and siren behind you, signal and
+  brake to the shoulder, the officer writes the out-of-service order,
+  and the ten hours pass while the truck is actually parked.
+
 - **Dispatch deadlines now respect the hours already on your clock.**
   Accepting a load six hours into your shift used to get a deadline
   planned for a fresh driver -- impossible to make once the law forced

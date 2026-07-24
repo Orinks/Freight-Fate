@@ -366,8 +366,6 @@ class DrivingEventMixin:
         p = self.ctx.profile
         fine = hos.HOS_FINES[min(self.hos_fine_count, len(hos.HOS_FINES) - 1)]
         self.hos_fine_count += 1
-        p.money -= fine  # can go negative; never a game over
-        p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT)
         evidence = list(event.data.get("evidence", ()))
         if not evidence:
             evidence = ["HOS/ELD violation"]
@@ -378,18 +376,40 @@ class DrivingEventMixin:
             self.ctx.settings.hos_mode not in hos.HOS_NON_ENFORCED_MODES
             and self.hos.in_violation(self.ctx.settings.hos_mode)
         )
+        if serious_hos:
+            # A serious violation is a REAL roadside stop: lights, signal,
+            # brake to the shoulder, and the 10-hour out-of-service order
+            # passes while the truck is actually stopped. The old instant
+            # ledger hit teleported the clock ten hours mid-drive with the
+            # wheels still rolling -- the owner heard "you are stopped"
+            # while cruising, then found 3 AM had become 1:57 PM between
+            # two spoken lines (log, 2026-07-24). Fine and reputation are
+            # applied by the stop itself, not here.
+            self._begin_enforcement_pull_over(
+                kind="hos_out_of_service",
+                title="Log check",
+                summary=(
+                    f"{event.message} Evidence: {evidence_text}. The officer "
+                    "writes the order: out of service, ten hours, right here."
+                ),
+                fine=fine,
+                reputation_hit=hos.HOS_REPUTATION_HIT,
+                return_message=(
+                    "Back on the highway with a reset clock. Keep the logbook clean."
+                ),
+                lights_message=(
+                    "Lights and siren behind you for a log check. Signal "
+                    "with X and brake to a stop on the shoulder."
+                ),
+            )
+            _record_inspection(self.ctx, event=True)
+            return
+        p.money -= fine  # can go negative; never a game over
+        p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT)
         message = (
             f"{event.message} Evidence: {evidence_text}. "
             f"Fined {fine:,.0f} dollars, and your reputation took a hit."
         )
-        if serious_hos:
-            self.ctx.say_event(
-                message + " Out of service order: parked for 10 hours to reset your ELD clock.",
-                interrupt=True,
-            )
-            _record_inspection(self.ctx, event=True)
-            self._place_out_of_service()
-            return
         self.ctx.say_event(message, interrupt=True)
         _record_inspection(self.ctx, event=True)
 

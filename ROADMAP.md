@@ -1115,14 +1115,31 @@ section below and the Unreleased changelog; the release-line view:
       (or at minimum speak it in the briefing: "with your hours, this
       run includes your 10-hour break"), reusing the fair_active_deadline
       machinery that already does this for resumed saves.
-- [ ] **Log-check stops should stop the truck and burn clock (owner
-      playtest, 2026-07-24, UNCLAIMED).** An enforcement log check
+- [x] **Log-check stops stop the truck and burn clock -- SHIPPED same
+      day (owner playtest, 2026-07-24).** Root cause found in the log:
+      the out-of-service order applied its 10 hours and ledger reset
+      instantly while the wheels rolled (3 AM became 1:57 PM between
+      two spoken lines). Serious HOS violations now run the real
+      pull-over: lights and siren, signal and brake to the shoulder,
+      and the ten hours pass parked with the officer's order spoken.
+      Original bullet: An enforcement log check
       played its tone and said the driver was stopped -- while the
       truck rolled on unbothered. The stop should be real: truck
       braked to the shoulder, a realistic inspection duration off the
       clock (and off the 14-hour window), then released. Same shape as
       the pull-over flow the speeding rework wants, so build them on
       one mechanism.
+- [ ] **Reefer rules for the reefer feature (owner spec, 2026-07-24).**
+      Two rulings to build into the queued reefer-temp feature: (1) a
+      refrigerated load means the engine NEVER shuts down at rests --
+      resting keeps it idling and burns idle fuel for the whole stop
+      (the game simplifies the separate reefer unit onto the truck
+      engine, so engine-on is the cold chain). (2) If the driver shuts
+      the engine off with cold cargo aboard: an immediate spoken
+      warning, then spoilage as a percentage scaling with how long the
+      engine stayed off -- tied into the degree-hours spoilage model
+      and its claim path. A driver should never do it; the game should
+      let them find out why.
 - [ ] **Rebalance speeding toward police encounters (owner design
       question, 2026-07-23).** Today sustained speeding rolls against
       patrol intensity: caught means a real pull-over and ticket;

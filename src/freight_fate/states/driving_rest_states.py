@@ -178,6 +178,7 @@ class EnforcementStopState(MenuState):
         reputation_hit: float,
         signaled: bool,
         return_message: str,
+        out_of_service: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.driving = driving
@@ -187,6 +188,7 @@ class EnforcementStopState(MenuState):
         self.reputation_hit = reputation_hit
         self.signaled = signaled
         self.return_message = return_message
+        self.out_of_service = out_of_service
         self._outcome_text = ""
         self._resolve()
 
@@ -212,6 +214,15 @@ class EnforcementStopState(MenuState):
         self._outcome_text = (
             f"Fine: {self.fine:,.0f} dollars, paid on the spot, and a reputation hit."
         )
+        if self.out_of_service:
+            # The ten hours pass HERE, parked on the shoulder with the
+            # officer's order in hand -- never as a silent mid-drive jump.
+            d._place_out_of_service()
+            self._outcome_text += (
+                " Out of service: ten hours pass parked on the shoulder before "
+                f"you may roll. It is now {clock_text(d.trip.local_hour)}. "
+                "Hours of service reset."
+            )
 
     def announce_entry(self) -> None:
         polite = " You signaled and pulled over promptly." if self.signaled else ""

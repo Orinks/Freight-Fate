@@ -2182,6 +2182,7 @@ class DrivingUpdateMixin:
                     reputation_hit=reputation_hit,
                     signaled=signaled,
                     return_message=return_message,
+                    out_of_service=(kind == "hos_out_of_service"),
                 )
             )
             return
