@@ -143,7 +143,7 @@ class DrivingRadioDiscoveryMixin:
             and preferred.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES
             and preferred.id != self.radio.station_id
         ):
-            details += (f"Saved station {preferred.display_name} is back on the dial.",)
+            details += ("Your saved public station is back on the dial.",)
         self._radio_discovery_status = status
         self._radio_discovery_details = details
         restore_candidate = bool(

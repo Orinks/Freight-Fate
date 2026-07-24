@@ -321,6 +321,25 @@ def test_saved_discovered_station_resumes_when_it_first_appears_later(monkeypatc
         harness.__exit__(None, None, None)
 
 
+def test_saved_long_station_name_uses_fixed_status_row(monkeypatch):
+    harness, manager, _prepared, _played, _discarded = _start_radio_harness(monkeypatch)
+    try:
+        driving = harness.driving
+        saved_id = f"radio-browser:{UUID_ONE}"
+        driving.radio.enabled = False
+        driving.radio.preferred_station_id = saved_id
+        manager.result = _result(_station(name="W" * 60))
+
+        driving._update_radio_discovery()
+
+        assert driving._radio_discovery_details[-1] == (
+            "Your saved public station is back on the dial."
+        )
+        assert "W" not in driving._radio_discovery_details[-1]
+    finally:
+        harness.__exit__(None, None, None)
+
+
 def test_pending_station_survives_silent_geographic_refresh(monkeypatch):
     harness, manager, _prepared, played, _discarded = _start_radio_harness(monkeypatch)
     try:
