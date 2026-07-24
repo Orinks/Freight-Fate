@@ -1129,6 +1129,26 @@ section below and the Unreleased changelog; the release-line view:
       clock (and off the 14-hour window), then released. Same shape as
       the pull-over flow the speeding rework wants, so build them on
       one mechanism.
+- [ ] **A non-qualifying sleep must say loudly what it did NOT do (owner
+      confusion, 2026-07-24).** A 7-hour berth sleep left the split
+      pending and the 14-hour window RUNNING -- but the wake-up message
+      buried that in one clause, and the owner drove into a window
+      violation believing he had hours left (the "six hours" he heard
+      was the deadline clock). Wake from any non-resetting sleep should
+      lead with the consequence: "This did not reset your clock. Your
+      duty window closes at X; pair 3 more sleeper hours by then or
+      stop." And the window-close countdown deserves spoken warnings at
+      60 and 30 minutes, like the break countdown already gets.
+- [ ] **Violation class decides the roadside outcome (owner ruling,
+      2026-07-24).** Caught DRIVING over hours right now: out of
+      service on the spot, ten hours -- that is real FMCSA and stays.
+      But a logbook ERROR or a past-trip violation found in the record
+      (an unpaired shoulder rest from yesterday, form-and-manner)
+      should mean the fine and a marked record that raises your
+      likelihood of future inspections -- never an instant ten-hour
+      hold when you are legal to drive TODAY. Wire the scrutiny
+      escalation into the same patrol-frequency machinery the speeding
+      rebalance will use.
 - [ ] **Reefer rules for the reefer feature (owner spec, 2026-07-24).**
       Two rulings to build into the queued reefer-temp feature: (1) a
       refrigerated load means the engine NEVER shuts down at rests --
