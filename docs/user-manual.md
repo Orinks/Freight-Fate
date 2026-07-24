@@ -35,6 +35,16 @@ Release archives are named by platform when that platform is available:
 | Windows | `FreightFate-<version>-windows-portable.zip` |
 | macOS | `FreightFate-<version>-macos.zip` |
 | Linux | `FreightFate-<version>-linux-x64.tar.gz` |
+| Linux (AppImage) | `FreightFate-<version>-linux-x86_64.AppImage` |
+
+On Linux you can pick either download. The tarball extracts to a portable
+folder, exactly like Windows. The AppImage is a single file: mark it
+executable (`chmod +x`) and run it, no extraction needed. It bundles the
+libraries the Ubuntu build depends on, so it also works on distributions
+such as Fedora, Arch, and openSUSE. An AppImage cannot write into itself,
+so its saves live in `~/.local/share/FreightFate` instead of a `saves`
+folder beside the game, and the in-game updater does not apply updates to
+an AppImage — download the newer AppImage from the releases page instead.
 
 Use the newest stable release for normal play. Stable releases are numbered,
 such as `v1.6.0`.

@@ -89,6 +89,13 @@ itself — updates replace only the game's own files and never touch the
 `saves` folder. Switch between stable and snapshot updates in Settings
 under "Update channel".
 
+On Linux there is also a single-file AppImage
+(`FreightFate-<version>-linux-x86_64.AppImage`): mark it executable and run
+it, no extraction needed, and it works beyond Ubuntu (Fedora, Arch,
+openSUSE). Since an AppImage is read-only, its saves live in
+`~/.local/share/FreightFate`, and you update it by downloading the newer
+AppImage rather than through the in-game updater.
+
 For a complete player-facing guide to installing, careers, dispatch, driving,
 route stops, saves, settings, audio, speech, and troubleshooting, see the
 [Freight Fate Player Manual](docs/user-manual.md).

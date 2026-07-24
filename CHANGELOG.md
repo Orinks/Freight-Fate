@@ -4,6 +4,15 @@
 
 ### Added
 
+- **Linux players get an AppImage.** Alongside the tarball, each release now
+  ships `FreightFate-<version>-linux-x86_64.AppImage`: one file you mark
+  executable and run, with no extraction step. It carries the libraries the
+  Ubuntu build needs, so it also runs on Fedora, Arch, and openSUSE, and
+  every build boots on Fedora before it ships. Because the AppImage itself
+  is read-only, saves live in `~/.local/share/FreightFate` instead of a
+  `saves` folder beside the game, and you update by downloading the newer
+  AppImage — the in-game updater only works in the tarball build.
+
 - **An armed exit now counts itself down.** Once your signal is on, the
   exit calls out again at two miles, one mile, and half a mile. No more
   hearing about an exit once, five miles early, and never again until
