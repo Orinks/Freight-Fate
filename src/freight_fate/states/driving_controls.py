@@ -139,7 +139,8 @@ class DrivingControlsMixin:
             "Space speed, active speed-control mode, and target. "
             "S posted speed limit. Tab status menu. F fuel. "
             "C clock, deadline, and hours of service. "
-            "R route and current location. Shift R next listed highway exit. "
+            "R trip progress, route, and current location. "
+            "Shift R next listed highway exit. "
             "V weather. L lane position. A repeats the last announcement. "
             "U reads what is coming up: "
             "imposed limits, stops, and exits ahead. "
@@ -487,6 +488,7 @@ class DrivingControlsMixin:
             f"Speed: {self.ctx.settings.speed_text(t.speed_mph)}",
             f"Limit: {self.ctx.settings.speed_text(limit)}"
             + (f" in a {reason} zone" if reason else ""),
+            f"Progress: {self.trip.progress_percent} percent there",
             f"Route: {progress}",
             f"Fuel: {t.fuel_fraction * 100:.0f} percent",
             f"Air brakes: {self._air_status_text(detailed=True)}",
@@ -577,7 +579,7 @@ class DrivingControlsMixin:
         range_mi = t.fuel_gal * mpg
         self.ctx.say(
             f"Fuel {t.fuel_fraction * 100:.0f} percent, {t.fuel_gal:.0f} gallons. "
-            f"Estimated range {self.ctx.settings.distance_text(range_mi)}."
+            f"Range about {self.ctx.settings.distance_text(range_mi)}."
         )
 
     def _calendar_phrase(self) -> str:
@@ -589,53 +591,64 @@ class DrivingControlsMixin:
         return f"{date}, {season}" if season else date
 
     def _clock_phrase(self) -> str:
-        """'It is 5:33 AM, March 21, spring.' -- the time plus the calendar."""
+        """'5:33 AM Eastern, March 21, spring.' -- the time plus the calendar."""
         cal = self._calendar_phrase()
-        base = f"It is {clock_text(self.trip.local_hour)} {self.trip.current_timezone.name}"
+        base = f"{clock_text(self.trip.local_hour)} {self.trip.current_timezone.name}"
         return f"{base}, {cal}." if cal else f"{base}."
 
     def _speak_clock(self) -> None:
+        """C: local time, then the deadline verdict, then hours of service.
+
+        Ordered for braille as much as speech: a display shows one short line
+        at a time, so the clock and the on-schedule verdict must land in the
+        first 40 cells, with detail behind them. Terse speech drops the
+        calendar, the appointment restatement, and the stop-planning context
+        (Tab still carries all three)."""
         hours_used = self.trip.game_minutes / 60.0
-        now = self._clock_phrase()
+        terse = self._terse_speech()
+        now = (
+            f"{clock_text(self.trip.local_hour)} {self.trip.current_timezone.name}."
+            if terse
+            else self._clock_phrase()
+        )
+        hos_part = self.hos.summary(self.ctx.settings.hos_mode)
+        if not terse:
+            hos_route = self._hos_route_context()
+            if hos_route:
+                hos_part = f"{hos_part} {hos_route}"
         if self.phase == DRIVE_PHASE_PICKUP:
             self.ctx.say(
-                f"{now} Pickup drive to {self._pickup_facility_text()}. "
-                f"{self.ctx.settings.distance_text(self.trip.remaining_miles)} remain. "
-                f"{hours_used:.1f} hours used before loading. "
-                f"{self.hos.summary(self.ctx.settings.hos_mode)} "
-                f"{self._hos_route_context()}"
+                f"{now} Pickup at {self._pickup_facility_text()}: "
+                f"{self.ctx.settings.distance_text(self.trip.remaining_miles)} to go, "
+                f"{hours_used:.1f} hours used. {hos_part}"
             )
             return
         remaining = self.job.deadline_game_h - hours_used
         eta = self.trip.eta_game_hours()
+        if remaining <= 0:
+            self.ctx.say(
+                f"{now} {-remaining:.1f} hours past the deadline. "
+                f"The pay is shrinking, but finish the delivery. {hos_part}"
+            )
+            return
+        verdict = "On schedule" if eta < remaining else "Running behind"
+        if terse:
+            self.ctx.say(
+                f"{now} {verdict}: arrival in {eta:.1f} hours, "
+                f"deadline in {remaining:.1f}. {hos_part}"
+            )
+            return
         basis = (
-            "at your current speed"
+            "at this pace"
             if self.truck.speed_mph >= self.trip.ETA_MIN_MPH
             else "at a typical highway pace"
         )
-        hos_part = self.hos.summary(self.ctx.settings.hos_mode)
-        hos_route = self._hos_route_context()
-        if hos_route:
-            hos_part = f"{hos_part} {hos_route}"
-        if remaining > 0:
-            verdict = (
-                "You are on schedule."
-                if eta < remaining
-                else "You are running behind. Keep your speed up."
-            )
-            appointment = _deadline_appointment(self)
-            self.ctx.say(
-                f"{now} {hours_used:.1f} hours on the road. "
-                f"{remaining:.1f} hours until the deadline; "
-                f"delivery is due by {appointment}. "
-                f"Estimated time to arrival {eta:.1f} hours {basis}. "
-                f"{verdict} {hos_part}"
-            )
-        else:
-            self.ctx.say(
-                f"{now} You are {-remaining:.1f} hours past the deadline. "
-                f"The pay is shrinking, but finish the delivery. {hos_part}"
-            )
+        push = " Keep your speed up." if verdict == "Running behind" else ""
+        self.ctx.say(
+            f"{now} {verdict}: arrival in {eta:.1f} hours {basis}, "
+            f"deadline in {remaining:.1f}, due {_deadline_appointment(self)}.{push} "
+            f"{hours_used:.1f} hours on the road. {hos_part}"
+        )
 
     def _hos_route_context(self) -> str:
         mode = self.ctx.settings.hos_mode
@@ -715,23 +728,23 @@ class DrivingControlsMixin:
         return "No route stop is nearby. You can pull over and rest on the shoulder."
 
     def _speak_weather(self) -> None:
+        """V: conditions first -- the answer must lead for braille displays."""
         safe_speed = self.ctx.settings.speed_text(self.weather.effects.safe_speed_mph)
+        tod = time_of_day(self.trip.local_hour)
         if self.weather.live_weather_loading:
             self.ctx.say(
-                f"It is {time_of_day(self.trip.local_hour)}. "
-                "Live weather is still loading. "
-                f"Safe speed about {safe_speed}."
+                f"Live weather is still loading. Safe speed about {safe_speed}. It is {tod}."
             )
             return
-        source = "Live conditions" if self.weather.live else "Currently"
-        parts = [
-            f"It is {time_of_day(self.trip.local_hour)}.",
-            f"{source} {self.weather.describe(self.ctx.settings.imperial_units)}.",
-            f"Safe speed about {safe_speed}.",
-        ]
+        conditions = self.weather.describe(self.ctx.settings.imperial_units)
+        lead = (
+            f"Live: {conditions}" if self.weather.live else conditions[:1].upper() + conditions[1:]
+        )
+        parts = [f"{lead}.", f"Safe speed about {safe_speed}."]
         if not self.weather.live:
             ahead = ", then ".join(k.value for k in self.weather.forecast(2))
             parts.append(f"Ahead: {ahead}.")
+        parts.append(f"It is {tod}.")
         self.ctx.say(" ".join(parts))
 
     # -- per-frame update -----------------------------------------------------------------

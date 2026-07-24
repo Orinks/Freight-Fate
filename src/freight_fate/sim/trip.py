@@ -750,6 +750,12 @@ class Trip:
             mph = max(1.0, fallback_mph)
         return self.remaining_miles / mph
 
+    @property
+    def progress_percent(self) -> int:
+        """Whole-percent trip progress, the figure the drivers board shows."""
+        total = self.total_miles or 1.0
+        return max(0, min(100, round(100.0 * self.position_mi / total)))
+
     def progress_summary(self, imperial: bool = True) -> str:
         if imperial:
             dist = (

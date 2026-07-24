@@ -25,15 +25,18 @@ class DrivingLocationMixin:
         toward = world.spoken_city(toward_city, qualified=True)
         place_text = self._nearest_named_place(leg_index, leg_start, forward)
         _, zone_reason = trip.speed_limit_at(trip.position_mi)
-        zone_text = f" You are in a {zone_reason} zone." if zone_reason else ""
+        zone_text = f" In a {zone_reason} zone." if zone_reason else ""
 
+        # Progress leads: a braille display shows one short line at a time,
+        # and the percentage plus what is left fits the first line whole.
+        # The percent is the same figure the online drivers board shows.
         next_context = trip.next_navigation_context(self.ctx.settings.imperial_units)
         self.ctx.say(
-            f"Route status: on {road} in {state}, heading toward {toward}. "
-            f"{place_text}{zone_text} "
-            f"{trip._distance_text(trip.position_mi)} into the trip; "
-            f"{trip._distance_text(trip.remaining_miles)} remaining of "
+            f"{trip.progress_percent} percent there, "
+            f"{trip._distance_text(trip.remaining_miles)} left of "
             f"{trip._distance_text(trip.total_miles)}. "
+            f"On {road} in {state}, toward {toward}. "
+            f"{place_text}{zone_text} "
             f"{trip._current_grade_text()}. {next_context}"
         )
 

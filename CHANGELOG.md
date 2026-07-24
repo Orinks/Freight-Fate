@@ -30,8 +30,20 @@
   sign-in as driver setup; the Mastodon account item walks you through it
   and can check whether the link took.
 
+- **The R key now tells you how far along you are.** The route report leads
+  with your trip progress, like 53 percent there, followed by the miles left.
+  It is the same figure the online drivers board shows for you, and the Tab
+  status menu has a matching Progress line. Deadhead drives count too.
+
 ### Changed
 
+- **Shorter driving readouts that fit a braille display.** The clock, route,
+  weather, and fuel reports now put the answer in the first few words, so a
+  one-line braille display shows what matters without panning. The C key
+  leads with the time and whether you are on schedule instead of burying the
+  verdict at the end, and on the terse speech setting it skips the calendar,
+  the appointment restatement, and the stop-planning advice, all of which
+  the Tab status menu still carries.
 - **Speech verbosity is now a simple choice between terse and normal.** The
   chatty level never said anything normal did not; it only repeated your
   speed a little more often. If you had chatty selected, the game now uses
