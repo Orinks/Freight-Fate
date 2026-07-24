@@ -740,7 +740,7 @@ Use these keys when you need status without leaving the road:
 | V | Weather and forecast. |
 | M | Toggle the in-cab radio. |
 | [ / ] | Tune the radio down or up. |
-| Ctrl+[ / Ctrl+] | Jump to the previous or next radio category: route playlist, Freight Fate stations, your playlists, terrestrial, AFN, satellite. |
+| Ctrl+[ / Ctrl+] | Jump to the previous or next radio category: route playlist, Freight Fate stations, your playlists, terrestrial, nearby internet, or satellite. |
 | Y | Speak radio station, source, signal or fallback state, volume, and streamer-safe status. |
 | Tab | Grouped driving status screens. |
 
@@ -751,7 +751,7 @@ Tab opens the Driving status menu. It has four review screens and a Driver apps 
 | Route | Current route status lines from the active drive. |
 | Driver | Driver name, money, load, objective, truck fuel and damage, transmission, fatigue, hours, and deadline. |
 | Map | Route cities, highways, progress, next guidance, upcoming stops, map points, and toll exposure. |
-| Radio | Current station, stream-safety state, approximate reception position, and currently receivable stations. |
+| Radio | Current station, stream-safety state, nearby-search mode, and current directory status. |
 | Driver apps | A tablet-style app menu for Navigation, Weather, Traffic, Truck stops, Road chatter, and ELD. |
 
 Inside a status screen, Up and Down move line by line, Enter repeats the current
@@ -873,7 +873,8 @@ Audio settings include:
 | Music volume | Menu and facility background music volume. |
 | In-cab radio volume | Driving radio music volume. It defaults lower than speech and safety cues. |
 | Radio streamer-safe mode | Keeps radio on built-in safe stations and hides real public streams. |
-| Radio real public streams | Opt-in catalog access for real public stations, including AFN choices. Streamer-safe mode must also be off before they appear. |
+| Radio real public streams | Allows nearby public stations to join the normal bracket-key dial. Streamer-safe mode must also be off before they appear. |
+| Nearby radio location | Uses your approximate real-world location by default, or follows the simulated truck if you choose that mode. |
 | Menu and UI sounds volume | Menu movement, selection, warning, and cash sounds. |
 
 Speech and weather settings include:
@@ -945,10 +946,9 @@ Audio is layered by category:
 
 Speech, gameplay cues, and warnings are the primary access path. Radio, music,
 and ambience sit behind those cues and can be adjusted separately. The in-cab
-radio defaults to built-in Freight Fate music and streamer-safe mode. Bracket
-tuning moves through stations the truck can currently receive from the checked-in
-catalog, using the route's approximate position and each station's range. The
-Radio status screen lists the currently receivable stations.
+radio defaults to built-in Freight Fate music and streamer-safe mode. Left and
+right bracket move through every station currently on the dial. The Radio
+status screen remains a concise informational review of the current radio.
 
 The Freight Fate Roadhouse and the Night Line have their own hosts, who break
 in between songs. Fictional regional stations cover markets across the map --
@@ -959,10 +959,22 @@ past the edge. When a station drops out of range the radio announces it and
 falls back to the Roadhouse, which is receivable everywhere along with the
 Night Line and the satellite fallback.
 
-Real public stream stations, including AFN choices, are hidden unless you turn on
-real streams and turn off streamer-safe mode. When the BASS audio backend is
-available, those stations play from their public stream URLs. If a selected
-station cannot play, the radio falls back safely instead of blocking the drive.
+Real public stations are hidden unless you turn on real streams and turn off
+streamer-safe mode. The game quietly checks a public station directory in the
+background, adds working nearby stations to the same bracket-key dial, and keeps
+the built-in or saved dial usable while it checks. It uses an approximate
+network-based real-world location by default. If that lookup fails, it follows
+the simulated truck instead; you can also choose Follow the simulated truck in
+Audio settings. Location and station results are saved for about a day so the
+game does not keep asking the network. If the directory is offline, saved
+results remain available. If no saved results work, the built-in stations
+remain. No location permission prompt is needed.
+
+Selecting a public station says that it is tuning while the game checks and
+opens the stream away from the driving loop. Success and fallback are spoken
+briefly. A quick second bracket press replaces the first pending choice, so an
+older request cannot take over the radio afterward. If the current audio system
+cannot play public streams, status says so and keeps the built-in dial.
 
 You can put your own music on the dial. Drop M3U or M3U8 playlist files into
 the Playlists folder next to your saves (the game creates it on first run) and
@@ -976,9 +988,9 @@ vouch for what your files are licensed for. Ctrl+Right bracket jumps straight
 to the category.
 
 The dial is grouped into categories -- route playlist, Freight Fate stations,
-your playlists, terrestrial, AFN, and satellite -- and Ctrl with a bracket key
-jumps between them, so twenty-five AFN stations never again stand between you
-and the local dial.
+your playlists, terrestrial, nearby internet, and satellite -- and Ctrl with a
+bracket key jumps between them. Plain bracket keys still move through every
+station.
 
 Useful accessibility patterns:
 
@@ -987,8 +999,8 @@ Useful accessibility patterns:
   reminders.
 - Use the status menu when you want reviewable lines instead of one long status
   message.
-- Use the Radio status screen when you want the current station list before
-  tuning.
+- Use Y or the Radio status screen when you want the current station and
+  discovery status. Use the brackets to browse the dial.
 - Lower music or ambience if speech or route cues are hard to follow.
 - Treat route stop menus as data-backed: if a stop does not list fuel, repair,
   or sleep, that stop is not currently documented as supporting that action.

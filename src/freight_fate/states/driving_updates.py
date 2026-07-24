@@ -128,6 +128,7 @@ class DrivingUpdateMixin:
         )
         self.trip.traffic_manager.hazard_scale = self.trip.hazard_scale
         self._sync_radio_settings()
+        self._update_radio_discovery()
         self._sync_weather_source()
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2
@@ -1151,6 +1152,8 @@ class DrivingUpdateMixin:
         rotating songs and host breaks under the pause menu instead of going
         silent when the current bed runs out. Day/night flavor stays as it
         was when the menu opened; it catches up when driving resumes."""
+        self._sync_radio_settings()
+        self._update_radio_discovery()
         if self.radio.enabled:
             self._update_radio_playback(self._music_night, dt)
 
@@ -1304,53 +1307,6 @@ class DrivingUpdateMixin:
         except RadioPlaybackError:
             self.ctx.audio.stop_music(600)
             self._playlist_wait_s = 30.0
-
-    def _sync_radio_settings(self) -> None:
-        station_before = self.radio.station_id
-        self.radio.apply_settings(self.ctx.settings)
-        self.radio.update_position(
-            truck_position(self.route, self.trip.position_mi, self.ctx.world)
-        )
-        self.radio.current_station()
-        if self.radio.station_id != station_before:
-            self.radio.write_settings(self.ctx.settings)
-            self.ctx.settings.save()
-
-    def _apply_radio_volume(self) -> None:
-        factor = getattr(self, "_radio_signal_factor", 1.0)
-        self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume * factor)
-
-    def _play_radio_current(self) -> None:
-        self._sync_radio_settings()
-        if self.radio.enabled:
-            self._apply_radio_volume()
-            self.radio.play(self._radio_backend)
-        else:
-            self.ctx.audio.stop_music(600)
-
-    def _finish_radio_action(self, action) -> None:
-        self.radio.write_settings(self.ctx.settings)
-        self.ctx.settings.save()
-        self.ctx.say(action.message)
-
-    def _toggle_radio(self) -> None:
-        self._sync_radio_settings()
-        action = self.radio.toggle(self._radio_backend)
-        self._finish_radio_action(action)
-
-    def _tune_radio(self, direction: int) -> None:
-        self._sync_radio_settings()
-        action = self.radio.tune(direction, self._radio_backend)
-        self._finish_radio_action(action)
-
-    def _jump_radio_category(self, direction: int) -> None:
-        self._sync_radio_settings()
-        action = self.radio.tune_category(direction, self._radio_backend)
-        self._finish_radio_action(action)
-
-    def _speak_radio_status(self) -> None:
-        self._sync_radio_settings()
-        self.ctx.say(self.radio.status_text())
 
     def _sync_weather_source(self) -> None:
         real = self.ctx.settings.real_weather

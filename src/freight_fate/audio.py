@@ -699,6 +699,17 @@ class _PygameBackend:
     def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
         raise RuntimeError("radio stream unavailable")
 
+    def prepare_radio_stream(self, url: str):
+        raise RuntimeError("radio stream unavailable")
+
+    def play_prepared_radio_stream(self, stream, url: str, fade_ms: int = 1500) -> None:
+        raise RuntimeError("radio stream unavailable")
+
+    @staticmethod
+    def discard_radio_stream(stream) -> None:
+        with contextlib.suppress(Exception):
+            stream.free()
+
     def play_music_file(self, path: str, fade_ms: int = 1200) -> None:
         """Play one media file from disk on the music channel.
 
@@ -786,11 +797,14 @@ class _BassBackend:
             BASS_ATTRIB_FREQ,
             BASS_ATTRIB_PAN,
             BASS_ATTRIB_VOL,
+            BASS_CONFIG_NET_READTIMEOUT,
+            BASS_CONFIG_NET_TIMEOUT,
             BASS_POS_BYTE,
             BASS_ChannelBytes2Seconds,
             BASS_ChannelGetLength,
             BASS_ChannelSetAttribute,
             BASS_ChannelSlideAttribute,
+            BASS_SetConfig,
         )
         from sound_lib.main import BassError, bass_call
         from sound_lib.output import Output
@@ -808,6 +822,9 @@ class _BassBackend:
         self._ATTRIB_FREQ = BASS_ATTRIB_FREQ
         self._ATTRIB_VOL = BASS_ATTRIB_VOL
         self._ATTRIB_PAN = BASS_ATTRIB_PAN
+        self._set_config = BASS_SetConfig
+        self._CONFIG_NET_TIMEOUT = BASS_CONFIG_NET_TIMEOUT
+        self._CONFIG_NET_READTIMEOUT = BASS_CONFIG_NET_READTIMEOUT
 
         self.master_volume = 1.0
         self.sfx_volume = 0.8
@@ -850,6 +867,8 @@ class _BassBackend:
             except BassError:
                 log.warning("No audio device; using the BASS no-sound device")
                 self._output = Output(device=BASS_NO_SOUND_DEVICE)
+        self._bass_call(self._set_config, self._CONFIG_NET_TIMEOUT, 4000)
+        self._bass_call(self._set_config, self._CONFIG_NET_READTIMEOUT, 5000)
         self._load_plugins()
         self.enabled = True
 
@@ -1410,15 +1429,25 @@ class _BassBackend:
         self._music_track = track
 
     def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
+        stream = self.prepare_radio_stream(url)
+        self.play_prepared_radio_stream(stream, url, fade_ms)
+
+    def prepare_radio_stream(self, url: str):
+        """Open network media without changing the currently playing bed."""
+        stream = self._url_stream(url)
+        if stream is None:
+            raise RuntimeError("radio stream unavailable")
+        return stream
+
+    def play_prepared_radio_stream(self, stream, url: str, fade_ms: int = 1500) -> None:
+        """Commit an already opened URL stream; this path does no network I/O."""
         if self._music_track == url:
+            self.discard_radio_stream(stream)
             return
         if self._music_stream is not None:
             self._fade_out(self._music_stream, 800)
             self._music_stream = None
             self._music_track = None
-        stream = self._url_stream(url)
-        if stream is None:
-            raise RuntimeError("radio stream unavailable")
         try:
             stream.set_volume(0.0)
             stream.play()
@@ -1431,9 +1460,15 @@ class _BassBackend:
             )
         except self._BassError as exc:
             log.warning("Could not play radio stream: %s", url, exc_info=True)
+            self.discard_radio_stream(stream)
             raise RuntimeError("radio stream unavailable") from exc
         self._music_stream = stream
         self._music_track = url
+
+    @staticmethod
+    def discard_radio_stream(stream) -> None:
+        with contextlib.suppress(Exception):
+            stream.free()
 
     def play_music_file(self, path: str, fade_ms: int = 1200) -> None:
         """Play one media file from disk on the music channel.
@@ -1583,6 +1618,17 @@ class _NullBackend:
     def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
         raise RuntimeError("radio stream unavailable")
 
+    def prepare_radio_stream(self, url: str):
+        raise RuntimeError("radio stream unavailable")
+
+    def play_prepared_radio_stream(self, stream, url: str, fade_ms: int = 1500) -> None:
+        raise RuntimeError("radio stream unavailable")
+
+    @staticmethod
+    def discard_radio_stream(stream) -> None:
+        with contextlib.suppress(Exception):
+            stream.free()
+
     def play_music_file(self, path: str, fade_ms: int = 1200) -> None:
         raise RuntimeError("audio disabled")
 
@@ -1648,6 +1694,10 @@ class AudioEngine:
     @property
     def backend_name(self) -> str:
         return self._impl.name
+
+    def supports_radio_streams(self) -> bool:
+        """Whether the active backend can open public HTTP audio streams."""
+        return self._impl.name == "bass"
 
     @property
     def master_volume(self) -> float:
@@ -1896,6 +1946,18 @@ class AudioEngine:
     def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
         """Stream a live radio URL when the active backend supports it."""
         self._impl.play_radio_stream(url, fade_ms)
+
+    def prepare_radio_stream(self, url: str):
+        """Open a live stream off-thread without replacing current playback."""
+        return self._impl.prepare_radio_stream(url)
+
+    def play_prepared_radio_stream(self, stream, url: str, fade_ms: int = 1500) -> None:
+        """Commit a prepared stream after the latest-selection check."""
+        self._impl.play_prepared_radio_stream(stream, url, fade_ms)
+
+    def discard_radio_stream(self, stream) -> None:
+        """Release a prepared stream that lost a tune-generation race."""
+        self._impl.discard_radio_stream(stream)
 
     def play_music_file(self, path: str, fade_ms: int = 1200) -> None:
         """Play one local media file (a personal playlist entry) as music.

@@ -123,7 +123,7 @@ class DrivingControlsMixin:
             self._toggle_radio()
         elif key == pygame.K_LEFTBRACKET:
             # Brackets walk the dial; Ctrl+brackets leap a whole category
-            # (25 AFN stations in a row buried terrestrial for a linear tune).
+            # without changing the plain-bracket every-station path.
             if event.mod & pygame.KMOD_CTRL:
                 self._jump_radio_category(-1)
             else:
@@ -255,8 +255,12 @@ class DrivingControlsMixin:
             "C also speaks the date and season. "
             "M toggles the in-cab radio, left and right brackets tune it, "
             "and Y speaks radio station, volume, and streamer-safe status. "
-            "The Tab status menu includes a radio screen with the currently "
-            "receivable stations. "
+            "Nearby public stations join the bracket dial quietly when real "
+            "streams are allowed, Online services are on, and streamer-safe "
+            "mode is off. The default search uses your approximate location; "
+            "Audio settings can make it follow the simulated truck. Personal "
+            "M3U files use the separate Playlists folder next to your saves. "
+            "The Tab status menu includes a concise current-radio screen. "
             "E starts the engine, and stops it only below 5 miles per hour. "
             "Air pressure must build before the truck can move. "
             "Press P to release or set the parking brake; if pressure is "
@@ -392,9 +396,7 @@ class DrivingControlsMixin:
             self._auto_jake = False
             stage = max(1, self.truck.engine_brake_stage)
             self._jake_selected_stage = stage
-            self.ctx.say(
-                f"Automatic jake off; holding stage {self._JAKE_STAGE_WORD[stage]}."
-            )
+            self.ctx.say(f"Automatic jake off; holding stage {self._JAKE_STAGE_WORD[stage]}.")
             return
         self.ctx.say(f"Automatic jake {'on' if self._auto_jake_enabled else 'off'}.")
 

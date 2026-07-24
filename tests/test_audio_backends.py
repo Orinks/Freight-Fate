@@ -62,6 +62,7 @@ def test_bass_backend_selected_by_default(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
     assert a.backend_name == "bass"
+    assert a.supports_radio_streams()
     assert a.enabled
     exercise(a)
 
@@ -70,6 +71,7 @@ def test_env_var_forces_pygame_backend(monkeypatch):
     monkeypatch.setenv("FREIGHT_FATE_AUDIO_BACKEND", "pygame")
     a = AudioEngine()
     assert a.backend_name in ("pygame", "none")
+    assert not a.supports_radio_streams()
     exercise(a)
 
 
@@ -127,9 +129,7 @@ def test_engine_band_weights_edges_blend_and_pure_zones():
     # wherever a band has weight, rpm/native stays inside the safety clamps.
     rpm = 300.0
     while rpm < 2400.0:
-        for weight, native in zip(
-            audio.engine_band_weights(rpm, natives), natives, strict=True
-        ):
+        for weight, native in zip(audio.engine_band_weights(rpm, natives), natives, strict=True):
             if weight > 1e-6 and natives[0] <= rpm <= natives[-1]:
                 ratio = rpm / native
                 assert audio.ENGINE_BAND_RATE_MIN <= ratio <= audio.ENGINE_BAND_RATE_MAX
@@ -261,7 +261,7 @@ def test_bass_music_never_loops_catalog_tracks(monkeypatch):
     assert loop_flags == [False] * len(ALL_MUSIC_TRACKS)
 
 
-def test_bass_radio_stream_uses_url_stream(monkeypatch):
+def test_bass_radio_stream_prepares_before_it_commits_playback(monkeypatch):
     class FakeStream:
         handle = 1
 
@@ -293,9 +293,18 @@ def test_bass_radio_stream_uses_url_stream(monkeypatch):
 
     monkeypatch.setattr(backend, "_url_stream", fake_url_stream)
 
-    backend.play_radio_stream("https://example.test/live.mp3", fade_ms=321)
+    stream = backend.prepare_radio_stream("https://example.test/live.mp3")
 
     assert opened == ["https://example.test/live.mp3"]
+    assert backend._music_track is None
+    assert not stream.played
+
+    backend.play_prepared_radio_stream(
+        stream,
+        "https://example.test/live.mp3",
+        fade_ms=321,
+    )
+
     assert backend._music_track == "https://example.test/live.mp3"
     assert backend._music_stream.played
     assert backend._music_stream.volume == 0.0

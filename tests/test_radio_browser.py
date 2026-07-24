@@ -5,8 +5,10 @@ import pytest
 
 from freight_fate.radio_browser import (
     NEARBY_DIAL_LIMIT,
+    DirectoryStation,
     RadioBrowserClient,
     discover_mirrors,
+    filter_cached_stations,
     normalize_stations,
     sanitize_directory_text,
 )
@@ -123,6 +125,25 @@ def test_normalization_filters_distance_codec_bitrate_geo_and_region():
     assert [station.uuid for station in result] == ["12345678-1234-1234-1234-123456789abc"]
 
 
+@pytest.mark.parametrize(
+    "updates",
+    [
+        {"hls": 1},
+        {"url_resolved": "https://stream.example/live.m3u8"},
+        {"url_resolved": "https://stream.example/list.m3u"},
+    ],
+)
+def test_normalization_rejects_optional_hls_and_playlist_transports(updates):
+    result = normalize_stations(
+        [_row(**updates)],
+        state_name="New York",
+        state_code="NY",
+        position=(42.88, -78.87),
+        resolver=_resolver,
+    )
+    assert result == ()
+
+
 def test_normalization_sanitizes_metadata_and_rejects_unsafe_or_duplicate_urls():
     rows = [
         _row(
@@ -177,6 +198,29 @@ def test_normalization_deduplicates_uuid_and_has_stable_bounded_order():
 
 def test_sanitizer_removes_control_characters_and_limits_length():
     assert sanitize_directory_text(" Hello\n\tworld\x00 " + "x" * 20, limit=12) == "Hello world"
+
+
+def test_cached_station_metadata_is_revalidated_before_reuse():
+    cached = DirectoryStation(
+        uuid="12345678-1234-1234-1234-123456789abc",
+        name="Cached\x00 Station",
+        format="community",
+        codec="MP3",
+        bitrate=128,
+        stream_url="http://127.0.0.1/private",
+        lat=42.9,
+        lon=-78.8,
+        distance_miles=1.0,
+        state="New York",
+    )
+    assert (
+        filter_cached_stations(
+            (cached,),
+            position=(42.88, -78.87),
+            resolver=_resolver,
+        )
+        == ()
+    )
 
 
 @pytest.mark.parametrize("codec", ["MP3", "AAC", "AAC+", "OGG", "OPUS"])

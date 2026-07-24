@@ -73,13 +73,9 @@ def test_builtin_stations_have_hosts_and_playlists():
     assert STATION_HOST_SEGMENTS["nightline"]
 
 
-def test_new_afn_globals_are_cataloged_with_checked_sources():
-    for station_id in ("afn-global-fans", "afn-global-holiday", "afn-mach-5"):
-        station = _station(station_id)
-        assert station.real_stream
-        assert station.stream_url.startswith("http")
-        assert "Radio Browser" in station.source
-        assert station.always_available
+def test_checked_catalog_has_no_maintenance_heavy_public_stream_urls():
+    assert not any(station.real_stream for station in DEFAULT_RADIO_CATALOG)
+    assert not any(station.stream_url for station in DEFAULT_RADIO_CATALOG)
 
 
 def test_signal_volume_factor_fades_with_distance():
@@ -248,7 +244,8 @@ def test_how_to_play_documents_the_radio_page():
     titles = [title for title, _lines in HELP_PAGES]
     assert "The in-cab radio" in titles
     help_text = " ".join(line for _title, lines in HELP_PAGES for line in lines).lower()
-    assert "receivable stations" in help_text
+    assert "join that same dial quietly" in help_text
+    assert "left and right bracket tune every station" in help_text
     assert "streamer-safe status" in help_text
     assert "host breaks in between songs" in help_text
     assert "regional stations cover markets across the map" in help_text

@@ -1,0 +1,440 @@
+# ruff: noqa: F403,F405
+"""Non-blocking runtime discovery and tuning for the in-cab radio."""
+
+from __future__ import annotations
+
+from .driving_core import *
+
+
+class DrivingRadioDiscoveryMixin:
+    def _radio_discovery_allowed(self) -> bool:
+        settings = self.ctx.settings
+        supports_streams = getattr(self.ctx.audio, "supports_radio_streams", lambda: True)
+        return bool(
+            settings.online_services
+            and settings.radio_real_streams
+            and not settings.radio_streamer_safe
+            and supports_streams()
+        )
+
+    def _truck_radio_location(self) -> ApproximateLocation:
+        position = truck_position(self.route, self.trip.position_mi, self.ctx.world)
+        target = self.trip.current_target_city
+        state = self.trip.current_state or target.state
+        candidates = [city for city in self.ctx.world.cities.values() if city.state == state]
+        if position is None:
+            position = (target.lat, target.lon)
+        if candidates:
+            market = min(
+                candidates,
+                key=lambda city: (city.lat - position[0]) ** 2 + (city.lon - position[1]) ** 2,
+            )
+        else:
+            market = target
+        state_code = next(
+            (city.state_code for city in candidates if city.state == state and city.state_code),
+            target.state_code,
+        )
+        return ApproximateLocation(
+            position[0],
+            position[1],
+            market.name,
+            state,
+            state_code,
+            source=LOCATION_MODE_TRUCK,
+        )
+
+    def _radio_market_key(self) -> str:
+        mode = self.ctx.settings.radio_discovery_location
+        if mode == LOCATION_MODE_REAL and (
+            self._radio_discovery_effective_source != LOCATION_MODE_TRUCK
+        ):
+            return "player-location"
+        location = self._truck_radio_location()
+        if mode == LOCATION_MODE_REAL:
+            return f"player-location-fallback:{location.state_code}"
+        return location.state_code
+
+    def _maybe_refresh_radio_discovery(self) -> None:
+        if not self._radio_discovery_allowed():
+            if self._radio_discovery_key:
+                self._radio_discovery.cancel()
+                self._radio_discovery_key = ""
+                self.radio.replace_directory_stations(())
+            return
+        key = self._radio_market_key()
+        if key == self._radio_discovery_key:
+            return
+        self._radio_discovery_key = key
+        self._request_radio_discovery(explicit=False, force=False)
+
+    def _request_radio_discovery(self, *, explicit: bool, force: bool) -> str:
+        if not self._radio_discovery_allowed():
+            if explicit:
+                settings = self.ctx.settings
+                if not settings.online_services:
+                    message = "Online services are off. Built-in stations remain available."
+                elif not settings.radio_real_streams:
+                    message = (
+                        "Real public streams are off. Turn them on in Audio settings "
+                        "to find nearby stations."
+                    )
+                elif settings.radio_streamer_safe:
+                    message = (
+                        "Real public streams are hidden by streamer-safe mode. "
+                        "Built-in stations remain available."
+                    )
+                else:
+                    message = (
+                        "The active audio system cannot play public streams. "
+                        "Built-in stations remain available."
+                    )
+                self.ctx.say(message)
+                self._radio_discovery_status = message
+            return "blocked"
+        mode = self.ctx.settings.radio_discovery_location
+        truck = self._truck_radio_location()
+        market_key = self._radio_market_key()
+        result = self._radio_discovery.request(
+            mode=mode,
+            truck_location=truck,
+            market_key=market_key,
+            explicit=explicit,
+            force=force,
+        )
+        if result == "already":
+            if explicit:
+                self.ctx.say("A nearby-station refresh is already in progress.")
+            return result
+        mode_text = (
+            "your approximate location"
+            if mode == LOCATION_MODE_REAL
+            else f"the simulated truck near {truck.city}, {truck.state}"
+        )
+        self._radio_discovery_status = f"Checking nearby stations for {mode_text}."
+        if explicit:
+            self.ctx.say(self._radio_discovery_status)
+        return result
+
+    def _update_radio_discovery(self) -> None:
+        self._maybe_refresh_radio_discovery()
+        result = self._radio_discovery.poll()
+        if result is not None:
+            self._apply_radio_discovery_result(result)
+        self._poll_radio_tune()
+
+    def _apply_radio_discovery_result(self, result: DiscoveryResult) -> None:
+        initial = not self._radio_discovery_has_applied
+        self._radio_discovery_has_applied = True
+        self._radio_discovery_effective_source = result.location.source
+        if (
+            self.ctx.settings.radio_discovery_location == LOCATION_MODE_REAL
+            and result.location.source == LOCATION_MODE_TRUCK
+        ):
+            self._radio_discovery_key = (
+                f"player-location-fallback:{self._truck_radio_location().state_code}"
+            )
+        elif self.ctx.settings.radio_discovery_location == LOCATION_MODE_REAL:
+            self._radio_discovery_key = "player-location"
+        else:
+            self._radio_discovery_key = self._truck_radio_location().state_code
+        self.radio.replace_directory_stations(result.stations)
+        self._radio_discovery_location_label = result.location.label
+        message = self._radio_discovery_message(result)
+        preferred = self.radio.station_by_id(self.radio.preferred_station_id)
+        if (
+            preferred is not None
+            and preferred.source_type == DIRECTORY_SOURCE_TYPE
+            and preferred.id != self.radio.station_id
+        ):
+            message += f" Saved station {preferred.display_name} is back on the dial."
+        self._radio_discovery_status = message
+        if (
+            initial
+            and preferred is not None
+            and preferred.source_type == DIRECTORY_SOURCE_TYPE
+            and preferred.id != self.radio.station_id
+        ):
+            if self.radio.enabled:
+                self._begin_radio_stream_tune(
+                    preferred,
+                    prefix=f"Restoring saved station. Tuning to {preferred.display_name}.",
+                )
+            else:
+                self.radio.station_id = preferred.id
+
+    @staticmethod
+    def _radio_discovery_message(result: DiscoveryResult) -> str:
+        location = result.location.label
+        fallback = (
+            " Your approximate location was unavailable, so the simulated truck was used."
+            if result.used_truck_fallback
+            else ""
+        )
+        count = len(result.stations)
+        if result.outcome == "updated":
+            return f"Nearby stations updated for {location}: {count} available.{fallback}"
+        if result.outcome == "cached":
+            return f"Using saved nearby stations for {location}: {count} available.{fallback}"
+        if result.outcome == "stale":
+            return (
+                f"Using saved nearby stations for {location}. "
+                f"The live station directory could not be reached.{fallback}"
+            )
+        if result.outcome == "empty":
+            return (
+                f"No nearby public stations were found for {location}. "
+                f"Built-in stations remain available.{fallback}"
+            )
+        return f"Nearby stations could not be loaded. Built-in stations remain available.{fallback}"
+
+    def _begin_radio_stream_tune(self, station: RadioStation, *, prefix: str = "") -> None:
+        self._radio_tune_generation += 1
+        generation = self._radio_tune_generation
+        self._radio_pending_station_id = station.id
+        message = prefix or f"Tuning to {station.display_name}."
+        self.ctx.say(message)
+        self._apply_radio_volume()
+
+        def worker() -> None:
+            prepared = None
+            url = ""
+            try:
+                probe = probe_stream_url(station.stream_url, user_agent=USER_AGENT)
+                url = probe.url
+                prepared = self.ctx.audio.prepare_radio_stream(url)
+                error = ""
+            except (OSError, TypeError, ValueError, ConnectionError) as exc:
+                error = str(exc)
+            except RuntimeError as exc:
+                error = str(exc)
+            if generation != self._radio_tune_generation:
+                if prepared is not None:
+                    self.ctx.audio.discard_radio_stream(prepared)
+                return
+            self._radio_tune_results.put((generation, station.id, url, prepared, error))
+
+        threading.Thread(
+            target=worker,
+            name=f"radio-tune-{generation}",
+            daemon=True,
+        ).start()
+
+    def _poll_radio_tune(self) -> None:
+        latest = None
+        while True:
+            try:
+                candidate = self._radio_tune_results.get_nowait()
+            except queue.Empty:
+                break
+            if candidate[0] == self._radio_tune_generation:
+                if latest is not None and latest[3] is not None:
+                    self.ctx.audio.discard_radio_stream(latest[3])
+                latest = candidate
+            elif candidate[3] is not None:
+                self.ctx.audio.discard_radio_stream(candidate[3])
+        if latest is None:
+            return
+        generation, station_id, url, prepared, error = latest
+        if generation != self._radio_tune_generation:
+            if prepared is not None:
+                self.ctx.audio.discard_radio_stream(prepared)
+            return
+        station = self.radio.station_by_id(station_id)
+        if (
+            station is None
+            or self._radio_pending_station_id != station_id
+            or not self.radio.enabled
+            or not self._radio_discovery_allowed()
+        ):
+            if prepared is not None:
+                self.ctx.audio.discard_radio_stream(prepared)
+            return
+        if not error and prepared is not None:
+            try:
+                self.ctx.audio.play_prepared_radio_stream(prepared, url, fade_ms=900)
+            except RuntimeError as exc:
+                error = str(exc)
+            else:
+                self.radio.station_id = station.id
+                self.radio.preferred_station_id = station.id
+                self._radio_pending_station_id = ""
+                self.radio.write_settings(self.ctx.settings)
+                self.ctx.settings.save()
+                self._radio_discovery.record_click(station_id.removeprefix("radio-browser:"))
+                self.ctx.say(f"Playing {station.display_name}.", interrupt=False)
+                return
+        elif prepared is not None:
+            self.ctx.audio.discard_radio_stream(prepared)
+        self._radio_pending_station_id = ""
+        self.radio.station_id = SAFE_ROUTE_PLAYLIST
+        fallback = self.radio.play(self._radio_backend)
+        self.radio.write_settings(self.ctx.settings)
+        self.ctx.settings.save()
+        self.ctx.say(
+            f"{station.display_name} is unavailable. "
+            f"Playing {fallback.station.display_name} instead.",
+            interrupt=False,
+        )
+
+    def _cancel_radio_tune(self) -> None:
+        self._radio_tune_generation += 1
+        self._radio_pending_station_id = ""
+
+    def _radio_discovery_status_text(self) -> str:
+        settings = self.ctx.settings
+        if not settings.online_services:
+            return "Nearby public stations are off with online services."
+        if not settings.radio_real_streams:
+            return "Nearby public stations are off."
+        if settings.radio_streamer_safe:
+            return "Nearby public stations are hidden by streamer-safe mode."
+        supports_streams = getattr(self.ctx.audio, "supports_radio_streams", lambda: True)
+        if not supports_streams():
+            return (
+                "Nearby public stations are allowed but unavailable with the "
+                "current audio system. Built-in stations remain available."
+            )
+        return self._radio_discovery_status
+
+    def _radio_status_text(self) -> str:
+        text = self.radio.status_text()
+        pending = self.radio.station_by_id(self._radio_pending_station_id)
+        if pending is not None:
+            current = self.radio.current_station()
+            text += (
+                f" Tuning to {pending.display_name}. "
+                f"{current.display_name} remains on until the stream is ready."
+            )
+        preferred = self.radio.station_by_id(self.radio.preferred_station_id)
+        if (
+            pending is None
+            and preferred is not None
+            and preferred.source_type == DIRECTORY_SOURCE_TYPE
+            and preferred.id != self.radio.station_id
+        ):
+            text += (
+                f" Saved station {preferred.display_name} is available on the dial. "
+                "Use the bracket keys to tune it."
+            )
+        unavailable = self._radio_discovery_status_text()
+        if "unavailable with the current audio system" in unavailable:
+            text += f" {unavailable}"
+        return text
+
+    def _sync_radio_settings(self) -> None:
+        station_before = self.radio.station_id
+        selected_before = self.radio.station_by_id(station_before)
+        self.radio.apply_settings(self.ctx.settings)
+        self.radio.update_position(
+            truck_position(self.route, self.trip.position_mi, self.ctx.world)
+        )
+        self.radio.current_station()
+        public_stream_became_unavailable = bool(
+            selected_before is not None
+            and selected_before.real_stream
+            and not self._radio_discovery_allowed()
+        )
+        if public_stream_became_unavailable:
+            self.radio.station_id = self.radio.fallback_station().id
+        if self.radio.station_id != station_before:
+            self.radio.write_settings(self.ctx.settings)
+            self.ctx.settings.save()
+            if public_stream_became_unavailable:
+                self._cancel_radio_tune()
+                action = self.radio.play(
+                    self._radio_backend,
+                    prefix="Real public audio is now hidden. Radio fallback.",
+                )
+                self.ctx.say_event(
+                    f"Real public audio is now hidden. "
+                    f"Playing {action.station.display_name} instead.",
+                    interrupt=False,
+                )
+
+    def _apply_radio_volume(self) -> None:
+        factor = getattr(self, "_radio_signal_factor", 1.0)
+        self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume * factor)
+
+    def _play_radio_current(self) -> None:
+        self._sync_radio_settings()
+        if self.radio.enabled:
+            self._apply_radio_volume()
+            station = self.radio.current_station()
+            if station.source_type == DIRECTORY_SOURCE_TYPE:
+                self.radio.station_id = self.radio.fallback_station().id
+                self._begin_radio_stream_tune(station)
+            else:
+                self.radio.play(self._radio_backend)
+        else:
+            self.ctx.audio.stop_music(600)
+
+    def _finish_radio_action(self, action) -> None:
+        self.radio.write_settings(self.ctx.settings)
+        self.ctx.settings.save()
+        self.ctx.say(action.message)
+
+    def _toggle_radio(self) -> None:
+        self._sync_radio_settings()
+        station = self.radio.current_station()
+        if not self.radio.enabled and station.source_type == DIRECTORY_SOURCE_TYPE:
+            self.radio.toggle(None)
+            self.radio.station_id = self.radio.fallback_station().id
+            self._begin_radio_stream_tune(
+                station,
+                prefix=f"Radio on. Tuning to {station.display_name}.",
+            )
+            return
+        self._cancel_radio_tune()
+        action = self.radio.toggle(self._radio_backend)
+        self._finish_radio_action(action)
+
+    def _tune_radio(self, direction: int) -> None:
+        self._sync_radio_settings()
+        from_station_id = self._radio_pending_station_id or self.radio.station_id
+        reception = self.radio.next_reception(
+            direction,
+            from_station_id=from_station_id,
+        )
+        self._cancel_radio_tune()
+        station = reception.station
+        if station.source_type == DIRECTORY_SOURCE_TYPE and self.radio.enabled:
+            self._begin_radio_stream_tune(
+                station,
+                prefix=f"Tuning to {station.display_name}.",
+            )
+            return
+        action = self.radio.select_station(station.id, None)
+        if action.enabled:
+            action = self.radio.play(
+                self._radio_backend,
+                prefix=f"Tuned to {station.display_name}.",
+            )
+        self._finish_radio_action(action)
+
+    def _jump_radio_category(self, direction: int) -> None:
+        self._sync_radio_settings()
+        from_station_id = self._radio_pending_station_id or self.radio.station_id
+        reception, category = self.radio.next_category_reception(
+            direction,
+            from_station_id=from_station_id,
+        )
+        self._cancel_radio_tune()
+        station = reception.station
+        if station.source_type == DIRECTORY_SOURCE_TYPE and self.radio.enabled:
+            self._begin_radio_stream_tune(
+                station,
+                prefix=f"{category}. Tuning to {station.display_name}.",
+            )
+            return
+        action = self.radio.select_station(station.id, None)
+        if action.enabled:
+            action = self.radio.play(
+                self._radio_backend,
+                prefix=f"{category}. Tuned to {station.display_name}.",
+            )
+        self._finish_radio_action(action)
+
+    def _speak_radio_status(self) -> None:
+        self._sync_radio_settings()
+        self.ctx.say(self._radio_status_text())

@@ -918,9 +918,18 @@ class SettingsCategoryState(MenuState):
                     help="When on, the radio uses only built-in safe stations and skips real public streams.",
                 ),
                 MenuItem(
-                    lambda: f"Radio real public streams: {'on' if s.radio_real_streams else 'off'}",
+                    lambda: self._radio_streams_label(),
                     lambda: self._toggle_radio_real_streams(1),
-                    help="Opt in to real public stream stations. Streamer-safe mode must also be off before they can play.",
+                    help="Allow nearby public stations to join the normal bracket-key "
+                    "dial. Streamer-safe mode must also be off before they can play.",
+                ),
+                MenuItem(
+                    lambda: self._radio_discovery_location_label(),
+                    lambda: self._cycle_radio_discovery_location(1),
+                    help="Choose where nearby public station searches are centered. "
+                    "Approximate real-world location uses a network-based estimate "
+                    "and may be wrong. Follow the simulated truck uses the truck's "
+                    "location in the game.",
                 ),
                 MenuItem(
                     lambda: f"Menu and UI sounds volume: {round(s.ui_volume * 100)} percent",
@@ -1010,6 +1019,7 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("radio_volume", 0.1 * d),
                     self._toggle_radio_streamer_safe,
                     self._toggle_radio_real_streams,
+                    self._cycle_radio_discovery_location,
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
                 "updates": [self._toggle_update_channel],
@@ -1397,13 +1407,40 @@ class SettingsCategoryState(MenuState):
         self.ctx.apply_volumes()  # re-voices a running engine in place
         self._announce()
 
-
     def _toggle_radio_streamer_safe(self, _d: int) -> None:
         self.ctx.settings.radio_streamer_safe = not self.ctx.settings.radio_streamer_safe
         self._announce()
 
     def _toggle_radio_real_streams(self, _d: int) -> None:
         self.ctx.settings.radio_real_streams = not self.ctx.settings.radio_real_streams
+        self._announce()
+
+    def _radio_streams_label(self) -> str:
+        settings = self.ctx.settings
+        if not settings.radio_real_streams:
+            state = "off"
+        elif not settings.online_services:
+            state = "allowed, unavailable because Online services are off; built-in stations remain"
+        elif settings.radio_streamer_safe:
+            state = "allowed, currently hidden by streamer-safe mode"
+        elif not getattr(self.ctx.audio, "supports_radio_streams", lambda: True)():
+            state = "allowed, unavailable with the current audio system; built-in stations remain"
+        else:
+            state = "on"
+        return f"Radio real public streams: {state}"
+
+    def _radio_discovery_location_label(self) -> str:
+        value = self.ctx.settings.radio_discovery_location
+        label = (
+            "approximate real-world location" if value == "real" else "follow the simulated truck"
+        )
+        return f"Nearby radio location: {label}"
+
+    def _cycle_radio_discovery_location(self, direction: int) -> None:
+        modes = ("real", "truck")
+        current = self.ctx.settings.radio_discovery_location
+        index = modes.index(current) if current in modes else 0
+        self.ctx.settings.radio_discovery_location = modes[(index + direction) % len(modes)]
         self._announce()
 
     def _toggle_controller(self, _d: int) -> None:

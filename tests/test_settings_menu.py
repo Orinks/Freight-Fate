@@ -240,6 +240,26 @@ def test_settings_menu_volume_survives_new_app_session():
         next_app.shutdown()
 
 
+def test_public_radio_setting_names_online_services_blocker():
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    app = App()
+    try:
+        app.ctx.settings.radio_real_streams = True
+        app.ctx.settings.radio_streamer_safe = False
+        app.ctx.settings.online_services = False
+        menu = SettingsCategoryState(app.ctx, "audio")
+
+        label = menu._radio_streams_label()
+
+        assert "allowed" in label
+        assert "unavailable because Online services are off" in label
+        assert "built-in stations remain" in label
+    finally:
+        app.shutdown()
+
+
 def test_settings_menu_f1_has_help_for_every_item():
     from freight_fate.app import App
     from freight_fate.states.main_menu import SettingsCategoryState, SettingsState

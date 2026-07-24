@@ -76,14 +76,12 @@
   long event. Every shift, manual or automatic, is a real recorded shift,
   and no two in a row sound identical.
 
-- **Real stations reach a lot more of the map.** With streamer-safe mode
-  off, the in-cab radio now picks up public, community, and college
-  stations in dozens more places -- the Rio Grande Valley, Savannah,
-  Amarillo, the Iowa corridor, the northern Plains, the high Rockies, the
-  Carolinas coast, the Florida panhandle, and more -- so wherever a load
-  takes you, there is a far better chance of catching local news or music
-  instead of an empty band. A couple of stations whose streams had gone
-  quiet are back on the air as well.
+- **Nearby public radio now finds itself.** Allow real streams, turn
+  streamer-safe mode off, and working public stations near your
+  approximate real-world location quietly join the normal bracket-key
+  dial. If location lookup fails, the search follows the simulated truck.
+  Saved results keep the dial useful offline, and built-in stations are
+  always ready while the background check runs.
 
 - **The engine brake grew its real cylinder selector.** J is now the
   dash switch: it turns the engine brake on at whatever stage you last
@@ -107,9 +105,9 @@
 
 - **The radio dial now jumps by category.** Control with a bracket key
   leaps to the previous or next section of the dial -- route playlist,
-  Freight Fate stations, your playlists, terrestrial, AFN, satellite --
-  and announces where you landed. No more tuning through twenty-five
-  AFN stations one by one to reach the local dial.
+  Freight Fate stations, your playlists, terrestrial, nearby internet,
+  or satellite -- and announces where you landed. Plain bracket keys
+  still tune every station.
 
 - **The road now names the towns that change your speed limit.** When a
   limit is about to drop for a small town, you hear the town first --
@@ -294,9 +292,9 @@
 
 - **The radio dial now jumps by category.** Control with a bracket key
   leaps to the previous or next section of the dial -- route playlist,
-  Freight Fate stations, your playlists, terrestrial, AFN, satellite --
-  and announces where you landed. No more tuning through twenty-five
-  AFN stations one by one to reach the local dial.
+  Freight Fate stations, your playlists, terrestrial, nearby internet,
+  or satellite -- and announces where you landed. Plain bracket keys
+  still tune every station.
 
 - **The road now names the towns that change your speed limit.** When a
   limit is about to drop for a small town, you hear the town first --
@@ -516,25 +514,11 @@
   Comma and the game says it again -- in menus, in the truck, everywhere.
   The A key still replays the last route announcement while driving.
 
-- **The in-cab radio picks up forty-three more real stations.** With real
-  streams allowed in settings, live local radio now reaches Portland, Boise,
-  Spokane, Salt Lake City, Las Vegas, Reno, Minneapolis, Milwaukee, Detroit,
-  St. Louis, Houston, Pittsburgh, Philadelphia, Baltimore, Washington,
-  Nashville, Memphis, Birmingham, Tampa, Miami, and more -- plus the wide
-  public radio networks that carry the empty country: the Dakotas, Montana,
-  the Texas plains, the Upper Peninsula, northern New England, and West
-  Virginia. Real jazz, news, roots, and independent music fades in and out
-  as you drive through each market, just like FM.
-
-- **The desert Southwest gets its real radio dial.** Six more live
-  stations light up the border-to-canyon country: KTNN out of Window
-  Rock, the Voice of the Navajo Nation, whose 50,000-watt AM signal
-  carries news and country across most of the Four Corners; Arizona
-  Public Radio from Flagstaff; Tucson's KXCI community radio; New Mexico
-  music on KANW alongside Albuquerque's KUNM; public radio from Las
-  Cruces; and community radio in Yuma on the Colorado River. Turn on
-  real public streams in Settings and drive Route 66 with the real
-  Navajo Nation blowtorch on the dial.
+- **The radio no longer ships a list of public stream addresses.** It
+  checks the public directory at runtime, keeps only working and
+  compatible nearby stations, and remembers results for offline use.
+  That means fewer dead entries and no catalog update whenever a station
+  moves its stream.
 
 - **The alpha ships with a test book.** A new guide in the docs folder
   walks through everything this version changes and how to hear each

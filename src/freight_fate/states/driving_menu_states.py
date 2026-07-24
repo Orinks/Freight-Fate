@@ -271,22 +271,22 @@ class DrivingStatusScreenState(MenuState):
         d = self.driving
         d._sync_radio_settings()
         settings = self.ctx.settings
-        position = d.radio.position
+        mode = (
+            "Nearby search uses your approximate real-world location."
+            if settings.radio_discovery_location == LOCATION_MODE_REAL
+            else "Nearby search follows the simulated truck."
+        )
         lines = [
-            d.radio.status_text(),
+            d._radio_status_text(),
             (
                 "Real public streams: on, streamer-safe mode off"
                 if settings.radio_real_streams and not settings.radio_streamer_safe
                 else "Real public streams are hidden unless real streams are on and streamer-safe mode is off."
             ),
+            mode,
+            d._radio_discovery_status_text(),
             "Tune with left and right brackets. Press M to toggle radio from the cab.",
         ]
-        if position is not None:
-            lines.append(f"Approximate truck radio position: {position[0]:.2f}, {position[1]:.2f}.")
-        lines.append("Receivable stations:")
-        lines.extend(
-            d.radio.station_list_lines(limit=16, distance_text=self.ctx.settings.distance_text)
-        )
         return lines
 
 

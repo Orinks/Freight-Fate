@@ -1066,20 +1066,15 @@ section below and the Unreleased changelog; the release-line view:
       with newly composed songs cover markets across the map, fading to
       static at the fringe of their range and handing back to the Roadhouse
       when the signal drops.
-- [x] **Real local stations across the whole map.** The catalog now carries
-      57 real public and community streams (up from 14), filling Portland,
-      Boise, Spokane, Salt Lake City, Las Vegas, Reno, Minneapolis,
-      Milwaukee, Detroit, St. Louis, Houston, the Ohio Valley, the Northeast
-      corridor, the South, Florida, and the southern plains, plus wide
-      public-radio networks over the 623-city map's empty country (Prairie
-      Public, SDPB, Montana Public Radio, Yellowstone Public Radio, High
-      Plains Public Radio, Jefferson Public Radio, Interlochen, Maine
-      Public, Vermont Public, WV Public Broadcasting). Each is geo-ranged
-      like FM and verified with a live BASS smoke test; a coverage script
-      shows 162 of 623 cities still outside every contour, mostly realistic
-      radio darkness. The game now bundles and loads the BASSHLS addon
-      (`src/freight_fate/lib/`), so HLS-only streams play too (first user:
-      KMHD Portland).
+- [x] **Nearby public stations are discovered at runtime (2026-07-23).**
+      The checked-in public URL inventory is gone. Radio Browser is now the
+      optional runtime directory, discovered through its mirrors with
+      failover. A no-key approximate real-world location is the default
+      search center; the simulated truck is the automatic fallback and an
+      optional mode. State-level results are filtered locally, cached for
+      about a day outside career saves, and added silently to the same dial
+      plain brackets already tune. Built-in, fictional regional, satellite
+      fallback, and personal playlist stations remain.
 - [ ] **AFN 360 Global channels stay unsupported.** StreamTheWorld
       geo-blocks those mounts outside overseas military regions (HTTP 403
       from US IPs on every URL form, HLS included); revisit only if AFN
@@ -1139,8 +1134,7 @@ section below and the Unreleased changelog; the release-line view:
       breaks) so music never competes with menu speech.
 - [x] **Map-refresh utility shipped (v1, report-only) --
       tools/refresh_map_data.py, 2026-07-14.** The owner-run drift
-      checker: --radio plays every supported real stream through the
-      game's BASS stack and reports the dead; --limits-lint runs the
+      checker: --limits-lint runs the
       anchor-repair judgment rules as a linter (fresh bakes must report
       zero); --stops re-queries OSM per leg (honors OVERPASS_URL) and
       diffs live named truck POIs against baked stops, with a direct
@@ -1148,7 +1142,8 @@ section below and the Unreleased changelog; the release-line view:
       sampled miss never reads as a closure. Never writes; exit code 1
       when anything needs attention, so a scheduled run can alert.
       Curation stays with the recipes. Future: fold in landmark and
-      interchange drift.
+      interchange drift. Its old checked-in radio URL sweep was retired
+      when public stations moved to runtime discovery on 2026-07-23.
 - [x] **Personal playlist stations from M3U files (landed 2026-07-20).**
       Drop `.m3u`/`.m3u8` files into the Playlists folder next to the
       saves (created on first run) and each becomes a dial station under
@@ -1162,31 +1157,29 @@ section below and the Unreleased changelog; the release-line view:
       the drive. A drop-in folder, never a file picker -- screen-reader
       users manage folders in Explorer. Personal media rides the
       streamer-safe gate like real streams; stream URLs inside an M3U
-      are ignored (curated catalog only). Follow-up: consider shuffle
+      are ignored. Follow-up: consider shuffle
       and a cross-session resume position if playtests want them.
 - [x] **Radio dial categories with a jump key (landed 2026-07-20).**
       Ctrl+bracket (the owner's binding -- plain brackets already tune)
       leaps to the first station of the previous/next dial category and
       leads with the category name: route playlist, Freight Fate
-      stations, your playlists, terrestrial, AFN, satellite. AFN got its
-      own category so its 25-station block never buries the local dial
-      again; the dial sort and the jump share one grouping.
+      stations, your playlists, terrestrial, nearby internet, and
+      satellite. The dial sort and the jump share one grouping.
 - [ ] **Fictional call signs must not squat real stations (owner catch
       2026-07-20).** Our fictional Phoenix classic-rock station is
       "KDRT Desert Rock 101.5" -- but KDRT-LP is a real community station
       in Davis, California. Rename it, and audit all 15 fictional call
       signs against the FCC database (WDLT and WSOL look suspect too);
       fictional stations should hold call signs no real broadcaster owns.
-- [ ] **Community and college radio sweep, and an NPR coverage audit
-      (owner ask 2026-07-20).** There is no policy against real
-      terrestrial stations -- 63 already stream in-game; the limits were
-      streamer-safety flags and URL rot. Add the freeform and community
-      institutions (WFMU Jersey City, KABF Little Rock, college stations
-      with reliable streams), and audit NPR-member coverage per market so
-      the dial finds local news most places a route goes. Direct station
-      stream URLs with source notes, as the desert-Southwest sweep did;
-      Radio Browser as the finding aid, never a runtime dependency.
-      TuneIn is partner-gated API-wise and stays out.
+- [x] **Community and college coverage moved to runtime discovery
+      (2026-07-23).** Radio Browser is now the optional runtime dependency
+      for public stations, rather than only a finding aid for checked-in
+      URLs. Its live state directory covers public, community, and college
+      stations without a manual URL sweep. TuneIn remains out.
+- [ ] **Custom internet station entry.** Add a simple accessible settings
+      path for a player-supplied HTTP or HTTPS stream. Reuse the runtime
+      URL-safety and non-blocking tune path; do not turn the Radio status
+      screen into a station manager. Personal M3U files remain file-only.
 - [ ] **Spotify and Apple Music: research only, parked (owner idea
       2026-07-20).** In-game playback of either is off the table --
       both wrap streams in DRM their licenses forbid unwrapping, official
@@ -1199,13 +1192,9 @@ section below and the Unreleased changelog; the release-line view:
       crude API volume nudges. The M3U playlist feature above covers the
       underlying need -- your own library on the dial -- without any of
       this. Rides the online-enhancement determinism boundary if built.
-- [ ] **Stream URLs rot fast -- fold a dial health check into the
-      map-refresh tool.** One day after the 57-station sweep, seven
-      streams were already dead (KJZZ, KCRW, KUNM, KUTX, KERA, KCUR,
-      WBUR -- all repointed 2026-07-14 after a full BASS live sweep of
-      the catalog). The owner-run map-refresh tool should re-test every
-      real stream the same way and report movers, so the dial stays
-      honest between releases.
+- [x] **Retire the public-stream catalog health chore (2026-07-23).**
+      Runtime directory health, bounded stream checks, and cached stale
+      fallback replace the manual checked-in URL sweep.
 - [x] **The desert Southwest sweep landed: six stations, ten total.** KTNN
       660 AM (Window Rock, the Voice of the Navajo Nation, 175-mile AM
       groundwave contour -- widest in the catalog, honestly), KNAU
@@ -2383,36 +2372,26 @@ Deliver -> Earn and level up -> Repeat
 
 ### In-cab radio (1.8 / 1.9 candidate)
 
-A truck radio you can tune as you drive: pull in the local FM stations for
-wherever you are on the map, with a satellite-style network as the
-always-available fallback when you are out of range of anything local. A
-community suggestion; the right kind of immersion for long hauls and a natural
-fit for an audio-first game.
+A truck radio you can tune as you drive: built-in and fictional stations are
+always ready, while optional public stations near the player's approximate
+real-world location join the same dial at runtime. A satellite-style safe
+station remains the always-available fallback.
 
 - [x] **Practical in-cab radio.** Shipped: driving now has keyboard radio
   controls (M toggles, brackets tune, Y speaks status), persistent radio
   enabled/station/volume settings, a dedicated lower radio volume, streamer-safe
   mode on by default, real public streams gated behind explicit opt-in, and
   graceful fallback when a selected station/backend cannot play. The checked-in
-  JSON catalog includes safe built-in stations, AFN Pacific, multiple AFN Go
-  choices (Freedom, Gravity, Country, The Voice, and Okinawa Eagle), and a curated
-  regional public-station subset across the current map. The truck estimates its
-  lat/lon from checked-in route geometry and city coordinates, bracket tuning
-  walks only the currently receivable stations, and the Tab status menu has a
-  Radio screen with signal/fallback/source/volume details. External live streams
-  are still metadata-only until a non-blocking stream backend is added; opt-in
-  stations fall back safely instead of hanging or crashing. Remaining: FCC-derived
-  contour/range refresh, station favorites/presets beyond the review list,
-  audible static/signal fades, and actual external stream playback once the
-  backend can do it without stealing priority from speech and safety cues.
+  JSON catalog now contains only safe built-in, fictional regional, and
+  satellite-fallback stations. Radio Browser supplies nearby public stations
+  at runtime through a cached, non-blocking, mirror-failing-over path. Plain
+  brackets walk every receivable entry. Stream probing and opening stay off the
+  driving loop, and the latest generation alone may take over playback.
 
-- **Direction (decided):** use real stations via their public internet stream
-  URLs (a friend has a curated list). The game is free and non-commercial, and
-  it acts as a *tuner* -- it points the player's own client at a stream the
-  station already broadcasts publicly, not hosting or rebroadcasting audio
-  (the TuneIn / car-head-unit model). Free and non-commercial is not a blanket
-  copyright exemption, but the tuner-to-public-stream posture plus no money
-  changing hands keeps practical risk low for a small game.
+- **Direction (decided):** discover public station streams from Radio Browser
+  at runtime instead of maintaining a checked-in URL list. The directory is
+  optional, requires no shared key, and never replaces the built-in/offline
+  dial.
 
 - **Streamer-safe toggle still required.** Independent of the game's own
   posture: a player who streams a session to YouTube/Twitch with copyrighted
@@ -2421,55 +2400,33 @@ fit for an audio-first game.
   royalty-free station and the satellite fallback as the always-safe default
   audio, so streamers are protected unless they opt in.
 
-- **Geography-gated reception.** Stations are data, not magic: a JSON catalog
-  per station with call sign, format/genre, public stream URL and its audio
-  format (so the loader can skip unsupported transports), transmitter
-  latitude/longitude, ERP (effective radiated power), and antenna HAAT, plus a
-  derived `range_miles`. Range is estimated from public FCC license data (FM Query /
-  LMS) using the F(50,50) protected-contour idea -- power and antenna height,
-  refined by terrain -- so you can only pull in stations whose coverage
-  actually reaches you. The truck's geo-position is interpolated in
-  latitude/longitude along the current route leg (cities already carry
-  lat/lon), signal strength falls off toward the edge of a station's contour,
-  and reception fades into static and drops out as you leave range -- then the
-  next town's stations fade in.
+- **Nearby, without false precision.** A no-key approximate network location is
+  the default center. If it fails, discovery follows the simulated truck; that
+  is also an optional setting. Queries send a state/region, and distance is
+  calculated locally from directory coordinates. Those coordinates are not FCC
+  contours, so public entries are described only as nearby internet stations.
+  The fictional regional stations keep their existing authored range behavior.
 
-- **Satellite fallback: AFN.** An always-available station for when no local
-  FM is in range -- AFN (American Forces Network), which has exactly the right
-  always-on, ad-free, slightly-institutional vibe. AFN's *overseas over-the-air
-  and decoder-box* broadcasts are encrypted, but its internet radio (AFN 360)
-  is publicly streamable to anyone, so it can be used directly. Public stream
-  URL (Triton/StreamTheWorld, AFN Pacific):
-  `https://playerservices.streamtheworld.com/api/livestream-redirect/AFNP_OKN_SC`.
-  AFN is ad-free and U.S. government-produced, but the music it airs is still
-  commercially licensed, so the streamer-safe toggle still applies to it. This
-  is the one station that is always in range, so it doubles as the graceful
-  fallback when a local stream rots or drops out.
+- **Satellite fallback: owned and offline.** The Safe Satellite Fallback remains
+  always available without a public network stream. It covers directory
+  outages, unsupported audio systems, and streamer-safe play.
 
-- **Audio sourcing: real streams, with the real work being technical not
-  legal.** The friend's stream-URL list is the primary source. The gotchas to
-  build around: (1) streams rot -- URLs change and stations go dark, so
-  reception must fail gracefully and fall back to the satellite/owned station,
-  never dead air or a crash; (2) codec/transport -- the BASS/sound_lib backend
-  handles Icecast/Shoutcast MP3/AAC easily, but HLS (`.m3u8`) needs more work,
-  so the catalog should record stream format and the loader should skip
-  unsupported ones; (3) some stations geo-block or require their own app, so a
-  few URLs won't work for a third-party player and the catalog needs a
-  reachable/working flag. Keep an owned royalty-free station and the satellite
-  fallback for offline play and the streamer-safe default.
+- **Audio sourcing: bounded and defensive.** Runtime results must be currently
+  working, use a supported ordinary HTTP audio codec/transport, and pass public
+  destination checks before entering the dial. A selected stream is checked and
+  prepared asynchronously, including redirect validation; failures return to a
+  safe built-in station without blocking controls or speech.
 
 - **Accessibility is the feature, not a checkbox.** Tuning must be fully
-  spoken and keyboard-driven: seek/scan up and down the dial, announce call
-  sign + format + signal strength, audibly fade as you move in and out of
-  range, a station list and favorites, and a dedicated radio volume in
-  Settings. This is core UX for the game's audience, designed in from the
-  start.
+  spoken and keyboard-driven: plain brackets move through the dial, pending
+  and playing states are truthful, failures are concise, discovery never
+  steals focus or floods speech, and radio volume remains separate in
+  Settings. The status screen stays current-only; it is not a second tuning
+  interface.
 
-- **Ties to existing systems.** Reuses regions and city lat/lon, the music
-  backend, and the day/night + seasons clock (programming could shift by time
-  of day or season). Open questions: ship the full FCC-derived dataset or a
-  curated subset; how granular the range/terrain model needs to be; and
-  per-genre licensing for any owned music library.
+- **Ties to existing systems.** Reuses the music backend, settings gates,
+  state names, simulated truck position as fallback, and the normal dial.
+  Directory results never enter signed career saves.
 
 ### Business
 - [x] Company-driver to owner-operator career arc. Full first arc: choose among

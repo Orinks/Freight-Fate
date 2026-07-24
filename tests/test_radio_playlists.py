@@ -2,8 +2,7 @@
 
 The Playlists folder next to the saves turns each dropped M3U file into a
 station of the player's own music; Ctrl with a bracket key leaps the dial a
-whole category at a time, so the AFN block never again stands between the
-player and the terrestrial section.
+whole category at a time without changing the plain-bracket every-station path.
 """
 
 from pathlib import Path

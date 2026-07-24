@@ -10,12 +10,14 @@ from .driving_events import DrivingEventMixin
 from .driving_location import DrivingLocationMixin
 from .driving_pacenotes import DrivingPacenoteMixin
 from .driving_pickup import DrivingPickupMixin
+from .driving_radio import DrivingRadioDiscoveryMixin
 from .driving_speed_control import SpeedControlStateMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 
 
 class DrivingState(
     DrivingControlsMixin,
+    DrivingRadioDiscoveryMixin,
     DrivingUpdateMixin,
     SpeedControlStateMixin,
     DrivingLocationMixin,
@@ -119,6 +121,15 @@ class DrivingState(
         self._music_night = is_night(self.trip.local_start_hour)
         self.radio = RadioState.from_settings(ctx.settings)
         self._radio_backend = _DrivingRadioBackend(self)
+        self._radio_discovery = RadioDiscoveryManager()
+        self._radio_discovery_key = ""
+        self._radio_discovery_effective_source = ""
+        self._radio_discovery_has_applied = False
+        self._radio_discovery_status = "Nearby stations have not been checked."
+        self._radio_discovery_location_label = ""
+        self._radio_tune_generation = 0
+        self._radio_tune_results = queue.SimpleQueue()
+        self._radio_pending_station_id = ""
         # Station rotation: per-station shuffled song order, with host breaks
         # every few songs on the stations that have a live host.
         self._radio_station_id = ""

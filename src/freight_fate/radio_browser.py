@@ -129,6 +129,10 @@ def normalize_stations(
         bitrate = _int(row.get("bitrate"))
         if codec not in SUPPORTED_CODECS or bitrate is None:
             continue
+        if _int(row.get("hls")) == 1:
+            # BASSHLS is optional, so HLS is not a dependable active-backend
+            # transport. Ordinary HTTP audio streams work in stock BASS.
+            continue
         if bitrate < MIN_BITRATE_KBPS or bitrate > MAX_BITRATE_KBPS:
             continue
         lat, lon = _float(row.get("geo_lat")), _float(row.get("geo_long"))
@@ -149,6 +153,8 @@ def normalize_stations(
             )
         except (UnsafeStreamURL, OSError):
             continue
+        if urllib.parse.urlsplit(url).path.casefold().endswith((".m3u8", ".m3u")):
+            continue
         url_key = url.casefold()
         if url_key in seen_url:
             continue
@@ -167,6 +173,7 @@ def normalize_stations(
                 lon=lon,
                 distance_miles=distance,
                 state=state,
+                city=sanitize_directory_text(row.get("city"), limit=60),
             )
         )
     normalized.sort(
@@ -183,21 +190,64 @@ def filter_cached_stations(
     stations: Sequence[DirectoryStation],
     *,
     position: tuple[float, float],
+    resolver=None,
     distance_cap_miles: float = NEARBY_DISTANCE_CAP_MI,
     limit: int = NEARBY_DIAL_LIMIT,
 ) -> tuple[DirectoryStation, ...]:
-    """Recalculate locally when the search center moves within a cached state."""
+    """Revalidate cached metadata and recalculate distance at the new center."""
 
     updated = []
+    seen_uuid: set[str] = set()
+    seen_url: set[str] = set()
     for station in stations:
-        distance = distance_miles(position, (station.lat, station.lon))
+        uuid = sanitize_directory_text(station.uuid, limit=64).lower()
+        codec = sanitize_directory_text(station.codec, limit=16).upper()
+        bitrate = _int(station.bitrate)
+        lat, lon = _float(station.lat), _float(station.lon)
+        if (
+            not re.fullmatch(r"[0-9a-f-]{32,36}", uuid)
+            or uuid in seen_uuid
+            or codec not in SUPPORTED_CODECS
+            or bitrate is None
+            or not MIN_BITRATE_KBPS <= bitrate <= MAX_BITRATE_KBPS
+            or lat is None
+            or lon is None
+            or not (-90 <= lat <= 90 and -180 <= lon <= 180)
+        ):
+            continue
+        name = sanitize_directory_text(station.name, limit=60)
+        if not name:
+            continue
+        try:
+            url = (
+                validate_stream_url(str(station.stream_url), resolver=resolver)
+                if resolver is not None
+                else validate_stream_url(str(station.stream_url))
+            )
+        except (UnsafeStreamURL, OSError):
+            continue
+        if urllib.parse.urlsplit(url).path.casefold().endswith((".m3u8", ".m3u")):
+            continue
+        url_key = url.casefold()
+        if url_key in seen_url:
+            continue
+        distance = distance_miles(position, (lat, lon))
         if distance <= distance_cap_miles:
+            seen_uuid.add(uuid)
+            seen_url.add(url_key)
             updated.append(
                 DirectoryStation(
-                    **{
-                        **station.to_cache(),
-                        "distance_miles": distance,
-                    }
+                    uuid=uuid,
+                    name=name,
+                    format=sanitize_directory_text(station.format, limit=96),
+                    codec=codec,
+                    bitrate=bitrate,
+                    stream_url=url,
+                    lat=lat,
+                    lon=lon,
+                    distance_miles=distance,
+                    state=sanitize_directory_text(station.state, limit=40),
+                    city=sanitize_directory_text(station.city, limit=60),
                 )
             )
     updated.sort(

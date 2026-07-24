@@ -2,6 +2,7 @@ import pytest
 
 from freight_fate.radio import (
     DEFAULT_RADIO_CATALOG,
+    DIRECTORY_SOURCE_TYPE,
     SAFE_FALLBACK_STATION_ID,
     SAFE_ROUTE_PLAYLIST,
     RadioPlaybackError,
@@ -10,6 +11,7 @@ from freight_fate.radio import (
     load_radio_catalog,
     truck_position,
 )
+from freight_fate.radio_browser import DirectoryStation
 from freight_fate.settings import Settings
 
 
@@ -32,48 +34,38 @@ def station_ids(stations):
     return [station.id for station in stations]
 
 
-def test_catalog_loads_structured_regional_and_afn_stations():
+def _directory_station(
+    *,
+    uuid="12345678-1234-1234-1234-123456789abc",
+    name="KTEST Community",
+    distance=5.0,
+):
+    return DirectoryStation(
+        uuid=uuid,
+        name=name,
+        format="community; MP3, 128 kilobits",
+        codec="MP3",
+        bitrate=128,
+        stream_url="https://stream.example/live",
+        lat=42.9,
+        lon=-78.8,
+        distance_miles=distance,
+        state="New York",
+        city="Buffalo",
+    )
+
+
+def test_catalog_contains_only_built_in_and_curated_offline_stations():
     catalog = load_radio_catalog()
     ids = station_ids(catalog)
-    afn = [station for station in catalog if station.source_type == "afn"]
-    locals_ = [station for station in catalog if station.source_type == "local"]
+    regional = [station for station in catalog if station.source_type == "regional"]
 
-    assert len(catalog) >= 20
+    assert len(catalog) >= 15
     assert SAFE_ROUTE_PLAYLIST in ids
     assert SAFE_FALLBACK_STATION_ID in ids
-    assert len(afn) >= 5
-    assert {
-        "afn-aviano",
-        "afn-bavaria",
-        "afn-benelux",
-        "afn-tokyo",
-        "afn-guantanamo-bay",
-        "afn-incirlik",
-        "afn-kaiserslautern",
-        "afn-humphreys",
-        "afn-daegu",
-        "afn-bahrain",
-        "afn-naples",
-        "afn-rota",
-        "afn-sigonella",
-        "afn-souda-bay",
-        "afn-spangdahlem",
-        "afn-stuttgart",
-        "afn-vicenza",
-        "afn-wiesbaden",
-    } <= set(ids)
-    assert len({station.region for station in locals_}) >= 7
-    assert all(station.stream_url for station in afn + locals_)
-    assert all(station.stream_format for station in afn + locals_)
-    # A local stream can rot off the air (WABE 2026-07-14), but going dark
-    # is a documented state, never a silent one: unsupported locals carry
-    # notes saying why, and the dial stays overwhelmingly alive.
-    dark_locals = [station for station in locals_ if not station.supported]
-    assert all(station.notes for station in dark_locals)
-    assert len(dark_locals) <= len(locals_) // 10
-    assert sum(1 for station in afn if station.supported) >= 15
-    assert all(station.lat is not None and station.lon is not None for station in locals_)
-    assert all(station.range_miles > 0 for station in locals_)
+    assert len(regional) >= 10
+    assert not any(station.real_stream for station in catalog)
+    assert not any(station.stream_url for station in catalog)
 
 
 def test_radio_defaults_to_streamer_safe_builtin_station():
@@ -84,18 +76,26 @@ def test_radio_defaults_to_streamer_safe_builtin_station():
     assert radio.volume == 0.25
     assert radio.streamer_safe is True
     assert radio.real_streams_enabled is False
-    assert not any(station.source_type == "afn" for station in radio.available_stations())
+    assert not any(
+        station.source_type == DIRECTORY_SOURCE_TYPE for station in radio.available_stations()
+    )
     assert "streamer-safe" in radio.status_text()
     assert "always available" in radio.status_text()
 
 
 def test_real_stream_station_requires_opt_in_and_streamer_safe_off():
     radio = RadioState(real_streams_enabled=True, streamer_safe=True)
-    assert not any(station.source_type == "afn" for station in radio.available_stations())
+    radio.replace_directory_stations((_directory_station(),))
+    assert not any(
+        station.source_type == DIRECTORY_SOURCE_TYPE for station in radio.available_stations()
+    )
 
     radio.streamer_safe = False
 
-    assert any(station.id == "afn-tokyo" for station in radio.available_stations())
+    assert any(
+        station.id == "radio-browser:12345678-1234-1234-1234-123456789abc"
+        for station in radio.available_stations()
+    )
     assert all(
         not station.safe_for_streaming
         for station in radio.available_stations()
@@ -123,17 +123,15 @@ def test_radio_persists_enabled_station_and_volume():
 
 
 def test_regional_station_filtering_uses_simulated_truck_position():
-    radio = RadioState(
-        real_streams_enabled=True,
-        streamer_safe=False,
-        position=(47.61, -122.33),
-    )
+    radio = RadioState(position=(47.61, -122.33))
     ids = station_ids(radio.available_stations())
 
-    assert "kexp-seattle" in ids
-    assert "wbur-boston" not in ids
-    kexp = next(station for station in radio.available_stations() if station.id == "kexp-seattle")
-    assert estimate_signal(kexp, radio.position).signal_label == "strong signal"
+    assert "ksnd-seattle" in ids
+    assert "wsol-atlanta" not in ids
+    station = next(
+        station for station in radio.available_stations() if station.id == "ksnd-seattle"
+    )
+    assert estimate_signal(station, radio.position).signal_label == "strong signal"
 
 
 def test_tuning_uses_receivable_stations_not_global_catalog():
@@ -142,18 +140,19 @@ def test_tuning_uses_receivable_stations_not_global_catalog():
         streamer_safe=False,
         position=(47.61, -122.33),
     )
+    radio.replace_directory_stations((_directory_station(name="Nearby Test"),))
     backend = RecordingBackend()
 
     seen = []
-    for _ in range(4):
+    for _ in range(len(radio.receivable_stations())):
         action = radio.tune(1, backend)
         seen.append(action.station.id)
 
-    assert "kexp-seattle" in seen
-    assert "wbur-boston" not in seen
+    assert "radio-browser:12345678-1234-1234-1234-123456789abc" in seen
+    assert "wsol-atlanta" not in seen
 
 
-def test_no_regional_signal_still_has_safe_and_afn_fallback_choices():
+def test_no_regional_signal_still_has_safe_fallback_choices():
     # Interior Nevada on US-50: real radio darkness even after the
     # 623-city coverage fill (central South Dakota is SDPB country now).
     radio = RadioState(
@@ -164,18 +163,22 @@ def test_no_regional_signal_still_has_safe_and_afn_fallback_choices():
     stations = radio.available_stations()
 
     assert any(station.id == SAFE_ROUTE_PLAYLIST for station in stations)
-    assert any(station.source_type == "afn" for station in stations)
+    assert any(station.id == SAFE_FALLBACK_STATION_ID for station in stations)
     assert not any(station.source_type == "local" for station in stations)
 
 
 def test_radio_falls_back_when_backend_cannot_play_selected_station():
+    stream = _directory_station()
     radio = RadioState(
+        catalog=DEFAULT_RADIO_CATALOG,
         enabled=True,
-        station_id="afn-tokyo",
         real_streams_enabled=True,
         streamer_safe=False,
     )
-    backend = RecordingBackend(fail_ids={"afn-tokyo"})
+    radio.replace_directory_stations((stream,))
+    station_id = f"radio-browser:{stream.uuid}"
+    radio.select_station(station_id)
+    backend = RecordingBackend(fail_ids={station_id})
 
     action = radio.play(backend)
 
@@ -229,21 +232,39 @@ def test_driving_radio_backend_plays_real_stream_url():
 
 
 def test_spoken_status_includes_signal_source_safety_and_volume():
+    stream = _directory_station(name="KTEST Buffalo")
     radio = RadioState(
         real_streams_enabled=True,
         streamer_safe=False,
-        station_id="kexp-seattle",
-        position=(47.61, -122.33),
         volume=0.35,
     )
+    radio.replace_directory_stations((stream,))
+    radio.select_station(f"radio-browser:{stream.uuid}")
 
     text = radio.status_text()
 
-    assert "KEXP" in text
-    assert "strong signal" in text
+    assert "KTEST Buffalo" in text
+    assert "nearby internet station" in text
     assert "Volume 35 percent" in text
     assert "streamer-safe off" in text
     assert "Source:" in text
+
+
+def test_discovery_arrival_preserves_current_playback_and_stable_preference():
+    radio = RadioState(
+        enabled=True,
+        station_id="radio-browser:12345678-1234-1234-1234-123456789abc",
+        real_streams_enabled=True,
+        streamer_safe=False,
+    )
+    assert radio.current_station().id == SAFE_FALLBACK_STATION_ID
+    assert radio.preferred_station_id.endswith("123456789abc")
+
+    radio.replace_directory_stations((_directory_station(),))
+
+    assert radio.current_station().id == SAFE_FALLBACK_STATION_ID
+    assert radio.preferred_station_id.endswith("123456789abc")
+    assert any(station.id == radio.preferred_station_id for station in radio.available_stations())
 
 
 def test_truck_position_uses_route_geometry(world):

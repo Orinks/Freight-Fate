@@ -1,9 +1,13 @@
+import json
 import threading
+
+import pytest
 
 from freight_fate.radio_browser import DirectoryStation
 from freight_fate.radio_discovery import (
     CACHE_TTL_S,
     ApproximateLocation,
+    ApproximateLocationProvider,
     RadioDiscoveryCache,
     RadioDiscoveryManager,
 )
@@ -20,7 +24,7 @@ def _station(uuid="12345678-1234-1234-1234-123456789abc"):
         "community; MP3, 128 kilobits",
         "MP3",
         128,
-        "https://stream.example/live",
+        "https://1.1.1.1/live",
         42.9,
         -78.8,
         4.0,
@@ -75,7 +79,7 @@ def _row():
         "bitrate": 128,
         "geo_lat": 42.9,
         "geo_long": -78.8,
-        "url_resolved": "https://stream.example/live",
+        "url_resolved": "https://1.1.1.1/live",
         "tags": "community",
     }
 
@@ -85,6 +89,72 @@ def _poll_after(manager, event):
     result = manager.poll()
     assert result is not None
     return result
+
+
+class _LocationResponse:
+    def __init__(self, value):
+        self.value = value
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+    def read(self):
+        return json.dumps(self.value).encode()
+
+
+def test_approximate_location_provider_uses_no_key_and_normalizes_us_market():
+    calls = []
+
+    def opener(request, **kwargs):
+        calls.append((request, kwargs))
+        return _LocationResponse(
+            {
+                "success": True,
+                "country_code": "US",
+                "region": "New York",
+                "region_code": "ny",
+                "city": "Buffalo\n",
+                "latitude": 42.88,
+                "longitude": -78.87,
+            }
+        )
+
+    location = ApproximateLocationProvider(opener=opener, timeout=1.5).lookup()
+    assert location.city == "Buffalo"
+    assert location.state_code == "NY"
+    assert location.source == "real"
+    request, kwargs = calls[0]
+    assert "key=" not in request.full_url
+    assert request.headers["User-agent"].startswith("Freight-Fate/")
+    assert kwargs["timeout"] == 1.5
+
+
+@pytest.mark.parametrize(
+    "updates",
+    [
+        {"success": False},
+        {"country_code": "CA"},
+        {"region_code": "not-a-state"},
+        {"latitude": float("nan")},
+    ],
+)
+def test_approximate_location_provider_rejects_unusable_responses(updates):
+    value = {
+        "success": True,
+        "country_code": "US",
+        "region": "New York",
+        "region_code": "NY",
+        "city": "Buffalo",
+        "latitude": 42.88,
+        "longitude": -78.87,
+    }
+    value.update(updates)
+    provider = ApproximateLocationProvider(opener=lambda *args, **kwargs: _LocationResponse(value))
+    with pytest.raises((ValueError, ConnectionError)):
+        provider.lookup()
 
 
 def test_cache_ttl_uses_fresh_data_without_network(tmp_path, monkeypatch):

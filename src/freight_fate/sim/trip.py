@@ -1293,6 +1293,17 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
     def current_region(self) -> str:
         return self.current_target_city.region
 
+    @property
+    def current_state(self) -> str:
+        """State at the truck's exact route offset, including mid-leg crossings."""
+
+        index = self.current_leg_index
+        leg = self.route.legs[index]
+        local = max(0.0, min(leg.miles, self.position_mi - self._leg_starts[index]))
+        if self.route.cities[index] != leg.a:
+            local = leg.miles - local
+        return _leg_state_at(leg, local)
+
     def grade_at(self, mile: float) -> float:
         leg_i, leg_start = self._leg_at_mile(mile)
         leg = self.route.legs[leg_i]
