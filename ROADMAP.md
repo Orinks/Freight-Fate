@@ -1152,6 +1152,15 @@ section below and the Unreleased changelog; the release-line view:
       hold when you are legal to drive TODAY. Wire the scrutiny
       escalation into the same patrol-frequency machinery the speeding
       rebalance will use.
+- [ ] **Let assigned-dispatch drivers HEAR the board they cannot pick
+      from yet (owner observation, 2026-07-24 -- product call for
+      Norm/Josh).** Below level 8 the board shows exactly one assigned
+      load, by design -- but the offer pool behind it grows with level
+      (5 wide at 1, 6 at 6, more later) and that growth is inaudible.
+      Proposal: the assignment board previews the rest of the day's
+      pool as locked flavor entries ("Dispatch also posted: ...;
+      assigned loads only until level 8"), so each level audibly widens
+      the world and level 8 lands as a real payoff instead of a number.
 - [ ] **Reefer rules for the reefer feature (owner spec, 2026-07-24).**
       Two rulings to build into the queued reefer-temp feature: (1) a
       refrigerated load means the engine NEVER shuts down at rests --
