@@ -100,6 +100,25 @@
   instead of an empty band. A couple of stations whose streams had gone
   quiet are back on the air as well.
 
+- **The dial now fills out like a real city.** With streamer-safe mode
+  off, the in-cab radio no longer catches just one station per town -- it
+  picks up the whole non-commercial band a market really has: the public
+  news station and its separate classical or jazz sister, the community
+  and college stations, and the digital sub-channels that ride alongside
+  them, including the ones carrying BBC World Service. Hundreds of real
+  stations were added and checked one by one, so from Atlanta to Amarillo
+  to the Montana Hi-Line you can tune across a dial that sounds like the
+  place you are actually driving through. A few stations whose streams had
+  gone quiet are back on the air as well.
+
+- **Reading services for blind listeners are on the dial.** Radio reading
+  services -- the stations that read newspapers, magazines, and books
+  aloud for blind and print-disabled listeners -- now appear as real
+  stations in the cities that have them, from Memphis and New Orleans to
+  Phoenix, Chicago, Houston, Atlanta, Nashville, Des Moines, Columbus,
+  and Gainesville, and more. Wherever one is in range, it is right there
+  on the band with everything else.
+
 - **The engine brake grew its real cylinder selector.** J is now the
   dash switch: it turns the engine brake on at whatever stage you last
   selected, and while it is on, 1, 2, and 3 pick two, four, or six
@@ -122,9 +141,18 @@
 
 - **The radio dial now jumps by category.** Control with a bracket key
   leaps to the previous or next section of the dial -- route playlist,
-  Freight Fate stations, your playlists, terrestrial, AFN, satellite --
-  and announces where you landed. No more tuning through twenty-five
-  AFN stations one by one to reach the local dial.
+  Freight Fate stations, your playlists, terrestrial, AFN, satellite,
+  international -- and announces where you landed. No more tuning through
+  twenty-five AFN stations one by one to reach the local dial.
+
+- **International public broadcasters are always on the dial.** With
+  streamer-safe mode off, a new International section carries English-
+  language public radio you can catch anywhere, the way AFN already
+  works -- ABC from Australia (triple j, Jazz, Classic, and Double J),
+  RTÉ from Ireland (Radio 1, 2FM, and lyric fm), RNZ from New Zealand
+  (National and Concert), RFI English from France, and CBC Radio One and
+  CBC Music from Canada. Music, news, and classical all in the mix, so
+  there is always something to tune to no matter where a load leaves you.
 
 - **The road now names the towns that change your speed limit.** When a
   limit is about to drop for a small town, you hear the town first --

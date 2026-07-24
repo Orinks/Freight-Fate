@@ -256,14 +256,16 @@ def _dial_group(station: RadioStation) -> int:
     if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
         return 2
     if station.fallback:
-        return 6
+        return 7
     if station.source_type in {"local", "regional"}:
         return 3
     if station.source_type == "afn":
         return 4
     if station.source_type == "satellite":
         return 5
-    return 7
+    if station.source_type == "international":
+        return 6
+    return 8
 
 
 DIAL_CATEGORY_NAMES = {
@@ -273,8 +275,9 @@ DIAL_CATEGORY_NAMES = {
     3: "Terrestrial",
     4: "AFN",
     5: "Satellite",
-    6: "Fallback",
-    7: "Other stations",
+    6: "International",
+    7: "Fallback",
+    8: "Other stations",
 }
 
 
