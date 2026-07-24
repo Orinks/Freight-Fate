@@ -793,6 +793,13 @@
 
 ### Fixed
 
+- **No more 35-mile deadheads to a local pickup.** Some facilities'
+  map pins landed counties away from their city, and the local
+  deadhead drive to them stretched to thirty-plus straight-line miles.
+  Local approaches now stay between about two and nine miles -- the
+  range a real cross-town deadhead runs -- while the misplaced pins
+  get properly re-mapped.
+
 - **A same-city dispatch no longer zones the whole interstate at 25.**
   A job from one facility to another inside the same city -- yard to
   cross-dock around the interstate loop -- was mistaken for a facility

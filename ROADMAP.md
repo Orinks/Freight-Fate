@@ -1165,6 +1165,17 @@ section below and the Unreleased changelog; the release-line view:
       pool as locked flavor entries ("Dispatch also posted: ...;
       assigned loads only until level 8"), so each level audibly widens
       the world and level 8 lands as a real payoff instead of a number.
+- [ ] **Facility placement audit: 776 approach pins land too far out
+      (Josh's Kenosha 35-mile deadhead, 2026-07-24).** The approach bake
+      caps at 35 miles and 776 records sit past 8 -- geocoded pins that
+      landed counties from their city (worst offenders pinned at exactly
+      the cap). Runtime now clamps synthetic approaches to Josh's 1-9
+      band as mitigation; the real fix is an agent sweep re-geocoding
+      each flagged facility within its city's bounds (OSM name+type
+      match, mark unresolvable ones estimated-near-city), then re-bake
+      approaches and lift the clamp for genuinely-remote facilities
+      that carry evidence. Flag list reproducible: audit script walks
+      facility_approach_route for miles > 8.
 - [ ] **Real speed limits for facility approach streets (owner ask,
       2026-07-24).** Street-chain legs carry defaults today -- 25 for
       named streets, 15 for unnamed service ways -- but a real arterial
