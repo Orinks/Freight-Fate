@@ -1475,3 +1475,41 @@ def test_city_events_include_state_without_repeating_crossing(world):
 
     city_events = [e.message for e in events if e.kind == TripEventKind.CITY_REACHED]
     assert city_events == ["Passing Buffalo, New York. Continuing on I-90 toward Cleveland."]
+
+
+def test_same_city_highway_dispatch_is_not_a_facility_approach(world):
+    """Endpoints alone lied: a yard-to-cross-dock job inside one city rides
+    the interstate and still starts and ends at the same city key, which
+    blanketed 17 miles of I-80 in the 25 mph access zone (owner,
+    2026-07-24, Fernley)."""
+    from freight_fate.data.world_models import Leg, Route
+
+    def trip_for(route):
+        truck = TruckState()
+        truck.transmission.automatic = True
+        truck.start_engine()
+        return Trip(route, truck, WeatherSystem("great_lakes", seed=1), seed=2)
+
+    highway_loop = Route(
+        ["fernley_nv_us", "fernley_nv_us"],
+        [Leg("fernley_nv_us", "fernley_nv_us", 17.0, "I-80", "flat", ())],
+    )
+    trip = trip_for(highway_loop)
+    assert trip._is_facility_approach_route() is False
+    assert not any(z.reason == "facility access road" for z in trip.zones)
+
+    street_chain = Route(
+        ["fernley_nv_us", "fernley_nv_us"],
+        [
+            Leg(
+                "fernley_nv_us",
+                "fernley_nv_us",
+                1.2,
+                "Main Street",
+                "flat",
+                (),
+                local_speed_mph=25.0,
+            )
+        ],
+    )
+    assert trip_for(street_chain)._is_facility_approach_route() is True

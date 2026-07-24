@@ -1170,7 +1170,20 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         ]
 
     def _is_facility_approach_route(self) -> bool:
-        return len(self.route.cities) >= 2 and self.route.cities[0] == self.route.cities[-1]
+        """A street chain to a gate, never a same-city highway dispatch.
+
+        Endpoints alone lied: a yard-to-cross-dock job inside one city
+        rides the interstate loop and still starts and ends at the same
+        city key -- which blanketed 17 miles of I-80 in the 25 mph
+        facility-access zone and silenced its curve and limit warnings
+        (owner, 2026-07-24, Fernley). A real approach chain is BUILT
+        from streets (baked local speeds or cues) or is gate-shot short.
+        """
+        if len(self.route.cities) < 2 or self.route.cities[0] != self.route.cities[-1]:
+            return False
+        if any(leg.local_speed_mph > 0 or leg.local_cue for leg in self.route.legs):
+            return True
+        return self.route.miles <= 3.0
 
     def _patrol_intensity_at(self, mile: float) -> float:
         leg_i, _ = self._leg_at_mile(mile)

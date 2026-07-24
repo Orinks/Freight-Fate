@@ -793,6 +793,14 @@
 
 ### Fixed
 
+- **A same-city dispatch no longer zones the whole interstate at 25.**
+  A job from one facility to another inside the same city -- yard to
+  cross-dock around the interstate loop -- was mistaken for a facility
+  street approach, blanketing the entire highway run in the 25 mile per
+  hour access-road zone and silencing its curve and limit warnings.
+  Real street chains keep their street speeds; highway miles keep
+  highway rules.
+
 - **Automatic shifts sound like a real gear change now: clunk, sigh,
   clunk.** During a shift the engine used to hang frozen at its old
   revs through the whole interruption, then leap to the new pitch all
