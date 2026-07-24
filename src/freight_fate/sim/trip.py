@@ -1183,7 +1183,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             return False
         if any(leg.local_speed_mph > 0 or leg.local_cue for leg in self.route.legs):
             return True
-        return self.route.miles <= 3.0
+        # The synthetic single-leg approach carries no baked route geometry;
+        # a real same-city HIGHWAY dispatch always does (route_points come
+        # from the corridor bake). That geometry, not mileage, is what
+        # separates a 6-mile synthetic dock approach from a 17-mile I-80
+        # loop job.
+        return all(len(leg.route_points) < 2 for leg in self.route.legs)
 
     def _patrol_intensity_at(self, mile: float) -> float:
         leg_i, _ = self._leg_at_mile(mile)

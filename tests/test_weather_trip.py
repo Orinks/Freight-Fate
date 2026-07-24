@@ -1490,9 +1490,23 @@ def test_same_city_highway_dispatch_is_not_a_facility_approach(world):
         truck.start_engine()
         return Trip(route, truck, WeatherSystem("great_lakes", seed=1), seed=2)
 
+    from freight_fate.data.world_models import RoutePoint
+
+    # A real dispatch leg always carries corridor geometry; the synthetic
+    # facility approach never does -- that geometry is the discriminator.
     highway_loop = Route(
         ["fernley_nv_us", "fernley_nv_us"],
-        [Leg("fernley_nv_us", "fernley_nv_us", 17.0, "I-80", "flat", ())],
+        [
+            Leg(
+                "fernley_nv_us",
+                "fernley_nv_us",
+                17.0,
+                "I-80",
+                "flat",
+                (),
+                route_points=(RoutePoint(0.0, 39.6, -119.3), RoutePoint(17.0, 39.5, -119.1)),
+            )
+        ],
     )
     trip = trip_for(highway_loop)
     assert trip._is_facility_approach_route() is False
