@@ -4,6 +4,12 @@
 
 ### Added
 
+- **New hires can review the rest of the day's board.** Below level 8,
+  dispatch still assigns your load -- but a new board option, "Review
+  the rest of today's board", reads out the other postings dispatch put
+  up, so you can hear the pool widen as you level even before load
+  choice unlocks. It speaks only when you ask.
+
 - **FM radio now behaves like FM radio.** Height is range: climb a grade
   and distant stations reach you from far beyond their normal coverage --
   crest the Mogollon Rim and Phoenix comes in clear. At the edge of coverage

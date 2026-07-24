@@ -1152,9 +1152,10 @@ section below and the Unreleased changelog; the release-line view:
       hold when you are legal to drive TODAY. Wire the scrutiny
       escalation into the same patrol-frequency machinery the speeding
       rebalance will use.
-- [ ] **Let assigned-dispatch drivers HEAR the board they cannot pick
-      from yet (owner observation, 2026-07-24 -- product call for
-      Norm/Josh).** Below level 8 the board shows exactly one assigned
+- [x] **Assigned-dispatch drivers can HEAR the board they cannot pick
+      from yet -- SHIPPED same day (owner design, 2026-07-24): an
+      on-demand "Review the rest of today's board" option, owner's
+      refinement over automatic flavor. Original:** Below level 8 the board shows exactly one assigned
       load, by design -- but the offer pool behind it grows with level
       (5 wide at 1, 6 at 6, more later) and that growth is inaudible.
       Proposal: the assignment board previews the rest of the day's

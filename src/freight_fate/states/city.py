@@ -1024,8 +1024,37 @@ class JobBoardState(MenuState):
                     ),
                 )
             )
+        if len(self._assigned_queue) > 1:
+            items.append(
+                MenuItem(
+                    "Review the rest of today's board",
+                    self._review_locked_board,
+                    help=(
+                        "Hear the other loads dispatch posted today. They are "
+                        "flavor for now: assigned loads only until load choice "
+                        f"unlocks at level {SENIOR_LOAD_CHOICE_LEVEL}."
+                    ),
+                )
+            )
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
+
+    def _review_locked_board(self) -> None:
+        """Speak the pool behind the assignment, as flavor (owner design,
+        2026-07-24): the offer pool widens with every level, and growth the
+        driver cannot hear is not a reward yet. On demand, never automatic."""
+        others = [self.jobs[i] for i in self._assigned_queue[1:]]
+        lines = [
+            f"{job.weight_tons:.0f} tons of {job.cargo.label} to "
+            f"{job.spoken_destination}, {job.distance_mi:.0f} miles"
+            for job in others
+        ]
+        self.ctx.say(
+            f"Dispatch also posted today: {'; '.join(lines)}. "
+            "Assigned loads only until load choice unlocks at level "
+            f"{SENIOR_LOAD_CHOICE_LEVEL}.",
+            interrupt=True,
+        )
 
     def _assigned_job(self) -> Job:
         return self.jobs[self._assigned_queue[0]]
