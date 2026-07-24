@@ -10,8 +10,11 @@
   Ubuntu build needs, so it also runs on Fedora, Arch, and openSUSE, and
   every build boots on Fedora before it ships. Because the AppImage itself
   is read-only, saves live in `~/.local/share/FreightFate` instead of a
-  `saves` folder beside the game, and you update by downloading the newer
-  AppImage — the in-game updater only works in the tarball build.
+  `saves` folder beside the game. In-game updates work too: the game
+  downloads the new AppImage, swaps the file in place, and restarts — and
+  if the AppImage sits somewhere your user account cannot write to, the
+  game tells you where the downloaded update was saved instead of failing
+  quietly.
 
 - **An armed exit now counts itself down.** Once your signal is on, the
   exit calls out again at two miles, one mile, and half a mile. No more

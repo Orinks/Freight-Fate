@@ -27,6 +27,7 @@ import json
 import logging
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -183,12 +184,33 @@ def spoken_version(version: str) -> str:
     return f"{base} development build" if sep else version
 
 
+APPIMAGE_SUFFIX = "-linux-x86_64.AppImage"
+TARBALL_SUFFIX = "-linux-x64.tar.gz"
+
+
+def running_appimage_path(appimage_path: str | None = None) -> Path | None:
+    """The .AppImage file this process is running from, or None.
+
+    The AppImage runtime exports ``APPIMAGE`` with the file's absolute path.
+    This must be checked before any executable-path heuristics: the payload
+    runs from a read-only mount (or a throwaway extraction) under the temp
+    directory, whose paths mislead directory-based logic.
+    """
+    raw = appimage_path or os.environ.get("APPIMAGE")
+    if not raw:
+        return None
+    path = Path(raw)
+    return path if path.is_file() else None
+
+
 def _platform_suffix() -> str:
     if sys.platform == "win32":
         return "-windows-portable.zip"
     if sys.platform == "darwin":
         return "-macos.zip"
-    return "-linux-x64.tar.gz"
+    if running_appimage_path() is not None:
+        return APPIMAGE_SUFFIX
+    return TARBALL_SUFFIX
 
 
 def pick_asset(release: dict, suffix: str | None = None):
@@ -225,6 +247,11 @@ def _nightly_date(tag: str) -> str:
 
 def _update_from_release(release: dict, title: str) -> UpdateInfo | None:
     asset = pick_asset(release)
+    if asset is None and running_appimage_path() is not None:
+        # Releases published before the AppImage existed ship only the
+        # tarball; still offer the update. The download flow parks it for
+        # a manual install (can_auto_apply is False) instead of hiding it.
+        asset = pick_asset(release, suffix=TARBALL_SUFFIX)
     if asset is None:
         return None
     name, url, size = asset
@@ -497,6 +524,63 @@ def make_staging_dir() -> Path:
     return Path(tempfile.mkdtemp(prefix=f"{APP_NAME.lower()}-update-"))
 
 
+def stage_update(archive: Path, staging: Path) -> Path:
+    """The runnable update staged from a downloaded release asset.
+
+    An .AppImage download IS the update — one file, nothing to unpack.
+    Archives unpack into the staging dir and yield the new app folder.
+    """
+    if archive.name.endswith(".AppImage"):
+        return archive
+    new_root = extract(archive, staging / "unpacked")
+    archive.unlink(missing_ok=True)
+    return new_root
+
+
+def _dir_writable(path: Path) -> bool:
+    probe = path / f".{APP_NAME.lower()}-update-probe"
+    try:
+        probe.write_text("", encoding="ascii")
+        probe.unlink()
+    except OSError:
+        return False
+    return True
+
+
+def can_auto_apply(new_root: Path) -> bool:
+    """Whether apply_and_restart() can install this staged update by itself.
+
+    False means the player must finish the install manually: an AppImage
+    swap needs the .AppImage's own folder to be writable, and a folder
+    update can never be applied to an AppImage run — the mounted payload
+    is read-only and disposable; the .AppImage file is the install.
+    """
+    appimage = running_appimage_path()
+    if new_root.name.endswith(".AppImage") and new_root.is_file():
+        return appimage is not None and _dir_writable(appimage.parent)
+    return appimage is None
+
+
+def stash_for_manual_install(new_root: Path) -> Path:
+    """Park an update that needs a manual install somewhere describable.
+
+    The staging dir lives under the system temp folder; a single-file
+    update moves to the home folder instead, so the spoken location is
+    one the player can find again (and that survives a reboot). Folder
+    updates stay where they were unpacked.
+    """
+    if not new_root.is_file():
+        return new_root
+    dest = Path.home() / new_root.name
+    try:
+        if dest.exists():
+            dest.unlink()
+        shutil.move(str(new_root), str(dest))
+    except OSError:
+        return new_root
+    return dest
+
+
 _WINDOWS_SCRIPT = """@echo off
 :wait
 tasklist /FI "PID eq {pid}" 2>NUL | find "{pid}" >NUL
@@ -523,6 +607,21 @@ rm -rf "{staging}"
 rm -f "$0"
 """
 
+_APPIMAGE_SCRIPT = """#!/bin/sh
+# Swap the .AppImage file itself; the mounted payload it runs from is
+# read-only (or a throwaway extraction) and must never be touched. The
+# new file is staged next to the target so the final rename is atomic,
+# and the relaunch runs the new AppImage, whose own AppRun rebuilds the
+# library search path.
+while kill -0 {pid} 2>/dev/null; do sleep 1; done
+cp "{src}" "{dst}.update-new" || exit 1
+chmod +x "{dst}.update-new"
+mv -f "{dst}.update-new" "{dst}" || exit 1
+rm -rf "{staging}"
+"{dst}" &
+rm -f "$0"
+"""
+
 _MACOS_SCRIPT = """#!/bin/sh
 # Swap the whole app bundle. Saves live in ~/Library/Application Support,
 # never inside the bundle. The old bundle is parked beside the install until
@@ -545,7 +644,10 @@ rm -f "$0"
 def write_apply_script(new_root: Path, install: Path, staging: Path, pid: int) -> Path:
     """The helper script that swaps in the update once the game exits."""
     exe = APP_NAME + (".exe" if sys.platform == "win32" else "")
-    if sys.platform == "win32":
+    if new_root.name.endswith(".AppImage"):
+        # install is the running .AppImage file itself, not a folder.
+        template = _APPIMAGE_SCRIPT
+    elif sys.platform == "win32":
         template = _WINDOWS_SCRIPT
     elif sys.platform == "darwin" and install.suffix == ".app":
         template = _MACOS_SCRIPT
@@ -563,7 +665,14 @@ def write_apply_script(new_root: Path, install: Path, staging: Path, pid: int) -
 def apply_and_restart(new_root: Path, staging: Path) -> None:
     """Spawn the detached apply script. The caller must then quit the game;
     the script waits for this process to exit before touching files."""
-    script = write_apply_script(new_root, install_target(), staging, os.getpid())
+    if new_root.name.endswith(".AppImage"):
+        install = running_appimage_path()
+        if install is None:
+            log.warning("Not an AppImage run; cannot swap %s in place", new_root)
+            return
+    else:
+        install = install_target()
+    script = write_apply_script(new_root, install, staging, os.getpid())
     if sys.platform == "win32":
         flags = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
         subprocess.Popen(

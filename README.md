@@ -93,8 +93,8 @@ On Linux there is also a single-file AppImage
 (`FreightFate-<version>-linux-x86_64.AppImage`): mark it executable and run
 it, no extraction needed, and it works beyond Ubuntu (Fedora, Arch,
 openSUSE). Since an AppImage is read-only, its saves live in
-`~/.local/share/FreightFate`, and you update it by downloading the newer
-AppImage rather than through the in-game updater.
+`~/.local/share/FreightFate`. The in-game updater works here too — it
+downloads the new AppImage, swaps the file in place, and restarts the game.
 
 For a complete player-facing guide to installing, careers, dispatch, driving,
 route stops, saves, settings, audio, speech, and troubleshooting, see the
