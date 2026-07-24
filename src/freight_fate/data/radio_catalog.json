@@ -786,7 +786,7 @@
       "call_sign": "KQED",
       "name": "San Francisco",
       "format": "news and public affairs",
-      "source": "public station stream metadata",
+      "source": "public station stream metadata; 88.5 MHz from Sutro Tower",
       "source_type": "local",
       "stream_url": "https://streams.kqed.org/kqedradio",
       "stream_format": "redirect",
@@ -796,6 +796,8 @@
       "range_miles": 120,
       "market": "San Francisco",
       "region": "california",
+      "frequency_mhz": 88.5,
+      "site_elev_ft": 830,
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true
