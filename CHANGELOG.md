@@ -634,6 +634,13 @@
 
 ### Fixed
 
+- **The engine stopped ticking and the jake stopped breathing.** A faint
+  click repeated in the engine sound at cruise -- speeding up and slowing
+  down with the revs -- and the jake brake's growl carried a little dip
+  that pulsed on every cycle. Both came from the seams where those sounds
+  loop, and both seams are now clean: no tick in the cruise, no pulse in
+  the growl.
+
 - **The radio finds its station again after a stop.** A live station
   used to go silent after a dock or terminal visit and stay that way --
   all you got was a mysterious burst of static every few seconds, and
