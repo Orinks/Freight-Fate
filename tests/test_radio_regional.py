@@ -92,7 +92,9 @@ def test_signal_volume_factor_fades_with_distance():
     fringe_position = (DALLAS[0], DALLAS[1] + 1.9)  # ~110 mi east of Dallas
     fringe = estimate_signal(station, fringe_position)
     assert 0.0 < fringe.signal < 0.6
-    assert 0.3 <= signal_volume_factor(fringe) < 1.0
+    # deep fringe: the program sinks under the rising static but a trace
+    # survives while the station is technically in range (owner's smear rule)
+    assert 0.1 < signal_volume_factor(fringe) < 0.6
 
     gone = estimate_signal(station, CHICAGO)
     assert gone.signal == 0.0
