@@ -32,6 +32,10 @@
 
 ### Changed
 
+- **Speech verbosity is now a simple choice between terse and normal.** The
+  chatty level never said anything normal did not; it only repeated your
+  speed a little more often. If you had chatty selected, the game now uses
+  normal, and everything you heard before is still there.
 - **Rest stops no longer let you sleep twice for nothing.** When you are
   already fully rested at a rest stop, choosing a sleep option now warns you
   that it would only move the clock and your deadline forward, and asks you to

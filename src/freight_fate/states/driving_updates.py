@@ -631,8 +631,7 @@ class DrivingUpdateMixin:
         if self.ctx.settings.speech_verbosity == 0:
             return
         self._speed_announce_timer += dt
-        interval = 12.0 if self.ctx.settings.speech_verbosity == 1 else 7.0
-        if self._speed_announce_timer >= interval:
+        if self._speed_announce_timer >= 12.0:
             self._speed_announce_timer = 0.0
             mph = self.truck.speed_mph
             if abs(mph - self._last_announced_mph) >= 5 and mph > 1:

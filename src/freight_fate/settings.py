@@ -45,7 +45,7 @@ class Settings:
     weather_volume: float = 0.65
     engine_volume: float = 0.55
     ui_volume: float = 0.9
-    speech_verbosity: int = 1  # 0 terse, 1 normal, 2 chatty
+    speech_verbosity: int = 1  # 0 terse, 1 normal
     announce_menu_position: bool = True  # speak "N of M" position in menus
     sapi_events: bool = True  # driving events on a separate voice
     event_backend: str = "SAPI"  # which voice that is (e.g. SAPI/OneCore)
@@ -125,6 +125,10 @@ class Settings:
             s.steering_assist = "off"
         if s.automatic_direction_changes not in ("simple", "deliberate"):
             s.automatic_direction_changes = "simple"
+        # The chatty level (2) was retired; it never diverged from normal
+        # beyond a quicker speed-callout timer. Saved chatty falls to normal.
+        if s.speech_verbosity not in (0, 1):
+            s.speech_verbosity = 1
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""
         if not isinstance(s.event_backend, str) or not s.event_backend:

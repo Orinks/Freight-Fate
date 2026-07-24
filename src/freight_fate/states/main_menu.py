@@ -1050,7 +1050,7 @@ class SettingsCategoryState(MenuState):
         speech = self.ctx.speech
         specs = [
             (
-                lambda: f"Speech verbosity: {['terse', 'normal', 'chatty'][s.speech_verbosity]}",
+                lambda: f"Speech verbosity: {['terse', 'normal'][s.speech_verbosity]}",
                 self._cycle_verbosity,
                 "Controls how often driving status reminders speak.",
             ),
@@ -1220,7 +1220,7 @@ class SettingsCategoryState(MenuState):
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:
-        self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 3
+        self.ctx.settings.speech_verbosity = (self.ctx.settings.speech_verbosity + d) % 2
         self._announce()
 
     def _toggle_menu_position(self, _d: int) -> None:
