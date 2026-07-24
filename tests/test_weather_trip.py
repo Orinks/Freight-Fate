@@ -1069,6 +1069,11 @@ def test_npc_traffic_status_includes_speed_units(world):
 
 def test_time_scale_compresses_fuel_burn(world):
     trip, truck = make_trip(world, time_scale=40.0)
+    # This test teleports straight to cruise speed at mile zero, on top of
+    # whatever curves the city approach bakes -- and a sharp bend now pins
+    # the clock to real time (its own feature, its own test). Clear them:
+    # the subject here is fuel compression on an open road.
+    trip.curves = []
     truck.velocity_mps = 26.0  # already at cruise: full pacing applies
     truck.throttle = 0.9
     for _ in range(60 * 30):
