@@ -752,6 +752,13 @@
 
 ### Fixed
 
+- **Rolling a green light at the ramp end takes you straight onto the
+  streets.** Crossing the terminal legally on a green used to leave you
+  marooned past the end of the ramp -- the city streets refused to
+  start until you came to a dead stop in the middle of the road. The
+  street chain now begins at whatever legal speed the light let
+  through; only the dock itself still wants you at a crawl.
+
 - **The radio finds its station again after a stop.** A live station
   used to go silent after a dock or terminal visit and stay that way --
   all you got was a mysterious burst of static every few seconds, and

@@ -1151,6 +1151,15 @@ section below and the Unreleased changelog; the release-line view:
       same beat and likely cuts the release sound before it plays (owner,
       Merced delivery). The arrival pssht deserves to finish; it is the
       punctuation on the whole drive.
+- [ ] **Shift transient lands AFTER the band crossfade (owner ear,
+      2026-07-24, for the audio session).** On automatic around 7->8 the
+      owner hears the ring crossfade to the higher band FIRST, then the
+      tsh/shift sound arrives late. The locked design is gap-then-
+      re-entry: hold the voice at pre-shift rpm through the interrupt,
+      transient AT the gap, one quick slide at hook-up. Something now
+      slides the ring (or crossfades) before the transient fires --
+      check trigger order between the shift bank one-shot and the
+      rpm-follow path, upper gears especially (quick 0.5s interrupts).
 - [ ] **Lay on the horn (owner ask, 2026-07-23).** H plays one shortish
       horn sample today. Holding H should hold the horn -- attack, a
       seamless sustain loop for as long as the key is down, then the

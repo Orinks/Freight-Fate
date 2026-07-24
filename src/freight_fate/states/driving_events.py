@@ -1569,6 +1569,22 @@ class DrivingEventMixin:
                 self._update_ramp_terminal()
             if self._ramp_mi > 0:
                 return
+            if (
+                self._ramp_stop.type == "delivery_destination"
+                and self._ramp_terminal_done
+                and self._begin_surface_chain()
+            ):
+                # The street chain is a DRIVING continuation: hand off at
+                # whatever legal speed the terminal let through. Gating the
+                # handoff on docking speed marooned a green-light roll past
+                # the end of the ramp -- the streets refused to start until
+                # the driver stopped dead in the road (owner playtest,
+                # 2026-07-24). The scripted dock-menu arrival below still
+                # rightly waits for a crawl.
+                self._ramp_mi = None
+                self._ramp_stop = None
+                self._ramp_control = ""
+                return
             if self.truck.speed_mph <= DOCKING_MAX_MPH:
                 stop = self._ramp_stop
                 self._ramp_mi = None
