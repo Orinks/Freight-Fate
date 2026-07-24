@@ -65,6 +65,13 @@
 
 ### Fixed
 
+- **Short hauls no longer pay several times more per mile than long ones.**
+  A guaranteed minimum meant a fifty mile hop could pay over a thousand
+  dollars, four to five times the per-mile rate of a real cross country run,
+  so short hops were always the best money. Short jobs still pay a premium
+  per mile, the way real freight does, but it now eases down smoothly as the
+  distance grows. Pay for medium and long routes is essentially unchanged.
+
 - **The updater no longer hides a developer snapshot released the same
   day as a stable build.** On the developer snapshots channel, a stable
   release published in the small hours used to mask that morning's
