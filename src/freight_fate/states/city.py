@@ -1051,8 +1051,9 @@ class JobBoardState(MenuState):
         ]
         self.ctx.say(
             f"Dispatch also posted today: {'; '.join(lines)}. "
-            "Postings change with each market day. Assigned loads only "
-            f"until load choice unlocks at level {SENIOR_LOAD_CHOICE_LEVEL}.",
+            "Declining your assignment draws the first of these next. "
+            "Postings change with each market day; load choice unlocks "
+            f"at level {SENIOR_LOAD_CHOICE_LEVEL}.",
             interrupt=True,
         )
 
