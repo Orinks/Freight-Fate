@@ -15,6 +15,7 @@ import urllib.error
 from freight_fate.discord_presence import PresenceState
 from freight_fate.online_presence import (
     HEARTBEAT_INTERVAL_S,
+    IDLE_SIGNOFF_S,
     MIN_CHANGE_INTERVAL_S,
     OFF_DUTY_GRACE_S,
     OnlineIdentity,
@@ -240,6 +241,55 @@ def test_off_duty_without_ever_posting_sends_nothing():
     clock.advance(OFF_DUTY_GRACE_S + 1)
     service._pump()
     assert transport.requests == []
+
+
+def test_idle_snapshot_signs_off_and_goes_quiet():
+    # A truck parked with the game left running (not paused) reports the
+    # identical snapshot forever; after the idle window the service must
+    # leave the board and stop spending heartbeats on it.
+    transport = FakeTransport()
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.start()
+    service.update(DRIVING)
+    assert len(transport.posts) == 1
+
+    # Half the window in: still a live driver, heartbeats keep the TTL alive.
+    clock.advance(IDLE_SIGNOFF_S / 2)
+    service._pump()
+    assert transport.posts[-1]["activity"] == DRIVING.activity
+
+    # Window crossed: one sign-off, then silence on later heartbeat slots.
+    clock.advance(IDLE_SIGNOFF_S / 2)
+    service._pump()
+    assert transport.posts[-1]["activity"] == ""
+    sent = len(transport.posts)
+    clock.advance(HEARTBEAT_INTERVAL_S * 2)
+    service._pump()
+    assert len(transport.posts) == sent
+
+
+def test_snapshot_change_relists_an_idle_driver():
+    transport = FakeTransport()
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.start()
+    service.update(DRIVING)
+    clock.advance(IDLE_SIGNOFF_S)
+    service._pump()
+    assert transport.posts[-1]["activity"] == ""
+
+    # Rolling again changes the snapshot, which restarts the idle clock and
+    # puts the driver back on the board within the change throttle.
+    service.update(RESTING)
+    clock.advance(MIN_CHANGE_INTERVAL_S)
+    service._pump()
+    assert transport.posts[-1]["activity"] == RESTING.activity
+
+    # And the driver stays live from there: the next heartbeat still goes out.
+    clock.advance(HEARTBEAT_INTERVAL_S)
+    service._pump()
+    assert transport.posts[-1]["activity"] == RESTING.activity
 
 
 def test_shutdown_signs_off():

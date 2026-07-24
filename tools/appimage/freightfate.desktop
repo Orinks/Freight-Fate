@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Freight Fate
+Comment=Accessible audio-first trucking simulation game
+Exec=FreightFate
+Icon=freightfate
+Categories=Game;Simulation;
+Terminal=false

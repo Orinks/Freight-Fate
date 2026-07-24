@@ -453,11 +453,16 @@ MIN_JOB_DISTANCE_MI = 25.0
 LEVEL_DISTANCE_CAPS = {1: 300.0, 2: 450.0, 3: 650.0, 4: 850.0, 5: 1200.0}
 LONG_HAUL_MILES = 600.0  # what counts as a cross-country haul
 HOOKUP_FEE = 120.0  # flat load/unload fee keeping short hops worthwhile
-MINIMUM_PAY_BY_LEVEL = {
-    1: (700.0, 1.55),
-    2: (900.0, 1.65),
-    3: (1050.0, 1.75),
-}
+# Dispatch minimums: a small "worth rolling the truck" flat floor plus a
+# short-haul rate premium that tapers into the long-haul rates, so dollars
+# per mile decline gently with distance the way real freight does -- drayage
+# pays a premium per mile, never several times more. The old flat $700-1050
+# floors paid a 50-mile hop ~$23 a mile, four to five times any long haul,
+# at every level, which made grinding short hops strictly optimal.
+SHORT_HAUL_FULL_PREMIUM_MI = 100.0  # the full premium rate holds up to here
+SHORT_HAUL_RATE_BY_LEVEL = {1: 4.70, 2: 5.10, 3: 5.50}  # $/mi at short range
+SHORT_HAUL_TAPER_END_RATE_BY_LEVEL = {1: 3.20, 2: 3.35, 3: 3.50}  # $/mi at 600
+DISPATCH_FLAT_MINIMUM_BY_LEVEL = {1: 300.0, 2: 325.0, 3: 350.0}
 LONG_HAUL_MINIMUM_RATE_BY_LEVEL = {
     4: 4.75,
     5: 5.25,
@@ -697,11 +702,24 @@ def _route_city_region(city: str, world: World | None) -> str:
 
 
 def minimum_pay_for_level(miles: float, level: int) -> float:
-    """Dispatch minimums keep short early jobs worth the player's time."""
-    floor, per_mile = MINIMUM_PAY_BY_LEVEL.get(
-        min(level, max(MINIMUM_PAY_BY_LEVEL)), MINIMUM_PAY_BY_LEVEL[3]
-    )
-    pay = floor + miles * per_mile
+    """Dispatch minimums keep short jobs worth the player's time.
+
+    The guaranteed rate per mile starts at the short-haul premium, holds
+    through SHORT_HAUL_FULL_PREMIUM_MI, then slides linearly down to the
+    taper-end rate at LONG_HAUL_MILES, where the long-haul minimum rates
+    (levels 4+) take over. The flat floor only matters on the shortest hops.
+    """
+    lvl = min(level, max(SHORT_HAUL_RATE_BY_LEVEL))
+    full = SHORT_HAUL_RATE_BY_LEVEL[lvl]
+    end = SHORT_HAUL_TAPER_END_RATE_BY_LEVEL[lvl]
+    if miles <= SHORT_HAUL_FULL_PREMIUM_MI:
+        rate = full
+    elif miles >= LONG_HAUL_MILES:
+        rate = end
+    else:
+        span = LONG_HAUL_MILES - SHORT_HAUL_FULL_PREMIUM_MI
+        rate = full - (full - end) * (miles - SHORT_HAUL_FULL_PREMIUM_MI) / span
+    pay = max(DISPATCH_FLAT_MINIMUM_BY_LEVEL[lvl], miles * rate)
     long_haul_rate = LONG_HAUL_MINIMUM_RATE_BY_LEVEL.get(
         min(level, max(LONG_HAUL_MINIMUM_RATE_BY_LEVEL))
     )

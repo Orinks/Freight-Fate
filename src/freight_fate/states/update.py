@@ -68,7 +68,9 @@ class UpdateCheckState(State):
         if c.error:
             self.message = c.error + " Try again in a little while."
         elif c.result is None:
-            self.message = f"You are up to date. Freight Fate version {__version__}."
+            self.message = (
+                f"You are up to date. Freight Fate version {updater.spoken_version(__version__)}."
+            )
         else:
             self.ctx.replace_state(UpdatePromptState(self.ctx, c.result))
             return
@@ -107,7 +109,7 @@ class UpdatePromptState(MenuState):
         size = f" The download is {mb:.0f} megabytes." if mb else ""
         self.ctx.say(
             f"Update available. {self.info.title} is ready to "
-            f"install. You are running version {__version__}.{size} "
+            f"install. You are running version {updater.spoken_version(__version__)}.{size} "
             f"{self.current_text()}"
         )
 
@@ -225,8 +227,7 @@ class UpdateDownloadState(State):
             archive = updater.download(
                 self.info, self.staging, progress=self._on_progress, cancelled=self.cancelled
             )
-            self.new_root = updater.extract(archive, self.staging / "unpacked")
-            archive.unlink(missing_ok=True)
+            self.new_root = updater.stage_update(archive, self.staging)
         except updater.UpdateCancelled:
             pass
         except Exception as e:
@@ -254,6 +255,17 @@ class UpdateDownloadState(State):
         elif self.error or self.new_root is None:
             self.ctx.say(self.error or "The download failed.")
             self.ctx.audio.play("ui/error")
+            self.ctx.pop_state()
+        elif not updater.can_auto_apply(self.new_root):
+            # e.g. an AppImage sitting in a folder this user cannot write
+            # to: the swap would fail, so park the download somewhere
+            # findable and say where instead of dead-ending on restart.
+            dest = updater.stash_for_manual_install(self.new_root)
+            self.ctx.say(
+                "Download complete, but this install cannot update itself "
+                f"automatically. The new version was saved to {dest}. "
+                "Install it yourself, then restart the game."
+            )
             self.ctx.pop_state()
         else:
             self.ctx.say(

@@ -64,6 +64,9 @@ OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
 EXIT_WINDOW_MI = 5.0  # how far out X can arm the upcoming exit, at minimum
 EXIT_WARNING_REAL_S = 25.0  # target real seconds from callout to the ramp
 EXIT_WINDOW_MAX_MI = 20.0
+# Spoken distance anchors for an armed exit; a signal-on announcement miles
+# out gets buried under limit changes and scenery chatter without them.
+EXIT_COUNTDOWN_MILESTONES_MI = (2.0, 1.0, 0.5)
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
 RAMP_CRUISE_TARGET_MPH = 40.0  # leave control-loop headroom below the hard ramp limit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
@@ -99,6 +102,12 @@ ACC_LIMIT_COMFORT_DECEL_MPS2 = 1.0
 ENGINE_SHUTDOWN_SAFE_MPH = 5.0  # prevent accidental kill-switch use at speed
 DELIVERY_PARK_MPH = 3.0  # within this, the gate prompts you to stop
 DOCKING_MAX_MPH = 0.5  # dock/settle/rest actions need a complete stop
+# How often a facility gate re-speaks its stop instruction while the truck is
+# still rolling past it. The one-shot warnings latch, so without a cadence a
+# player who overshot the gate at speed heard them once, minutes ago, and got
+# silence for the rest of the drive (playtest 2026-07-22: six minutes and the
+# on-time bonus lost three miles past a delivery entrance).
+GATE_REMINDER_INTERVAL_S = 10.0
 
 
 def terse_hazard_message(message: str) -> str:

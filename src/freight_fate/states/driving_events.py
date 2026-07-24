@@ -261,6 +261,7 @@ class DrivingEventMixin:
             self.ctx.say("No exit coming up. Exits are announced as you approach them.")
             return
         self._exit_stop = stop
+        self._exit_countdown_said = set()
         self.ctx.audio.play("ui/notify", volume=0.5)
         ahead = stop.at_mi - self.trip.position_mi
         if stop.type == "delivery_destination":
@@ -469,6 +470,49 @@ class DrivingEventMixin:
         candidates.sort()
         return candidates[0][3], candidates[0][4], candidates[0][5]
 
+    def _update_exit_countdown(self, stop) -> None:
+        """Distance reminders for an armed exit as it closes.
+
+        A single signal-on announcement miles out gets buried under limit
+        changes and scenery chatter, and the driver hears nothing again
+        until the miss. The countdown re-anchors the exit at two miles, one
+        mile, and half a mile. Ported from the 1.9 line without its
+        exit-lane readiness hint -- this line has no lane tracker.
+
+        Terse speech opts out of the whole countdown: the player asked for
+        the signal-on announcement to be the last word."""
+        if self._terse_speech():
+            return
+        ahead = stop.at_mi - self.trip.position_mi
+        if ahead <= 0:
+            return
+        crossed = [
+            m
+            for m in EXIT_COUNTDOWN_MILESTONES_MI
+            if ahead <= m and m not in self._exit_countdown_said
+        ]
+        if not crossed:
+            return
+        # Time compression can cross several milestones in one frame:
+        # mark them all, speak only the nearest.
+        self._exit_countdown_said.update(crossed)
+        nearest = min(crossed)
+        if nearest >= 1.0:
+            distance = self.ctx.settings.distance_text(nearest)
+        elif self.ctx.settings.imperial_units:
+            # spoken_distance rounds to whole units; the half-mile anchor
+            # needs its own words on both unit settings.
+            distance = "half a mile"
+        else:
+            distance = "800 meters"
+        name = (
+            "Destination exit"
+            if stop.type == "delivery_destination"
+            else f"Exit for {stop.spoken_name}"
+        )
+        self.ctx.audio.play("ui/notify", volume=0.6)
+        self.ctx.say_event(f"{name} in {distance}.", interrupt=False)
+
     def _update_exit(self, moved_mi: float) -> None:
         """Advance an armed exit or an active ramp; opens the stop menu."""
         if self._ramp_mi is not None:
@@ -527,7 +571,10 @@ class DrivingEventMixin:
                 self.ctx.say_event(message, interrupt=True)
             return
         stop = self._exit_stop
-        if stop is None or self.trip.position_mi < stop.at_mi:
+        if stop is None:
+            return
+        if self.trip.position_mi < stop.at_mi:
+            self._update_exit_countdown(stop)
             return
         self._exit_stop = None
         # The exit is settled either way now, so the ramp cap comes off: taking
@@ -945,8 +992,18 @@ class DrivingEventMixin:
             self._handle_arrival_creep()
             return
         if self._arrival_stop_said:
+            self._remind_arrival_gate(
+                "Destination gate: stop to dock.",
+                f"At {self._destination_facility_text()}. Stop to dock."
+                if self._terse_speech()
+                else (
+                    f"Still at {self._destination_facility_text()}. The delivery "
+                    "is here, not ahead: slow down and stop to dock."
+                ),
+            )
             return
         self._arrival_stop_said = True
+        self._gate_reminder_s = GATE_REMINDER_INTERVAL_S
         self._cancel_cruise()
         self.ctx.audio.play("ui/warning")
         self._set_status("Destination ahead: slow down and come to a complete stop.")
@@ -959,6 +1016,41 @@ class DrivingEventMixin:
             )
         )
         self.ctx.say_event(message, interrupt=True)
+
+    def _remind_arrival_gate(self, status: str, message: str, *, pickup: bool = False) -> None:
+        """Repeat a gate's stop instruction while the truck rolls past it.
+
+        The gate warnings latch after speaking once, which is right for a
+        driver who is slowing -- but a driver who rolls on hears nothing
+        again for the rest of the drive, with any re-armed cruise happily
+        holding highway speed at a dead-end. Re-speak on a calm cadence and
+        drop the cruise each time; the reminder stops the moment the truck
+        slows into the gate's own creep-and-dock flow.
+        """
+        if self._gate_reminder_s > 0.0:
+            return
+        self._gate_reminder_s = GATE_REMINDER_INTERVAL_S
+        if pickup:
+            self._pause_speed_control()
+        else:
+            self._cancel_cruise()
+        self.ctx.audio.play("ui/warning")
+        self._set_status(status)
+        self.ctx.say_event(message, interrupt=True)
+
+    def _arrival_gate_query_text(self) -> str | None:
+        """The gate's instruction when the trip has ended at one, else None.
+
+        Mirrors the update loop's gate dispatch so the info keys agree with
+        what the gate handlers are actually waiting for.
+        """
+        if not self.trip.finished or self._arrival_menu_open:
+            return None
+        if self.phase == DRIVE_PHASE_PICKUP:
+            return f"At {self._pickup_facility_text()}. Stop to check in."
+        if self._ramp_mi is not None or not self._destination_exit_taken:
+            return None
+        return f"At {self._destination_facility_text()}. Stop to dock."
 
     def _handle_arrival_creep(self) -> None:
         if self._arrival_full_stop_said:

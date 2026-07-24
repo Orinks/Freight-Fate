@@ -124,6 +124,7 @@ class DrivingState(
         self._rescue_offered = False
         self._signal_timer = 0.0
         self._exit_stop = None  # armed exit, set with X
+        self._exit_countdown_said: set[float] = set()
         self._ramp_mi: float | None = None  # ramp distance left, once taken
         self._ramp_stop = None
         self._ramp_end_said = False
@@ -151,6 +152,7 @@ class DrivingState(
         self._arrival_stop_said = False
         self._arrival_full_stop_said = False
         self._arrival_menu_open = False
+        self._gate_reminder_s = 0.0
         self._air_ready_said = self.truck.air_ready
         self._low_air_said = self.truck.air_low_warning
         self._spring_brake_said = self.truck.spring_brakes_active

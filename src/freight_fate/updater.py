@@ -27,6 +27,7 @@ import json
 import logging
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -160,9 +161,46 @@ def _api_get(path: str):
 
 
 def parse_version(text: str) -> tuple[int, ...]:
-    """'v1.6.0' -> (1, 6, 0). Unparseable text compares lowest."""
-    nums = re.findall(r"\d+", text)
-    return tuple(int(n) for n in nums) if nums else (0,)
+    """'v1.6.0' -> (1, 6, 0, 0); '1.8.6.dev0' -> (1, 8, 6, -1, 0).
+
+    The trailing sentinel orders a ``.devN`` pre-release below the release
+    it works toward and above the previous stable, so dev checkouts and
+    nightlies are offered the stable they were promoted into. Unparseable
+    text compares lowest."""
+    base, sep, dev = text.partition(".dev")
+    nums = re.findall(r"\d+", base)
+    if not nums:
+        return (0,)
+    parts = tuple(int(n) for n in nums)
+    if sep:
+        return parts + (-1, *(int(n) for n in re.findall(r"\d+", dev)))
+    return parts + (0,)
+
+
+def spoken_version(version: str) -> str:
+    """Player-facing wording for a version: '1.8.6.dev0' becomes
+    '1.8.6 development build' so spoken menus never read packaging jargon."""
+    base, sep, _ = version.partition(".dev")
+    return f"{base} development build" if sep else version
+
+
+APPIMAGE_SUFFIX = "-linux-x86_64.AppImage"
+TARBALL_SUFFIX = "-linux-x64.tar.gz"
+
+
+def running_appimage_path(appimage_path: str | None = None) -> Path | None:
+    """The .AppImage file this process is running from, or None.
+
+    The AppImage runtime exports ``APPIMAGE`` with the file's absolute path.
+    This must be checked before any executable-path heuristics: the payload
+    runs from a read-only mount (or a throwaway extraction) under the temp
+    directory, whose paths mislead directory-based logic.
+    """
+    raw = appimage_path or os.environ.get("APPIMAGE")
+    if not raw:
+        return None
+    path = Path(raw)
+    return path if path.is_file() else None
 
 
 def _platform_suffix() -> str:
@@ -170,7 +208,9 @@ def _platform_suffix() -> str:
         return "-windows-portable.zip"
     if sys.platform == "darwin":
         return "-macos.zip"
-    return "-linux-x64.tar.gz"
+    if running_appimage_path() is not None:
+        return APPIMAGE_SUFFIX
+    return TARBALL_SUFFIX
 
 
 def pick_asset(release: dict, suffix: str | None = None):
@@ -207,6 +247,11 @@ def _nightly_date(tag: str) -> str:
 
 def _update_from_release(release: dict, title: str) -> UpdateInfo | None:
     asset = pick_asset(release)
+    if asset is None and running_appimage_path() is not None:
+        # Releases published before the AppImage existed ship only the
+        # tarball; still offer the update. The download flow parks it for
+        # a manual install (can_auto_apply is False) instead of hiding it.
+        asset = pick_asset(release, suffix=TARBALL_SUFFIX)
     if asset is None:
         return None
     name, url, size = asset
@@ -268,26 +313,65 @@ def _build_date(build: BuildInfo | None) -> str:
     return _nightly_date(build.tag) or build.built_at.replace("-", "")
 
 
-def _stable_newer_than_build(release: dict, build: BuildInfo | None, build_date: str) -> bool:
+def _release_timestamp(release: dict | None) -> str:
+    """A release's full ``published_at`` (ISO 8601, sortable as text); ''
+    when unknown. Dates alone cannot order a same-day stable and nightly,
+    and both orderings really happen: the 04:00 UTC cron nightly precedes
+    an afternoon promotion, but a small-hours stable precedes that same
+    cron -- which then carries fixes merged in between (v1.8.5.1 day,
+    2026-07-23: stable 01:07, nightly 03:58 with two backports, and the
+    date tie hid the nightly from every dev-channel player)."""
+    if release is None:
+        return ""
+    return str(release.get("published_at") or "")
+
+
+def _build_timestamp(build: BuildInfo | None, releases: list[dict], stable: dict | None) -> str:
+    """The running build's publish moment, recovered from its own release.
+
+    build_info carries only a date, so the release list is the one source
+    of intra-day ordering for the copy the player is on."""
+    if build is None:
+        return ""
+    if stable is not None and stable.get("tag_name", "") == build.tag:
+        return _release_timestamp(stable)
+    for release in releases:
+        if release.get("tag_name", "") == build.tag:
+            return _release_timestamp(release)
+    return ""
+
+
+def _stable_newer_than_build(
+    release: dict, build: BuildInfo | None, build_date: str, build_ts: str = ""
+) -> bool:
     """Whether ``release`` (a stable build) is an upgrade for the running copy.
 
     A stable build compares by version (two builds can share a date but differ
-    in version); a nightly build compares by date, since the version number is
-    typically unchanged across the dev-to-stable promotion."""
+    in version); a nightly build compares by publish timestamp when both are
+    known, else by date, since the version number is typically unchanged
+    across the dev-to-stable promotion."""
     tag = release.get("tag_name", "")
     if build is not None and tag == build.tag:
         return False
     if build is not None and not _nightly_date(build.tag):
         return parse_version(tag) > parse_version(build.tag)
+    stable_ts = _release_timestamp(release)
+    if build_ts and stable_ts:
+        return stable_ts > build_ts
     stable_date = _release_date(release)
     return not (build_date and stable_date and stable_date <= build_date)
 
 
-def _nightly_newer_than_build(release: dict, build: BuildInfo | None, build_date: str) -> bool:
+def _nightly_newer_than_build(
+    release: dict, build: BuildInfo | None, build_date: str, build_ts: str = ""
+) -> bool:
     tag = release.get("tag_name", "")
     if build is not None:
         if tag == build.tag:
             return False
+        nightly_ts = _release_timestamp(release)
+        if build_ts and nightly_ts:
+            return nightly_ts > build_ts
         if build_date and _nightly_date(tag) <= build_date:
             return False
     return True
@@ -312,16 +396,29 @@ def dev_update_from(
         stable = _latest_stable_release(releases)
 
     build_date = _build_date(build)
+    build_ts = _build_timestamp(build, releases, stable)
     nightly_date = _release_date(latest_nightly)
     stable_date = _release_date(stable)
+    nightly_ts = _release_timestamp(latest_nightly)
+    stable_ts = _release_timestamp(stable)
 
-    if stable is not None and stable_date and stable_date >= nightly_date:
-        if _stable_newer_than_build(stable, build, build_date):
+    # Timestamps order a same-day stable and nightly; dates alone cannot,
+    # and a date tie wrongly favored a small-hours stable over the 04:00
+    # nightly that carried fixes merged between them (2026-07-23).
+    if nightly_ts and stable_ts:
+        stable_leads = stable_ts >= nightly_ts
+    else:
+        stable_leads = bool(stable_date) and stable_date >= nightly_date
+
+    if stable is not None and stable_leads:
+        if _stable_newer_than_build(stable, build, build_date, build_ts):
             tag = stable.get("tag_name", "")
             return _update_from_release(stable, f"Freight Fate version {tag.lstrip('v')}")
         return None  # already on the newest stable; nothing newer on dev
 
-    if latest_nightly is not None and _nightly_newer_than_build(latest_nightly, build, build_date):
+    if latest_nightly is not None and _nightly_newer_than_build(
+        latest_nightly, build, build_date, build_ts
+    ):
         date = _nightly_date(latest_nightly.get("tag_name", ""))
         spoken = f"{date[:4]}-{date[4:6]}-{date[6:]}"
         return _update_from_release(latest_nightly, f"Freight Fate developer snapshot {spoken}")
@@ -427,6 +524,63 @@ def make_staging_dir() -> Path:
     return Path(tempfile.mkdtemp(prefix=f"{APP_NAME.lower()}-update-"))
 
 
+def stage_update(archive: Path, staging: Path) -> Path:
+    """The runnable update staged from a downloaded release asset.
+
+    An .AppImage download IS the update — one file, nothing to unpack.
+    Archives unpack into the staging dir and yield the new app folder.
+    """
+    if archive.name.endswith(".AppImage"):
+        return archive
+    new_root = extract(archive, staging / "unpacked")
+    archive.unlink(missing_ok=True)
+    return new_root
+
+
+def _dir_writable(path: Path) -> bool:
+    probe = path / f".{APP_NAME.lower()}-update-probe"
+    try:
+        probe.write_text("", encoding="ascii")
+        probe.unlink()
+    except OSError:
+        return False
+    return True
+
+
+def can_auto_apply(new_root: Path) -> bool:
+    """Whether apply_and_restart() can install this staged update by itself.
+
+    False means the player must finish the install manually: an AppImage
+    swap needs the .AppImage's own folder to be writable, and a folder
+    update can never be applied to an AppImage run — the mounted payload
+    is read-only and disposable; the .AppImage file is the install.
+    """
+    appimage = running_appimage_path()
+    if new_root.name.endswith(".AppImage") and new_root.is_file():
+        return appimage is not None and _dir_writable(appimage.parent)
+    return appimage is None
+
+
+def stash_for_manual_install(new_root: Path) -> Path:
+    """Park an update that needs a manual install somewhere describable.
+
+    The staging dir lives under the system temp folder; a single-file
+    update moves to the home folder instead, so the spoken location is
+    one the player can find again (and that survives a reboot). Folder
+    updates stay where they were unpacked.
+    """
+    if not new_root.is_file():
+        return new_root
+    dest = Path.home() / new_root.name
+    try:
+        if dest.exists():
+            dest.unlink()
+        shutil.move(str(new_root), str(dest))
+    except OSError:
+        return new_root
+    return dest
+
+
 _WINDOWS_SCRIPT = """@echo off
 :wait
 tasklist /FI "PID eq {pid}" 2>NUL | find "{pid}" >NUL
@@ -453,6 +607,21 @@ rm -rf "{staging}"
 rm -f "$0"
 """
 
+_APPIMAGE_SCRIPT = """#!/bin/sh
+# Swap the .AppImage file itself; the mounted payload it runs from is
+# read-only (or a throwaway extraction) and must never be touched. The
+# new file is staged next to the target so the final rename is atomic,
+# and the relaunch runs the new AppImage, whose own AppRun rebuilds the
+# library search path.
+while kill -0 {pid} 2>/dev/null; do sleep 1; done
+cp "{src}" "{dst}.update-new" || exit 1
+chmod +x "{dst}.update-new"
+mv -f "{dst}.update-new" "{dst}" || exit 1
+rm -rf "{staging}"
+"{dst}" &
+rm -f "$0"
+"""
+
 _MACOS_SCRIPT = """#!/bin/sh
 # Swap the whole app bundle. Saves live in ~/Library/Application Support,
 # never inside the bundle. The old bundle is parked beside the install until
@@ -475,7 +644,10 @@ rm -f "$0"
 def write_apply_script(new_root: Path, install: Path, staging: Path, pid: int) -> Path:
     """The helper script that swaps in the update once the game exits."""
     exe = APP_NAME + (".exe" if sys.platform == "win32" else "")
-    if sys.platform == "win32":
+    if new_root.name.endswith(".AppImage"):
+        # install is the running .AppImage file itself, not a folder.
+        template = _APPIMAGE_SCRIPT
+    elif sys.platform == "win32":
         template = _WINDOWS_SCRIPT
     elif sys.platform == "darwin" and install.suffix == ".app":
         template = _MACOS_SCRIPT
@@ -493,7 +665,14 @@ def write_apply_script(new_root: Path, install: Path, staging: Path, pid: int) -
 def apply_and_restart(new_root: Path, staging: Path) -> None:
     """Spawn the detached apply script. The caller must then quit the game;
     the script waits for this process to exit before touching files."""
-    script = write_apply_script(new_root, install_target(), staging, os.getpid())
+    if new_root.name.endswith(".AppImage"):
+        install = running_appimage_path()
+        if install is None:
+            log.warning("Not an AppImage run; cannot swap %s in place", new_root)
+            return
+    else:
+        install = install_target()
+    script = write_apply_script(new_root, install, staging, os.getpid())
     if sys.platform == "win32":
         flags = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
         subprocess.Popen(

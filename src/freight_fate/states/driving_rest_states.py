@@ -175,10 +175,47 @@ class RestStopState(MenuState):
         super().__init__(ctx)
         self.driving = driving
         self.stop = stop
+        self._confirm_sleep_rested = False
 
     @property
     def title(self) -> str:  # type: ignore[override]
         return self.stop.spoken_name
+
+    def enter(self) -> None:
+        self._confirm_sleep_rested = False
+        super().enter()
+
+    # Moving off a sleep item withdraws its pending double-press confirmation,
+    # so a stale "press Enter again" can never sleep you silently later.
+    def move(self, delta: int) -> None:
+        self._confirm_sleep_rested = False
+        super().move(delta)
+
+    def jump(self, index: int) -> None:
+        self._confirm_sleep_rested = False
+        super().jump(index)
+
+    def _guard_double_sleep(self, *, fatigue_floor: float = 0.0) -> bool:
+        """Warn once before a redundant sleep, matching the terminal. A sleep
+        gains nothing when hours of service are already fresh and this rest
+        cannot lower fatigue any further -- for a proper berth that means zero
+        fatigue, for a lot's poor rest it bottoms out at the shoulder floor.
+        Returns True if this press should be blocked."""
+        p = self.ctx.profile
+        gains_nothing = (
+            p.hos.driving_min <= 0.0 and p.hos.duty_min <= 0.0 and p.fatigue <= fatigue_floor
+        )
+        if gains_nothing and not self._confirm_sleep_rested:
+            self._confirm_sleep_rested = True
+            self.ctx.audio.play("ui/warning")
+            self.ctx.say(
+                "You are already rested: fresh hours of service and no more "
+                "rest to gain here. Sleeping now would only move the clock and "
+                "your deadline forward. Press Enter again to sleep anyway."
+            )
+            return True
+        self._confirm_sleep_rested = False
+        return False
 
     def presence(self):
         from ..discord_presence import PresenceState
@@ -436,6 +473,8 @@ class RestStopState(MenuState):
         return f"{pair} The clock and your deadline advance {hours} hours."
 
     def _sleeper_split_rest(self, hours: int) -> None:
+        if self._guard_double_sleep():
+            return
         d = self.driving
         p = self.ctx.profile
         minutes = float(hours * 60)
@@ -459,6 +498,8 @@ class RestStopState(MenuState):
         self.refresh()
 
     def _sleep(self) -> None:
+        if self._guard_double_sleep():
+            return
         d = self.driving
         p = self.ctx.profile
         before_fatigue = p.fatigue
@@ -482,6 +523,8 @@ class RestStopState(MenuState):
         """Bed down in a break/fuel stop's lot when out of hours: a legal HOS
         reset, but cramped poor rest (no proper sleeper), so you wake still
         tired. No shoulder fine -- a lot is more legitimate than the freeway."""
+        if self._guard_double_sleep(fatigue_floor=hos.FATIGUE_SHOULDER_FLOOR):
+            return
         d = self.driving
         p = self.ctx.profile
         engine_off = _shut_down_engine(d)

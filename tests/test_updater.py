@@ -8,6 +8,8 @@ import threading
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from freight_fate import updater
 from freight_fate.settings import Settings
 from freight_fate.updater import (
@@ -79,6 +81,19 @@ def test_parse_version_orders_semver():
     assert parse_version("v1.6.0") > parse_version("1.5.0")
     assert parse_version("1.10.0") > parse_version("1.9.3")
     assert parse_version("garbage") == (0,)
+
+
+def test_parse_version_orders_dev_prereleases():
+    # A dev checkout sits between the previous stable and the release it
+    # works toward, so promoting dev to stable is offered as an update.
+    assert parse_version("1.8.6.dev0") < parse_version("v1.8.6")
+    assert parse_version("1.8.6.dev0") > parse_version("v1.8.5")
+    assert parse_version("1.8.6.dev1") > parse_version("1.8.6.dev0")
+
+
+def test_spoken_version_translates_dev_suffix():
+    assert updater.spoken_version("1.8.6.dev0") == "1.8.6 development build"
+    assert updater.spoken_version("1.8.5") == "1.8.5"
 
 
 def test_resolve_channel_prefers_explicit_setting():
@@ -603,6 +618,32 @@ def test_dev_on_promoted_stable_is_not_pulled_onto_equivalent_nightly():
     assert dev_update_from(releases, build, stable) is None
 
 
+def test_dev_offers_same_day_nightly_that_postdates_the_stable():
+    # The v1.8.5.1 morning, 2026-07-23: stable published 01:07 UTC, the
+    # 03:58 UTC cron nightly carried two fixes merged in between. The old
+    # date-granularity tie favored stable and hid the nightly from every
+    # dev-channel player (owner report, same day).
+    stable = release("v1.8.5.1", published="2026-07-23T01:07:34Z")
+    nightly = release("nightly-20260723", prerelease=True, published="2026-07-23T03:58:51Z")
+    build = BuildInfo(tag="v1.8.5.1", channel="stable", built_at="2026-07-23")
+    info = dev_update_from([stable, nightly], build, stable)
+    assert info is not None
+    assert info.tag == "nightly-20260723"
+
+
+def test_dev_morning_nightly_still_steered_to_same_day_afternoon_stable():
+    # Promotion day with real timestamps: the 04:00 UTC cron nightly
+    # predates the afternoon stable, so a player on that morning nightly
+    # converges onto the promoted stable -- the date tie used to block
+    # this direction too.
+    stable = release("v1.9.0", published="2026-08-01T15:00:00Z")
+    nightly = release("nightly-20260801", prerelease=True, published="2026-08-01T04:00:00Z")
+    build = BuildInfo(tag="nightly-20260801", channel="dev", built_at="2026-08-01")
+    info = dev_update_from([stable, nightly], build, stable)
+    assert info is not None
+    assert info.tag == "v1.9.0"
+
+
 def test_dev_resumes_nightlies_once_they_outpace_stable():
     # Days later dev advances past stable again; nightlies resume.
     stable = release("v1.7.0", published="2026-06-26T15:00:00Z")
@@ -996,3 +1037,195 @@ def test_remind_later_help_describes_terminal_exit_check():
 
     assert "from a terminal or pickup facility" in remind.help
     assert "next time the game starts" in remind.help
+
+
+# -- AppImage self-update ------------------------------------------------------
+
+
+def _fake_appimage(tmp_path):
+    appimage = tmp_path / "FreightFate-1.8.5-linux-x86_64.AppImage"
+    appimage.write_bytes(b"old")
+    return appimage
+
+
+def test_running_appimage_path_requires_existing_file(tmp_path, monkeypatch):
+    monkeypatch.delenv("APPIMAGE", raising=False)
+    assert updater.running_appimage_path() is None
+
+    monkeypatch.setenv("APPIMAGE", str(tmp_path / "missing.AppImage"))
+    assert updater.running_appimage_path() is None
+
+    appimage = _fake_appimage(tmp_path)
+    monkeypatch.setenv("APPIMAGE", str(appimage))
+    assert updater.running_appimage_path() == appimage
+
+
+def test_platform_suffix_prefers_appimage_when_running_as_one(tmp_path, monkeypatch):
+    monkeypatch.setattr(updater.sys, "platform", "linux")
+    monkeypatch.delenv("APPIMAGE", raising=False)
+    assert updater._platform_suffix() == "-linux-x64.tar.gz"
+
+    monkeypatch.setenv("APPIMAGE", str(_fake_appimage(tmp_path)))
+    assert updater._platform_suffix() == "-linux-x86_64.AppImage"
+
+
+def test_appimage_run_picks_appimage_asset(tmp_path, monkeypatch):
+    monkeypatch.setattr(updater.sys, "platform", "linux")
+    monkeypatch.setenv("APPIMAGE", str(_fake_appimage(tmp_path)))
+    rel = release(
+        "v9.9.9",
+        assets=("-windows-portable.zip", "-linux-x64.tar.gz", "-linux-x86_64.AppImage"),
+    )
+    info = stable_update_from(rel, "1.5.0")
+    assert info is not None
+    assert info.asset_name.endswith("-linux-x86_64.AppImage")
+
+
+def test_appimage_run_falls_back_to_tarball_for_old_releases(tmp_path, monkeypatch):
+    # Releases published before the AppImage existed only ship the tarball;
+    # the update must still be offered rather than reported as up to date.
+    monkeypatch.setattr(updater.sys, "platform", "linux")
+    monkeypatch.setenv("APPIMAGE", str(_fake_appimage(tmp_path)))
+    info = stable_update_from(release("v9.9.9"), "1.5.0")
+    assert info is not None
+    assert info.asset_name.endswith("-linux-x64.tar.gz")
+
+
+def test_stage_update_appimage_is_the_update(tmp_path):
+    staging = tmp_path / "staging"
+    staging.mkdir()
+    archive = staging / "FreightFate-9.9.9-linux-x86_64.AppImage"
+    archive.write_bytes(b"new")
+
+    assert updater.stage_update(archive, staging) == archive
+    assert archive.exists()  # nothing unpacked, nothing deleted
+
+
+def test_can_auto_apply_matrix(tmp_path, monkeypatch):
+    appimage_update = tmp_path / "FreightFate-9.9.9-linux-x86_64.AppImage"
+    appimage_update.write_bytes(b"new")
+    folder_update = tmp_path / "FreightFate"
+    folder_update.mkdir()
+
+    # Not an AppImage run: folder swaps work, an AppImage file does not.
+    monkeypatch.delenv("APPIMAGE", raising=False)
+    assert updater.can_auto_apply(folder_update) is True
+    assert updater.can_auto_apply(appimage_update) is False
+
+    # AppImage run with a writable folder: swap the file, never the folder
+    # (the mounted payload is read-only and disposable).
+    monkeypatch.setenv("APPIMAGE", str(_fake_appimage(tmp_path)))
+    assert updater.can_auto_apply(appimage_update) is True
+    assert updater.can_auto_apply(folder_update) is False
+
+
+def test_write_apply_script_appimage_swaps_the_file(tmp_path, monkeypatch):
+    monkeypatch.setattr(updater.sys, "platform", "linux")
+    staging = tmp_path / "staging"
+    staging.mkdir()
+    new_root = staging / "FreightFate-9.9.9-linux-x86_64.AppImage"
+    new_root.write_bytes(b"new")
+    install = tmp_path / "Apps" / "FreightFate-1.8.5-linux-x86_64.AppImage"
+
+    script = write_apply_script(new_root, install, staging, pid=4242)
+    text = script.read_text(encoding="utf-8")
+
+    assert "4242" in text
+    # staged next to the target so the final rename is atomic
+    assert f'cp "{new_root}" "{install}.update-new"' in text
+    assert f'chmod +x "{install}.update-new"' in text
+    assert f'mv -f "{install}.update-new" "{install}"' in text
+    # relaunches the new AppImage file, never the dead mount path
+    assert f'"{install}" &' in text
+    assert script.parent == tmp_path  # outside the staging dir it deletes
+    # the mounted payload is never touched: no folder copy, no purge
+    assert "cp -a" not in text
+    assert f'rm -rf "{install}"' not in text
+
+
+def test_apply_and_restart_appimage_targets_running_appimage(tmp_path, monkeypatch):
+    monkeypatch.setattr(updater.sys, "platform", "linux")
+    appimage = _fake_appimage(tmp_path)
+    monkeypatch.setenv("APPIMAGE", str(appimage))
+    staging = tmp_path / "staging"
+    staging.mkdir()
+    new_root = staging / "FreightFate-9.9.9-linux-x86_64.AppImage"
+    new_root.write_bytes(b"new")
+
+    spawned = []
+    monkeypatch.setattr(updater.subprocess, "Popen", lambda cmd, **kwargs: spawned.append(cmd))
+    updater.apply_and_restart(new_root, staging)
+
+    assert spawned and spawned[0][0] == "/bin/sh"
+    text = Path(spawned[0][1]).read_text(encoding="utf-8")
+    assert str(appimage) in text
+
+
+def test_apply_and_restart_appimage_without_env_refuses(tmp_path, monkeypatch):
+    # A .AppImage download while not running from an AppImage must never
+    # fall through to the folder-swap script.
+    monkeypatch.setattr(updater.sys, "platform", "linux")
+    monkeypatch.delenv("APPIMAGE", raising=False)
+    staging = tmp_path / "staging"
+    staging.mkdir()
+    new_root = staging / "FreightFate-9.9.9-linux-x86_64.AppImage"
+    new_root.write_bytes(b"new")
+
+    spawned = []
+    monkeypatch.setattr(updater.subprocess, "Popen", lambda cmd, **kwargs: spawned.append(cmd))
+    updater.apply_and_restart(new_root, staging)
+
+    assert spawned == []
+
+
+def test_stash_for_manual_install_moves_file_to_home(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    home.mkdir()
+    monkeypatch.setattr(updater.Path, "home", staticmethod(lambda: home))
+    update = tmp_path / "FreightFate-9.9.9-linux-x86_64.AppImage"
+    update.write_bytes(b"new")
+
+    dest = updater.stash_for_manual_install(update)
+
+    assert dest == home / update.name
+    assert dest.read_bytes() == b"new"
+    assert not update.exists()
+
+
+def test_stash_for_manual_install_leaves_folders_in_place(tmp_path):
+    folder = tmp_path / "FreightFate"
+    folder.mkdir()
+    assert updater.stash_for_manual_install(folder) == folder
+
+
+def test_download_state_parks_update_when_not_auto_appliable(tmp_path, monkeypatch):
+    from freight_fate.states.update import UpdateDownloadState
+
+    spoken = []
+    popped = []
+    ctx = SimpleNamespace(
+        say=lambda text, interrupt=False: spoken.append(text),
+        pop_state=lambda: popped.append(True),
+        quit=lambda: pytest.fail("must not quit when the update is manual"),
+    )
+    info = updater.UpdateInfo(
+        tag="v9.9.9",
+        title="Freight Fate version 9.9.9",
+        notes=[],
+        asset_name="FreightFate-9.9.9-linux-x86_64.AppImage",
+        asset_url="https://example.test/a",
+        asset_size=1,
+    )
+    state = UpdateDownloadState(ctx, info)
+    state.staging = tmp_path
+    state.new_root = tmp_path / info.asset_name
+    state.new_root.write_bytes(b"new")
+    state.done.set()
+    monkeypatch.setattr(updater, "can_auto_apply", lambda _root: False)
+    monkeypatch.setattr(updater, "stash_for_manual_install", lambda root: root)
+
+    state.update(0.0)
+
+    assert popped == [True]
+    assert any("cannot update itself" in text for text in spoken)
+    assert any(str(state.new_root) in text for text in spoken)
