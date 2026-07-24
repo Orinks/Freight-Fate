@@ -44,6 +44,9 @@ SHIFT_LOAD_CAP = 0.45
 # the torque interrupt, then rides the same recovery curve back up: the
 # engine genuinely falls away and returns, like a clutch actually opening.
 SHIFT_DISENGAGE_DUCK = 0.35
+# The gear taking at the end of an auto shift: a soft pick from the shift
+# bank, quieter than the interrupt clunk (0.65) that opened the shift.
+SHIFT_END_CLUNK_VOLUME = 0.4
 # When the shift completes the cap eases from SHIFT_LOAD_CAP back to full over
 # this window. The curve (a key into audio_fades.CURVES) shapes the return: an
 # ease-out leaves the shift level quickly -- so the engine doesn't sit soft --
@@ -1030,21 +1033,30 @@ class DrivingUpdateMixin:
         # -- ease the cap back to full over SHIFT_LOAD_RECOVERY_S along the
         # recovery curve, so the return "under load" is a shaped glide rather
         # than a single-frame snap.
-        # A real shift is a gap and a re-entry: the unloaded engine falls
-        # away, then SOUNDS again at the newly engaged rpm -- never a loaded
-        # glissando sliding down through the change (the formant smear the
-        # owner heard). Automatic: hold the voice at the pre-shift rpm
-        # through the torque interrupt and jump at engagement. Manual: the
-        # player owns the revs while the clutch is out (blips and
-        # rev-matching stay audible, and the physics already sinks toward
-        # idle), so only the load ducks -- the engine falls back unloaded
-        # and swells back in when the clutch hooks up.
+        # A real shift is kachunk -- sigh -- kachunk: never a LOADED
+        # glissando sliding through the change (the meow), but never a
+        # frozen hang either (the owner's 2026-07-24 catch: the voice used
+        # to hold the pre-shift rpm for the whole interrupt, then cliff).
+        # Automatic: the voice follows the live physics rpm, which eases
+        # unloaded toward the new gear's road speed -- ducked to 0.35 the
+        # whole way, it reads as the real between-gears fall -- and the
+        # engagement plays its own soft clunk as the load swells back.
+        # Manual: the player owns the revs while the clutch is out (blips
+        # and rev-matching stay audible, and the physics already sinks
+        # toward idle), so only the load ducks -- the engine falls back
+        # unloaded and swells back in when the clutch hooks up.
         manual_clutch_out = not t.transmission.automatic and t.transmission.clutch > 0.5
         if (t.transmission.automatic and t.transmission.shifting) or manual_clutch_out:
             self._shift_recover_t = 0.0
             cap = SHIFT_LOAD_CAP
             duck = SHIFT_DISENGAGE_DUCK
-            if t.transmission.automatic and self._shift_hold_rpm is None:
+            if t.transmission.automatic:
+                # Marker only: an auto shift is in flight. The voice follows
+                # the live physics rpm, which already sighs down toward the
+                # new gear's road speed through the interrupt (vehicle
+                # _update_rpm) -- ducked and unloaded, it reads as the real
+                # between-gears fall, not the old frozen hang (owner,
+                # 2026-07-24).
                 self._shift_hold_rpm = t.rpm
         elif self._shift_recover_t < 1.0:
             step = dt / SHIFT_LOAD_RECOVERY_S if SHIFT_LOAD_RECOVERY_S > 0 else 1.0
@@ -1052,7 +1064,14 @@ class DrivingUpdateMixin:
             recovered = _shift_recovery_curve(self._shift_recover_t)
             cap = SHIFT_LOAD_CAP + (1.0 - SHIFT_LOAD_CAP) * recovered
             duck = SHIFT_DISENGAGE_DUCK + (1.0 - SHIFT_DISENGAGE_DUCK) * recovered
-            self._shift_hold_rpm = None  # shift done: re-enter at the engaged rpm
+            if self._shift_hold_rpm is not None:
+                # Engagement: the gear takes. The interrupt's clunk played a
+                # second ago at shift START, so without this the actual
+                # moment the truck picks the load back up was silent.
+                audio.play_bank(
+                    "vehicle/shift_auto", "vehicle/gear_shift", volume=SHIFT_END_CLUNK_VOLUME
+                )
+                self._shift_hold_rpm = None
         else:
             cap = 1.0
             duck = 1.0
@@ -1067,9 +1086,7 @@ class DrivingUpdateMixin:
             blend = min(1.0, dt / ENGINE_LOAD_SMOOTH_S)
             self._engine_audio_throttle += (target_load - self._engine_audio_throttle) * blend
         engine_load = min(self._engine_audio_throttle, cap)
-        audio.set_engine_rpm(
-            t.rpm if self._shift_hold_rpm is None else self._shift_hold_rpm, engine_load
-        )
+        audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:
             if not self._reverse_cue_active:

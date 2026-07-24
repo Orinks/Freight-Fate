@@ -786,6 +786,14 @@
 
 ### Fixed
 
+- **Automatic shifts sound like a real gear change now: clunk, sigh,
+  clunk.** During a shift the engine used to hang frozen at its old
+  revs through the whole interruption, then leap to the new pitch all
+  at once -- and the moment the gear actually took was silent. Now the
+  revs audibly fall away toward the next gear while the box is between
+  gears, exactly like a real automated manual, and the gear taking hold
+  gets its own soft clunk as the engine picks the load back up.
+
 - **The engine stopped ticking and the jake stopped breathing.** A faint
   click repeated in the engine sound at cruise -- speeding up and slowing
   down with the revs -- and the jake brake's growl carried a little dip

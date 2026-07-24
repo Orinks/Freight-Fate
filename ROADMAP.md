@@ -686,10 +686,13 @@ terminal becomes the anchor of that week instead of a spawn point.
       plays the clunk bank leveled by force; release breathes the air
       back out, scaled by how hard you braked. All licensed cuts live
       in the gitignored sounds-licensed/ overlay; a clean clone keeps
-      the old synthesized cues everywhere. STILL OPEN from the
-      diagnosis: (3) an engagement clunk at shift END (the banks fire
-      at shift start), and (4) whether SHIFT_TIME 1.0 s eases to
-      ~0.7 s -- that one is PHYSICS and needs the bench re-run. Also
+      the old synthesized cues everywhere. (3) SHIPPED 2026-07-24: the
+      engagement clunk at shift END, together with the shift SIGH --
+      the voice now follows the physics rpm falling toward the new
+      gear through the interrupt (ducked, unloaded) instead of the
+      frozen pre-shift hang; kachunk -- sigh -- kachunk per the
+      owner's ear. (4) OBSOLETE: Phil's modern-AMT power upshifts
+      (155f05ad, 0.25-0.5 s) already went past the 0.7 s idea. Also
       open: launch/load rev one-shots (engine/rev_launch, rev_load are
       encoded and staged but not yet wired -- mixing them over the
       ring needs the owner's ear) and per-trigger pitch jitter on the

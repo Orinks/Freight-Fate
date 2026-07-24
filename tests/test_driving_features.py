@@ -2600,16 +2600,24 @@ def test_engine_audio_load_eases_without_dropping_out_during_automatic_shift(mon
         app.shutdown()
 
 
-def test_shift_holds_engine_voice_at_preshift_rpm(monkeypatch):
-    # A real shift is a gap and a re-entry: the voice must not glissando
-    # down with the falling physics rpm during the torque interrupt, but
-    # speak at the newly engaged rpm when the shift completes.
+def test_auto_shift_voice_sighs_with_physics_and_clunks_on_engagement(monkeypatch):
+    # A real AMT shift is kachunk -- sigh -- kachunk: the ducked voice
+    # follows the physics rpm falling toward the new gear through the
+    # interrupt (never a frozen hang), and the moment the gear takes plays
+    # its own soft clunk (the engagement used to be silent).
     from freight_fate.app import App
+    from freight_fate.states.driving_updates import SHIFT_END_CLUNK_VOLUME
 
     app = App()
     samples = []
+    banks = []
     monkeypatch.setattr(
         app.ctx.audio, "set_engine_rpm", lambda rpm, throttle=0.0: samples.append(rpm)
+    )
+    monkeypatch.setattr(
+        app.ctx.audio,
+        "play_bank",
+        lambda base, fallback, volume=1.0, pan=0.0: banks.append((base, volume)),
     )
     monkeypatch.setattr(app.ctx.audio, "set_road_noise", lambda *a, **k: None)
     monkeypatch.setattr(app.ctx.audio, "set_weather", lambda *a, **k: None)
@@ -2626,13 +2634,20 @@ def test_shift_holds_engine_voice_at_preshift_rpm(monkeypatch):
         t.transmission._shift_timer = 0.5  # mid-shift
 
         driving._update_audio(0.0)
-        t.rpm = 950.0  # physics rpm falls through the interrupt
+        t.rpm = 1150.0  # physics rpm sighs down through the interrupt
         driving._update_audio(0.0)
-        assert samples[-1] == 1400.0  # held at the pre-shift rpm
+        assert samples[-1] == 1150.0  # voice rides the fall, no frozen hang
+        assert banks == []  # no engagement clunk while still shifting
 
-        t.transmission._shift_timer = 0.0  # clutch back in
+        t.transmission._shift_timer = 0.0  # the gear takes
+        t.rpm = 950.0
         driving._update_audio(0.0)
-        assert samples[-1] == 950.0  # re-entry at the engaged rpm
+        assert samples[-1] == 950.0
+        assert ("vehicle/shift_auto", SHIFT_END_CLUNK_VOLUME) in banks
+
+        banks.clear()
+        driving._update_audio(0.0)  # recovery continues: clunk fires only once
+        assert banks == []
     finally:
         app.shutdown()
 
