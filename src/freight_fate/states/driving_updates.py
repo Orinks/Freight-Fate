@@ -18,7 +18,9 @@ LANE_GUIDANCE_PAN = 0.85
 # the old static threshold. PICKET_DUCK is the program level while a splash
 # owns the channel -- capture lost, near-silent, restored sharply.
 FRINGE_BED_SIGNAL = 0.6
-FRINGE_BED_MAX_VOLUME = 0.5
+# Peak bed level ~= where the program used to sit, never a wall of noise on
+# top of it: the owner's smear ruling -- static takes the program's place.
+FRINGE_BED_MAX_VOLUME = 0.35
 PICKET_SIGNAL = 0.35
 PICKET_DUCK = 0.12
 # Flutter rate bounds: parked multipath barely moves (slow wander floor);
@@ -1280,7 +1282,7 @@ class DrivingUpdateMixin:
         audio.play_bank(
             "radio/picket",
             "radio/static_burst",
-            volume=(0.15 + 0.45 * picket_depth) * self.ctx.settings.radio_volume,
+            volume=(0.15 + 0.35 * picket_depth) * self.ctx.settings.radio_volume,
         )
         self._radio_picket_duck = PICKET_DUCK
         self._picket_duck_s = 0.05 + 0.08 * self._fringe_rng.random()

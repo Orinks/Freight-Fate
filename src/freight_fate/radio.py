@@ -333,10 +333,16 @@ def estimate_signal(
     return RadioReception(station, distance, signal, "in range")
 
 
-# Below this signal the audio starts to thin out; the floor keeps a fringe
-# station audible enough to be worth chasing toward its city.
+# Below this signal the audio starts to thin out. Entering the fringe the
+# program holds a listenable level (worth chasing toward its city); past the
+# static threshold it keeps sinking toward the deep floor while the noise
+# rises to take its place -- the owner's ruling (2026-07-24): the two smear
+# together, static going TO program level, never bombarding on top of a
+# still-loud program. The deep floor keeps a trace of program in the noise
+# while the station is technically in range.
 SIGNAL_FULL_VOLUME = 0.6
 SIGNAL_FRINGE_FLOOR = 0.3
+SIGNAL_DEEP_FLOOR = 0.08
 STATIC_SIGNAL_THRESHOLD = 0.35
 
 
@@ -344,8 +350,9 @@ def signal_volume_factor(reception: RadioReception) -> float:
     """How much of the radio volume the current signal supports.
 
     Satellite/built-in sources always play at full volume. Ranged stations
-    hold full volume through most of their contour, then fade toward a fringe
-    floor as the truck drives away, and go silent past the range edge.
+    hold full volume through most of their contour, fade toward the fringe
+    floor as the truck drives away, keep sinking under the rising static in
+    the deep fringe, and go silent past the range edge.
     """
     station = reception.station
     if reception.fallback or station.always_available or station.range_miles <= 0:
@@ -355,7 +362,12 @@ def signal_volume_factor(reception: RadioReception) -> float:
         return 0.0
     if signal >= SIGNAL_FULL_VOLUME:
         return 1.0
-    return SIGNAL_FRINGE_FLOOR + (1.0 - SIGNAL_FRINGE_FLOOR) * (signal / SIGNAL_FULL_VOLUME)
+    if signal >= STATIC_SIGNAL_THRESHOLD:
+        return SIGNAL_FRINGE_FLOOR + (1.0 - SIGNAL_FRINGE_FLOOR) * (signal / SIGNAL_FULL_VOLUME)
+    edge = SIGNAL_FRINGE_FLOOR + (1.0 - SIGNAL_FRINGE_FLOOR) * (
+        STATIC_SIGNAL_THRESHOLD / SIGNAL_FULL_VOLUME
+    )
+    return max(SIGNAL_DEEP_FLOOR, edge * (signal / STATIC_SIGNAL_THRESHOLD) ** 0.8)
 
 
 def truck_position(route, position_mi: float, world) -> tuple[float, float] | None:
