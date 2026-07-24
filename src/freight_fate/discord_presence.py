@@ -111,8 +111,12 @@ def driving_presence(
     pct = max(0, min(100, round(max(0.0, min(1.0, fraction)) * 20) * 5))
     if phase == "pickup":
         activity = f"Deadheading to a pickup in {origin}" if origin else "Deadheading to a pickup"
-        detail = f"Picking up {cargo}" if cargo else ""
-        return PresenceState(activity, detail)
+        # The deadhead line carries progress too: the drivers board treats a
+        # long-unchanged snapshot as an idle (parked, player away) truck, so
+        # an advancing deadhead must keep its snapshot moving.
+        bits = [f"Picking up {cargo}"] if cargo else []
+        bits.append(f"{pct}% there")
+        return PresenceState(activity, ", ".join(bits))
     verb = "Driving" if moving else "Stopped"
     if origin and destination:
         activity = f"{verb}: {origin} to {destination}"

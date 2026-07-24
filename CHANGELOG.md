@@ -49,6 +49,13 @@
   sits first because viewing it shares nothing about you. Choosing Online
   inside Settings still works and opens the same menu, and every toggle keeps
   the familiar Enter, Right, and Left arrow controls.
+- **Walking away from a parked truck now takes you off the drivers board.**
+  If your truck sits stopped with nothing changing for half an hour, you
+  leave the public board just as if you had paused the game, and the board
+  stops calling you a driver who is on duty. The moment anything changes,
+  like rolling again or pulling into a stop, you are back on the board within
+  seconds. Deadhead drives also now say how far along they are, on the board
+  and in Discord, so a long empty run never looks like a parked truck.
 - **Test builds now introduce themselves as development builds.** The main
   menu welcome and the update screen used to read a bare version number that
   looked like a stable release. A nightly or source build now says, for

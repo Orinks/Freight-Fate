@@ -69,6 +69,19 @@ MIN_CHANGE_INTERVAL_S = 15.0
 # bouncing the driver off and back onto the public board.
 OFF_DUTY_GRACE_S = 20.0
 
+# A truck parked on the road with the game left running (not paused -- pausing
+# already counts as off duty) reports the identical snapshot for hours, and
+# would squat the live board indefinitely while its heartbeats run up the
+# site's largest database cost. After this long without any snapshot change
+# the service signs off and goes quiet; any change -- rolling again, a new
+# leg, pulling into a stop -- re-lists the driver within
+# MIN_CHANGE_INTERVAL_S. While actually driving the snapshot ticks every five
+# percent of route progress (deadheads included), which even the longest haul
+# clears in well under this window. The server hides idle rows on the same
+# clock (PRESENCE_IDLE_MS in orinks-net's freightFate.ts) so older builds
+# that never stop beating age off the board too.
+IDLE_SIGNOFF_S = 30 * 60.0
+
 _REQUEST_TIMEOUT_S = 10.0
 _WORKER_TICK_S = HEARTBEAT_INTERVAL_S
 
@@ -271,6 +284,7 @@ class OnlinePresence:
         heartbeat_s: float = HEARTBEAT_INTERVAL_S,
         min_change_s: float = MIN_CHANGE_INTERVAL_S,
         off_duty_grace_s: float = OFF_DUTY_GRACE_S,
+        idle_signoff_s: float = IDLE_SIGNOFF_S,
         clock: Callable[[], float] = time.monotonic,
         transport: Transport = _http_json,
         threaded: bool = True,
@@ -280,7 +294,9 @@ class OnlinePresence:
         self._heartbeat = max(1.0, float(heartbeat_s))
         self._min_change = max(0.0, float(min_change_s))
         self._off_duty_grace = max(0.0, float(off_duty_grace_s))
+        self._idle_signoff = max(1.0, float(idle_signoff_s))
         self._none_since: float | None = None
+        self._desired_changed_t: float | None = None
         self._clock = clock
         self._transport = transport
         self._threaded = threaded
@@ -328,6 +344,9 @@ class OnlinePresence:
             if state == self._desired:
                 return
             self._desired = state
+            # Any genuine change restarts the idle clock; the dedupe above
+            # means a parked truck re-reporting the same snapshot does not.
+            self._desired_changed_t = self._clock()
         if self._threaded:
             self._wake.set()
         else:
@@ -386,6 +405,11 @@ class OnlinePresence:
             if not self._on_board or self._none_since is None:
                 return _WORKER_TICK_S
             return max(0.05, self._off_duty_grace - (now - self._none_since))
+        # Idle and already signed off: nothing to send until a change. (Idle
+        # but still on the board falls through, so the sign-off — or a failed
+        # sign-off's retry — runs on the heartbeat cadence like any post.)
+        if not pending and not self._on_board and self._idle_for(now) >= self._idle_signoff:
+            return _WORKER_TICK_S
         if self._last_send_t is None:
             return _WORKER_TICK_S
         until_heartbeat = self._heartbeat - (now - self._last_send_t)
@@ -393,6 +417,12 @@ class OnlinePresence:
             until_change = self._min_change - (now - self._last_send_t)
             return max(0.05, min(until_heartbeat, until_change))
         return max(0.05, until_heartbeat)
+
+    def _idle_for(self, now: float) -> float:
+        """Seconds the desired snapshot has gone unchanged."""
+        if self._desired_changed_t is None:
+            return 0.0
+        return now - self._desired_changed_t
 
     def _pump(self) -> None:
         """Send at most one request: a change, a heartbeat, or a sign-off."""
@@ -422,6 +452,16 @@ class OnlinePresence:
 
         self._none_since = None
         changed = desired != last_sent
+        if not changed and self._idle_for(now) >= self._idle_signoff:
+            # The same snapshot for this long means a parked truck and an
+            # absent player: leave the board and stop heartbeating. _last_sent
+            # keeps the idle snapshot so the next real change is still
+            # detected and re-lists the driver.
+            if self._on_board:
+                if self._post("", ""):
+                    self._on_board = False
+                self._last_send_t = now
+            return
         if changed and (since_send is None or since_send >= self._min_change):
             pass  # send the change now
         elif since_send is None or since_send >= self._heartbeat:
