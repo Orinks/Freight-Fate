@@ -16,7 +16,9 @@ from freight_fate.music import (
 )
 from freight_fate.radio import (
     DEFAULT_RADIO_CATALOG,
+    RadioReception,
     RadioState,
+    RadioStation,
     estimate_signal,
     signal_volume_factor,
 )
@@ -98,6 +100,39 @@ def test_signal_volume_factor_fades_with_distance():
 
     always = estimate_signal(_station("route_playlist"), None)
     assert signal_volume_factor(always) == 1.0
+
+
+def test_elevation_extends_fm_range_like_the_rim(  # the owner's ham anchor
+):
+    # From high ground you receive far past the flat contour: line-of-sight
+    # FM, 4/3-earth radio horizon. Desert Rock Phoenix (site 1086 ft, range
+    # 125 mi) at ~200 miles: silent on the flats, clear from ~7000 ft.
+    station = _station("kdrt-phoenix")
+    assert station.frequency_mhz == pytest.approx(101.5)
+    far_north = (station.lat + 2.9, station.lon)  # ~200 miles out
+
+    flat = estimate_signal(station, far_north, elevation_ft=station.site_elev_ft)
+    assert flat.signal == 0.0
+    assert flat.reason == "out of range"
+
+    rim = estimate_signal(station, far_north, elevation_ft=7000.0)
+    assert rim.signal > 0.0
+
+    # no elevation data behaves exactly like the flat model
+    unknown = estimate_signal(station, far_north)
+    assert unknown.signal == 0.0
+
+
+def test_valley_shadow_squeezes_the_contour():
+    station = _station("krdg-denver")  # site 5280 ft, range 125 mi
+    at_100mi = (station.lat + 1.45, station.lon)
+
+    on_the_plain = estimate_signal(station, at_100mi, elevation_ft=station.site_elev_ft)
+    assert on_the_plain.signal > 0.0
+
+    in_a_canyon = estimate_signal(station, at_100mi, elevation_ft=3800.0)
+    assert in_a_canyon.signal == 0.0
+    assert in_a_canyon.reason == "out of range"
 
 
 def test_fringe_factor_is_monotonic_toward_the_range_edge():
@@ -238,8 +273,118 @@ def test_fringe_signal_thins_radio_volume(denver_driving):
     assert applied, "reception update should re-apply the radio volume"
     volume = applied[-1]["music"]
     assert 0.0 < volume < driving.ctx.settings.radio_volume
-    # fringe reception crackles
-    assert any(key == "radio/static_burst" for key, _v in played_effects)
+
+
+def _fringe_stream_station():
+    return RadioStation(
+        "kfog-test",
+        "Test FM",
+        "KFOG",
+        "music",
+        "fixture",
+        stream_url="https://example.test/live.aac",
+        real_stream=True,
+    )
+
+
+def test_dead_stream_reconnects_quietly_and_never_crackles(denver_driving, monkeypatch):
+    # A real stream the dock bed (or a network stall) killed: the reception
+    # tick re-tunes it silently and plays NO fringe static -- a silent radio
+    # has no program for static to sit under (the Merced ghost-hiss bug).
+    app, driving, _music, played_effects, _events = denver_driving
+    station = _fringe_stream_station()
+    reception = RadioReception(station, 90.0, 0.2, "in range")
+    driving.radio.enabled = True
+    monkeypatch.setattr(driving.radio, "current_station", lambda: station)
+    monkeypatch.setattr(driving.radio, "current_reception", lambda: reception)
+    monkeypatch.setattr(driving.ctx.audio, "music_playing", lambda: False)
+    streams = []
+    monkeypatch.setattr(
+        driving.ctx.audio, "play_radio_stream", lambda url, fade_ms=1500: streams.append(url)
+    )
+
+    driving._radio_signal_timer = 0.0
+    driving._update_radio_reception(1.0)
+
+    assert streams == [station.stream_url]
+    assert not any(key == "radio/static_burst" for key, _v in played_effects)
+
+    # retries back off instead of hammering the stream every tick
+    driving._radio_signal_timer = 0.0
+    driving._update_radio_reception(1.0)
+    assert streams == [station.stream_url]
+
+
+def test_live_fringe_stream_gets_hiss_bed_and_pickets(denver_driving, monkeypatch):
+    # A thinning but audible station: the reception tick caches the fringe,
+    # the per-frame renderer brings in the hiss bed and fires a sharp picket
+    # that ducks the program hard, then releases it.
+    app, driving, _music, played_effects, _events = denver_driving
+    station = _fringe_stream_station()
+    reception = RadioReception(station, 90.0, 0.2, "in range")
+    driving.radio.enabled = True
+    monkeypatch.setattr(driving.radio, "current_station", lambda: station)
+    monkeypatch.setattr(driving.radio, "current_reception", lambda: reception)
+    monkeypatch.setattr(driving.ctx.audio, "music_playing", lambda: True)
+    streams = []
+    monkeypatch.setattr(
+        driving.ctx.audio, "play_radio_stream", lambda url, fade_ms=1500: streams.append(url)
+    )
+    loops = []
+    monkeypatch.setattr(
+        driving.ctx.audio,
+        "start_loop",
+        lambda ch, key, volume=1.0, fade_ms=300: loops.append((ch, key, volume)),
+    )
+    applied = []
+    monkeypatch.setattr(driving.ctx.audio, "set_volumes", lambda **kw: applied.append(kw))
+
+    driving._radio_signal_timer = 0.0
+    driving._update_radio_reception(1.0)
+    assert streams == []  # audible stream is left alone
+    assert driving._radio_fringe_signal == pytest.approx(0.2)
+
+    driving.truck.velocity_mps = 25.0
+    driving._picket_wait_s = 0.0
+    driving._update_radio_fringe(0.016)
+
+    assert loops and loops[-1][1] == "radio/fm_hiss_loop" and loops[-1][2] > 0.0
+    assert any(key.startswith("radio/picket") for key, _v in played_effects)
+    assert driving._radio_picket_duck < 1.0  # capture lost: program near-silent
+    assert driving._picket_wait_s > 0.0  # next picket is scheduled, never metronomic
+
+    # the splash releases sharply once its window passes
+    driving._picket_wait_s = 10.0
+    driving._update_radio_fringe(0.5)
+    assert driving._radio_picket_duck == 1.0
+
+
+def test_strong_signal_and_dead_stream_render_no_fringe(denver_driving, monkeypatch):
+    app, driving, _music, played_effects, _events = denver_driving
+    station = _fringe_stream_station()
+    driving.radio.enabled = True
+    monkeypatch.setattr(driving.radio, "current_station", lambda: station)
+    loops = []
+    monkeypatch.setattr(
+        driving.ctx.audio,
+        "start_loop",
+        lambda ch, key, volume=1.0, fade_ms=300: loops.append((ch, key, volume)),
+    )
+    # strong signal: no bed, no pickets
+    monkeypatch.setattr(
+        driving.radio, "current_reception", lambda: RadioReception(station, 5.0, 0.95, "in range")
+    )
+    monkeypatch.setattr(driving.ctx.audio, "music_playing", lambda: True)
+    driving._radio_signal_timer = 0.0
+    driving._update_radio_reception(1.0)
+    driving._update_radio_fringe(0.016)
+    assert loops == []
+    # dead stream: fringe stays silent too (no ghost hiss over a dead radio)
+    monkeypatch.setattr(driving.ctx.audio, "music_playing", lambda: False)
+    driving._radio_fringe_signal = 0.2
+    driving._update_radio_fringe(0.016)
+    assert loops == []
+    assert not any(key.startswith("radio/picket") for key, _v in played_effects)
 
 
 def test_how_to_play_documents_the_radio_page():

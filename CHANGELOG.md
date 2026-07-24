@@ -4,6 +4,16 @@
 
 ### Added
 
+- **FM radio now behaves like FM radio.** Height is range: climb a grade
+  and distant stations reach you from far beyond their normal coverage --
+  crest the Mogollon Rim and Phoenix comes in clear -- while dropping
+  into a valley can shadow a station you had. At the edge of coverage
+  the station does not just get quieter: a smooth receiver hiss creeps
+  in underneath, and at highway speed the signal flickers in quick,
+  sharp splashes of noise -- the picket-fencing every driver has heard
+  on a fading FM station. The flutter follows your actual speed and the
+  station's dial position, slows as you slow, and settles when you park.
+
 - **The truck now sounds like a real truck.** The engine voice is built
   from a real cab recording and follows the rpm through its range --
   idle, pulling away, cruising, working up high -- instead of one loop
@@ -742,6 +752,20 @@
   axles, and now the game tells you so.
 
 ### Fixed
+
+- **The radio finds its station again after a stop.** A live station
+  used to go silent after a dock or terminal visit and stay that way --
+  all you got was a mysterious burst of static every few seconds, and
+  the only cure was tuning away and back. Now the radio reconnects the
+  stream by itself within a moment of rolling out, tells you if the
+  station really cannot be reached, and never plays fringe static over
+  a station you cannot hear.
+
+- **Fringe static finally sounds like FM.** The old crackle was really
+  an AM lightning-storm sound; an FM set between stations plays a
+  smooth frying hiss instead. The static you hear at the edge of a
+  station's range is now that hiss, shaped the way a real receiver
+  shapes it.
 
 - **Speed-limit drop warnings no longer double up.** The advance warning
   before a big posted-limit drop could speak twice back to back. It

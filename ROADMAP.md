@@ -1250,6 +1250,73 @@ section below and the Unreleased changelog; the release-line view:
       source notes, each gated on the BASS live check; real-station reach
       went 78% -> 93% of the 623 cities. Radio Browser was the finding aid
       only; TuneIn stayed out.
+- [x] **Streams reconnect themselves; a silent radio never crackles
+      (owner catch 2026-07-23).** The Merced ghost hiss: a live stream
+      killed by a dock-menu bed (or a network stall) stayed dead --
+      nothing restarted real streams, the same-URL guard blocked
+      re-tuning the same station, and fringe static bursts fired off
+      reception math alone every 6 seconds over a radio making no sound.
+      Now the reception tick quietly re-tunes a dead stream (spoken
+      fallback if it is truly unreachable), and static only plays under
+      an audible program.
+- [x] **Terrain-aware FM propagation with honest fringe audio (owner
+      approved AND SHIPPED same day, 2026-07-23).** What shipped:
+      elevation-aware contours (truck elevation from the leg's samples
+      vs station site_elev_ft through the 4/3-earth radio horizon; the
+      Rim case is a regression test), the hiss-bed loop + sharp picket
+      splashes replacing the 6-second burst timer entirely, exponential
+      inter-arrival around 2v/lambda, program duck to 0.12 per splash,
+      frequency_mhz + site_elev_ft on all 12 regional stations, and NO
+      fringe over a dead stream. Original design notes kept below;
+      follow-ups split into the next bullet. Was: replace the flat
+      distance-falloff with
+      line-of-sight over the elevation data we already carry: terrain
+      profile between truck and tower decides the signal, so a river
+      valley drops a station and a ridge crest brings it in.
+      Acceptance test from the owner's ham experience: from the
+      Mogollon Rim you receive Phoenix AND Flagstaff clearly at
+      distances the current radius model would refuse. Fringe audio is
+      synthesized, not sampled (FM has no static crashes -- the limiter
+      rejects impulse noise): a shaped white-noise hiss bed rising as
+      signal thins, blended UNDER the program instead of the current
+      6-second burst timer, plus picket-fence flutter RANDOMIZED around
+      the physical 2v/lambda rate (owner's ear ruling 2026-07-23: a
+      metronomic 18 Hz tremolo sounds fake -- real flutter is a Rayleigh
+      fading envelope, irregular nulls whose average rate rides truck
+      speed and the station's dial frequency; synthesize as low-passed
+      complex noise at the Doppler cutoff, magnitude out). It slows as
+      you slow and stops when you park. Stations need a real frequency
+      field for that; tune the noise shaping by the owner's ear.
+      PICKETS ARE SHARP, not crossfades (owner ear ruling 2026-07-23):
+      FM capture is a threshold, so render flutter as the Rayleigh
+      envelope GATING program vs hiss with abrupt edges -- brief hiss
+      splashes punching through clean audio, never a smooth linear
+      fade. Picket density and depth grow as signal thins with
+      distance (occasional single pickets at the strong edge,
+      machine-gun picketing deep in the fringe, then mostly noise).
+      RUNTIME, not baked (owner call 2026-07-23): the flutter depends on
+      live speed so the bed must be synthesized in play -- hybrid shape:
+      a seamless committed hiss LOOP as the texture with fade depth and
+      the Rayleigh envelope computed per-frame as channel gain (the
+      engine ring's machinery); fast flutter near 18 Hz gets steppy at
+      frame-rate volume updates, so the BASS path likely wants a
+      push-stream or DSP callback, degrading to slow wander on pygame.
+      The 2026-07-23 static_burst regen (FM demod curve + de-emphasis in
+      tools/generate_radio.py) is the interim burst asset AND the
+      reference recipe for that loop.
+- [ ] **FM propagation follow-ups.** Backfill frequency_mhz and
+      site_elev_ft for the ~63 real terrestrial streams (real dial
+      facts -- fold into the community-radio sweep; unknown fields
+      degrade honestly to the flat model and a mid-band default).
+      Later: true path-profile occlusion if off-route terrain data
+      ever lands, and a BASS push-stream Rayleigh envelope if the
+      one-shot pickets feel too sparse at deep fringe (perceptual cap
+      9 per second now).
+- [ ] **Tell "still buffering" from "stalled for good" on stream
+      startup.** The reconnect loop recreates a silent stream every 9
+      seconds; a slow HLS join that needed 10 could get interrupted.
+      Poll the BASS stalled/buffering channel state before tearing one
+      down.
 - [ ] **Spotify and Apple Music: research only, parked (owner idea
       2026-07-20).** In-game playback of either is off the table --
       both wrap streams in DRM their licenses forbid unwrapping, official
