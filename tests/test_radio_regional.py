@@ -123,16 +123,17 @@ def test_elevation_extends_fm_range_like_the_rim(  # the owner's ham anchor
     assert unknown.signal == 0.0
 
 
-def test_valley_shadow_squeezes_the_contour():
+def test_below_the_tower_site_is_neutral_never_a_penalty():
+    # A mountain-top transmitter looks straight down into its own valley:
+    # every in-market listener sits below the site, and that must never
+    # shrink the contour (KJZZ on South Mountain serving Phoenix).
     station = _station("krdg-denver")  # site 5280 ft, range 125 mi
     at_100mi = (station.lat + 1.45, station.lon)
 
-    on_the_plain = estimate_signal(station, at_100mi, elevation_ft=station.site_elev_ft)
-    assert on_the_plain.signal > 0.0
-
-    in_a_canyon = estimate_signal(station, at_100mi, elevation_ft=3800.0)
-    assert in_a_canyon.signal == 0.0
-    assert in_a_canyon.reason == "out of range"
+    at_site_level = estimate_signal(station, at_100mi, elevation_ft=station.site_elev_ft)
+    below_site = estimate_signal(station, at_100mi, elevation_ft=3800.0)
+    assert below_site.signal == pytest.approx(at_site_level.signal)
+    assert below_site.signal > 0.0
 
 
 def test_fringe_factor_is_monotonic_toward_the_range_edge():

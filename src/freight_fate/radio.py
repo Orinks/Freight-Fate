@@ -296,21 +296,20 @@ def station_distance_miles(
 # d_miles ~ 1.23 * sqrt(height_ft). Standing above a station's tower site
 # extends its contour by that term -- the owner's ham anchor: from the
 # Mogollon Rim (~7000 ft) both Phoenix (~1100 ft) and Flagstaff come in
-# clearly at distances a flat radius refuses. Sitting BELOW the site (a
-# river valley) shadows the path and squeezes the contour instead.
+# clearly at distances a flat radius refuses. Sitting BELOW the site is
+# NEUTRAL, never a penalty: a mountain-top transmitter looks straight down
+# into its valley (that height is why they put it there), and the published
+# range already assumes ordinary low receivers. True canyon shadowing needs
+# a path profile we do not carry -- roadmap follow-up, not a proxy that
+# would punish every in-market listener under a mountain site.
 RADIO_HORIZON_MI_PER_SQRT_FT = 1.23
-VALLEY_SHADOW_DIVISOR = 90.0  # sqrt(drop_ft)/90 shaved off; -1000 ft -> x0.65
-VALLEY_SHADOW_FLOOR = 0.55
 
 
 def effective_range_miles(station: RadioStation, elevation_ft: float | None) -> float:
     if elevation_ft is None or station.site_elev_ft is None or station.range_miles <= 0:
         return station.range_miles
-    diff = elevation_ft - station.site_elev_ft
-    if diff >= 0.0:
-        return station.range_miles + RADIO_HORIZON_MI_PER_SQRT_FT * math.sqrt(diff)
-    shrink = 1.0 - math.sqrt(-diff) / VALLEY_SHADOW_DIVISOR
-    return station.range_miles * max(VALLEY_SHADOW_FLOOR, shrink)
+    lift = max(0.0, elevation_ft - station.site_elev_ft)
+    return station.range_miles + RADIO_HORIZON_MI_PER_SQRT_FT * math.sqrt(lift)
 
 
 def estimate_signal(

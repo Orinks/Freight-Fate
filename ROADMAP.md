@@ -1263,7 +1263,10 @@ section below and the Unreleased changelog; the release-line view:
       approved AND SHIPPED same day, 2026-07-23).** What shipped:
       elevation-aware contours (truck elevation from the leg's samples
       vs station site_elev_ft through the 4/3-earth radio horizon; the
-      Rim case is a regression test), the hiss-bed loop + sharp picket
+      Rim case is a regression test; below the site is NEUTRAL -- a
+      mountain-top transmitter looks down into its valley, so canyon
+      shadowing waits for real path profiles, owner-test catch
+      2026-07-24), the hiss-bed loop + sharp picket
       splashes replacing the 6-second burst timer entirely, exponential
       inter-arrival around 2v/lambda, program duck to 0.12 per splash,
       frequency_mhz + site_elev_ft on all 12 regional stations, and NO
