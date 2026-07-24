@@ -758,6 +758,13 @@
 
 ### Fixed
 
+- **The engine stopped ticking and the jake stopped breathing.** A faint
+  click repeated in the engine sound at cruise -- speeding up and slowing
+  down with the revs -- and the jake brake's growl carried a little dip
+  that pulsed on every cycle. Both came from the seams where those sounds
+  loop, and both seams are now clean: no tick in the cruise, no pulse in
+  the growl.
+
 - **Hairpin warnings now come with time to act on them.** At compressed
   time pacing, "Hairpin right, a quarter mile" could not finish speaking
   before the braking point arrived. Sharp and hairpin bends now play out

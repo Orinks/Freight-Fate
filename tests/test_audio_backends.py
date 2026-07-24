@@ -177,8 +177,11 @@ def test_sound_lookup_prefers_ogg_when_available():
     assert _asset_path("vehicle/road", ("ogg", "wav")).name == "road.ogg"
 
 
-def test_engine_recordings_prefer_ogg_over_generated_wav():
-    assert _asset_path("engine/idle", ("ogg", "wav")).name == "idle.ogg"
+def test_engine_recordings_resolve_for_the_ring_and_one_shots():
+    # Looping beds may resolve to WAV (lossy edges break loop seams --
+    # tools/fix_loop_seams.py); the licensed overlay's file wins where
+    # present. One-shots stay ogg.
+    assert _asset_path("engine/idle", ("ogg", "wav")).name in {"idle.ogg", "idle.wav"}
     assert _asset_path("engine/start", ("ogg", "wav")).name == "start.ogg"
     assert _asset_path("engine/shutdown", ("ogg", "wav")).name == "shutdown.ogg"
 
