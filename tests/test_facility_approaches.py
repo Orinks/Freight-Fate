@@ -219,3 +219,27 @@ def test_facility_approach_status_names_the_dock_not_the_town():
     assert "toward dry warehouse Camp Verde Dry Warehouse" in status
     assert "toward Camp Verde," not in status
     assert "Destination dry warehouse Camp Verde Dry Warehouse ahead." in status
+
+
+def test_long_synthetic_approach_steps_down_45_25_15(world):
+    """Owner design 2026-07-24: a long local approach is an arterial before
+    it is an access road -- 45 wide out, 25 for the last two miles, 15 at
+    the gate. A blanket 25 for six-plus miles was a crawl no city posts."""
+    from freight_fate.sim.trip import Trip
+    from freight_fate.sim.vehicle import TruckState
+    from freight_fate.sim.weather import WeatherSystem
+
+    route = world.facility_approach_route("madison_wi_us", "Madison Cold Storage")
+    assert route.miles > 3.0  # long synthetic approach (clamped to Josh's band)
+    truck = TruckState()
+    truck.transmission.automatic = True
+    truck.start_engine()
+    trip = Trip(route, truck, WeatherSystem("great_lakes", seed=1), seed=2)
+
+    reasons = [(z.reason, z.limit_mph) for z in trip.zones]
+    assert ("facility approach", 45.0) in reasons
+    assert ("facility access road", 25.0) in reasons
+    assert ("facility gate", 15.0) in reasons
+    arterial = next(z for z in trip.zones if z.reason == "facility approach")
+    access = next(z for z in trip.zones if z.reason == "facility access road")
+    assert arterial.end_mi == access.start_mi  # steps down, never overlaps up

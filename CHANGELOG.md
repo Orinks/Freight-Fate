@@ -793,6 +793,12 @@
 
 ### Fixed
 
+- **Long local approaches step down like real streets.** A facility
+  approach longer than a couple of miles now runs 45 on the wide-out
+  stretch, drops to 25 for the last two miles, and 15 at the gate --
+  instead of a blanket 25 crawl from the moment you left the yard.
+  Short approaches and the gate zone are unchanged.
+
 - **No more 35-mile deadheads to a local pickup.** Some facilities'
   map pins landed counties away from their city, and the local
   deadhead drive to them stretched to thirty-plus straight-line miles.

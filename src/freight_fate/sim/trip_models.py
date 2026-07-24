@@ -274,6 +274,10 @@ def truck_limit_at(leg: Leg, offset_mi: float) -> tuple[bool, str | None]:
 SHARED_CITY_STOP_MERGE_MI = 3.0
 
 FACILITY_ACCESS_LIMIT_MPH = 25.0
+# Graduated synthetic approach: the wide-out portion of a long local
+# approach is an arterial, not an access road (owner, 2026-07-24).
+FACILITY_ARTERIAL_LIMIT_MPH = 45.0
+FACILITY_ACCESS_TAIL_MI = 2.0
 DESTINATION_APPROACH_LIMIT_MPH = 35.0
 FACILITY_GATE_LIMIT_MPH = 15.0
 DESTINATION_APPROACH_ZONE_MI = 3.0

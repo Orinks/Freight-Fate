@@ -1159,10 +1159,24 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         )
                 zones.append(Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"))
                 return zones
-            return [
-                Zone(0.0, total, FACILITY_ACCESS_LIMIT_MPH, "facility access road"),
-                Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"),
-            ]
+            # Graduated fallback (owner design, 2026-07-24): a long
+            # synthetic approach is an arterial before it is an access
+            # road -- 45 out wide, 25 for the last stretch, 15 at the
+            # gate. A blanket 25 for a 6-mile approach was a crawl no
+            # real city posts. Short approaches stay all-access-road.
+            zones = []
+            access_start = max(0.0, total - FACILITY_ACCESS_TAIL_MI)
+            if access_start > 0.5:
+                zones.append(
+                    Zone(0.0, access_start, FACILITY_ARTERIAL_LIMIT_MPH, "facility approach")
+                )
+                zones.append(
+                    Zone(access_start, total, FACILITY_ACCESS_LIMIT_MPH, "facility access road")
+                )
+            else:
+                zones.append(Zone(0.0, total, FACILITY_ACCESS_LIMIT_MPH, "facility access road"))
+            zones.append(Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"))
+            return zones
         approach_start = max(0.0, total - DESTINATION_APPROACH_ZONE_MI)
         return [
             Zone(approach_start, total, DESTINATION_APPROACH_LIMIT_MPH, "destination approach"),
