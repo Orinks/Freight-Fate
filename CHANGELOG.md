@@ -752,6 +752,14 @@
 
 ### Fixed
 
+- **Hairpin warnings now come with time to act on them.** At compressed
+  time pacing, "Hairpin right, a quarter mile" could not finish speaking
+  before the braking point arrived. Sharp and hairpin bends now play out
+  in real time from the moment their warning window opens until the
+  curve is behind you -- the same rule controlled ramp endings already
+  follow -- so the callout, your reaction, and the braking all get real
+  seconds at any time compression.
+
 - **A sleep that does not reset your hours says so, first and loudly.**
   Waking from a sleeper-berth rest with the split still pending now
   leads with the consequence: "This sleep did NOT reset your hours.

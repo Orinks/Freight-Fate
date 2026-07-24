@@ -248,6 +248,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             # seconds, not compressed ones. A hot entry used to burn the
             # whole half mile in a few real seconds.
             return min(full, 1.0)
+        if self._severe_curve_decompression():
+            # Same law for a hard bend: the pacenote lead is sized in real
+            # reaction-plus-braking seconds, but compression spent them in
+            # a blink -- "Hairpin right, a quarter mile" did not finish
+            # speaking before the braking point (owner, 2026-07-24). From
+            # inside the warning window to the end of the curve, the clock
+            # runs real.
+            return min(full, 1.0)
         floor = min(LOW_SPEED_TIME_SCALE, full)
         ramp = min(1.0, self.truck.speed_mph / FULL_COMPRESSION_MPH)
         return floor + (full - floor) * ramp
@@ -853,6 +861,29 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 continue
             return cr
         return None
+
+    def _severe_curve_decompression(self) -> bool:
+        """True while a sharp or hairpin bend is inside its reaction window.
+
+        Uses the same lead the pacenote speaks at, widened a little so the
+        call itself lands in real time, and holds until the curve's end so
+        the bend is also DRIVEN in real time.
+        """
+        speed = self.truck.speed_mph
+        for cr in self.curves:
+            if cr.end_mi < self.position_mi:
+                continue
+            ahead = cr.start_mi - self.position_mi
+            if ahead > PACENOTE_MAX_LEAD_MI:
+                break
+            if cr.connector or cr.severity not in ("hairpin", "sharp"):
+                continue
+            if speed <= cr.advisory_mph + PACENOTE_MARGIN_MPH:
+                continue
+            window = self._curve_pacenote_lead_mi(speed, cr.advisory_mph) * 1.5
+            if ahead <= window:
+                return True
+        return False
 
     @staticmethod
     def _curve_pacenote_lead_mi(speed_mph: float, advisory_mph: float) -> float:
