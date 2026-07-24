@@ -863,11 +863,15 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         return None
 
     def _severe_curve_decompression(self) -> bool:
-        """True while a sharp or hairpin bend is inside its reaction window.
+        """True while a warning-worthy bend is inside its reaction window.
 
-        Uses the same lead the pacenote speaks at, widened a little so the
-        call itself lands in real time, and holds until the curve's end so
-        the bend is also DRIVEN in real time.
+        Demand-based, not severity-based: any curve the pacenote would
+        speak for (same margin rules) gets real seconds to act on -- a
+        40-advisory bend from 55 went 'half a mile' to 'too fast' in
+        three real seconds under compression because the first cut only
+        covered hairpin and sharp (owner, 2026-07-24). Uses the pacenote
+        lead widened a little so the call itself lands in real time, and
+        holds until the curve's end so the bend is DRIVEN in real time.
         """
         speed = self.truck.speed_mph
         for cr in self.curves:
@@ -876,9 +880,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             ahead = cr.start_mi - self.position_mi
             if ahead > PACENOTE_MAX_LEAD_MI:
                 break
-            if cr.connector or cr.severity not in ("hairpin", "sharp"):
+            if cr.connector:
                 continue
-            if speed <= cr.advisory_mph + PACENOTE_MARGIN_MPH:
+            margin = (
+                PACENOTE_GENTLE_MARGIN_MPH if cr.severity == "gentle" else PACENOTE_MARGIN_MPH
+            )
+            if speed <= cr.advisory_mph + margin:
                 continue
             window = self._curve_pacenote_lead_mi(speed, cr.advisory_mph) * 1.5
             if ahead <= window:

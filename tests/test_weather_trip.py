@@ -729,6 +729,9 @@ def test_zone_entry_is_worded_apart_from_its_advance_warning(world):
 def test_construction_zone_warns_before_entry(world):
     trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
+    # Teleporting to 70 mph at mile zero sits on the city's baked curves,
+    # and a warned curve pins the clock (its own feature, its own test).
+    trip.curves = []
     truck.velocity_mps = 70 / 2.23694
     trip.time_scale = 20.0
 

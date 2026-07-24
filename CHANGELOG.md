@@ -808,13 +808,13 @@
   loop, and both seams are now clean: no tick in the cruise, no pulse in
   the growl.
 
-- **Hairpin warnings now come with time to act on them.** At compressed
-  time pacing, "Hairpin right, a quarter mile" could not finish speaking
-  before the braking point arrived. Sharp and hairpin bends now play out
-  in real time from the moment their warning window opens until the
-  curve is behind you -- the same rule controlled ramp endings already
-  follow -- so the callout, your reaction, and the braking all get real
-  seconds at any time compression.
+- **Curve warnings now come with time to act on them.** At compressed
+  time pacing, "Curve right, half a mile" could go from spoken to "too
+  fast" in three real seconds. Any bend the game warns you about now
+  plays out in real time from the moment its warning window opens until
+  the curve is behind you -- the same rule controlled ramp endings
+  already follow -- so the callout, your reaction, and the braking all
+  get real seconds at any time compression.
 
 - **A sleep that does not reset your hours says so, first and loudly.**
   Waking from a sleeper-berth rest with the split still pending now
