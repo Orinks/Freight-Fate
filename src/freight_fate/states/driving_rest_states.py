@@ -217,11 +217,21 @@ class EnforcementStopState(MenuState):
         if self.out_of_service:
             # The ten hours pass HERE, parked on the shoulder with the
             # officer's order in hand -- never as a silent mid-drive jump.
+            # Capture the plain-language WHY before the reset wipes the
+            # ledger: the stop must explain itself completely (owner ask,
+            # 2026-07-24).
+            causes = d.hos.violation_causes(self.ctx.settings.hos_mode)
+            why = (
+                " The order stands because " + " and ".join(causes) + "."
+                if causes
+                else ""
+            )
             d._place_out_of_service()
             self._outcome_text += (
-                " Out of service: ten hours pass parked on the shoulder before "
-                f"you may roll. It is now {clock_text(d.trip.local_hour)}. "
-                "Hours of service reset."
+                f"{why} Out of service: ten hours pass parked on the shoulder "
+                f"before you may roll. It is now {clock_text(d.trip.local_hour)}, "
+                "your hours of service are reset, and you wake rested -- but "
+                "the delivery deadline kept counting the whole time."
             )
 
     def announce_entry(self) -> None:
@@ -748,14 +758,38 @@ class RestStopState(MenuState):
         p.fatigue = hos.rest_sleeper_split(p.fatigue, minutes, completed=completed)
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
-        status = (
-            f"Sleeper split credited. {d.hos.summary(self.ctx.settings.hos_mode)} "
-            if completed
-            else (d.hos.split_pending_summary() or "Sleeper berth rest recorded.")
-        )
+        mode = self.ctx.settings.hos_mode
+        if completed:
+            status = f"Sleeper split credited. {d.hos.summary(mode)} "
+        else:
+            # A rest that did NOT reset the shift leads with that consequence:
+            # the old wording buried "split pending" in one clause and the
+            # owner drove into a window violation believing he had hours left
+            # (2026-07-24). The countdown warnings re-arm too, so the 60- and
+            # 30-minute window calls speak again after waking.
+            d.hos.re_arm_warnings()
+            pending = d.hos.split_pending_summary() or "Sleeper berth rest recorded."
+            if mode in hos.HOS_NON_ENFORCED_MODES:
+                status = f"{pending} "
+            else:
+                _, duty_limit, _ = hos.LIMITS[mode]
+                duty_left_h = max(0.0, duty_limit - d.hos.duty_min) / 60.0
+                if duty_left_h <= 0.0:
+                    window = (
+                        "Warning: this sleep did NOT reset your hours, and your "
+                        "duty window has already closed. Do not drive: finish "
+                        "the split or take a full 10-hour reset first. "
+                    )
+                else:
+                    closes = clock_text((d.trip.local_hour + duty_left_h) % 24.0)
+                    window = (
+                        "This sleep did NOT reset your hours. Your duty window "
+                        f"closes in {duty_left_h:.1f} hours, at {closes}. "
+                    )
+                status = f"{window}{pending} "
         self.ctx.say(
             f"{engine_off}You slept {hours} hours in the sleeper berth. "
-            f"It is {clock_text(d.trip.local_hour)}. {status} {_deadline_text(d)}"
+            f"It is {clock_text(d.trip.local_hour)}. {status}{_deadline_text(d)}"
             f"{_wake_air_instruction(d)}"
         )
         self.ctx.award_achievement("slept_on_route")

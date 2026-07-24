@@ -1724,3 +1724,23 @@ def test_players_own_parking_brake_press_arms_waiting():
         assert not trip.waiting
     finally:
         app.shutdown()
+
+
+def test_re_arm_warnings_speaks_the_countdown_again_after_a_non_reset_rest():
+    # A pending-split sleep used to leave the once-per-shift warning marks in
+    # place, so the driver woke to silence and hit the window with no
+    # countdown (owner, 2026-07-24).
+    clock = hos.HosClock()
+    clock.drive(13 * 60.0)  # deep into the window: all thresholds fired
+    assert clock.check_warnings("realistic")
+    assert not clock.check_warnings("realistic")  # marks hold within a shift
+    clock.re_arm_warnings()
+    assert clock.check_warnings("realistic")  # spoken again after waking
+
+
+def test_violation_causes_name_the_blown_limits_plainly():
+    clock = hos.HosClock()
+    clock.drive(14 * 60.0 + 30.0)
+    causes = clock.violation_causes("realistic")
+    assert any("11-hour driving limit" in c for c in causes)
+    assert any("14-hour duty window" in c for c in causes)

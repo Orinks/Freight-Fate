@@ -752,6 +752,16 @@
 
 ### Fixed
 
+- **A sleep that does not reset your hours says so, first and loudly.**
+  Waking from a sleeper-berth rest with the split still pending now
+  leads with the consequence: "This sleep did NOT reset your hours.
+  Your duty window closes in 4.2 hours, at 6:05 AM" -- before anything
+  else. The 60- and 30-minute window warnings also speak again after
+  such a sleep instead of staying silent because they had already fired
+  earlier in the shift. And the roadside out-of-service stop now
+  explains itself completely: which limit you blew, in plain words, and
+  that the delivery deadline kept counting while you sat.
+
 - **A serious log-check violation now pulls you over for real.** Getting
   caught over your hours used to play a tone, claim you were stopped,
   and silently jump the clock ten hours while you kept driving. Now it

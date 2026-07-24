@@ -1129,8 +1129,11 @@ section below and the Unreleased changelog; the release-line view:
       clock (and off the 14-hour window), then released. Same shape as
       the pull-over flow the speeding rework wants, so build them on
       one mechanism.
-- [ ] **A non-qualifying sleep must say loudly what it did NOT do (owner
-      confusion, 2026-07-24).** A 7-hour berth sleep left the split
+- [x] **A non-qualifying sleep says loudly what it did NOT do -- SHIPPED
+      same day (owner confusion, 2026-07-24).** Wake message leads with
+      "did NOT reset" plus the window-close time; countdown warnings
+      re-arm after any non-resetting sleep; the out-of-service stop
+      names the blown limits in plain words. Original: A 7-hour berth sleep left the split
       pending and the 14-hour window RUNNING -- but the wake-up message
       buried that in one clause, and the owner drove into a window
       violation believing he had hours left (the "six hours" he heard
