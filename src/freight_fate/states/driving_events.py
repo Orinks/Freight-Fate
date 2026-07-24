@@ -477,7 +477,12 @@ class DrivingEventMixin:
         changes and scenery chatter, and the driver hears nothing again
         until the miss. The countdown re-anchors the exit at two miles, one
         mile, and half a mile. Ported from the 1.9 line without its
-        exit-lane readiness hint -- this line has no lane tracker."""
+        exit-lane readiness hint -- this line has no lane tracker.
+
+        Terse speech opts out of the whole countdown: the player asked for
+        the signal-on announcement to be the last word."""
+        if self._terse_speech():
+            return
         ahead = stop.at_mi - self.trip.position_mi
         if ahead <= 0:
             return

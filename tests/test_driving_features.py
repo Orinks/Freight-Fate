@@ -1106,6 +1106,39 @@ def test_armed_exit_counts_down(monkeypatch):
         app.shutdown()
 
 
+def test_armed_exit_countdown_silent_on_terse(monkeypatch):
+    """Terse speech opts out of the countdown; the signal-on line stays last."""
+    from types import SimpleNamespace
+
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    try:
+        app.ctx.settings.speech_verbosity = 0
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = SimpleNamespace(
+            at_mi=driving.trip.position_mi + 3.0,
+            type="delivery_destination",
+            spoken_name="Test Plaza",
+            name="Test Receiver",
+            exit_label="",
+            exit_phrase="",
+        )
+        driving._exit_stop = stop
+        driving._exit_countdown_said = set()
+
+        for ahead in (2.5, 1.9, 0.9, 0.3):
+            driving.trip.position_mi = stop.at_mi - ahead
+            driving._update_exit(0.0)
+
+        assert not [t for t in events if t.startswith("Destination exit in")]
+    finally:
+        app.shutdown()
+
+
 def test_arrival_gate_repeats_after_overshoot(monkeypatch):
     """Rolling past the destination gate keeps the stop instruction alive.
 
