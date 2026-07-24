@@ -45,8 +45,8 @@ class OnlineHubState(MenuState):
                 lambda: self._toggle_online_services(1),
                 help="Master switch for all online/live-data features. "
                 "When off, real-time weather, traffic, parking, Discord "
-                "presence, Mastodon sharing, and cloud backup all behave as "
-                "disabled without losing their individual settings.",
+                "presence, Mastodon sharing, cloud backup, and nearby public "
+                "radio all behave as disabled without losing their individual settings.",
             ),
             MenuItem(
                 lambda: (

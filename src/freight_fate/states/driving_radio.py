@@ -57,6 +57,7 @@ class DrivingRadioDiscoveryMixin:
 
     def _maybe_refresh_radio_discovery(self) -> None:
         if not self._radio_discovery_allowed():
+            self._cancel_blocked_radio_tune()
             if self._radio_discovery_key:
                 self._radio_discovery.cancel()
                 self._radio_discovery_key = ""
@@ -124,8 +125,6 @@ class DrivingRadioDiscoveryMixin:
         self._poll_radio_tune()
 
     def _apply_radio_discovery_result(self, result: DiscoveryResult) -> None:
-        initial = not self._radio_discovery_has_applied
-        self._radio_discovery_has_applied = True
         self._radio_discovery_effective_source = result.location.source
         if (
             self.ctx.settings.radio_discovery_location == LOCATION_MODE_REAL
@@ -138,7 +137,10 @@ class DrivingRadioDiscoveryMixin:
             self._radio_discovery_key = "player-location"
         else:
             self._radio_discovery_key = self._truck_radio_location().state_code
-        self.radio.replace_directory_stations(result.stations)
+        self.radio.replace_directory_stations(
+            result.stations,
+            preserve_station_ids=(self._radio_pending_station_id,),
+        )
         self._radio_discovery_location_label = result.location.label
         message = self._radio_discovery_message(result)
         preferred = self.radio.station_by_id(self.radio.preferred_station_id)
@@ -149,16 +151,19 @@ class DrivingRadioDiscoveryMixin:
         ):
             message += f" Saved station {preferred.display_name} is back on the dial."
         self._radio_discovery_status = message
-        if (
-            initial
+        should_restore = (
+            not self._radio_saved_station_restore_attempted
             and preferred is not None
             and preferred.source_type == DIRECTORY_SOURCE_TYPE
             and preferred.id != self.radio.station_id
-        ):
+        )
+        if should_restore:
+            self._radio_saved_station_restore_attempted = True
             if self.radio.enabled:
                 self._begin_radio_stream_tune(
                     preferred,
                     prefix=f"Restoring saved station. Tuning to {preferred.display_name}.",
+                    interrupt=False,
                 )
             else:
                 self.radio.station_id = preferred.id
@@ -188,12 +193,18 @@ class DrivingRadioDiscoveryMixin:
             )
         return f"Nearby stations could not be loaded. Built-in stations remain available.{fallback}"
 
-    def _begin_radio_stream_tune(self, station: RadioStation, *, prefix: str = "") -> None:
+    def _begin_radio_stream_tune(
+        self,
+        station: RadioStation,
+        *,
+        prefix: str = "",
+        interrupt: bool = True,
+    ) -> None:
         self._radio_tune_generation += 1
         generation = self._radio_tune_generation
         self._radio_pending_station_id = station.id
         message = prefix or f"Tuning to {station.display_name}."
-        self.ctx.say(message)
+        self.ctx.say(message, interrupt=interrupt)
         self._apply_radio_volume()
 
         def worker() -> None:
@@ -249,6 +260,14 @@ class DrivingRadioDiscoveryMixin:
         ):
             if prepared is not None:
                 self.ctx.audio.discard_radio_stream(prepared)
+            if self._radio_pending_station_id == station_id:
+                self._radio_pending_station_id = ""
+                if self.radio.enabled:
+                    current = self.radio.current_station()
+                    self.ctx.say(
+                        f"Public station tuning ended. {current.display_name} remains playing.",
+                        interrupt=False,
+                    )
             return
         if not error and prepared is not None:
             try:
@@ -281,23 +300,30 @@ class DrivingRadioDiscoveryMixin:
         self._radio_tune_generation += 1
         self._radio_pending_station_id = ""
 
-    def _radio_discovery_status_text(self) -> str:
-        settings = self.ctx.settings
-        if not settings.online_services:
-            return "Nearby public stations are off with online services."
-        if not settings.radio_real_streams:
-            return "Nearby public stations are off."
-        if settings.radio_streamer_safe:
-            return "Nearby public stations are hidden by streamer-safe mode."
-        supports_streams = getattr(self.ctx.audio, "supports_radio_streams", lambda: True)
-        if not supports_streams():
-            return (
-                "Nearby public stations are allowed but unavailable with the "
-                "current audio system. Built-in stations remain available."
+    def _cancel_blocked_radio_tune(self) -> None:
+        if self._radio_discovery_allowed() or not self._radio_pending_station_id:
+            return
+        self._cancel_radio_tune()
+        if self.radio.enabled:
+            current = self.radio.current_station()
+            self.ctx.say(
+                f"Public station tuning canceled. {current.display_name} remains playing.",
+                interrupt=False,
             )
+
+    def _radio_stream_availability_text(self) -> str:
+        supports_streams = getattr(self.ctx.audio, "supports_radio_streams", lambda: True)
+        return public_stream_availability(
+            self.ctx.settings,
+            backend_supported=supports_streams(),
+        )
+
+    def _radio_discovery_status_text(self) -> str:
+        if not self._radio_discovery_allowed():
+            return self._radio_stream_availability_text()
         return self._radio_discovery_status
 
-    def _radio_status_text(self) -> str:
+    def _radio_status_text(self, *, include_availability: bool = True) -> str:
         text = self.radio.status_text()
         pending = self.radio.station_by_id(self._radio_pending_station_id)
         if pending is not None:
@@ -317,9 +343,8 @@ class DrivingRadioDiscoveryMixin:
                 f" Saved station {preferred.display_name} is available on the dial. "
                 "Use the bracket keys to tune it."
             )
-        unavailable = self._radio_discovery_status_text()
-        if "unavailable with the current audio system" in unavailable:
-            text += f" {unavailable}"
+        if include_availability:
+            text += f" {self._radio_stream_availability_text()}"
         return text
 
     def _sync_radio_settings(self) -> None:
@@ -330,6 +355,7 @@ class DrivingRadioDiscoveryMixin:
             truck_position(self.route, self.trip.position_mi, self.ctx.world)
         )
         self.radio.current_station()
+        self._cancel_blocked_radio_tune()
         public_stream_became_unavailable = bool(
             selected_before is not None
             and selected_before.real_stream

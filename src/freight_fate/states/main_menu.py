@@ -13,6 +13,7 @@ from ..models.profile import Profile, ProfileIntegrityError
 from ..models.start_options import apply_start_option, option_for_profile
 from ..music import select_menu_music_sequence
 from ..playtest_levers import apply_continue_levers
+from ..radio import public_stream_availability
 from ..settings import (
     DRIVING_ASSIST_FIELDS,
     DRIVING_ASSIST_PRESETS,
@@ -915,13 +916,15 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Radio streamer-safe mode: {'on' if s.radio_streamer_safe else 'off'}",
                     lambda: self._toggle_radio_streamer_safe(1),
-                    help="When on, the radio uses only built-in safe stations and skips real public streams.",
+                    help="When on, the radio uses only built-in safe stations. "
+                    "Real public streams and personal M3U playlists are hidden.",
                 ),
                 MenuItem(
                     lambda: self._radio_streams_label(),
                     lambda: self._toggle_radio_real_streams(1),
-                    help="Allow nearby public stations to join the normal bracket-key "
-                    "dial. Streamer-safe mode must also be off before they can play.",
+                    help="Allow nearby public stations to join the normal bracket-key dial. "
+                    "Online services must be on, streamer-safe mode must be off, and "
+                    "the active audio system must support public streams.",
                 ),
                 MenuItem(
                     lambda: self._radio_discovery_location_label(),
@@ -1416,18 +1419,11 @@ class SettingsCategoryState(MenuState):
         self._announce()
 
     def _radio_streams_label(self) -> str:
-        settings = self.ctx.settings
-        if not settings.radio_real_streams:
-            state = "off"
-        elif not settings.online_services:
-            state = "allowed, unavailable because Online services are off; built-in stations remain"
-        elif settings.radio_streamer_safe:
-            state = "allowed, currently hidden by streamer-safe mode"
-        elif not getattr(self.ctx.audio, "supports_radio_streams", lambda: True)():
-            state = "allowed, unavailable with the current audio system; built-in stations remain"
-        else:
-            state = "on"
-        return f"Radio real public streams: {state}"
+        supports_streams = getattr(self.ctx.audio, "supports_radio_streams", lambda: True)
+        return public_stream_availability(
+            self.ctx.settings,
+            backend_supported=supports_streams(),
+        )
 
     def _radio_discovery_location_label(self) -> str:
         value = self.ctx.settings.radio_discovery_location

@@ -28,6 +28,7 @@ def test_main_menu_online_item_opens_the_hub():
         # online-enhancement master switch sits right under it.
         assert hub.items[0].text == "Drivers board"
         assert hub.items[1].text == "Online services: on"
+        assert "nearby public radio" in hub.items[1].help
         for item in hub.items[:-1]:  # every row but Back explains itself
             assert item.help
     finally:

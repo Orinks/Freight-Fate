@@ -225,6 +225,7 @@ def test_saved_discovered_station_resumes_through_normal_pending_tune(monkeypatc
         assert harness.result.transcript[-1] == (
             "Restoring saved station. Tuning to KTEST Buffalo."
         )
+        assert harness.result.spoken[-1].interrupt is False
         harness.press_key(pygame.K_y, "y")
         assert "Tuning to KTEST Buffalo" in harness.result.transcript[-1]
         release_prepare.set()
@@ -232,6 +233,120 @@ def test_saved_discovered_station_resumes_through_normal_pending_tune(monkeypatc
         assert driving.radio.station_id == saved_id
         assert played
         assert harness.result.transcript[-1] == "Playing KTEST Buffalo."
+    finally:
+        harness.__exit__(None, None, None)
+
+
+def test_saved_discovered_station_resumes_when_it_first_appears_later(monkeypatch):
+    harness, manager, _prepared, played, _discarded = _start_radio_harness(monkeypatch)
+    try:
+        driving = harness.driving
+        saved_id = f"radio-browser:{UUID_ONE}"
+        driving.radio.preferred_station_id = saved_id
+        driving.ctx.settings.radio_station_id = saved_id
+
+        manager.result = _result(outcome="empty")
+        driving._update_radio_discovery()
+        assert not driving._radio_pending_station_id
+
+        release_prepare = threading.Event()
+
+        def delayed_prepare(url):
+            assert release_prepare.wait(2)
+            return PreparedStream(url)
+
+        monkeypatch.setattr(driving.ctx.audio, "prepare_radio_stream", delayed_prepare)
+        manager.result = _result(_station())
+        driving._update_radio_discovery()
+        assert driving._radio_pending_station_id == saved_id
+        assert harness.result.transcript[-1] == (
+            "Restoring saved station. Tuning to KTEST Buffalo."
+        )
+        assert harness.result.spoken[-1].interrupt is False
+
+        release_prepare.set()
+        _finish_pending(driving)
+        assert driving.radio.station_id == saved_id
+        assert played
+
+        transcript_count = len(harness.result.transcript)
+        manager.result = _result(_station())
+        driving._update_radio_discovery()
+        assert len(harness.result.transcript) == transcript_count
+        assert not driving._radio_pending_station_id
+    finally:
+        harness.__exit__(None, None, None)
+
+
+def test_pending_station_survives_silent_geographic_refresh(monkeypatch):
+    harness, manager, _prepared, played, _discarded = _start_radio_harness(monkeypatch)
+    try:
+        driving = harness.driving
+        manager.result = _result(_station())
+        driving._update_radio_discovery()
+        harness.press_key(pygame.K_RIGHTBRACKET, "]")
+
+        prepare_started = threading.Event()
+        release_prepare = threading.Event()
+
+        def delayed_prepare(url):
+            prepare_started.set()
+            assert release_prepare.wait(2)
+            return PreparedStream(url)
+
+        monkeypatch.setattr(driving.ctx.audio, "prepare_radio_stream", delayed_prepare)
+        harness.press_key(pygame.K_RIGHTBRACKET, "]")
+        assert prepare_started.wait(1)
+        transcript_count = len(harness.result.transcript)
+
+        manager.result = _result(outcome="empty")
+        driving._update_radio_discovery()
+        assert driving._radio_pending_station_id == f"radio-browser:{UUID_ONE}"
+        assert driving.radio.station_by_id(f"radio-browser:{UUID_ONE}") is not None
+        assert len(harness.result.transcript) == transcript_count
+
+        release_prepare.set()
+        _finish_pending(driving)
+        assert driving.radio.station_id == f"radio-browser:{UUID_ONE}"
+        assert played
+    finally:
+        harness.__exit__(None, None, None)
+
+
+def test_gate_change_cancels_pending_tune_with_terminal_truth(monkeypatch):
+    harness, manager, _prepared, played, discarded = _start_radio_harness(monkeypatch)
+    try:
+        driving = harness.driving
+        manager.result = _result(_station())
+        driving._update_radio_discovery()
+        harness.press_key(pygame.K_RIGHTBRACKET, "]")
+
+        prepare_started = threading.Event()
+        release_prepare = threading.Event()
+
+        def delayed_prepare(url):
+            prepare_started.set()
+            assert release_prepare.wait(2)
+            return PreparedStream(url)
+
+        monkeypatch.setattr(driving.ctx.audio, "prepare_radio_stream", delayed_prepare)
+        harness.press_key(pygame.K_RIGHTBRACKET, "]")
+        assert prepare_started.wait(1)
+
+        driving.ctx.settings.radio_streamer_safe = True
+        current_name = driving.radio.current_station().display_name
+        driving._update_radio_discovery()
+        assert not driving._radio_pending_station_id
+        assert harness.result.transcript[-1] == (
+            f"Public station tuning canceled. {current_name} remains playing."
+        )
+        assert harness.result.spoken[-1].interrupt is False
+
+        release_prepare.set()
+        time.sleep(0.03)
+        driving._poll_radio_tune()
+        assert played == []
+        assert all(stream.discarded for stream in discarded)
     finally:
         harness.__exit__(None, None, None)
 
@@ -329,8 +444,31 @@ def test_streamer_safe_and_backend_unavailable_keep_public_dial_hidden(monkeypat
     )
     try:
         harness.press_key(pygame.K_y, "y")
-        assert "unavailable with the current audio system" in harness.result.transcript[-1]
-        assert "Built-in stations remain available" in harness.result.transcript[-1]
+        assert "audio system cannot play them" in harness.result.transcript[-1]
+        assert "Built-ins remain" in harness.result.transcript[-1]
+    finally:
+        harness.__exit__(None, None, None)
+
+
+def test_online_off_status_is_truthful_on_y_and_radio_screen(monkeypatch):
+    harness, _manager, _prepared, _played, _discarded = _start_radio_harness(monkeypatch)
+    try:
+        driving = harness.driving
+        driving.ctx.settings.online_services = False
+
+        harness.press_key(pygame.K_y, "y")
+        assert "Public streams allowed; Online services off" in harness.result.transcript[-1]
+        assert "Built-ins remain" in harness.result.transcript[-1]
+
+        driving.handle_event(key_event(pygame.K_TAB))
+        for _ in range(3):
+            harness.app.state.handle_event(key_event(pygame.K_DOWN))
+        harness.app.state.handle_event(key_event(pygame.K_RETURN))
+        harness.app.state.handle_event(key_event(pygame.K_DOWN))
+        assert harness.result.transcript[-1].startswith(
+            "Public streams allowed; Online services off"
+        )
+        assert "Built-ins remain" in harness.result.transcript[-1]
     finally:
         harness.__exit__(None, None, None)
 

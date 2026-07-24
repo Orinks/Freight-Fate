@@ -25,6 +25,20 @@ DIRECTORY_SOURCE_TYPE = "directory_nearby"
 PLAYLISTS_DIR_NAME = "Playlists"
 
 
+def public_stream_availability(settings, *, backend_supported: bool) -> str:
+    """Describe the preference and its effective playback availability."""
+
+    if not settings.radio_real_streams:
+        return "Public streams: off. Built-ins remain."
+    if not settings.online_services:
+        return "Public streams allowed; Online services off. Built-ins remain."
+    if settings.radio_streamer_safe:
+        return "Public streams allowed; hidden by streamer-safe mode. Built-ins remain."
+    if not backend_supported:
+        return "Public streams allowed; audio system cannot play them. Built-ins remain."
+    return "Public streams: available."
+
+
 @dataclass(frozen=True)
 class RadioStation:
     id: str
@@ -437,10 +451,20 @@ class RadioState:
     def update_position(self, position: tuple[float, float] | None) -> None:
         self.position = position
 
-    def replace_directory_stations(self, stations) -> None:
+    def replace_directory_stations(
+        self,
+        stations,
+        *,
+        preserve_station_ids: tuple[str, ...] = (),
+    ) -> None:
         """Install one normalized runtime snapshot without touching saved careers."""
 
-        current = self._station_by_id(self.station_id)
+        preserved = [
+            station
+            for station_id in (self.station_id, *preserve_station_ids)
+            if (station := self._station_by_id(station_id)) is not None
+            and station.source_type == DIRECTORY_SOURCE_TYPE
+        ]
         base = tuple(
             station for station in self.catalog if station.source_type != DIRECTORY_SOURCE_TYPE
         )
@@ -467,14 +491,14 @@ class RadioState:
             for station in stations
         )
         discovered_ids = {station.id for station in discovered}
-        if (
-            current is not None
-            and current.source_type == DIRECTORY_SOURCE_TYPE
-            and current.id not in discovered_ids
-        ):
+        for station in preserved:
+            if station.id in discovered_ids:
+                continue
             # A location refresh must not replace audio the player already
-            # chose. Keep that one stream on the dial until they tune away.
-            discovered += (current,)
+            # chose or a stream that is still being prepared. Keep it on the
+            # dial until playback commits or the pending tune is canceled.
+            discovered += (station,)
+            discovered_ids.add(station.id)
         self.catalog = base + discovered
 
     def receivable_stations(self) -> tuple[RadioReception, ...]:

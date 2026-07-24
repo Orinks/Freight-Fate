@@ -124,7 +124,7 @@ class DrivingState(
         self._radio_discovery = RadioDiscoveryManager()
         self._radio_discovery_key = ""
         self._radio_discovery_effective_source = ""
-        self._radio_discovery_has_applied = False
+        self._radio_saved_station_restore_attempted = False
         self._radio_discovery_status = "Nearby stations have not been checked."
         self._radio_discovery_location_label = ""
         self._radio_tune_generation = 0

@@ -254,8 +254,8 @@ def test_public_radio_setting_names_online_services_blocker():
         label = menu._radio_streams_label()
 
         assert "allowed" in label
-        assert "unavailable because Online services are off" in label
-        assert "built-in stations remain" in label
+        assert "Online services off" in label
+        assert "Built-ins remain" in label
     finally:
         app.shutdown()
 
@@ -281,6 +281,29 @@ def test_settings_menu_f1_has_help_for_every_item():
                 text = cat.current_help()
                 assert text == (item.help or f"{item.text}.")
                 assert cat.intro_help not in text
+    finally:
+        app.shutdown()
+
+
+def test_radio_settings_help_names_every_playback_gate():
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    app = App()
+    try:
+        menu = SettingsCategoryState(app.ctx, "audio")
+        menu.items = menu.build_items()
+        public_help = next(
+            item.help for item in menu.items if item.text.startswith("Public streams")
+        )
+        safe_help = next(
+            item.help for item in menu.items if item.text.startswith("Radio streamer-safe mode")
+        )
+
+        assert "Online services" in public_help
+        assert "streamer-safe mode" in public_help
+        assert "audio system" in public_help
+        assert "personal M3U playlists" in safe_help
     finally:
         app.shutdown()
 

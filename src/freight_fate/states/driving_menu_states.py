@@ -277,16 +277,13 @@ class DrivingStatusScreenState(MenuState):
             else "Nearby search follows the simulated truck."
         )
         lines = [
-            d._radio_status_text(),
-            (
-                "Real public streams: on, streamer-safe mode off"
-                if settings.radio_real_streams and not settings.radio_streamer_safe
-                else "Real public streams are hidden unless real streams are on and streamer-safe mode is off."
-            ),
+            d._radio_status_text(include_availability=False),
+            d._radio_stream_availability_text(),
             mode,
-            d._radio_discovery_status_text(),
-            "Tune with left and right brackets. Press M to toggle radio from the cab.",
         ]
+        if d._radio_discovery_allowed():
+            lines.append(d._radio_discovery_status_text())
+        lines.append("Tune with left and right brackets. Press M to toggle radio from the cab.")
         return lines
 
 
