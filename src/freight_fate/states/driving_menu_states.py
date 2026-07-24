@@ -272,9 +272,9 @@ class DrivingStatusScreenState(MenuState):
         d._sync_radio_settings()
         settings = self.ctx.settings
         mode = (
-            "Nearby search uses your approximate real-world location."
+            "Public radio search uses your approximate real-world location."
             if settings.radio_discovery_location == LOCATION_MODE_REAL
-            else "Nearby search follows the simulated truck."
+            else "Public radio search follows the simulated truck."
         )
         lines = [
             d._radio_status_text(include_availability=False),
@@ -282,7 +282,7 @@ class DrivingStatusScreenState(MenuState):
             mode,
         ]
         if d._radio_discovery_allowed():
-            lines.append(d._radio_discovery_status_text())
+            lines.extend(d._radio_discovery_status_lines())
         lines.append("Tune with left and right brackets. Press M to toggle radio from the cab.")
         return lines
 

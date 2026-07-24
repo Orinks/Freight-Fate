@@ -873,7 +873,7 @@ Audio settings include:
 | Music volume | Menu and facility background music volume. |
 | In-cab radio volume | Driving radio music volume. It defaults lower than speech and safety cues. |
 | Radio streamer-safe mode | On keeps the radio on built-in safe stations. Off also permits personal playlists and automatic public-station discovery when Online services and the audio system allow it. |
-| Nearby radio location | Uses your approximate real-world location by default, or follows the simulated truck if you choose that mode. |
+| Public radio search location | Uses your approximate real-world location by default, or follows the simulated truck if you choose that mode. |
 | Menu and UI sounds volume | Menu movement, selection, warning, and cash sounds. |
 
 Speech and weather settings include:

@@ -244,7 +244,7 @@ def test_how_to_play_documents_the_radio_page():
     titles = [title for title, _lines in HELP_PAGES]
     assert "The in-cab radio" in titles
     help_text = " ".join(line for _title, lines in HELP_PAGES for line in lines).lower()
-    assert "join that same dial quietly" in help_text
+    assert "join the bracket dial quietly" in help_text
     assert "left and right bracket tune every station" in help_text
     assert "streamer-safe status" in help_text
     assert "online services are on" in help_text

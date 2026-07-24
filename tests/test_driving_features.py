@@ -1157,7 +1157,7 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         open_status_screen(app, "Radio")
         radio_lines = [item.text for item in app.state.items]
         assert any(line.startswith("Radio on.") for line in radio_lines)
-        assert any("Nearby search" in line for line in radio_lines)
+        assert any("Public radio search" in line for line in radio_lines)
         assert not any(line.startswith("Receivable stations:") for line in radio_lines)
 
         app.state.handle_event(key_event(pygame.K_ESCAPE))

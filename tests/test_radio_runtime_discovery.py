@@ -765,10 +765,11 @@ def test_stale_cache_status_is_reviewable_through_existing_keyboard_screen(monke
         for _ in range(3):
             harness.app.state.handle_event(key_event(pygame.K_DOWN))
         harness.app.state.handle_event(key_event(pygame.K_RETURN))
-        for _ in range(3):
+        for _ in range(4):
             harness.app.state.handle_event(key_event(pygame.K_DOWN))
 
         assert "Using saved public radio" in harness.result.transcript[-1]
+        harness.app.state.handle_event(key_event(pygame.K_DOWN))
         assert "could not be reached" in harness.result.transcript[-1]
     finally:
         harness.__exit__(None, None, None)

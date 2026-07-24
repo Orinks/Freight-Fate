@@ -265,7 +265,7 @@ def test_audio_settings_have_one_public_audio_gate_and_aligned_keyboard_actions(
         menu.index = next(
             index
             for index, item in enumerate(menu.items)
-            if item.text.startswith("Nearby radio location")
+            if item.text.startswith("Public radio search location")
         )
         before_location = app.ctx.settings.radio_discovery_location
         menu._adjust(1)

@@ -319,7 +319,7 @@ HELP_PAGES = [
             "M toggles the radio. Left and right bracket tune every station",
             "currently on the dial, and Y speaks the station, signal, volume, and",
             "streamer-safe status.",
-            "Public stations for your region join that same dial quietly in the background",
+            "Public stations for your region join the bracket dial quietly in the background",
             "when Online services are on, streamer-safe mode is off,",
             "and the active audio system can play public streams.",
             "The default search uses your approximate real-world location.",

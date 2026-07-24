@@ -84,6 +84,7 @@ class DrivingRadioDiscoveryMixin:
                     )
                 self.ctx.say(message)
                 self._radio_discovery_status = message
+                self._radio_discovery_details = ()
             return "blocked"
         mode = self.ctx.settings.radio_discovery_location
         truck = self._truck_radio_location()
@@ -97,16 +98,17 @@ class DrivingRadioDiscoveryMixin:
         )
         if result == "already":
             if explicit:
-                self.ctx.say("A nearby-station refresh is already in progress.")
+                self.ctx.say("A public radio search is already in progress.")
             return result
         mode_text = (
             "your approximate location"
             if mode == LOCATION_MODE_REAL
             else f"the simulated truck near {truck.city}, {truck.state}"
         )
-        self._radio_discovery_status = f"Checking public radio for {mode_text}."
+        self._radio_discovery_status = "Checking public radio."
+        self._radio_discovery_details = (f"Search location: {mode_text}.",)
         if explicit:
-            self.ctx.say(self._radio_discovery_status)
+            self.ctx.say(f"{self._radio_discovery_status} {self._radio_discovery_details[0]}")
         return result
 
     def _update_radio_discovery(self) -> None:
@@ -134,15 +136,16 @@ class DrivingRadioDiscoveryMixin:
             preserve_station_ids=(self._radio_pending_station_id,),
         )
         self._radio_discovery_location_label = result.location.label
-        message = self._radio_discovery_message(result)
+        status, details = self._radio_discovery_lines(result)
         preferred = self.radio.station_by_id(self.radio.preferred_station_id)
         if (
             preferred is not None
             and preferred.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES
             and preferred.id != self.radio.station_id
         ):
-            message += f" Saved station {preferred.display_name} is back on the dial."
-        self._radio_discovery_status = message
+            details += (f"Saved station {preferred.display_name} is back on the dial.",)
+        self._radio_discovery_status = status
+        self._radio_discovery_details = details
         restore_candidate = bool(
             preferred is not None
             and preferred.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES
@@ -169,13 +172,8 @@ class DrivingRadioDiscoveryMixin:
                 self.radio.station_id = preferred.id
 
     @staticmethod
-    def _radio_discovery_message(result: DiscoveryResult) -> str:
+    def _radio_discovery_lines(result: DiscoveryResult) -> tuple[str, tuple[str, ...]]:
         state = result.location.state
-        fallback = (
-            " Your approximate location was unavailable, so the simulated truck was used."
-            if result.used_truck_fallback
-            else ""
-        )
         nearby = sum(not station.internet_only for station in result.stations)
         internet_only = sum(station.internet_only for station in result.stations)
         counts = []
@@ -184,21 +182,28 @@ class DrivingRadioDiscoveryMixin:
         if internet_only:
             counts.append(f"{internet_only} internet-only")
         summary = " and ".join(counts) or "none"
+        status = f"Public radio for {state}: {summary}."
+        details: tuple[str, ...] = ()
         if result.outcome == "updated":
-            return f"Public radio updated for {state}: {summary}.{fallback}"
-        if result.outcome == "cached":
-            return f"Using saved public radio for {state}: {summary}.{fallback}"
-        if result.outcome == "stale":
-            return (
-                f"Using saved public radio for {state}: {summary}. "
-                f"The live station directory could not be reached.{fallback}"
+            details = ("Live station directory updated.",)
+        elif result.outcome == "cached":
+            details = ("Using saved public radio results.",)
+        elif result.outcome == "stale":
+            details = (
+                "Using saved public radio results.",
+                "The live station directory could not be reached.",
             )
-        if result.outcome == "empty":
-            return (
-                f"No matching public stations were found for {state}. "
-                f"Built-in stations remain available.{fallback}"
+        elif result.outcome == "empty":
+            details = (
+                "No matching public stations were found.",
+                "Built-in stations remain available.",
             )
-        return f"Public radio could not be loaded. Built-in stations remain available.{fallback}"
+        else:
+            status = "Public radio could not be loaded."
+            details = ("Built-in stations remain available.",)
+        if result.used_truck_fallback:
+            details += ("Approximate location unavailable; following the simulated truck.",)
+        return status, details
 
     def _begin_radio_stream_tune(
         self,
@@ -327,9 +332,12 @@ class DrivingRadioDiscoveryMixin:
         )
 
     def _radio_discovery_status_text(self) -> str:
+        return " ".join(self._radio_discovery_status_lines())
+
+    def _radio_discovery_status_lines(self) -> tuple[str, ...]:
         if not self._radio_discovery_allowed():
-            return self._radio_stream_availability_text()
-        return self._radio_discovery_status
+            return (self._radio_stream_availability_text(),)
+        return (self._radio_discovery_status, *self._radio_discovery_details)
 
     def _radio_status_text(self, *, include_availability: bool = True) -> str:
         text = self.radio.status_text()

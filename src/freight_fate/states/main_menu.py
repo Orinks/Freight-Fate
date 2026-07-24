@@ -923,7 +923,7 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: self._radio_discovery_location_label(),
                     lambda: self._cycle_radio_discovery_location(1),
-                    help="Choose where nearby public station searches are centered. "
+                    help="Choose where public radio searches are centered. "
                     "Approximate real-world location uses a network-based estimate "
                     "and may be wrong. Follow the simulated truck uses the truck's "
                     "location in the game.",
@@ -1413,7 +1413,7 @@ class SettingsCategoryState(MenuState):
         label = (
             "approximate real-world location" if value == "real" else "follow the simulated truck"
         )
-        return f"Nearby radio location: {label}"
+        return f"Public radio search location: {label}"
 
     def _cycle_radio_discovery_location(self, direction: int) -> None:
         modes = ("real", "truck")
