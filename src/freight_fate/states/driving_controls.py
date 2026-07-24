@@ -585,6 +585,27 @@ class DrivingControlsMixin:
         t.set_parking_brake()
         t.throttle = 0.0
         self._cancel_cruise()
+        speed = t.speed_mph
+        if speed > DYNAMITE_MIN_MPH:
+            # Dynamiting the brakes: pulling the valve at speed is NOT
+            # impossible in a real truck -- it is the emergency backup, and
+            # it is violent. The springs slam the drive axle, the tires
+            # flat-spot against the pavement, and the tread bill scales
+            # with how fast you were going (owner design question,
+            # 2026-07-24: realism says allowed-with-consequences, never
+            # impossible). No waiting fast-forward while still rolling.
+            t.tire_wear_pct = min(100.0, t.tire_wear_pct + speed * FLAT_SPOT_WEAR_PCT_PER_MPH)
+            self.ctx.audio.play("vehicle/tire_screech", volume=0.9)
+            self.ctx.audio.play("vehicle/brake_set", volume=0.9)
+            self.ctx.controller.rumble.alert()
+            self._set_status("Parking brake dynamited at speed!")
+            self.ctx.say(
+                f"You dynamited the parking brake at {self.ctx.settings.speed_text(speed)}! "
+                "The spring brakes slam the drive axle and the tires grind "
+                "flat spots into the tread. Save it for emergencies.",
+                interrupt=True,
+            )
+            return
         # The player's own brake press means deliberate waiting; auto-sets at
         # trip start, rest stops, and arrivals never arm the fast-forward.
         self.trip.waiting = True

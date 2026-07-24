@@ -124,6 +124,12 @@ ROAD_BRAKE_MIN = 120.0
 FUEL_STOP_MIN = 20.0  # fueling is on-duty-not-driving work
 INSPECTION_MIN = 15.0  # routine scale/inspection check-in time
 OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
+# Dynamiting the parking brake: pulling the valve at speed slams the spring
+# brakes on and grinds flat spots into the tires. Above this speed the set
+# is treated as the violent emergency move it really is; the tread cost
+# scales with speed (55 mph costs about a percent and a half of tread).
+DYNAMITE_MIN_MPH = 5.0
+FLAT_SPOT_WEAR_PCT_PER_MPH = 0.028
 STOP_PULL_IN_MIN = 5.0
 STOP_PULL_IN_WAIT_S = 1.0
 

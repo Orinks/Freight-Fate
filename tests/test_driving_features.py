@@ -3466,3 +3466,40 @@ def test_destination_exit_scan_stays_on_the_final_approach():
         details = DrivingState._scan_destination_exit_details(driving)
         if details is not None:
             assert details[0] >= total - DESTINATION_EXIT_SCAN_WINDOW_MI
+
+
+def test_setting_the_parking_brake_at_speed_dynamites_the_brakes(monkeypatch):
+    """Not impossible -- violent (owner design, 2026-07-24): the real valve
+    is the emergency backup, so at speed the set slams on, flat-spots the
+    tires by speed, warns out loud, and never arms the waiting
+    fast-forward while rolling. A stopped set stays calm and quiet."""
+    from freight_fate.app import App
+
+    spoken: list[str] = []
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        t = driving.truck
+        t.velocity_mps = 55.0 / 2.2369362920544
+        wear_before = t.tire_wear_pct
+
+        driving._toggle_parking_brake()
+
+        assert t.parking_brake
+        assert t.tire_wear_pct > wear_before + 1.0
+        assert driving.trip.waiting is False
+        assert "dynamited" in spoken[-1]
+
+        # Release, stop, set again: the calm path, no extra tread cost.
+        t.release_parking_brake()
+        t.velocity_mps = 0.0
+        wear_stopped = t.tire_wear_pct
+        driving._toggle_parking_brake()
+        assert t.parking_brake
+        assert t.tire_wear_pct == wear_stopped
+        assert driving.trip.waiting is True
+        assert spoken[-1].startswith("Parking brake set.")
+    finally:
+        app.shutdown()

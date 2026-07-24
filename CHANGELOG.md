@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Setting the parking brake at speed now dynamites the brakes.** The
+  valve works at any speed, just like a real truck -- it is the
+  emergency backup -- but pulling it while rolling slams the spring
+  brakes on, screeches the tires, grinds flat spots into your tread
+  scaled by how fast you were going, and tells you plainly to save it
+  for emergencies. Setting it at a stop is as calm as ever.
+
 - **New hires can review the rest of the day's board.** Below level 8,
   dispatch still assigns your load -- but a new board option, "Review
   the rest of today's board", reads out the other postings dispatch put
