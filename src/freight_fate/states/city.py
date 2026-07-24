@@ -1046,7 +1046,7 @@ class JobBoardState(MenuState):
         others = [self.jobs[i] for i in self._assigned_queue[1:]]
         lines = [
             f"{job.weight_tons:.0f} tons of {job.cargo.label} to "
-            f"{job.spoken_destination}, {job.distance_mi:.0f} miles"
+            f"{job.spoken_destination}, {self.ctx.settings.distance_text(job.distance_mi)}"
             for job in others
         ]
         self.ctx.say(
