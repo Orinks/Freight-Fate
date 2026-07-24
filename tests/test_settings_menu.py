@@ -240,22 +240,45 @@ def test_settings_menu_volume_survives_new_app_session():
         next_app.shutdown()
 
 
-def test_public_radio_setting_names_online_services_blocker():
+def test_audio_settings_have_one_public_audio_gate_and_aligned_keyboard_actions():
     from freight_fate.app import App
     from freight_fate.states.main_menu import SettingsCategoryState
 
     app = App()
     try:
-        app.ctx.settings.radio_real_streams = True
-        app.ctx.settings.radio_streamer_safe = False
-        app.ctx.settings.online_services = False
         menu = SettingsCategoryState(app.ctx, "audio")
+        menu.items = menu.build_items()
+        labels = [item.text for item in menu.items]
+        assert sum(label.startswith("Radio streamer-safe mode") for label in labels) == 1
+        assert not any("real public streams" in label.lower() for label in labels)
+        assert not any(label.startswith("Public streams") for label in labels)
 
-        label = menu._radio_streams_label()
+        menu.index = next(
+            index
+            for index, item in enumerate(menu.items)
+            if item.text.startswith("Radio streamer-safe mode")
+        )
+        before_safe = app.ctx.settings.radio_streamer_safe
+        menu._adjust(1)
+        assert app.ctx.settings.radio_streamer_safe is not before_safe
 
-        assert "allowed" in label
-        assert "Online services off" in label
-        assert "Built-ins remain" in label
+        menu.index = next(
+            index
+            for index, item in enumerate(menu.items)
+            if item.text.startswith("Nearby radio location")
+        )
+        before_location = app.ctx.settings.radio_discovery_location
+        menu._adjust(1)
+        assert app.ctx.settings.radio_discovery_location != before_location
+
+        menu.index = next(
+            index
+            for index, item in enumerate(menu.items)
+            if item.text.startswith("Menu and UI sounds volume")
+        )
+        before_volume = app.ctx.settings.ui_volume
+        menu._adjust(-1)
+        assert app.ctx.settings.ui_volume < before_volume
     finally:
         app.shutdown()
 
@@ -293,16 +316,13 @@ def test_radio_settings_help_names_every_playback_gate():
     try:
         menu = SettingsCategoryState(app.ctx, "audio")
         menu.items = menu.build_items()
-        public_help = next(
-            item.help for item in menu.items if item.text.startswith("Public streams")
-        )
         safe_help = next(
             item.help for item in menu.items if item.text.startswith("Radio streamer-safe mode")
         )
 
-        assert "Online services" in public_help
-        assert "streamer-safe mode" in public_help
-        assert "audio system" in public_help
+        assert "automatically found public stations" in safe_help
+        assert "Online services" in safe_help
+        assert "audio system" in safe_help
         assert "personal M3U playlists" in safe_help
     finally:
         app.shutdown()

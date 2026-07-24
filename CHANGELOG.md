@@ -76,10 +76,12 @@
   long event. Every shift, manual or automatic, is a real recorded shift,
   and no two in a row sound identical.
 
-- **Nearby public radio now finds itself.** Allow real streams, turn
-  streamer-safe mode off, and working public stations near your
-  approximate real-world location quietly join the normal bracket-key
-  dial. If location lookup fails, the search follows the simulated truck.
+- **Public radio now finds itself.** Turn streamer-safe mode off and
+  working public stations quietly join the normal bracket-key dial.
+  Coordinate-backed stations are filtered by approximate distance;
+  state-matched stations without coordinates are labeled internet-only
+  and make no distance or signal claim. If location lookup fails, the
+  search follows the simulated truck.
   Saved results keep the dial useful offline, and built-in stations are
   always ready while the background check runs.
 
@@ -100,13 +102,13 @@
   a network drive, and the usual formats all play. The station picks up
   where it left off when you tune away and back during a drive, and a
   file that will not open is skipped instead of stopping the music.
-  Like real public streams, your playlists play only when streamer-safe
+  Like public station audio, your playlists play only when streamer-safe
   mode is off.
 
 - **The radio dial now jumps by category.** Control with a bracket key
   leaps to the previous or next section of the dial -- route playlist,
   Freight Fate stations, your playlists, terrestrial, nearby internet,
-  or satellite -- and announces where you landed. Plain bracket keys
+  internet-only, or satellite -- and announces where you landed. Plain bracket keys
   still tune every station.
 
 - **The road now names the towns that change your speed limit.** When a
@@ -287,13 +289,13 @@
   a network drive, and the usual formats all play. The station picks up
   where it left off when you tune away and back during a drive, and a
   file that will not open is skipped instead of stopping the music.
-  Like real public streams, your playlists play only when streamer-safe
+  Like public station audio, your playlists play only when streamer-safe
   mode is off.
 
 - **The radio dial now jumps by category.** Control with a bracket key
   leaps to the previous or next section of the dial -- route playlist,
   Freight Fate stations, your playlists, terrestrial, nearby internet,
-  or satellite -- and announces where you landed. Plain bracket keys
+  internet-only, or satellite -- and announces where you landed. Plain bracket keys
   still tune every station.
 
 - **The road now names the towns that change your speed limit.** When a
@@ -516,7 +518,8 @@
 
 - **The radio no longer ships a list of public stream addresses.** It
   checks the public directory at runtime, keeps only working and
-  compatible nearby stations, and remembers results for offline use.
+  compatible nearby or state-matched internet-only stations, and
+  remembers results for offline use.
   That means fewer dead entries and no catalog update whenever a station
   moves its stream.
 
@@ -1922,8 +1925,8 @@
   keys to tune receivable stations, Y for spoken station status, and Tab for a
   Radio status screen. The checked-in catalog now includes regional public
   stations across the game map plus multiple AFN choices. Streamer-safe mode
-  stays on by default, real public streams stay hidden unless explicitly opted
-  in, and external streams fall back safely until live stream playback is added.
+  stays on by default, public station audio stays hidden while it is on, and
+  external streams fall back safely until live stream playback is added.
 - **Highway exits now require a real setup.** X signals for the next announced
   exit instead of magically taking it. The GPS now stages the maneuver, asks for
   the right-side exit lane, checks that you are slowed to ramp speed at the

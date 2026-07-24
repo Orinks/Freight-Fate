@@ -13,7 +13,6 @@ from ..models.profile import Profile, ProfileIntegrityError
 from ..models.start_options import apply_start_option, option_for_profile
 from ..music import select_menu_music_sequence
 from ..playtest_levers import apply_continue_levers
-from ..radio import public_stream_availability
 from ..settings import (
     DRIVING_ASSIST_FIELDS,
     DRIVING_ASSIST_PRESETS,
@@ -916,15 +915,10 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Radio streamer-safe mode: {'on' if s.radio_streamer_safe else 'off'}",
                     lambda: self._toggle_radio_streamer_safe(1),
-                    help="When on, the radio uses only built-in safe stations. "
-                    "Real public streams and personal M3U playlists are hidden.",
-                ),
-                MenuItem(
-                    lambda: self._radio_streams_label(),
-                    lambda: self._toggle_radio_real_streams(1),
-                    help="Allow nearby public stations to join the normal bracket-key dial. "
-                    "Online services must be on, streamer-safe mode must be off, and "
-                    "the active audio system must support public streams.",
+                    help="On keeps the radio on built-in safe stations. Off also permits "
+                    "personal M3U playlists and automatically found public stations for "
+                    "your region. Public stations additionally require Online services and an "
+                    "audio system that supports streams.",
                 ),
                 MenuItem(
                     lambda: self._radio_discovery_location_label(),
@@ -1021,7 +1015,6 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("radio_volume", 0.1 * d),
                     self._toggle_radio_streamer_safe,
-                    self._toggle_radio_real_streams,
                     self._cycle_radio_discovery_location,
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
@@ -1413,17 +1406,7 @@ class SettingsCategoryState(MenuState):
     def _toggle_radio_streamer_safe(self, _d: int) -> None:
         self.ctx.settings.radio_streamer_safe = not self.ctx.settings.radio_streamer_safe
         self._announce()
-
-    def _toggle_radio_real_streams(self, _d: int) -> None:
-        self.ctx.settings.radio_real_streams = not self.ctx.settings.radio_real_streams
-        self._announce()
-
-    def _radio_streams_label(self) -> str:
-        supports_streams = getattr(self.ctx.audio, "supports_radio_streams", lambda: True)
-        return public_stream_availability(
-            self.ctx.settings,
-            backend_supported=supports_streams(),
-        )
+        self.ctx.apply_active_radio_settings()
 
     def _radio_discovery_location_label(self) -> str:
         value = self.ctx.settings.radio_discovery_location

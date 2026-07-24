@@ -123,8 +123,9 @@ signal strength, distance, and source.
 - Overspeed warning: on, urgent only, or off. Urgent only stays quiet until
   you are far past the limit -- for drivers who speed on purpose but still
   want the runaway alarm.
-- Radio real public streams: allow live stations on the dial. Streamer-safe
-  mode must also be off before they play.
+- Radio streamer-safe mode: on keeps built-in safe stations only; off permits
+  personal playlists and automatic public-station discovery when Online
+  services and the audio system allow it.
 - Automatic direction changes: both styles now use the same gesture -- a
   fresh press held at a standstill. The setting remains for familiarity.
 

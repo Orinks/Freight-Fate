@@ -145,7 +145,6 @@ class Settings:
     radio_enabled: bool = True
     radio_station_id: str = "route_playlist"
     radio_streamer_safe: bool = True
-    radio_real_streams: bool = False
     radio_discovery_location: str = "real"  # real / truck
     weather_volume: float = 0.65
     engine_volume: float = 0.55
@@ -338,8 +337,6 @@ class Settings:
             s.radio_station_id = "route_playlist"
         if not isinstance(s.radio_streamer_safe, bool):
             s.radio_streamer_safe = True
-        if not isinstance(s.radio_real_streams, bool):
-            s.radio_real_streams = False
         if s.radio_discovery_location not in ("real", "truck"):
             s.radio_discovery_location = "real"
         return s

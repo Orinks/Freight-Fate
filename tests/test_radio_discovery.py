@@ -17,18 +17,23 @@ def _location(source="real"):
     return ApproximateLocation(42.88, -78.87, "Buffalo", "New York", "NY", source=source)
 
 
-def _station(uuid="12345678-1234-1234-1234-123456789abc"):
+def _station(
+    uuid="12345678-1234-1234-1234-123456789abc",
+    *,
+    internet_only=False,
+):
     return DirectoryStation(
         uuid,
         "KTEST",
         "community; MP3, 128 kilobits",
         "MP3",
         128,
-        "https://1.1.1.1/live",
-        42.9,
-        -78.8,
-        4.0,
+        f"https://1.1.1.1/{uuid[:8]}/live",
+        None if internet_only else 42.9,
+        None if internet_only else -78.8,
+        None if internet_only else 4.0,
         "New York",
+        internet_only=internet_only,
     )
 
 
@@ -160,7 +165,11 @@ def test_approximate_location_provider_rejects_unusable_responses(updates):
 def test_cache_ttl_uses_fresh_data_without_network(tmp_path, monkeypatch):
     cache = RadioDiscoveryCache(tmp_path)
     cache.save_location(_location(), now=100.0)
-    cache.save_state("NY", (_station(),), now=100.0)
+    internet = _station(
+        "22345678-1234-1234-1234-123456789abc",
+        internet_only=True,
+    )
+    cache.save_state("NY", (_station(), internet), now=100.0)
     directory = _Directory(error=AssertionError("network should not run"))
     manager = RadioDiscoveryManager(
         location_provider=_LocationProvider(error=AssertionError("location should not run")),
@@ -188,6 +197,8 @@ def test_cache_ttl_uses_fresh_data_without_network(tmp_path, monkeypatch):
     result = _poll_after(manager, done)
     assert result.outcome == "cached"
     assert result.stations[0].uuid == _station().uuid
+    assert result.stations[1].internet_only is True
+    assert result.stations[1].distance_miles is None
     assert directory.calls == []
 
 

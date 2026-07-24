@@ -2,6 +2,7 @@ import pytest
 
 from freight_fate.radio import (
     DEFAULT_RADIO_CATALOG,
+    DIRECTORY_INTERNET_ONLY_SOURCE_TYPE,
     DIRECTORY_SOURCE_TYPE,
     SAFE_FALLBACK_STATION_ID,
     SAFE_ROUTE_PLAYLIST,
@@ -39,6 +40,7 @@ def _directory_station(
     uuid="12345678-1234-1234-1234-123456789abc",
     name="KTEST Community",
     distance=5.0,
+    internet_only=False,
 ):
     return DirectoryStation(
         uuid=uuid,
@@ -47,11 +49,12 @@ def _directory_station(
         codec="MP3",
         bitrate=128,
         stream_url="https://stream.example/live",
-        lat=42.9,
-        lon=-78.8,
-        distance_miles=distance,
+        lat=None if internet_only else 42.9,
+        lon=None if internet_only else -78.8,
+        distance_miles=None if internet_only else distance,
         state="New York",
         city="Buffalo",
+        internet_only=internet_only,
     )
 
 
@@ -75,7 +78,6 @@ def test_radio_defaults_to_streamer_safe_builtin_station():
     assert radio.current_station().id == SAFE_ROUTE_PLAYLIST
     assert radio.volume == 0.25
     assert radio.streamer_safe is True
-    assert radio.real_streams_enabled is False
     assert not any(
         station.source_type == DIRECTORY_SOURCE_TYPE for station in radio.available_stations()
     )
@@ -83,8 +85,8 @@ def test_radio_defaults_to_streamer_safe_builtin_station():
     assert "always available" in radio.status_text()
 
 
-def test_real_stream_station_requires_opt_in_and_streamer_safe_off():
-    radio = RadioState(real_streams_enabled=True, streamer_safe=True)
+def test_public_station_requires_only_streamer_safe_off():
+    radio = RadioState(streamer_safe=True)
     radio.replace_directory_stations((_directory_station(),))
     assert not any(
         station.source_type == DIRECTORY_SOURCE_TYPE for station in radio.available_stations()
@@ -109,7 +111,6 @@ def test_radio_persists_enabled_station_and_volume():
     settings.radio_station_id = "ff-night-line"
     settings.radio_volume = 0.4
     settings.radio_streamer_safe = False
-    settings.radio_real_streams = True
     settings.save()
 
     loaded = Settings.load()
@@ -119,7 +120,6 @@ def test_radio_persists_enabled_station_and_volume():
     assert radio.station_id == "ff-night-line"
     assert radio.volume == 0.4
     assert radio.streamer_safe is False
-    assert radio.real_streams_enabled is True
 
 
 def test_regional_station_filtering_uses_simulated_truck_position():
@@ -136,7 +136,6 @@ def test_regional_station_filtering_uses_simulated_truck_position():
 
 def test_tuning_uses_receivable_stations_not_global_catalog():
     radio = RadioState(
-        real_streams_enabled=True,
         streamer_safe=False,
         position=(47.61, -122.33),
     )
@@ -156,7 +155,6 @@ def test_no_regional_signal_still_has_safe_fallback_choices():
     # Interior Nevada on US-50: real radio darkness even after the
     # 623-city coverage fill (central South Dakota is SDPB country now).
     radio = RadioState(
-        real_streams_enabled=True,
         streamer_safe=False,
         position=(38.9, -116.6),
     )
@@ -172,7 +170,6 @@ def test_radio_falls_back_when_backend_cannot_play_selected_station():
     radio = RadioState(
         catalog=DEFAULT_RADIO_CATALOG,
         enabled=True,
-        real_streams_enabled=True,
         streamer_safe=False,
     )
     radio.replace_directory_stations((stream,))
@@ -234,7 +231,6 @@ def test_driving_radio_backend_plays_real_stream_url():
 def test_spoken_status_includes_signal_source_safety_and_volume():
     stream = _directory_station(name="KTEST Buffalo")
     radio = RadioState(
-        real_streams_enabled=True,
         streamer_safe=False,
         volume=0.35,
     )
@@ -250,11 +246,31 @@ def test_spoken_status_includes_signal_source_safety_and_volume():
     assert "Source:" in text
 
 
+def test_internet_only_station_is_always_receivable_without_distance_or_signal_claim():
+    stream = _directory_station(name="Statewide Web", internet_only=True)
+    radio = RadioState(streamer_safe=False, volume=0.35)
+    radio.replace_directory_stations((stream,))
+    station_id = f"radio-browser:{stream.uuid}"
+    radio.select_station(station_id)
+
+    station = radio.current_station()
+    reception = radio.current_reception()
+    text = radio.status_text()
+
+    assert station.source_type == DIRECTORY_INTERNET_ONLY_SOURCE_TYPE
+    assert station.always_available is True
+    assert reception.distance_miles is None
+    assert reception.signal_label == "internet-only station"
+    assert "internet-only station" in text
+    assert "nearby" not in text.lower()
+    assert "miles" not in text.lower()
+    assert "signal" not in text.lower()
+
+
 def test_discovery_arrival_preserves_current_playback_and_stable_preference():
     radio = RadioState(
         enabled=True,
         station_id="radio-browser:12345678-1234-1234-1234-123456789abc",
-        real_streams_enabled=True,
         streamer_safe=False,
     )
     assert radio.current_station().id == SAFE_FALLBACK_STATION_ID

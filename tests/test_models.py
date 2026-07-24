@@ -594,7 +594,6 @@ def test_settings_roundtrip():
     s.radio_enabled = False
     s.radio_station_id = "ff-night-line"
     s.radio_streamer_safe = False
-    s.radio_real_streams = True
     s.weather_volume = 0.4
     s.engine_volume = 0.7
     s.ui_volume = 0.8
@@ -607,7 +606,6 @@ def test_settings_roundtrip():
     assert loaded.radio_enabled is False
     assert loaded.radio_station_id == "ff-night-line"
     assert loaded.radio_streamer_safe is False
-    assert loaded.radio_real_streams is True
     assert loaded.weather_volume == 0.4
     assert loaded.engine_volume == 0.7
     assert loaded.ui_volume == 0.8
@@ -627,7 +625,31 @@ def test_radio_defaults_are_streamer_safe_and_quiet():
     assert s.radio_enabled is True
     assert s.radio_volume == 0.25
     assert s.radio_streamer_safe is True
-    assert s.radio_real_streams is False
+
+
+@pytest.mark.parametrize("legacy_value", [False, True])
+def test_legacy_public_stream_setting_is_ignored_and_removed_on_save(legacy_value):
+    settings = Settings()
+    settings.path.parent.mkdir(parents=True, exist_ok=True)
+    settings.path.write_text(
+        json.dumps(
+            {
+                "radio_real_streams": legacy_value,
+                "radio_streamer_safe": False,
+                "radio_volume": 0.4,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    loaded = Settings.load()
+    assert not hasattr(loaded, "radio_real_streams")
+    assert loaded.radio_streamer_safe is False
+    assert loaded.radio_volume == 0.4
+
+    loaded.save()
+    saved = json.loads(loaded.path.read_text(encoding="utf-8"))
+    assert "radio_real_streams" not in saved
 
 
 def test_split_audio_volume_defaults_prioritize_cues_over_background():

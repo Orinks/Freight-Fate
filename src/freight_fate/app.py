@@ -390,6 +390,18 @@ class GameContext:
         pool_name, sequence = self._music_rotation_pool
         self.play_music_sequence(pool_name, sequence, advance=True)
 
+    def apply_active_radio_settings(self) -> None:
+        """Apply radio gates to a covered drive without changing menu focus."""
+
+        for state in reversed(self._app.states):
+            sync = getattr(state, "_sync_radio_settings", None)
+            update_discovery = getattr(state, "_update_radio_discovery", None)
+            if sync is None or update_discovery is None:
+                continue
+            sync()
+            update_discovery()
+            break
+
     def clear_music_rotation(self) -> None:
         self._music_rotation_pool = None
         self._music_rotation_track = None

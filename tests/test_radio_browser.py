@@ -96,12 +96,16 @@ def test_client_queries_state_with_mirror_failover_and_descriptive_agent():
     assert request.headers["User-agent"].startswith("Freight-Fate/")
 
 
-def test_normalization_filters_distance_codec_bitrate_geo_and_region():
+def test_normalization_filters_distance_codec_bitrate_and_region():
     rows = [
         _row(),
         _row(stationuuid="22345678-1234-1234-1234-123456789abc", codec="WMA"),
         _row(stationuuid="32345678-1234-1234-1234-123456789abc", bitrate=8),
-        _row(stationuuid="42345678-1234-1234-1234-123456789abc", geo_lat=None),
+        _row(
+            stationuuid="42345678-1234-1234-1234-123456789abc",
+            geo_lat=None,
+            url_resolved="https://internet.example/live",
+        ),
         _row(
             stationuuid="52345678-1234-1234-1234-123456789abc",
             state="California",
@@ -122,7 +126,55 @@ def test_normalization_filters_distance_codec_bitrate_geo_and_region():
         resolver=_resolver,
         distance_cap_miles=100,
     )
-    assert [station.uuid for station in result] == ["12345678-1234-1234-1234-123456789abc"]
+    assert [station.uuid for station in result] == [
+        "12345678-1234-1234-1234-123456789abc",
+        "42345678-1234-1234-1234-123456789abc",
+    ]
+    assert result[1].internet_only is True
+    assert result[1].lat is None
+    assert result[1].distance_miles is None
+
+
+def test_coordinate_less_station_requires_matching_state_or_iso_region():
+    rows = [
+        _row(geo_lat=None, geo_long=None),
+        _row(
+            stationuuid="22345678-1234-1234-1234-123456789abc",
+            state="",
+            iso_3166_2="US-NY",
+            geo_lat=None,
+            geo_long=None,
+            url_resolved="https://iso.example/live",
+        ),
+        _row(
+            stationuuid="32345678-1234-1234-1234-123456789abc",
+            state="",
+            iso_3166_2="",
+            geo_lat=None,
+            geo_long=None,
+            url_resolved="https://noise.example/live",
+        ),
+        _row(
+            stationuuid="42345678-1234-1234-1234-123456789abc",
+            state="California",
+            iso_3166_2="US-CA",
+            geo_lat=None,
+            geo_long=None,
+            url_resolved="https://wrong.example/live",
+        ),
+    ]
+    result = normalize_stations(
+        rows,
+        state_name="New York",
+        state_code="NY",
+        position=(42.88, -78.87),
+        resolver=_resolver,
+    )
+    assert [station.uuid for station in result] == [
+        "12345678-1234-1234-1234-123456789abc",
+        "22345678-1234-1234-1234-123456789abc",
+    ]
+    assert all(station.internet_only for station in result)
 
 
 @pytest.mark.parametrize(
@@ -196,6 +248,50 @@ def test_normalization_deduplicates_uuid_and_has_stable_bounded_order():
     assert len({station.uuid for station in result}) == len(result)
 
 
+def test_bounded_order_reserves_room_for_nearby_and_internet_only_stations():
+    rows = []
+    for index in range(30):
+        rows.append(
+            _row(
+                stationuuid=f"{index:08x}-1234-1234-1234-123456789abc",
+                name=f"Nearby {index:02}",
+                geo_lat=42.88 + index * 0.001,
+                url_resolved=f"https://nearby{index}.example/live",
+            )
+        )
+        rows.append(
+            _row(
+                stationuuid=f"{index + 100:08x}-1234-1234-1234-123456789abc",
+                name=f"Internet {index:02}",
+                geo_lat=None,
+                geo_long=None,
+                url_resolved=f"https://internet{index}.example/live",
+            )
+        )
+    rows.append(
+        _row(
+            stationuuid="ffffffff-1234-1234-1234-123456789abc",
+            name="Duplicate Internet",
+            geo_lat=None,
+            geo_long=None,
+            url_resolved="https://nearby0.example/live",
+        )
+    )
+    result = normalize_stations(
+        list(reversed(rows)),
+        state_name="New York",
+        state_code="NY",
+        position=(42.88, -78.87),
+        resolver=_resolver,
+    )
+    assert len(result) == NEARBY_DIAL_LIMIT
+    assert sum(not station.internet_only for station in result) == 18
+    assert sum(station.internet_only for station in result) == 6
+    assert [station.name for station in result[:2]] == ["Nearby 00", "Nearby 01"]
+    assert [station.name for station in result[-2:]] == ["Internet 04", "Internet 05"]
+    assert len({station.stream_url for station in result}) == len(result)
+
+
 def test_sanitizer_removes_control_characters_and_limits_length():
     assert sanitize_directory_text(" Hello\n\tworld\x00 " + "x" * 20, limit=12) == "Hello world"
 
@@ -217,6 +313,40 @@ def test_cached_station_metadata_is_revalidated_before_reuse():
         filter_cached_stations(
             (cached,),
             position=(42.88, -78.87),
+            resolver=_resolver,
+        )
+        == ()
+    )
+
+
+def test_internet_only_cached_station_round_trips_without_distance_claim():
+    cached = DirectoryStation(
+        uuid="12345678-1234-1234-1234-123456789abc",
+        name="Statewide Web",
+        format="community",
+        codec="MP3",
+        bitrate=128,
+        stream_url="https://stream.example/live",
+        lat=None,
+        lon=None,
+        distance_miles=None,
+        state="New York",
+        internet_only=True,
+    )
+    result = filter_cached_stations(
+        (DirectoryStation.from_cache(cached.to_cache()),),
+        position=(40.7, -74.0),
+        resolver=_resolver,
+    )
+    assert len(result) == 1
+    assert result[0].internet_only is True
+    assert result[0].distance_miles is None
+    assert result[0].lat is None
+    assert (
+        filter_cached_stations(
+            (cached,),
+            position=(40.7, -74.0),
+            state_name="California",
             resolver=_resolver,
         )
         == ()

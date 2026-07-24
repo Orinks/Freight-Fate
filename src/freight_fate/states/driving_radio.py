@@ -11,10 +11,7 @@ class DrivingRadioDiscoveryMixin:
         settings = self.ctx.settings
         supports_streams = getattr(self.ctx.audio, "supports_radio_streams", lambda: True)
         return bool(
-            settings.online_services
-            and settings.radio_real_streams
-            and not settings.radio_streamer_safe
-            and supports_streams()
+            settings.online_services and not settings.radio_streamer_safe and supports_streams()
         )
 
     def _truck_radio_location(self) -> ApproximateLocation:
@@ -75,11 +72,6 @@ class DrivingRadioDiscoveryMixin:
                 settings = self.ctx.settings
                 if not settings.online_services:
                     message = "Online services are off. Built-in stations remain available."
-                elif not settings.radio_real_streams:
-                    message = (
-                        "Real public streams are off. Turn them on in Audio settings "
-                        "to find nearby stations."
-                    )
                 elif settings.radio_streamer_safe:
                     message = (
                         "Real public streams are hidden by streamer-safe mode. "
@@ -112,7 +104,7 @@ class DrivingRadioDiscoveryMixin:
             if mode == LOCATION_MODE_REAL
             else f"the simulated truck near {truck.city}, {truck.state}"
         )
-        self._radio_discovery_status = f"Checking nearby stations for {mode_text}."
+        self._radio_discovery_status = f"Checking public radio for {mode_text}."
         if explicit:
             self.ctx.say(self._radio_discovery_status)
         return result
@@ -146,16 +138,24 @@ class DrivingRadioDiscoveryMixin:
         preferred = self.radio.station_by_id(self.radio.preferred_station_id)
         if (
             preferred is not None
-            and preferred.source_type == DIRECTORY_SOURCE_TYPE
+            and preferred.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES
             and preferred.id != self.radio.station_id
         ):
             message += f" Saved station {preferred.display_name} is back on the dial."
         self._radio_discovery_status = message
+        restore_candidate = bool(
+            preferred is not None
+            and preferred.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES
+            and preferred.id != self.radio.station_id
+        )
+        if restore_candidate and self._radio_pending_station_id:
+            # The player's newer bracket choice wins for this drive. Keep the
+            # older saved ID persisted only if that explicit tune fails.
+            self._radio_saved_station_restore_attempted = True
         should_restore = (
             not self._radio_saved_station_restore_attempted
-            and preferred is not None
-            and preferred.source_type == DIRECTORY_SOURCE_TYPE
-            and preferred.id != self.radio.station_id
+            and not self._radio_pending_station_id
+            and restore_candidate
         )
         if should_restore:
             self._radio_saved_station_restore_attempted = True
@@ -170,28 +170,35 @@ class DrivingRadioDiscoveryMixin:
 
     @staticmethod
     def _radio_discovery_message(result: DiscoveryResult) -> str:
-        location = result.location.label
+        state = result.location.state
         fallback = (
             " Your approximate location was unavailable, so the simulated truck was used."
             if result.used_truck_fallback
             else ""
         )
-        count = len(result.stations)
+        nearby = sum(not station.internet_only for station in result.stations)
+        internet_only = sum(station.internet_only for station in result.stations)
+        counts = []
+        if nearby:
+            counts.append(f"{nearby} nearby")
+        if internet_only:
+            counts.append(f"{internet_only} internet-only")
+        summary = " and ".join(counts) or "none"
         if result.outcome == "updated":
-            return f"Nearby stations updated for {location}: {count} available.{fallback}"
+            return f"Public radio updated for {state}: {summary}.{fallback}"
         if result.outcome == "cached":
-            return f"Using saved nearby stations for {location}: {count} available.{fallback}"
+            return f"Using saved public radio for {state}: {summary}.{fallback}"
         if result.outcome == "stale":
             return (
-                f"Using saved nearby stations for {location}. "
+                f"Using saved public radio for {state}: {summary}. "
                 f"The live station directory could not be reached.{fallback}"
             )
         if result.outcome == "empty":
             return (
-                f"No nearby public stations were found for {location}. "
+                f"No matching public stations were found for {state}. "
                 f"Built-in stations remain available.{fallback}"
             )
-        return f"Nearby stations could not be loaded. Built-in stations remain available.{fallback}"
+        return f"Public radio could not be loaded. Built-in stations remain available.{fallback}"
 
     def _begin_radio_stream_tune(
         self,
@@ -300,16 +307,17 @@ class DrivingRadioDiscoveryMixin:
         self._radio_tune_generation += 1
         self._radio_pending_station_id = ""
 
-    def _cancel_blocked_radio_tune(self) -> None:
+    def _cancel_blocked_radio_tune(self, *, announce: bool = True) -> bool:
         if self._radio_discovery_allowed() or not self._radio_pending_station_id:
-            return
+            return False
         self._cancel_radio_tune()
-        if self.radio.enabled:
+        if announce and self.radio.enabled:
             current = self.radio.current_station()
             self.ctx.say(
                 f"Public station tuning canceled. {current.display_name} remains playing.",
                 interrupt=False,
             )
+        return True
 
     def _radio_stream_availability_text(self) -> str:
         supports_streams = getattr(self.ctx.audio, "supports_radio_streams", lambda: True)
@@ -336,7 +344,7 @@ class DrivingRadioDiscoveryMixin:
         if (
             pending is None
             and preferred is not None
-            and preferred.source_type == DIRECTORY_SOURCE_TYPE
+            and preferred.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES
             and preferred.id != self.radio.station_id
         ):
             text += (
@@ -350,31 +358,48 @@ class DrivingRadioDiscoveryMixin:
     def _sync_radio_settings(self) -> None:
         station_before = self.radio.station_id
         selected_before = self.radio.station_by_id(station_before)
+        pending_before = self.radio.station_by_id(self._radio_pending_station_id)
         self.radio.apply_settings(self.ctx.settings)
         self.radio.update_position(
             truck_position(self.route, self.trip.position_mi, self.ctx.world)
         )
         self.radio.current_station()
-        self._cancel_blocked_radio_tune()
-        public_stream_became_unavailable = bool(
+        selected_became_unavailable = bool(
             selected_before is not None
-            and selected_before.real_stream
-            and not self._radio_discovery_allowed()
+            and (
+                (selected_before.real_stream and not self._radio_discovery_allowed())
+                or (
+                    selected_before.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE
+                    and self.radio.streamer_safe
+                )
+            )
         )
-        if public_stream_became_unavailable:
+        pending_was_canceled = self._cancel_blocked_radio_tune(
+            announce=not selected_became_unavailable,
+        )
+        if selected_became_unavailable:
+            if (
+                selected_before.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES
+                or pending_before is not None
+                and pending_before.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES
+            ):
+                self._radio_saved_station_restore_attempted = True
             self.radio.station_id = self.radio.fallback_station().id
         if self.radio.station_id != station_before:
             self.radio.write_settings(self.ctx.settings)
             self.ctx.settings.save()
-            if public_stream_became_unavailable:
+            if selected_became_unavailable and self.radio.enabled:
                 self._cancel_radio_tune()
-                action = self.radio.play(
-                    self._radio_backend,
-                    prefix="Real public audio is now hidden. Radio fallback.",
-                )
-                self.ctx.say_event(
-                    f"Real public audio is now hidden. "
-                    f"Playing {action.station.display_name} instead.",
+                cancellation = " Public station tuning canceled." if pending_was_canceled else ""
+                action = self.radio.play(self._radio_backend)
+                if self.ctx.settings.radio_streamer_safe:
+                    reason = "Streamer-safe mode on."
+                elif not self.ctx.settings.online_services:
+                    reason = "Online services off."
+                else:
+                    reason = "Public audio unavailable with this audio system."
+                self.ctx.say(
+                    f"{reason}{cancellation} Playing {action.station.display_name} instead.",
                     interrupt=False,
                 )
 
@@ -387,7 +412,7 @@ class DrivingRadioDiscoveryMixin:
         if self.radio.enabled:
             self._apply_radio_volume()
             station = self.radio.current_station()
-            if station.source_type == DIRECTORY_SOURCE_TYPE:
+            if station.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES:
                 self.radio.station_id = self.radio.fallback_station().id
                 self._begin_radio_stream_tune(station)
             else:
@@ -403,7 +428,7 @@ class DrivingRadioDiscoveryMixin:
     def _toggle_radio(self) -> None:
         self._sync_radio_settings()
         station = self.radio.current_station()
-        if not self.radio.enabled and station.source_type == DIRECTORY_SOURCE_TYPE:
+        if not self.radio.enabled and station.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES:
             self.radio.toggle(None)
             self.radio.station_id = self.radio.fallback_station().id
             self._begin_radio_stream_tune(
@@ -424,7 +449,7 @@ class DrivingRadioDiscoveryMixin:
         )
         self._cancel_radio_tune()
         station = reception.station
-        if station.source_type == DIRECTORY_SOURCE_TYPE and self.radio.enabled:
+        if station.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES and self.radio.enabled:
             self._begin_radio_stream_tune(
                 station,
                 prefix=f"Tuning to {station.display_name}.",
@@ -447,7 +472,7 @@ class DrivingRadioDiscoveryMixin:
         )
         self._cancel_radio_tune()
         station = reception.station
-        if station.source_type == DIRECTORY_SOURCE_TYPE and self.radio.enabled:
+        if station.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES and self.radio.enabled:
             self._begin_radio_stream_tune(
                 station,
                 prefix=f"{category}. Tuning to {station.display_name}.",

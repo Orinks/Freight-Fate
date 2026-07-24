@@ -1,4 +1,4 @@
-"""Cached, asynchronous nearby-radio discovery using approximate location."""
+"""Cached, asynchronous regional radio discovery using approximate location."""
 
 from __future__ import annotations
 
@@ -285,7 +285,11 @@ class RadioDiscoveryManager:
         state_cache = self.cache.load_state(location.state_code)
         cached = _cached_stations(state_cache)
         if state_cache is not None and state_cache.fresh(now) and not force:
-            stations = filter_cached_stations(cached, position=location.position)
+            stations = filter_cached_stations(
+                cached,
+                position=location.position,
+                state_name=location.state,
+            )
             result = DiscoveryResult(
                 generation,
                 key,
@@ -309,7 +313,11 @@ class RadioDiscoveryManager:
                 limit=300,
             )
             self.cache.save_state(location.state_code, state_stations, now=now)
-            stations = filter_cached_stations(state_stations, position=location.position)
+            stations = filter_cached_stations(
+                state_stations,
+                position=location.position,
+                state_name=location.state,
+            )
             outcome = "updated" if stations else "empty"
             result = DiscoveryResult(
                 generation,
@@ -321,7 +329,11 @@ class RadioDiscoveryManager:
                 used_truck_fallback,
             )
         except (OSError, TypeError, ValueError, ConnectionError):
-            stations = filter_cached_stations(cached, position=location.position)
+            stations = filter_cached_stations(
+                cached,
+                position=location.position,
+                state_name=location.state,
+            )
             result = DiscoveryResult(
                 generation,
                 key,

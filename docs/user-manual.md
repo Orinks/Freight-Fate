@@ -740,7 +740,7 @@ Use these keys when you need status without leaving the road:
 | V | Weather and forecast. |
 | M | Toggle the in-cab radio. |
 | [ / ] | Tune the radio down or up. |
-| Ctrl+[ / Ctrl+] | Jump to the previous or next radio category: route playlist, Freight Fate stations, your playlists, terrestrial, nearby internet, or satellite. |
+| Ctrl+[ / Ctrl+] | Jump to the previous or next radio category: route playlist, Freight Fate stations, your playlists, terrestrial, nearby internet, internet-only, or satellite. |
 | Y | Speak radio station, source, signal or fallback state, volume, and streamer-safe status. |
 | Tab | Grouped driving status screens. |
 
@@ -751,7 +751,7 @@ Tab opens the Driving status menu. It has four review screens and a Driver apps 
 | Route | Current route status lines from the active drive. |
 | Driver | Driver name, money, load, objective, truck fuel and damage, transmission, fatigue, hours, and deadline. |
 | Map | Route cities, highways, progress, next guidance, upcoming stops, map points, and toll exposure. |
-| Radio | Current station, stream-safety state, nearby-search mode, and current directory status. |
+| Radio | Current station, stream-safety state, search mode, and latest public-radio result. |
 | Driver apps | A tablet-style app menu for Navigation, Weather, Traffic, Truck stops, Road chatter, and ELD. |
 
 Inside a status screen, Up and Down move line by line, Enter repeats the current
@@ -872,8 +872,7 @@ Audio settings include:
 | Engine sounds volume | Engine start, shutdown, and running engine sounds. |
 | Music volume | Menu and facility background music volume. |
 | In-cab radio volume | Driving radio music volume. It defaults lower than speech and safety cues. |
-| Radio streamer-safe mode | Keeps radio on built-in safe stations and hides real public streams. |
-| Radio real public streams | Allows nearby public stations to join the normal bracket-key dial. Streamer-safe mode must also be off before they appear. |
+| Radio streamer-safe mode | On keeps the radio on built-in safe stations. Off also permits personal playlists and automatic public-station discovery when Online services and the audio system allow it. |
 | Nearby radio location | Uses your approximate real-world location by default, or follows the simulated truck if you choose that mode. |
 | Menu and UI sounds volume | Menu movement, selection, warning, and cash sounds. |
 
@@ -901,7 +900,7 @@ your orinks.net account, cloud backup, and every sharing choice in one place:
 | Item | Purpose |
 | --- | --- |
 | Drivers board | Reads the public board: each driver's name, what they are doing, and how fresh the report is. Viewing the board shares nothing about you and does not require sharing to be on. |
-| Online services | The master switch for every online and live-data feature. When off, real-time weather, traffic, parking, Discord presence, Mastodon sharing, and cloud backup all behave as disabled, and each keeps its own setting for when you turn the master switch back on. |
+| Online services | The master switch for every online and live-data feature. When off, real-time weather, traffic, parking, nearby public radio, Discord presence, Mastodon sharing, and cloud backup all behave as disabled, and each keeps its own setting for when you turn the master switch back on. |
 | Set up orinks.net account | Connects the game to your orinks.net account without turning on Profile sharing or Cloud backup. Everything below uses this one sign-in. |
 | Profile sharing | One optional public setting covers the drivers board, eligible profile details, official achievements, automatic road-journal posts, and the updates feed. It is off until you connect your orinks.net driver and turn it on. The game never publishes the full save, money, coordinates, active cargo details, real name, or precise live location. Detailed career statistics appear only after orinks.net accepts a validated private cloud backup; without one, the public profile remains available but omits those statistics. Turning Profile sharing off stops local posting immediately and hides the public profile independently of Cloud backup. |
 | Back up saves to your orinks.net account | After each game save, upload that career to your own orinks.net account so you can restore it on another computer or after losing this one. Off until you turn it on, and separate from Profile sharing: backups are private to your account and never become public downloads. orinks.net validates each revision before accepting and signing it. It uses the same one-time sign-in as your driver profile, so set that up first. The last ten accepted backups of each career are kept. |
@@ -959,16 +958,22 @@ past the edge. When a station drops out of range the radio announces it and
 falls back to the Roadhouse, which is receivable everywhere along with the
 Night Line and the satellite fallback.
 
-Real public stations are hidden unless you turn on real streams and turn off
-streamer-safe mode. The game quietly checks a public station directory in the
-background, adds working nearby stations to the same bracket-key dial, and keeps
-the built-in or saved dial usable while it checks. It uses an approximate
+Public stations are hidden while streamer-safe mode is on. Turn it off and the
+game quietly checks a public station directory in the background whenever
+Online services and the audio system allow it. Working stations join the same
+bracket-key dial while the built-in or saved dial remains usable. It uses an approximate
 network-based real-world location by default. If that lookup fails, it follows
 the simulated truck instead; you can also choose Follow the simulated truck in
 Audio settings. Location and station results are saved for about a day so the
 game does not keep asking the network. If the directory is offline, saved
 results remain available. If no saved results work, the built-in stations
 remain. No location permission prompt is needed.
+
+Stations with credible coordinates are distance-filtered and described as
+nearby internet stations. A state-matched station without coordinates can still
+join a reserved internet-only part of the dial. It is always receivable while
+present and never claims a distance, signal strength, terrestrial range, or
+nearby identity.
 
 Selecting a public station says that it is tuning while the game checks and
 opens the stream away from the driving loop. Success and fallback are spoken
@@ -988,7 +993,7 @@ vouch for what your files are licensed for. Ctrl+Right bracket jumps straight
 to the category.
 
 The dial is grouped into categories -- route playlist, Freight Fate stations,
-your playlists, terrestrial, nearby internet, and satellite -- and Ctrl with a
+your playlists, terrestrial, nearby internet, internet-only, and satellite -- and Ctrl with a
 bracket key jumps between them. Plain bracket keys still move through every
 station.
 

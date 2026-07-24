@@ -22,21 +22,24 @@ EARTH_RADIUS_MI = 3958.8
 # than in any in-game browse dialog.
 PERSONAL_PLAYLIST_SOURCE_TYPE = "playlist"
 DIRECTORY_SOURCE_TYPE = "directory_nearby"
+DIRECTORY_INTERNET_ONLY_SOURCE_TYPE = "directory_internet_only"
+PUBLIC_DIRECTORY_SOURCE_TYPES = {
+    DIRECTORY_SOURCE_TYPE,
+    DIRECTORY_INTERNET_ONLY_SOURCE_TYPE,
+}
 PLAYLISTS_DIR_NAME = "Playlists"
 
 
 def public_stream_availability(settings, *, backend_supported: bool) -> str:
-    """Describe the preference and its effective playback availability."""
+    """Describe automatic nearby-station playback availability."""
 
-    if not settings.radio_real_streams:
-        return "Public streams: off. Built-ins remain."
-    if not settings.online_services:
-        return "Public streams allowed; Online services off. Built-ins remain."
     if settings.radio_streamer_safe:
-        return "Public streams allowed; hidden by streamer-safe mode. Built-ins remain."
+        return "Streamer-safe on: public radio and personal playlists hidden."
+    if not settings.online_services:
+        return "Public stations unavailable: Online services off. Local radio remains."
     if not backend_supported:
-        return "Public streams allowed; audio system cannot play them. Built-ins remain."
-    return "Public streams: available."
+        return "Public stations unavailable with this audio system. Local radio remains."
+    return "Public radio discovery: available."
 
 
 @dataclass(frozen=True)
@@ -93,6 +96,8 @@ class RadioReception:
     def signal_label(self) -> str:
         if self.station.source_type == DIRECTORY_SOURCE_TYPE:
             return "nearby internet station"
+        if self.station.source_type == DIRECTORY_INTERNET_ONLY_SOURCE_TYPE:
+            return "internet-only station"
         if self.fallback:
             return "fallback"
         if self.station.always_available:
@@ -267,16 +272,18 @@ def _dial_group(station: RadioStation) -> int:
     if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
         return 2
     if station.fallback:
-        return 7
+        return 8
     if station.source_type in {"local", "regional"}:
         return 3
     if station.source_type == DIRECTORY_SOURCE_TYPE:
         return 4
-    if station.source_type == "afn":
+    if station.source_type == DIRECTORY_INTERNET_ONLY_SOURCE_TYPE:
         return 5
-    if station.source_type == "satellite":
+    if station.source_type == "afn":
         return 6
-    return 8
+    if station.source_type == "satellite":
+        return 7
+    return 9
 
 
 DIAL_CATEGORY_NAMES = {
@@ -285,10 +292,11 @@ DIAL_CATEGORY_NAMES = {
     2: "Your playlists",
     3: "Terrestrial",
     4: "Nearby internet",
-    5: "AFN",
-    6: "Satellite",
-    7: "Fallback",
-    8: "Other stations",
+    5: "Internet-only",
+    6: "AFN",
+    7: "Satellite",
+    8: "Fallback",
+    9: "Other stations",
 }
 
 
@@ -296,7 +304,7 @@ def station_distance_miles(
     station: RadioStation,
     position: tuple[float, float] | None,
 ) -> float | None:
-    if station.source_type == DIRECTORY_SOURCE_TYPE:
+    if station.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES:
         return station.approximate_distance_miles
     if position is None or station.lat is None or station.lon is None:
         return None
@@ -319,6 +327,8 @@ def estimate_signal(
             1.0,
             "nearby internet",
         )
+    if station.source_type == DIRECTORY_INTERNET_ONLY_SOURCE_TYPE:
+        return RadioReception(station, None, 1.0, "internet only")
     if station.always_available:
         return RadioReception(station, None, 1.0, "always available")
     if station.range_miles <= 0:
@@ -413,7 +423,6 @@ class RadioState:
         enabled: bool = True,
         station_id: str = SAFE_ROUTE_PLAYLIST,
         volume: float = 0.25,
-        real_streams_enabled: bool = False,
         streamer_safe: bool = True,
         position: tuple[float, float] | None = None,
     ) -> None:
@@ -422,7 +431,6 @@ class RadioState:
         self.station_id = station_id
         self.preferred_station_id = station_id
         self.volume = self._clamp_volume(volume)
-        self.real_streams_enabled = real_streams_enabled
         self.streamer_safe = streamer_safe
         self.position = position
 
@@ -433,15 +441,11 @@ class RadioState:
             enabled=bool(getattr(settings, "radio_enabled", True)),
             station_id=str(getattr(settings, "radio_station_id", SAFE_ROUTE_PLAYLIST)),
             volume=float(getattr(settings, "radio_volume", 0.25)),
-            real_streams_enabled=bool(getattr(settings, "radio_real_streams", False)),
             streamer_safe=bool(getattr(settings, "radio_streamer_safe", True)),
         )
 
     def apply_settings(self, settings) -> None:
         self.volume = self._clamp_volume(float(getattr(settings, "radio_volume", self.volume)))
-        self.real_streams_enabled = bool(
-            getattr(settings, "radio_real_streams", self.real_streams_enabled)
-        )
         self.streamer_safe = bool(getattr(settings, "radio_streamer_safe", self.streamer_safe))
 
     def write_settings(self, settings) -> None:
@@ -463,10 +467,12 @@ class RadioState:
             station
             for station_id in (self.station_id, *preserve_station_ids)
             if (station := self._station_by_id(station_id)) is not None
-            and station.source_type == DIRECTORY_SOURCE_TYPE
+            and station.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES
         ]
         base = tuple(
-            station for station in self.catalog if station.source_type != DIRECTORY_SOURCE_TYPE
+            station
+            for station in self.catalog
+            if station.source_type not in PUBLIC_DIRECTORY_SOURCE_TYPES
         )
         discovered = tuple(
             RadioStation(
@@ -474,8 +480,16 @@ class RadioState:
                 name=station.name,
                 call_sign="",
                 format=station.format,
-                source="nearby public internet station",
-                source_type=DIRECTORY_SOURCE_TYPE,
+                source=(
+                    "state-matched internet-only public station"
+                    if station.internet_only
+                    else "nearby public internet station"
+                ),
+                source_type=(
+                    DIRECTORY_INTERNET_ONLY_SOURCE_TYPE
+                    if station.internet_only
+                    else DIRECTORY_SOURCE_TYPE
+                ),
                 stream_url=station.stream_url,
                 stream_format="HLS" if station.stream_url.lower().endswith(".m3u8") else "stream",
                 codec=station.codec,
@@ -486,6 +500,7 @@ class RadioState:
                 region=station.state,
                 safe_for_streaming=False,
                 real_stream=True,
+                always_available=station.internet_only,
                 notes="Discovered at runtime through Radio Browser.",
             )
             for station in stations
@@ -733,13 +748,13 @@ class RadioState:
         if not station.supported:
             return False
         if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
-            # Personal media rides the streamer-safe gate like real streams
-            # do (the game cannot vouch for its licensing), but not the
-            # real-streams switch -- your own files need no internet.
+            # Personal media rides the streamer-safe gate like public streams
+            # do because the game cannot vouch for its licensing. Your own
+            # files do not depend on Online services.
             return not self.streamer_safe
         if not station.real_stream:
             return True
-        return self.real_streams_enabled and not self.streamer_safe
+        return not self.streamer_safe
 
     def _station_by_id(self, station_id: str) -> RadioStation | None:
         for station in self.catalog:

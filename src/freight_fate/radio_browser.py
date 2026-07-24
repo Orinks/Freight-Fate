@@ -1,4 +1,4 @@
-"""Radio Browser mirror client and normalization for a bounded nearby dial."""
+"""Radio Browser mirror client for bounded nearby and internet-only stations."""
 
 from __future__ import annotations
 
@@ -23,6 +23,7 @@ DIRECTORY_TIMEOUT_S = 5.0
 DIRECTORY_QUERY_LIMIT = 300
 NEARBY_DISTANCE_CAP_MI = 175.0
 NEARBY_DIAL_LIMIT = 24
+INTERNET_ONLY_RESERVE_DIVISOR = 4
 SUPPORTED_CODECS = {"MP3", "AAC", "AAC+", "OGG", "OPUS"}
 MIN_BITRATE_KBPS = 24
 MAX_BITRATE_KBPS = 512
@@ -36,11 +37,12 @@ class DirectoryStation:
     codec: str
     bitrate: int
     stream_url: str
-    lat: float
-    lon: float
-    distance_miles: float
+    lat: float | None
+    lon: float | None
+    distance_miles: float | None
     state: str
     city: str = ""
+    internet_only: bool = False
 
     @classmethod
     def from_cache(cls, value: dict) -> DirectoryStation:
@@ -110,16 +112,15 @@ def normalize_stations(
     distance_cap_miles: float = NEARBY_DISTANCE_CAP_MI,
     limit: int = NEARBY_DIAL_LIMIT,
 ) -> tuple[DirectoryStation, ...]:
-    """Filter untrusted rows and return stable, nearest-first station records."""
+    """Return a bounded mix of nearby and state-matched internet stations."""
 
-    normalized = []
-    seen_uuid: set[str] = set()
-    seen_url: set[str] = set()
+    nearby = []
+    internet_only = []
     for row in rows:
         if not isinstance(row, dict):
             continue
         uuid = sanitize_directory_text(row.get("stationuuid"), limit=64).lower()
-        if not re.fullmatch(r"[0-9a-f-]{32,36}", uuid) or uuid in seen_uuid:
+        if not re.fullmatch(r"[0-9a-f-]{32,36}", uuid):
             continue
         if sanitize_directory_text(row.get("countrycode"), limit=4).upper() != "US":
             continue
@@ -136,10 +137,11 @@ def normalize_stations(
         if bitrate < MIN_BITRATE_KBPS or bitrate > MAX_BITRATE_KBPS:
             continue
         lat, lon = _float(row.get("geo_lat")), _float(row.get("geo_long"))
-        if lat is None or lon is None or not (-90 <= lat <= 90 and -180 <= lon <= 180):
-            continue
-        distance = distance_miles(position, (lat, lon))
-        if distance > distance_cap_miles:
+        credible_coordinates = bool(
+            lat is not None and lon is not None and -90 <= lat <= 90 and -180 <= lon <= 180
+        )
+        distance = distance_miles(position, (lat, lon)) if credible_coordinates else None
+        if distance is not None and distance > distance_cap_miles:
             continue
         name = sanitize_directory_text(row.get("name"), limit=60)
         if not name:
@@ -155,64 +157,61 @@ def normalize_stations(
             continue
         if urllib.parse.urlsplit(url).path.casefold().endswith((".m3u8", ".m3u")):
             continue
-        url_key = url.casefold()
-        if url_key in seen_url:
-            continue
-        seen_uuid.add(uuid)
-        seen_url.add(url_key)
         state = sanitize_directory_text(row.get("state"), limit=40) or state_name
-        normalized.append(
-            DirectoryStation(
-                uuid=uuid,
-                name=name,
-                format=_station_format(row, codec, bitrate),
-                codec=codec,
-                bitrate=bitrate,
-                stream_url=url,
-                lat=lat,
-                lon=lon,
-                distance_miles=distance,
-                state=state,
-                city=sanitize_directory_text(row.get("city"), limit=60),
-            )
+        station = DirectoryStation(
+            uuid=uuid,
+            name=name,
+            format=_station_format(row, codec, bitrate),
+            codec=codec,
+            bitrate=bitrate,
+            stream_url=url,
+            lat=lat if credible_coordinates else None,
+            lon=lon if credible_coordinates else None,
+            distance_miles=distance,
+            state=state,
+            city=sanitize_directory_text(row.get("city"), limit=60),
+            internet_only=not credible_coordinates,
         )
-    normalized.sort(
-        key=lambda station: (
-            round(station.distance_miles, 3),
-            station.name.casefold(),
-            station.uuid,
-        )
-    )
-    return tuple(normalized[: max(0, limit)])
+        (internet_only if station.internet_only else nearby).append(station)
+    return _bounded_station_mix(nearby, internet_only, limit=limit)
 
 
 def filter_cached_stations(
     stations: Sequence[DirectoryStation],
     *,
     position: tuple[float, float],
+    state_name: str = "",
     resolver=None,
     distance_cap_miles: float = NEARBY_DISTANCE_CAP_MI,
     limit: int = NEARBY_DIAL_LIMIT,
 ) -> tuple[DirectoryStation, ...]:
     """Revalidate cached metadata and recalculate distance at the new center."""
 
-    updated = []
-    seen_uuid: set[str] = set()
-    seen_url: set[str] = set()
+    nearby = []
+    internet_only = []
     for station in stations:
         uuid = sanitize_directory_text(station.uuid, limit=64).lower()
         codec = sanitize_directory_text(station.codec, limit=16).upper()
         bitrate = _int(station.bitrate)
         lat, lon = _float(station.lat), _float(station.lon)
+        has_coordinates = bool(
+            lat is not None and lon is not None and -90 <= lat <= 90 and -180 <= lon <= 180
+        )
         if (
             not re.fullmatch(r"[0-9a-f-]{32,36}", uuid)
-            or uuid in seen_uuid
             or codec not in SUPPORTED_CODECS
             or bitrate is None
             or not MIN_BITRATE_KBPS <= bitrate <= MAX_BITRATE_KBPS
-            or lat is None
-            or lon is None
-            or not (-90 <= lat <= 90 and -180 <= lon <= 180)
+            or (
+                station.internet_only
+                and (
+                    not sanitize_directory_text(station.state, limit=40)
+                    or state_name
+                    and sanitize_directory_text(station.state, limit=40).casefold()
+                    != state_name.casefold()
+                )
+            )
+            or (not station.internet_only and not has_coordinates)
         ):
             continue
         name = sanitize_directory_text(station.name, limit=60)
@@ -228,36 +227,77 @@ def filter_cached_stations(
             continue
         if urllib.parse.urlsplit(url).path.casefold().endswith((".m3u8", ".m3u")):
             continue
-        url_key = url.casefold()
-        if url_key in seen_url:
+        distance = distance_miles(position, (lat, lon)) if has_coordinates else None
+        if distance is not None and distance > distance_cap_miles:
             continue
-        distance = distance_miles(position, (lat, lon))
-        if distance <= distance_cap_miles:
-            seen_uuid.add(uuid)
-            seen_url.add(url_key)
-            updated.append(
-                DirectoryStation(
-                    uuid=uuid,
-                    name=name,
-                    format=sanitize_directory_text(station.format, limit=96),
-                    codec=codec,
-                    bitrate=bitrate,
-                    stream_url=url,
-                    lat=lat,
-                    lon=lon,
-                    distance_miles=distance,
-                    state=sanitize_directory_text(station.state, limit=40),
-                    city=sanitize_directory_text(station.city, limit=60),
-                )
-            )
-    updated.sort(
+        updated = DirectoryStation(
+            uuid=uuid,
+            name=name,
+            format=sanitize_directory_text(station.format, limit=96),
+            codec=codec,
+            bitrate=bitrate,
+            stream_url=url,
+            lat=lat if has_coordinates else None,
+            lon=lon if has_coordinates else None,
+            distance_miles=distance,
+            state=sanitize_directory_text(station.state, limit=40),
+            city=sanitize_directory_text(station.city, limit=60),
+            internet_only=not has_coordinates,
+        )
+        (internet_only if updated.internet_only else nearby).append(updated)
+    return _bounded_station_mix(nearby, internet_only, limit=limit)
+
+
+def _bounded_station_mix(
+    nearby: Sequence[DirectoryStation],
+    internet_only: Sequence[DirectoryStation],
+    *,
+    limit: int,
+) -> tuple[DirectoryStation, ...]:
+    """Deduplicate and reserve part of a bounded dial for each useful class."""
+
+    maximum = max(0, limit)
+    nearby_sorted = sorted(
+        nearby,
         key=lambda station: (
-            round(station.distance_miles, 3),
+            round(station.distance_miles or 0.0, 3),
             station.name.casefold(),
             station.uuid,
-        )
+        ),
     )
-    return tuple(updated[: max(0, limit)])
+    internet_sorted = sorted(
+        internet_only,
+        key=lambda station: (station.name.casefold(), station.uuid),
+    )
+    seen_uuid: set[str] = set()
+    seen_url: set[str] = set()
+
+    def unique(stations):
+        result = []
+        for station in stations:
+            url_key = station.stream_url.casefold()
+            if station.uuid in seen_uuid or url_key in seen_url:
+                continue
+            seen_uuid.add(station.uuid)
+            seen_url.add(url_key)
+            result.append(station)
+        return result
+
+    nearby_unique = unique(nearby_sorted)
+    internet_unique = unique(internet_sorted)
+    if maximum == 0:
+        return ()
+    if not nearby_unique:
+        return tuple(internet_unique[:maximum])
+    if not internet_unique or maximum == 1:
+        return tuple(nearby_unique[:maximum])
+    internet_reserve = max(1, maximum // INTERNET_ONLY_RESERVE_DIVISOR)
+    selected_nearby = nearby_unique[: max(1, maximum - internet_reserve)]
+    selected_internet = internet_unique[: maximum - len(selected_nearby)]
+    remaining = maximum - len(selected_nearby) - len(selected_internet)
+    if remaining:
+        selected_nearby.extend(nearby_unique[len(selected_nearby) :][:remaining])
+    return tuple((*selected_nearby, *selected_internet))
 
 
 def discover_mirrors(

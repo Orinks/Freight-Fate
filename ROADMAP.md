@@ -1059,22 +1059,24 @@ section below and the Unreleased changelog; the release-line view:
 
 - [x] **The in-cab radio follows the map.** M toggles, brackets tune the
       currently receivable stations, Y speaks status, Tab has a Radio
-      screen; streamer-safe by default with real public streams behind an
-      explicit opt-in.
+      screen; streamer-safe mode is the single radio-content gate for public
+      stations and personal playlists.
 - [x] **Hosts, regional stations, and real signal behavior.** The Roadhouse
       and Night Line have live hosts; twelve fictional regional stations
       with newly composed songs cover markets across the map, fading to
       static at the fringe of their range and handing back to the Roadhouse
       when the signal drops.
-- [x] **Nearby public stations are discovered at runtime (2026-07-23).**
+- [x] **Public stations are discovered at runtime (2026-07-23).**
       The checked-in public URL inventory is gone. Radio Browser is now the
       optional runtime directory, discovered through its mirrors with
       failover. A no-key approximate real-world location is the default
       search center; the simulated truck is the automatic fallback and an
-      optional mode. State-level results are filtered locally, cached for
-      about a day outside career saves, and added silently to the same dial
-      plain brackets already tune. Built-in, fictional regional, satellite
-      fallback, and personal playlist stations remain.
+      optional mode. Coordinate-backed results are distance-filtered; bounded
+      state-matched results without coordinates join as internet-only stations
+      with no distance or signal claim. Results are cached for about a day
+      outside career saves and added silently to the same dial plain brackets
+      already tune. Built-in, fictional regional, satellite fallback, and
+      personal playlist stations remain.
 - [ ] **AFN 360 Global channels stay unsupported.** StreamTheWorld
       geo-blocks those mounts outside overseas military regions (HTTP 403
       from US IPs on every URL form, HLS included); revisit only if AFN
@@ -1156,14 +1158,14 @@ section below and the Unreleased changelog; the release-line view:
       must not erase the station); each station remembers its place for
       the drive. A drop-in folder, never a file picker -- screen-reader
       users manage folders in Explorer. Personal media rides the
-      streamer-safe gate like real streams; stream URLs inside an M3U
+      streamer-safe gate like public station audio; stream URLs inside an M3U
       are ignored. Follow-up: consider shuffle
       and a cross-session resume position if playtests want them.
 - [x] **Radio dial categories with a jump key (landed 2026-07-20).**
       Ctrl+bracket (the owner's binding -- plain brackets already tune)
       leaps to the first station of the previous/next dial category and
       leads with the category name: route playlist, Freight Fate
-      stations, your playlists, terrestrial, nearby internet, and
+      stations, your playlists, terrestrial, nearby internet, internet-only, and
       satellite. The dial sort and the jump share one grouping.
 - [ ] **Fictional call signs must not squat real stations (owner catch
       2026-07-20).** Our fictional Phoenix classic-rock station is
@@ -2373,18 +2375,20 @@ Deliver -> Earn and level up -> Repeat
 ### In-cab radio (1.8 / 1.9 candidate)
 
 A truck radio you can tune as you drive: built-in and fictional stations are
-always ready, while optional public stations near the player's approximate
-real-world location join the same dial at runtime. A satellite-style safe
+always ready, while public stations for the player's detected region join the
+same dial at runtime. Coordinate-backed entries are distance-filtered and
+coordinate-less entries are explicitly internet-only. A satellite-style safe
 station remains the always-available fallback.
 
 - [x] **Practical in-cab radio.** Shipped: driving now has keyboard radio
   controls (M toggles, brackets tune, Y speaks status), persistent radio
   enabled/station/volume settings, a dedicated lower radio volume, streamer-safe
-  mode on by default, real public streams gated behind explicit opt-in, and
+  mode on by default as the sole radio-content gate for public streams, and
   graceful fallback when a selected station/backend cannot play. The checked-in
   JSON catalog now contains only safe built-in, fictional regional, and
-  satellite-fallback stations. Radio Browser supplies nearby public stations
-  at runtime through a cached, non-blocking, mirror-failing-over path. Plain
+  satellite-fallback stations. Radio Browser supplies bounded nearby and
+  state-matched internet-only stations at runtime through a cached,
+  non-blocking, mirror-failing-over path. Plain
   brackets walk every receivable entry. Stream probing and opening stay off the
   driving loop, and the latest generation alone may take over playback.
 
@@ -2393,19 +2397,21 @@ station remains the always-available fallback.
   optional, requires no shared key, and never replaces the built-in/offline
   dial.
 
-- **Streamer-safe toggle still required.** Independent of the game's own
+- **Streamer-safe is the single radio-content gate.** Independent of the game's own
   posture: a player who streams a session to YouTube/Twitch with copyrighted
-  station audio can still get the VOD struck. So real-stream radio stays an
-  explicit toggle (and a "mute radio for streaming" switch), with an owned
-  royalty-free station and the satellite fallback as the always-safe default
-  audio, so streamers are protected unless they opt in.
+  station audio can still get the VOD struck. With streamer-safe on, public
+  stations and personal playlists are hidden; turning it off silently permits
+  automatic public discovery when Online services and the audio system allow it.
 
-- **Nearby, without false precision.** A no-key approximate network location is
+- **Nearby and internet-only, without false precision.** A no-key approximate network location is
   the default center. If it fails, discovery follows the simulated truck; that
   is also an optional setting. Queries send a state/region, and distance is
   calculated locally from directory coordinates. Those coordinates are not FCC
-  contours, so public entries are described only as nearby internet stations.
-  The fictional regional stations keep their existing authored range behavior.
+  contours, so coordinate-backed entries are described only as nearby internet
+  stations. State-matched entries without coordinates are a bounded
+  internet-only category: always receivable while cached, with no distance,
+  signal, or terrestrial claim. The fictional regional stations keep their
+  existing authored range behavior.
 
 - **Satellite fallback: owned and offline.** The Safe Satellite Fallback remains
   always available without a public network stream. It covers directory

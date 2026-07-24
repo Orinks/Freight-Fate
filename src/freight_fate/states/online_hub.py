@@ -201,6 +201,7 @@ class OnlineHubState(MenuState):
         self.ctx.apply_cloud_saves()
         self.ctx.apply_mastodon_sharing()
         self._announce()
+        self.ctx.apply_active_radio_settings()
 
     def _online_account_setup(self) -> None:
         from .online_states import OnlineSetupState

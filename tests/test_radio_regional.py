@@ -250,6 +250,8 @@ def test_how_to_play_documents_the_radio_page():
     assert "online services are on" in help_text
     assert "active audio system can play public streams" in help_text
     assert "personal playlists play only when streamer-safe mode is off" in help_text
+    assert "without coordinates are called internet-only" in help_text
+    assert "no distance or signal claim" in help_text
     assert "host breaks in between songs" in help_text
     assert "regional stations cover markets across the map" in help_text
     assert "static crackle at the fringe" in help_text
