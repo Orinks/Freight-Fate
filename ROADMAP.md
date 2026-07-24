@@ -1104,6 +1104,17 @@ section below and the Unreleased changelog; the release-line view:
       (parent network) actually covers each Hi-Line dispatch city and seat
       the parent stream there under the local translator's dial position,
       the same honest-coverage rule as everywhere else.
+- [ ] **Deadlines should respect the hours you already burned (owner
+      question, 2026-07-24).** Dispatch deadlines model HOS honestly for
+      a FRESH clock (route-aware driving + breaks + a 10-hour sleep per
+      11-hour shift, times 1.2-1.5 slack) -- but never look at the
+      driver's CURRENT shift state at acceptance. Accept a one-shift
+      load with six hours already used and a mandatory mid-trip sleep
+      makes the deadline impossible. Real dispatch asks how many hours
+      you have. Fix shape: feed hours-already-used into the deadline
+      (or at minimum speak it in the briefing: "with your hours, this
+      run includes your 10-hour break"), reusing the fair_active_deadline
+      machinery that already does this for resumed saves.
 - [ ] **Rebalance speeding toward police encounters (owner design
       question, 2026-07-23).** Today sustained speeding rolls against
       patrol intensity: caught means a real pull-over and ticket;
