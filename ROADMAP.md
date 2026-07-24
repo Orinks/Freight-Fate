@@ -1104,8 +1104,8 @@ section below and the Unreleased changelog; the release-line view:
       (parent network) actually covers each Hi-Line dispatch city and seat
       the parent stream there under the local translator's dial position,
       the same honest-coverage rule as everywhere else.
-- [ ] **Deadlines should respect the hours you already burned (owner
-      question, 2026-07-24).** Dispatch deadlines model HOS honestly for
+- [x] **Deadlines respect the hours you already burned -- SHIPPED
+      same day (owner question, 2026-07-24).** Dispatch deadlines model HOS honestly for
       a FRESH clock (route-aware driving + breaks + a 10-hour sleep per
       11-hour shift, times 1.2-1.5 slack) -- but never look at the
       driver's CURRENT shift state at acceptance. Accept a one-shift
@@ -1115,6 +1115,14 @@ section below and the Unreleased changelog; the release-line view:
       (or at minimum speak it in the briefing: "with your hours, this
       run includes your 10-hour break"), reusing the fair_active_deadline
       machinery that already does this for resumed saves.
+- [ ] **Log-check stops should stop the truck and burn clock (owner
+      playtest, 2026-07-24, UNCLAIMED).** An enforcement log check
+      played its tone and said the driver was stopped -- while the
+      truck rolled on unbothered. The stop should be real: truck
+      braked to the shoulder, a realistic inspection duration off the
+      clock (and off the 14-hour window), then released. Same shape as
+      the pull-over flow the speeding rework wants, so build them on
+      one mechanism.
 - [ ] **Rebalance speeding toward police encounters (owner design
       question, 2026-07-23).** Today sustained speeding rolls against
       patrol intensity: caught means a real pull-over and ticket;

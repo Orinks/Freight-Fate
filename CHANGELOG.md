@@ -752,6 +752,14 @@
 
 ### Fixed
 
+- **Dispatch deadlines now respect the hours already on your clock.**
+  Accepting a load six hours into your shift used to get a deadline
+  planned for a fresh driver -- impossible to make once the law forced
+  your 10-hour rest mid-run. The deadline now plans around your actual
+  remaining driving hours and duty window, and when it stretches to
+  cover a rest, the offer says so: "planned around the 10-hour rest
+  your hours will force."
+
 - **Rolling a green light at the ramp end takes you straight onto the
   streets.** Crossing the terminal legally on a green used to leave you
   marooned past the end of the ramp -- the city streets refused to

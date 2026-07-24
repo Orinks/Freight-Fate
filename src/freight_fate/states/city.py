@@ -136,7 +136,7 @@ class CityMenuState(MenuState):
 
     def __init__(self, ctx) -> None:
         super().__init__(ctx)
-        self._board = JobBoard(ctx.world)
+        self._board = JobBoard(ctx.world, hos=ctx.profile.hos)
         self._jobs_cache: list[Job] | None = None
         self._confirm_sleep_rested = False
 
@@ -627,7 +627,7 @@ def dispatch_cache_key(p) -> dict:
 
 def open_freight_market(ctx) -> list[Job]:
     p = ctx.profile
-    board = JobBoard(ctx.world)
+    board = JobBoard(ctx.world, hos=p.hos)
     market_changed = p.market.advance_to(p.market_day())
     key = dispatch_cache_key(p)
     cache = p.dispatch_board_cache if not market_changed else None
