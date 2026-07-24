@@ -1263,10 +1263,13 @@ class DrivingUpdateMixin:
         rate = min(PICKET_MAX_RATE_HZ, max(PICKET_MIN_RATE_HZ, rate))
         rate *= 0.3 + 0.7 * picket_depth
         self._picket_wait_s = self._fringe_rng.expovariate(rate)
+        # Owner's ear 2026-07-24: pickets sit UNDER the program at shallow
+        # fringe (they play on the hotter sfx bus, so numbers here run low)
+        # and only rival it deep in the noise.
         audio.play_bank(
             "radio/picket",
             "radio/static_burst",
-            volume=(0.3 + 0.5 * picket_depth) * self.ctx.settings.radio_volume,
+            volume=(0.15 + 0.45 * picket_depth) * self.ctx.settings.radio_volume,
         )
         self._radio_picket_duck = PICKET_DUCK
         self._picket_duck_s = 0.05 + 0.08 * self._fringe_rng.random()
