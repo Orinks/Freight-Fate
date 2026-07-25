@@ -149,7 +149,7 @@ class Settings:
     weather_volume: float = 0.65
     engine_volume: float = 0.55
     ui_volume: float = 0.9
-    speech_verbosity: int = 1  # 0 terse, 1 normal, 2 chatty
+    speech_verbosity: int = 1  # 0 terse, 1 normal
     # Roadside chatter: the ambient color spoken between navigation cues.
     # Each category has its own switch so a player can keep the geography
     # (rivers, passes) while silencing the jokes (billboards), or vice versa.
@@ -288,6 +288,10 @@ class Settings:
             s.overspeed_warning = "off"
         if s.overspeed_warning not in ("on", "urgent only", "off"):
             s.overspeed_warning = "on"
+        # The chatty level (2) was retired; it never diverged from normal
+        # beyond a quicker speed-callout timer. Saved chatty falls to normal.
+        if s.speech_verbosity not in (0, 1):
+            s.speech_verbosity = 1
         if s.update_channel not in ("", "stable", "dev"):
             s.update_channel = ""
         if not isinstance(s.event_backend, str) or not s.event_backend:

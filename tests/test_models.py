@@ -648,6 +648,16 @@ def test_legacy_hos_off_setting_loads_as_realistic():
     assert loaded.hos_mode == "realistic"
 
 
+def test_legacy_chatty_verbosity_loads_as_normal():
+    # The chatty level (2) is gone; it only sped up the speed-callout timer.
+    # Saved chatty falls to normal instead of indexing off the label list.
+    s = Settings()
+    s.speech_verbosity = 2
+    s.save()
+    loaded = Settings.load()
+    assert loaded.speech_verbosity == 1
+
+
 def test_settings_survive_corrupt_file():
     s = Settings()
     s.save()
@@ -741,7 +751,14 @@ def test_board_speaks_the_rest_the_deadline_covers():
     from freight_fate.models.jobs import Job
 
     job = Job(
-        CARGO_CATALOG["general"], 15, "A", "Loc", "B", 300, 700.0, 24.0,
+        CARGO_CATALOG["general"],
+        15,
+        "A",
+        "Loc",
+        "B",
+        300,
+        700.0,
+        24.0,
         deadline_covers_rest=True,
     )
     assert "10-hour rest" in job.describe()

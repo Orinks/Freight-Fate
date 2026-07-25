@@ -324,12 +324,13 @@ def test_route_key_reports_current_road_place_progress_and_guidance(monkeypatch)
         d.handle_event(key_event(pygame.K_r))
 
         report = spoken[-1]
-        assert report.startswith("Route status: on I-90 East in New York")
-        assert "heading toward Rochester, New York" in report
+        # Progress leads so a one-line braille display gets it without panning,
+        # and the percent matches what the online drivers board shows.
+        pct = round(100 * d.trip.position_mi / d.trip.total_miles)
+        assert report.startswith(f"{pct} percent there, 34 miles left of ")
+        assert "On I-90 East in New York, toward Rochester, New York" in report
         assert "Near Batavia, New York" in report
-        assert "40 miles into the trip" in report
-        assert "34 miles remaining" in report
-        assert "You are in a construction zone" in report
+        assert "In a construction zone" in report
         assert "Current grade" in report
         assert report.endswith(d.trip.next_navigation_context(True))
     finally:
@@ -367,8 +368,7 @@ def test_route_key_reports_reverse_route_direction(monkeypatch):
         d.handle_event(key_event(pygame.K_r))
 
         report = spoken[-1]
-        assert report.startswith("Route status: on I-90 West in New York")
-        assert "heading toward Buffalo, New York" in report
+        assert "On I-90 West in New York, toward Buffalo, New York" in report
         assert "Near Batavia, New York" in report
     finally:
         app.shutdown()
@@ -411,6 +411,65 @@ def test_grade_key_reads_slope_and_verdict(monkeypatch):
         app.shutdown()
 
 
+def test_clock_key_leads_with_time_then_schedule_verdict(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 40.0
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_c))
+        report = spoken[-1]
+        # Time first, verdict right behind it: the first line of a braille
+        # display must carry the answer, not a preamble.
+        assert not report.startswith("It is")
+        verdict_at = max(
+            report.find("On schedule: arrival in"), report.find("Running behind: arrival in")
+        )
+        assert 0 < verdict_at < 60
+        assert "deadline in" in report
+        assert "due" in report
+    finally:
+        app.shutdown()
+
+
+def test_terse_clock_key_drops_calendar_and_stop_planning(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        app.ctx.settings.speech_verbosity = 0
+        d = _driving(app)
+        d.trip.position_mi = 40.0
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_c))
+        terse_report = spoken[-1]
+        assert "deadline in" in terse_report
+
+        app.ctx.settings.speech_verbosity = 1
+        spoken.clear()
+        d.handle_event(key_event(pygame.K_c))
+        assert len(terse_report) < len(spoken[-1])
+        assert ", due " not in terse_report  # no appointment restatement
+        assert "Next legal stop" not in terse_report
+    finally:
+        app.shutdown()
+
+
+def test_status_menu_carries_the_drivers_board_progress_percent(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 40.0
+        pct = round(100 * d.trip.position_mi / d.trip.total_miles)
+        assert f"Progress: {pct} percent there" in d.status_lines()
+    finally:
+        app.shutdown()
+
+
 def test_route_key_uses_metric_distances(monkeypatch):
     from freight_fate.app import App
 
@@ -426,9 +485,7 @@ def test_route_key_uses_metric_distances(monkeypatch):
 
         report = spoken[-1]
         assert "Flying J Travel Center Corfu, 13 kilometers ahead" in report
-        assert "32 kilometers into the trip" in report
-        assert "87 kilometers remaining" in report
-        assert "119 kilometers" in report
+        assert "87 kilometers left of 119 kilometers" in report
         assert " miles" not in report
     finally:
         app.shutdown()

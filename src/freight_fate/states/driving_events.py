@@ -514,6 +514,10 @@ class DrivingEventMixin:
         self._exit_signal_on = True
         self._exit_cancel_armed = False
         self._exit_signal_canceled = False
+        # Re-arming after a cancel starts the distance anchors over; without
+        # this the milestones already spoken stay marked and the second
+        # approach runs silent.
+        self._exit_countdown_said = set()
         self.ctx.audio.play("vehicle/turn_signal", volume=0.7)
         if stop.type == "delivery_destination":
             labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
@@ -613,7 +617,12 @@ class DrivingEventMixin:
         A canyon approach buries a single signal-on announcement under
         pacenotes and limit changes (owner playtest: signal at 4.7 miles,
         then silence until the miss). The countdown re-anchors the exit as
-        it closes, and names the lane fix while there is road to make it."""
+        it closes, and names the lane fix while there is road to make it.
+
+        Terse speech opts out of the whole countdown: the player asked for
+        the signal-on announcement to be the last word."""
+        if self._terse_speech():
+            return
         ahead = stop.at_mi - self.trip.position_mi
         if ahead <= 0:
             return
@@ -1678,7 +1687,10 @@ class DrivingEventMixin:
                 self.ctx.say_event(message, interrupt=True)
             return
         stop = self._exit_stop
-        if stop is None or self.trip.position_mi < stop.at_mi:
+        if stop is None:
+            return
+        if self.trip.position_mi < stop.at_mi:
+            self._update_exit_countdown(stop)
             return
         self._exit_stop = None
         # The exit is settled either way now, so the ramp cap comes off: taking

@@ -416,7 +416,7 @@ def test_controller_info_buttons_speak(monkeypatch):
     app._dispatch_controller(_button_up(pygame.CONTROLLER_BUTTON_RIGHTSHOULDER))
     spoken.clear()
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_DPAD_UP))
-    assert spoken[-1].startswith("Route status:")
+    assert "percent there" in spoken[-1]
     assert "Nearest named place" in spoken[-1] or "Near " in spoken[-1]
     app.shutdown()
 

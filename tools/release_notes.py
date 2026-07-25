@@ -326,6 +326,20 @@ def commit_messages(base: str, head: str) -> list[str]:
     return [run_git(["show", "-s", "--format=%B", commit]) for commit in commits]
 
 
+def new_commit_messages(base: str, head: str) -> list[str]:
+    """Messages of range commits that were authored for this push.
+
+    A dev push that merges release history back from main carries commits
+    that already passed this gate when they landed on main; requiring
+    fresh changelog bullets (or skip markers) from them would block every
+    sync. Exclude anything already reachable from origin/main — on the
+    main branch itself the base is origin/main, so nothing is excluded.
+    """
+    commits = git_output_lines(["log", "--no-merges", "--format=%H", f"{base}..{head}"])
+    fresh = [commit for commit in commits if not ref_is_ancestor(commit, "origin/main")]
+    return [run_git(["show", "-s", "--format=%B", commit]) for commit in fresh]
+
+
 def commits_request_nightly_build(base: str, head: str) -> bool:
     return any(
         marker in message.casefold()
@@ -335,8 +349,12 @@ def commits_request_nightly_build(base: str, head: str) -> bool:
 
 
 def commits_opt_out_of_changelog(base: str, head: str) -> bool:
-    messages = commit_messages(base, head)
-    return bool(messages) and all(
+    messages = new_commit_messages(base, head)
+    if not messages:
+        # Every commit in the range is already on origin/main: this push
+        # only syncs release history, which was gated when it landed there.
+        return True
+    return all(
         any(marker in message.casefold() for marker in SKIP_CHANGELOG_MARKERS)
         for message in messages
     )

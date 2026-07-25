@@ -599,7 +599,7 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         assert "simple direction changes" in spoken[-1]
         assert "press and hold it again" in spoken[-1]
         assert "holds the truck" in spoken[-1]
-        assert "R route and current location" in spoken[-1]
+        assert "R trip progress, route, and current location" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_keyboard_help()
@@ -1496,6 +1496,82 @@ def test_curve_assist_cues_do_not_thrash(monkeypatch):
 
         cues = [text for text in events if "Curve speed assistance" in text]
         assert cues == ["Curve speed assistance slowing."]
+    finally:
+        app.shutdown()
+
+
+def test_armed_exit_counts_down(monkeypatch):
+    """An armed exit re-anchors itself at two miles, one mile, half a mile.
+
+    Backport of the 1.9-line countdown: a signal-on announcement miles out
+    was the last word before the miss -- 1.8 players kept losing exits
+    armed under scenery chatter."""
+    from types import SimpleNamespace
+
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = SimpleNamespace(
+            at_mi=driving.trip.position_mi + 3.0,
+            type="delivery_destination",
+            spoken_name="Test Plaza",
+            name="Test Receiver",
+            exit_label="",
+            exit_phrase="",
+        )
+        driving._exit_stop = stop
+        driving._exit_countdown_said = set()
+
+        for ahead in (2.5, 1.9, 1.9, 0.9, 0.4, 0.3):
+            driving.trip.position_mi = stop.at_mi - ahead
+            driving._update_exit(0.0)
+
+        # Each anchor speaks once, in order. The lane advice that follows is
+        # covered by tests/test_exit_recovery.py; here only the sequence matters.
+        calls = [t.split(".")[0] for t in events if t.startswith("Destination exit in")]
+        assert calls == [
+            "Destination exit in 2 miles",
+            "Destination exit in 1 mile",
+            "Destination exit in half a mile",
+        ]
+    finally:
+        app.shutdown()
+
+
+def test_armed_exit_countdown_silent_on_terse(monkeypatch):
+    """Terse speech opts out of the countdown; the signal-on line stays last."""
+    from types import SimpleNamespace
+
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    try:
+        app.ctx.settings.speech_verbosity = 0
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = SimpleNamespace(
+            at_mi=driving.trip.position_mi + 3.0,
+            type="delivery_destination",
+            spoken_name="Test Plaza",
+            name="Test Receiver",
+            exit_label="",
+            exit_phrase="",
+        )
+        driving._exit_stop = stop
+        driving._exit_countdown_said = set()
+
+        for ahead in (2.5, 1.9, 0.9, 0.3):
+            driving.trip.position_mi = stop.at_mi - ahead
+            driving._update_exit(0.0)
+
+        assert not [t for t in events if t.startswith("Destination exit in")]
     finally:
         app.shutdown()
 
@@ -2448,6 +2524,116 @@ def test_poi_menu_uses_curated_roadside_assistance_label():
         ]
         assert "Call roadside assistance" in texts
         assert all("osm" not in text.lower() for text in texts)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_rest_stop_sleep_warns_before_redundant_double_sleep():
+    from freight_fate.app import App
+    from freight_fate.sim.trip import RoadStop
+    from freight_fate.states.career_stats import fully_rested
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = RoadStop(
+            "Example Turnpike Service Plaza",
+            driving.trip.position_mi,
+            "service_plaza",
+            ("park", "sleep", "save"),
+            ("parking",),
+        )
+        state = RestStopState(app.ctx, driving, stop)
+
+        # Force the driver fully rested: sleeping would gain nothing but time.
+        profile = app.ctx.profile
+        profile.hos.driving_min = 0.0
+        profile.hos.duty_min = 0.0
+        profile.fatigue = 0.0
+        assert fully_rested(profile)
+
+        def find(label):
+            for item in state.build_items():
+                text = item.text if isinstance(item.text, str) else item.text()
+                if text == label:
+                    return item.action
+            raise AssertionError(f"no {label!r} item")
+
+        sleep_10 = find("Sleep 10 hours")
+        before = driving.trip.game_minutes
+
+        # First press only warns; the clock must not move.
+        sleep_10()
+        assert driving.trip.game_minutes == before
+        assert state._confirm_sleep_rested is True
+
+        # Second consecutive press sleeps the full 10 hours.
+        sleep_10()
+        assert driving.trip.game_minutes == pytest.approx(before + 600.0)
+        assert state._confirm_sleep_rested is False
+
+        # The guard covers sleeper-split rests too: a fresh visit warns first.
+        state._confirm_sleep_rested = False
+        profile.hos.driving_min = 0.0
+        profile.hos.duty_min = 0.0
+        profile.fatigue = 0.0
+        split_before = driving.trip.game_minutes
+        find("Sleep 2 hours in sleeper berth")()
+        assert driving.trip.game_minutes == split_before
+        assert state._confirm_sleep_rested is True
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_lot_sleep_warns_before_redundant_double_sleep():
+    # A non-sleeper stop only offers the poor-rest lot sleep, which floors
+    # fatigue at the shoulder value -- so the guard must key off "hours fresh
+    # and no more rest to gain", not full restedness, or it never fires.
+    from freight_fate.app import App
+    from freight_fate.sim import hos
+    from freight_fate.sim.trip import RoadStop
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = RoadStop(
+            "Test Fuel Stop",
+            driving.trip.position_mi,
+            "fuel_stop",
+            ("park", "fuel", "break"),
+            ("parking",),
+        )
+        state = RestStopState(app.ctx, driving, stop)
+
+        # Simulate a drive, then a first lot sleep so hours are fresh but
+        # fatigue is stuck at the shoulder floor -- the state a driver is in
+        # right after bedding down once.
+        profile = app.ctx.profile
+        profile.hos.driving_min = 0.0
+        profile.hos.duty_min = 0.0
+        profile.fatigue = hos.FATIGUE_SHOULDER_FLOOR
+
+        lot_sleep = None
+        for item in state.build_items():
+            text = item.text if isinstance(item.text, str) else item.text()
+            if text == "Sleep 10 hours in the lot":
+                lot_sleep = item.action
+                break
+        assert lot_sleep is not None
+
+        before = driving.trip.game_minutes
+        lot_sleep()  # first press only warns
+        assert driving.trip.game_minutes == before
+        assert state._confirm_sleep_rested is True
+
+        lot_sleep()  # second press sleeps anyway
+        assert driving.trip.game_minutes == pytest.approx(before + 600.0)
     finally:
         app.shutdown()
 

@@ -1932,6 +1932,13 @@ From a batch of player reports:
   state line again. City narration retains the old crossing wording only as a
   fallback for legacy legs without mapped boundaries. Full harness regressions
   cover Tennessee and Texas routes, reverse travel, and an all-Texas route.
+- [x] **Terrain labels read real relief -- LANDED 2026-07-22 (nromey,
+  PR #107).** Grade segments were labeled mountain from point steepness alone,
+  so a single creek-crossing roller in flat country read as mountains in the
+  status readout. Labels are now reclassified from the relief-aware sweep
+  computed on the 1.9 line (18,638 false-mountain segments corrected
+  network-wide, 166 leg summaries promoted, no curated corridor downgraded).
+  Labels only; `avg_grade_pct` and everything physics reads is untouched.
 - [ ] Reconcile checkpoint positions with state-boundary positions on seven
   corridor legs. A 24-route forward/reverse harness sweep found 13 places
   spoken on the wrong side of a state line: Fort Oglethorpe on
@@ -2741,6 +2748,10 @@ Deliver -> Earn and level up -> Repeat
       correct leg, and facility data should carry enough road name, distance,
       gate speed, and dock-approach detail to make warehouses, terminals,
       ports, and industrial yards feel distinct.
+- [ ] International expansion, beginning with research into Canada and the
+      United Kingdom: country profiles need driving side, units, currency,
+      local trucking terms, hours-of-service rules, weather fallbacks, legal
+      routing, and border-crossing behavior before routes can ship.
 
 ### In-cab radio (1.8 / 1.9 candidate)
 
@@ -2915,8 +2926,13 @@ fit for an audio-first game.
 - [ ] Server absolution for `integrity_modified`: a profile that passes full server validation may have the client mark cleared on the next verified restore, so honest cross-machine movers are not marked forever (`docs/server-integrity-handoff.md`)
 - [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)
 - [x] Copy the delivery summary to the clipboard from the delivery complete screen (verified by read-back before the game says "copied")
+- [x] Delete a career's cloud backups from the Cloud backup menu: a confirmed, safe-default-first delete removes every kept revision from the account (server DELETE route + existing `deleteSaveSlot` mutation); local saves untouched, sync state forgotten so a still-local career starts a fresh slot on its next save
 - [x] Opt-in Mastodon sharing of notable deliveries: the player links their own Mastodon account on orinks.net (any instance, dynamic app registration, `read:accounts write:statuses` scope), and the game offers deliveries that earned an achievement, level, or streak milestone; the server composes the public post from allowlisted facts and adds the #FreightFate hashtag. Off by default, separate consent from Profile sharing, durable outbox client-side
 - [ ] Mastodon sharing follow-ups: unlink from inside the game (today the orinks.net page is the only unlink), and consider per-post visibility choice (public vs unlisted) if players ask
+- [x] Idle drivers age off the live board: a truck parked with the game left running (not paused) signs off after 30 minutes without a snapshot change and stops heartbeating (`online_presence.py` IDLE_SIGNOFF_S); the server hides still-beating idle rows on the same clock for older builds (orinks-net `PRESENCE_IDLE_MS` + per-row `changedAt`), and deadhead presence now carries progress so a long empty run never reads as idle
 - [x] Online hub: the drivers board, orinks.net account, cloud backup and restore, and all sharing toggles moved from Settings into one Online menu on the main menu (`states/online_hub.py`); Settings keeps an Online pointer that opens the same menu for a release or two
 - [ ] Remove the Settings Online pointer once players have had a release or two to relearn the location
 - [ ] 1.9.0 release-notes credit sweep: nromey's Unreleased bullets (engine audio arc, physics realism, playlists, place callouts, speed-limit audits, signature v3) carry no "Thanks to" attribution yet -- credit them with the PR link when the 1.9.0 notes are cut, per the contributor-credit rule in AGENTS.md
+- [x] The drivers-board progress percent is readable in-game: the R route report leads with "N percent there" (`Trip.progress_percent`, same position/total figure presence posts) and the Tab status menu carries a Progress line; deadhead drives included
+- [x] Braille-friendly driving readouts: the on-demand C, R, V, and F reports front-load the answer so the first line of a one-line braille display carries it (displays are 14 to 80 cells, commonly 40, and screen readers flash game speech one line at a time); terse speech additionally trims the C report to time, verdict, and hours of service
+- [ ] Braille pass over the remaining spoken surfaces (event announcements, menus, arrival and settlement summaries): same front-loading rule, and check flash-message length against a 40-cell display

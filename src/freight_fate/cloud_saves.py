@@ -106,6 +106,11 @@ def _saves_url() -> str:
     return f"{base_url()}/api/freight-fate/saves"
 
 
+def _http_delete(url: str, payload: dict | None, headers: dict[str, str]) -> dict:
+    """Transport-shaped DELETE, so tests can stub it like every other call."""
+    return _http_json(url, payload, headers, method="DELETE")
+
+
 def _auth_headers(identity: OnlineIdentity) -> dict[str, str]:
     return {"Authorization": f"Bearer {identity.driver_token}"}
 
@@ -228,6 +233,16 @@ class SyncState:
                 del entry["conflict"]
                 self._persist()
 
+    def forget(self, name: str) -> None:
+        """Drop everything known about a slot, conflict included. Called after
+        the cloud copy is deleted so the next local save starts a fresh slot
+        instead of naming a revision that no longer exists."""
+        with self._lock:
+            self._ensure_loaded()
+            if name in self._slots:
+                del self._slots[name]
+                self._persist()
+
 
 # -- API calls (used by the service worker and, via menus, worker threads) -----
 
@@ -299,6 +314,36 @@ def list_saves(identity: OnlineIdentity, *, transport: Transport = _http_json) -
         return None
     saves = reply.get("saves")
     return saves if isinstance(saves, list) else None
+
+
+def delete_save(
+    identity: OnlineIdentity,
+    *,
+    save_name: str,
+    transport: Transport = _http_delete,
+) -> bool:
+    """Remove every kept cloud revision of one slot from the account. True on
+    success, False when the site could not be reached or refused. Raises
+    :class:`CloudAuthError` when the server answers but refuses the
+    credentials. Called from menu worker threads only."""
+    url = f"{_saves_url()}?driverId={identity.driver_id}&saveName={urllib.parse.quote(save_name)}"
+    try:
+        reply = transport(url, None, _auth_headers(identity))
+    except urllib.error.HTTPError as e:
+        body = _error_body(e)
+        if _auth_refused(e, body):
+            log.warning(
+                "Cloud delete of %s refused (HTTP %s): this computer's sign-in is no longer accepted",
+                save_name,
+                e.code,
+            )
+            raise CloudAuthError from e
+        log.warning("Cloud delete of %s failed: HTTP %s", save_name, e.code)
+        return False
+    except Exception as e:
+        log.debug("Cloud delete of %s failed: %s", save_name, e)
+        return False
+    return bool(reply.get("ok"))
 
 
 def download_save(

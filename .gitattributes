@@ -1,0 +1,3 @@
+# AppImage launcher runs on Linux; a CRLF checkout would break its shebang.
+tools/appimage/AppRun text eol=lf
+tools/appimage/*.desktop text eol=lf

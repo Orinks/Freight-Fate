@@ -1,0 +1,11 @@
+#!/bin/bash
+# AppImage entry point. Bundled libraries live in usr/lib; the Nuitka dist
+# keeps its own layout under opt/freightfate with rpaths patched by
+# linuxdeploy to reach usr/lib. The dist root must also be on the search
+# path: linuxdeploy rewrites the executable's transitive RPATH into a
+# non-transitive RUNPATH, which no longer resolves wheel libraries that
+# live at the dist root (e.g. numpy's libscipy_openblas64_) for extension
+# modules loaded from subdirectories.
+HERE="$(dirname "$(readlink -f "$0")")"
+export LD_LIBRARY_PATH="$HERE/usr/lib:$HERE/opt/freightfate${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+exec "$HERE/opt/freightfate/FreightFate" "$@"

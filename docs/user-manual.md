@@ -36,6 +36,20 @@ Release archives are named by platform when that platform is available:
 | Windows | `FreightFate-<version>-windows-portable.zip` |
 | macOS | `FreightFate-<version>-macos.zip` |
 | Linux | `FreightFate-<version>-linux-x64.tar.gz` |
+| Linux (AppImage) | `FreightFate-<version>-linux-x86_64.AppImage` |
+
+On Linux you can pick either download. The tarball extracts to a portable
+folder, exactly like Windows. The AppImage is a single file: mark it
+executable (`chmod +x`) and run it, no extraction needed. It bundles the
+libraries the Ubuntu build depends on, so it also works on distributions
+such as Fedora, Arch, and openSUSE. An AppImage cannot write into itself,
+so its saves live in `~/.local/share/FreightFate` instead of a `saves`
+folder beside the game. The in-game updater handles the AppImage by
+downloading the new version and replacing the `.AppImage` file itself,
+then restarting. That needs the folder holding the AppImage to be writable
+by your user account; when it is not, the game keeps the downloaded update
+in your home folder and tells you where it is so you can finish the
+install yourself.
 
 Use the newest stable release for normal play. Stable releases are numbered,
 such as `v1.6.0`.
@@ -404,7 +418,7 @@ Driving controls are active while the road view is focused:
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
 | C | Report clock, deadline, estimated arrival, and hours of service. |
-| R | Report the current road and direction, state, nearest named place, route progress, grade, and GPS context. |
+| R | Report trip progress first (the same percent the online drivers board shows), then the current road and direction, state, nearest named place, grade, and GPS context. |
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
 | L | Report which lane you are in and whether you are centered, drifting, or at an edge. |

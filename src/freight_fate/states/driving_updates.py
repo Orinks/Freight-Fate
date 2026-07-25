@@ -1520,8 +1520,7 @@ class DrivingUpdateMixin:
         if self.ctx.settings.speech_verbosity == 0:
             return
         self._speed_announce_timer += dt
-        base_interval = tuning_for_time_scale(self.trip.time_scale).routine_speech_interval_s
-        interval = base_interval if self.ctx.settings.speech_verbosity == 1 else 7.0
+        interval = tuning_for_time_scale(self.trip.time_scale).routine_speech_interval_s
         if self._speed_announce_timer >= interval:
             self._speed_announce_timer = 0.0
             mph = self.truck.speed_mph

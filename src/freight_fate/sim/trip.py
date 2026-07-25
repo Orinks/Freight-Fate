@@ -882,9 +882,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 break
             if cr.connector:
                 continue
-            margin = (
-                PACENOTE_GENTLE_MARGIN_MPH if cr.severity == "gentle" else PACENOTE_MARGIN_MPH
-            )
+            margin = PACENOTE_GENTLE_MARGIN_MPH if cr.severity == "gentle" else PACENOTE_MARGIN_MPH
             if speed <= cr.advisory_mph + margin:
                 continue
             window = self._curve_pacenote_lead_mi(speed, cr.advisory_mph) * 1.5
@@ -1564,6 +1562,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         if mph < self.ETA_MIN_MPH:
             mph = max(1.0, fallback_mph)
         return self.remaining_miles / mph
+
+    @property
+    def progress_percent(self) -> int:
+        """Whole-percent trip progress, the figure the drivers board shows."""
+        total = self.total_miles or 1.0
+        return max(0, min(100, round(100.0 * self.position_mi / total)))
 
     def progress_summary(self, imperial: bool = True) -> str:
         if imperial:

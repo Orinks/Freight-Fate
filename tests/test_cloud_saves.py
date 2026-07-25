@@ -29,6 +29,7 @@ from freight_fate.cloud_saves import (
     SyncState,
     backup_summary,
     cloud_content,
+    delete_save,
     download_save,
     list_saves,
     profile_dict_from_content,
@@ -672,3 +673,103 @@ def test_a_restore_without_absolution_leaves_the_mark_alone():
     path = restore_to_disk(payload, SyncState())
 
     assert Profile.load(path).integrity_modified is True
+
+
+# -- deleting a cloud slot -------------------------------------------------------
+
+
+def test_delete_save_issues_a_delete_for_the_named_slot():
+    transport = FakeTransport(reply={"ok": True, "deletedRevisions": 3})
+
+    assert delete_save(IDENTITY, save_name="Road Star", transport=transport) is True
+
+    url, payload, headers = transport.requests[0]
+    assert url == (
+        f"{base_url()}/api/freight-fate/saves?driverId={IDENTITY.driver_id}&saveName=Road%20Star"
+    )
+    assert payload is None
+    assert headers["Authorization"] == f"Bearer {IDENTITY.driver_token}"
+
+
+def test_delete_save_network_trouble_is_false():
+    assert (
+        delete_save(
+            IDENTITY, save_name="Road Star", transport=FakeTransport(error=OSError("no route"))
+        )
+        is False
+    )
+
+
+def test_delete_save_refused_credentials_raise_cloud_auth_error():
+    with pytest.raises(CloudAuthError):
+        delete_save(IDENTITY, save_name="Road Star", transport=FakeTransport(error=auth_error(401)))
+
+
+def test_forget_drops_the_slot_and_its_conflict():
+    sync_state = SyncState()
+    sync_state.record_synced("Road Star", 3, "hash")
+    sync_state.record_conflict("Road Star", {"latestRevision": 4})
+
+    sync_state.forget("Road Star")
+
+    assert sync_state.slots() == {}
+    # Idempotent: forgetting an unknown slot is not an error.
+    sync_state.forget("Road Star")
+
+
+def test_delete_menu_flow_confirms_then_forgets_the_slot(monkeypatch):
+    import time as time_module
+
+    import pygame
+
+    from freight_fate import cloud_saves as cloud_saves_module
+    from freight_fate.app import App
+    from freight_fate.states.cloud_save_states import CloudSlotState
+
+    IDENTITY.save()
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+    try:
+        app.cloud.sync_state.record_synced("Road Star", 3, "hash")
+        entry = {
+            "saveName": "Road Star",
+            "revision": 3,
+            "createdAt": 1_700_000_000_000,
+            "summary": "Rig Hauler, level 9",
+        }
+        slot = CloudSlotState(app.ctx, "Road Star", [entry])
+        app.push_state(slot)
+        while not slot.items[slot.index].text.startswith("Delete"):
+            slot.handle_event(key_event(pygame.K_DOWN))
+        slot.handle_event(key_event(pygame.K_RETURN))
+
+        confirm = app.state
+        assert confirm.title == "Delete the cloud backups?"
+        # Safe default first: "No" is the focused item.
+        assert confirm.items[0].text == "No, keep the cloud backups"
+        assert any("cannot be brought back" in t for t in spoken)
+
+        calls = {}
+
+        def fake_delete(identity, *, save_name, transport=None):
+            calls["save_name"] = save_name
+            return True
+
+        monkeypatch.setattr(cloud_saves_module, "delete_save", fake_delete)
+        confirm.handle_event(key_event(pygame.K_DOWN))
+        confirm.handle_event(key_event(pygame.K_RETURN))
+
+        deadline = time_module.time() + 5.0
+        while slot._outcome is None and time_module.time() < deadline:
+            time_module.sleep(0.01)
+        slot.update(0.0)
+
+        assert calls["save_name"] == "Road Star"
+        assert app.cloud.sync_state.slots() == {}
+        assert slot.revisions == []
+        assert any("removed from your orinks.net account" in t for t in spoken)
+        # The slot menu no longer offers a delete for backups that are gone.
+        assert not any(item.text.startswith("Delete") for item in slot.items)
+    finally:
+        app.shutdown()

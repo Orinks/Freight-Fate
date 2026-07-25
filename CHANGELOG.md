@@ -4,6 +4,31 @@
 
 ### Added
 
+- **Linux players get an AppImage.** Alongside the tarball, each release now
+  ships `FreightFate-<version>-linux-x86_64.AppImage`: one file you mark
+  executable and run, with no extraction step. It carries the libraries the
+  Ubuntu build needs, so it also runs on Fedora, Arch, and openSUSE, and
+  every build boots on Fedora before it ships. Because the AppImage itself
+  is read-only, saves live in `~/.local/share/FreightFate` instead of a
+  `saves` folder beside the game. In-game updates work too: the game
+  downloads the new AppImage, swaps the file in place, and restarts -- and
+  if the AppImage sits somewhere your user account cannot write to, the
+  game tells you where the downloaded update was saved instead of failing
+  quietly.
+
+- **Delete a career's cloud backups.** Each career in the Cloud backup menu
+  now has a Delete item that removes every kept backup of that career from
+  your orinks.net account, after a spoken confirmation. Your saves on this
+  computer are never touched, and a career that is still on this computer
+  with cloud backup turned on simply starts a fresh backup the next time it
+  saves. Handy if a save was backed up by mistake, such as someone else's
+  career you had copied onto your computer.
+
+- **The R key now tells you how far along you are.** The route report leads
+  with your trip progress, like 53 percent there, followed by the miles left.
+  It is the same figure the online drivers board shows for you, and the Tab
+  status menu has a matching Progress line. Deadhead drives count too.
+
 - **Setting the parking brake at speed now dynamites the brakes.** The
   valve works at any speed, just like a real truck -- it is the
   emergency backup -- but pulling it while rolling slams the spring
@@ -25,14 +50,6 @@
   sharp splashes of noise -- the picket-fencing every driver has heard
   on a fading FM station. The flutter follows your actual speed and the
   station's dial position, slows as you slow, and settles when you park.
-
-- **The truck now sounds like a real truck.** The engine voice is built
-  from a real cab recording and follows the rpm through its range --
-  idle, pulling away, cruising, working up high -- instead of one loop
-  stretched faster and slower. You will hear the difference the moment
-  the engine settles into idle. Prefer the old sound? A new Engine
-  voice setting under Settings, Audio switches between real and
-  classic, and it applies instantly, even while driving.
 
 - **Cold starts build their air out loud.** Start the engine with low
   tanks and it holds a fast idle while the compressor charges the air
@@ -368,6 +385,33 @@
   freight weighs.
 
 ### Changed
+
+- **Shorter driving readouts that fit a braille display.** The clock, route,
+  weather, and fuel reports now put the answer in the first few words, so a
+  one-line braille display shows what matters without panning. The C key
+  leads with the time and whether you are on schedule instead of burying the
+  verdict at the end, and on the terse speech setting it skips the calendar,
+  the appointment restatement, and the stop-planning advice, all of which
+  the Tab status menu still carries.
+
+- **Speech verbosity is now a simple choice between terse and normal.** The
+  chatty level never said anything normal did not; it only repeated your
+  speed a little more often. If you had chatty selected, the game now uses
+  normal, and everything you heard before is still there.
+
+- **Rest stops no longer let you sleep twice for nothing.** When you are
+  already fully rested at a rest stop, choosing a sleep option now warns you
+  that it would only move the clock and your deadline forward, and asks you to
+  press Enter again to confirm. This is the same safeguard the terminal bunk
+  room already had.
+
+- **Walking away from a parked truck now takes you off the drivers board.**
+  If your truck sits stopped with nothing changing for half an hour, you
+  leave the public board just as if you had paused the game, and the board
+  stops calling you a driver who is on duty. The moment anything changes,
+  like rolling again or pulling into a stop, you are back on the board within
+  seconds. Deadhead drives also now say how far along they are, on the board
+  and in Discord, so a long empty run never looks like a parked truck.
 
 - **Gear changes are quicker, like a modern automated box.** Power
   upshifts now take a quarter second in the low gears and half a second
@@ -793,6 +837,16 @@
 
 ### Fixed
 
+- **Driving past a pickup or delivery entrance no longer goes silent.**
+  Arriving at a facility used to announce itself once; if you rolled on --
+  easy to do with cruise re-engaged -- the game said nothing more for the
+  rest of the drive, and the delivery quietly went late. Now the gate
+  repeats its instruction every ten seconds while you are still moving,
+  cruise drops each time so the truck is never held at speed past a dead
+  end, and the S key answers with the gate itself -- "At the receiver.
+  Stop to dock." -- instead of a speed limit that stopped mattering when
+  the route ended.
+
 - **Route-transition assistance no longer traps the truck short of a stop
   bar.** If you braked yourself while the assistance was already braking for
   a stop sign or a red light, the truck could come to rest a little short of
@@ -969,7 +1023,8 @@
   really are, so the status readout no longer puts you in the mountains where
   no Texan would. The real climbs you brace for still call out as mountain
   grades, and every famous grade -- the Grapevine, Monteagle, the Siskiyous,
-  the run up to the Continental Divide -- keeps its name.
+  the run up to the Continental Divide -- keeps its name. Thanks to nromey,
+  [PR #107](https://github.com/Orinks/Freight-Fate/pull/107).
 
 - **The engine revs freely when you sit with the parking brake set.**
   Blipping the throttle while parked used to drag the engine up to a
@@ -1277,6 +1332,10 @@
   holding you still, the engine answers the throttle across its whole
   range -- so you can warm it up, build air faster, or just listen to it
   come alive -- and it settles back to a steady idle when you let off.
+
+## 1.8.5.1 - 2026-07-22
+
+### Fixed
 
 - **Each extracted copy of the game now keeps its saves strictly to itself.**
   Previously, a copy of the game could look one folder up on its first run

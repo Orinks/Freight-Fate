@@ -141,12 +141,57 @@ jobs:
           uv run python tools/build_release.py
           --tag "${{ needs.prepare.outputs.is_nightly == 'true' && needs.prepare.outputs.tag || needs.prepare.outputs.version }}"
 
+      - name: Package AppImage
+        if: matrix.label == 'Linux'
+        timeout-minutes: 15
+        run: >
+          uv run python tools/build_appimage.py
+          --tag "${{ needs.prepare.outputs.is_nightly == 'true' && needs.prepare.outputs.tag || needs.prepare.outputs.version }}"
+
+      - name: Smoke test AppImage on Fedora
+        if: matrix.label == 'Linux'
+        timeout-minutes: 15
+        run: |
+          cat > fedora-smoke.sh <<'EOF'
+          set -e
+          dnf install -y -q alsa-lib xorg-x11-server-Xvfb dejavu-sans-fonts >/dev/null
+          cd /work
+          appimage=$(find dist -maxdepth 1 -name 'FreightFate-*-linux-x86_64.AppImage' -print -quit)
+          if [ -z "$appimage" ]; then
+            echo "AppImage was not created."
+            exit 1
+          fi
+          chmod +x "$appimage"
+          export FREIGHT_FATE_NO_SPEECH=1
+          export SDL_AUDIODRIVER=dummy
+          set +e
+          timeout 60s xvfb-run -a "$appimage" --appimage-extract-and-run --smoke > fedora-smoke.log 2>&1
+          status=$?
+          set -e
+          cat fedora-smoke.log
+          if grep -E "error while loading shared libraries|cannot open shared object file" fedora-smoke.log; then
+            echo "AppImage is missing a shared library on Fedora."
+            exit 1
+          fi
+          if grep -E "cannot register existing type|GLib-GObject-CRITICAL" fedora-smoke.log; then
+            echo "AppImage hit the GLib/GIO duplicate type-registration crash on Fedora."
+            exit 1
+          fi
+          if [ "$status" -ne 0 ] && [ "$status" -ne 124 ]; then
+            echo "AppImage exited unexpectedly with status $status on Fedora."
+            exit "$status"
+          fi
+          echo "Fedora smoke test passed."
+          EOF
+          docker run --rm -v "$PWD:/work" fedora:43 bash /work/fedora-smoke.sh
+
       - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.label }}
           path: |
             dist/FreightFate-*.zip
             dist/FreightFate-*.tar.gz
+            dist/FreightFate-*.AppImage
           # A rename or bad glob must fail the build, not silently ship a
           # release without this platform's download.
           if-no-files-found: error
@@ -170,7 +215,7 @@ jobs:
       - name: Verify every platform archive is present
         run: |
           missing=0
-          for suffix in windows-portable.zip macos.zip linux-x64.tar.gz; do
+          for suffix in windows-portable.zip macos.zip linux-x64.tar.gz linux-x86_64.AppImage; do
             if ! ls assets/FreightFate-*-"$suffix" >/dev/null 2>&1; then
               echo "Release is missing the $suffix download" >&2
               missing=1
