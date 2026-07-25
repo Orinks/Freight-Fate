@@ -369,6 +369,13 @@
 
 ### Changed
 
+- **The streets into town speak their real speed limit now.** Heading in
+  to a customer or a truck stop, the posted limit you hear on each
+  approach street comes from the real road -- an arterial posted 35 or 45
+  no longer reads as a blanket 25 for miles. Where a street's limit isn't
+  on record the sensible default stays, and the slow crawl right at the
+  gate is unchanged.
+
 - **Gear changes are quicker, like a modern automated box.** Power
   upshifts now take a quarter second in the low gears and half a second
   at the top, instead of dragging toward a full second. Downshifts keep
