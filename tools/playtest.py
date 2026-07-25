@@ -14,6 +14,15 @@ Usage::
 
 ``--route`` drives one supported corridor directly (skipping the menus); without
 it a fresh career takes whatever the dispatch board offers.
+
+Every run also prints an equipment report -- which tractor dispatch drew from
+the yard, which spares it had to choose between, whether the shipper staged a
+loaded trailer or loaded at a dock, what shape that trailer is in, and any
+detention the wait earned. None of that is in the transcript, and all of it
+changes how a run plays::
+
+    uv run python tools/playtest.py --equipment-only
+    uv run python tools/playtest.py --walk-around      # pre-trip, refuse a bad box
 """
 
 from __future__ import annotations
@@ -60,6 +69,18 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Print only the GPS/event cues, not every spoken line.",
     )
+    parser.add_argument(
+        "--walk-around",
+        action="store_true",
+        help="Do the pre-trip on the hooked trailer before departing, and "
+        "refuse it if the walk-around turns up a defect.",
+    )
+    parser.add_argument(
+        "--equipment-only",
+        action="store_true",
+        help="Print just the equipment report: tractor, yard spares, how the "
+        "freight loads and unloads, trailer condition, detention.",
+    )
     args = parser.parse_args(argv)
 
     from career_1_9_scenarios import CAREER_STAGES, career_stage
@@ -82,6 +103,8 @@ def main(argv: list[str] | None = None) -> int:
                 job_rank=args.job_rank,
                 route_rank=args.route_rank,
                 configure_profile=configure,
+                walk_around_trailer=args.walk_around,
+                refuse_bad_trailer=args.walk_around,
             )
         driving = harness.driving
         assert driving is not None
@@ -99,6 +122,16 @@ def main(argv: list[str] | None = None) -> int:
     print("=" * 70)
     print(f"PLAYTEST: {header}")
     print("=" * 70)
+    equipment = result.equipment_summary()
+    if equipment:
+        # The transcript alone cannot say which tractor dispatch drew or what
+        # was wrong with the trailer, and both now decide how a run reads.
+        print("EQUIPMENT")
+        for line in equipment.splitlines():
+            print(f"  {line}")
+        print("-" * 70)
+    if args.equipment_only:
+        return 0
     for line in result.transcript:
         if args.events_only and not line.startswith("[event]"):
             continue

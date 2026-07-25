@@ -288,6 +288,9 @@ class DrivingState(
         self._climb_cue_said = False  # cruise has already owned up to this pull
         self._climb_cue_s = 0.0  # quiet time between hand-back cues
         self._descent_cue_s = 0.0  # quiet time between descent-control cues
+        # A trailer refused at the shipper: the yard swapped it, so the box
+        # under the truck is sound and no scale house should say otherwise.
+        self.trailer_refused = False
         self._nice_speed_mi = 0.0  # distance held at a very particular speed
         self._jake_descent_mi = 0.0  # downgrade held on the engine alone
         self._radio_states_station = ""  # station the state tally belongs to
@@ -423,6 +426,7 @@ class DrivingState(
             ),
             "city_service_key": self.city_service_key,
             "navigation_schema": 1,
+            "trailer_refused": self.trailer_refused,
             "trip_seed": self.trip_seed,
             "start_hour": self.trip.start_hour,
             "position_mi": self.trip.position_mi,
@@ -521,6 +525,7 @@ class DrivingState(
             state.start_engine_wear = float(start_wear.get("engine", state.truck.engine_wear_pct))
             # Chains stay on the drives across a save; absent on older saves.
             state.truck.chains_on = bool(data.get("chains_on", False))
+            state.trailer_refused = bool(data.get("trailer_refused", False))
             state.rig_buffs = {
                 str(group): dict(info) for group, info in dict(data.get("rig_buffs", {})).items()
             }

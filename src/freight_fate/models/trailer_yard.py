@@ -241,6 +241,85 @@ def pickup_plan(job, profile) -> PickupPlan:
     return PickupPlan(MODE_LIVE, minutes, None, detention, reason)
 
 
+TRAILER_SWAP_MIN = 30.0  # the yard finds another box and brings it round
+
+
+def replacement_trailer(job, refused: TrailerUnit | None) -> TrailerUnit | None:
+    """The box the yard brings out after a driver refuses one.
+
+    A yard asked to swap a trailer does not hand over another bad one -- the
+    point of refusing is that somebody goes and finds a serviceable trailer.
+    Drawn from the same yard so the number is real, then guaranteed sound.
+    """
+    if refused is None:
+        return None
+    units = yard_trailers(
+        str(getattr(job, "origin_type", "") or ""),
+        str(getattr(job, "origin_facility_id", "") or getattr(job, "origin_location", "")),
+        str(getattr(getattr(job, "cargo", None), "key", "") or ""),
+    )
+    clean = [unit for unit in units if not unit.defect and unit.number != refused.number]
+    if clean:
+        return clean[0]
+    # Every box in this yard has something on it, so the swap is a trailer
+    # somebody actually went and fixed before handing it over.
+    seed = _seed("swap", refused.number, getattr(job, "origin_facility_id", ""))
+    return TrailerUnit(str(1000 + seed % 8999), refused.trailer_key, 12.0)
+
+
+DROP_EMPTY_MIN = 20.0  # back it in, drop, hook an empty, sign, gone
+LIVE_UNLOAD_MIN = 45.0  # the receiver's own dock time
+
+
+@dataclass(frozen=True)
+class DeliveryPlan:
+    """How the freight comes off: dropped in the yard, or unloaded at a dock."""
+
+    mode: str
+    minutes: float
+    keeps_trailer: bool  # False when the loaded box stays and you leave with an empty
+    reason: str
+
+    @property
+    def is_drop_hook(self) -> bool:
+        return self.mode == MODE_DROP_HOOK
+
+
+def delivery_plan(job, profile) -> DeliveryPlan:
+    """Decide live unload or drop-and-hook at the receiver.
+
+    Same trade as the pickup end and the same rules decide it, with one
+    addition that only exists here: dropping the loaded box is also how a
+    driver gets rid of a trailer they have been dragging a defect around on
+    since the shipper. You hand the write-up to the receiver's yard along
+    with the freight, and hook a clean empty.
+    """
+    if owns_the_trailer(profile, job):
+        return DeliveryPlan(
+            MODE_LIVE,
+            LIVE_UNLOAD_MIN,
+            True,
+            "it is your own trailer, so they unload you at the dock",
+        )
+    facility_type = str(getattr(job, "destination_type", "") or "")
+    facility_id = str(
+        getattr(job, "destination_facility_id", "") or getattr(job, "destination_location", "")
+    )
+    if facility_has_drop_yard(facility_type, facility_id):
+        return DeliveryPlan(
+            MODE_DROP_HOOK,
+            DROP_EMPTY_MIN,
+            False,
+            "the receiver takes the whole trailer and you leave with an empty",
+        )
+    return DeliveryPlan(
+        MODE_LIVE,
+        LIVE_UNLOAD_MIN,
+        True,
+        "the receiver is unloading you at the dock",
+    )
+
+
 def detention_charge(plan: PickupPlan):
     """Detention as a settlement line, or None when nobody owes anybody.
 

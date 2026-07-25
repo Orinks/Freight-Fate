@@ -6,6 +6,7 @@ from __future__ import annotations
 from ..data.world import Route
 from ..models.dispatch_policy import dispatch_policy
 from ..models.jobs import Job, job_from_payload, job_payload, plan_hos
+from ..models.trailer_yard import TRAILER_SWAP_MIN
 from ..music import select_menu_music_sequence
 from ..sim.vehicle import TruckState
 from .base import MenuItem, MenuState, TimedMessageState
@@ -24,12 +25,14 @@ def pickup_snapshot(
     engine_on: bool = False,
     speed_control_armed: bool = False,
     speed_control_target_mph: float | None = None,
+    trailer_refused: bool = False,
 ) -> dict:
     data = {
         "kind": "pickup",
         "job": job_payload(job),
         "checked_in": checked_in,
         "loaded": loaded,
+        "trailer_refused": trailer_refused,
         "engine_on": engine_on,
         "speed_control_armed": speed_control_armed,
         "speed_control_target_mph": speed_control_target_mph,
@@ -77,6 +80,7 @@ def start_loaded_drive(
     speed_control_armed: bool = False,
     speed_control_target_mph: float | None = None,
     lead: str = "",
+    trailer_refused: bool = False,
 ) -> None:
     """Build the loaded delivery trip and depart, narrating ``lead`` first.
 
@@ -87,6 +91,9 @@ def start_loaded_drive(
     from .driving import DrivingState
 
     driving = DrivingState(ctx, job, route)
+    # A trailer the driver refused at the shipper must not follow them onto the
+    # road: the scale house has to find the box they are actually pulling.
+    driving.trailer_refused = trailer_refused
     driving.truck.restore_air_brake_snapshot(air_brake, default_ready=True)
     if engine_on:
         driving.truck.start_engine()
@@ -127,12 +134,18 @@ class PickupFacilityState(MenuState):
         speed_control_armed: bool = False,
         speed_control_target_mph: float | None = None,
         announce_speed_control_status: bool = False,
+        trailer_refused: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.job = job
         self.checked_in = checked_in
         self.loaded = loaded
         self.driving = driving
+        # A refused trailer is a decision the driver made, so it has to survive
+        # a save and follow them onto the road -- otherwise the walk-around is
+        # theatre and the inspector still writes up the box they refused.
+        self._trailer_refused = trailer_refused
+        self._offer_refusal = False
         self.announce_speed_control_status = announce_speed_control_status
         if driving is not None:
             self.truck = driving.truck
@@ -161,6 +174,7 @@ class PickupFacilityState(MenuState):
                 speed_control_armed=bool(data.get("speed_control_armed", False)),
                 speed_control_target_mph=None if target is None else float(target),
                 announce_speed_control_status=True,
+                trailer_refused=bool(data.get("trailer_refused", False)),
             )
         except (KeyError, TypeError, ValueError):
             return None
@@ -269,13 +283,35 @@ class PickupFacilityState(MenuState):
                 self._check_in,
                 help="Confirm the pickup number and receive the dock assignment.",
             )
-        return [
-            primary,
+        items = [primary]
+        if self.loaded and self.pickup_plan.trailer is not None:
+            items.append(
+                MenuItem(
+                    "Walk around the trailer",
+                    self._walk_around,
+                    help="Check the lamps, the brake adjustment, and the tires "
+                    "on the trailer you hooked. Anything wrong with it is "
+                    "yours the moment you pull out of the gate.",
+                )
+            )
+        if self._offer_refusal and not self._trailer_refused:
+            items.append(
+                MenuItem(
+                    "Refuse this trailer",
+                    self._refuse_trailer,
+                    help="Send it back and have the yard bring a sound one. "
+                    f"Costs about {TRAILER_SWAP_MIN:.0f} minutes, and the "
+                    "write-up stays with them instead of you.",
+                )
+            )
+        items.append(
             MenuItem(
                 "Pickup status",
                 self._status,
                 help="Hear the origin facility, cargo, destination, and loading instruction.",
-            ),
+            )
+        )
+        return items + [
             MenuItem(
                 "Save and quit to main menu",
                 self._save_and_quit,
@@ -289,12 +325,91 @@ class PickupFacilityState(MenuState):
             ),
         ]
 
+    def _walk_around(self) -> None:
+        """The pre-trip on the trailer, done on purpose rather than to you.
+
+        A defect on a hooked trailer used to surface only when an inspector
+        found it, which for a blind driver meant the walk-around was something
+        that happened to them at a scale house. It is a deliberate action now:
+        walk the trailer, hear what is wrong with it, and decide.
+
+        A defect found here can be refused -- the yard swaps the box, which
+        costs the time a swap really costs and hands the problem back to the
+        people whose problem it is.
+        """
+        plan = self.pickup_plan
+        trailer = plan.trailer
+        if trailer is None:
+            self.ctx.say(
+                "Nothing to walk around yet. The shipper is loading the trailer you came in with."
+            )
+            return
+        if self._trailer_refused:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"You already had the yard swap that one. {self.swapped_trailer.describe()} "
+                "It checks out."
+            )
+            return
+        if not trailer.defect:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Walking {trailer.spoken_name}: lamps all lit, brakes in "
+                "adjustment, tires with tread on them. It checks out. Good to go."
+            )
+            return
+        self.ctx.audio.play("ui/warning")
+        self.ctx.say(
+            f"Walking {trailer.spoken_name}, you find a {trailer.defect}. "
+            f"The trailer is {trailer.condition_text}. Pull out of the gate with "
+            "it and the write-up is yours at the first scale. "
+            f"Choose Refuse this trailer to have the yard swap it, which costs "
+            f"about {TRAILER_SWAP_MIN:.0f} minutes.",
+            interrupt=True,
+        )
+        self._offer_refusal = True
+        self.refresh(keep_index=False)
+
+    def _refuse_trailer(self) -> None:
+        p = self.ctx.profile
+        start = p.game_hours
+        p.game_hours += TRAILER_SWAP_MIN / 60.0
+        p.duty_log.record("on_duty_not_driving", start, p.game_hours, self.facility, "trailer swap")
+        p.hos.on_duty(TRAILER_SWAP_MIN)
+        self._trailer_refused = True
+        self._offer_refusal = False
+        self._save_state()
+        self.refresh(keep_index=False)
+        self.ctx.audio.play("ui/notify")
+        self.ctx.award_achievement("refused_the_trailer")
+        self.ctx.say(
+            f"You refuse it and the yard brings another. {self.swapped_trailer.describe()} "
+            f"The swap cost {TRAILER_SWAP_MIN:.0f} minutes, and the write-up "
+            "stays with the people whose problem it is.",
+            interrupt=True,
+        )
+
+    @property
+    def swapped_trailer(self):
+        """The clean box the yard brings out when a defect is refused."""
+        from ..models.trailer_yard import replacement_trailer
+
+        return replacement_trailer(self.job, self.pickup_plan.trailer)
+
+    @property
+    def hooked_trailer(self):
+        """The trailer actually under the truck, swap included."""
+        if self._trailer_refused:
+            return self.swapped_trailer
+        return self.pickup_plan.trailer
+
     def _save_state(self) -> None:
         self.ctx.profile.store_truck_condition(self.truck)
         self.ctx.profile.active_trip = pickup_snapshot(
             self.job,
             checked_in=self.checked_in,
             loaded=self.loaded,
+            trailer_refused=self._trailer_refused,
             air_brake=self.truck.air_brake_snapshot(),
             engine_on=self.truck.engine_on,
             speed_control_armed=self.speed_control_armed,
@@ -419,6 +534,7 @@ class PickupFacilityState(MenuState):
                 engine_on=self.truck.engine_on,
                 speed_control_armed=self.speed_control_armed,
                 speed_control_target_mph=self.speed_control_target_mph,
+                trailer_refused=self._trailer_refused,
                 lead=(f"Dispatch routed you to {self.job.destination_facility_text()}. "),
             )
             return
@@ -438,6 +554,7 @@ class PickupFacilityState(MenuState):
                 engine_on=self.truck.engine_on,
                 speed_control_armed=self.speed_control_armed,
                 speed_control_target_mph=self.speed_control_target_mph,
+                trailer_refused=self._trailer_refused,
             )
         )
 
@@ -532,6 +649,7 @@ class RouteSelectState(MenuState):
         engine_on: bool = False,
         speed_control_armed: bool = False,
         speed_control_target_mph: float | None = None,
+        trailer_refused: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.job = job
@@ -541,6 +659,7 @@ class RouteSelectState(MenuState):
         self.engine_on = engine_on
         self.speed_control_armed = speed_control_armed
         self.speed_control_target_mph = speed_control_target_mph
+        self.trailer_refused = trailer_refused
         provider = ctx.real_weather_provider()
         if provider is not None:
             for route in routes:
@@ -670,5 +789,6 @@ class RouteSelectState(MenuState):
             engine_on=self.engine_on,
             speed_control_armed=self.speed_control_armed,
             speed_control_target_mph=self.speed_control_target_mph,
+            trailer_refused=self.trailer_refused,
             lead=f"Navigation set for {self.job.destination_facility_text()}. ",
         )

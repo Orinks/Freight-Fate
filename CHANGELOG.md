@@ -4,6 +4,21 @@
 
 ### Added
 
+- **Walk around the trailer before you pull out.** When you hook a trailer
+  out of a drop yard, a new pickup option lets you check the lamps, the
+  brake adjustment, and the tires yourself. If something is wrong with it
+  you hear exactly what, and you can refuse the box: the yard takes about
+  thirty minutes to bring a sound one, and the write-up stays with them
+  instead of riding to the first scale house with you. Roll out without
+  looking and it is yours.
+
+- **Receivers with a drop yard take the whole trailer.** The delivery end
+  works the way the pickup end does now: at a receiver set up for it you
+  back the loaded trailer into their yard, hook a clean empty, and go --
+  twenty minutes instead of forty-five at a dock. It is also how you finally
+  get rid of a trailer you have been dragging a defect around on since the
+  shipper.
+
 - **Drop and hook.** Not every pickup is an hour backed into a dock any
   more. Busy shippers -- cross-docks, parcel hubs, retail distribution
   centres, intermodal ramps -- keep loaded trailers standing in a yard, so

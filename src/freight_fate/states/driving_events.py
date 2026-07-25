@@ -356,7 +356,7 @@ class DrivingEventMixin:
         """What an inspector would write up on the trailer, if anything."""
         from ..models.trailer_yard import pickup_plan
 
-        if self.ctx.profile is None or self.job is None:
+        if self.ctx.profile is None or self.job is None or self.trailer_refused:
             return None
         plan = pickup_plan(self.job, self.ctx.profile)
         return plan.trailer.defect if plan.trailer is not None else None

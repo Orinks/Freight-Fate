@@ -904,13 +904,35 @@ class FacilityArrivalState(MenuState):
         self.ctx.audio.set_ambient(facility_ambient_key(self.driving.job.destination_type))
         self.ctx.say(f"At {self.facility}. {self.current_text()}")
 
+    @property
+    def delivery_plan(self):
+        """How the freight comes off here: dropped in the yard, or a live dock.
+
+        Recomputed from the job rather than stored, exactly like the pickup
+        side, so it survives a save and never disagrees with itself.
+        """
+        from ..models.trailer_yard import delivery_plan
+
+        return delivery_plan(self.driving.job, self.ctx.profile)
+
     def build_items(self) -> list[MenuItem]:
-        return [
-            MenuItem(
+        plan = self.delivery_plan
+        if plan.is_drop_hook:
+            primary = MenuItem(
+                "Drop the loaded trailer and hook an empty",
+                self._dock,
+                help="The receiver takes the whole trailer. Drop it in their "
+                "yard, hook an empty, and go -- quicker than a dock, and it "
+                "is how you hand off a trailer with a write-up on it.",
+            )
+        else:
+            primary = MenuItem(
                 "Dock and deliver",
                 self._dock,
                 help="Back into the dock and complete this delivery.",
-            ),
+            )
+        return [
+            primary,
             MenuItem(
                 "Check paperwork",
                 self._paperwork,
@@ -932,29 +954,63 @@ class FacilityArrivalState(MenuState):
         d.truck.throttle = 0.0
         d.truck.brake = 1.0
         d.truck.set_parking_brake()
-        d._set_status("Docked. Unloading cargo.")
+        plan = self.delivery_plan
+        d._set_status(
+            "In the yard. Dropping the trailer."
+            if plan.is_drop_hook
+            else "Docked. Unloading cargo."
+        )
 
         def complete() -> None:
-            _advance_rest_clock(d, UNLOADING_MIN)
-            d.hos.on_duty(UNLOADING_MIN)
-            d._set_status("Unloaded. Delivery paperwork signed.")
+            _advance_rest_clock(d, plan.minutes)
+            d.hos.on_duty(plan.minutes)
+            d._set_status(
+                "Trailer dropped. Hooked to an empty, paperwork signed."
+                if plan.is_drop_hook
+                else "Unloaded. Delivery paperwork signed."
+            )
+            if plan.is_drop_hook:
+                self.ctx.award_achievement("first_delivery_drop")
+                if self._hooked_defect():
+                    # The write-up leaves with the trailer, which is the only
+                    # honest way to be rid of one.
+                    self.ctx.award_achievement("dropped_the_bad_one")
             d._arrive()
 
+        if plan.is_drop_hook:
+            title = "Dropping the trailer"
+            message = (
+                f"Backing into the yard at {self.facility} and dropping the "
+                f"loaded trailer with {d.job.weight_tons:.0f} tons of "
+                f"{d.job.cargo.label} still in it. Gear down, lines off, "
+                "hooking a clean empty for the next run."
+            )
+            status = "Dropping the trailer. Please wait."
+        else:
+            title = "Unloading cargo"
+            message = (
+                f"Docked at {self.facility}. Unloading "
+                f"{d.job.weight_tons:.0f} tons of {d.job.cargo.label}; "
+                "paperwork is being signed."
+            )
+            status = "Unloading cargo. Please wait."
         self.ctx.replace_state(
             TimedMessageState(
                 self.ctx,
-                title="Unloading cargo",
-                message=(
-                    f"Docked at {self.facility}. Unloading "
-                    f"{d.job.weight_tons:.0f} tons of {d.job.cargo.label}; "
-                    "paperwork is being signed."
-                ),
-                status="Unloading cargo. Please wait.",
+                title=title,
+                message=message,
+                status=status,
                 seconds=UNLOADING_WAIT_S,
                 on_complete=complete,
                 sound_key="poi/dock_and_deliver",
             )
         )
+
+    def _hooked_defect(self) -> str | None:
+        from ..models.trailer_yard import pickup_plan
+
+        plan = pickup_plan(self.driving.job, self.ctx.profile)
+        return plan.trailer.defect if plan.trailer is not None else None
 
     def _paperwork(self) -> None:
         d = self.driving
@@ -998,8 +1054,12 @@ class FacilityArrivalState(MenuState):
             f"Driver-responsibility charges are estimated at "
             f"{driver_charges:,.0f} dollars, for estimated net driver pay "
             f"{net_estimated_pay:,.0f}.{advance_note} "
-            f"{timing}. {cargo_condition} Dock and deliver to settle."
+            f"{timing}. {cargo_condition} {self._finish_instruction()} to settle."
         )
+
+    def _finish_instruction(self) -> str:
+        """The action that ends this delivery, named the way the menu names it."""
+        return "Drop the loaded trailer" if self.delivery_plan.is_drop_hook else "Dock and deliver"
 
     def _status(self) -> None:
         d = self.driving
@@ -1007,11 +1067,11 @@ class FacilityArrivalState(MenuState):
             f"At {self.facility}. Hauling {d.job.weight_tons:.0f} tons of "
             f"{d.job.cargo.label}. Current speed "
             f"{self.ctx.settings.speed_text(d.truck.speed_mph)}. "
-            "Stop, then Dock and deliver."
+            f"Stop, then {self._finish_instruction()}."
         )
 
     def go_back(self) -> None:
-        self.ctx.say("At destination. Dock and deliver to finish.")
+        self.ctx.say(f"At destination. {self._finish_instruction()} to finish.")
 
     def lines(self) -> list[str]:
         return [
@@ -1019,7 +1079,7 @@ class FacilityArrivalState(MenuState):
             "",
             f"Facility: {self.facility}",
             f"Speed: {self.driving.truck.speed_mph:.0f} mph",
-            "Docking required before delivery settlement.",
+            "Stopping required before delivery settlement.",
             "",
         ] + [("> " if i == self.index else "  ") + item.text for i, item in enumerate(self.items)]
 

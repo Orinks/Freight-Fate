@@ -1201,6 +1201,27 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
         "Little Feat - Willin'",
     ),
     Achievement(
+        "refused_the_trailer",
+        "Send It Back",
+        "You walked a trailer, found what was wrong with it, and refused it. Thirty minutes for the swap, and the write-up stayed with the people whose problem it was.",
+        "Cargo",
+        "Johnny Paycheck - Take This Job and Shove It",
+    ),
+    Achievement(
+        "first_delivery_drop",
+        "Leave It Where It Lies",
+        "Your first drop at the receiving end. They keep the whole trailer, freight and all, you hook a clean empty, and you are back on the road before a dock would have called your number.",
+        "Cargo",
+        "The Band - The Weight",
+    ),
+    Achievement(
+        "dropped_the_bad_one",
+        "Somebody Else's Turn",
+        "You dragged a trailer with a write-up on it all the way across the country and left it in the receiver's yard. It is their problem now. You did check the lights at every stop.",
+        "Cargo",
+        "Hank Williams - Move It On Over",
+    ),
+    Achievement(
         "detention_paid",
         "Paid to Sit Still",
         "A shipper held you past the free time and the carrier billed them for it. The clock was the only thing working, and for once it was working for you.",

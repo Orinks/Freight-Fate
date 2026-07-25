@@ -18,6 +18,8 @@ from driving_feature_helpers import (
     take_destination_exit,
 )
 
+DELIVERY_ACTIONS = ("Dock and deliver", "Drop the loaded trailer and hook an empty")
+
 
 def test_trip_event_sounds_use_contextual_cues():
     from freight_fate.sim.trip import NavigationCue, TripEvent, TripEventKind, Zone
@@ -1374,6 +1376,9 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        # Pinned to a receiver that unloads live: this test is about having to
+        # stop before the dock will take you, and it reads the unload back.
+        driving.job.destination_type = "mine_quarry"
         mark_destination_exit_taken(driving)
         driving.truck.velocity_mps = 26.8
 
@@ -1389,8 +1394,11 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
         finish_timed_state(app)
 
         assert isinstance(app.state, FacilityArrivalState)
-        assert app.state.items[app.state.index].text == "Dock and deliver"
-        assert "Docking required before delivery settlement." in app.state.lines()
+        # Either delivery is a valid arrival: a dock if this receiver unloads
+        # live, dropping the loaded box if they have a yard for it
+        # (tests/test_trailer_yard.py pins which receivers do which).
+        assert app.state.items[app.state.index].text in DELIVERY_ACTIONS
+        assert "Stopping required before delivery settlement." in app.state.lines()
         assert app.ctx.profile.career.deliveries == 0
 
         app.state.handle_event(key_event(pygame.K_RETURN))
@@ -2208,7 +2216,10 @@ def test_destination_exit_opens_delivery_gate():
         take_destination_exit(driving)
 
         assert isinstance(app.state, FacilityArrivalState)
-        assert app.state.items[app.state.index].text == "Dock and deliver"
+        # Either delivery is a valid arrival: a dock if this receiver unloads
+        # live, dropping the loaded box if they have a yard for it
+        # (tests/test_trailer_yard.py pins which receivers do which).
+        assert app.state.items[app.state.index].text in DELIVERY_ACTIONS
     finally:
         app.shutdown()
 
@@ -2249,6 +2260,10 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        # This test walks the dock ending in detail, so pin the receiver to one
+        # that unloads live. A receiver with a drop yard takes the whole trailer
+        # instead, and that ending has its own test.
+        driving.job.destination_type = "mine_quarry"
         spoken.clear()
         played.clear()
         mark_destination_exit_taken(driving)
@@ -2270,11 +2285,9 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
         assert isinstance(app.state, FacilityArrivalState)
         assert played[-1][0] == "facility/dock_gate"
         assert all(key != "ui/menu_open" for key, _volume in played)
-        assert [item.text for item in app.state.items] == [
-            "Dock and deliver",
-            "Check paperwork",
-            "Check arrival status",
-        ]
+        labels = [item.text for item in app.state.items]
+        assert labels[0] in DELIVERY_ACTIONS
+        assert labels[1:] == ["Check paperwork", "Check arrival status"]
         assert app.state.index == 0
 
         app.state.handle_event(key_event(pygame.K_DOWN))

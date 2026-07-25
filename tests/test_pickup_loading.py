@@ -14,6 +14,13 @@ def finish_timed_state(app):
     app.state.update(app.state.remaining + 0.01)
 
 
+def select_item(menu, label):
+    """Move to a named menu item and choose it."""
+    while menu.items[menu.index].text != label:
+        menu.handle_event(key_event(pygame.K_DOWN))
+    menu.handle_event(key_event(pygame.K_RETURN))
+
+
 def accept_pickup_drive(app):
     from freight_fate.states.driving import DrivingState
     from freight_fate.states.main_menu import MainMenuState
@@ -463,4 +470,144 @@ def test_drop_and_hook_gets_the_truck_out_in_a_fraction_of_the_time(monkeypatch)
         assert plan.trailer.number in readout
         assert "hooked to" in readout.lower()
     finally:
+        app.shutdown()
+
+
+# -- the walk-around, and refusing a trailer ---------------------------------------
+
+
+def _pickup_with_trailer(app, *, condition_pct):
+    """A checked-in, loaded pickup holding a trailer of a chosen condition."""
+    from freight_fate.models import trailer_yard
+    from freight_fate.models.trailer_yard import TrailerUnit
+
+    accept_pickup_drive(app)
+    pickup = arrive_at_pickup(app)
+    pickup.job.origin_type = "cross_dock"  # a shipper that stages trailers
+    unit = TrailerUnit("4417", "dry_van", condition_pct)
+    trailer_yard.preloaded_trailer = lambda job, _unit=unit: _unit
+    pickup.handle_event(key_event(pygame.K_RETURN))  # check in
+    pickup.handle_event(key_event(pygame.K_RETURN))  # drop and hook
+    finish_timed_state(app)
+    return pickup, unit
+
+
+def test_a_clean_trailer_walks_around_clean(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models import trailer_yard
+
+    original = trailer_yard.preloaded_trailer
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        pickup, unit = _pickup_with_trailer(app, condition_pct=10.0)
+        assert unit.defect is None
+        select_item(pickup, "Walk around the trailer")
+        assert "checks out" in spoken[-1]
+        # Nothing to refuse, so no refusal offered.
+        assert all(item.text != "Refuse this trailer" for item in pickup.items)
+    finally:
+        trailer_yard.preloaded_trailer = original
+        app.shutdown()
+
+
+def test_walking_a_bad_trailer_finds_it_and_offers_the_refusal(monkeypatch):
+    """The defect is something the driver goes and finds, not something that
+    happens to them at a scale house."""
+    from freight_fate.app import App
+    from freight_fate.models import trailer_yard
+
+    original = trailer_yard.preloaded_trailer
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        pickup, unit = _pickup_with_trailer(app, condition_pct=90.0)
+        assert unit.defect
+        assert all(item.text != "Refuse this trailer" for item in pickup.items)
+
+        select_item(pickup, "Walk around the trailer")
+        assert unit.defect in spoken[-1]
+        assert "4417" in spoken[-1]
+        # Only once the driver has actually looked does refusing become an option.
+        assert any(item.text == "Refuse this trailer" for item in pickup.items)
+    finally:
+        trailer_yard.preloaded_trailer = original
+        app.shutdown()
+
+
+def test_refusing_a_trailer_costs_time_and_gets_a_sound_one(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models import trailer_yard
+    from freight_fate.models.trailer_yard import TRAILER_SWAP_MIN
+
+    original = trailer_yard.preloaded_trailer
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        pickup, unit = _pickup_with_trailer(app, condition_pct=90.0)
+        select_item(pickup, "Walk around the trailer")
+        hours_before = app.ctx.profile.game_hours
+
+        select_item(pickup, "Refuse this trailer")
+
+        assert app.ctx.profile.game_hours == hours_before + TRAILER_SWAP_MIN / 60.0
+        assert pickup.hooked_trailer.defect is None
+        assert pickup.hooked_trailer.number != unit.number
+        assert "yard brings another" in spoken[-1]
+        # Walking it again reports the sound one, not the box that went back.
+        select_item(pickup, "Walk around the trailer")
+        assert "checks out" in spoken[-1]
+    finally:
+        trailer_yard.preloaded_trailer = original
+        app.shutdown()
+
+
+def test_a_refused_trailer_does_not_follow_the_driver_onto_the_road(monkeypatch):
+    """Otherwise the walk-around is theatre: the scale house has to find the
+    box actually under the truck."""
+    from freight_fate.app import App
+    from freight_fate.models import trailer_yard
+    from freight_fate.states.driving import DrivingState
+
+    original = trailer_yard.preloaded_trailer
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+    try:
+        pickup, unit = _pickup_with_trailer(app, condition_pct=90.0)
+        select_item(pickup, "Walk around the trailer")
+        select_item(pickup, "Refuse this trailer")
+        # The decision survives a save.
+        assert app.ctx.profile.active_trip["trailer_refused"] is True
+
+        select_item(pickup, "Depart for destination")
+        driving = app.state
+        assert isinstance(driving, DrivingState)
+        assert driving.trailer_refused is True
+        assert driving._hooked_trailer_defect() is None
+        assert driving.snapshot()["trailer_refused"] is True
+    finally:
+        trailer_yard.preloaded_trailer = original
+        app.shutdown()
+
+
+def test_an_unrefused_defect_is_what_the_inspector_finds(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models import trailer_yard
+    from freight_fate.states.driving import DrivingState
+
+    original = trailer_yard.preloaded_trailer
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+    try:
+        pickup, unit = _pickup_with_trailer(app, condition_pct=90.0)
+        select_item(pickup, "Depart for destination")  # rolled out without looking
+        driving = app.state
+        assert isinstance(driving, DrivingState)
+        assert driving.trailer_refused is False
+        assert driving._hooked_trailer_defect() == unit.defect
+    finally:
+        trailer_yard.preloaded_trailer = original
         app.shutdown()

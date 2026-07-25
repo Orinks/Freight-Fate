@@ -46,6 +46,44 @@ class PlaytestResult:
     speed_control_transitions: list[str] = field(default_factory=list)
     max_speeding_timer_s: float = 0.0
     destination_exit_speed_mph: float | None = None
+    # Equipment and freight handling. A transcript alone cannot tell you which
+    # tractor dispatch drew, whether the shipper staged a trailer or loaded at
+    # a dock, or what was wrong with the box -- and those now decide how a run
+    # reads, so a playtest that cannot see them is reviewing half the game.
+    assigned_truck: str = ""
+    assigned_truck_label: str = ""
+    slip_seat_pool: list[str] = field(default_factory=list)
+    pickup_mode: str = ""
+    pickup_minutes: float = 0.0
+    detention_minutes: float = 0.0
+    detention_pay: float = 0.0
+    trailer_number: str = ""
+    trailer_condition: str = ""
+    trailer_defect: str = ""
+    trailer_refused: bool = False
+    delivery_mode: str = ""
+    delivery_minutes: float = 0.0
+
+    def equipment_summary(self) -> str:
+        """One plain-text block covering everything the truck came with."""
+        lines = [f"Tractor: {self.assigned_truck_label or self.assigned_truck or 'unknown'}"]
+        if self.slip_seat_pool:
+            lines.append(f"Yard spares: {', '.join(self.slip_seat_pool)}")
+        if self.pickup_mode:
+            lines.append(f"Pickup: {self.pickup_mode}, {self.pickup_minutes:.0f} minutes")
+        if self.detention_minutes:
+            lines.append(
+                f"Detention: {self.detention_minutes:.0f} minutes, "
+                f"{self.detention_pay:,.0f} dollars"
+            )
+        if self.trailer_number:
+            state = self.trailer_condition or "unknown condition"
+            defect = f", {self.trailer_defect}" if self.trailer_defect else ""
+            refused = " (refused and swapped)" if self.trailer_refused else ""
+            lines.append(f"Trailer: {self.trailer_number}, {state}{defect}{refused}")
+        if self.delivery_mode:
+            lines.append(f"Delivery: {self.delivery_mode}, {self.delivery_minutes:.0f} minutes")
+        return chr(10).join(lines)
 
     @property
     def transcript_text(self) -> str:
@@ -124,6 +162,8 @@ class PlaytestHarness:
         configure_profile=None,
         stop_at_pickup: bool = False,
         arm_speed_control_on_deadhead: bool = False,
+        walk_around_trailer: bool = False,
+        refuse_bad_trailer: bool = False,
     ) -> PlaytestResult:
         from freight_fate.states.city import (
             CityMenuState,
@@ -187,12 +227,25 @@ class PlaytestHarness:
         self.app.state.update(1 / 60)
         _finish_timed_state(self.app)
         assert isinstance(self.app.state, PickupFacilityState)
+        self.record_equipment()
         if stop_at_pickup:
             return self.result
-        self.app.state.handle_event(key_event(pygame.K_RETURN))
-        self.app.state.handle_event(key_event(pygame.K_RETURN))
+        self.select_menu_item("Check in at shipping office")
+        # Either way the freight gets aboard; naming both keeps the harness
+        # working whichever kind of shipper dispatch drew.
+        for label in ("Drop and hook in the yard", "Load cargo at dock"):
+            if label in self.menu_labels():
+                self.select_menu_item(label)
+                break
+        else:  # pragma: no cover - the pickup menu always offers one of them
+            raise AssertionError(f"no way to load: {self.menu_labels()}")
         _finish_timed_state(self.app)
-        self.app.state.handle_event(key_event(pygame.K_RETURN))
+        if walk_around_trailer:
+            self.walk_around_trailer()
+            if refuse_bad_trailer:
+                self.refuse_trailer()
+        self.record_equipment()
+        self.select_menu_item("Depart for destination")
         if isinstance(self.app.state, RouteSelectState):
             # Owner-operators and authority choose their routing.
             self._choose_route(route_rank)
@@ -470,8 +523,7 @@ class PlaytestHarness:
             )
 
         assert isinstance(self.app.state, FacilityArrivalState)
-        self.app.state.handle_event(key_event(pygame.K_RETURN))
-        _finish_timed_state(self.app)
+        self._finish_delivery()
         assert isinstance(self.app.state, ArrivalState)
 
         profile = self.app.ctx.profile
@@ -481,6 +533,18 @@ class PlaytestHarness:
         self.result.current_city = profile.current_city
         self.result.remaining_miles = driving.trip.remaining_miles
         return self.result
+
+    def _finish_delivery(self) -> None:
+        """End the delivery whichever way this receiver takes freight."""
+        assert self.app is not None
+        self.record_equipment()
+        for label in ("Drop the loaded trailer and hook an empty", "Dock and deliver"):
+            if label in self.menu_labels():
+                self.select_menu_item(label)
+                break
+        else:  # pragma: no cover - the arrival menu always offers one of them
+            raise AssertionError(f"no way to deliver: {self.menu_labels()}")
+        _finish_timed_state(self.app)
 
     def settle_current_delivery(self) -> PlaytestResult:
         """Fast-forward the active delivery to its settlement screen.
@@ -503,8 +567,7 @@ class PlaytestHarness:
         driving._handle_arrival_gate()
         _finish_timed_state(self.app)
         assert isinstance(self.app.state, FacilityArrivalState)
-        self.app.state.handle_event(key_event(pygame.K_RETURN))
-        _finish_timed_state(self.app)
+        self._finish_delivery()
         assert isinstance(self.app.state, ArrivalState)
 
         profile = self.app.ctx.profile
@@ -623,6 +686,79 @@ class PlaytestHarness:
 
         assert self.driving is not None
         self.driving._handle_trip_event(TripEvent(kind, text, data or {}))
+
+    def select_menu_item(self, label: str) -> None:
+        """Choose a menu item by its label instead of by blind Enter presses.
+
+        The pickup and arrival menus grow items as features land -- the
+        walk-around, refusing a trailer -- and a harness that presses Enter a
+        fixed number of times silently starts driving a different button when
+        that happens. Naming what it wants keeps a playtest honest.
+        """
+        assert self.app is not None
+        state = self.app.state
+        labels = [item.text for item in state.items]
+        assert label in labels, f"{label!r} not in {labels}"
+        while state.items[state.index].text != label:
+            state.handle_event(key_event(pygame.K_DOWN))
+        state.handle_event(key_event(pygame.K_RETURN))
+
+    def menu_labels(self) -> list[str]:
+        """Every option on the current menu, for reviewing what is reachable."""
+        assert self.app is not None
+        return [item.text for item in getattr(self.app.state, "items", [])]
+
+    def record_equipment(self) -> PlaytestResult:
+        """Capture the tractor, the trailer, and how the freight is handled.
+
+        Read rather than driven, so it is safe to call at any point in a run.
+        """
+        from freight_fate.models.carrier_fleet import fleet_tier_for_level, slip_seat_pool
+        from freight_fate.models.trailer_yard import delivery_plan, pickup_plan
+        from freight_fate.models.trucks import TRUCK_CATALOG
+
+        assert self.app is not None
+        profile = self.app.ctx.profile
+        assert profile is not None
+        key = profile.active_truck_key()
+        self.result.assigned_truck = key
+        self.result.assigned_truck_label = TRUCK_CATALOG[key].label
+        if not profile.owns_equipment():
+            fleet_tier_for_level(int(profile.career.level))
+            self.result.slip_seat_pool = [
+                TRUCK_CATALOG[spare].label for spare in slip_seat_pool(profile)
+            ]
+        job = getattr(self.app.state, "job", None) or getattr(self.driving, "job", None)
+        if job is None:
+            return self.result
+        plan = pickup_plan(job, profile)
+        self.result.pickup_mode = "drop and hook" if plan.is_drop_hook else "live load"
+        self.result.pickup_minutes = plan.minutes
+        self.result.detention_minutes = plan.detention_minutes
+        self.result.detention_pay = plan.detention_pay
+        if plan.trailer is not None:
+            self.result.trailer_number = plan.trailer.number
+            self.result.trailer_condition = plan.trailer.condition_text
+            self.result.trailer_defect = plan.trailer.defect or ""
+        drop = delivery_plan(job, profile)
+        self.result.delivery_mode = "drop the trailer" if drop.is_drop_hook else "live unload"
+        self.result.delivery_minutes = drop.minutes
+        return self.result
+
+    def walk_around_trailer(self) -> PlaytestResult:
+        """Do the pre-trip on the hooked trailer, if there is one to walk."""
+        if "Walk around the trailer" not in self.menu_labels():
+            return self.result
+        self.select_menu_item("Walk around the trailer")
+        return self.result
+
+    def refuse_trailer(self) -> bool:
+        """Send a defective trailer back; returns whether there was one to refuse."""
+        if "Refuse this trailer" not in self.menu_labels():
+            return False
+        self.select_menu_item("Refuse this trailer")
+        self.result.trailer_refused = True
+        return True
 
     def _select_current_menu_text(self, text: str) -> None:
         assert self.app is not None

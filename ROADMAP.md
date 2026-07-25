@@ -247,15 +247,38 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       of the yard. Yards are derived from facility identity and the plan is
       recomputed from the job, so the whole feature persists nothing and
       touches no save schema. Three badges came with it.
-- [ ] **Drop-and-hook on the delivery end.** The pickup side drops and hooks;
-      the delivery side still unloads live every time. A receiver with a drop
-      yard should let the driver drop the loaded box, hook an empty, and go --
-      which is also the natural home for a trailer the driver has been
-      dragging a defect around on.
-- [ ] **Pre-trip inspection surfaces the trailer defect.** Today the write-up
-      only appears when an inspector finds it. A driver who walks the trailer
-      before departing should be able to find it themselves and refuse the
-      box, which is what the walk-around is for.
+- [x] **Drop-and-hook on the delivery end (2026-07-25).** A receiver with a
+      drop yard takes the whole trailer: 20 minutes against a live unload's
+      45, and it is how a driver sheds a box they have been dragging a defect
+      around on. Every dock-worded instruction on the arrival screen now says
+      the right thing for the ending it is offering.
+- [x] **Pre-trip walk-around (2026-07-25).** Walking the hooked trailer is a
+      menu action at the pickup, so the defect is something the driver goes
+      and finds rather than something an inspector springs on them at a
+      scale -- the accessibility point, since a blind driver had no other way
+      to look. Finding one unlocks refusing it: the yard swaps the box for
+      `TRAILER_SWAP_MIN`, and the refusal is threaded through the pickup
+      snapshot, `start_loaded_drive`, `RouteSelectState`, and the driving
+      snapshot so the scale house finds the trailer actually under the truck.
+- [x] **Playtest harness reaches the equipment layer (2026-07-25).** The
+      harness pressed Enter a fixed number of times at the pickup and arrival
+      menus, so every new menu item silently pushed it onto a different
+      button; it now selects by label (`select_menu_item`) and handles either
+      pickup mode and either delivery ending by name. `PlaytestResult` gained
+      the facts a transcript cannot carry -- assigned tractor, the yard spares
+      it was drawn from, live load versus drop-and-hook, trailer number,
+      condition and defect, detention earned, delivery mode -- and
+      `tools/playtest.py` prints them as an equipment block, with
+      `--equipment-only` and `--walk-around` for driving the pre-trip.
+- [ ] **Harness still cannot reach rest, fuel, the garage, or enforcement.**
+      Sleeping, fuelling, repairs, endorsement courses, and roadside
+      inspections are all driven by hand in their own tests rather than
+      through the harness, so a whole-session playtest cannot cover them.
+      Worth a second pass with the same select-by-label approach.
+- [ ] **Trailer wear should accumulate, not just be drawn.** A trailer's
+      condition is derived from the yard, so nothing the driver does to it
+      sticks. Real per-trailer wear wants somewhere to live -- probably the
+      same per-truck condition record, keyed by trailer number.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
 - [x] **Physics test bench** (`tools/physics_bench.py`): deterministic scripted-driver scenarios over the real truck model -- descents, runaway coasts, stop tests -- printing plain-text, screen-reader-friendly, diffable reports (peak brake temp, fade onset, wear added, the cues the game would have played). The tuning loop for every physics change; `tests/test_physics_bench.py` keeps its orderings honest. Now also a tuning instrument: `--sweep` re-runs a scenario across one knob (speed, cargo, grade, wear) one line per value, and `--solve` bisects for an edge ("the fastest drag speed that stays under fade"), both plain-text and deterministic.
 - [x] **Per-truck condition.** Wear, damage, and fuel moved off the profile into `truck_conditions`, keyed by truck, so each owned tractor keeps its own state and swapping trucks no longer teleports condition. Legacy saves migrate (all owned trucks inherit current wear; no pristine spare), per-truck wear is under the save signature, and the field is scoped by truck *model* key -- true per-instance trucks are still the rental feature's job.
