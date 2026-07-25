@@ -145,7 +145,7 @@ class Settings:
     radio_enabled: bool = True
     radio_station_id: str = "route_playlist"
     radio_streamer_safe: bool = True
-    radio_discovery_location: str = "real"  # real / truck
+    radio_real_streams: bool = False
     weather_volume: float = 0.65
     engine_volume: float = 0.55
     ui_volume: float = 0.9
@@ -335,10 +335,6 @@ class Settings:
             setattr(s, attr, max(0.0, min(1.0, float(getattr(s, attr)))))
         if not isinstance(s.radio_station_id, str) or not s.radio_station_id:
             s.radio_station_id = "route_playlist"
-        if not isinstance(s.radio_streamer_safe, bool):
-            s.radio_streamer_safe = True
-        if s.radio_discovery_location not in ("real", "truck"):
-            s.radio_discovery_location = "real"
         return s
 
     def chatter_enabled(self, category: str) -> bool:

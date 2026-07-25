@@ -103,27 +103,28 @@ never surprises you.
 
 ## The In-Cab Radio: new section
 
-The Freight Fate stations -- the Roadhouse, the Night Line, and the regional
-stations -- play original music composed for the game, with hosts, and they are
-always safe to stream on Twitch or YouTube. When Online services are on, the
-audio system supports streams, and streamer-safe mode is off, public stations
-for your region join the same dial quietly. Stations with usable coordinates
-are treated as approximately nearby. Regional stations without coordinates are
-identified as internet-only and do not claim distance, range, or signal
-strength. Personal M3U playlists use the same streamer-safe switch.
+The radio carries two kinds of stations. The Freight Fate stations -- the
+Roadhouse, the Night Line, and the regional stations -- play original music
+composed for the game, with hosts, and they are always safe to stream on
+Twitch or YouTube. Real public radio stations join them when you allow real
+streams in Settings: live jazz from Portland, news in the cities, community
+radio in Tucson, the Voice of the Navajo Nation across the Four Corners.
+Real stations fade in and out by distance like FM, and the wide rural
+networks carry the empty country. Real streams are not streamer-safe --
+station-side music licensing does not cover a re-broadcast -- which is why
+they sit behind both the real-streams setting and the streamer-safe switch.
 
-M toggles the radio, the brackets tune the complete current dial, and Y speaks
-what is playing. The Tab Radio screen stays a concise current-status view;
-bracket keys are the station-browsing path.
+M toggles the radio, the brackets tune it, Y speaks what is playing, and the
+Tab status menu has a Radio screen listing every receivable station with
+signal strength, distance, and source.
 
 ## Settings section: new entries
 
 - Overspeed warning: on, urgent only, or off. Urgent only stays quiet until
   you are far past the limit -- for drivers who speed on purpose but still
   want the runaway alarm.
-- Radio streamer-safe mode: on keeps built-in safe stations only; off permits
-  personal playlists and automatic public-station discovery when Online
-  services and the audio system allow it.
+- Radio real public streams: allow live stations on the dial. Streamer-safe
+  mode must also be off before they play.
 - Automatic direction changes: both styles now use the same gesture -- a
   fresh press held at a standstill. The setting remains for familiarity.
 

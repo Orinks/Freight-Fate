@@ -9,9 +9,7 @@ information keys, and important changes announce themselves.
 from __future__ import annotations
 
 import logging
-import queue
 import random
-import threading
 
 import pygame
 
@@ -49,28 +47,15 @@ from ..music import (
     select_station_playlist,
 )
 from ..radio import (
-    DIRECTORY_INTERNET_ONLY_SOURCE_TYPE,
-    DIRECTORY_SOURCE_TYPE,
     PERSONAL_PLAYLIST_SOURCE_TYPE,
-    PUBLIC_DIRECTORY_SOURCE_TYPES,
     SAFE_ROUTE_PLAYLIST,
     STATIC_SIGNAL_THRESHOLD,
     RadioPlaybackError,
     RadioState,
     RadioStation,
-    public_stream_availability,
     signal_volume_factor,
     truck_position,
 )
-from ..radio_browser import USER_AGENT
-from ..radio_discovery import (
-    LOCATION_MODE_REAL,
-    LOCATION_MODE_TRUCK,
-    ApproximateLocation,
-    DiscoveryResult,
-    RadioDiscoveryManager,
-)
-from ..radio_url_safety import probe_stream_url
 from ..sim import hos
 from ..sim.driving_modes import tuning_for_time_scale
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day

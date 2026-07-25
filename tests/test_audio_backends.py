@@ -62,7 +62,6 @@ def test_bass_backend_selected_by_default(monkeypatch):
     monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
     a = AudioEngine()
     assert a.backend_name == "bass"
-    assert a.supports_radio_streams()
     assert a.enabled
     exercise(a)
 
@@ -71,7 +70,6 @@ def test_env_var_forces_pygame_backend(monkeypatch):
     monkeypatch.setenv("FREIGHT_FATE_AUDIO_BACKEND", "pygame")
     a = AudioEngine()
     assert a.backend_name in ("pygame", "none")
-    assert not a.supports_radio_streams()
     exercise(a)
 
 
@@ -261,7 +259,7 @@ def test_bass_music_never_loops_catalog_tracks(monkeypatch):
     assert loop_flags == [False] * len(ALL_MUSIC_TRACKS)
 
 
-def test_bass_radio_stream_prepares_before_it_commits_playback(monkeypatch):
+def test_bass_radio_stream_uses_url_stream(monkeypatch):
     class FakeStream:
         handle = 1
 
@@ -293,18 +291,9 @@ def test_bass_radio_stream_prepares_before_it_commits_playback(monkeypatch):
 
     monkeypatch.setattr(backend, "_url_stream", fake_url_stream)
 
-    stream = backend.prepare_radio_stream("https://example.test/live.mp3")
+    backend.play_radio_stream("https://example.test/live.mp3", fade_ms=321)
 
     assert opened == ["https://example.test/live.mp3"]
-    assert backend._music_track is None
-    assert not stream.played
-
-    backend.play_prepared_radio_stream(
-        stream,
-        "https://example.test/live.mp3",
-        fade_ms=321,
-    )
-
     assert backend._music_track == "https://example.test/live.mp3"
     assert backend._music_stream.played
     assert backend._music_stream.volume == 0.0

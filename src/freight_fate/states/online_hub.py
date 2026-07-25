@@ -45,8 +45,8 @@ class OnlineHubState(MenuState):
                 lambda: self._toggle_online_services(1),
                 help="Master switch for all online/live-data features. "
                 "When off, real-time weather, traffic, parking, Discord "
-                "presence, Mastodon sharing, cloud backup, and nearby public "
-                "radio all behave as disabled without losing their individual settings.",
+                "presence, Mastodon sharing, and cloud backup all behave as "
+                "disabled without losing their individual settings.",
             ),
             MenuItem(
                 lambda: (
@@ -201,7 +201,6 @@ class OnlineHubState(MenuState):
         self.ctx.apply_cloud_saves()
         self.ctx.apply_mastodon_sharing()
         self._announce()
-        self.ctx.apply_active_radio_settings()
 
     def _online_account_setup(self) -> None:
         from .online_states import OnlineSetupState

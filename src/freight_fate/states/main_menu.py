@@ -915,18 +915,12 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Radio streamer-safe mode: {'on' if s.radio_streamer_safe else 'off'}",
                     lambda: self._toggle_radio_streamer_safe(1),
-                    help="On keeps the radio on built-in safe stations. Off also permits "
-                    "personal M3U playlists and automatically found public stations for "
-                    "your region. Public stations additionally require Online services and an "
-                    "audio system that supports streams.",
+                    help="When on, the radio uses only built-in safe stations and skips real public streams.",
                 ),
                 MenuItem(
-                    lambda: self._radio_discovery_location_label(),
-                    lambda: self._cycle_radio_discovery_location(1),
-                    help="Choose where public radio searches are centered. "
-                    "Approximate real-world location uses a network-based estimate "
-                    "and may be wrong. Follow the simulated truck uses the truck's "
-                    "location in the game.",
+                    lambda: f"Radio real public streams: {'on' if s.radio_real_streams else 'off'}",
+                    lambda: self._toggle_radio_real_streams(1),
+                    help="Opt in to real public stream stations. Streamer-safe mode must also be off before they can play.",
                 ),
                 MenuItem(
                     lambda: f"Menu and UI sounds volume: {round(s.ui_volume * 100)} percent",
@@ -1015,7 +1009,7 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("radio_volume", 0.1 * d),
                     self._toggle_radio_streamer_safe,
-                    self._cycle_radio_discovery_location,
+                    self._toggle_radio_real_streams,
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
                 "updates": [self._toggle_update_channel],
@@ -1406,20 +1400,9 @@ class SettingsCategoryState(MenuState):
     def _toggle_radio_streamer_safe(self, _d: int) -> None:
         self.ctx.settings.radio_streamer_safe = not self.ctx.settings.radio_streamer_safe
         self._announce()
-        self.ctx.apply_active_radio_settings()
 
-    def _radio_discovery_location_label(self) -> str:
-        value = self.ctx.settings.radio_discovery_location
-        label = (
-            "approximate real-world location" if value == "real" else "follow the simulated truck"
-        )
-        return f"Public radio search location: {label}"
-
-    def _cycle_radio_discovery_location(self, direction: int) -> None:
-        modes = ("real", "truck")
-        current = self.ctx.settings.radio_discovery_location
-        index = modes.index(current) if current in modes else 0
-        self.ctx.settings.radio_discovery_location = modes[(index + direction) % len(modes)]
+    def _toggle_radio_real_streams(self, _d: int) -> None:
+        self.ctx.settings.radio_real_streams = not self.ctx.settings.radio_real_streams
         self._announce()
 
     def _toggle_controller(self, _d: int) -> None:

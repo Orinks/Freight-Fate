@@ -99,7 +99,7 @@ checks.
 **The radio follows the map.** M toggles it, brackets tune the stations
 you can actually receive, twelve fictional regional stations fade to
 static at the edge of their range and hand back to the Roadhouse.
-Streamer-safe by default; turn it off to permit automatic public discovery.
+Streamer-safe by default; real public streams behind an explicit opt-in.
 Chapter 10.
 
 **The world got big and specific.** More than a hundred new dispatchable
@@ -590,11 +590,11 @@ signal loss is automatic and spoken.
 
 Setup: a fresh install or reset settings.
 
-Do: check what the radio plays before changing streamer-safe mode; then turn
-streamer-safe mode off and confirm public discovery starts silently.
+Do: check what the radio plays before touching any opt-in; then find
+the explicit opt-in for real public streams.
 
-Pass when: nothing externally licensed plays while streamer-safe mode is on,
-and no second public-stream setting exists.
+Pass when: nothing externally licensed plays until you opted in, in so
+many words.
 
 ## Chapter 11. The world speaks
 

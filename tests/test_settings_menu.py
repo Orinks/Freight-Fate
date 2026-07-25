@@ -240,49 +240,6 @@ def test_settings_menu_volume_survives_new_app_session():
         next_app.shutdown()
 
 
-def test_audio_settings_have_one_public_audio_gate_and_aligned_keyboard_actions():
-    from freight_fate.app import App
-    from freight_fate.states.main_menu import SettingsCategoryState
-
-    app = App()
-    try:
-        menu = SettingsCategoryState(app.ctx, "audio")
-        menu.items = menu.build_items()
-        labels = [item.text for item in menu.items]
-        assert sum(label.startswith("Radio streamer-safe mode") for label in labels) == 1
-        assert not any("real public streams" in label.lower() for label in labels)
-        assert not any(label.startswith("Public streams") for label in labels)
-
-        menu.index = next(
-            index
-            for index, item in enumerate(menu.items)
-            if item.text.startswith("Radio streamer-safe mode")
-        )
-        before_safe = app.ctx.settings.radio_streamer_safe
-        menu._adjust(1)
-        assert app.ctx.settings.radio_streamer_safe is not before_safe
-
-        menu.index = next(
-            index
-            for index, item in enumerate(menu.items)
-            if item.text.startswith("Public radio search location")
-        )
-        before_location = app.ctx.settings.radio_discovery_location
-        menu._adjust(1)
-        assert app.ctx.settings.radio_discovery_location != before_location
-
-        menu.index = next(
-            index
-            for index, item in enumerate(menu.items)
-            if item.text.startswith("Menu and UI sounds volume")
-        )
-        before_volume = app.ctx.settings.ui_volume
-        menu._adjust(-1)
-        assert app.ctx.settings.ui_volume < before_volume
-    finally:
-        app.shutdown()
-
-
 def test_settings_menu_f1_has_help_for_every_item():
     from freight_fate.app import App
     from freight_fate.states.main_menu import SettingsCategoryState, SettingsState
@@ -304,26 +261,6 @@ def test_settings_menu_f1_has_help_for_every_item():
                 text = cat.current_help()
                 assert text == (item.help or f"{item.text}.")
                 assert cat.intro_help not in text
-    finally:
-        app.shutdown()
-
-
-def test_radio_settings_help_names_every_playback_gate():
-    from freight_fate.app import App
-    from freight_fate.states.main_menu import SettingsCategoryState
-
-    app = App()
-    try:
-        menu = SettingsCategoryState(app.ctx, "audio")
-        menu.items = menu.build_items()
-        safe_help = next(
-            item.help for item in menu.items if item.text.startswith("Radio streamer-safe mode")
-        )
-
-        assert "automatically found public stations" in safe_help
-        assert "Online services" in safe_help
-        assert "audio system" in safe_help
-        assert "personal M3U playlists" in safe_help
     finally:
         app.shutdown()
 

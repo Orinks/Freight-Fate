@@ -21,25 +21,7 @@ EARTH_RADIUS_MI = 3958.8
 # reader users manage folders in their file manager far more comfortably
 # than in any in-game browse dialog.
 PERSONAL_PLAYLIST_SOURCE_TYPE = "playlist"
-DIRECTORY_SOURCE_TYPE = "directory_nearby"
-DIRECTORY_INTERNET_ONLY_SOURCE_TYPE = "directory_internet_only"
-PUBLIC_DIRECTORY_SOURCE_TYPES = {
-    DIRECTORY_SOURCE_TYPE,
-    DIRECTORY_INTERNET_ONLY_SOURCE_TYPE,
-}
 PLAYLISTS_DIR_NAME = "Playlists"
-
-
-def public_stream_availability(settings, *, backend_supported: bool) -> str:
-    """Describe automatic nearby-station playback availability."""
-
-    if settings.radio_streamer_safe:
-        return "Streamer-safe on: public radio and personal playlists hidden."
-    if not settings.online_services:
-        return "Public stations unavailable: Online services off. Local radio remains."
-    if not backend_supported:
-        return "Public stations unavailable with this audio system. Local radio remains."
-    return "Public radio discovery: available."
 
 
 @dataclass(frozen=True)
@@ -55,7 +37,6 @@ class RadioStation:
     codec: str = ""
     lat: float | None = None
     lon: float | None = None
-    approximate_distance_miles: float | None = None
     range_miles: float = 0.0
     market: str = ""
     region: str = ""
@@ -75,8 +56,6 @@ class RadioStation:
 
     @property
     def display_name(self) -> str:
-        if not self.call_sign:
-            return self.name
         return f"{self.call_sign}, {self.name}"
 
     @property
@@ -94,10 +73,6 @@ class RadioReception:
 
     @property
     def signal_label(self) -> str:
-        if self.station.source_type == DIRECTORY_SOURCE_TYPE:
-            return "nearby internet station"
-        if self.station.source_type == DIRECTORY_INTERNET_ONLY_SOURCE_TYPE:
-            return "internet-only station"
         if self.fallback:
             return "fallback"
         if self.station.always_available:
@@ -272,18 +247,14 @@ def _dial_group(station: RadioStation) -> int:
     if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
         return 2
     if station.fallback:
-        return 8
+        return 6
     if station.source_type in {"local", "regional"}:
         return 3
-    if station.source_type == DIRECTORY_SOURCE_TYPE:
-        return 4
-    if station.source_type == DIRECTORY_INTERNET_ONLY_SOURCE_TYPE:
-        return 5
     if station.source_type == "afn":
-        return 6
+        return 4
     if station.source_type == "satellite":
-        return 7
-    return 9
+        return 5
+    return 7
 
 
 DIAL_CATEGORY_NAMES = {
@@ -291,12 +262,10 @@ DIAL_CATEGORY_NAMES = {
     1: "Freight Fate stations",
     2: "Your playlists",
     3: "Terrestrial",
-    4: "Nearby internet",
-    5: "Internet-only",
-    6: "AFN",
-    7: "Satellite",
-    8: "Fallback",
-    9: "Other stations",
+    4: "AFN",
+    5: "Satellite",
+    6: "Fallback",
+    7: "Other stations",
 }
 
 
@@ -304,8 +273,6 @@ def station_distance_miles(
     station: RadioStation,
     position: tuple[float, float] | None,
 ) -> float | None:
-    if station.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES:
-        return station.approximate_distance_miles
     if position is None or station.lat is None or station.lon is None:
         return None
     lat1, lon1 = (math.radians(position[0]), math.radians(position[1]))
@@ -320,15 +287,6 @@ def estimate_signal(
     station: RadioStation,
     position: tuple[float, float] | None,
 ) -> RadioReception:
-    if station.source_type == DIRECTORY_SOURCE_TYPE:
-        return RadioReception(
-            station,
-            station_distance_miles(station, position),
-            1.0,
-            "nearby internet",
-        )
-    if station.source_type == DIRECTORY_INTERNET_ONLY_SOURCE_TYPE:
-        return RadioReception(station, None, 1.0, "internet only")
     if station.always_available:
         return RadioReception(station, None, 1.0, "always available")
     if station.range_miles <= 0:
@@ -423,14 +381,15 @@ class RadioState:
         enabled: bool = True,
         station_id: str = SAFE_ROUTE_PLAYLIST,
         volume: float = 0.25,
+        real_streams_enabled: bool = False,
         streamer_safe: bool = True,
         position: tuple[float, float] | None = None,
     ) -> None:
         self.catalog = catalog
         self.enabled = enabled
         self.station_id = station_id
-        self.preferred_station_id = station_id
         self.volume = self._clamp_volume(volume)
+        self.real_streams_enabled = real_streams_enabled
         self.streamer_safe = streamer_safe
         self.position = position
 
@@ -441,80 +400,23 @@ class RadioState:
             enabled=bool(getattr(settings, "radio_enabled", True)),
             station_id=str(getattr(settings, "radio_station_id", SAFE_ROUTE_PLAYLIST)),
             volume=float(getattr(settings, "radio_volume", 0.25)),
+            real_streams_enabled=bool(getattr(settings, "radio_real_streams", False)),
             streamer_safe=bool(getattr(settings, "radio_streamer_safe", True)),
         )
 
     def apply_settings(self, settings) -> None:
         self.volume = self._clamp_volume(float(getattr(settings, "radio_volume", self.volume)))
+        self.real_streams_enabled = bool(
+            getattr(settings, "radio_real_streams", self.real_streams_enabled)
+        )
         self.streamer_safe = bool(getattr(settings, "radio_streamer_safe", self.streamer_safe))
 
     def write_settings(self, settings) -> None:
         settings.radio_enabled = self.enabled
-        settings.radio_station_id = self.preferred_station_id
+        settings.radio_station_id = self.station_id
 
     def update_position(self, position: tuple[float, float] | None) -> None:
         self.position = position
-
-    def replace_directory_stations(
-        self,
-        stations,
-        *,
-        preserve_station_ids: tuple[str, ...] = (),
-    ) -> None:
-        """Install one normalized runtime snapshot without touching saved careers."""
-
-        preserved = [
-            station
-            for station_id in (self.station_id, *preserve_station_ids)
-            if (station := self._station_by_id(station_id)) is not None
-            and station.source_type in PUBLIC_DIRECTORY_SOURCE_TYPES
-        ]
-        base = tuple(
-            station
-            for station in self.catalog
-            if station.source_type not in PUBLIC_DIRECTORY_SOURCE_TYPES
-        )
-        discovered = tuple(
-            RadioStation(
-                id=f"radio-browser:{station.uuid}",
-                name=station.name,
-                call_sign="",
-                format=station.format,
-                source=(
-                    "state-matched internet-only public station"
-                    if station.internet_only
-                    else "nearby public internet station"
-                ),
-                source_type=(
-                    DIRECTORY_INTERNET_ONLY_SOURCE_TYPE
-                    if station.internet_only
-                    else DIRECTORY_SOURCE_TYPE
-                ),
-                stream_url=station.stream_url,
-                stream_format="HLS" if station.stream_url.lower().endswith(".m3u8") else "stream",
-                codec=station.codec,
-                lat=station.lat,
-                lon=station.lon,
-                approximate_distance_miles=station.distance_miles,
-                market=station.city,
-                region=station.state,
-                safe_for_streaming=False,
-                real_stream=True,
-                always_available=station.internet_only,
-                notes="Discovered at runtime through Radio Browser.",
-            )
-            for station in stations
-        )
-        discovered_ids = {station.id for station in discovered}
-        for station in preserved:
-            if station.id in discovered_ids:
-                continue
-            # A location refresh must not replace audio the player already
-            # chose or a stream that is still being prepared. Keep it on the
-            # dial until playback commits or the pending tune is canceled.
-            discovered += (station,)
-            discovered_ids.add(station.id)
-        self.catalog = base + discovered
 
     def receivable_stations(self) -> tuple[RadioReception, ...]:
         receptions = [
@@ -533,16 +435,11 @@ class RadioState:
     def available_stations(self) -> tuple[RadioStation, ...]:
         return tuple(reception.station for reception in self.receivable_stations())
 
-    def station_by_id(self, station_id: str) -> RadioStation | None:
-        return self._station_by_id(station_id)
-
     def station_list_lines(self, limit: int = 12, distance_text=None) -> list[str]:
         lines = []
         for reception in self.receivable_stations()[:limit]:
             station = reception.station
-            selected = ""
-            if station.id == self.current_station().id:
-                selected = "Playing now. " if self.enabled else "Selected; radio off. "
+            selected = "current, " if station.id == self.current_station().id else ""
             distance = ""
             if reception.distance_miles is not None:
                 spoken = (
@@ -552,7 +449,7 @@ class RadioState:
                 )
                 distance = f", {spoken} away"
             lines.append(
-                f"{selected}{station.display_name}. Format: {station.format}. "
+                f"{selected}{station.display_name}: {station.format}, "
                 f"{reception.signal_label}{distance}. Source: {station.source}."
             )
         return lines
@@ -610,9 +507,15 @@ class RadioState:
         return self.play(backend, prefix="Radio on.")
 
     def tune(self, direction: int, backend: RadioPlaybackBackend | None = None) -> RadioAction:
-        reception = self.next_reception(direction)
+        receptions = self.receivable_stations()
+        current = self.current_station()
+        ids = [reception.station.id for reception in receptions]
+        try:
+            index = ids.index(current.id)
+        except ValueError:
+            index = 0
+        reception = receptions[(index + direction) % len(receptions)]
         self.station_id = reception.station.id
-        self.preferred_station_id = reception.station.id
         if not self.enabled:
             return RadioAction(
                 f"Radio off. Selected {self._station_phrase(reception)}.",
@@ -621,23 +524,6 @@ class RadioState:
                 reception=reception,
             )
         return self.play(backend, prefix=f"Tuned to {reception.station.display_name}.")
-
-    def next_reception(
-        self,
-        direction: int,
-        *,
-        from_station_id: str | None = None,
-    ) -> RadioReception:
-        """Return the next dial entry without changing the playing station."""
-
-        receptions = self.receivable_stations()
-        current_id = from_station_id or self.current_station().id
-        ids = [reception.station.id for reception in receptions]
-        try:
-            index = ids.index(current_id)
-        except ValueError:
-            index = 0
-        return receptions[(index + direction) % len(receptions)]
 
     def tune_category(
         self, direction: int, backend: RadioPlaybackBackend | None = None
@@ -648,9 +534,21 @@ class RadioState:
         anyone tuning linearly (owner, 2026-07-20); this is the escape. Only
         categories with a receivable station exist to jump to, and the spoken
         line leads with the category so the landing is oriented."""
-        reception, label = self.next_category_reception(direction)
+        receptions = self.receivable_stations()
+        groups: list[int] = []
+        for reception in receptions:
+            group = _dial_group(reception.station)
+            if group not in groups:
+                groups.append(group)
+        current_group = _dial_group(self.current_station())
+        if current_group in groups:
+            index = groups.index(current_group)
+            target = groups[(index + direction) % len(groups)]
+        else:
+            target = groups[0]
+        reception = next(r for r in receptions if _dial_group(r.station) == target)
         self.station_id = reception.station.id
-        self.preferred_station_id = reception.station.id
+        label = DIAL_CATEGORY_NAMES.get(target, "Radio")
         if not self.enabled:
             return RadioAction(
                 f"Radio off. {label}. Selected {self._station_phrase(reception)}.",
@@ -659,31 +557,6 @@ class RadioState:
                 reception=reception,
             )
         return self.play(backend, prefix=f"{label}. Tuned to {reception.station.display_name}.")
-
-    def next_category_reception(
-        self,
-        direction: int,
-        *,
-        from_station_id: str | None = None,
-    ) -> tuple[RadioReception, str]:
-        """Return the next category landing without changing playback."""
-
-        receptions = self.receivable_stations()
-        groups: list[int] = []
-        for reception in receptions:
-            group = _dial_group(reception.station)
-            if group not in groups:
-                groups.append(group)
-        current = self._station_by_id(from_station_id or "") or self.current_station()
-        current_group = _dial_group(current)
-        if current_group in groups:
-            index = groups.index(current_group)
-            target = groups[(index + direction) % len(groups)]
-        else:
-            target = groups[0]
-        reception = next(r for r in receptions if _dial_group(r.station) == target)
-        label = DIAL_CATEGORY_NAMES.get(target, "Radio")
-        return reception, label
 
     def select_station(
         self,
@@ -694,7 +567,6 @@ class RadioState:
         if station is None or not self._station_allowed(station):
             return self.play(backend, prefix="Radio fallback.")
         self.station_id = station.id
-        self.preferred_station_id = station.id
         if not self.enabled:
             return RadioAction(
                 f"Radio off. Selected {self._station_phrase(estimate_signal(station, self.position))}.",
@@ -748,13 +620,13 @@ class RadioState:
         if not station.supported:
             return False
         if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
-            # Personal media rides the streamer-safe gate like public streams
-            # do because the game cannot vouch for its licensing. Your own
-            # files do not depend on Online services.
+            # Personal media rides the streamer-safe gate like real streams
+            # do (the game cannot vouch for its licensing), but not the
+            # real-streams switch -- your own files need no internet.
             return not self.streamer_safe
         if not station.real_stream:
             return True
-        return not self.streamer_safe
+        return self.real_streams_enabled and not self.streamer_safe
 
     def _station_by_id(self, station_id: str) -> RadioStation | None:
         for station in self.catalog:
@@ -798,16 +670,9 @@ class RadioState:
         return ". ".join(parts) + "."
 
     @staticmethod
-    def _reception_sort_key(reception: RadioReception) -> tuple:
+    def _reception_sort_key(reception: RadioReception) -> tuple[int, str]:
         station = reception.station
-        distance = reception.distance_miles if reception.distance_miles is not None else 0.0
-        return (
-            _dial_group(station),
-            distance if station.source_type == DIRECTORY_SOURCE_TYPE else 0.0,
-            station.call_sign.casefold(),
-            station.name.casefold(),
-            station.id,
-        )
+        return (_dial_group(station), station.call_sign)
 
     @staticmethod
     def _stop(backend: RadioPlaybackBackend | None) -> None:

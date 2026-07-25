@@ -123,7 +123,7 @@ class DrivingControlsMixin:
             self._toggle_radio()
         elif key == pygame.K_LEFTBRACKET:
             # Brackets walk the dial; Ctrl+brackets leap a whole category
-            # without changing the plain-bracket every-station path.
+            # (25 AFN stations in a row buried terrestrial for a linear tune).
             if event.mod & pygame.KMOD_CTRL:
                 self._jump_radio_category(-1)
             else:
@@ -255,14 +255,8 @@ class DrivingControlsMixin:
             "C also speaks the date and season. "
             "M toggles the in-cab radio, left and right brackets tune it, "
             "and Y speaks radio station, volume, and streamer-safe status. "
-            "Public stations join the bracket dial quietly when Online services "
-            "are on, streamer-safe mode is off, and the audio system supports "
-            "streams. The default search uses your approximate location; "
-            "Audio settings can make it follow the simulated truck. Personal "
-            "M3U files use the separate Playlists folder next to your saves. "
-            "State-matched stations without coordinates are internet-only and "
-            "never claim a distance or signal. "
-            "The Tab status menu includes a concise current-radio screen. "
+            "The Tab status menu includes a radio screen with the currently "
+            "receivable stations. "
             "E starts the engine, and stops it only below 5 miles per hour. "
             "Air pressure must build before the truck can move. "
             "Press P to release or set the parking brake; if pressure is "
