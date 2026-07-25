@@ -139,7 +139,7 @@ class DrivingControlsMixin:
             "Space speed, active speed-control mode, and target. "
             "S posted speed limit. Tab status menu. F fuel. "
             "C clock, deadline, and hours of service. "
-            "R trip progress, route, and current location. "
+            "R progress, distance left, and where you are. "
             "Shift R next listed highway exit. "
             "V weather. L lane position. A repeats the last announcement. "
             "U reads what is coming up: "

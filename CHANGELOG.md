@@ -49,6 +49,15 @@
 
 ### Changed
 
+- **The R key now answers just "where am I".** Two short sentences: how far
+  along you are and how far is left, then the road you are on with its
+  direction, the state you are in, and the city it is taking you toward. If
+  you have planned a stop, the distance counts down to that stop instead of
+  the destination, so R tells you how far to the place you are actually
+  driving at. The nearest named place, the grade, the zone, and the next
+  maneuver are gone from it, because each of those already has its own key
+  or lives in the Tab status menu. U still reads what is coming up, and
+  Shift R still reads the next exit.
 - **Shorter driving readouts that fit a braille display.** The clock, route,
   weather, and fuel reports now put the answer in the first few words, so a
   one-line braille display shows what matters without panning. The C key

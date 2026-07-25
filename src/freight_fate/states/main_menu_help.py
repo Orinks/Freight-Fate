@@ -123,7 +123,7 @@ HELP_PAGES = [
             "Tab opens a driving status menu for speed, route, air tanks, weather, and hours.",
             "F speaks fuel level and range.",
             "C speaks the clock, your deadline, and your hours of service.",
-            "R speaks your current road, state, direction, nearest named place, route progress, and the next stop or maneuver.",
+            "R speaks how far along you are and how far is left, then the road you are on, the state you are in, and the city you are heading toward. With a planned stop set, it counts down to that stop instead of the destination.",
             "Shift R speaks the next listed highway exit for route context.",
             "L speaks lane position when lane drift is enabled.",
             "Directional beeps cue drift direction; steer away from the beep.",

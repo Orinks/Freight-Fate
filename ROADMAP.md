@@ -104,8 +104,9 @@ From a batch of player reports:
   another city-narration composition bug.
 - [x] **Quick info keys.** S reads the posted speed limit (was buried in the
   Tab menu); A repeats the last route announcement; U reads what is coming
-  up (imposed limits, stops, exits ahead); R includes the current road, state,
-  direction, nearest named place, and trip progress in its route report.
+  up (imposed limits, stops, exits ahead); R answers "where am I" in two
+  short sentences -- progress and distance left (to a planned stop when one
+  is set), then the road, the state, and the city it is taking you toward.
 - [x] **Stop details and planned stops (1.8.x nightly).** Enter on a Map-screen
   stop opens a job-details-style view (exit, distance, offers, parking, and an
   ELD-rule ETA with an arrive-before-your-next-HOS-limit note), with plan /
