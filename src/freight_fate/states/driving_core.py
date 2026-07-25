@@ -254,6 +254,13 @@ CRUISE_P_GAIN = 0.055  # throttle per mph of error
 CRUISE_I_GAIN = 0.05  # throttle per mph-second of error
 CRUISE_TRIM_LIMIT = 0.4  # how far trim may pull away from the feed-forward
 CRUISE_COAST_MPH = 2.0  # feed-forward eases to nothing across this much overspeed
+# The droop band: how far under its number cruise tolerates before the truck
+# counts as beaten by the hill rather than working through a dip. Fleet cruise
+# parameters use the same idea (a configurable underspeed), and it is what
+# keeps the spoken hand-back off a pull cruise recovers from on its own.
+CRUISE_DROOP_MPH = 6.0
+CRUISE_FLOORED_THROTTLE = 0.98  # pedal genuinely on the floor, not merely deep
+CLIMB_CUE_COOLDOWN_S = 120.0  # a mountain is many pulls; say it once a hill
 # Holding the target from above. Cutting fuel was cruise's only answer, so any
 # downgrade gentler than the descent assist's 2.5 percent trigger carried the
 # truck past the set speed and kept it there (bench trace: 2 percent down, 62
@@ -263,7 +270,12 @@ CRUISE_COAST_MPH = 2.0  # feed-forward eases to nothing across this much overspe
 CRUISE_JAKE_OVER_MPH = 0.75  # over the target by this much and the jake steps in
 CRUISE_JAKE_STEP_MPH = 1.0  # further overspeed per additional jake stage
 CRUISE_JAKE_RELEASE_MPH = 0.25  # back inside this and the retarder hands off
-CRUISE_JAKE_STEP_S = 1.5  # quiet time between stage changes; the jake is loud
+CRUISE_JAKE_STEP_S = 4.0  # quiet time between stage changes; the jake is loud
+# Descent control announcing itself is a per-grade event, not a per-dip one:
+# rolling country crosses the 2.5 percent trigger every dip, and at 1.5
+# seconds of retarder spacing the bench heard a stage change every ten
+# seconds and the holding cue four times in six minutes (2026-07-25).
+DESCENT_CUE_COOLDOWN_S = 120.0
 # The drums are the last resort, and they only come out in snubs: apply,
 # recover the target, release. Dragging a light application down a long grade
 # is how a real truck fades its brakes and empties its air tanks -- and the
@@ -276,6 +288,23 @@ CRUISE_SNUB_BRAKE = 0.3  # a real application, not a drag
 # Interactive descent control's ceiling while a grade lasts. A cap on the
 # working target only -- it must never be written into the set speed.
 DESCENT_SAFE_MAX_MPH = 55.0
+# Predictive cruise: the road profile ahead, read the way a real system reads
+# a stored 3D map (Volvo I-See, Detroit Intelligent Powertrain Management).
+# The preview distance is what those systems use, and the baked grade segments
+# resolve to a median half a mile, so a mile and a half is a real look ahead
+# rather than a smoothed guess.
+PCC_PREVIEW_MI = 1.5
+PCC_PREVIEW_STEP_MI = 0.1
+PCC_GRADE_MIN = 0.015  # shallower than this is not a hill worth planning for
+PCC_GRADE_WINDOW_MI = 0.3  # a hill is a sustained window, not one spike
+PCC_PREBUILD_MPH = 3.0  # momentum banked before a climb, at a 4 percent pull
+PCC_CREST_SAG_MPH = 4.0  # speed given up rather than fought for at a summit
+PCC_DESCENT_SHAVE_MPH = 2.0  # taken off before a downgrade, at 5 percent
+# The crest gets its own, much shorter horizon: the summit is "close" when the
+# road inside this distance has already gone flat. Judged on the full preview
+# instead, a three-mile pull read as cresting from a mile and a half out.
+PCC_CREST_WINDOW_MI = 0.4
+PCC_CUE_COOLDOWN_S = 45.0  # rolling country must not chant preview cues
 ACC_BASE_GAP_SECONDS = 3.0  # clear-weather adaptive cruise gap
 ACC_LIMIT_OFFSET_MPH = 5.0  # predictive ACC holds this far over the posted
 # limit -- a with-traffic pace, sized to sit right at OVERSPEED_WARN_MPH

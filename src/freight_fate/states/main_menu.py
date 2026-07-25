@@ -1223,6 +1223,11 @@ class SettingsCategoryState(MenuState):
                 "Tap the accelerator or brake, then press again and hold for half a second: a click and a spoken confirmation latch the pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly. Presets never change this.",
             ),
             (
+                "predictive_cruise",
+                "Predictive cruise",
+                "Cruise reads the road a mile and a half ahead: it banks a little speed before a climb so the truck carries it up the hill, gives up the last few miles an hour at a crest instead of fighting for them, and stops adding speed it would only have to brake away before a descent. It says what it is doing the first time on each hill. Presets never change this.",
+            ),
+            (
                 "curve_callouts",
                 "Curve callouts",
                 "A co-driver reads the road: bends that demand slowing are called before they arrive, like Sharp left, half a mile, advise 35. Bends you are already slow enough for stay silent. The U readout lists the next few either way. Presets never change this.",
@@ -1256,7 +1261,7 @@ class SettingsCategoryState(MenuState):
             )
 
     def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
-        if field in ("speed_keeper", "pedal_latch", "curve_callouts"):
+        if field in ("speed_keeper", "pedal_latch", "curve_callouts", "predictive_cruise"):
             # Input-accessibility aids and information layers, not realism
             # choices: they live outside the presets, so toggling one never
             # reads as Custom.

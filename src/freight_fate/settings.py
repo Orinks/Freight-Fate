@@ -127,6 +127,13 @@ class Settings:
     # accessibility aid stays independent of the assistance preset above:
     # presets never touch it.
     speed_keeper: bool = True
+    # Cruise reads the baked grade profile a mile and a half ahead and plans
+    # against it: banks a little momentum before a climb, gives up the last
+    # few mph at a crest instead of fighting for them, and stops adding speed
+    # it is about to brake away before a descent. Every modern truck ships
+    # this as part of its cruise, not as a driver-assistance level, so it sits
+    # outside the assistance presets the way the speed keeper does.
+    predictive_cruise: bool = True
     # Double-tap-and-hold latches the accelerator or brake key so a long
     # pull or a steady snub needs no sustained hold; a fresh press of the
     # same key, the opposite pedal, or any safety override releases it.

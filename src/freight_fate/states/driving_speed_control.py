@@ -23,6 +23,8 @@ class SpeedControlStateMixin:
         self._cruise_curve_end_mi = None
         self._cruise_descent_mph = None
         self._cruise_snubbing = False
+        self._pcc_phase = ""
+        self._climb_cue_said = False
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False

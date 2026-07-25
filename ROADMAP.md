@@ -157,12 +157,37 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       force, so the box walks down the pull and stops. A loaded 18-tonne
       run at 62 set: a 2 percent climb held 55.7 and never recovered,
       now holds 61; a 4 percent climb bottomed at 33.5, now 43.
-- [ ] **A climb cruise cannot hold says nothing.** The descent side
-      speaks up ("Descent control cannot hold this grade"); the climb
-      side has no equivalent, so a blind driver hears the engine work
-      and the box walk down but is never told plainly that cruise has
-      run out of truck. The engine voice and the G key both carry it
-      today -- decide whether that is enough before adding more speech.
+- [x] **A climb cruise cannot hold now says so (2026-07-25).** Once the
+      pedal is genuinely on the floor and the truck is still more than the
+      droop band under its number, cruise says it is flat out and names the
+      speed it is holding. Once a hill (a re-arm at half droop plus a two
+      minute floor), and terse speech keeps it -- the engine note and the
+      downshifts already say the truck is working.
+- [x] **Predictive cruise (2026-07-25).** Cruise reads `Trip.grade_at` a
+      mile and a half ahead -- the baked grade segments resolve to a median
+      half a mile, so this is a real road profile, not a smoothed guess --
+      and plans against it the way Volvo I-See and Detroit Intelligent
+      Powertrain Management do. Banks up to 3 mph before a pull, holds
+      rather than reaches in the last 0.4 mile before a crest, and shaves
+      up to 2 mph before a downgrade it would only brake away. Read through
+      a 0.3-mile window rather than a preview average: averaging buried a
+      half-mile 4 percent hill at 1.3 percent and skipped exactly the hills
+      banked momentum helps most. Bench, 18 t at 62 set: a 1-mile 4 percent
+      pull crests 45.5 instead of 44.3 and takes 4 s less; a half-mile
+      6 percent pull averages 49.0 instead of 48.2. Clamped against the
+      posted cap, so momentum is never a licence to speed. Setting is
+      `predictive_cruise`, on by default, preset-independent like the speed
+      keeper.
+- [ ] **Eco-coast / neutral roll.** Real AMTs drop the driveline on a
+      gentle downgrade (Detroit eCoast, Volvo I-Roll) and let the truck
+      roll. Deferred from the 2026-07-25 pass: the fuel model here is pure
+      wheel power, so the saving would be real but small, and it lands in
+      the engine-audio path that nromey's arc owns. Worth doing when that
+      area is next open.
+- [ ] **Driver-selectable following gap.** Real ACC offers three gaps
+      (roughly 2.5, 3.0, 3.5 seconds). Freight Fate derives the gap from
+      weather only. A setting would suit the players who want a longer
+      cushion without pretending it is raining.
 - [ ] **I-5 speed limit changes for a few miles (owner observation,
       night of 2026-07-22, verify only).** A short stretch of I-5 spoke
       a different limit. Probably CORRECT -- the dense maxspeed sweep

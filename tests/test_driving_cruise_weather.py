@@ -9,7 +9,11 @@ from driving_feature_helpers import (
     start_drive,
 )
 
-from freight_fate.states.driving import SPEEDING_HOLD_S
+from freight_fate.states.driving import (
+    ACC_LIMIT_OFFSET_MPH,
+    PCC_CREST_SAG_MPH,
+    SPEEDING_HOLD_S,
+)
 
 # -- cruise control -------------------------------------------------------------
 
@@ -1711,5 +1715,243 @@ def test_cruise_leaves_the_drivers_own_jake_alone():
 
         assert t.engine_brake_stage == 2
         assert driving._cruise_jake_stage == 0
+    finally:
+        app.shutdown()
+
+
+# -- predictive cruise ------------------------------------------------------------
+
+
+def _hill_road(driving, *, flat_mi, grade, climb_mi):
+    """Flat, then a sustained climb, then flat, anchored where the truck is."""
+    start = driving.trip.position_mi
+
+    def grade_at(mile):
+        offset = mile - start
+        if offset < flat_mi:
+            return 0.0
+        return grade if offset < flat_mi + climb_mi else 0.0
+
+    driving.trip.grade_at = grade_at
+    return start
+
+
+def _cruising(app, set_mph=62.0):
+    driving = start_drive(app)
+    quiet_trip(driving)
+    open_limits(driving)
+    driving.trip.traffic_context = lambda: None
+    app.ctx.settings.automatic_transmission = True
+    t = driving.truck
+    t.transmission.automatic = True
+    t.cargo_kg = 18_000.0
+    t.start_engine()
+    t.set_air_ready(parking_brake=False)
+    t.velocity_mps = set_mph / 2.23694
+    t.transmission.gear = t.transmission.num_gears
+    driving._engage_cruise(set_mph)
+    return driving
+
+
+def test_predictive_cruise_banks_speed_before_a_climb():
+    """The preview reads the grade profile and enters the pull carrying more.
+
+    Momentum banked on the flat is speed the truck keeps most of the way up,
+    which is the whole point of a predictive system reading a stored road
+    profile.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = lambda text, interrupt=False: None
+    try:
+        driving = _cruising(app)
+        _hill_road(driving, flat_mi=0.5, grade=0.04, climb_mi=1.0)
+        driving.truck.grade = 0.0
+        app.ctx.settings.predictive_cruise = True
+        assert driving._predictive_cruise_bias(62.0) > 1.0
+
+        # Turned off, cruise plans nothing and holds the number it was given.
+        app.ctx.settings.predictive_cruise = False
+        assert driving._predictive_cruise_bias(62.0) == 0.0
+    finally:
+        app.shutdown()
+
+
+def test_predictive_cruise_finds_a_short_hill():
+    """A half-mile hill must not average away inside the preview.
+
+    Averaging the whole preview, a half-mile four percent pull came out at
+    1.3 percent -- under the threshold -- so the hills that gain the most from
+    banked momentum were exactly the ones the preview skipped (bench,
+    2026-07-25). The windowed reading finds them.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = lambda text, interrupt=False: None
+    try:
+        driving = _cruising(app)
+        _hill_road(driving, flat_mi=0.3, grade=0.04, climb_mi=0.5)
+        driving.truck.grade = 0.0
+        climb_ahead, _ = driving._grade_extremes_ahead()
+        assert climb_ahead >= 0.03, climb_ahead
+        assert driving._predictive_cruise_bias(62.0) > 1.0
+    finally:
+        app.shutdown()
+
+
+def test_predictive_cruise_holds_at_a_crest_but_never_slows_the_truck():
+    """Near the top it stops reaching for speed; it does not give speed away.
+
+    An earlier cut returned a flat four mph giveaway and cost a 2 percent pull
+    three mph it had been holding comfortably (bench, 2026-07-25).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = lambda text, interrupt=False: None
+    try:
+        driving = _cruising(app)
+        start = _hill_road(driving, flat_mi=0.0, grade=0.04, climb_mi=0.2)
+        driving.trip.position_mi = start
+        driving.truck.grade = 0.04
+        driving.truck.velocity_mps = 55.0 / 2.23694
+        bias = driving._predictive_cruise_bias(62.0)
+        assert bias < 0.0
+        # It brings the target down to the speed on the clock, no further.
+        assert 62.0 + bias >= driving.truck.speed_mph - 0.01
+        assert bias >= -PCC_CREST_SAG_MPH
+
+        # A truck still holding its number at a crest is left alone.
+        driving.truck.velocity_mps = 62.0 / 2.23694
+        assert driving._predictive_cruise_bias(62.0) == 0.0
+    finally:
+        app.shutdown()
+
+
+def test_predictive_cruise_shaves_before_a_descent():
+    """Speed added just before a downgrade comes back out through the brakes."""
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = lambda text, interrupt=False: None
+    try:
+        driving = _cruising(app)
+        _hill_road(driving, flat_mi=0.4, grade=-0.05, climb_mi=1.0)
+        driving.truck.grade = 0.0
+        assert driving._predictive_cruise_bias(62.0) < 0.0
+    finally:
+        app.shutdown()
+
+
+def test_predictive_cruise_never_banks_past_the_posted_limit():
+    """Momentum for a hill is not a licence to speed."""
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = lambda text, interrupt=False: None
+    try:
+        driving = _cruising(app, set_mph=55.0)
+        driving.trip.speed_limit_at = lambda mile: (55.0, None)
+        _hill_road(driving, flat_mi=0.5, grade=0.06, climb_mi=1.0)
+        driving.truck.grade = 0.0
+        for _ in range(240):
+            driving._update_cruise(1 / 60, False, False, False)
+            driving.truck.update(1 / 60)
+        assert driving.truck.speed_mph <= 55.0 + ACC_LIMIT_OFFSET_MPH + 0.5
+    finally:
+        app.shutdown()
+
+
+def test_cruise_says_when_a_climb_has_beaten_it():
+    """The climb side owes the driver the same honesty the descent side gives.
+
+    Terse speech keeps it: the engine note and the downshifts already say the
+    truck is working, and a terse player asked for less.
+    """
+    from freight_fate.app import App
+
+    for verbosity, expected in ((1, True), (0, False)):
+        app = App()
+        events: list[str] = []
+        app.ctx.say_event = lambda text, interrupt=False, sink=events: sink.append(text)
+        try:
+            app.ctx.settings.speech_verbosity = verbosity
+            driving = _cruising(app)
+            driving.trip.grade_at = lambda mile: 0.07
+            for _ in range(90 * 60):
+                driving.truck.grade = 0.07
+                driving._update_cruise(1 / 60, False, False, False)
+                if driving.truck.transmission.automatic:
+                    driving.truck.auto_shift()
+                driving.truck.update(1 / 60)
+            said = sum("still losing the grade" in e for e in events)
+            assert bool(said) is expected, (verbosity, events[-3:])
+            if expected:
+                assert said == 1  # once a hill, not once a second
+        finally:
+            app.shutdown()
+
+
+def test_cruise_leaves_the_retarder_alone_when_descent_control_is_off():
+    """The stalk decides. The drums still hold the speed either way.
+
+    Turning descent control off is the driver saying they manage grades
+    themselves, and a real truck's cruise does not flip the engine brake on
+    for you. It must cost the quiet retarder, never the ability to hold the
+    set speed -- that was the runaway this whole area started with.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = lambda text, interrupt=False: None
+    try:
+        app.ctx.settings.descent_speed_control = "off"
+        driving = _cruising(app)
+        driving.trip.grade_at = lambda mile: -0.06
+        speeds = []
+        for _ in range(60 * 60):
+            driving.truck.grade = -0.06
+            ramp = (1 / 60) * 2.2
+            driving.truck.throttle = max(0.0, driving.truck.throttle - ramp * 2)
+            driving.truck.brake = max(0.0, driving.truck.brake - ramp * 3)
+            driving._update_cruise(1 / 60, False, False, False)
+            if driving.truck.transmission.automatic:
+                driving.truck.auto_shift()
+            driving.truck.update(1 / 60)
+            speeds.append(driving.truck.speed_mph)
+        assert driving._cruise_jake_stage == 0
+        assert driving.truck.engine_brake_stage == 0
+        assert max(speeds) <= 68.0, max(speeds)
+        assert not driving.truck.air_brakes_holding
+    finally:
+        app.shutdown()
+
+
+def test_descent_control_cue_does_not_chant_through_rolling_country():
+    """Every dip crosses the trigger; the announcement needs its own clock."""
+    import math
+
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    app.ctx.say_event = lambda text, interrupt=False: events.append(text)
+    try:
+        driving = _cruising(app)
+        driving.trip.grade_at = lambda mile: 0.05 * math.sin(2 * math.pi * mile / 2.0)
+        for _ in range(6 * 60 * 60):
+            driving.truck.grade = driving.trip.grade_at(driving.trip.position_mi)
+            ramp = (1 / 60) * 2.2
+            driving.truck.throttle = max(0.0, driving.truck.throttle - ramp * 2)
+            driving.truck.brake = max(0.0, driving.truck.brake - ramp * 3)
+            driving._update_cruise(1 / 60, False, False, False)
+            if driving.truck.transmission.automatic:
+                driving.truck.auto_shift()
+            driving.truck.update(1 / 60)
+            driving.trip.position_mi += driving.truck.speed_mph / 60.0 / 3600.0
+        holding = sum("Descent control holding" in e for e in events)
+        assert holding <= 3, holding
     finally:
         app.shutdown()

@@ -4,6 +4,29 @@
 
 ### Added
 
+- **Cruise reads the road ahead and drives the hill before it arrives.**
+  Like the predictive cruise on a modern truck, it looks a mile and a half
+  up the road and plans against what is actually there. It banks a couple
+  of miles an hour before a climb so the truck carries that speed up the
+  grade instead of meeting the hill at exactly your set speed and falling
+  behind from the first yard. Near the top it stops fighting for the last
+  few miles an hour the summit is about to hand back, so you keep the gear
+  you are in rather than taking a downshift twenty seconds from the crest.
+  And it will not build speed just before a downgrade that it would only
+  have to brake away again. It tells you the first time it does each of
+  these on a hill, so you are never wondering why the truck is doing
+  something you did not ask for. On by default, under Settings, Driving
+  assistance, Predictive cruise.
+
+- **Cruise says so when a hill has beaten it.** Going downhill the truck
+  has long told you when descent control could not hold the grade. Going
+  up it said nothing at all: the truck just quietly sank, and unless you
+  were watching the tach there was no moment where you were told plainly
+  that cruise had run out of truck and it was your call whether to take
+  over. Now, once the accelerator is genuinely on the floor and the truck
+  is still losing the grade, it says so and tells you what speed it is
+  holding. Once per hill, and never on terse speech.
+
 - **Linux players get an AppImage.** Alongside the tarball, each release now
   ships `FreightFate-<version>-linux-x86_64.AppImage`: one file you mark
   executable and run, with no extraction step. It carries the libraries the

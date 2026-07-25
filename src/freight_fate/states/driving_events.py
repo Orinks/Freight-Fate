@@ -2021,6 +2021,139 @@ class DrivingEventMixin:
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
         return lowest_limit, lowest_reason
 
+    def _grade_samples(self, distance_mi: float) -> list[float]:
+        """Grade every tenth of a mile over the road ahead.
+
+        Real predictive cruise plans against a stored road profile a mile or
+        two out (Volvo I-See, Detroit Intelligent Powertrain Management). The
+        baked grade segments are the same thing at the same resolution -- a
+        median half a mile, ninety-odd segments a leg -- so the preview is a
+        straight read of data the trip already carries, no new bake.
+        """
+        start = self.trip.position_mi
+        end = min(self.trip.total_miles, start + distance_mi)
+        samples = []
+        probe = start + PCC_PREVIEW_STEP_MI
+        while probe <= end + 1e-6:
+            samples.append(self.trip.grade_at(probe))
+            probe += PCC_PREVIEW_STEP_MI
+        return samples
+
+    def _grade_preview(self, distance_mi: float = PCC_PREVIEW_MI) -> float:
+        """Mean grade over the road ahead, or 0.0 with nothing to read.
+
+        The crest test uses this on a short horizon: near the top, the road
+        just ahead has already gone flat. Judged on the full preview instead,
+        a three-mile pull read as cresting from a mile and a half out and the
+        truck stopped recovering for half the hill (bench, 2026-07-25).
+        """
+        samples = self._grade_samples(distance_mi)
+        return sum(samples) / len(samples) if samples else 0.0
+
+    def _grade_extremes_ahead(self) -> tuple[float, float]:
+        """Steepest sustained climb and descent inside the preview.
+
+        Windowed rather than averaged over the whole preview: a half-mile
+        four percent hill inside a mile and a half of otherwise flat road
+        averages out to nothing, and short hills are exactly where banked
+        momentum pays -- long enough to hurt, short enough that speed carried
+        in still reaches the top (bench, 2026-07-25: averaging skipped the
+        half-mile hills entirely). A window rather than a bare maximum so a
+        single tenth-mile spike is not mistaken for a grade.
+        """
+        samples = self._grade_samples(PCC_PREVIEW_MI)
+        window = max(1, int(round(PCC_GRADE_WINDOW_MI / PCC_PREVIEW_STEP_MI)))
+        if len(samples) < window:
+            return (0.0, 0.0) if not samples else (max(samples), min(samples))
+        means = [sum(samples[i : i + window]) / window for i in range(len(samples) - window + 1)]
+        return max(means), min(means)
+
+    def _predictive_cruise_bias(self, target_mph: float) -> float:
+        """Speed to add or give up for the grade the truck is about to reach.
+
+        Three behaviors, all of them what a real predictive system does:
+
+        Bank momentum before a climb. Entering a pull two or three mph faster
+        means carrying more speed the whole way up and holding a taller gear
+        for longer -- the truck arrives at the top sooner having done the same
+        work, instead of meeting the hill at exactly the set speed and
+        immediately falling behind it.
+
+        Give up the last few mph at a crest. Holding full throttle to the top
+        of a pull buys seconds and costs a downshift that upshifts again over
+        the summit; letting it sag inside a band leaves the truck in the gear
+        it is already turning.
+
+        Do not accelerate into a descent cruise is about to brake away. Speed
+        added just before a downgrade comes straight back out through the
+        retarder and the drums, which in this truck means real heat and real
+        air -- so the preview shaves instead of adding.
+        """
+        if not self.ctx.settings.predictive_cruise:
+            return 0.0
+        # Following a lead, capped for a ramp or a bend, or already fighting a
+        # lower posted limit: something closer than the horizon owns the speed.
+        if self._acc_following or self._cruise_exit_mph is not None:
+            return 0.0
+        climb_ahead, descent_ahead = self._grade_extremes_ahead()
+        here = self.truck.grade
+        speed = self.truck.speed_mph
+        if descent_ahead <= -PCC_GRADE_MIN and climb_ahead < PCC_GRADE_MIN:
+            # A downgrade is coming and no pull stands between here and it.
+            # Shave in proportion to how steep, so the truck rolls onto the
+            # grade at or under the set speed instead of arriving over it and
+            # spending the retarder to get back down.
+            return -min(PCC_DESCENT_SHAVE_MPH, PCC_DESCENT_SHAVE_MPH * (-descent_ahead / 0.05))
+        if here >= PCC_GRADE_MIN and self._grade_preview(PCC_CREST_WINDOW_MI) < PCC_GRADE_MIN:
+            # On a pull whose top is inside the crest window. Stop reaching for
+            # speed the summit is about to hand back for nothing: hold what
+            # the truck has rather than spending the last of the climb at full
+            # throttle recovering it, and taking a downshift to do it.
+            #
+            # It asks the truck to hold, never to slow: the bias can only ever
+            # bring the target down to the speed already on the clock. An
+            # earlier cut of this gave up a flat four mph and cost a 2 percent
+            # pull three miles an hour it had been holding comfortably (bench,
+            # 2026-07-25) -- the allowance is a ceiling on the giveaway, not
+            # the giveaway itself.
+            if speed < target_mph - 0.5:
+                return max(-PCC_CREST_SAG_MPH, speed - target_mph)
+            return 0.0
+        if here < PCC_GRADE_MIN and climb_ahead >= PCC_GRADE_MIN:
+            # Level ground now, a pull inside the preview: bank what the grade
+            # is about to take. Scaled by the climb, capped so cruise never
+            # reads as running away with the truck.
+            return min(PCC_PREBUILD_MPH, PCC_PREBUILD_MPH * (climb_ahead / 0.04))
+        return 0.0
+
+    def _say_predictive_cruise(self, dt: float, bias: float) -> None:
+        """Name what the preview is doing, once per hill and never terse.
+
+        A truck that quietly runs three over and then sags four under reads as
+        broken to a driver who cannot see the road ahead. Naming it once turns
+        the same behavior into the system working. It is information, not
+        safety, so terse speech keeps it.
+        """
+        self._pcc_cue_s = max(0.0, self._pcc_cue_s - dt)
+        if bias > 0.5:
+            phase = "building"
+        elif bias < -0.5:
+            phase = "easing"
+        else:
+            phase = ""
+        if phase == self._pcc_phase:
+            return
+        self._pcc_phase = phase
+        if not phase or self._terse_speech() or self._pcc_cue_s > 0.0:
+            return
+        self._pcc_cue_s = PCC_CUE_COOLDOWN_S
+        message = (
+            "Building speed for the grade ahead."
+            if phase == "building"
+            else "Easing off for the road ahead."
+        )
+        self.ctx.say_event(message, interrupt=False)
+
     def _descent_hold_mph(self) -> float:
         """The speed descent control is actually working to: set speed under
         the interactive level's safe ceiling."""
@@ -2037,6 +2170,7 @@ class DrivingEventMixin:
             return
         t = self.truck
         self._acc_follow_cue_s = max(0.0, self._acc_follow_cue_s - dt)
+        self._descent_cue_s = max(0.0, self._descent_cue_s - dt)
         descent_level = self.ctx.settings.descent_speed_control
         descending = t.grade <= -0.025 and descent_level != "off"
         if descending and self._cruise_mph is not None:
@@ -2057,11 +2191,18 @@ class DrivingEventMixin:
             self._descent_capture_active = False
             if not self._descent_control_active:
                 self._descent_control_active = True
-                self.ctx.say_event(
-                    "Descent control holding "
-                    f"{self.ctx.settings.speed_text(self._descent_hold_mph())}.",
-                    interrupt=False,
-                )
+                # Rolling country crosses the descent trigger on every dip, so
+                # the announcement needs a clock of its own or it becomes the
+                # loudest thing on the road: four times in six minutes of
+                # rollers on the bench (2026-07-25). The control still engages
+                # every time; only saying so waits.
+                if self._descent_cue_s <= 0.0 and not self._terse_speech():
+                    self._descent_cue_s = DESCENT_CUE_COOLDOWN_S
+                    self.ctx.say_event(
+                        "Descent control holding "
+                        f"{self.ctx.settings.speed_text(self._descent_hold_mph())}.",
+                        interrupt=False,
+                    )
             if not t.transmission.automatic and t.rpm < 1100:
                 limit_state = "gear"
                 limit_message = "Descent control needs a lower gear. Downshift now."
@@ -2176,6 +2317,13 @@ class DrivingEventMixin:
                     interrupt=False,
                 )
         self._acc_limit_capped = limit_capped
+        # The preview goes on last so it can only ever move the number the
+        # caps already agreed on, and it is clamped against the posted cap:
+        # banking momentum for a hill must never bank it past the limit.
+        bias = self._predictive_cruise_bias(target_mph)
+        self._say_predictive_cruise(dt, bias)
+        if bias:
+            target_mph = max(CRUISE_MIN_MPH, min(target_mph + bias, cap_mph))
         context = self.trip.traffic_context()
         following = False
         if context is not None:
@@ -2265,7 +2413,45 @@ class DrivingEventMixin:
         else:
             self._cruise_applied = self._cruise_throttle
         t.throttle = self._cruise_applied
+        self._say_cruise_out_of_truck(dt, error)
         self._hold_cruise_from_above(dt, error, closing=following or limit_capped or exit_capped)
+
+    def _say_cruise_out_of_truck(self, dt: float, error: float) -> None:
+        """Say plainly when the hill has beaten cruise.
+
+        The descent side has said "cannot hold this grade" for a while; the
+        climb side said nothing at all, so the truck just quietly sank. A
+        sighted driver reads that off the tach in a second. A blind driver has
+        the engine note and the downshifts, which say the truck is working but
+        not that it is losing -- and losing is the part that decides whether to
+        take it over by hand.
+
+        Only once the pedal is genuinely on the floor and the truck is still
+        falling past the droop band, so a normal pull that cruise recovers
+        from on its own stays quiet.
+        """
+        self._climb_cue_s = max(0.0, self._climb_cue_s - dt)
+        t = self.truck
+        # error is target minus speed, so a positive error is the truck
+        # sitting below the number cruise is working to.
+        beaten = (
+            self._cruise_applied >= CRUISE_FLOORED_THROTTLE
+            and t.grade > 0.0
+            and error > CRUISE_DROOP_MPH
+        )
+        if not beaten:
+            if error < CRUISE_DROOP_MPH * 0.5:
+                self._climb_cue_said = False  # back on its number: arm again
+            return
+        if self._climb_cue_said or self._climb_cue_s > 0.0 or self._terse_speech():
+            return
+        self._climb_cue_said = True
+        self._climb_cue_s = CLIMB_CUE_COOLDOWN_S
+        self.ctx.say_event(
+            "Cruise is flat out and still losing the grade. "
+            f"Holding {self.ctx.settings.speed_text(t.speed_mph)}.",
+            interrupt=False,
+        )
 
     def _hold_cruise_from_above(self, dt: float, error: float, *, closing: bool) -> None:
         """Bring the truck back down to the target: retarder first, drums last.
@@ -2297,14 +2483,18 @@ class DrivingEventMixin:
             # The driver put the AMT retarder manager in charge with J; it
             # already holds the descent target. Two owners would fight.
             return
-        # Stage the retard against the overspeed. The map is proportional, so
-        # the truck settles at whatever overspeed the chosen stage balances
-        # instead of hunting between full retard and none.
+        # Cruise reaches for the retarder only where a real one would: the
+        # engine-brake stalk has to permit it. Descent control set to off is
+        # the driver saying they manage grades themselves, and a real truck's
+        # cruise does not flip the stalk on for you. The drums below still
+        # answer either way, so turning it off costs the quiet retarder, never
+        # the ability to hold the speed.
+        may_retard = self.ctx.settings.descent_speed_control != "off"
         wanted = 0
-        if over > CRUISE_JAKE_OVER_MPH and t.throttle <= 0.05:
+        if may_retard and over > CRUISE_JAKE_OVER_MPH and t.throttle <= 0.05:
             steps = int((over - CRUISE_JAKE_OVER_MPH) / CRUISE_JAKE_STEP_MPH)
             wanted = min(JAKE_STAGES, 1 + steps)
-        elif over > CRUISE_JAKE_RELEASE_MPH:
+        elif may_retard and over > CRUISE_JAKE_RELEASE_MPH:
             wanted = self._cruise_jake_stage  # inside the deadband, hold
         wanted = min(wanted, max(0, self._auto_jake_max_stage()))
         # Never reach for a retarder the driver's own jake switch is holding,
@@ -2322,10 +2512,11 @@ class DrivingEventMixin:
                 t.engine_brake_stage = wanted
                 self._cruise_jake_cooldown_s = CRUISE_JAKE_STEP_S
         # Holding a grade. The drums only come out once the retarder is doing
-        # everything it can, and then as a snub that finishes and lets go.
-        jake_maxed = self._cruise_jake_stage >= max(
-            1, min(JAKE_STAGES, self._auto_jake_max_stage())
-        )
+        # everything it can -- or once it is clear there is no retarder coming,
+        # which is the whole of it when the stalk is off -- and then as a snub
+        # that finishes and lets go.
+        jake_ceiling = min(JAKE_STAGES, self._auto_jake_max_stage()) if may_retard else 0
+        jake_maxed = self._cruise_jake_stage >= max(1, jake_ceiling) or jake_ceiling <= 0
         if self._cruise_snubbing:
             self._cruise_snubbing = over > -CRUISE_SNUB_UNDER_MPH
         elif jake_maxed and over > CRUISE_BRAKE_OVER_MPH:

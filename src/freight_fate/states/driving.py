@@ -283,6 +283,11 @@ class DrivingState(
         self._cruise_jake_stage = 0  # retarder stages cruise itself commanded
         self._cruise_jake_cooldown_s = 0.0  # quiet time between those stage steps
         self._cruise_snubbing = False  # a service-brake snub is in progress
+        self._pcc_phase = ""  # what the grade preview is doing, for the cue
+        self._pcc_cue_s = 0.0  # quiet time between preview cues
+        self._climb_cue_said = False  # cruise has already owned up to this pull
+        self._climb_cue_s = 0.0  # quiet time between hand-back cues
+        self._descent_cue_s = 0.0  # quiet time between descent-control cues
         self._cruise_descent_mph = None  # interactive descent ceiling, while it lasts
         self._cruise_exit_mph: float | None = None
         self._cruise_curve_mph: float | None = None
