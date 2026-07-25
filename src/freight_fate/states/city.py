@@ -136,7 +136,7 @@ class CityMenuState(MenuState):
 
     def __init__(self, ctx) -> None:
         super().__init__(ctx)
-        self._board = JobBoard(ctx.world)
+        self._board = JobBoard(ctx.world, hos=ctx.profile.hos)
         self._jobs_cache: list[Job] | None = None
         self._confirm_sleep_rested = False
 
@@ -627,7 +627,7 @@ def dispatch_cache_key(p) -> dict:
 
 def open_freight_market(ctx) -> list[Job]:
     p = ctx.profile
-    board = JobBoard(ctx.world)
+    board = JobBoard(ctx.world, hos=p.hos)
     market_changed = p.market.advance_to(p.market_day())
     key = dispatch_cache_key(p)
     cache = p.dispatch_board_cache if not market_changed else None
@@ -1024,8 +1024,38 @@ class JobBoardState(MenuState):
                     ),
                 )
             )
+        if len(self._assigned_queue) > 1:
+            items.append(
+                MenuItem(
+                    "Review the rest of today's board",
+                    self._review_locked_board,
+                    help=(
+                        "Hear the other loads dispatch posted today. They are "
+                        "flavor for now: assigned loads only until load choice "
+                        f"unlocks at level {SENIOR_LOAD_CHOICE_LEVEL}."
+                    ),
+                )
+            )
         items.append(MenuItem("Back to terminal", self.go_back))
         return items
+
+    def _review_locked_board(self) -> None:
+        """Speak the pool behind the assignment, as flavor (owner design,
+        2026-07-24): the offer pool widens with every level, and growth the
+        driver cannot hear is not a reward yet. On demand, never automatic."""
+        others = [self.jobs[i] for i in self._assigned_queue[1:]]
+        lines = [
+            f"{job.weight_tons:.0f} tons of {job.cargo.label} to "
+            f"{job.spoken_destination}, {self.ctx.settings.distance_text(job.distance_mi)}"
+            for job in others
+        ]
+        self.ctx.say(
+            f"Dispatch also posted today: {'; '.join(lines)}. "
+            "Declining your assignment draws the first of these next. "
+            "Postings change with each market day; load choice unlocks "
+            f"at level {SENIOR_LOAD_CHOICE_LEVEL}.",
+            interrupt=True,
+        )
 
     def _assigned_job(self) -> Job:
         return self.jobs[self._assigned_queue[0]]

@@ -1301,7 +1301,44 @@
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 1.4,
+            "end_mi": 2.1,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 2.1,
+            "end_mi": 2.6,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 2.6,
+            "end_mi": 3.8,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 4.1,
+            "end_mi": 97.6,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 97.6,
+            "end_mi": 97.8,
+            "lanes": 1,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "stops": [
         {
@@ -1905,16 +1942,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-94 corridor between Bismarck and Jamestown",
-            "at_mi": 50.0,
-            "type": "place",
-            "state": "North Dakota",
-            "highway": "I-94",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Dakota",
@@ -2326,7 +2354,22 @@
             "hgv": false
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 2.0,
+            "end_mi": 97.4,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 99.6,
+            "end_mi": 100.0,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "stops": [
         {
@@ -3676,6 +3719,78 @@
             "source": "OpenStreetMap place=village node 151778891, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Burlington"
           }
+        ],
+        "lane_segments": [
+          {
+            "start_mi": 2.0,
+            "end_mi": 4.4,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 4.4,
+            "end_mi": 41.0,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 41.0,
+            "end_mi": 41.7,
+            "lanes": 4,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 41.7,
+            "end_mi": 53.2,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 53.5,
+            "end_mi": 55.5,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 55.5,
+            "end_mi": 107.2,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 107.2,
+            "end_mi": 108.5,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 108.5,
+            "end_mi": 109.1,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 109.1,
+            "end_mi": 109.6,
+            "lanes": 5,
+            "lanes_forward": 2,
+            "lanes_backward": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 109.6,
+            "end_mi": 109.9,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
         ]
       },
       "stops": [
@@ -4279,7 +4394,31 @@
             "hgv": false
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 0.3,
+            "end_mi": 0.8,
+            "lanes": 4,
+            "lanes_forward": 2,
+            "lanes_backward": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 0.8,
+            "end_mi": 86.7,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 86.7,
+            "end_mi": 88.8,
+            "lanes": 4,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "stops": [
         {
@@ -5700,7 +5839,160 @@
             "miles": 131.0
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 1.1,
+            "lanes": 3,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 1.4,
+            "end_mi": 2.5,
+            "lanes": 1,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 2.5,
+            "end_mi": 20.0,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 20.0,
+            "end_mi": 25.8,
+            "lanes": 1,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 25.8,
+            "end_mi": 57.0,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 57.0,
+            "end_mi": 57.8,
+            "lanes": 3,
+            "lanes_forward": 1,
+            "lanes_backward": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 57.8,
+            "end_mi": 67.8,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 68.1,
+            "end_mi": 70.1,
+            "lanes": 3,
+            "lanes_forward": 2,
+            "lanes_backward": 1,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 70.1,
+            "end_mi": 70.4,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 70.4,
+            "end_mi": 70.8,
+            "lanes": 5,
+            "lanes_forward": 3,
+            "lanes_backward": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 70.8,
+            "end_mi": 74.9,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 74.9,
+            "end_mi": 82.4,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 82.6,
+            "end_mi": 83.1,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 83.1,
+            "end_mi": 83.4,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 83.4,
+            "end_mi": 86.0,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 86.0,
+            "end_mi": 86.7,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 87.2,
+            "end_mi": 101.5,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 101.8,
+            "end_mi": 103.6,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 103.6,
+            "end_mi": 104.6,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 104.6,
+            "end_mi": 123.1,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 123.1,
+            "end_mi": 125.8,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 125.8,
+            "end_mi": 128.9,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "stops": [
         {
@@ -7959,7 +8251,169 @@
             "spoken": "Passing Robbinsdale"
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 0.5,
+            "end_mi": 1.2,
+            "lanes": 1,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 1.2,
+            "end_mi": 2.9,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 2.9,
+            "end_mi": 3.2,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 3.5,
+            "end_mi": 159.6,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 159.6,
+            "end_mi": 160.8,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 160.8,
+            "end_mi": 184.1,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 184.1,
+            "end_mi": 197.2,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 197.2,
+            "end_mi": 198.5,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 198.5,
+            "end_mi": 198.8,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 198.8,
+            "end_mi": 205.2,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 205.2,
+            "end_mi": 212.5,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 212.5,
+            "end_mi": 215.6,
+            "lanes": 4,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 215.6,
+            "end_mi": 216.7,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 216.7,
+            "end_mi": 218.3,
+            "lanes": 4,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 218.3,
+            "end_mi": 219.7,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 219.7,
+            "end_mi": 220.4,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 220.4,
+            "end_mi": 221.8,
+            "lanes": 4,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 221.8,
+            "end_mi": 226.3,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 226.3,
+            "end_mi": 227.7,
+            "lanes": 4,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 227.7,
+            "end_mi": 228.7,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 228.7,
+            "end_mi": 233.3,
+            "lanes": 4,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 233.3,
+            "end_mi": 234.1,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 234.1,
+            "end_mi": 234.4,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "terrain": "flat"
     },
@@ -9171,7 +9625,55 @@
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 0.5,
+            "end_mi": 1.4,
+            "lanes": 1,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 1.4,
+            "end_mi": 2.6,
+            "lanes": 5,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 2.6,
+            "end_mi": 88.6,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 88.6,
+            "end_mi": 91.0,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 100.9,
+            "end_mi": 143.9,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 143.9,
+            "end_mi": 146.3,
+            "lanes": 1,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 146.3,
+            "end_mi": 148.2,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "stops": [
         {
@@ -10050,7 +10552,64 @@
             "hgv": false
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 1.1,
+            "end_mi": 26.5,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 26.5,
+            "end_mi": 26.8,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 26.8,
+            "end_mi": 28.0,
+            "lanes": 4,
+            "lanes_forward": 2,
+            "lanes_backward": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 28.0,
+            "end_mi": 70.6,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 70.6,
+            "end_mi": 72.7,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 72.7,
+            "end_mi": 87.5,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 87.5,
+            "end_mi": 89.2,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 89.2,
+            "end_mi": 112.9,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "stops": [
         {
@@ -10790,7 +11349,37 @@
             "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/"
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 1.0,
+            "end_mi": 3.0,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 3.0,
+            "end_mi": 5.7,
+            "lanes": 1,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 5.7,
+            "end_mi": 80.2,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 80.2,
+            "end_mi": 81.6,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "stops": [
         {
@@ -11267,16 +11856,7 @@
           }
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
-        "checkpoints": [
-          {
-            "name": "I-94 corridor between Jamestown and Fargo",
-            "at_mi": 47.0,
-            "type": "place",
-            "state": "North Dakota",
-            "highway": "I-94",
-            "source": "Curated OSRM/OpenStreetMap corridor checkpoint."
-          }
-        ],
+        "checkpoints": [],
         "state_miles": [
           {
             "state": "North Dakota",
@@ -11853,7 +12433,42 @@
             "mph": null
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 0.3,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 2.6,
+            "end_mi": 2.9,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 2.9,
+            "end_mi": 85.7,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 86.2,
+            "end_mi": 92.2,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 92.2,
+            "end_mi": 93.6,
+            "lanes": 3,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "stops": [
         {
@@ -12676,7 +13291,30 @@
             "hgv": false
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 0.0,
+            "end_mi": 0.7,
+            "lanes": 5,
+            "lanes_forward": 2,
+            "lanes_backward": 3,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 0.7,
+            "end_mi": 3.4,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 3.6,
+            "end_mi": 120.9,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "stops": [
         {
@@ -13606,7 +14244,68 @@
             "hgv": false
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 1.9,
+            "end_mi": 9.8,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 9.8,
+            "end_mi": 10.8,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 10.8,
+            "end_mi": 11.8,
+            "lanes": 3,
+            "lanes_forward": 1,
+            "lanes_backward": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 11.8,
+            "end_mi": 18.5,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 18.5,
+            "end_mi": 18.8,
+            "lanes": 5,
+            "lanes_forward": 3,
+            "lanes_backward": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 18.8,
+            "end_mi": 33.5,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 33.8,
+            "end_mi": 36.0,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 36.0,
+            "end_mi": 37.5,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 93.4,
+            "end_mi": 96.8,
+            "lanes": 2,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "stops": [
         {
@@ -14987,7 +15686,35 @@
             "hgv": false
           }
         ],
-        "restrictions": []
+        "restrictions": [],
+        "lane_segments": [
+          {
+            "start_mi": 2.1,
+            "end_mi": 34.7,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 34.7,
+            "end_mi": 35.1,
+            "lanes": 4,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 35.1,
+            "end_mi": 123.6,
+            "lanes": 2,
+            "oneway": true,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          },
+          {
+            "start_mi": 123.6,
+            "end_mi": 125.0,
+            "lanes": 5,
+            "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
+          }
+        ]
       },
       "stops": [
         {

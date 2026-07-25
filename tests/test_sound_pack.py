@@ -55,6 +55,19 @@ def test_pack_overlay_replaces_and_adds(tmp_path):
     assert pack.read("music/open_road.wav") == b"fake wav for open road"  # untouched
 
 
+def test_pack_overlay_wins_by_key_across_extensions(tmp_path):
+    # The loader tries ogg before wav inside the pack, so a committed ogg
+    # fallback must not ship beside a licensed wav for the same key.
+    sounds = _write_fixture_sounds(tmp_path)
+    overlay = tmp_path / "licensed"
+    (overlay / "ui").mkdir(parents=True)
+    (overlay / "ui" / "menu_select.wav").write_bytes(b"licensed wav")
+    out = assets_pack.write_pack(sounds, tmp_path / "sounds.pak", overlay_dir=overlay)
+    pack = assets_pack.SoundPack(out)
+    assert pack.read("ui/menu_select.wav") == b"licensed wav"
+    assert pack.read("ui/menu_select.ogg") is None  # stale-extension twin dropped
+
+
 def test_pack_missing_overlay_dir_is_fine(tmp_path):
     sounds = _write_fixture_sounds(tmp_path)
     out = assets_pack.write_pack(

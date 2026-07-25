@@ -384,6 +384,29 @@ class HosClock:
     def in_violation(self, mode: str) -> bool:
         return any(rem <= 0 for _, rem, _ in self._statuses(mode))
 
+    def violation_causes(self, mode: str) -> list[str]:
+        """Plain spoken phrases for every limit currently blown.
+
+        The roadside out-of-service stop uses these BEFORE the reset wipes
+        the ledger, so the officer can say exactly why the order stands.
+        """
+        phrases = {
+            "drive": "you had driven past the 11-hour driving limit",
+            "duty": "your 14-hour duty window had expired",
+            "break": "you were past the 30-minute break requirement",
+        }
+        return [phrases[kind] for kind, rem, _ in self._statuses(mode) if rem <= 0 and kind in phrases]
+
+    def re_arm_warnings(self) -> None:
+        """Speak the countdown again after a rest that did NOT reset the shift.
+
+        Warnings fire once per threshold per shift -- correct while driving,
+        but a long non-qualifying sleep (a pending sleeper split) left the
+        marks in place, so the driver woke to silence and drove straight
+        into a window violation with no countdown (owner, 2026-07-24).
+        """
+        self.warned = [w for w in self.warned if not w.startswith(("drive:", "duty:", "break:"))]
+
     def check_warnings(self, mode: str) -> list[str]:
         """Newly crossed warning messages; each threshold fires once.
 

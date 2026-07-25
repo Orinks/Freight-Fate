@@ -596,8 +596,12 @@ class Leg:
         """
         if len(self.route_points) < 2:
             return False
-        if not self.checkpoints:
-            return False
+        # Checkpoints are deliberately NOT required: they are a speech-quality
+        # layer, same class as the POIs the docstring already exempts. The old
+        # non-empty requirement is why 246 legs carried a fake "X corridor
+        # between A and B" placeholder checkpoint -- which then leaked into
+        # place callouts as if it were a town (owner report 2026-07-23). The
+        # placeholders are gone; dispatch must not miss them.
         if not self.state_miles:
             return False
         if len(self.elevation_samples) < 2 or not self.grade_segments:

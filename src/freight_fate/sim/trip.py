@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import math
 import random
 from dataclasses import replace
 
@@ -246,6 +247,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             # from the gore: the stop-sign warning must buy human reaction
             # seconds, not compressed ones. A hot entry used to burn the
             # whole half mile in a few real seconds.
+            return min(full, 1.0)
+        if self._severe_curve_decompression():
+            # Same law for a hard bend: the pacenote lead is sized in real
+            # reaction-plus-braking seconds, but compression spent them in
+            # a blink -- "Hairpin right, a quarter mile" did not finish
+            # speaking before the braking point (owner, 2026-07-24). From
+            # inside the warning window to the end of the curve, the clock
+            # runs real.
             return min(full, 1.0)
         floor = min(LOW_SPEED_TIME_SCALE, full)
         ramp = min(1.0, self.truck.speed_mph / FULL_COMPRESSION_MPH)
@@ -853,6 +862,36 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             return cr
         return None
 
+    def _severe_curve_decompression(self) -> bool:
+        """True while a warning-worthy bend is inside its reaction window.
+
+        Demand-based, not severity-based: any curve the pacenote would
+        speak for (same margin rules) gets real seconds to act on -- a
+        40-advisory bend from 55 went 'half a mile' to 'too fast' in
+        three real seconds under compression because the first cut only
+        covered hairpin and sharp (owner, 2026-07-24). Uses the pacenote
+        lead widened a little so the call itself lands in real time, and
+        holds until the curve's end so the bend is DRIVEN in real time.
+        """
+        speed = self.truck.speed_mph
+        for cr in self.curves:
+            if cr.end_mi < self.position_mi:
+                continue
+            ahead = cr.start_mi - self.position_mi
+            if ahead > PACENOTE_MAX_LEAD_MI:
+                break
+            if cr.connector:
+                continue
+            margin = (
+                PACENOTE_GENTLE_MARGIN_MPH if cr.severity == "gentle" else PACENOTE_MARGIN_MPH
+            )
+            if speed <= cr.advisory_mph + margin:
+                continue
+            window = self._curve_pacenote_lead_mi(speed, cr.advisory_mph) * 1.5
+            if ahead <= window:
+                return True
+        return False
+
     @staticmethod
     def _curve_pacenote_lead_mi(speed_mph: float, advisory_mph: float) -> float:
         over = max(0.0, speed_mph - advisory_mph)
@@ -1120,10 +1159,24 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                         )
                 zones.append(Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"))
                 return zones
-            return [
-                Zone(0.0, total, FACILITY_ACCESS_LIMIT_MPH, "facility access road"),
-                Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"),
-            ]
+            # Graduated fallback (owner design, 2026-07-24): a long
+            # synthetic approach is an arterial before it is an access
+            # road -- 45 out wide, 25 for the last stretch, 15 at the
+            # gate. A blanket 25 for a 6-mile approach was a crawl no
+            # real city posts. Short approaches stay all-access-road.
+            zones = []
+            access_start = max(0.0, total - FACILITY_ACCESS_TAIL_MI)
+            if access_start > 0.5:
+                zones.append(
+                    Zone(0.0, access_start, FACILITY_ARTERIAL_LIMIT_MPH, "facility approach")
+                )
+                zones.append(
+                    Zone(access_start, total, FACILITY_ACCESS_LIMIT_MPH, "facility access road")
+                )
+            else:
+                zones.append(Zone(0.0, total, FACILITY_ACCESS_LIMIT_MPH, "facility access road"))
+            zones.append(Zone(gate_start, total, FACILITY_GATE_LIMIT_MPH, "facility gate"))
+            return zones
         approach_start = max(0.0, total - DESTINATION_APPROACH_ZONE_MI)
         return [
             Zone(approach_start, total, DESTINATION_APPROACH_LIMIT_MPH, "destination approach"),
@@ -1131,7 +1184,25 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         ]
 
     def _is_facility_approach_route(self) -> bool:
-        return len(self.route.cities) >= 2 and self.route.cities[0] == self.route.cities[-1]
+        """A street chain to a gate, never a same-city highway dispatch.
+
+        Endpoints alone lied: a yard-to-cross-dock job inside one city
+        rides the interstate loop and still starts and ends at the same
+        city key -- which blanketed 17 miles of I-80 in the 25 mph
+        facility-access zone and silenced its curve and limit warnings
+        (owner, 2026-07-24, Fernley). A real approach chain is BUILT
+        from streets (baked local speeds or cues) or is gate-shot short.
+        """
+        if len(self.route.cities) < 2 or self.route.cities[0] != self.route.cities[-1]:
+            return False
+        if any(leg.local_speed_mph > 0 or leg.local_cue for leg in self.route.legs):
+            return True
+        # The synthetic single-leg approach carries no baked route geometry;
+        # a real same-city HIGHWAY dispatch always does (route_points come
+        # from the corridor bake). That geometry, not mileage, is what
+        # separates a 6-mile synthetic dock approach from a 17-mile I-80
+        # loop job.
+        return all(len(leg.route_points) < 2 for leg in self.route.legs)
 
     def _patrol_intensity_at(self, mile: float) -> float:
         leg_i, _ = self._leg_at_mile(mile)
@@ -1954,7 +2025,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 if current - limit < LIMIT_DROP_WARN_MIN_DELTA_MPH:
                     return None
                 boundary = mi
-                probe = prev
+                # Anchor the fine probe to ABSOLUTE hundredth-mile marks, not
+                # to wherever this tick's position landed: a position-anchored
+                # grid shifted every frame, the boundary rounded to a
+                # different hundredth, and the dedup key changed -- the same
+                # drop warned twice 16 ms apart (owner log, 2026-07-23).
+                probe = math.floor(prev * 100.0) / 100.0
                 while probe < mi:
                     probe += 0.01
                     if self._corridor_limit_at(probe) != current:

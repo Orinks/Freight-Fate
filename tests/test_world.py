@@ -730,3 +730,18 @@ def test_original_map_is_preserved_for_old_saves(world):
         assert world.route_from_cities([a, b]) is not None, (
             f"old direct leg {a}-{b} no longer resolves"
         )
+
+
+def test_synthetic_facility_approaches_stay_within_the_local_band(world):
+    """Josh's ruling 2026-07-24: local deadheads run 1 to 9 miles. 776 baked
+    approach records carried up to 35 miles because the facility's geocoded
+    pin landed counties away (his Kenosha straight-line deadhead); the
+    synthetic single-leg route is clamped until the placement audit
+    re-geocodes them. Real multi-leg street chains are never clamped."""
+    for city_key, name in (
+        ("madison_wi_us", "Madison Cold Storage"),
+        ("kenosha_wi_us", "Kenosha Cold Storage"),
+        ("yakima_wa_us", "Washington Fruit & Produce"),
+    ):
+        route = world.facility_approach_route(city_key, name)
+        assert 1.0 <= route.miles <= 9.0, f"{city_key}/{name}: {route.miles}"

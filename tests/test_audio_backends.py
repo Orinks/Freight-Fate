@@ -175,8 +175,11 @@ def test_sound_lookup_prefers_ogg_when_available():
     assert _asset_path("vehicle/road", ("ogg", "wav")).name == "road.ogg"
 
 
-def test_engine_recordings_prefer_ogg_over_generated_wav():
-    assert _asset_path("engine/idle", ("ogg", "wav")).name == "idle.ogg"
+def test_engine_recordings_resolve_for_the_ring_and_one_shots():
+    # Looping beds may resolve to WAV (lossy edges break loop seams --
+    # tools/fix_loop_seams.py); the licensed overlay's file wins where
+    # present. One-shots stay ogg.
+    assert _asset_path("engine/idle", ("ogg", "wav")).name in {"idle.ogg", "idle.wav"}
     assert _asset_path("engine/start", ("ogg", "wav")).name == "start.ogg"
     assert _asset_path("engine/shutdown", ("ogg", "wav")).name == "shutdown.ogg"
 
@@ -298,6 +301,47 @@ def test_bass_radio_stream_uses_url_stream(monkeypatch):
     assert backend._music_stream.played
     assert backend._music_stream.volume == 0.0
     assert slides[-1][-1] == 321
+
+
+def test_bass_radio_stream_recreates_a_stalled_stream(monkeypatch):
+    # Re-tuning the SAME url must rebuild a dead connection (the dock bed or
+    # a network stall killed it); only a live stream is allowed to dedupe.
+    class FakeStream:
+        def __init__(self, playing):
+            self.handle = 1
+            self.is_playing = playing
+            self.volume = None
+
+        def set_volume(self, volume):
+            self.volume = volume
+
+        def play(self):
+            self.is_playing = True
+
+    backend = audio._BassBackend.__new__(audio._BassBackend)
+    backend.master_volume = 1.0
+    backend.music_volume = 0.5
+    backend._BassError = Exception
+    backend._ATTRIB_VOL = 0
+    backend._slide = object()
+    backend._bass_call = lambda *args: None
+    backend._fade_out = lambda stream, fade_ms: None
+    backend._music_stream = FakeStream(playing=False)
+    backend._music_track = "https://example.test/live.mp3"
+
+    opened = []
+
+    def fake_url_stream(url):
+        opened.append(url)
+        return FakeStream(playing=True)
+
+    monkeypatch.setattr(backend, "_url_stream", fake_url_stream)
+
+    backend.play_radio_stream("https://example.test/live.mp3", fade_ms=100)
+    assert opened == ["https://example.test/live.mp3"]
+
+    backend.play_radio_stream("https://example.test/live.mp3", fade_ms=100)
+    assert opened == ["https://example.test/live.mp3"]
 
 
 def test_bass_engine_model_matches_available_cuts(monkeypatch):

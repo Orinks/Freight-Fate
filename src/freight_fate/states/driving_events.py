@@ -366,8 +366,6 @@ class DrivingEventMixin:
         p = self.ctx.profile
         fine = hos.HOS_FINES[min(self.hos_fine_count, len(hos.HOS_FINES) - 1)]
         self.hos_fine_count += 1
-        p.money -= fine  # can go negative; never a game over
-        p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT)
         evidence = list(event.data.get("evidence", ()))
         if not evidence:
             evidence = ["HOS/ELD violation"]
@@ -378,18 +376,38 @@ class DrivingEventMixin:
             self.ctx.settings.hos_mode not in hos.HOS_NON_ENFORCED_MODES
             and self.hos.in_violation(self.ctx.settings.hos_mode)
         )
+        if serious_hos:
+            # A serious violation is a REAL roadside stop: lights, signal,
+            # brake to the shoulder, and the 10-hour out-of-service order
+            # passes while the truck is actually stopped. The old instant
+            # ledger hit teleported the clock ten hours mid-drive with the
+            # wheels still rolling -- the owner heard "you are stopped"
+            # while cruising, then found 3 AM had become 1:57 PM between
+            # two spoken lines (log, 2026-07-24). Fine and reputation are
+            # applied by the stop itself, not here.
+            self._begin_enforcement_pull_over(
+                kind="hos_out_of_service",
+                title="Log check",
+                summary=(
+                    f"{event.message} Evidence: {evidence_text}. The officer "
+                    "writes the order: out of service, ten hours, right here."
+                ),
+                fine=fine,
+                reputation_hit=hos.HOS_REPUTATION_HIT,
+                return_message=("Back on the highway with a reset clock. Keep the logbook clean."),
+                lights_message=(
+                    "Lights and siren behind you for a log check. Signal "
+                    "with X and brake to a stop on the shoulder."
+                ),
+            )
+            _record_inspection(self.ctx, event=True)
+            return
+        p.money -= fine  # can go negative; never a game over
+        p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT)
         message = (
             f"{event.message} Evidence: {evidence_text}. "
             f"Fined {fine:,.0f} dollars, and your reputation took a hit."
         )
-        if serious_hos:
-            self.ctx.say_event(
-                message + " Out of service order: parked for 10 hours to reset your ELD clock.",
-                interrupt=True,
-            )
-            _record_inspection(self.ctx, event=True)
-            self._place_out_of_service()
-            return
         self.ctx.say_event(message, interrupt=True)
         _record_inspection(self.ctx, event=True)
 
@@ -1253,6 +1271,15 @@ class DrivingEventMixin:
         for threshold in thresholds:
             if gap_mi <= threshold * unit_mi and threshold not in self._ramp_gap_milestones_said:
                 self._ramp_gap_milestones_said.add(threshold)
+                if self._terse_speech():
+                    # One compact line with everything a driver needs
+                    # (owner spec 2026-07-23): distance, target, limit.
+                    self.ctx.say_event(
+                        f"{threshold} {unit_word} to stop bar, "
+                        f"speed limit {self._approach_limit_text()}.",
+                        interrupt=False,
+                    )
+                    return
                 self.ctx.say_event(f"{threshold} {unit_word} to the bar.", interrupt=False)
                 return
 
@@ -1298,11 +1325,17 @@ class DrivingEventMixin:
         if self._ramp_control == "stop":
             if gap_mi <= 0:
                 return "At the stop bar. Stop sign; brake to a full stop."
-            return f"Stop sign, about {self._short_distance_text(gap_mi)} to the stop bar."
+            return (
+                f"Stop sign, about {self._short_distance_text(gap_mi)} to the "
+                f"stop bar, speed limit {self._approach_limit_text()}."
+            )
         phase = self._ramp_light_phase()
         if gap_mi <= 0:
             return f"At the stop bar. The light is {phase}."
-        return f"Light {phase}, about {self._short_distance_text(gap_mi)} to the stop bar."
+        return (
+            f"Light {phase}, about {self._short_distance_text(gap_mi)} to the "
+            f"stop bar, speed limit {self._approach_limit_text()}."
+        )
 
     def _short_distance_text(self, miles: float) -> str:
         """A short gap in round spoken units: feet or meters, never decimals."""
@@ -1312,9 +1345,33 @@ class DrivingEventMixin:
         meters = max(20, int(round(miles * 1609.344 / 20.0)) * 20)
         return f"{meters} meters"
 
+    def _approach_limit_text(self) -> str:
+        """The enforced limit AT THE STOP BAR, spoken.
+
+        The terminal callouts named the control but never the limit the
+        approach is driven at (owner report 2026-07-23). First cut read
+        the limit at the truck's position -- which mid-ramp still said 55,
+        the highway's number, useless for a light a quarter mile ahead
+        (owner's log, same night). The honest number is the zone at the
+        bar itself: the street being entered.
+        """
+        bar_mi = self.trip.position_mi
+        if self._ramp_mi is not None:
+            bar_mi += max(0.0, self._ramp_mi - RAMP_ACCESS_MI)
+        # Probe just PAST the bar, not at it: the entered road's zone (the
+        # facility access 25, the street's 35) begins on the far side, so a
+        # probe at the bar itself still read the corridor's 55 -- the owner
+        # was told "speed limit 55 on the approach" at a stop sign whose far
+        # side was a 25 access road (log, 2026-07-23, Merced).
+        bar_mi += 0.05
+        bar_mi = min(bar_mi, max(0.0, self.trip.total_miles - 0.01))
+        limit, _ = self.trip.speed_limit_at(bar_mi)
+        return self.ctx.settings.speed_text(limit)
+
     def _announce_ramp_terminal(self) -> None:
         """Mid-ramp callout naming the control at the terminal."""
         self._ramp_light_announced = True
+        limit_text = self._approach_limit_text()
         if self._ramp_control == "signal":
             phase = self._ramp_light_phase()
             self._ramp_light_last_phase = phase
@@ -1322,6 +1379,11 @@ class DrivingEventMixin:
                 "events/ramp_light_red" if phase == "red" else "events/ramp_light_green",
                 volume=0.8,
             )
+            if self._terse_speech():
+                self.ctx.say_event(
+                    f"Light at ramp end, {phase}. Limit {limit_text}.", interrupt=False
+                )
+                return
             # "Brake to a stop" alone invites stopping right here, a quarter
             # mile short of the bar; the stop belongs at the light.
             if phase == "red":
@@ -1336,11 +1398,17 @@ class DrivingEventMixin:
                 )
             else:
                 message = "Traffic light at the end of the ramp, currently green."
-            self.ctx.say_event(message, interrupt=False)
+            self.ctx.say_event(
+                f"{message} Speed limit {limit_text} on the approach.", interrupt=False
+            )
         elif self._ramp_control == "stop":
             self.ctx.audio.play("ui/notify", volume=0.7)
+            if self._terse_speech():
+                self.ctx.say_event(f"Stop sign at ramp end. Limit {limit_text}.", interrupt=False)
+                return
             self.ctx.say_event(
-                "Stop sign at the end of the ramp. Brake to a full stop there.",
+                "Stop sign at the end of the ramp. Brake to a full stop there. "
+                f"Speed limit {limit_text} on the approach.",
                 interrupt=False,
             )
 
@@ -1527,6 +1595,22 @@ class DrivingEventMixin:
                 self._update_ramp_terminal()
             if self._ramp_mi > 0:
                 return
+            if (
+                self._ramp_stop.type == "delivery_destination"
+                and self._ramp_terminal_done
+                and self._begin_surface_chain()
+            ):
+                # The street chain is a DRIVING continuation: hand off at
+                # whatever legal speed the terminal let through. Gating the
+                # handoff on docking speed marooned a green-light roll past
+                # the end of the ramp -- the streets refused to start until
+                # the driver stopped dead in the road (owner playtest,
+                # 2026-07-24). The scripted dock-menu arrival below still
+                # rightly waits for a crawl.
+                self._ramp_mi = None
+                self._ramp_stop = None
+                self._ramp_control = ""
+                return
             if self.truck.speed_mph <= DOCKING_MAX_MPH:
                 stop = self._ramp_stop
                 self._ramp_mi = None
@@ -1569,6 +1653,18 @@ class DrivingEventMixin:
                 return
             if not self._ramp_end_said:
                 self._ramp_end_said = True
+                if (
+                    self._ramp_stop.type == "delivery_destination"
+                    and not self._surface_chain
+                    and self._surface_chain_route() is not None
+                ):
+                    # The facility has a street chain, so "you are at X" here
+                    # is a lie by two miles: the driver was told they had
+                    # arrived and then handed turn-by-turn streets (owner
+                    # log, 2026-07-23, Sacramento Dry Warehouse). The chain's
+                    # own "off the ramp and onto city streets" line follows
+                    # and says it right.
+                    return
                 place = (
                     self._ramp_stop.name
                     if self._ramp_stop.type == "delivery_destination"

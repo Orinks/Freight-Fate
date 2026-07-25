@@ -41,10 +41,12 @@ def _mask(data: bytes) -> bytes:
 def write_pack(sounds_dir: Path, output: Path, overlay_dir: Path | None = None) -> Path:
     """Pack every file under ``sounds_dir`` and return the pack path.
 
-    ``overlay_dir`` (the licensed-audio tree) is merged on top: where both
-    trees carry the same relative path, the overlay's file is packed. A build
-    made on a machine that owns the licensed libraries ships them; a clean
-    clone packs the synthesized fallbacks alone.
+    ``overlay_dir`` (the licensed-audio tree) is merged on top and wins by
+    sound KEY (path stem), not just exact path: the loader prefers ogg over
+    wav inside the pack, so a committed ``engine/mid.ogg`` fallback would
+    shadow a licensed ``engine/mid.wav`` if both shipped. A build made on a
+    machine that owns the licensed libraries ships them; a clean clone packs
+    the synthesized fallbacks alone.
     """
     entries = {
         path.relative_to(sounds_dir).as_posix(): path
@@ -52,11 +54,18 @@ def write_pack(sounds_dir: Path, output: Path, overlay_dir: Path | None = None) 
         if path.is_file()
     }
     if overlay_dir is not None and overlay_dir.is_dir():
-        entries.update(
-            (path.relative_to(overlay_dir).as_posix(), path)
+        overlay_entries = {
+            path.relative_to(overlay_dir).as_posix(): path
             for path in overlay_dir.rglob("*")
             if path.is_file()
-        )
+        }
+        overlay_stems = {name.rsplit(".", 1)[0] for name in overlay_entries}
+        entries = {
+            name: path
+            for name, path in entries.items()
+            if name.rsplit(".", 1)[0] not in overlay_stems
+        }
+        entries.update(overlay_entries)
     if not entries:
         raise ValueError(f"No sound assets to pack under {sounds_dir}")
     buffer = io.BytesIO()

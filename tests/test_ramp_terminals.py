@@ -775,3 +775,48 @@ def test_bar_ticks_speed_up_as_the_bar_closes():
         assert ticks_over(50) == 0
     finally:
         app.shutdown()
+
+
+def test_hairpin_approach_pins_the_clock_to_real_time():
+    """The pacenote lead is sized in real reaction-plus-braking seconds, but
+    compression spent them in a blink: "Hairpin right, a quarter mile" did
+    not finish speaking before the braking point (owner, 2026-07-24). Inside
+    a sharp bend's warning window the clock runs real, and it releases once
+    the curve is behind the truck."""
+    from types import SimpleNamespace
+
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.time_scale = 10.0
+        d.truck.velocity_mps = 55.0 / 2.2369362920544
+        assert d.trip.effective_time_scale > 8.0
+
+        mile = d.trip.position_mi
+        d.trip.curves = [
+            SimpleNamespace(
+                start_mi=mile + 0.3,
+                apex_mi=mile + 0.35,
+                end_mi=mile + 0.4,
+                direction="R",
+                advisory_mph=25,
+                min_radius_ft=120,
+                deflection_deg=150.0,
+                severity="hairpin",
+                connector=False,
+            )
+        ]
+        assert d.trip.effective_time_scale == 1.0
+
+        # Slow enough for the bend already: no pacenote, no decompression.
+        d.truck.velocity_mps = 20.0 / 2.2369362920544
+        assert d.trip.effective_time_scale > 1.0
+
+        # Curve behind the truck: full compression returns.
+        d.truck.velocity_mps = 55.0 / 2.2369362920544
+        d.trip.position_mi = mile + 0.5
+        assert d.trip.effective_time_scale > 8.0
+    finally:
+        app.shutdown()

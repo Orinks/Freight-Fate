@@ -17,6 +17,7 @@ from ..data.world import (
     Route,
     World,
 )
+from ..sim.hos import HosClock
 from ..sim.trip_models import (
     DESTINATION_APPROACH_LIMIT_MPH,
     DESTINATION_APPROACH_ZONE_MI,
@@ -189,6 +190,11 @@ class Job:
     # so the fallback properties below always read cleanly.
     origin_spoken: str = ""
     destination_spoken: str = ""
+    # The deadline was stretched to cover a 10-hour rest the driver's
+    # CURRENT shift clock will force mid-run (a fresh clock would not
+    # have needed one). Spoken so the long number reads as the law, not
+    # dispatcher generosity.
+    deadline_covers_rest: bool = False
 
     @property
     def spoken_origin(self) -> str:
@@ -224,9 +230,14 @@ class Job:
             f"{prefix}{self.weight_tons:.0f} tons of {self.cargo.label} "
             f"{origin} {dest}. {distance}. "
             f"{pay_label} {pay:,.0f} dollars. "
-            f"Deadline {self.deadline_game_h:.0f} hours. "
-            f"Equipment: {self.cargo.equipment_text}.{trailer}{preview}{market}"
-            f"{endorsement}"
+            f"Deadline {self.deadline_game_h:.0f} hours"
+            + (
+                ", planned around the 10-hour rest your hours will force. "
+                if self.deadline_covers_rest
+                else ". "
+            )
+            + f"Equipment: {self.cargo.equipment_text}.{trailer}{preview}{market}"
+            + f"{endorsement}"
         )
 
     def origin_facility_text(self) -> str:
@@ -322,6 +333,7 @@ def job_payload(job: Job) -> dict:
         "deadline_game_h": job.deadline_game_h,
         "market_mult": job.market_mult,
         "bobtail": job.bobtail,
+        "deadline_covers_rest": job.deadline_covers_rest,
     }
 
 
@@ -359,6 +371,7 @@ def job_from_payload(data: dict) -> Job:
         bobtail=bool(data.get("bobtail", False)),
         origin_spoken=str(data.get("origin_spoken", "")),
         destination_spoken=str(data.get("destination_spoken", "")),
+        deadline_covers_rest=bool(data.get("deadline_covers_rest", False)),
     )
 
 
@@ -529,6 +542,7 @@ def plan_hos(
     miles: float,
     route: Route | None = None,
     world: World | None = None,
+    clock: HosClock | None = None,
 ) -> HosPlan:
     """Estimate the FMCSA-compliant plan for a property-carrying trip.
 
@@ -540,29 +554,61 @@ def plan_hos(
     drive_h = (
         route_drive_hours(route, world=world) if route is not None else miles / DEADLINE_AVG_MPH
     )
-    return _plan_hos_for_drive_hours(drive_h, route)
+    if clock is None:
+        return _plan_hos_for_drive_hours(drive_h, route)
+    return _plan_hos_for_drive_hours(
+        drive_h,
+        route,
+        start_drive_h=clock.driving_min / 60.0,
+        start_window_h=clock.duty_min / 60.0,
+        start_since_break_h=clock.since_break_min / 60.0,
+    )
 
 
-def _plan_hos_for_drive_hours(drive_h: float, route: Route | None = None) -> HosPlan:
-    """Apply the HOS break/sleep model to already-estimated driving hours."""
+def _plan_hos_for_drive_hours(
+    drive_h: float,
+    route: Route | None = None,
+    *,
+    start_drive_h: float = 0.0,
+    start_window_h: float = 0.0,
+    start_since_break_h: float = 0.0,
+) -> HosPlan:
+    """Apply the HOS break/sleep model to already-estimated driving hours.
+
+    The ``start_*`` hours seed the first shift with the driver's CURRENT
+    clock, so a load accepted six hours into a shift plans its 10-hour
+    sleep where the law will actually force one. A fresh clock (all
+    zeros) reproduces the original fresh-driver plan exactly. The
+    14-hour window is tracked here too -- irrelevant for a fresh driver
+    (11 driving + a break fits easily) but decisive mid-shift.
+    """
 
     breaks = 0
     sleeps = 0
     remaining = drive_h
-    since_break = 0.0
-    drive_this_shift = 0.0
+    since_break = max(0.0, start_since_break_h)
+    drive_this_shift = max(0.0, start_drive_h)
+    window_this_shift = max(0.0, start_window_h)
     while remaining > 1e-6:
         if since_break >= 8.0:
             breaks += 1
             since_break = 0.0
-        if drive_this_shift >= 11.0:
+            window_this_shift += 0.5  # the 30-minute break burns window
+        if drive_this_shift >= 11.0 or window_this_shift >= 14.0:
             sleeps += 1
             drive_this_shift = 0.0
+            window_this_shift = 0.0
             since_break = 0.0
-        step = min(remaining, 8.0 - since_break, 11.0 - drive_this_shift)
+        step = min(
+            remaining,
+            8.0 - since_break,
+            11.0 - drive_this_shift,
+            14.0 - window_this_shift,
+        )
         remaining -= step
         since_break += step
         drive_this_shift += step
+        window_this_shift += step
     break_stops = sleep_stops = 0
     if route is not None:
         for stop in route.accessible_stop_details():
@@ -576,11 +622,13 @@ def required_hours(
     miles: float,
     route: Route | None = None,
     world: World | None = None,
+    clock: HosClock | None = None,
 ) -> float:
     """Honest hours for the run: driving at an achievable average, plus the
     30-minute break every 8 driving hours and a 10-hour sleep for every
-    11-hour shift the distance demands. Dispatch cannot ask for less."""
-    return plan_hos(miles, route, world).total_h
+    11-hour shift the distance demands -- planned from the driver's CURRENT
+    shift clock when one is given. Dispatch cannot ask for less."""
+    return plan_hos(miles, route, world, clock).total_h
 
 
 def route_required_hours(
@@ -600,10 +648,16 @@ def dispatch_deadline_hours(
     slack: float,
     route: Route | None = None,
     world: World | None = None,
+    clock: HosClock | None = None,
 ) -> float:
-    """Deadline from the current route-aware timing model plus dispatch slack."""
+    """Deadline from the current route-aware timing model plus dispatch slack.
 
-    return required_hours(miles, route, world) * slack + DEADLINE_DISPATCH_MIN_SLACK_H
+    ``clock`` is the driver's live shift ledger: a load that will need a
+    10-hour sleep because of hours ALREADY burned gets that sleep in its
+    deadline, instead of a fresh-driver promise nobody could legally keep
+    (owner catch, 2026-07-24)."""
+
+    return required_hours(miles, route, world, clock) * slack + DEADLINE_DISPATCH_MIN_SLACK_H
 
 
 def fair_active_deadline(
@@ -756,8 +810,11 @@ class JobBoard:
     old saves while enrichment coverage expands.
     """
 
-    def __init__(self, world: World, seed: int | None = None) -> None:
+    def __init__(self, world: World, seed: int | None = None, hos: HosClock | None = None) -> None:
         self.world = world
+        # The driver's live shift clock: deadlines plan around the hours
+        # already burned, the way a real dispatcher asks what you have left.
+        self.hos = hos
         self._rng = random.Random(seed)
 
     @staticmethod
@@ -1102,8 +1159,15 @@ class JobBoard:
         route = self.world.supported_route(origin, destination)
         slack = self._rng.uniform(*DEADLINE_DISPATCH_SLACK_RANGE)
         deadline = (
-            dispatch_deadline_hours(miles, slack, route, self.world)
+            dispatch_deadline_hours(miles, slack, route, self.world, self.hos)
             * start_option(carrier_key).dispatch.deadline_slack
+        )
+        # Speak the stretch when the driver's current clock forces a sleep a
+        # fresh clock would not have needed -- the long number is the law.
+        covers_rest = (
+            self.hos is not None
+            and plan_hos(miles, route, self.world, self.hos).sleeps
+            > plan_hos(miles, route, self.world).sleeps
         )
         return Job(
             cargo,
@@ -1122,6 +1186,7 @@ class JobBoard:
             destination_facility_id=destination_facility.id,
             origin_locality=origin_facility.locality,
             destination_locality=destination_facility.locality,
+            deadline_covers_rest=covers_rest,
             origin_spoken=self.world.spoken_city(origin, qualified=True),
             destination_spoken=self.world.spoken_city(destination, qualified=True),
         )

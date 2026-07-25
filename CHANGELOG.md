@@ -4,6 +4,28 @@
 
 ### Added
 
+- **Setting the parking brake at speed now dynamites the brakes.** The
+  valve works at any speed, just like a real truck -- it is the
+  emergency backup -- but pulling it while rolling slams the spring
+  brakes on, screeches the tires, grinds flat spots into your tread
+  scaled by how fast you were going, and tells you plainly to save it
+  for emergencies. Setting it at a stop is as calm as ever.
+
+- **New hires can review the rest of the day's board.** Below level 8,
+  dispatch still assigns your load -- but a new board option, "Review
+  the rest of today's board", reads out the other postings dispatch put
+  up, so you can hear the pool widen as you level even before load
+  choice unlocks. It speaks only when you ask.
+
+- **FM radio now behaves like FM radio.** Height is range: climb a grade
+  and distant stations reach you from far beyond their normal coverage --
+  crest the Mogollon Rim and Phoenix comes in clear. At the edge of coverage
+  the station does not just get quieter: a smooth receiver hiss creeps
+  in underneath, and at highway speed the signal flickers in quick,
+  sharp splashes of noise -- the picket-fencing every driver has heard
+  on a fading FM station. The flutter follows your actual speed and the
+  station's dial position, slows as you slow, and settles when you park.
+
 - **The truck now sounds like a real truck.** The engine voice is built
   from a real cab recording and follows the rpm through its range --
   idle, pulling away, cruising, working up high -- instead of one loop
@@ -85,6 +107,25 @@
   instead of an empty band. A couple of stations whose streams had gone
   quiet are back on the air as well.
 
+- **The dial now fills out like a real city.** With streamer-safe mode
+  off, the in-cab radio no longer catches just one station per town -- it
+  picks up the whole non-commercial band a market really has: the public
+  news station and its separate classical or jazz sister, the community
+  and college stations, and the digital sub-channels that ride alongside
+  them, including the ones carrying BBC World Service. Hundreds of real
+  stations were added and checked one by one, so from Atlanta to Amarillo
+  to the Montana Hi-Line you can tune across a dial that sounds like the
+  place you are actually driving through. A few stations whose streams had
+  gone quiet are back on the air as well.
+
+- **Reading services for blind listeners are on the dial.** Radio reading
+  services -- the stations that read newspapers, magazines, and books
+  aloud for blind and print-disabled listeners -- now appear as real
+  stations in the cities that have them, from Memphis and New Orleans to
+  Phoenix, Chicago, Houston, Atlanta, Nashville, Des Moines, Columbus,
+  and Gainesville, and more. Wherever one is in range, it is right there
+  on the band with everything else.
+
 - **The engine brake grew its real cylinder selector.** J is now the
   dash switch: it turns the engine brake on at whatever stage you last
   selected, and while it is on, 1, 2, and 3 pick two, four, or six
@@ -107,9 +148,18 @@
 
 - **The radio dial now jumps by category.** Control with a bracket key
   leaps to the previous or next section of the dial -- route playlist,
-  Freight Fate stations, your playlists, terrestrial, AFN, satellite --
-  and announces where you landed. No more tuning through twenty-five
-  AFN stations one by one to reach the local dial.
+  Freight Fate stations, your playlists, terrestrial, AFN, satellite,
+  international -- and announces where you landed. No more tuning through
+  twenty-five AFN stations one by one to reach the local dial.
+
+- **International public broadcasters are always on the dial.** With
+  streamer-safe mode off, a new International section carries English-
+  language public radio you can catch anywhere, the way AFN already
+  works -- ABC from Australia (triple j, Jazz, Classic, and Double J),
+  RTÉ from Ireland (Radio 1, 2FM, and lyric fm), RNZ from New Zealand
+  (National and Concert), RFI English from France, and CBC Radio One and
+  CBC Music from Canada. Music, news, and classical all in the mix, so
+  there is always something to tune to no matter where a load leaves you.
 
 - **The road now names the towns that change your speed limit.** When a
   limit is about to drop for a small town, you hear the town first --
@@ -318,6 +368,12 @@
   freight weighs.
 
 ### Changed
+
+- **Gear changes are quicker, like a modern automated box.** Power
+  upshifts now take a quarter second in the low gears and half a second
+  at the top, instead of dragging toward a full second. Downshifts keep
+  their deliberate rev-matched pace -- that slower beat is real, and it
+  is also what keeps the engine brake steady on a slick descent.
 
 - **The game is about a third smaller to download.** The music now uses a
   newer, more efficient audio format, cutting the download from roughly 282
@@ -752,6 +808,145 @@
   so short hops were always the best money. Short jobs still pay a premium
   per mile, the way real freight does, but it now eases down smoothly as the
   distance grows. Pay for medium and long routes is essentially unchanged.
+
+- **Long local approaches step down like real streets.** A facility
+  approach longer than a couple of miles now runs 45 on the wide-out
+  stretch, drops to 25 for the last two miles, and 15 at the gate --
+  instead of a blanket 25 crawl from the moment you left the yard.
+  Short approaches and the gate zone are unchanged.
+
+- **No more 35-mile deadheads to a local pickup.** Some facilities'
+  map pins landed counties away from their city, and the local
+  deadhead drive to them stretched to thirty-plus straight-line miles.
+  Local approaches now stay between about two and nine miles -- the
+  range a real cross-town deadhead runs -- while the misplaced pins
+  get properly re-mapped.
+
+- **A same-city dispatch no longer zones the whole interstate at 25.**
+  A job from one facility to another inside the same city -- yard to
+  cross-dock around the interstate loop -- was mistaken for a facility
+  street approach, blanketing the entire highway run in the 25 mile per
+  hour access-road zone and silencing its curve and limit warnings.
+  Real street chains keep their street speeds; highway miles keep
+  highway rules.
+
+- **Automatic shifts sound like a real gear change now: clunk, sigh,
+  clunk.** During a shift the engine used to hang frozen at its old
+  revs through the whole interruption, then leap to the new pitch all
+  at once -- and the moment the gear actually took was silent. Now the
+  revs audibly fall away toward the next gear while the box is between
+  gears, exactly like a real automated manual, and the gear taking hold
+  gets its own soft clunk as the engine picks the load back up.
+
+- **The engine stopped ticking and the jake stopped breathing.** A faint
+  click repeated in the engine sound at cruise -- speeding up and slowing
+  down with the revs -- and the jake brake's growl carried a little dip
+  that pulsed on every cycle. Both came from the seams where those sounds
+  loop, and both seams are now clean: no tick in the cruise, no pulse in
+  the growl.
+
+- **Curve warnings now come with time to act on them.** At compressed
+  time pacing, "Curve right, half a mile" could go from spoken to "too
+  fast" in three real seconds. Any bend the game warns you about now
+  plays out in real time from the moment its warning window opens until
+  the curve is behind you -- the same rule controlled ramp endings
+  already follow -- so the callout, your reaction, and the braking all
+  get real seconds at any time compression.
+
+- **A sleep that does not reset your hours says so, first and loudly.**
+  Waking from a sleeper-berth rest with the split still pending now
+  leads with the consequence: "This sleep did NOT reset your hours.
+  Your duty window closes in 4.2 hours, at 6:05 AM" -- before anything
+  else. The 60- and 30-minute window warnings also speak again after
+  such a sleep instead of staying silent because they had already fired
+  earlier in the shift. And the roadside out-of-service stop now
+  explains itself completely: which limit you blew, in plain words, and
+  that the delivery deadline kept counting while you sat.
+
+- **A serious log-check violation now pulls you over for real.** Getting
+  caught over your hours used to play a tone, claim you were stopped,
+  and silently jump the clock ten hours while you kept driving. Now it
+  is a real roadside stop: lights and siren behind you, signal and
+  brake to the shoulder, the officer writes the out-of-service order,
+  and the ten hours pass while the truck is actually parked.
+
+- **Dispatch deadlines now respect the hours already on your clock.**
+  Accepting a load six hours into your shift used to get a deadline
+  planned for a fresh driver -- impossible to make once the law forced
+  your 10-hour rest mid-run. The deadline now plans around your actual
+  remaining driving hours and duty window, and when it stretches to
+  cover a rest, the offer says so: "planned around the 10-hour rest
+  your hours will force."
+
+- **Rolling a green light at the ramp end takes you straight onto the
+  streets.** Crossing the terminal legally on a green used to leave you
+  marooned past the end of the ramp -- the city streets refused to
+  start until you came to a dead stop in the middle of the road. The
+  street chain now begins at whatever legal speed the light let
+  through; only the dock itself still wants you at a crawl.
+
+- **The radio finds its station again after a stop.** A live station
+  used to go silent after a dock or terminal visit and stay that way --
+  all you got was a mysterious burst of static every few seconds, and
+  the only cure was tuning away and back. Now the radio reconnects the
+  stream by itself within a moment of rolling out, tells you if the
+  station really cannot be reached, and never plays fringe static over
+  a station you cannot hear.
+
+- **Fringe static finally sounds like FM.** The old crackle was really
+  an AM lightning-storm sound; an FM set between stations plays a
+  smooth frying hiss instead. The static you hear at the edge of a
+  station's range is now that hiss, shaped the way a real receiver
+  shapes it.
+
+- **Speed-limit drop warnings no longer double up.** The advance warning
+  before a big posted-limit drop could speak twice back to back. It
+  speaks once now.
+
+- **The game no longer says you have arrived while handing you two miles
+  of streets.** Coming off the destination exit at a facility with a
+  street approach, the end of the ramp announced "You are at [the
+  facility], come to a complete stop" -- and then the turn-by-turn
+  street directions began. When streets follow the ramp, the arrival
+  announcement now waits for the actual gate; the "off the ramp and
+  onto city streets" callout owns that moment instead.
+
+- **No more "corridor between" announcements pretending to be towns.**
+  Two hundred forty-six legs carried a leftover data placeholder named
+  like "CA-99 corridor between Sacramento and Yuba City", and the place
+  callouts and route report spoke them as if they were real places. The
+  placeholders are gone from the map data, and the routing rule that
+  forced them to exist is fixed so every affected road stays dispatchable.
+
+- **The gear change comes at the top of the rev, not a second after.**
+  Above the launch gears, the transmission used to rev to its shift
+  point and then sit at the crest waiting out an internal timer before
+  taking the gear -- you heard the engine top out, then a long beat,
+  then the shift. Now the revs earn the shift: the moment the engine
+  crests the threshold on a hard pull, the gear comes. The deliberate
+  launch cadence through the low gears is unchanged.
+
+- **Ramp-end callouts now tell you the approach speed limit -- the one
+  at the bar.** The stop sign and traffic light announcements named the
+  control but never how fast you were allowed to approach it. Every
+  callout that names the bar now carries the limit of the street you
+  are entering -- "Light red, about 800 feet to the stop bar, speed
+  limit 25" -- including the repeating status line, and on the lowest
+  speech verbosity the countdown compresses to one line with everything
+  a driver needs.
+
+- **Manual shifting answers the moment the clutch comes out.** Shifting by
+  hand used to leave the truck coasting for up to a second after you
+  released the clutch, because the automatic gearbox's internal shift
+  delay was charged on top of your own clutch work. Your clutch is the
+  interruption now: the box only takes its quarter-second through
+  neutral, so a clean shift pulls again as soon as you let the pedal out.
+
+- **Period walks the speech history forward.** Comma has always stepped
+  back through recent speech; now Period steps forward again toward the
+  newest line, the same comma-and-period pairing screen-reader players
+  know from Civilization VI. Pressed on its own, Period simply re-reads
+  the newest line.
 
 - **The updater no longer hides a developer snapshot released the same
   day as a stable build.** On the developer snapshots channel, a stable

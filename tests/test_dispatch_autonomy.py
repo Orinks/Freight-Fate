@@ -365,3 +365,37 @@ def test_assigned_board_help_describes_accept_and_decline(monkeypatch):
         assert "Each entry is one dispatch" in JobBoardState.intro_help
     finally:
         app.shutdown()
+
+
+def test_assignment_board_offers_a_review_of_the_locked_pool(monkeypatch):
+    """The pool widens with every level, and growth the driver cannot hear is
+    not a reward yet (owner design, 2026-07-24): an on-demand board review
+    speaks the other postings as flavor, never automatically."""
+    from freight_fate.app import App
+    from freight_fate.states.city import JobBoardState
+
+    spoken: list[str] = []
+    app = App()
+    try:
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        app.ctx.profile = _new_hire()
+        app.ctx.profile.career.deliveries = 12
+
+        app.push_state(JobBoardState(app.ctx, [_job(miles=180.0), _job(miles=70.0)]))
+        board = app.state
+        assert board.assigned_mode
+        review = next(
+            item for item in board.items if item.text == "Review the rest of today's board"
+        )
+        review.action()
+        assert spoken[-1].startswith("Dispatch also posted today:")
+        assert "180 miles" in spoken[-1]
+        assert f"level {SENIOR_LOAD_CHOICE_LEVEL}" in spoken[-1]
+
+        # A one-job day has nothing to review: the option stays off the menu.
+        app.ctx.pop_state()
+        app.push_state(JobBoardState(app.ctx, [_job(miles=70.0)]))
+        labels = [item.text for item in app.state.items]
+        assert "Review the rest of today's board" not in labels
+    finally:
+        app.shutdown()

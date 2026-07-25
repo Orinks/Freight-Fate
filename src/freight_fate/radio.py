@@ -50,6 +50,13 @@ class RadioStation:
     playlist: str = ""  # music.STATION_PLAYLISTS pool for built-in rotation
     host: str = ""  # music.STATION_HOST_SEGMENTS voice between songs
     notes: str = ""
+    # FM physics fields. frequency_mhz drives the picket-fence flutter rate
+    # (2v/lambda); 0.0 means unknown and the mid-band default applies --
+    # wavelength varies only ~10 percent across 88-108, so a default is
+    # honest. site_elev_ft is the tower site's ground elevation; None skips
+    # the elevation term of the range model entirely.
+    frequency_mhz: float = 0.0
+    site_elev_ft: float | None = None
     # Personal playlist stations only: the resolved media file paths from the
     # player's M3U file, in playlist order.
     playlist_files: tuple[str, ...] = ()
@@ -144,6 +151,8 @@ def _station_from_dict(row: dict) -> RadioStation:
         playlist=str(row.get("playlist", "")),
         host=str(row.get("host", "")),
         notes=str(row.get("notes", "")),
+        frequency_mhz=float(row.get("frequency_mhz", 0.0)),
+        site_elev_ft=_optional_float(row.get("site_elev_ft")),
     )
 
 
@@ -247,14 +256,16 @@ def _dial_group(station: RadioStation) -> int:
     if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
         return 2
     if station.fallback:
-        return 6
+        return 7
     if station.source_type in {"local", "regional"}:
         return 3
     if station.source_type == "afn":
         return 4
     if station.source_type == "satellite":
         return 5
-    return 7
+    if station.source_type == "international":
+        return 6
+    return 8
 
 
 DIAL_CATEGORY_NAMES = {
@@ -264,8 +275,9 @@ DIAL_CATEGORY_NAMES = {
     3: "Terrestrial",
     4: "AFN",
     5: "Satellite",
-    6: "Fallback",
-    7: "Other stations",
+    6: "International",
+    7: "Fallback",
+    8: "Other stations",
 }
 
 
@@ -283,9 +295,30 @@ def station_distance_miles(
     return EARTH_RADIUS_MI * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
+# FM is line-of-sight, and height is range: the 4/3-earth radio horizon is
+# d_miles ~ 1.23 * sqrt(height_ft). Standing above a station's tower site
+# extends its contour by that term -- the owner's ham anchor: from the
+# Mogollon Rim (~7000 ft) both Phoenix (~1100 ft) and Flagstaff come in
+# clearly at distances a flat radius refuses. Sitting BELOW the site is
+# NEUTRAL, never a penalty: a mountain-top transmitter looks straight down
+# into its valley (that height is why they put it there), and the published
+# range already assumes ordinary low receivers. True canyon shadowing needs
+# a path profile we do not carry -- roadmap follow-up, not a proxy that
+# would punish every in-market listener under a mountain site.
+RADIO_HORIZON_MI_PER_SQRT_FT = 1.23
+
+
+def effective_range_miles(station: RadioStation, elevation_ft: float | None) -> float:
+    if elevation_ft is None or station.site_elev_ft is None or station.range_miles <= 0:
+        return station.range_miles
+    lift = max(0.0, elevation_ft - station.site_elev_ft)
+    return station.range_miles + RADIO_HORIZON_MI_PER_SQRT_FT * math.sqrt(lift)
+
+
 def estimate_signal(
     station: RadioStation,
     position: tuple[float, float] | None,
+    elevation_ft: float | None = None,
 ) -> RadioReception:
     if station.always_available:
         return RadioReception(station, None, 1.0, "always available")
@@ -294,18 +327,25 @@ def estimate_signal(
     distance = station_distance_miles(station, position)
     if distance is None:
         return RadioReception(station, None, 0.0, "no truck position")
-    if distance > station.range_miles:
+    range_miles = effective_range_miles(station, elevation_ft)
+    if distance > range_miles:
         return RadioReception(station, distance, 0.0, "out of range")
     # Signal is intentionally simple and monotonic. Future FCC contours can
     # replace range_miles without changing the state/menu layer.
-    signal = max(0.05, 1.0 - (distance / station.range_miles) ** 1.4)
+    signal = max(0.05, 1.0 - (distance / range_miles) ** 1.4)
     return RadioReception(station, distance, signal, "in range")
 
 
-# Below this signal the audio starts to thin out; the floor keeps a fringe
-# station audible enough to be worth chasing toward its city.
+# Below this signal the audio starts to thin out. Entering the fringe the
+# program holds a listenable level (worth chasing toward its city); past the
+# static threshold it keeps sinking toward the deep floor while the noise
+# rises to take its place -- the owner's ruling (2026-07-24): the two smear
+# together, static going TO program level, never bombarding on top of a
+# still-loud program. The deep floor keeps a trace of program in the noise
+# while the station is technically in range.
 SIGNAL_FULL_VOLUME = 0.6
 SIGNAL_FRINGE_FLOOR = 0.3
+SIGNAL_DEEP_FLOOR = 0.08
 STATIC_SIGNAL_THRESHOLD = 0.35
 
 
@@ -313,8 +353,9 @@ def signal_volume_factor(reception: RadioReception) -> float:
     """How much of the radio volume the current signal supports.
 
     Satellite/built-in sources always play at full volume. Ranged stations
-    hold full volume through most of their contour, then fade toward a fringe
-    floor as the truck drives away, and go silent past the range edge.
+    hold full volume through most of their contour, fade toward the fringe
+    floor as the truck drives away, keep sinking under the rising static in
+    the deep fringe, and go silent past the range edge.
     """
     station = reception.station
     if reception.fallback or station.always_available or station.range_miles <= 0:
@@ -324,7 +365,12 @@ def signal_volume_factor(reception: RadioReception) -> float:
         return 0.0
     if signal >= SIGNAL_FULL_VOLUME:
         return 1.0
-    return SIGNAL_FRINGE_FLOOR + (1.0 - SIGNAL_FRINGE_FLOOR) * (signal / SIGNAL_FULL_VOLUME)
+    if signal >= STATIC_SIGNAL_THRESHOLD:
+        return SIGNAL_FRINGE_FLOOR + (1.0 - SIGNAL_FRINGE_FLOOR) * (signal / SIGNAL_FULL_VOLUME)
+    edge = SIGNAL_FRINGE_FLOOR + (1.0 - SIGNAL_FRINGE_FLOOR) * (
+        STATIC_SIGNAL_THRESHOLD / SIGNAL_FULL_VOLUME
+    )
+    return max(SIGNAL_DEEP_FLOOR, edge * (signal / STATIC_SIGNAL_THRESHOLD) ** 0.8)
 
 
 def truck_position(route, position_mi: float, world) -> tuple[float, float] | None:
@@ -339,6 +385,39 @@ def truck_position(route, position_mi: float, world) -> tuple[float, float] | No
             return _leg_position(route, leg, i, local, world)
         remaining -= leg_miles
     return None
+
+
+def truck_elevation_ft(route, position_mi: float) -> float | None:
+    """Current ground elevation from the leg's elevation samples, if any."""
+    if route is None or not getattr(route, "legs", None):
+        return None
+    remaining = max(0.0, float(position_mi))
+    for i, leg in enumerate(route.legs):
+        leg_miles = max(0.0, float(getattr(leg, "miles", 0.0)))
+        if remaining <= leg_miles or i == len(route.legs) - 1:
+            local = min(leg_miles, remaining)
+            return _leg_elevation(route, leg, i, local)
+        remaining -= leg_miles
+    return None
+
+
+def _leg_elevation(route, leg, index: int, local_mi: float) -> float | None:
+    samples = tuple(getattr(leg, "elevation_samples", ()) or ())
+    if not samples:
+        return None
+    total = max(0.01, float(getattr(leg, "miles", 0.0)))
+    forward = route.cities[index] == leg.a
+    # Sample mileposts are leg-local in the a->b direction; a reversed
+    # traversal reads the profile from the far end, same as route points.
+    at = local_mi if forward else total - local_mi
+    if len(samples) == 1 or at <= samples[0].at_mi:
+        return samples[0].elevation_ft
+    for prev, cur in zip(samples, samples[1:], strict=False):
+        if at <= cur.at_mi:
+            span = max(0.01, cur.at_mi - prev.at_mi)
+            t = max(0.0, min(1.0, (at - prev.at_mi) / span))
+            return prev.elevation_ft + (cur.elevation_ft - prev.elevation_ft) * t
+    return samples[-1].elevation_ft
 
 
 def _leg_position(route, leg, index: int, local_mi: float, world) -> tuple[float, float] | None:
@@ -392,6 +471,7 @@ class RadioState:
         self.real_streams_enabled = real_streams_enabled
         self.streamer_safe = streamer_safe
         self.position = position
+        self.elevation_ft: float | None = None
 
     @classmethod
     def from_settings(cls, settings) -> RadioState:
@@ -415,12 +495,15 @@ class RadioState:
         settings.radio_enabled = self.enabled
         settings.radio_station_id = self.station_id
 
-    def update_position(self, position: tuple[float, float] | None) -> None:
+    def update_position(
+        self, position: tuple[float, float] | None, elevation_ft: float | None = None
+    ) -> None:
         self.position = position
+        self.elevation_ft = elevation_ft
 
     def receivable_stations(self) -> tuple[RadioReception, ...]:
         receptions = [
-            estimate_signal(station, self.position)
+            estimate_signal(station, self.position, self.elevation_ft)
             for station in self.catalog
             if self._station_allowed(station)
         ]
@@ -457,7 +540,7 @@ class RadioState:
     def current_station(self) -> RadioStation:
         station = self._station_by_id(self.station_id)
         if station is not None and self._station_allowed(station):
-            reception = estimate_signal(station, self.position)
+            reception = estimate_signal(station, self.position, self.elevation_ft)
             if reception.signal > 0.0 or station.always_available:
                 return station
         fallback = self.fallback_station()
@@ -468,7 +551,7 @@ class RadioState:
         station = self.current_station()
         if station.fallback:
             return self.fallback_reception()
-        return estimate_signal(station, self.position)
+        return estimate_signal(station, self.position, self.elevation_ft)
 
     def fallback_station(self) -> RadioStation:
         for station in self.catalog:
@@ -569,7 +652,7 @@ class RadioState:
         self.station_id = station.id
         if not self.enabled:
             return RadioAction(
-                f"Radio off. Selected {self._station_phrase(estimate_signal(station, self.position))}.",
+                f"Radio off. Selected {self._station_phrase(estimate_signal(station, self.position, self.elevation_ft))}.",
                 station,
                 enabled=False,
                 reception=self.current_reception(),

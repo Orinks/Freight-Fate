@@ -388,6 +388,10 @@ def test_zone_warning_lead_scales_with_speed_and_pacing():
     try:
         d = _driving(app)
         d.trip.time_scale = 20.0
+        # Teleporting to highway speed at mile zero lands on the city's baked
+        # curves, and a sharp bend now pins the clock to real time (its own
+        # feature, its own test). The subject here is zone-lead scaling.
+        d.trip.curves = []
 
         d.truck.velocity_mps = 0.0  # crawling -> the minimum base lead
         crawl = d.trip._zone_warning_lookahead_mi()

@@ -729,6 +729,9 @@ def test_zone_entry_is_worded_apart_from_its_advance_warning(world):
 def test_construction_zone_warns_before_entry(world):
     trip, truck = make_trip(world, "Chicago", "Indianapolis", seed=2)
     zone = next(z for z in trip.zones if z.reason == "construction")
+    # Teleporting to 70 mph at mile zero sits on the city's baked curves,
+    # and a warned curve pins the clock (its own feature, its own test).
+    trip.curves = []
     truck.velocity_mps = 70 / 2.23694
     trip.time_scale = 20.0
 
@@ -1069,6 +1072,11 @@ def test_npc_traffic_status_includes_speed_units(world):
 
 def test_time_scale_compresses_fuel_burn(world):
     trip, truck = make_trip(world, time_scale=40.0)
+    # This test teleports straight to cruise speed at mile zero, on top of
+    # whatever curves the city approach bakes -- and a sharp bend now pins
+    # the clock to real time (its own feature, its own test). Clear them:
+    # the subject here is fuel compression on an open road.
+    trip.curves = []
     truck.velocity_mps = 26.0  # already at cruise: full pacing applies
     truck.throttle = 0.9
     for _ in range(60 * 30):
@@ -1467,3 +1475,55 @@ def test_city_events_include_state_without_repeating_crossing(world):
 
     city_events = [e.message for e in events if e.kind == TripEventKind.CITY_REACHED]
     assert city_events == ["Passing Buffalo, New York. Continuing on I-90 toward Cleveland."]
+
+
+def test_same_city_highway_dispatch_is_not_a_facility_approach(world):
+    """Endpoints alone lied: a yard-to-cross-dock job inside one city rides
+    the interstate and still starts and ends at the same city key, which
+    blanketed 17 miles of I-80 in the 25 mph access zone (owner,
+    2026-07-24, Fernley)."""
+    from freight_fate.data.world_models import Leg, Route
+
+    def trip_for(route):
+        truck = TruckState()
+        truck.transmission.automatic = True
+        truck.start_engine()
+        return Trip(route, truck, WeatherSystem("great_lakes", seed=1), seed=2)
+
+    from freight_fate.data.world_models import RoutePoint
+
+    # A real dispatch leg always carries corridor geometry; the synthetic
+    # facility approach never does -- that geometry is the discriminator.
+    highway_loop = Route(
+        ["fernley_nv_us", "fernley_nv_us"],
+        [
+            Leg(
+                "fernley_nv_us",
+                "fernley_nv_us",
+                17.0,
+                "I-80",
+                "flat",
+                (),
+                route_points=(RoutePoint(0.0, 39.6, -119.3), RoutePoint(17.0, 39.5, -119.1)),
+            )
+        ],
+    )
+    trip = trip_for(highway_loop)
+    assert trip._is_facility_approach_route() is False
+    assert not any(z.reason == "facility access road" for z in trip.zones)
+
+    street_chain = Route(
+        ["fernley_nv_us", "fernley_nv_us"],
+        [
+            Leg(
+                "fernley_nv_us",
+                "fernley_nv_us",
+                1.2,
+                "Main Street",
+                "flat",
+                (),
+                local_speed_mph=25.0,
+            )
+        ],
+    )
+    assert trip_for(street_chain)._is_facility_approach_route() is True

@@ -133,6 +133,38 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       cruise drives the bend instead of fighting the assist brake.
       Manual handoff survives only for advisories under the 20 mph
       cruise floor.
+- [ ] **Air buzzer once after a shoulder rest (owner playtest, night of
+      2026-07-22, UNCLAIMED).** Sleeping on the shoulder then starting
+      the engine issued one low-air buzzer. Might be honest (parked
+      leak-down leaves the tanks low after a rest, and one buzzer while
+      pressure builds is what a real dash does) or the cold-start
+      buzzer-defer may not cover the rest-resume path the way it covers
+      first ignition. Read the owner's session log before deciding;
+      diagnosis first, no reflex fix.
+- [ ] **Cruise sags on a loaded pull instead of revving out (owner
+      playtest, night of 2026-07-22, UNCLAIMED).** Climbing under load
+      with cruise on, speed falls and the truck does not rev toward
+      power or take a downshift; the owner has to cancel cruise and
+      pedal it himself. Real cruise has full throttle authority and
+      holds the climb gear at power when speed is dropping. Suspect the
+      cruise controller's throttle ceiling or the shift schedule never
+      seeing full-throttle intent from cruise (progressive/throttle-
+      raise logic keys off the throttle value cruise sets).
+- [ ] **I-5 speed limit changes for a few miles (owner observation,
+      night of 2026-07-22, verify only).** A short stretch of I-5 spoke
+      a different limit. Probably CORRECT -- the dense maxspeed sweep
+      baked real posted limits and short zones are exactly what it
+      added -- but confirm against the owner's session log which
+      stretch it was and check the baked segment against the real
+      posted limit there. Verify through a Trip readout, never the raw
+      data files.
+- [ ] **Speeding fine with cruise engaged (Josh report, 2026-07-22,
+      UNCLAIMED -- awaiting his log).** Likely a downgrade letting the
+      truck creep past the limit while cruise holds its set speed with
+      no brake authority. Candidate shape: cruise arms the auto jake
+      downhill (the stalk's AUTO mode already exists) or eases its
+      target when the road outruns it. Diagnose from Josh's log before
+      building; grade is the owner's guess.
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
 - [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
@@ -196,14 +228,26 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       outside presets. Remaining slices: the required-slowdown
       consequence tier (hot entries pay physics), the pursuit guide and
       edge textures (audio assets), steering-input feel, cue previews.
-- [ ] **Real lane counts from OSM (owner ask 2026-07-16).** OSM tags
-      lanes directly (lanes=, lanes:forward=); bake per-mile lane counts
-      along every leg from the self-hosted Overpass/PBF harvest, the
-      exact pattern of the dense maxspeed sweep. Buys real widths (four
-      lanes through Albuquerque on I-40, two-plus-two rural) and REAL
-      LANE DROPS: where three lanes become two, that is a genuine merge
-      event with a real location, not a scripted taper. Goes in the next
-      map re-bake brief.
+- [x] **Real lane counts from OSM (owner ask 2026-07-16) -- DATA LAYER
+      BAKED 2026-07-23.** `corridor.lane_segments` now carries real OSM
+      lane counts (`lanes`, `lanes:forward`/`backward`, `oneway`) for every
+      leg OSM tags, matched to the archived route geometry against the
+      self-hosted Overpass -- the exact way-matching pattern of the dense
+      maxspeed sweep (`tools/bake_lane_segments.py`, reusing the Job 2
+      matcher). Honest absence where OSM has no tag (no guessed defaults);
+      the runtime can default by road class later. All 1,287 legs swept,
+      20,666 segments, 96.3% of route-miles covered (per-state 92-99%,
+      reported in `logs/oatis-lane-bake-done.json`); acceptance verified --
+      I-40 widens to 3+ lanes through Albuquerque and holds 2 rural.
+      Guarded by `tests/test_lane_data.py`. No mechanic reads it yet: the
+      wiring job below carries the player-facing changelog.
+- [ ] **Wire lane data into play (follows the bake above).** REAL LANE
+      DROPS as genuine merge events at real mileposts (three lanes become
+      two = a located merge, not a scripted taper), real widths spoken/
+      enforced, exit-lane guidance, and keep-right pressure that knows how
+      many lanes exist. Reads `corridor.lane_segments`; advisory guidance
+      may run on partial data, punitive consequences only where lane data
+      is real (see `docs/lanes-harvest-brief.md`).
 - [ ] **Assistance-mode assessment: accessibility features that drive the
       truck right (Josh's ask to the owner, 2026-07-22).** The automatic
       driving aids -- adaptive cruise, the speed keeper, curve speed
@@ -689,10 +733,13 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       plays the clunk bank leveled by force; release breathes the air
       back out, scaled by how hard you braked. All licensed cuts live
       in the gitignored sounds-licensed/ overlay; a clean clone keeps
-      the old synthesized cues everywhere. STILL OPEN from the
-      diagnosis: (3) an engagement clunk at shift END (the banks fire
-      at shift start), and (4) whether SHIFT_TIME 1.0 s eases to
-      ~0.7 s -- that one is PHYSICS and needs the bench re-run. Also
+      the old synthesized cues everywhere. (3) SHIPPED 2026-07-24: the
+      engagement clunk at shift END, together with the shift SIGH --
+      the voice now follows the physics rpm falling toward the new
+      gear through the interrupt (ducked, unloaded) instead of the
+      frozen pre-shift hang; kachunk -- sigh -- kachunk per the
+      owner's ear. (4) OBSOLETE: Phil's modern-AMT power upshifts
+      (155f05ad, 0.25-0.5 s) already went past the 0.7 s idea. Also
       open: launch/load rev one-shots (engine/rev_launch, rev_load are
       encoded and staged but not yet wired -- mixing them over the
       ring needs the owner's ear) and per-trigger pitch jitter on the
@@ -1092,9 +1139,9 @@ section below and the Unreleased changelog; the release-line view:
       on the air; WFMU and KABF joined by name; and public-radio networks
       filled the Iowa corridor, the Plains, the Rockies, the Southeast
       coast, and the Florida panhandle. jpr-redding was repointed to JPR's
-      new Zeno mount. Honest remaining gaps: WABE Atlanta (every mount,
-      including its Zeno relay, still refuses BASS -- supported:false with
-      notes), KDHX St. Louis (defunct on air; 88.1 sold, no successor
+      new Zeno mount. Honest remaining gaps at the time: WABE Atlanta (later
+      revived in the 2026-07-23 cleanup pass -- see below),
+      KDHX St. Louis (defunct on air; 88.1 sold, no successor
       stream yet; market covered by KWMU), WFSU Tallahassee (mount refuses
       BASS), the far Montana Hi-Line, the Texas border west of the Valley,
       and interior US-50 Nevada -- genuinely thin country, left dark rather
@@ -1107,6 +1154,171 @@ section below and the Unreleased changelog; the release-line view:
       (parent network) actually covers each Hi-Line dispatch city and seat
       the parent stream there under the local translator's dial position,
       the same honest-coverage rule as everywhere else.
+- [x] **Deadlines respect the hours you already burned -- SHIPPED
+      same day (owner question, 2026-07-24).** Dispatch deadlines model HOS honestly for
+      a FRESH clock (route-aware driving + breaks + a 10-hour sleep per
+      11-hour shift, times 1.2-1.5 slack) -- but never look at the
+      driver's CURRENT shift state at acceptance. Accept a one-shift
+      load with six hours already used and a mandatory mid-trip sleep
+      makes the deadline impossible. Real dispatch asks how many hours
+      you have. Fix shape: feed hours-already-used into the deadline
+      (or at minimum speak it in the briefing: "with your hours, this
+      run includes your 10-hour break"), reusing the fair_active_deadline
+      machinery that already does this for resumed saves.
+- [x] **Log-check stops stop the truck and burn clock -- SHIPPED same
+      day (owner playtest, 2026-07-24).** Root cause found in the log:
+      the out-of-service order applied its 10 hours and ledger reset
+      instantly while the wheels rolled (3 AM became 1:57 PM between
+      two spoken lines). Serious HOS violations now run the real
+      pull-over: lights and siren, signal and brake to the shoulder,
+      and the ten hours pass parked with the officer's order spoken.
+      Original bullet: An enforcement log check
+      played its tone and said the driver was stopped -- while the
+      truck rolled on unbothered. The stop should be real: truck
+      braked to the shoulder, a realistic inspection duration off the
+      clock (and off the 14-hour window), then released. Same shape as
+      the pull-over flow the speeding rework wants, so build them on
+      one mechanism.
+- [x] **A non-qualifying sleep says loudly what it did NOT do -- SHIPPED
+      same day (owner confusion, 2026-07-24).** Wake message leads with
+      "did NOT reset" plus the window-close time; countdown warnings
+      re-arm after any non-resetting sleep; the out-of-service stop
+      names the blown limits in plain words. Original: A 7-hour berth sleep left the split
+      pending and the 14-hour window RUNNING -- but the wake-up message
+      buried that in one clause, and the owner drove into a window
+      violation believing he had hours left (the "six hours" he heard
+      was the deadline clock). Wake from any non-resetting sleep should
+      lead with the consequence: "This did not reset your clock. Your
+      duty window closes at X; pair 3 more sleeper hours by then or
+      stop." And the window-close countdown deserves spoken warnings at
+      60 and 30 minutes, like the break countdown already gets.
+- [ ] **Violation class decides the roadside outcome (owner ruling,
+      2026-07-24).** Caught DRIVING over hours right now: out of
+      service on the spot, ten hours -- that is real FMCSA and stays.
+      But a logbook ERROR or a past-trip violation found in the record
+      (an unpaired shoulder rest from yesterday, form-and-manner)
+      should mean the fine and a marked record that raises your
+      likelihood of future inspections -- never an instant ten-hour
+      hold when you are legal to drive TODAY. Wire the scrutiny
+      escalation into the same patrol-frequency machinery the speeding
+      rebalance will use.
+- [x] **Assigned-dispatch drivers can HEAR the board they cannot pick
+      from yet -- SHIPPED same day (owner design, 2026-07-24): an
+      on-demand "Review the rest of today's board" option, owner's
+      refinement over automatic flavor. Original:** Below level 8 the board shows exactly one assigned
+      load, by design -- but the offer pool behind it grows with level
+      (5 wide at 1, 6 at 6, more later) and that growth is inaudible.
+      Proposal: the assignment board previews the rest of the day's
+      pool as locked flavor entries ("Dispatch also posted: ...;
+      assigned loads only until level 8"), so each level audibly widens
+      the world and level 8 lands as a real payoff instead of a number.
+- [ ] **Facility placement audit: 776 approach pins land too far out
+      (Josh's Kenosha 35-mile deadhead, 2026-07-24).** The approach bake
+      caps at 35 miles and 776 records sit past 8 -- geocoded pins that
+      landed counties from their city (worst offenders pinned at exactly
+      the cap). Runtime now clamps synthetic approaches to Josh's 1-9
+      band as mitigation; the real fix is an agent sweep re-geocoding
+      each flagged facility within its city's bounds (OSM name+type
+      match, mark unresolvable ones estimated-near-city), then re-bake
+      approaches and lift the clamp for genuinely-remote facilities
+      that carry evidence. Flag list reproducible: audit script walks
+      facility_approach_route for miles > 8.
+- [ ] **Real speed limits for facility approach streets (owner ask,
+      2026-07-24).** Street-chain legs carry defaults today -- 25 for
+      named streets, 15 for unnamed service ways -- but a real arterial
+      approach can be posted 35 or 45, and a blanket 25 for miles of it
+      is not cool. Bake OSM maxspeed over every facility approach
+      route's street legs (same sweep pattern as the corridor and lane
+      bakes, self-hosted Overpass, honest absence: keep the current
+      defaults only where OSM is untagged). A short 25 or 15 right at
+      the gate stays exactly as it is -- that part is true.
+- [ ] **Reefer rules for the reefer feature (owner spec, 2026-07-24).**
+      Two rulings to build into the queued reefer-temp feature: (1) a
+      refrigerated load means the engine NEVER shuts down at rests --
+      resting keeps it idling and burns idle fuel for the whole stop
+      (the game simplifies the separate reefer unit onto the truck
+      engine, so engine-on is the cold chain). (2) If the driver shuts
+      the engine off with cold cargo aboard: an immediate spoken
+      warning, then spoilage as a percentage scaling with how long the
+      engine stayed off -- tied into the degree-hours spoilage model
+      and its claim path. A driver should never do it; the game should
+      let them find out why.
+- [ ] **Rebalance speeding toward police encounters (owner design
+      question, 2026-07-23).** Today sustained speeding rolls against
+      patrol intensity: caught means a real pull-over and ticket;
+      NOT caught means a silent "strike" fine at delivery (the
+      insurance/safety framing). The owner questions the uncaught
+      branch: real life mostly punishes speeding through getting
+      caught. Options to weigh: drop or soften the silent fine (shift
+      it to a carrier safety score that affects job quality instead of
+      cash), raise patrol-encounter frequency to compensate so speeding
+      still carries real risk, and keep CB bear reports as the
+      counterplay. Ties into Josh's cruise-speeding ding finding --
+      whatever survives must never fire while assists hold the limit.
+- [ ] **Fine speed adjust: step cruise by 1, not just 5 (owner ask,
+      2026-07-23).** Plus and minus move the cruise set speed in 5 mph
+      jumps; there is no way to nudge by 1. Add a fine step -- e.g.
+      Shift+plus / Shift+minus for 1 mph (and the metric equivalent) --
+      for dialing exactly to a posted limit or a curve advisory.
+- [ ] **Food and coffee stops are free (owner catch, 2026-07-23, night
+      drive).** The short food-and-coffee break at a travel plaza speaks
+      its alertness effect but charges nothing -- a real stop costs real
+      money. Belongs to the truck-stop economy and buffs pass: price the
+      quick stops (coffee, meal, shower outside loyalty credits), charge
+      at the register, and let the tiered buffs ride the same purchase.
+      The new loyalty program (owner likes it) gives the natural hook:
+      paid purchases should earn points too, not just fuel gallons.
+- [ ] **Long repeating hiss at highway cruise (owner report 2026-07-23,
+      CLAIMED: ff-audio session).** OWNER CORRECTION: not machinery
+      engaging -- a GENUINE LONG HISS that repeats at steady cruise.
+      Evidence gathered: the sim is innocent (log shows psi pinned at
+      125, compressor idle, no brake applications on that stretch) and
+      the ring bands measure hiss-flat (no in-loop fill hiss -- the old
+      bug is NOT back). Prime suspect: cruise rpm 1695-1767 sits inside
+      the narrow midhigh(1425)<->high(1900) crossfade window, so ACC's
+      small rpm wobble slides the mix across the seam cyclically.
+      A long hiss fading in/out fits the seam IF one band carries a
+      hissier steady character than its neighbor (the swing scan only
+      rules out WITHIN-loop hiss spikes, not a uniformly hissy band --
+      measured means: idle .131, high .144, midhigh .149, mid .155,
+      low .159, all in 3-8 kHz ratio). Also re-check the long-hiss
+      assets themselves: brake_hiss_bed and air_pressurize triggering
+      at cruise despite the gates. Candidate fixes: de-hiss the guilty
+      band, widen/recenter the window, damp mix against rpm wobble.
+      ALSO for the same session: the brake-release pssht goes missing at
+      the final dock stop -- "Brakes set; dock menu opening" fires in the
+      same beat and likely cuts the release sound before it plays (owner,
+      Merced delivery). The arrival pssht deserves to finish; it is the
+      punctuation on the whole drive.
+- [ ] **Shift transient lands AFTER the band crossfade (owner ear,
+      2026-07-24, for the audio session).** On automatic around 7->8 the
+      owner hears the ring crossfade to the higher band FIRST, then the
+      tsh/shift sound arrives late. The locked design is gap-then-
+      re-entry: hold the voice at pre-shift rpm through the interrupt,
+      transient AT the gap, one quick slide at hook-up. Something now
+      slides the ring (or crossfades) before the transient fires --
+      check trigger order between the shift bank one-shot and the
+      rpm-follow path, upper gears especially (quick 0.5s interrupts).
+- [ ] **Lay on the horn (owner ask, 2026-07-23).** H plays one shortish
+      horn sample today. Holding H should hold the horn -- attack, a
+      seamless sustain loop for as long as the key is down, then the
+      release -- like a real air horn lever. Pairs perfectly with the
+      horn replacement already owed (the current horn is Duff material):
+      when the new Splice/synth horn is cut, cut it AS attack/sustain/
+      release pieces so the hold behavior falls out of the asset design.
+      NOTE (owner, same night): the horn already sounds SHORTER than it
+      used to, but the shipped file is untouched since June -- so the
+      audio rework's playback path is probably cutting it early. Check
+      the play site before blaming the sample.
+- [ ] **Refresh tool: periodic live-check of the whole radio catalog
+      (owner, 2026-07-23).** The station search had a first-match-wins
+      bug -- one hit per area and it moved on (one station in New York,
+      NPR forgotten) -- and the full re-search now running will grow the
+      catalog far past what a one-time BASS gate covered. Teach
+      tools/refresh_map_data.py's --radio pass to re-test every stream
+      on a cadence (streams die: KDHX did), report dead mounts for
+      re-pointing, and keep honest-coverage rules: a dead stream goes
+      dark or gets a verified replacement, never a fake.
 - [ ] **Fringe reception should burst, not fade (owner spec, 2026-07-23,
       ham-ear ruling).** Today the edge of a station's range plays static
       at a volume scaled by signal -- a knob, not a radio. Real analog
@@ -1118,12 +1330,15 @@ section below and the Unreleased changelog; the release-line view:
       so no two fades sound alike. If a digital/HD station ever joins the
       dial its fringe is different and simpler -- it just drops out --
       but analog static done right is the foundation.
-- [x] **Fictional call signs de-squatted (2026-07-22).** An FCC license
-      audit found eleven of the twelve invented regional call signs
-      collide with real licensed stations (only KRWL was clear). Each was
-      renamed to an FCC-unassigned sign with the brand and dial position
-      unchanged; Josh accepted the old->new list 2026-07-23, closing the
-      audit -- nothing further owed before the release cut.
+- [x] **Fictional call signs de-squatted (2026-07-22, Josh-approved).** An
+      FCC license audit found eleven of the twelve invented regional call
+      signs collide with real licensed stations; each was renamed to an
+      FCC-unassigned sign with the brand and dial position unchanged. A
+      second overnight pass against the FCC LPFM/translator databases (the
+      records Wikipedia misses) caught two more squats: the twelfth sign,
+      KRWL, is a real LPFM in Coquille, Oregon, and one replacement, KHRM,
+      collides with a Nevada station -- both swapped to verified-free signs
+      (KRWZ, KHRZ). Josh approved the full list.
 - [x] **Full music rotations for the fictional stations.** A 52-track
       Suno-composed batch (via the Zero CLI) grows the format pools to
       radio-scale: country 15 songs, classic rock 17 (including a Saltwake
@@ -1171,22 +1386,155 @@ section below and the Unreleased changelog; the release-line view:
       stations, your playlists, terrestrial, AFN, satellite. AFN got its
       own category so its 25-station block never buries the local dial
       again; the dial sort and the jump share one grouping.
-- [ ] **Fictional call signs must not squat real stations (owner catch
-      2026-07-20).** Our fictional Phoenix classic-rock station is
-      "KDRT Desert Rock 101.5" -- but KDRT-LP is a real community station
-      in Davis, California. Rename it, and audit all 15 fictional call
-      signs against the FCC database (WDLT and WSOL look suspect too);
-      fictional stations should hold call signs no real broadcaster owns.
-- [ ] **Community and college radio sweep, and an NPR coverage audit
-      (owner ask 2026-07-20).** There is no policy against real
-      terrestrial stations -- 63 already stream in-game; the limits were
-      streamer-safety flags and URL rot. Add the freeform and community
-      institutions (WFMU Jersey City, KABF Little Rock, college stations
-      with reliable streams), and audit NPR-member coverage per market so
-      the dial finds local news most places a route goes. Direct station
-      stream URLs with source notes, as the desert-Southwest sweep did;
-      Radio Browser as the finding aid, never a runtime dependency.
-      TuneIn is partner-gated API-wise and stays out.
+- [x] **Fictional call signs must not squat real stations (owner catch
+      2026-07-20).** Shipped 2026-07-22 -- see "Fictional call signs
+      de-squatted" above. KDRT and every other invented sign was audited
+      against the FCC database (including the LPFM/translator records) and
+      renamed to a verified-free sign; brands and dial positions unchanged.
+- [x] **Community and college radio sweep, and an NPR coverage audit
+      (owner ask 2026-07-20).** Shipped 2026-07-22 -- see "Community/
+      college/NPR coverage sweep" above. WFMU, KABF, college stations, and
+      public-radio networks joined via direct station stream URLs with
+      source notes, each gated on the BASS live check; real-station reach
+      went 78% -> 93% of the 623 cities. Radio Browser was the finding aid
+      only; TuneIn stayed out.
+- [x] **Streams reconnect themselves; a silent radio never crackles
+      (owner catch 2026-07-23).** The Merced ghost hiss: a live stream
+      killed by a dock-menu bed (or a network stall) stayed dead --
+      nothing restarted real streams, the same-URL guard blocked
+      re-tuning the same station, and fringe static bursts fired off
+      reception math alone every 6 seconds over a radio making no sound.
+      Now the reception tick quietly re-tunes a dead stream (spoken
+      fallback if it is truly unreachable), and static only plays under
+      an audible program.
+- [x] **Terrain-aware FM propagation with honest fringe audio (owner
+      approved AND SHIPPED same day, 2026-07-23).** What shipped:
+      elevation-aware contours (truck elevation from the leg's samples
+      vs station site_elev_ft through the 4/3-earth radio horizon; the
+      Rim case is a regression test; below the site is NEUTRAL -- a
+      mountain-top transmitter looks down into its valley, so canyon
+      shadowing waits for real path profiles, owner-test catch
+      2026-07-24), the hiss-bed loop + sharp picket
+      splashes replacing the 6-second burst timer entirely, exponential
+      inter-arrival around 2v/lambda, program duck to 0.12 per splash,
+      frequency_mhz + site_elev_ft on all 12 regional stations, and NO
+      fringe over a dead stream. Original design notes kept below;
+      follow-ups split into the next bullet. Was: replace the flat
+      distance-falloff with
+      line-of-sight over the elevation data we already carry: terrain
+      profile between truck and tower decides the signal, so a river
+      valley drops a station and a ridge crest brings it in.
+      Acceptance test from the owner's ham experience: from the
+      Mogollon Rim you receive Phoenix AND Flagstaff clearly at
+      distances the current radius model would refuse. Fringe audio is
+      synthesized, not sampled (FM has no static crashes -- the limiter
+      rejects impulse noise): a shaped white-noise hiss bed rising as
+      signal thins, blended UNDER the program instead of the current
+      6-second burst timer, plus picket-fence flutter RANDOMIZED around
+      the physical 2v/lambda rate (owner's ear ruling 2026-07-23: a
+      metronomic 18 Hz tremolo sounds fake -- real flutter is a Rayleigh
+      fading envelope, irregular nulls whose average rate rides truck
+      speed and the station's dial frequency; synthesize as low-passed
+      complex noise at the Doppler cutoff, magnitude out). It slows as
+      you slow and stops when you park. Stations need a real frequency
+      field for that; tune the noise shaping by the owner's ear.
+      PICKETS ARE SHARP, not crossfades (owner ear ruling 2026-07-23):
+      FM capture is a threshold, so render flutter as the Rayleigh
+      envelope GATING program vs hiss with abrupt edges -- brief hiss
+      splashes punching through clean audio, never a smooth linear
+      fade. Picket density and depth grow as signal thins with
+      distance (occasional single pickets at the strong edge,
+      machine-gun picketing deep in the fringe, then mostly noise).
+      RUNTIME, not baked (owner call 2026-07-23): the flutter depends on
+      live speed so the bed must be synthesized in play -- hybrid shape:
+      a seamless committed hiss LOOP as the texture with fade depth and
+      the Rayleigh envelope computed per-frame as channel gain (the
+      engine ring's machinery); fast flutter near 18 Hz gets steppy at
+      frame-rate volume updates, so the BASS path likely wants a
+      push-stream or DSP callback, degrading to slow wander on pygame.
+      The 2026-07-23 static_burst regen (FM demod curve + de-emphasis in
+      tools/generate_radio.py) is the interim burst asset AND the
+      reference recipe for that loop.
+- [ ] **FM propagation follow-ups.** Backfill frequency_mhz and
+      site_elev_ft for the ~63 real terrestrial streams (real dial
+      facts -- fold into the community-radio sweep; unknown fields
+      degrade honestly to the flat model and a mid-band default).
+      Later: true path-profile occlusion if off-route terrain data
+      ever lands, and a BASS push-stream Rayleigh envelope if the
+      one-shot pickets feel too sparse at deep fringe (perceptual cap
+      9 per second now).
+- [ ] **Tell "still buffering" from "stalled for good" on stream
+      startup.** The reconnect loop recreates a silent stream every 9
+      seconds; a slow HLS join that needed 10 could get interrupted.
+      Poll the BASS stalled/buffering channel state before tearing one
+      down.
+
+- [x] **Whole-market completeness sweep (owner ask 2026-07-23).** Shipped
+      2026-07-23. The dial no longer carries one station per town but the
+      market's full non-commercial roster: public news plus separate
+      classical/jazz sisters, community and college stations, and HD2/HD3
+      sub-channels (the HD3s are how BBC World Service reaches the dial --
+      WUKY, KWGS, KUT, KCND, Vermont Public). 396 real stations added
+      (167 -> 563), every one BASS-gated 3x, across all 48 continental
+      states + DC. Twelve parallel research agents sourced station-owned
+      "listen live" mounts only (no TuneIn/iHeart), with FCC call-sign
+      rigor and honest transmitter ranges; darkness stays honest where a
+      market has no streamable non-commercial station. Each new entry also
+      carries a `state` tag for the future main-menu Radio Player.
+- [x] **Always-available international public broadcasters (owner ask
+      2026-07-23).** Shipped 2026-07-23 (Phase 0, commit 61e79cbb). New
+      "International" dial category carrying 12 English-language public
+      streams verified from a US machine: ABC AU (triple j, Jazz, Classic,
+      Double J), RTE IE (Radio 1, 2FM, lyric fm), RNZ NZ (National,
+      Concert), RFI English, CBC (Radio One, Music). BBC World Service was
+      excluded direct (its CDN 403s US IPs) and reaches the dial via US HD3
+      sub-channels instead.
+- [x] **Radio reading services for blind listeners (owner ask
+      2026-07-23).** Shipped 2026-07-23. Twelve reading services (that read
+      newspapers/books aloud for blind and print-disabled listeners) now
+      ride the dial as real local stations -- WYPL Memphis, WRBH New
+      Orleans, Sun Sounds of Arizona, CRIS Chicago, Triangle and Down East
+      NC, Sight Into Sound Houston, GPB Reading Radio, WQCS FL, Vision
+      Resources PA -- each tagged `reading_service: true`. Most of the
+      category (per the IAAIS directory) is SCA-subcarrier only with no
+      public stream, so those stay out honestly.
+- [x] **Holdout cleanup pass (2026-07-23).** A fresh-session pass that
+      cracked JS-locked / no-mount stations the big sweeps had to defer.
+      New finding aid: `onlineradiobox.com/json/us/<call>/play` 302-redirects
+      to a station's true upstream mount, so Brightspot and other JS players
+      give up their stream without a browser. Un-darked WABE Atlanta (its
+      StreamTheWorld HD1 mount plays cleanly once STW is not being hammered)
+      and added two net-new public markets, KWBU-FM Waco (NPR/Baylor) and
+      WLRH Huntsville; corrected VPM Richmond's call sign to WCVE-FM. Four
+      more reading services joined the dial -- Iowa (IRIS, Des Moines),
+      VOICEcorps (Columbus OH), the Nashville Talking Library, and the WUFT
+      Radio Reading Service (Gainesville) -- lifting the category from 12 to
+      16. Every stream BASS-gated 3/3 spaced from a clean session; Mississippi
+      RRS, Omaha RTBS, and Detroit DRIS stay out honestly (closed-circuit /
+      subcarrier / part-time only).
+- [ ] **Reading Services dial category with a "nearest" jump.** The data +
+      tag are in; the feature is a new dial category whose bracket-jump
+      tunes the geographically NEAREST reading service (not first-by-call),
+      so the most useful content for blind players is always one jump away
+      from anywhere on the map.
+- [ ] **Main-menu Radio Player (browse-all utility).** A parked-only menu
+      to browse and play any catalog station free of range gating, states
+      as categories, reading services nested per state, International/AFN
+      their own groups. Needs `state` on the RadioStation dataclass +
+      backfill on pre-sweep locals. Accessibility-critical spoken menu.
+- [ ] **Radio cleanup pass: JS-locked holdouts + a real trucking station.**
+      Chase the stations the sweep flagged but could not extract a mount
+      for -- WABE Atlanta, KWBU Waco, the Richmond/Huntsville public and
+      reading stations, ~37 IAAIS "no-mount" services -- via the StreamGuys
+      sgplayer3 config.json trick and Chrome network inspection (proved on
+      GPB Radio Atlanta 2026-07-23). Also hunt a real free trucking-format
+      webcaster to put a genuine trucker station on the dial (SiriusXM Road
+      Dog is pay-only/DRM and cannot be tuned).
+- [ ] **AM news/talk sweep (next session -- needs fresh web budget).**
+      iHeart is tunable via its public revma HLS mounts; Audacy is app-
+      locked. Real-first so players lean less on the fictional fallback
+      stations. Overnight trucker talk (Red Eye Radio, Coast to Coast AM)
+      already rides free AM affiliates in the catalog.
 - [ ] **Spotify and Apple Music: research only, parked (owner idea
       2026-07-20).** In-game playback of either is off the table --
       both wrap streams in DRM their licenses forbid unwrapping, official

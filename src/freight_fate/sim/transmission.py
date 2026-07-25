@@ -22,11 +22,22 @@ AUTO_DOWNSHIFT_RPM = 1050
 # Torque-interrupt length. Real AMTs are quickest in the low box -- small
 # inertia steps and launch urgency -- and take the longest up top, so the
 # time scales with the gear being ENGAGED (owner's ear after the Camp
-# Verde-Kingman run: a one-second gap on a two-second low-gear pull reads
-# as a long, "shifty" hole). SHIFT_TIME stays as the top-gear ceiling and
-# the conservative figure the grade-loss estimate uses.
-SHIFT_TIME = 1.0  # seconds of torque interruption, 10th-gear ceiling
-SHIFT_TIME_LOW = 0.45  # through gear 4
+# Verde-Kingman run, then tightened to modern-AMT figures 2026-07-23:
+# power upshifts run 0.25 through the low box to 0.5 in 10th). Downshifts
+# keep their own full-second figure: a real box has to rev-match UP into
+# the lower gear, which is genuinely slower than a power upshift -- and
+# that deliberateness is also what keeps a jake descent from cycling the
+# retarder fast enough to break a chained truck loose (physics bench).
+# DOWNSHIFT_TIME is also the conservative figure the grade-loss estimate
+# uses.
+SHIFT_TIME = 0.5  # seconds of torque interruption, 10th-gear power-upshift ceiling
+SHIFT_TIME_LOW = 0.25  # through gear 4
+DOWNSHIFT_TIME = 1.0  # rev-matched downshifts, and the jake preselect
+# Manual shifts: the player's clutch is already the torque interruption, so
+# the box only charges the lever's own travel through neutral. Stacking the
+# AMT interrupt on top left up to 0.6 s of dead pedal AFTER the clutch was
+# out in the top gears (Josh's "manual needs tuning", measured 2026-07-23).
+MANUAL_LEVER_TIME = 0.25
 
 
 def shift_time_for(gear: int) -> float:
@@ -102,7 +113,7 @@ class Transmission:
         if self.clutch < 0.8 and target != NEUTRAL:
             return ShiftResult(False, "Clutch not pressed", grind=True)
         self.gear = target
-        self._shift_timer = shift_time_for(self.gear)
+        self._shift_timer = MANUAL_LEVER_TIME
         return ShiftResult(True, self._gear_name(target))
 
     def shift_up(self) -> ShiftResult:
@@ -159,12 +170,27 @@ class Transmission:
             self._shift_timer = shift_time_for(self.gear)
             self._gear_hold_timer = 0.0
             return self.gear
-        # The comfort hold between shifts never delays engine protection:
-        # with the road driving the engine past the jake ceiling, the box
-        # upshifts NOW, timer or no timer. Under power the governor caps RPM,
-        # so the hold stays in charge and anti-hunting keeps its teeth.
-        if self._gear_hold_timer < minimum_shift_interval_s and not (
-            engine_braking and rpm > JAKE_MAX_RPM
+        # The comfort hold between shifts never delays engine protection
+        # (road past the jake ceiling upshifts NOW) -- and above the launch
+        # box it never delays an upshift the revs have already earned. Two
+        # owner rulings meet here: the hold IS part of the approved stately
+        # launch feel through the low gears (each gear revs out, then a
+        # beat), but past gear five the same hold left the engine hanging
+        # at the crest of the pull -- the driver heard the rev top out and
+        # then waited a second for the gear (owner report, 2026-07-23).
+        # After an upshift the rpm falls a whole ratio step, so up there
+        # the rev-out time is all the anti-hunt spacing the box needs.
+        earned_upshift = (
+            self.gear >= 5
+            and throttle > 0.2
+            and rpm > upshift_rpm
+            and can_upshift
+            and not braking
+        )
+        if (
+            self._gear_hold_timer < minimum_shift_interval_s
+            and not (engine_braking and rpm > JAKE_MAX_RPM)
+            and not earned_upshift
         ):
             return None
         # Braking or engine-braking holds the gear -- except that a real
@@ -198,7 +224,7 @@ class Transmission:
                 # engine-protect-up, and quick downshifts doubled that
                 # cycle rate -- enough extra jake-connected time to break
                 # a chained truck loose on ice (physics bench regression).
-                self._shift_timer = SHIFT_TIME
+                self._shift_timer = DOWNSHIFT_TIME
                 self._gear_hold_timer = 0.0
                 return self.gear
         if rpm < downshift_rpm and self.gear > 1 and moving and not retarder_slipping:
@@ -208,7 +234,7 @@ class Transmission:
             # gear would multiply the retard past what the drives can hold.
             target = self.gear - 1 if downshift_target is None else downshift_target
             self.gear = max(1, min(self.gear - 1, target))
-            self._shift_timer = SHIFT_TIME
+            self._shift_timer = DOWNSHIFT_TIME
             self._gear_hold_timer = 0.0
             return self.gear
         return None

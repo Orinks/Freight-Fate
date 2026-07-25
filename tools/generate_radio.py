@@ -237,30 +237,97 @@ def generate_hosts(key: str) -> None:
             _write_ogg(mp3, out)
 
 
-def generate_static() -> None:
-    """Procedural AM-radio static burst; no API credits."""
+def _fm_hiss(rng, rate: int, seconds: float):
+    """Shaped FM interstation noise; the shared recipe for all fringe assets.
+
+    FM fringe noise is not AM crackle -- the limiter rejects impulse
+    noise (owner's ham-ear ruling 2026-07-23). What a real receiver
+    plays between stations is the demodulator's triangular noise
+    spectrum (+6 dB/octave) rolled off by the 75 microsecond
+    de-emphasis network: a full, smooth frying hiss with body around
+    1-2 kHz, no pops. A second gentle pole (~5 kHz) stands in for the
+    receiver's audio stage: pure post-de-emphasis noise is rise-then-
+    flat and reads thin and digital on full-range playback.
+    """
     import numpy as np
+
+    noise = rng.normal(0.0, 1.0, int(rate * seconds))
+    # FM demod noise rises 6 dB/octave: a differentiator is exactly that.
+    shaped = np.diff(noise, prepend=0.0)
+    for rc in (75e-6, 1.0 / (2.0 * np.pi * 5000.0)):
+        alpha = (1.0 / rate) / (rc + 1.0 / rate)
+        acc = 0.0
+        out_buf = np.empty_like(shaped)
+        for i, x in enumerate(shaped):
+            acc += alpha * (x - acc)
+            out_buf[i] = acc
+        shaped = out_buf
+    return shaped
+
+
+def _write_asset(sample, rate: int, relpath: str) -> None:
     import soundfile as sf
+
+    out = ASSETS / relpath
+    out.parent.mkdir(parents=True, exist_ok=True)
+    sf.write(str(out), sample.astype("float32"), rate, format="OGG", subtype="VORBIS")
+    print(f"    wrote {out} ({out.stat().st_size:,} bytes)", flush=True)
+
+
+def generate_static() -> None:
+    """Procedural FM interstation hiss burst; no API credits."""
+    import numpy as np
 
     rng = np.random.default_rng(1290)
     rate = 44100
     seconds = 2.4
-    noise = rng.normal(0.0, 1.0, int(rate * seconds))
-    # crude band-limit: difference filter knocks out the deep rumble, a short
-    # moving average softens the hiss into AM-radio crackle
-    noise = np.diff(noise, prepend=0.0)
-    kernel = np.ones(6) / 6.0
-    noise = np.convolve(noise, kernel, mode="same")
-    # crackle envelope: irregular bursts over a low bed
-    t = np.linspace(0.0, seconds, noise.size)
-    envelope = 0.35 + 0.65 * (rng.random(noise.size) ** 6)
+    shaped = _fm_hiss(rng, rate, seconds)
+    t = np.linspace(0.0, seconds, shaped.size)
+    # slow AGC-like wander, subtle: +/-20 percent over ~1 Hz, never impulsive
+    wander = 1.0 + 0.2 * np.sin(2.0 * np.pi * (0.7 * t + 0.3 * np.sin(2.0 * np.pi * 0.23 * t)))
     fade = np.minimum(1.0, np.minimum(t / 0.05, (seconds - t) / 0.4))
-    sample = noise * envelope * fade
+    sample = shaped * wander * fade
     sample = 0.8 * sample / np.max(np.abs(sample))
-    out = ASSETS / "radio" / "static_burst.ogg"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    sf.write(str(out), sample.astype(np.float32), rate, format="OGG", subtype="VORBIS")
-    print(f"    wrote {out} ({out.stat().st_size:,} bytes)", flush=True)
+    _write_asset(sample, rate, "radio/static_burst.ogg")
+
+
+def generate_fringe() -> None:
+    """FM fringe runtime kit: a seamless hiss-bed loop and the picket bank.
+
+    The bed loops on its own channel with distance-scaled gain; pickets are
+    short sharp-edged splashes (FM capture is a threshold -- the gating is
+    abrupt, owner ruling 2026-07-23) fired at the Rayleigh-flutter rate by
+    the driving state. Edges: ~3 ms attack, ~12 ms release; anything softer
+    smears the picket, anything shorter clicks.
+    """
+    import numpy as np
+
+    rate = 44100
+    rng = np.random.default_rng(4471)
+    # Bed: generate long, then splice the tail over the head (equal-power,
+    # 50 ms) so the loop point is seamless in a noise signal.
+    seconds = 4.0
+    xfade = int(0.05 * rate)
+    raw = _fm_hiss(rng, rate, seconds + 0.05)
+    head = raw[:xfade].copy()
+    body = raw[xfade : xfade + int(seconds * rate)].copy()
+    ramp = np.linspace(0.0, 1.0, xfade)
+    body[-xfade:] = body[-xfade:] * np.sqrt(1.0 - ramp) + head * np.sqrt(ramp)
+    body = 0.7 * body / np.max(np.abs(body))
+    _write_asset(body, rate, "radio/fm_hiss_loop.ogg")
+
+    durations = (0.05, 0.07, 0.09, 0.11, 0.13, 0.16)
+    for i, dur in enumerate(durations, start=1):
+        splash = _fm_hiss(rng, rate, dur)
+        n = splash.size
+        attack = int(0.003 * rate)
+        release = int(0.012 * rate)
+        env = np.ones(n)
+        env[:attack] = np.linspace(0.0, 1.0, attack)
+        env[-release:] = np.linspace(1.0, 0.0, release)
+        splash = splash * env
+        splash = 0.85 * splash / np.max(np.abs(splash))
+        _write_asset(splash, rate, f"radio/picket_{i:02d}.ogg")
 
 
 def report_durations() -> None:
@@ -285,6 +352,8 @@ def main(argv: list[str] | None = None) -> int:
             raise SystemExit(f"Unknown music keys: {', '.join(unknown)}")
     if "--static" in flags or do_all:
         generate_static()
+    if "--fringe" in flags or do_all:
+        generate_fringe()
     needs_api = do_all or "--music" in flags or "--hosts" in flags or keys
     if needs_api:
         key = _api_key()

@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 from .. import engine_audio
-from ..audio import CH_AIR, CH_BRAKE, CH_JAKE
+from ..audio import CH_AIR, CH_BRAKE, CH_JAKE, CH_RADIO_FX
 from ..audio_fades import curve as _resolve_curve
+from ..radio import truck_elevation_ft
 from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
 from .driving_rest_states import EnforcementStopState, FelonyStopState, TrafficStopState
@@ -11,6 +12,23 @@ from .driving_rest_states import EnforcementStopState, FelonyStopState, TrafficS
 LANE_GUIDANCE_DRIFT_START = 0.3
 LANE_GUIDANCE_CENTER_MAX = 0.18
 LANE_GUIDANCE_PAN = 0.85
+
+# FM fringe rendering. The bed creeps in below full quieting (signal 0.6,
+# radio.SIGNAL_FULL_VOLUME) and deepens quadratically; pickets begin below
+# the old static threshold. PICKET_DUCK is the program level while a splash
+# owns the channel -- capture lost, near-silent, restored sharply.
+FRINGE_BED_SIGNAL = 0.6
+# Peak bed level ~= where the program used to sit, never a wall of noise on
+# top of it: the owner's smear ruling -- static takes the program's place.
+FRINGE_BED_MAX_VOLUME = 0.35
+PICKET_SIGNAL = 0.35
+PICKET_DUCK = 0.12
+# Flutter rate bounds: parked multipath barely moves (slow wander floor);
+# the ceiling is perceptual -- past ~9 events a second it just reads as
+# noise, and the one-shot mixer would thrash.
+PICKET_MIN_RATE_HZ = 0.4
+PICKET_MAX_RATE_HZ = 9.0
+FM_DEFAULT_MHZ = 98.0  # mid-band; wavelength varies ~10 percent over 88-108
 
 # Sustained redline quietly grinds the engine down (Truck._update_temps), so
 # the player must hear about it while it is happening, not at the end screen.
@@ -26,6 +44,9 @@ SHIFT_LOAD_CAP = 0.45
 # the torque interrupt, then rides the same recovery curve back up: the
 # engine genuinely falls away and returns, like a clutch actually opening.
 SHIFT_DISENGAGE_DUCK = 0.35
+# The gear taking at the end of an auto shift: a soft pick from the shift
+# bank, quieter than the interrupt clunk (0.65) that opened the shift.
+SHIFT_END_CLUNK_VOLUME = 0.4
 # When the shift completes the cap eases from SHIFT_LOAD_CAP back to full over
 # this window. The curve (a key into audio_fades.CURVES) shapes the return: an
 # ease-out leaves the shift level quickly -- so the engine doesn't sit soft --
@@ -1012,21 +1033,30 @@ class DrivingUpdateMixin:
         # -- ease the cap back to full over SHIFT_LOAD_RECOVERY_S along the
         # recovery curve, so the return "under load" is a shaped glide rather
         # than a single-frame snap.
-        # A real shift is a gap and a re-entry: the unloaded engine falls
-        # away, then SOUNDS again at the newly engaged rpm -- never a loaded
-        # glissando sliding down through the change (the formant smear the
-        # owner heard). Automatic: hold the voice at the pre-shift rpm
-        # through the torque interrupt and jump at engagement. Manual: the
-        # player owns the revs while the clutch is out (blips and
-        # rev-matching stay audible, and the physics already sinks toward
-        # idle), so only the load ducks -- the engine falls back unloaded
-        # and swells back in when the clutch hooks up.
+        # A real shift is kachunk -- sigh -- kachunk: never a LOADED
+        # glissando sliding through the change (the meow), but never a
+        # frozen hang either (the owner's 2026-07-24 catch: the voice used
+        # to hold the pre-shift rpm for the whole interrupt, then cliff).
+        # Automatic: the voice follows the live physics rpm, which eases
+        # unloaded toward the new gear's road speed -- ducked to 0.35 the
+        # whole way, it reads as the real between-gears fall -- and the
+        # engagement plays its own soft clunk as the load swells back.
+        # Manual: the player owns the revs while the clutch is out (blips
+        # and rev-matching stay audible, and the physics already sinks
+        # toward idle), so only the load ducks -- the engine falls back
+        # unloaded and swells back in when the clutch hooks up.
         manual_clutch_out = not t.transmission.automatic and t.transmission.clutch > 0.5
         if (t.transmission.automatic and t.transmission.shifting) or manual_clutch_out:
             self._shift_recover_t = 0.0
             cap = SHIFT_LOAD_CAP
             duck = SHIFT_DISENGAGE_DUCK
-            if t.transmission.automatic and self._shift_hold_rpm is None:
+            if t.transmission.automatic:
+                # Marker only: an auto shift is in flight. The voice follows
+                # the live physics rpm, which already sighs down toward the
+                # new gear's road speed through the interrupt (vehicle
+                # _update_rpm) -- ducked and unloaded, it reads as the real
+                # between-gears fall, not the old frozen hang (owner,
+                # 2026-07-24).
                 self._shift_hold_rpm = t.rpm
         elif self._shift_recover_t < 1.0:
             step = dt / SHIFT_LOAD_RECOVERY_S if SHIFT_LOAD_RECOVERY_S > 0 else 1.0
@@ -1034,7 +1064,14 @@ class DrivingUpdateMixin:
             recovered = _shift_recovery_curve(self._shift_recover_t)
             cap = SHIFT_LOAD_CAP + (1.0 - SHIFT_LOAD_CAP) * recovered
             duck = SHIFT_DISENGAGE_DUCK + (1.0 - SHIFT_DISENGAGE_DUCK) * recovered
-            self._shift_hold_rpm = None  # shift done: re-enter at the engaged rpm
+            if self._shift_hold_rpm is not None:
+                # Engagement: the gear takes. The interrupt's clunk played a
+                # second ago at shift START, so without this the actual
+                # moment the truck picks the load back up was silent.
+                audio.play_bank(
+                    "vehicle/shift_auto", "vehicle/gear_shift", volume=SHIFT_END_CLUNK_VOLUME
+                )
+                self._shift_hold_rpm = None
         else:
             cap = 1.0
             duck = 1.0
@@ -1049,9 +1086,7 @@ class DrivingUpdateMixin:
             blend = min(1.0, dt / ENGINE_LOAD_SMOOTH_S)
             self._engine_audio_throttle += (target_load - self._engine_audio_throttle) * blend
         engine_load = min(self._engine_audio_throttle, cap)
-        audio.set_engine_rpm(
-            t.rpm if self._shift_hold_rpm is None else self._shift_hold_rpm, engine_load
-        )
+        audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
         if t.engine_on and t.transmission.in_reverse:
             if not self._reverse_cue_active:
@@ -1139,6 +1174,9 @@ class DrivingUpdateMixin:
         if self.radio.enabled:
             self._update_radio_reception(dt)
             self._update_radio_playback(night, dt)
+            self._update_radio_fringe(dt)
+        else:
+            self._stop_radio_fringe()
         if self.weather.should_thunder():
             audio.play("weather/thunder")
 
@@ -1162,7 +1200,8 @@ class DrivingUpdateMixin:
         self._radio_signal_timer = 1.5
         before = self.radio.current_station()
         self.radio.update_position(
-            truck_position(self.route, self.trip.position_mi, self.ctx.world)
+            truck_position(self.route, self.trip.position_mi, self.ctx.world),
+            truck_elevation_ft(self.route, self.trip.position_mi),
         )
         reception = self.radio.current_reception()
         if reception.station.id != before.id:
@@ -1179,15 +1218,101 @@ class DrivingUpdateMixin:
             return
         self._radio_signal_factor = signal_volume_factor(reception)
         self._apply_radio_volume()
+        if reception.station.real_stream and not self.ctx.audio.music_playing():
+            # A dead stream is a silent radio, not a fringe one -- no program,
+            # so no crackle. Dock and menu beds borrow the music channel and
+            # nothing restarts the stream afterward (a network stall ends the
+            # same way), so quietly re-tune it here; if the station is truly
+            # unreachable the radio's own fallback machinery speaks the switch.
+            self._radio_reconnect_timer -= 1.5
+            if self._radio_reconnect_timer <= 0.0:
+                self._radio_reconnect_timer = 9.0
+                action = self.radio.play(self._radio_backend)
+                if action.fallback_used:
+                    self.radio.write_settings(self.ctx.settings)
+                    self.ctx.settings.save()
+                    self.ctx.say_event(action.message, interrupt=False)
+            self._radio_fringe_signal = None
+            return
+        self._radio_reconnect_timer = 0.0
+        # Cache what the per-frame fringe renderer needs: thinning signal and
+        # the dial frequency (for the picket flutter rate). Satellite and
+        # built-in stations have no fringe.
         signal = reception.signal
-        if 0.0 < signal < STATIC_SIGNAL_THRESHOLD and not reception.station.always_available:
-            self._radio_static_timer -= 1.5
-            if self._radio_static_timer <= 0.0:
-                self._radio_static_timer = 6.0
-                self.ctx.audio.play(
-                    "radio/static_burst",
-                    volume=0.08 + (STATIC_SIGNAL_THRESHOLD - signal) * 0.6,
-                )
+        if signal > 0.0 and not reception.station.always_available:
+            self._radio_fringe_signal = signal
+            self._radio_fringe_freq = reception.station.frequency_mhz
+        else:
+            self._radio_fringe_signal = None
+
+    # -- FM fringe: hiss bed + picket-fence flutter ---------------------------
+    #
+    # The hiss bed creeps in below full quieting and deepens with distance;
+    # pickets are sharp splashes of noise punching through the program (FM
+    # capture is a threshold, so the gating is abrupt -- owner ruling
+    # 2026-07-23). Their arrival is exponential around the physical Rayleigh
+    # rate 2v/lambda, never metronomic: a fixed 18 Hz tremolo sounds like a
+    # helicopter, not a fringe FM signal.
+
+    def _update_radio_fringe(self, dt: float) -> None:
+        audio = self.ctx.audio
+        signal = self._radio_fringe_signal
+        if signal is None or not audio.music_playing():
+            # No station, satellite/built-in, or a dead stream: a silent
+            # radio has no fringe (the Merced ghost-hiss lesson).
+            self._stop_radio_fringe()
+            return
+        depth = max(0.0, min(1.0, (FRINGE_BED_SIGNAL - signal) / FRINGE_BED_SIGNAL))
+        if depth <= 0.0:
+            self._stop_radio_fringe()
+            return
+        # start_loop dedupes on a running key, so this doubles as the volume
+        # update AND self-heals after anything stopped the channel. The radio
+        # knob scales the hiss along with the program it degrades.
+        audio.start_loop(
+            CH_RADIO_FX,
+            "radio/fm_hiss_loop",
+            volume=FRINGE_BED_MAX_VOLUME * depth * depth * self.ctx.settings.radio_volume,
+            fade_ms=600,
+        )
+        self._fringe_bed_active = True
+        if self._picket_duck_s > 0.0:
+            self._picket_duck_s -= dt
+            if self._picket_duck_s <= 0.0 and self._radio_picket_duck != 1.0:
+                self._radio_picket_duck = 1.0
+                self._apply_radio_volume()
+        if signal >= PICKET_SIGNAL:
+            return
+        picket_depth = (PICKET_SIGNAL - signal) / PICKET_SIGNAL
+        self._picket_wait_s -= dt
+        if self._picket_wait_s > 0.0:
+            return
+        freq = self._radio_fringe_freq or FM_DEFAULT_MHZ
+        wavelength_m = 299.792458 / freq
+        rate = 2.0 * abs(self.truck.velocity_mps) / wavelength_m
+        rate = min(PICKET_MAX_RATE_HZ, max(PICKET_MIN_RATE_HZ, rate))
+        rate *= 0.3 + 0.7 * picket_depth
+        self._picket_wait_s = self._fringe_rng.expovariate(rate)
+        # Owner's ear 2026-07-24: pickets sit UNDER the program at shallow
+        # fringe (they play on the hotter sfx bus, so numbers here run low)
+        # and only rival it deep in the noise.
+        audio.play_bank(
+            "radio/picket",
+            "radio/static_burst",
+            volume=(0.15 + 0.35 * picket_depth) * self.ctx.settings.radio_volume,
+        )
+        self._radio_picket_duck = PICKET_DUCK
+        self._picket_duck_s = 0.05 + 0.08 * self._fringe_rng.random()
+        self._apply_radio_volume()
+
+    def _stop_radio_fringe(self) -> None:
+        if self._fringe_bed_active:
+            self.ctx.audio.stop_loop(CH_RADIO_FX, fade_ms=400)
+            self._fringe_bed_active = False
+        if self._radio_picket_duck != 1.0:
+            self._radio_picket_duck = 1.0
+            self._picket_duck_s = 0.0
+            self._apply_radio_volume()
 
     def _station_rotation_pool(self, station: RadioStation, night: bool) -> tuple[str, ...]:
         if station.playlist == "route":
@@ -1309,7 +1434,8 @@ class DrivingUpdateMixin:
         station_before = self.radio.station_id
         self.radio.apply_settings(self.ctx.settings)
         self.radio.update_position(
-            truck_position(self.route, self.trip.position_mi, self.ctx.world)
+            truck_position(self.route, self.trip.position_mi, self.ctx.world),
+            truck_elevation_ft(self.route, self.trip.position_mi),
         )
         self.radio.current_station()
         if self.radio.station_id != station_before:
@@ -1318,7 +1444,8 @@ class DrivingUpdateMixin:
 
     def _apply_radio_volume(self) -> None:
         factor = getattr(self, "_radio_signal_factor", 1.0)
-        self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume * factor)
+        duck = getattr(self, "_radio_picket_duck", 1.0)
+        self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume * factor * duck)
 
     def _play_radio_current(self) -> None:
         self._sync_radio_settings()
@@ -2072,6 +2199,7 @@ class DrivingUpdateMixin:
                     reputation_hit=reputation_hit,
                     signaled=signaled,
                     return_message=return_message,
+                    out_of_service=(kind == "hos_out_of_service"),
                 )
             )
             return

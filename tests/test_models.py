@@ -694,3 +694,56 @@ def test_job_spoken_names_always_carry_the_state(world):
             assert origin_city.state in job.spoken_origin
         if dest_city.state:
             assert dest_city.state in job.spoken_destination
+
+
+def test_deadline_plans_around_hours_already_on_the_clock():
+    """A load accepted mid-shift gets its mandatory sleep in the deadline.
+
+    Owner catch 2026-07-24: deadlines assumed a fresh clock, so a
+    one-shift load accepted six hours into a shift promised a delivery
+    nobody could legally make (the mid-trip 10-hour sleep ate it)."""
+    from freight_fate.models.jobs import dispatch_deadline_hours, plan_hos
+    from freight_fate.sim.hos import HosClock
+
+    miles = 495.0  # ~9 driving hours: one shift for a fresh driver
+    fresh = plan_hos(miles)
+    assert fresh.sleeps == 0
+
+    used = HosClock(driving_min=6 * 60.0, duty_min=7 * 60.0, since_break_min=2 * 60.0)
+    mid_shift = plan_hos(miles, clock=used)
+    assert mid_shift.sleeps == 1
+
+    fresh_deadline = dispatch_deadline_hours(miles, 1.2)
+    tired_deadline = dispatch_deadline_hours(miles, 1.2, clock=used)
+    assert tired_deadline >= fresh_deadline + 10.0
+
+
+def test_fresh_clock_plans_are_unchanged_by_the_clock_parameter():
+    from freight_fate.models.jobs import plan_hos
+    from freight_fate.sim.hos import HosClock
+
+    for miles in (110.0, 495.0, 1150.0):
+        assert plan_hos(miles, clock=HosClock()) == plan_hos(miles)
+
+
+def test_burned_duty_window_forces_the_sleep_even_with_drive_hours_left():
+    # 13 hours of window gone with only 3 driven: the 14-hour wall, not the
+    # 11-hour driving cap, is what forces the reset.
+    from freight_fate.models.jobs import plan_hos
+    from freight_fate.sim.hos import HosClock
+
+    window_burned = HosClock(driving_min=3 * 60.0, duty_min=13 * 60.0)
+    plan = plan_hos(495.0, clock=window_burned)
+    assert plan.sleeps == 1
+
+
+def test_board_speaks_the_rest_the_deadline_covers():
+    from freight_fate.models.jobs import Job
+
+    job = Job(
+        CARGO_CATALOG["general"], 15, "A", "Loc", "B", 300, 700.0, 24.0,
+        deadline_covers_rest=True,
+    )
+    assert "10-hour rest" in job.describe()
+    plain = Job(CARGO_CATALOG["general"], 15, "A", "Loc", "B", 300, 700.0, 9.0)
+    assert "10-hour rest" not in plain.describe()

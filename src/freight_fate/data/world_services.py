@@ -37,6 +37,12 @@ CITY_SERVICE_APPROACH_ROADS = {
 _ROAD_REF_LIST = re.compile(r"\(([^()]*;[^()]*)\)")
 
 
+# Josh's ruling (2026-07-24): local deadheads run 1 to 9 miles. The bake
+# already floors facilities at 2.1; this caps the synthetic single-leg
+# top end until the placement audit re-geocodes the misplaced pins.
+SYNTHETIC_APPROACH_CAP_MI = 9.0
+
+
 def _spoken_road_text(text: str) -> str:
     """Trim raw OSM ref lists out of player-facing street text.
 
@@ -277,5 +283,13 @@ class WorldServiceMixin:
             offset = (seed % 7) * 0.25
             miles = round(base_miles + offset, 1)
             road = FACILITY_APPROACH_ROADS.get(location.type, "facility access road")
+        # Sanity clamp for the synthetic single-leg approach: 776 baked
+        # records carry up to the bake tool's 35-mile cap because the
+        # facility's geocoded pin landed tens of miles from its city --
+        # Josh drew a 35-mile straight deadhead in Kenosha (2026-07-24).
+        # Until the placement audit re-geocodes them (roadmap), no local
+        # deadhead crawls half a county; real multi-leg street chains
+        # above are never clamped.
+        miles = min(miles, SYNTHETIC_APPROACH_CAP_MI)
         leg = Leg(city, city, miles, road, "flat", ())
         return Route([city, city], [leg])
