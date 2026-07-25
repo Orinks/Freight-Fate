@@ -1658,7 +1658,7 @@ class ArrivalState(MenuState):
             ids.append("home_return")
 
         # -- Seasons: the calendar rides shotgun ------------------------------
-        from ..sim.season import date_text
+        from ..sim.season import date_text, is_friday_the_thirteenth
         from ..sim.season import season as season_of
 
         career_season = season_of(p.game_hours)
@@ -1695,6 +1695,46 @@ class ArrivalState(MenuState):
             ids.append("first_ticket")
         if d.speeding_tickets >= 2:
             ids.append("second_ticket")
+
+        # -- Dates worth noticing, and records worth keeping ------------------
+        arrival_date = date_text(p.game_hours)
+        if arrival_date == "December 25":
+            ids.append("christmas_delivery")
+        if arrival_date == "January 1" and arrival_hour < 3.0:
+            ids.append("new_year_run")
+        if is_friday_the_thirteenth(p.game_hours) and trip_damage <= 1.0:
+            ids.append("friday_thirteenth")
+        if job.distance_mi >= 1_000.0:
+            ids.append("five_hundred_mile_run")
+        if job.weight_tons >= 16.0:
+            ids.append("sixteen_tons")
+        if arrival_hour < 4.0 and increment_stat(p, "night_deliveries") >= 10:
+            ids.append("night_shift_regular")
+        # A clean licence is a running record, so a single ticket ends it: the
+        # counter only advances on deliveries that came with none.
+        if d.speeding_tickets == 0:
+            if increment_stat(p, "ticket_free_deliveries") >= 50:
+                ids.append("never_fought_the_law")
+        else:
+            reset_stat(p, "ticket_free_deliveries")
+        # Everything that could have gone wrong, going wrong slowly.
+        if (
+            on_time
+            and arrival_hour < 4.0
+            and d.truck.fuel_fraction < 0.15
+            and d.weather.effects.grip < 0.9
+        ):
+            ids.append("one_for_the_road")
+        # The tractor and the band it came out of: slip-seating means a junior
+        # driver meets a lot of iron.
+        if add_unique_stat(p, "tractors_driven", p.active_truck_key()) >= 5:
+            ids.append("five_tractors")
+        if not p.owns_equipment():
+            from ..models.carrier_fleet import FLEET_TIERS, fleet_tier_for_level
+
+            tier = fleet_tier_for_level(int(p.career.level)).key
+            if add_unique_stat(p, "fleet_tiers_driven", tier) >= len(FLEET_TIERS):
+                ids.append("every_fleet_tier")
 
         for achievement_id in ids:
             result = self.ctx.award_achievement(achievement_id, announce=False)

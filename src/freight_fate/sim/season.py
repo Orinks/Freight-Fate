@@ -127,6 +127,18 @@ def date_text(game_hours: float) -> str:
     return f"{date:%B} {date.day}"
 
 
+def is_friday_the_thirteenth(game_hours: float) -> bool:
+    """Whether the career calendar has landed on a Friday the thirteenth.
+
+    The career runs the same fixed 365-day year every lap, mapped onto 2001,
+    so the unlucky dates are the ones 2001 had -- and they come round again
+    each career year, which is what a superstition wants anyway.
+    """
+    doy = int(day_of_year(game_hours))
+    date = datetime.date(2001, 1, 1) + datetime.timedelta(days=(doy - 1) % 365)
+    return date.day == 13 and date.weekday() == 4
+
+
 def career_year(game_hours: float) -> int:
     """Which year of the career this clock falls in (1 on the first lap of the
     calendar, 2 after a full year, ...). Always 1 for the real-calendar clock."""

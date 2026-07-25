@@ -4,6 +4,34 @@
 
 ### Added
 
+- **The yard has thirty-five tractors in it now, not twelve.** Day cabs and
+  sleepers, light tractors that leave the weight for the freight and heavy
+  ones spec'd to pull it, aero shapes that sip diesel and long-hood
+  conventionals that absolutely do not. Every band of the carrier's fleet
+  now holds a real spread instead of two or three trucks, so the truck you
+  are handed says something about the work.
+
+- **Dispatch picks the truck to fit the load.** Early in a career you
+  slip-seat, the way a new hire really does: no tractor is yours, and the
+  yard hands you whatever is free and suited to the run. A load too far to
+  finish inside one driving shift comes with a bunk. A heavy load comes with
+  the driveline for it. A turn you will be back from tonight comes with a
+  day cab. Dispatch tells you which truck and why when it changes. The yard
+  leaves you the same few spares, so each one keeps its own fuel, wear, and
+  dents and you get to know which of them pulls. Make level nine and that
+  ends: seniority means a truck of your own, and you keep it.
+
+- **Twenty-one new achievements, including several that should not count.**
+  The radio finally has badges of its own -- riding a station until the hiss
+  takes it, catching one from far outside anything it should reach, holding
+  one signal across three state lines. So does the driving craft: two miles
+  of downgrade held on the engine without touching the service brake, and
+  cooking the drums hot enough to start losing them. There are badges for
+  Christmas Day, for a Friday the thirteenth that went fine anyway, and for
+  fifty deliveries without a single ticket. And there is one for holding
+  exactly sixty-nine miles an hour for a solid mile, which means nothing at
+  all.
+
 - **Cruise reads the road ahead and drives the hill before it arrives.**
   Like the predictive cruise on a modern truck, it looks a mile and a half
   up the road and plans against what is actually there. It banks a couple

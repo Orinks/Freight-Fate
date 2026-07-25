@@ -1060,8 +1060,160 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
         "Landmarks",
         "George Hamilton IV - Abilene",
     ),
+    # -- The dial: 569 stations and nothing hung on them until now -------------
+    Achievement(
+        "radio_faded_out",
+        "Somewhere in the Static",
+        "You rode a station all the way to the end of its reach, hiss creeping in under the music until the last of it went. Nobody hung up on you. The hill just got in the way.",
+        "Radio",
+        "Harry Chapin - W.O.L.D.",
+    ),
+    Achievement(
+        "radio_fringe_catch",
+        "Skip on the Far End",
+        "You pulled in a station from far outside anything it has business reaching, flickering in and out at highway speed. Height is range, and you were up where the air is thin.",
+        "Radio",
+        "Wall of Voodoo - Mexican Radio",
+    ),
+    Achievement(
+        "radio_three_states",
+        "Same Song, Three State Lines",
+        "One station carried you across three states before you finally lost it. Somewhere back there a transmitter is still trying.",
+        "Radio",
+        "Golden Earring - Radar Love",
+    ),
+    Achievement(
+        "radio_dial_wanderer",
+        "Worked the Whole Dial",
+        "Twenty-five different stations found and left behind. You are not listening to the radio so much as reading the country off it.",
+        "Radio",
+        "The Carpenters - Yesterday Once More",
+    ),
+    # -- Craft: things only a driver who is paying attention will do -----------
+    Achievement(
+        "jake_only_descent",
+        "Down the Mountain on the Jake",
+        "Two miles of real downgrade and you never once put a foot on the service brake. The engine held the whole thing, and the drums came off that hill as cool as they went on.",
+        "Challenges",
+        "C.W. McCall - Black Bear Road",
+    ),
+    Achievement(
+        "brake_smoke",
+        "Smoke, Smoke, Smoke Those Drums",
+        "You cooked the brakes hot enough to start losing them. They came back. Next hill, try the gear you should have been in.",
+        "Challenges",
+        "Tex Williams - Smoke! Smoke! Smoke! (That Cigarette)",
+    ),
+    Achievement(
+        "predictive_crest",
+        "No Mountain High Enough",
+        "You let cruise read the hill before you got to it: it banked a little speed on the flat and carried it up a grade that would have taken it off you. Nothing you had to do about it.",
+        "Challenges",
+        "Marvin Gaye & Tammi Terrell - Ain't No Mountain High Enough",
+    ),
+    Achievement(
+        "thrifty_run",
+        "Sipping It All the Way",
+        "A whole delivery run at better than eight miles to the gallon. Light foot, early lift, and a truck that was in the right gear for once.",
+        "Challenges",
+        "Eddie Rabbitt - Drivin' My Life Away",
+    ),
+    # -- The yard: whatever they hand you --------------------------------------
+    Achievement(
+        "five_tractors",
+        "Whatever the Yard Has Free",
+        "Five different tractors under you. Slip-seating means no truck is yours, and you have started noticing which of the spares pulls and which one just makes noise.",
+        "Truck care",
+        "Red Simpson - Roll, Truck, Roll",
+    ),
+    Achievement(
+        "every_fleet_tier",
+        "Every Rung of the Yard",
+        "From the trainer rig to first pick of the lot, you have driven something out of every band the carrier keeps. The good iron was worth waiting for.",
+        "Truck care",
+        "Waylon Jennings - Are You Sure Hank Done It This Way",
+    ),
+    # -- Dates on the calendar --------------------------------------------------
+    Achievement(
+        "christmas_delivery",
+        "Hard Candy Christmas Run",
+        "You signed for a load on Christmas Day. The dock was quiet, the receiver was nice about it, and somewhere a table went ahead without you.",
+        "Seasons",
+        "Dolly Parton - Hard Candy Christmas",
+    ),
+    Achievement(
+        "friday_thirteenth",
+        "Superstition, Signed For",
+        "Delivered on a Friday the thirteenth without a scratch on you. Whatever was supposed to happen took the day off.",
+        "Seasons",
+        "Stevie Wonder - Superstition",
+    ),
+    Achievement(
+        "new_year_run",
+        "Working Through the Countdown",
+        "Midnight on New Year's found you between two towns with the heater on. Somebody somewhere was counting backwards. You were counting mile markers.",
+        "Seasons",
+        "U2 - New Year's Day",
+    ),
+    # -- Long numbers and clean records ----------------------------------------
+    Achievement(
+        "five_hundred_mile_run",
+        "And Five Hundred More",
+        "One dispatch, over a thousand miles, start to finish. Long enough that the weather changed its mind twice and you stopped noticing the radio.",
+        "Routes",
+        "The Proclaimers - I'm Gonna Be (500 Miles)",
+    ),
+    Achievement(
+        "never_fought_the_law",
+        "Never Fought the Law",
+        "Fifty deliveries and not one ticket. No arguing at the window, no citation in the door pocket, no story to tell about it either.",
+        "Challenges",
+        "The Bobby Fuller Four - I Fought the Law",
+    ),
+    Achievement(
+        "night_shift_regular",
+        "Night Moves on the Interstate",
+        "Ten loads signed for in the small hours. You have gone properly nocturnal: empty lanes, cheap fuel, and receivers who are surprised to see anybody.",
+        "Deliveries",
+        "Bob Seger - Night Moves",
+    ),
+    Achievement(
+        "coffee_regular",
+        "One More Cup for the Road",
+        "Twenty-five breaks taken properly, and every one of them started at a coffee pot of dubious reputation. It is not the coffee. It is the sitting down.",
+        "Rest and service",
+        "Bob Dylan - One More Cup of Coffee",
+    ),
+    # -- Numbers that mean nothing and everything ------------------------------
+    Achievement(
+        "sixty_nine_mph",
+        "Summer of Sixty-Nine",
+        "You held it at exactly sixty-nine miles an hour for a solid mile. The number has no significance whatsoever. You know precisely what you did.",
+        "Challenges",
+        "Bryan Adams - Summer of '69",
+    ),
+    Achievement(
+        "eighty_eight_mph",
+        "Where We're Going, We Need Roads",
+        "Eighty-eight miles an hour in a loaded truck. Nothing happened, nowhere else and no other year. Just a very fast truck and a very brief lapse of judgment.",
+        "Challenges",
+        "Huey Lewis and the News - The Power of Love",
+    ),
+    Achievement(
+        "sixteen_tons",
+        "Another Day Older",
+        "You have moved sixteen tons in a single load, and what did you get. A settlement line, a sore back, and a dispatcher already asking about the next one.",
+        "Cargo",
+        "Tennessee Ernie Ford - Sixteen Tons",
+    ),
+    Achievement(
+        "one_for_the_road",
+        "One More for the Ditch",
+        "A load delivered after midnight, on fumes, in the rain, still on time. Everything went wrong slowly enough that none of it managed to matter.",
+        "Challenges",
+        "Tom Waits - One for My Baby (and One More for the Road)",
+    ),
 )
-
 ACHIEVEMENT_BY_ID = {achievement.id: achievement for achievement in ACHIEVEMENTS}
 
 
@@ -1106,6 +1258,11 @@ def increment_stat(profile: Profile, key: str) -> int:
     value = int_stat(profile, key) + 1
     _stats(profile)[key] = value
     return value
+
+
+def reset_stat(profile: Profile, key: str) -> None:
+    """Zero a running counter, for the streaks a single bad day ends."""
+    _stats(profile)[key] = 0
 
 
 def bool_stat(profile: Profile, key: str) -> bool:

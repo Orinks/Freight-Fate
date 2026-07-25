@@ -288,6 +288,10 @@ class DrivingState(
         self._climb_cue_said = False  # cruise has already owned up to this pull
         self._climb_cue_s = 0.0  # quiet time between hand-back cues
         self._descent_cue_s = 0.0  # quiet time between descent-control cues
+        self._nice_speed_mi = 0.0  # distance held at a very particular speed
+        self._jake_descent_mi = 0.0  # downgrade held on the engine alone
+        self._radio_states_station = ""  # station the state tally belongs to
+        self._radio_states_held: set[str] = set()
         self._cruise_descent_mph = None  # interactive descent ceiling, while it lasts
         self._cruise_exit_mph: float | None = None
         self._cruise_curve_mph: float | None = None

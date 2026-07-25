@@ -3,10 +3,15 @@
 from freight_fate.models.business import LEASED_OWNER_OPERATOR
 from freight_fate.models.career import LEVEL_XP
 from freight_fate.models.carrier_fleet import (
+    DEDICATED_TRUCK_LEVEL,
     FLEET_TIERS,
+    SLIP_SEAT_POOL_SIZE,
     assigned_truck_key,
+    assignment_reason_text,
     fleet_assignment_text,
     fleet_tier_for_level,
+    slip_seat_pool,
+    slip_seats,
 )
 from freight_fate.models.profile import Profile
 from freight_fate.models.trucks import TRUCK_CATALOG
@@ -91,3 +96,161 @@ def test_assignment_text_is_spoken_plainly():
     lowered = text.lower()
     for marker in ("osm", "_", "tier_", "key="):
         assert marker not in lowered
+
+
+# -- slip-seating: the tractor is picked for the load ------------------------------
+
+
+def _job(distance_mi: float, weight_tons: float):
+    from types import SimpleNamespace
+
+    return SimpleNamespace(distance_mi=distance_mi, weight_tons=weight_tons)
+
+
+def test_every_fleet_tier_offers_a_real_choice_of_equipment():
+    """Dispatch can only match a load if the yard holds different trucks.
+
+    The regional tier is where slip-seating actually bites, so it has to carry
+    both cab types and all three driveline specs; the long-haul tiers up are
+    sleepers by definition but still need light through heavy.
+    """
+    from freight_fate.models.trucks import CAB_DAY, CAB_SLEEPER, TRUCK_CATALOG
+
+    regional = next(tier for tier in FLEET_TIERS if tier.key == "regional")
+    cabs = {TRUCK_CATALOG[key].cab for key in regional.pool}
+    assert cabs == {CAB_DAY, CAB_SLEEPER}
+    for tier in FLEET_TIERS[1:]:
+        specs = {TRUCK_CATALOG[key].spec for key in tier.pool}
+        assert len(specs) >= 3, (tier.key, specs)
+    # Long-haul and up is life-on-the-road work: no day cabs up there.
+    for tier in FLEET_TIERS[2:]:
+        assert all(TRUCK_CATALOG[key].cab == CAB_SLEEPER for key in tier.pool), tier.key
+
+
+def test_a_junior_driver_draws_a_small_stable_set_of_spares():
+    """The yard leaves the same few trucks free, so their wear is knowable.
+
+    Each tractor keeps its own fuel, wear, and damage, and a driver who drew a
+    brand new truck every load would never watch one age.
+    """
+    profile = _profile_at_level(6)
+    pool = slip_seat_pool(profile)
+    assert len(pool) == SLIP_SEAT_POOL_SIZE
+    assert len(set(pool)) == len(pool)
+    assert slip_seat_pool(_profile_at_level(6)) == pool  # stable across calls
+    tier = fleet_tier_for_level(6)
+    assert set(pool) <= set(tier.pool)
+    # Two drivers at the same level do not get the same three trucks.
+    others = {slip_seat_pool(_profile_at_level(6, name=f"Driver {n}")) for n in range(12)}
+    assert len(others) > 1
+
+
+def test_a_run_that_needs_a_bunk_never_goes_out_on_a_day_cab():
+    """Hours of service decide this, not preference.
+
+    Eleven hours of driving does not cover a nine hundred mile run, so the
+    truck has to have a bed in it.
+    """
+    from freight_fate.models.trucks import CAB_SLEEPER, TRUCK_CATALOG
+
+    long_run = _job(900.0, 12.0)
+    for n in range(24):
+        profile = _profile_at_level(6, name=f"Driver {n}")
+        key = assigned_truck_key(profile, long_run)
+        assert TRUCK_CATALOG[key].cab == CAB_SLEEPER, (n, key)
+
+
+def test_a_heavy_load_gets_a_heavy_spec_tractor():
+    from freight_fate.models.trucks import SPEC_HEAVY, TRUCK_CATALOG
+
+    heavy = _job(140.0, 24.0)
+    picks = set()
+    for n in range(24):
+        profile = _profile_at_level(6, name=f"Driver {n}")
+        key = assigned_truck_key(profile, heavy)
+        picks.add(TRUCK_CATALOG[key].spec)
+    assert picks == {SPEC_HEAVY}
+
+
+def test_a_light_local_turn_gets_a_day_cab():
+    """A day's work is day-cab work; the yard keeps its sleepers for the lanes."""
+    from freight_fate.models.trucks import CAB_DAY, TRUCK_CATALOG
+
+    turn = _job(120.0, 8.0)
+    day_cabs = 0
+    for n in range(24):
+        profile = _profile_at_level(6, name=f"Driver {n}")
+        if TRUCK_CATALOG[assigned_truck_key(profile, turn)].cab == CAB_DAY:
+            day_cabs += 1
+    # Not every driver's three spares include a day cab, but most yards do.
+    assert day_cabs >= 12, day_cabs
+
+
+def test_the_same_load_from_the_same_yard_always_comes_with_the_same_truck():
+    job = _job(700.0, 15.0)
+    first = assigned_truck_key(_profile_at_level(6), job)
+    assert assigned_truck_key(_profile_at_level(6), job) == first
+
+
+def test_seniority_ends_slip_seating():
+    """A senior driver has a seat of their own and comes back to it."""
+    profile = _profile_at_level(DEDICATED_TRUCK_LEVEL)
+    assert not slip_seats(profile)
+    standing = assigned_truck_key(profile)
+    for job in (_job(120.0, 8.0), _job(900.0, 24.0), _job(380.0, 14.0)):
+        assert assigned_truck_key(profile, job) == standing
+    assert slip_seats(_profile_at_level(DEDICATED_TRUCK_LEVEL - 1))
+
+
+def test_new_hires_are_not_shuffled_around_the_yard():
+    """Levels one to three are the trainer truck, every load, every driver."""
+    for n in range(8):
+        profile = _profile_at_level(2, name=f"Driver {n}")
+        assert assigned_truck_key(profile, _job(900.0, 24.0)) == "rig"
+        assert profile.take_slip_seat(_job(120.0, 8.0)) == "rig"
+
+
+def test_taking_a_slip_seat_sticks_for_the_run():
+    """The truck dispatch handed over is the truck the drive uses."""
+    profile = _profile_at_level(6)
+    key = profile.take_slip_seat(_job(900.0, 12.0))
+    assert profile.active_truck_key() == key
+    assert profile.truck_specs() == TRUCK_CATALOG[key].specs
+    # A different load can bring a different truck, and that one sticks too.
+    other = profile.take_slip_seat(_job(120.0, 24.0))
+    assert profile.active_truck_key() == other
+
+
+def test_a_stale_assignment_falls_back_instead_of_stranding_the_driver():
+    """A promotion moves the pool on; the old key must not survive it.
+
+    Saves written before slip-seating also carry a truck value from the old
+    scheme, and it must not pin a driver to a truck their yard does not hold.
+    """
+    profile = _profile_at_level(6)
+    profile.truck = "presidential_sleeper"  # not in any regional yard
+    assert profile.active_truck_key() in fleet_tier_for_level(6).pool
+
+
+def test_owner_operators_are_never_slip_seated():
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
+
+    profile = _profile_at_level(6)
+    profile.business_status = LEASED_OWNER_OPERATOR
+    profile.truck = "highline_sleeper"
+    profile.owned_trucks = ["highline_sleeper"]
+    assert profile.take_slip_seat(_job(900.0, 24.0)) == "highline_sleeper"
+    assert profile.active_truck_key() == "highline_sleeper"
+
+
+def test_the_assignment_reason_is_spoken_plainly():
+    """The driver is told why they are in this truck, in driver words."""
+    profile = _profile_at_level(6)
+    long_run = _job(900.0, 12.0)
+    text = assignment_reason_text(assigned_truck_key(profile, long_run), long_run)
+    assert "bunk" in text
+    lowered = text.lower()
+    for marker in ("osm", "_", "spec=", "cab=", "key=", "none"):
+        assert marker not in lowered
+    heavy = _job(140.0, 24.0)
+    assert "heavy" in assignment_reason_text(assigned_truck_key(profile, heavy), heavy)

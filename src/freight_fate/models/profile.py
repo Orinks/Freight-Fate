@@ -721,9 +721,31 @@ class Profile:
         """
         if self.owns_equipment():
             return self.truck
-        from .carrier_fleet import assigned_truck_key
+        from .carrier_fleet import assigned_truck_key, slip_seat_pool, slip_seats
 
+        # A slip-seating driver keeps the tractor dispatch handed them for this
+        # run (``take_slip_seat`` wrote it into ``truck``, which has always
+        # doubled as the assignment key). It has to still be one of this
+        # driver's spares to count: a promotion moves the pool on, and a save
+        # written before slip-seating carries a value from the old scheme.
+        if slip_seats(self) and self.truck in slip_seat_pool(self):
+            return self.truck
         return assigned_truck_key(self)
+
+    def take_slip_seat(self, job) -> str:
+        """Draw the tractor dispatch has picked for this load; returns its key.
+
+        Company drivers only, and only while they are still slip-seating --
+        an owner-operator's truck is their own, and a senior company driver
+        has a seat of their own to come back to.
+        """
+        from .carrier_fleet import assigned_truck_key, slip_seats
+
+        if self.owns_equipment() or not slip_seats(self):
+            return self.active_truck_key()
+        key = assigned_truck_key(self, job)
+        self.truck = key
+        return key
 
     def visible_owned_trucks(self) -> tuple[str, ...]:
         """Player-owned tractors to show in menus."""

@@ -295,6 +295,7 @@ class DrivingUpdateMixin:
         self._update_keeper(dt, braking, accelerating, clutch_disengaged)
 
         self._update_auto_jake(dt)
+        self._track_driving_badges(dt)
         if t.transmission.automatic and t.engine_on:
             new_gear = t.auto_shift()
             if new_gear is not None:
@@ -1206,6 +1207,8 @@ class DrivingUpdateMixin:
         reception = self.radio.current_reception()
         if reception.station.id != before.id:
             # the tuned station fell past its range contour mid-drive
+            self.ctx.award_achievement("radio_faded_out", event=True)
+            self._radio_states_held.clear()
             self.ctx.audio.play("radio/static_burst", volume=0.5)
             action = self.radio.select_station(SAFE_ROUTE_PLAYLIST, self._radio_backend)
             self.radio.write_settings(self.ctx.settings)
@@ -1217,6 +1220,7 @@ class DrivingUpdateMixin:
             )
             return
         self._radio_signal_factor = signal_volume_factor(reception)
+        self._track_radio_badges(reception)
         self._apply_radio_volume()
         if reception.station.real_stream and not self.ctx.audio.music_playing():
             # A dead stream is a silent radio, not a fringe one -- no program,
@@ -1429,6 +1433,78 @@ class DrivingUpdateMixin:
         except RadioPlaybackError:
             self.ctx.audio.stop_music(600)
             self._playlist_wait_s = 30.0
+
+    def _track_radio_badges(self, reception) -> None:
+        """Badges for actually living on the dial rather than just switching it on.
+
+        The catalog had nothing for the radio at all, which is a strange gap in
+        a game with five hundred odd real stations and terrain-aware
+        propagation: the interesting things a driver notices -- a signal held
+        across three states, a station arriving from far outside its contour --
+        went unremarked.
+        """
+        p = self.ctx.profile
+        if p is None:
+            return
+        station = reception.station
+        if add_unique_stat(p, "radio_stations_heard", station.id) >= 25:
+            self.ctx.award_achievement("radio_dial_wanderer", event=True)
+        # Fringe reception: audible, but well past where this station has any
+        # business reaching. Height is range, so this is a hilltop catch.
+        if 0.0 < self._radio_signal_factor <= STATIC_SIGNAL_THRESHOLD:
+            self.ctx.award_achievement("radio_fringe_catch", event=True)
+        state = self.trip.state_at()
+        if not state:
+            return
+        if self._radio_states_station != station.id:
+            self._radio_states_station = station.id
+            self._radio_states_held = {state}
+            return
+        self._radio_states_held.add(state)
+        if len(self._radio_states_held) >= 3:
+            self.ctx.award_achievement("radio_three_states", event=True)
+
+    def _track_driving_badges(self, dt: float) -> None:
+        """Badges for the driving itself: craft, and one or two bad ideas.
+
+        Kept out of the physics so nothing here can change how the truck
+        behaves -- these only ever read.
+        """
+        t = self.truck
+        if self.ctx.profile is None or not t.engine_on:
+            return
+        speed = t.speed_mph
+        # A mile held at exactly sixty-nine. It means nothing. It is also the
+        # single most requested number in the history of odometers.
+        if 68.5 <= speed <= 69.5:
+            self._nice_speed_mi += speed * dt / 3600.0
+            if self._nice_speed_mi >= 1.0:
+                self.ctx.award_achievement("sixty_nine_mph", event=True)
+        else:
+            self._nice_speed_mi = 0.0
+        if speed >= 88.0:
+            self.ctx.award_achievement("eighty_eight_mph", event=True)
+        if t.brake_temp_c >= t.brake_fade_onset_c:
+            self.ctx.award_achievement("brake_smoke", event=True)
+        # Two miles of real downgrade held on the engine alone. The service
+        # brake touching at all resets it -- that is the whole point.
+        if t.grade <= -0.04 and t.engine_brake and speed > 5.0:
+            if t.brake > 0.01 or t.emergency_brake:
+                self._jake_descent_mi = 0.0
+            else:
+                self._jake_descent_mi += speed * dt / 3600.0
+                if self._jake_descent_mi >= 2.0:
+                    self.ctx.award_achievement("jake_only_descent", event=True)
+        elif t.grade > -0.02:
+            self._jake_descent_mi = 0.0
+        # Predictive cruise banking speed for a grade that would really have
+        # taken it: the feature earning its keep, once, out loud.
+        if (
+            self._cruise_mph is not None
+            and self._pcc_phase == "building"
+            and self._grade_extremes_ahead()[0] >= 0.04
+        ):
+            self.ctx.award_achievement("predictive_crest", event=True)
 
     def _sync_radio_settings(self) -> None:
         station_before = self.radio.station_id

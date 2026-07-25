@@ -1386,6 +1386,20 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 return segment.terrain
         return leg.terrain
 
+    def state_at(self, mile: float | None = None) -> str:
+        """The state the truck is in, or empty where the bake is silent.
+
+        Baked per leg segment, so it follows the road rather than the endpoint
+        cities -- a leg that clips a corner of a third state answers with that
+        state while the wheels are in it.
+        """
+        sample_mile = self.position_mi if mile is None else mile
+        leg_i, leg_start = self._leg_at_mile(sample_mile)
+        leg = self.route.legs[leg_i]
+        forward = self.route.cities[leg_i] == leg.a
+        offset = max(0.0, min(leg.miles, sample_mile - leg_start))
+        return _leg_state_at(leg, offset if forward else leg.miles - offset) or ""
+
     def _leg_at_mile(self, mile: float) -> tuple[int, float]:
         clamped = max(0.0, min(mile, self.total_miles))
         for i in range(len(self.route.legs) - 1, -1, -1):

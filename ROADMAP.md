@@ -217,7 +217,26 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       on traffic or easing to a lower limit -- the drums do that quietly
       and the jake is loud.
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
-- [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
+- [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models; the roster grew to 35 on 2026-07-25 and dispatch now matches the tractor to the load -- see the slip-seat entry below), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
+- [x] **Slip-seat dispatch and a 35-tractor roster (2026-07-25).** The
+      catalog grew from twelve to thirty-five, spread across day cabs and
+      sleepers and light, standard, and heavy driveline specs so there is
+      something real for dispatch to choose between. Junior company drivers
+      now slip-seat -- what actually happens to a new hire at a big carrier
+      -- drawing a tractor per load from a small stable set of yard spares,
+      matched to the work: a bunk for anything past 500 miles (eleven hours
+      of driving does not cover it), a heavy spec past 20 tons, a day cab
+      for a turn inside 250. The pool is deliberately small and stable so
+      each spare keeps its own fuel, wear, and damage and the player learns
+      which of them pulls; it is also coverage-checked, because the rotation
+      alone once left a driver holding nothing but day cabs and sent them
+      out on a nine hundred mile run. Levels 1 to 3 stay on the trainer rig
+      (onboarding wants one answer), and level 9 ends slip-seating for good
+      -- seniority is a truck of your own.
+- [ ] **Trailers still come from the cargo, not the yard.** Trailer type is
+      already chosen by what is in the load, which is right, but the yard has
+      no trailer *inventory* and no notion of dropping and hooking. Worth
+      revisiting alongside drop-and-hook freight.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
 - [x] **Physics test bench** (`tools/physics_bench.py`): deterministic scripted-driver scenarios over the real truck model -- descents, runaway coasts, stop tests -- printing plain-text, screen-reader-friendly, diffable reports (peak brake temp, fade onset, wear added, the cues the game would have played). The tuning loop for every physics change; `tests/test_physics_bench.py` keeps its orderings honest. Now also a tuning instrument: `--sweep` re-runs a scenario across one knob (speed, cargo, grade, wear) one line per value, and `--solve` bisects for an edge ("the fastest drag speed that stays under fade"), both plain-text and deterministic.
 - [x] **Per-truck condition.** Wear, damage, and fuel moved off the profile into `truck_conditions`, keyed by truck, so each owned tractor keeps its own state and swapping trucks no longer teleports condition. Legacy saves migrate (all owned trucks inherit current wear; no pristine spare), per-truck wear is under the save signature, and the field is scoped by truck *model* key -- true per-instance trucks are still the rental feature's job.
@@ -1136,7 +1155,7 @@ section below and the Unreleased changelog; the release-line view:
       first dispatch is accepted, a Career plan terminal item naming the
       next practical step, and a rewritten How to play that teaches earned
       dispatch freedom.
-- [x] **145 achievements.** The badge wall nearly doubles and keeps
+- [x] **166 achievements.** The badge wall nearly doubles and keeps
       growing: state, region, and city arrivals, cargo firsts, close calls,
       mishaps, and career milestones, each nodding to a country or trucking
       song. The 1.9 arc adds level milestones through 30, business-gate
@@ -1149,6 +1168,17 @@ section below and the Unreleased changelog; the release-line view:
       shared `SIMPLE_ARRIVAL_BADGES` mapping. The copy rule now allows a
       song title in badge text when it is simply a place name; artist names
       and lyrics stay out.
+      The 2026-07-25 pass adds twenty-one more over ground the wall had
+      never touched: the radio (a station ridden until the hiss takes it,
+      a fringe catch from far outside its contour, one signal held across
+      three state lines, twenty-five stations found), driving craft (two
+      miles of downgrade on the engine alone, drums cooked past fade,
+      predictive cruise reading a real hill, a run better than eight miles
+      to the gallon), the slip-seat yard (five tractors, every fleet band),
+      calendar dates (Christmas, Friday the thirteenth, New Year's
+      midnight), clean-record streaks, and a short row of deliberate jokes
+      -- eighty-eight miles an hour, sixteen tons in one load, and a solid
+      mile held at exactly sixty-nine.
 - [x] **Save compatibility.** Careers back through the version-4 schema
       load with sensible defaults, and newer-snapshot saves no longer crash
       older-schema loads.

@@ -13,7 +13,7 @@ import random
 
 import pygame
 
-from ..achievements import add_unique_stat, increment_stat
+from ..achievements import add_unique_stat, increment_stat, reset_stat
 from ..data.amenities import classify_brand, spoken_amenities
 from ..data.buffs import buffs_for_stop
 from ..data.world import Route

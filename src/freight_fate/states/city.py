@@ -1373,12 +1373,16 @@ class JobBoardState(MenuState):
             )
             return
         terminal = self.ctx.world.home_terminal(p.current_city)
+        # Junior drivers slip-seat: the yard picks the tractor for the load
+        # before the keys change hands, so the truck is decided before the
+        # trip snapshot is taken.
+        equipment_note = self._slip_seat_note(job)
         driving = DrivingState(self.ctx, job, route, phase=DRIVE_PHASE_PICKUP)
         p.dispatch_board_cache = None
         p.active_trip = driving.snapshot()
         self.ctx.save_profile()
         self.ctx.say(
-            f"Dispatch accepted from {terminal.name}. Deadhead "
+            f"Dispatch accepted from {terminal.name}.{equipment_note} Deadhead "
             f"{self.ctx.settings.distance_text(route.miles, precise=True)} on "
             f"{route.highways[0]} to pickup at "
             f"{job.origin_facility_text()}. "
@@ -1387,6 +1391,23 @@ class JobBoardState(MenuState):
         )
         self.ctx.push_state(driving)
         self.ctx.award_achievement("first_dispatch")
+
+    def _slip_seat_note(self, job: Job) -> str:
+        """Draw the assigned tractor and say why, or nothing if it is not new.
+
+        Silent when the truck has not changed: a driver who drew the same
+        spare three loads running does not need telling three times.
+        """
+        from ..models.carrier_fleet import assignment_reason_text, slip_seats
+
+        p = self.ctx.profile
+        if p.owns_equipment() or not slip_seats(p):
+            return ""
+        before = p.active_truck_key()
+        key = p.take_slip_seat(job)
+        if key == before:
+            return ""
+        return f" {assignment_reason_text(key, job)}"
 
     def _trailer_note(self, job: Job) -> str:
         p = self.ctx.profile

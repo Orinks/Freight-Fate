@@ -343,3 +343,175 @@ def test_state_crossing_keeps_gameplay_prompt_before_achievement(monkeypatch):
         assert screen_reader[0].startswith("New achievement! Kept It Between the Lines.")
     finally:
         app.shutdown()
+
+
+# -- the 2026-07-25 additions: radio, craft, and a few bad ideas -------------------
+
+
+def _driving_for_badges():
+    """A drive with the physics quiet, for exercising badge triggers only."""
+    import sys
+
+    sys.path.insert(0, "tests")
+    from driving_feature_helpers import open_limits, quiet_trip, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say = lambda *a, **k: None
+    app.ctx.say_event = lambda *a, **k: None
+    awarded: list[str] = []
+    original = app.ctx.award_achievement
+
+    def spy(achievement_id, **kwargs):
+        awarded.append(achievement_id)
+        return original(achievement_id, **kwargs)
+
+    app.ctx.award_achievement = spy
+    driving = start_drive(app)
+    quiet_trip(driving)
+    open_limits(driving)
+    driving.trip.traffic_context = lambda: None
+    driving.trip.grade_at = lambda mile: 0.0
+    t = driving.truck
+    t.start_engine()
+    t.set_air_ready(parking_brake=False)
+    t.transmission.gear = t.transmission.num_gears
+    t.grade = 0.0
+    return app, driving, awarded
+
+
+def test_the_number_that_means_nothing_takes_a_whole_mile():
+    """Sixty-nine has to be held, not merely passed through."""
+    app, driving, awarded = _driving_for_badges()
+    try:
+        t = driving.truck
+        # Passing through the number on the way somewhere else is not holding it.
+        for speed in (60.0, 69.0, 75.0, 69.0):
+            t.velocity_mps = speed / 2.23694
+            driving._track_driving_badges(1 / 60)
+        assert "sixty_nine_mph" not in awarded
+
+        for _ in range(70 * 60):  # a mile at sixty-nine takes about fifty seconds
+            t.velocity_mps = 69.0 / 2.23694
+            driving._track_driving_badges(1 / 60)
+        assert "sixty_nine_mph" in awarded
+    finally:
+        app.shutdown()
+
+
+def test_eighty_eight_miles_an_hour_is_noticed():
+    app, driving, awarded = _driving_for_badges()
+    try:
+        driving.truck.velocity_mps = 80.0 / 2.23694
+        driving._track_driving_badges(1 / 60)
+        assert "eighty_eight_mph" not in awarded
+        driving.truck.velocity_mps = 89.0 / 2.23694
+        driving._track_driving_badges(1 / 60)
+        assert "eighty_eight_mph" in awarded
+    finally:
+        app.shutdown()
+
+
+def test_a_jake_only_descent_is_ruined_by_one_touch_of_the_brake():
+    """The badge is for the gear discipline, so the service brake resets it."""
+    app, driving, awarded = _driving_for_badges()
+    try:
+        t = driving.truck
+        t.grade = -0.05
+        t.engine_brake_stage = 2
+
+        def roll(seconds, brake=0.0):
+            for _ in range(int(seconds * 60)):
+                t.velocity_mps = 55.0 / 2.23694
+                t.brake = brake
+                driving._track_driving_badges(1 / 60)
+
+        roll(100)  # most of the way there
+        roll(1, brake=0.4)  # one touch, and it starts over
+        assert "jake_only_descent" not in awarded
+        roll(200)
+        assert "jake_only_descent" in awarded
+    finally:
+        app.shutdown()
+
+
+def test_cooking_the_drums_is_its_own_badge():
+    app, driving, awarded = _driving_for_badges()
+    try:
+        t = driving.truck
+        t.brake_temp_c = t.brake_fade_onset_c - 50.0
+        driving._track_driving_badges(1 / 60)
+        assert "brake_smoke" not in awarded
+        t.brake_temp_c = t.brake_fade_onset_c + 10.0
+        driving._track_driving_badges(1 / 60)
+        assert "brake_smoke" in awarded
+    finally:
+        app.shutdown()
+
+
+def test_the_radio_badges_follow_the_signal():
+    """Holding a station across three states, and catching one at the fringe."""
+    from types import SimpleNamespace
+
+    app, driving, awarded = _driving_for_badges()
+    try:
+        station = SimpleNamespace(id="ff:test", display_name="Test Radio")
+        reception = SimpleNamespace(station=station)
+        driving._radio_signal_factor = 1.0
+        for state in ("Illinois", "Indiana"):
+            driving.trip.state_at = lambda _mile=None, s=state: s
+            driving._track_radio_badges(reception)
+        assert "radio_three_states" not in awarded
+        driving.trip.state_at = lambda _mile=None: "Ohio"
+        driving._track_radio_badges(reception)
+        assert "radio_three_states" in awarded
+
+        # A signal down in the hiss is a fringe catch.
+        awarded.clear()
+        driving._radio_signal_factor = 0.01
+        driving._track_radio_badges(reception)
+        assert "radio_fringe_catch" in awarded
+    finally:
+        app.shutdown()
+
+
+def test_a_new_station_restarts_the_three_state_tally():
+    from types import SimpleNamespace
+
+    app, driving, awarded = _driving_for_badges()
+    try:
+        driving._radio_signal_factor = 1.0
+        for index, state in enumerate(("Illinois", "Indiana", "Ohio")):
+            driving.trip.state_at = lambda _mile=None, s=state: s
+            # A different station every state: no single signal held three.
+            driving._track_radio_badges(SimpleNamespace(station=SimpleNamespace(id=f"ff:{index}")))
+        assert "radio_three_states" not in awarded
+    finally:
+        app.shutdown()
+
+
+def test_the_funny_ones_are_actually_in_the_catalog():
+    """They are jokes, but they are shipped jokes and they follow the copy rules."""
+    from freight_fate.achievements import ACHIEVEMENTS
+
+    by_id = {a.id: a for a in ACHIEVEMENTS}
+    for badge_id in (
+        "sixty_nine_mph",
+        "eighty_eight_mph",
+        "sixteen_tons",
+        "brake_smoke",
+        "one_for_the_road",
+    ):
+        badge = by_id[badge_id]
+        assert badge.inspiration.count(" - ") >= 1  # artist and title, both named
+        assert badge.description.strip()
+
+
+def test_every_badge_cites_a_song():
+    """The catalog's whole voice rests on this; a new one must not break it."""
+    from freight_fate.achievements import ACHIEVEMENTS
+
+    for badge in ACHIEVEMENTS:
+        artist, title = badge.inspiration.split(" - ", 1)
+        assert artist.strip() and title.strip(), badge.id
