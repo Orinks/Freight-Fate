@@ -87,7 +87,13 @@ testpaths = ["tests"]
 pythonpath = ["tools"]
 # Per-test timeout (thread method works on Windows) so a hung simulation fails
 # fast with a stack trace instead of stalling the whole run.
-addopts = "-q --timeout=120 --timeout-method=thread"
+# -n auto spreads the run across cores: the serial suite takes about eleven
+# minutes on a working checkout, long enough that nobody runs it before
+# pushing. CI already passed -n auto on the command line, so making it the
+# default here also stops local runs and CI diverging. Slow sweep tests must
+# carry their own @pytest.mark.timeout -- under xdist the thread timeout kills
+# the whole worker, which surfaces as "node down" rather than a test failure.
+addopts = "-q -n auto --timeout=120 --timeout-method=thread"
 markers = [
     "career_1_9: curated transcript-backed career 1.9 smoke coverage",
     "property: property-based randomized tests",
