@@ -280,6 +280,39 @@ def test_transition_assist_completes_the_stop_sign():
         app.shutdown()
 
 
+@pytest.mark.parametrize("control", ["stop", "signal"])
+def test_transition_assist_releases_a_truck_stopped_short_of_the_hold(control):
+    """Stopping short of the hold window must not pin the truck forever.
+
+    Regression for the 2026-07-24 playtest softlock: braking manually on top
+    of the assist parked the rig about 80 feet short of the bar -- past the
+    hold window that ends the stop, inside the 30-metre band that keeps the
+    assist working the pedals. With no speed left there was nothing to brake
+    for, so the assist held throttle at zero and the brake at its floor every
+    tick and the driver could never move again."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        app.ctx.settings.route_transition_assist = True
+        _on_ramp(d, control, red=True, mph=0.0)
+        d._ramp_mi = RAMP_ACCESS_MI + 80.0 / 5280.0  # inside the dead band
+        d.truck.brake = 0.0
+        d.truck.throttle = 0.5
+
+        d._update_ramp_terminal_assist()
+
+        # The pedals stay the driver's: they have to drive up to the bar.
+        assert d.truck.throttle == 0.5
+        assert d.truck.brake == 0.0
+        # Short of the bar is not a completed stop, and not a light hold.
+        assert not d._ramp_terminal_done
+        assert not d._ramp_waiting_at_light
+    finally:
+        app.shutdown()
+
+
 def test_transition_assist_caps_a_hot_green_crossing():
     from freight_fate.app import App
 

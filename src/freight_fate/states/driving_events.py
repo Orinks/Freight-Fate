@@ -1397,6 +1397,16 @@ class DrivingEventMixin:
                     interrupt=False,
                 )
             return
+        if speed <= RED_STOP_MPH:
+            # Already stopped, but short of the hold window: a driver braking
+            # on their own on top of the assist lands here, and a standing
+            # truck has nothing left to brake for. The assist must hand the
+            # pedals back -- pinning throttle at zero and the brake at its
+            # floor against a truck that is already stopped is a hold with no
+            # release, and the driver cannot move again (playtest softlock,
+            # 2026-07-24). The queue guidance is what tells them to close the
+            # gap to the bar from here.
+            return
         # Brake down the approach: needed deceleration to stop at the bar,
         # recomputed each tick, mapped onto brake application. As the gap
         # closes the demand rises and the pedal follows.

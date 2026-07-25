@@ -724,6 +724,15 @@
 
 ### Fixed
 
+- **Route-transition assistance no longer traps the truck short of a stop
+  bar.** If you braked yourself while the assistance was already braking for
+  a stop sign or a red light, the truck could come to rest a little short of
+  the line, in a spot where the assistance kept holding the pedals but never
+  finished the stop. The accelerator did nothing and the truck could not be
+  moved again for the rest of the drive. Coming to a stop short of the line
+  now hands the pedals straight back, and you are told how far ahead the bar
+  is so you can drive up and stop again on it.
+
 - **Short hauls no longer pay several times more per mile than long ones.**
   A guaranteed minimum meant a fifty mile hop could pay over a thousand
   dollars, four to five times the per-mile rate of a real cross country run,
