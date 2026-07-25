@@ -243,10 +243,47 @@ KEEPER_GAP_SECONDS = 3.0  # follow queued traffic at this gap, down to a stop
 CRUISE_MIN_MPH = 20.0  # cruise control needs road speed to hold
 CRUISE_STEP_MPH = 5.0  # set-point change per Accel/Coast (+/-) tap
 CRUISE_MAX_MPH = 85.0  # highest cruise set point (top US posted limits)
+# Speed-hold gains. The feed-forward term (``Truck.hold_throttle``) carries
+# the grade; P and I only trim from there. The old loop was integral-only at
+# 0.08 per mph-second, which needed over ten seconds just to reach full
+# throttle -- a 4 percent climb had already taken twenty mph off the truck by
+# then (bench trace, 2026-07-25: 62 set, 31.9 mph low, and the sag never came
+# back). Trim is bounded so a grade the engine genuinely cannot pull does not
+# wind the integrator into a spike when the road levels out.
+CRUISE_P_GAIN = 0.055  # throttle per mph of error
+CRUISE_I_GAIN = 0.05  # throttle per mph-second of error
+CRUISE_TRIM_LIMIT = 0.4  # how far trim may pull away from the feed-forward
+CRUISE_COAST_MPH = 2.0  # feed-forward eases to nothing across this much overspeed
+# Holding the target from above. Cutting fuel was cruise's only answer, so any
+# downgrade gentler than the descent assist's 2.5 percent trigger carried the
+# truck past the set speed and kept it there (bench trace: 2 percent down, 62
+# set, 67.2 held) -- a speeding strike cruise handed the driver. The retarder
+# answers first because its heat goes out the exhaust; the drums only join in
+# when the jake cannot hold, so a long grade does not fade them away.
+CRUISE_JAKE_OVER_MPH = 0.75  # over the target by this much and the jake steps in
+CRUISE_JAKE_STEP_MPH = 1.0  # further overspeed per additional jake stage
+CRUISE_JAKE_RELEASE_MPH = 0.25  # back inside this and the retarder hands off
+CRUISE_JAKE_STEP_S = 1.5  # quiet time between stage changes; the jake is loud
+# The drums are the last resort, and they only come out in snubs: apply,
+# recover the target, release. Dragging a light application down a long grade
+# is how a real truck fades its brakes and empties its air tanks -- and the
+# sim models both, so cruise did exactly that to itself (bench trace,
+# 2026-07-25: 6 percent down, a tenth of brake held steady, 125 psi to 74 in
+# twenty-two seconds, spring brakes on, an emergency stop on a downhill).
+CRUISE_BRAKE_OVER_MPH = 2.5  # retarder maxed and still this far over: snub
+CRUISE_SNUB_UNDER_MPH = 0.5  # snub runs until this far back under the target
+CRUISE_SNUB_BRAKE = 0.3  # a real application, not a drag
+# Interactive descent control's ceiling while a grade lasts. A cap on the
+# working target only -- it must never be written into the set speed.
+DESCENT_SAFE_MAX_MPH = 55.0
 ACC_BASE_GAP_SECONDS = 3.0  # clear-weather adaptive cruise gap
 ACC_LIMIT_OFFSET_MPH = 5.0  # predictive ACC holds this far over the posted
-# limit -- a with-traffic pace, comfortably under
-# the 9 mph speeding-strike threshold
+# limit -- a with-traffic pace, sized to sit right at OVERSPEED_WARN_MPH
+# without arming it, and comfortably under the 9 mph speeding-strike
+# threshold. Cruise used to overshoot it on every downgrade and chime at the
+# driver for a speed cruise itself had picked; the grade band is bounded now
+# (see CRUISE_JAKE_OVER_MPH and the snub constants) rather than the pace
+# being cut.
 ACC_LIMIT_LOOKAHEAD_MIN_MI = 0.25
 ACC_LIMIT_LOOKAHEAD_MAX_MI = 1.5
 ACC_LIMIT_LOOKAHEAD_STEP_MI = 0.1

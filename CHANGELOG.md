@@ -837,6 +837,37 @@
 
 ### Fixed
 
+- **Cruise control holds your speed down a hill instead of running away
+  with it.** Coasting was all cruise could do about going too fast, so a
+  downgrade just carried the truck past the speed you set and kept it
+  there -- a gentle two percent grade sat nine over, and a steep one kept
+  building with nothing to stop it. Now cruise uses the engine brake the
+  way you would, stepping it up only as far as the hill needs, and comes
+  down on the service brakes in proper snubs when the jake alone will not
+  hold. The old behavior dragged the brakes lightly and forever instead,
+  which quietly emptied the air tanks until the spring brakes set and
+  stopped the truck dead on a downhill.
+
+- **Cruise control answers a hill as you reach it, not ten seconds later.**
+  It used to feed the throttle in slowly with no idea what the grade was
+  asking for, so every climb cost you speed before it responded and a real
+  pull could take twenty miles an hour off the truck. Cruise now reads the
+  grade under the wheels and gives it the throttle it needs right away.
+
+- **The automatic gearbox downshifts for a hill instead of lugging up it.**
+  With the accelerator on the floor, the road going up, and the truck still
+  losing ground, the box used to hold top gear because the engine had not
+  quite started lugging yet -- so the truck sank toward a crawl in a gear
+  that could never pull it. It now goes looking for a lower gear, the way a
+  driver does, as long as that gear genuinely turns the load better.
+
+- **A hill no longer rewrites your cruise speed for the rest of the run.**
+  On the All assists setting, descent control lowered your cruising speed
+  to 55 the moment a grade steepened -- and left it there afterward, on the
+  flat and uphill too, until you noticed and set it again. The safe descent
+  speed is now a ceiling that lasts only as long as the hill; your number
+  comes back at the bottom.
+
 - **Driving past a pickup or delivery entrance no longer goes silent.**
   Arriving at a facility used to announce itself once; if you rolled on --
   easy to do with cruise re-engaged -- the game said nothing more for the

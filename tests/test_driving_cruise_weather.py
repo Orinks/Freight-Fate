@@ -205,6 +205,10 @@ def test_cruise_does_not_rev_engine_when_clutch_is_depressed(monkeypatch):
         t = driving.truck
         driving.handle_event(key_event(pygame.K_e))  # engine on
         t.cargo_kg = 0.0
+        # A flat road for the whole run, not just the first frame: the trip
+        # re-reads the grade every update, and this test needs cruise to be
+        # genuinely holding throttle. On a downgrade it correctly holds none.
+        driving.trip.grade_at = lambda mile: 0.0
         t.grade = 0.0
         app.ctx.settings.automatic_transmission = False
         t.transmission.automatic = False  # the bug is manual-only
@@ -1516,5 +1520,196 @@ def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
             driving._update_speeding(0.1)
         assert played.count("vehicle/overspeed_chime") == chimes
         assert sum("Watch your speed" in e for e in events) == spoken
+    finally:
+        app.shutdown()
+
+
+# -- holding the set speed on a grade --------------------------------------------
+
+
+def _grade_hold(app, grade, *, set_mph=62.0, seconds=90.0, descent="realistic"):
+    """Run cruise at a set speed on a fixed grade; return the speed trace.
+
+    Mirrors the driving loop's own order for the pieces a grade exercises:
+    pedals decay when nothing is held, cruise runs, the retarder manager and
+    the automatic get their turn, then the physics steps.
+    """
+    driving = start_drive(app)
+    quiet_trip(driving)
+    open_limits(driving)
+    driving.trip.traffic_context = lambda: None
+    driving.trip.grade_at = lambda mile: grade
+    app.ctx.settings.descent_speed_control = descent
+    app.ctx.settings.automatic_transmission = True
+    t = driving.truck
+    t.transmission.automatic = True
+    t.cargo_kg = 18_000.0
+    t.start_engine()
+    t.set_air_ready(parking_brake=False)
+    t.velocity_mps = set_mph / 2.23694
+    t.transmission.gear = t.transmission.num_gears
+    driving._engage_cruise(set_mph)
+
+    dt = 1 / 60
+    speeds = []
+    for step in range(int(seconds * 60)):
+        # Settle on the flat first so the grade arrives at a steady truck.
+        t.grade = 0.0 if step < 20 * 60 else grade
+        ramp = dt * 2.2
+        t.throttle = max(0.0, t.throttle - ramp * 2)
+        t.brake = max(0.0, t.brake - ramp * 3)
+        driving._update_cruise(dt, False, False, False)
+        driving._update_auto_jake(dt)
+        if t.transmission.automatic and t.engine_on:
+            t.auto_shift()
+        t.update(dt)
+        if step >= 20 * 60:
+            speeds.append(t.speed_mph)
+    return driving, speeds
+
+
+@pytest.mark.smoke
+def test_cruise_does_not_run_away_down_a_grade():
+    """Cutting fuel is not speed control on a downgrade.
+
+    Cruise had no authority over the truck from above unless a lead or a
+    lower posted limit was already pulling the target down, so gravity simply
+    carried it: a 2 percent descent settled nine mph past the set speed and a
+    6 percent descent accelerated without limit (bench trace, 2026-07-25: 62
+    set, 100 mph and still climbing). The retarder now stages against the
+    overspeed, and the drums snub when it is not enough.
+    """
+    from freight_fate.app import App
+
+    for grade, ceiling in ((-0.02, 63.5), (-0.04, 66.0), (-0.06, 66.0)):
+        app = App()
+        app.ctx.say_event = lambda text, interrupt=False: None
+        try:
+            _, speeds = _grade_hold(app, grade)
+            assert max(speeds) <= ceiling, (grade, max(speeds))
+            # And it is holding a speed, not braking the truck to a stop: the
+            # jake used to be pinned wide open the moment the grade passed
+            # 2.5 percent, which dragged the truck well under its own target.
+            assert min(speeds[-600:]) >= 58.0, (grade, min(speeds[-600:]))
+        finally:
+            app.shutdown()
+
+
+@pytest.mark.smoke
+def test_cruise_answers_a_climb_before_it_costs_twenty_mph():
+    """Feed-forward plus the pull downshift, instead of a slow integrator.
+
+    Cruise used to walk the throttle up at 0.08 per mph-second with no idea
+    what the grade was asking for, and the automatic held top gear because
+    the revs were not lugging yet. A 2 percent climb bled six mph and never
+    got them back; a 4 percent climb lost thirty (bench trace, 2026-07-25).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = lambda text, interrupt=False: None
+    try:
+        driving, speeds = _grade_hold(app, 0.02)
+        # A 2 percent pull is well inside what the truck has: hold it.
+        assert min(speeds) >= 59.0, min(speeds)
+        assert speeds[-1] >= 60.0, speeds[-1]
+        assert driving.truck.transmission.gear < driving.truck.transmission.num_gears or (
+            driving.truck.throttle < 1.0
+        )
+    finally:
+        app.shutdown()
+
+    app = App()
+    app.ctx.say_event = lambda text, interrupt=False: None
+    try:
+        driving, speeds = _grade_hold(app, 0.04)
+        # A 4 percent pull genuinely costs a loaded truck speed -- but it
+        # must cost it in a lower gear making real torque, not at full
+        # throttle in overdrive watching the hill win.
+        assert speeds[-1] >= 40.0, speeds[-1]
+        assert driving.truck.transmission.gear < driving.truck.transmission.num_gears
+    finally:
+        app.shutdown()
+
+
+def test_interactive_descent_control_caps_the_target_without_rewriting_it():
+    """The safe descent ceiling lasts as long as the grade, not the career.
+
+    It used to assign straight into the cruise set speed, so one downgrade on
+    a 65 road knocked cruise to 55 permanently -- on the flat, uphill, the
+    rest of the run.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = lambda text, interrupt=False: None
+    try:
+        driving, _ = _grade_hold(app, -0.06, seconds=25.0, descent="interactive")
+        assert driving._cruise_mph == pytest.approx(62.0)
+        assert driving._cruise_descent_mph == pytest.approx(55.0)
+
+        # Back on the level: the ceiling lifts and the driver's number returns.
+        driving.trip.grade_at = lambda mile: 0.0
+        driving.truck.grade = 0.0
+        for _ in range(120):
+            driving._update_cruise(1 / 60, False, False, False)
+            driving.truck.update(1 / 60)
+        assert driving._cruise_descent_mph is None
+        assert driving._cruise_mph == pytest.approx(62.0)
+    finally:
+        app.shutdown()
+
+
+def test_cruise_snubs_the_drums_instead_of_dragging_them_down_a_grade():
+    """A held application empties the air tanks and fades the shoes.
+
+    Cruise trimmed the service brake proportionally, which on a long grade
+    settled into a permanent light application: the compressor lost ground
+    until the spring brakes set and stopped the truck dead on a downhill
+    (bench trace, 2026-07-25: 125 psi to 74 in twenty-two seconds).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = lambda text, interrupt=False: None
+    try:
+        driving, speeds = _grade_hold(app, -0.06, seconds=80.0)
+        t = driving.truck
+        # The grade is held, and held without the drums paying for it: full
+        # tanks, cool shoes, no spring brakes.
+        assert max(speeds) <= 66.0, max(speeds)
+        assert min(speeds) > 30.0, min(speeds)
+        assert not t.air_brakes_holding
+        assert t.air_pressure_psi >= 100.0, t.air_pressure_psi
+        assert t.brake_temp_c < t.brake_fade_onset_c, t.brake_temp_c
+    finally:
+        app.shutdown()
+
+
+def test_cruise_leaves_the_drivers_own_jake_alone():
+    """Cruise releases only the retarder stages it raised itself."""
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = lambda text, interrupt=False: None
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        open_limits(driving)
+        driving.trip.traffic_context = lambda: None
+        t = driving.truck
+        t.start_engine()
+        t.set_air_ready(parking_brake=False)
+        t.transmission.gear = t.transmission.num_gears
+        t.velocity_mps = 62.0 / 2.23694
+        t.grade = 0.0
+        driving._engage_cruise(62.0)
+        t.engine_brake_stage = 2  # the driver's own selection
+
+        for _ in range(60):
+            driving._update_cruise(1 / 60, False, False, False)
+
+        assert t.engine_brake_stage == 2
+        assert driving._cruise_jake_stage == 0
     finally:
         app.shutdown()

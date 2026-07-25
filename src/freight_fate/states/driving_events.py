@@ -1843,6 +1843,9 @@ class DrivingEventMixin:
         self._speed_control_target_mph = self._cruise_mph
         self._cruise_throttle = t.throttle
         self._cruise_applied = t.throttle
+        # Engaging on a grade starts from the feed-forward, so the trim opens
+        # at zero rather than carrying a stale wind-up into the new session.
+        self._cruise_trim = 0.0
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
@@ -2018,6 +2021,14 @@ class DrivingEventMixin:
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
         return lowest_limit, lowest_reason
 
+    def _descent_hold_mph(self) -> float:
+        """The speed descent control is actually working to: set speed under
+        the interactive level's safe ceiling."""
+        target = self._cruise_mph or CRUISE_MIN_MPH
+        if self._cruise_descent_mph is not None:
+            target = min(target, self._cruise_descent_mph)
+        return target
+
     def _update_cruise(
         self, dt: float, braking: bool, accelerating: bool, clutch_disengaged: bool
     ) -> None:
@@ -2047,7 +2058,8 @@ class DrivingEventMixin:
             if not self._descent_control_active:
                 self._descent_control_active = True
                 self.ctx.say_event(
-                    f"Descent control holding {self.ctx.settings.speed_text(self._cruise_mph)}.",
+                    "Descent control holding "
+                    f"{self.ctx.settings.speed_text(self._descent_hold_mph())}.",
                     interrupt=False,
                 )
             if not t.transmission.automatic and t.rpm < 1100:
@@ -2059,13 +2071,25 @@ class DrivingEventMixin:
             else:
                 limit_state = ""
                 limit_message = ""
-                t.engine_brake = True
+                # The retarder is staged against the overspeed further down,
+                # not pinned open here. Selecting all three stages the moment
+                # the grade passed 2.5 percent over-retarded every descent
+                # gentler than the one that balances full jake: a 4 percent
+                # grade settled seven mph under the set speed and stayed
+                # there, with cruise at full throttle fighting its own
+                # engine brake (bench trace, 2026-07-25: 62 set, 54.9 held).
                 if descent_level == "interactive":
-                    safe_target = min(self._cruise_mph, 55.0)
-                    self._cruise_mph = safe_target
+                    # A cap that lives as long as the grade does, not a rewrite
+                    # of the driver's set speed. It used to assign straight into
+                    # _cruise_mph, so one 3 percent dip on a 65 road knocked
+                    # cruise down to 55 permanently -- on the flat, uphill, the
+                    # rest of the run (bench trace, 2026-07-25: 62 set, 55 held
+                    # ever after). The driver's number now survives the hill.
+                    self._cruise_descent_mph = DESCENT_SAFE_MAX_MPH
+                    safe_target = min(self._cruise_mph, DESCENT_SAFE_MAX_MPH)
                     if t.speed_mph > safe_target + 8.0:
                         t.brake = max(t.brake, min(0.7, (t.speed_mph - safe_target) / 25.0))
-                if t.speed_mph > self._cruise_mph + 10.0:
+                if t.speed_mph > self._descent_hold_mph() + 10.0:
                     limit_state = "grade"
                     limit_message = "Descent control cannot hold this grade. Apply service brakes."
             if limit_state != self._descent_limit_state:
@@ -2076,7 +2100,12 @@ class DrivingEventMixin:
             self._descent_control_active = False
             self._descent_limit_state = ""
             self._descent_capture_active = False
-            t.engine_brake = False
+            self._cruise_descent_mph = None  # the grade is behind us; so is its cap
+            # Release only the retarder cruise itself raised: the driver's own
+            # jake switch survives the road levelling out.
+            if self._cruise_jake_stage > 0:
+                self._cruise_jake_stage = 0
+                t.engine_brake_stage = 0
         if braking or t.emergency_brake or t.air_brakes_holding or not t.engine_on or t.stalled:
             self._cancel_cruise()
             self.ctx.say_event(
@@ -2118,6 +2147,10 @@ class DrivingEventMixin:
             self._cruise_curve_end_mi = None
         if self._cruise_curve_mph is not None and self._cruise_curve_mph < target_mph:
             target_mph = self._cruise_curve_mph
+        # Interactive descent control's safe ceiling, which lasts exactly as
+        # long as the grade under the wheels.
+        if self._cruise_descent_mph is not None and self._cruise_descent_mph < target_mph:
+            target_mph = self._cruise_descent_mph
         # Predictive ACC: never carry the driver past the posted limit. With real
         # OSM limits baked per leg, a held set speed would otherwise sail through
         # urban drops and corridor limit changes straight into speeding strikes,
@@ -2188,7 +2221,35 @@ class DrivingEventMixin:
             self.ctx.say_event("Traffic ahead, adaptive cruise reducing speed.", interrupt=False)
         self._acc_following = following
         error = target_mph - t.speed_mph
-        self._cruise_throttle = max(0.0, min(1.0, self._cruise_throttle + error * 0.08 * dt))
+        # Feed-forward first: the truck's own physics knows what throttle
+        # balances the grade under the wheels, so cruise answers a hill as it
+        # arrives. P and I only trim from there.
+        hold = t.hold_throttle()
+        trim = max(
+            -CRUISE_TRIM_LIMIT,
+            min(CRUISE_TRIM_LIMIT, self._cruise_trim + error * CRUISE_I_GAIN * dt),
+        )
+        if error < 0.0:
+            # Over the target, cruise comes off the fuel: feeding the grade-hold
+            # value into a truck that also needs to lose speed is a truck
+            # fighting itself, and the speeding-strike grace only forgives a
+            # cruise genuinely off the throttle. Eased out across a band rather
+            # than switched -- a hard cut at the boundary chattered the pedal on
+            # and off at steady state, and the engine voice shows every bit of
+            # that.
+            hold *= max(0.0, 1.0 + error / CRUISE_COAST_MPH)
+            if error <= -CRUISE_COAST_MPH:
+                trim = min(0.0, trim)
+        demand = hold + error * CRUISE_P_GAIN + trim
+        # Anti-windup: a grade the engine cannot pull, or a downgrade gravity
+        # owns, pins the pedal at one end for as long as it lasts. Integrating
+        # through that buries the trim at its limit, and the truck then sags or
+        # surges for seconds after the road levels out while it unwinds. Only
+        # take the new trim when it can still move the pedal.
+        saturated = (demand <= 0.0 and error < 0.0) or (demand >= 1.0 and error > 0.0)
+        if not saturated:
+            self._cruise_trim = trim
+        self._cruise_throttle = max(0.0, min(1.0, demand))
         # Ramp the applied throttle up to the held integrator value rather than
         # snapping, so cruise eases back in after a clutch release; drops (traffic
         # or a lower limit) still apply immediately. On a steady frame the applied
@@ -2204,9 +2265,74 @@ class DrivingEventMixin:
         else:
             self._cruise_applied = self._cruise_throttle
         t.throttle = self._cruise_applied
-        if (following or limit_capped or exit_capped) and error < -2.0:
+        self._hold_cruise_from_above(dt, error, closing=following or limit_capped or exit_capped)
+
+    def _hold_cruise_from_above(self, dt: float, error: float, *, closing: bool) -> None:
+        """Bring the truck back down to the target: retarder first, drums last.
+
+        Cutting fuel was cruise's whole answer to being over the target, which
+        works on the flat and fails on every downgrade. Anything gentler than
+        the descent assist's 2.5 percent trigger got no retarder at all, so
+        gravity carried the truck past the set speed and simply held it there
+        -- and the service brake only ever came out while a cap or a lead was
+        already pulling the target down. Cruise now stages the retarder against
+        the overspeed rather than leaving it off or pinning it open.
+
+        Closing on a lead or easing down to a lower posted limit keeps the old
+        proportional service-brake trim and no retarder at all. That is a
+        deliberate limit: the jake is a loud device, and reaching for it on
+        every piece of traffic would put a stage change in the player's ears
+        several times a mile for a job the drums do quietly.
+        """
+        t = self.truck
+        over = -error
+        self._cruise_jake_cooldown_s = max(0.0, self._cruise_jake_cooldown_s - dt)
+        if closing:
+            if over > 2.0:
+                weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
+                t.brake = max(t.brake, min(weather_brake, over / 30.0))
+            self._cruise_snubbing = False
+            return
+        if self._auto_jake:
+            # The driver put the AMT retarder manager in charge with J; it
+            # already holds the descent target. Two owners would fight.
+            return
+        # Stage the retard against the overspeed. The map is proportional, so
+        # the truck settles at whatever overspeed the chosen stage balances
+        # instead of hunting between full retard and none.
+        wanted = 0
+        if over > CRUISE_JAKE_OVER_MPH and t.throttle <= 0.05:
+            steps = int((over - CRUISE_JAKE_OVER_MPH) / CRUISE_JAKE_STEP_MPH)
+            wanted = min(JAKE_STAGES, 1 + steps)
+        elif over > CRUISE_JAKE_RELEASE_MPH:
+            wanted = self._cruise_jake_stage  # inside the deadband, hold
+        wanted = min(wanted, max(0, self._auto_jake_max_stage()))
+        # Never reach for a retarder the driver's own jake switch is holding,
+        # and never release one either -- only what cruise raised itself.
+        driver_owns_jake = self._cruise_jake_stage == 0 and t.engine_brake_stage > 0
+        if wanted != self._cruise_jake_stage and not driver_owns_jake:
+            # Stage changes wait out a cooldown so a rolling grade does not
+            # make the retarder chatter -- it is a loud device. Coming off it
+            # because the truck has fallen under the target goes through at
+            # once: holding retard the truck no longer needs is what drags it
+            # below the speed cruise is supposed to be keeping.
+            releasing_under_target = wanted == 0 and over < -CRUISE_JAKE_RELEASE_MPH
+            if releasing_under_target or self._cruise_jake_cooldown_s <= 0.0:
+                self._cruise_jake_stage = wanted
+                t.engine_brake_stage = wanted
+                self._cruise_jake_cooldown_s = CRUISE_JAKE_STEP_S
+        # Holding a grade. The drums only come out once the retarder is doing
+        # everything it can, and then as a snub that finishes and lets go.
+        jake_maxed = self._cruise_jake_stage >= max(
+            1, min(JAKE_STAGES, self._auto_jake_max_stage())
+        )
+        if self._cruise_snubbing:
+            self._cruise_snubbing = over > -CRUISE_SNUB_UNDER_MPH
+        elif jake_maxed and over > CRUISE_BRAKE_OVER_MPH:
+            self._cruise_snubbing = True
+        if self._cruise_snubbing:
             weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
-            t.brake = max(t.brake, min(weather_brake, abs(error) / 30.0))
+            t.brake = max(t.brake, min(weather_brake, CRUISE_SNUB_BRAKE))
 
     def _handle_out_of_fuel(self) -> None:
         if self._rescue_offered:

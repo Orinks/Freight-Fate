@@ -141,15 +141,28 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       buzzer-defer may not cover the rest-resume path the way it covers
       first ignition. Read the owner's session log before deciding;
       diagnosis first, no reflex fix.
-- [ ] **Cruise sags on a loaded pull instead of revving out (owner
-      playtest, night of 2026-07-22, UNCLAIMED).** Climbing under load
-      with cruise on, speed falls and the truck does not rev toward
-      power or take a downshift; the owner has to cancel cruise and
-      pedal it himself. Real cruise has full throttle authority and
-      holds the climb gear at power when speed is dropping. Suspect the
-      cruise controller's throttle ceiling or the shift schedule never
-      seeing full-throttle intent from cruise (progressive/throttle-
-      raise logic keys off the throttle value cruise sets).
+- [x] **Cruise sags on a loaded pull instead of revving out (owner
+      playtest, night of 2026-07-22) -- FIXED 2026-07-25.** Two causes,
+      both confirmed on the bench. The controller was integral-only at
+      0.08 per mph-second, so it needed over ten seconds just to reach
+      full throttle while the hill was already taking a mile an hour a
+      second; it now feed-forwards from `Truck.hold_throttle()`, the
+      throttle the truck's own physics says balances the grade under the
+      wheels, and only trims from there with P and I (anti-windup, so a
+      grade the engine cannot pull does not bury the integrator). And
+      the automatic never downshifted, because the revs were not lugging
+      yet: `auto_shift` now takes a pull downshift when the pedal is on
+      the floor, the road is going up, and the truck is still losing
+      ground -- gated on the lower gear genuinely making more wheel
+      force, so the box walks down the pull and stops. A loaded 18-tonne
+      run at 62 set: a 2 percent climb held 55.7 and never recovered,
+      now holds 61; a 4 percent climb bottomed at 33.5, now 43.
+- [ ] **A climb cruise cannot hold says nothing.** The descent side
+      speaks up ("Descent control cannot hold this grade"); the climb
+      side has no equivalent, so a blind driver hears the engine work
+      and the box walk down but is never told plainly that cruise has
+      run out of truck. The engine voice and the G key both carry it
+      today -- decide whether that is enough before adding more speech.
 - [ ] **I-5 speed limit changes for a few miles (owner observation,
       night of 2026-07-22, verify only).** A short stretch of I-5 spoke
       a different limit. Probably CORRECT -- the dense maxspeed sweep
@@ -158,13 +171,26 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       stretch it was and check the baked segment against the real
       posted limit there. Verify through a Trip readout, never the raw
       data files.
-- [ ] **Speeding fine with cruise engaged (Josh report, 2026-07-22,
-      UNCLAIMED -- awaiting his log).** Likely a downgrade letting the
-      truck creep past the limit while cruise holds its set speed with
-      no brake authority. Candidate shape: cruise arms the auto jake
-      downhill (the stalk's AUTO mode already exists) or eases its
-      target when the road outruns it. Diagnose from Josh's log before
-      building; grade is the owner's guess.
+- [x] **Speeding fine with cruise engaged (Josh report, 2026-07-22) --
+      FIXED 2026-07-25; the owner's grade guess was exactly right.**
+      Cruise could only cut fuel, and it only ever touched the service
+      brake while a lead or a lower posted limit was already pulling the
+      target down -- so on a plain downgrade nothing held the truck at
+      all. On the bench at 62 set, a 2 percent grade settled nine mph
+      over and a 6 percent grade accelerated past 100 with no ceiling;
+      on top of the +5 posted offset that is well past the 9 mph strike
+      leeway, which is the fine Josh paid. Cruise now stages the
+      retarder against the overspeed itself (release, one, two, three,
+      on a cooldown so it does not chatter in the player's ears) and
+      snubs the service brakes when the jake is not enough. Snubs, not
+      the old proportional trim: that settled into a permanent light
+      application that drained the tanks 125 psi to 74 in twenty-two
+      seconds until the spring brakes set and stopped the truck on a
+      downhill. Held speed is now inside about three mph of the set
+      speed on grades up to 6 percent, with full air and cool drums.
+      Cruise deliberately leaves the retarder alone when it is closing
+      on traffic or easing to a lower limit -- the drums do that quietly
+      and the jake is loud.
 - [x] Add a curated `career_1_9` transcript-backed smoke suite with reusable career-stage presets, structured speech ordering, keyboard reachability, all driving modes, and deterministic event hooks.
 - [x] Months-long career arc rebalance: dispatch-assigned fleet tractors by level band (ten new truck models), a per-level unlock audit so every rank names something concrete, rebalanced XP with re-paced level 21-30 thresholds, 19 new achievements, and a deterministic pacing model (`tools/career_pacing.py`) pinned by tests.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.

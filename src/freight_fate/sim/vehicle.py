@@ -488,6 +488,39 @@ class TruckState:
         # bounced every skip-shift straight back down a gear, and the launch
         # churned through torque interruptions instead of accelerating.
         downshift_rpm = AUTO_DOWNSHIFT_RPM - 300.0 * (1.0 - load_fraction)
+        # The pull downshift. A real automated box does not sit at full
+        # throttle watching the hill win: pedal on the floor, road going up,
+        # truck still losing ground, and it goes hunting for torque even
+        # though the revs are nowhere near lugging. Without it the box held
+        # top gear while automatic speed control floored the accelerator, and
+        # a loaded truck bled twenty mph up a 4 percent grade with a lower
+        # hole sitting right there (bench trace, 2026-07-25: 62 set, 31.5 mph
+        # low; the same pull now holds a gear that can actually turn it).
+        # Only taken when the next gear down genuinely makes more wheel force
+        # than the one it is in, so the box walks down the pull and stops
+        # rather than hunting past the torque peak.
+        if (
+            self.throttle >= 0.9
+            and self.grade > 0.01
+            and tr.gear > 1
+            and not tr.in_neutral
+            and self.drive_force() < self.resistance_force()
+        ):
+            lower_gear = tr.gear - 1
+            lower_gear_rpm = self.coupled_rpm(lower_gear)
+            if lower_gear_rpm <= self.specs.max_rpm * 0.95:
+                lower_gear_force = min(
+                    self.torque_at(lower_gear_rpm)
+                    * self.throttle
+                    * self.health_factor
+                    * self.engine_wear_factor
+                    * abs(tr.ratio_for(lower_gear))
+                    * self.specs.driveline_efficiency
+                    / self.specs.wheel_radius_m,
+                    self.drive_traction_limit(),
+                )
+                if lower_gear_force > self.drive_force() * 1.02:
+                    downshift_rpm = max(downshift_rpm, rpm_est + 1.0)
         # Traction-linked retarder management: refuse a jake pre-select into a
         # gear whose retard demand would break the drive axle loose (predicted
         # the same way the upshift path predicts tractive force). Without
@@ -500,8 +533,10 @@ class TruckState:
             lower_rpm = min(s.max_rpm, self.coupled_rpm(tr.gear - 1))
             rpm_frac = max(0.0, min(1.0, lower_rpm / s.max_rpm))
             stage = min(JAKE_STAGES, self.engine_brake_stage) / JAKE_STAGES
-            lower_torque = s.engine_brake_torque_nm * stage * (
-                JAKE_RPM_FLOOR + (1.0 - JAKE_RPM_FLOOR) * rpm_frac
+            lower_torque = (
+                s.engine_brake_torque_nm
+                * stage
+                * (JAKE_RPM_FLOOR + (1.0 - JAKE_RPM_FLOOR) * rpm_frac)
             )
             lower_demand = (
                 lower_torque
@@ -579,6 +614,34 @@ class TruckState:
         rolling = self.gross_mass_kg * G * s.rolling_resistance * direction
         grade_f = self.gross_mass_kg * G * math.sin(math.atan(self.grade))
         return drag + rolling + grade_f
+
+    def hold_throttle(self) -> float:
+        """The throttle that balances what the truck is fighting right now.
+
+        Grade, drag, and rolling resistance all land in ``resistance_force``,
+        so dividing it by the force full throttle can make in this gear gives
+        the pedal position that holds the current speed. Automatic speed
+        control uses it as a feed-forward term: the grade is answered as the
+        wheels reach it rather than integrated up to over the following ten
+        seconds. Zero on a downgrade gravity will carry, and one where the
+        grade asks for more than the engine has in this gear.
+        """
+        if not self.engine_on or self.stalled or self.air_brakes_holding:
+            return 0.0
+        ratio = self.transmission.drive_ratio
+        if ratio == 0.0 or self.coupled_rpm() >= self.specs.max_rpm:
+            return 0.0
+        full_force = (
+            self.torque_at(self.rpm)
+            * self.health_factor
+            * self.engine_wear_factor
+            * abs(ratio)
+            * self.specs.driveline_efficiency
+            / self.specs.wheel_radius_m
+        )
+        if full_force <= 0.0:
+            return 1.0
+        return max(0.0, min(1.0, self.resistance_force() / full_force))
 
     def _brake_fade_factor(self) -> float:
         """How much of the rated brake effort survives the current drum heat."""

@@ -279,6 +279,11 @@ class DrivingState(
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._cruise_applied = 0.0
+        self._cruise_trim = 0.0  # integral trim on top of the grade feed-forward
+        self._cruise_jake_stage = 0  # retarder stages cruise itself commanded
+        self._cruise_jake_cooldown_s = 0.0  # quiet time between those stage steps
+        self._cruise_snubbing = False  # a service-brake snub is in progress
+        self._cruise_descent_mph = None  # interactive descent ceiling, while it lasts
         self._cruise_exit_mph: float | None = None
         self._cruise_curve_mph: float | None = None
         self._cruise_curve_end_mi: float | None = None
