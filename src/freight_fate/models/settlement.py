@@ -31,9 +31,20 @@ class SettlementCharge:
     note: str = ""
 
 
-def carrier_accessorial_charges(job: Job) -> tuple[SettlementCharge, ...]:
-    """Approved load-related charges that do not reduce driver pay."""
+def carrier_accessorial_charges(job: Job, profile=None) -> tuple[SettlementCharge, ...]:
+    """Approved load-related charges that do not reduce driver pay.
+
+    With a profile, this also picks up detention: a shipper who held the truck
+    past the free time owes for the wait, and that lands on the same ledger as
+    a negative charge because it is money coming the other way.
+    """
     charges: list[SettlementCharge] = []
+    if profile is not None:
+        from .trailer_yard import detention_charge, pickup_plan
+
+        detention = detention_charge(pickup_plan(job, profile))
+        if detention is not None:
+            charges.append(detention)
     if job.destination_type in LUMPER_DESTINATION_TYPES:
         charges.append(
             SettlementCharge(

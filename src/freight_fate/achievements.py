@@ -1185,6 +1185,28 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
         "Bob Dylan - One More Cup of Coffee",
     ),
     # -- Numbers that mean nothing and everything ------------------------------
+    # -- The yard: dropping, hooking, and waiting -----------------------------
+    Achievement(
+        "first_drop_hook",
+        "Drop It and Hook It",
+        "Your first drop and hook. You backed under a trailer somebody else loaded hours ago, cranked the gear up, and were rolling before a dock would have found you a door.",
+        "Cargo",
+        "Red Sovine - Giddyup Go",
+    ),
+    Achievement(
+        "hooked_a_bad_one",
+        "You Get What You Get",
+        "You hooked a trailer out of a drop yard and found a write-up on the walk-around. Somebody parked it, signed for it, and went home. Now it is yours.",
+        "Cargo",
+        "Little Feat - Willin'",
+    ),
+    Achievement(
+        "detention_paid",
+        "Paid to Sit Still",
+        "A shipper held you past the free time and the carrier billed them for it. The clock was the only thing working, and for once it was working for you.",
+        "Cargo",
+        "Otis Redding - (Sittin' On) The Dock of the Bay",
+    ),
     Achievement(
         "sixty_nine_mph",
         "Summer of Sixty-Nine",

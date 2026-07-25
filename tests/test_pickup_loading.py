@@ -147,7 +147,9 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
     spoken = []
     monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
     monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
+    )
     try:
         driving = accept_pickup_drive(app)
 
@@ -180,11 +182,19 @@ def test_loading_at_pickup_uses_dock_sound(monkeypatch):
 
     app = App()
     played = []
-    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume)))
+    monkeypatch.setattr(
+        app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
+    )
     try:
         accept_pickup_drive(app)
         pickup = arrive_at_pickup(app)
+        # This test is about the dock, so pin the pickup to a shipper that
+        # loads at one: a drop yard would hand over a preloaded trailer and
+        # never open a door (see tests/test_trailer_yard.py).
+        pickup.job.origin_type = "mine_quarry"
         pickup.handle_event(key_event(pygame.K_RETURN))  # check in
+        plan = pickup.pickup_plan
+        assert not plan.is_drop_hook
         hours_before = app.ctx.profile.game_hours
         duty_before = app.ctx.profile.hos.duty_min
         pickup.handle_event(key_event(pygame.K_RETURN))  # load cargo
@@ -193,8 +203,8 @@ def test_loading_at_pickup_uses_dock_sound(monkeypatch):
 
         assert ("poi/dock_and_deliver", 1.0) in played
         assert any(key == "ui/level_up" for key, _volume in played)
-        assert app.ctx.profile.game_hours == hours_before + 1.0
-        assert app.ctx.profile.hos.duty_min == duty_before + 60.0
+        assert app.ctx.profile.game_hours == hours_before + plan.minutes / 60.0
+        assert app.ctx.profile.hos.duty_min == duty_before + plan.minutes
     finally:
         app.shutdown()
 
@@ -416,5 +426,41 @@ def test_accepting_stale_cached_offer_drops_it_instead_of_crashing():
         assert p.dispatch_board_cache is None
         assert dead not in app.state.jobs
         assert any("no longer on the network" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+def test_drop_and_hook_gets_the_truck_out_in_a_fraction_of_the_time(monkeypatch):
+    """A preloaded trailer means no dock and no hour standing at one."""
+    from freight_fate.app import App
+    from freight_fate.models.trailer_yard import DROP_HOOK_MIN, LIVE_LOAD_MIN
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    try:
+        accept_pickup_drive(app)
+        pickup = arrive_at_pickup(app)
+        pickup.job.origin_type = "cross_dock"  # a shipper that stages trailers
+        pickup.handle_event(key_event(pygame.K_RETURN))  # check in
+        plan = pickup.pickup_plan
+        assert plan.is_drop_hook
+        assert plan.minutes == DROP_HOOK_MIN < LIVE_LOAD_MIN
+        # Check-in already says there is no dock coming.
+        assert "drop yard" in spoken[-1]
+        assert plan.trailer.number in spoken[-1]
+
+        hours_before = app.ctx.profile.game_hours
+        pickup.handle_event(key_event(pygame.K_RETURN))  # drop and hook
+        assert "Hooking the loaded trailer" in app.state.lines()[0]
+        finish_timed_state(app)
+
+        assert app.ctx.profile.game_hours == hours_before + DROP_HOOK_MIN / 60.0
+        assert app.ctx.profile.hos.duty_min > 0.0
+        # The driver is told which trailer they are pulling and what shape it
+        # is in -- the whole risk of hooking somebody else's box.
+        readout = " ".join(spoken[-3:])
+        assert plan.trailer.number in readout
+        assert "hooked to" in readout.lower()
     finally:
         app.shutdown()

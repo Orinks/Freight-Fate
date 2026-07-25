@@ -352,6 +352,15 @@ class DrivingEventMixin:
             message = f"{message} Adaptive cruise disabled; take manual speed control."
         self.ctx.say_event(message, interrupt=True)
 
+    def _hooked_trailer_defect(self) -> str | None:
+        """What an inspector would write up on the trailer, if anything."""
+        from ..models.trailer_yard import pickup_plan
+
+        if self.ctx.profile is None or self.job is None:
+            return None
+        plan = pickup_plan(self.job, self.ctx.profile)
+        return plan.trailer.defect if plan.trailer is not None else None
+
     def _handle_inspection(self, event) -> None:
         """Route-backed enforcement with stable evidence and no duplicate fines."""
         event_key = str(
@@ -367,6 +376,12 @@ class DrivingEventMixin:
         fine = hos.HOS_FINES[min(self.hos_fine_count, len(hos.HOS_FINES) - 1)]
         self.hos_fine_count += 1
         evidence = list(event.data.get("evidence", ()))
+        # A trailer hooked out of a drop yard came with whatever the last
+        # driver left on it, and an inspector finds what a walk-around would
+        # have. This is drop-and-hook's real cost, arriving at the worst moment.
+        trailer_defect = self._hooked_trailer_defect()
+        if trailer_defect:
+            evidence.append(trailer_defect)
         if not evidence:
             evidence = ["HOS/ELD violation"]
         evidence_text = ", ".join(evidence)

@@ -233,10 +233,29 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       out on a nine hundred mile run. Levels 1 to 3 stay on the trainer rig
       (onboarding wants one answer), and level 9 ends slip-seating for good
       -- seniority is a truck of your own.
-- [ ] **Trailers still come from the cargo, not the yard.** Trailer type is
-      already chosen by what is in the load, which is right, but the yard has
-      no trailer *inventory* and no notion of dropping and hooking. Worth
-      revisiting alongside drop-and-hook freight.
+- [x] **Trailer yards and drop-and-hook (2026-07-25).** Trailers are things
+      in yards now, not just a type derived from the cargo. High-volume
+      facility types stage loaded trailers; a farm elevator or a quarry does
+      not, and the middle types are a weighted, facility-stable coin. A
+      drop-and-hook pickup is 25 minutes against a live load's 60, and the
+      trailer you hook carries its own number and condition -- a rough one
+      hands the next roadside inspection a write-up your own walk-around
+      would have caught, which is drop-and-hook's real cost. Live loads that
+      run past two hours earn detention pay, on the settlement ledger as a
+      negative charge (money the other way). Owner-operators pulling their
+      own box always live-load, because nobody swaps your trailer for one out
+      of the yard. Yards are derived from facility identity and the plan is
+      recomputed from the job, so the whole feature persists nothing and
+      touches no save schema. Three badges came with it.
+- [ ] **Drop-and-hook on the delivery end.** The pickup side drops and hooks;
+      the delivery side still unloads live every time. A receiver with a drop
+      yard should let the driver drop the loaded box, hook an empty, and go --
+      which is also the natural home for a trailer the driver has been
+      dragging a defect around on.
+- [ ] **Pre-trip inspection surfaces the trailer defect.** Today the write-up
+      only appears when an inspector finds it. A driver who walks the trailer
+      before departing should be able to find it themselves and refuse the
+      box, which is what the walk-around is for.
 - [ ] Wire Big Buck's content into a playable roadside stop; current 1.9 data and spoken refusal content are shipped, but no honest drive-and-enter gameplay path exists yet.
 - [x] **Physics test bench** (`tools/physics_bench.py`): deterministic scripted-driver scenarios over the real truck model -- descents, runaway coasts, stop tests -- printing plain-text, screen-reader-friendly, diffable reports (peak brake temp, fade onset, wear added, the cues the game would have played). The tuning loop for every physics change; `tests/test_physics_bench.py` keeps its orderings honest. Now also a tuning instrument: `--sweep` re-runs a scenario across one knob (speed, cargo, grade, wear) one line per value, and `--solve` bisects for an edge ("the fastest drag speed that stays under fade"), both plain-text and deterministic.
 - [x] **Per-truck condition.** Wear, damage, and fuel moved off the profile into `truck_conditions`, keyed by truck, so each owned tractor keeps its own state and swapping trucks no longer teleports condition. Legacy saves migrate (all owned trucks inherit current wear; no pristine spare), per-truck wear is under the save signature, and the field is scoped by truck *model* key -- true per-instance trucks are still the rental feature's job.

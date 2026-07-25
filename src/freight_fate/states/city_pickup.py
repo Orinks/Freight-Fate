@@ -189,16 +189,31 @@ class PickupFacilityState(MenuState):
         from ..audio import facility_ambient_key
 
         self.ctx.audio.set_ambient(facility_ambient_key(self.job.origin_type))
+        plan = self.pickup_plan
         if self.loaded:
             lead = (
                 f"Loaded at {self.facility}. The trailer is sealed for "
                 f"{self.job.spoken_destination}."
             )
             if getattr(self, "_just_loaded", False):
-                lead += f" Loading took {PICKUP_LOADING_MIN:.0f} minutes."
+                verb = "Dropping and hooking" if plan.is_drop_hook else "Loading"
+                lead += f" {verb} took {plan.minutes:.0f} minutes."
+                if plan.detention_minutes > 0.0:
+                    lead += (
+                        f" That is {plan.detention_minutes:.0f} minutes past the free time, "
+                        f"so you are owed {plan.detention_pay:,.0f} dollars in detention."
+                    )
+                if plan.trailer is not None:
+                    lead += f" {plan.trailer.describe()}"
                 self._just_loaded = False
         elif self.checked_in:
-            lead = f"Checked in at {self.facility}. You are assigned a dock for loading."
+            if plan.is_drop_hook:
+                lead = (
+                    f"Checked in at {self.facility}. No dock needed: your load is "
+                    f"already on {plan.trailer.spoken_name} in the drop yard."
+                )
+            else:
+                lead = f"Checked in at {self.facility}. You are assigned a dock for loading."
         else:
             lead = (
                 f"Arrived at pickup: {self.facility}. Check in with the "
@@ -233,11 +248,20 @@ class PickupFacilityState(MenuState):
                 self._depart_for_destination,
                 help="Dispatch loads the navigation itinerary and starts the trip.",
             )
+        elif self.checked_in and self.pickup_plan.is_drop_hook:
+            primary = MenuItem(
+                "Drop and hook in the yard",
+                self._load,
+                help="Drop the empty you came in with and hook the trailer the "
+                "shipper already loaded. Far quicker than a dock, but the "
+                "trailer is whatever the yard has, so walk around it.",
+            )
         elif self.checked_in:
             primary = MenuItem(
                 "Load cargo at dock",
                 self._load,
-                help="Back into the assigned dock and wait while the trailer is loaded.",
+                help="Back into the assigned dock and wait while the trailer is loaded. "
+                "Past two hours the wait earns detention pay.",
             )
         else:
             primary = MenuItem(
@@ -290,7 +314,26 @@ class PickupFacilityState(MenuState):
         self._save_state()
         self.refresh(keep_index=False)
         self.ctx.audio.play("ui/notify")
-        self.ctx.say(f"Checked in at {self.facility}. Dock assigned. Stop, then load cargo.")
+        plan = self.pickup_plan
+        if plan.is_drop_hook:
+            self.ctx.say(
+                f"Checked in at {self.facility}. No dock: your load is already on "
+                f"{plan.trailer.spoken_name} in the drop yard. Stop, then drop and hook."
+            )
+        else:
+            self.ctx.say(f"Checked in at {self.facility}. Dock assigned. Stop, then load cargo.")
+
+    @property
+    def pickup_plan(self):
+        """How this load gets on the truck: dropped and hooked, or live loaded.
+
+        Derived from the job and the profile every time rather than stored, so
+        it survives a save and a reload without a byte of new schema and always
+        agrees with itself.
+        """
+        from ..models.trailer_yard import pickup_plan
+
+        return pickup_plan(self.job, self.ctx.profile)
 
     def _load(self) -> None:
         from .driving import DOCKING_MAX_MPH
@@ -305,16 +348,30 @@ class PickupFacilityState(MenuState):
         self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
+        plan = self.pickup_plan
+        if plan.is_drop_hook:
+            title = "Hooking the loaded trailer"
+            message = (
+                f"Dropping your empty in the yard at {self.facility} and hooking "
+                f"{plan.trailer.spoken_name}, already loaded with "
+                f"{self.job.weight_tons:.0f} tons of {self.job.cargo.label}. "
+                "Gear down, lines connected, pin locked."
+            )
+            status = "Dropping and hooking. Please wait."
+        else:
+            title = "Loading cargo"
+            message = (
+                f"Loading {self.job.weight_tons:.0f} tons of "
+                f"{self.job.cargo.label} at {self.facility}. "
+                "Trailer doors open, dock crew working, brakes set."
+            )
+            status = "Loading cargo. Please wait."
         self.ctx.push_state(
             TimedMessageState(
                 self.ctx,
-                title="Loading cargo",
-                message=(
-                    f"Loading {self.job.weight_tons:.0f} tons of "
-                    f"{self.job.cargo.label} at {self.facility}. "
-                    "Trailer doors open, dock crew working, brakes set."
-                ),
-                status="Loading cargo. Please wait.",
+                title=title,
+                message=message,
+                status=status,
                 seconds=PICKUP_LOADING_WAIT_S,
                 on_complete=self._finish_load,
                 sound_key="poi/dock_and_deliver",
@@ -323,14 +380,22 @@ class PickupFacilityState(MenuState):
 
     def _finish_load(self) -> None:
         p = self.ctx.profile
+        plan = self.pickup_plan
         start = p.game_hours
-        p.game_hours += PICKUP_LOADING_MIN / 60.0
-        p.duty_log.record("on_duty_not_driving", start, p.game_hours, self.facility, "loading")
-        p.hos.on_duty(PICKUP_LOADING_MIN)
+        p.game_hours += plan.minutes / 60.0
+        activity = "dropping and hooking" if plan.is_drop_hook else "loading"
+        p.duty_log.record("on_duty_not_driving", start, p.game_hours, self.facility, activity)
+        p.hos.on_duty(plan.minutes)
         self.loaded = True
         self._just_loaded = True
         self._save_state()
         self.ctx.award_achievement("first_pickup")
+        if plan.is_drop_hook:
+            self.ctx.award_achievement("first_drop_hook")
+            if plan.trailer is not None and plan.trailer.defect:
+                self.ctx.award_achievement("hooked_a_bad_one")
+        elif plan.detention_minutes > 0.0:
+            self.ctx.award_achievement("detention_paid")
         self.ctx.pop_state()
 
     def _depart_for_destination(self) -> None:

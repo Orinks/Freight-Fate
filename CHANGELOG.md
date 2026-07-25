@@ -4,6 +4,27 @@
 
 ### Added
 
+- **Drop and hook.** Not every pickup is an hour backed into a dock any
+  more. Busy shippers -- cross-docks, parcel hubs, retail distribution
+  centres, intermodal ramps -- keep loaded trailers standing in a yard, so
+  you drop the empty you came in with, hook one that was loaded hours ago,
+  and you are gone in twenty-five minutes instead of sixty. The catch is
+  the one real drivers know: you get the trailer you get. The game tells
+  you which one you hooked and what shape it is in, and if you hooked a
+  rough one, the inspector at the next scale finds exactly what your
+  walk-around would have. Smaller shippers still load you at a dock.
+
+- **Detention pay.** When a shipper holds you at the dock past two hours,
+  the carrier bills them for the wait and it shows up on your settlement as
+  money in rather than money out. About one live load in three runs long.
+  The clock was going to run anyway; now some of it is working for you.
+
+- **Owning your trailer costs you the fast turn.** Nobody swaps an
+  owner-operator's own trailer for one out of a yard, so if you bought your
+  box you load at a dock every time, even at a shipper with a drop yard full
+  of them. It is a real trade and it is why leased carriers move freight
+  faster.
+
 - **The yard has thirty-five tractors in it now, not twelve.** Day cabs and
   sleepers, light tractors that leave the weight for the freight and heavy
   ones spec'd to pull it, aero shapes that sip diesel and long-hood

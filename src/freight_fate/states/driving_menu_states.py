@@ -964,7 +964,7 @@ class FacilityArrivalState(MenuState):
         trip_damage = max(0.0, d.truck.damage_pct - d.start_damage)
         estimated_pay = job.payout(hours, trip_damage)
         tolls = d.trip.toll_expense
-        accessorials = carrier_accessorial_charges(job)
+        accessorials = carrier_accessorial_charges(job, self.ctx.profile)
         carrier_charges = tolls + charge_total(accessorials)
         driver_charges = _speeding_settlement_fine(d.speeding_strikes)
         net_estimated_pay = max(0.0, estimated_pay - driver_charges)
@@ -1094,7 +1094,7 @@ class ArrivalState(MenuState):
             return
         gross_base = job.payout(hours, trip_damage)
         toll_expense = d.trip.toll_expense
-        accessorials = carrier_accessorial_charges(job)
+        accessorials = carrier_accessorial_charges(job, p)
         carrier_charges = toll_expense + charge_total(accessorials)
         driver_charges = _speeding_settlement_fine(d.speeding_strikes)
         business = build_business_settlement(
