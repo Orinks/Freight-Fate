@@ -247,6 +247,10 @@ From a batch of player reports:
   ever appear after a pygame upgrade, the fix is to make disable only close
   the pad and keep the initialized subsystem alive, reserving `_sdl.quit()`
   for `shutdown()`.
+- [x] **Speed-dependent tire pitch and concrete road joint thumps.** Tire hum
+  pitches up/down dynamically with speed (BASS backend) and thumps over
+  joints every 14-18m (audio + haptic) to eliminate the "flat/stationary"
+  road feeling (issue #112).
 - **Gear / launch realism.** Partly addressed: gross mass is now
   cargo-weight-aware (tare + payload), so a heavy load accelerates slower,
   lugs on grades, and burns more fuel, and an empty deadhead is light and

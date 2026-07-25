@@ -2707,3 +2707,45 @@ def test_destination_exit_scan_stays_on_the_final_approach():
         details = DrivingState._scan_destination_exit_details(driving)
         if details is not None:
             assert details[0] >= total - DESTINATION_EXIT_SCAN_WINDOW_MI
+
+
+def test_road_joint_thumps_accumulate_distance_and_trigger(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        plays = []
+        rumbles = []
+
+        monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: plays.append((key, volume)))
+        monkeypatch.setattr(app.ctx.controller.rumble, "joint", lambda severity: rumbles.append(severity))
+
+        driving._road_joint_accumulator_m = 0.0
+        driving._next_joint_distance_m = 15.0
+        driving.ctx.settings.time_scale = 1.0
+        driving.trip.time_scale = 1.0
+        monkeypatch.setattr(driving.truck, "update", lambda dt: None)
+        driving.truck.velocity_mps = 20.0
+        driving.truck.engine_on = True
+
+        driving.update(0.5)  # move 10m at 20 mps
+        assert driving._road_joint_accumulator_m == pytest.approx(10.0, rel=1e-3)
+        assert not plays
+        assert not rumbles
+
+        driving.update(0.5)  # move another 10m (total 20m, triggering joint thump)
+        assert len(plays) == 1
+        assert plays[0][0] == "vehicle/collision"
+        assert plays[0][1] == pytest.approx(0.01, rel=1e-3)
+
+        assert len(rumbles) == 1
+        assert rumbles[0] == pytest.approx(20.0 / 30.0, rel=1e-3)
+
+        assert driving._road_joint_accumulator_m == pytest.approx(5.0, rel=1e-3)
+        assert 14.0 <= driving._next_joint_distance_m <= 18.0
+    finally:
+        app.shutdown()
+

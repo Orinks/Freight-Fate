@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Tire pitch and concrete road joints bring the road to life.** The tire hum
+  now pitches up and down dynamically with the truck's speed (BASS backend
+  only), giving an organic sensation of acceleration and braking. Additionally,
+  tires thump rhythmically over concrete highway expansion joints (both audio
+  clicks and subtle controller haptic pulses) at randomized intervals of 14 to
+  18 meters, scaling speed-proportionally and falling silent when stopped or
+  crawling.
+
 - **Linux players get an AppImage.** Alongside the tarball, each release now
   ships `FreightFate-<version>-linux-x86_64.AppImage`: one file you mark
   executable and run, with no extraction step. It carries the libraries the
