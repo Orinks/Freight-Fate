@@ -119,8 +119,14 @@ def test_full_game_flow_headless(monkeypatch):
         finish_timed_state(app)
         assert isinstance(app.state, PickupFacilityState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # check in at origin
-        assert "Load cargo at dock" in app.state.items[app.state.index].text
-        app.state.handle_event(key_event(pygame.K_RETURN))  # load at dock
+        # Either way of getting the freight aboard is a valid full flow: a
+        # dock if this shipper loads live, the drop yard if it stages trailers
+        # (tests/test_trailer_yard.py pins which shippers do which).
+        assert app.state.items[app.state.index].text in (
+            "Load cargo at dock",
+            "Drop and hook in the yard",
+        )
+        app.state.handle_event(key_event(pygame.K_RETURN))  # load, or drop and hook
         finish_timed_state(app)
         assert "Depart for destination" in app.state.items[app.state.index].text
         app.state.handle_event(key_event(pygame.K_RETURN))
