@@ -4,6 +4,8 @@
 
 ### Added
 
+- **Review recent spoken messages while driving.** Use the message review controls to move through general and critical announcements, jump to the first or latest message, switch categories, and copy the current message to the clipboard.
+
 - **Tire sounds now react to your speed.** On supported audio systems, the tire
   hum rises and falls as you accelerate or brake. Above a crawl, soft road-seam
   thumps add texture through sound and controller vibration. Contributed by
