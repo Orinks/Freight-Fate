@@ -175,7 +175,7 @@ class DrivingUpdateMixin:
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
         self._check_destination_exit()
-        self._update_exit(self.trip.last_moved_mi)
+        self._update_exit(self.trip.last_moved_mi, dt)
 
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)

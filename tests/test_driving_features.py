@@ -2490,7 +2490,52 @@ def test_announced_destination_exit_stays_actionable_when_window_shrinks(
         assert driving._exit_stop.type == "delivery_destination"
         assert "Signaling for" in transcript[-1]
         assert "No exit coming up" not in "\n".join(transcript)
-        assert stopped_event_speech == [True]
+        assert stopped_event_speech == []
+    finally:
+        app.shutdown()
+
+
+def test_destination_exit_response_queues_behind_intervening_safety_cue(monkeypatch):
+    """X must not silence a newer warning on the shared event-speech channel."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    stopped_event_speech = []
+    monkeypatch.setattr(
+        app.ctx,
+        "say",
+        lambda text, interrupt=True: spoken.append(("main", text, interrupt)),
+    )
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        lambda text, interrupt=True: spoken.append(("event", text, interrupt)),
+    )
+    monkeypatch.setattr(
+        app.ctx,
+        "stop_event_speech",
+        lambda: stopped_event_speech.append(True),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(driving.trip, "upcoming_stop", lambda _window: None)
+        driving.trip.time_scale = 20.0
+        driving.truck.velocity_mps = 54.0 / 2.23694
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - driving._exit_window_mi() + 0.01
+        driving._check_destination_exit()
+
+        app.ctx.say_event("Brake now. Hazard ahead.", interrupt=True)
+        driving.handle_event(key_event(pygame.K_x))
+
+        assert stopped_event_speech == []
+        assert spoken[-2] == ("event", "Brake now. Hazard ahead.", True)
+        channel, confirmation, interrupt = spoken[-1]
+        assert channel == "event"
+        assert "Signaling for" in confirmation
+        assert interrupt is False
     finally:
         app.shutdown()
 
