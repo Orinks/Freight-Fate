@@ -32,8 +32,10 @@ class PlaytestResult:
     remaining_miles: float = 0.0
     speeding_strikes: int = 0
     speeding_tickets: int = 0
+    inspection_fines: int = 0
     speed_control_transitions: list[str] = field(default_factory=list)
     max_speeding_timer_s: float = 0.0
+    construction_entry_speed_mph: float | None = None
     destination_exit_speed_mph: float | None = None
 
     @property
@@ -241,6 +243,9 @@ class PlaytestHarness:
                 self.result.max_speeding_timer_s,
                 driving._speeding_timer,
             )
+            _, zone_reason = driving.trip.speed_limit_at(driving.trip.position_mi)
+            if zone_reason == "construction" and self.result.construction_entry_speed_mph is None:
+                self.result.construction_entry_speed_mph = driving.truck.speed_mph
             if driving.trip.position_mi >= end_mi:
                 break
         else:
@@ -251,6 +256,7 @@ class PlaytestHarness:
 
         self.result.speeding_strikes = driving.speeding_strikes
         self.result.speeding_tickets = driving.speeding_tickets
+        self.result.inspection_fines = driving.hos_fine_count
         return self.result
 
     def settle_delivery_after_segment(self) -> PlaytestResult:

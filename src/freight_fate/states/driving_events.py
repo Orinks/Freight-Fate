@@ -878,6 +878,9 @@ class DrivingEventMixin:
             if limit < lowest_limit and probe - start <= braking_mi:
                 lowest_limit, lowest_reason = limit, reason
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
+        construction_limit = self._construction_limit_ahead()
+        if construction_limit is not None and construction_limit <= lowest_limit:
+            return construction_limit, "construction"
         return lowest_limit, lowest_reason
 
     def _update_cruise(
@@ -922,8 +925,8 @@ class DrivingEventMixin:
         # urban drops and corridor limit changes straight into speeding strikes,
         # tickets, and trooper stops -- all of which now exist. The "Speed limit X"
         # cue still names the number; this cue says cruise is handling it.
-        posted, _ = self._acc_posted_limit_ahead()
-        cap_mph = posted + ACC_LIMIT_OFFSET_MPH
+        posted, limit_reason = self._acc_posted_limit_ahead()
+        cap_mph = posted if limit_reason == "construction" else posted + ACC_LIMIT_OFFSET_MPH
         limit_capped = cap_mph < self._cruise_mph
         if limit_capped:
             # Take the lower of the two caps. A posted limit above ramp speed
@@ -931,9 +934,13 @@ class DrivingEventMixin:
             # ramp at the corridor limit.
             target_mph = min(target_mph, cap_mph)
             if not self._acc_limit_capped:
+                reason = (
+                    "Construction zone ahead"
+                    if limit_reason == "construction"
+                    else "Posted limit lower"
+                )
                 self.ctx.say_event(
-                    "Posted limit lower; adaptive cruise easing to "
-                    f"{self.ctx.settings.speed_text(cap_mph)}.",
+                    f"{reason}; adaptive cruise easing to {self.ctx.settings.speed_text(cap_mph)}.",
                     interrupt=False,
                 )
         self._acc_limit_capped = limit_capped
