@@ -38,6 +38,15 @@ class DrivingUpdateMixin:
         # pacing can be changed from the pause menu mid-trip; keep the trip's
         # clock compression in step with the setting
         self.trip.time_scale = self.ctx.settings.time_scale
+        if self._destination_exit_response_s > 0.0:
+            self._destination_exit_response_s = max(
+                0.0,
+                self._destination_exit_response_s - dt,
+            )
+            if self._destination_exit_response_s == 0.0 and self._exit_stop is None:
+                # A driver who stopped after the early callout must still get a
+                # fresh, closer instruction once the normal window reaches them.
+                self._destination_exit_announced_key = ""
         self._sync_weather_source()
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2

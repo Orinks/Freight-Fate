@@ -64,6 +64,9 @@ OUT_OF_SERVICE_MIN = hos.SLEEP_MIN
 EXIT_WINDOW_MI = 5.0  # how far out X can arm the upcoming exit, at minimum
 EXIT_WARNING_REAL_S = 25.0  # target real seconds from callout to the ramp
 EXIT_WINDOW_MAX_MI = 20.0
+# Keep the exact announced destination exit available for the same real-time
+# budget even if coasting or automatic braking shrinks the dynamic window.
+DESTINATION_EXIT_RESPONSE_GRACE_S = EXIT_WARNING_REAL_S
 # Spoken distance anchors for an armed exit; a signal-on announcement miles
 # out gets buried under limit changes and scenery chatter without them.
 EXIT_COUNTDOWN_MILESTONES_MI = (2.0, 1.0, 0.5)

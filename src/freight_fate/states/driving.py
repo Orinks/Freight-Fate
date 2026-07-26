@@ -131,6 +131,7 @@ class DrivingState(
         self._destination_exit_taken = False
         self._missed_destination_exit_said = False
         self._destination_exit_announced_key = ""
+        self._destination_exit_response_s = 0.0
         # (position when computed, scan result) -- see _destination_exit_details
         self._destination_exit_cache: tuple[float, tuple[float, str, str] | None] | None = None
         self._cruise_mph: float | None = None
