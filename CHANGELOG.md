@@ -6,7 +6,9 @@
 
 - **Tire sounds now react to your speed.** On supported audio systems, the tire
   hum rises and falls as you accelerate or brake. Above a crawl, soft road-seam
-  thumps add texture through sound and controller vibration.
+  thumps add texture through sound and controller vibration. Contributed by
+  Swarup Baral ([@swarup-developer](https://github.com/swarup-developer)) in
+  [PR #114](https://github.com/Orinks/Freight-Fate/pull/114).
 
 - **Linux players get an AppImage.** Alongside the tarball, each release now
   ships `FreightFate-<version>-linux-x86_64.AppImage`: one file you mark
