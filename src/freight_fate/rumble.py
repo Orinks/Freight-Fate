@@ -139,7 +139,19 @@ class RumbleEngine:
 
         self._oneshots.append(_OneShot(IMPACT_DURATION_MS / 1000.0, envelope))
 
+    def joint(self, severity: float) -> None:
+        """A quick soft thump representing a tire crossing a road joint/crack."""
+        sev = _clamp01(severity)
+        low_peak = 0.15 * sev
+
+        def envelope(t: float) -> tuple[float, float]:
+            low = low_peak * (1.0 - t)
+            return low, 0.0
+
+        self._oneshots.append(_OneShot(0.2, envelope))
+
     # -- continuous effects (refresh each frame while active) -----------------
+
 
     def rumble_strip(self, level: float) -> None:
         """Refresh the harsh rumble-strip buzz; ``level`` is 0..1."""

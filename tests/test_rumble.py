@@ -186,3 +186,17 @@ def test_set_haptics_enabled_toggles_and_stops():
     m.rumble.alert()
     m.tick(0.05)
     assert m._controller.calls == []
+
+
+def test_joint_is_low_frequency_only_and_stops():
+    e, r = _engine()
+    e.joint(0.8)
+    e.tick(0.05)
+    assert len(r.calls) == 1
+    low, high, duration = r.calls[0]
+    assert low > 0.0
+    assert high == 0.0  # joint is low-frequency motor thump only
+    # Check that it stops after decay
+    e.tick(0.25)  # past the 0.2s duration
+    assert r.stops >= 1
+

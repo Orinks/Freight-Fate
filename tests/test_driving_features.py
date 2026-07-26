@@ -2707,3 +2707,77 @@ def test_destination_exit_scan_stays_on_the_final_approach():
         details = DrivingState._scan_destination_exit_details(driving)
         if details is not None:
             assert details[0] >= total - DESTINATION_EXIT_SCAN_WINDOW_MI
+
+
+@pytest.mark.parametrize("time_scale", [10.0, 20.0, 40.0])
+def test_road_joint_thumps_use_physical_distance_at_every_pace(monkeypatch, time_scale):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        plays = []
+        rumbles = []
+
+        monkeypatch.setattr(
+            app.ctx.audio, "play", lambda key, volume=1.0: plays.append((key, volume))
+        )
+        monkeypatch.setattr(
+            app.ctx.controller.rumble, "joint", lambda severity: rumbles.append(severity)
+        )
+
+        driving._road_joint_accumulator_m = 0.0
+        driving._next_joint_distance_m = 15.0
+        driving.ctx.settings.time_scale = time_scale
+        driving.trip.time_scale = time_scale
+        monkeypatch.setattr(driving.truck, "update", lambda dt: None)
+        driving.truck.velocity_mps = 20.0
+        driving.truck.engine_on = True
+
+        for _ in range(30):
+            driving.update(1.0 / 60.0)
+        assert driving._road_joint_accumulator_m == pytest.approx(10.0, rel=1e-3)
+        assert not plays
+        assert not rumbles
+
+        for _ in range(30):
+            driving.update(1.0 / 60.0)
+        assert len(plays) == 1
+        assert plays[0][0] == "vehicle/road_joint"
+        assert plays[0][1] == pytest.approx(0.01, rel=1e-3)
+
+        assert len(rumbles) == 1
+        assert rumbles[0] == pytest.approx(20.0 / 30.0, rel=1e-3)
+
+        assert driving._road_joint_accumulator_m == pytest.approx(5.0, rel=1e-3)
+        assert 14.0 <= driving._next_joint_distance_m <= 18.0
+    finally:
+        app.shutdown()
+
+
+def test_road_joint_thumps_pause_off_highway(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        plays = []
+        rumbles = []
+        monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: plays.append(key))
+        monkeypatch.setattr(app.ctx.controller.rumble, "joint", rumbles.append)
+
+        driving._road_joint_accumulator_m = 0.0
+        driving._next_joint_distance_m = 15.0
+        driving.trip.on_ramp = True
+        driving.truck.velocity_mps = 20.0
+
+        driving._update_audio(1.0)
+
+        assert driving._road_joint_accumulator_m == 0.0
+        assert "vehicle/road_joint" not in plays
+        assert not rumbles
+    finally:
+        app.shutdown()
