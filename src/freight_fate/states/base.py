@@ -146,7 +146,7 @@ class MenuState(State):
         self.announce_entry()
 
     def announce_entry(self) -> None:
-        self.ctx.say(f"{end_sentence(self.title)} {self.current_text()}")
+        self.ctx.say(f"{end_sentence(self.title)} {self.current_text()}", review=False)
 
     def refresh(self, keep_index: bool = True) -> None:
         old = self.index
