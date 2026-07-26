@@ -108,6 +108,7 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
         "start_mi",
         "end_mi",
         "set_mph",
+        "time_scale",
         "modes",
     ),
     [
@@ -119,6 +120,18 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
             None,
             None,
             70.0,
+            20.0,
+            ["cruise", "keeper", "cruise"],
+        ),
+        (
+            "Chicago",
+            "Indianapolis",
+            0,
+            "construction",
+            None,
+            None,
+            70.0,
+            40.0,
             ["cruise", "keeper", "cruise"],
         ),
         (
@@ -129,6 +142,7 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
             None,
             None,
             70.0,
+            10.0,
             ["cruise", "keeper", "cruise"],
         ),
         (
@@ -139,6 +153,7 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
             5.0,
             22.0,
             70.0,
+            10.0,
             ["cruise"],
         ),
     ],
@@ -152,6 +167,7 @@ def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
     start_mi,
     end_mi,
     set_mph,
+    time_scale,
     modes,
 ):
     from freight_fate.states.driving import SPEEDING_HOLD_S
@@ -160,11 +176,12 @@ def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
         harness.app.ctx.settings.hos_mode = "realistic"
         harness.app.ctx.settings.speed_keeper = True
         harness.app.ctx.settings.automatic_transmission = True
-        harness.app.ctx.settings.time_scale = 10.0
+        harness.app.ctx.settings.time_scale = time_scale
         harness.start_route(origin, destination, trip_seed=trip_seed)
         if zone_reason is not None:
             zone = next(zone for zone in harness.driving.trip.zones if zone.reason == zone_reason)
-            start_mi = max(0.0, zone.start_mi - 5.0)
+            approach_mi = 9.0 if zone_reason == "construction" else 5.0
+            start_mi = max(0.0, zone.start_mi - approach_mi)
             end_mi = min(harness.driving.trip.total_miles, zone.end_mi + 3.0)
         result = harness.drive_speed_control_segment(
             start_mi=start_mi,
@@ -176,15 +193,33 @@ def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
     assert result.speed_control_transitions == modes
     assert result.speeding_strikes == 0, result.transcript_text
     assert result.speeding_tickets == 0, result.transcript_text
+    assert result.inspection_fines == 0, result.transcript_text
     assert result.max_speeding_timer_s < SPEEDING_HOLD_S
     assert "Speeding strike" not in result.transcript_text
     assert "speeding fines" not in result.transcript_text.lower()
+    assert "Trooper in the construction zone" not in result.transcript_text
     assert result.deliveries == 1
     if "keeper" in modes:
         assert "Speed keeper holding" in result.transcript_text
         assert "Adaptive cruise resuming" in result.transcript_text
     else:
         assert "Posted limit lower; adaptive cruise easing" in result.transcript_text
+    if zone_reason == "construction":
+        assert result.construction_entry_speed_mph is not None
+        assert result.construction_entry_speed_mph <= 45.5
+        assert (
+            result.transcript_text.count(
+                "Construction zone ahead; adaptive cruise easing to 45 miles per hour"
+            )
+            == 1
+        )
+        warning = result.transcript_text.index("construction ahead. Speed limit 45")
+        easing = result.transcript_text.index(
+            "Construction zone ahead; adaptive cruise easing to 45 miles per hour"
+        )
+        handoff = result.transcript_text.index("Speed keeper holding 45 miles per hour")
+        resumed = result.transcript_text.index("Adaptive cruise resuming")
+        assert warning < easing < handoff < resumed
 
 
 @pytest.mark.smoke

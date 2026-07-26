@@ -104,6 +104,11 @@
 
 ### Fixed
 
+- **Automatic speed control now slows in time for construction zones.** At
+  highway speed, adaptive cruise begins braking when the advance warning is
+  announced and reaches the work-zone limit before the speed keeper takes over,
+  so the game no longer fines you while its own controls are still slowing down.
+
 - **The rest-stop arrival cue now leaves real time to set the brake.** Trip
   pacing no longer consumes the whole stopping buffer while even a slow voice
   is still speaking. Terse speech now says "Stop now." If you set the parking
