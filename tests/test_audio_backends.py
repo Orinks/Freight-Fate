@@ -547,3 +547,26 @@ def test_bass_headless_uses_no_sound_device(monkeypatch):
     assert a.enabled
     assert a._impl._output.get_device() == audio.BASS_NO_SOUND_DEVICE
     a.shutdown()
+
+
+def test_bass_road_noise_frequency_changes_with_speed(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+
+    slides = []
+    def fake_bass_call(fn, *args):
+        if fn == a._impl._slide and args[1] == a._impl._ATTRIB_FREQ:
+            slides.append(args[2])
+        return fn(*args)
+
+    a._impl._bass_call = fake_bass_call
+
+    a.set_road_noise(15.0)
+    assert len(slides) > 0
+    base_freq = a._impl._loops[audio.CH_ROAD][2]._road_base_freq
+    assert slides[-1] == pytest.approx(base_freq * 0.85)
+
+    a.shutdown()
+

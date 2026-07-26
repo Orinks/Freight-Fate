@@ -4,6 +4,12 @@
 
 ### Added
 
+- **Tire sounds now react to your speed.** On supported audio systems, the tire
+  hum rises and falls as you accelerate or brake. Above a crawl, soft road-seam
+  thumps add texture through sound and controller vibration. Contributed by
+  Swarup Baral ([@swarup-developer](https://github.com/swarup-developer)) in
+  [PR #114](https://github.com/Orinks/Freight-Fate/pull/114).
+
 - **Linux players get an AppImage.** Alongside the tarball, each release now
   ships `FreightFate-<version>-linux-x86_64.AppImage`: one file you mark
   executable and run, with no extraction step. It carries the libraries the
@@ -49,6 +55,15 @@
 
 ### Changed
 
+- **The R key now answers just "where am I".** Two short sentences: how far
+  along you are and how far is left, then the road you are on with its
+  direction, the state you are in, and the city it is taking you toward. If
+  you have planned a stop, the distance counts down to that stop instead of
+  the destination, so R tells you how far to the place you are actually
+  driving at. The nearest named place, the grade, the zone, and the next
+  maneuver are gone from it, because each of those already has its own key
+  or lives in the Tab status menu. U still reads what is coming up, and
+  Shift R still reads the next exit.
 - **Shorter driving readouts that fit a braille display.** The clock, route,
   weather, and fuel reports now put the answer in the first few words, so a
   one-line braille display shows what matters without panning. The C key

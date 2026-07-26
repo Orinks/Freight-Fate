@@ -257,7 +257,7 @@ Driving controls are active while the road view is focused:
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
 | C | Report clock, deadline, estimated arrival, and hours of service. |
-| R | Report trip progress first (the same percent the online drivers board shows), then the current road and direction, state, nearest named place, grade, and GPS context. |
+| R | Report trip progress (the same percent the online drivers board shows) and the distance left, then the road you are on with its direction, the state you are in, and the city you are heading toward. With a planned stop set, the distance counts down to that stop instead of the destination. |
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
 | L | Report lane position when lane drift is enabled. |
@@ -540,6 +540,8 @@ Gameplay settings include:
 | Hours of service | Choose realistic or relaxed hours rules. |
 | Lane drift | Choose whether lane drift is off, light, or realistic. When on, a short beep comes from the side you drift toward, so steer away from the beep. A dedicated centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. |
 | Speed keeper | Allow automatic speed control to use the speed keeper in low-speed zones and switch back to adaptive cruise on open roads. |
+| Controller | Accept controller input alongside the keyboard. The keyboard always stays active. |
+| Haptics | Use controller vibration for hazards, hard braking, rumble strips, and road seams. |
 
 Audio settings include:
 
@@ -609,7 +611,7 @@ Audio is layered by category:
 | --- | --- |
 | UI | Menu movement, selection, warning, cash, pause, unpause, and notification sounds. |
 | Engine | Engine start, shutdown, idle, and RPM-tracking running engine audio. |
-| Vehicle | Horn, gear shift, parking brake, brake air, road noise, collision, rumble strip, and fuel pump sounds. |
+| Vehicle | Horn, gear shift, parking brake, brake air, road noise, road seams, collision, rumble strip, and fuel pump sounds. |
 | Weather | Rain, snow, wind, thunder, and fog sounds. |
 | Route events | Hazards, construction zones, inspections, state crossings, traffic slowing, and toll charges. |
 | Facilities and stops | Facility gates, docks, rest stops, and weigh station lanes. |

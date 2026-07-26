@@ -536,6 +536,19 @@ class DrivingUpdateMixin:
         engine_load = min(self._engine_audio_throttle, cap)
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
+
+        # Road texture follows real wheel travel, not the trip model's compressed
+        # route distance. Ramps are outside the highway soundscape.
+        if dt > 0.0 and t.velocity_mps > 5.0 and not self.trip.on_ramp:
+            self._road_joint_accumulator_m += t.velocity_mps * dt
+            if self._road_joint_accumulator_m >= self._next_joint_distance_m:
+                self._road_joint_accumulator_m %= self._next_joint_distance_m
+                self._next_joint_distance_m = self._patrol_rng.uniform(14.0, 18.0)
+
+                vol = 0.015 * min(1.0, t.velocity_mps / 30.0)
+                audio.play("vehicle/road_joint", volume=vol)
+                self.ctx.controller.rumble.joint(min(1.0, t.velocity_mps / 30.0))
+
         if t.engine_on and t.transmission.in_reverse:
             if not self._reverse_cue_active:
                 audio.reverse_start()

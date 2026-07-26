@@ -553,6 +553,13 @@ class _PygameBackend:
                 CH_ENGINE[i], ENGINE_LOOP_GAIN * w * load_gain * self._engine_intro_gain
             )
 
+    def set_road_noise(self, speed_mps: float) -> None:
+        gain = min(1.0, speed_mps / 30.0)
+        if gain < 0.02:
+            self.stop_loop(CH_ROAD, fade_ms=500)
+        else:
+            self.start_loop(CH_ROAD, "vehicle/road", volume=gain, fade_ms=400)
+
     @property
     def engine_running(self) -> bool:
         return self._engine_running
@@ -1115,6 +1122,29 @@ class _BassBackend:
         except self._BassError:
             self._engine_stream = None
 
+    def set_road_noise(self, speed_mps: float) -> None:
+        gain = min(1.0, speed_mps / 30.0)
+        if gain < 0.02:
+            self.stop_loop(CH_ROAD, fade_ms=500)
+            return
+
+        self.start_loop(CH_ROAD, "vehicle/road", volume=gain, fade_ms=400)
+        entry = self._loops.get(CH_ROAD)
+        if entry is not None:
+            _, _, stream = entry
+            mult = 0.4 + 0.9 * min(1.0, speed_mps / 30.0)
+            try:
+                base_freq = getattr(stream, "_road_base_freq", None)
+                if base_freq is None:
+                    base_freq = stream.get_frequency()
+                    stream._road_base_freq = base_freq
+                target = base_freq * mult
+                self._bass_call(
+                    self._slide, stream.handle, self._ATTRIB_FREQ, target, 120
+                )
+            except self._BassError:
+                pass
+
     @property
     def engine_running(self) -> bool:
         return self._engine_running
@@ -1266,6 +1296,7 @@ class _NullBackend:
     def engine_start(self, play_start_sound: bool = True) -> None: ...
     def engine_stop(self, shutdown_sound: bool = True) -> None: ...
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None: ...
+    def set_road_noise(self, speed_mps: float) -> None: ...
     def update(self, dt: float) -> None: ...
     def reverse_start(self) -> None: ...
     def reverse_stop(self) -> None: ...
@@ -1427,14 +1458,8 @@ class AudioEngine:
     # -- road / weather / ambience --------------------------------------------
 
     def set_road_noise(self, speed_mps: float) -> None:
-        """Tire-on-asphalt loop whose volume tracks speed."""
-        if not self.enabled:
-            return
-        gain = min(1.0, speed_mps / 30.0)
-        if gain < 0.02:
-            self.stop_loop(CH_ROAD, fade_ms=500)
-        else:
-            self.start_loop(CH_ROAD, "vehicle/road", volume=gain, fade_ms=400)
+        """Tire-on-asphalt loop whose volume (and pitch under BASS) tracks speed."""
+        self._impl.set_road_noise(speed_mps)
 
     def set_weather(self, key: str | None, intensity: float = 1.0) -> None:
         """Play a weather ambience loop, e.g. ``weather/rain_light``."""

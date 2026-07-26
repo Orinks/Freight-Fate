@@ -363,9 +363,8 @@ def test_playtest_route_report_includes_current_location_on_real_keyboard_path(m
         harness.driving.trip.position_mi = 40.0
         harness.driving.handle_event(key_event(ord("r")))
 
+    assert result.transcript[-1].endswith("On I-90 East in New York, toward Rochester, New York.")
     assert "percent there" in result.transcript[-1]
-    assert "On I-90 East in New York" in result.transcript[-1]
-    assert "Near Batavia, New York" in result.transcript[-1]
 
 
 def test_playtest_transcript_covers_both_automatic_direction_styles(monkeypatch):

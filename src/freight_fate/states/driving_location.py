@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from ..sim.trip_models import _leg_state_at
-from ..sim.trip_route_helpers import _leg_heading, _stop_offset_for_direction
+from ..sim.trip_route_helpers import _leg_heading
 
 
 class DrivingLocationMixin:
     def _speak_route_status(self) -> None:
+        # Deliberately short: how far along you are, how far to the thing you
+        # are actually driving at, and where you are. Grade, zones, and the
+        # next maneuver each have their own key, so repeating them here just
+        # made drivers wait through a paragraph to hear where they were.
         trip = self.trip
         route = trip.route
         leg_index, leg_start = trip._leg_at_mile(trip.position_mi)
@@ -23,49 +27,15 @@ class DrivingLocationMixin:
         world = self.ctx.world
         state = _leg_state_at(leg, native_offset) or world.cities[toward_city].state
         toward = world.spoken_city(toward_city, qualified=True)
-        place_text = self._nearest_named_place(leg_index, leg_start, forward)
-        _, zone_reason = trip.speed_limit_at(trip.position_mi)
-        zone_text = f" In a {zone_reason} zone." if zone_reason else ""
 
-        # Progress leads: a braille display shows one short line at a time,
-        # and the percentage plus what is left fits the first line whole.
-        # The percent is the same figure the online drivers board shows.
-        next_context = trip.next_navigation_context(self.ctx.settings.imperial_units)
-        self.ctx.say(
-            f"{trip.progress_percent} percent there, "
-            f"{trip._distance_text(trip.remaining_miles)} left of "
-            f"{trip._distance_text(trip.total_miles)}. "
-            f"On {road} in {state}, toward {toward}. "
-            f"{place_text}{zone_text} "
-            f"{trip._current_grade_text()}. {next_context}"
-        )
-
-    def _nearest_named_place(self, leg_index: int, leg_start: float, forward: bool) -> str:
-        trip = self.trip
-        route = trip.route
-        leg = route.legs[leg_index]
-        leg_end = leg_start + leg.miles
-        world = self.ctx.world
-        candidates = [
-            (leg_start, world.spoken_city(route.cities[leg_index], qualified=True)),
-            (leg_end, world.spoken_city(route.cities[leg_index + 1], qualified=True)),
-        ]
-        for checkpoint in leg.checkpoints:
-            mile = leg_start + _stop_offset_for_direction(checkpoint.at_mi, leg.miles, forward)
-            name = checkpoint.name
-            if checkpoint.state and checkpoint.state.casefold() not in name.casefold():
-                name = f"{name}, {checkpoint.state}"
-            candidates.append((mile, name))
-        for stop in trip.stops:
-            if leg_start <= stop.at_mi <= leg_end:
-                candidates.append((stop.at_mi, stop.spoken_name))
-
-        place_mile, place = min(
-            candidates,
-            key=lambda candidate: abs(candidate[0] - trip.position_mi),
-        )
-        offset = place_mile - trip.position_mi
-        if abs(offset) <= 1.0:
-            return f"Near {place}."
-        direction = "ahead" if offset > 0 else "behind"
-        return f"Nearest named place is {place}, {trip._distance_text(abs(offset))} {direction}."
+        # Progress leads so a one-line braille display gets it without panning,
+        # and the percent is the same figure the online drivers board shows.
+        # A planned stop is the next place you actually mean to be, so it takes
+        # the distance slot from the destination until you have passed it.
+        planned = trip.planned_stop
+        if planned is not None and planned.at_mi > trip.position_mi:
+            ahead = trip._distance_text(planned.at_mi - trip.position_mi)
+            lead = f"{trip.progress_percent} percent there, {ahead} to {planned.spoken_name}."
+        else:
+            lead = f"{trip.progress_percent} percent there, {trip._distance_text(trip.remaining_miles)} left."
+        self.ctx.say(f"{lead} On {road} in {state}, toward {toward}.")
