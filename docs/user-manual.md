@@ -377,12 +377,12 @@ brake to a stop at the end of the ramp.
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
 and tells you to press X. If adaptive cruise is active, it eases the truck to
-45 miles per hour or your lower cruise target so you can reach ramp speed
-without an abrupt handoff. Press X to take the exit; automatic speed control
-releases as you enter the ramp, then you brake to the stop. If you miss the
-destination exit, continue to the next safe turnaround. Dispatch loops you
-back onto the approach so you can hear the exit call again and press X to take
-it.
+40 miles per hour or your lower cruise target, below the 45 mile-per-hour ramp
+limit, so you can reach ramp speed without an abrupt handoff. Press X to take
+the exit; automatic speed control releases as you enter the ramp, then you
+brake to the stop. If you miss the destination exit, continue to the next safe
+turnaround. Dispatch loops you back onto the approach so you can hear the exit
+call again and press X to take it.
 
 Ordinary highway exits that do not lead to a current action are not announced
 during the drive. Press Shift+R if you want the next listed exit for route

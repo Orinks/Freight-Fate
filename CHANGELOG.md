@@ -111,6 +111,13 @@
   and open the rest-stop menu; continuing past without stopping still misses
   the stop.
 
+- **A destination exit stays ready after it is announced.** On Standard or
+  Fast trip pacing, slowing down while the callout spoke could shrink the
+  action window, so pressing X answered "No exit coming up." The exact
+  announced exit now remains available through a human reaction window, while
+  expired and already-passed exits still cannot be armed. Braking, inspection,
+  and other safety warnings also finish before the signaling confirmation.
+
 - **Short hauls no longer pay several times more per mile than long ones.**
   A guaranteed minimum meant a fifty mile hop could pay over a thousand
   dollars, four to five times the per-mile rate of a real cross country run,
