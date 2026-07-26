@@ -115,7 +115,7 @@ class MessageLog:
         position = self._FILTERS.index(self.filter)
         if position <= 0: return None
         self.filter = self._FILTERS[position-1]
-                self._move_to_latest()
+        self._move_to_latest()
         return self.category_name()
 
     def next_category(self) -> str | None:
