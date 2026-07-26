@@ -12,6 +12,9 @@ class DrivingControlsMixin:
             return
         if event.type != pygame.KEYDOWN:
             return
+        if self.handle_message_review(event):
+            return
+
         key = event.key
         tr = self.truck.transmission
         if key in (pygame.K_LCTRL, pygame.K_RCTRL):
