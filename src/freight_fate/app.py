@@ -19,6 +19,7 @@ from .cloud_saves import CloudSaves
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
+from .message_log import MessageCategory, MessageLog
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
@@ -27,7 +28,6 @@ from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
 from .speech import Speech
 from .states.base import State
-from .message_log import MessageCategory, MessageLog
 
 log = logging.getLogger(__name__)
 # Every spoken line lands here too, so a logged playtest reads as a transcript of
@@ -115,7 +115,8 @@ class GameContext:
     def say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         transcript.info("%s", text)
         self.speech.say(text, interrupt)
-        if review: self.message_log.add(text, MessageCategory.GENERAL)
+        if review:
+            self.message_log.add(text, MessageCategory.GENERAL)
 
     def say_event(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
@@ -136,7 +137,8 @@ class GameContext:
             if interrupt:
                 _stop_main_speech(self.speech)
             self.speech.say(text, interrupt=False)
-        if review: self.message_log.add(text, MessageCategory.EVENT)
+        if review:
+            self.message_log.add(text, MessageCategory.EVENT)
 
     def stop_event_speech(self) -> None:
         _stop_event_speech(self.speech)

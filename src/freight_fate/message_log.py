@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
+
 class MessageCategory(Enum):
     GENERAL = "general"
     EVENT = "event"
@@ -74,7 +75,8 @@ class MessageLog:
             self.index = -1
             return None
 
-        if self.index <= 0: return None
+        if self.index <= 0:
+            return None
         self.index -= 1
 
         return messages[self.index]
@@ -86,7 +88,8 @@ class MessageLog:
             self.index = -1
             return None
 
-        if self.index >= len(messages) - 1: return None
+        if self.index >= len(messages) - 1:
+            return None
         self.index += 1
 
         return messages[self.index]
@@ -113,14 +116,16 @@ class MessageLog:
 
     def previous_category(self) -> str | None:
         position = self._FILTERS.index(self.filter)
-        if position <= 0: return None
+        if position <= 0:
+            return None
         self.filter = self._FILTERS[position-1]
         self._move_to_latest()
         return self.category_name()
 
     def next_category(self) -> str | None:
         position = self._FILTERS.index(self.filter)
-        if position >= len(self._FILTERS)-1: return None
+        if position >= len(self._FILTERS)-1:
+            return None
         self.filter = self._FILTERS[position + 1]
         self._move_to_latest()
         return self.category_name()

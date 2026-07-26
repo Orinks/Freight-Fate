@@ -17,7 +17,7 @@ import pygame
 
 if TYPE_CHECKING:
     from ..app import GameContext
-
+    from ..message_log import Message
 
 def end_sentence(text: str) -> str:
     """A spoken fragment ending in exactly one sentence mark, never two.
@@ -116,12 +116,14 @@ class State:
 
         if key == pygame.K_LEFTBRACKET:
             category = log.previous_category()
-            if category: self.ctx.say(f"{category} messages.", review=False)
+            if category:
+                self.ctx.say(f"{category} messages.", review=False)
             return True
 
         if key == pygame.K_RIGHTBRACKET:
             category = log.next_category()
-            if category: self.ctx.say(f"{category} messages.", review=False)
+            if category:
+                self.ctx.say(f"{category} messages.", review=False)
             return True
 
         if key == pygame.K_COMMA and ctrl:
@@ -142,16 +144,19 @@ class State:
 
         if key == pygame.K_c and ctrl:
             message = log.current_message()
-            if message is None: return True
+            if message is None:
+                return True
             from .online_states import write_clipboard_text
-            if write_clipboard_text(message.text): self.ctx.say("Message copied to clipboard.", review=False)
+            if write_clipboard_text(message.text):
+                self.ctx.say("Message copied to clipboard.", review=False)
             return True
         return False
-    
+
     def _speak_review_message(self, message: Message | None) -> None:
-        if message is None: return
+        if message is None:
+            return
         self.ctx.say(message.text, review=False)
-    
+
 
 @dataclass
 class MenuItem:
