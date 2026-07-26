@@ -265,6 +265,24 @@ def test_settings_menu_f1_has_help_for_every_item():
         app.shutdown()
 
 
+def test_haptics_help_explains_road_seam_feedback():
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+    try:
+        cat = open_settings_category(app, "Gameplay")
+        while not cat.items[cat.index].text.startswith("Haptics"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+
+        spoken.clear()
+        cat.handle_event(key_event(pygame.K_F1))
+        assert any("road seams" in text for text in spoken)
+    finally:
+        app.shutdown()
+
+
 def test_settings_menu_uses_category_submenus():
     from freight_fate.app import App
     from freight_fate.states.main_menu import SettingsCategoryState, SettingsState

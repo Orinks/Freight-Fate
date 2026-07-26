@@ -537,20 +537,17 @@ class DrivingUpdateMixin:
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
 
-        # Accumulate distance for road joints (e.g. thumps and haptic bumps)
-        moved_mi = self.trip.last_moved_mi
-        if moved_mi > 0.0:
-            moved_m = moved_mi * 1609.344
-            self._road_joint_accumulator_m += moved_m
+        # Road texture follows real wheel travel, not the trip model's compressed
+        # route distance. Ramps are outside the highway soundscape.
+        if dt > 0.0 and t.velocity_mps > 5.0 and not self.trip.on_ramp:
+            self._road_joint_accumulator_m += t.velocity_mps * dt
             if self._road_joint_accumulator_m >= self._next_joint_distance_m:
                 self._road_joint_accumulator_m %= self._next_joint_distance_m
                 self._next_joint_distance_m = self._patrol_rng.uniform(14.0, 18.0)
 
-                # Play a soft thump and a haptic bump only if above crawl speed
-                if t.velocity_mps > 5.0:
-                    vol = 0.015 * min(1.0, t.velocity_mps / 30.0)
-                    audio.play("vehicle/collision", volume=vol)
-                    self.ctx.controller.rumble.joint(min(1.0, t.velocity_mps / 30.0))
+                vol = 0.015 * min(1.0, t.velocity_mps / 30.0)
+                audio.play("vehicle/road_joint", volume=vol)
+                self.ctx.controller.rumble.joint(min(1.0, t.velocity_mps / 30.0))
 
         if t.engine_on and t.transmission.in_reverse:
             if not self._reverse_cue_active:
