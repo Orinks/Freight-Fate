@@ -254,12 +254,24 @@ class DrivingEventMixin:
         if self._exit_stop is not None:
             self._exit_stop = None
             self._cruise_exit_mph = None
+            self._destination_exit_response_s = 0.0
             self.ctx.say("Exit canceled. Staying on the highway.")
             return
         stop = self._upcoming_exit_stop()
         if stop is None:
             self.ctx.say("No exit coming up. Exits are announced as you approach them.")
             return
+        responding_to_destination_callout = (
+            stop.type == "delivery_destination"
+            and self._destination_exit_response_s > 0.0
+            and self._destination_exit_key(stop) == self._destination_exit_announced_key
+        )
+        if responding_to_destination_callout:
+            # Dedicated event speech can still be reading the callout when the
+            # player reacts. The success message repeats the needed details, so
+            # replace the old instruction instead of speaking over it.
+            self.ctx.stop_event_speech()
+            self._destination_exit_response_s = 0.0
         self._exit_stop = stop
         self._exit_countdown_said = set()
         self.ctx.audio.play("ui/notify", volume=0.5)
@@ -335,7 +347,16 @@ class DrivingEventMixin:
         if destination is None:
             return stop
         ahead = destination.at_mi - self.trip.position_mi
-        if not (0 <= ahead <= window):
+        announced_destination_is_actionable = (
+            ahead > 0.0
+            and self._destination_exit_response_s > 0.0
+            and self._destination_exit_key(destination) == self._destination_exit_announced_key
+        )
+        if announced_destination_is_actionable:
+            # X responds to the exit just named, even if an optional stop has
+            # since entered the ordinary lookahead window.
+            return destination
+        if not 0 < ahead <= window:
             return stop
         if stop is None or destination.at_mi <= stop.at_mi:
             return destination
@@ -401,6 +422,7 @@ class DrivingEventMixin:
         if key == self._destination_exit_announced_key:
             return
         self._destination_exit_announced_key = key
+        self._destination_exit_response_s = DESTINATION_EXIT_RESPONSE_GRACE_S
         message = self._destination_exit_announcement(stop, ahead) + self._cap_cruise_for_ramp()
         self.ctx.audio.play("ui/notify", volume=0.7)
         self.ctx.say_event(message, interrupt=True)
@@ -967,6 +989,7 @@ class DrivingEventMixin:
             self.trip.game_minutes += 20.0
             self.trip.position_mi = max(0.0, exit_details[0] - self._exit_window_mi())
             self._destination_exit_announced_key = None
+            self._destination_exit_response_s = 0.0
             if self._terse_speech():
                 reroute_text = "Safe turnaround. Destination exit ahead again."
             else:

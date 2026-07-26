@@ -227,6 +227,58 @@ def test_realistic_cruise_eases_for_destination_exit_without_speeding_fine(
 
 
 @pytest.mark.smoke
+@pytest.mark.parametrize(
+    ("time_scale", "approach_mph"),
+    [(20.0, 54.0), (40.0, 56.0)],
+    ids=["standard", "fast"],
+)
+def test_delayed_x_takes_announced_destination_exit_after_window_shrinks(
+    monkeypatch,
+    time_scale,
+    approach_mph,
+):
+    """Transcript proof for issue #113 using the real pygame X path."""
+    import pygame
+
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.ctx.settings.time_scale = time_scale
+        harness.start_route("Chicago", "Indianapolis", trip_seed=0)
+        driving = harness.driving
+        assert driving is not None
+        driving.tutorial = None
+        driving.trip.time_scale = time_scale
+        driving.trip.patrols = []
+        driving.truck.velocity_mps = approach_mph / 2.23694
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - driving._exit_window_mi() + 0.01
+
+        driving._check_destination_exit()
+        driving.truck.velocity_mps = 30.0 / 2.23694
+        # Give the player five real seconds to hear and react instead of
+        # repeating the former same-frame harness coverage that masked the bug.
+        response_before = driving._destination_exit_response_s
+        for _frame in range(5 * 60):
+            driving.update(1 / 60)
+        assert driving._destination_exit_response_s == pytest.approx(
+            response_before - 5.0,
+            abs=0.05,
+        )
+        assert driving._exit_window_mi() < destination.at_mi - driving.trip.position_mi
+
+        driving.handle_event(key_event(pygame.K_x))
+        result = harness.result
+
+    assert driving._exit_stop is not None
+    assert driving._exit_stop.type == "delivery_destination"
+    assert "destination exit" in result.transcript_text
+    assert "Signaling for" in result.transcript_text
+    assert "No exit coming up" not in result.transcript_text
+    assert "missed the destination exit" not in result.transcript_text.lower()
+    assert driving._cruise_mph is None
+    assert driving._cruise_exit_mph is None
+
+
+@pytest.mark.smoke
 def test_signaled_downhill_exit_keeps_cruise_below_ramp_limit(monkeypatch):
     import pygame
 

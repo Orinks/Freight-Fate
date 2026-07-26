@@ -2440,6 +2440,143 @@ def test_destination_exit_announced_within_scaled_window(monkeypatch):
         app.shutdown()
 
 
+@pytest.mark.parametrize(
+    ("time_scale", "approach_mph"),
+    [(20.0, 54.0), (40.0, 56.0)],
+    ids=["standard", "fast"],
+)
+def test_announced_destination_exit_stays_actionable_when_window_shrinks(
+    monkeypatch,
+    time_scale,
+    approach_mph,
+):
+    """The spoken X instruction remains true through a human reaction delay."""
+    from freight_fate.app import App
+
+    app = App()
+    transcript = []
+    stopped_event_speech = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: transcript.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, **k: transcript.append(text))
+    monkeypatch.setattr(
+        app.ctx,
+        "stop_event_speech",
+        lambda: stopped_event_speech.append(True),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(driving.trip, "upcoming_stop", lambda _window: None)
+        driving.trip.time_scale = time_scale
+        driving.truck.velocity_mps = approach_mph / 2.23694
+        destination = driving._destination_exit_stop()
+        announced_window = driving._exit_window_mi()
+        driving.trip.position_mi = destination.at_mi - announced_window + 0.01
+
+        driving._check_destination_exit()
+
+        assert "destination exit" in transcript[-1]
+        assert driving._cruise_mph is None  # reported case: automatic control is off
+
+        # Coasting while the player listens makes the dynamic window contract
+        # below the still-ahead exit. Before the fix, the real X path answered
+        # "No exit coming up" here.
+        driving.truck.velocity_mps = 30.0 / 2.23694
+        ahead = destination.at_mi - driving.trip.position_mi
+        assert driving._exit_window_mi() < ahead
+        driving.handle_event(key_event(pygame.K_x))
+
+        assert driving._exit_stop is not None
+        assert driving._exit_stop.type == "delivery_destination"
+        assert "Signaling for" in transcript[-1]
+        assert "No exit coming up" not in "\n".join(transcript)
+        assert stopped_event_speech == [True]
+    finally:
+        app.shutdown()
+
+
+def test_announced_destination_exit_grace_rejects_expired_and_passed_exit(monkeypatch):
+    """The reaction buffer never turns an old or passed announcement into an exit."""
+    from freight_fate.app import App
+
+    app = App()
+    transcript = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: transcript.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, **k: transcript.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(driving.trip, "upcoming_stop", lambda _window: None)
+        driving.trip.time_scale = 40.0
+        driving.truck.velocity_mps = 56.0 / 2.23694
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - driving._exit_window_mi() + 0.01
+        driving._check_destination_exit()
+
+        driving.truck.velocity_mps = 0.0
+        driving._destination_exit_response_s = 1 / 120
+        driving.update(1 / 60)
+        assert driving._destination_exit_response_s == 0.0
+        assert driving._destination_exit_announced_key == ""
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_stop is None
+        assert transcript[-1].startswith("No exit coming up")
+
+        # Once the normal window catches up, the destination is announced
+        # again instead of leaving the player with a permanently stale cue.
+        driving.trip.position_mi = destination.at_mi - 4.0
+        driving._check_destination_exit()
+        assert driving._destination_exit_announced_key
+        assert sum("destination exit" in line for line in transcript) == 2
+
+        # Even a live response timer cannot resurrect an exit behind the truck.
+        driving._destination_exit_response_s = 10.0
+        driving.trip.position_mi = destination.at_mi + 0.1
+        monkeypatch.setattr(driving, "_destination_exit_stop", lambda: destination)
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_stop is None
+        assert transcript[-1].startswith("No exit coming up")
+    finally:
+        app.shutdown()
+
+
+def test_announced_destination_exit_wins_over_nearer_optional_stop(monkeypatch):
+    """X responds to the destination callout, not a newly nearby truck stop."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import RoadStop
+
+    app = App()
+    transcript = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: transcript.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, **k: transcript.append(text))
+    monkeypatch.setattr(app.ctx, "stop_event_speech", lambda: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.time_scale = 20.0
+        driving.truck.velocity_mps = 54.0 / 2.23694
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - driving._exit_window_mi() + 0.01
+        nearer_stop = RoadStop(
+            "Nearby Travel Plaza",
+            driving.trip.position_mi + 2.0,
+            "truck_stop",
+            ("fuel", "sleep"),
+        )
+        monkeypatch.setattr(driving.trip, "upcoming_stop", lambda _window: nearer_stop)
+
+        driving._check_destination_exit()
+        driving.truck.velocity_mps = 30.0 / 2.23694
+        driving.handle_event(key_event(pygame.K_x))
+
+        assert driving._exit_stop is not None
+        assert driving._exit_stop.type == "delivery_destination"
+        assert "destination exit" in transcript[-1]
+        assert "Nearby Travel Plaza" not in transcript[-1]
+    finally:
+        app.shutdown()
+
+
 def test_exit_announcements_speak_each_name_once(monkeypatch):
     """Fallback phrasing must not repeat the facility or exit label -- the
     sentence is heard, not read."""
