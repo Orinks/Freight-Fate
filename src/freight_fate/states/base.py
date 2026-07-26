@@ -109,43 +109,43 @@ class State:
     def handle_message_review(self, event: pygame.event.Event) -> bool:
         if event.type != pygame.KEYDOWN:
             return False
-    
+
         key = event.key
-        ctrl = bool(event.mod & pygame.KMOD_CTRL)
+        ctrl = bool(getattr(event, "mod", 0) & pygame.KMOD_CTRL)
         log = self.ctx.message_log
-    
+
         if key == pygame.K_LEFTBRACKET:
             category = log.previous_category()
             if category: self.ctx.say(f"{category} messages.", review=False)
-                return True
+            return True
 
         if key == pygame.K_RIGHTBRACKET:
             category = log.next_category()
             if category: self.ctx.say(f"{category} messages.", review=False)
-                return True
+            return True
 
         if key == pygame.K_COMMA and ctrl:
             self._speak_review_message(log.first_message())
-                    return True
+            return True
 
         if key == pygame.K_PERIOD and ctrl:
             self._speak_review_message(log.last_message())
-                    return True
+            return True
 
         if key == pygame.K_COMMA:
             self._speak_review_message(log.previous_message())
-                    return True
+            return True
 
         if key == pygame.K_PERIOD:
             self._speak_review_message(log.next_message())
-                    return True
+            return True
 
-        if key == pygame.K_C and ctrl:
+        if key == pygame.K_c and ctrl:
             message = log.current_message()
             if message is None: return True
             from .online_states import write_clipboard_text
             if write_clipboard_text(message.text): self.ctx.say("Message copied to clipboard.", review=False)
-                    return True
+            return True
         return False
     
     def _speak_review_message(self, message: Message | None) -> None:

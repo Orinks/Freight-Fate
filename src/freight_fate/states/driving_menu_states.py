@@ -1056,14 +1056,14 @@ class ArrivalState(MenuState):
         text = "\n".join([f"Freight Fate: {self.title}.", *self.summary_lines])
         if write_clipboard_text(text):
             self.ctx.audio.play("ui/menu_select")
-            self.ctx.say("Delivery summary copied to clipboard.", interrupt=True, review=false)
+            self.ctx.say("Delivery summary copied to clipboard.", interrupt=True, review=False)
         else:
             self.ctx.audio.play("ui/error")
             self.ctx.say(
                 "I could not copy to the clipboard. The summary lines above "
                 "can still be read one at a time.",
                 interrupt=True,
-            review=false)
+            review=False)
 
     def go_back(self) -> None:
         self._continue()
