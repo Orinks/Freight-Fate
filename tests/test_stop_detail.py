@@ -428,6 +428,7 @@ def test_taken_exit_blown_when_never_stopping(monkeypatch):
         d.trip.stops = _stops(d.trip.position_mi)
         stop = d.trip.stops[0]
         d.trip.planned_stop_key = stop.key
+        d.truck.set_air_ready(parking_brake=False)
 
         # Signal and make the ramp: slow enough at the marker, but never stop.
         d._exit_stop = stop
@@ -440,13 +441,80 @@ def test_taken_exit_blown_when_never_stopping(monkeypatch):
         # Roll to the ramp end (nudge) then past it without ever slowing.
         d._update_exit(RAMP_LENGTH_MI)
         assert d.trip.planned_stop_key == stop.key  # still nudging, not blown
-        d._update_exit(RAMP_OVERSHOOT_MI)
+        grace_s = d._ramp_arrival_grace_s
+        d._update_exit(RAMP_OVERSHOOT_MI, grace_s - 0.1)
+        assert d._ramp_stop is stop  # distance alone cannot consume the spoken grace
+        d._update_exit(0.0, 0.2)
 
         assert d._ramp_mi is None
         assert d._ramp_stop is None
         assert d.trip.planned_stop_key is None
         assert "never stopped" in said[-1]
         assert "Plan cancelled." in said[-1]
+    finally:
+        app.shutdown()
+
+
+def test_rest_stop_arrival_grace_scales_for_slow_long_speech():
+    from freight_fate.states.driving_core import (
+        RAMP_ARRIVAL_GRACE_MIN_S,
+        ramp_arrival_grace_seconds,
+    )
+
+    short = ramp_arrival_grace_seconds("At Rest Area. Stop now.")
+    long = ramp_arrival_grace_seconds(
+        "You are at the Northbound Welcome Center and Scenic Travel Plaza. Come to a complete stop."
+    )
+    slowest = ramp_arrival_grace_seconds("At Rest Area. Stop now.", speech_rate=0.0)
+    fastest = ramp_arrival_grace_seconds("At Rest Area. Stop now.", speech_rate=1.0)
+
+    assert short >= RAMP_ARRIVAL_GRACE_MIN_S
+    assert long > short
+    assert slowest > fastest
+
+
+def test_terse_rest_stop_arrival_names_the_stop_action(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import RAMP_ARRIVAL_GRACE_MIN_S
+
+    app = App()
+    said = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    try:
+        app.ctx.settings.speech_verbosity = 0
+        d = _driving(app)
+        stop = _stops(d.trip.position_mi)[0]
+        d._ramp_mi = 0.0
+        d._ramp_stop = stop
+        d.truck.velocity_mps = 18.0
+
+        d._update_exit(0.0)
+
+        assert said[-1] == f"At {stop.spoken_name}. Stop now."
+        assert d._ramp_arrival_grace_s >= RAMP_ARRIVAL_GRACE_MIN_S
+    finally:
+        app.shutdown()
+
+
+def test_screen_reader_owned_rate_uses_slowest_arrival_grace(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import ramp_arrival_grace_seconds
+
+    app = App()
+    said = []
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    try:
+        app.ctx.settings.sapi_events = False
+        app.ctx.settings.speech_rate = 1.0  # stale for a screen-reader-owned voice
+        d = _driving(app)
+        stop = _stops(d.trip.position_mi)[0]
+        d._ramp_mi = 0.0
+        d._ramp_stop = stop
+        d.truck.velocity_mps = 18.0
+
+        d._update_exit(0.0)
+
+        assert d._ramp_arrival_grace_s == ramp_arrival_grace_seconds(said[-1], speech_rate=0.0)
     finally:
         app.shutdown()
 

@@ -275,6 +275,77 @@ def test_signaled_downhill_exit_keeps_cruise_below_ramp_limit(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_rest_stop_arrival_cue_allows_immediate_parking_brake_stop(monkeypatch):
+    """The spoken arrival point must leave enough real time to stop from 40 mph."""
+    import pygame
+
+    from freight_fate.sim.trip_models import RoadStop
+    from freight_fate.states.driving import RestStopState
+
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.ctx.settings.automatic_transmission = True
+        harness.app.ctx.settings.time_scale = 40.0
+        harness.start_route("Chicago", "Indianapolis", trip_seed=0)
+        driving = harness.driving
+        assert driving is not None
+        driving.tutorial = None
+        driving.trip.patrols = []
+        driving.truck.start_engine()
+        driving.truck.set_air_ready(parking_brake=False)
+        driving.truck.transmission.automatic = True
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 40.0 / 2.23694
+
+        stop = RoadStop(
+            "Prairie View Rest Area",
+            driving.trip.position_mi + 0.1,
+            actions=("fuel", "break"),
+            parking="confirmed",
+            exit_label="exit 99",
+        )
+        monkeypatch.setattr(driving, "_upcoming_exit_stop", lambda: stop)
+
+        # Use the same real keyboard path as the report: X takes the exit, then
+        # P is pressed as soon as the spoken arrival point is heard.
+        driving.handle_event(key_event(pygame.K_x))
+        driving.trip.position_mi = stop.at_mi
+        for _frame in range(10_000):
+            driving.update(1 / 60)
+            if any(
+                "Prairie View Rest Area. Come to a complete stop." in line
+                for line in harness.result.transcript
+            ):
+                break
+        else:
+            raise AssertionError(
+                f"rest-stop arrival cue never played\n{harness.result.transcript_text}"
+            )
+
+        # Exercise nearly the whole modeled slow-voice-plus-reaction interval.
+        # Once P is pressed, that explicit stop action remains accepted while
+        # the real truck physics finishes the deceleration.
+        reaction_frames = int((driving._ramp_arrival_grace_s - 0.5) * 60)
+        for _frame in range(reaction_frames):
+            driving.update(1 / 60)
+        assert driving._ramp_stop is stop
+        driving.handle_event(key_event(pygame.K_p))
+        for _frame in range(2_000):
+            driving.update(1 / 60)
+            if isinstance(harness.app.state, RestStopState):
+                break
+        else:
+            raise AssertionError(
+                "parking at the spoken arrival point did not open the rest-stop menu\n"
+                f"{harness.result.transcript_text}"
+            )
+
+        transcript = harness.result.transcript_text
+        assert "Parking brake set." in transcript
+        assert "never stopped" not in transcript
+        assert "drove past" not in transcript.lower()
+
+
+@pytest.mark.smoke
 def test_delivery_publication_is_queued_without_spoken_interruption(monkeypatch):
     from freight_fate.online_presence import OnlineIdentity
 

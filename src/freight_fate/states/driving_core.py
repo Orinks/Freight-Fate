@@ -71,10 +71,15 @@ RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
 RAMP_CRUISE_TARGET_MPH = 40.0  # leave control-loop headroom below the hard ramp limit
 RAMP_LENGTH_MI = 0.5  # deceleration lane plus ramp to the stop
 # Grace past the end of the ramp before a taken-but-never-stopped exit counts
-# as blown. The driver gets the "come to a complete stop" nudge at the ramp
-# end; roll this much further without stopping and the exit is missed, so the
-# stuck ramp doesn't linger for miles (unpatrolled, off the plan) once passed.
+# as blown. Distance alone is not enough under trip pacing: at 40 mph the same
+# half mile can pass in barely a second, before the driver can hear the arrival
+# cue and set the brake. Require both this distance and a real-time reaction
+# window. A driver who keeps rolling still misses the stop promptly.
 RAMP_OVERSHOOT_MI = 0.5
+RAMP_SPEECH_WPM_MIN = 30.0
+RAMP_SPEECH_WPM_MAX = 60.0
+RAMP_ARRIVAL_REACTION_S = 3.0
+RAMP_ARRIVAL_GRACE_MIN_S = 8.0
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
 # A real interchange counts as the destination exit only inside this final
 # approach window. Routes that finish on rural highways carry no baked
@@ -108,6 +113,21 @@ DOCKING_MAX_MPH = 0.5  # dock/settle/rest actions need a complete stop
 # silence for the rest of the drive (playtest 2026-07-22: six minutes and the
 # on-time bonus lost three miles past a delivery entrance).
 GATE_REMINDER_INTERVAL_S = 10.0
+
+
+def ramp_arrival_grace_seconds(message: str, speech_rate: float = 0.5) -> float:
+    """Conservatively cover the spoken cue plus a real response window.
+
+    Screen-reader speech completion is not observable through every Prism
+    backend, so model a deliberately slow 30-to-60 WPM voice, scaled by the
+    player's event-voice rate, instead of starting a fixed timer when the
+    utterance is merely queued. Once the player sets the parking brake, the stop
+    remains accepted while the truck finishes decelerating.
+    """
+    rate = max(0.0, min(1.0, float(speech_rate)))
+    modeled_wpm = RAMP_SPEECH_WPM_MIN + (RAMP_SPEECH_WPM_MAX - RAMP_SPEECH_WPM_MIN) * rate
+    spoken_seconds = len(message.split()) * 60.0 / modeled_wpm
+    return max(RAMP_ARRIVAL_GRACE_MIN_S, spoken_seconds + RAMP_ARRIVAL_REACTION_S)
 
 
 def terse_hazard_message(message: str) -> str:

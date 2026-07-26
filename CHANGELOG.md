@@ -104,6 +104,13 @@
 
 ### Fixed
 
+- **The rest-stop arrival cue now leaves real time to set the brake.** Trip
+  pacing no longer consumes the whole stopping buffer while even a slow voice
+  is still speaking. Terse speech now says "Stop now." If you set the parking
+  brake when the stop announces your arrival, the truck can finish stopping
+  and open the rest-stop menu; continuing past without stopping still misses
+  the stop.
+
 - **Short hauls no longer pay several times more per mile than long ones.**
   A guaranteed minimum meant a fifty mile hop could pay over a thousand
   dollars, four to five times the per-mile rate of a real cross country run,

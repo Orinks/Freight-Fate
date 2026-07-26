@@ -513,7 +513,7 @@ class DrivingEventMixin:
         self.ctx.audio.play("ui/notify", volume=0.6)
         self.ctx.say_event(f"{name} in {distance}.", interrupt=False)
 
-    def _update_exit(self, moved_mi: float) -> None:
+    def _update_exit(self, moved_mi: float, dt: float = 0.0) -> None:
         """Advance an armed exit or an active ramp; opens the stop menu."""
         if self._ramp_mi is not None:
             self._ramp_mi -= moved_mi
@@ -531,14 +531,52 @@ class DrivingEventMixin:
                     self._open_poi_stop(stop)
                 return
             stop = self._ramp_stop
+            if not self._ramp_end_said:
+                self._ramp_end_said = True
+                if stop.type != "delivery_destination":
+                    place = stop.spoken_name
+                    message = (
+                        f"At {place}. Stop now."
+                        if self._terse_speech()
+                        else f"You are at {place}. Come to a complete stop."
+                    )
+                    speech_rate = (
+                        self.ctx.settings.speech_rate
+                        if self.ctx.settings.sapi_events
+                        and getattr(self.ctx.speech, "event_supports_rate", False)
+                        else 0.0
+                    )
+                    self._ramp_arrival_grace_s = ramp_arrival_grace_seconds(
+                        message,
+                        speech_rate,
+                    )
+                else:
+                    place = stop.name
+                    message = (
+                        f"At {place}."
+                        if self._terse_speech()
+                        else f"You are at {place}. Come to a complete stop."
+                    )
+                self.ctx.say_event(message, interrupt=True)
+                return
+            if stop.type != "delivery_destination":
+                self._ramp_arrival_grace_s = max(0.0, self._ramp_arrival_grace_s - dt)
             # Rolled clear past the end of the ramp without ever stopping. A
             # destination exit keeps waiting (missing it drives its own reroute);
             # a route POI is blown, so give the highway back instead of leaving a
-            # stuck, unpatrolled ramp lingering for miles.
-            if stop.type != "delivery_destination" and self._ramp_mi <= -RAMP_OVERSHOOT_MI:
+            # stuck, unpatrolled ramp lingering for miles. Both the distance and
+            # real-time grace must expire, so trip pacing cannot consume the
+            # player's spoken-cue reaction window.
+            if (
+                stop.type != "delivery_destination"
+                and self._ramp_mi <= -RAMP_OVERSHOOT_MI
+                and self._ramp_arrival_grace_s <= 0.0
+                and not self.truck.parking_brake
+            ):
                 self._ramp_mi = None
                 self._ramp_stop = None
                 self._ramp_end_said = False
+                self._ramp_arrival_grace_s = 0.0
                 planned = self.trip.is_planned(stop)
                 if planned:
                     self.trip.planned_stop_key = None
@@ -556,19 +594,6 @@ class DrivingEventMixin:
                     line += " Plan cancelled."
                 self.ctx.say_event(line, interrupt=True)
                 return
-            if not self._ramp_end_said:
-                self._ramp_end_said = True
-                place = (
-                    self._ramp_stop.name
-                    if self._ramp_stop.type == "delivery_destination"
-                    else self._ramp_stop.spoken_name
-                )
-                message = (
-                    f"At {place}."
-                    if self._terse_speech()
-                    else f"You are at {place}. Come to a complete stop."
-                )
-                self.ctx.say_event(message, interrupt=True)
             return
         stop = self._exit_stop
         if stop is None:
@@ -585,6 +610,7 @@ class DrivingEventMixin:
             self._ramp_mi = RAMP_LENGTH_MI
             self._ramp_stop = stop
             self._ramp_end_said = False
+            self._ramp_arrival_grace_s = 0.0
             self._destination_exit_taken = stop.type == "delivery_destination"
             self._cancel_cruise()
             self._cancel_keeper()

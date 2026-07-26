@@ -128,6 +128,7 @@ class DrivingState(
         self._ramp_mi: float | None = None  # ramp distance left, once taken
         self._ramp_stop = None
         self._ramp_end_said = False
+        self._ramp_arrival_grace_s = 0.0
         self._destination_exit_taken = False
         self._missed_destination_exit_said = False
         self._destination_exit_announced_key = ""
