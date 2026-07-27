@@ -1784,6 +1784,14 @@ section below and the Unreleased changelog; the release-line view:
       as categories, reading services nested per state, International/AFN
       their own groups. Needs `state` on the RadioStation dataclass +
       backfill on pre-sweep locals. Accessibility-critical spoken menu.
+      A `station_type` tag (public / community / college / tribal /
+      reading_service / international / afn / regional / built_in / satellite)
+      is now baked on every catalog record (data-only, loader ignores it for
+      now) -- pre-wiring a browse filter that separates NPR/public from
+      community and college. Whether the Radio Player exposes those as
+      categories/tabs is a product call raised by the owner (2026-07-27) and
+      forwarded to Josh; the in-cab driving dial deliberately stays a single
+      scan-what's-in-range band (no genre tabs, matching a real car radio).
 - [ ] **Radio cleanup pass: JS-locked holdouts + a real trucking station.**
       Chase the stations the sweep flagged but could not extract a mount
       for -- WABE Atlanta, KWBU Waco, the Richmond/Huntsville public and
