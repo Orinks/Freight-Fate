@@ -195,7 +195,13 @@ def _parse_m3u(path: Path) -> tuple[tuple[str, ...], str]:
         if line.lower().startswith(("http://", "https://")):
             continue
         entry = Path(line)
-        if not entry.is_absolute():
+        # A Windows drive path is absolute-in-intent on every platform:
+        # Path.is_absolute() says False for "C:\music" on Linux, which
+        # made CI resolve it under the playlist folder while Windows
+        # passed it through -- same playlist, two behaviors. Drive-letter
+        # entries always pass through untouched.
+        drive_path = len(line) >= 3 and line[1] == ":" and line[2] in r"\/" and line[0].isalpha()
+        if not entry.is_absolute() and not drive_path:
             entry = path.parent / entry
         files.append(str(entry))
     return tuple(files), title
