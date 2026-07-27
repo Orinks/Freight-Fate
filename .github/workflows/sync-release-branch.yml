@@ -41,6 +41,22 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Nobody is watching this run, so a blip on the GitHub API must not
+          # be the reason a merge goes unnoticed for a week. Observed: a 502
+          # from the GraphQL endpoint on the very first run.
+          retry() {
+            local attempt=1
+            until "$@"; do
+              if [ "$attempt" -ge 3 ]; then
+                echo "'$*' failed $attempt times; giving up." >&2
+                return 1
+              fi
+              echo "'$*' failed; retrying in $((attempt * 5))s." >&2
+              sleep $((attempt * 5))
+              attempt=$((attempt + 1))
+            done
+          }
+
           if ! git rev-parse --verify "origin/$TARGET_BRANCH" >/dev/null 2>&1; then
             echo "No $TARGET_BRANCH branch; nothing to sync."
             echo "Release branch \`$TARGET_BRANCH\` does not exist." >> "$GITHUB_STEP_SUMMARY"
@@ -92,15 +108,19 @@ jobs:
 
           cat body.md >> "$GITHUB_STEP_SUMMARY"
 
-          EXISTING=$(gh pr list --repo "$GITHUB_REPOSITORY" \
-            --base "$TARGET_BRANCH" --head dev --state open \
-            --json number --jq '.[0].number // empty')
+          list_open_pr() {
+            gh pr list --repo "$GITHUB_REPOSITORY" \
+              --base "$TARGET_BRANCH" --head dev --state open \
+              --json number --jq '.[0].number // empty' > pr.txt
+          }
+          retry list_open_pr
+          EXISTING=$(cat pr.txt)
 
           if [ -n "$EXISTING" ]; then
             echo "Refreshing PR #$EXISTING."
-            gh pr edit "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file body.md
+            retry gh pr edit "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file body.md
           else
-            gh pr create --repo "$GITHUB_REPOSITORY" \
+            retry gh pr create --repo "$GITHUB_REPOSITORY" \
               --base "$TARGET_BRANCH" --head dev \
               --title "Merge dev into $TARGET_BRANCH" \
               --body-file body.md
