@@ -130,7 +130,10 @@ def test_existing_curated_endpoint_stop_is_not_duplicated_or_crowded(monkeypatch
         monkeypatch,
         {
             "named-city--kingman_az_us": {
-                "elements": [_stop_element("TA Travel Center"), _stop_element("Flying J Travel Center")]
+                "elements": [
+                    _stop_element("TA Travel Center"),
+                    _stop_element("Flying J Travel Center"),
+                ]
             }
         },
     )

@@ -12,6 +12,7 @@ os.environ.setdefault("FREIGHT_FATE_NO_SPEECH", "1")
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pygame
+from speech_capture import speech_stub
 
 
 def key_event(key: int, unicode: str = ""):
@@ -69,19 +70,16 @@ class PlaytestHarness:
         from freight_fate.app import App
 
         self.app = App()
-        self.monkeypatch.setattr(self.app.ctx, "say", self._say)
-        self.monkeypatch.setattr(self.app.ctx, "say_event", self._say_event)
+        transcript = self.result.transcript
+        self.monkeypatch.setattr(self.app.ctx, "say", speech_stub(transcript))
+        self.monkeypatch.setattr(
+            self.app.ctx, "say_event", speech_stub(transcript, prefix="[event] ")
+        )
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
         if self.app is not None:
             self.app.shutdown()
-
-    def _say(self, text: str, interrupt: bool = True) -> None:
-        self.result.transcript.append(text)
-
-    def _say_event(self, text: str, interrupt: bool = True) -> None:
-        self.result.transcript.append(f"[event] {text}")
 
     def start_delivery(
         self,

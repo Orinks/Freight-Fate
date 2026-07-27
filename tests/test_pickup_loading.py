@@ -1,6 +1,7 @@
 """Drivable pickup, loading, and transition into loaded delivery."""
 
 import pygame
+from speech_capture import speech_stub
 
 
 def key_event(key, unicode=""):
@@ -49,7 +50,7 @@ def test_accepting_job_starts_drivable_pickup_leg():
 
     app = App()
     spoken = []
-    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    app.ctx.say = speech_stub(spoken)
     try:
         pickup = accept_pickup_drive(app)
 
@@ -124,7 +125,7 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
     app = App()
     events = []
     played = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: played.append((key, volume)))
     try:
         driving = accept_pickup_drive(app)
@@ -280,8 +281,8 @@ def test_pickup_save_and_route_planning_keep_speed_control_session(monkeypatch):
     app = App()
     spoken = []
     events = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
         pickup_drive = accept_pickup_drive(app)
         pickup_drive.truck.start_engine()

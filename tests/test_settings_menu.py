@@ -1,5 +1,6 @@
 import pygame
 import pytest
+from speech_capture import speech_stub
 
 
 def key_event(key, unicode="", mod=0):
@@ -270,7 +271,7 @@ def test_haptics_help_explains_road_seam_feedback():
 
     app = App()
     spoken = []
-    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    app.ctx.say = speech_stub(spoken)
     try:
         cat = open_settings_category(app, "Gameplay")
         while not cat.items[cat.index].text.startswith("Haptics"):
@@ -289,7 +290,7 @@ def test_settings_menu_uses_category_submenus():
 
     app = App()
     spoken = []
-    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    app.ctx.say = speech_stub(spoken)
     try:
         picker = SettingsState(app.ctx)
         app.push_state(picker)
@@ -358,7 +359,7 @@ def test_speech_setting_adjustment_previews_adjusted_voice(monkeypatch):
     preview = PreviewSpeech()
     monkeypatch.setattr(app.ctx, "speech", preview)
     monkeypatch.setattr(app, "speech", preview)
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: fallback_spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(fallback_spoken))
     try:
         menu = SettingsCategoryState(app.ctx, "speech")
         app.push_state(menu)
@@ -416,7 +417,7 @@ def test_online_menu_keeps_profile_sharing_and_private_cloud_backup_separate():
 
     app = App()
     spoken: list[str] = []
-    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    app.ctx.say = speech_stub(spoken)
     try:
         menu = open_online_hub_from_settings(app)
         labels = [item.text for item in menu.items]
@@ -459,7 +460,7 @@ def test_problem_reports_reads_out_the_active_log_file(tmp_path, monkeypatch):
 
     app = App()
     spoken = []
-    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    app.ctx.say = speech_stub(spoken)
     try:
         cat = SettingsCategoryState(app.ctx, "reports")
         app.push_state(cat)

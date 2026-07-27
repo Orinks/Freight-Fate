@@ -3,6 +3,7 @@
 import datetime
 
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.sim.season import (
     CAREER_START_DAY_OF_YEAR,
@@ -121,15 +122,9 @@ def test_calendar_guard_keeps_snow_in_winter_and_storms_in_summer():
     summer = _hours_for_day(200)
     winter = _hours_for_day(15)
     assert adjust_for_calendar(WeatherKind.SNOW, -10.0, summer) is WeatherKind.RAIN
-    assert (
-        adjust_for_calendar(WeatherKind.THUNDERSTORM, 25.0, winter)
-        is WeatherKind.HEAVY_RAIN
-    )
+    assert adjust_for_calendar(WeatherKind.THUNDERSTORM, 25.0, winter) is WeatherKind.HEAVY_RAIN
     assert adjust_for_calendar(WeatherKind.SNOW, -10.0, winter) is WeatherKind.SNOW
-    assert (
-        adjust_for_calendar(WeatherKind.THUNDERSTORM, 25.0, summer)
-        is WeatherKind.THUNDERSTORM
-    )
+    assert adjust_for_calendar(WeatherKind.THUNDERSTORM, 25.0, summer) is WeatherKind.THUNDERSTORM
 
 
 def test_dry_conditions_and_unknown_temperature_pass_through():
@@ -249,7 +244,7 @@ def test_terminal_sleep_uses_independent_calendar_with_live_weather(monkeypatch)
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: _Provider())
     app.ctx.settings.real_weather = True
     app.ctx.settings.live_weather_controls_calendar = False
@@ -290,7 +285,7 @@ def test_terminal_does_not_present_modeled_temperature_while_live_weather_loads(
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: _LoadingProvider())
     app.ctx.settings.real_weather = True
     app.ctx.settings.live_weather_controls_calendar = False

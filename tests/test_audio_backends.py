@@ -556,6 +556,7 @@ def test_bass_road_noise_frequency_changes_with_speed(monkeypatch):
         pytest.skip("BASS backend unavailable")
 
     slides = []
+
     def fake_bass_call(fn, *args):
         if fn == a._impl._slide and args[1] == a._impl._ATTRIB_FREQ:
             slides.append(args[2])
@@ -569,4 +570,3 @@ def test_bass_road_noise_frequency_changes_with_speed(monkeypatch):
     assert slides[-1] == pytest.approx(base_freq * 0.85)
 
     a.shutdown()
-

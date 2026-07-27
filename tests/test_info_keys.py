@@ -1,6 +1,7 @@
 """On-demand driving info keys: speed limit (S), repeat (A), what's ahead (U)."""
 
 import pygame
+from speech_capture import speech_stub
 
 
 def key_event(key):
@@ -30,7 +31,7 @@ def _driving(app, origin="Buffalo", destination="Rochester"):
 
 def _capture(app, monkeypatch):
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     return spoken
 
 

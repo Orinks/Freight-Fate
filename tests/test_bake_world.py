@@ -60,9 +60,7 @@ def test_default_root_prefers_baked_module(monkeypatch):
 
 def test_explicit_root_reads_files_even_with_baked_module(monkeypatch, tmp_path):
     baked_payload = {"cities": {"Baked Only": {}}, "legs": []}
-    monkeypatch.setattr(
-        data_pkg, "_baked_world", _fake_baked_module(baked_payload), raising=False
-    )
+    monkeypatch.setattr(data_pkg, "_baked_world", _fake_baked_module(baked_payload), raising=False)
     root = tmp_path / "world_data"
     (root / "us").mkdir(parents=True)
     (root / "index.json").write_text(

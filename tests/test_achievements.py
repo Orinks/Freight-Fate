@@ -1,6 +1,7 @@
 import json
 
 import pygame
+from speech_capture import speech_stub
 
 
 def key_event(key, unicode=""):
@@ -54,7 +55,7 @@ def test_award_achievement_persists_and_deduplicates_notification(monkeypatch):
         app.ctx.profile = Profile(name="Badge Driver")
         spoken = []
         played = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         monkeypatch.setattr(app.ctx.audio, "play", lambda key, **_kwargs: played.append(key))
 
         first = app.ctx.award_achievement("first_delivery")
@@ -80,8 +81,8 @@ def test_event_achievement_speaks_through_screen_reader(monkeypatch):
         app.ctx.profile = Profile(name="Screen Reader Badges")
         screen_reader = []
         events = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: screen_reader.append(text))
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(screen_reader))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
 
         result = app.ctx.award_achievement("first_delivery", event=True)
 
@@ -107,7 +108,7 @@ def test_main_menu_achievement_path_is_keyboard_accessible(monkeypatch):
         profile.achievements.append("first_delivery")
         profile.save()
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
 
         app.push_state(MainMenuState(app.ctx))
         select(app.state, "Achievements")
@@ -221,7 +222,7 @@ def test_suppressed_award_collects_without_chime_or_speech(monkeypatch):
         app.ctx.profile = Profile(name="Quiet Badges")
         spoken = []
         played = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         monkeypatch.setattr(app.ctx.audio, "play", lambda key, **_kwargs: played.append(key))
 
         result = app.ctx.award_achievement("first_delivery", announce=False)
@@ -260,8 +261,8 @@ def test_state_crossing_keeps_gameplay_prompt_before_achievement(monkeypatch):
         driving = DrivingState(app.ctx, job, route)
         events = []
         screen_reader = []
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text))
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: screen_reader.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(screen_reader))
 
         cue = NavigationCue(
             "state:test",

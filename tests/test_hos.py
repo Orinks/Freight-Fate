@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 import pygame
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.sim import hos
 from freight_fate.sim.hos import (
@@ -899,7 +900,7 @@ def test_split_sleeper_rest_action_advances_clock_and_speaks_status(monkeypatch)
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     awards = []
     original_award = app.ctx.award_achievement
 
@@ -952,7 +953,7 @@ def test_sleeping_shuts_down_a_running_engine(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
         driving.truck.set_air_ready(parking_brake=True)
@@ -1016,7 +1017,7 @@ def test_full_parking_offers_drive_on_and_shoulder(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
         park_at_first_stop(driving)
@@ -1062,7 +1063,7 @@ def test_emergency_shoulder_sleep_pause_menu_constraints(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
         stop = park_at_first_stop(driving)
@@ -1101,7 +1102,7 @@ def test_hos_off_still_allows_fatigue_emergency_shoulder_sleep(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         app.ctx.settings.hos_mode = "debug_off"
         driving = start_drive(app)
@@ -1286,7 +1287,7 @@ def test_dispatch_warns_before_accepting_job_that_exceeds_current_hos(monkeypatc
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     try:
         from freight_fate.models.profile import Profile
@@ -1320,7 +1321,7 @@ def test_dispatch_board_warns_when_all_generated_jobs_exceed_current_hos(monkeyp
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     try:
         app.ctx.profile = Profile(name="All Risky", current_city="Austin")
@@ -1356,7 +1357,7 @@ def test_dispatch_does_not_warn_after_hours_reset(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     try:
         app.ctx.profile = Profile(name="Rested", current_city="Austin")

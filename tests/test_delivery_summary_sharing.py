@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pygame
+from speech_capture import speech_stub
 
 from freight_fate.models.jobs import CARGO_CATALOG, Job
 from freight_fate.models.profile import Profile
@@ -273,7 +274,7 @@ def test_status_check_records_linked_flag_even_without_handle():
     said: list[str] = []
     ctx = SimpleNamespace(
         settings=settings,
-        say=lambda text, interrupt=True, review=True: said.append(text),
+        say=speech_stub(said),
         audio=SimpleNamespace(play=lambda *_a, **_kw: None),
     )
     state = MastodonLinkState(ctx)

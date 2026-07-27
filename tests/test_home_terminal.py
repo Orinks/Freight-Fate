@@ -3,6 +3,7 @@
 import os
 
 import pygame
+from speech_capture import speech_stub
 
 
 def key_event(key, unicode=""):
@@ -168,7 +169,7 @@ def test_unreadable_save_is_spoken_and_omitted_from_main_menu(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         app.push_state(MainMenuState(app.ctx))
         labels = [item.text for item in app.state.items]
@@ -192,7 +193,7 @@ def test_edited_save_stays_listed_but_marked_modified(monkeypatch):
     edited_path.write_bytes(encode_save_bytes(data))
 
     app = App()
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: None)
+    monkeypatch.setattr(app.ctx, "say", speech_stub())
     try:
         app.push_state(MainMenuState(app.ctx))
         labels = [item.text for item in app.state.items]
@@ -327,7 +328,7 @@ def test_manage_careers_resets_selected_save_to_fresh_profile(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         profile = Profile(name="Reset Me", current_city="Seattle", money=4321.0)
         profile.career.xp = 3200.0
