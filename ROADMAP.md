@@ -1290,15 +1290,20 @@ section below and the Unreleased changelog; the release-line view:
       stream yet; market covered by KWMU), WFSU Tallahassee (mount refuses
       BASS), the far Montana Hi-Line, the Texas border west of the Valley,
       and interior US-50 Nevada -- genuinely thin country, left dark rather
-      than faked.
-- [ ] **Montana Hi-Line via translators (owner lead, 2026-07-22).** The
-      Hi-Line gap may not be as dark as the license map suggests: Montana
-      Public Radio and Yellowstone Public Radio blanket the state through
-      low-power FM translators, and the parent streams are real, licensed,
-      and likely BASS-friendly. Next radio pass: map which translator
-      (parent network) actually covers each Hi-Line dispatch city and seat
-      the parent stream there under the local translator's dial position,
-      the same honest-coverage rule as everywhere else.
+      than faked. (Interior Nevada and the Texas border were later lit by the
+      2026-07-27 NPR translator dark-corridor sweep -- see below; the truly
+      stationless spots, Wells/Austin NV and Malta MT, stay dark.)
+- [x] **Montana Hi-Line via translators (owner lead, 2026-07-22) --
+      resolved 2026-07-27.** The Hi-Line east of Havre was already lit by
+      Yellowstone Public Radio in the catalog (Havre, Glasgow, Wolf Point,
+      Glendive, Miles City). The 2026-07-27 sweep confirmed the remaining
+      gap honestly: Malta, Chinook, and Saco have no reliable public-radio
+      signal (Malta's only in-town FMs are religious and commercial), so
+      they stay dark rather than faked. The one real find is KGVA 88.1
+      (Aaniiih Nakoda College, Fort Belknap), a full-power tribal NPR
+      station that covers the Harlem/Dodson stretch -- carried forward as
+      the follow-up in the dark-corridor bullet above (its stream needs a
+      Chrome network-sniff to extract).
 - [x] **Deadlines respect the hours you already burned -- SHIPPED
       same day (owner question, 2026-07-24).** Dispatch deadlines model HOS honestly for
       a FRESH clock (route-aware driving + breaks + a 10-hour sleep per
@@ -1725,6 +1730,27 @@ section below and the Unreleased changelog; the release-line view:
       16. Every stream BASS-gated 3/3 spaced from a clean session; Mississippi
       RRS, Omaha RTBS, and Detroit DRIS stay out honestly (closed-circuit /
       subcarrier / part-time only).
+- [x] **NPR translator dark-corridor sweep (2026-07-27).** The map's
+      genuinely dark stretches got their first public-radio signal, each
+      seated at the real FCC translator or repeater serving the town and
+      carrying its parent network's BASS-verified live stream. Interior
+      Nevada now catches NPR along Interstate 80 (Winnemucca K217AX, Battle
+      Mountain K263AB, Elko KNCC) and US-50 (Eureka K215CM via KUNR; Ely
+      KWPR via Nevada Public Radio); the Big Bend of far West Texas picks up
+      Marfa Public Radio (Marfa KRTS, Alpine KRTP, Marathon KDKY, Presidio
+      KOJP) and Texas Public Radio at Del Rio (KTPD). Translator ranges are
+      honestly short, so the signals fade in and out between the mountain
+      ranges the way low-power translators really do. Every parent stream was
+      re-checked on the BASS live gate three times from a clean session.
+      Honestly still dark, no real signal, not faked: Wells and Austin,
+      Nevada (US-50's loneliest stretch -- a test asserts Austin stays dark),
+      Malta on the Montana Hi-Line (only a religious and a commercial FM in
+      town), and Eagle Pass and Van Horn on the Texas border. Follow-up:
+      KGVA 88.1, the Aaniiih Nakoda College tribal NPR station, reliably
+      covers the dark Harlem/Dodson stretch of the Hi-Line, but its stream
+      hides behind a JavaScript player -- a Chrome network-sniff pass could
+      add it, and it pairs naturally with the planned tribal-nation crossing
+      callouts.
 - [ ] **Reading Services dial category with a "nearest" jump.** The data +
       tag are in; the feature is a new dial category whose bracket-jump
       tunes the geographically NEAREST reading service (not first-by-call),
