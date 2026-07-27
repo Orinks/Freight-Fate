@@ -1524,6 +1524,17 @@ section below and the Unreleased changelog; the release-line view:
       on a cadence (streams die: KDHX did), report dead mounts for
       re-pointing, and keep honest-coverage rules: a dead stream goes
       dark or gets a verified replacement, never a fake.
+      Two findings from the first full 741-station run (2026-07-27):
+      (1) the single-threaded `--radio` pass FALSE-DEATHS on StreamTheWorld
+      -- rapid sequential probes get rate-limited, so it must host-partition
+      or space same-host hits the way the sweep gate does, else it cries
+      wolf; verify any dead list with a serial clean-session re-gate before
+      acting. (2) The most common REAL rot is stored StreamTheWorld
+      *numbered-edge* URLs (`NNNNN.live.streamtheworld.com/<MOUNT>`) that
+      expire; auto-repair could rewrite those to the stable canonical
+      `playerservices.streamtheworld.com/api/livestream-redirect/<MOUNT>`
+      form and re-gate, healing most deaths without a hand pass. First heal
+      pass done by hand (3a81da73): 13 restored, 6 unsupported honestly.
 - [ ] **NPR translator/repeater hunt for the remaining dark zones
       (owner leads, 2026-07-27 -- next radio pass, 2.0 line).** The
       Hi-Line pattern generalizes: query the FCC facility database for
