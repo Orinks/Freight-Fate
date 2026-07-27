@@ -678,14 +678,16 @@ class DrivingUpdateMixin:
         if active is not None and not active.connector:
             excess = max(0.0, self.truck.speed_mph - active.advisory_mph)
             tightness = max(0.2, 1.0 - active.min_radius_ft / 5000.0)
-            # Curve push: full CURVE_RATE at advisory, ramping with excess.
-            # A heavier load pushes harder (more inertia to pull wide);
-            # worn or icy grip means less lateral resistance.
+            # Curve push severity: around 1.0 at advisory in a tight bend,
+            # ramping with excess speed. A heavier load pushes harder (more
+            # inertia to pull wide); worn or icy grip means less resistance.
             load = min(1.5, self.truck.gross_mass_kg / self.truck.specs.mass_kg)
             grip_factor = min(1.0, self.truck.effective_grip)
-            curve_push = (
-                CURVE_RATE * tightness * (1.0 + excess * 0.05) * load / max(0.2, grip_factor)
-            )
+            # Raw severity only: the lane model applies CURVE_RATE itself.
+            # Scaling here too made every bend ~8x weaker than designed --
+            # a 30-advisory curve at 45 could be no-hands (owner-caught on
+            # Camp Verde-Payson: "didn't hear or have to turn").
+            curve_push = tightness * (1.0 + excess * 0.05) * load / max(0.2, grip_factor)
             # Centrifugal force pushes the truck OUTSIDE the curve: a left
             # curve pushes right (positive offset), a right curve pushes left
             # (negative offset). The lane model's positive offset = rightward.

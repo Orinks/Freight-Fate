@@ -221,6 +221,42 @@ def test_cue_loudness_scales_the_edge_rung():
     assert subtle < standard < prominent <= 1.0
 
 
+def test_a_hot_bend_actually_pushes_the_truck(monkeypatch):
+    """A 30-advisory bend taken 15 over must demand real counter-steering:
+    unopposed, the truck reaches the lane line in a handful of seconds.
+    Pins the curve-push scaling against the double-CURVE_RATE bug that let
+    every bend be driven no-hands (owner-caught on Camp Verde-Payson)."""
+    from types import SimpleNamespace
+
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.ctx.settings.steering_assist = "realistic"
+        d.ctx.settings.curve_speed_assist = False
+        d.truck.velocity_mps = 45.0 / 2.23694
+        bend = SimpleNamespace(
+            start_mi=0.0,
+            end_mi=1.0,
+            advisory_mph=30.0,
+            min_radius_ft=235.0,
+            direction="L",
+            connector=False,
+            severity="curve",
+        )
+        monkeypatch.setattr(d.trip, "curve_at", lambda mile: bend)
+        from collections import defaultdict
+
+        no_keys = defaultdict(bool)  # hands off the wheel
+        for _ in range(8 * 60):  # eight seconds through the bend
+            d._update_lane(no_keys, 1 / 60)
+        # A left bend pushes the truck right, toward the outside.
+        assert d.lane.offset > 0.45, d.lane.offset
+    finally:
+        app.shutdown()
+
+
 def test_audio_play_accepts_pan_on_the_active_backend():
     from freight_fate.audio import AudioEngine
 
