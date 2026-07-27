@@ -99,13 +99,19 @@ class SpeedControlStateMixin:
         else:
             self._disarm_speed_control()
 
-    def _construction_limit_ahead(self) -> float | None:
-        """A lower work-zone limit inside the player's advance-warning window."""
+    def _restricted_zone_limit_ahead(self) -> tuple[float, str] | None:
+        """A lower restricted-zone limit inside the player's advance-warning window.
+
+        Returns ``(limit_mph, zone_reason)`` for the nearest construction or
+        heavy-traffic zone that is closer than the spoken advance-warning
+        distance and whose limit is lower than the current corridor limit.
+        Returns ``None`` when there is nothing to pre-brake for.
+        """
         if not self._speed_control_armed or not self.ctx.settings.speed_keeper:
             return None
         lookahead_mi = self.trip._zone_warning_lookahead_mi()
         zone = self.trip.next_zone_within(lookahead_mi)
-        if zone is None or zone.reason != "construction":
+        if zone is None or zone.reason not in {"construction", "heavy traffic"}:
             return None
         current_limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
-        return zone.limit_mph if zone.limit_mph < current_limit else None
+        return (zone.limit_mph, zone.reason) if zone.limit_mph < current_limit else None

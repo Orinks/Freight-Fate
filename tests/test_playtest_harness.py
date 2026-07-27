@@ -220,6 +220,22 @@ def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
         handoff = result.transcript_text.index("Speed keeper holding 45 miles per hour")
         resumed = result.transcript_text.index("Adaptive cruise resuming")
         assert warning < easing < handoff < resumed
+    if zone_reason == "heavy traffic":
+        assert result.heavy_traffic_entry_speed_mph is not None
+        assert result.heavy_traffic_entry_speed_mph <= 50.5
+        assert (
+            result.transcript_text.count(
+                "Heavy traffic ahead; adaptive cruise easing to 50 miles per hour"
+            )
+            == 1
+        )
+        warning = result.transcript_text.index("heavy traffic ahead. Speed limit 50")
+        easing = result.transcript_text.index(
+            "Heavy traffic ahead; adaptive cruise easing to 50 miles per hour"
+        )
+        handoff = result.transcript_text.index("Speed keeper holding 50 miles per hour")
+        resumed = result.transcript_text.index("Adaptive cruise resuming")
+        assert warning < easing < handoff < resumed
 
 
 @pytest.mark.smoke
