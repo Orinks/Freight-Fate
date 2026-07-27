@@ -246,6 +246,19 @@
   and Gainesville, and more. Wherever one is in range, it is right there
   on the band with everything else.
 
+- **The loneliest highways have a signal now.** With streamer-safe mode
+  off, the emptiest stretches of the map catch a real public-radio
+  station where there used to be only static. Across the Nevada high
+  desert -- Winnemucca, Battle Mountain, and Elko on Interstate 80,
+  Eureka and Ely on US-50 -- the radio now finds the local NPR signal
+  as you pass through, and it fades the way a small mountaintop signal
+  really does, coming up out of the noise and slipping back into it
+  between the ranges. Down in the Big Bend country of far West Texas,
+  Marfa, Alpine, Marathon, Presidio, and Del Rio pick up their own
+  border-country public stations. A few places stay silent on purpose:
+  out where no station truly reaches, the band stays empty rather than
+  pretend otherwise.
+
 - **The engine brake grew its real cylinder selector.** J is now the
   dash switch: it turns the engine brake on at whatever stage you last
   selected, and while it is on, 1, 2, and 3 pick two, four, or six
