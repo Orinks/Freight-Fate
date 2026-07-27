@@ -463,7 +463,15 @@ class CityMenuState(MenuState):
             else "poor"
         )
         if not p.owns_equipment():
-            lead = f"Assigned {carrier_name(p)} tractor: {truck.label}."
+            from ..models.carrier_fleet import fleet_assignment_text, slip_seats
+
+            lead = f"Assigned {carrier_name(p)} tractor. {fleet_assignment_text(p)}"
+            if slip_seats(p):
+                lead += (
+                    " You slip-seat: dispatch matches one of the yard's spare "
+                    "tractors to each load, and each spare keeps its own fuel "
+                    "and wear between draws. A dedicated seat comes at level 9."
+                )
         else:
             lead = f"Owned tractor: {truck.label}."
         compound = "winter" if p.tire_type == "winter" else "all-season"

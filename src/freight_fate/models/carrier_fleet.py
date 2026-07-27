@@ -273,7 +273,10 @@ def assignment_reason_text(key: str, job) -> str:
 
 def fleet_assignment_text(profile) -> str:
     """Spoken description of the current carrier tractor assignment."""
-    key = assigned_truck_key(profile)
+    # The active key, not a fresh assignment draw: a slip-seating driver may
+    # still be holding the tractor dispatch matched to their last load, and
+    # the readout has to name the truck whose condition it describes.
+    key = profile.active_truck_key()
     model = TRUCK_CATALOG[key]
     tier = fleet_tier_for_level(int(profile.career.level))
     return f"Dispatch has you in a {model.label} from the {tier.label}: {model.description}"

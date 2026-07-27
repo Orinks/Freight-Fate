@@ -489,6 +489,15 @@
 
 ### Changed
 
+- **Truck status now explains whose truck you are in.** Company drivers
+  hear which carrier fleet their tractor comes from and what it is good at.
+  Junior drivers also hear that they slip-seat: dispatch matches one of the
+  yard's spare tractors to each load, and every spare keeps its own fuel and
+  wear between draws, so a fresh truck after a turn is the yard handing you
+  a different unit, not your wear disappearing. The level 4 and level 9 rank
+  announcements now say the same in plain words, including that a dedicated
+  seat of your own comes with seniority.
+
 - **The driving school steps out of this release to finish training.**
   The Driving school item leaves the terminal menu for now: the lessons
   are not complete, and this release locks its features down. The school
