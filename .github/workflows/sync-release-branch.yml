@@ -21,7 +21,10 @@ permissions:
 
 on:
   push:
-    branches: [dev]
+    # The release branch is listed too so catching it up closes the issue
+    # straight away, rather than leaving a stale one until dev next moves.
+    # Keep it in step with TARGET_BRANCH below; `on:` cannot read env.
+    branches: [dev, feat/career-1.9]
   workflow_dispatch:
 
 env:

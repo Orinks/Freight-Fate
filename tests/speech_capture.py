@@ -30,6 +30,7 @@ def speech_stub(
     tag: str | None = None,
     with_interrupt: bool = False,
     prefix: str = "",
+    record: Callable[[str, bool], None] | None = None,
 ) -> Callable[..., None]:
     """A stand-in for ``GameContext.say`` / ``say_event`` that records calls.
 
@@ -43,9 +44,16 @@ def speech_stub(
       channels into one list and assert on their order;
     - ``prefix`` to mark the line itself, for the playtest harness, whose
       transcript is read back as one block of text.
+
+    ``record`` takes over entirely, for a caller that keeps something richer
+    than a list of lines. It still belongs here rather than in a hand-written
+    stub, so that ``ctx.say``'s signature has exactly one definition.
     """
 
     def _speak(text: str, interrupt: bool = True, review: bool = True) -> None:
+        if record is not None:
+            record(text, interrupt)
+            return
         if sink is None:
             return
         line = f"{prefix}{text}" if prefix else text
