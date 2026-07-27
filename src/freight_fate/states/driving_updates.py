@@ -669,7 +669,7 @@ class DrivingUpdateMixin:
         # drives the street legs, not the highway legs.
         leg = self.trip.route.legs[self.trip.current_leg_index]
         # The exit ramp is a single lane; the mainline keeps its leg count.
-        self.lane.set_lane_count(1 if self._ramp_mi is not None else leg_lane_count(leg))
+        self.lane.set_lane_count(1 if self._ramp_mi is not None else self._lane_count_here(leg))
         # Use the real baked curve data when the truck is inside a curve.
         # The curve force pushes the lane offset outward proportionally to
         # how much the truck's speed exceeds the advisory speed, scaled by
@@ -975,6 +975,23 @@ class DrivingUpdateMixin:
             interstate=_highway_class(getattr(leg, "highway", "")) == "interstate",
         )
         return left if self.lane.offset < 0 else right
+
+    def _lane_count_here(self, leg) -> int:
+        """Lanes on our side, from the best data available at this mile.
+
+        The baked lane segments (real OSM counts) rule where they exist;
+        else an undivided leg (carriageway-geometry flag) is one lane our
+        side -- the old default of two invented a phantom passing lane on
+        every rural two-lane, which swallowed the curve push as fake lane
+        changes and silenced the whole edge ladder (owner-caught on Camp
+        Verde-Payson). The HPMS leg count remains the last word elsewhere.
+        """
+        baked = self.trip.lanes_at()
+        if baked is not None:
+            return max(1, baked[0])
+        if getattr(leg, "divided", None) is False:
+            return 1
+        return leg_lane_count(leg)
 
     def _cue_loudness(self) -> float:
         from ..sim.lane_guidance import CUE_LOUDNESS
