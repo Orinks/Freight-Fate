@@ -14,6 +14,7 @@ import argparse
 import heapq
 import json
 import math
+import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -23,6 +24,9 @@ import osmium
 
 from freight_fate.data.world import get_world
 from freight_fate.data.world_services import CITY_SERVICE_APPROACH_MILES
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from enrich_routes_pois import _maxspeed_from_tags  # noqa: E402  (shared OSM maxspeed parser)
 
 ROOT = Path(__file__).resolve().parents[1]
 CITY_SERVICES_PATH = ROOT / "src" / "freight_fate" / "data" / "city_services.json"
@@ -77,13 +81,15 @@ class Target:
 @dataclass(slots=True)
 class RouteGraph:
     nodes: dict[int, tuple[float, float]] = field(default_factory=dict)
-    edges: dict[int, list[tuple[int, float, str]]] = field(
+    # each edge: (neighbor, miles, road, mph) -- mph is the way's real posted
+    # limit or None where OSM does not tag one (honest absence).
+    edges: dict[int, list[tuple[int, float, str, float | None]]] = field(
         default_factory=lambda: defaultdict(list)
     )
 
-    def add_edge(self, a: int, b: int, road: str, miles: float) -> None:
-        self.edges[a].append((b, miles, road))
-        self.edges[b].append((a, miles, road))
+    def add_edge(self, a: int, b: int, road: str, miles: float, mph: float | None) -> None:
+        self.edges[a].append((b, miles, road, mph))
+        self.edges[b].append((a, miles, road, mph))
 
 
 @dataclass(frozen=True, slots=True)
@@ -92,10 +98,12 @@ class GeometryPath:
     segments: tuple[dict[str, Any], ...]
 
 
-def build_local_geometry(cache_dir: Path) -> dict[str, Any]:
+def build_local_geometry(cache_dir: Path, only_states: set[str] | None = None) -> dict[str, Any]:
     targets = collect_targets()
     by_state: dict[str, list[Target]] = defaultdict(list)
     for target in targets:
+        if only_states is not None and state_slug(target.state) not in only_states:
+            continue
         by_state[target.state].append(target)
 
     geometries: dict[str, dict[str, Any]] = {}
@@ -240,6 +248,9 @@ def route_state_targets(osm_path: Path, targets: list[Target]) -> dict[str, Geom
         coords = way_coords(way)
         if len(coords) < 2:
             continue
+        # Real posted limit for this street, or None where OSM does not tag one.
+        parsed = _maxspeed_from_tags(tags)
+        way_mph = parsed[0] if parsed is not None else None
         candidate_ids = way_target_ids(grid, coords)
         if not candidate_ids:
             continue
@@ -254,7 +265,7 @@ def route_state_targets(osm_path: Path, targets: list[Target]) -> dict[str, Geom
                 if prev is not None:
                     miles = haversine_mi(prev[1], prev[2], lat, lon)
                     if miles > 0:
-                        graph.add_edge(prev[0], ref, road, miles)
+                        graph.add_edge(prev[0], ref, road, miles, way_mph)
                 prev = (ref, lat, lon)
     routed: dict[str, GeometryPath] = {}
     for target in targets:
@@ -276,7 +287,7 @@ def shortest_geometry(target: Target, graph: RouteGraph) -> GeometryPath | None:
     if start_dist > CITY_SNAP_RADIUS_MI or end_dist > TARGET_SNAP_RADIUS_MI:
         return None
     dist: dict[int, float] = {start_ref: 0.0}
-    prev: dict[int, tuple[int, str]] = {}
+    prev: dict[int, tuple[int, str, float | None]] = {}
     heap: list[tuple[float, int]] = [(0.0, start_ref)]
     while heap:
         miles, node = heapq.heappop(heap)
@@ -286,26 +297,31 @@ def shortest_geometry(target: Target, graph: RouteGraph) -> GeometryPath | None:
             continue
         if miles > max(target.approach_miles * 1.8, 3.0):
             continue
-        for nxt, edge_miles, road in graph.edges.get(node, ()):
+        for nxt, edge_miles, road, mph in graph.edges.get(node, ()):
             nd = miles + edge_miles
             if nd < dist.get(nxt, float("inf")):
                 dist[nxt] = nd
-                prev[nxt] = (node, road)
+                prev[nxt] = (node, road, mph)
                 heapq.heappush(heap, (nd, nxt))
     if end_ref not in dist:
         return None
     node = end_ref
     path_nodes = [node]
     reversed_roads: list[str] = []
+    reversed_speeds: list[float | None] = []
     while node != start_ref:
-        prev_node, road = prev[node]
+        prev_node, road, mph = prev[node]
         reversed_roads.append(road)
+        reversed_speeds.append(mph)
         path_nodes.append(prev_node)
         node = prev_node
     path_nodes.reverse()
     roads = list(reversed(reversed_roads))  # one road label per edge
+    speeds = list(reversed(reversed_speeds))  # one posted limit (or None) per edge
     coords = [graph.nodes[ref] for ref in path_nodes]
-    raw_edges = [(roads[i], haversine_mi(*coords[i], *coords[i + 1])) for i in range(len(roads))]
+    raw_edges = [
+        (roads[i], haversine_mi(*coords[i], *coords[i + 1]), speeds[i]) for i in range(len(roads))
+    ]
     segments = collapse_segments(raw_edges, coords)
     if not segments:
         return None
@@ -315,8 +331,19 @@ def shortest_geometry(target: Target, graph: RouteGraph) -> GeometryPath | None:
     return GeometryPath(total, tuple(segments))
 
 
+def _resolve_speed(speed_miles: dict[float, float], road: str) -> float:
+    """The segment's posted limit: the real OSM value covering the most miles
+    (ties broken toward the higher limit, deterministically), or the honest
+    default where no way on this run carries a ``maxspeed`` -- 25 for a named
+    street, 15 for an unnamed public road."""
+    if speed_miles:
+        mph, _ = max(speed_miles.items(), key=lambda kv: (kv[1], kv[0]))
+        return float(mph)
+    return 25.0 if road != "unnamed public road" else 15.0
+
+
 def collapse_segments(
-    edges: list[tuple[str, float]],
+    edges: list[tuple[str, float, float | None]],
     coords: list[tuple[float, float]] | None = None,
 ) -> list[dict[str, Any]]:
     """Merge same-road edge runs into spoken segments.
@@ -326,14 +353,28 @@ def collapse_segments(
     bearing change through the junction, so the cue reads "Turn right onto
     Palm Street" and the runtime's panned turn earcon fires; near-straight
     name changes read "Continue onto". Without coords the cues stay
-    directionless ("Turn onto"), the pre-existing wording."""
+    directionless ("Turn onto"), the pre-existing wording.
+
+    Each edge carries its way's posted limit (or None); a merged run keeps the
+    real limit covering the most of its miles and otherwise falls back to the
+    named/unnamed default -- honest absence, never a guessed number."""
     segments: list[dict[str, Any]] = []
-    for i, (road, miles) in enumerate(edges):
+    for i, (road, miles, mph) in enumerate(edges):
         if segments and segments[-1]["road"] == road:
             segments[-1]["miles"] += miles
             segments[-1]["end_edge"] = i + 1
         else:
-            segments.append({"road": road, "miles": miles, "start_edge": i, "end_edge": i + 1})
+            segments.append(
+                {
+                    "road": road,
+                    "miles": miles,
+                    "start_edge": i,
+                    "end_edge": i + 1,
+                    "speed_miles": defaultdict(float),
+                }
+            )
+        if mph is not None:
+            segments[-1]["speed_miles"][mph] += miles
     out: list[dict[str, Any]] = []
     for i, segment in enumerate(segments):
         miles = round(max(segment["miles"], 0.05), 2)
@@ -360,7 +401,7 @@ def collapse_segments(
                 "road": road,
                 "miles": miles,
                 "cue": cue,
-                "speed_mph": 25.0 if road != "unnamed public road" else 15.0,
+                "speed_mph": _resolve_speed(segment["speed_miles"], road),
             }
         )
     return out[:8]
@@ -679,9 +720,17 @@ def main() -> int:
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)
     parser.add_argument("--output", type=Path, default=LOCAL_GEOMETRY_PATH)
     parser.add_argument("--write", action="store_true")
+    parser.add_argument(
+        "--state",
+        action="append",
+        metavar="SLUG",
+        help="limit to one or more state slugs (e.g. south-dakota) -- for testing "
+        "against a temp --output; a full --write to the real file needs every state",
+    )
     args = parser.parse_args()
 
-    payload = build_local_geometry(args.cache_dir)
+    only_states = set(args.state) if args.state else None
+    payload = build_local_geometry(args.cache_dir, only_states=only_states)
     print(json.dumps(payload["coverage"], indent=2, sort_keys=True))
     if args.write:
         args.output.write_text(

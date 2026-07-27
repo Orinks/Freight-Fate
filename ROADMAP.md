@@ -1365,6 +1365,23 @@ section below and the Unreleased changelog; the release-line view:
       bakes, self-hosted Overpass, honest absence: keep the current
       defaults only where OSM is untagged). A short 25 or 15 right at
       the gate stays exactly as it is -- that part is true.
+
+- [x] **Real speed limits for facility approach streets (owner ask,
+      2026-07-24) -- SHIPPED 2026-07-24.** Every facility approach
+      street chain now carries its real OSM `maxspeed` where the road is
+      tagged; the 25 (named) / 15 (unnamed) defaults stay only where OSM
+      is untagged (honest absence). Read from the local per-state PBF
+      cache the facility builder already uses, NOT the self-hosted
+      Overpass -- that extract is the corridor extract (motorway..
+      tertiary) and carries none of the residential/service streets
+      these approaches run on. `tools/build_local_geometry.py` gained a
+      maxspeed read threaded through its own osmium graph, so the limit
+      comes from the exact way that defines each segment. Labels only: a
+      full rebuild changed nothing but `speed_mph` (0 structural diffs
+      across all 6,910 targets). 1,457 of 12,820 segments moved off the
+      blanket default to a real limit -- 593 to 30, 404 to 35, 245 to
+      40/45 -- the mis-blanketed arterials the owner flagged. The short
+      25/15 and the 15 mph gate zone right at the dock are untouched.
 - [ ] **Reefer rules for the reefer feature (owner spec, 2026-07-24).**
       Two rulings to build into the queued reefer-temp feature: (1) a
       refrigerated load means the engine NEVER shuts down at rests --
