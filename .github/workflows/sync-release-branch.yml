@@ -34,6 +34,10 @@ env:
 
 jobs:
   sync:
+    # The tracking issue belongs to the canonical repo; on forks the
+    # dev branch and issue tracker are absent, so every run just
+    # failed red on push (2026-07-27). No-op anywhere but upstream.
+    if: github.repository == 'Orinks/Freight-Fate'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
