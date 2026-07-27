@@ -30,10 +30,16 @@ every spoken line, no window, no speech::
 
     uv run python tools/playtest_road.py --find downgrade --cruise 70 --headless 8
 
-``--find`` takes: downgrade, upgrade, zone, limit-drop, stop. ``--routes`` picks
-a named set (mountain, rolling, flat, all) unless ``--from``/``--to`` name a
-pair. Anything not given falls back to your real settings, so the playtest
-reproduces what a player would actually get.
+``--find`` takes: downgrade, upgrade, zone, limit-drop, stop, curve,
+interchange, toll, chain-law. ``--routes`` picks a named set (mountain,
+rolling, flat, all) unless ``--from``/``--to`` name a pair.
+
+The driving assists that change what the truck does on a grade are arguments
+too -- ``--descent off|realistic|interactive``, ``--assists``,
+``--predictive-cruise on|off``, ``--steering``, ``--transmission``, and
+``--verbosity`` -- so a behaviour can be compared across settings without
+editing your own. Anything not given falls back to your real settings, so the
+playtest otherwise reproduces what a player would actually get.
 """
 
 from __future__ import annotations
@@ -70,7 +76,17 @@ ROUTE_SETS: dict[str, list[tuple[str, str]]] = {
 }
 ROUTE_SETS["all"] = [pair for pairs in ROUTE_SETS.values() for pair in pairs]
 
-FEATURES = ("downgrade", "upgrade", "zone", "limit-drop", "stop")
+FEATURES = (
+    "downgrade",
+    "upgrade",
+    "zone",
+    "limit-drop",
+    "stop",
+    "curve",
+    "interchange",
+    "toll",
+    "chain-law",
+)
 SCAN_STEP_MI = 0.1
 # How far before the feature the truck is placed: far enough that an advance
 # warning has somewhere to land, close enough that you are not driving to it.
@@ -219,6 +235,123 @@ def _stop_hits(trip, origin, destination) -> list[Hit]:
     return hits
 
 
+def _curve_hits(trip, origin, destination, max_advisory) -> list[Hit]:
+    """Baked curves, tightest advisory first -- the pacenote's own source.
+
+    Connector curves (ramps) are skipped: the interesting case is a mainline
+    bend taken at speed, not the geometry of an exit you are already braking
+    for.
+    """
+    hits = []
+    for curve in getattr(trip, "curves", None) or []:
+        if getattr(curve, "connector", False):
+            continue
+        advisory = float(getattr(curve, "advisory_mph", 0.0) or 0.0)
+        if advisory <= 0.0 or advisory > max_advisory:
+            continue
+        at = float(curve.start_mi)
+        limit, _ = trip.speed_limit_at(max(0.0, at - DEFAULT_LEAD_MI))
+        side = "right" if getattr(curve, "direction", "") == "R" else "left"
+        hits.append(
+            Hit(
+                origin,
+                destination,
+                at,
+                trip.total_miles,
+                # Rank by how much speed the bend actually asks you to give up.
+                max(0.0, limit - advisory),
+                max(0.0, float(curve.end_mi) - at),
+                limit,
+                f"{side} curve, advisory {advisory:.0f} "
+                f"({getattr(curve, 'min_radius_ft', 0):.0f} ft radius)",
+            )
+        )
+    return hits
+
+
+def _interchange_hits(trip, origin, destination) -> list[Hit]:
+    """Real signed exits, for testing the exit callout and ramp handling."""
+    hits, offset = [], 0.0
+    for i, leg in enumerate(trip.route.legs):
+        forward = trip.route.cities[i] == leg.a
+        for ic in getattr(leg, "interchanges", None) or []:
+            at_leg = float(ic.at_mi) if forward else leg.miles - float(ic.at_mi)
+            at = offset + at_leg
+            if not 0.0 <= at < trip.total_miles:
+                continue
+            limit, _ = trip.speed_limit_at(max(0.0, at - DEFAULT_LEAD_MI))
+            label = ic.name or (ic.destinations[0] if ic.destinations else "")
+            hits.append(
+                Hit(
+                    origin,
+                    destination,
+                    at,
+                    trip.total_miles,
+                    0.0,
+                    0.0,
+                    limit,
+                    f"exit {ic.exit_ref or '?'} {label}".strip(),
+                )
+            )
+        offset += leg.miles
+    return hits
+
+
+def _toll_hits(trip, origin, destination) -> list[Hit]:
+    hits, offset = [], 0.0
+    for i, leg in enumerate(trip.route.legs):
+        forward = trip.route.cities[i] == leg.a
+        for toll in getattr(leg, "toll_events", None) or []:
+            at_leg = float(getattr(toll, "at_mi", 0.0))
+            at = offset + (at_leg if forward else leg.miles - at_leg)
+            if not 0.0 <= at < trip.total_miles:
+                continue
+            limit, _ = trip.speed_limit_at(max(0.0, at - DEFAULT_LEAD_MI))
+            cost = float(getattr(toll, "amount", 0.0) or 0.0)
+            # Ticket-system entries carry no amount of their own -- the charge
+            # settles at the exit -- so say that rather than printing $0.00.
+            price = (
+                f"${cost:.2f}"
+                if cost
+                else str(getattr(toll, "method_label", "") or "no charge here")
+            )
+            hits.append(
+                Hit(
+                    origin,
+                    destination,
+                    at,
+                    trip.total_miles,
+                    cost,
+                    0.0,
+                    limit,
+                    f"toll {getattr(toll, 'name', '')}: {price}".strip(),
+                )
+            )
+        offset += leg.miles
+    return hits
+
+
+def _chain_law_hits(trip, origin, destination) -> list[Hit]:
+    """Chain-law areas. Whether the law is *up* depends on live weather, so
+    pair this with --weather snow to make the pass actually demand chains."""
+    hits = []
+    for start_mi, end_mi in getattr(trip, "chain_law_areas", None) or []:
+        limit, _ = trip.speed_limit_at(max(0.0, start_mi - DEFAULT_LEAD_MI))
+        hits.append(
+            Hit(
+                origin,
+                destination,
+                start_mi,
+                trip.total_miles,
+                end_mi - start_mi,
+                end_mi - start_mi,
+                limit,
+                "chain-law area (needs winter weather to be active)",
+            )
+        )
+    return hits
+
+
 def find_feature(world, pairs, feature: str, args) -> list[Hit]:
     """Every matching feature across the given routes, best first."""
     hits: list[Hit] = []
@@ -237,6 +370,14 @@ def find_feature(world, pairs, feature: str, args) -> list[Hit]:
             hits += _limit_drop_hits(trip, origin, destination, args.min_drop)
         elif feature == "stop":
             hits += _stop_hits(trip, origin, destination)
+        elif feature == "curve":
+            hits += _curve_hits(trip, origin, destination, args.max_advisory)
+        elif feature == "interchange":
+            hits += _interchange_hits(trip, origin, destination)
+        elif feature == "toll":
+            hits += _toll_hits(trip, origin, destination)
+        elif feature == "chain-law":
+            hits += _chain_law_hits(trip, origin, destination)
     if feature in ("downgrade", "upgrade"):
         hits.sort(key=lambda h: (-h.run_mi, -h.magnitude))
     else:
@@ -249,6 +390,22 @@ def build_driving(ctx, hit: Hit, args):
     from freight_fate.models.jobs import CARGO_CATALOG, Job
     from freight_fate.models.profile import Profile
     from freight_fate.states.driving import DrivingState
+
+    s = ctx.settings
+    # Settings first: DrivingState reads the gearbox and the assist choices in
+    # its constructor, so an override applied afterwards would not take.
+    if args.assists:
+        s.apply_driving_assistance_preset(args.assists)
+    if args.descent:
+        s.descent_speed_control = args.descent
+    if args.predictive_cruise:
+        s.predictive_cruise = args.predictive_cruise == "on"
+    if args.steering:
+        s.steering_assist = args.steering
+    if args.transmission:
+        s.automatic_transmission = args.transmission == "automatic"
+    if args.verbosity is not None:
+        s.speech_verbosity = args.verbosity
 
     ctx.profile = Profile(name="Playtest", current_city=hit.origin)
     route = ctx.world.supported_route(hit.origin, hit.destination)
@@ -305,6 +462,9 @@ def _print_setup(ctx, driving, hit: Hit, start_mi: float, args) -> None:
     )
     print(f"    units           : {'miles' if s.imperial_units else 'kilometers'}")
     print(f"    speed keeper    : {'on' if s.speed_keeper else 'off'}")
+    print(f"    descent control : {getattr(s, 'descent_speed_control', 'n/a')}")
+    print(f"    predictive cruise: {'on' if getattr(s, 'predictive_cruise', False) else 'off'}")
+    print(f"    assists preset  : {getattr(s, 'driving_assistance_preset', 'n/a')}")
     print(f"    time scale      : {s.time_scale}")
     print("  grade ahead       :")
     for ahead in (0.0, 1.0, 2.0, 3.0, 5.0, 8.0):
@@ -374,6 +534,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--speed", type=float, default=62.0, help="rolling speed at the start")
     p.add_argument("--cargo", type=float, default=20.0, help="payload in tons")
     p.add_argument("--cargo-type", default="general", help="cargo catalog key")
+    p.add_argument(
+        "--max-advisory", type=float, default=45.0, help="curve search: slowest advisory to accept"
+    )
+    p.add_argument(
+        "--descent", choices=("off", "realistic", "interactive"), help="descent speed control"
+    )
+    p.add_argument("--assists", help="driving assistance preset, e.g. realistic, all")
+    p.add_argument("--predictive-cruise", choices=("on", "off"), help="grade preview for cruise")
+    p.add_argument("--steering", choices=("off", "light", "realistic"), help="steering assist")
+    p.add_argument("--transmission", choices=("automatic", "manual"), help="override the gearbox")
+    p.add_argument("--verbosity", type=int, choices=(0, 1, 2), help="speech verbosity override")
     p.add_argument("--weather", help="force a weather kind, e.g. rain, snow, clear")
     p.add_argument("--hour", type=float, help="clock hour to start at")
     p.add_argument("--headless", type=float, default=0.0, help="bench for N minutes, no window")
@@ -417,7 +588,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Searching {len(pairs)} route(s) for a {args.feature}...")
         hits = find_feature(world, pairs, args.feature, args)
         if not hits:
-            print("Nothing matched. Loosen --min-pct / --min-run, or try --routes all.")
+            hint = {
+                "downgrade": "Loosen --min-pct / --min-run",
+                "upgrade": "Loosen --min-pct / --min-run",
+                "limit-drop": "Loosen --min-drop",
+                "curve": "Raise --max-advisory",
+                "toll": "Tolled corridors are mostly eastern turnpikes",
+            }.get(args.feature, "Try another route")
+            print(f"Nothing matched. {hint}, or try --routes all.")
             return 1
         if args.scan:
             print(f"\n{len(hits)} found:\n")
