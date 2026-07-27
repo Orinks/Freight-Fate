@@ -1333,7 +1333,10 @@ def test_dispatch_board_warns_when_all_generated_jobs_exceed_current_hos(monkeyp
 
         board.announce_entry()
 
-        assert "every listed dispatch would need an extra legal rest" in spoken[-1]
+        assert any(
+            "every listed dispatch would need an extra legal rest" in text
+            for text in spoken
+        )
         for job in jobs:
             board._accept(job)
             assert "Hours warning" in spoken[-1]

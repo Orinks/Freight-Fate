@@ -197,7 +197,8 @@ class MenuState(State):
         self.announce_entry()
 
     def announce_entry(self) -> None:
-        self.ctx.say(f"{end_sentence(self.title)} {self.current_text()}", review=False)
+        self.ctx.say(f"{end_sentence(self.title)}")
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
 
     def refresh(self, keep_index: bool = True) -> None:
         old = self.index
@@ -213,7 +214,7 @@ class MenuState(State):
         return f"{label} {self.index + 1} of {len(self.items)}."
 
     def speak_current(self) -> None:
-        self.ctx.say(self.current_text())
+        self.ctx.say(self.current_text(), review=False)
 
     def current_help(self) -> str:
         if not self.items:

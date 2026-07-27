@@ -107,8 +107,9 @@ class JobBoardState(MenuState):
             hos_note = self._hos_board_note()
             self.ctx.say(
                 f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
-                f"{self.ctx.profile.market.summary()} {hos_note}" + self.current_text()
-            )
+                f"{self.ctx.profile.market.summary()} {hos_note}")
+            self.ctx.say(self.current_text(), interrupt=False, review=False)
+
 
     def build_items(self) -> list[MenuItem]:
         items = []

@@ -98,8 +98,9 @@ class CityMenuState(MenuState):
         terminal = self.ctx.world.home_terminal(p.current_city)
         self.ctx.say(
             f"Parked at {terminal.spoken_name} in the {city.name} "
-            f"service area, {city.state}. You have {p.money:,.0f} dollars. "
-            f"{self.current_text()}"
+            f"service area, {city.state}. You have {p.money:,.0f} dollars.")
+        self.ctx.say(
+            f"{self.current_text()}", interrupt=False, review=False
         )
 
     def build_items(self) -> list[MenuItem]:
