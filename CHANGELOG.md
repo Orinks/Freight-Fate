@@ -4,6 +4,23 @@
 
 ### Added
 
+- **A warning before every steep grade.** Any climb or descent of three percent
+  or more that runs for at least three quarters of a mile is now called out
+  before you reach it, with how steep it is, how far it runs, and -- going down
+  -- what to do about it before it starts. In a manual that is picking your
+  gear and setting the engine brake; in an automatic it is setting the engine
+  brake and braking down to speed, which is what puts the transmission in a
+  lower gear for you. Short dips stay quiet, so on a mountain route you hear
+  the hills that matter and nothing else. Terse speech does not get these
+  announcements at all -- press G whenever you want the grade instead. The
+  advisory is there so you can decide before the hill starts: when in doubt,
+  take manual control of the speed rather than leaving it to cruise.
+
+- **G also names the next grade ahead.** Alongside the slope under the wheels
+  and the truck's verdict on it, G now tells you what the next steep grade is,
+  how far off, and how long it runs -- so one press answers both what you are
+  on and what is coming.
+
 - **Review recent spoken messages while driving.** A line lost under an
   overlapping announcement is no longer gone for good. From the cab, comma
   and period step back and forward through what has been said, Ctrl with

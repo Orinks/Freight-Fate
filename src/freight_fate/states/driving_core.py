@@ -313,6 +313,22 @@ PCC_DESCENT_SHAVE_MPH = 2.0  # taken off before a downgrade, at 5 percent
 # instead, a three-mile pull read as cresting from a mile and a half out.
 PCC_CREST_WINDOW_MI = 0.4
 PCC_CUE_COOLDOWN_S = 45.0  # rolling country must not chant preview cues
+# Grade advisories, spoken whether or not cruise is on. A downgrade this steep
+# is the one a driver has to plan for -- gear and retarder before the hill, not
+# halfway down it.
+GRADE_WARN_PCT = 3.0  # steep enough to call out, either direction
+GRADE_WARN_CLEAR_PCT = 2.0  # hysteresis: under this the grade is behind you
+GRADE_WARN_LOOKAHEAD_MI = 0.75  # how far ahead the advisory reaches
+GRADE_WARN_SCAN_MI = 15.0  # how far a grade's run is measured before giving up
+GRADE_WARN_STEP_MI = 0.25  # sampling stride; matches the baked segment length
+GRADE_WARN_MIN_MPH = 25.0  # no advisories while crawling; nothing to plan for
+# A grade has to last to be worth planning for. The baked segments are around
+# half a mile each and the mountain corridors are full of short punchy dips: a
+# 4 percent blip lasting a third of a mile costs a couple of mph and warning
+# about it buried the hills that matter. Unfiltered, Knoxville to Asheville
+# spoke 76 advisories in 116 miles; at three quarters of a mile it speaks 4.
+GRADE_WARN_MIN_RUN_MI = 0.75
+GRADE_WARN_RESCAN_MI = 0.1  # how far the truck rolls between advisory scans
 ACC_BASE_GAP_SECONDS = 3.0  # clear-weather adaptive cruise gap
 ACC_LIMIT_OFFSET_MPH = 5.0  # predictive ACC holds this far over the posted
 # limit -- a with-traffic pace, sized to sit right at OVERSPEED_WARN_MPH
