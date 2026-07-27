@@ -489,6 +489,11 @@
 
 ### Changed
 
+- **The driving school steps out of this release to finish training.**
+  The Driving school item leaves the terminal menu for now: the lessons
+  are not complete, and this release locks its features down. The school
+  returns finished in the next major version.
+
 - **The radio dial moved to semicolon and apostrophe.** The brackets used to
   tune it; they now switch categories in the new message review, so the dial
   sits on the two keys just right of the home row instead. Semicolon walks

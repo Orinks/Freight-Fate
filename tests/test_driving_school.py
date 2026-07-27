@@ -14,6 +14,16 @@ def select(menu, label):
     menu.handle_event(key_event(pygame.K_RETURN))
 
 
+
+@pytest.fixture(autouse=True)
+def _school_enabled(monkeypatch):
+    """The school is gated off the frozen 1.9 menu; these tests cover the
+    school itself, which the 2.0 line finishes, so the gate opens here."""
+    from freight_fate.states import city
+
+    monkeypatch.setattr(city, "DRIVING_SCHOOL_ENABLED", True)
+
+
 @pytest.fixture
 def school_app(monkeypatch):
     from freight_fate.app import App
