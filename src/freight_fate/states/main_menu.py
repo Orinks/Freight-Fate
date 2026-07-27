@@ -782,9 +782,26 @@ class SettingsCategoryState(MenuState):
                     "Off keeps the truck centered with no lane work. Light "
                     "drifts gently with centering help, and realistic drifts "
                     "like a real wheel, so exits need a signal and the exit "
-                    "lane. Choosing light or realistic turns the matching "
-                    "lane support on. The All assists preset switches this "
-                    "off; other presets never change it.",
+                    "lane. With drift on, the road sound leans toward where "
+                    "the wheel should go -- follow it into a bend and back "
+                    "to lane center -- and the road edge answers with real "
+                    "textures: a stutter clipping the rumble strip, a buzz "
+                    "fully on it, gravel off the pavement. Choosing light or "
+                    "realistic turns the matching lane support on. The All "
+                    "assists preset switches this off; other presets never "
+                    "change it.",
+                )
+            )
+            items.append(
+                MenuItem(
+                    lambda: f"Lane and edge cue loudness: {s.lane_cue_loudness}",
+                    lambda: self._cycle_cue_loudness(1),
+                    help="How loud the road speaks when you leave your line: "
+                    "the rumble-strip and shoulder textures, the lane "
+                    "locator, and the warning bars before a hairpin all "
+                    "follow this. Subtle keeps them under the engine, "
+                    "standard matches it, prominent cuts through for "
+                    "players who want no doubt. Presets never change it.",
                 )
             )
             items.append(MenuItem("Back", self.go_back))
@@ -1298,11 +1315,13 @@ class SettingsCategoryState(MenuState):
         }.get(self.ctx.settings.hos_mode, "realistic")
 
     def _steering_label(self) -> str:
+        # The value carries its own meaning: a player cycling the row hears
+        # what changes hands, not a bare difficulty word (owner ask 2026-07-27).
         return {
-            "off": "off",
-            "light": "light",
-            "realistic": "realistic",
-        }.get(self.ctx.settings.steering_assist, "off")
+            "off": "off, the truck holds the lane for you",
+            "light": "light, gentle drift and you steer with help",
+            "realistic": "realistic, you hold the lane yourself",
+        }.get(self.ctx.settings.steering_assist, "off, the truck holds the lane for you")
 
     def _announce(self) -> None:
         self.refresh()
@@ -1379,6 +1398,15 @@ class SettingsCategoryState(MenuState):
         except ValueError:
             i = 0
         self.ctx.settings.hos_mode = modes[(i + d) % len(modes)]
+        self._announce()
+
+    def _cycle_cue_loudness(self, d: int) -> None:
+        levels = ["subtle", "standard", "prominent"]
+        try:
+            i = levels.index(self.ctx.settings.lane_cue_loudness)
+        except ValueError:
+            i = 1
+        self.ctx.settings.lane_cue_loudness = levels[(i + d) % len(levels)]
         self._announce()
 
     def _cycle_steering(self, d: int) -> None:

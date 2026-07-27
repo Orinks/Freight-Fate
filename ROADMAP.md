@@ -370,9 +370,19 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       + comfortable-braking distance, floor a third of a mile), silent
       when already slow enough, linked "then right" tails, U lists the
       next bends, D folds the bend into its number, Settings toggle
-      outside presets. Remaining slices: the required-slowdown
-      consequence tier (hot entries pay physics), the pursuit guide and
-      edge textures (audio assets), steering-input feel, cue previews.
+      outside presets. PURSUIT GUIDE + EDGE LADDER SHIPPED (2026-07-27,
+      Track B): the road bed pans along the arc toward the needed steer
+      (community ruling honored -- the existing bed, never a new tone;
+      silence-is-centered with drift/curve wake-sleep hysteresis), and
+      the lane edges answer with structural textures synthesized from
+      the edge_nav audition machinery -- intermittent clip / periodic
+      strip / aperiodic gravel, panned to the side, with boundary truth
+      from the baked lane data (no gravel past an undivided centerline;
+      the spoken warning names the oncoming lane; graded haptics
+      unchanged). Turn signals now speak as panned tones (owner call
+      2026-07-27); the relay click stays for a future vintage-equipment
+      option. Remaining slices: the required-slowdown consequence tier
+      (hot entries pay physics), steering-input feel, cue previews.
 - [x] **Real lane counts from OSM (owner ask 2026-07-16) -- DATA LAYER
       BAKED 2026-07-23.** `corridor.lane_segments` now carries real OSM
       lane counts (`lanes`, `lanes:forward`/`backward`, `oneway`) for every

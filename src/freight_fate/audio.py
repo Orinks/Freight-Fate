@@ -74,6 +74,8 @@ CH_AIR = 11  # compressor charging the tanks below governor release
 CH_BRAKE = 12  # brake-release air bleed: the hiss bed shaped per release
 CH_JAKE = 13  # engine-brake growl: synthesized loop, stage- and rpm-keyed
 CH_RADIO_FX = 14  # FM fringe hiss bed under a thinning station
+CH_EDGE = 15  # edge-boundary ladder loops: clip / strip / shoulder textures
+CH_ALERT = 16  # continuous alert tones: the stop bar's solid zone
 RESERVED = 14
 NUM_CHANNELS = 32
 
@@ -303,6 +305,7 @@ class _PygameBackend:
         self.ui_volume = 0.9
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
+        self._loop_pans: dict[int, float] = {}  # channel -> stereo pan, -1 left .. 1 right
         # channel -> sustain-loop state (segment Sounds + phase); see
         # start_sustain_loop. Kept separate from _loops so per-frame update()
         # can re-queue the loop body for gapless repetition.
@@ -386,6 +389,10 @@ class _PygameBackend:
             self._loops[channel] = (key, volume)
             self._apply_channel_volume(channel)
 
+    def set_loop_pan(self, channel: int, pan: float) -> None:
+        self._loop_pans[channel] = max(-1.0, min(1.0, pan))
+        self._apply_channel_volume(channel)
+
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
         if not self.enabled:
             return
@@ -395,6 +402,7 @@ class _PygameBackend:
         if channel in self._loops:
             pygame.mixer.Channel(channel).fadeout(fade_ms)
             del self._loops[channel]
+        self._loop_pans.pop(channel, None)
 
     def _build_segments(self, key: str, loop_start: int, loop_end: int):
         """Slice a decoded sound into (head, body, tail) Sounds; cached per key.
@@ -533,7 +541,13 @@ class _PygameBackend:
             0.0,
             min(1.0, gain * self._category_volume(_loop_category(channel)) * self.master_volume),
         )
-        pygame.mixer.Channel(channel).set_volume(vol)
+        pan = self._loop_pans.get(channel, 0.0)
+        if pan:
+            left = vol * (1.0 - max(0.0, pan))
+            right = vol * (1.0 + min(0.0, pan))
+            pygame.mixer.Channel(channel).set_volume(left, right)
+        else:
+            pygame.mixer.Channel(channel).set_volume(vol)
 
     # -- truck engine crossfade ----------------------------------------------
 
@@ -1025,6 +1039,16 @@ class _BassBackend:
             key, _, stream = self._loops[channel]
             self._loops[channel] = (key, volume, stream)
             self._apply_loop_volume(channel)
+
+    def set_loop_pan(self, channel: int, pan: float) -> None:
+        if channel not in self._loops:
+            return
+        stream = self._loops[channel][2]
+        # A dying stream drops its pan silently; the volume path logs.
+        with contextlib.suppress(self._BassError):
+            self._bass_call(
+                self._set_attr, stream.handle, self._ATTRIB_PAN, max(-1.0, min(1.0, pan))
+            )
 
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
         releasing = self._releasing.pop(channel, None)
@@ -1627,6 +1651,7 @@ class _NullBackend:
         self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300
     ) -> None: ...
     def set_loop_volume(self, channel: int, volume: float) -> None: ...
+    def set_loop_pan(self, channel: int, pan: float) -> None: ...
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None: ...
     def start_sustain_loop(
         self,
@@ -1834,6 +1859,9 @@ class AudioEngine:
 
     def set_loop_volume(self, channel: int, volume: float) -> None:
         self._impl.set_loop_volume(channel, volume)
+
+    def set_loop_pan(self, channel: int, pan: float) -> None:
+        self._impl.set_loop_pan(channel, pan)
 
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
         self._impl.stop_loop(channel, fade_ms)

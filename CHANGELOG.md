@@ -4,6 +4,28 @@
 
 ### Added
 
+- **Steer through curves by ear.** With steering assist on, the road sound
+  now leans toward where the wheel should go: it slides into a bend as the
+  bend arrives and leads you through it, and when you drift it sits toward
+  lane center so you can follow it home. Centered on a straight road it
+  stays put and nothing new plays. Drift to the road edge and the boundary
+  answers with real textures from the side it happens on: a ragged stutter
+  as your tires clip the rumble strip, a steady buzz fully on it, and
+  loose gravel once you are off the pavement. On an undivided road the
+  warning tells the truth: past the centerline you are in the oncoming
+  lane, and there is no gravel out there. Ahead of a true hairpin, warning
+  bars cut across the whole lane wake you up the way the real ones do --
+  three hard grouped rumbles under all your tires, far enough out that
+  braking after them still makes the curve. The I key adds an on-demand
+  lane locator: a soft repeating tock from wherever you sit in your lane,
+  and pressing I again turns it off. Entering a demanding bend ticks a
+  bright cue from the bend's side, and coming out the far side the
+  co-driver gives the verdict: held your line, caught the edge, or
+  through it hot. Changing lanes, your tires roll over the lane line's
+  raised markers -- the front-to-back thump-roll of a real crossing,
+  from the side you crossed. A new setting, lane and edge cue loudness,
+  sets how loud all of it speaks: subtle, standard, or prominent.
+
 - **The road tells you how many lanes it has.** Your road status now says
   the lanes on your side of the road -- "divided, three lanes your side" on
   an interstate, "two lanes your side" on a smaller highway -- and your trip
@@ -526,6 +548,12 @@
   freight weighs.
 
 ### Changed
+
+- **Turn signals play a clear tone instead of a soft click.** The blinker,
+  the exit signal, and the pull-over signal now mark themselves with a
+  clean indicator tone panned to the side you are signaling -- the sound a
+  modern cab actually makes -- so the cue carries even for players who
+  could not hear the old relay click.
 
 - **Truck status now explains whose truck you are in.** Company drivers
   hear which carrier fleet their tractor comes from and what it is good at.

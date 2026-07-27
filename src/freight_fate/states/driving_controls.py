@@ -124,6 +124,8 @@ class DrivingControlsMixin:
             self._speak_last_announcement()
         elif key == pygame.K_g:
             self._speak_grade()
+        elif key == pygame.K_i:
+            self._toggle_lane_locator()
         elif key == pygame.K_u:
             self._speak_upcoming()
         elif key == pygame.K_m:
@@ -180,7 +182,7 @@ class DrivingControlsMixin:
         self._lane_change_timer = LANE_TAP_CHANGE_S
         self._lane_signal_timer = 0.0
         pan = -0.6 if direction > 0 else 0.6
-        self.ctx.audio.play("vehicle/turn_signal", volume=0.8, pan=pan)
+        self.ctx.audio.play("vehicle/signal_tone", volume=0.8, pan=pan)
         self.ctx.say(f"Changing to the {lane_label(target, lane.lane_count)} lane.")
 
     def _objective_help(self) -> str:
@@ -753,6 +755,19 @@ class DrivingControlsMixin:
             self.ctx.say(self._last_event_message)
         else:
             self.ctx.say("No recent announcement to repeat.")
+
+    def _toggle_lane_locator(self) -> None:
+        """I: a periodic panned tock marking where the truck sits in its lane.
+
+        Opt-in and player-summoned, which is what keeps it inside the
+        community ruling against continuous steering tones: nothing plays
+        unless the driver asked, and I again turns it off."""
+        if self.ctx.settings.steering_assist == "off":
+            self.ctx.say("Lane drift is off; the truck holds the lane for you.")
+            return
+        self._lane_locator_on = not self._lane_locator_on
+        self._lane_locator_timer = 0.0
+        self.ctx.say(f"Lane locator {'on' if self._lane_locator_on else 'off'}.")
 
     def _speak_grade(self) -> None:
         """G: the grade under the wheels, the next one, and what they mean.

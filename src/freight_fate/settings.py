@@ -112,6 +112,9 @@ class Settings:
     # lane keeping, tap lane changes), because the easiest preset must not
     # leave a manual steering task running.
     steering_assist: str = "off"  # off/light/realistic lane drift
+    # How loud the lane and edge cues speak: the edge-boundary textures,
+    # the lane locator, and the dead-man's-curve strips all scale by it.
+    lane_cue_loudness: str = "standard"  # subtle/standard/prominent
     driving_assistance_preset: str = "realistic"
     automatic_emergency_braking: bool = True
     lane_departure_warning: bool = True
@@ -262,6 +265,8 @@ class Settings:
         # below. debug_off stays valid as an internal dev/test bypass only.
         if s.hos_mode not in HOS_MODES:
             s.hos_mode = "realistic"
+        if s.lane_cue_loudness not in ("subtle", "standard", "prominent"):
+            s.lane_cue_loudness = "standard"
         if s.steering_assist not in ("off", "light", "realistic"):
             s.steering_assist = "off"
             s.lane_departure_warning = False

@@ -843,6 +843,20 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 return cr
         return None
 
+    def curve_ahead_mi(self, lead_mi: float) -> float | None:
+        """Distance to the next mainline curve start inside ``lead_mi``, or
+        None. Connector ramps have their own cues and never arm guidance."""
+        for cr in self.curves:
+            ahead = cr.start_mi - self.position_mi
+            if ahead <= 0:
+                continue
+            if ahead > lead_mi:
+                break
+            if cr.connector:
+                continue
+            return ahead
+        return None
+
     def _next_curve_approach(self) -> RouteCurve | None:
         """The next curve ahead that deserves a spoken approach warning.
 

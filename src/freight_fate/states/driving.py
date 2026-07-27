@@ -255,6 +255,7 @@ class DrivingState(
         self._ramp_creep_prompt_said = False
         self._ramp_gap_milestones_said: set[int] = set()
         self._ramp_bar_tick_timer = 0.0
+        self._bar_solid_on = False  # the bar's continuous final-zone tone
         self._ramp_assist_said = False
         # Safety-call re-arm window (curve calls vs the Ctrl reflex).
         self._critical_curve = None
@@ -343,7 +344,6 @@ class DrivingState(
         self._brake_peak_application = 0.0  # hardest press this application, shapes the release
         self._overrev_s = 0.0  # continuous seconds at damaging RPM
         self._overrev_warn_due = OVERREV_GRACE_S  # repeats push it out further
-        self._lane_rumble_timer = 0.0
         # Discrete lanes: tap-change progress (assist off), closed-lane
         # policing, hazard-dodge context, and keep-right pressure.
         self._lane_change_target: int | None = None
@@ -358,7 +358,22 @@ class DrivingState(
         self._pending_ambient_event: tuple[str, str | None] | None = None
         self._road_joint_accumulator_m = 0.0
         self._next_joint_distance_m = self._patrol_rng.uniform(14.0, 18.0)
-        self._lane_guidance_state = "center"
+        self.lane_guidance = LaneGuidance()
+        self._edge_loop_key: str | None = None  # active edge-ladder rung loop
+        self._road_pan_applied = 0.0  # last pursuit-guide pan set on the road bed
+        # Dead-man's-curve strips: fixed road furniture ahead of each hairpin.
+        from ..sim.lane_guidance import HAIRPIN_ADVISORY_MPH, STRIP_LEAD_MI
+
+        self._transverse_strip_miles = tuple(
+            max(0.05, min(cr.start_mi, cr.end_mi) - STRIP_LEAD_MI)
+            for cr in self.trip.curves
+            if not cr.connector and cr.advisory_mph <= HAIRPIN_ADVISORY_MPH
+        )
+        self._transverse_fired: set[float] = set()
+        self._lane_locator_on = False  # I toggles the panned position tock
+        self._lane_locator_timer = 0.0
+        self._curve_run: dict | None = None  # the bend underway, and how it is going
+        self._cross_repeat_s = 0.0  # rapid re-crossings keep only the quiet thump
         self._reverse_cue_active = False
         self._air_cue_active = False  # compressor fill loop below governor release
         self._jake_cue_key: str | None = None  # jake growl loop currently playing

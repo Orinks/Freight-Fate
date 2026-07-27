@@ -167,7 +167,7 @@ class DrivingEventMixin:
             # is auditioned (docs/sound-hunt-brief.md, need 1).
             if curve is not None:
                 pan = -PACENOTE_CUE_PAN if curve.direction == "L" else PACENOTE_CUE_PAN
-                self.ctx.audio.play("ui/tick", volume=0.9, pan=pan)
+                self.ctx.audio.play("vehicle/curve_bink", volume=0.9, pan=pan)
             # A curve well above the cruise set point: with curve speed
             # assistance on, the bend is cruise's job -- cap the working
             # target to the advisory the way an armed exit caps for its
@@ -549,7 +549,7 @@ class DrivingEventMixin:
         # this the milestones already spoken stay marked and the second
         # approach runs silent.
         self._exit_countdown_said = set()
-        self.ctx.audio.play("vehicle/turn_signal", volume=0.7)
+        self.ctx.audio.play("vehicle/signal_tone", volume=0.7, pan=0.6)
         if stop.type == "delivery_destination":
             labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
             head = (
@@ -1133,7 +1133,7 @@ class DrivingEventMixin:
         self.lane.lane = 0
         self.lane.offset = 0.0
         merge_leg = highway.route.legs[0]
-        self.ctx.audio.play("vehicle/turn_signal", volume=0.6, pan=-0.6)
+        self.ctx.audio.play("vehicle/signal_tone", volume=0.6, pan=-0.6)
         self.ctx.say_event(
             f"Up the ramp and onto {merge_leg.highway}. Merge left when clear.",
             interrupt=False,
@@ -1342,31 +1342,53 @@ class DrivingEventMixin:
                 self.ctx.say_event(f"{threshold} {unit_word} to the bar.", interrupt=False)
                 return
 
+    def _set_bar_solid(self, on: bool) -> None:
+        """The continuous tone of the bar's final zone, started and stopped
+        idempotently so every early exit can just turn it off."""
+        from ..audio import CH_ALERT
+
+        if on and not self._bar_solid_on:
+            self.ctx.audio.start_loop(CH_ALERT, "vehicle/bar_solid", volume=0.85, fade_ms=60)
+        elif not on and self._bar_solid_on:
+            self.ctx.audio.stop_loop(CH_ALERT, fade_ms=120)
+        self._bar_solid_on = on
+
     def _update_ramp_bar_ticks(self, dt: float) -> None:
         """Parking-sensor tick for the stop bar's last few hundred feet.
 
         Rate carries the distance -- faster is closer -- and silence means
         stopped, so the cue never nags a driver holding at the bar. Center
         pan, unlike the side-panned curve cues, so the two never read as
-        the same instrument (owner ask, 2026-07-19)."""
+        the same instrument (owner ask, 2026-07-19). Inside the last
+        stretch of leeway, still moving, the ticks fuse into a continuous
+        tone (owner spec, written into the manual 2026-07-27): at the
+        solid tone you had better be close to stopped."""
         if not self._ramp_light_announced or self._ramp_waiting_at_light:
+            self._set_bar_solid(False)
             return
         if self._ramp_mi is None or self._ramp_terminal_done:
+            self._set_bar_solid(False)
             return
         if self.truck.speed_mph <= RED_STOP_MPH:
+            self._set_bar_solid(False)
             return
         gap_mi = self._ramp_mi - RAMP_ACCESS_MI
         if gap_mi > RAMP_BAR_TICK_RANGE_MI or gap_mi < 0:
+            self._set_bar_solid(False)
             return
+        if gap_mi <= RAMP_BAR_SOLID_MI:
+            self._set_bar_solid(True)
+            return
+        self._set_bar_solid(False)
         closeness = 1.0 - gap_mi / RAMP_BAR_TICK_RANGE_MI
         period = RAMP_BAR_TICK_SLOW_S - closeness * (RAMP_BAR_TICK_SLOW_S - RAMP_BAR_TICK_FAST_S)
         self._ramp_bar_tick_timer += dt
         if self._ramp_bar_tick_timer >= period:
             self._ramp_bar_tick_timer = 0.0
             # Full volume: at 0.5 the owner judged it missable by someone
-            # not listening for it (2026-07-19). A dedicated short beep is
-            # on the sound-hunt list; until then the tick carries the job.
-            self.ctx.audio.play("ui/tick", volume=0.9)
+            # not listening for it (2026-07-19). The dedicated beep the old
+            # note asked for arrived with the curve bink (2026-07-27).
+            self.ctx.audio.play("vehicle/curve_bink", volume=0.9)
 
     def _ramp_light_query_text(self) -> str | None:
         """Light phase and bar distance on demand, for the info keys.
