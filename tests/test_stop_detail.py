@@ -283,7 +283,7 @@ def test_planned_prefix_reaches_every_stop_announcement(monkeypatch):
 
         # U-key upcoming readout.
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
         d._speak_upcoming()
         assert any(f"Planned stop, {stop.spoken_name}" in text for text in spoken)
 
@@ -387,7 +387,7 @@ def test_too_fast_miss_cancels_plan_once(monkeypatch):
 
     app = App()
     said = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True, review=True: said.append(text))
     try:
         d = _driving(app)
         d.trip.stops = _stops(d.trip.position_mi)
@@ -422,7 +422,7 @@ def test_taken_exit_blown_when_never_stopping(monkeypatch):
 
     app = App()
     said = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True, review=True: said.append(text))
     try:
         d = _driving(app)
         d.trip.stops = _stops(d.trip.position_mi)
@@ -479,7 +479,7 @@ def test_terse_rest_stop_arrival_names_the_stop_action(monkeypatch):
 
     app = App()
     said = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True, review=True: said.append(text))
     try:
         app.ctx.settings.speech_verbosity = 0
         d = _driving(app)
@@ -502,7 +502,7 @@ def test_screen_reader_owned_rate_uses_slowest_arrival_grace(monkeypatch):
 
     app = App()
     said = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True, review=True: said.append(text))
     try:
         app.ctx.settings.sapi_events = False
         app.ctx.settings.speech_rate = 1.0  # stale for a screen-reader-owned voice

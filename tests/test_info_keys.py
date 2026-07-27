@@ -30,7 +30,7 @@ def _driving(app, origin="Buffalo", destination="Rochester"):
 
 def _capture(app, monkeypatch):
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
     return spoken
 
 

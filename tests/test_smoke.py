@@ -63,7 +63,7 @@ def test_full_game_flow_headless(monkeypatch):
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
         app.push_state(MainMenuState(app.ctx))
         menu = app.state
         assert isinstance(menu, MainMenuState)
@@ -332,7 +332,7 @@ def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
     app = App()
     try:
         spoken: list[str] = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
         toggles: list[bool] = []
         monkeypatch.setattr(app.presence, "set_enabled", toggles.append)
 

@@ -19,6 +19,7 @@ from .cloud_saves import CloudSaves
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
+from .message_log import MessageCategory, MessageLog
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
@@ -95,6 +96,8 @@ class GameContext:
         self._music_rotation_elapsed_s = 0.0
         self.achievement_notice = ""
         self.achievement_notice_timer = 0.0
+        self.message_log = app.message_log
+        self.message_category = app.message_category
 
     def real_weather_provider(self):
         """Shared NWS provider when real weather is enabled, else None.
@@ -109,11 +112,13 @@ class GameContext:
             self._real_weather = RealWeatherProvider()
         return self._real_weather
 
-    def say(self, text: str, interrupt: bool = True) -> None:
+    def say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         transcript.info("%s", text)
         self.speech.say(text, interrupt)
+        if review:
+            self.message_log.add(text, MessageCategory.GENERAL)
 
-    def say_event(self, text: str, interrupt: bool = True) -> None:
+    def say_event(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
 
         With the dedicated SAPI event voice enabled, events speak on their own
@@ -132,6 +137,8 @@ class GameContext:
             if interrupt:
                 _stop_main_speech(self.speech)
             self.speech.say(text, interrupt=False)
+        if review:
+            self.message_log.add(text, MessageCategory.EVENT)
 
     def stop_event_speech(self) -> None:
         _stop_event_speech(self.speech)
@@ -350,6 +357,8 @@ class App:
 
         self.settings = Settings.load()
         self.speech = Speech()
+        self.message_log = MessageLog()
+        self.message_category = None
         self.audio = AudioEngine()
         self.world = get_world()
         self.economy = Economy()

@@ -60,7 +60,7 @@ def test_tab_repeats_only_the_market_watch(monkeypatch):
     try:
         board = _job_board(app)
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text))
 
         board.handle_event(key_event(pygame.K_TAB))
 
