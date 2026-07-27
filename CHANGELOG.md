@@ -1095,9 +1095,10 @@
 - **The engine stopped ticking and the jake stopped breathing.** A faint
   click repeated in the engine sound at cruise -- speeding up and slowing
   down with the revs -- and the jake brake's growl carried a little dip
-  that pulsed on every cycle. Both came from the seams where those sounds
-  loop, and both seams are now clean: no tick in the cruise, no pulse in
-  the growl.
+  that pulsed on every cycle. Two culprits, both fixed: the seams where
+  those sounds loop are now clean, and a stray click that had been
+  recorded inside the engine sound itself -- repeating on every pass --
+  has been patched out. No tick at any speed, no pulse in the growl.
 
 - **Curve warnings now come with time to act on them.** At compressed
   time pacing, "Curve right, half a mile" could go from spoken to "too
