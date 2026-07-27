@@ -385,6 +385,15 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       with no baked lane data say nothing). Runs shorter than two miles
       collapse so a passing-lane blip is not announced. Speech only -- no
       traffic, no lane-position mechanic. `tests/test_multilane_speech.py`.
+- [x] **Divided-highway flag baked (Track D2, for curve nav) -- SHIPPED
+      2026-07-27.** Each leg carries `divided: true/false` from real OSM
+      carriageway geometry (`tools/bake_divided.py`, PBF cache, oneway
+      pairing), so curve nav's LEFT edge can sound like a median on a
+      divided highway vs the centerline with oncoming traffic on an
+      undivided one -- instead of inferring it from road class. 1005
+      divided, 196 undivided, 86 genuinely-mixed legs omitted (honest
+      absence, inference stays the fallback). Data only; curve nav reads
+      it. `tests/test_divided_data.py`.
 - [ ] **Lane data as a mechanic (Track B / 2.0, follows the speech
       above).** REAL LANE DROPS as genuine merge events tied to lateral
       position, real widths enforced, exit-lane guidance, and keep-right
