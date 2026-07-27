@@ -609,8 +609,15 @@ def main(argv: list[str] | None = None) -> int:
         hit = hits[args.pick]
 
     from freight_fate.app import App, _configure_logging
+    from freight_fate.settings import data_dir
 
     _configure_logging()
+    # The session must not leak its --steering/--assists overrides into the
+    # player's real settings: App.shutdown() saves settings on the way out,
+    # which persisted a playtest's flags as the player's own choices
+    # (owner-hit 2026-07-27: --steering realistic became the saved setting).
+    settings_path = data_dir() / "settings.json"
+    settings_before = settings_path.read_bytes() if settings_path.exists() else None
     app = App()
     try:
         driving, start_mi = build_driving(app.ctx, hit, args)
@@ -625,14 +632,30 @@ def main(argv: list[str] | None = None) -> int:
         # App.run() imports MainMenuState inside the function and pushes it, so
         # swapping the name there is what puts us on the road instead of in the
         # menu -- with the real loop, real speech, and real input behind it.
-        main_menu.MainMenuState = lambda ctx: driving
+        # First call only: quitting to the main menu must reach the REAL menu
+        # (with its working Exit), not respawn the drive with no way out.
+        real_menu = main_menu.MainMenuState
+        served = []
+
+        def _drive_then_menu(ctx):
+            if served:
+                return real_menu(ctx)
+            served.append(True)
+            return driving
+
+        main_menu.MainMenuState = _drive_then_menu
         print("\n  G grade, J engine brake, K cruise, Down arrow brakes (hands cruise back).")
+        print("  To leave: Escape pauses; quit to the main menu, then Exit as usual.")
         print(f"  Transcript: {log_path}\n")
         app.run()
         print(f"\nDone. Transcript written to {log_path}")
         return 0
     finally:
         app.shutdown()
+        if settings_before is not None:
+            settings_path.write_bytes(settings_before)
+        elif settings_path.exists():
+            settings_path.unlink()
 
 
 if __name__ == "__main__":
