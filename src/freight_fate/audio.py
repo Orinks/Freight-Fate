@@ -123,6 +123,18 @@ ENGINE_SLIDE_MS = 120
 ENGINE_SLIDE_SNAP_MS = 25
 ENGINE_SLIDE_SNAP_RPM = 150.0
 ENGINE_LOOP_GAIN = 1.0
+# Loop-repetition camouflage (owner + outside review, 2026-07-27): even a
+# seam-clean 1-2 s loop is recognizable -- the ear locks onto its spectral
+# fingerprint recurring at a perfectly fixed period. Each band's playback
+# rate and gain take a slow, bounded random walk, so the loop period is
+# never exactly the same twice and the recurrence stops landing where the
+# ear predicted. Rate stays within ~5 cents (well under the formant-smear
+# threshold); gain within ~0.5 dB. BASS ring only -- the pygame fallback
+# has no per-channel rate control.
+ENGINE_WOBBLE_RATE_MAX = 0.003  # +/- fraction of playback rate (~5 cents)
+ENGINE_WOBBLE_RATE_STEP = 0.004  # random-walk speed, fraction per second
+ENGINE_WOBBLE_GAIN_MAX = 0.06  # +/- fraction of band gain (~0.5 dB)
+ENGINE_WOBBLE_GAIN_STEP = 0.10
 
 # Ignition crossfade. When the engine is deliberately started, the "engine/start"
 # one-shot plays at full volume while the idle loop is held silent; near the tail
@@ -842,6 +854,8 @@ class _BassBackend:
         self._engine_last_throttle = 0.0
         self._engine_duck = 1.0  # shift-gap disengage: below the load floor
         self._fades = FadeScheduler()
+        self._engine_wobble: list[list[float]] = []
+        self._wobble_rng = random.Random()
 
         if os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
             self._output = Output(device=BASS_NO_SOUND_DEVICE)
@@ -1150,6 +1164,7 @@ class _BassBackend:
                 )
             )
         self._engine_bands = []
+        self._engine_wobble = []
         if not self.engine_voice_classic:
             for key, native in ENGINE_BANDS:
                 band_stream = self._sfx_stream(key, looping=True)
@@ -1162,6 +1177,7 @@ class _BassBackend:
                 except self._BassError:
                     continue
                 self._engine_bands.append((native, band_stream, base_freq))
+                self._engine_wobble.append([0.0, 0.0])  # [rate walk, gain walk]
         if len(self._engine_bands) < 2:
             # Not enough cuts for a crossfade ring (a clean clone carries only
             # the synthesized engine/idle): legacy single pitched loop.
@@ -1278,6 +1294,20 @@ class _BassBackend:
 
     def update(self, dt: float) -> None:
         self._fades.update(dt)
+        # Advance the per-band anti-repetition walks; set_engine_rpm applies
+        # them. Diffusion scales with sqrt(dt) so the walk speed is frame-rate
+        # independent; the clamp keeps each walk meandering inside its box.
+        if self._engine_wobble and dt > 0.0:
+            scale = math.sqrt(dt)
+            for wob in self._engine_wobble:
+                for i, (step, bound) in enumerate(
+                    (
+                        (ENGINE_WOBBLE_RATE_STEP, ENGINE_WOBBLE_RATE_MAX),
+                        (ENGINE_WOBBLE_GAIN_STEP, ENGINE_WOBBLE_GAIN_MAX),
+                    )
+                ):
+                    wob[i] += self._wobble_rng.uniform(-step, step) * scale
+                    wob[i] = max(-bound, min(bound, wob[i]))
 
     def engine_stop(self, shutdown_sound: bool = True) -> None:
         self.reverse_stop()
@@ -1292,6 +1322,7 @@ class _BassBackend:
         for _native, stream, _freq in self._engine_bands:
             self._fade_out(stream, 250)
         self._engine_bands = []
+        self._engine_wobble = []
         if self._engine_stream is not None:
             self._fade_out(self._engine_stream, 250)
             self._engine_stream = None
@@ -1334,8 +1365,11 @@ class _BassBackend:
         if self._engine_bands:
             natives = tuple(native for native, _stream, _freq in self._engine_bands)
             weights = engine_band_weights(rpm, natives)
-            for (native, stream, base_freq), w in zip(self._engine_bands, weights, strict=True):
+            for (native, stream, base_freq), w, wob in zip(
+                self._engine_bands, weights, self._engine_wobble, strict=True
+            ):
                 rate = max(ENGINE_BAND_RATE_MIN, min(ENGINE_BAND_RATE_MAX, rpm / native))
+                rate *= 1.0 + wob[0]
                 try:
                     self._bass_call(
                         self._slide,
@@ -1344,7 +1378,7 @@ class _BassBackend:
                         base_freq * rate,
                         slide_ms,
                     )
-                    stream.set_volume(level * w)
+                    stream.set_volume(level * w * (1.0 + wob[1]))
                 except self._BassError:
                     self._engine_bands = []
                     return

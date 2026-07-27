@@ -634,6 +634,13 @@
 
 ### Fixed
 
+- **The engine never repeats itself exactly anymore.** Even with clean
+  loops, a careful ear could catch the engine sound recurring on a
+  perfectly fixed cycle at steady revs. Each layer of the engine voice
+  now wanders very slightly in speed and level -- the way a real
+  engine's rhythm breathes -- so there is no fixed cycle left to
+  notice.
+
 - **Automatic shifts sound like a real gear change now: clunk, sigh,
   clunk.** During a shift the engine used to hang frozen at its old
   revs through the whole interruption, then leap to the new pitch all
