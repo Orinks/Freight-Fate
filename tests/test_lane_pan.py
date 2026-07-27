@@ -257,6 +257,42 @@ def test_a_hot_bend_actually_pushes_the_truck(monkeypatch):
         app.shutdown()
 
 
+def test_pinballing_across_a_line_keeps_only_the_thump(monkeypatch):
+    """The first crossing gets the marker roll, the signal tone, and the
+    spoken lane. Re-crossing inside the repeat window is fighting the bend,
+    not changing lanes: quieter thump only, no ding, no announcement."""
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    try:
+        d = _driving(app)
+        d.ctx.settings.steering_assist = "realistic"
+        d.ctx.say_event = lambda text, interrupt=False: events.append(text)
+        d.truck.velocity_mps = 25.0
+        played = []
+        monkeypatch.setattr(
+            app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
+        )
+
+        d.lane.lane = 0
+        d.lane.crossed = 1
+        d._on_lane_crossed()
+        assert any(k == "vehicle/signal_tone" for k, _ in played)
+        assert any("lane" in e for e in events)
+
+        played.clear()
+        events.clear()
+        d.lane.crossed = -1  # right back across, mid-fight
+        d._on_lane_crossed()
+        rolls = [(k, v) for k, v in played if k == "vehicle/lane_line_cross"]
+        assert rolls and rolls[0][1] < 0.7  # quieter thump
+        assert not any(k == "vehicle/signal_tone" for k, _ in played)
+        assert not any("In the" in e for e in events)
+    finally:
+        app.shutdown()
+
+
 def test_curve_run_speaks_a_verdict_on_exit(monkeypatch):
     """The co-driver closes the loop: entering a demanding bend ticks on its
     side, and leaving it earns a spoken verdict -- clean, edge, or hot."""

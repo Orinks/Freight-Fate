@@ -38,7 +38,7 @@ AXLES = [(0.0, 1.0), (3.8, 0.95), (5.1, 0.9)]
 BARS_PER_GROUP = 4
 BAR_SPACING_M = 0.6  # bars inside one group
 GROUP_COUNT = 3
-GROUP_GAP_M = 7.0  # centre-to-centre between groups -> the duh...duh rhythm
+GROUP_GAP_M = 9.5  # centre-to-centre between groups -> a slow, deliberate duh...duh
 
 
 def build_strips() -> np.ndarray:
@@ -54,12 +54,18 @@ def build_strips() -> np.ndarray:
                 i = int(t_hit * SR)
                 if 0 <= i < n:
                     out[i] += load
-    # Spikier than the shoulder strip: a sharper grain and a body that
-    # keeps far more high end (hf_keep 0.55 vs the cab's usual smoothing).
-    sig = convolve(out, grain(0.0011))
-    sig = convolve(sig, body_ir(0.55))
+    # A different ANIMAL from the shoulder strip, not a louder cousin
+    # (owner 2026-07-27: too similar). The milled edge is a bright buzz;
+    # these are big raised bars under the whole truck -- a heavy grain
+    # into a dark body makes each group a deep DOUBLE-THUD, and a
+    # sub-weight layer puts it in the chest, not the ears.
+    sig = convolve(out, grain(0.0032))
+    body = convolve(sig, body_ir(0.22))
+    sub = convolve(sig, body_ir(0.06))
+    n2 = min(len(body), len(sub))
+    sig = body[:n2] + 1.2 * sub[:n2]
     top = float(np.max(np.abs(sig))) or 1.0
-    return sig / top * 0.95
+    return sig / top * 0.98
 
 
 def build_lane_line() -> np.ndarray:

@@ -9,6 +9,9 @@ from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
 from .driving_rest_states import EnforcementStopState, FelonyStopState, TrafficStopState
 
+# Re-crossings inside this window are pinballing, not lane changes.
+LANE_CROSS_REPEAT_S = 4.0
+
 # FM fringe rendering. The bed creeps in below full quieting (signal 0.6,
 # radio.SIGNAL_FULL_VOLUME) and deepens quadratically; pickets begin below
 # the old static threshold. PICKET_DUCK is the program level while a splash
@@ -803,19 +806,9 @@ class DrivingUpdateMixin:
             if not self._terse_speech():
                 message += " Steer back toward the lane center."
             self.ctx.say_event(message, interrupt=True)
+        self._cross_repeat_s = max(0.0, self._cross_repeat_s - dt)
         if self.lane.crossed:
-            # A held drift carried the truck across the line: the wheel was
-            # the lane change. The tires roll over the line's raised markers
-            # (the five-hit flurp, panned to the crossed side) and one
-            # signal tone marks the commit.
-            pan = -0.6 if self.lane.crossed > 0 else 0.6
-            self.ctx.audio.play(
-                "vehicle/lane_line_cross",
-                volume=min(1.0, 0.7 * self._cue_loudness()),
-                pan=pan,
-            )
-            self.ctx.audio.play("vehicle/signal_tone", volume=0.6, pan=pan)
-            self._finish_lane_change()
+            self._on_lane_crossed()
         self._update_tap_lane_change(dt)
         self._update_merge(dt)
         self._update_keep_right(dt)
@@ -842,7 +835,26 @@ class DrivingUpdateMixin:
             )
             self._finish_lane_change()
 
-    def _finish_lane_change(self) -> None:
+    def _on_lane_crossed(self) -> None:
+        """A held drift carried the truck across a line: the wheel was the
+        lane change. The tires roll the line's raised markers every time --
+        physics does not rate-limit -- but the signal tone and the spoken
+        lane name mark a DELIBERATE change only. Pinballing back and forth
+        across the same line mid-bend repeats just the quieter thump
+        (owner: "the thing dings at you as you're going")."""
+        repeat = self._cross_repeat_s > 0.0
+        self._cross_repeat_s = LANE_CROSS_REPEAT_S
+        pan = -0.6 if self.lane.crossed > 0 else 0.6
+        self.ctx.audio.play(
+            "vehicle/lane_line_cross",
+            volume=min(1.0, (0.4 if repeat else 0.7) * self._cue_loudness()),
+            pan=pan,
+        )
+        if not repeat:
+            self.ctx.audio.play("vehicle/signal_tone", volume=0.6, pan=pan)
+        self._finish_lane_change(quiet=repeat)
+
+    def _finish_lane_change(self, quiet: bool = False) -> None:
         """The truck has just arrived in a new lane: check the space it moved
         into, resolve any dodgeable hazard, and reset keep-right pressure."""
         self._left_lane_s = 0.0
@@ -876,7 +888,8 @@ class DrivingUpdateMixin:
             self.ctx.say_event("You swerve around it. Well done.", interrupt=False)
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
-        self.ctx.say_event(f"In the {lane.lane_name} lane.", interrupt=False)
+        if not quiet:
+            self.ctx.say_event(f"In the {lane.lane_name} lane.", interrupt=False)
 
     def _update_merge(self, dt: float) -> None:
         """Riding a coned-off lane: one urgent warning, then the barrels win."""
