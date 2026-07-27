@@ -33,6 +33,7 @@ from .world_parsing import (
     _parse_grade_segment,
     _parse_interchange,
     _parse_landmarks,
+    _parse_lane_segments,
     _parse_location,
     _parse_restrictions,
     _parse_route_point,
@@ -153,6 +154,9 @@ class World(WorldServiceMixin):
                 _parse_grade_segment(s, miles, leg_from, leg_to)
                 for s in corridor.get("grade_segments", ())
             )
+            lane_segments = _parse_lane_segments(
+                corridor.get("lane_segments", ()), miles, leg_from, leg_to
+            )
             state_crossings = tuple(
                 _parse_state_crossing(c, miles, leg_from, leg_to, self.cities[leg_from].state)
                 for c in corridor.get("state_crossings", ())
@@ -203,6 +207,7 @@ class World(WorldServiceMixin):
                     max(0, int(leg.get("lanes", 0))),
                     landmarks=landmarks,
                     restrictions=restrictions,
+                    lane_segments=lane_segments,
                 )
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}

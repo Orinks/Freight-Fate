@@ -455,6 +455,44 @@ def _parse_grade_segment(raw, leg_miles: float, from_city: str, to_city: str) ->
     return GradeSegment(start_mi, end_mi, avg_grade_pct, terrain, source)
 
 
+def _parse_lane_segment(raw, leg_miles: float, from_city: str, to_city: str) -> LaneSegment:
+    if not isinstance(raw, dict):
+        raise ValueError(f"{from_city} to {to_city} lane segment must be an object")
+    start_mi = float(raw["start_mi"])
+    end_mi = float(raw["end_mi"])
+    if not 0.0 <= start_mi <= leg_miles or not 0.0 <= end_mi <= leg_miles or end_mi <= start_mi:
+        raise ValueError(
+            f"{from_city} to {to_city} lane segment has invalid range {start_mi}-{end_mi}"
+        )
+    lanes = int(raw["lanes"])
+    if not 1 <= lanes <= 10:
+        raise ValueError(f"{from_city} to {to_city} lane segment has out-of-range lanes {lanes}")
+
+    def _opt_lanes(key: str) -> int:
+        if key not in raw:
+            return 0
+        val = int(raw[key])
+        if not 1 <= val <= 10:
+            raise ValueError(f"{from_city} to {to_city} lane segment has out-of-range {key} {val}")
+        return val
+
+    return LaneSegment(
+        start_mi=start_mi,
+        end_mi=end_mi,
+        lanes=lanes,
+        lanes_forward=_opt_lanes("lanes_forward"),
+        lanes_backward=_opt_lanes("lanes_backward"),
+        oneway=bool(raw.get("oneway", False)),
+        source=str(raw.get("source", "")).strip(),
+    )
+
+
+def _parse_lane_segments(
+    raw, leg_miles: float, from_city: str, to_city: str
+) -> tuple[LaneSegment, ...]:
+    return tuple(_parse_lane_segment(s, leg_miles, from_city, to_city) for s in raw)
+
+
 def _parse_speed_limit(raw, leg_miles: float, from_city: str, to_city: str) -> SpeedLimitSample:
     if not isinstance(raw, dict):
         raise ValueError(f"{from_city} to {to_city} speed limit must be an object")

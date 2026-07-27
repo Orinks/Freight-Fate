@@ -8,7 +8,7 @@ import random
 from dataclasses import replace
 
 from ..data.curves import RouteCurve, route_curves
-from ..data.world import Leg, Route, get_world
+from ..data.world import Leg, Route, get_world, lane_word
 from ..units import spoken_distance
 from .hos import clock_text, is_night
 from .season import is_weekend
@@ -28,6 +28,9 @@ from .weather import WeatherSystem
 # trips to occasionally replay a STOP_AHEAD.
 STOP_AHEAD_LOOKAHEAD_MI = 5.0
 LOCAL_TURN_LOOKAHEAD_MI = 0.3  # street maneuvers announce at block scale, not highway scale
+# A lane-count run shorter than this is collapsed into its neighbor, so a
+# fleeting widen/narrow (data noise, a short passing lane) is not announced.
+LANE_RUN_MIN_MI = 2.0
 
 # The reaction allowance covers hearing the call out loud (the sentence
 # itself takes several seconds through a screen reader), orienting by ear,
@@ -196,6 +199,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.controlled_ramp = False
         self._announced_chain_law: set[str] = set()
         self._announced_curves: set[str] = set()
+        self._announced_lane_changes: set[str] = set()
+        self._lane_runs: list[list] | None = None  # lazily built, direction-aware
         self._announced_landmarks: set[str] = set()
         self._announced_billboards: set[str] = set()
         self._announced_stops: set[str] = set()  # RoadStop.key, never the name
@@ -938,6 +943,83 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             ahead_mi=ahead,
         )
 
+    def _build_lane_runs(self) -> list[list]:
+        """Direction-aware lane runs across the whole route in travel order:
+        ``[route_start_mi, route_end_mi, lanes_your_side, divided]``. Adjacent
+        equal runs merge; runs shorter than ``LANE_RUN_MIN_MI`` are absorbed
+        into the value before them so a brief widen/narrow is not announced."""
+        runs: list[list] = []
+        for i, leg in enumerate(self.route.legs):
+            leg_start = self._leg_starts[i]
+            forward = self.route.cities[i] == leg.a
+            segs = list(leg.lane_segments if forward else reversed(leg.lane_segments))
+            for seg in segs:
+                if forward:
+                    s, e = leg_start + seg.start_mi, leg_start + seg.end_mi
+                else:
+                    s, e = leg_start + (leg.miles - seg.end_mi), leg_start + (leg.miles - seg.start_mi)
+                runs.append([s, e, seg.your_side(forward), seg.divided])
+        if not runs:
+            return []
+        runs.sort(key=lambda r: r[0])
+
+        def _coalesce(rows: list[list]) -> list[list]:
+            out: list[list] = []
+            for r in rows:
+                if out and r[2] == out[-1][2] and r[3] == out[-1][3] and r[0] - out[-1][1] <= 0.3:
+                    out[-1][1] = r[1]
+                else:
+                    out.append([r[0], r[1], r[2], r[3]])
+            return out
+
+        merged = _coalesce(runs)
+        # Absorb short runs into the previous value (a leading short run is kept,
+        # since there is no earlier value to inherit), then re-merge.
+        collapsed: list[list] = []
+        for r in merged:
+            if collapsed and (r[1] - r[0]) < LANE_RUN_MIN_MI:
+                collapsed[-1][1] = r[1]
+            else:
+                collapsed.append(r)
+        return _coalesce(collapsed)
+
+    def _check_lane_changes(self) -> None:
+        """Announce when the lane count in the travel direction changes, once
+        per boundary. Divided-only changes (same count) stay quiet -- the count
+        is the story a driver acts on."""
+        if self._lane_runs is None:
+            self._lane_runs = self._build_lane_runs()
+            # Seed everything already behind the starting position so a resumed
+            # trip does not re-announce a change it passed before the save.
+            for run in self._lane_runs:
+                if run[0] <= self.position_mi:
+                    self._announced_lane_changes.add(f"lane:{run[0]:.2f}")
+        for idx in range(1, len(self._lane_runs)):
+            boundary = self._lane_runs[idx][0]
+            key = f"lane:{boundary:.2f}"
+            if key in self._announced_lane_changes:
+                continue
+            behind = self.position_mi - boundary
+            if behind < 0:
+                break  # sorted; nothing further along is due yet
+            self._announced_lane_changes.add(key)
+            prev_side = self._lane_runs[idx - 1][2]
+            new_side = self._lane_runs[idx][2]
+            if new_side == prev_side:
+                continue
+            if behind <= 1.0:  # not a stale, overshot boundary from a jump/resume
+                self._emit(
+                    TripEventKind.LANE,
+                    self._lane_change_message(prev_side, new_side),
+                    lanes=new_side,
+                )
+
+    @staticmethod
+    def _lane_change_message(prev_side: int, new_side: int) -> str:
+        if new_side > prev_side:
+            return f"Road widens to {lane_word(new_side)} lanes your side."
+        return f"Down to {lane_word(new_side)} lane{'s' if new_side != 1 else ''} your side."
+
     def _check_roadside_callouts(self) -> None:
         self._check_callout_list(self.landmarks, self._announced_landmarks, TripEventKind.LANDMARK)
         self._check_callout_list(
@@ -1386,6 +1468,20 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 return segment.terrain
         return leg.terrain
 
+    def lanes_at(self, mile: float | None = None) -> tuple[int, bool] | None:
+        """(lanes in the direction of travel, divided) at a route mile, or None
+        where the lane bake found no tag -- honest absence, speak nothing."""
+        sample_mile = self.position_mi if mile is None else mile
+        leg_i, leg_start = self._leg_at_mile(sample_mile)
+        leg = self.route.legs[leg_i]
+        forward = self.route.cities[leg_i] == leg.a
+        offset = max(0.0, min(leg.miles, sample_mile - leg_start))
+        sample_offset = offset if forward else leg.miles - offset
+        for seg in leg.lane_segments:
+            if seg.start_mi <= sample_offset <= seg.end_mi:
+                return seg.your_side(forward), seg.divided
+        return None
+
     def state_at(self, mile: float | None = None) -> str:
         """The state the truck is in, or empty where the bake is silent.
 
@@ -1597,6 +1693,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         leg = self.route.legs[self.current_leg_index]
         next_context = self.next_navigation_context(imperial)
         terrain_text = self._current_grade_text()
+        lane_text = self._current_lane_text()
+        lane_part = f" {lane_text.capitalize()}." if lane_text else ""
         if self._is_facility_approach_route() and self.destination_label:
             toward_text = self.destination_label
         else:
@@ -1604,7 +1702,17 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             world = get_world()
             toward_name = world.spoken_city(toward, qualified=False)
             toward_text = f"{toward_name}, {world.cities[toward].state}"
-        return f"{dist}. On {leg.highway} toward {toward_text}. {terrain_text}. {next_context}"
+        return f"{dist}. On {leg.highway} toward {toward_text}.{lane_part} {terrain_text}. {next_context}"
+
+    def _current_lane_text(self) -> str:
+        """Lane count in plain words for the road-status readout, or empty where
+        the bake is silent here."""
+        info = self.lanes_at()
+        if info is None:
+            return ""
+        n, divided = info
+        lanes = f"{lane_word(n)} lane{'s' if n != 1 else ''} your side"
+        return f"divided, {lanes}" if divided else lanes
 
     def _current_grade_text(self) -> str:
         grade_pct = self.grade_at(self.position_mi) * 100.0
@@ -1806,6 +1914,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._check_traffic_pressures()
         self._check_real_traffic_events()
         self._check_curves()
+        self._check_lane_changes()
         self._check_stops()
         self._check_roadside_callouts()
         self._check_tolls()
