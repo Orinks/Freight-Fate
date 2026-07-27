@@ -359,6 +359,7 @@ class DrivingState(
         self._next_joint_distance_m = self._patrol_rng.uniform(14.0, 18.0)
         self.lane_guidance = LaneGuidance()
         self._edge_loop_key: str | None = None  # active edge-ladder rung loop
+        self._road_pan_applied = 0.0  # last pursuit-guide pan set on the road bed
         self._reverse_cue_active = False
         self._air_cue_active = False  # compressor fill loop below governor release
         self._jake_cue_key: str | None = None  # jake growl loop currently playing

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from .. import engine_audio
-from ..audio import CH_AIR, CH_BRAKE, CH_EDGE, CH_JAKE, CH_LANE, CH_RADIO_FX
+from ..audio import CH_AIR, CH_BRAKE, CH_EDGE, CH_JAKE, CH_RADIO_FX, CH_ROAD
 from ..audio_fades import curve as _resolve_curve
 from ..radio import truck_elevation_ft
 from .driving_core import *
@@ -804,7 +804,7 @@ class DrivingUpdateMixin:
             # A held drift carried the truck across the line: the wheel was
             # the lane change. One signal click marks the commit.
             pan = -0.6 if self.lane.crossed > 0 else 0.6
-            self.ctx.audio.play("vehicle/turn_signal", volume=0.6, pan=pan)
+            self.ctx.audio.play("vehicle/signal_tone", volume=0.6, pan=pan)
             self._finish_lane_change()
         self._update_tap_lane_change(dt)
         self._update_merge(dt)
@@ -819,7 +819,7 @@ class DrivingUpdateMixin:
         self._lane_signal_timer += dt
         if self._lane_signal_timer >= LANE_SIGNAL_CLICK_S:
             self._lane_signal_timer = 0.0
-            self.ctx.audio.play("vehicle/turn_signal", volume=0.8, pan=pan)
+            self.ctx.audio.play("vehicle/signal_tone", volume=0.8, pan=pan)
         self._lane_change_timer -= dt
         if self._lane_change_timer <= 0:
             self._lane_change_target = None
@@ -997,38 +997,48 @@ class DrivingUpdateMixin:
         audio.set_loop_pan(CH_EDGE, self._lane_pan())
         self._edge_loop_key = key
 
-    def _update_lane_guidance_audio(self) -> None:
-        """Run the guidance director: a panned bed that wakes for drift or a
-        curve and sleeps on the centered straight (owner contract 2026-07-27)."""
-        from ..sim.lane_guidance import BED_FADE_MS, BED_KEY, CURVE_LEAD_MI
+    def _curve_steer_demand(self) -> float:
+        """Signed steer the active bend asks for, -1 full left .. 1 full right.
 
-        was_awake = self.lane_guidance.awake
-        if not self.ctx.settings.lane_departure_warning:
-            if was_awake:
-                self.ctx.audio.stop_loop(CH_LANE, fade_ms=BED_FADE_MS)
-            self.lane_guidance.update(
-                self.lane, assist_on=False, curve_active=False, curve_ahead_mi=None
-            )
-            return
+        Direction leads into the curve (a left bend wants left); magnitude
+        follows the same tightness/overspeed shape the curve push uses, so
+        the guide leans harder exactly when the bend pulls harder."""
         active = self.trip.curve_at(self.trip.position_mi)
-        frame = self.lane_guidance.update(
-            self.lane,
-            assist_on=(
-                self.ctx.settings.steering_assist != "off"
-                and self.truck.speed_mph >= LANE_MIN_MPH
-            ),
-            curve_active=active is not None and not active.connector,
-            curve_ahead_mi=self.trip.curve_ahead_mi(CURVE_LEAD_MI),
-        )
-        if frame.awake:
-            self.ctx.audio.start_loop(CH_LANE, BED_KEY, volume=frame.volume, fade_ms=BED_FADE_MS)
-            self.ctx.audio.set_loop_volume(CH_LANE, frame.volume)
-            self.ctx.audio.set_loop_pan(CH_LANE, frame.pan)
-        elif was_awake:
-            self.ctx.audio.stop_loop(CH_LANE, fade_ms=BED_FADE_MS)
-            if frame.centered:
-                # The drift settled: the old centered earcon still says so.
-                self.ctx.audio.play("vehicle/lane_centered", volume=0.45, pan=0.0)
+        if active is None or active.connector:
+            return 0.0
+        tightness = max(0.2, 1.0 - active.min_radius_ft / 5000.0)
+        excess = max(0.0, self.truck.speed_mph - active.advisory_mph)
+        magnitude = min(1.0, tightness * (1.0 + excess * 0.04))
+        return -magnitude if active.direction == "L" else magnitude
+
+    def _update_lane_guidance_audio(self, dt: float) -> None:
+        """Run the guidance director: the road bed leans toward where the
+        wheel should go (pursuit guide -- follow the sound), wakes for drift
+        or a bend, and slews home on the centered straight. Never a new
+        tone: the community ruling keeps the guide on the existing bed."""
+        from ..sim.lane_guidance import CURVE_LEAD_MI
+
+        if not self.ctx.settings.lane_departure_warning:
+            frame = self.lane_guidance.update(
+                self.lane, dt, assist_on=False, curve_steer=0.0, curve_ahead_mi=None
+            )
+        else:
+            frame = self.lane_guidance.update(
+                self.lane,
+                dt,
+                assist_on=(
+                    self.ctx.settings.steering_assist != "off"
+                    and self.truck.speed_mph >= LANE_MIN_MPH
+                ),
+                curve_steer=self._curve_steer_demand(),
+                curve_ahead_mi=self.trip.curve_ahead_mi(CURVE_LEAD_MI),
+            )
+        if frame.pan != self._road_pan_applied:
+            self.ctx.audio.set_loop_pan(CH_ROAD, frame.pan)
+            self._road_pan_applied = frame.pan
+        if frame.centered:
+            # The drift settled: the old centered earcon still says so.
+            self.ctx.audio.play("vehicle/lane_centered", volume=0.45, pan=0.0)
 
     def _auto_jake_max_stage(self) -> int:
         """The highest stage the drive axle can hold right now (0..3).
@@ -1230,7 +1240,7 @@ class DrivingUpdateMixin:
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)
-        self._update_lane_guidance_audio()
+        self._update_lane_guidance_audio(dt)
         rumble = self.lane.rumble_level()
         self._update_edge_ladder_audio(audio)
         if rumble > 0.0 and self.ctx.settings.steering_assist != "off":
@@ -2244,7 +2254,7 @@ class DrivingUpdateMixin:
                 self._pull_over_compliance = min(
                     1.0, self._pull_over_compliance + PULL_OVER_SIGNAL_BOOST
                 )
-            self.ctx.audio.play("vehicle/turn_signal", volume=0.7)
+            self.ctx.audio.play("vehicle/signal_tone", volume=0.7, pan=0.6)
             self.ctx.say("Signaling and easing onto the shoulder. Brake to a full stop.")
         else:
             self.ctx.say("Pulling over. Brake to a full stop on the shoulder.")

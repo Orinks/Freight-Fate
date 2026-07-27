@@ -1,27 +1,35 @@
-"""Lane-guidance audio director: decides what the steering ear hears.
+"""Lane-guidance director: pans the EXISTING road bed toward the steer.
 
 Pure logic, no audio calls -- the driving state feeds it the lane model and
-the curve context each frame and plays whatever it returns. Keeping it a
-plain object keeps the whole cue ladder testable headless.
+the curve context each frame and applies the pan it returns to the road
+noise loop. Keeping it a plain object keeps the cue logic testable headless.
 
-The owner's contract (2026-07-27): centered and stable is SILENT -- the
-engine and the tires are the soundscape. Guidance wakes for exactly two
-reasons: the truck is drifting toward a lane line, or a curve is coming up
-(or underway) and the driver needs continuous position to steer through it.
-It goes back to sleep on the straight.
+The design is the community-resolved one on the roadmap (JaceK's audiogames
+ruling, owner concurring, 2026-07-17), plus the owner's wake/sleep contract
+(2026-07-27):
 
-What plays when awake is one panned bed on a reserved loop channel, panned
-toward the side the truck is drifting to -- hear it right, steer left, push
-the sound back out of the cab. Volume grows toward the line. Crossing onto
-a true road edge is not this module's voice: the edge ladder (rumble strip,
-shoulder) stays with the lane model's ``rumble_level`` and the departure
-events, which grade by STRUCTURE, not loudness.
+- Silence-is-centered: on a straight, centered and stable, guidance does
+  nothing at all -- the road bed sits where it always sits.
+- NO new steering tones, ever: continuous synthetic tones overwhelm the
+  soundscape and hurt players with sensory or hearing issues. The guide is
+  the EXISTING road/tire bed, panned along the arc.
+- Pursuit, not error-nulling: the bed leans toward where the wheel should
+  go -- follow the sound. In a bend it leads into the curve; in a drift it
+  sits toward lane center. (Forza's audio steering guide panned
+  engine+tires the same way; pursuit tracking beats error-nulling in the
+  human-factors literature.)
+- The guide wakes for exactly two reasons: drifting toward a lane line, or
+  a curve inside its lead window (or underway). It slews home and sleeps
+  on the straight.
+- Drift cues stay underneath as the error backstop: the edge-boundary
+  ladder (intermittent clip / periodic strip / aperiodic gravel) and the
+  departure warnings, which grade by structure, not loudness.
 
 ``boundary`` names what is past the lane line on each side of the CURRENT
-lane, so the departure sounds and spoken warnings can say the truth:
-``lane`` (another lane of same-direction traffic), ``median`` (a divided
-highway's left edge), ``oncoming`` (an undivided road's centerline), or
-``shoulder`` (the right road edge).
+lane, so the edge sounds and spoken warnings can say the truth: ``lane``
+(another lane of same-direction traffic), ``median`` (a divided highway's
+left edge), ``oncoming`` (an undivided road's centerline), or ``shoulder``
+(the right road edge).
 """
 
 from __future__ import annotations
@@ -30,24 +38,19 @@ from dataclasses import dataclass
 
 from .lane import LANE_EDGE, LaneKeeping
 
-# The bed stays asleep inside this much of lane center: normal wander on a
+# The guide stays asleep inside this much of lane center: normal wander on a
 # straight never wakes it (WANDER_RATE drift stays well inside 0.35).
 DRIFT_WAKE = 0.45
 # Hysteresis: once awake, sleep only after settling back inside this.
 DRIFT_SLEEP = 0.30
-# A curve wakes the bed this many miles before its start...
+# A curve wakes the guide this many miles before its start.
 CURVE_LEAD_MI = 0.30
-# ...and holds it this long past its end, so the exit straightening is heard.
-CURVE_TAIL_MI = 0.05
-# Bed volume ramp: silent at the wake line, full voice with tires on the line.
-BED_MIN_VOLUME = 0.10
-BED_MAX_VOLUME = 0.55
-# In a curve the bed idles at this floor even when centered: continuous
-# position is the point -- steering by ear needs a carrier to pan.
-CURVE_FLOOR_VOLUME = 0.16
-BED_FADE_MS = 220
-
-BED_KEY = "vehicle/lane_bed"
+# The bed never pans fully into one ear: some road stays on both sides so
+# the soundscape keeps its floor under the guide.
+GUIDE_PAN_MAX = 0.8
+# How fast the bed slews toward its target, pan units per second: quick
+# enough to lead a bend, slow enough to read as leaning, not jumping.
+PAN_SLEW_PER_S = 1.6
 
 # The edge-boundary ladder: three structural states (intermittent clip,
 # periodic strip, aperiodic shoulder) so the rungs stay separable under
@@ -108,17 +111,17 @@ class GuidanceFrame:
     """One frame of guidance output for the driving state to perform."""
 
     awake: bool
-    volume: float  # bed loop volume, 0 when asleep
-    pan: float  # -1 full left .. 1 full right, the side the truck drifts to
+    pan: float  # road-bed pan, -1..1: the side the wheel should go toward
     centered: bool = False  # this frame ended a drift episode back at center
 
 
 class LaneGuidance:
-    """Wake/sleep and bed shaping. One instance per drive."""
+    """Wake/sleep and pursuit-pan shaping. One instance per drive."""
 
     def __init__(self) -> None:
         self._awake = False
         self._episode_drifted = False
+        self.pan = 0.0  # current slewed pan, applied to the road bed
 
     @property
     def awake(self) -> bool:
@@ -127,21 +130,27 @@ class LaneGuidance:
     def update(
         self,
         lane: LaneKeeping,
+        dt: float,
         *,
         assist_on: bool,
-        curve_active: bool,
+        curve_steer: float,
         curve_ahead_mi: float | None,
     ) -> GuidanceFrame:
-        """Advance one frame. ``curve_ahead_mi`` is distance to the next
-        curve's start (None when nothing is within lookahead); the caller
-        applies CURVE_TAIL_MI when reporting ``curve_active``."""
+        """Advance one frame.
+
+        ``curve_steer`` is the signed steer the active bend asks for
+        (-1 full left .. 1 full right, 0 when no bend is active);
+        ``curve_ahead_mi`` is distance to the next curve's start (None when
+        nothing is inside the lookahead).
+        """
         if not assist_on:
             self._awake = False
             self._episode_drifted = False
-            return GuidanceFrame(False, 0.0, 0.0)
+            self.pan = 0.0
+            return GuidanceFrame(False, 0.0)
 
         drift = abs(lane.offset)
-        in_curve_window = curve_active or (
+        in_curve_window = curve_steer != 0.0 or (
             curve_ahead_mi is not None and curve_ahead_mi <= CURVE_LEAD_MI
         )
         was_awake = self._awake
@@ -151,17 +160,22 @@ class LaneGuidance:
             self._awake = in_curve_window or drift > DRIFT_WAKE
         if self._awake and drift > DRIFT_WAKE:
             self._episode_drifted = True
+
+        # Pursuit target: lean into the bend, corrected toward lane center.
+        # Asleep, the target is home -- the bed slews back where it lives.
+        if self._awake:
+            target = curve_steer - lane.offset / LANE_EDGE
+            target = max(-GUIDE_PAN_MAX, min(GUIDE_PAN_MAX, target))
+        else:
+            target = 0.0
+        step = PAN_SLEW_PER_S * max(0.0, dt)
+        if abs(target - self.pan) <= step:
+            self.pan = target
+        else:
+            self.pan += step if target > self.pan else -step
+
         if not self._awake:
             centered = was_awake and self._episode_drifted
             self._episode_drifted = False
-            return GuidanceFrame(False, 0.0, 0.0, centered=centered)
-
-        # Volume: how close the tires are to the line, on top of the curve
-        # floor. Pan tracks the offset direction -- the bed sits on the side
-        # the truck is sliding toward.
-        closeness = max(0.0, min(1.0, (drift - DRIFT_SLEEP) / (LANE_EDGE - DRIFT_SLEEP)))
-        volume = BED_MIN_VOLUME + closeness * (BED_MAX_VOLUME - BED_MIN_VOLUME)
-        if in_curve_window:
-            volume = max(volume, CURVE_FLOOR_VOLUME)
-        pan = max(-1.0, min(1.0, lane.offset / LANE_EDGE))
-        return GuidanceFrame(True, volume, pan)
+            return GuidanceFrame(False, self.pan, centered=centered)
+        return GuidanceFrame(True, self.pan)

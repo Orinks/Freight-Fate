@@ -549,7 +549,7 @@ class DrivingEventMixin:
         # this the milestones already spoken stay marked and the second
         # approach runs silent.
         self._exit_countdown_said = set()
-        self.ctx.audio.play("vehicle/turn_signal", volume=0.7)
+        self.ctx.audio.play("vehicle/signal_tone", volume=0.7, pan=0.6)
         if stop.type == "delivery_destination":
             labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
             head = (
@@ -1133,7 +1133,7 @@ class DrivingEventMixin:
         self.lane.lane = 0
         self.lane.offset = 0.0
         merge_leg = highway.route.legs[0]
-        self.ctx.audio.play("vehicle/turn_signal", volume=0.6, pan=-0.6)
+        self.ctx.audio.play("vehicle/signal_tone", volume=0.6, pan=-0.6)
         self.ctx.say_event(
             f"Up the ramp and onto {merge_leg.highway}. Merge left when clear.",
             interrupt=False,

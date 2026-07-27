@@ -68,36 +68,33 @@ def test_edge_ladder_loop_is_panned_to_the_drift_side(monkeypatch):
         app.shutdown()
 
 
-def test_guidance_bed_wakes_panned_to_the_drift_side(monkeypatch):
+def test_road_bed_leans_toward_the_correction_on_a_drift(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.sim.lane_guidance import BED_KEY
+    from freight_fate.audio import CH_ROAD
 
     app = App()
     try:
         d = _driving(app)
         d.ctx.settings.steering_assist = "realistic"
         d.truck.velocity_mps = 25.0  # guidance only listens at speed
-        loops = []
         pans = []
         monkeypatch.setattr(
             app.ctx.audio,
-            "start_loop",
-            lambda ch, key, volume=1.0, fade_ms=300: loops.append((ch, key, volume)),
+            "set_loop_pan",
+            lambda ch, pan: pans.append(pan) if ch == CH_ROAD else None,
         )
-        monkeypatch.setattr(app.ctx.audio, "set_loop_volume", lambda ch, volume: None)
-        monkeypatch.setattr(app.ctx.audio, "set_loop_pan", lambda ch, pan: pans.append(pan))
 
-        d.lane.offset = -0.6  # drifting left, past the wake line
-        d._update_audio(0.0)
+        d.lane.offset = -0.6  # drifting left: the wheel should go right
+        d._update_audio(0.5)
 
-        assert [entry for entry in loops if entry[1] == BED_KEY]
-        assert pans and pans[-1] < 0.0  # the bed sits on the drift side
+        assert pans and pans[-1] > 0.0  # the road bed leans right -- follow it
     finally:
         app.shutdown()
 
 
-def test_guidance_bed_sleeps_and_centered_cue_ends_a_drift(monkeypatch):
+def test_road_bed_slews_home_and_centered_cue_ends_a_drift(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.audio import CH_ROAD
 
     app = App()
     try:
@@ -105,24 +102,25 @@ def test_guidance_bed_sleeps_and_centered_cue_ends_a_drift(monkeypatch):
         d.ctx.settings.steering_assist = "realistic"
         d.truck.velocity_mps = 25.0  # guidance only listens at speed
         calls = []
-        stops = []
+        pans = []
         monkeypatch.setattr(
             app.ctx.audio,
             "play",
             lambda key, volume=1.0, pan=0.0: calls.append((key, volume, pan)),
         )
         monkeypatch.setattr(
-            app.ctx.audio, "stop_loop", lambda ch, fade_ms=300: stops.append(ch)
+            app.ctx.audio,
+            "set_loop_pan",
+            lambda ch, pan: pans.append(pan) if ch == CH_ROAD else None,
         )
 
-        d.lane.offset = 0.6  # drift right wakes the bed
-        d._update_audio(0.0)
+        d.lane.offset = 0.6  # drift right wakes the guide
+        d._update_audio(0.5)
         d.lane.offset = 0.05  # settled back to center
-        d._update_audio(0.0)
+        for _ in range(4):
+            d._update_audio(0.5)
 
-        from freight_fate.audio import CH_LANE
-
-        assert CH_LANE in stops, "the guidance bed should stop once centered"
+        assert pans and pans[-1] == pytest.approx(0.0)  # bed back home
         assert ("vehicle/lane_centered", pytest.approx(0.45), pytest.approx(0.0)) in calls
     finally:
         app.shutdown()
@@ -130,25 +128,26 @@ def test_guidance_bed_sleeps_and_centered_cue_ends_a_drift(monkeypatch):
 
 def test_guidance_stays_asleep_inside_normal_wander(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.audio import CH_ROAD
 
     app = App()
     try:
         d = _driving(app)
         d.ctx.settings.steering_assist = "realistic"
         d.truck.velocity_mps = 25.0  # guidance only listens at speed
-        loops = []
+        pans = []
         monkeypatch.setattr(
             app.ctx.audio,
-            "start_loop",
-            lambda ch, key, volume=1.0, fade_ms=300: loops.append(key),
+            "set_loop_pan",
+            lambda ch, pan: pans.append(pan) if ch == CH_ROAD else None,
         )
 
         d.lane.offset = 0.35  # ordinary wander, inside the wake line
-        d._update_audio(0.0)
+        d._update_audio(0.5)
 
-        from freight_fate.sim.lane_guidance import BED_KEY
-
-        assert BED_KEY not in loops, "centered-and-stable must stay silent"
+        assert not [pan for pan in pans if pan != 0.0], (
+            "centered-and-stable must leave the road bed home"
+        )
     finally:
         app.shutdown()
 

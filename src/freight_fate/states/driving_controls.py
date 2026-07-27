@@ -180,7 +180,7 @@ class DrivingControlsMixin:
         self._lane_change_timer = LANE_TAP_CHANGE_S
         self._lane_signal_timer = 0.0
         pan = -0.6 if direction > 0 else 0.6
-        self.ctx.audio.play("vehicle/turn_signal", volume=0.8, pan=pan)
+        self.ctx.audio.play("vehicle/signal_tone", volume=0.8, pan=pan)
         self.ctx.say(f"Changing to the {lane_label(target, lane.lane_count)} lane.")
 
     def _objective_help(self) -> str:
