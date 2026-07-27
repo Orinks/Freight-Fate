@@ -2523,15 +2523,23 @@ class DrivingEventMixin:
         self._climb_cue_s = max(0.0, self._climb_cue_s - dt)
         t = self.truck
         # error is target minus speed, so a positive error is the truck
-        # sitting below the number cruise is working to.
+        # sitting below the number cruise is working to. The three ported
+        # guards (see CRUISE_GRADE_BEATEN_* in driving_core): a real grade,
+        # not mid-shift, and the condition holding rather than one frame.
         beaten = (
             self._cruise_applied >= CRUISE_FLOORED_THROTTLE
-            and t.grade > 0.0
+            and t.grade * 100.0 >= CRUISE_GRADE_BEATEN_PCT
             and error > CRUISE_DROOP_MPH
         )
         if not beaten:
+            self._climb_beaten_s = 0.0
             if error < CRUISE_DROOP_MPH * 0.5:
                 self._climb_cue_said = False  # back on its number: arm again
+            return
+        if t.transmission.shifting:
+            return  # an open driveline is no evidence either way; hold the count
+        self._climb_beaten_s += dt
+        if self._climb_beaten_s < CRUISE_GRADE_BEATEN_S:
             return
         if self._climb_cue_said or self._climb_cue_s > 0.0 or self._terse_speech():
             return

@@ -1895,6 +1895,36 @@ def test_cruise_says_when_a_climb_has_beaten_it():
             app.shutdown()
 
 
+def test_climb_cue_stays_quiet_when_cruise_is_winning():
+    """The ported dev guards (f23a97ec): a limit rise that jumps the target
+    well above current speed floors the throttle on near-level road -- that
+    is acceleration toward the number, not defeat, and it must stay silent
+    (71-and-climbing-to-77 was announced as losing the grade; playtest
+    transcript 2026-07-27)."""
+    from freight_fate.app import App
+
+    app = App()
+    events: list[str] = []
+    app.ctx.say_event = lambda text, interrupt=False, sink=events: sink.append(text)
+    try:
+        app.ctx.settings.speech_verbosity = 1
+        driving = _cruising(app)
+        # The target sits well above the truck -- the limit-rise shape --
+        # so cruise floors the pedal while genuinely accelerating.
+        driving.truck.velocity_mps = 50.0 / 2.23694
+        # Road the G key calls level: below the beaten-grade floor.
+        driving.trip.grade_at = lambda mile: 0.005
+        for _ in range(30 * 60):
+            driving.truck.grade = 0.005
+            driving._update_cruise(1 / 60, False, False, False)
+            if driving.truck.transmission.automatic:
+                driving.truck.auto_shift()
+            driving.truck.update(1 / 60)
+        assert not any("still losing the grade" in e for e in events), events[-3:]
+    finally:
+        app.shutdown()
+
+
 def test_cruise_leaves_the_retarder_alone_when_descent_control_is_off():
     """The stalk decides. The drums still hold the speed either way.
 

@@ -289,6 +289,7 @@ class DrivingState(
         self._pcc_cue_s = 0.0  # quiet time between preview cues
         self._climb_cue_said = False  # cruise has already owned up to this pull
         self._climb_cue_s = 0.0  # quiet time between hand-back cues
+        self._climb_beaten_s = 0.0  # how long the grade has genuinely been winning
         self._descent_cue_s = 0.0  # quiet time between descent-control cues
         # A trailer refused at the shipper: the yard swapped it, so the box
         # under the truck is sound and no scale house should say otherwise.

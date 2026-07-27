@@ -184,25 +184,18 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       speed it is holding. Once a hill (a re-arm at half droop plus a two
       minute floor), and terse speech keeps it -- the engine note and the
       downshifts already say the truck is working.
-- [ ] **MUST FIX BEFORE 1.9 SHIPS: that climb cue fires when cruise is
-      winning.** `_say_cruise_out_of_truck` asks only for the pedal on the
-      floor, a positive grade, and an error past the droop band. It never
-      asks whether the truck is actually losing ground, so any moment the
-      target jumps well above current speed -- a posted limit rising, the
-      driver dialing the set point up with plus -- has cruise floor the
-      throttle on a slight grade and the cue call that a defeat while the
-      truck is accelerating through it. Caught on dev 2026-07-27 from a
-      playtest transcript: 71 mph and climbing to 77 after a 50-to-75 limit
-      rise, announced as losing the grade. Dev's fix (commit f23a97ec, in
-      `_announce_cruise_grade_verdict`) is three guards worth porting onto
-      1.9's version: a grade floor of `CRUISE_GRADE_BEATEN_PCT` so it never
-      fires on road the G key calls level, a `not t.transmission.shifting`
-      guard because `drive_ratio` is 0 mid-shift and makes `drive_force()`
-      read as 0, and a `CRUISE_GRADE_BEATEN_S` debounce so the condition has
-      to hold rather than catch one frame. 1.9's cooldown and terse
-      suppression stay as they are. Reproduce with
-      `uv run python tools/playtest_road.py --find limit-drop --cruise 80
-      --verbosity 2 --headless 6`.
+- [x] **Climb cue no longer fires when cruise is winning (dev guards
+      ported 2026-07-27, same day as the flag).** `_say_cruise_out_of_truck`
+      now carries dev's three guards (f23a97ec): a `CRUISE_GRADE_BEATEN_PCT`
+      floor so it never fires on road the G key calls level, a mid-shift
+      hold (an open driveline is no evidence either way -- the debounce
+      pauses rather than resets, so a shift-heavy climb still gets its cue),
+      and a `CRUISE_GRADE_BEATEN_S` debounce so one frame is never enough.
+      Cooldown and terse suppression unchanged. Pinned by
+      `test_climb_cue_stays_quiet_when_cruise_is_winning` (target jumped
+      well above speed on near-level road: silence while accelerating);
+      the original repro (`tools/playtest_road.py --find limit-drop
+      --cruise 80 --verbosity 2 --headless 6`) runs clean.
 - [x] **Predictive cruise (2026-07-25).** Cruise reads `Trip.grade_at` a
       mile and a half ahead -- the baked grade segments resolve to a median
       half a mile, so this is a real road profile, not a smoothed guess --

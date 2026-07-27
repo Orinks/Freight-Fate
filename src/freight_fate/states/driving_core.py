@@ -269,6 +269,14 @@ CRUISE_COAST_MPH = 2.0  # feed-forward eases to nothing across this much overspe
 CRUISE_DROOP_MPH = 6.0
 CRUISE_FLOORED_THROTTLE = 0.98  # pedal genuinely on the floor, not merely deep
 CLIMB_CUE_COOLDOWN_S = 120.0  # a mountain is many pulls; say it once a hill
+# ...and only once the grade has genuinely won (dev fix f23a97ec, ported):
+# a road the G key calls level never counts as a climb, a shift's open
+# driveline is not evidence (drive_ratio is 0 mid-shift), and the condition
+# has to hold rather than catch one frame -- a limit rise raising the target
+# had cruise flooring the pedal on a slight grade and announcing defeat at
+# 71 mph while accelerating to 77 (playtest transcript, 2026-07-27).
+CRUISE_GRADE_BEATEN_PCT = 1.5
+CRUISE_GRADE_BEATEN_S = 3.0
 # Holding the target from above. Cutting fuel was cruise's only answer, so any
 # downgrade gentler than the descent assist's 2.5 percent trigger carried the
 # truck past the set speed and kept it there (bench trace: 2 percent down, 62

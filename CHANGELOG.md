@@ -1020,6 +1020,13 @@
 
 ### Fixed
 
+- **Cruise no longer claims a hill has beaten it while it is winning.** When
+  a rising speed limit or a higher set speed put the target well above the
+  truck, cruise flooring the pedal to catch up could be announced as losing
+  the grade -- even as the truck accelerated. The call now waits for a real
+  grade, ignores the moment of a gear change, and has to stay true for a few
+  seconds before it speaks.
+
 - **The engine never repeats itself exactly anymore.** Even with clean
   loops, a careful ear could catch the engine sound recurring on a
   perfectly fixed cycle at steady revs. Each layer of the engine voice
