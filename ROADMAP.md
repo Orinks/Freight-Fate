@@ -1448,15 +1448,28 @@ section below and the Unreleased changelog; the release-line view:
       same beat and likely cuts the release sound before it plays (owner,
       Merced delivery). The arrival pssht deserves to finish; it is the
       punctuation on the whole drive.
-- [ ] **Shift transient lands AFTER the band crossfade (owner ear,
-      2026-07-24, for the audio session).** On automatic around 7->8 the
-      owner hears the ring crossfade to the higher band FIRST, then the
-      tsh/shift sound arrives late. The locked design is gap-then-
-      re-entry: hold the voice at pre-shift rpm through the interrupt,
-      transient AT the gap, one quick slide at hook-up. Something now
-      slides the ring (or crossfades) before the transient fires --
-      check trigger order between the shift bank one-shot and the
-      rpm-follow path, upper gears especially (quick 0.5s interrupts).
+- [x] **Shift transient lands AFTER the band crossfade (owner ear,
+      2026-07-24) -- SUPERSEDED by the shift sigh (shipped same day).**
+      The gap-then-re-entry hold this bullet defends was replaced at
+      the owner's direction: the voice now follows the physics rpm
+      falling through the interrupt (ducked -- the real between-gears
+      sigh), the start clunk fires the same frame the interrupt begins,
+      and engagement got its own soft end clunk. The voice moving
+      during the interrupt is now intentional; re-open only if the
+      owner still hears the start clunk arriving late.
+- [ ] **Quitting at speed should confirm before discarding the leg
+      (owner loss, 2026-07-27).** Save-at-stops is the right design,
+      but the "this delivery will resume from your last stop" warning
+      speaks WHILE the quit executes -- too late to matter. The owner
+      quit at 76 mph on I-80 (relaunching for an audio test) and lost
+      67 miles back to the trip start. Quit-to-menu while moving should
+      ask first, and say the cost in miles: "You will lose 67 miles
+      since your last stop. Quit anyway?" Parked quits stay instant.
+      Same session, related surprise worth a product look with Josh:
+      resuming always starts you parked with the brake set even when
+      the save context was mid-corridor -- honest, but it should
+      narrate itself ("pulled to the shoulder at your last checkpoint")
+      so the stopped truck makes story sense.
 - [x] **Randomize sound loop edges (owner + ChatGPT ideas, 2026-07-27,
       SHIPPED same day as the engine-ring wobble).** The suggestions were
       reviewed in the audio session: seam/phase advice was already done
