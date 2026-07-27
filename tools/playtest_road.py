@@ -402,6 +402,8 @@ def build_driving(ctx, hit: Hit, args):
         s.predictive_cruise = args.predictive_cruise == "on"
     if args.steering:
         s.steering_assist = args.steering
+    if args.curve_assist:
+        s.curve_speed_assist = args.curve_assist == "on"
     if args.transmission:
         s.automatic_transmission = args.transmission == "automatic"
     if args.verbosity is not None:
@@ -543,6 +545,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--assists", help="driving assistance preset, e.g. realistic, all")
     p.add_argument("--predictive-cruise", choices=("on", "off"), help="grade preview for cruise")
     p.add_argument("--steering", choices=("off", "light", "realistic"), help="steering assist")
+    p.add_argument(
+        "--curve-assist",
+        choices=("on", "off"),
+        help="curve speed assistance: off means you brake for the bends yourself",
+    )
     p.add_argument("--transmission", choices=("automatic", "manual"), help="override the gearbox")
     p.add_argument("--verbosity", type=int, choices=(0, 1, 2), help="speech verbosity override")
     p.add_argument("--weather", help="force a weather kind, e.g. rain, snow, clear")
