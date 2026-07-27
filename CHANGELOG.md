@@ -4,7 +4,12 @@
 
 ### Added
 
-- **Review recent spoken messages while driving.** Use the message review controls to move through general and critical announcements, jump to the first or latest message, switch categories, and copy the current message to the clipboard.
+- **Review recent spoken messages while driving.** Use the message review
+  controls to move through general and critical announcements, jump to the
+  first or latest message, switch categories, and copy the current message to
+  the clipboard. Contributed by Day Garwood
+  ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #122](https://github.com/Orinks/Freight-Fate/pull/122).
 
 - **Tire sounds now react to your speed.** On supported audio systems, the tire
   hum rises and falls as you accelerate or brake. Above a crawl, soft road-seam
