@@ -54,6 +54,12 @@ it couples input, trip physics, and audio:
 - Josh's ask verbatim: "real speeds in for curves as well as panning
   sounds so we can steer through them." The speeds are already real;
   the steering and panning are this track.
+- Owner add-on (2026-07-27): once the tone generation exists, the
+  turn-signal clicks that mark lane changes become tones too, panned
+  to the signaling side -- the soft relay click is hard to hear for
+  some players. Not an invented cue: modern cabs play designed
+  indicator tones through the speakers; the bare relay click is the
+  vintage sound (and can return later as era equipment).
 
 ## Track C — NPR translator radio batch (ff-radio window, Oatis)
 
