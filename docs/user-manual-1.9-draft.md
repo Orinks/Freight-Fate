@@ -301,7 +301,44 @@ loop your ear can learn, brakes and gear changes are the real
 mechanisms, tire sounds rise and fall with speed, and road-seam thumps
 give the road texture through sound and controller vibration.
 
-## Driving section: NEW -- steering through curves [PENDING CURVE-NAV FOLD]
+## Driving section: NEW -- "How To Take Curves Like A Boss" [PENDING CURVE-NAV FOLD]
+
+(The owner's title, earned the honest way -- every rule below is a mistake
+somebody made on Camp Verde to Payson first.)
+
+**Rule one: carry your speed to the fight.** Cruise holds your pace between
+bends; the curve callout is braking DISTANCE, not an order to stop. When
+you hear "sharp right, half a mile, advise 30," you have real seconds --
+brake firmly down TOWARD the advisory and arrive within a few of it. Slam
+to a crawl at the callout and the bend becomes nothing: no push, no
+steering, no fun, and time lost. The exit verdict tells on you either way.
+
+**Rule two: know the vocabulary.** A bright bink on one side is a curve
+call or a curve beginning on that side. Hard double-thuds under the whole
+truck are the dead-man's bars: a true hairpin is a quarter mile out --
+brake hard NOW, because 25 means 25 with fifteen tons pushing you. A
+thump-roll from one side is your tires crossing a lane line's markers.
+The stutter-buzz-gravel ladder on one side is the road edge, in order of
+how much trouble you are in.
+
+**Rule three: steer toward the sound, gently.** In the bend the road
+sound leans toward where the wheel should go -- hold the arrow that way
+and keep the sound centered. Small, held corrections. Sawing at it
+bounces you across the lane line -- you will hear the marker thump each
+time you cross, and that rhythm is the sound of overcorrecting. Ease off.
+
+**Rule four: use the co-driver.** U says what bends are coming and
+exactly how far. D says the safe speed for the road you are on right
+now. G reads the grade. I toggles the lane locator -- a soft tock from
+wherever you sit in the lane -- when you want continuous position. K
+resumes cruise on the way out.
+
+**Rule five: listen for the verdict.** "Held your line" means you did it
+right. "You caught the edge" means the strip has notes. "Through the
+bend, hot" means you gambled and won -- this time. String together clean
+verdicts on a mountain road and you have earned the title.
+
+## Driving section: NEW -- steering through curves (the sound design) [PENDING CURVE-NAV FOLD]
 
 With lane drift on, the road sound becomes your steering guide. It
 leans toward where the wheel should go: into a bend as the bend
