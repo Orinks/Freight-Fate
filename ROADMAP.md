@@ -1482,6 +1482,19 @@ section below and the Unreleased changelog; the release-line view:
       4-6 s with continuous harmonics over a fresh-random noise floor,
       shrinking the fingerprint itself; and the dual-loop LCM overlap
       idea stays deferred (doubles the stream count).
+- [ ] **Ring rebuild: longer spectrally-extended cuts (owner-confirmed
+      2026-07-27, NEXT audio session).** After the wobble and the
+      transient patch, the owner still hears the loop's own loudness
+      contour repeating ("three shudders", faster with rpm) -- the
+      fingerprint is the ~1.7 s anchor's envelope shape, and only a
+      longer, less-shaped cut removes it. Rebuild the formant pipeline
+      (the original generation scripts were scratchpad casualties --
+      recipe survives in the engine-voice memory + CREDITS.md), then
+      regenerate each band at 4-6 s: continuous harmonic skeleton,
+      fresh-random inter-partial noise floor, envelope flattened harder
+      inside the loop (keep the 15-30 Hz diesel lope, kill the 5-15 Hz
+      swell pattern). Owner's ear re-approves every band. Rumble-strip
+      synthesis queues AFTER this (owner ruling, same day).
 - [ ] **Lay on the horn (owner ask, 2026-07-23).** H plays one shortish
       horn sample today. Holding H should hold the horn -- attack, a
       seamless sustain loop for as long as the key is down, then the
