@@ -18,9 +18,13 @@
   three hard grouped rumbles under all your tires, far enough out that
   braking after them still makes the curve. The I key adds an on-demand
   lane locator: a soft repeating tock from wherever you sit in your lane,
-  and pressing I again turns it off. A new setting, lane and edge cue
-  loudness, sets how loud all of it speaks: subtle, standard, or
-  prominent.
+  and pressing I again turns it off. Entering a demanding bend ticks a
+  bright cue from the bend's side, and coming out the far side the
+  co-driver gives the verdict: held your line, caught the edge, or
+  through it hot. Changing lanes, your tires roll over the lane line's
+  raised markers -- the front-to-back thump-roll of a real crossing,
+  from the side you crossed. A new setting, lane and edge cue loudness,
+  sets how loud all of it speaks: subtle, standard, or prominent.
 
 - **The road tells you how many lanes it has.** Your road status now says
   the lanes on your side of the road -- "divided, three lanes your side" on

@@ -289,7 +289,7 @@ def test_curve_run_speaks_a_verdict_on_exit(monkeypatch):
         )
 
         d._update_curve_run(bend)  # entering
-        assert ("ui/tick", pytest.approx(-0.85)) in ticks  # left bend, left ear
+        assert ("vehicle/curve_bink", pytest.approx(-0.85)) in ticks  # left bend, left ear
         d._update_curve_run(bend)  # riding it, clean and at advisory
         d._update_curve_run(None)  # out the far side
         assert events and "held your line" in events[-1]

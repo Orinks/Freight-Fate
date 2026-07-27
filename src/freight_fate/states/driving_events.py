@@ -167,7 +167,7 @@ class DrivingEventMixin:
             # is auditioned (docs/sound-hunt-brief.md, need 1).
             if curve is not None:
                 pan = -PACENOTE_CUE_PAN if curve.direction == "L" else PACENOTE_CUE_PAN
-                self.ctx.audio.play("ui/tick", volume=0.9, pan=pan)
+                self.ctx.audio.play("vehicle/curve_bink", volume=0.9, pan=pan)
             # A curve well above the cruise set point: with curve speed
             # assistance on, the bend is cruise's job -- cap the working
             # target to the advisory the way an armed exit caps for its
@@ -1364,9 +1364,9 @@ class DrivingEventMixin:
         if self._ramp_bar_tick_timer >= period:
             self._ramp_bar_tick_timer = 0.0
             # Full volume: at 0.5 the owner judged it missable by someone
-            # not listening for it (2026-07-19). A dedicated short beep is
-            # on the sound-hunt list; until then the tick carries the job.
-            self.ctx.audio.play("ui/tick", volume=0.9)
+            # not listening for it (2026-07-19). The dedicated beep the old
+            # note asked for arrived with the curve bink (2026-07-27).
+            self.ctx.audio.play("vehicle/curve_bink", volume=0.9)
 
     def _ramp_light_query_text(self) -> str | None:
         """Light phase and bar distance on demand, for the info keys.

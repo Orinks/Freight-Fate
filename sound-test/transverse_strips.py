@@ -62,6 +62,41 @@ def build_strips() -> np.ndarray:
     return sig / top * 0.95
 
 
+def build_lane_line() -> np.ndarray:
+    """Crossing the raised markers on an interior lane line: the flurp-flurp.
+
+    Each axle strikes the marker line ONCE, front to back -- a tractor-
+    trailer turns a car's tight two-bump into a five-hit roll spread over
+    half a second, each hit quieter and duller than the last (the
+    lane_line.py audition's arithmetic). Panned by the game toward the
+    side being crossed. NOT a rumble strip: interior lines have no milled
+    grooves, and the edge ladder stays the edges' voice."""
+    axles_m = [(0.0, 1.0), (3.8, 0.85), (5.1, 0.75), (12.5, 0.55), (13.8, 0.45)]
+    n = int(1.0 * SR)
+    out = np.zeros(n)
+    for dist_m, gain in axles_m:
+        i = int(dist_m / SPEED_MS * SR)
+        if i < n:
+            out[i] += gain
+    sig = convolve(out, grain(0.0016))
+    sig = convolve(sig, body_ir(0.45))
+    top = float(np.max(np.abs(sig))) or 1.0
+    return sig / top * 0.8
+
+
+def build_bink() -> np.ndarray:
+    """The curve cue: a short bright bink, not a click (owner call
+    2026-07-27 -- a click is not loud enough to carry a safety cue).
+    Distinct from the signal tone (lower tock) and the locator (soft)."""
+    seconds = 0.13
+    t = np.arange(int(SR * seconds)) / SR
+    sig = np.sin(2.0 * np.pi * 1250.0 * t) + 0.4 * np.sin(2.0 * np.pi * 2500.0 * t)
+    env = np.minimum(t / 0.003, 1.0) * np.exp(-t / 0.035)
+    sig *= env
+    top = float(np.max(np.abs(sig))) or 1.0
+    return sig / top * 0.9
+
+
 def build_locator() -> np.ndarray:
     seconds = 0.07
     t = np.arange(int(SR * seconds)) / SR
@@ -87,6 +122,8 @@ def write_mono(rel: str, sig: np.ndarray) -> None:
 def main() -> None:
     write_mono("vehicle/transverse_strips.wav", build_strips())
     write_mono("vehicle/lane_locator.wav", build_locator())
+    write_mono("vehicle/curve_bink.wav", build_bink())
+    write_mono("vehicle/lane_line_cross.wav", build_lane_line())
 
 
 if __name__ == "__main__":

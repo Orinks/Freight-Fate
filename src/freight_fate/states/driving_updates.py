@@ -114,7 +114,7 @@ class DrivingUpdateMixin:
         if ahead <= 0 or speed <= curve.advisory_mph + PACENOTE_MARGIN_MPH:
             return
         pan = -PACENOTE_CUE_PAN if curve.direction == "L" else PACENOTE_CUE_PAN
-        self.ctx.audio.play("ui/tick", volume=0.9, pan=pan)
+        self.ctx.audio.play("vehicle/curve_bink", volume=0.9, pan=pan)
         self.ctx.say_event(self._pacenote_text(curve, ahead, speed), interrupt=True)
 
     def _note_critical_speech_stopped(self) -> None:
@@ -805,8 +805,15 @@ class DrivingUpdateMixin:
             self.ctx.say_event(message, interrupt=True)
         if self.lane.crossed:
             # A held drift carried the truck across the line: the wheel was
-            # the lane change. One signal click marks the commit.
+            # the lane change. The tires roll over the line's raised markers
+            # (the five-hit flurp, panned to the crossed side) and one
+            # signal tone marks the commit.
             pan = -0.6 if self.lane.crossed > 0 else 0.6
+            self.ctx.audio.play(
+                "vehicle/lane_line_cross",
+                volume=min(1.0, 0.7 * self._cue_loudness()),
+                pan=pan,
+            )
             self.ctx.audio.play("vehicle/signal_tone", volume=0.6, pan=pan)
             self._finish_lane_change()
         self._update_tap_lane_change(dt)
@@ -827,6 +834,12 @@ class DrivingUpdateMixin:
         if self._lane_change_timer <= 0:
             self._lane_change_target = None
             self.lane.lane = min(target, self.lane.lane_count - 1)
+            # The tap change crosses the same painted line: same marker roll.
+            self.ctx.audio.play(
+                "vehicle/lane_line_cross",
+                volume=min(1.0, 0.7 * self._cue_loudness()),
+                pan=pan,
+            )
             self._finish_lane_change()
 
     def _finish_lane_change(self) -> None:
@@ -1006,7 +1019,9 @@ class DrivingUpdateMixin:
                 }
                 if demanding and self.ctx.settings.curve_callouts:
                     pan = -PACENOTE_CUE_PAN if active.direction == "L" else PACENOTE_CUE_PAN
-                    self.ctx.audio.play("ui/tick", volume=0.5, pan=pan)
+                    self.ctx.audio.play(
+                        "vehicle/curve_bink", volume=min(1.0, 0.65 * self._cue_loudness()), pan=pan
+                    )
             if self.lane.rumble_level() > 0.0:
                 run["touched"] = True
             if self.truck.speed_mph > run["curve"].advisory_mph + 15:

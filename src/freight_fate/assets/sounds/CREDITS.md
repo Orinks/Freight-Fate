@@ -63,6 +63,8 @@ current idle, start, and shutdown cues.
 | Turn-signal tone | `vehicle/signal_tone.wav` | Original synthesized indicator tick-tone (`sound-test/signal_tone.py`), the designed modern-cab indicator sound; supersedes the relay click for signaling (the click remains for a future vintage-equipment option) |
 | Dead-man's-curve strips | `vehicle/transverse_strips.wav` | Original synthesized transverse rumble-bar crossing (`sound-test/transverse_strips.py`): three grouped bar sets under all axles, the real DOT hairpin warning |
 | Lane locator tock | `vehicle/lane_locator.wav` | Original synthesized soft position tock (`sound-test/transverse_strips.py`), panned by the game to the truck's place in its lane |
+| Curve cue bink | `vehicle/curve_bink.wav` | Original synthesized bright cue tone (`sound-test/transverse_strips.py`); carries the pacenote call, the curve entry, and the stop-bar closing tick -- the beep the old ui/tick placeholder note asked for |
+| Lane-line marker roll | `vehicle/lane_line_cross.wav` | Original synthesized raised-marker crossing (`sound-test/transverse_strips.py`): the five-hit axle roll of a tractor-trailer crossing a lane line, panned to the crossed side |
 
 ## Licensed Driving Sounds (release builds only)
 
