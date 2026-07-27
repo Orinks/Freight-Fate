@@ -293,6 +293,19 @@
   and Gainesville, and more. Wherever one is in range, it is right there
   on the band with everything else.
 
+- **Community radio joins the dial.** With streamer-safe mode off, the
+  radio now carries the volunteer-run and student stations that give a
+  place its own voice, right alongside the public and NPR ones -- freeform,
+  Pacifica, college, and tribal community radio, from the big cities down
+  to small towns in the mountains and plains. Tune across a market and you
+  come across the local independents, not just the network feed: WORT in
+  Madison, WFMU-style freeform on WTJU and WRFL, the Pacifica stations in
+  Los Angeles, New York, and Washington, and the college institutions --
+  Berkeley, Stanford, Chapel Hill, Georgia Tech, Austin -- that have been
+  on the air for decades. As always, where a town's only community station
+  broadcasts solely through a phone app the game cannot reach, the dial
+  stays quiet there rather than invent a signal.
+
 - **The loneliest highways have a signal now.** With streamer-safe mode
   off, the emptiest stretches of the map catch a real public-radio
   station where there used to be only static. Across the Nevada high
@@ -1060,6 +1073,14 @@
   and anticipate. Every layer has been rebuilt three times longer from
   its own recording -- same voice, same working rhythm, but the fine
   texture never repeats, so there is no pattern left to learn.
+- **Public-radio stations that had gone silent play again.** A sweep of
+  every stream in the catalog turned up a batch that had drifted to stale
+  addresses -- big public stations among them, like KUAR Little Rock, WBFO
+  Buffalo, Maine Public, South Dakota Public Broadcasting, and Texas Public
+  Radio -- and pointed them back at their current feeds, so they tune and
+  play instead of coming up quiet. A few whose streams have genuinely gone
+  away are set aside for now, so the dial does not hand you dead air where a
+  station used to be.
 
 - **The engine never repeats itself exactly anymore.** Even with clean
   loops, a careful ear could catch the engine sound recurring on a

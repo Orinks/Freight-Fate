@@ -1565,6 +1565,17 @@ section below and the Unreleased changelog; the release-line view:
       on a cadence (streams die: KDHX did), report dead mounts for
       re-pointing, and keep honest-coverage rules: a dead stream goes
       dark or gets a verified replacement, never a fake.
+      Two findings from the first full 741-station run (2026-07-27):
+      (1) the single-threaded `--radio` pass FALSE-DEATHS on StreamTheWorld
+      -- rapid sequential probes get rate-limited, so it must host-partition
+      or space same-host hits the way the sweep gate does, else it cries
+      wolf; verify any dead list with a serial clean-session re-gate before
+      acting. (2) The most common REAL rot is stored StreamTheWorld
+      *numbered-edge* URLs (`NNNNN.live.streamtheworld.com/<MOUNT>`) that
+      expire; auto-repair could rewrite those to the stable canonical
+      `playerservices.streamtheworld.com/api/livestream-redirect/<MOUNT>`
+      form and re-gate, healing most deaths without a hand pass. First heal
+      pass done by hand (3a81da73): 13 restored, 6 unsupported honestly.
 - [ ] **NPR translator/repeater hunt for the remaining dark zones
       (owner leads, 2026-07-27 -- next radio pass, 2.0 line).** The
       Hi-Line pattern generalizes: query the FCC facility database for
@@ -1792,6 +1803,29 @@ section below and the Unreleased changelog; the release-line view:
       hides behind a JavaScript player -- a Chrome network-sniff pass could
       add it, and it pairs naturally with the planned tribal-nation crossing
       callouts.
+- [x] **Community-radio second sweep (2026-07-27).** The dial skewed heavily
+      to NPR and public-radio news (306 public locals vs 129 community), so
+      this pass added the volunteer-run and student side. 162 community,
+      college, freeform, Pacifica, and tribal stations joined the catalog
+      (579 -> 741 stations), each FCC-call-checked and verified on the BASS
+      live gate (parallel-gate false deaths re-confirmed serially from a
+      clean session before anything was dropped). Twelve states that had
+      public radio but no community station are now covered -- New York
+      (WBAI, WNYU, WHCR), Wisconsin (WORT, WSUM), Virginia (WTJU, WUVT,
+      WDCE), Kentucky (WRFL, WLXU), Vermont (WRUV, WGDR), Indiana (WFHB),
+      South Carolina (WUSC), and more -- and the Pacifica flagships (KPFK,
+      WBAI, WPFW) and the marquee college freeforms (KALX Berkeley, KDVS
+      Davis, KZSU Stanford, WREK Georgia Tech, WXYC Chapel Hill, KVRX
+      Austin) are on the air. Honest omissions, not faked: stations that
+      stream only through phone apps (Live365, Mixlr, Zeno), internet-only
+      outfits with no FCC license, and simulcasts of stations already
+      carried were left out (77 such cases logged by the research pass).
+      KDHX St. Louis was confirmed defunct (88.1 license reissued) and
+      dropped. Follow-up: a handful of real stations whose stream the game's
+      audio engine cannot open -- WRAS Atlanta (Georgia State), KNON Dallas,
+      KUCI Irvine, WEGL Auburn, KRUI Iowa, plus WRIR Richmond and WVUA
+      Tuscaloosa whose mounts would not resolve -- want a Chrome
+      network-sniff pass, same as the KGVA follow-up.
 - [ ] **Reading Services dial category with a "nearest" jump.** The data +
       tag are in; the feature is a new dial category whose bracket-jump
       tunes the geographically NEAREST reading service (not first-by-call),
@@ -1802,6 +1836,14 @@ section below and the Unreleased changelog; the release-line view:
       as categories, reading services nested per state, International/AFN
       their own groups. Needs `state` on the RadioStation dataclass +
       backfill on pre-sweep locals. Accessibility-critical spoken menu.
+      A `station_type` tag (public / community / college / tribal /
+      reading_service / international / afn / regional / built_in / satellite)
+      is now baked on every catalog record (data-only, loader ignores it for
+      now) -- pre-wiring a browse filter that separates NPR/public from
+      community and college. Whether the Radio Player exposes those as
+      categories/tabs is a product call raised by the owner (2026-07-27) and
+      forwarded to Josh; the in-cab driving dial deliberately stays a single
+      scan-what's-in-range band (no genre tabs, matching a real car radio).
 - [ ] **Radio cleanup pass: JS-locked holdouts + a real trucking station.**
       Chase the stations the sweep flagged but could not extract a mount
       for -- WABE Atlanta, KWBU Waco, the Richmond/Huntsville public and
