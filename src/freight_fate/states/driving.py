@@ -371,6 +371,7 @@ class DrivingState(
         self._transverse_fired: set[float] = set()
         self._lane_locator_on = False  # I toggles the panned position tock
         self._lane_locator_timer = 0.0
+        self._curve_run: dict | None = None  # the bend underway, and how it is going
         self._reverse_cue_active = False
         self._air_cue_active = False  # compressor fill loop below governor release
         self._jake_cue_key: str | None = None  # jake growl loop currently playing

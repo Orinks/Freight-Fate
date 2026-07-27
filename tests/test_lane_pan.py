@@ -257,6 +257,52 @@ def test_a_hot_bend_actually_pushes_the_truck(monkeypatch):
         app.shutdown()
 
 
+def test_curve_run_speaks_a_verdict_on_exit(monkeypatch):
+    """The co-driver closes the loop: entering a demanding bend ticks on its
+    side, and leaving it earns a spoken verdict -- clean, edge, or hot."""
+    from types import SimpleNamespace
+
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    try:
+        d = _driving(app)
+        d.ctx.settings.steering_assist = "realistic"
+        d.ctx.settings.curve_callouts = True
+        d.ctx.settings.speech_verbosity = 1
+        d.ctx.say_event = lambda text, interrupt=False: events.append(text)
+        d.truck.velocity_mps = 30.0 / 2.23694
+        ticks = []
+        monkeypatch.setattr(
+            app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: ticks.append((key, pan))
+        )
+        monkeypatch.setattr(d.trip, "curve_ahead_mi", lambda lead: None)
+        bend = SimpleNamespace(
+            start_mi=1.0,
+            end_mi=1.3,
+            advisory_mph=30.0,
+            min_radius_ft=235.0,
+            direction="L",
+            connector=False,
+            severity="curve",
+        )
+
+        d._update_curve_run(bend)  # entering
+        assert ("ui/tick", pytest.approx(-0.85)) in ticks  # left bend, left ear
+        d._update_curve_run(bend)  # riding it, clean and at advisory
+        d._update_curve_run(None)  # out the far side
+        assert events and "held your line" in events[-1]
+
+        # A hot run says so instead.
+        d.truck.velocity_mps = 50.0 / 2.23694
+        d._update_curve_run(bend)
+        d._update_curve_run(None)
+        assert "hot" in events[-1]
+    finally:
+        app.shutdown()
+
+
 def test_audio_play_accepts_pan_on_the_active_backend():
     from freight_fate.audio import AudioEngine
 

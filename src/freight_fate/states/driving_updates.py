@@ -708,6 +708,7 @@ class DrivingUpdateMixin:
             curve += 0.35
         if active is None and self._curve_slip_active:
             self._curve_slip_active = False
+        self._update_curve_run(active)
         # Curve speed assist: use the real advisory speed when one is active
         # instead of the old terrain heuristic. Hysteresis both places:
         # engage above advisory + 5, but once slowing, hold until the truck
@@ -975,6 +976,61 @@ class DrivingUpdateMixin:
             interstate=_highway_class(getattr(leg, "highway", "")) == "interstate",
         )
         return left if self.lane.offset < 0 else right
+
+    def _update_curve_run(self, active) -> None:
+        """Close the loop the pacenote opens: a soft tick on the bend's side
+        as the curve begins, and a spoken verdict once you are through --
+        held your line, caught the edge, or through it hot. The windshield
+        gives a sighted driver this for free; the co-driver owes it to ours
+        (owner ask 2026-07-27: "nothing tells you that you made it through
+        well"). Chained bends hold their verdict for the last link."""
+        if active is not None and active.connector:
+            active = None
+        run = self._curve_run
+        if active is not None:
+            if run is None or run["curve"] is not active:
+                limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+                demanding = (
+                    active.advisory_mph < limit and getattr(active, "severity", "") != "gentle"
+                )
+                touched = hot = False
+                if run is not None:
+                    # A chained link: carry what the earlier bends earned.
+                    demanding = demanding or run["demanding"]
+                    touched, hot = run["touched"], run["hot"]
+                self._curve_run = run = {
+                    "curve": active,
+                    "demanding": demanding,
+                    "touched": touched,
+                    "hot": hot,
+                }
+                if demanding and self.ctx.settings.curve_callouts:
+                    pan = -PACENOTE_CUE_PAN if active.direction == "L" else PACENOTE_CUE_PAN
+                    self.ctx.audio.play("ui/tick", volume=0.5, pan=pan)
+            if self.lane.rumble_level() > 0.0:
+                run["touched"] = True
+            if self.truck.speed_mph > run["curve"].advisory_mph + 15:
+                run["hot"] = True
+            return
+        if run is None:
+            return
+        if self.trip.curve_ahead_mi(0.2) is not None:
+            return  # linked "then right": the verdict waits for the last bend
+        self._curve_run = None
+        if not run["demanding"] or not self.ctx.settings.curve_callouts:
+            return
+        if self._terse_speech():
+            self.ctx.audio.play("vehicle/lane_centered", volume=0.5, pan=0.0)
+            return
+        if run["touched"]:
+            text = "Through the bend. You caught the edge."
+        elif run["hot"]:
+            text = "Through the bend, hot."
+        elif self.ctx.settings.steering_assist != "off":
+            text = "Through the bend, held your line."
+        else:
+            text = "Through the bend."
+        self.ctx.say_event(text, interrupt=False)
 
     def _lane_count_here(self, leg) -> int:
         """Lanes on our side, from the best data available at this mile.
