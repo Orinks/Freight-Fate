@@ -176,6 +176,10 @@ RAMP_GAP_MILESTONES_M = (300, 150, 100, 50)
 # the distance, silence means stopped. Placeholder ui/tick until the
 # audio-design pass gives the bar its own voice (steering-sound RFC).
 RAMP_BAR_TICK_RANGE_MI = 300.0 / 5280.0
+# The bar's final leeway: inside this, still rolling, the ticks fuse into a
+# continuous tone -- be nearly stopped or eat the intersection (owner spec,
+# written straight into the manual, 2026-07-27). About sixty feet.
+RAMP_BAR_SOLID_MI = 0.012
 RAMP_BAR_TICK_SLOW_S = 1.1  # period at the edge of the range
 RAMP_BAR_TICK_FAST_S = 0.15  # period at the bar
 # Safety-call re-arm: Ctrl always silences (a screen-reader reflex must

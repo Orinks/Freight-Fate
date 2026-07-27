@@ -103,6 +103,21 @@ def build_bink() -> np.ndarray:
     return sig / top * 0.9
 
 
+def build_bar_solid() -> np.ndarray:
+    """The stop bar's continuous tone: the parking-sensor 'solid' zone.
+
+    Owner spec (written straight into the manual, 2026-07-27): ticks
+    quicken from 300 feet, and AT the bar, still moving, the tone goes
+    continuous -- your last leeway to be nearly stopped. Same pitch family
+    as the bink so it reads as the ticks fusing. Seamless by integer
+    cycles: 1250 Hz and its octave both complete exactly on the loop."""
+    seconds = 0.5
+    t = np.arange(int(SR * seconds)) / SR
+    sig = np.sin(2.0 * np.pi * 1250.0 * t) + 0.3 * np.sin(2.0 * np.pi * 2500.0 * t)
+    top = float(np.max(np.abs(sig))) or 1.0
+    return sig / top * 0.7
+
+
 def build_locator() -> np.ndarray:
     seconds = 0.07
     t = np.arange(int(SR * seconds)) / SR
@@ -130,6 +145,7 @@ def main() -> None:
     write_mono("vehicle/lane_locator.wav", build_locator())
     write_mono("vehicle/curve_bink.wav", build_bink())
     write_mono("vehicle/lane_line_cross.wav", build_lane_line())
+    write_mono("vehicle/bar_solid.wav", build_bar_solid())
 
 
 if __name__ == "__main__":

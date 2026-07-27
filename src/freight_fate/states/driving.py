@@ -255,6 +255,7 @@ class DrivingState(
         self._ramp_creep_prompt_said = False
         self._ramp_gap_milestones_said: set[int] = set()
         self._ramp_bar_tick_timer = 0.0
+        self._bar_solid_on = False  # the bar's continuous final-zone tone
         self._ramp_assist_said = False
         # Safety-call re-arm window (curve calls vs the Ctrl reflex).
         self._critical_curve = None

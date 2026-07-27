@@ -723,10 +723,10 @@ def test_stop_sign_bar_has_position():
         assert len(bar_calls) == len(RAMP_GAP_MILESTONES_FT)
         assert bar_calls[0] == "1000 feet to the bar."
 
-        # Parking-sensor ticks run for the sign too.
+        # Parking-sensor beeps run for the sign too (outside the solid zone).
         played = []
         d.ctx.audio.play = lambda *a, **k: played.append(a)
-        d._ramp_mi = RAMP_ACCESS_MI + 50 / 5280.0
+        d._ramp_mi = RAMP_ACCESS_MI + 100 / 5280.0
         d._ramp_bar_tick_timer = 0.0
         for _ in range(40):
             d._update_ramp_light(0.05)
@@ -767,13 +767,24 @@ def test_bar_ticks_speed_up_as_the_bar_closes():
                 d._update_ramp_bar_ticks(dt)
             return len(played)
 
-        far, near = ticks_over(280), ticks_over(30)
+        far, near = ticks_over(280), ticks_over(80)
         assert near > far > 0
 
-        # Beyond the range, and at a standstill, the tick is silent.
+        # Inside the final leeway the beeps fuse into the continuous tone
+        # (owner spec 2026-07-27): no discrete beeps, the alert loop runs.
+        loops = []
+        d.ctx.audio.start_loop = lambda ch, key, volume=1.0, fade_ms=300: loops.append(key)
+        d.ctx.audio.stop_loop = lambda ch, fade_ms=300: None
+        assert ticks_over(30) == 0
+        assert "vehicle/bar_solid" in loops
+
+        # Beyond the range, and at a standstill, everything is silent.
         assert ticks_over(600) == 0
         d.truck.velocity_mps = 0.0
+        d._bar_solid_on = False
+        loops.clear()
         assert ticks_over(50) == 0
+        assert not loops
     finally:
         app.shutdown()
 

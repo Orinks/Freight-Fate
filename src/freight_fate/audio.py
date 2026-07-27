@@ -75,6 +75,7 @@ CH_BRAKE = 12  # brake-release air bleed: the hiss bed shaped per release
 CH_JAKE = 13  # engine-brake growl: synthesized loop, stage- and rpm-keyed
 CH_RADIO_FX = 14  # FM fringe hiss bed under a thinning station
 CH_EDGE = 15  # edge-boundary ladder loops: clip / strip / shoulder textures
+CH_ALERT = 16  # continuous alert tones: the stop bar's solid zone
 RESERVED = 14
 NUM_CHANNELS = 32
 

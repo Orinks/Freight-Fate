@@ -1342,22 +1342,44 @@ class DrivingEventMixin:
                 self.ctx.say_event(f"{threshold} {unit_word} to the bar.", interrupt=False)
                 return
 
+    def _set_bar_solid(self, on: bool) -> None:
+        """The continuous tone of the bar's final zone, started and stopped
+        idempotently so every early exit can just turn it off."""
+        from ..audio import CH_ALERT
+
+        if on and not self._bar_solid_on:
+            self.ctx.audio.start_loop(CH_ALERT, "vehicle/bar_solid", volume=0.85, fade_ms=60)
+        elif not on and self._bar_solid_on:
+            self.ctx.audio.stop_loop(CH_ALERT, fade_ms=120)
+        self._bar_solid_on = on
+
     def _update_ramp_bar_ticks(self, dt: float) -> None:
         """Parking-sensor tick for the stop bar's last few hundred feet.
 
         Rate carries the distance -- faster is closer -- and silence means
         stopped, so the cue never nags a driver holding at the bar. Center
         pan, unlike the side-panned curve cues, so the two never read as
-        the same instrument (owner ask, 2026-07-19)."""
+        the same instrument (owner ask, 2026-07-19). Inside the last
+        stretch of leeway, still moving, the ticks fuse into a continuous
+        tone (owner spec, written into the manual 2026-07-27): at the
+        solid tone you had better be close to stopped."""
         if not self._ramp_light_announced or self._ramp_waiting_at_light:
+            self._set_bar_solid(False)
             return
         if self._ramp_mi is None or self._ramp_terminal_done:
+            self._set_bar_solid(False)
             return
         if self.truck.speed_mph <= RED_STOP_MPH:
+            self._set_bar_solid(False)
             return
         gap_mi = self._ramp_mi - RAMP_ACCESS_MI
         if gap_mi > RAMP_BAR_TICK_RANGE_MI or gap_mi < 0:
+            self._set_bar_solid(False)
             return
+        if gap_mi <= RAMP_BAR_SOLID_MI:
+            self._set_bar_solid(True)
+            return
+        self._set_bar_solid(False)
         closeness = 1.0 - gap_mi / RAMP_BAR_TICK_RANGE_MI
         period = RAMP_BAR_TICK_SLOW_S - closeness * (RAMP_BAR_TICK_SLOW_S - RAMP_BAR_TICK_FAST_S)
         self._ramp_bar_tick_timer += dt
