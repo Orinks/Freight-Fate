@@ -982,6 +982,13 @@
 
 ### Fixed
 
+- **The engine's voice is now longer than your memory.** The deepest
+  layer of the repeating-engine problem: each layer of the engine sound
+  was a short recording whose rise and fall a careful ear could learn
+  and anticipate. Every layer has been rebuilt three times longer from
+  its own recording -- same voice, same working rhythm, but the fine
+  texture never repeats, so there is no pattern left to learn.
+
 - **The engine never repeats itself exactly anymore.** Even with clean
   loops, a careful ear could catch the engine sound recurring on a
   perfectly fixed cycle at steady revs. Each layer of the engine voice
