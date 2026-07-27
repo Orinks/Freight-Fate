@@ -1,0 +1,107 @@
+name: Sync dev into release branch
+
+# A long-lived release branch drifts from dev a little every day, and the cost
+# of reconciling it grows faster than the drift: three weeks of divergence took
+# an afternoon, where the same commits absorbed two at a time would have been
+# routine. This opens (or refreshes) one pull request carrying dev into the
+# release branch every time dev moves, so a collision surfaces the day it lands
+# while both sides are still fresh.
+#
+# The pull request's head is dev itself, so it re-points at every push and
+# never needs its own branch. Note that a pull request opened with GITHUB_TOKEN
+# does not start `pull_request` workflows -- close and reopen it to run CI. The
+# conflict report below is written into the body so the PR is worth reading
+# either way.
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+env:
+  # The in-flight release branch. Point this at the next one when this ships.
+  TARGET_BRANCH: feat/career-1.9
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Open or refresh the merge pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if ! git rev-parse --verify "origin/$TARGET_BRANCH" >/dev/null 2>&1; then
+            echo "No $TARGET_BRANCH branch; nothing to sync."
+            echo "Release branch \`$TARGET_BRANCH\` does not exist." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if git merge-base --is-ancestor origin/dev "origin/$TARGET_BRANCH"; then
+            echo "$TARGET_BRANCH already contains dev; nothing to sync."
+            echo "\`$TARGET_BRANCH\` is already up to date with dev." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          PENDING=$(git log --oneline "origin/$TARGET_BRANCH..origin/dev" | wc -l)
+
+          # merge-tree reports conflicts without touching either branch, so the
+          # report is accurate before anyone opens the PR.
+          CONFLICTS=""
+          if OUT=$(git merge-tree --write-tree --name-only \
+                     "origin/$TARGET_BRANCH" origin/dev 2>/dev/null); then
+            VERDICT="Merges cleanly."
+          else
+            CONFLICTS=$(printf '%s\n' "$OUT" | tail -n +2 | sed '/^$/,$d')
+            COUNT=$(printf '%s\n' "$CONFLICTS" | grep -c . || true)
+            VERDICT="Conflicts in $COUNT file(s):"
+          fi
+
+          {
+            echo "$PENDING commit(s) on dev are not yet on \`$TARGET_BRANCH\`."
+            echo
+            echo "$VERDICT"
+            if [ -n "$CONFLICTS" ]; then
+              echo
+              printf '%s\n' "$CONFLICTS" | sed 's/^/- /'
+              echo
+              echo "Resolve them on \`$TARGET_BRANCH\`:"
+              echo
+              echo '```'
+              echo "git checkout $TARGET_BRANCH && git merge origin/dev"
+              echo '```'
+            fi
+            echo
+            echo "Commits:"
+            echo
+            git log --format='- %h %s' "origin/$TARGET_BRANCH..origin/dev"
+            echo
+            echo "_Opened automatically when dev moved. CI does not start by"
+            echo "itself on this PR; close and reopen it to run the suite._"
+          } > body.md
+
+          cat body.md >> "$GITHUB_STEP_SUMMARY"
+
+          EXISTING=$(gh pr list --repo "$GITHUB_REPOSITORY" \
+            --base "$TARGET_BRANCH" --head dev --state open \
+            --json number --jq '.[0].number // empty')
+
+          if [ -n "$EXISTING" ]; then
+            echo "Refreshing PR #$EXISTING."
+            gh pr edit "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file body.md
+          else
+            gh pr create --repo "$GITHUB_REPOSITORY" \
+              --base "$TARGET_BRANCH" --head dev \
+              --title "Merge dev into $TARGET_BRANCH" \
+              --body-file body.md
+          fi
