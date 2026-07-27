@@ -49,6 +49,39 @@ BED_FADE_MS = 220
 
 BED_KEY = "vehicle/lane_bed"
 
+# The edge-boundary ladder: three structural states (intermittent clip,
+# periodic strip, aperiodic shoulder) so the rungs stay separable under
+# engine and road noise. Offsets are lane-model units (see sim.lane).
+EDGE_CLIP_KEY = "vehicle/edge_clip"
+EDGE_STRIP_KEY = "vehicle/edge_strip"
+EDGE_SHOULDER_KEY = "vehicle/edge_shoulder"
+EDGE_STRIP_AT = 1.0  # past this the whole tire is on the strip
+EDGE_VOLUME_MIN = 0.35
+EDGE_VOLUME_MAX = 0.80
+
+
+def edge_rung(excursion: float, *, boundary: str) -> tuple[str, float] | None:
+    """(loop key, volume) for a road-edge excursion, or None inside the lane.
+
+    ``boundary`` is what lies past this edge (classify_boundaries). The
+    gravel shoulder rung only exists where there IS gravel: past an
+    undivided centerline the pavement continues into the oncoming lane, so
+    the strip stays the outermost texture and the spoken warning carries
+    the danger.
+    """
+    from .lane import OFF_ROAD, RUMBLE_START
+
+    if excursion < RUMBLE_START:
+        return None
+    span = max(OFF_ROAD - RUMBLE_START, 0.01)
+    level = min(1.0, (excursion - RUMBLE_START) / span)
+    volume = EDGE_VOLUME_MIN + level * (EDGE_VOLUME_MAX - EDGE_VOLUME_MIN)
+    if excursion >= OFF_ROAD and boundary != "oncoming":
+        return EDGE_SHOULDER_KEY, EDGE_VOLUME_MAX
+    if excursion >= EDGE_STRIP_AT:
+        return EDGE_STRIP_KEY, volume
+    return EDGE_CLIP_KEY, volume
+
 
 def classify_boundaries(
     lane: int, lane_count: int, *, divided: bool | None, interstate: bool

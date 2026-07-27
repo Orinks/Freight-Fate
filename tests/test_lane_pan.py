@@ -42,23 +42,28 @@ def test_lane_pan_follows_the_drift_side():
         app.shutdown()
 
 
-def test_rumble_is_panned_to_the_drift_side(monkeypatch):
+def test_edge_ladder_loop_is_panned_to_the_drift_side(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.sim.lane_guidance import EDGE_STRIP_KEY
 
     app = App()
     try:
         d = _driving(app)
         d.ctx.settings.steering_assist = "realistic"
-        d.lane.offset = 1.0  # at the right edge -> rumble fires
-        d._lane_rumble_timer = 0.0
-        calls = []
+        d.truck.velocity_mps = 25.0  # rolling: grooves make noise
+        d.lane.offset = 1.0  # whole tire on the right-edge strip
+        loops = []
+        pans = []
         monkeypatch.setattr(
-            app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: calls.append((key, pan))
+            app.ctx.audio,
+            "start_loop",
+            lambda ch, key, volume=1.0, fade_ms=300: loops.append(key),
         )
+        monkeypatch.setattr(app.ctx.audio, "set_loop_volume", lambda ch, volume: None)
+        monkeypatch.setattr(app.ctx.audio, "set_loop_pan", lambda ch, pan: pans.append(pan))
         d._update_audio(0.0)
-        rumble = [pan for key, pan in calls if key == "vehicle/rumble_strip"]
-        assert rumble, "the rumble strip should sound at the lane edge"
-        assert rumble[0] == pytest.approx(1.0)  # hard right
+        assert EDGE_STRIP_KEY in loops, "the strip loop should run at the lane edge"
+        assert pans and pans[-1] == pytest.approx(1.0)  # hard right
     finally:
         app.shutdown()
 
@@ -71,6 +76,7 @@ def test_guidance_bed_wakes_panned_to_the_drift_side(monkeypatch):
     try:
         d = _driving(app)
         d.ctx.settings.steering_assist = "realistic"
+        d.truck.velocity_mps = 25.0  # guidance only listens at speed
         loops = []
         pans = []
         monkeypatch.setattr(
@@ -97,6 +103,7 @@ def test_guidance_bed_sleeps_and_centered_cue_ends_a_drift(monkeypatch):
     try:
         d = _driving(app)
         d.ctx.settings.steering_assist = "realistic"
+        d.truck.velocity_mps = 25.0  # guidance only listens at speed
         calls = []
         stops = []
         monkeypatch.setattr(
@@ -128,6 +135,7 @@ def test_guidance_stays_asleep_inside_normal_wander(monkeypatch):
     try:
         d = _driving(app)
         d.ctx.settings.steering_assist = "realistic"
+        d.truck.velocity_mps = 25.0  # guidance only listens at speed
         loops = []
         monkeypatch.setattr(
             app.ctx.audio,

@@ -74,7 +74,8 @@ CH_AIR = 11  # compressor charging the tanks below governor release
 CH_BRAKE = 12  # brake-release air bleed: the hiss bed shaped per release
 CH_JAKE = 13  # engine-brake growl: synthesized loop, stage- and rpm-keyed
 CH_RADIO_FX = 14  # FM fringe hiss bed under a thinning station
-CH_LANE = 15  # lane-guidance bed and edge textures, panned to the drift side
+CH_LANE = 15  # lane-guidance bed, panned to the drift side
+CH_EDGE = 16  # edge-boundary ladder loops: clip / strip / shoulder textures
 RESERVED = 14
 NUM_CHANNELS = 32
 

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from .. import engine_audio
-from ..audio import CH_AIR, CH_BRAKE, CH_JAKE, CH_LANE, CH_RADIO_FX
+from ..audio import CH_AIR, CH_BRAKE, CH_EDGE, CH_JAKE, CH_LANE, CH_RADIO_FX
 from ..audio_fades import curve as _resolve_curve
 from ..radio import truck_elevation_ft
 from .driving_core import *
@@ -158,7 +158,6 @@ class DrivingUpdateMixin:
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2
         self._brake_lockout_cue_timer = max(0.0, self._brake_lockout_cue_timer - dt)
-        self._lane_rumble_timer = max(0.0, self._lane_rumble_timer - dt)
         # Controller triggers/clutch are analog held positions blended in below;
         # the keyboard keys keep their ramped behavior so both devices work.
         pad = self.ctx.controller
@@ -789,7 +788,15 @@ class DrivingUpdateMixin:
                 return
             self.ctx.audio.play("vehicle/rumble_strip", volume=1.0, pan=self._lane_pan())
             self.truck.damage_pct = min(100.0, self.truck.damage_pct + 1.0)
-            message = self.lane.describe()
+            boundary = self._edge_boundary()
+            if boundary == "oncoming":
+                # Past an undivided centerline is not a shoulder: say the
+                # real danger, on the side it lives.
+                message = "Across the centerline, in the oncoming lane!"
+            elif boundary == "median":
+                message = "Off the pavement, into the median on the left!"
+            else:
+                message = self.lane.describe()
             if not self._terse_speech():
                 message += " Steer back toward the lane center."
             self.ctx.say_event(message, interrupt=True)
@@ -945,6 +952,51 @@ class DrivingUpdateMixin:
         on is the side to steer away from."""
         return max(-1.0, min(1.0, self.lane.offset))
 
+    def _edge_boundary(self) -> str:
+        """What lies past the road edge the truck is drifting toward.
+
+        The divided flag prefers Oatis's baked lane data at the current mile
+        and falls back to the classifier's honest inference (interstates are
+        divided by definition; one lane per side means a centerline).
+        """
+        from ..sim.lane_guidance import classify_boundaries
+        from ..sim.trip_models import _highway_class
+
+        baked = self.trip.lanes_at()
+        leg = self.trip.route.legs[self.trip.current_leg_index]
+        left, right = classify_boundaries(
+            self.lane.lane,
+            self.lane.lane_count,
+            divided=baked[1] if baked is not None else None,
+            interstate=_highway_class(getattr(leg, "highway", "")) == "interstate",
+        )
+        return left if self.lane.offset < 0 else right
+
+    def _update_edge_ladder_audio(self, audio) -> None:
+        """Run the edge-boundary ladder: structural loops, not louder beeps.
+
+        Clipping the strip is intermittent, fully on it is periodic, off the
+        pavement is aperiodic gravel -- states a driver can tell apart under
+        engine noise. Panned to the drift side. Past an undivided centerline
+        the strip stays the outermost texture (there is no gravel out there;
+        the spoken warning carries the oncoming danger)."""
+        from ..sim.lane_guidance import edge_rung
+
+        if self.ctx.settings.steering_assist == "off" or self.truck.speed_mph < 2.0:
+            rung = None  # tires that are not rolling make no groove noise
+        else:
+            rung = edge_rung(self.lane.edge_excursion(), boundary=self._edge_boundary())
+        if rung is None:
+            if self._edge_loop_key is not None:
+                audio.stop_loop(CH_EDGE, fade_ms=150)
+                self._edge_loop_key = None
+            return
+        key, volume = rung
+        audio.start_loop(CH_EDGE, key, volume=volume, fade_ms=120)
+        audio.set_loop_volume(CH_EDGE, volume)
+        audio.set_loop_pan(CH_EDGE, self._lane_pan())
+        self._edge_loop_key = key
+
     def _update_lane_guidance_audio(self) -> None:
         """Run the guidance director: a panned bed that wakes for drift or a
         curve and sleeps on the centered straight (owner contract 2026-07-27)."""
@@ -961,7 +1013,10 @@ class DrivingUpdateMixin:
         active = self.trip.curve_at(self.trip.position_mi)
         frame = self.lane_guidance.update(
             self.lane,
-            assist_on=self.ctx.settings.steering_assist != "off",
+            assist_on=(
+                self.ctx.settings.steering_assist != "off"
+                and self.truck.speed_mph >= LANE_MIN_MPH
+            ),
             curve_active=active is not None and not active.connector,
             curve_ahead_mi=self.trip.curve_ahead_mi(CURVE_LEAD_MI),
         )
@@ -1177,13 +1232,7 @@ class DrivingUpdateMixin:
         audio.set_wind(eff.wind)
         self._update_lane_guidance_audio()
         rumble = self.lane.rumble_level()
-        if (
-            rumble > 0.0
-            and self.ctx.settings.steering_assist != "off"
-            and self._lane_rumble_timer <= 0.0
-        ):
-            self._lane_rumble_timer = 0.8
-            audio.play("vehicle/rumble_strip", volume=0.25 + rumble * 0.45, pan=self._lane_pan())
+        self._update_edge_ladder_audio(audio)
         if rumble > 0.0 and self.ctx.settings.steering_assist != "off":
             # Harsh, continuous pad buzz while over the rumble strip; refreshed
             # each frame, it stops on its own once steered back off.

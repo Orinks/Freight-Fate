@@ -84,6 +84,29 @@ def test_assist_off_is_inert():
     assert not frame.awake
 
 
+def test_edge_rungs_grade_by_structure():
+    from freight_fate.sim.lane import OFF_ROAD, RUMBLE_START
+    from freight_fate.sim.lane_guidance import (
+        EDGE_CLIP_KEY,
+        EDGE_SHOULDER_KEY,
+        EDGE_STRIP_KEY,
+        edge_rung,
+    )
+
+    assert edge_rung(RUMBLE_START - 0.1, boundary="shoulder") is None
+    key, vol_clip = edge_rung(RUMBLE_START + 0.05, boundary="shoulder")
+    assert key == EDGE_CLIP_KEY
+    key, vol_strip = edge_rung(1.05, boundary="shoulder")
+    assert key == EDGE_STRIP_KEY
+    assert vol_strip > vol_clip  # louder as well as structurally different
+    key, _ = edge_rung(OFF_ROAD + 0.05, boundary="shoulder")
+    assert key == EDGE_SHOULDER_KEY
+    # Past an undivided centerline there is no gravel: the strip stays the
+    # outermost texture and the spoken warning carries the danger.
+    key, _ = edge_rung(OFF_ROAD + 0.05, boundary="oncoming")
+    assert key == EDGE_STRIP_KEY
+
+
 def test_boundaries_divided_and_undivided():
     # Rightmost lane of a divided 3-lane: another lane left, shoulder right.
     assert classify_boundaries(0, 3, divided=True, interstate=True) == ("lane", "shoulder")
