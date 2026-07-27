@@ -96,6 +96,16 @@ speech-wiring only and should land FIRST (it is small); B rebases on
 top. If D finds itself needing trip-state changes, stop and flag Phil
 instead of making them.
 
+### Track D2 — divided-flag bake (ff-map, after D's done marker)
+
+Track B needs a baked `divided` flag per leg so the left road edge can
+sound like what it is: a median on a divided highway, the centerline
+with oncoming traffic on an undivided one. Only `lanes` is baked today;
+Phil infers in the meantime (interstate = divided, one lane per side =
+undivided) and the multilane US/state middle needs real OSM data.
+Full brief queued in the ff-map window's STATUS.md. Data-only branch
+off 1.9, honest-absence rule, done marker as usual.
+
 ## Fold order
 
 1. Track D (small, speech only) -> 1.9.
