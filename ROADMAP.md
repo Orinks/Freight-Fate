@@ -1515,6 +1515,19 @@ section below and the Unreleased changelog; the release-line view:
       on a cadence (streams die: KDHX did), report dead mounts for
       re-pointing, and keep honest-coverage rules: a dead stream goes
       dark or gets a verified replacement, never a fake.
+- [ ] **NPR translator/repeater hunt for the remaining dark zones
+      (owner leads, 2026-07-27 -- next radio pass, 2.0 line).** The
+      Hi-Line pattern generalizes: query the FCC facility database for
+      service class FX (FM translator) along each dark corridor; every
+      translator record names its PRIMARY station -- resolve to the
+      parent network, BASS-verify the parent stream, seat it at the
+      translator's dial position. Owner's concrete leads: KQEI-FM 89.3
+      Sacramento (KQED repeater -- NPR flagship programming for the
+      Sacramento dial) and Winnemucca, likely a KUNR Reno translator --
+      which would start lighting the interior I-80 Nevada dark zone.
+      Full-power repeaters (like KQEI) surface in the ordinary FM query;
+      the FX class search is what catches the low-power translators
+      Wikipedia and the first sweeps missed.
 - [ ] **Fringe reception should burst, not fade (owner spec, 2026-07-23,
       ham-ear ruling).** Today the edge of a station's range plays static
       at a volume scaled by signal -- a knob, not a radio. Real analog
