@@ -3,6 +3,7 @@
 import json
 
 import pygame
+from speech_capture import speech_stub
 
 from freight_fate.models.business import LEASED_OWNER_OPERATOR
 from freight_fate.models.profile import (
@@ -181,9 +182,7 @@ def test_migration_notice_shows_once_then_enters_world(monkeypatch):
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile.load(path)
 
         enter_world(app.ctx)
@@ -214,7 +213,7 @@ def test_migration_notice_escape_also_acknowledges(monkeypatch):
     path = write_v4_save(name="Escape Notice")
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         app.ctx.profile = Profile.load(path)
         enter_world(app.ctx)
         assert isinstance(app.state, SaveMigrationNoticeState)
@@ -241,9 +240,7 @@ def test_modified_notice_shows_once_then_enters_world(monkeypatch):
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile.load(path)
         assert app.ctx.profile.integrity_modified is True
 
@@ -272,7 +269,7 @@ def test_bought_truck_starts_fresh_and_each_keeps_its_own_condition(monkeypatch)
 
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         app.ctx.profile = Profile(name="Fleet Condition")
         p = app.ctx.profile
         # Only an owner-operator buys or switches tractors; a company driver

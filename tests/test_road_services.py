@@ -16,7 +16,9 @@ from freight_fate.states.driving import (
 
 
 def _job() -> Job:
-    return Job(CARGO_CATALOG["general"], 12.0, "Denver", "yard", "Salt Lake City", 200.0, 900.0, 12.0)
+    return Job(
+        CARGO_CATALOG["general"], 12.0, "Denver", "yard", "Salt Lake City", 200.0, 900.0, 12.0
+    )
 
 
 def _driving(app, business_status=LEASED_OWNER_OPERATOR):
@@ -54,7 +56,9 @@ def _labels(state) -> list[str]:
 
 def _quiet(app, monkeypatch, spoken=None):
     monkeypatch.setattr(
-        app.ctx, "say", lambda text, interrupt=True: spoken.append(text) if spoken is not None else None
+        app.ctx,
+        "say",
+        lambda text, interrupt=True: spoken.append(text) if spoken is not None else None,
     )
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
 

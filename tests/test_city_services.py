@@ -1,5 +1,6 @@
 import pygame
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.data.world_services import _spoken_road_text
 
@@ -131,12 +132,8 @@ def test_city_service_drive_requires_enter_before_opening(monkeypatch):
         monkeypatch.setattr(app.ctx.audio, "play", lambda *args, **kwargs: None)
         monkeypatch.setattr(app.ctx, "play_music_sequence", lambda *args, **kwargs: None)
         monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *args, **kwargs: None)
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
-        )
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: spoken.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
         app.ctx.profile = Profile(name="Services", current_city="Chicago")
         app.push_state(CityMenuState(app.ctx))
 

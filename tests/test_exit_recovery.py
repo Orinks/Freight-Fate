@@ -18,9 +18,7 @@ from freight_fate.states.driving_core import (
 
 def _capture_events(app, monkeypatch):
     spoken = []
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
     return spoken
 
 
@@ -33,9 +31,7 @@ def test_rural_miss_loops_back_to_the_synthetic_exit(monkeypatch):
         quiet_trip(driving)
         spoken = _capture_events(app, monkeypatch)
         # A rural approach: no baked interchange anywhere on the route.
-        monkeypatch.setattr(
-            driving, "_destination_exit_details", lambda **kwargs: None
-        )
+        monkeypatch.setattr(driving, "_destination_exit_details", lambda **kwargs: None)
         total = driving.trip.total_miles
         driving.trip.position_mi = total - 0.05
         driving._handle_missed_destination_exit()
@@ -59,9 +55,7 @@ def test_second_miss_still_loops_back(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         _capture_events(app, monkeypatch)
-        monkeypatch.setattr(
-            driving, "_destination_exit_details", lambda **kwargs: None
-        )
+        monkeypatch.setattr(driving, "_destination_exit_details", lambda **kwargs: None)
         total = driving.trip.total_miles
         for _ in range(2):
             driving.trip.position_mi = total - 0.05

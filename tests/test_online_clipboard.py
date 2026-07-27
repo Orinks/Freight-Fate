@@ -10,6 +10,8 @@ from __future__ import annotations
 import sys
 from types import SimpleNamespace
 
+from speech_capture import speech_stub
+
 from freight_fate.settings import Settings
 from freight_fate.states import online_states
 
@@ -144,7 +146,7 @@ def test_account_setup_connects_with_both_sharing_toggles_off(monkeypatch):
     ctx = SimpleNamespace(
         settings=settings,
         audio=SimpleNamespace(play=lambda sound: calls.append(("sound", sound))),
-        say=lambda text, interrupt=True, review=True: calls.append(("say", text)),
+        say=speech_stub(calls, tag="say"),
         pop_state=lambda: calls.append(("pop", None)),
         adopt_online_identity=lambda identity: calls.append(("identity", identity.driver_id)),
         apply_online_presence=lambda: calls.append(("profile", settings.online_presence)),

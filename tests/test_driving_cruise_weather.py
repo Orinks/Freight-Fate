@@ -8,6 +8,7 @@ from driving_feature_helpers import (
     quiet_trip,
     start_drive,
 )
+from speech_capture import speech_stub
 
 from freight_fate.states.driving import (
     ACC_LIMIT_OFFSET_MPH,
@@ -288,9 +289,7 @@ def test_cruise_refuses_to_engage_in_a_facility_zone(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True, review=True: said.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", speech_stub(said))
         # With the speed keeper turned off, the original explanation applies:
         # cruise must not engage on a low-speed facility access road.
         app.ctx.settings.speed_keeper = False
@@ -322,9 +321,7 @@ def test_speed_keeper_holds_through_a_facility_zone(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True, review=True: said.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", speech_stub(said))
         driving.trip.speed_limit_at = lambda mile: (15.0, "facility access road")
         driving.trip.traffic_context = lambda: None
         driving.handle_event(key_event(pygame.K_e))
@@ -363,9 +360,7 @@ def test_speed_keeper_cancels_on_braking(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         driving.trip.speed_limit_at = lambda mile: (15.0, "facility access road")
         driving.trip.traffic_context = lambda: None
         driving.handle_event(key_event(pygame.K_e))
@@ -402,9 +397,7 @@ def test_speed_keeper_switches_to_cruise_on_the_open_road(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         zone = {"limit": 15.0, "reason": "facility access road"}
         driving.trip.speed_limit_at = lambda mile: (zone["limit"], zone["reason"])
         driving.trip.traffic_context = lambda: None
@@ -432,9 +425,7 @@ def test_speed_keeper_needs_the_truck_rolling(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True, review=True: said.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", speech_stub(said))
         driving.trip.speed_limit_at = lambda mile: (15.0, "facility access road")
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.velocity_mps = 0.0
@@ -455,9 +446,7 @@ def test_cruise_adjust_is_inert_when_cruise_is_off(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True, review=True: said.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", speech_stub(said))
         driving.handle_event(key_event(pygame.K_e))
         assert driving._cruise_mph is None
         driving.handle_event(key_event(pygame.K_EQUALS))
@@ -476,9 +465,7 @@ def test_air_ready_cue_does_not_repeat_on_compressor_cycling(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         t = driving.truck
         t.parking_brake = True  # cue only fires while set
         t.air_pressure_psi = t.specs.air_governor_cut_out_psi  # charged
@@ -577,9 +564,7 @@ def test_hazard_announces_speed_control_cancellation_once(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
         driving.truck.velocity_mps = 26.8
@@ -604,9 +589,7 @@ def test_metric_cruise_minimum_refusal_uses_metric_units(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         spoken = []
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         driving.handle_event(key_event(pygame.K_k))
         assert driving._cruise_mph is None
         assert "kilometers per hour" in spoken[-1]
@@ -625,9 +608,7 @@ def test_adaptive_cruise_follows_npc_traffic(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         open_limits(driving)  # isolate following from the limit cap
         driving.trip.traffic_manager.vehicles = [
             NPCVehicle("npc:acc", driving.trip.position_mi + 0.08, 44.0, 44.0, 0, "braking_traffic")
@@ -743,9 +724,7 @@ def test_adaptive_cruise_caps_at_posted_limit(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         # A posted limit well below the held set speed: predictive ACC must ease
         # off rather than carry the driver over the limit into a speeding strike.
         driving.trip.speed_limit_at = lambda mile: (45.0, None)
@@ -775,9 +754,7 @@ def test_adaptive_cruise_slows_before_large_limit_drop(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         drop_at = driving.trip.position_mi + 0.4
         driving.trip.speed_limit_at = lambda mile: (40.0, None) if mile >= drop_at else (65.0, None)
         driving.handle_event(key_event(pygame.K_e))
@@ -818,9 +795,7 @@ def test_adaptive_cruise_limit_drop_does_not_trigger_speeding_strike(
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         driving.trip.speed_limit_at = lambda mile: (35.0, None)
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
@@ -897,9 +872,7 @@ def test_adaptive_cruise_increases_gap_for_bad_weather(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
         driving.truck.velocity_mps = 29.0
@@ -937,9 +910,7 @@ def test_adaptive_cruise_stays_armed_before_restricted_zone(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
         driving.truck.velocity_mps = 26.8
@@ -970,12 +941,8 @@ def test_adaptive_cruise_switches_to_keeper_for_heavy_traffic(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(events))
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 10
         driving.truck.velocity_mps = 26.8
@@ -1016,9 +983,7 @@ def test_speed_control_restores_cruise_target_after_zone(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         state = {"limit": 65.0, "reason": None}
         driving.trip.speed_limit_at = lambda mile: (state["limit"], state["reason"])
         driving.trip.traffic_context = lambda: None
@@ -1051,9 +1016,7 @@ def test_cruise_target_can_be_adjusted_while_keeper_is_active(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True, review=True: said.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", speech_stub(said))
         driving.trip.speed_limit_at = lambda mile: (15.0, "facility access road")
         driving.handle_event(key_event(pygame.K_e))
         driving.truck.transmission.gear = 3
@@ -1373,9 +1336,7 @@ def test_live_weather_calendar_off_does_not_announce_simulated_forecast_while_lo
     provider = _FakeWeatherProvider(kind=None)
     app = App()
     spoken = []
-    monkeypatch.setattr(
-        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: provider)
     app.ctx.settings.real_weather = True
     app.ctx.settings.live_weather_controls_calendar = False

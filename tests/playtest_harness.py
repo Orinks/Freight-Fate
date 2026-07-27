@@ -12,6 +12,7 @@ os.environ.setdefault("FREIGHT_FATE_NO_SPEECH", "1")
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pygame
+from speech_capture import speech_stub
 
 from freight_fate.sim.trip_models import NPCVehicle, TrafficPressure
 
@@ -139,19 +140,19 @@ class PlaytestHarness:
         from freight_fate.app import App
 
         self.app = App()
-        self.monkeypatch.setattr(self.app.ctx, "say", self._say)
-        self.monkeypatch.setattr(self.app.ctx, "say_event", self._say_event)
+        self.monkeypatch.setattr(self.app.ctx, "say", speech_stub(record=self._record_main))
+        self.monkeypatch.setattr(self.app.ctx, "say_event", speech_stub(record=self._record_event))
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
         if self.app is not None:
             self.app.shutdown()
 
-    def _say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
+    def _record_main(self, text: str, interrupt: bool) -> None:
         self.result.spoken.append(SpokenEntry(len(self.result.spoken), "main", text, interrupt))
         self.result.transcript.append(text)
 
-    def _say_event(self, text: str, interrupt: bool = True, review: bool = True) -> None:
+    def _record_event(self, text: str, interrupt: bool) -> None:
         self.result.spoken.append(SpokenEntry(len(self.result.spoken), "event", text, interrupt))
         self.result.transcript.append(f"[event] {text}")
 

@@ -13,7 +13,9 @@ from freight_fate.states.driving import RestStopState
 
 
 def _job() -> Job:
-    return Job(CARGO_CATALOG["general"], 12.0, "Denver", "yard", "Salt Lake City", 200.0, 900.0, 12.0)
+    return Job(
+        CARGO_CATALOG["general"], 12.0, "Denver", "yard", "Salt Lake City", 200.0, 900.0, 12.0
+    )
 
 
 def _driving(app, business_status=LEASED_OWNER_OPERATOR):
@@ -241,8 +243,14 @@ def test_big_bucks_buffs_require_running_bobtail(monkeypatch):
 def test_fatigue_buff_rate_active_then_expires():
     p = Profile(name="Rate")
     p.add_timed_buff(
-        {"id": "energy_drink", "label": "Energy drink", "group": "fatigue",
-         "rate": 0.85, "expires_h": 12.0, "worn_off": "The energy drink has worn off."}
+        {
+            "id": "energy_drink",
+            "label": "Energy drink",
+            "group": "fatigue",
+            "rate": 0.85,
+            "expires_h": 12.0,
+            "worn_off": "The energy drink has worn off.",
+        }
     )
     assert p.fatigue_buff_rate(11.0) == pytest.approx(0.85)
     expired = p.expire_buffs(12.5)
@@ -290,8 +298,14 @@ def test_engine_buff_slows_duty_wear_but_not_over_rev_abuse():
 def test_active_buffs_round_trip_through_a_saved_profile():
     p = Profile(name="Buff Save")
     p.add_timed_buff(
-        {"id": "diner_meal", "label": "Diner meal", "group": "fatigue",
-         "rate": 0.75, "expires_h": 40.0, "worn_off": "That meal has worn off."}
+        {
+            "id": "diner_meal",
+            "label": "Diner meal",
+            "group": "fatigue",
+            "rate": 0.75,
+            "expires_h": 40.0,
+            "worn_off": "That meal has worn off.",
+        }
     )
     path = p.save()
     loaded = Profile.load(path)

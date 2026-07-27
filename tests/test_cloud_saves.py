@@ -18,6 +18,7 @@ import urllib.error
 import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from speech_capture import speech_stub
 
 from freight_fate import cloud_save_integrity
 from freight_fate.cloud_save_integrity import CloudSaveIntegrityError, canonical_profile
@@ -510,7 +511,7 @@ def test_cloud_toggle_requires_the_account_setup_first():
 
     app = App()
     spoken = []
-    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    app.ctx.say = speech_stub(spoken)
     try:
         cat = open_online_settings(app)
         while not cat.items[cat.index].text.startswith("Back up saves"):
@@ -533,7 +534,7 @@ def test_cloud_toggle_speaks_the_disclosure_when_turned_on():
     IDENTITY.save()
     app = App()
     spoken = []
-    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    app.ctx.say = speech_stub(spoken)
     try:
         cat = open_online_settings(app)
         while not cat.items[cat.index].text.startswith("Back up saves"):
@@ -729,7 +730,7 @@ def test_delete_menu_flow_confirms_then_forgets_the_slot(monkeypatch):
     IDENTITY.save()
     app = App()
     spoken = []
-    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    app.ctx.say = speech_stub(spoken)
     try:
         app.cloud.sync_state.record_synced("Road Star", 3, "hash")
         entry = {

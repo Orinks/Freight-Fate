@@ -59,16 +59,12 @@ def test_reverse_wins_over_idle_and_still_shows_air_fill():
 
 
 def test_in_gear_stopped_on_throttle_is_launch():
-    v = classify(
-        reading(in_neutral=False, parked_brakes_holding=False, throttle=0.5)
-    )
+    v = classify(reading(in_neutral=False, parked_brakes_holding=False, throttle=0.5))
     assert v.state == LAUNCH
 
 
 def test_in_gear_stopped_off_throttle_holds_ready_idle():
-    v = classify(
-        reading(in_neutral=False, parked_brakes_holding=False, throttle=0.0)
-    )
+    v = classify(reading(in_neutral=False, parked_brakes_holding=False, throttle=0.0))
     assert v.state == READY_IDLE
 
 

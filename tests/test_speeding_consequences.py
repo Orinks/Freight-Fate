@@ -1,6 +1,8 @@
 """Speeding strikes surface their cost the moment they land (the bridge to the
 trooper/enforcement milestone), judged against the leg's real posted limit."""
 
+from speech_capture import speech_stub
+
 
 def _driving(app):
     from freight_fate.models.jobs import CARGO_CATALOG, Job
@@ -25,7 +27,7 @@ def _driving(app):
 
 def _capture_events(app, monkeypatch):
     spoken = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True, review=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     return spoken
 

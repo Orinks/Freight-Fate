@@ -199,4 +199,3 @@ def test_joint_is_low_frequency_only_and_stops():
     # Check that it stops after decay
     e.tick(0.25)  # past the 0.2s duration
     assert r.stops >= 1
-

@@ -1,5 +1,6 @@
 import pygame
 from driving_feature_helpers import key_event
+from speech_capture import speech_stub
 
 
 def _job_board(app):
@@ -60,9 +61,7 @@ def test_tab_repeats_only_the_market_watch(monkeypatch):
     try:
         board = _job_board(app)
         spoken = []
-        monkeypatch.setattr(
-            app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
-        )
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
 
         index_before = board.index  # the board may open on a recommended job
         board.handle_event(key_event(pygame.K_TAB))

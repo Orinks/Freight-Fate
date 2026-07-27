@@ -55,10 +55,14 @@ def test_lane_segments_are_well_formed():
             start, end = s["start_mi"], s["end_mi"]
             assert 0.0 <= start < end, f"{leg_id}: bad span {start}->{end}"
             # sorted and non-overlapping along the leg
-            assert start >= prev_end - 0.05, f"{leg_id}: segment overlap at {start} (prev end {prev_end})"
+            assert start >= prev_end - 0.05, (
+                f"{leg_id}: segment overlap at {start} (prev end {prev_end})"
+            )
             prev_end = end
             lanes = s["lanes"]
-            assert isinstance(lanes, int) and LANES_MIN <= lanes <= LANES_MAX, f"{leg_id}: lanes={lanes}"
+            assert isinstance(lanes, int) and LANES_MIN <= lanes <= LANES_MAX, (
+                f"{leg_id}: lanes={lanes}"
+            )
             for k in ("lanes_forward", "lanes_backward"):
                 if k in s:
                     v = s[k]
@@ -81,10 +85,16 @@ def test_lane_sources_are_curated_not_raw_osm():
     "leg_id, predicate, why",
     [
         # Acceptance spot checks from the brief: metro widens, rural stays 2.
-        ("albuquerque_nm_us:gallup_nm_us", lambda segs: any(s["lanes"] >= 3 for s in segs),
-         "I-40 through Albuquerque should widen to 3+ lanes"),
-        ("winslow_az_us:holbrook_az_us", lambda segs: any(s["lanes"] == 2 for s in segs),
-         "rural I-40 Arizona should be 2 lanes"),
+        (
+            "albuquerque_nm_us:gallup_nm_us",
+            lambda segs: any(s["lanes"] >= 3 for s in segs),
+            "I-40 through Albuquerque should widen to 3+ lanes",
+        ),
+        (
+            "winslow_az_us:holbrook_az_us",
+            lambda segs: any(s["lanes"] == 2 for s in segs),
+            "rural I-40 Arizona should be 2 lanes",
+        ),
     ],
 )
 def test_acceptance_anchor_lane_counts(leg_id, predicate, why):

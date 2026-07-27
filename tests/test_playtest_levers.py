@@ -171,9 +171,7 @@ def test_force_city_unknown_city_stays_put(world, monkeypatch, parked_ctx):
     assert any("no city called atlantis" in note for note in notes)
 
 
-def test_force_city_already_there_speaks_only_the_sandbox_note(
-    world, monkeypatch, parked_ctx
-):
+def test_force_city_already_there_speaks_only_the_sandbox_note(world, monkeypatch, parked_ctx):
     monkeypatch.setenv(playtest_levers.CITY_ENV, "denver_co_us")
     monkeypatch.delenv(playtest_levers.PERSIST_ENV, raising=False)
 
@@ -212,9 +210,7 @@ def test_force_clock_advances_to_local_hour(world, monkeypatch, parked_ctx):
     assert segment.end_hour == pytest.approx(p.game_hours)
 
 
-def test_force_clock_already_at_hour_speaks_only_the_sandbox_note(
-    world, monkeypatch, parked_ctx
-):
+def test_force_clock_already_at_hour_speaks_only_the_sandbox_note(world, monkeypatch, parked_ctx):
     p = parked_ctx.profile
     zone = city_zone(world.city(p.current_city))
     local = to_local(p.game_hours, zone) % 24.0

@@ -62,9 +62,7 @@ def test_parse_stop_rejects_unknown_access():
 
 def test_access_is_independent_of_parking():
     """A site may admit a rig for fuel and have nowhere to park it."""
-    stop = _parse_stop(
-        _stop_raw(parking="none", vehicle_access="tractor_trailer"), 60.0, "a", "b"
-    )
+    stop = _parse_stop(_stop_raw(parking="none", vehicle_access="tractor_trailer"), 60.0, "a", "b")
     assert stop.parking == "none"
     assert stop.accessible_to(bobtail=False)
 

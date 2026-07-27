@@ -323,6 +323,7 @@ def test_hgv_tag_is_trusted_only_as_far_as_the_statute_allows():
     can never license a speed the statute forbids. Real case: I-5 carries a
     60 mph hgv tag eleven miles south of the Oregon line, inside California,
     where CVC 22406 says 55."""
+
     def _trip(state, highway, mph):
         leg = Leg(
             "A",
@@ -403,9 +404,7 @@ def _split_limit_trip(state: str, mph: float, hgv: bool, highway: str = "I-80") 
         state_miles=(StateMileage(state, 100.0),),
         speed_limits=(SpeedLimitSample(0.0, mph, hgv=hgv),),
     )
-    return Trip(
-        Route(["A", "B"], [leg]), TruckState(), WeatherSystem("california", seed=1), seed=2
-    )
+    return Trip(Route(["A", "B"], [leg]), TruckState(), WeatherSystem("california", seed=1), seed=2)
 
 
 def test_split_limit_reported_whether_the_cap_or_the_tag_produced_it():

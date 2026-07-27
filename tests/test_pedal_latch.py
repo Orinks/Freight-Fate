@@ -127,12 +127,8 @@ def test_latched_throttle_drives_the_truck_hands_free(monkeypatch):
     played = []
     held = set()
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: events.append(text)
-    )
-    monkeypatch.setattr(
-        app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append(key)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append(key))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -179,9 +175,7 @@ def test_latch_setting_off_keeps_pedals_plain(monkeypatch):
     events = []
     held = set()
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: events.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
     try:
         app.ctx.settings.pedal_latch = False
         driving = start_drive(app)
@@ -238,9 +232,7 @@ def test_latching_the_brake_at_a_standstill_never_grabs_reverse(monkeypatch):
     events = []
     held = set()
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
-    monkeypatch.setattr(
-        app.ctx, "say_event", lambda text, interrupt=True: events.append(text)
-    )
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
     try:
         driving = start_drive(app)
         quiet_trip(driving)

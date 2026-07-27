@@ -2,6 +2,7 @@
 
 import pygame
 import pytest
+from speech_capture import speech_stub
 
 
 def key_event(key):
@@ -61,7 +62,7 @@ def test_hub_left_right_adjust_rows_align_with_items():
     from freight_fate.states.online_hub import OnlineHubState
 
     app = App()
-    app.ctx.say = lambda text, interrupt=True, review=True: None
+    app.ctx.say = speech_stub()
     try:
         hub = OnlineHubState(app.ctx)
         app.push_state(hub)
