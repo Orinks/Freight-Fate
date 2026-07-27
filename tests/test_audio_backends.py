@@ -303,6 +303,53 @@ def test_bass_radio_stream_uses_url_stream(monkeypatch):
     assert slides[-1][-1] == 321
 
 
+def test_bass_engine_wobble_meanders_and_shapes_the_ring(monkeypatch):
+    # Anti-repetition: each band's rate and gain take a slow bounded random
+    # walk so a seam-clean loop's period is never exactly fixed -- the ear
+    # cannot lock onto the recurrence. Rate stays within ~5 cents.
+    class FakeStream:
+        def __init__(self):
+            self.handle = 1
+            self.volume = None
+
+        def set_volume(self, volume):
+            self.volume = volume
+
+    slides = []
+    backend = audio._BassBackend.__new__(audio._BassBackend)
+    backend.master_volume = 1.0
+    backend.engine_volume = 1.0
+    backend._BassError = Exception
+    backend._ATTRIB_FREQ = 1
+    backend._slide = object()
+    backend._bass_call = lambda _fn, _handle, _attr, value, _ms: slides.append(value)
+    backend._fades = audio.FadeScheduler()
+    backend._engine_running = True
+    backend._engine_starting = False
+    backend._engine_stream = None
+    backend._engine_last_rpm = 950.0
+    backend._engine_last_throttle = 0.0
+    backend._engine_duck = 1.0
+    backend._engine_intro_gain = 1.0
+    backend._engine_intro_load = 0.0
+    backend._engine_bands = [(950.0, FakeStream(), 44100.0)]
+    backend._engine_wobble = [[0.0, 0.0]]
+    backend._wobble_rng = __import__("random").Random(7)
+
+    for _ in range(120):  # ~2 s of frames
+        backend.update(1.0 / 60.0)
+    rate_walk, gain_walk = backend._engine_wobble[0]
+    assert rate_walk != 0.0 and abs(rate_walk) <= audio.ENGINE_WOBBLE_RATE_MAX
+    assert gain_walk != 0.0 and abs(gain_walk) <= audio.ENGINE_WOBBLE_GAIN_MAX
+
+    backend.set_engine_rpm(950.0, 0.0)
+    assert slides[-1] == pytest.approx(44100.0 * (1.0 + rate_walk))
+    base_level = audio.engine_load_gain(0.0)
+    assert backend._engine_bands[0][1].volume == pytest.approx(
+        base_level * (1.0 + gain_walk)
+    )
+
+
 def test_bass_radio_stream_recreates_a_stalled_stream(monkeypatch):
     # Re-tuning the SAME url must rebuild a dead connection (the dock bed or
     # a network stall killed it); only a live stream is allowed to dedupe.

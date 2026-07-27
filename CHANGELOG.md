@@ -968,6 +968,13 @@
 
 ### Fixed
 
+- **The engine never repeats itself exactly anymore.** Even with clean
+  loops, a careful ear could catch the engine sound recurring on a
+  perfectly fixed cycle at steady revs. Each layer of the engine voice
+  now wanders very slightly in speed and level -- the way a real
+  engine's rhythm breathes -- so there is no fixed cycle left to
+  notice.
+
 - **Cruise control holds your speed down a hill instead of running away
   with it.** Coasting was all cruise could do about going too fast, so a
   downgrade just carried the truck past the speed you set and kept it
