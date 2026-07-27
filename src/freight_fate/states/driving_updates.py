@@ -974,6 +974,48 @@ class DrivingUpdateMixin:
         )
         return left if self.lane.offset < 0 else right
 
+    def _cue_loudness(self) -> float:
+        from ..sim.lane_guidance import CUE_LOUDNESS
+
+        return CUE_LOUDNESS.get(self.ctx.settings.lane_cue_loudness, 1.0)
+
+    def _update_transverse_strips(self) -> None:
+        """Fixed dead-man's-curve bars ahead of hairpins: cross them, hear
+        them -- at any speed, in any assist mode, because they are cut into
+        the road. Louder when faster, like the real hits."""
+        from ..sim.lane_guidance import TRANSVERSE_KEY
+
+        if self.truck.speed_mph < 2.0:
+            return
+        position = self.trip.position_mi
+        for strip_mi in self._transverse_strip_miles:
+            if strip_mi in self._transverse_fired or position < strip_mi:
+                continue
+            if position - strip_mi > 0.5:
+                self._transverse_fired.add(strip_mi)  # resumed past it; stay quiet
+                continue
+            self._transverse_fired.add(strip_mi)
+            volume = min(1.0, (0.65 + self.truck.speed_mph / 150.0) * self._cue_loudness())
+            self.ctx.audio.play(TRANSVERSE_KEY, volume=volume, pan=0.0)
+            self.ctx.controller.rumble.impact(0.5)
+
+    def _update_lane_locator_audio(self, dt: float) -> None:
+        """The I-key locator: a soft tock every beat, panned to where the
+        truck sits in its lane. Player-summoned, so it keeps ticking until
+        they shut it off or lane drift goes away."""
+        if not self._lane_locator_on:
+            return
+        if self.ctx.settings.steering_assist == "off" or self.truck.speed_mph < 2.0:
+            return
+        self._lane_locator_timer -= dt
+        if self._lane_locator_timer > 0.0:
+            return
+        self._lane_locator_timer = 0.9
+        pan = max(-1.0, min(1.0, self.lane.offset))
+        self.ctx.audio.play(
+            "vehicle/lane_locator", volume=min(1.0, 0.5 * self._cue_loudness()), pan=pan
+        )
+
     def _update_edge_ladder_audio(self, audio) -> None:
         """Run the edge-boundary ladder: structural loops, not louder beeps.
 
@@ -987,7 +1029,11 @@ class DrivingUpdateMixin:
         if self.ctx.settings.steering_assist == "off" or self.truck.speed_mph < 2.0:
             rung = None  # tires that are not rolling make no groove noise
         else:
-            rung = edge_rung(self.lane.edge_excursion(), boundary=self._edge_boundary())
+            rung = edge_rung(
+                self.lane.edge_excursion(),
+                boundary=self._edge_boundary(),
+                loudness=self._cue_loudness(),
+            )
         if rung is None:
             if self._edge_loop_key is not None:
                 audio.stop_loop(CH_EDGE, fade_ms=150)
@@ -1245,6 +1291,8 @@ class DrivingUpdateMixin:
         self._update_lane_guidance_audio(dt)
         rumble = self.lane.rumble_level()
         self._update_edge_ladder_audio(audio)
+        self._update_transverse_strips()
+        self._update_lane_locator_audio(dt)
         if rumble > 0.0 and self.ctx.settings.steering_assist != "off":
             # Harsh, continuous pad buzz while over the rumble strip; refreshed
             # each frame, it stops on its own once steered back off.

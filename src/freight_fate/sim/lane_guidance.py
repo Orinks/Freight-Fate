@@ -59,11 +59,26 @@ EDGE_CLIP_KEY = "vehicle/edge_clip"
 EDGE_STRIP_KEY = "vehicle/edge_strip"
 EDGE_SHOULDER_KEY = "vehicle/edge_shoulder"
 EDGE_STRIP_AT = 1.0  # past this the whole tire is on the strip
-EDGE_VOLUME_MIN = 0.35
-EDGE_VOLUME_MAX = 0.80
+EDGE_VOLUME_MIN = 0.42
+EDGE_VOLUME_MAX = 0.88
+
+# The player picks how loud the lane and edge cues speak (owner call
+# 2026-07-27: the strip read too quiet on the first drive). Scales the
+# edge ladder, the lane locator, and the dead-man's-curve strips alike.
+CUE_LOUDNESS = {"subtle": 0.6, "standard": 1.0, "prominent": 1.35}
+
+# Dead-man's-curve transverse strips: real DOTs cut grouped rumble bars
+# ACROSS the lane ahead of curves that kill people. Hairpin class only --
+# the wake-up means something because it is rare -- placed far enough up
+# the road that braking after it still makes the curve.
+TRANSVERSE_KEY = "vehicle/transverse_strips"
+HAIRPIN_ADVISORY_MPH = 25.0
+STRIP_LEAD_MI = 0.25
 
 
-def edge_rung(excursion: float, *, boundary: str) -> tuple[str, float] | None:
+def edge_rung(
+    excursion: float, *, boundary: str, loudness: float = 1.0
+) -> tuple[str, float] | None:
     """(loop key, volume) for a road-edge excursion, or None inside the lane.
 
     ``boundary`` is what lies past this edge (classify_boundaries). The
@@ -79,8 +94,9 @@ def edge_rung(excursion: float, *, boundary: str) -> tuple[str, float] | None:
     span = max(OFF_ROAD - RUMBLE_START, 0.01)
     level = min(1.0, (excursion - RUMBLE_START) / span)
     volume = EDGE_VOLUME_MIN + level * (EDGE_VOLUME_MAX - EDGE_VOLUME_MIN)
+    volume = min(1.0, volume * loudness)
     if excursion >= OFF_ROAD and boundary != "oncoming":
-        return EDGE_SHOULDER_KEY, EDGE_VOLUME_MAX
+        return EDGE_SHOULDER_KEY, min(1.0, EDGE_VOLUME_MAX * loudness)
     if excursion >= EDGE_STRIP_AT:
         return EDGE_STRIP_KEY, volume
     return EDGE_CLIP_KEY, volume

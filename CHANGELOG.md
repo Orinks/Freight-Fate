@@ -13,7 +13,14 @@
   as your tires clip the rumble strip, a steady buzz fully on it, and
   loose gravel once you are off the pavement. On an undivided road the
   warning tells the truth: past the centerline you are in the oncoming
-  lane, and there is no gravel out there.
+  lane, and there is no gravel out there. Ahead of a true hairpin, warning
+  bars cut across the whole lane wake you up the way the real ones do --
+  three hard grouped rumbles under all your tires, far enough out that
+  braking after them still makes the curve. The I key adds an on-demand
+  lane locator: a soft repeating tock from wherever you sit in your lane,
+  and pressing I again turns it off. A new setting, lane and edge cue
+  loudness, sets how loud all of it speaks: subtle, standard, or
+  prominent.
 
 - **The road tells you how many lanes it has.** Your road status now says
   the lanes on your side of the road -- "divided, three lanes your side" on

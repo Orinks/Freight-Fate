@@ -792,6 +792,18 @@ class SettingsCategoryState(MenuState):
                     "change it.",
                 )
             )
+            items.append(
+                MenuItem(
+                    lambda: f"Lane and edge cue loudness: {s.lane_cue_loudness}",
+                    lambda: self._cycle_cue_loudness(1),
+                    help="How loud the road speaks when you leave your line: "
+                    "the rumble-strip and shoulder textures, the lane "
+                    "locator, and the warning bars before a hairpin all "
+                    "follow this. Subtle keeps them under the engine, "
+                    "standard matches it, prominent cuts through for "
+                    "players who want no doubt. Presets never change it.",
+                )
+            )
             items.append(MenuItem("Back", self.go_back))
             return items
         if self.category == "gameplay":
@@ -1386,6 +1398,15 @@ class SettingsCategoryState(MenuState):
         except ValueError:
             i = 0
         self.ctx.settings.hos_mode = modes[(i + d) % len(modes)]
+        self._announce()
+
+    def _cycle_cue_loudness(self, d: int) -> None:
+        levels = ["subtle", "standard", "prominent"]
+        try:
+            i = levels.index(self.ctx.settings.lane_cue_loudness)
+        except ValueError:
+            i = 1
+        self.ctx.settings.lane_cue_loudness = levels[(i + d) % len(levels)]
         self._announce()
 
     def _cycle_steering(self, d: int) -> None:

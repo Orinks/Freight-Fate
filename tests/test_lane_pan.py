@@ -152,6 +152,75 @@ def test_guidance_stays_asleep_inside_normal_wander(monkeypatch):
         app.shutdown()
 
 
+def test_transverse_strips_fire_once_at_the_marked_mile(monkeypatch):
+    """The dead-man's-curve bars are road furniture: cross them, hear them --
+    any speed, any assist mode, exactly once."""
+    from freight_fate.app import App
+    from freight_fate.sim.lane_guidance import TRANSVERSE_KEY
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.ctx.settings.steering_assist = "off"  # even with drift off
+        d.truck.velocity_mps = 25.0
+        d._transverse_strip_miles = (5.0,)
+        d._transverse_fired = set()
+        calls = []
+        monkeypatch.setattr(
+            app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: calls.append(key)
+        )
+        d.trip.position_mi = 4.9
+        d._update_transverse_strips()
+        assert TRANSVERSE_KEY not in calls  # not there yet
+        d.trip.position_mi = 5.1
+        d._update_transverse_strips()
+        d._update_transverse_strips()
+        assert calls.count(TRANSVERSE_KEY) == 1  # once, not per frame
+    finally:
+        app.shutdown()
+
+
+def test_lane_locator_toggle_and_panned_tick(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    try:
+        d = _driving(app)
+        d.ctx.say = lambda text, **kw: spoken.append(text)
+        d.truck.velocity_mps = 25.0
+
+        d.ctx.settings.steering_assist = "off"
+        d._toggle_lane_locator()
+        assert not d._lane_locator_on  # refused: nothing to locate
+        assert "holds the lane" in spoken[-1]
+
+        d.ctx.settings.steering_assist = "realistic"
+        d._toggle_lane_locator()
+        assert d._lane_locator_on
+        calls = []
+        monkeypatch.setattr(
+            app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: calls.append((key, pan))
+        )
+        d.lane.offset = 0.8  # sitting right of center
+        d._update_lane_locator_audio(1.0)
+        ticks = [pan for key, pan in calls if key == "vehicle/lane_locator"]
+        assert ticks and ticks[-1] == pytest.approx(0.8)
+        d._toggle_lane_locator()
+        assert not d._lane_locator_on
+    finally:
+        app.shutdown()
+
+
+def test_cue_loudness_scales_the_edge_rung():
+    from freight_fate.sim.lane_guidance import edge_rung
+
+    _, standard = edge_rung(1.05, boundary="shoulder", loudness=1.0)
+    _, subtle = edge_rung(1.05, boundary="shoulder", loudness=0.6)
+    _, prominent = edge_rung(1.05, boundary="shoulder", loudness=1.35)
+    assert subtle < standard < prominent <= 1.0
+
+
 def test_audio_play_accepts_pan_on_the_active_backend():
     from freight_fate.audio import AudioEngine
 

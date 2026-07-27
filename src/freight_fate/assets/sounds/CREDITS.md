@@ -61,6 +61,8 @@ current idle, start, and shutdown cues.
 | Jake brake growl | `engine/jake_1200.ogg` ... `engine/jake_2200.ogg` | Original synthesized engine-brake loops at six rpm points (deterministic pulse-train DSP, `sound-test/jake_v2.py` family; approved by ear 2026-07-18) |
 | Edge-boundary ladder | `vehicle/edge_clip.wav`, `vehicle/edge_strip.wav`, `vehicle/edge_shoulder.wav` | Original synthesized boundary loops (deterministic pulse-train DSP from the `sound-test/edge_nav.py` audition machinery, baked by `sound-test/edge_ladder.py`); intermittent / periodic / aperiodic structural states |
 | Turn-signal tone | `vehicle/signal_tone.wav` | Original synthesized indicator tick-tone (`sound-test/signal_tone.py`), the designed modern-cab indicator sound; supersedes the relay click for signaling (the click remains for a future vintage-equipment option) |
+| Dead-man's-curve strips | `vehicle/transverse_strips.wav` | Original synthesized transverse rumble-bar crossing (`sound-test/transverse_strips.py`): three grouped bar sets under all axles, the real DOT hairpin warning |
+| Lane locator tock | `vehicle/lane_locator.wav` | Original synthesized soft position tock (`sound-test/transverse_strips.py`), panned by the game to the truck's place in its lane |
 
 ## Licensed Driving Sounds (release builds only)
 

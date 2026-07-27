@@ -360,6 +360,17 @@ class DrivingState(
         self.lane_guidance = LaneGuidance()
         self._edge_loop_key: str | None = None  # active edge-ladder rung loop
         self._road_pan_applied = 0.0  # last pursuit-guide pan set on the road bed
+        # Dead-man's-curve strips: fixed road furniture ahead of each hairpin.
+        from ..sim.lane_guidance import HAIRPIN_ADVISORY_MPH, STRIP_LEAD_MI
+
+        self._transverse_strip_miles = tuple(
+            max(0.05, min(cr.start_mi, cr.end_mi) - STRIP_LEAD_MI)
+            for cr in self.trip.curves
+            if not cr.connector and cr.advisory_mph <= HAIRPIN_ADVISORY_MPH
+        )
+        self._transverse_fired: set[float] = set()
+        self._lane_locator_on = False  # I toggles the panned position tock
+        self._lane_locator_timer = 0.0
         self._reverse_cue_active = False
         self._air_cue_active = False  # compressor fill loop below governor release
         self._jake_cue_key: str | None = None  # jake growl loop currently playing
