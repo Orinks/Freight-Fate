@@ -1008,6 +1008,15 @@
 
 ### Fixed
 
+- **Public-radio stations that had gone silent play again.** A sweep of
+  every stream in the catalog turned up a batch that had drifted to stale
+  addresses -- big public stations among them, like KUAR Little Rock, WBFO
+  Buffalo, Maine Public, South Dakota Public Broadcasting, and Texas Public
+  Radio -- and pointed them back at their current feeds, so they tune and
+  play instead of coming up quiet. A few whose streams have genuinely gone
+  away are set aside for now, so the dial does not hand you dead air where a
+  station used to be.
+
 - **The engine never repeats itself exactly anymore.** Even with clean
   loops, a careful ear could catch the engine sound recurring on a
   perfectly fixed cycle at steady revs. Each layer of the engine voice

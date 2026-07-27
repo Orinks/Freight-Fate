@@ -1537,7 +1537,7 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://26293.live.streamtheworld.com:3690/KUARFM_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KUARFM.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 34.7465,
@@ -1548,7 +1548,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: KUAR 89.1 (UALR Public Radio) Little Rock, AR. BASS live smoke OK 2026-07-13."
+      "notes": "Radio Browser checked entry: KUAR 89.1 (UALR Public Radio) Little Rock, AR. BASS live smoke OK 2026-07-13. Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "wfae-charlotte",
@@ -1579,9 +1579,9 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://26423.live.streamtheworld.com/WBFOFM_SC",
-      "stream_format": "mp3",
-      "codec": "mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WBFOFMAAC.aac",
+      "stream_format": "hls",
+      "codec": "aac",
       "lat": 42.8864,
       "lon": -78.8784,
       "range_miles": 135,
@@ -1590,7 +1590,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: WBFO-FM 88.7 Buffalo, NY. BASS live smoke OK 2026-07-13."
+      "notes": "Radio Browser checked entry: WBFO-FM 88.7 Buffalo, NY. BASS live smoke OK 2026-07-13. Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "kios-omaha",
@@ -1663,7 +1663,7 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://26283.live.streamtheworld.com:3690/KCNDHD2_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KCNDHD2.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 46.8083,
@@ -1674,7 +1674,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: Prairie Public Radio FM 1 Classical (KCND). BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map."
+      "notes": "Radio Browser checked entry: Prairie Public Radio FM 1 Classical (KCND). BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map. Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "kttz-lubbock",
@@ -1726,7 +1726,7 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://14843.live.streamtheworld.com/KANZFM_HPPR_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KANZFM_HPPR.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 37.9717,
@@ -1737,7 +1737,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: High Plains Public Radio - 91.1 KANZ. BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map."
+      "notes": "Radio Browser checked entry: High Plains Public Radio - 91.1 KANZ. BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map. Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "ipr-traverse-city",
@@ -1852,7 +1852,7 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://18183.live.streamtheworld.com/WMEAFM_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMEAFM.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 44.8016,
@@ -1863,7 +1863,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: WBSP-FM 90.1 - Maine Public Radio. BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map."
+      "notes": "Radio Browser checked entry: WBSP-FM 90.1 - Maine Public Radio. BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map. Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "vpr-burlington",
@@ -1915,7 +1915,7 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://15723.live.streamtheworld.com/KUSDHD2_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KUSDHD2.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 44.0805,
@@ -1926,7 +1926,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: KUSD-HD2 \"South Dakota Public Broadcasting\". BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map."
+      "notes": "Radio Browser checked entry: KUSD-HD2 \"South Dakota Public Broadcasting\". BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map. Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "sdpb-sioux-falls",
@@ -1936,7 +1936,7 @@
       "source": "public station stream metadata",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "http://15723.live.streamtheworld.com/KUSDHD2_SC",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KUSDHD2.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 43.546,
@@ -1947,7 +1947,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser checked entry: KUSD-HD2 \"South Dakota Public Broadcasting\". BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map."
+      "notes": "Radio Browser checked entry: KUSD-HD2 \"South Dakota Public Broadcasting\". BASS live smoke OK 2026-07-14. Coverage fill for the 623-city map. Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "wnmu-marquette",
@@ -3400,7 +3400,7 @@
       "source": "https://kxlu.com/",
       "source_type": "local",
       "station_type": "college",
-      "stream_url": "https://kxlu.streamguys1.com/kxlu-hi",
+      "stream_url": "https://kxlu.streamguys1.com/kxlu-lo",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 33.9689,
@@ -3412,7 +3412,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Loyola Marymount University; mount returns audio/mpeg 320k."
+      "notes": "Loyola Marymount University; mount returns audio/mpeg 320k. Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "kpbs-san-diego",
@@ -4736,7 +4736,7 @@
       "source": "https://www.ketr.org",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://26443.live.streamtheworld.com/KETRFM.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KETRFM.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 33.2373,
@@ -4748,7 +4748,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Texas A&M University-Commerce NPR member for Northeast Texas; transmitter at Commerce covers Paris and Sherman."
+      "notes": "Texas A&M University-Commerce NPR member for Northeast Texas; transmitter at Commerce covers Paris and Sherman. Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "kpcc-los-angeles",
@@ -5098,8 +5098,8 @@
       "state": "RI",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Providence College student radio; icy-name 'Providence College WDOM' confirmed"
+      "supported": false,
+      "notes": "Providence College student radio; icy-name 'Providence College WDOM' confirmed Stream dead at the 2026-07-27 health check with no working replacement mount found; marked unsupported (kept for the record, not tuned) pending a future re-check."
     },
     {
       "id": "wnxp-nashville",
@@ -5796,8 +5796,8 @@
       "state": "IA",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Iowa State University student station."
+      "supported": false,
+      "notes": "Iowa State University student station. Stream dead at the 2026-07-27 health check with no working replacement mount found; marked unsupported (kept for the record, not tuned) pending a future re-check."
     },
     {
       "id": "knvc-carson-city",
@@ -7928,8 +7928,8 @@
       "state": "WA",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Puget Sound Public Radio NPR news flagship. StreamTheWorld redirect."
+      "supported": false,
+      "notes": "Puget Sound Public Radio NPR news flagship. StreamTheWorld redirect. Stream dead at the 2026-07-27 health check with no working replacement mount found; marked unsupported (kept for the record, not tuned) pending a future re-check."
     },
     {
       "id": "wesm-salisbury",
@@ -8137,7 +8137,7 @@
       "source": "https://onlineradiobox.com/us/kmcu/",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://26273.live.streamtheworld.com/KCCUFM.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KCCUFM.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 33.9137,
@@ -8149,7 +8149,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Wichita Falls full-power repeater of KCCU (Cameron University, Lawton OK); carries the KCCU network feed."
+      "notes": "Wichita Falls full-power repeater of KCCU (Cameron University, Lawton OK); carries the KCCU network feed. Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "kvmr-yuba-city",
@@ -8368,8 +8368,8 @@
       "state": "NE",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "University of Nebraska Omaha classical; icy-name 'Classical 90.7, KVNO' confirmed, Class C2"
+      "supported": false,
+      "notes": "University of Nebraska Omaha classical; icy-name 'Classical 90.7, KVNO' confirmed, Class C2 Stream dead at the 2026-07-27 health check with no working replacement mount found; marked unsupported (kept for the record, not tuned) pending a future re-check."
     },
     {
       "id": "wfmt-chicago",
@@ -8626,7 +8626,8 @@
       "state": "OR",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true
+      "supported": false,
+      "notes": "Stream dead at the 2026-07-27 health check with no working replacement mount found; marked unsupported (kept for the record, not tuned) pending a future re-check."
     },
     {
       "id": "kmuz-salem",
@@ -8712,8 +8713,8 @@
       "state": "DC",
       "safe_for_streaming": false,
       "real_stream": true,
-      "supported": true,
-      "notes": "Low-power community station, Takoma Park MD serving DC."
+      "supported": false,
+      "notes": "Low-power community station, Takoma Park MD serving DC. Stream dead at the 2026-07-27 health check with no working replacement mount found; marked unsupported (kept for the record, not tuned) pending a future re-check."
     },
     {
       "id": "wesa-pittsburgh",
@@ -9597,8 +9598,8 @@
       "source": "https://www.tpr.org",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://26373.live.streamtheworld.com/KSTXFMAAC.aac",
-      "stream_format": "aac",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KSTXFMAAC.aac",
+      "stream_format": "hls",
       "codec": "aac",
       "lat": 28.805,
       "lon": -96.985,
@@ -9609,7 +9610,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Victoria full station simulcasting Texas Public Radio news (KSTX feed)."
+      "notes": "Victoria full station simulcasting Texas Public Radio news (KSTX feed). Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "bpr-news-asheville",
@@ -9795,7 +9796,7 @@
       "source": "https://www.mainepublic.org/listen-live",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://27143.live.streamtheworld.com:443/WMEA_CLASSICAL.mp3",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMEA_CLASSICAL.mp3",
       "stream_format": "mp3",
       "codec": "mp3",
       "lat": 43.6615,
@@ -9807,7 +9808,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Maine Public Classical, distinct statewide classical service. StreamTheWorld direct mount from playerservices WMEA_CLASSICAL.mp3."
+      "notes": "Maine Public Classical, distinct statewide classical service. StreamTheWorld direct mount from playerservices WMEA_CLASSICAL.mp3. Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "wlrn-miami",
@@ -10845,8 +10846,8 @@
       "source": "https://www.tpr.org/kstx-89-1-fm-san-antonio",
       "source_type": "local",
       "station_type": "public",
-      "stream_url": "https://26373.live.streamtheworld.com/KSTXFMAAC.aac",
-      "stream_format": "aac",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/KSTXFMAAC.aac",
+      "stream_format": "hls",
       "codec": "aac",
       "lat": 29.4241,
       "lon": -98.4936,
@@ -10857,7 +10858,7 @@
       "safe_for_streaming": false,
       "real_stream": true,
       "supported": true,
-      "notes": "Texas Public Radio news; StreamTheWorld direct node (mount KSTXFMAAC)."
+      "notes": "Texas Public Radio news; StreamTheWorld direct node (mount KSTXFMAAC). Stream URL refreshed 2026-07-27 (stale StreamTheWorld edge / moved mount); BASS 3/3."
     },
     {
       "id": "ktbg-kansas-city",
