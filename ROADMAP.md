@@ -1751,6 +1751,29 @@ section below and the Unreleased changelog; the release-line view:
       hides behind a JavaScript player -- a Chrome network-sniff pass could
       add it, and it pairs naturally with the planned tribal-nation crossing
       callouts.
+- [x] **Community-radio second sweep (2026-07-27).** The dial skewed heavily
+      to NPR and public-radio news (306 public locals vs 129 community), so
+      this pass added the volunteer-run and student side. 162 community,
+      college, freeform, Pacifica, and tribal stations joined the catalog
+      (579 -> 741 stations), each FCC-call-checked and verified on the BASS
+      live gate (parallel-gate false deaths re-confirmed serially from a
+      clean session before anything was dropped). Twelve states that had
+      public radio but no community station are now covered -- New York
+      (WBAI, WNYU, WHCR), Wisconsin (WORT, WSUM), Virginia (WTJU, WUVT,
+      WDCE), Kentucky (WRFL, WLXU), Vermont (WRUV, WGDR), Indiana (WFHB),
+      South Carolina (WUSC), and more -- and the Pacifica flagships (KPFK,
+      WBAI, WPFW) and the marquee college freeforms (KALX Berkeley, KDVS
+      Davis, KZSU Stanford, WREK Georgia Tech, WXYC Chapel Hill, KVRX
+      Austin) are on the air. Honest omissions, not faked: stations that
+      stream only through phone apps (Live365, Mixlr, Zeno), internet-only
+      outfits with no FCC license, and simulcasts of stations already
+      carried were left out (77 such cases logged by the research pass).
+      KDHX St. Louis was confirmed defunct (88.1 license reissued) and
+      dropped. Follow-up: a handful of real stations whose stream the game's
+      audio engine cannot open -- WRAS Atlanta (Georgia State), KNON Dallas,
+      KUCI Irvine, WEGL Auburn, KRUI Iowa, plus WRIR Richmond and WVUA
+      Tuscaloosa whose mounts would not resolve -- want a Chrome
+      network-sniff pass, same as the KGVA follow-up.
 - [ ] **Reading Services dial category with a "nearest" jump.** The data +
       tag are in; the feature is a new dial category whose bracket-jump
       tunes the geographically NEAREST reading service (not first-by-call),
