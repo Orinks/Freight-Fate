@@ -955,19 +955,21 @@ class DrivingUpdateMixin:
     def _edge_boundary(self) -> str:
         """What lies past the road edge the truck is drifting toward.
 
-        The divided flag prefers Oatis's baked lane data at the current mile
-        and falls back to the classifier's honest inference (interstates are
-        divided by definition; one lane per side means a centerline).
+        The divided flag prefers the baked lane segment at the current mile,
+        then the leg's carriageway-geometry flag (Track D2), then the
+        classifier's honest inference (interstates are divided by
+        definition; one lane per side means a centerline).
         """
         from ..sim.lane_guidance import classify_boundaries
         from ..sim.trip_models import _highway_class
 
         baked = self.trip.lanes_at()
         leg = self.trip.route.legs[self.trip.current_leg_index]
+        divided = baked[1] if baked is not None else getattr(leg, "divided", None)
         left, right = classify_boundaries(
             self.lane.lane,
             self.lane.lane_count,
-            divided=baked[1] if baked is not None else None,
+            divided=divided,
             interstate=_highway_class(getattr(leg, "highway", "")) == "interstate",
         )
         return left if self.lane.offset < 0 else right

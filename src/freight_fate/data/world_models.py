@@ -624,6 +624,10 @@ class Leg:
     # Real OSM lane counts along the leg (a->b native direction); empty where
     # the bake found no tag. Spoken, not a mechanic (Track D, 1.9).
     lane_segments: tuple[LaneSegment, ...] = ()
+    # Whether the leg runs on a divided carriageway, baked from real OSM
+    # oneway-pair geometry (Track D2). None where the bake was mixed or
+    # thin -- honest absence; the runtime infers from road class instead.
+    divided: bool | None = None
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a

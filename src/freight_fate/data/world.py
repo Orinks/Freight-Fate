@@ -208,6 +208,7 @@ class World(WorldServiceMixin):
                     landmarks=landmarks,
                     restrictions=restrictions,
                     lane_segments=lane_segments,
+                    divided=leg["divided"] if isinstance(leg.get("divided"), bool) else None,
                 )
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
