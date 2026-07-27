@@ -504,6 +504,15 @@ class DrivingEventMixin:
                 "No route exit to signal for yet. Exits are announced as you approach them."
             )
             return
+        responding_to_destination_callout = (
+            stop.type == "delivery_destination"
+            and self._destination_exit_response_s > 0.0
+            and self._destination_exit_key(stop) == self._destination_exit_announced_key
+        )
+        if responding_to_destination_callout:
+            # The shared event voice may now be reading a newer safety warning,
+            # so do not stop it just to replace the earlier exit callout.
+            self._destination_exit_response_s = 0.0
         self._exit_stop = stop
         ahead = stop.at_mi - self.trip.position_mi
         if self._exit_signal_on:
@@ -524,6 +533,7 @@ class DrivingEventMixin:
             # Letting the cap linger would leave automatic control crawling
             # at ramp speed down the open highway after the driver begged off.
             self._cruise_exit_mph = None
+            self._destination_exit_response_s = 0.0
             self.ctx.say("Signal canceled. Keep following the highway.")
             return
         self._exit_signal_on = True
@@ -556,21 +566,28 @@ class DrivingEventMixin:
             "stop": " The ramp ends at a stop sign.",
         }.get(self._ramp_control_for(stop), "")
         ahead_text = self.ctx.settings.distance_text(ahead, precise=True)
+        ramp_text = self.ctx.settings.speed_text(RAMP_MAX_MPH)
         if self.ctx.settings.steering_assist == "off":
             self._exit_lane_alignment = EXIT_LANE_READY
             self._exit_lane_ready_said = True
             self.ctx.audio.play("ui/notify", volume=0.6)
-            self.ctx.say(
+            message = (
                 f"{head} {ahead_text} ahead. Exit lane set.{lane_hint} "
-                f"Slow to {RAMP_MAX_MPH:.0f} or less for the ramp.{ending}"
-                + self._cap_cruise_for_ramp()
+                f"Slow to {ramp_text} or less for the ramp.{ending}" + self._cap_cruise_for_ramp()
             )
-            return
-        self.ctx.say(
-            f"{head} {ahead_text} ahead.{lane_hint} "
-            "Move right for the exit lane, then slow to "
-            f"{RAMP_MAX_MPH:.0f} or less for the ramp.{ending}" + self._cap_cruise_for_ramp()
-        )
+        else:
+            message = (
+                f"{head} {ahead_text} ahead.{lane_hint} "
+                "Move right for the exit lane, then slow to "
+                f"{ramp_text} or less for the ramp.{ending}" + self._cap_cruise_for_ramp()
+            )
+        if responding_to_destination_callout:
+            # Queue behind whichever event is currently speaking. Usually that
+            # is the exit callout; if a critical warning preempted it, the
+            # warning must finish before the confirmation.
+            self.ctx.say_event(message, interrupt=False)
+        else:
+            self.ctx.say(message)
 
     def _cap_cruise_for_ramp(self) -> str:
         """Bring automatic speed control down to ramp speed for an armed exit.
@@ -799,7 +816,16 @@ class DrivingEventMixin:
         if destination is None:
             return stop
         ahead = destination.at_mi - self.trip.position_mi
-        if not (0 <= ahead <= window):
+        announced_destination_is_actionable = (
+            ahead > 0.0
+            and self._destination_exit_response_s > 0.0
+            and self._destination_exit_key(destination) == self._destination_exit_announced_key
+        )
+        if announced_destination_is_actionable:
+            # X responds to the exit just named, even if an optional stop has
+            # since entered the ordinary lookahead window.
+            return destination
+        if not 0 < ahead <= window:
             return stop
         if stop is None or destination.at_mi <= stop.at_mi:
             return destination
@@ -882,6 +908,9 @@ class DrivingEventMixin:
         key = self._destination_exit_key(stop)
         if key != self._destination_exit_announced_key:
             self._destination_exit_announced_key = key
+            # The exact exit stays answerable for a human reaction window even
+            # if coasting or automatic braking shrinks the dynamic one.
+            self._destination_exit_response_s = DESTINATION_EXIT_RESPONSE_GRACE_S
             # Cruise stays engaged down the ramp approach, capped at the ramp
             # target, rather than handing the pedal back cold.
             message = self._destination_exit_announcement(stop, ahead) + self._cap_cruise_for_ramp()
@@ -1600,7 +1629,7 @@ class DrivingEventMixin:
             return
         self._ramp_terminal_done = True
 
-    def _update_exit(self, moved_mi: float) -> None:
+    def _update_exit(self, moved_mi: float, dt: float = 0.0) -> None:
         """Advance an armed exit or an active ramp; opens the stop menu."""
         # Real time from the gore to the terminal: while the ramp ends in
         # a live light or sign, the clock must not compress the seconds
@@ -1650,14 +1679,60 @@ class DrivingEventMixin:
                     self._open_poi_stop(stop, settle=True)
                 return
             stop = self._ramp_stop
+            if not self._ramp_end_said:
+                self._ramp_end_said = True
+                if stop.type != "delivery_destination":
+                    place = stop.spoken_name
+                    message = (
+                        f"At {place}. Stop now."
+                        if self._terse_speech()
+                        else f"You are at {place}. Come to a complete stop."
+                    )
+                    speech_rate = (
+                        self.ctx.settings.speech_rate
+                        if self.ctx.settings.sapi_events
+                        and getattr(self.ctx.speech, "event_supports_rate", False)
+                        else 0.0
+                    )
+                    self._ramp_arrival_grace_s = ramp_arrival_grace_seconds(
+                        message,
+                        speech_rate,
+                    )
+                else:
+                    if not self._surface_chain and self._surface_chain_route() is not None:
+                        # The facility has a street chain, so "you are at X"
+                        # here is a lie by two miles: the driver was told they
+                        # had arrived and then handed turn-by-turn streets
+                        # (owner log, 2026-07-23, Sacramento Dry Warehouse).
+                        # The chain's own "off the ramp and onto city streets"
+                        # line follows and says it right.
+                        return
+                    place = stop.name
+                    message = (
+                        f"At {place}."
+                        if self._terse_speech()
+                        else f"You are at {place}. Come to a complete stop."
+                    )
+                self.ctx.say_event(message, interrupt=True)
+                return
+            if stop.type != "delivery_destination":
+                self._ramp_arrival_grace_s = max(0.0, self._ramp_arrival_grace_s - dt)
             # Rolled clear past the end of the ramp without ever stopping. A
             # destination exit keeps waiting (missing it drives its own reroute);
             # a route POI is blown, so give the highway back instead of leaving a
-            # stuck, unpatrolled ramp lingering for miles.
-            if stop.type != "delivery_destination" and self._ramp_mi <= -RAMP_OVERSHOOT_MI:
+            # stuck, unpatrolled ramp lingering for miles. Both the distance and
+            # real-time grace must expire, so trip pacing cannot consume the
+            # player's spoken-cue reaction window.
+            if (
+                stop.type != "delivery_destination"
+                and self._ramp_mi <= -RAMP_OVERSHOOT_MI
+                and self._ramp_arrival_grace_s <= 0.0
+                and not self.truck.parking_brake
+            ):
                 self._ramp_mi = None
                 self._ramp_stop = None
                 self._ramp_end_said = False
+                self._ramp_arrival_grace_s = 0.0
                 planned = self.trip.is_planned(stop)
                 if planned:
                     self.trip.planned_stop_key = None
@@ -1675,31 +1750,6 @@ class DrivingEventMixin:
                     line += " Plan cancelled."
                 self.ctx.say_event(line, interrupt=True)
                 return
-            if not self._ramp_end_said:
-                self._ramp_end_said = True
-                if (
-                    self._ramp_stop.type == "delivery_destination"
-                    and not self._surface_chain
-                    and self._surface_chain_route() is not None
-                ):
-                    # The facility has a street chain, so "you are at X" here
-                    # is a lie by two miles: the driver was told they had
-                    # arrived and then handed turn-by-turn streets (owner
-                    # log, 2026-07-23, Sacramento Dry Warehouse). The chain's
-                    # own "off the ramp and onto city streets" line follows
-                    # and says it right.
-                    return
-                place = (
-                    self._ramp_stop.name
-                    if self._ramp_stop.type == "delivery_destination"
-                    else self._ramp_stop.spoken_name
-                )
-                message = (
-                    f"At {place}."
-                    if self._terse_speech()
-                    else f"You are at {place}. Come to a complete stop."
-                )
-                self.ctx.say_event(message, interrupt=True)
             return
         stop = self._exit_stop
         if stop is None:
@@ -1761,6 +1811,7 @@ class DrivingEventMixin:
             self._ramp_mi = RAMP_LENGTH_MI
             self._ramp_stop = stop
             self._ramp_end_said = False
+            self._ramp_arrival_grace_s = 0.0
             self._destination_exit_taken = stop.type == "delivery_destination"
             # The ramp is a single lane peeling off the right side.
             self.lane.lane = 0
@@ -1864,6 +1915,7 @@ class DrivingEventMixin:
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
+        self._acc_limit_cap_said = None
         gap = self._acc_gap_seconds()
         effective_mph = (
             min(self._cruise_mph, self._cruise_exit_mph)
@@ -2034,6 +2086,9 @@ class DrivingEventMixin:
             if limit < lowest_limit and probe - start <= braking_mi:
                 lowest_limit, lowest_reason = limit, reason
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
+        construction_limit = self._construction_limit_ahead()
+        if construction_limit is not None and construction_limit <= lowest_limit:
+            return construction_limit, "construction"
         return lowest_limit, lowest_reason
 
     def _grade_samples(self, distance_mi: float) -> list[float]:
@@ -2312,8 +2367,8 @@ class DrivingEventMixin:
         # urban drops and corridor limit changes straight into speeding strikes,
         # tickets, and trooper stops -- all of which now exist. The "Speed limit X"
         # cue still names the number; this cue says cruise is handling it.
-        posted, _ = self._acc_posted_limit_ahead()
-        cap_mph = posted + ACC_LIMIT_OFFSET_MPH
+        posted, limit_reason = self._acc_posted_limit_ahead()
+        cap_mph = posted if limit_reason == "construction" else posted + ACC_LIMIT_OFFSET_MPH
         # Measured against the working target, not the set speed, so this cap
         # can only ever lower it. Against the set speed it overwrote a stricter
         # ramp cap: cruise announced it was easing to 45 for the exit and then
@@ -2325,12 +2380,26 @@ class DrivingEventMixin:
             # must not undo an armed exit's cap and send the truck past its
             # ramp at the corridor limit.
             target_mph = min(target_mph, cap_mph)
-            if not self._acc_limit_capped:
+            # Once per cap, not once per frame it happens to be in force. The
+            # advance-warning window scales with speed, so as cruise slows for
+            # a work zone the zone slips out of the window and back in, and a
+            # plain on/off latch recited the same easing line all the way to
+            # the barrels.
+            if self._acc_limit_cap_said is None or cap_mph < self._acc_limit_cap_said - 0.5:
+                self._acc_limit_cap_said = cap_mph
+                reason = (
+                    "Construction zone ahead"
+                    if limit_reason == "construction"
+                    else "Posted limit lower"
+                )
                 self.ctx.say_event(
-                    "Posted limit lower; adaptive cruise easing to "
-                    f"{self.ctx.settings.speed_text(cap_mph)}.",
+                    f"{reason}; adaptive cruise easing to {self.ctx.settings.speed_text(cap_mph)}.",
                     interrupt=False,
                 )
+        elif cap_mph >= self._cruise_mph:
+            # Back out on the open road at the set speed: the next drop is
+            # news again.
+            self._acc_limit_cap_said = None
         self._acc_limit_capped = limit_capped
         # The preview goes on last so it can only ever move the number the
         # caps already agreed on, and it is clamped against the posted cap:
@@ -2597,6 +2666,7 @@ class DrivingEventMixin:
         # re-approach unwinnable before it was heard.
         self.trip.position_mi = max(0.0, exit_at - self._exit_window_mi())
         self._destination_exit_announced_key = None
+        self._destination_exit_response_s = 0.0
         self._destination_exit_cache = None
         if self._terse_speech():
             # The signal reset with the miss; with lane drift on, terse

@@ -61,7 +61,7 @@ def test_hub_left_right_adjust_rows_align_with_items():
     from freight_fate.states.online_hub import OnlineHubState
 
     app = App()
-    app.ctx.say = lambda text, interrupt=True: None
+    app.ctx.say = lambda text, interrupt=True, review=True: None
     try:
         hub = OnlineHubState(app.ctx)
         app.push_state(hub)

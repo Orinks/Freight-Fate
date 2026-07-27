@@ -424,6 +424,11 @@ class Speech:
         return self._any_supports("supports_set_rate")
 
     @property
+    def event_supports_rate(self) -> bool:
+        """Whether the dedicated event voice honors the in-game rate setting."""
+        return self._backend_supports(self._event_backend, "supports_set_rate")
+
+    @property
     def supports_pitch(self) -> bool:
         return self._any_supports("supports_set_pitch")
 

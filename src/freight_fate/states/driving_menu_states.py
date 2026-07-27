@@ -279,7 +279,7 @@ class DrivingStatusScreenState(MenuState):
                 if settings.radio_real_streams and not settings.radio_streamer_safe
                 else "Real public streams are hidden unless real streams are on and streamer-safe mode is off."
             ),
-            "Tune with left and right brackets. Press M to toggle radio from the cab.",
+            "Tune with semicolon and apostrophe. Press M to toggle radio from the cab.",
         ]
         if position is not None:
             lines.append(f"Approximate truck radio position: {position[0]:.2f}, {position[1]:.2f}.")
@@ -1844,13 +1844,14 @@ class ArrivalState(MenuState):
         text = "\n".join([f"Freight Fate: {self.title}.", *self.summary_lines])
         if write_clipboard_text(text):
             self.ctx.audio.play("ui/menu_select")
-            self.ctx.say("Delivery summary copied to clipboard.", interrupt=True)
+            self.ctx.say("Delivery summary copied to clipboard.", interrupt=True, review=False)
         else:
             self.ctx.audio.play("ui/error")
             self.ctx.say(
                 "I could not copy to the clipboard. The summary lines above "
                 "can still be read one at a time.",
                 interrupt=True,
+                review=False,
             )
 
     def go_back(self) -> None:

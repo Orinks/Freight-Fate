@@ -4,6 +4,22 @@
 
 ### Added
 
+- **Review recent spoken messages while driving.** A line lost under an
+  overlapping announcement is no longer gone for good. From the cab, comma
+  and period step back and forward through what has been said, Ctrl with
+  either jumps to the first or latest message, the brackets switch between
+  all messages, general ones, and driving events, and Ctrl+C copies the one
+  you are on to the clipboard. Routine menu navigation stays out of the
+  history so it cannot bury anything worth keeping. Contributed by Day
+  Garwood ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #122](https://github.com/Orinks/Freight-Fate/pull/122).
+
+- **Tire sounds now react to your speed.** On supported audio systems, the tire
+  hum rises and falls as you accelerate or brake. Above a crawl, soft road-seam
+  thumps add texture through sound and controller vibration. Contributed by
+  Swarup Baral ([@swarup-developer](https://github.com/swarup-developer)) in
+  [PR #114](https://github.com/Orinks/Freight-Fate/pull/114).
+
 - **Walk around the trailer before you pull out.** When you hook a trailer
   out of a drop yard, a new pickup option lets you check the lamps, the
   brake adjustment, and the tires yourself. If something is wrong with it
@@ -473,6 +489,27 @@
 
 ### Changed
 
+- **The radio dial moved to semicolon and apostrophe.** The brackets used to
+  tune it; they now switch categories in the new message review, so the dial
+  sits on the two keys just right of the home row instead. Semicolon walks
+  down the dial, apostrophe walks up, and holding Ctrl with either still
+  leaps a whole category. M still turns the radio on and off and Y still
+  reads what is playing.
+
+- **Comma and period review your messages while driving.** They still repeat
+  and step through recent speech everywhere else in the game. From the cab
+  they now walk the message log instead, which is the same gesture doing a
+  fuller job: the lines are kept by category and you can copy one out.
+
+- **The R key now answers just "where am I".** Two short sentences: how far
+  along you are and how far is left, then the road you are on with its
+  direction, the state you are in, and the city it is taking you toward. If
+  you have planned a stop, the distance counts down to that stop instead of
+  the destination, so R tells you how far to the place you are actually
+  driving at. The nearest named place, the grade, the zone, and the next
+  maneuver are gone from it, because each of those already has its own key
+  or lives in the Tab status menu. U still reads what is coming up, and
+  Shift R still reads the next exit.
 - **Shorter driving readouts that fit a braille display.** The clock, route,
   weather, and fuel reports now put the answer in the first few words, so a
   one-line braille display shows what matters without panning. The C key
@@ -934,6 +971,32 @@
   hold. The old behavior dragged the brakes lightly and forever instead,
   which quietly emptied the air tanks until the spring brakes set and
   stopped the truck dead on a downhill.
+
+- **Automatic speed control now slows in time for construction zones.** At
+  highway speed, adaptive cruise begins braking when the advance warning is
+  announced and reaches the work-zone limit before the speed keeper takes over,
+  so the game no longer fines you while its own controls are still slowing down.
+
+- **The rest-stop arrival cue now leaves real time to set the brake.** Trip
+  pacing no longer consumes the whole stopping buffer while even a slow voice
+  is still speaking. Terse speech now says "Stop now." If you set the parking
+  brake when the stop announces your arrival, the truck can finish stopping
+  and open the rest-stop menu; continuing past without stopping still misses
+  the stop.
+
+- **A destination exit stays ready after it is announced.** On Standard or
+  Fast trip pacing, slowing down while the callout spoke could shrink the
+  action window, so pressing X answered "No exit coming up." The exact
+  announced exit now remains available through a human reaction window, while
+  expired and already-passed exits still cannot be armed. Braking, inspection,
+  and other safety warnings also finish before the signaling confirmation.
+
+- **Short hauls no longer pay several times more per mile than long ones.**
+  A guaranteed minimum meant a fifty mile hop could pay over a thousand
+  dollars, four to five times the per-mile rate of a real cross country run,
+  so short hops were always the best money. Short jobs still pay a premium
+  per mile, the way real freight does, but it now eases down smoothly as the
+  distance grows. Pay for medium and long routes is essentially unchanged.
 
 - **Cruise control answers a hill as you reach it, not ten seconds later.**
   It used to feed the throttle in slowly with no idea what the grade was

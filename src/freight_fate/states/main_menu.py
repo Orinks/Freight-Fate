@@ -865,8 +865,8 @@ class SettingsCategoryState(MenuState):
                     lambda: f"Haptics: {'enabled' if s.haptics_enabled else 'disabled'}",
                     lambda: self._toggle_haptics(1),
                     help="Rumble feedback on the controller for hazards, hard "
-                    "braking, and the rumble strip. Has no effect without a "
-                    "controller connected.",
+                    "braking, the rumble strip, and road seams. Has no effect "
+                    "without a controller connected.",
                 ),
                 MenuItem("Back", self.go_back),
             ]

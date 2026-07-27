@@ -403,7 +403,9 @@ def test_controller_info_buttons_speak(monkeypatch):
     driving = start_drive(app)
     quiet_trip(driving)
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     # B button speaks speed; RB+B speaks fuel; D-pad up reports the route and location.
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_B))
     assert any("per hour" in t for t in spoken)
@@ -417,7 +419,7 @@ def test_controller_info_buttons_speak(monkeypatch):
     spoken.clear()
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_DPAD_UP))
     assert "percent there" in spoken[-1]
-    assert "Nearest named place" in spoken[-1] or "Near " in spoken[-1]
+    assert ", toward " in spoken[-1]
     app.shutdown()
 
 
@@ -430,7 +432,9 @@ def test_controller_speed_control_handoff_status_adjustment_and_brake(monkeypatc
     driving = start_drive(app)
     quiet_trip(driving)
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     state = {"limit": 65.0, "reason": None}
     driving.trip.speed_limit_at = lambda mile: (state["limit"], state["reason"])
     driving.trip.traffic_context = lambda: None
@@ -474,7 +478,9 @@ def test_paused_speed_control_can_be_canceled_by_keyboard_or_controller(monkeypa
     force_controller(app)
     driving = start_drive(app)
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
 
     driving._restore_speed_control_session(armed=True, target_mph=47.0)
     driving.handle_event(key_event(pygame.K_k))

@@ -265,13 +265,31 @@ def test_settings_menu_f1_has_help_for_every_item():
         app.shutdown()
 
 
+def test_haptics_help_explains_road_seam_feedback():
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    try:
+        cat = open_settings_category(app, "Gameplay")
+        while not cat.items[cat.index].text.startswith("Haptics"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+
+        spoken.clear()
+        cat.handle_event(key_event(pygame.K_F1))
+        assert any("road seams" in text for text in spoken)
+    finally:
+        app.shutdown()
+
+
 def test_settings_menu_uses_category_submenus():
     from freight_fate.app import App
     from freight_fate.states.main_menu import SettingsCategoryState, SettingsState
 
     app = App()
     spoken = []
-    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
     try:
         picker = SettingsState(app.ctx)
         app.push_state(picker)
@@ -312,7 +330,7 @@ def test_driving_assistance_preset_keyboard_path_and_custom_transition():
     spoken = []
     utterances = []
 
-    def fake_say(text, interrupt=True):
+    def fake_say(text, interrupt=True, review=True):
         spoken.append(text)
         utterances.append((text, interrupt))
 
@@ -472,7 +490,9 @@ def test_speech_setting_adjustment_previews_adjusted_voice(monkeypatch):
     preview = PreviewSpeech()
     monkeypatch.setattr(app.ctx, "speech", preview)
     monkeypatch.setattr(app, "speech", preview)
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: fallback_spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: fallback_spoken.append(text)
+    )
     try:
         menu = SettingsCategoryState(app.ctx, "speech")
         app.push_state(menu)
@@ -530,7 +550,7 @@ def test_online_menu_keeps_profile_sharing_and_private_cloud_backup_separate():
 
     app = App()
     spoken: list[str] = []
-    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
     try:
         menu = open_online_hub_from_settings(app)
         labels = [item.text for item in menu.items]
@@ -574,7 +594,7 @@ def test_problem_reports_reads_out_the_active_log_file(tmp_path, monkeypatch):
 
     app = App()
     spoken = []
-    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
     try:
         cat = SettingsCategoryState(app.ctx, "reports")
         app.push_state(cat)

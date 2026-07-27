@@ -16,12 +16,19 @@ SAFE_SPEED_CURVE_MI = 0.5
 
 
 class DrivingControlsMixin:
+    # Comma and period walk the categorised message log from the cab rather
+    # than the app-wide speech repeat: same gesture, fuller job.
+    reviews_messages = True
+
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYUP and event.key == pygame.K_h:
             self.ctx.audio.horn_stop()
             return
         if event.type != pygame.KEYDOWN:
             return
+        if self.handle_message_review(event):
+            return
+
         key = event.key
         tr = self.truck.transmission
         if key in (pygame.K_LCTRL, pygame.K_RCTRL):
@@ -121,14 +128,16 @@ class DrivingControlsMixin:
             self._speak_upcoming()
         elif key == pygame.K_m:
             self._toggle_radio()
-        elif key == pygame.K_LEFTBRACKET:
-            # Brackets walk the dial; Ctrl+brackets leap a whole category
-            # (25 AFN stations in a row buried terrestrial for a linear tune).
+        elif key == pygame.K_SEMICOLON:
+            # Semicolon and apostrophe walk the dial; with Ctrl they leap a
+            # whole category (25 AFN stations in a row buried terrestrial for
+            # a linear tune). The dial used to live on the brackets, which
+            # message review now uses to switch categories.
             if event.mod & pygame.KMOD_CTRL:
                 self._jump_radio_category(-1)
             else:
                 self._tune_radio(-1)
-        elif key == pygame.K_RIGHTBRACKET:
+        elif key == pygame.K_QUOTE:
             if event.mod & pygame.KMOD_CTRL:
                 self._jump_radio_category(1)
             else:
@@ -253,7 +262,7 @@ class DrivingControlsMixin:
             "gives staged failure-to-stop warnings, then a felony stop "
             "that can cancel the active load. "
             "C also speaks the date and season. "
-            "M toggles the in-cab radio, left and right brackets tune it, "
+            "M toggles the in-cab radio, semicolon and apostrophe tune it, "
             "and Y speaks radio station, volume, and streamer-safe status. "
             "The Tab status menu includes a radio screen with the currently "
             "receivable stations. "
@@ -266,7 +275,7 @@ class DrivingControlsMixin:
             "S posted speed limit. G the grade under the wheels and whether "
             "the truck is holding it. Tab status menu. F fuel. "
             "C clock, deadline, and hours of service. "
-            "R trip progress, route, and current location. "
+            "R progress, distance left, and where you are. "
             "Shift R next listed highway exit. "
             "V weather. L lane position. "
             "A repeats the last announcement. Comma re-reads the last spoken "

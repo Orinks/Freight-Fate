@@ -152,7 +152,7 @@ def test_active_drive_applies_manual_setting_and_announces_it(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     try:
         driving = start_drive(app)
@@ -182,7 +182,7 @@ def test_passing_hazard_plays_clear_sound(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     try:
         driving = start_drive(app)
@@ -272,7 +272,7 @@ def test_automatic_reverse_selection_is_spoken(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     try:
         driving = start_drive(app)
@@ -297,7 +297,7 @@ def test_sustained_redline_speaks_a_damage_warning(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     try:
         driving = start_drive(app)
@@ -591,7 +591,9 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -601,7 +603,7 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         assert "simple direction changes" in spoken[-1]
         assert "press and hold it again" in spoken[-1]
         assert "holds the truck" in spoken[-1]
-        assert "R trip progress, route, and current location" in spoken[-1]
+        assert "R progress, distance left, and where you are" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_keyboard_help()
@@ -631,7 +633,7 @@ def test_driving_f1_describes_safe_shutdown_and_destination_parking(monkeypatch)
     monkeypatch.setattr(
         app.ctx,
         "say",
-        lambda text, interrupt=True: spoken.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: spoken.append((text, interrupt)),
     )
     try:
         driving = start_drive(app)
@@ -845,12 +847,12 @@ def test_terse_air_brake_startup_omits_control_instructions(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     monkeypatch.setattr(
         app.ctx,
         "say",
-        lambda text, interrupt=True: spoken.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: spoken.append((text, interrupt)),
     )
     try:
         app.ctx.settings.speech_verbosity = 0
@@ -908,12 +910,12 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     monkeypatch.setattr(
         app.ctx,
         "say",
-        lambda text, interrupt=True: spoken.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: spoken.append((text, interrupt)),
     )
     monkeypatch.setattr(
         app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
@@ -972,7 +974,7 @@ def test_terse_hazard_drops_brake_now_instruction(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     try:
         app.ctx.settings.speech_verbosity = 0
@@ -1000,7 +1002,7 @@ def test_low_air_warning_flushes_event_voice(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     try:
         driving = start_drive(app)
@@ -1035,7 +1037,7 @@ def test_terse_lane_departure_omits_recovery_instruction(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     monkeypatch.setattr(app.ctx.audio, "play", lambda *args, **kwargs: None)
     try:
@@ -1065,7 +1067,7 @@ def test_lane_departure_warning_flushes_event_voice(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     monkeypatch.setattr(app.ctx.audio, "play", lambda *args, **kwargs: None)
     try:
@@ -1093,7 +1095,7 @@ def test_speeding_strike_flushes_event_voice(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     try:
         driving = start_drive(app)
@@ -1124,7 +1126,7 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say",
-        lambda text, interrupt=True: spoken.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: spoken.append((text, interrupt)),
     )
     try:
         driving = start_drive(app)
@@ -1218,7 +1220,9 @@ def test_driver_apps_screen_uses_keyboard_and_vague_road_chatter(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1289,7 +1293,9 @@ def test_engine_shutdown_is_blocked_at_highway_speed(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1313,7 +1319,7 @@ def test_metric_status_lines_do_not_mix_mph_and_miles(monkeypatch):
     from freight_fate.sim.trip import NavigationCue
 
     app = App()
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: None)
     try:
         app.ctx.settings.imperial_units = False
         driving = start_drive(app)
@@ -1371,8 +1377,12 @@ def test_delivery_requires_parking_at_destination(monkeypatch):
     app = App()
     events = []
     spoken = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
+    )
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1423,7 +1433,9 @@ def test_arrival_gate_repeats_after_overshoot(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1451,7 +1463,9 @@ def test_arrival_gate_repeats_after_overshoot(monkeypatch):
 
         # S answers with the gate, not the posted limit of the ended route.
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(
+            app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+        )
         driving._speak_speed_limit()
         assert "Stop to dock" in spoken[-1]
         assert "miles per hour" not in spoken[-1]
@@ -1792,7 +1806,7 @@ def test_terse_destination_exit_omits_press_x_instruction(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     try:
         app.ctx.settings.speech_verbosity = 0
@@ -1821,12 +1835,12 @@ def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: events.append((text, interrupt)),
+        lambda text, interrupt=True, review=True: events.append((text, interrupt)),
     )
     monkeypatch.setattr(
         app.ctx,
         "say",
-        lambda text, interrupt=True: said.append(text),
+        lambda text, interrupt=True, review=True: said.append(text),
     )
     try:
         driving = start_drive(app)
@@ -1885,7 +1899,9 @@ def test_a_zone_past_the_destination_exit_is_never_announced(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1932,7 +1948,9 @@ def test_taking_the_announced_exit_does_not_repeat_the_ramp_cap(monkeypatch):
     app = App()
     said = []
     monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: said.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -2003,7 +2021,9 @@ def test_destination_exit_suppresses_matching_interchange_gps_cue(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -2088,7 +2108,9 @@ def test_missed_destination_exit_reroutes_every_time(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -2183,7 +2205,9 @@ def test_missed_destination_recovery_does_not_keep_issuing_gate_speed_strikes(mo
 
     app = App()
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
+    )
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
     try:
         driving = start_drive(app)
@@ -2252,8 +2276,12 @@ def test_facility_menu_waits_for_full_stop(monkeypatch):
     events = []
     played = []
     spoken = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
+    )
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     monkeypatch.setattr(
         app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append((key, volume))
     )
@@ -2395,7 +2423,9 @@ def test_engine_brake_cannot_be_enabled_while_accelerating(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -2474,7 +2504,9 @@ def test_accelerating_turns_engine_brake_off(monkeypatch):
     app = App()
     events = []
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys())
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -2701,7 +2733,9 @@ def test_toll_route_delivery_settlement_records_expense(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     try:
         app.ctx.profile = Profile(name="Toll Test", current_city="New York")
         job = Job(
@@ -3377,7 +3411,9 @@ def test_destination_exit_announced_within_scaled_window(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -3394,6 +3430,198 @@ def test_destination_exit_announced_within_scaled_window(monkeypatch):
         app.shutdown()
 
 
+@pytest.mark.parametrize(
+    ("time_scale", "approach_mph"),
+    [(20.0, 54.0), (40.0, 56.0)],
+    ids=["standard", "fast"],
+)
+def test_announced_destination_exit_stays_actionable_when_window_shrinks(
+    monkeypatch,
+    time_scale,
+    approach_mph,
+):
+    """The spoken X instruction remains true through a human reaction delay."""
+    from freight_fate.app import App
+
+    app = App()
+    transcript = []
+    stopped_event_speech = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: transcript.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, **k: transcript.append(text))
+    monkeypatch.setattr(
+        app.ctx,
+        "stop_event_speech",
+        lambda: stopped_event_speech.append(True),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(driving.trip, "upcoming_stop", lambda _window: None)
+        # A bend inside its reaction window decompresses the clock, which
+        # collapses the exit window to its floor; this test is about the
+        # window shrinking with speed, so keep the curves out of it.
+        driving.trip.curves = []
+        driving.trip.time_scale = time_scale
+        driving.truck.velocity_mps = approach_mph / 2.23694
+        destination = driving._destination_exit_stop()
+        announced_window = driving._exit_window_mi()
+        driving.trip.position_mi = destination.at_mi - announced_window + 0.01
+
+        driving._check_destination_exit()
+
+        assert "destination exit" in transcript[-1]
+        assert driving._cruise_mph is None  # reported case: automatic control is off
+
+        # Coasting while the player listens makes the dynamic window contract
+        # below the still-ahead exit. Before the fix, the real X path answered
+        # "No exit coming up" here.
+        driving.truck.velocity_mps = 30.0 / 2.23694
+        ahead = destination.at_mi - driving.trip.position_mi
+        assert driving._exit_window_mi() < ahead
+        driving.handle_event(key_event(pygame.K_x))
+
+        assert driving._exit_stop is not None
+        assert driving._exit_stop.type == "delivery_destination"
+        # "Signal on for ..." is the 1.9 wording of the old "Signaling for ...".
+        assert "Signal on for" in transcript[-1]
+        assert "No exit coming up" not in "\n".join(transcript)
+        assert stopped_event_speech == []
+    finally:
+        app.shutdown()
+
+
+def test_destination_exit_response_queues_behind_intervening_safety_cue(monkeypatch):
+    """X must not silence a newer warning on the shared event-speech channel."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    stopped_event_speech = []
+    monkeypatch.setattr(
+        app.ctx,
+        "say",
+        lambda text, interrupt=True, review=True: spoken.append(("main", text, interrupt)),
+    )
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        lambda text, interrupt=True, review=True: spoken.append(("event", text, interrupt)),
+    )
+    monkeypatch.setattr(
+        app.ctx,
+        "stop_event_speech",
+        lambda: stopped_event_speech.append(True),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(driving.trip, "upcoming_stop", lambda _window: None)
+        driving.trip.time_scale = 20.0
+        driving.truck.velocity_mps = 54.0 / 2.23694
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - driving._exit_window_mi() + 0.01
+        driving._check_destination_exit()
+
+        app.ctx.say_event("Brake now. Hazard ahead.", interrupt=True)
+        driving.handle_event(key_event(pygame.K_x))
+
+        assert stopped_event_speech == []
+        assert spoken[-2] == ("event", "Brake now. Hazard ahead.", True)
+        channel, confirmation, interrupt = spoken[-1]
+        assert channel == "event"
+        assert "Signal on for" in confirmation
+        assert interrupt is False
+    finally:
+        app.shutdown()
+
+
+def test_announced_destination_exit_grace_rejects_expired_and_passed_exit(monkeypatch):
+    """The reaction buffer never turns an old or passed announcement into an exit."""
+    from freight_fate.app import App
+
+    app = App()
+    transcript = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: transcript.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, **k: transcript.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(driving.trip, "upcoming_stop", lambda _window: None)
+        # See the sibling window-shrink test: a bend in its reaction window
+        # decompresses the clock and collapses the exit window to its floor.
+        driving.trip.curves = []
+        driving.trip.time_scale = 40.0
+        driving.truck.velocity_mps = 56.0 / 2.23694
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - driving._exit_window_mi() + 0.01
+        driving._check_destination_exit()
+
+        # The callout arms the destination exit itself, so the reaction
+        # buffer only has to keep the spoken confirmation honest -- the exit
+        # can no longer go missing while the player is still reacting.
+        assert driving._exit_stop is not None
+        assert driving._exit_stop.type == "delivery_destination"
+
+        driving.truck.velocity_mps = 0.0
+        driving._destination_exit_response_s = 1 / 120
+        driving.update(1 / 60)
+        assert driving._destination_exit_response_s == 0.0
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_signal_on
+        assert not any(line.startswith("No route exit to signal") for line in transcript)
+
+        # Even a live response timer cannot resurrect an exit behind the truck.
+        driving._exit_stop = None
+        driving._exit_signal_on = False
+        driving._destination_exit_response_s = 10.0
+        driving.trip.position_mi = destination.at_mi + 0.1
+        monkeypatch.setattr(driving, "_destination_exit_stop", lambda: destination)
+        driving.handle_event(key_event(pygame.K_x))
+        assert driving._exit_stop is None
+        # "No route exit to signal for yet" is the 1.9 wording of the older
+        # "No exit coming up" refusal.
+        assert transcript[-1].startswith("No route exit to signal")
+    finally:
+        app.shutdown()
+
+
+def test_announced_destination_exit_wins_over_nearer_optional_stop(monkeypatch):
+    """X responds to the destination callout, not a newly nearby truck stop."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import RoadStop
+
+    app = App()
+    transcript = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, **k: transcript.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, **k: transcript.append(text))
+    monkeypatch.setattr(app.ctx, "stop_event_speech", lambda: None)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.time_scale = 20.0
+        driving.truck.velocity_mps = 54.0 / 2.23694
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - driving._exit_window_mi() + 0.01
+        nearer_stop = RoadStop(
+            "Nearby Travel Plaza",
+            driving.trip.position_mi + 2.0,
+            "truck_stop",
+            ("fuel", "sleep"),
+        )
+        monkeypatch.setattr(driving.trip, "upcoming_stop", lambda _window: nearer_stop)
+
+        driving._check_destination_exit()
+        driving.truck.velocity_mps = 30.0 / 2.23694
+        driving.handle_event(key_event(pygame.K_x))
+
+        assert driving._exit_stop is not None
+        assert driving._exit_stop.type == "delivery_destination"
+        assert "destination exit" in transcript[-1]
+        assert "Nearby Travel Plaza" not in transcript[-1]
+    finally:
+        app.shutdown()
+
+
 def test_exit_announcements_speak_each_name_once(monkeypatch):
     """Fallback phrasing must not repeat the facility or exit label -- the
     sentence is heard, not read."""
@@ -3403,7 +3631,9 @@ def test_exit_announcements_speak_each_name_once(monkeypatch):
     app = App()
     said = []
     monkeypatch.setattr(app.ctx, "say", lambda text, **k: said.append(text))
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: said.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -3436,7 +3666,9 @@ def test_labeled_missed_exit_names_the_exit_once(monkeypatch):
 
     app = App()
     said = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: said.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say_event", lambda text, interrupt=True, review=True: said.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -3612,7 +3844,9 @@ def test_live_route_weather_accounts_for_loading_and_unavailable_cities(monkeypa
 
         app.ctx.profile = Profile(name="Route Weather Driver")
         monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: PartialProvider())
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(
+            app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+        )
 
         state = RouteSelectState(app.ctx, job, [route])
         state._speak_forecast(route)
@@ -3677,7 +3911,9 @@ def test_setting_the_parking_brake_at_speed_dynamites_the_brakes(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(
+            app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+        )
         t = driving.truck
         t.velocity_mps = 55.0 / 2.2369362920544
         wear_before = t.tire_wear_pct
@@ -3698,5 +3934,79 @@ def test_setting_the_parking_brake_at_speed_dynamites_the_brakes(monkeypatch):
         assert t.tire_wear_pct == wear_stopped
         assert driving.trip.waiting is True
         assert spoken[-1].startswith("Parking brake set.")
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.parametrize("time_scale", [10.0, 20.0, 40.0])
+def test_road_joint_thumps_use_physical_distance_at_every_pace(monkeypatch, time_scale):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        plays = []
+        rumbles = []
+
+        monkeypatch.setattr(
+            app.ctx.audio, "play", lambda key, volume=1.0: plays.append((key, volume))
+        )
+        monkeypatch.setattr(
+            app.ctx.controller.rumble, "joint", lambda severity: rumbles.append(severity)
+        )
+
+        driving._road_joint_accumulator_m = 0.0
+        driving._next_joint_distance_m = 15.0
+        driving.ctx.settings.time_scale = time_scale
+        driving.trip.time_scale = time_scale
+        monkeypatch.setattr(driving.truck, "update", lambda dt: None)
+        driving.truck.velocity_mps = 20.0
+        driving.truck.engine_on = True
+
+        for _ in range(30):
+            driving.update(1.0 / 60.0)
+        assert driving._road_joint_accumulator_m == pytest.approx(10.0, rel=1e-3)
+        assert not plays
+        assert not rumbles
+
+        for _ in range(30):
+            driving.update(1.0 / 60.0)
+        assert len(plays) == 1
+        assert plays[0][0] == "vehicle/road_joint"
+        assert plays[0][1] == pytest.approx(0.01, rel=1e-3)
+
+        assert len(rumbles) == 1
+        assert rumbles[0] == pytest.approx(20.0 / 30.0, rel=1e-3)
+
+        assert driving._road_joint_accumulator_m == pytest.approx(5.0, rel=1e-3)
+        assert 14.0 <= driving._next_joint_distance_m <= 18.0
+    finally:
+        app.shutdown()
+
+
+def test_road_joint_thumps_pause_off_highway(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        plays = []
+        rumbles = []
+        monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0: plays.append(key))
+        monkeypatch.setattr(app.ctx.controller.rumble, "joint", rumbles.append)
+
+        driving._road_joint_accumulator_m = 0.0
+        driving._next_joint_distance_m = 15.0
+        driving.trip.on_ramp = True
+        driving.truck.velocity_mps = 20.0
+
+        driving._update_audio(1.0)
+
+        assert driving._road_joint_accumulator_m == 0.0
+        assert "vehicle/road_joint" not in plays
+        assert not rumbles
     finally:
         app.shutdown()

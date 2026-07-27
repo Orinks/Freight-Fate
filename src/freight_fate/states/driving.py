@@ -242,6 +242,7 @@ class DrivingState(
         self._ramp_mi: float | None = None  # ramp distance left, once taken
         self._ramp_stop = None
         self._ramp_end_said = False
+        self._ramp_arrival_grace_s = 0.0
         # Ramp terminal control for the active ramp: what meets you where the
         # ramp joins the surface road, and the light's cycle state if a signal.
         self._ramp_control = ""  # "signal" | "stop" | "none" | "" (no ramp)
@@ -262,6 +263,7 @@ class DrivingState(
         self._destination_exit_taken = False
         self._missed_destination_exit_said = False
         self._destination_exit_announced_key = ""
+        self._destination_exit_response_s = 0.0
         # Surface chain: after the destination ramp, the drive continues on
         # the facility's real street chain to the gate instead of a scripted
         # arrival. The highway trip is kept for records; the active trip
@@ -308,6 +310,9 @@ class DrivingState(
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
+        self._acc_limit_cap_said: float | None = None
+        # (end mile, limit) of a work zone cruise has begun slowing for.
+        self._construction_slowdown: tuple[float, float] | None = None
         self._acc_follow_cue_s = 0.0  # quiet window between "Traffic ahead" cues
         self._descent_control_active = False
         self._descent_limit_state = ""
@@ -346,6 +351,8 @@ class DrivingState(
         self._keep_right_nags = 0
         self._ambient_event_cooldown_s = 0.0
         self._pending_ambient_event: tuple[str, str | None] | None = None
+        self._road_joint_accumulator_m = 0.0
+        self._next_joint_distance_m = self._patrol_rng.uniform(14.0, 18.0)
         self._lane_guidance_state = "center"
         self._reverse_cue_active = False
         self._air_cue_active = False  # compressor fill loop below governor release

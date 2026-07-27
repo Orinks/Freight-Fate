@@ -17,6 +17,7 @@ import pygame
 
 if TYPE_CHECKING:
     from ..app import GameContext
+    from ..message_log import Message
 
 
 def end_sentence(text: str) -> str:
@@ -32,6 +33,10 @@ def end_sentence(text: str) -> str:
 
 class State:
     """Base class for all game screens."""
+
+    # Set on a state that routes comma and period into its own message-log
+    # review; the app-level repeat key stands aside for it.
+    reviews_messages = False
 
     def __init__(self, ctx: GameContext) -> None:
         self.ctx = ctx
@@ -105,6 +110,58 @@ class State:
         off the public board when they are not actively on a job.
         """
         return None
+
+    def handle_message_review(self, event: pygame.event.Event) -> bool:
+        if event.type != pygame.KEYDOWN:
+            return False
+
+        key = event.key
+        ctrl = bool(getattr(event, "mod", 0) & pygame.KMOD_CTRL)
+        log = self.ctx.message_log
+
+        if key == pygame.K_LEFTBRACKET:
+            category = log.previous_category()
+            if category:
+                self.ctx.say(f"{category} messages.", review=False)
+            return True
+
+        if key == pygame.K_RIGHTBRACKET:
+            category = log.next_category()
+            if category:
+                self.ctx.say(f"{category} messages.", review=False)
+            return True
+
+        if key == pygame.K_COMMA and ctrl:
+            self._speak_review_message(log.first_message())
+            return True
+
+        if key == pygame.K_PERIOD and ctrl:
+            self._speak_review_message(log.last_message())
+            return True
+
+        if key == pygame.K_COMMA:
+            self._speak_review_message(log.previous_message())
+            return True
+
+        if key == pygame.K_PERIOD:
+            self._speak_review_message(log.next_message())
+            return True
+
+        if key == pygame.K_c and ctrl:
+            message = log.current_message()
+            if message is None:
+                return True
+            from .online_states import write_clipboard_text
+
+            if write_clipboard_text(message.text):
+                self.ctx.say("Message copied to clipboard.", review=False)
+            return True
+        return False
+
+    def _speak_review_message(self, message: Message | None) -> None:
+        if message is None:
+            return
+        self.ctx.say(message.text, review=False)
 
 
 class TimedMessageState(State):
@@ -210,7 +267,7 @@ class MenuState(State):
         self.announce_entry()
 
     def announce_entry(self) -> None:
-        self.ctx.say(f"{end_sentence(self.title)} {self.current_text()}")
+        self.ctx.say(f"{end_sentence(self.title)} {self.current_text()}", review=False)
 
     def refresh(self, keep_index: bool = True) -> None:
         old = self.index

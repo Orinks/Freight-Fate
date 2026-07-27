@@ -83,6 +83,15 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 - [x] Add one driving-assistance preset selector with independently adjustable emergency braking, lane, stop-and-go, descent, exit, destination, curve, and route-transition support while preserving player confirmation and control.
 - [ ] Add future individual yard-entry guidance and assisted docking; no current preset navigates a yard or completes a delivery.
+- [x] **Spoken-message review from the cab (PR #122, Day Garwood).**
+      Comma and period walk the message log, Ctrl with either jumps to the
+      first or latest, the brackets switch category, and Ctrl+C copies the
+      current line. Merged from `dev`; the radio dial moved to semicolon
+      and apostrophe to make room, and the app-wide speech repeat now
+      stands aside for any state that reviews its own log.
+- [ ] Decide whether the app-wide speech repeat and the categorised message
+      log should stay two features. They answer the same need with the same
+      keys, and only the state flag keeps them apart today.
 - [x] **Stop-sign terminals got the bar instruments (playtest
       2026-07-22, third session) -- FIXED same day.** Every bar-position
       instrument (countdown, closing tick, S query, stopped-short
@@ -1227,10 +1236,11 @@ section below and the Unreleased changelog; the release-line view:
 
 ### Radio
 
-- [x] **The in-cab radio follows the map.** M toggles, brackets tune the
-      currently receivable stations, Y speaks status, Tab has a Radio
-      screen; streamer-safe by default with real public streams behind an
-      explicit opt-in.
+- [x] **The in-cab radio follows the map.** M toggles, semicolon and
+      apostrophe tune the currently receivable stations, Y speaks status,
+      Tab has a Radio screen; streamer-safe by default with real public
+      streams behind an explicit opt-in. (The dial moved off the brackets
+      when message review took them for its categories.)
 - [x] **Hosts, regional stations, and real signal behavior.** The Roadhouse
       and Night Line have live hosts; twelve fictional regional stations
       with newly composed songs cover markets across the map, fading to
@@ -2073,8 +2083,9 @@ From a batch of player reports:
   another city-narration composition bug.
 - [x] **Quick info keys.** S reads the posted speed limit (was buried in the
   Tab menu); A repeats the last route announcement; U reads what is coming
-  up (imposed limits, stops, exits ahead); R includes the current road, state,
-  direction, nearest named place, and trip progress in its route report.
+  up (imposed limits, stops, exits ahead); R answers "where am I" in two
+  short sentences -- progress and distance left (to a planned stop when one
+  is set), then the road, the state, and the city it is taking you toward.
 - [x] **Stop details and planned stops (1.8.x nightly).** Enter on a Map-screen
   stop opens a job-details-style view (exit, distance, offers, parking, and an
   ELD-rule ETA with an arrive-before-your-next-HOS-limit note), with plan /
@@ -2231,6 +2242,9 @@ From a batch of player reports:
   ever appear after a pygame upgrade, the fix is to make disable only close
   the pad and keep the initialized subsystem alive, reserving `_sdl.quit()`
   for `shutdown()`.
+- [x] **Speed-dependent tire pitch and road-seam thumps.** Tire hum pitches
+  up and down dynamically with speed on supported audio systems, with a
+  distinct sound and controller pulse for road seams (PR #114).
 - [x] **Gear / launch realism.** Shipped: gross mass is now
   cargo-weight-aware (tare + payload), so a heavy load accelerates slower,
   lugs on grades, and burns more fuel, and an empty deadhead is light and

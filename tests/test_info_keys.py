@@ -30,7 +30,9 @@ def _driving(app, origin="Buffalo", destination="Rochester"):
 
 def _capture(app, monkeypatch):
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     return spoken
 
 
@@ -226,7 +228,9 @@ def test_driving_help_describes_x_as_signal_not_take_exit(monkeypatch):
 
     spoken = []
     app = App()
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -310,7 +314,7 @@ def test_safe_speed_key_speaks_one_number(monkeypatch):
         app.shutdown()
 
 
-def test_route_key_reports_current_road_place_progress_and_guidance(monkeypatch):
+def test_route_key_reports_progress_then_road_state_and_destination(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.trip import Zone
 
@@ -324,15 +328,55 @@ def test_route_key_reports_current_road_place_progress_and_guidance(monkeypatch)
         d.handle_event(key_event(pygame.K_r))
 
         report = spoken[-1]
-        # Progress leads so a one-line braille display gets it without panning,
-        # and the percent matches what the online drivers board shows.
+        # Two short sentences and nothing else: the grade, the zone, the
+        # nearest named place, and the next maneuver all have their own key.
         pct = round(100 * d.trip.position_mi / d.trip.total_miles)
-        assert report.startswith(f"{pct} percent there, 34 miles left of ")
-        assert "On I-90 East in New York, toward Rochester, New York" in report
-        assert "Near Batavia, New York" in report
-        assert "In a construction zone" in report
-        assert "Current grade" in report
-        assert report.endswith(d.trip.next_navigation_context(True))
+        assert report == (
+            f"{pct} percent there, 34 miles left. "
+            "On I-90 East in New York, toward Rochester, New York."
+        )
+    finally:
+        app.shutdown()
+
+
+def test_route_key_counts_down_to_a_planned_stop_instead_of_the_destination(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 20.0
+        stop = next(s for s in d.trip.stops if s.at_mi > d.trip.position_mi)
+        d.trip.planned_stop_key = stop.key
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_r))
+
+        report = spoken[-1]
+        ahead = d.trip._distance_text(stop.at_mi - d.trip.position_mi)
+        assert f"{ahead} to {stop.spoken_name}." in report
+        assert "left." not in report
+        assert "On I-90 East in New York, toward Rochester, New York." in report
+    finally:
+        app.shutdown()
+
+
+def test_route_key_falls_back_to_the_destination_once_the_plan_is_behind(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        stop = d.trip.stops[0]
+        d.trip.planned_stop_key = stop.key
+        d.trip.position_mi = stop.at_mi + 1.0
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_r))
+
+        report = spoken[-1]
+        assert f"{d.trip._distance_text(d.trip.remaining_miles)} left." in report
+        assert stop.spoken_name not in report
     finally:
         app.shutdown()
 
@@ -369,7 +413,6 @@ def test_route_key_reports_reverse_route_direction(monkeypatch):
 
         report = spoken[-1]
         assert "On I-90 West in New York, toward Buffalo, New York" in report
-        assert "Near Batavia, New York" in report
     finally:
         app.shutdown()
 
@@ -470,6 +513,26 @@ def test_status_menu_carries_the_drivers_board_progress_percent(monkeypatch):
         app.shutdown()
 
 
+def test_upcoming_key_uses_metric_distances(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        app.ctx.settings.imperial_units = False
+        d = _driving(app)
+        d.trip.imperial = False
+        d.trip.position_mi = 20.0
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_u))
+
+        report = spoken[-1]
+        assert "kilometers" in report
+        assert " miles" not in report
+    finally:
+        app.shutdown()
+
+
 def test_route_key_uses_metric_distances(monkeypatch):
     from freight_fate.app import App
 
@@ -484,8 +547,7 @@ def test_route_key_uses_metric_distances(monkeypatch):
         d.handle_event(key_event(pygame.K_r))
 
         report = spoken[-1]
-        assert "Flying J Travel Center Corfu, 13 kilometers ahead" in report
-        assert "87 kilometers left of 119 kilometers" in report
+        assert "87 kilometers left." in report
         assert " miles" not in report
     finally:
         app.shutdown()

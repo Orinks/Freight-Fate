@@ -149,6 +149,15 @@ class DrivingUpdateMixin:
         )
         self.trip.traffic_manager.hazard_scale = self.trip.hazard_scale
         self._sync_radio_settings()
+        if self._destination_exit_response_s > 0.0:
+            self._destination_exit_response_s = max(
+                0.0,
+                self._destination_exit_response_s - dt,
+            )
+            if self._destination_exit_response_s == 0.0 and self._exit_stop is None:
+                # A driver who stopped after the early callout must still get a
+                # fresh, closer instruction once the normal window reaches them.
+                self._destination_exit_announced_key = ""
         self._sync_weather_source()
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2
@@ -340,7 +349,7 @@ class DrivingUpdateMixin:
         self._check_weigh_station_enforcement(pos_before)
         self._check_unsafe_damage_enforcement()
         self._check_destination_exit()
-        self._update_exit(self.trip.last_moved_mi)
+        self._update_exit(self.trip.last_moved_mi, dt)
 
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)
@@ -1089,6 +1098,19 @@ class DrivingUpdateMixin:
         engine_load = min(self._engine_audio_throttle, cap)
         audio.set_engine_rpm(t.rpm, engine_load)
         audio.set_road_noise(t.velocity_mps)
+
+        # Road texture follows real wheel travel, not the trip model's compressed
+        # route distance. Ramps are outside the highway soundscape.
+        if dt > 0.0 and t.velocity_mps > 5.0 and not self.trip.on_ramp:
+            self._road_joint_accumulator_m += t.velocity_mps * dt
+            if self._road_joint_accumulator_m >= self._next_joint_distance_m:
+                self._road_joint_accumulator_m %= self._next_joint_distance_m
+                self._next_joint_distance_m = self._patrol_rng.uniform(14.0, 18.0)
+
+                vol = 0.015 * min(1.0, t.velocity_mps / 30.0)
+                audio.play("vehicle/road_joint", volume=vol)
+                self.ctx.controller.rumble.joint(min(1.0, t.velocity_mps / 30.0))
+
         if t.engine_on and t.transmission.in_reverse:
             if not self._reverse_cue_active:
                 audio.reverse_start()

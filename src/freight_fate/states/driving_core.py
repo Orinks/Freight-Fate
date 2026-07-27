@@ -141,6 +141,9 @@ EXIT_WINDOW_MI = 5.0  # how far out X can arm the upcoming exit, at minimum
 EXIT_WARNING_REAL_S = 25.0  # target real seconds from callout to the ramp
 EXIT_WINDOW_MAX_MI = 20.0
 EXIT_LANE_PREP_MI = 2.0  # where GPS starts asking for the exit lane
+# Keep the exact announced destination exit available for the same real-time
+# budget even if coasting or automatic braking shrinks the dynamic window.
+DESTINATION_EXIT_RESPONSE_GRACE_S = EXIT_WARNING_REAL_S
 # Spoken distance anchors for an armed exit; a signal-on announcement miles
 # out gets buried under canyon pacenotes without them.
 EXIT_COUNTDOWN_MILESTONES_MI = (2.0, 1.0, 0.5)
@@ -205,10 +208,15 @@ STOP_ROLL_DAMAGE = 0.2  # lighter clip for blowing the stop sign
 RAMP_CONTROL_URBAN_WEIGHTS = (0.70, 0.95)
 RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)
 # Grace past the end of the ramp before a taken-but-never-stopped exit counts
-# as blown. The driver gets the "come to a complete stop" nudge at the ramp
-# end; roll this much further without stopping and the exit is missed, so the
-# stuck ramp doesn't linger for miles (unpatrolled, off the plan) once passed.
+# as blown. Distance alone is not enough under trip pacing: at 40 mph the same
+# half mile can pass in barely a second, before the driver can hear the arrival
+# cue and set the brake. Require both this distance and a real-time reaction
+# window. A driver who keeps rolling still misses the stop promptly.
 RAMP_OVERSHOOT_MI = 0.5
+RAMP_SPEECH_WPM_MIN = 30.0
+RAMP_SPEECH_WPM_MAX = 60.0
+RAMP_ARRIVAL_REACTION_S = 3.0
+RAMP_ARRIVAL_GRACE_MIN_S = 8.0
 DESTINATION_EXIT_BEFORE_END_MI = 1.0
 # A real interchange counts as the destination exit only inside this final
 # approach window. Routes that finish on rural highways carry no baked
@@ -333,6 +341,21 @@ GATE_REMINDER_INTERVAL_S = 10.0
 # legitimately cycle when cruise fights the curve brake; the cues must not
 # (playtest 2026-07-22: 23 slowing/released flips in four seconds).
 CURVE_ASSIST_CUE_COOLDOWN_S = 15.0
+
+
+def ramp_arrival_grace_seconds(message: str, speech_rate: float = 0.5) -> float:
+    """Conservatively cover the spoken cue plus a real response window.
+
+    Screen-reader speech completion is not observable through every Prism
+    backend, so model a deliberately slow 30-to-60 WPM voice, scaled by the
+    player's event-voice rate, instead of starting a fixed timer when the
+    utterance is merely queued. Once the player sets the parking brake, the stop
+    remains accepted while the truck finishes decelerating.
+    """
+    rate = max(0.0, min(1.0, float(speech_rate)))
+    modeled_wpm = RAMP_SPEECH_WPM_MIN + (RAMP_SPEECH_WPM_MAX - RAMP_SPEECH_WPM_MIN) * rate
+    spoken_seconds = len(message.split()) * 60.0 / modeled_wpm
+    return max(RAMP_ARRIVAL_GRACE_MIN_S, spoken_seconds + RAMP_ARRIVAL_REACTION_S)
 
 
 def terse_hazard_message(message: str) -> str:

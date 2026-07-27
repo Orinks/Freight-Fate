@@ -163,7 +163,9 @@ def test_metric_pull_over_announcement_uses_metric_units(monkeypatch):
         app.ctx.settings.imperial_units = False
         d = _driving(app, patrol_intensity=1.0)
         spoken = []
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(
+            app.ctx, "say_event", lambda text, interrupt=True, review=True: spoken.append(text)
+        )
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         _speed_for(d)
         assert "kilometers per hour" in spoken[-1]

@@ -28,6 +28,8 @@ class SpeedControlStateMixin:
         self._acc_following = False
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
+        self._acc_limit_cap_said = None
+        self._construction_slowdown = None
 
     def _clear_keeper(self) -> None:
         self._keeper_mph = None
@@ -130,3 +132,46 @@ class SpeedControlStateMixin:
             self._clear_keeper()
         else:
             self._disarm_speed_control()
+
+    def _construction_limit_ahead(self) -> float | None:
+        """A lower work-zone limit inside the player's advance-warning window."""
+        if not self._speed_control_armed or not self.ctx.settings.speed_keeper:
+            self._construction_slowdown = None
+            return None
+        held = self._construction_slowdown
+        if held is not None and self.trip.position_mi < held[0]:
+            # Keep aiming at a work zone already being slowed for. The warning
+            # window is sized in real seconds, so it retracts as cruise slows:
+            # without this the zone dropped back out of sight and cruise wound
+            # the truck up again on the approach to the barrels.
+            limit_mph = held[1]
+        else:
+            self._construction_slowdown = None
+            lookahead_mi = self.trip._zone_warning_lookahead_mi()
+            # Aim at the work zone itself, skipping the merge taper in front
+            # of it exactly as the spoken zone warning does. The taper starts
+            # earlier and posts a higher limit: slowing to the taper's number
+            # still reached the barrels too fast, and slowing on the taper's
+            # position had cruise easing before the player was told why.
+            zone = min(
+                (
+                    z
+                    for z in self.trip.zones
+                    if z.reason == "construction"
+                    and 0 < z.start_mi - self.trip.position_mi <= lookahead_mi
+                ),
+                key=lambda z: z.start_mi,
+                default=None,
+            )
+            if zone is None:
+                return None
+            # Not before the player hears why: cruise and the warning share a
+            # window, so which one landed first was down to frame order.
+            from ..sim.trip import _zone_key
+
+            if _zone_key(zone) not in self.trip._announced_zone_warnings:
+                return None
+            limit_mph = zone.limit_mph
+            self._construction_slowdown = (zone.end_mi, limit_mph)
+        current_limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        return limit_mph if limit_mph < current_limit else None

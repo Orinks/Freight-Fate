@@ -19,6 +19,7 @@ from .cloud_saves import CloudSaves
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
+from .message_log import MessageCategory, MessageLog
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
@@ -107,6 +108,8 @@ class GameContext:
         # True while a playtest-lever scenario runs unsaved (see
         # playtest_levers.apply_continue_levers); save_profile honors it.
         self.playtest_sandbox = False
+        self.message_log = app.message_log
+        self.message_category = app.message_category
 
     def _online_enabled(self, setting: bool) -> bool:
         """True when both the master ``online_services`` switch and the
@@ -152,11 +155,13 @@ class GameContext:
             self._truck_parking = TruckParkingProvider()
         return self._truck_parking
 
-    def say(self, text: str, interrupt: bool = True) -> None:
+    def say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         transcript.info("%s", text)
         self.last_spoken = text
         self._speech_history.record(text)
         self.speech.say(text, interrupt)
+        if review:
+            self.message_log.add(text, MessageCategory.GENERAL)
 
     def repeat_last_spoken(self) -> None:
         """Walk back through recent speech (the comma key, from anywhere).
@@ -192,7 +197,7 @@ class GameContext:
             transcript.info("[repeat -%d] %s", back, line)
             self.speech.say(f"{back} back: {line}", interrupt=True)
 
-    def say_event(self, text: str, interrupt: bool = True) -> None:
+    def say_event(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
 
         With the dedicated SAPI event voice enabled, events speak on their own
@@ -224,6 +229,8 @@ class GameContext:
             if interrupt:
                 _stop_main_speech(self.speech)
             self.speech.say(text, interrupt=False)
+        if review:
+            self.message_log.add(text, MessageCategory.EVENT)
 
     def stop_event_speech(self) -> None:
         self._event_pacer.reset()
@@ -456,6 +463,8 @@ class App:
 
         self.settings = Settings.load()
         self.speech = Speech()
+        self.message_log = MessageLog()
+        self.message_category = None
         self.audio = AudioEngine()
         self.world = get_world()
         self.economy = Economy()
@@ -587,14 +596,22 @@ class App:
                             self.controller.note_keyboard()
                             # Global repeat-last-spoken. Text entry keeps its
                             # commas; menus are safe (first-letter jump is
-                            # alphanumeric only).
-                            if event.key == pygame.K_COMMA and not getattr(
-                                self.state, "captures_text_input", False
+                            # alphanumeric only). A state that reviews its own
+                            # message log keeps these keys: while driving they
+                            # walk the categorised log, which is the same
+                            # gesture doing a fuller job.
+                            reviews_messages = getattr(self.state, "reviews_messages", False)
+                            if (
+                                event.key == pygame.K_COMMA
+                                and not reviews_messages
+                                and not getattr(self.state, "captures_text_input", False)
                             ):
                                 self.ctx.repeat_last_spoken()
                                 continue
-                            if event.key == pygame.K_PERIOD and not getattr(
-                                self.state, "captures_text_input", False
+                            if (
+                                event.key == pygame.K_PERIOD
+                                and not reviews_messages
+                                and not getattr(self.state, "captures_text_input", False)
                             ):
                                 self.ctx.step_forward_spoken()
                                 continue

@@ -47,6 +47,7 @@ current idle, start, and shutdown cues.
 | Air dryer purge | `vehicle/air_dryer_purge.ogg` | ElevenLabs-generated compressor cut-out purge, played when air pressure is ready |
 | Low air buzzer | `vehicle/low_air_buzzer.ogg` | ElevenLabs-generated low-air-pressure / spring-brake warning buzzer |
 | Highway road bed | `vehicle/road.ogg` | ElevenLabs-generated in-cab road ambience |
+| Road seam thump | `vehicle/road_joint.ogg` | Short low thump synthesized in-repo for routine road texture |
 | Car pass-by | `traffic/car_pass.ogg` | ElevenLabs-generated nearby passenger-car pass-by cue |
 | Box truck pass-by | `traffic/box_truck_pass.ogg` | ElevenLabs-generated nearby medium-truck pass-by cue |
 | Semi pass-by | `traffic/semi_pass.ogg` | ElevenLabs-generated nearby tractor-trailer pass-by cue |

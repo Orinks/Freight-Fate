@@ -260,7 +260,9 @@ def test_terminal_sleep_uses_independent_calendar_with_live_weather(monkeypatch)
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: _Provider())
     app.ctx.settings.real_weather = True
     app.ctx.settings.live_weather_controls_calendar = False
@@ -301,7 +303,9 @@ def test_terminal_does_not_present_modeled_temperature_while_live_weather_loads(
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: _LoadingProvider())
     app.ctx.settings.real_weather = True
     app.ctx.settings.live_weather_controls_calendar = False

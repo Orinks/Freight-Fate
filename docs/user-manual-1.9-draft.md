@@ -48,7 +48,7 @@ Add these rows:
 | G | Report the grade under the wheels: the slope, how far it runs, and whether the truck is holding it -- including whether the jake has the descent or is about to lose it. |
 | Comma | Say the last spoken line again, whatever it was. Works everywhere, including menus. |
 | M | Toggle the in-cab radio. |
-| Left and Right brackets | Tune the radio down and up the dial. |
+| Semicolon and apostrophe | Tune the radio down and up the dial. |
 | Y | Report the radio station, volume, and streamer-safe status. |
 
 Update the A row so the two repeat keys read as a pair:
@@ -114,7 +114,8 @@ networks carry the empty country. Real streams are not streamer-safe --
 station-side music licensing does not cover a re-broadcast -- which is why
 they sit behind both the real-streams setting and the streamer-safe switch.
 
-M toggles the radio, the brackets tune it, Y speaks what is playing, and the
+M toggles the radio, semicolon and apostrophe tune it, Y speaks what is
+playing, and the
 Tab status menu has a Radio screen listing every receivable station with
 signal strength, distance, and source.
 

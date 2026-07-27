@@ -65,7 +65,9 @@ def test_terse_drive_entry_skips_startup_handholding(monkeypatch):
     try:
         app.ctx.settings.speech_verbosity = 0
         d = _driving(app)
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(
+            app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+        )
 
         d.enter()
 
@@ -86,7 +88,9 @@ def test_cold_start_low_air_does_not_stack_on_entry(monkeypatch):
     events = []
     try:
         d = _driving(app)
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(
+            app.ctx, "say_event", lambda text, interrupt=True, review=True: events.append(text)
+        )
 
         assert d.truck.air_low_warning
         assert d._low_air_said
@@ -143,7 +147,9 @@ def test_zone_warning_interrupts_while_weather_chatter_queues(monkeypatch):
         d = _driving(app)
         calls = []
         monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True: calls.append((text, interrupt))
+            app.ctx,
+            "say_event",
+            lambda text, interrupt=True, review=True: calls.append((text, interrupt)),
         )
         zone = Zone(5.0, 8.0, 45.0, "construction")
 

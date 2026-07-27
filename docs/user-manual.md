@@ -418,7 +418,7 @@ Driving controls are active while the road view is focused:
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
 | C | Report clock, deadline, estimated arrival, and hours of service. |
-| R | Report trip progress first (the same percent the online drivers board shows), then the current road and direction, state, nearest named place, grade, and GPS context. |
+| R | Report trip progress (the same percent the online drivers board shows) and the distance left, then the road you are on with its direction, the state you are in, and the city you are heading toward. With a planned stop set, the distance counts down to that stop instead of the destination. |
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
 | L | Report which lane you are in and whether you are centered, drifting, or at an edge. |
@@ -662,12 +662,12 @@ announces the signed exit and toward cities, marks it as the destination exit,
 and tells you to slow down and set up for the ramp. If lane drift is on, use X
 to signal and move right for the exit lane. With lane drift off, the GPS infers
 your destination-exit intent from the route. If automatic speed control is
-active, it eases the truck to 45 miles per hour or your lower cruise target so
-you can reach ramp speed without an abrupt handoff. Press X to take the exit;
-automatic speed control releases as you enter the ramp, then you brake to the
-stop. If you miss the destination exit, continue to the next safe turnaround.
-Dispatch loops you back onto the approach so you can hear the exit call again
-and press X to take it.
+active, it eases the truck to 40 miles per hour or your lower cruise target,
+below the 45 mile-per-hour ramp limit, so you can reach ramp speed without an
+abrupt handoff. Press X to take the exit; automatic speed control releases as
+you enter the ramp, then you brake to the stop. If you miss the destination
+exit, continue to the next safe turnaround. Dispatch loops you back onto the
+approach so you can hear the exit call again and press X to take it.
 
 Ordinary highway exits that do not lead to a current action are not announced
 during the drive. Press Shift+R if you want the next listed exit for route
@@ -875,6 +875,8 @@ Gameplay settings include:
 | Hours of service | Choose realistic or relaxed hours rules. |
 | Lane drift | Choose whether lane drift is off, light, or realistic. When on, a short beep comes from the side you drift toward, so steer away from the beep. A dedicated centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. |
 | Speed keeper | Allow automatic speed control to use the speed keeper in low-speed zones and switch back to adaptive cruise on open roads. |
+| Controller | Accept controller input alongside the keyboard. The keyboard always stays active. |
+| Haptics | Use controller vibration for hazards, hard braking, rumble strips, and road seams. |
 
 Audio settings include:
 
@@ -950,7 +952,7 @@ Audio is layered by category:
 | --- | --- |
 | UI | Menu movement, selection, warning, cash, pause, unpause, and notification sounds. |
 | Engine | Engine start, shutdown, idle, and RPM-tracking running engine audio. |
-| Vehicle | Horn, gear shift, parking brake, brake air, road noise, collision, rumble strip, and fuel pump sounds. |
+| Vehicle | Horn, gear shift, parking brake, brake air, road noise, road seams, collision, rumble strip, and fuel pump sounds. |
 | Weather | Rain, snow, wind, thunder, and fog sounds. |
 | Route events | Hazards, construction zones, inspections, state crossings, traffic slowing, and toll charges. |
 | Facilities and stops | Facility gates, docks, rest stops, and weigh station lanes. |

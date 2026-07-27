@@ -46,9 +46,10 @@ code, in the same change:
 ## Commands
 
 - Setup: `uv sync --group dev`
-- Tests: `uv run pytest` (config already applies `-q`; per-test timeout is
-  set). Run focused tests for your area first, the full suite for shared
-  behavior.
+- Tests: `uv run pytest` (config already applies `-q -n auto` and a per-test
+  timeout). Run focused tests for your area first, the full suite for shared
+  behavior. A slow sweep test needs its own `@pytest.mark.timeout` -- under
+  xdist the thread timeout kills the worker and reads as "node down".
 - Lint: `uv run ruff check src tests tools`
 - Byte-compile check: `uv run python -m compileall src tests tools`
 - Headless runs: set `FREIGHT_FATE_NO_SPEECH=1` (CI also uses

@@ -88,7 +88,9 @@ def test_active_drive_snapshot_restores_paused_speed_control_session(monkeypatch
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(
+        app.ctx, "say", lambda text, interrupt=True, review=True: spoken.append(text)
+    )
     try:
         driving = start_drive(app)
         driving._restore_speed_control_session(armed=True, target_mph=52.0)

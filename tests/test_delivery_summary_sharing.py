@@ -273,7 +273,7 @@ def test_status_check_records_linked_flag_even_without_handle():
     said: list[str] = []
     ctx = SimpleNamespace(
         settings=settings,
-        say=lambda text, interrupt=True: said.append(text),
+        say=lambda text, interrupt=True, review=True: said.append(text),
         audio=SimpleNamespace(play=lambda *_a, **_kw: None),
     )
     state = MastodonLinkState(ctx)
