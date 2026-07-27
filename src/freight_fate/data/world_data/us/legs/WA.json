@@ -1300,7 +1300,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "everett_wa_us",
@@ -2245,7 +2246,8 @@
           "lon": -122.3461,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "longview_wa_us",
@@ -3398,7 +3400,8 @@
           "parking_spaces": 11,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "moses_lake_wa_us",
@@ -6136,7 +6139,8 @@
           "lon": -121.718,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "moses_lake_wa_us",
@@ -6913,7 +6917,8 @@
           "lon": -119.85366,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "olympia_wa_us",
@@ -8074,7 +8079,8 @@
           "lon": -122.90702,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "port_angeles_wa_us",
@@ -10285,7 +10291,8 @@
           "lon": -122.89758,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "port_angeles_wa_us",
@@ -13295,7 +13302,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "seattle_wa_us",
@@ -20360,7 +20368,8 @@
           "lon": -116.65427,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "spokane_wa_us",
@@ -21154,7 +21163,8 @@
           "lon": -116.86605,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "spokane_wa_us",
@@ -22842,7 +22852,8 @@
           "vehicle_access": "tractor_trailer",
           "parking_spaces": 5
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "spokane_wa_us",
@@ -23953,7 +23964,8 @@
           "lon": -119.31635,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "spokane_wa_us",
@@ -27639,7 +27651,8 @@
           "lon": -121.7180036,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "spokane_wa_us",
@@ -29488,7 +29501,8 @@
           "lon": -119.95618,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tacoma_wa_us",
@@ -30404,7 +30418,8 @@
           "lon": -122.38459,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tacoma_wa_us",
@@ -32516,7 +32531,8 @@
           "lon": -120.5859875,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tri_cities_wa_us",
@@ -33191,7 +33207,8 @@
           "lon": -119.31635,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "tri_cities_wa_us",
@@ -36553,7 +36570,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "tri_cities_wa_us",
@@ -39772,7 +39790,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "tri_cities_wa_us",
@@ -41203,7 +41222,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "walla_walla_wa_us",
@@ -41860,7 +41880,8 @@
           "lon": -118.42539,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "walla_walla_wa_us",
@@ -42685,7 +42706,8 @@
           "lon": -119.15931,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wenatchee_wa_us",
@@ -45619,7 +45641,8 @@
           "lon": -122.2148666,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wenatchee_wa_us",
@@ -47166,7 +47189,8 @@
           "lon": -120.5371859,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "yakima_wa_us",
@@ -48415,7 +48439,8 @@
           "lon": -119.31635,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "yakima_wa_us",
@@ -50817,7 +50842,8 @@
           "lon": -121.7180036,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "yakima_wa_us",
@@ -51921,7 +51947,8 @@
           "lon": -119.15931,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

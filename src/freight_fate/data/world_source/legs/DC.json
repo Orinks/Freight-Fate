@@ -1878,7 +1878,8 @@
           "lon": -77.14084,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "washington_dc_us",
@@ -4217,7 +4218,8 @@
           "lon": -77.9961,
           "note": "Culpeper on US-29"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "washington_dc_us",
@@ -5863,7 +5865,8 @@
           "lon": -77.78268,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "washington_dc_us",
@@ -8681,7 +8684,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "washington_dc_us",
@@ -10967,7 +10971,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "washington_dc_us",
@@ -12506,7 +12511,8 @@
           "lon": -75.64174,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "washington_dc_us",
@@ -14161,7 +14167,8 @@
           "lon": -77.56798,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

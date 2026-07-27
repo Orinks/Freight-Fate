@@ -624,7 +624,8 @@
           "lon": -90.71653,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "clarksdale_ms_us",
@@ -1310,7 +1311,8 @@
           "lon": -89.8334,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "clarksdale_ms_us",
@@ -1970,7 +1972,8 @@
           "lon": -90.01596,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbus_ms_us",
@@ -2895,7 +2898,8 @@
           "lon": -88.70684,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbus_ms_us",
@@ -4090,7 +4094,8 @@
           "lon": -87.53236,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "greenville_ms_us",
@@ -6646,7 +6651,8 @@
           "lon": -90.82951,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "grenada_ms_us",
@@ -8034,7 +8040,8 @@
           "lon": -90.15441,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "gulfport_ms_us",
@@ -8953,7 +8960,8 @@
           "parking_spaces": 8,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "gulfport_ms_us",
@@ -11248,7 +11256,8 @@
           "lon": -90.19802,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "gulfport_ms_us",
@@ -12299,7 +12308,8 @@
           "lon": -88.23869,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "gulfport_ms_us",
@@ -13187,7 +13197,8 @@
           "parking_spaces": 20,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hattiesburg_ms_us",
@@ -14382,7 +14393,8 @@
           "lon": -89.75046,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jackson_ms_us",
@@ -16594,7 +16606,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "jackson_ms_us",
@@ -18016,7 +18029,8 @@
           "lon": -89.5111,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jackson_ms_us",
@@ -19497,7 +19511,8 @@
           "lon": -88.7278,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jackson_ms_us",
@@ -21667,7 +21682,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "jackson_ms_us",
@@ -24242,7 +24258,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "meridian_ms_us",
@@ -25581,7 +25598,8 @@
           "lon": -89.18071,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "meridian_ms_us",
@@ -27269,7 +27287,8 @@
           "lon": -88.657546,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "meridian_ms_us",
@@ -28607,7 +28626,8 @@
           "lon": -88.39685,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "natchez_ms_us",
@@ -29856,7 +29876,8 @@
           "lon": -91.24251,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "natchez_ms_us",
@@ -30972,7 +30993,8 @@
           "lon": -90.82951,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "oxford_ms_us",
@@ -33812,7 +33834,8 @@
           "lon": -88.96878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tupelo_ms_us",
@@ -35506,7 +35529,8 @@
           "lon": -89.79356,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "vicksburg_ms_us",
@@ -36304,7 +36328,8 @@
           "lon": -90.15441,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

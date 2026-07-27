@@ -684,7 +684,8 @@
           "lon": -93.22176,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "albert_lea_mn_us",
@@ -1409,7 +1410,8 @@
           "lon": -93.31555,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bemidji_mn_us",
@@ -6711,7 +6713,8 @@
           "lon": -93.02336,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "grand_rapids_mn_us",
@@ -7709,7 +7712,8 @@
           "lon": -92.13176,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "hibbing_mn_us",
@@ -9131,7 +9135,8 @@
           "lon": -92.13176,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hibbing_mn_us",
@@ -12905,7 +12910,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mankato_mn_us",
@@ -13882,7 +13888,8 @@
           ],
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "minneapolis_mn_us",
@@ -16882,7 +16889,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "owatonna_mn_us",
@@ -18187,7 +18195,8 @@
           "lon": -93.32946,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rochester_mn_us",
@@ -19309,7 +19318,8 @@
           "lon": -93.31555,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rochester_mn_us",
@@ -20705,7 +20715,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rochester_mn_us",
@@ -22190,7 +22201,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rochester_mn_us",
@@ -23153,7 +23165,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "st_cloud_mn_us",
@@ -24910,7 +24923,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "st_cloud_mn_us",
@@ -26028,7 +26042,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "st_cloud_mn_us",
@@ -27008,7 +27023,8 @@
           "lon": -95.04823,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "willmar_mn_us",
@@ -28524,7 +28540,8 @@
           ],
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "willmar_mn_us",
@@ -29636,7 +29653,8 @@
           "lon": -96.61669,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "winona_mn_us",
@@ -30411,7 +30429,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

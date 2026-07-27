@@ -1226,7 +1226,8 @@
           "lon": -75.09216,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "newark_nj_us",
@@ -3276,7 +3277,8 @@
           "lon": -75.55856,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "newark_nj_us",
@@ -4255,7 +4257,8 @@
           "parking_spaces": 33,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "newark_nj_us",
@@ -6020,7 +6023,8 @@
           "parking_spaces": 42,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "newark_nj_us",
@@ -7248,7 +7252,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "toms_river_nj_us",
@@ -8233,7 +8238,8 @@
           "lon": -74.52916,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "toms_river_nj_us",
@@ -9677,7 +9683,8 @@
           "lon": -74.26491,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "trenton_nj_us",
@@ -11880,7 +11887,8 @@
           "lon": -74.92266,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "vineland_nj_us",
@@ -13532,7 +13540,8 @@
           "lon": -75.11356,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

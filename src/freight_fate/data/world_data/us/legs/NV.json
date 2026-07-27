@@ -1289,7 +1289,8 @@
           "lon": -114.86925,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "austin_nv_us",
@@ -1881,7 +1882,8 @@
           "lon": -118.76826,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "battle_mountain_nv_us",
@@ -2704,7 +2706,8 @@
           "lon": -115.75157,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "carson_city_nv_us",
@@ -5136,7 +5139,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": false
     },
     {
       "from": "elko_nv_us",
@@ -8339,7 +8343,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "elko_nv_us",
@@ -8922,7 +8927,8 @@
           "lon": -114.95445,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ely_nv_us",
@@ -9793,7 +9799,8 @@
           "lon": -115.9613,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "ely_nv_us",
@@ -10933,7 +10940,8 @@
           "lon": -117.21556,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "ely_nv_us",
@@ -11710,7 +11718,8 @@
           "lon": -114.95445,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "eureka_nv_us",
@@ -12224,7 +12233,8 @@
           "lon": -115.9613,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "fallon_nv_us",
@@ -13623,7 +13633,8 @@
           "lon": -117.75796,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "las_vegas_nv_us",
@@ -14426,7 +14437,8 @@
           "lon": -114.89699,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "las_vegas_nv_us",
@@ -16298,7 +16310,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": true
     },
     {
       "from": "las_vegas_nv_us",
@@ -19915,7 +19928,8 @@
           "lon": -112.5140344,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "reno_nv_us",
@@ -20602,7 +20616,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "reno_nv_us",
@@ -21334,7 +21349,8 @@
           "lon": -119.26719,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "reno_nv_us",
@@ -28628,7 +28644,8 @@
           "lon": -115.1274579,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "wells_nv_us",
@@ -29179,7 +29196,8 @@
           "lon": -114.06568,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "west_wendover_nv_us",
@@ -30058,7 +30076,8 @@
           "lon": -114.86925,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "west_wendover_nv_us",
@@ -31024,7 +31043,8 @@
           "lon": -111.94614,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "winnemucca_nv_us",
@@ -31478,7 +31498,8 @@
           "parking_spaces": 23,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "winnemucca_nv_us",
@@ -32130,7 +32151,8 @@
           "lon": -118.7498451,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

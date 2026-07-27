@@ -2024,7 +2024,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "aurora_il_us",
@@ -3764,7 +3765,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "aurora_il_us",
@@ -4663,7 +4665,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "bloomington_il_us",
@@ -5423,7 +5426,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bloomington_il_us",
@@ -7053,7 +7057,8 @@
           "lon": -87.69442,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bloomington_il_us",
@@ -7956,7 +7961,8 @@
           "lon": -89.46532,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "champaign_il_us",
@@ -8722,7 +8728,8 @@
           "lon": -88.89479,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "champaign_il_us",
@@ -10249,7 +10256,8 @@
           "lon": -86.13311,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "champaign_il_us",
@@ -11445,7 +11453,8 @@
           "lon": -87.77952,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "chicago_il_us",
@@ -12767,7 +12776,8 @@
           "lon": -87.8666247,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "chicago_il_us",
@@ -14161,7 +14171,8 @@
           "lon": -86.13311,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "chicago_il_us",
@@ -16804,7 +16815,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": true
     },
     {
       "from": "decatur_il_us",
@@ -17587,7 +17599,8 @@
           "lon": -89.01722,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "effingham_il_us",
@@ -19048,7 +19061,8 @@
           "lon": -89.3875,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "galesburg_il_us",
@@ -20062,7 +20076,8 @@
           "lon": -90.45647,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mattoon_il_us",
@@ -20739,7 +20754,8 @@
           "lon": -88.26813,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mattoon_il_us",
@@ -21236,7 +21252,8 @@
           "lon": -88.53003,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mount_vernon_il_us",
@@ -22158,7 +22175,8 @@
           "lon": -88.566,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mount_vernon_il_us",
@@ -23387,7 +23405,8 @@
           "lon": -88.96176,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "peoria_il_us",
@@ -24303,7 +24322,8 @@
           "lon": -89.0024,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "peoria_il_us",
@@ -25202,7 +25222,8 @@
           "lon": -89.75196,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "peoria_il_us",
@@ -27749,7 +27770,8 @@
           "lon": -89.58432,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "quincy_il_us",
@@ -29265,7 +29287,8 @@
           "lon": -90.38245,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "quincy_il_us",
@@ -30504,7 +30527,8 @@
           "lon": -89.58432,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rockford_il_us",
@@ -31821,7 +31845,8 @@
           "lon": -87.69442,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rockford_il_us",
@@ -33165,7 +33190,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "springfield_il_us",
@@ -34307,7 +34333,8 @@
           "lon": -89.01722,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "springfield_il_us",
@@ -35065,7 +35092,8 @@
           "lon": -89.0024,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "springfield_il_us",
@@ -36261,7 +36289,8 @@
           "lon": -90.2026,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

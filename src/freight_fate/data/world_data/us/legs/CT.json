@@ -1525,7 +1525,8 @@
           "lon": -73.1076,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hartford_ct_us",
@@ -4297,7 +4298,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hartford_ct_us",
@@ -6093,7 +6095,8 @@
           "lon": -72.08773,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "new_haven_ct_us",
@@ -6931,7 +6934,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "new_haven_ct_us",
@@ -8035,7 +8039,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "new_haven_ct_us",
@@ -9991,7 +9996,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "new_london_ct_us",
@@ -11224,7 +11230,8 @@
           "lon": -72.76095,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

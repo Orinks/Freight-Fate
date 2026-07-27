@@ -782,7 +782,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": false
     },
     {
       "from": "burlington_co_us",
@@ -2784,7 +2785,8 @@
           "lon": -105.02558,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "colorado_springs_co_us",
@@ -7247,7 +7249,8 @@
           "lon": -106.64893,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "colorado_springs_co_us",
@@ -8718,7 +8721,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "colorado_springs_co_us",
@@ -9532,7 +9536,8 @@
           "lon": -104.60696,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "delta_co_us",
@@ -10326,7 +10331,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "denver_co_us",
@@ -16347,7 +16353,8 @@
           "lon": -106.64893,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "denver_co_us",
@@ -18576,7 +18583,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": false
     },
     {
       "from": "denver_co_us",
@@ -20068,7 +20076,8 @@
           "lon": -105.49729,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "durango_co_us",
@@ -21680,7 +21689,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": false
     },
     {
       "from": "durango_co_us",
@@ -22803,7 +22813,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": false
     },
     {
       "from": "edwards_co_us",
@@ -23783,7 +23794,8 @@
           "lon": -107.2913,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_collins_co_us",
@@ -24542,7 +24554,8 @@
           "lon": -104.84878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_collins_co_us",
@@ -27140,7 +27153,8 @@
           "lon": -104.8526916,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_collins_co_us",
@@ -28548,7 +28562,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_collins_co_us",
@@ -29553,7 +29568,8 @@
           "lon": -105.61119,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "glenwood_springs_co_us",
@@ -30798,7 +30814,8 @@
           "lon": -108.04476,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "grand_junction_co_us",
@@ -32117,7 +32134,8 @@
           "lon": -110.14842,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lamar_co_us",
@@ -33116,7 +33134,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "limon_co_us",
@@ -34305,7 +34324,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "montrose_co_us",
@@ -34799,7 +34819,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "pagosa_springs_co_us",
@@ -35985,7 +36006,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": false
     },
     {
       "from": "pueblo_co_us",
@@ -39660,7 +39682,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "pueblo_co_us",
@@ -41849,7 +41872,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "pueblo_co_us",
@@ -45144,7 +45168,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "silverthorne_co_us",
@@ -46066,7 +46091,8 @@
           "lon": -106.63249,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "trinidad_co_us",
@@ -47321,7 +47347,8 @@
           "lon": -104.79648,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "walsenburg_co_us",
@@ -48125,7 +48152,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     }
   ]
 }

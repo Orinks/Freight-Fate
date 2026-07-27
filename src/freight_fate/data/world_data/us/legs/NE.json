@@ -581,7 +581,8 @@
           "lon": -98.35416,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "columbus_ne_us",
@@ -1218,7 +1219,8 @@
           "lon": -97.42815,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbus_ne_us",
@@ -2232,7 +2234,8 @@
           "lon": -95.87878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "grand_island_ne_us",
@@ -2773,7 +2776,8 @@
           "lon": -99.12096,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "grand_island_ne_us",
@@ -3851,7 +3855,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kearney_ne_us",
@@ -5549,7 +5554,8 @@
           "lon": -99.29736,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "kearney_ne_us",
@@ -5977,7 +5983,8 @@
           "lon": -99.3818,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kearney_ne_us",
@@ -6558,7 +6565,8 @@
           "lon": -100.72723,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lexington_ne_us",
@@ -7001,7 +7009,8 @@
           "lon": -100.72723,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lincoln_ne_us",
@@ -10064,7 +10073,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lincoln_ne_us",
@@ -12283,7 +12293,8 @@
           "lon": -96.86361,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "lincoln_ne_us",
@@ -13544,7 +13555,8 @@
           "lon": -95.87878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "norfolk_ne_us",
@@ -14616,7 +14628,8 @@
           "lon": -98.35416,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "norfolk_ne_us",
@@ -16073,7 +16086,8 @@
           "lon": -95.87878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "norfolk_ne_us",
@@ -17347,7 +17361,8 @@
           "lon": -96.37197,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "north_platte_ne_us",
@@ -18724,7 +18739,8 @@
           "lon": -101.05271,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "north_platte_ne_us",
@@ -19106,7 +19122,8 @@
           "lon": -101.71289,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ogallala_ne_us",
@@ -19763,7 +19780,8 @@
           "lon": -102.95021,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "omaha_ne_us",
@@ -23613,7 +23631,8 @@
           "lon": -104.84878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "scottsbluff_ne_us",
@@ -24761,7 +24780,8 @@
           "lon": -104.84878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "scottsbluff_ne_us",
@@ -25638,7 +25658,8 @@
           "lon": -102.95021,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sidney_ne_us",
@@ -26661,7 +26682,8 @@
           "lon": -104.84878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

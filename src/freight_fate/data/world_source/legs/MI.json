@@ -1023,7 +1023,8 @@
           "lon": -83.73216,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ann_arbor_mi_us",
@@ -3196,7 +3197,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "ann_arbor_mi_us",
@@ -5131,7 +5133,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "ann_arbor_mi_us",
@@ -6332,7 +6335,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "ann_arbor_mi_us",
@@ -7123,7 +7127,8 @@
           "lon": -83.67085,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "detroit_mi_us",
@@ -8065,7 +8070,8 @@
           "lon": -83.46043,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "detroit_mi_us",
@@ -11662,7 +11668,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": true
     },
     {
       "from": "detroit_mi_us",
@@ -13857,7 +13864,8 @@
           "lon": -82.2235298,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "detroit_mi_us",
@@ -14942,7 +14950,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "escanaba_mi_us",
@@ -16945,7 +16954,8 @@
           "curation": "curated",
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "escanaba_mi_us",
@@ -17966,7 +17976,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "flint_mi_us",
@@ -19379,7 +19390,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "flint_mi_us",
@@ -20304,7 +20316,8 @@
           "lon": -84.30616,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "flint_mi_us",
@@ -20929,7 +20942,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "grand_rapids_mi_us",
@@ -23391,7 +23405,8 @@
           "lon": -87.69442,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "grand_rapids_mi_us",
@@ -25818,7 +25833,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "grand_rapids_mi_us",
@@ -27287,7 +27303,8 @@
           "lon": -83.89407,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "iron_mountain_mi_us",
@@ -29176,7 +29193,8 @@
           "curation": "curated",
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "iron_mountain_mi_us",
@@ -30578,7 +30596,8 @@
           "lon": -87.36253,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "jackson_mi_us",
@@ -31533,7 +31552,8 @@
           "lon": -83.87933,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jackson_mi_us",
@@ -32686,7 +32706,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jackson_mi_us",
@@ -33416,7 +33437,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kalamazoo_mi_us",
@@ -35564,7 +35586,8 @@
           "lon": -83.8768253,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kalamazoo_mi_us",
@@ -36498,7 +36521,8 @@
           "lon": -86.00502,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kalamazoo_mi_us",
@@ -37197,7 +37221,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kalamazoo_mi_us",
@@ -38209,7 +38234,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lansing_mi_us",
@@ -39857,7 +39883,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "lansing_mi_us",
@@ -41068,7 +41095,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "lansing_mi_us",
@@ -42167,7 +42195,8 @@
           "lon": -85.21947,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "marquette_mi_us",
@@ -43845,7 +43874,8 @@
           "curation": "curated",
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "marquette_mi_us",
@@ -45611,7 +45641,8 @@
           "lon": -84.3715,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "muskegon_mi_us",
@@ -46396,7 +46427,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "muskegon_mi_us",
@@ -47629,7 +47661,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "muskegon_mi_us",
@@ -49729,7 +49762,8 @@
           "lon": -86.31852,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "port_huron_mi_us",
@@ -50617,7 +50651,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "port_huron_mi_us",
@@ -51584,7 +51619,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "saginaw_mi_us",
@@ -52608,7 +52644,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sault_ste_marie_mi_us",
@@ -54653,7 +54690,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "traverse_city_mi_us",
@@ -56571,7 +56609,8 @@
           "lon": -85.5917269,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

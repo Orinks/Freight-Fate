@@ -2370,7 +2370,8 @@
           "lon": -83.51547,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "albany_ga_us",
@@ -4636,7 +4637,8 @@
           "lon": -84.10747,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "americus_ga_us",
@@ -5854,7 +5856,8 @@
           "lon": -84.79209,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "athens_ga_us",
@@ -7345,7 +7348,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "athens_ga_us",
@@ -8936,7 +8940,8 @@
           "lon": -82.03313,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "athens_ga_us",
@@ -11983,7 +11988,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "athens_ga_us",
@@ -14553,7 +14559,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "athens_ga_us",
@@ -16305,7 +16312,8 @@
           "lon": -82.6922,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "athens_ga_us",
@@ -19154,7 +19162,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": true
     },
     {
       "from": "atlanta_ga_us",
@@ -28427,7 +28436,8 @@
           "lon": -96.24547,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "augusta_ga_us",
@@ -30700,7 +30710,8 @@
           "lon": -83.47944,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "augusta_ga_us",
@@ -32146,7 +32157,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "augusta_ga_us",
@@ -34397,7 +34409,8 @@
           "lon": -82.1706533,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "augusta_ga_us",
@@ -36446,7 +36459,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "brunswick_ga_us",
@@ -37514,7 +37528,8 @@
           "lon": -81.33195,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cartersville_ga_us",
@@ -38850,7 +38865,8 @@
           "lon": -84.57987,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbus_ga_us",
@@ -40290,7 +40306,8 @@
           "lon": -84.10747,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbus_ga_us",
@@ -41996,7 +42013,8 @@
           "lon": -85.39989,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbus_ga_us",
@@ -43766,7 +43784,8 @@
           "lon": -84.08569,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cordele_ga_us",
@@ -44968,7 +44987,8 @@
           "lon": -83.74457,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dalton_ga_us",
@@ -46031,7 +46051,8 @@
           "lon": -84.74424,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dublin_ga_us",
@@ -47582,7 +47603,8 @@
           "lon": -81.45665,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hinesville_ga_us",
@@ -49185,7 +49207,8 @@
           "lon": -81.1998,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lagrange_ga_us",
@@ -50828,7 +50851,8 @@
           "lon": -84.74618,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lagrange_ga_us",
@@ -51720,7 +51744,8 @@
           "lon": -84.96405,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "macon_ga_us",
@@ -53473,7 +53498,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "macon_ga_us",
@@ -55186,7 +55212,8 @@
           "lon": -84.24182,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "macon_ga_us",
@@ -56096,7 +56123,8 @@
           "lon": -82.93435,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rome_ga_us",
@@ -56749,7 +56777,8 @@
           "lon": -84.80727,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rome_ga_us",
@@ -58177,7 +58206,8 @@
           "lon": -85.2818,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "savannah_ga_us",
@@ -61605,7 +61635,8 @@
           "lon": -84.0648724,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "savannah_ga_us",
@@ -63421,7 +63452,8 @@
           "lon": -79.80173,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "statesboro_ga_us",
@@ -64778,7 +64810,8 @@
           "lon": -82.03313,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "statesboro_ga_us",
@@ -65797,7 +65830,8 @@
           "lon": -81.28269,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tifton_ga_us",
@@ -66457,7 +66491,8 @@
           "lon": -83.75811,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "valdosta_ga_us",
@@ -68686,7 +68721,8 @@
           "lon": -85.39989,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "valdosta_ga_us",
@@ -70645,7 +70681,8 @@
           "lon": -83.51547,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }
