@@ -11,6 +11,15 @@ class SpeedControlStateMixin:
         self._cruise_mph = None
         self._cruise_throttle = 0.0
         self._cruise_applied = 0.0
+        self._cruise_trim = 0.0
+        if self._cruise_jake_on:
+            # Hand the retarder back with the cruise session, but only when
+            # cruise raised it -- the driver's own jake switch stays put.
+            self._cruise_jake_on = False
+            self.truck.engine_brake = False
+        self._cruise_snubbing = False
+        self._cruise_grade_said = 0
+        self._cruise_beaten_s = 0.0
         if not preserve_exit_cap:
             self._cruise_exit_mph = None
         self._acc_following = False

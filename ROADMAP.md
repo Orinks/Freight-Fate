@@ -324,6 +324,33 @@ From a batch of player reports:
   Plus and Minus adjust the set point by `CRUISE_STEP_MPH` (the real
   Accel/Coast buttons), so you engage once rolling and dial the target up to the
   speed you want; the truck accelerates up to it, capped by the limit offset.
+- [x] **Grade-aware adaptive cruise, and grades you can hear coming.** Shipped
+  on the 1.8.x nightly line from a player report: cruise could only add
+  throttle, so a downgrade carried the truck fifteen-plus mph past the set
+  speed in silence and into a fine. `Truck.hold_throttle` now feed-forwards the
+  grade under the wheels and P/I only trims from there; over the target cruise
+  takes the engine brake and snubs the drums when that is not enough, holding
+  the set speed on grades to eight percent with full air and cool shoes. It
+  hands back only the engine brake it switched on itself. Alongside it, a
+  spoken advisory for any grade of 3 percent or more lasting at least three
+  quarters of a mile (short dips filtered out -- unfiltered, Knoxville to
+  Asheville spoke 76 advisories in 116 miles), a once-per-grade line when
+  cruise concedes the hill, and the G key for the slope under the wheels, its
+  run, the truck's verdict, and the next steep grade ahead.
+- [x] **`tools/playtest_road.py`: drop into a chosen piece of road.** Built
+  alongside the grade work, because walking the menus to a specific hill takes
+  minutes and lands somewhere slightly different every time. Finds a road
+  feature by evidence (`--find downgrade|upgrade|zone|limit-drop|stop`, with
+  `--scan` to list candidates), then starts the real game already rolling at
+  it with the truck, cargo, weather, hour, and cruise set as asked -- or
+  `--headless N` for a speed/gear/jake/air trace instead of a window. Searching
+  reads the world data alone, so `--scan` never opens a window. Its sibling
+  `tools/playtest.py` still drives a whole delivery headlessly for transcripts.
+- [ ] Follow-ups the dev line does not have: staged retarder control (dev's
+  engine brake is one switch, so cruise holds by cycling it against the
+  throttle rather than picking a stage), the predictive read of the grade
+  ahead, and a pull downshift for climbs the automatic currently rides out in
+  top gear. All three exist on `feat/career-1.9`; the merge takes 1.9's side.
 
 - [x] **Window-model on-time bonus.** Shipped on the 1.8.x nightly line:
   `Job.payout` used to scale its on-time bonus by unused deadline (max 15%

@@ -79,6 +79,8 @@ class DrivingControlsMixin:
             self._speak_speed_limit()
         elif key == pygame.K_a:
             self._speak_last_announcement()
+        elif key == pygame.K_g:
+            self._speak_grade()
         elif key == pygame.K_u:
             self._speak_upcoming()
         elif key == pygame.K_F1:
@@ -140,7 +142,8 @@ class DrivingControlsMixin:
             "below 100 psi, wait with the engine running. "
             f"{objective_help}"
             "Space speed, active speed-control mode, and target. "
-            "S posted speed limit. Tab status menu. F fuel. "
+            "S posted speed limit. G the grade under the wheels, whether the "
+            "truck is holding it, and the next grade ahead. Tab status menu. F fuel. "
             "C clock, deadline, and hours of service. "
             "R progress, distance left, and where you are. "
             "Shift R next listed highway exit. "
@@ -445,6 +448,95 @@ class DrivingControlsMixin:
             self.ctx.say(self._last_event_message)
         else:
             self.ctx.say("No recent announcement to repeat.")
+
+    def _speak_grade(self) -> None:
+        """G: the grade under the wheels, the next one, and what they mean.
+
+        The verdict comes from the sim's own net-force balance, so the spoken
+        answer to "why am I gaining speed" is the same physics the wheels feel
+        -- including whether the engine brake has the descent or is losing it.
+        """
+        t = self.truck
+        grade_pct = self.trip.grade_at(self.trip.position_mi) * 100.0
+        parts: list[str] = []
+        if abs(grade_pct) < 0.5:
+            parts.append("Level road.")
+        else:
+            sign = 1 if grade_pct > 0 else -1
+            direction = "uphill" if sign > 0 else "downhill"
+            run_mi = self._grade_run_mi(self.trip.position_mi, sign)
+            # Spoken distances round to whole units, so anything shorter than
+            # this reads as "for another 0 miles". A grade that close to over
+            # is not worth putting a number on anyway.
+            length = (
+                f" for another {self.trip._distance_text(run_mi)}"
+                if run_mi >= GRADE_WARN_MIN_RUN_MI
+                else ""
+            )
+            parts.append(f"Grade {abs(grade_pct):.1f} percent {direction}{length}.")
+            if t.velocity_mps > 0.5:
+                net = t.drive_force() - t.resistance_force() - t.brake_force()
+                accel_mph_s = net / t.gross_mass_kg * 2.23694
+                if sign > 0:
+                    if accel_mph_s < -0.2:
+                        parts.append("The hill has the load; expect to lose speed.")
+                    elif accel_mph_s > 0.2:
+                        parts.append("Pulling it with speed to spare.")
+                    else:
+                        parts.append("Holding speed.")
+                elif accel_mph_s > 0.2:
+                    if t.engine_brake:
+                        # An automatic driver has no gear to reach for; the
+                        # brake pedal is what puts their box in a lower one.
+                        losing = (
+                            "brake to hold it back"
+                            if t.transmission.automatic
+                            else "gear down or brake"
+                        )
+                        parts.append(f"The engine brake is not holding it; {losing}.")
+                    elif t.throttle <= 0.05:
+                        hint = self.ctx.control_hint("engine_brake")
+                        parts.append(f"Speed is building; set the engine brake with {hint}.")
+                elif t.engine_brake:
+                    parts.append("The engine brake has it.")
+                else:
+                    parts.append("Speed in hand.")
+        parts.append(self._next_grade_text())
+        self.ctx.say(" ".join(part for part in parts if part))
+
+    def _next_grade_text(self) -> str:
+        """The next grade worth planning for, and how far off it is."""
+        probe = self.trip.position_mi + GRADE_WARN_STEP_MI
+        here = self.trip.grade_at(self.trip.position_mi) * 100.0
+        here_sign = (
+            1 if here >= GRADE_WARN_CLEAR_PCT else -1 if here <= -GRADE_WARN_CLEAR_PCT else 0
+        )
+        while probe < min(self.trip.total_miles, self.trip.position_mi + GRADE_WARN_SCAN_MI):
+            pct = self.trip.grade_at(probe) * 100.0
+            sign = 1 if pct > 0 else -1
+            # The grade already under the wheels is the first sentence's job;
+            # this one starts at the next change of character.
+            if abs(pct) >= GRADE_WARN_PCT and sign != here_sign:
+                run_mi = self._grade_run_mi(probe, sign)
+                # Same filter the advisory uses: a third-of-a-mile dip is not
+                # the next grade, it is a bump in this one.
+                if run_mi >= GRADE_WARN_MIN_RUN_MI:
+                    direction = "upgrade" if sign > 0 else "downgrade"
+                    ahead = probe - self.trip.position_mi
+                    distance = (
+                        f"in {self.trip._distance_text(ahead)}"
+                        if ahead >= GRADE_WARN_MIN_RUN_MI
+                        else "just ahead"
+                    )
+                    return (
+                        f"Next, a {abs(pct):.1f} percent {direction} {distance}, "
+                        f"running {self.trip._distance_text(run_mi)}."
+                    )
+            if abs(pct) < GRADE_WARN_CLEAR_PCT:
+                here_sign = 0
+            probe += GRADE_WARN_STEP_MI
+        scanned = max(0.0, min(GRADE_WARN_SCAN_MI, self.trip.total_miles - self.trip.position_mi))
+        return f"Nothing steep in the next {self.trip._distance_text(scanned)}."
 
     def _speak_upcoming(self, within_mi: float = 15.0) -> None:
         """U: what is coming up -- imposed limits, stops, and exits ahead."""

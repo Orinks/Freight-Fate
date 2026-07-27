@@ -4,6 +4,23 @@
 
 ### Added
 
+- **A warning before every steep grade.** Any climb or descent of three percent
+  or more that runs for at least three quarters of a mile is now called out
+  before you reach it, with how steep it is, how far it runs, and -- going down
+  -- what to do about it before it starts. In a manual that is picking your
+  gear and setting the engine brake; in an automatic it is setting the engine
+  brake and braking down to speed, which is what puts the transmission in a
+  lower gear for you. Short dips stay quiet, so on a mountain route you hear
+  the hills that matter and nothing else. Terse speech does not get these
+  announcements at all -- press G whenever you want the grade instead. The
+  advisory is there so you can decide before the hill starts: when in doubt,
+  take manual control of the speed rather than leaving it to cruise.
+
+- **G speaks the grade.** Press G while driving for the slope under the wheels,
+  how much further it runs, whether the truck is holding it or losing ground --
+  and the next steep grade ahead with how far off it is. It answers "why is my
+  speed building" without waiting for anything to be announced.
+
 - **Review recent spoken messages while driving.** Use the message review
   controls to move through general and critical announcements, jump to the
   first or latest message, switch categories, and copy the current message to
@@ -110,6 +127,28 @@
   numbers no longer skip when a stable release comes out.
 
 ### Fixed
+
+- **Adaptive cruise no longer runs away down a hill.** Cruise could only ever
+  add throttle, so on a downgrade it simply came off the fuel and let gravity
+  carry the truck -- fifteen miles per hour or more over your set speed, with
+  nothing said about it, and a speeding fine at the bottom. It now reaches for
+  the engine brake when the truck starts to gain on a descent and snubs the
+  service brakes when the engine brake is not enough, holding your set speed
+  on grades as steep as eight percent. It hands the engine brake back when the
+  hill ends, and never touches the switch when you set it yourself. Climbing,
+  cruise now answers a hill as the wheels reach it instead of taking ten
+  seconds to work up to full throttle. Cruise is still an assistant, not a
+  driver: on a steep or long grade, when in doubt, take manual control of the
+  speed. Braking hands the truck straight back to you.
+
+- **Cruise tells you when a grade has beaten it.** If the truck is running well
+  past your set speed down a hill, or has lost a lot of it climbing, cruise
+  says so once, names the speed you are actually doing, and tells you to brake
+  or gear down -- or just to brake, if you are driving an automatic. Before
+  this it drifted in silence. It waits until the grade has genuinely won and
+  stayed won, so a gear change or a stretch of nearly level road never sets it
+  off. Treat it as your cue to take over: when in doubt, brake rather than
+  waiting to see whether cruise recovers the speed.
 
 - **Automatic speed control now slows in time for construction zones.** At
   highway speed, adaptive cruise begins braking when the advance warning is

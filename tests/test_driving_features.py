@@ -2964,3 +2964,204 @@ def test_road_joint_thumps_pause_off_highway(monkeypatch):
         assert not rumbles
     finally:
         app.shutdown()
+
+
+# -- grade advisories ------------------------------------------------------------
+
+
+def _advisory_setup(app, grade_at):
+    driving = start_drive(app)
+    quiet_trip(driving)
+    driving.trip.position_mi = 5.0
+    driving.trip.grade_at = grade_at
+    driving.truck.velocity_mps = 60.0 / 2.23694
+    return driving
+
+
+def test_a_steep_downgrade_is_called_out_before_the_truck_is_on_it(monkeypatch):
+    """The player had no warning at all: the first news of a hill was the
+    speeding chime after cruise had already run away down it."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        driving = _advisory_setup(app, lambda mile: -0.06 if mile >= 5.5 else 0.0)
+        driving._update_grade_advisory()
+        assert any("6.0 percent downgrade ahead" in line for line in spoken), spoken
+        assert any("at least" in line for line in spoken), spoken
+        assert any("engine brake" in line for line in spoken), spoken
+        said = len(spoken)
+        # Once per grade, not once per scan, all the way down the hill.
+        for _ in range(10):
+            driving.trip.position_mi += 0.2
+            driving._update_grade_advisory()
+        assert len(spoken) == said
+    finally:
+        app.shutdown()
+
+
+def test_a_gentle_grade_gets_no_advisory(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        driving = _advisory_setup(app, lambda mile: -0.02)
+        driving._update_grade_advisory()
+        assert not any("downgrade" in line for line in spoken), spoken
+    finally:
+        app.shutdown()
+
+
+def test_a_short_dip_is_not_announced_as_a_grade(monkeypatch):
+    """The baked profile is full of third-of-a-mile blips; they are not hills,
+    and warning about each one buried the grades that matter."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        # A 5 percent dip a third of a mile long, then a real 4 percent hill.
+        driving = _advisory_setup(
+            app,
+            lambda mile: -0.05 if 5.6 <= mile <= 5.9 else (-0.04 if mile >= 7.0 else 0.0),
+        )
+        driving._update_grade_advisory()
+        assert not spoken, spoken
+        # And the dip did not latch away the hill behind it.
+        driving.trip.position_mi = 6.5
+        driving._update_grade_advisory()
+        assert any("4.0 percent downgrade ahead" in line for line in spoken), spoken
+    finally:
+        app.shutdown()
+
+
+def test_the_next_grade_is_announced_after_the_road_levels_out(monkeypatch):
+    """The latch clears on the flat, so a rolling route keeps warning."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        driving = _advisory_setup(app, lambda mile: -0.05)
+        driving._update_grade_advisory()
+        assert sum("downgrade" in line for line in spoken) == 1, spoken
+        driving.trip.grade_at = lambda mile: 0.0
+        driving.trip.position_mi += 0.5
+        driving._update_grade_advisory()  # level: the latch lifts
+        driving.trip.grade_at = lambda mile: -0.05
+        driving.trip.position_mi += 0.5
+        driving._update_grade_advisory()
+        assert sum("downgrade" in line for line in spoken) == 2, spoken
+    finally:
+        app.shutdown()
+
+
+def test_an_upgrade_is_called_out_too(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        driving = _advisory_setup(app, lambda mile: 0.045)
+        driving._update_grade_advisory()
+        assert any("4.5 percent upgrade ahead" in line for line in spoken), spoken
+        assert any("lose speed" in line for line in spoken), spoken
+    finally:
+        app.shutdown()
+
+
+def test_the_descent_advisory_names_controls_the_driver_actually_has(monkeypatch):
+    """An automatic has no gear selection, so "pick your gear" names nothing.
+
+    W, Q, N and Backspace are all gated on a manual box. What an automatic
+    driver has is the brake, which is exactly what puts their transmission in
+    a lower gear -- so that is what the advisory tells them to use.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        driving = _advisory_setup(app, lambda mile: -0.05)
+        driving.truck.transmission.automatic = True
+        driving._update_grade_advisory()
+        said = spoken[-1]
+        assert "pick your gear" not in said.lower(), said
+        assert "brake down to speed" in said, said
+        assert "hold a lower gear" in said, said
+
+        # The manual box keeps the gear advice, because it can act on it.
+        spoken.clear()
+        driving.truck.transmission.automatic = False
+        driving._grade_warned_sign = 0
+        driving.trip.position_mi += 0.5
+        driving._update_grade_advisory()
+        assert "Pick your gear" in spoken[-1], spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_terse_speech_hears_no_grade_advisories(monkeypatch):
+    """Terse asked for the road to stay quiet; G is there on demand.
+
+    The advisory is unrequested commentary, which is exactly what the setting
+    exists to remove -- and it costs nothing, because terse skips the road
+    profile scan entirely rather than scanning and then staying silent.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    played = []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: played.append(a))
+    try:
+        app.ctx.settings.speech_verbosity = 0
+        driving = _advisory_setup(app, lambda mile: -0.06)
+        spoken.clear()
+        played.clear()  # the career setup's own menu sounds are not ours
+        for _ in range(10):
+            driving.trip.position_mi += 0.5
+            driving._update_grade_advisory()
+        assert not spoken, spoken
+        assert not played, played  # silent means silent: no cue sound either
+        assert driving._grade_scan_mi == -1e9  # never even scanned
+
+        # Normal speech still gets it.
+        app.ctx.settings.speech_verbosity = 2
+        driving._update_grade_advisory()
+        assert any("downgrade" in line for line in spoken), spoken
+    finally:
+        app.shutdown()
+
+
+def test_cruise_still_concedes_a_grade_on_terse_speech(monkeypatch):
+    """The advisory is commentary; this one is the controller reporting it has
+    stopped doing its job, so terse keeps it."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        app.ctx.settings.speech_verbosity = 0
+        driving = _advisory_setup(app, lambda mile: -0.08)
+        t = driving.truck
+        t.start_engine()
+        t.set_air_ready(parking_brake=False)
+        t.transmission.gear = t.transmission.num_gears
+        driving._engage_cruise(60.0)
+        t.grade = -0.08
+        for _ in range(300):
+            driving._announce_cruise_grade_verdict(1 / 60, -18.0, closing=False)
+        assert any("losing the downgrade" in line for line in spoken), spoken
+    finally:
+        app.shutdown()

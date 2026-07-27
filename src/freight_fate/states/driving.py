@@ -138,7 +138,17 @@ class DrivingState(
         self._cruise_mph: float | None = None
         self._cruise_throttle = 0.0
         self._cruise_applied = 0.0
+        self._cruise_trim = 0.0  # integral trim on top of the grade feed-forward
+        self._cruise_jake_on = False  # the engine brake cruise itself switched on
+        self._cruise_jake_cooldown_s = 0.0  # quiet time between those changes
+        self._cruise_snubbing = False  # a service-brake snub is in progress
+        self._cruise_grade_said = 0  # sign of the grade cruise has already conceded
+        self._cruise_beaten_s = 0.0  # how long the grade has been winning
         self._cruise_exit_mph: float | None = None
+        # Sign of the steep grade already announced, so each hill is called out
+        # once rather than every frame, and where the road profile was last read.
+        self._grade_warned_sign = 0
+        self._grade_scan_mi = -1e9
         # K arms one continuous speed-control session. The active controller
         # changes between adaptive cruise on open roads and the speed keeper in
         # restricted zones, while this target remembers what cruise should

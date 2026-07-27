@@ -964,7 +964,35 @@ class DrivingEventMixin:
             self.ctx.say_event("Traffic ahead, adaptive cruise reducing speed.", interrupt=False)
         self._acc_following = following
         error = target_mph - t.speed_mph
-        self._cruise_throttle = max(0.0, min(1.0, self._cruise_throttle + error * 0.08 * dt))
+        # Feed-forward first: the truck's own physics knows what throttle
+        # balances the grade under the wheels, so cruise answers a hill as it
+        # arrives. P and I only trim from there.
+        hold = t.hold_throttle()
+        trim = max(
+            -CRUISE_TRIM_LIMIT,
+            min(CRUISE_TRIM_LIMIT, self._cruise_trim + error * CRUISE_I_GAIN * dt),
+        )
+        if error < 0.0:
+            # Over the target, cruise comes off the fuel: feeding the grade-hold
+            # value into a truck that also needs to lose speed is a truck
+            # fighting itself, and the speeding-strike grace only forgives a
+            # cruise genuinely off the throttle. Eased out across a band rather
+            # than switched -- a hard cut at the boundary chattered the pedal on
+            # and off at steady state, and the engine voice shows every bit of
+            # that.
+            hold *= max(0.0, 1.0 + error / CRUISE_COAST_MPH)
+            if error <= -CRUISE_COAST_MPH:
+                trim = min(0.0, trim)
+        demand = hold + error * CRUISE_P_GAIN + trim
+        # Anti-windup: a grade the engine cannot pull, or a downgrade gravity
+        # owns, pins the pedal at one end for as long as it lasts. Integrating
+        # through that buries the trim at its limit, and the truck then sags or
+        # surges for seconds after the road levels out while it unwinds. Only
+        # take the new trim when it can still move the pedal.
+        saturated = (demand <= 0.0 and error < 0.0) or (demand >= 1.0 and error > 0.0)
+        if not saturated:
+            self._cruise_trim = trim
+        self._cruise_throttle = max(0.0, min(1.0, demand))
         # Ramp the applied throttle up to the held integrator value rather than
         # snapping, so cruise eases back in after a clutch release; drops (traffic
         # or a lower limit) still apply immediately. On a steady frame the applied
@@ -980,9 +1008,144 @@ class DrivingEventMixin:
         else:
             self._cruise_applied = self._cruise_throttle
         t.throttle = self._cruise_applied
-        if (following or limit_capped or exit_capped) and error < -2.0:
-            weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
-            t.brake = max(t.brake, min(weather_brake, abs(error) / 30.0))
+        closing = following or limit_capped or exit_capped
+        self._hold_cruise_from_above(dt, error, closing=closing)
+        self._announce_cruise_grade_verdict(dt, error, closing=closing)
+
+    def _hold_cruise_from_above(self, dt: float, error: float, *, closing: bool) -> None:
+        """Bring the truck back down to the target: retarder first, drums last.
+
+        Cutting fuel was cruise's whole answer to being over the target, which
+        works on the flat and fails on every downgrade: gravity carried the
+        truck past the set speed and simply held it there, and the service
+        brake only ever came out while a cap or a lead was already pulling the
+        target down. Cruise now reaches for the engine brake against the
+        overspeed, and snubs the drums when that is not enough.
+
+        Closing on a lead or easing down to a lower posted limit keeps the old
+        proportional service-brake trim and no retarder at all. That is a
+        deliberate limit: the jake is a loud device, and reaching for it on
+        every piece of traffic would put its bark in the player's ears several
+        times a mile for a job the drums do quietly.
+        """
+        t = self.truck
+        over = -error
+        self._cruise_jake_cooldown_s = max(0.0, self._cruise_jake_cooldown_s - dt)
+        if self._cruise_jake_on and not t.engine_brake:
+            # The accelerator key, or the driver's own J, took it back off.
+            self._cruise_jake_on = False
+        if closing:
+            if over > 2.0:
+                weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
+                t.brake = max(t.brake, min(weather_brake, over / 30.0))
+            self._cruise_snubbing = False
+            return
+        # Never release a retarder the driver's own switch is holding -- only
+        # the one cruise raised itself.
+        driver_owns_jake = t.engine_brake and not self._cruise_jake_on
+        if not driver_owns_jake:
+            wanted = t.engine_brake
+            if over > CRUISE_JAKE_OVER_MPH and t.throttle <= 0.05:
+                wanted = True
+            elif over < -CRUISE_JAKE_RELEASE_MPH or t.grade > -0.005:
+                # Under the target, or the hill is behind us. The switch stays
+                # on for the length of a descent the way a driver leaves it on:
+                # any throttle cruise puts down takes the jake out of the
+                # physics anyway, so the speed is modulated without the device
+                # barking on and off every few seconds.
+                wanted = False
+            # Changes wait out a cooldown so a rolling grade does not make the
+            # jake chatter -- it is a loud device. Coming off it because the
+            # truck has fallen under the target goes through at once: holding
+            # retard the truck no longer needs is what drags it below the speed
+            # cruise is supposed to be keeping.
+            if wanted != t.engine_brake and (not wanted or self._cruise_jake_cooldown_s <= 0.0):
+                t.engine_brake = wanted
+                self._cruise_jake_on = wanted
+                self._cruise_jake_cooldown_s = CRUISE_JAKE_STEP_S
+        # Holding a grade. The drums only come out once the retarder is doing
+        # everything it can, and then as a snub that finishes and lets go.
+        if self._cruise_snubbing:
+            self._cruise_snubbing = over > -CRUISE_SNUB_UNDER_MPH
+        elif t.engine_brake and over > CRUISE_BRAKE_OVER_MPH:
+            self._cruise_snubbing = True
+        if self._cruise_snubbing:
+            t.brake = max(t.brake, CRUISE_SNUB_BRAKE)
+
+    def _announce_cruise_grade_verdict(self, dt: float, error: float, *, closing: bool) -> None:
+        """Say when the grade has beaten cruise, rather than drifting silently.
+
+        A player who cannot see the speedometer had no way to know cruise had
+        given up on its number -- the truck simply ran fifteen mph over down a
+        hill (playtest, 2026-07-27). Once per grade, and it clears when the
+        road hands the speed back. Silent while cruise is deliberately coming
+        down to a lead or a lower limit: that gap is the plan, not a failure.
+        """
+        t = self.truck
+        if closing:
+            self._cruise_grade_said = 0
+            self._cruise_beaten_s = 0.0
+            return
+        grade_pct = t.grade * 100.0
+        # The verdict follows the road, not the sign of the error. Reading the
+        # error alone announced "the climb has beaten cruise" on a downgrade,
+        # purely because the truck happened to be under its number there
+        # (bench trace, 2026-07-27: mile 69.5, road at -0.8 percent). The floor
+        # keeps it off road the G key calls level.
+        grade_sign = (
+            1
+            if grade_pct >= CRUISE_GRADE_BEATEN_PCT
+            else -1
+            if grade_pct <= -CRUISE_GRADE_BEATEN_PCT
+            else 0
+        )
+        if grade_sign > 0:
+            # A climb has only beaten cruise once the pedal is on the floor
+            # and the hill is still winning. Without that, every time the
+            # driver dialed the target up -- or a limit rise raised it --
+            # cruise announced defeat while it was simply accelerating toward
+            # a speed it would have reached.
+            beaten = (
+                error >= CRUISE_GRADE_BEATEN_MPH
+                and t.throttle >= 0.95
+                and not t.transmission.shifting
+                and t.drive_force() <= t.resistance_force()
+            )
+        elif grade_sign < 0:
+            beaten = error <= -CRUISE_GRADE_BEATEN_MPH
+        else:
+            beaten = False
+        # One frame is not evidence -- the driveline opens on every gear change
+        # -- so the grade has to keep winning for a few seconds before cruise
+        # concedes out loud.
+        self._cruise_beaten_s = self._cruise_beaten_s + dt if beaten else 0.0
+        if self._cruise_beaten_s < CRUISE_GRADE_BEATEN_S:
+            if abs(error) < CRUISE_GRADE_BEATEN_MPH * 0.5:
+                self._cruise_grade_said = 0
+            return
+        if self._cruise_grade_said == grade_sign:
+            return
+        self._cruise_grade_said = grade_sign
+        speed = self.ctx.settings.speed_text(t.speed_mph)
+        terse = self._terse_speech()
+        if grade_sign < 0:
+            self.ctx.audio.play("ui/notify", volume=0.55)
+            # Terse keeps the fact and drops the instruction, the way the
+            # hazard cue drops its "Brake now!" -- a driver on terse speech
+            # knows what to do and wants the number sooner.
+            if terse:
+                message = f"Cruise losing the downgrade; {speed}."
+            else:
+                # Braking is what an automatic driver has -- and braking is
+                # also what hands the truck back from cruise, so it leads
+                # either way.
+                take_over = "Brake" if t.transmission.automatic else "Brake or gear down"
+                message = f"Cruise cannot hold this downgrade; {speed} and building. {take_over}."
+        elif terse:
+            message = f"Cruise losing the climb; {speed}."
+        else:
+            message = f"The climb has beaten cruise; holding {speed}."
+        self.ctx.say_event(message, interrupt=False)
 
     def _handle_out_of_fuel(self) -> None:
         if self._rescue_offered:

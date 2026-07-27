@@ -260,6 +260,33 @@ class TruckState:
         grade_f = self.gross_mass_kg * G * math.sin(math.atan(self.grade))
         return drag + rolling + grade_f
 
+    def hold_throttle(self) -> float:
+        """The throttle that balances what the truck is fighting right now.
+
+        Grade, drag, and rolling resistance all land in ``resistance_force``,
+        so dividing it by the force full throttle can make in this gear gives
+        the pedal position that holds the current speed. Automatic speed
+        control uses it as a feed-forward term: the grade is answered as the
+        wheels reach it rather than integrated up to over the following ten
+        seconds. Zero on a downgrade gravity will carry, and one where the
+        grade asks for more than the engine has in this gear.
+        """
+        if not self.engine_on or self.stalled or self.air_brakes_holding:
+            return 0.0
+        ratio = self.transmission.drive_ratio
+        if ratio == 0.0 or self.coupled_rpm() >= self.specs.max_rpm:
+            return 0.0
+        full_force = (
+            self.torque_at(self.rpm)
+            * self.health_factor
+            * abs(ratio)
+            * self.specs.driveline_efficiency
+            / self.specs.wheel_radius_m
+        )
+        if full_force <= 0.0:
+            return 1.0
+        return max(0.0, min(1.0, self.resistance_force() / full_force))
+
     def brake_force(self) -> float:
         if abs(self.velocity_mps) <= 0.01:
             return 0.0

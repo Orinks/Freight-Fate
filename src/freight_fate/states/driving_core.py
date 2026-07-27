@@ -99,6 +99,66 @@ KEEPER_GAP_SECONDS = 3.0  # follow queued traffic at this gap, down to a stop
 CRUISE_MIN_MPH = 20.0  # cruise control needs road speed to hold
 CRUISE_STEP_MPH = 5.0  # set-point change per Accel/Coast (+/-) tap
 CRUISE_MAX_MPH = 85.0  # highest cruise set point (top US posted limits)
+# Speed-hold gains. The feed-forward term (``Truck.hold_throttle``) carries the
+# grade; P and I only trim from there. The old loop was integral-only at 0.08
+# per mph-second, which needed over ten seconds just to reach full throttle --
+# long enough for a climb to have taken the speed away before cruise answered
+# it. Trim is bounded so a grade the engine genuinely cannot pull does not wind
+# the integrator into a spike when the road levels out.
+CRUISE_P_GAIN = 0.055  # throttle per mph of error
+CRUISE_I_GAIN = 0.05  # throttle per mph-second of error
+CRUISE_TRIM_LIMIT = 0.4  # how far trim may pull away from the feed-forward
+CRUISE_COAST_MPH = 2.0  # feed-forward eases to nothing across this much overspeed
+# Holding the target from above. Cutting fuel was cruise's only answer, so any
+# downgrade carried the truck past the set speed and simply kept it there
+# (playtest, 2026-07-27: fifteen-plus mph over, silently). The retarder answers
+# first because its heat goes out the exhaust; the drums only join in when the
+# jake cannot hold, so a long grade does not fade them away.
+CRUISE_JAKE_OVER_MPH = 0.75  # over the target by this much and the jake steps in
+# The engine brake is one switch, not a three-stage stalk, so holding a number
+# with it means cycling -- and a narrow band cycles fast. A quarter-mph release
+# barked it on and off every 3.4 seconds on a 6 percent grade (bench trace,
+# 2026-07-27). Letting the truck run a mile and a half under before handing off
+# halves that, and a mile and a half is nothing a driver notices.
+CRUISE_JAKE_RELEASE_MPH = 1.5  # this far under the target and the retarder hands off
+CRUISE_JAKE_STEP_S = 1.5  # quiet time between engine-brake changes; the jake is loud
+# The drums are the last resort, and they only come out in snubs: apply,
+# recover the target, release. Dragging a light application down a long grade
+# is how a real truck fades its brakes and empties its air tanks -- and the sim
+# models both, so the old proportional trim did exactly that to itself.
+CRUISE_BRAKE_OVER_MPH = 2.5  # retarder on and still this far over: snub
+CRUISE_SNUB_UNDER_MPH = 0.5  # snub runs until this far back under the target
+CRUISE_SNUB_BRAKE = 0.3  # a real application, not a drag
+# Cruise says so when the grade has beaten it, rather than sailing over the
+# set speed (or sinking under it) without a word. Once per grade.
+CRUISE_GRADE_BEATEN_MPH = 5.0
+# ...but only once the grade has genuinely won, held for this long. A single
+# frame is not evidence: the driveline opens during every gear change
+# (``drive_ratio`` is 0 while shifting, so the truck momentarily makes no
+# force at all), and reading that one frame announced defeat on a road the
+# truck was accelerating along -- 71 mph and climbing to 77, right after a
+# 50-to-75 limit rise raised the target (playtest transcript, 2026-07-27).
+CRUISE_GRADE_BEATEN_S = 3.0
+# And the road has to be a grade a driver would call one. Half a percent
+# counts as level to the G key, so announcing a climb there contradicted the
+# readout the player had just asked for.
+CRUISE_GRADE_BEATEN_PCT = 1.5
+# Grade advisories, spoken whether or not cruise is on. A downgrade this steep
+# is the one a driver has to plan for -- gear and retarder before the hill, not
+# halfway down it.
+GRADE_WARN_PCT = 3.0  # steep enough to call out, either direction
+GRADE_WARN_CLEAR_PCT = 2.0  # hysteresis: under this the grade is behind you
+GRADE_WARN_LOOKAHEAD_MI = 0.75  # how far ahead the advisory reaches
+GRADE_WARN_SCAN_MI = 15.0  # how far a grade's run is measured before giving up
+GRADE_WARN_STEP_MI = 0.25  # sampling stride; matches the baked segment length
+GRADE_WARN_MIN_MPH = 25.0  # no advisories while crawling; nothing to plan for
+# A grade has to last to be worth planning for. The baked segments are around
+# half a mile each and the mountain corridors are full of short punchy dips: a
+# 4 percent blip lasting a third of a mile costs a couple of mph and warning
+# about it buried the hills that matter. Unfiltered, Knoxville to Asheville
+# spoke 76 advisories in 116 miles; at three quarters of a mile it speaks 4.
+GRADE_WARN_MIN_RUN_MI = 0.75
+GRADE_WARN_RESCAN_MI = 0.1  # how far the truck rolls between advisory scans
 ACC_BASE_GAP_SECONDS = 3.0  # clear-weather adaptive cruise gap
 ACC_LIMIT_OFFSET_MPH = 5.0  # predictive ACC holds this far over the posted
 # limit -- a with-traffic pace, comfortably under

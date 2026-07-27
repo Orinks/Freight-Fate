@@ -120,6 +120,7 @@ HELP_PAGES = [
         [
             "Space speaks your speed, gear, RPM, active speed-control mode, open-road target, air pressure, and brake state.",
             "S speaks the posted speed limit here, the zone if any, and how far over you are.",
+            "G speaks the grade under the wheels, how far it runs, whether the truck is holding it, and the next steep grade ahead.",
             "Tab opens a driving status menu for speed, route, air tanks, weather, and hours.",
             "F speaks fuel level and range.",
             "C speaks the clock, your deadline, and your hours of service.",
