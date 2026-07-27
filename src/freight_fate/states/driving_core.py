@@ -60,6 +60,7 @@ from ..sim import hos
 from ..sim.driving_modes import tuning_for_time_scale
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.lane import CURVE_RATE, LaneKeeping, lane_label
+from ..sim.lane_guidance import LaneGuidance
 from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind

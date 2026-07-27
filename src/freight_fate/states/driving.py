@@ -358,7 +358,7 @@ class DrivingState(
         self._pending_ambient_event: tuple[str, str | None] | None = None
         self._road_joint_accumulator_m = 0.0
         self._next_joint_distance_m = self._patrol_rng.uniform(14.0, 18.0)
-        self._lane_guidance_state = "center"
+        self.lane_guidance = LaneGuidance()
         self._reverse_cue_active = False
         self._air_cue_active = False  # compressor fill loop below governor release
         self._jake_cue_key: str | None = None  # jake growl loop currently playing

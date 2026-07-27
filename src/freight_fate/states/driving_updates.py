@@ -2,16 +2,12 @@
 from __future__ import annotations
 
 from .. import engine_audio
-from ..audio import CH_AIR, CH_BRAKE, CH_JAKE, CH_RADIO_FX
+from ..audio import CH_AIR, CH_BRAKE, CH_JAKE, CH_LANE, CH_RADIO_FX
 from ..audio_fades import curve as _resolve_curve
 from ..radio import truck_elevation_ft
 from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
 from .driving_rest_states import EnforcementStopState, FelonyStopState, TrafficStopState
-
-LANE_GUIDANCE_DRIFT_START = 0.3
-LANE_GUIDANCE_CENTER_MAX = 0.18
-LANE_GUIDANCE_PAN = 0.85
 
 # FM fringe rendering. The bed creeps in below full quieting (signal 0.6,
 # radio.SIGNAL_FULL_VOLUME) and deepens quadratically; pickets begin below
@@ -949,33 +945,35 @@ class DrivingUpdateMixin:
         on is the side to steer away from."""
         return max(-1.0, min(1.0, self.lane.offset))
 
-    def _lane_guidance_zone(self) -> str:
-        offset = self.lane.offset
-        if offset <= -LANE_GUIDANCE_DRIFT_START:
-            return "left"
-        if offset >= LANE_GUIDANCE_DRIFT_START:
-            return "right"
-        if abs(offset) <= LANE_GUIDANCE_CENTER_MAX:
-            return "center"
-        if self._lane_guidance_state in {"left", "right"}:
-            return self._lane_guidance_state
-        return "center"
-
     def _update_lane_guidance_audio(self) -> None:
+        """Run the guidance director: a panned bed that wakes for drift or a
+        curve and sleeps on the centered straight (owner contract 2026-07-27)."""
+        from ..sim.lane_guidance import BED_FADE_MS, BED_KEY, CURVE_LEAD_MI
+
+        was_awake = self.lane_guidance.awake
         if not self.ctx.settings.lane_departure_warning:
-            self._lane_guidance_state = "center"
+            if was_awake:
+                self.ctx.audio.stop_loop(CH_LANE, fade_ms=BED_FADE_MS)
+            self.lane_guidance.update(
+                self.lane, assist_on=False, curve_active=False, curve_ahead_mi=None
+            )
             return
-        zone = self._lane_guidance_zone()
-        previous = self._lane_guidance_state
-        if zone == previous:
-            return
-        self._lane_guidance_state = zone
-        if zone == "left":
-            self.ctx.audio.play("vehicle/lane_drift", volume=0.45, pan=-LANE_GUIDANCE_PAN)
-        elif zone == "right":
-            self.ctx.audio.play("vehicle/lane_drift", volume=0.45, pan=LANE_GUIDANCE_PAN)
-        elif previous in {"left", "right"}:
-            self.ctx.audio.play("vehicle/lane_centered", volume=0.45, pan=0.0)
+        active = self.trip.curve_at(self.trip.position_mi)
+        frame = self.lane_guidance.update(
+            self.lane,
+            assist_on=self.ctx.settings.steering_assist != "off",
+            curve_active=active is not None and not active.connector,
+            curve_ahead_mi=self.trip.curve_ahead_mi(CURVE_LEAD_MI),
+        )
+        if frame.awake:
+            self.ctx.audio.start_loop(CH_LANE, BED_KEY, volume=frame.volume, fade_ms=BED_FADE_MS)
+            self.ctx.audio.set_loop_volume(CH_LANE, frame.volume)
+            self.ctx.audio.set_loop_pan(CH_LANE, frame.pan)
+        elif was_awake:
+            self.ctx.audio.stop_loop(CH_LANE, fade_ms=BED_FADE_MS)
+            if frame.centered:
+                # The drift settled: the old centered earcon still says so.
+                self.ctx.audio.play("vehicle/lane_centered", volume=0.45, pan=0.0)
 
     def _auto_jake_max_stage(self) -> int:
         """The highest stage the drive axle can hold right now (0..3).

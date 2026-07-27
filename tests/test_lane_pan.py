@@ -63,32 +63,34 @@ def test_rumble_is_panned_to_the_drift_side(monkeypatch):
         app.shutdown()
 
 
-def test_lane_drift_cue_beeps_from_the_drift_side(monkeypatch):
+def test_guidance_bed_wakes_panned_to_the_drift_side(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.sim.lane_guidance import BED_KEY
 
     app = App()
     try:
         d = _driving(app)
         d.ctx.settings.steering_assist = "realistic"
-        d.lane.offset = -0.35
-        calls = []
+        loops = []
+        pans = []
         monkeypatch.setattr(
             app.ctx.audio,
-            "play",
-            lambda key, volume=1.0, pan=0.0: calls.append((key, volume, pan)),
+            "start_loop",
+            lambda ch, key, volume=1.0, fade_ms=300: loops.append((ch, key, volume)),
         )
+        monkeypatch.setattr(app.ctx.audio, "set_loop_volume", lambda ch, volume: None)
+        monkeypatch.setattr(app.ctx.audio, "set_loop_pan", lambda ch, pan: pans.append(pan))
 
-        d._update_audio(0.0)
+        d.lane.offset = -0.6  # drifting left, past the wake line
         d._update_audio(0.0)
 
-        drift_cues = [call for call in calls if call[0] == "vehicle/lane_drift"]
-        assert len(drift_cues) == 1
-        assert drift_cues[0][2] == pytest.approx(-0.85)
+        assert [entry for entry in loops if entry[1] == BED_KEY]
+        assert pans and pans[-1] < 0.0  # the bed sits on the drift side
     finally:
         app.shutdown()
 
 
-def test_lane_center_cue_sounds_when_back_in_lane(monkeypatch):
+def test_guidance_bed_sleeps_and_centered_cue_ends_a_drift(monkeypatch):
     from freight_fate.app import App
 
     app = App()
@@ -96,19 +98,49 @@ def test_lane_center_cue_sounds_when_back_in_lane(monkeypatch):
         d = _driving(app)
         d.ctx.settings.steering_assist = "realistic"
         calls = []
+        stops = []
         monkeypatch.setattr(
             app.ctx.audio,
             "play",
             lambda key, volume=1.0, pan=0.0: calls.append((key, volume, pan)),
         )
+        monkeypatch.setattr(
+            app.ctx.audio, "stop_loop", lambda ch, fade_ms=300: stops.append(ch)
+        )
 
-        d.lane.offset = 0.38
+        d.lane.offset = 0.6  # drift right wakes the bed
         d._update_audio(0.0)
-        d.lane.offset = 0.05
+        d.lane.offset = 0.05  # settled back to center
         d._update_audio(0.0)
 
-        assert ("vehicle/lane_drift", pytest.approx(0.45), pytest.approx(0.85)) in calls
+        from freight_fate.audio import CH_LANE
+
+        assert CH_LANE in stops, "the guidance bed should stop once centered"
         assert ("vehicle/lane_centered", pytest.approx(0.45), pytest.approx(0.0)) in calls
+    finally:
+        app.shutdown()
+
+
+def test_guidance_stays_asleep_inside_normal_wander(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.ctx.settings.steering_assist = "realistic"
+        loops = []
+        monkeypatch.setattr(
+            app.ctx.audio,
+            "start_loop",
+            lambda ch, key, volume=1.0, fade_ms=300: loops.append(key),
+        )
+
+        d.lane.offset = 0.35  # ordinary wander, inside the wake line
+        d._update_audio(0.0)
+
+        from freight_fate.sim.lane_guidance import BED_KEY
+
+        assert BED_KEY not in loops, "centered-and-stable must stay silent"
     finally:
         app.shutdown()
 
