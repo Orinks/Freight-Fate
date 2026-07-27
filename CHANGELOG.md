@@ -4,6 +4,15 @@
 
 ### Added
 
+- **The road tells you how many lanes it has.** Your road status now says
+  the lanes on your side of the road -- "divided, three lanes your side" on
+  an interstate, "two lanes your side" on a smaller highway -- and your trip
+  briefing sums it up before you roll. As the road widens or narrows, you
+  hear it: "road widens to three lanes", "down to two lanes your side". It
+  reads the real road, so where the map has no lane data it stays quiet
+  rather than guess, and the extra callouts hush in terse speech. Lane
+  numbers only for now -- passing and lane changes come later.
+
 - **Review recent spoken messages while driving.** A line lost under an
   overlapping announcement is no longer gone for good. From the cab, comma
   and period step back and forward through what has been said, Ctrl with

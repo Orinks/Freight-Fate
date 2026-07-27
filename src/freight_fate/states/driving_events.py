@@ -56,6 +56,8 @@ class DrivingEventMixin:
             return
         kind = event.kind
         sound = _route_event_sound(event)
+        if kind == TripEventKind.LANE and self._terse_speech():
+            return  # lane-count callouts are a normal-verbosity nicety, muted whole
         if kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
             # Ambient roadside color, filtered by the player's chatter
             # switches at speak time so a mid-trip settings change applies
@@ -208,6 +210,10 @@ class DrivingEventMixin:
                 self._critical_call_age_s = 0.0
                 self._critical_respeak_at = None
         elif kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
+            self._speak_ambient_event(event.message)
+        elif kind == TripEventKind.LANE:
+            # Road-status color: how many lanes the road just became. Ambient,
+            # so it yields to safety cues and is muted whole in terse speech.
             self._speak_ambient_event(event.message)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()

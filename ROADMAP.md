@@ -374,13 +374,25 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       I-40 widens to 3+ lanes through Albuquerque and holds 2 rural.
       Guarded by `tests/test_lane_data.py`. No mechanic reads it yet: the
       wiring job below carries the player-facing changelog.
-- [ ] **Wire lane data into play (follows the bake above).** REAL LANE
-      DROPS as genuine merge events at real mileposts (three lanes become
-      two = a located merge, not a scripted taper), real widths spoken/
-      enforced, exit-lane guidance, and keep-right pressure that knows how
-      many lanes exist. Reads `corridor.lane_segments`; advisory guidance
-      may run on partial data, punitive consequences only where lane data
-      is real (see `docs/lanes-harvest-brief.md`).
+- [x] **Lane counts spoken (Track D multilane slice) -- SHIPPED
+      2026-07-27.** The baked `corridor.lane_segments` now reach the player
+      as speech: the road-status readout and the route briefing say the
+      lanes in the travel direction ("divided, three lanes your side"),
+      and a callout fires when the count changes mid-leg ("road widens to
+      three lanes", "down to two lanes your side"). Direction-aware (your
+      side flips with travel direction), verbosity-aware (change callouts
+      hush in terse; status readout keeps them), and honest-absence (legs
+      with no baked lane data say nothing). Runs shorter than two miles
+      collapse so a passing-lane blip is not announced. Speech only -- no
+      traffic, no lane-position mechanic. `tests/test_multilane_speech.py`.
+- [ ] **Lane data as a mechanic (Track B / 2.0, follows the speech
+      above).** REAL LANE DROPS as genuine merge events tied to lateral
+      position, real widths enforced, exit-lane guidance, and keep-right
+      pressure that knows how many lanes exist. Reads the same
+      `corridor.lane_segments`; advisory guidance may run on partial data,
+      punitive consequences only where lane data is real (see
+      `docs/lanes-harvest-brief.md`). Lateral position belongs to the
+      curve-navigation track.
 - [ ] **Assistance-mode assessment: accessibility features that drive the
       truck right (Josh's ask to the owner, 2026-07-22).** The automatic
       driving aids -- adaptive cruise, the speed keeper, curve speed
