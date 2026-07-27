@@ -174,7 +174,7 @@ def test_unreadable_save_is_spoken_and_omitted_from_main_menu(monkeypatch):
         app.push_state(MainMenuState(app.ctx))
         labels = [item.text for item in app.state.items]
         assert labels[0].startswith("Continue latest career: Honest")
-        assert "could not be read" in spoken[-1]
+        assert any("could not be read" in text for text in spoken)
         assert not bad_path.exists()
         assert bad_path.with_suffix(".ffsave.invalid").exists()
     finally:

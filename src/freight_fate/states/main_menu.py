@@ -192,8 +192,9 @@ class MainMenuState(MenuState):
             )
         self.ctx.say(
             f"Welcome to Freight Fate, version {updater.spoken_version(__version__)}. "
-            f"An audio trucking adventure across America. {warning}"
-            f"{self.current_text()}",
+            f"An audio trucking adventure across America. {warning}")
+        self.ctx.say(
+            f"{self.current_text()}", interrupt=False, review=False
         )
 
     def build_items(self) -> list[MenuItem]:
@@ -494,7 +495,7 @@ class CareerActionsState(MenuState):
 
     def announce_entry(self) -> None:
         self.ctx.say(
-            f"Actions for {_career_summary(self.path, self.profile)}. {self.current_text()}"
+            f"Actions for {_career_summary(self.path, self.profile)}. {self.current_text()}", interrupt=False, review=False
         )
 
     def build_items(self) -> list[MenuItem]:
@@ -549,7 +550,7 @@ class ConfirmCareerActionState(MenuState):
         else:
             detail = "Deleting permanently removes this saved career."
         self.ctx.say(
-            f"Confirm {self._action_label} for {self.profile.name}. {detail} {self.current_text()}"
+            f"Confirm {self._action_label} for {self.profile.name}. {detail} {self.current_text()}", review=False
         )
 
     def build_items(self) -> list[MenuItem]:
@@ -606,16 +607,16 @@ class NameEntryState(State):
         elif event.key == pygame.K_BACKSPACE:
             if self.name:
                 removed, self.name = self.name[-1], self.name[:-1]
-                self.ctx.say(f"Deleted {removed}. " + (self.name or "Empty."))
+                self.ctx.say(f"Deleted {removed}. " + (self.name or "Empty."), review=False)
             else:
                 self.ctx.audio.play("ui/error")
         elif event.key == pygame.K_F2:
-            self.ctx.say(self.name if self.name else "Empty.")
+            self.ctx.say(self.name if self.name else "Empty.", review=False)
         elif event.unicode and event.unicode.isprintable() and len(self.name) < self.MAX_LEN:
             self.name += event.unicode
             self.ctx.audio.play("ui/tick")
             spoken = "space" if event.unicode == " " else event.unicode
-            self.ctx.say(spoken)
+            self.ctx.say(spoken, review=False)
 
     def _confirm(self) -> None:
         name = self.name.strip() or "Driver"
@@ -678,7 +679,8 @@ class HomeTerminalState(MenuState):
     def announce_entry(self) -> None:
         self.ctx.say(
             "Home region. Pick the part of the country where your "
-            f"career starts. {self.current_text()}"
+            "career starts.")
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False
         )
 
     def build_items(self) -> list[MenuItem]:
@@ -724,7 +726,8 @@ class HomeCityState(MenuState):
     def announce_entry(self) -> None:
         region = _region_menu_name(self.region)
         self.ctx.say(
-            f"{region} terminals. Pick the city where your career starts. {self.current_text()}"
+            f"{region} terminals. Pick the city where your career starts.")
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False
         )
 
     def build_items(self) -> list[MenuItem]:
