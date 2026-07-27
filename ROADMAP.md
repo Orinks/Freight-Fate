@@ -1449,6 +1449,13 @@ section below and the Unreleased changelog; the release-line view:
       slides the ring (or crossfades) before the transient fires --
       check trigger order between the shift bank one-shot and the
       rpm-follow path, upper gears especially (quick 0.5s interrupts).
+- [ ] **Randomize sound loop edges (owner + ChatGPT ideas, 2026-07-27,
+      for the audio session).** Looping beds repeat their seam however
+      clean the loop: randomizing the edge -- varying the loop-in point,
+      crossfading from randomized offsets, or micro-varying each pass --
+      would kill the once-per-pass signature the ear locks onto. Owner
+      has ChatGPT's suggestions to relay; pairs with the WAV-not-Vorbis
+      looping rule and the crossfade-seam finding already filed.
 - [ ] **Lay on the horn (owner ask, 2026-07-23).** H plays one shortish
       horn sample today. Holding H should hold the horn -- attack, a
       seamless sustain loop for as long as the key is down, then the
