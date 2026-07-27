@@ -2535,7 +2535,8 @@
           "lon": -73.7547675,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "burlington_vt_us",
@@ -5338,7 +5339,8 @@
           "parking_spaces": 10,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "montpelier_vt_us",
@@ -6335,7 +6337,8 @@
           "lon": -73.07847,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "montpelier_vt_us",
@@ -8664,7 +8667,8 @@
           "lon": -72.10199,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rutland_vt_us",
@@ -10562,7 +10566,8 @@
           "lon": -73.75477,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "rutland_vt_us",
@@ -12094,7 +12099,8 @@
           "lon": -73.16423,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     }
   ]
 }

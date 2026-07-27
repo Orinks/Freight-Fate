@@ -1229,7 +1229,8 @@
           "lon": -86.19071,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "birmingham_al_us",
@@ -4304,7 +4305,8 @@
           "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "birmingham_al_us",
@@ -8665,7 +8667,8 @@
           "lon": -89.75046,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "birmingham_al_us",
@@ -10627,7 +10630,8 @@
           "lon": -86.4199,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "birmingham_al_us",
@@ -13069,7 +13073,8 @@
           "lon": -88.39869,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "birmingham_al_us",
@@ -14476,7 +14481,8 @@
           "lon": -87.09074,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cullman_al_us",
@@ -15669,7 +15675,8 @@
           "lon": -86.8783,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dothan_al_us",
@@ -16825,7 +16832,8 @@
           "lon": -84.10747,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "dothan_al_us",
@@ -18455,7 +18463,8 @@
           "lon": -84.4296585,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "florence_al_us",
@@ -19713,7 +19722,8 @@
           "lon": -86.84449,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "florence_al_us",
@@ -21274,7 +21284,8 @@
           "lon": -88.40204,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "gadsden_al_us",
@@ -22735,7 +22746,8 @@
           "lon": -85.51424,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "huntsville_al_us",
@@ -24445,7 +24457,8 @@
           "lon": -85.58306,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "huntsville_al_us",
@@ -25415,7 +25428,8 @@
           "lon": -86.89344,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "huntsville_al_us",
@@ -27422,7 +27436,8 @@
           "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "mobile_al_us",
@@ -28778,7 +28793,8 @@
           "lon": -89.34821,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mobile_al_us",
@@ -32496,7 +32512,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mobile_al_us",
@@ -34061,7 +34078,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "montgomery_al_us",
@@ -35670,7 +35688,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "montgomery_al_us",
@@ -36644,7 +36663,8 @@
           "lon": -85.61497,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "montgomery_al_us",
@@ -37413,7 +37433,8 @@
           "lon": -86.60747,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "montgomery_al_us",
@@ -38207,7 +38228,8 @@
           "lon": -86.19711,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "opelika_al_us",
@@ -38869,7 +38891,8 @@
           "lon": -85.08217,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "opelika_al_us",
@@ -39561,7 +39584,8 @@
           "lon": -85.14795,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "selma_al_us",
@@ -41007,7 +41031,8 @@
           "lon": -88.72823,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "troy_al_us",
@@ -45253,7 +45278,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "tuscaloosa_al_us",

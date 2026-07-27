@@ -496,7 +496,8 @@
           "lon": -82.60128,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ashland_ky_us",
@@ -1678,7 +1679,8 @@
           "lon": -82.81886,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bowling_green_ky_us",
@@ -2835,7 +2837,8 @@
           "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "elizabethtown_ky_us",
@@ -4090,7 +4093,8 @@
           "lon": -86.21184,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "elizabethtown_ky_us",
@@ -5824,7 +5828,8 @@
           "lon": -86.75816,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "hazard_ky_us",
@@ -6876,7 +6881,8 @@
           "lon": -84.11525,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "lexington_ky_us",
@@ -8437,7 +8443,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lexington_ky_us",
@@ -9761,7 +9768,8 @@
           "lon": -85.88669,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lexington_ky_us",
@@ -11319,7 +11327,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lexington_ky_us",
@@ -12059,7 +12068,8 @@
           "lon": -83.89823,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lexington_ky_us",
@@ -12641,7 +12651,8 @@
           "lon": -84.32422,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "london_ky_us",
@@ -16073,7 +16084,8 @@
           "lon": -83.97619,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "louisville_ky_us",
@@ -17340,7 +17352,8 @@
           "lon": -85.83629,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "louisville_ky_us",
@@ -18357,7 +18370,8 @@
           "lon": -85.69456,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "morehead_ky_us",
@@ -19568,7 +19582,8 @@
           "lon": -82.69657,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mount_sterling_ky_us",
@@ -20991,7 +21006,8 @@
           "lon": -83.54882,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "mount_sterling_ky_us",
@@ -21582,7 +21598,8 @@
           "lon": -83.54191,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mount_sterling_ky_us",
@@ -22280,7 +22297,8 @@
           "lon": -84.32422,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "owensboro_ky_us",
@@ -23104,7 +23122,8 @@
           "lon": -86.84542,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "owensboro_ky_us",
@@ -23672,7 +23691,8 @@
           "lon": -87.46215,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "paducah_ky_us",
@@ -24952,7 +24972,8 @@
           "lon": -87.87537,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "paducah_ky_us",
@@ -26626,7 +26647,8 @@
           "lon": -88.65298,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "paintsville_ky_us",
@@ -27668,7 +27690,8 @@
           "lon": -83.19018,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "paintsville_ky_us",
@@ -28393,7 +28416,8 @@
           "lon": -82.52361,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "pikeville_ky_us",
@@ -29416,7 +29440,8 @@
           "lon": -82.82977,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "richmond_ky_us",
@@ -30471,7 +30496,8 @@
           "lon": -84.11525,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

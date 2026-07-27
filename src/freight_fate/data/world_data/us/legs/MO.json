@@ -1217,7 +1217,8 @@
           "lon": -88.65298,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "cape_girardeau_mo_us",
@@ -3315,7 +3316,8 @@
           "lon": -90.13134,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbia_mo_us",
@@ -5287,7 +5289,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbia_mo_us",
@@ -7004,7 +7007,8 @@
           "lon": -91.7193,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "columbia_mo_us",
@@ -9056,7 +9060,8 @@
           "lon": -90.13134,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "joplin_mo_us",
@@ -10484,7 +10489,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "joplin_mo_us",
@@ -12294,7 +12300,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kansas_city_mo_us",
@@ -18502,7 +18509,8 @@
           "lon": -104.6040341,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kansas_city_mo_us",
@@ -20731,7 +20739,8 @@
           "lon": -94.3253145,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kansas_city_mo_us",
@@ -21949,7 +21958,8 @@
           "lon": -94.78614,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kansas_city_mo_us",
@@ -24121,7 +24131,8 @@
           "lon": -93.38834,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kirksville_mo_us",
@@ -25087,7 +25098,8 @@
           "lon": -92.32427,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kirksville_mo_us",
@@ -26082,7 +26094,8 @@
           "lon": -92.44064,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "poplar_bluff_mo_us",
@@ -27029,7 +27042,8 @@
           "lon": -89.55251,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "poplar_bluff_mo_us",
@@ -28089,7 +28103,8 @@
           "lon": -90.72668,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "poplar_bluff_mo_us",
@@ -30628,7 +30643,8 @@
           "lon": -93.24003,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rolla_mo_us",
@@ -32604,7 +32620,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rolla_mo_us",
@@ -34565,7 +34582,8 @@
           "lon": -90.13134,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "saint_joseph_mo_us",
@@ -36150,7 +36168,8 @@
           "lon": -95.87878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sedalia_mo_us",
@@ -37068,7 +37087,8 @@
           "lon": -92.84691,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sedalia_mo_us",
@@ -38445,7 +38465,8 @@
           "lon": -93.98878,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "springfield_mo_us",
@@ -39740,7 +39761,8 @@
           "lon": -93.22477,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "springfield_mo_us",
@@ -43149,7 +43171,8 @@
           "lon": -90.13134,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "springfield_mo_us",
@@ -45389,7 +45412,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "st_louis_mo_us",
@@ -46471,7 +46495,8 @@
           "lon": -89.6467,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "st_louis_mo_us",
@@ -49945,7 +49970,8 @@
           "lon": -94.06611,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "st_louis_mo_us",
@@ -53259,7 +53285,8 @@
           "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

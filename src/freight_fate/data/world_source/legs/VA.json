@@ -451,7 +451,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "cape_charles_va_us",
@@ -1702,7 +1703,8 @@
           "lon": -75.64174,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "charlottesville_va_us",
@@ -3813,7 +3815,8 @@
           "lon": -79.64043,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "danville_va_us",
@@ -5199,7 +5202,8 @@
           "lon": -79.35896,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "harrisonburg_va_us",
@@ -6599,7 +6603,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lynchburg_va_us",
@@ -7935,7 +7940,8 @@
           "lon": -78.87643,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lynchburg_va_us",
@@ -9991,7 +9997,8 @@
           "lon": -78.32883,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "marion_va_us",
@@ -10678,7 +10685,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "norfolk_va_us",
@@ -11213,7 +11221,8 @@
           "lon": -76.18595,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "norfolk_va_us",
@@ -17360,7 +17369,8 @@
           "lon": -76.0953,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "petersburg_va_us",
@@ -19568,7 +19578,8 @@
           "lon": -78.58164,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "petersburg_va_us",
@@ -20281,7 +20292,8 @@
           "lon": -77.39101,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "richmond_va_us",
@@ -21696,7 +21708,8 @@
           "lon": -77.88543,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "richmond_va_us",
@@ -24430,7 +24443,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "richmond_va_us",
@@ -26444,7 +26458,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "roanoke_va_us",
@@ -28528,7 +28543,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "roanoke_va_us",
@@ -29771,7 +29787,8 @@
           "lon": -79.50478,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "roanoke_va_us",
@@ -32780,7 +32797,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "roanoke_va_us",
@@ -34357,7 +34375,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "roanoke_va_us",
@@ -36380,7 +36399,8 @@
           "lon": -79.94039,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "staunton_va_us",
@@ -37411,7 +37431,8 @@
           "parking_spaces": 14,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "staunton_va_us",
@@ -38184,7 +38205,8 @@
           "lon": -78.95442,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "virginia_beach_va_us",
@@ -40496,7 +40518,8 @@
           "lon": -77.84363,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "winchester_va_us",
@@ -41705,7 +41728,8 @@
           "lon": -77.80692,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wytheville_va_us",
@@ -42319,7 +42343,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "wytheville_va_us",
@@ -44016,7 +44041,8 @@
           "lon": -80.24022,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

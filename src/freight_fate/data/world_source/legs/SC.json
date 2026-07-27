@@ -2750,7 +2750,8 @@
           "lon": -79.12798,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "charleston_sc_us",
@@ -4232,7 +4233,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "columbia_sc_us",
@@ -5909,7 +5911,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "columbia_sc_us",
@@ -7637,7 +7640,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "columbia_sc_us",
@@ -9465,7 +9469,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "columbia_sc_us",
@@ -11099,7 +11104,8 @@
           "lon": -81.36846,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "florence_sc_us",
@@ -12265,7 +12271,8 @@
           "lon": -80.74892,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "florence_sc_us",
@@ -13036,7 +13043,8 @@
           "lon": -79.23561,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "greenville_sc_us",
@@ -15771,7 +15779,8 @@
           "lon": -83.3222952,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "greenville_sc_us",
@@ -17752,7 +17761,8 @@
           "lon": -81.4599377,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "myrtle_beach_sc_us",
@@ -18604,7 +18614,8 @@
           "lon": -79.80173,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "myrtle_beach_sc_us",
@@ -19861,7 +19872,8 @@
           "lon": -78.38809,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "spartanburg_sc_us",
@@ -20827,7 +20839,8 @@
           "lon": -82.10756,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sumter_sc_us",
@@ -21668,7 +21681,8 @@
           "lon": -80.82161,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sumter_sc_us",
@@ -22200,7 +22214,8 @@
           "lon": -79.80173,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

@@ -802,7 +802,8 @@
           "lon": -75.64174,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dover_de_us",
@@ -1908,7 +1909,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wilmington_de_us",
@@ -3521,7 +3523,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wilmington_de_us",
@@ -4567,7 +4570,8 @@
           "parking_spaces": 11,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wilmington_de_us",
@@ -6240,7 +6244,8 @@
           "lon": -75.64174,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

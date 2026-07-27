@@ -1032,7 +1032,8 @@
           "lon": -97.16679,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "ada_ok_us",
@@ -2056,7 +2057,8 @@
           "lon": -95.76336,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "ada_ok_us",
@@ -3504,7 +3506,8 @@
           "lon": -97.53026,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "altus_ok_us",
@@ -4265,7 +4268,8 @@
           "lon": -98.38333,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "altus_ok_us",
@@ -5313,7 +5317,8 @@
           "lon": -98.48299,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ardmore_ok_us",
@@ -7468,7 +7473,8 @@
           "lon": -97.18139,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "atoka_ok_us",
@@ -8730,7 +8736,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "atoka_ok_us",
@@ -9544,7 +9551,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "bartlesville_ok_us",
@@ -11083,7 +11091,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "durant_ok_us",
@@ -11722,7 +11731,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "enid_ok_us",
@@ -13113,7 +13123,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "enid_ok_us",
@@ -14379,7 +14390,8 @@
           "lon": -97.32244,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "henryetta_ok_us",
@@ -14771,7 +14783,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "lawton_ok_us",
@@ -16461,7 +16474,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lawton_ok_us",
@@ -17352,7 +17366,8 @@
           "lon": -98.48299,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mcalester_ok_us",
@@ -18342,7 +18357,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "muskogee_ok_us",
@@ -19550,7 +19566,8 @@
           "lon": -94.97134,
           "vehicle_access": "none"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "oklahoma_city_ok_us",
@@ -22956,7 +22973,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "oklahoma_city_ok_us",
@@ -24839,7 +24857,8 @@
           "lon": -97.16679,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "oklahoma_city_ok_us",
@@ -26401,7 +26420,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "oklahoma_city_ok_us",
@@ -28531,7 +28551,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "okmulgee_ok_us",
@@ -29362,7 +29383,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "ponca_city_ok_us",
@@ -30629,7 +30651,8 @@
           "lon": -95.93503,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "ponca_city_ok_us",
@@ -31326,7 +31349,8 @@
           "lon": -97.01467,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "stillwater_ok_us",
@@ -32320,7 +32344,8 @@
           "lon": -97.82036,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "stillwater_ok_us",
@@ -33378,7 +33403,8 @@
           "lon": -97.43694,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "stillwater_ok_us",
@@ -34486,7 +34512,8 @@
           "lon": -96.28589,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tulsa_ok_us",
@@ -35282,7 +35309,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "tulsa_ok_us",
@@ -36531,7 +36559,8 @@
           "lon": -97.82036,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tulsa_ok_us",
@@ -38673,7 +38702,8 @@
           "lon": -94.54185,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tulsa_ok_us",
@@ -41444,7 +41474,8 @@
           "lon": -94.45168,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tulsa_ok_us",
@@ -42359,7 +42390,8 @@
           "lon": -95.40143,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

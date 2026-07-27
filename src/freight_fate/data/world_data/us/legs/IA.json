@@ -1241,7 +1241,8 @@
           "lon": -93.46077,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "burlington_ia_us",
@@ -2392,7 +2393,8 @@
           "lon": -91.14089,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "burlington_ia_us",
@@ -3592,7 +3594,8 @@
           "lon": -91.14089,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cedar_rapids_ia_us",
@@ -5075,7 +5078,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "cedar_rapids_ia_us",
@@ -7049,7 +7053,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "cedar_rapids_ia_us",
@@ -8360,7 +8365,8 @@
           "lon": -90.70208,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cedar_rapids_ia_us",
@@ -9172,7 +9178,8 @@
           "lon": -91.66769,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "davenport_ia_us",
@@ -10267,7 +10274,8 @@
           "lon": -91.25075,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "davenport_ia_us",
@@ -11582,7 +11590,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "des_moines_ia_us",
@@ -12465,7 +12474,8 @@
           "lon": -93.57307,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "des_moines_ia_us",
@@ -15981,7 +15991,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": true
     },
     {
       "from": "des_moines_ia_us",
@@ -18545,7 +18556,8 @@
           "lon": -94.37323,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "des_moines_ia_us",
@@ -20760,7 +20772,8 @@
           "lon": -95.87878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dubuque_ia_us",
@@ -22548,7 +22561,8 @@
           "lon": -89.07691,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "fort_dodge_ia_us",
@@ -23646,7 +23660,8 @@
           "lon": -93.62025,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_dodge_ia_us",
@@ -24705,7 +24720,8 @@
           "lon": -93.22157,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "iowa_city_ia_us",
@@ -26401,7 +26417,8 @@
           "lon": -92.06721,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "marshalltown_ia_us",
@@ -27166,7 +27183,8 @@
           "lon": -93.44994,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "marshalltown_ia_us",
@@ -28300,7 +28318,8 @@
           "lon": -92.20188,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ottumwa_ia_us",
@@ -29647,7 +29666,8 @@
           "lon": -93.62025,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sioux_city_ia_us",
@@ -30708,7 +30728,8 @@
           "lon": -95.87878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sioux_city_ia_us",
@@ -31736,7 +31757,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "waterloo_ia_us",
@@ -32615,7 +32637,8 @@
           "lon": -91.77426,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "waterloo_ia_us",
@@ -33819,7 +33842,8 @@
           "lon": -90.61807,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

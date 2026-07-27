@@ -1442,7 +1442,8 @@
           "lon": -82.44277,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "asheville_nc_us",
@@ -2924,7 +2925,8 @@
           "lon": -81.29529,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "asheville_nc_us",
@@ -6924,7 +6926,8 @@
           "lon": -82.24155,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "asheville_nc_us",
@@ -9326,7 +9329,8 @@
           "lon": -81.18892,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "charlotte_nc_us",
@@ -13301,7 +13305,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "charlotte_nc_us",
@@ -15338,7 +15343,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "charlotte_nc_us",
@@ -20004,7 +20010,8 @@
           "lon": -82.011,
           "note": "Marion on I-40 -- pins to the I-40 route (I-77 north to Statesville, then I-40 west through Hickory, Marion, Asheville). ORS otherwise takes US-74 through Shelby, off the curated I-40 stops (Marion, Waynesville)."
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "charlotte_nc_us",
@@ -21870,7 +21877,8 @@
           "lon": -79.41595,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "charlotte_nc_us",
@@ -27014,7 +27022,8 @@
           "lon": -81.70481,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "charlotte_nc_us",
@@ -28571,7 +28580,8 @@
           "lon": -80.51809,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "durham_nc_us",
@@ -29891,7 +29901,8 @@
           "lon": -79.6617,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "durham_nc_us",
@@ -30560,7 +30571,8 @@
           "lon": -78.8479,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fayetteville_nc_us",
@@ -32689,7 +32701,8 @@
           "lon": -80.83784,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fayetteville_nc_us",
@@ -34241,7 +34254,8 @@
           "lon": -78.25217,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "greensboro_nc_us",
@@ -35674,7 +35688,8 @@
           "lon": -79.06831,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "greensboro_nc_us",
@@ -37298,7 +37313,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "greenville_nc_us",
@@ -38121,7 +38137,8 @@
           "lon": -77.10596,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hickory_nc_us",
@@ -39390,7 +39407,8 @@
           "lon": -80.83784,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jacksonville_nc_us",
@@ -40358,7 +40376,8 @@
           "lon": -77.60688,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lumberton_nc_us",
@@ -40960,7 +40979,8 @@
           "lon": -78.92264,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "new_bern_nc_us",
@@ -41505,7 +41525,8 @@
           "lon": -77.4237,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "raleigh_nc_us",
@@ -44938,7 +44959,8 @@
           "lon": -80.83784,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "raleigh_nc_us",
@@ -46089,7 +46111,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "raleigh_nc_us",
@@ -47348,7 +47371,8 @@
           "lon": -78.00053,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "raleigh_nc_us",
@@ -49294,7 +49318,8 @@
           "lon": -77.73572,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rocky_mount_nc_us",
@@ -49982,7 +50007,8 @@
           "lon": -77.36948,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rocky_mount_nc_us",
@@ -51455,7 +51481,8 @@
           "lon": -77.58732,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rocky_mount_nc_us",
@@ -52573,7 +52600,8 @@
           "lon": -78.47538,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wilmington_nc_us",
@@ -53542,7 +53570,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "wilmington_nc_us",
@@ -54260,7 +54289,8 @@
           "lon": -78.95028,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wilmington_nc_us",
@@ -55814,7 +55844,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "winston_salem_nc_us",
@@ -56641,7 +56672,8 @@
           "lon": -79.99544,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

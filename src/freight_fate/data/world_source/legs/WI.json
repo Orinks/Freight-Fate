@@ -815,7 +815,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "eau_claire_wi_us",
@@ -2355,7 +2356,8 @@
           ],
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "eau_claire_wi_us",
@@ -4119,7 +4121,8 @@
           "parking_spaces": 52,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "eau_claire_wi_us",
@@ -5543,7 +5546,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fond_du_lac_wi_us",
@@ -6788,7 +6792,8 @@
           "lon": -88.85614,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fond_du_lac_wi_us",
@@ -7296,7 +7301,8 @@
           "lon": -88.46539,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "green_bay_wi_us",
@@ -12155,7 +12161,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "green_bay_wi_us",
@@ -14050,7 +14057,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "kenosha_wi_us",
@@ -15400,7 +15408,8 @@
           "lon": -87.69442,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kenosha_wi_us",
@@ -16443,7 +16452,8 @@
           "lon": -87.94093,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "la_crosse_wi_us",
@@ -18473,7 +18483,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "madison_wi_us",
@@ -20426,7 +20437,8 @@
           "lon": -87.69442,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "madison_wi_us",
@@ -21861,7 +21873,8 @@
           ],
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "milwaukee_wi_us",
@@ -22925,7 +22938,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": true
     },
     {
       "from": "milwaukee_wi_us",
@@ -24058,7 +24072,8 @@
           "lon": -88.46539,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "milwaukee_wi_us",
@@ -28651,7 +28666,8 @@
           "lon": -92.67882,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "milwaukee_wi_us",
@@ -30245,7 +30261,8 @@
           "lon": -88.99832,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "milwaukee_wi_us",
@@ -31407,7 +31424,8 @@
           "lon": -87.93001,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "oshkosh_wi_us",
@@ -32345,7 +32363,8 @@
           "lon": -88.32484,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rice_lake_wi_us",
@@ -33795,7 +33814,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "sheboygan_wi_us",
@@ -34853,7 +34873,8 @@
           "lon": -87.84585,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wausau_wi_us",
@@ -36119,7 +36140,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "wausau_wi_us",
@@ -37509,7 +37531,8 @@
           "lon": -88.44655,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wausau_wi_us",
@@ -39596,7 +39619,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

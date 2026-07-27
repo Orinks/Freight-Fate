@@ -1544,7 +1544,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "beckley_wv_us",
@@ -3770,7 +3771,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "charleston_wv_us",
@@ -5489,7 +5491,8 @@
           "lon": -81.99429,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "charleston_wv_us",
@@ -9542,7 +9545,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "charleston_wv_us",
@@ -14710,7 +14714,8 @@
           "vehicle_access": "tractor_trailer",
           "parking_spaces": 14
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "charleston_wv_us",
@@ -18172,7 +18177,8 @@
           "lon": -80.24022,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "huntington_wv_us",
@@ -19571,7 +19577,8 @@
           "lon": -81.83056,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "huntington_wv_us",
@@ -20782,7 +20789,8 @@
           "lon": -82.60354,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "morgantown_wv_us",
@@ -23671,7 +23679,8 @@
           "lon": -80.66352,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "morgantown_wv_us",
@@ -26651,7 +26660,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "morgantown_wv_us",
@@ -28259,7 +28269,8 @@
           "lon": -78.71638,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "morgantown_wv_us",
@@ -30068,7 +30079,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "parkersburg_wv_us",
@@ -31725,7 +31737,8 @@
           "lon": -81.72538,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "parkersburg_wv_us",
@@ -33820,7 +33833,8 @@
           "lon": -79.9940461,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wheeling_wv_us",
@@ -35138,7 +35152,8 @@
           "lon": -80.22892,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

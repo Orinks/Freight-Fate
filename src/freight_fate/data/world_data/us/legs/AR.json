@@ -1663,7 +1663,8 @@
           "lon": -93.93558,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "bentonville_ar_us",
@@ -3059,7 +3060,8 @@
           "lon": -94.51277,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "conway_ar_us",
@@ -5181,7 +5183,8 @@
           "lon": -92.44102,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "conway_ar_us",
@@ -5855,7 +5858,8 @@
           "lon": -93.08943,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "el_dorado_ar_us",
@@ -7112,7 +7116,8 @@
           "lon": -92.65692,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fayetteville_ar_us",
@@ -7936,7 +7941,8 @@
           "lon": -94.19332,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fayetteville_ar_us",
@@ -9340,7 +9346,8 @@
           "lon": -94.19798,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "fort_smith_ar_us",
@@ -10574,7 +10581,8 @@
           "lon": -94.11787,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_smith_ar_us",
@@ -12999,7 +13007,8 @@
           "lon": -93.0894274,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_smith_ar_us",
@@ -15845,7 +15854,8 @@
           "lon": -94.09963,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "harrison_ar_us",
@@ -17058,7 +17068,8 @@
           "lon": -92.38106,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "hot_springs_ar_us",
@@ -19181,7 +19192,8 @@
           "lon": -94.4604,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "hot_springs_ar_us",
@@ -21916,7 +21928,8 @@
           "lon": -94.09963,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "jonesboro_ar_us",
@@ -23031,7 +23044,8 @@
           "lon": -92.26081,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jonesboro_ar_us",
@@ -23683,7 +23697,8 @@
           "lon": -90.22578,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "little_rock_ar_us",
@@ -24487,7 +24502,8 @@
           "lon": -92.37519,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "little_rock_ar_us",
@@ -31171,7 +31187,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "little_rock_ar_us",
@@ -31875,7 +31892,8 @@
           "lon": -92.19461,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "little_rock_ar_us",
@@ -32422,7 +32440,8 @@
           "lon": -91.97164,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "little_rock_ar_us",
@@ -34787,7 +34806,8 @@
           "lon": -94.09963,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mountain_home_ar_us",
@@ -36988,7 +37008,8 @@
           "lon": -90.6698,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "pine_bluff_ar_us",
@@ -38200,7 +38221,8 @@
           "lon": -92.07421,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "russellville_ar_us",
@@ -39709,7 +39731,8 @@
           "lon": -93.78824,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "stuttgart_ar_us",
@@ -39999,7 +40022,8 @@
           "lon": -91.98969,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "texarkana_ar_us",
@@ -42454,7 +42478,8 @@
           "lon": -95.63422,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "texarkana_ar_us",
@@ -43537,7 +43562,8 @@
           "lon": -94.09963,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     }
   ]
 }

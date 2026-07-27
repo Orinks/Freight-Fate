@@ -874,7 +874,8 @@
           "lon": -99.02118,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "aberdeen_sd_us",
@@ -1723,7 +1724,8 @@
           "lon": -98.47565,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hot_springs_sd_us",
@@ -2636,7 +2638,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "mitchell_sd_us",
@@ -5234,7 +5237,8 @@
           "lon": -103.27354,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mitchell_sd_us",
@@ -6480,7 +6484,8 @@
           "lon": -97.54876,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "pierre_sd_us",
@@ -7500,7 +7505,8 @@
           "lon": -98.02943,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "pierre_sd_us",
@@ -12805,7 +12811,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "rapid_city_sd_us",
@@ -15999,7 +16006,8 @@
           "parking_spaces": 9,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sioux_falls_sd_us",
@@ -16816,7 +16824,8 @@
           "lon": -96.77105,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sioux_falls_sd_us",
@@ -18290,7 +18299,8 @@
           "lon": -93.98865,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sioux_falls_sd_us",
@@ -20875,7 +20885,8 @@
           ],
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sioux_falls_sd_us",
@@ -21664,7 +21675,8 @@
           "lon": -97.42355,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sioux_falls_sd_us",
@@ -23317,7 +23329,8 @@
           "lon": -95.87878,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "spearfish_sd_us",
@@ -24212,7 +24225,8 @@
           "lon": -103.27354,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "watertown_sd_us",
@@ -24881,7 +24895,8 @@
           "lon": -96.77105,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }
