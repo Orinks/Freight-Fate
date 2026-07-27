@@ -1,5 +1,13 @@
 # Freight Fate Roadmap
 
+
+> **RELEASE FREEZE (2026-07-27, owner + Josh):** the 1.9 line is
+> feature-frozen -- FIXES ONLY land here (playtest defects, CI reds,
+> data corrections). Every unchecked FEATURE bullet below now targets
+> the `feat/career-2.0` line (worktree `C:/dev/ff-2.0`) unless it is
+> explicitly a 1.9 fix. The driving school is gated off 1.9
+> (`DRIVING_SCHOOL_ENABLED`) and reopens on 2.0 to be finished.
+
 > Current stable: **1.8.0** (shipped 2026-07-05). Next release: **1.9.0**, in
 > flight on the `feat/career-1.9` branch -- driving realism between the exits
 > (discrete lanes, ramp terminals, congestion, real surface streets) plus the
