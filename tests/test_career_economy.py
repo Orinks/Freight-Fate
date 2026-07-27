@@ -3,6 +3,7 @@
 from types import SimpleNamespace
 
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.models.business import (
     COMPANY_DRIVER,
@@ -167,7 +168,7 @@ def test_paid_course_unlocks_endorsement_before_its_level(monkeypatch):
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="Course Buyer", current_city="Chicago")
         p = app.ctx.profile
         p.money = 5_000.0
@@ -198,7 +199,7 @@ def test_course_is_refused_without_the_money(monkeypatch):
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         app.ctx.profile = Profile(name="Broke Student", current_city="Chicago")
         app.ctx.profile.money = 100.0
@@ -262,7 +263,7 @@ def test_company_driver_road_fuel_is_carrier_billed(monkeypatch):
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         driving = _driving(app)
         money_before = app.ctx.profile.money
@@ -284,7 +285,7 @@ def test_owner_operator_road_fuel_still_costs_cash(monkeypatch):
 
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         driving = _driving(app, business_status=LEASED_OWNER_OPERATOR)
         app.ctx.profile.money = 10_000.0
@@ -304,7 +305,7 @@ def test_company_out_of_fuel_rescue_hits_reputation_not_wallet(monkeypatch):
     app = App()
     try:
         events = []
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         driving = _driving(app)
         p = app.ctx.profile
@@ -330,7 +331,7 @@ def test_motel_sleep_costs_money_and_gives_full_rest(monkeypatch):
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         driving = _driving(app)
         p = app.ctx.profile
@@ -359,7 +360,7 @@ def test_motel_is_refused_when_broke(monkeypatch):
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         driving = _driving(app)
         p = app.ctx.profile
@@ -383,7 +384,7 @@ def test_parking_full_night_offers_a_motel(monkeypatch):
 
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         driving = _driving(app)
         p = app.ctx.profile

@@ -9,6 +9,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate import updater
 from freight_fate.settings import Settings
@@ -1204,7 +1205,7 @@ def test_download_state_parks_update_when_not_auto_appliable(tmp_path, monkeypat
     spoken = []
     popped = []
     ctx = SimpleNamespace(
-        say=lambda text, interrupt=False: spoken.append(text),
+        say=speech_stub(spoken),
         pop_state=lambda: popped.append(True),
         quit=lambda: pytest.fail("must not quit when the update is manual"),
     )

@@ -4,6 +4,7 @@ from importlib import resources
 
 import pytest
 from asset_helpers import asset_exists
+from speech_capture import speech_stub
 
 from freight_fate.models.jobs import CARGO_CATALOG, Job
 from freight_fate.music import (
@@ -202,7 +203,7 @@ def denver_driving(monkeypatch):
         "play",
         lambda key, volume=1.0, pan=0.0: played_effects.append((key, volume)),
     )
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     from freight_fate.models.profile import Profile
 
     app.ctx.profile = Profile(name="Radio Range", current_city="Denver")

@@ -1,4 +1,5 @@
 import pygame
+from speech_capture import speech_stub
 
 from freight_fate.models.business import (
     LEASED_OWNER_OPERATOR,
@@ -117,7 +118,7 @@ def test_terminal_career_plan_is_keyboard_reachable_and_spoken(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="Keyboard Plan", current_city="Chicago")
         app.ctx.profile.achievements.append("first_dispatch")
 
@@ -142,7 +143,7 @@ def test_terminal_career_plan_speaks_senior_company_level_guidance(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="Senior Driver", current_city="Chicago")
         app.ctx.profile.achievements.append("first_dispatch")
         app.ctx.profile.career.xp = LEVEL_XP[9]
@@ -174,7 +175,7 @@ def test_dispatch_board_speaks_objective_and_marks_recommended_job(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="Board Plan", current_city="Chicago")
         app.ctx.profile.achievements.append("first_dispatch")
         app.ctx.profile.career.xp = LEVEL_XP[9]
@@ -211,7 +212,7 @@ def test_dispatch_board_speaks_authority_level_recommendation(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="Independent", current_city="Chicago")
         app.ctx.profile.achievements.append("first_dispatch")
         app.ctx.profile.business_status = INDEPENDENT_AUTHORITY
@@ -258,7 +259,7 @@ def test_first_day_terminal_entry_speaks_training_arc_without_tutorial_language(
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="First Day", current_city="Chicago")
 
         app.push_state(CityMenuState(app.ctx))
@@ -278,7 +279,7 @@ def test_out_of_sync_company_terminal_entry_uses_first_week_guidance(monkeypatch
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="First Week", current_city="Chicago")
         app.ctx.profile.career.deliveries = 1
 
@@ -304,7 +305,7 @@ def test_dispatch_board_recommendation_label_is_spoken_and_visible(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="Board Plan", current_city="Chicago")
         app.ctx.profile.achievements.append("first_dispatch")
         app.ctx.profile.career.xp = LEVEL_XP[9]
@@ -369,7 +370,7 @@ def test_owner_operator_first_day_terminal_keeps_cash_cushion_guidance(monkeypat
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="Owner Day", current_city="Chicago")
         app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
         app.ctx.profile.owned_trucks = ["rig"]
@@ -392,7 +393,7 @@ def test_out_of_sync_owner_operator_uses_career_guidance(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="Owner Week", current_city="Chicago")
         apply_start_option(app.ctx.profile, start_option(OWNER_OPERATOR_START_KEY))
 
@@ -431,7 +432,7 @@ def test_owner_operator_first_day_dispatch_board_keeps_business_cost_guidance(mo
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="Owner Board", current_city="Chicago")
         app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
         app.ctx.profile.owned_trucks = ["rig"]

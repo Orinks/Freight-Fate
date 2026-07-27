@@ -2,6 +2,7 @@
 surface road, honored or run, baked from OSM or seeded by the heuristic."""
 
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.states.driving import (
     GREEN_ROLL_MPH,
@@ -432,7 +433,7 @@ def test_stopped_short_of_the_light_gets_creep_guidance(monkeypatch):
     try:
         d = _driving(app)
         spoken = []
-        monkeypatch.setattr(d.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(d.ctx, "say_event", speech_stub(spoken))
         _on_ramp(d, "signal", red=True, mph=0.0)
         d._ramp_mi = RAMP_ACCESS_MI + 0.15  # stopped well short of the bar
 
@@ -473,7 +474,7 @@ def test_yellow_and_green_wording_track_distance_to_the_bar(monkeypatch):
     try:
         d = _driving(app)
         spoken = []
-        monkeypatch.setattr(d.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(d.ctx, "say_event", speech_stub(spoken))
         # Short of the bar, moving: yellow says stop then creep up on the red.
         _on_ramp(d, "signal", red=False, mph=20.0)
         d._ramp_mi = RAMP_ACCESS_MI + 0.15
@@ -498,7 +499,7 @@ def test_every_light_change_is_spoken_on_the_approach(monkeypatch):
     try:
         d = _driving(app)
         spoken = []
-        monkeypatch.setattr(d.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(d.ctx, "say_event", speech_stub(spoken))
         _on_ramp(d, "signal", red=True, mph=10.0)
         d._ramp_mi = RAMP_ACCESS_MI + 0.3  # still descending the ramp
         cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
@@ -555,7 +556,7 @@ def test_signal_on_names_the_ramp_ending(monkeypatch):
     try:
         d = _driving(app)
         spoken = []
-        monkeypatch.setattr(d.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(d.ctx, "say", speech_stub(spoken))
         d.trip.ramp_control_at = lambda mi: "stop"
         stop = _FakeStop(at_mi=d.trip.position_mi + 1.2)
         stop.spoken_name = "Test Plaza"
@@ -578,7 +579,7 @@ def test_upcoming_readout_names_the_ramp_ending(monkeypatch):
     try:
         d = _driving(app)
         spoken = []
-        monkeypatch.setattr(d.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(d.ctx, "say", speech_stub(spoken))
         d.trip.ramp_control_at = lambda mi: "signal"
         stop = _FakeStop(at_mi=d.trip.position_mi + 5.0)
         stop.spoken_name = "Test Plaza"

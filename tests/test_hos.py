@@ -943,7 +943,7 @@ def test_food_and_coffee_break_boosts_alertness_without_resetting_break_rule(mon
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
         stop = RoadStop(

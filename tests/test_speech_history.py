@@ -5,6 +5,8 @@ First press repeats what just spoke; pressing again within a few seconds
 walks one line older per press; a fresh announcement snaps back to newest.
 """
 
+from speech_capture import speech_stub
+
 from freight_fate.speech import SpeechHistory
 
 
@@ -126,7 +128,7 @@ def test_comma_walks_back_through_game_and_event_speech():
     app = App()
     try:
         spoken = []
-        app.ctx.speech.say = lambda text, interrupt=True: spoken.append(text)
+        app.ctx.speech.say = speech_stub(spoken)
         app.ctx.settings.sapi_events = False
 
         app.ctx.say("Fuel 62 gallons.")

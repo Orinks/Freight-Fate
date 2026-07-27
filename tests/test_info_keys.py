@@ -248,7 +248,7 @@ def test_comma_repeats_the_last_spoken_line():
     app = App()
     try:
         spoken = []
-        app.ctx.speech.say = lambda text, interrupt=True: spoken.append(text)
+        app.ctx.speech.say = speech_stub(spoken)
 
         app.ctx.say("Fuel 62 gallons.")
         assert app.ctx.last_spoken == "Fuel 62 gallons."
@@ -271,7 +271,7 @@ def test_comma_with_nothing_spoken_stays_silent():
     app = App()
     try:
         spoken = []
-        app.ctx.speech.say = lambda text, interrupt=True: spoken.append(text)
+        app.ctx.speech.say = speech_stub(spoken)
         app.ctx.repeat_last_spoken()
         assert spoken == []
     finally:

@@ -12,6 +12,7 @@ import random
 from types import SimpleNamespace
 
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.sim.trip import Trip
 from freight_fate.sim.vehicle import TruckState
@@ -100,7 +101,7 @@ def _law_stub(seed: int, *, level: int, position: float, chains_on: bool, tire_t
     )
     ctx = SimpleNamespace(
         profile=SimpleNamespace(money=1000.0),
-        say_event=lambda text, interrupt=True: spoken.append(text),
+        say_event=speech_stub(spoken),
         audio=SimpleNamespace(play=lambda *a, **k: None),
     )
     return SimpleNamespace(

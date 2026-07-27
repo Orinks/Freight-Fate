@@ -1479,7 +1479,7 @@ def test_curve_assist_cues_do_not_thrash(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1521,7 +1521,7 @@ def test_armed_exit_counts_down(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1560,7 +1560,7 @@ def test_armed_exit_countdown_silent_on_terse(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
         app.ctx.settings.speech_verbosity = 0
         driving = start_drive(app)
@@ -2040,7 +2040,7 @@ def test_destination_exit_announcement_names_lane_move_when_drift_is_on(monkeypa
     app = App()
     app.ctx.settings.steering_assist = "light"
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -2062,7 +2062,7 @@ def test_delivery_does_not_complete_without_taking_destination_exit(monkeypatch)
 
     app = App()
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -2146,7 +2146,7 @@ def test_missed_destination_exit_suppresses_facility_zone_cues(monkeypatch):
 
     app = App()
     events = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -2418,7 +2418,7 @@ def test_jake_engages_at_last_selected_stage(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -2451,7 +2451,7 @@ def test_jake_stage_keys_do_nothing_while_the_jake_is_off(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)

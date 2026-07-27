@@ -7,6 +7,8 @@ said miles while R spoke kilometers -- "38 miles" on the board, then
 through Settings.distance_text.
 """
 
+from speech_capture import speech_stub
+
 from freight_fate.settings import Settings
 
 
@@ -62,7 +64,7 @@ def test_exit_signal_announcement_speaks_kilometers(monkeypatch):
         app.ctx.settings.imperial_units = False
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
 
         class _Stop:
             at_mi = driving.trip.position_mi + 1.2

@@ -7,6 +7,7 @@ instantly. A bare double-tap must never latch -- players feather in taps.
 """
 
 import pygame
+from speech_capture import speech_stub
 
 from freight_fate.sim.pedal_latch import (
     CATCH_HOLD_S,
@@ -127,7 +128,7 @@ def test_latched_throttle_drives_the_truck_hands_free(monkeypatch):
     played = []
     held = set()
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     monkeypatch.setattr(app.ctx.audio, "play", lambda key, volume=1.0, pan=0.0: played.append(key))
     try:
         driving = start_drive(app)
@@ -175,7 +176,7 @@ def test_latch_setting_off_keeps_pedals_plain(monkeypatch):
     events = []
     held = set()
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
         app.ctx.settings.pedal_latch = False
         driving = start_drive(app)
@@ -232,7 +233,7 @@ def test_latching_the_brake_at_a_standstill_never_grabs_reverse(monkeypatch):
     events = []
     held = set()
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
         driving = start_drive(app)
         quiet_trip(driving)

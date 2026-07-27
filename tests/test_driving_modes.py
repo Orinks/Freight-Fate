@@ -3,6 +3,7 @@
 import pygame
 import pytest
 from driving_feature_helpers import HeldKeys, key_event, quiet_trip, start_drive
+from speech_capture import speech_stub
 
 
 def test_driving_mode_tuning_keeps_standard_baseline_and_softens_only_relaxed():
@@ -76,7 +77,7 @@ def test_hos_warning_waits_until_active_hazard_is_resolved(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)

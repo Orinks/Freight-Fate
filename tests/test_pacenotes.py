@@ -7,6 +7,7 @@ lists the next few bends, and D folds the bend into its one number.
 
 import pytest
 from driving_feature_helpers import quiet_trip, start_drive
+from speech_capture import speech_stub
 
 from freight_fate.data.curves import RouteCurve, leg_curves, route_curves
 from freight_fate.settings import Settings
@@ -70,7 +71,7 @@ def test_short_distance_text_units():
 
 def _spoken_pacenotes(app, driving, monkeypatch, curves, speed_mph):
     spoken = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     driving.trip.curves = tuple(curves)
     driving.trip._announced_curves = set()
     driving.truck.velocity_mps = speed_mph * 0.44704
@@ -176,7 +177,7 @@ def test_upcoming_curve_remains_eligible_after_resume(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         spoken = []
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
         pos = driving.trip.position_mi
         curve = _curve(pos + 0.3, "L", advisory=30)
         driving.trip.curves = (curve,)
@@ -201,7 +202,7 @@ def test_safe_speed_folds_in_the_bend(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         pos = driving.trip.position_mi
         driving.trip.curves = (_curve(pos + 0.2, advisory=25),)
         driving._speak_safe_speed()
@@ -218,7 +219,7 @@ def test_upcoming_lists_the_next_bends(monkeypatch):
         driving = start_drive(app)
         quiet_trip(driving)
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         pos = driving.trip.position_mi
         driving.trip.curves = (
             _curve(pos + 2.0, "L", advisory=30),

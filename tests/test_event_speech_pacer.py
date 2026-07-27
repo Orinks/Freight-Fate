@@ -10,6 +10,8 @@ described flushes the backlog and speaks fresh.
 
 from __future__ import annotations
 
+from speech_capture import speech_stub
+
 from freight_fate.speech import EventSpeechPacer
 
 
@@ -82,7 +84,7 @@ def test_say_event_flushes_a_stale_backlog_end_to_end() -> None:
     try:
         calls: list[tuple[str, bool]] = []
         app.ctx.settings.sapi_events = True
-        app.ctx.speech.say_event = lambda text, interrupt=True: calls.append((text, interrupt))
+        app.ctx.speech.say_event = speech_stub(calls, with_interrupt=True)
 
         approach = [
             "Slow down for the dock, twenty five miles per hour through the yard.",

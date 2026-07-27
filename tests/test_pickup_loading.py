@@ -408,7 +408,7 @@ def test_accepting_stale_cached_offer_drops_it_instead_of_crashing():
 
     app = App()
     spoken = []
-    app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+    app.ctx.say = speech_stub(spoken)
     try:
         app.ctx.profile = Profile(name="Stale Board", current_city="Chicago")
         p = app.ctx.profile
@@ -445,7 +445,7 @@ def test_drop_and_hook_gets_the_truck_out_in_a_fraction_of_the_time(monkeypatch)
 
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         accept_pickup_drive(app)
         pickup = arrive_at_pickup(app)
@@ -500,7 +500,7 @@ def test_a_clean_trailer_walks_around_clean(monkeypatch):
     original = trailer_yard.preloaded_trailer
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         pickup, unit = _pickup_with_trailer(app, condition_pct=10.0)
         assert unit.defect is None
@@ -522,7 +522,7 @@ def test_walking_a_bad_trailer_finds_it_and_offers_the_refusal(monkeypatch):
     original = trailer_yard.preloaded_trailer
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         pickup, unit = _pickup_with_trailer(app, condition_pct=90.0)
         assert unit.defect
@@ -546,7 +546,7 @@ def test_refusing_a_trailer_costs_time_and_gets_a_sound_one(monkeypatch):
     original = trailer_yard.preloaded_trailer
     app = App()
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         pickup, unit = _pickup_with_trailer(app, condition_pct=90.0)
         select_item(pickup, "Walk around the trailer")
@@ -575,7 +575,7 @@ def test_a_refused_trailer_does_not_follow_the_driver_onto_the_road(monkeypatch)
 
     original = trailer_yard.preloaded_trailer
     app = App()
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+    monkeypatch.setattr(app.ctx, "say", speech_stub())
     try:
         pickup, unit = _pickup_with_trailer(app, condition_pct=90.0)
         select_item(pickup, "Walk around the trailer")
@@ -601,7 +601,7 @@ def test_an_unrefused_defect_is_what_the_inspector_finds(monkeypatch):
 
     original = trailer_yard.preloaded_trailer
     app = App()
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+    monkeypatch.setattr(app.ctx, "say", speech_stub())
     try:
         pickup, unit = _pickup_with_trailer(app, condition_pct=90.0)
         select_item(pickup, "Depart for destination")  # rolled out without looking

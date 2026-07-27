@@ -642,7 +642,7 @@ def test_adaptive_cruise_ignores_distant_slower_traffic(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         open_limits(driving)
         driving.trip.traffic_manager.vehicles = [
             NPCVehicle("npc:far", driving.trip.position_mi + 2.3, 30.0, 30.0, 0, "slow_car")
@@ -672,7 +672,7 @@ def test_adaptive_cruise_follow_cue_does_not_repeat_within_the_cooldown(monkeypa
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
         open_limits(driving)
         # Flat ground: this test pins the follow-cue cooldown, not descent
         # physics. The helper route opens on a real 8.6 percent downhill,
@@ -1103,7 +1103,7 @@ def test_fixed_object_hazard_needs_nearly_a_stop_or_a_swerve(monkeypatch):
 
     app = App()
     spoken = []
-    app.ctx.say_event = lambda text, interrupt=False: spoken.append(text)
+    app.ctx.say_event = speech_stub(spoken)
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1220,7 +1220,7 @@ def test_descent_control_levels_and_brake_capture(monkeypatch, level, braking, e
 
     app = App()
     spoken = []
-    app.ctx.say_event = lambda text, interrupt=False: spoken.append(text)
+    app.ctx.say_event = speech_stub(spoken)
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1461,7 +1461,7 @@ def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
     app = App()
     events, played = [], []
     monkeypatch.setattr(app.ctx.audio, "play", lambda key, **k: played.append(key))
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1588,7 +1588,7 @@ def test_cruise_does_not_run_away_down_a_grade():
 
     for grade, ceiling in ((-0.02, 63.5), (-0.04, 66.0), (-0.06, 66.0)):
         app = App()
-        app.ctx.say_event = lambda text, interrupt=False: None
+        app.ctx.say_event = speech_stub()
         try:
             _, speeds = _grade_hold(app, grade)
             assert max(speeds) <= ceiling, (grade, max(speeds))
@@ -1612,7 +1612,7 @@ def test_cruise_answers_a_climb_before_it_costs_twenty_mph():
     from freight_fate.app import App
 
     app = App()
-    app.ctx.say_event = lambda text, interrupt=False: None
+    app.ctx.say_event = speech_stub()
     try:
         driving, speeds = _grade_hold(app, 0.02)
         # A 2 percent pull is well inside what the truck has: hold it.
@@ -1625,7 +1625,7 @@ def test_cruise_answers_a_climb_before_it_costs_twenty_mph():
         app.shutdown()
 
     app = App()
-    app.ctx.say_event = lambda text, interrupt=False: None
+    app.ctx.say_event = speech_stub()
     try:
         driving, speeds = _grade_hold(app, 0.04)
         # A 4 percent pull genuinely costs a loaded truck speed -- but it
@@ -1647,7 +1647,7 @@ def test_interactive_descent_control_caps_the_target_without_rewriting_it():
     from freight_fate.app import App
 
     app = App()
-    app.ctx.say_event = lambda text, interrupt=False: None
+    app.ctx.say_event = speech_stub()
     try:
         driving, _ = _grade_hold(app, -0.06, seconds=25.0, descent="interactive")
         assert driving._cruise_mph == pytest.approx(62.0)
@@ -1676,7 +1676,7 @@ def test_cruise_snubs_the_drums_instead_of_dragging_them_down_a_grade():
     from freight_fate.app import App
 
     app = App()
-    app.ctx.say_event = lambda text, interrupt=False: None
+    app.ctx.say_event = speech_stub()
     try:
         driving, speeds = _grade_hold(app, -0.06, seconds=80.0)
         t = driving.truck
@@ -1696,7 +1696,7 @@ def test_cruise_leaves_the_drivers_own_jake_alone():
     from freight_fate.app import App
 
     app = App()
-    app.ctx.say_event = lambda text, interrupt=False: None
+    app.ctx.say_event = speech_stub()
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -1764,7 +1764,7 @@ def test_predictive_cruise_banks_speed_before_a_climb():
     from freight_fate.app import App
 
     app = App()
-    app.ctx.say_event = lambda text, interrupt=False: None
+    app.ctx.say_event = speech_stub()
     try:
         driving = _cruising(app)
         _hill_road(driving, flat_mi=0.5, grade=0.04, climb_mi=1.0)
@@ -1790,7 +1790,7 @@ def test_predictive_cruise_finds_a_short_hill():
     from freight_fate.app import App
 
     app = App()
-    app.ctx.say_event = lambda text, interrupt=False: None
+    app.ctx.say_event = speech_stub()
     try:
         driving = _cruising(app)
         _hill_road(driving, flat_mi=0.3, grade=0.04, climb_mi=0.5)
@@ -1811,7 +1811,7 @@ def test_predictive_cruise_holds_at_a_crest_but_never_slows_the_truck():
     from freight_fate.app import App
 
     app = App()
-    app.ctx.say_event = lambda text, interrupt=False: None
+    app.ctx.say_event = speech_stub()
     try:
         driving = _cruising(app)
         start = _hill_road(driving, flat_mi=0.0, grade=0.04, climb_mi=0.2)
@@ -1836,7 +1836,7 @@ def test_predictive_cruise_shaves_before_a_descent():
     from freight_fate.app import App
 
     app = App()
-    app.ctx.say_event = lambda text, interrupt=False: None
+    app.ctx.say_event = speech_stub()
     try:
         driving = _cruising(app)
         _hill_road(driving, flat_mi=0.4, grade=-0.05, climb_mi=1.0)
@@ -1851,7 +1851,7 @@ def test_predictive_cruise_never_banks_past_the_posted_limit():
     from freight_fate.app import App
 
     app = App()
-    app.ctx.say_event = lambda text, interrupt=False: None
+    app.ctx.say_event = speech_stub()
     try:
         driving = _cruising(app, set_mph=55.0)
         driving.trip.speed_limit_at = lambda mile: (55.0, None)
@@ -1906,7 +1906,7 @@ def test_cruise_leaves_the_retarder_alone_when_descent_control_is_off():
     from freight_fate.app import App
 
     app = App()
-    app.ctx.say_event = lambda text, interrupt=False: None
+    app.ctx.say_event = speech_stub()
     try:
         app.ctx.settings.descent_speed_control = "off"
         driving = _cruising(app)
@@ -1938,7 +1938,7 @@ def test_descent_control_cue_does_not_chant_through_rolling_country():
 
     app = App()
     events = []
-    app.ctx.say_event = lambda text, interrupt=False: events.append(text)
+    app.ctx.say_event = speech_stub(events)
     try:
         driving = _cruising(app)
         driving.trip.grade_at = lambda mile: 0.05 * math.sin(2 * math.pi * mile / 2.0)

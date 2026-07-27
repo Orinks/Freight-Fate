@@ -9,6 +9,7 @@ left to signal for.
 
 import pytest
 from driving_feature_helpers import quiet_trip, start_drive
+from speech_capture import speech_stub
 
 from freight_fate.states.driving_core import (
     DESTINATION_EXIT_BEFORE_END_MI,
@@ -18,7 +19,7 @@ from freight_fate.states.driving_core import (
 
 def _capture_events(app, monkeypatch):
     spoken = []
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     return spoken
 
 

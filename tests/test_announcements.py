@@ -173,9 +173,7 @@ def test_curve_callout_setting_controls_the_single_automatic_announcement(monkey
     try:
         d = _driving(app)
         calls = []
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True: calls.append((text, interrupt))
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(calls, with_interrupt=True))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *args, **kwargs: None)
         event = TripEvent(
             TripEventKind.CURVE,
@@ -204,9 +202,7 @@ def test_cb_radio_chatter_queues_and_uses_cb_audio(monkeypatch):
         d = _driving(app)
         calls = []
         sounds = []
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True: calls.append((text, interrupt))
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(calls, with_interrupt=True))
         monkeypatch.setattr(app.ctx.audio, "play", lambda key, **kwargs: sounds.append(key))
 
         d._handle_trip_event(
@@ -233,9 +229,7 @@ def test_truly_ambient_chatter_is_spaced_without_blocking_safety(monkeypatch):
     try:
         d = _driving(app)
         calls = []
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True: calls.append((text, interrupt))
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(calls, with_interrupt=True))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
 
         d._handle_trip_event(TripEvent(TripEventKind.WEATHER_CHANGE, "Weather: rain."))
@@ -303,9 +297,7 @@ def test_stop_notice_yields_to_recent_route_speech(monkeypatch):
     try:
         d = _driving(app)
         calls = []
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True: calls.append((text, interrupt))
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(calls, with_interrupt=True))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
 
         merge = "Merge onto I-90 East toward South Bend; 66 miles."
@@ -328,9 +320,7 @@ def test_ambient_chatter_waits_while_hazard_is_active(monkeypatch):
     try:
         d = _driving(app)
         calls = []
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True: calls.append((text, interrupt))
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(calls, with_interrupt=True))
 
         d._hazard_deadline = 5.0
         d._handle_trip_event(TripEvent(TripEventKind.WEATHER_CHANGE, "Weather: rain."))
@@ -354,9 +344,7 @@ def test_critical_zone_clears_pending_ambient_chatter(monkeypatch):
     try:
         d = _driving(app)
         calls = []
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True: calls.append((text, interrupt))
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(calls, with_interrupt=True))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
 
         d._handle_trip_event(TripEvent(TripEventKind.WEATHER_CHANGE, "Weather: rain."))

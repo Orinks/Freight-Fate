@@ -1,6 +1,7 @@
 """Assigned dispatch for new hires; load and route choice earned with rank."""
 
 import pygame
+from speech_capture import speech_stub
 
 from freight_fate.models.business import LEASED_OWNER_OPERATOR
 from freight_fate.models.career import LEVEL_XP
@@ -42,7 +43,7 @@ def test_new_hire_board_offers_single_assignment_with_decline(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = _new_hire()
         app.ctx.profile.career.deliveries = 12  # past training stages
 
@@ -77,7 +78,7 @@ def test_declining_assignment_costs_reputation_and_draws_next_load(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = _new_hire("Decliner")
         app.ctx.profile.career.deliveries = 12
         reputation_before = app.ctx.profile.career.reputation
@@ -113,7 +114,7 @@ def test_exhausted_decline_budget_locks_board_to_accept_only(monkeypatch):
 
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         app.ctx.profile = _new_hire("Out Of Declines")
         app.ctx.profile.career.deliveries = 12
         app.ctx.profile.career.dispatch_declines_used = NEW_HIRE_DECLINE_BUDGET
@@ -141,7 +142,7 @@ def test_single_candidate_assignment_offers_no_decline(monkeypatch):
 
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         app.ctx.profile = _new_hire("One Load Town")
 
         app.push_state(JobBoardState(app.ctx, [_job(miles=70.0)]))
@@ -161,7 +162,7 @@ def test_accepting_assignment_starts_pickup_drive(monkeypatch):
 
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         app.ctx.profile = _new_hire("Assigned Acceptor")
         jobs = JobBoard(app.ctx.world, seed=7).offers("Chicago", set(), level=1)
 
@@ -181,7 +182,7 @@ def test_senior_company_driver_gets_browsable_board(monkeypatch):
 
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         app.ctx.profile = _new_hire("Senior Driver")
         app.ctx.profile.career.xp = LEVEL_XP[SENIOR_LOAD_CHOICE_LEVEL - 1]
         app.ctx.profile.career.deliveries = 20
@@ -209,7 +210,7 @@ def test_owner_operator_board_stays_browsable(monkeypatch):
 
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         app.ctx.profile = _new_hire("Owner Browser")
         app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
         app.ctx.profile.owned_trucks = ["rig"]
@@ -237,7 +238,7 @@ def test_company_departure_runs_dispatch_assigned_route(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = _new_hire("Routed Driver")
         expected = app.ctx.world.supported_route_options("Chicago", "Milwaukee")[0]
 
@@ -261,7 +262,7 @@ def test_senior_company_departure_is_still_dispatch_routed(monkeypatch):
 
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         app.ctx.profile = _new_hire("Senior Routed")
         app.ctx.profile.career.xp = LEVEL_XP[SENIOR_LOAD_CHOICE_LEVEL - 1]
 
@@ -281,7 +282,7 @@ def test_owner_operator_departure_keeps_route_choice(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = _new_hire("Owner Router")
         app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
         app.ctx.profile.owned_trucks = ["rig"]
@@ -301,7 +302,7 @@ def test_declined_load_stays_declined_when_the_board_is_reopened(monkeypatch):
 
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         app.ctx.profile = _new_hire("Board Returner")
 
         app.push_state(CityMenuState(app.ctx))
@@ -354,7 +355,7 @@ def test_assigned_board_help_describes_accept_and_decline(monkeypatch):
 
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
         app.ctx.profile = _new_hire("Help Reader")
 
         app.push_state(JobBoardState(app.ctx, [_job(miles=70.0)]))
@@ -377,7 +378,7 @@ def test_assignment_board_offers_a_review_of_the_locked_pool(monkeypatch):
     spoken: list[str] = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = _new_hire()
         app.ctx.profile.career.deliveries = 12
 

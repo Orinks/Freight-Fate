@@ -3,6 +3,7 @@
 from types import SimpleNamespace
 
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.data.buffs import BUFF_CATALOG, BUFF_GROUPS, buffs_for_stop
 from freight_fate.models.business import COMPANY_DRIVER, LEASED_OWNER_OPERATOR
@@ -46,11 +47,9 @@ def _stop(driving, name, actions=("fuel", "break")):
 
 
 def _quiet(app, monkeypatch, spoken=None):
-    monkeypatch.setattr(
-        app.ctx,
-        "say",
-        lambda text, interrupt=True: spoken.append(text) if spoken is not None else None,
-    )
+    # speech_stub swallows the line when there is no sink, so the default
+    # case needs no special handling here.
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
 
 

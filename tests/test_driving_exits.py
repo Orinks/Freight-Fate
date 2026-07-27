@@ -3,6 +3,7 @@
 import pygame
 import pytest
 from driving_feature_helpers import HeldKeys, key_event, quiet_trip, start_drive
+from speech_capture import speech_stub
 
 
 @pytest.mark.smoke
@@ -58,7 +59,7 @@ def test_x_signals_for_upcoming_route_exit_without_taking_it(monkeypatch):
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = "light"
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -89,7 +90,7 @@ def test_x_near_the_exit_keeps_the_signal_until_a_second_press(monkeypatch):
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = "realistic"
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -122,7 +123,7 @@ def test_right_taps_with_drift_on_earn_the_hold_hint_once(monkeypatch):
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = "realistic"
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -160,7 +161,7 @@ def test_missed_destination_exit_reroutes_every_time(monkeypatch):
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = "realistic"
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -196,7 +197,7 @@ def test_x_without_route_exit_reports_no_signal_target(monkeypatch):
 
     spoken = []
     app = App()
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -223,11 +224,11 @@ def test_canceled_exit_signal_does_not_prompt_lane_prep(monkeypatch):
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = "light"
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        lambda text, interrupt=True: spoken.append(text),
+        speech_stub(spoken),
     )
     try:
         driving = start_drive(app)
@@ -256,7 +257,7 @@ def test_canceled_destination_exit_signal_stays_on_highway(monkeypatch):
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = "off"
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -293,7 +294,7 @@ def test_destination_exit_auto_arms_and_takes_ramp_with_valid_setup(monkeypatch)
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = "off"
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -323,7 +324,7 @@ def test_destination_exit_no_longer_requires_x_to_take_ramp(monkeypatch):
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = "off"
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -350,7 +351,7 @@ def test_realistic_lane_drift_requires_signal_for_destination_exit(monkeypatch, 
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = steering_assist
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -377,7 +378,7 @@ def test_relaxed_lane_drift_infers_destination_exit_intent(monkeypatch):
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = "off"
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -403,7 +404,7 @@ def test_exit_requires_right_lane_alignment(monkeypatch):
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = "light"
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -431,7 +432,7 @@ def test_exit_traffic_pressure_changes_missed_lane_recovery(monkeypatch):
     spoken = []
     app = App()
     app.ctx.settings.steering_assist = "light"
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
@@ -468,7 +469,7 @@ def test_exit_lane_can_be_set_with_keyboard_steering(monkeypatch):
     sounds = []
     app = App()
     app.ctx.settings.steering_assist = "light"
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(
         app.ctx.audio, "play", lambda key, volume=1.0, **_kw: sounds.append((key, volume))
     )
@@ -494,7 +495,7 @@ def test_lane_drift_off_sets_exit_lane_when_signaling(monkeypatch):
     sounds = []
     app = App()
     app.ctx.settings.steering_assist = "off"
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(
         app.ctx.audio, "play", lambda key, volume=1.0, **_kw: sounds.append((key, volume))
     )
@@ -544,7 +545,7 @@ def test_exit_missed_after_gore_window(monkeypatch):
 
     spoken = []
     app = App()
-    monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)

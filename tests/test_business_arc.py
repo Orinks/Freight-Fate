@@ -2,6 +2,7 @@
 
 import pygame
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.models.business import (
     AUTHORITY_ACTIVATION_COST,
@@ -256,7 +257,7 @@ def test_company_driver_truck_status_says_assigned_not_owned():
         app.ctx.profile.owned_trucks = ["rig", "heavy_hauler"]  # legacy save data
         app.ctx.profile.truck = "heavy_hauler"
         app.ctx.profile.upgrades = {"engine_tune": 2}
-        app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+        app.ctx.say = speech_stub(spoken)
         menu = CityMenuState(app.ctx)
         menu._truck_status()
 
@@ -283,7 +284,7 @@ def test_company_driver_shops_hide_owned_truck_language():
         p = app.ctx.profile
         p.owned_trucks = ["rig", "heavy_hauler"]  # old save values stay hidden
         p.money = 200_000.0
-        app.ctx.say = lambda text, interrupt=True: spoken.append(text)
+        app.ctx.say = speech_stub(spoken)
 
         app.push_state(TruckShopState(app.ctx))
         assert "carrier-assigned tractor" in app.state.items[0].text

@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.data.world_parsing import _parse_landmark
 from freight_fate.settings import CHATTER_CATEGORY_FIELDS, Settings
@@ -263,7 +264,7 @@ def test_driving_serves_villages_by_ladder_tier(monkeypatch):
     try:
         driving = _driving_state(app)
         calls = []
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: calls.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(calls))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
 
         def serve(spoken, explains):
@@ -305,7 +306,7 @@ def test_driving_serves_route_town_markers_only_on_all(monkeypatch):
     try:
         driving = _driving_state(app)
         calls = []
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: calls.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(calls))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         near = TripEvent(TripEventKind.CHECKPOINT, "Passing Tucumcari, NM on I-40.", {})
         cue = NavigationCue(

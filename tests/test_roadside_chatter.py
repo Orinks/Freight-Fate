@@ -1,6 +1,7 @@
 """Spoken roadside landmarks and billboards, and the chatter switches."""
 
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.data.world_parsing import _parse_landmark
 from freight_fate.settings import Settings
@@ -245,7 +246,7 @@ def test_chatter_switches_gate_spoken_callouts(monkeypatch):
     try:
         d = _driving(app)
         calls = []
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: calls.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(calls))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         river = TripEvent(
             TripEventKind.LANDMARK, "Crossing the White River.", {"category": "river"}
