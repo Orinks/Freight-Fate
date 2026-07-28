@@ -36,6 +36,11 @@ import urllib.request
 from collections.abc import Callable
 from dataclasses import dataclass
 
+try:
+    import win32cred
+except ImportError:  # pragma: no cover - exercised on non-Windows test envs
+    win32cred = None
+
 from .discord_presence import PresenceState
 from .net import ssl_context
 
@@ -152,13 +157,80 @@ class OnlineIdentity:
 
         return data_dir() / "online.json"
 
+    @classmethod
+    def token_path(cls):
+        return cls.path().with_suffix(".token")
+
+    @staticmethod
+    def _credential_target(driver_id: str) -> str:
+        return f"freight-fate-orinks:{driver_id}"
+
+    @staticmethod
+    def _store_token(driver_id: str, token: str) -> bool:
+        if os.name != "nt" or win32cred is None:
+            return False
+        try:
+            win32cred.CredWrite(
+                {
+                    "TargetName": OnlineIdentity._credential_target(driver_id),
+                    "UserName": driver_id,
+                    "CredentialBlob": token.encode("utf-8"),
+                    "Comment": "Freight Fate Orinks driver token",
+                    "Type": win32cred.CRED_TYPE_GENERIC,
+                    "Persist": win32cred.CRED_PERSIST_LOCAL_MACHINE,
+                },
+                0,
+            )
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
+    def _read_token(driver_id: str) -> str | None:
+        if os.name != "nt" or win32cred is None:
+            return None
+        try:
+            credential = win32cred.CredRead(
+                OnlineIdentity._credential_target(driver_id),
+                win32cred.CRED_TYPE_GENERIC,
+                0,
+            )
+        except Exception:
+            return None
+        blob = credential.get("CredentialBlob")
+        if isinstance(blob, (bytes, bytearray)):
+            return blob.decode("utf-8")
+        if isinstance(blob, str):
+            return blob
+        return None
+
+    @classmethod
+    def _read_token_file(cls) -> str | None:
+        try:
+            with open(cls.token_path(), "rb") as f:
+                return f.read().decode("utf-8")
+        except FileNotFoundError:
+            return None
+        except OSError:
+            return None
+
+    @classmethod
+    def _save_token_file(cls, token: str) -> None:
+        path = cls.token_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(token.encode("utf-8"))
+
     def save(self) -> None:
         path = self.path()
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(".json.tmp")
         with open(tmp, "w", encoding="utf-8") as f:
-            json.dump({"driver_id": self.driver_id, "driver_token": self.driver_token}, f, indent=2)
+            json.dump({"driver_id": self.driver_id}, f, indent=2)
         tmp.replace(path)
+        if self._store_token(self.driver_id, self.driver_token):
+            return
+        self._save_token_file(self.driver_token)
 
     @classmethod
     def load(cls) -> OnlineIdentity | None:
@@ -166,10 +238,18 @@ class OnlineIdentity:
             with open(cls.path(), encoding="utf-8") as f:
                 data = json.load(f)
             driver_id = data["driver_id"]
-            driver_token = data["driver_token"]
+            legacy_driver_token = data.get("driver_token")
         except (FileNotFoundError, KeyError, json.JSONDecodeError, OSError, TypeError):
             return None
-        if not isinstance(driver_id, str) or not isinstance(driver_token, str):
+        if not isinstance(driver_id, str):
+            return None
+
+        driver_token = cls._read_token(driver_id)
+        if driver_token is None:
+            driver_token = cls._read_token_file()
+        if driver_token is None and isinstance(legacy_driver_token, str):
+            driver_token = legacy_driver_token
+        if not isinstance(driver_token, str):
             return None
         if len(driver_id) < 8 or len(driver_token) < 24:
             return None

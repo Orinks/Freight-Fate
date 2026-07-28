@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Online account tokens are now stored securely.** The driver token used for
+  Orinks online features is no longer written into the plain settings file;
+  on Windows it is kept in Credential Manager instead, while the Driver ID
+  remains available locally.
+
 ## 1.8.6 - 2026-07-28
 
 ### Fixed

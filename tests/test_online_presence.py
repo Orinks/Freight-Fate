@@ -327,6 +327,20 @@ def test_identity_round_trips_through_disk():
     assert loaded == identity
 
 
+def test_identity_storage_keeps_the_token_out_of_plain_json(monkeypatch, tmp_path):
+    monkeypatch.setattr(OnlineIdentity, "path", staticmethod(lambda: tmp_path / "online.json"))
+
+    identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
+    identity.save()
+
+    payload = (tmp_path / "online.json").read_text(encoding="utf-8")
+    assert '"driver_id"' in payload
+    assert '"driver_token"' not in payload
+
+    loaded = OnlineIdentity.load()
+    assert loaded == identity
+
+
 def test_missing_or_malformed_identity_loads_as_none():
     assert OnlineIdentity.load() is None
     path = OnlineIdentity.path()
