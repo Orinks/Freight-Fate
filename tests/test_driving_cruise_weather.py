@@ -970,6 +970,47 @@ def test_adaptive_cruise_switches_to_keeper_for_heavy_traffic(monkeypatch):
         app.shutdown()
 
 
+def test_cruise_pre_brakes_for_heavy_traffic_like_a_work_zone(monkeypatch):
+    """Heavy traffic is a restricted zone, so cruise aims at its posted limit
+    exactly instead of carrying the with-traffic offset into the jam, and it
+    keeps aiming there once the warning window has retracted behind it.
+
+    The end-to-end playtest case for this cannot run on this line: without
+    baked traffic volume no congestion zone lands on any route, so it is
+    marked xfail in the harness tests and the gap is a 2.0 item. This covers
+    the lookahead itself with a zone put on the route directly.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import Zone, _zone_key
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.speed_limit_at = lambda mile: (70.0, None)
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 31.3  # ~70 mph
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._cruise_mph is not None
+
+        start = driving.trip.position_mi + 0.5
+        zone = Zone(start, start + 3.0, 50.0, "heavy traffic")
+        driving.trip.zones.append(zone)
+        driving.trip._announced_zone_warnings.add(_zone_key(zone))
+
+        assert driving._restricted_zone_limit_ahead() == (50.0, "heavy traffic")
+        # Exactly the zone's limit, with no with-traffic offset added.
+        assert driving._acc_posted_limit_ahead() == (50.0, "heavy traffic")
+        # The latch carries the reason too, so a zone that slips back out of
+        # the speed-scaled warning window is still braked for by name.
+        assert driving._construction_slowdown == (zone.end_mi, 50.0, "heavy traffic")
+        driving.trip._zone_warning_lookahead_mi = lambda: 0.0
+        assert driving._restricted_zone_limit_ahead() == (50.0, "heavy traffic")
+    finally:
+        app.shutdown()
+
+
 def test_speed_control_restores_cruise_target_after_zone(monkeypatch):
     from freight_fate.app import App
 

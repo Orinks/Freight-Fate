@@ -48,6 +48,7 @@ class PlaytestResult:
     speed_control_transitions: list[str] = field(default_factory=list)
     max_speeding_timer_s: float = 0.0
     construction_entry_speed_mph: float | None = None
+    heavy_traffic_entry_speed_mph: float | None = None
     destination_exit_speed_mph: float | None = None
     # Equipment and freight handling. A transcript alone cannot tell you which
     # tractor dispatch drew, whether the shipper staged a trailer or loaded at
@@ -356,6 +357,8 @@ class PlaytestHarness:
             _, zone_reason = driving.trip.speed_limit_at(driving.trip.position_mi)
             if zone_reason == "construction" and self.result.construction_entry_speed_mph is None:
                 self.result.construction_entry_speed_mph = driving.truck.speed_mph
+            if zone_reason == "heavy traffic" and self.result.heavy_traffic_entry_speed_mph is None:
+                self.result.heavy_traffic_entry_speed_mph = driving.truck.speed_mph
             if driving.trip.position_mi >= end_mi:
                 break
         else:

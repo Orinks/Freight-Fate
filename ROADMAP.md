@@ -1060,6 +1060,14 @@ city service drives below.)
       drives clock-gated jams on a commuter curve: metro stretches jam at
       rush hour and flow free at midnight; entering a live jam injects slow
       traffic into both lanes.
+- [ ] **Live traffic volume -- deferred to 2.0.** The split `world_data`
+      tree carries no `traffic_aadt`, so congestion placement falls back to
+      the metro heuristic and no jam lands on any route: a sweep of 12 seeds
+      across 8 metro pairs found none. Sourcing live volume needs data work
+      beyond the 1.9 scope, so it waits for 2.0. Until then nothing that
+      depends on a live jam can be played or tested on this line, including
+      the end-to-end speed-control case for heavy traffic, which is xfail in
+      `tests/test_playtest_harness.py` for exactly this reason.
 - [x] **Surface streets driven for real.** Tier-1 street chains carry baked
       per-segment cues and speed zones; boundary cues speak the maneuver
       with block-aware distances; city-passage and highway-pressure language

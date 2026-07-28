@@ -994,6 +994,14 @@
   announced and reaches the work-zone limit before the speed keeper takes over,
   so the game no longer fines you while its own controls are still slowing down.
 
+- **Automatic speed control now slows in time for heavy traffic zones.** The
+  same early braking that construction zones already received now applies to
+  heavy traffic zones. When the advance warning sounds, adaptive cruise begins
+  easing down to the posted limit and hands off to the speed keeper at the
+  zone boundary, so the transition is smooth and you enter at the right speed.
+  Contributed by wleicht ([@wleicht](https://github.com/wleicht)) in
+  [PR #127](https://github.com/Orinks/Freight-Fate/pull/127).
+
 - **The rest-stop arrival cue now leaves real time to set the brake.** Trip
   pacing no longer consumes the whole stopping buffer while even a slow voice
   is still speaking. Terse speech now says "Stop now." If you set the parking

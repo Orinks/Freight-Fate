@@ -216,8 +216,9 @@ class CityMenuState(MenuState):
             f"service area, {city.state}. {business.capitalize()} with "
             f"level {rank.level}, {rank.title}. "
             f"You have {p.money:,.0f} dollars. "
-            f"{first_day} {self.current_text()}"
+            f"{first_day}"
         )
+        self.ctx.say(self.current_text(), interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         items = [
@@ -931,8 +932,9 @@ class JobBoardState(MenuState):
                 f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
                 f"{business_note}{objective_text}"
                 f"{self._hos_board_note()}"
-                f"{self.ctx.profile.market.summary()} " + self.current_text()
+                f"{self.ctx.profile.market.summary()}"
             )
+            self.ctx.say(self.current_text(), interrupt=False, review=False)
 
     def _announce_assignment(self) -> None:
         p = self.ctx.profile

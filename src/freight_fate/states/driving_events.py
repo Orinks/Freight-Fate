@@ -2086,9 +2086,9 @@ class DrivingEventMixin:
             if limit < lowest_limit and probe - start <= braking_mi:
                 lowest_limit, lowest_reason = limit, reason
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
-        construction_limit = self._construction_limit_ahead()
-        if construction_limit is not None and construction_limit <= lowest_limit:
-            return construction_limit, "construction"
+        restricted = self._restricted_zone_limit_ahead()
+        if restricted is not None and restricted[0] <= lowest_limit:
+            return restricted[0], restricted[1]
         return lowest_limit, lowest_reason
 
     def _grade_samples(self, distance_mi: float) -> list[float]:
@@ -2368,7 +2368,9 @@ class DrivingEventMixin:
         # tickets, and trooper stops -- all of which now exist. The "Speed limit X"
         # cue still names the number; this cue says cruise is handling it.
         posted, limit_reason = self._acc_posted_limit_ahead()
-        cap_mph = posted if limit_reason == "construction" else posted + ACC_LIMIT_OFFSET_MPH
+        cap_mph = (
+            posted if limit_reason in RESTRICTED_ZONE_REASONS else posted + ACC_LIMIT_OFFSET_MPH
+        )
         # Measured against the working target, not the set speed, so this cap
         # can only ever lower it. Against the set speed it overwrote a stricter
         # ramp cap: cruise announced it was easing to 45 for the exit and then
@@ -2387,11 +2389,10 @@ class DrivingEventMixin:
             # the barrels.
             if self._acc_limit_cap_said is None or cap_mph < self._acc_limit_cap_said - 0.5:
                 self._acc_limit_cap_said = cap_mph
-                reason = (
-                    "Construction zone ahead"
-                    if limit_reason == "construction"
-                    else "Posted limit lower"
-                )
+                reason = {
+                    "construction": "Construction zone ahead",
+                    "heavy traffic": "Heavy traffic ahead",
+                }.get(limit_reason, "Posted limit lower")
                 self.ctx.say_event(
                     f"{reason}; adaptive cruise easing to {self.ctx.settings.speed_text(cap_mph)}.",
                     interrupt=False,
