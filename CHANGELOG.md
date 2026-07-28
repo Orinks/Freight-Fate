@@ -219,6 +219,15 @@
   the run up to the Continental Divide -- keeps its name. Thanks to nromey,
   [PR #107](https://github.com/Orinks/Freight-Fate/pull/107).
 
+- **Starting a new career no longer talks over itself.** Naming your driver
+  and picking a home region and city used to leave those screens announcing
+  themselves again on the way out, each one cutting off the last, before the
+  terminal menu finally spoke. The screens you have finished with now stay
+  quiet, so you hear your new career's terminal and nothing else -- and the
+  stray announcements no longer fill up the message review history either.
+  Contributed by Day Garwood ([@day-garwood](https://github.com/day-garwood))
+  in [PR #129](https://github.com/Orinks/Freight-Fate/pull/129).
+
 ## 1.8.5.1 - 2026-07-22
 
 ### Fixed
