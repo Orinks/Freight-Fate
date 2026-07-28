@@ -109,7 +109,7 @@ def test_a_replay_stops_the_event_voice(monkeypatch):
     app = App()
     stopped = []
     monkeypatch.setattr(app.ctx, "stop_event_speech", lambda: stopped.append(True))
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: None)
+    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True, review=True: None)
     try:
         driving = start_drive(app)
         driving._last_event_message = "Hazard warning."
