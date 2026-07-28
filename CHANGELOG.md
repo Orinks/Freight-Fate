@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Quitting to the main menu no longer closes the game.** Choosing "Quit to
+  main menu" from the pause menu brought you back to the title screen and then
+  shut the game down a moment later. You now land on the title screen and stay
+  there, free to continue your career or start another. Reported by smeveriss
+  in [issue #132](https://github.com/Orinks/Freight-Fate/issues/132).
+
 ## 1.8.6 - 2026-07-28
 
 ### Fixed
