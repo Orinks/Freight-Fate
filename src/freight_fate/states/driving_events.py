@@ -878,9 +878,9 @@ class DrivingEventMixin:
             if limit < lowest_limit and probe - start <= braking_mi:
                 lowest_limit, lowest_reason = limit, reason
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
-        construction_limit = self._construction_limit_ahead()
-        if construction_limit is not None and construction_limit <= lowest_limit:
-            return construction_limit, "construction"
+        restricted = self._restricted_zone_limit_ahead()
+        if restricted is not None and restricted[0] <= lowest_limit:
+            return restricted[0], restricted[1]
         return lowest_limit, lowest_reason
 
     def _update_cruise(
@@ -926,7 +926,11 @@ class DrivingEventMixin:
         # tickets, and trooper stops -- all of which now exist. The "Speed limit X"
         # cue still names the number; this cue says cruise is handling it.
         posted, limit_reason = self._acc_posted_limit_ahead()
-        cap_mph = posted if limit_reason == "construction" else posted + ACC_LIMIT_OFFSET_MPH
+        cap_mph = (
+            posted
+            if limit_reason in {"construction", "heavy traffic"}
+            else posted + ACC_LIMIT_OFFSET_MPH
+        )
         limit_capped = cap_mph < self._cruise_mph
         if limit_capped:
             # Take the lower of the two caps. A posted limit above ramp speed
@@ -934,11 +938,10 @@ class DrivingEventMixin:
             # ramp at the corridor limit.
             target_mph = min(target_mph, cap_mph)
             if not self._acc_limit_capped:
-                reason = (
-                    "Construction zone ahead"
-                    if limit_reason == "construction"
-                    else "Posted limit lower"
-                )
+                reason = {
+                    "construction": "Construction zone ahead",
+                    "heavy traffic": "Heavy traffic ahead",
+                }.get(limit_reason, "Posted limit lower")
                 self.ctx.say_event(
                     f"{reason}; adaptive cruise easing to {self.ctx.settings.speed_text(cap_mph)}.",
                     interrupt=False,
