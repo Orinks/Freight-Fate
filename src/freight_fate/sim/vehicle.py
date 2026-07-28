@@ -612,6 +612,17 @@ class TruckState:
         self.fuel_gal += added
         return added
 
+    def recover_from_fuel_depletion(self) -> None:
+        """Leave a rescued truck safely stopped and ready for a normal restart."""
+        self.stop_engine()
+        self.velocity_mps = 0.0
+        self.rpm = 0.0
+        self.brake = 0.0
+        self.emergency_brake = False
+        self.engine_brake = False
+        self.parking_brake = True
+        self.transmission.reset_to_neutral()
+
     def apply_collision(self, severity: float) -> None:
         """severity 0..1; slows the truck and adds damage."""
         self.velocity_mps *= max(0.2, 1.0 - severity)

@@ -783,7 +783,9 @@ class DrivingUpdateMixin:
             self._hazard_deadline = None
             self.ctx.audio.play("events/hazard_clear", volume=0.75)
             self.ctx.controller.rumble.alert(intensity=0.4)
-            self.ctx.say_event("Hazard avoided. Well done.", interrupt=False)
+            message = "Hazard avoided. Well done."
+            self._last_event_message = message
+            self.ctx.say_event(message, interrupt=False)
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
         self._hazard_deadline -= dt
@@ -793,11 +795,12 @@ class DrivingUpdateMixin:
             severity = min(1.0, self.truck.speed_mph / 70.0)
             self.ctx.controller.rumble.impact(severity)
             self.truck.apply_collision(severity)
-            self.ctx.say_event(
+            message = (
                 f"Collision! The truck took damage. "
-                f"Total damage {self.truck.damage_pct:.0f} percent.",
-                interrupt=True,
+                f"Total damage {self.truck.damage_pct:.0f} percent."
             )
+            self._last_event_message = message
+            self.ctx.say_event(message, interrupt=True)
 
     # -- microsleeps (severe fatigue) ----------------------------------------------
 

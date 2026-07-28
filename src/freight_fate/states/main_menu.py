@@ -192,10 +192,9 @@ class MainMenuState(MenuState):
             )
         self.ctx.say(
             f"Welcome to Freight Fate, version {updater.spoken_version(__version__)}. "
-            f"An audio trucking adventure across America. {warning}")
-        self.ctx.say(
-            f"{self.current_text()}", interrupt=False, review=False
+            f"An audio trucking adventure across America. {warning}"
         )
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
@@ -495,7 +494,9 @@ class CareerActionsState(MenuState):
 
     def announce_entry(self) -> None:
         self.ctx.say(
-            f"Actions for {_career_summary(self.path, self.profile)}. {self.current_text()}", interrupt=False, review=False
+            f"Actions for {_career_summary(self.path, self.profile)}. {self.current_text()}",
+            interrupt=False,
+            review=False,
         )
 
     def build_items(self) -> list[MenuItem]:
@@ -550,7 +551,8 @@ class ConfirmCareerActionState(MenuState):
         else:
             detail = "Deleting permanently removes this saved career."
         self.ctx.say(
-            f"Confirm {self._action_label} for {self.profile.name}. {detail} {self.current_text()}", review=False
+            f"Confirm {self._action_label} for {self.profile.name}. {detail} {self.current_text()}",
+            review=False,
         )
 
     def build_items(self) -> list[MenuItem]:
@@ -587,6 +589,7 @@ class ConfirmCareerActionState(MenuState):
 class NameEntryState(State):
     """Accessible text entry: characters are echoed as you type."""
 
+    captures_text_input = True
     MAX_LEN = 24
 
     def __init__(self, ctx) -> None:
@@ -677,11 +680,8 @@ class HomeTerminalState(MenuState):
             self.index = self._regions.index(default)
 
     def announce_entry(self) -> None:
-        self.ctx.say(
-            "Home region. Pick the part of the country where your "
-            "career starts.")
-        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False
-        )
+        self.ctx.say("Home region. Pick the part of the country where your career starts.")
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
@@ -725,10 +725,8 @@ class HomeCityState(MenuState):
 
     def announce_entry(self) -> None:
         region = _region_menu_name(self.region)
-        self.ctx.say(
-            f"{region} terminals. Pick the city where your career starts.")
-        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False
-        )
+        self.ctx.say(f"{region} terminals. Pick the city where your career starts.")
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []

@@ -14,7 +14,7 @@ class DrivingEventMixin:
             return
         kind = event.kind
         sound = _route_event_sound(event)
-        if event.message:
+        if event.message and kind != TripEventKind.HAZARD:
             self._last_event_message = event.message  # replayable with A
         if kind == TripEventKind.HAZARD:
             if self._ramp_mi is not None:
@@ -40,6 +40,7 @@ class DrivingEventMixin:
             message = terse_hazard_message(event.message) if self._terse_speech() else event.message
             if speed_control_was_active:
                 message = f"{message} Automatic speed control canceled."
+            self._last_event_message = message
             self.ctx.say_event(message, interrupt=True)
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
@@ -1158,6 +1159,8 @@ class DrivingEventMixin:
         fee = 750.0
         p.money -= fee  # can go negative: the rescue is not optional
         self.truck.refuel(30.0)
+        self.truck.recover_from_fuel_depletion()
+        self._cancel_cruise()
         self._rescue_offered = False
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(

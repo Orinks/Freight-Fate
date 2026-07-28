@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Roadside fuel rescue now leaves your truck safely stopped.** After running
+  dry, rescue refuels the truck but clears its previous highway motion before
+  you restart, so you pull away normally instead of resuming at road speed.
+
 ### Added
 
 - **A warning before every steep grade.** Any climb or descent of three percent

@@ -124,6 +124,8 @@ Most menus use the same keyboard pattern:
 | Home or End | Jump to the first or last choice. |
 | Letter or number | Jump to the next choice starting with that character. |
 | F1 | Show help for the current item. |
+| Comma | Review earlier speech, except while typing text. |
+| Period | Move toward newer speech, except while typing text. |
 
 Menus provide the title, selected item, and item position, such as `2 of 6`.
 F1 help explains what the current item does.
@@ -261,9 +263,11 @@ Driving controls are active while the road view is focused:
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
 | L | Report lane position when lane drift is enabled. |
-| A | Repeat the last route announcement, in case you missed it. |
+| A | Repeat the last driving announcement, in case you missed it. |
 | U | Report what is coming up: imposed speed limits, stops, and exits ahead. |
 | F1 | Show the driving control list and current objective. |
+| Comma | Review earlier speech. |
+| Period | Move toward newer speech. |
 | Escape | Open the pause menu. |
 
 Manual transmission adds:

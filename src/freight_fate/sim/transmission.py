@@ -161,6 +161,12 @@ class Transmission:
         if self._shift_timer > 0.0:
             self._shift_timer = max(0.0, self._shift_timer - dt)
 
+    def reset_to_neutral(self) -> None:
+        """Clear a stopped recovery's drive state without a simulated shift."""
+        self.gear = NEUTRAL
+        self._shift_timer = 0.0
+        self._gear_hold_timer = 0.0
+
     @staticmethod
     def _gear_name(gear: int) -> str:
         if gear == REVERSE:
