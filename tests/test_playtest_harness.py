@@ -272,6 +272,24 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
     assert "resuming" in transcript
 
 
+def test_playtest_transcript_preserves_hazard_warning_and_outcome(monkeypatch):
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_SAFE_MPH
+
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Hazard Review")
+        driving = harness.driving
+        assert driving is not None
+        warning = "Brake now! A slow vehicle ahead."
+        driving._handle_trip_event(TripEvent(TripEventKind.HAZARD, warning, {"deadline_s": 3.0}))
+        driving.truck.velocity_mps = (HAZARD_SAFE_MPH - 1.0) / 2.2369362920544
+        driving._update_hazard(1 / 60)
+
+    warning_index = result.transcript.index(f"[event] {warning}")
+    outcome_index = result.transcript.index("[event] Hazard avoided. Well done.")
+    assert warning_index < outcome_index
+
+
 @pytest.mark.smoke
 @pytest.mark.parametrize(
     (

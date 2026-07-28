@@ -46,6 +46,8 @@ def shift_time_for(gear: int) -> float:
     if g <= 4:
         return SHIFT_TIME_LOW
     return SHIFT_TIME_LOW + (SHIFT_TIME - SHIFT_TIME_LOW) * (g - 4) / 6.0
+
+
 # With the engine brake working, a real automatic pre-selects a lower range
 # to put the engine where the retarder bites (high RPM) instead of upshifting
 # away from it. Downshift while below the target band, but never into a gear
@@ -181,11 +183,7 @@ class Transmission:
         # After an upshift the rpm falls a whole ratio step, so up there
         # the rev-out time is all the anti-hunt spacing the box needs.
         earned_upshift = (
-            self.gear >= 5
-            and throttle > 0.2
-            and rpm > upshift_rpm
-            and can_upshift
-            and not braking
+            self.gear >= 5 and throttle > 0.2 and rpm > upshift_rpm and can_upshift and not braking
         )
         if (
             self._gear_hold_timer < minimum_shift_interval_s
@@ -255,6 +253,12 @@ class Transmission:
         self._gear_hold_timer += max(0.0, dt)
         if self._shift_timer > 0.0:
             self._shift_timer = max(0.0, self._shift_timer - dt)
+
+    def reset_to_neutral(self) -> None:
+        """Clear a stopped recovery's drive state without a simulated shift."""
+        self.gear = NEUTRAL
+        self._shift_timer = 0.0
+        self._gear_hold_timer = 0.0
 
     @staticmethod
     def _gear_name(gear: int) -> str:

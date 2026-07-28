@@ -278,9 +278,8 @@ class DrivingControlsMixin:
             "R progress, distance left, and where you are. "
             "Shift R next listed highway exit. "
             "V weather. L lane position. "
-            "A repeats the last announcement. Comma re-reads the last spoken "
-            "line of any kind, here and in every menu; press it again quickly "
-            "to step back through earlier lines. U reads what is "
+            "A repeats the last driving announcement. Comma reviews recent speech "
+            "backward, and Period moves forward again. U reads what is "
             "coming up: imposed limits, stops, exits, and bends ahead. "
             "Curves that demand slowing are called before they arrive, "
             "like Sharp left, half a mile, advise 35; D folds the bend "
@@ -748,8 +747,9 @@ class DrivingControlsMixin:
         self.ctx.say(f"Safe speed {self.ctx.settings.speed_text(safe)}{context}.")
 
     def _speak_last_announcement(self) -> None:
-        """A: replay the last route announcement, for one you missed."""
+        """A: replay the last driving announcement, for one you missed."""
         if self._last_event_message:
+            self.ctx.stop_event_speech()
             self.ctx.say(self._last_event_message)
         else:
             self.ctx.say("No recent announcement to repeat.")

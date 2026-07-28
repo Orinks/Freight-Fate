@@ -192,9 +192,11 @@ class GameContext:
         back, line = step
         if back == 0:
             transcript.info("[repeat] %s", line)
+            self.stop_event_speech()
             self.speech.say(line, interrupt=True)
         else:
             transcript.info("[repeat -%d] %s", back, line)
+            self.stop_event_speech()
             self.speech.say(f"{back} back: {line}", interrupt=True)
 
     def say_event(self, text: str, interrupt: bool = True, review: bool = True) -> None:
@@ -600,18 +602,13 @@ class App:
                             # message log keeps these keys: while driving they
                             # walk the categorised log, which is the same
                             # gesture doing a fuller job.
-                            reviews_messages = getattr(self.state, "reviews_messages", False)
-                            if (
-                                event.key == pygame.K_COMMA
-                                and not reviews_messages
-                                and not getattr(self.state, "captures_text_input", False)
+                            if event.key == pygame.K_COMMA and not getattr(
+                                self.state, "captures_text_input", False
                             ):
                                 self.ctx.repeat_last_spoken()
                                 continue
-                            if (
-                                event.key == pygame.K_PERIOD
-                                and not reviews_messages
-                                and not getattr(self.state, "captures_text_input", False)
+                            if event.key == pygame.K_PERIOD and not getattr(
+                                self.state, "captures_text_input", False
                             ):
                                 self.ctx.step_forward_spoken()
                                 continue

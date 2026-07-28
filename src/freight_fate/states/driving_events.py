@@ -83,7 +83,7 @@ class DrivingEventMixin:
                 # The two-mile advance for a place earns nothing at any tier:
                 # a town is not actionable the way an exit or toll is.
                 return
-        if event.message:
+        if event.message and kind != TripEventKind.HAZARD:
             self._last_event_message = event.message  # replayable with A
         if kind == TripEventKind.HAZARD:
             if self._ramp_mi is not None:
@@ -119,6 +119,7 @@ class DrivingEventMixin:
             message = terse_hazard_message(event.message) if self._terse_speech() else event.message
             if speed_control_was_active:
                 message = f"{message} Automatic speed control canceled."
+            self._last_event_message = message
             self.ctx.say_event(message, interrupt=True)
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
@@ -2625,6 +2626,8 @@ class DrivingEventMixin:
             p.career.reputation = max(0.0, p.career.reputation - 2.0)
             billing = "on the carrier account, and dispatch noted the service call"
         self.truck.refuel(30.0)
+        self.truck.recover_from_fuel_depletion()
+        self._cancel_cruise()
         self._rescue_offered = False
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(

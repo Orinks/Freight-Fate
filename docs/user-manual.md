@@ -159,6 +159,8 @@ Most menus use the same keyboard pattern:
 | Home or End | Jump to the first or last choice. |
 | Letter or number | Jump to the next choice starting with that character. |
 | F1 | Show help for the current item. |
+| Comma | Review earlier speech, except while typing text. |
+| Period | Move toward newer speech, except while typing text. |
 
 Menus provide the title, selected item, and item position, such as `2 of 6`.
 F1 help explains what the current item does.
@@ -423,10 +425,12 @@ Driving controls are active while the road view is focused:
 | V | Report weather and forecast. |
 | L | Report which lane you are in and whether you are centered, drifting, or at an edge. |
 | Left / Right arrow | With lane drift on, steer; steer across the line to change lanes. With lane drift off, tap to change one lane in that direction -- the signal clicks and the change is announced. |
-| A | Repeat the last route announcement, in case you missed it. |
-| Comma | Re-read the last spoken line of any kind, here and in every menu. Press it again within a few seconds to step back through the last 20 lines; each older line is prefaced with how far back it is, and any new announcement returns the key to the newest line. |
+| A | Repeat the last driving announcement, in case you missed it. |
+| Comma | Review earlier speech. |
 | U | Report what is coming up: imposed speed limits, patrols, stops, exits, and the next few bends ahead with their advisory speeds. |
 | F1 | Show the driving control list and current objective. |
+| Comma | Review earlier speech. |
+| Period | Move toward newer speech. |
 | Escape | Open the pause menu. |
 
 Manual transmission adds:
