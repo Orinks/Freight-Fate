@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.6.1 - 2026-07-28
+
 ### Fixed
 
 - **Quitting to the main menu no longer closes the game.** Choosing "Quit to
