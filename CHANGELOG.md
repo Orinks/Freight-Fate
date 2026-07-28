@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.6 - 2026-07-28
+
 ### Fixed
 
 - **Roadside fuel rescue now leaves your truck safely stopped.** After running
