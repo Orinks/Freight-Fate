@@ -2,6 +2,7 @@
 
 import pygame
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.sim.trip import TripEvent, TripEventKind, Zone
 
@@ -62,7 +63,7 @@ def test_terse_drive_entry_skips_startup_handholding(monkeypatch):
     try:
         app.ctx.settings.speech_verbosity = 0
         d = _driving(app)
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
 
         d.enter()
 
@@ -83,7 +84,7 @@ def test_cold_start_low_air_does_not_stack_on_entry(monkeypatch):
     events = []
     try:
         d = _driving(app)
-        monkeypatch.setattr(app.ctx, "say_event", lambda text, interrupt=True: events.append(text))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
 
         assert d.truck.air_low_warning
         assert d._low_air_said
@@ -139,9 +140,7 @@ def test_zone_warning_interrupts_while_weather_chatter_queues(monkeypatch):
     try:
         d = _driving(app)
         calls = []
-        monkeypatch.setattr(
-            app.ctx, "say_event", lambda text, interrupt=True: calls.append((text, interrupt))
-        )
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(calls, with_interrupt=True))
         zone = Zone(5.0, 8.0, 45.0, "construction")
 
         d._handle_trip_event(

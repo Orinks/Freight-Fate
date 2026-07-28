@@ -2,6 +2,7 @@
 
 import pygame
 import pytest
+from speech_capture import speech_stub
 
 
 def key_event(key, unicode=""):
@@ -63,7 +64,7 @@ def test_full_game_flow_headless(monkeypatch):
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.push_state(MainMenuState(app.ctx))
         menu = app.state
         assert isinstance(menu, MainMenuState)
@@ -332,7 +333,7 @@ def test_discord_presence_toggle_is_accessible_and_wired(monkeypatch):
     app = App()
     try:
         spoken: list[str] = []
-        monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         toggles: list[bool] = []
         monkeypatch.setattr(app.presence, "set_enabled", toggles.append)
 

@@ -185,6 +185,8 @@ it" on the keyboard becomes "press D-pad down to take it" on a controller.
 | Home / End | First / last item |
 | Any letter | Jump to the next item starting with it |
 | F1 | Contextual help |
+| Comma | Review earlier speech |
+| Period | Move toward newer speech |
 
 #### Driving
 
@@ -209,7 +211,10 @@ it" on the keyboard becomes "press D-pad down to take it" on a controller.
 | Shift+R | Next listed highway exit |
 | L | Lane position |
 | V | Weather and forecast |
+| A | Repeat the last driving announcement |
 | F1 | List all controls |
+| Comma | Review earlier speech |
+| Period | Move toward newer speech |
 | Escape | Pause menu |
 
 ### Controller

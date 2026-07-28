@@ -137,7 +137,9 @@ def _tennessee_leg() -> Leg:
 
 
 def _trip(route: Route, start_hour: float = 12.0) -> Trip:
-    return Trip(route, TruckState(), WeatherSystem("mid_south", seed=1), seed=2, start_hour=start_hour)
+    return Trip(
+        route, TruckState(), WeatherSystem("mid_south", seed=1), seed=2, start_hour=start_hour
+    )
 
 
 def test_trip_finds_the_boundary_from_route_geometry():
@@ -275,9 +277,7 @@ def test_dispatch_detail_quotes_the_local_appointment():
         )
         board = JobBoardState(app.ctx, jobs)
         app.push_state(board)
-        board.handle_event(
-            pygame.event.Event(pygame.KEYDOWN, key=pygame.K_F1, mod=0, unicode="")
-        )
+        board.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_F1, mod=0, unicode=""))
         joined = " ".join(app.state.lines())
         assert "deliver by about" in joined
         assert "Time" in joined  # the zone is always named on the appointment

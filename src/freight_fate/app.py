@@ -19,13 +19,14 @@ from .cloud_saves import CloudSaves
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
+from .message_log import MessageCategory, MessageLog
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
 from .online_journal import JournalOutbox, queue_achievement
 from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
-from .speech import Speech
+from .speech import Speech, SpeechHistory
 from .states.base import State
 
 log = logging.getLogger(__name__)
@@ -95,6 +96,9 @@ class GameContext:
         self._music_rotation_elapsed_s = 0.0
         self.achievement_notice = ""
         self.achievement_notice_timer = 0.0
+        self.message_log = app.message_log
+        self.message_category = app.message_category
+        self._speech_history = SpeechHistory()
 
     def real_weather_provider(self):
         """Shared NWS provider when real weather is enabled, else None.
@@ -109,11 +113,30 @@ class GameContext:
             self._real_weather = RealWeatherProvider()
         return self._real_weather
 
-    def say(self, text: str, interrupt: bool = True) -> None:
+    def say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         transcript.info("%s", text)
+        self._speech_history.record(text)
         self.speech.say(text, interrupt)
+        if review:
+            self.message_log.add(text, MessageCategory.GENERAL)
 
-    def say_event(self, text: str, interrupt: bool = True) -> None:
+    def repeat_last_spoken(self) -> None:
+        """Walk back through recent speech with the comma key."""
+        self._speak_history_step(self._speech_history.step_back())
+
+    def step_forward_spoken(self) -> None:
+        """Walk forward through recent speech with the period key."""
+        self._speak_history_step(self._speech_history.step_forward())
+
+    def _speak_history_step(self, step: tuple[int, str] | None) -> None:
+        if step is None:
+            return
+        back, line = step
+        transcript.info("[repeat%s] %s", f" -{back}" if back else "", line)
+        self.stop_event_speech()
+        self.speech.say(line if back == 0 else f"{back} back: {line}", interrupt=True)
+
+    def say_event(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
 
         With the dedicated SAPI event voice enabled, events speak on their own
@@ -126,12 +149,15 @@ class GameContext:
         as a fresh queued utterance so old messages do not bury the warning.
         """
         transcript.info("[event] %s", text)
+        self._speech_history.record(text)
         if self.settings.sapi_events:
             self.speech.say_event(text, interrupt)
         else:
             if interrupt:
                 _stop_main_speech(self.speech)
             self.speech.say(text, interrupt=False)
+        if review:
+            self.message_log.add(text, MessageCategory.EVENT)
 
     def stop_event_speech(self) -> None:
         _stop_event_speech(self.speech)
@@ -148,17 +174,17 @@ class GameContext:
 
     # -- state stack ------------------------------------------------------------
 
-    def push_state(self, state: State) -> None:
-        self._app.push_state(state)
+    def push_state(self, state: State, should_enter: bool=True) -> None:
+        self._app.push_state(state, should_enter)
 
-    def pop_state(self) -> None:
-        self._app.pop_state()
+    def pop_state(self, should_exit: bool=True, reentry: bool=True) -> None:
+        self._app.pop_state(should_exit, reentry)
 
-    def replace_state(self, state: State) -> None:
-        self._app.replace_state(state)
+    def replace_state(self, state: State, should_exit: bool=True, reentry: bool=True) -> None:
+        self._app.replace_state(state, should_exit, reentry)
 
-    def reset_to(self, state: State) -> None:
-        self._app.reset_to(state)
+    def reset_to(self, state: State, should_exit: bool=True, reentry: bool=True) -> None:
+        self._app.reset_to(state, should_exit, reentry)
 
     def quit(self) -> None:
         self._app.running = False
@@ -350,6 +376,8 @@ class App:
 
         self.settings = Settings.load()
         self.speech = Speech()
+        self.message_log = MessageLog()
+        self.message_category = None
         self.audio = AudioEngine()
         self.world = get_world()
         self.economy = Economy()
@@ -401,27 +429,31 @@ class App:
     def state(self) -> State | None:
         return self.states[-1] if self.states else None
 
-    def push_state(self, state: State) -> None:
+    def push_state(self, state: State, should_enter: bool=True) -> None:
         self.states.append(state)
-        state.enter()
+        if should_enter:
+            state.enter()
 
-    def pop_state(self) -> None:
+    def pop_state(self, should_exit: bool=True, reentry: bool=True) -> None:
         if self.states:
-            self.states.pop().exit()
+            state = self.states.pop()
+            if should_exit:
+                state.exit()
         if self.state is not None:
-            self.state.enter()
+            if reentry:
+                self.state.enter()
         else:
             self.running = False
 
-    def replace_state(self, state: State) -> None:
+    def replace_state(self, state: State, should_exit: bool=True, reentry: bool=True) -> None:
         if self.states:
-            self.states.pop().exit()
-        self.push_state(state)
+            self.pop_state(should_exit, False)
+        self.push_state(state, reentry)
 
-    def reset_to(self, state: State) -> None:
+    def reset_to(self, state: State, should_exit: bool=True, reentry: bool=True) -> None:
         while self.states:
-            self.states.pop().exit()
-        self.push_state(state)
+            self.pop_state(should_exit, False)
+        self.push_state(state, reentry)
 
     def _dispatch_controller(self, event: pygame.event.Event) -> None:
         """Feed a controller event to the manager, then to the active state.
@@ -479,6 +511,16 @@ class App:
                     elif self.state is not None:
                         if event.type == pygame.KEYDOWN:
                             self.controller.note_keyboard()
+                            if event.key == pygame.K_COMMA and not getattr(
+                                self.state, "captures_text_input", False
+                            ):
+                                self.ctx.repeat_last_spoken()
+                                continue
+                            if event.key == pygame.K_PERIOD and not getattr(
+                                self.state, "captures_text_input", False
+                            ):
+                                self.ctx.step_forward_spoken()
+                                continue
                         self.state.handle_event(event)
                 # Auto-repeat (held D-pad left/right) and analog smoothing.
                 # Synthetic repeats go straight to the state (bypassing the

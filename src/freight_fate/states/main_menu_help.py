@@ -24,6 +24,8 @@ HELP_PAGES = [
             "Home and End jump to the first and last option.",
             "Type a letter to jump to options starting with that letter.",
             "Press F1 in any menu for contextual help.",
+            "Comma replays the latest speech from any non-text-entry screen; press it again within ten seconds "
+            "to step backward through earlier announcements. Period steps forward again.",
             "Manage careers on the main menu lets you reset or delete saved careers,",
             "with a confirmation screen before anything destructive happens.",
             "Corrupted career saves may be moved aside at the main menu. A save",
@@ -120,6 +122,7 @@ HELP_PAGES = [
         [
             "Space speaks your speed, gear, RPM, active speed-control mode, open-road target, air pressure, and brake state.",
             "S speaks the posted speed limit here, the zone if any, and how far over you are.",
+            "G speaks the grade under the wheels, how far it runs, whether the truck is holding it, and the next steep grade ahead.",
             "Tab opens a driving status menu for speed, route, air tanks, weather, and hours.",
             "F speaks fuel level and range.",
             "C speaks the clock, your deadline, and your hours of service.",
@@ -129,7 +132,8 @@ HELP_PAGES = [
             "Directional beeps cue drift direction; steer away from the beep.",
             "A softer chime confirms when you are centered again.",
             "V speaks the weather and the forecast.",
-            "A repeats the last route announcement, in case you missed it.",
+            "A repeats the last driving announcement, in case you missed it.",
+            "Comma reviews recent speech backward, and Period moves forward again.",
             "U speaks what is coming up: imposed speed limits, stops, and exits ahead.",
             "Left or Right Control stops the driving event voice.",
             "Escape opens the pause menu.",

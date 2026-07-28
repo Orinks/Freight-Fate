@@ -1,6 +1,7 @@
 """On-demand driving info keys: speed limit (S), repeat (A), what's ahead (U)."""
 
 import pygame
+from speech_capture import speech_stub
 
 
 def key_event(key):
@@ -30,7 +31,7 @@ def _driving(app, origin="Buffalo", destination="Rochester"):
 
 def _capture(app, monkeypatch):
     spoken = []
-    monkeypatch.setattr(app.ctx, "say", lambda text, interrupt=True: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     return spoken
 
 
@@ -366,5 +367,69 @@ def test_route_key_uses_metric_distances(monkeypatch):
         report = spoken[-1]
         assert "87 kilometers left." in report
         assert " miles" not in report
+    finally:
+        app.shutdown()
+
+
+def _fixed_grade(driving, pct, *, until_mi=None):
+    """Put a constant grade under the wheels for the whole scanned window."""
+    limit = driving.trip.total_miles if until_mi is None else until_mi
+    driving.trip.grade_at = lambda mile: pct / 100.0 if mile <= limit else 0.0
+
+
+def test_grade_key_reads_the_slope_and_whether_the_truck_holds_it(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 5.0
+        _fixed_grade(d, -5.0, until_mi=9.0)
+        d.truck.start_engine()
+        d.truck.set_air_ready(parking_brake=False)
+        d.truck.velocity_mps = 60.0 / 2.23694
+        d.truck.transmission.gear = d.truck.transmission.num_gears
+        d.truck.grade = -0.05
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_g))
+        said = spoken[-1]
+        assert "Grade 5.0 percent downhill" in said, said
+        # The run is spoken, and so is the verdict from the force balance.
+        assert "for another" in said, said
+        assert "Speed is building" in said or "engine brake" in said, said
+    finally:
+        app.shutdown()
+
+
+def test_grade_key_names_the_next_steep_grade_ahead(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 5.0
+        # Level here, a 6 percent downgrade waiting three miles out.
+        d.trip.grade_at = lambda mile: -0.06 if 8.0 <= mile <= 11.0 else 0.0
+        d.truck.velocity_mps = 60.0 / 2.23694
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_g))
+        said = spoken[-1]
+        assert said.startswith("Level road."), said
+        assert "Next, a 6.0 percent downgrade in" in said, said
+    finally:
+        app.shutdown()
+
+
+def test_grade_key_says_when_nothing_steep_is_coming(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.trip.position_mi = 5.0
+        d.trip.grade_at = lambda mile: 0.0
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_g))
+        assert "Nothing steep in the next" in spoken[-1], spoken[-1]
     finally:
         app.shutdown()

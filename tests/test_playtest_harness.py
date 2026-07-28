@@ -98,6 +98,24 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
     assert "resuming" in transcript
 
 
+def test_playtest_transcript_preserves_hazard_warning_and_outcome(monkeypatch):
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_SAFE_MPH
+
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Hazard Review")
+        driving = harness.driving
+        assert driving is not None
+        warning = "Brake now! A slow vehicle ahead."
+        driving._handle_trip_event(TripEvent(TripEventKind.HAZARD, warning, {"deadline_s": 3.0}))
+        driving.truck.velocity_mps = (HAZARD_SAFE_MPH - 1.0) / 2.2369362920544
+        driving._update_hazard(1 / 60)
+
+    warning_index = result.transcript.index(f"[event] {warning}")
+    outcome_index = result.transcript.index("[event] Hazard avoided. Well done.")
+    assert warning_index < outcome_index
+
+
 @pytest.mark.smoke
 @pytest.mark.parametrize(
     (
@@ -108,6 +126,7 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
         "start_mi",
         "end_mi",
         "set_mph",
+        "time_scale",
         "modes",
     ),
     [
@@ -119,6 +138,18 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
             None,
             None,
             70.0,
+            20.0,
+            ["cruise", "keeper", "cruise"],
+        ),
+        (
+            "Chicago",
+            "Indianapolis",
+            0,
+            "construction",
+            None,
+            None,
+            70.0,
+            40.0,
             ["cruise", "keeper", "cruise"],
         ),
         (
@@ -129,6 +160,7 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
             None,
             None,
             70.0,
+            10.0,
             ["cruise", "keeper", "cruise"],
         ),
         (
@@ -139,6 +171,7 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
             5.0,
             22.0,
             70.0,
+            10.0,
             ["cruise"],
         ),
     ],
@@ -152,6 +185,7 @@ def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
     start_mi,
     end_mi,
     set_mph,
+    time_scale,
     modes,
 ):
     from freight_fate.states.driving import SPEEDING_HOLD_S
@@ -160,11 +194,12 @@ def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
         harness.app.ctx.settings.hos_mode = "realistic"
         harness.app.ctx.settings.speed_keeper = True
         harness.app.ctx.settings.automatic_transmission = True
-        harness.app.ctx.settings.time_scale = 10.0
+        harness.app.ctx.settings.time_scale = time_scale
         harness.start_route(origin, destination, trip_seed=trip_seed)
         if zone_reason is not None:
             zone = next(zone for zone in harness.driving.trip.zones if zone.reason == zone_reason)
-            start_mi = max(0.0, zone.start_mi - 5.0)
+            approach_mi = 9.0 if zone_reason == "construction" else 5.0
+            start_mi = max(0.0, zone.start_mi - approach_mi)
             end_mi = min(harness.driving.trip.total_miles, zone.end_mi + 3.0)
         result = harness.drive_speed_control_segment(
             start_mi=start_mi,
@@ -176,15 +211,49 @@ def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
     assert result.speed_control_transitions == modes
     assert result.speeding_strikes == 0, result.transcript_text
     assert result.speeding_tickets == 0, result.transcript_text
+    assert result.inspection_fines == 0, result.transcript_text
     assert result.max_speeding_timer_s < SPEEDING_HOLD_S
     assert "Speeding strike" not in result.transcript_text
     assert "speeding fines" not in result.transcript_text.lower()
+    assert "Trooper in the construction zone" not in result.transcript_text
     assert result.deliveries == 1
     if "keeper" in modes:
         assert "Speed keeper holding" in result.transcript_text
         assert "Adaptive cruise resuming" in result.transcript_text
     else:
         assert "Posted limit lower; adaptive cruise easing" in result.transcript_text
+    if zone_reason == "construction":
+        assert result.construction_entry_speed_mph is not None
+        assert result.construction_entry_speed_mph <= 45.5
+        assert (
+            result.transcript_text.count(
+                "Construction zone ahead; adaptive cruise easing to 45 miles per hour"
+            )
+            == 1
+        )
+        warning = result.transcript_text.index("construction ahead. Speed limit 45")
+        easing = result.transcript_text.index(
+            "Construction zone ahead; adaptive cruise easing to 45 miles per hour"
+        )
+        handoff = result.transcript_text.index("Speed keeper holding 45 miles per hour")
+        resumed = result.transcript_text.index("Adaptive cruise resuming")
+        assert warning < easing < handoff < resumed
+    if zone_reason == "heavy traffic":
+        assert result.heavy_traffic_entry_speed_mph is not None
+        assert result.heavy_traffic_entry_speed_mph <= 50.5
+        assert (
+            result.transcript_text.count(
+                "Heavy traffic ahead; adaptive cruise easing to 50 miles per hour"
+            )
+            == 1
+        )
+        warning = result.transcript_text.index("heavy traffic ahead. Speed limit 50")
+        easing = result.transcript_text.index(
+            "Heavy traffic ahead; adaptive cruise easing to 50 miles per hour"
+        )
+        handoff = result.transcript_text.index("Speed keeper holding 50 miles per hour")
+        resumed = result.transcript_text.index("Adaptive cruise resuming")
+        assert warning < easing < handoff < resumed
 
 
 @pytest.mark.smoke
@@ -224,6 +293,58 @@ def test_realistic_cruise_eases_for_destination_exit_without_speeding_fine(
         assert (
             "Adaptive cruise resuming at 40 miles per hour for the ramp" in result.transcript_text
         )
+
+
+@pytest.mark.smoke
+@pytest.mark.parametrize(
+    ("time_scale", "approach_mph"),
+    [(20.0, 54.0), (40.0, 56.0)],
+    ids=["standard", "fast"],
+)
+def test_delayed_x_takes_announced_destination_exit_after_window_shrinks(
+    monkeypatch,
+    time_scale,
+    approach_mph,
+):
+    """Transcript proof for issue #113 using the real pygame X path."""
+    import pygame
+
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.ctx.settings.time_scale = time_scale
+        harness.start_route("Chicago", "Indianapolis", trip_seed=0)
+        driving = harness.driving
+        assert driving is not None
+        driving.tutorial = None
+        driving.trip.time_scale = time_scale
+        driving.trip.patrols = []
+        driving.truck.velocity_mps = approach_mph / 2.23694
+        destination = driving._destination_exit_stop()
+        driving.trip.position_mi = destination.at_mi - driving._exit_window_mi() + 0.01
+
+        driving._check_destination_exit()
+        driving.truck.velocity_mps = 30.0 / 2.23694
+        # Give the player five real seconds to hear and react instead of
+        # repeating the former same-frame harness coverage that masked the bug.
+        response_before = driving._destination_exit_response_s
+        for _frame in range(5 * 60):
+            driving.update(1 / 60)
+        assert driving._destination_exit_response_s == pytest.approx(
+            response_before - 5.0,
+            abs=0.05,
+        )
+        assert driving._exit_window_mi() < destination.at_mi - driving.trip.position_mi
+
+        driving.handle_event(key_event(pygame.K_x))
+        result = harness.result
+
+    assert driving._exit_stop is not None
+    assert driving._exit_stop.type == "delivery_destination"
+    assert "destination exit" in result.transcript_text
+    assert "Signaling for" in result.transcript_text
+    assert "No exit coming up" not in result.transcript_text
+    assert "missed the destination exit" not in result.transcript_text.lower()
+    assert driving._cruise_mph is None
+    assert driving._cruise_exit_mph is None
 
 
 @pytest.mark.smoke
@@ -272,6 +393,77 @@ def test_signaled_downhill_exit_keeps_cruise_below_ramp_limit(monkeypatch):
         harness.result.transcript_text
     )
     assert "going too fast for the ramp" not in harness.result.transcript_text
+
+
+@pytest.mark.smoke
+def test_rest_stop_arrival_cue_allows_immediate_parking_brake_stop(monkeypatch):
+    """The spoken arrival point must leave enough real time to stop from 40 mph."""
+    import pygame
+
+    from freight_fate.sim.trip_models import RoadStop
+    from freight_fate.states.driving import RestStopState
+
+    with PlaytestHarness(monkeypatch) as harness:
+        harness.app.ctx.settings.automatic_transmission = True
+        harness.app.ctx.settings.time_scale = 40.0
+        harness.start_route("Chicago", "Indianapolis", trip_seed=0)
+        driving = harness.driving
+        assert driving is not None
+        driving.tutorial = None
+        driving.trip.patrols = []
+        driving.truck.start_engine()
+        driving.truck.set_air_ready(parking_brake=False)
+        driving.truck.transmission.automatic = True
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 40.0 / 2.23694
+
+        stop = RoadStop(
+            "Prairie View Rest Area",
+            driving.trip.position_mi + 0.1,
+            actions=("fuel", "break"),
+            parking="confirmed",
+            exit_label="exit 99",
+        )
+        monkeypatch.setattr(driving, "_upcoming_exit_stop", lambda: stop)
+
+        # Use the same real keyboard path as the report: X takes the exit, then
+        # P is pressed as soon as the spoken arrival point is heard.
+        driving.handle_event(key_event(pygame.K_x))
+        driving.trip.position_mi = stop.at_mi
+        for _frame in range(10_000):
+            driving.update(1 / 60)
+            if any(
+                "Prairie View Rest Area. Come to a complete stop." in line
+                for line in harness.result.transcript
+            ):
+                break
+        else:
+            raise AssertionError(
+                f"rest-stop arrival cue never played\n{harness.result.transcript_text}"
+            )
+
+        # Exercise nearly the whole modeled slow-voice-plus-reaction interval.
+        # Once P is pressed, that explicit stop action remains accepted while
+        # the real truck physics finishes the deceleration.
+        reaction_frames = int((driving._ramp_arrival_grace_s - 0.5) * 60)
+        for _frame in range(reaction_frames):
+            driving.update(1 / 60)
+        assert driving._ramp_stop is stop
+        driving.handle_event(key_event(pygame.K_p))
+        for _frame in range(2_000):
+            driving.update(1 / 60)
+            if isinstance(harness.app.state, RestStopState):
+                break
+        else:
+            raise AssertionError(
+                "parking at the spoken arrival point did not open the rest-stop menu\n"
+                f"{harness.result.transcript_text}"
+            )
+
+        transcript = harness.result.transcript_text
+        assert "Parking brake set." in transcript
+        assert "never stopped" not in transcript
+        assert "drove past" not in transcript.lower()
 
 
 @pytest.mark.smoke

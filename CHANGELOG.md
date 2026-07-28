@@ -2,7 +2,39 @@
 
 ## Unreleased
 
+## 1.8.6 - 2026-07-28
+
+### Fixed
+
+- **Roadside fuel rescue now leaves your truck safely stopped.** After running
+  dry, rescue refuels the truck but clears its previous highway motion before
+  you restart, so you pull away normally instead of resuming at road speed.
+
 ### Added
+
+- **A warning before every steep grade.** Any climb or descent of three percent
+  or more that runs for at least three quarters of a mile is now called out
+  before you reach it, with how steep it is, how far it runs, and -- going down
+  -- what to do about it before it starts. In a manual that is picking your
+  gear and setting the engine brake; in an automatic it is setting the engine
+  brake and braking down to speed, which is what puts the transmission in a
+  lower gear for you. Short dips stay quiet, so on a mountain route you hear
+  the hills that matter and nothing else. Terse speech does not get these
+  announcements at all -- press G whenever you want the grade instead. The
+  advisory is there so you can decide before the hill starts: when in doubt,
+  take manual control of the speed rather than leaving it to cruise.
+
+- **G speaks the grade.** Press G while driving for the slope under the wheels,
+  how much further it runs, whether the truck is holding it or losing ground --
+  and the next steep grade ahead with how far off it is. It answers "why is my
+  speed building" without waiting for anything to be announced.
+
+- **Review recent spoken messages while driving.** Use the message review
+  controls to move through general and critical announcements, jump to the
+  first or latest message, switch categories, and copy the current message to
+  the clipboard. Contributed by Day Garwood
+  ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #122](https://github.com/Orinks/Freight-Fate/pull/122).
 
 - **Tire sounds now react to your speed.** On supported audio systems, the tire
   hum rises and falls as you accelerate or brake. Above a crawl, soft road-seam
@@ -104,6 +136,55 @@
 
 ### Fixed
 
+- **Adaptive cruise no longer runs away down a hill.** Cruise could only ever
+  add throttle, so on a downgrade it simply came off the fuel and let gravity
+  carry the truck -- fifteen miles per hour or more over your set speed, with
+  nothing said about it, and a speeding fine at the bottom. It now reaches for
+  the engine brake when the truck starts to gain on a descent and snubs the
+  service brakes when the engine brake is not enough, holding your set speed
+  on grades as steep as eight percent. It hands the engine brake back when the
+  hill ends, and never touches the switch when you set it yourself. Climbing,
+  cruise now answers a hill as the wheels reach it instead of taking ten
+  seconds to work up to full throttle. Cruise is still an assistant, not a
+  driver: on a steep or long grade, when in doubt, take manual control of the
+  speed. Braking hands the truck straight back to you.
+
+- **Cruise tells you when a grade has beaten it.** If the truck is running well
+  past your set speed down a hill, or has lost a lot of it climbing, cruise
+  says so once, names the speed you are actually doing, and tells you to brake
+  or gear down -- or just to brake, if you are driving an automatic. Before
+  this it drifted in silence. It waits until the grade has genuinely won and
+  stayed won, so a gear change or a stretch of nearly level road never sets it
+  off. Treat it as your cue to take over: when in doubt, brake rather than
+  waiting to see whether cruise recovers the speed.
+
+- **Automatic speed control now slows in time for construction zones.** At
+  highway speed, adaptive cruise begins braking when the advance warning is
+  announced and reaches the work-zone limit before the speed keeper takes over,
+  so the game no longer fines you while its own controls are still slowing down.
+
+- **Automatic speed control now slows in time for heavy traffic zones.** The
+  same early braking that construction zones already received now applies to
+  heavy traffic zones. When the advance warning sounds, adaptive cruise begins
+  easing down to the posted limit and hands off to the speed keeper at the
+  zone boundary, so the transition is smooth and you enter at the right speed.
+  Contributed by wleicht ([@wleicht](https://github.com/wleicht)) in
+  [PR #127](https://github.com/Orinks/Freight-Fate/pull/127).
+
+- **The rest-stop arrival cue now leaves real time to set the brake.** Trip
+  pacing no longer consumes the whole stopping buffer while even a slow voice
+  is still speaking. Terse speech now says "Stop now." If you set the parking
+  brake when the stop announces your arrival, the truck can finish stopping
+  and open the rest-stop menu; continuing past without stopping still misses
+  the stop.
+
+- **A destination exit stays ready after it is announced.** On Standard or
+  Fast trip pacing, slowing down while the callout spoke could shrink the
+  action window, so pressing X answered "No exit coming up." The exact
+  announced exit now remains available through a human reaction window, while
+  expired and already-passed exits still cannot be armed. Braking, inspection,
+  and other safety warnings also finish before the signaling confirmation.
+
 - **Short hauls no longer pay several times more per mile than long ones.**
   A guaranteed minimum meant a fifty mile hop could pay over a thousand
   dollars, four to five times the per-mile rate of a real cross country run,
@@ -137,6 +218,15 @@
   grades, and every famous grade -- the Grapevine, Monteagle, the Siskiyous,
   the run up to the Continental Divide -- keeps its name. Thanks to nromey,
   [PR #107](https://github.com/Orinks/Freight-Fate/pull/107).
+
+- **Starting a new career no longer talks over itself.** Naming your driver
+  and picking a home region and city used to leave those screens announcing
+  themselves again on the way out, each one cutting off the last, before the
+  terminal menu finally spoke. The screens you have finished with now stay
+  quiet, so you hear your new career's terminal and nothing else -- and the
+  stray announcements no longer fill up the message review history either.
+  Contributed by Day Garwood ([@day-garwood](https://github.com/day-garwood))
+  in [PR #129](https://github.com/Orinks/Freight-Fate/pull/129).
 
 ## 1.8.5.1 - 2026-07-22
 

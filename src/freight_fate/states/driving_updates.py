@@ -38,6 +38,15 @@ class DrivingUpdateMixin:
         # pacing can be changed from the pause menu mid-trip; keep the trip's
         # clock compression in step with the setting
         self.trip.time_scale = self.ctx.settings.time_scale
+        if self._destination_exit_response_s > 0.0:
+            self._destination_exit_response_s = max(
+                0.0,
+                self._destination_exit_response_s - dt,
+            )
+            if self._destination_exit_response_s == 0.0 and self._exit_stop is None:
+                # A driver who stopped after the early callout must still get a
+                # fresh, closer instruction once the normal window reaches them.
+                self._destination_exit_announced_key = ""
         self._sync_weather_source()
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2
@@ -166,12 +175,13 @@ class DrivingUpdateMixin:
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
         self._check_destination_exit()
-        self._update_exit(self.trip.last_moved_mi)
+        self._update_exit(self.trip.last_moved_mi, dt)
 
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)
         self._update_announcements(dt)
         self._update_hazard(dt)
+        self._update_grade_advisory()
         self._update_microsleep(keys, dt)
         self._update_overrev(dt)
         self._update_speeding(dt, accelerator_held=accel_held)
@@ -663,6 +673,109 @@ class DrivingUpdateMixin:
         decel = G * (t.specs.max_brake_decel_g * t.grip + t.grade)
         return over_mps / max(decel, 0.5)
 
+    # -- grades ---------------------------------------------------------------------
+
+    def _descend_advice(self) -> str:
+        """How to get down a hill, in terms of the controls this driver has.
+
+        An automatic has no gear selection -- W, Q, N and Backspace are all
+        manual-only -- so telling that driver to pick a gear names a control
+        they do not have. What they do have is the same one a real automated
+        box gives them: brake, and the transmission holds a lower gear for
+        them (``auto_shift`` picks the tallest gear landing in the 1050-1700
+        band while braking, and never upshifts off the pedal).
+        """
+        jake = self.ctx.control_hint("engine_brake")
+        if self.truck.transmission.automatic:
+            return (
+                f"Set the engine brake with {jake} and brake down to speed "
+                "before it starts; the transmission will hold a lower gear."
+            )
+        return f"Pick your gear and set the engine brake with {jake} before it starts."
+
+    def _grade_run_mi(self, start_mi: float, sign: int) -> float:
+        """How far a grade of this sign keeps its character from ``start_mi``.
+
+        Sampled at the stride the baked grade segments use, so the answer is
+        the run the road data actually has rather than an interpolation of it.
+        """
+        run = 0.0
+        probe = start_mi
+        while run < GRADE_WARN_SCAN_MI:
+            probe += GRADE_WARN_STEP_MI
+            if probe >= self.trip.total_miles:
+                break
+            if self.trip.grade_at(probe) * sign * 100.0 < GRADE_WARN_CLEAR_PCT:
+                break
+            run += GRADE_WARN_STEP_MI
+        return run
+
+    def _update_grade_advisory(self) -> None:
+        """Call out a steep grade before the truck is committed to it.
+
+        A downgrade is the one piece of road a driver has to plan for -- gear
+        and retarder chosen at the top, not halfway down -- and nothing spoke
+        it. Cruise would quietly run well over the set speed and the first
+        news of the hill was the speeding warning (playtest, 2026-07-27).
+        One advisory per grade, cleared once the road flattens out.
+
+        Terse speech gets none of them. A driver on terse has asked for the
+        road to stay quiet, and the grade is available on demand from the G
+        key any time they want it -- so this is exactly the kind of unrequested
+        commentary the setting exists to remove. Cruise still speaks up when a
+        grade has beaten it, terse or not: that one is not commentary, it is
+        the controller reporting it has stopped doing its job.
+        """
+        t = self.truck
+        if self._terse_speech():
+            return
+        if self.trip.finished or t.speed_mph < GRADE_WARN_MIN_MPH:
+            return
+        # Sampling the road profile is a scan over the leg's baked segments, so
+        # it runs per tenth of a mile rather than per frame. The advisory looks
+        # three quarters of a mile ahead; a tenth of that is no delay at all.
+        if abs(self.trip.position_mi - self._grade_scan_mi) < GRADE_WARN_RESCAN_MI:
+            return
+        self._grade_scan_mi = self.trip.position_mi
+        here_pct = self.trip.grade_at(self.trip.position_mi) * 100.0
+        ahead_mi = self.trip.position_mi + GRADE_WARN_LOOKAHEAD_MI
+        ahead_pct = (
+            self.trip.grade_at(ahead_mi) * 100.0 if ahead_mi < self.trip.total_miles else here_pct
+        )
+        # Take whichever of here and just-ahead is steeper, so a grade that
+        # starts under the wheels is called out as promptly as one seen coming.
+        from_ahead = abs(ahead_pct) >= abs(here_pct)
+        pct = ahead_pct if from_ahead else here_pct
+        if abs(pct) < GRADE_WARN_CLEAR_PCT:
+            # Level both here and just ahead: between hills, so the next one
+            # earns a cue. Clearing on the flat under the wheels alone re-armed
+            # the advisory on every frame of the approach to a hill, which
+            # spoke it over and over until the wheels reached the slope.
+            self._grade_warned_sign = 0
+            return
+        if abs(pct) < GRADE_WARN_PCT:
+            return
+        sign = 1 if pct > 0 else -1
+        if self._grade_warned_sign == sign:
+            return
+        run_mi = self._grade_run_mi(ahead_mi if from_ahead else self.trip.position_mi, sign)
+        if run_mi < GRADE_WARN_MIN_RUN_MI:
+            # A dip, not a hill. Deliberately without latching: a short blip
+            # must not swallow the advisory for the real grade behind it.
+            return
+        self._grade_warned_sign = sign
+        # The scan gives up at its horizon, so say so rather than claiming the
+        # grade ends exactly there.
+        about = "at least " if run_mi >= GRADE_WARN_SCAN_MI else ""
+        length = f" for {about}{self.trip._distance_text(run_mi)}"
+        direction = "upgrade" if sign > 0 else "downgrade"
+        self.ctx.audio.play("ui/notify", volume=0.55)
+        advice = self._descend_advice() if sign < 0 else "Expect to lose speed."
+        self.ctx.say_event(
+            f"{abs(pct):.1f} percent {direction} ahead{length}. {advice}",
+            interrupt=False,
+        )
+
     def _update_hazard(self, dt: float) -> None:
         if self._hazard_deadline is None:
             return
@@ -670,7 +783,9 @@ class DrivingUpdateMixin:
             self._hazard_deadline = None
             self.ctx.audio.play("events/hazard_clear", volume=0.75)
             self.ctx.controller.rumble.alert(intensity=0.4)
-            self.ctx.say_event("Hazard avoided. Well done.", interrupt=False)
+            message = "Hazard avoided. Well done."
+            self._last_event_message = message
+            self.ctx.say_event(message, interrupt=False)
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
         self._hazard_deadline -= dt
@@ -680,11 +795,12 @@ class DrivingUpdateMixin:
             severity = min(1.0, self.truck.speed_mph / 70.0)
             self.ctx.controller.rumble.impact(severity)
             self.truck.apply_collision(severity)
-            self.ctx.say_event(
+            message = (
                 f"Collision! The truck took damage. "
-                f"Total damage {self.truck.damage_pct:.0f} percent.",
-                interrupt=True,
+                f"Total damage {self.truck.damage_pct:.0f} percent."
             )
+            self._last_event_message = message
+            self.ctx.say_event(message, interrupt=True)
 
     # -- microsleeps (severe fatigue) ----------------------------------------------
 

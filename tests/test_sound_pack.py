@@ -73,8 +73,6 @@ def test_real_assets_tree_round_trips(tmp_path):
     out = assets_pack.write_pack(SOUNDS_DIR, tmp_path / "sounds.pak")
     pack = assets_pack.SoundPack(out)
     files = [path for path in SOUNDS_DIR.rglob("*") if path.is_file()]
-    assert sorted(pack.names()) == sorted(
-        path.relative_to(SOUNDS_DIR).as_posix() for path in files
-    )
+    assert sorted(pack.names()) == sorted(path.relative_to(SOUNDS_DIR).as_posix() for path in files)
     sample = next(path for path in files if path.suffix in (".ogg", ".wav"))
     assert pack.read(sample.relative_to(SOUNDS_DIR).as_posix()) == sample.read_bytes()

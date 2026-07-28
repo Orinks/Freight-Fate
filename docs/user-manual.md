@@ -124,6 +124,8 @@ Most menus use the same keyboard pattern:
 | Home or End | Jump to the first or last choice. |
 | Letter or number | Jump to the next choice starting with that character. |
 | F1 | Show help for the current item. |
+| Comma | Review earlier speech, except while typing text. |
+| Period | Move toward newer speech, except while typing text. |
 
 Menus provide the title, selected item, and item position, such as `2 of 6`.
 F1 help explains what the current item does.
@@ -261,9 +263,11 @@ Driving controls are active while the road view is focused:
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
 | L | Report lane position when lane drift is enabled. |
-| A | Repeat the last route announcement, in case you missed it. |
+| A | Repeat the last driving announcement, in case you missed it. |
 | U | Report what is coming up: imposed speed limits, stops, and exits ahead. |
 | F1 | Show the driving control list and current objective. |
+| Comma | Review earlier speech. |
+| Period | Move toward newer speech. |
 | Escape | Open the pause menu. |
 
 Manual transmission adds:
@@ -377,12 +381,12 @@ brake to a stop at the end of the ramp.
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
 and tells you to press X. If adaptive cruise is active, it eases the truck to
-45 miles per hour or your lower cruise target so you can reach ramp speed
-without an abrupt handoff. Press X to take the exit; automatic speed control
-releases as you enter the ramp, then you brake to the stop. If you miss the
-destination exit, continue to the next safe turnaround. Dispatch loops you
-back onto the approach so you can hear the exit call again and press X to take
-it.
+40 miles per hour or your lower cruise target, below the 45 mile-per-hour ramp
+limit, so you can reach ramp speed without an abrupt handoff. Press X to take
+the exit; automatic speed control releases as you enter the ramp, then you
+brake to the stop. If you miss the destination exit, continue to the next safe
+turnaround. Dispatch loops you back onto the approach so you can hear the exit
+call again and press X to take it.
 
 Ordinary highway exits that do not lead to a current action are not announced
 during the drive. Press Shift+R if you want the next listed exit for route

@@ -11,6 +11,15 @@ class SpeedControlStateMixin:
         self._cruise_mph = None
         self._cruise_throttle = 0.0
         self._cruise_applied = 0.0
+        self._cruise_trim = 0.0
+        if self._cruise_jake_on:
+            # Hand the retarder back with the cruise session, but only when
+            # cruise raised it -- the driver's own jake switch stays put.
+            self._cruise_jake_on = False
+            self.truck.engine_brake = False
+        self._cruise_snubbing = False
+        self._cruise_grade_said = 0
+        self._cruise_beaten_s = 0.0
         if not preserve_exit_cap:
             self._cruise_exit_mph = None
         self._acc_following = False
@@ -89,3 +98,20 @@ class SpeedControlStateMixin:
             self._clear_keeper()
         else:
             self._disarm_speed_control()
+
+    def _restricted_zone_limit_ahead(self) -> tuple[float, str] | None:
+        """A lower restricted-zone limit inside the player's advance-warning window.
+
+        Returns ``(limit_mph, zone_reason)`` for the nearest construction or
+        heavy-traffic zone that is closer than the spoken advance-warning
+        distance and whose limit is lower than the current corridor limit.
+        Returns ``None`` when there is nothing to pre-brake for.
+        """
+        if not self._speed_control_armed or not self.ctx.settings.speed_keeper:
+            return None
+        lookahead_mi = self.trip._zone_warning_lookahead_mi()
+        zone = self.trip.next_zone_within(lookahead_mi)
+        if zone is None or zone.reason not in {"construction", "heavy traffic"}:
+            return None
+        current_limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+        return (zone.limit_mph, zone.reason) if zone.limit_mph < current_limit else None

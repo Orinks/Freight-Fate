@@ -14,7 +14,7 @@ class DrivingEventMixin:
             return
         kind = event.kind
         sound = _route_event_sound(event)
-        if event.message:
+        if event.message and kind != TripEventKind.HAZARD:
             self._last_event_message = event.message  # replayable with A
         if kind == TripEventKind.HAZARD:
             if self._ramp_mi is not None:
@@ -40,6 +40,7 @@ class DrivingEventMixin:
             message = terse_hazard_message(event.message) if self._terse_speech() else event.message
             if speed_control_was_active:
                 message = f"{message} Automatic speed control canceled."
+            self._last_event_message = message
             self.ctx.say_event(message, interrupt=True)
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
@@ -254,12 +255,22 @@ class DrivingEventMixin:
         if self._exit_stop is not None:
             self._exit_stop = None
             self._cruise_exit_mph = None
+            self._destination_exit_response_s = 0.0
             self.ctx.say("Exit canceled. Staying on the highway.")
             return
         stop = self._upcoming_exit_stop()
         if stop is None:
             self.ctx.say("No exit coming up. Exits are announced as you approach them.")
             return
+        responding_to_destination_callout = (
+            stop.type == "delivery_destination"
+            and self._destination_exit_response_s > 0.0
+            and self._destination_exit_key(stop) == self._destination_exit_announced_key
+        )
+        if responding_to_destination_callout:
+            # The shared event voice may now be reading a newer safety warning,
+            # so do not stop it just to replace the earlier exit callout.
+            self._destination_exit_response_s = 0.0
         self._exit_stop = stop
         self._exit_countdown_said = set()
         self.ctx.audio.play("ui/notify", volume=0.5)
@@ -277,11 +288,18 @@ class DrivingEventMixin:
             head = f"Signaling for {stop.exit_label}, {stop.spoken_name},"
         else:
             head = f"Signaling for the {stop.spoken_name} exit,"
-        self.ctx.say(
+        message = (
             f"{head} {ahead:.1f} miles ahead. Slow to "
             f"{self.ctx.settings.speed_text(RAMP_MAX_MPH)} or less for the ramp."
             + self._cap_cruise_for_ramp()
         )
+        if responding_to_destination_callout:
+            # Queue behind whichever event is currently speaking. Usually that
+            # is the exit callout; if a critical warning preempted it, the
+            # warning must finish before the confirmation.
+            self.ctx.say_event(message, interrupt=False)
+        else:
+            self.ctx.say(message)
 
     def _cap_cruise_for_ramp(self) -> str:
         """Bring automatic speed control down to ramp speed for an armed exit.
@@ -335,7 +353,16 @@ class DrivingEventMixin:
         if destination is None:
             return stop
         ahead = destination.at_mi - self.trip.position_mi
-        if not (0 <= ahead <= window):
+        announced_destination_is_actionable = (
+            ahead > 0.0
+            and self._destination_exit_response_s > 0.0
+            and self._destination_exit_key(destination) == self._destination_exit_announced_key
+        )
+        if announced_destination_is_actionable:
+            # X responds to the exit just named, even if an optional stop has
+            # since entered the ordinary lookahead window.
+            return destination
+        if not 0 < ahead <= window:
             return stop
         if stop is None or destination.at_mi <= stop.at_mi:
             return destination
@@ -401,6 +428,7 @@ class DrivingEventMixin:
         if key == self._destination_exit_announced_key:
             return
         self._destination_exit_announced_key = key
+        self._destination_exit_response_s = DESTINATION_EXIT_RESPONSE_GRACE_S
         message = self._destination_exit_announcement(stop, ahead) + self._cap_cruise_for_ramp()
         self.ctx.audio.play("ui/notify", volume=0.7)
         self.ctx.say_event(message, interrupt=True)
@@ -513,7 +541,7 @@ class DrivingEventMixin:
         self.ctx.audio.play("ui/notify", volume=0.6)
         self.ctx.say_event(f"{name} in {distance}.", interrupt=False)
 
-    def _update_exit(self, moved_mi: float) -> None:
+    def _update_exit(self, moved_mi: float, dt: float = 0.0) -> None:
         """Advance an armed exit or an active ramp; opens the stop menu."""
         if self._ramp_mi is not None:
             self._ramp_mi -= moved_mi
@@ -531,14 +559,52 @@ class DrivingEventMixin:
                     self._open_poi_stop(stop)
                 return
             stop = self._ramp_stop
+            if not self._ramp_end_said:
+                self._ramp_end_said = True
+                if stop.type != "delivery_destination":
+                    place = stop.spoken_name
+                    message = (
+                        f"At {place}. Stop now."
+                        if self._terse_speech()
+                        else f"You are at {place}. Come to a complete stop."
+                    )
+                    speech_rate = (
+                        self.ctx.settings.speech_rate
+                        if self.ctx.settings.sapi_events
+                        and getattr(self.ctx.speech, "event_supports_rate", False)
+                        else 0.0
+                    )
+                    self._ramp_arrival_grace_s = ramp_arrival_grace_seconds(
+                        message,
+                        speech_rate,
+                    )
+                else:
+                    place = stop.name
+                    message = (
+                        f"At {place}."
+                        if self._terse_speech()
+                        else f"You are at {place}. Come to a complete stop."
+                    )
+                self.ctx.say_event(message, interrupt=True)
+                return
+            if stop.type != "delivery_destination":
+                self._ramp_arrival_grace_s = max(0.0, self._ramp_arrival_grace_s - dt)
             # Rolled clear past the end of the ramp without ever stopping. A
             # destination exit keeps waiting (missing it drives its own reroute);
             # a route POI is blown, so give the highway back instead of leaving a
-            # stuck, unpatrolled ramp lingering for miles.
-            if stop.type != "delivery_destination" and self._ramp_mi <= -RAMP_OVERSHOOT_MI:
+            # stuck, unpatrolled ramp lingering for miles. Both the distance and
+            # real-time grace must expire, so trip pacing cannot consume the
+            # player's spoken-cue reaction window.
+            if (
+                stop.type != "delivery_destination"
+                and self._ramp_mi <= -RAMP_OVERSHOOT_MI
+                and self._ramp_arrival_grace_s <= 0.0
+                and not self.truck.parking_brake
+            ):
                 self._ramp_mi = None
                 self._ramp_stop = None
                 self._ramp_end_said = False
+                self._ramp_arrival_grace_s = 0.0
                 planned = self.trip.is_planned(stop)
                 if planned:
                     self.trip.planned_stop_key = None
@@ -556,19 +622,6 @@ class DrivingEventMixin:
                     line += " Plan cancelled."
                 self.ctx.say_event(line, interrupt=True)
                 return
-            if not self._ramp_end_said:
-                self._ramp_end_said = True
-                place = (
-                    self._ramp_stop.name
-                    if self._ramp_stop.type == "delivery_destination"
-                    else self._ramp_stop.spoken_name
-                )
-                message = (
-                    f"At {place}."
-                    if self._terse_speech()
-                    else f"You are at {place}. Come to a complete stop."
-                )
-                self.ctx.say_event(message, interrupt=True)
             return
         stop = self._exit_stop
         if stop is None:
@@ -585,6 +638,7 @@ class DrivingEventMixin:
             self._ramp_mi = RAMP_LENGTH_MI
             self._ramp_stop = stop
             self._ramp_end_said = False
+            self._ramp_arrival_grace_s = 0.0
             self._destination_exit_taken = stop.type == "delivery_destination"
             self._cancel_cruise()
             self._cancel_keeper()
@@ -825,6 +879,9 @@ class DrivingEventMixin:
             if limit < lowest_limit and probe - start <= braking_mi:
                 lowest_limit, lowest_reason = limit, reason
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
+        restricted = self._restricted_zone_limit_ahead()
+        if restricted is not None and restricted[0] <= lowest_limit:
+            return restricted[0], restricted[1]
         return lowest_limit, lowest_reason
 
     def _update_cruise(
@@ -869,8 +926,12 @@ class DrivingEventMixin:
         # urban drops and corridor limit changes straight into speeding strikes,
         # tickets, and trooper stops -- all of which now exist. The "Speed limit X"
         # cue still names the number; this cue says cruise is handling it.
-        posted, _ = self._acc_posted_limit_ahead()
-        cap_mph = posted + ACC_LIMIT_OFFSET_MPH
+        posted, limit_reason = self._acc_posted_limit_ahead()
+        cap_mph = (
+            posted
+            if limit_reason in {"construction", "heavy traffic"}
+            else posted + ACC_LIMIT_OFFSET_MPH
+        )
         limit_capped = cap_mph < self._cruise_mph
         if limit_capped:
             # Take the lower of the two caps. A posted limit above ramp speed
@@ -878,9 +939,12 @@ class DrivingEventMixin:
             # ramp at the corridor limit.
             target_mph = min(target_mph, cap_mph)
             if not self._acc_limit_capped:
+                reason = {
+                    "construction": "Construction zone ahead",
+                    "heavy traffic": "Heavy traffic ahead",
+                }.get(limit_reason, "Posted limit lower")
                 self.ctx.say_event(
-                    "Posted limit lower; adaptive cruise easing to "
-                    f"{self.ctx.settings.speed_text(cap_mph)}.",
+                    f"{reason}; adaptive cruise easing to {self.ctx.settings.speed_text(cap_mph)}.",
                     interrupt=False,
                 )
         self._acc_limit_capped = limit_capped
@@ -904,7 +968,35 @@ class DrivingEventMixin:
             self.ctx.say_event("Traffic ahead, adaptive cruise reducing speed.", interrupt=False)
         self._acc_following = following
         error = target_mph - t.speed_mph
-        self._cruise_throttle = max(0.0, min(1.0, self._cruise_throttle + error * 0.08 * dt))
+        # Feed-forward first: the truck's own physics knows what throttle
+        # balances the grade under the wheels, so cruise answers a hill as it
+        # arrives. P and I only trim from there.
+        hold = t.hold_throttle()
+        trim = max(
+            -CRUISE_TRIM_LIMIT,
+            min(CRUISE_TRIM_LIMIT, self._cruise_trim + error * CRUISE_I_GAIN * dt),
+        )
+        if error < 0.0:
+            # Over the target, cruise comes off the fuel: feeding the grade-hold
+            # value into a truck that also needs to lose speed is a truck
+            # fighting itself, and the speeding-strike grace only forgives a
+            # cruise genuinely off the throttle. Eased out across a band rather
+            # than switched -- a hard cut at the boundary chattered the pedal on
+            # and off at steady state, and the engine voice shows every bit of
+            # that.
+            hold *= max(0.0, 1.0 + error / CRUISE_COAST_MPH)
+            if error <= -CRUISE_COAST_MPH:
+                trim = min(0.0, trim)
+        demand = hold + error * CRUISE_P_GAIN + trim
+        # Anti-windup: a grade the engine cannot pull, or a downgrade gravity
+        # owns, pins the pedal at one end for as long as it lasts. Integrating
+        # through that buries the trim at its limit, and the truck then sags or
+        # surges for seconds after the road levels out while it unwinds. Only
+        # take the new trim when it can still move the pedal.
+        saturated = (demand <= 0.0 and error < 0.0) or (demand >= 1.0 and error > 0.0)
+        if not saturated:
+            self._cruise_trim = trim
+        self._cruise_throttle = max(0.0, min(1.0, demand))
         # Ramp the applied throttle up to the held integrator value rather than
         # snapping, so cruise eases back in after a clutch release; drops (traffic
         # or a lower limit) still apply immediately. On a steady frame the applied
@@ -920,9 +1012,144 @@ class DrivingEventMixin:
         else:
             self._cruise_applied = self._cruise_throttle
         t.throttle = self._cruise_applied
-        if (following or limit_capped or exit_capped) and error < -2.0:
-            weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
-            t.brake = max(t.brake, min(weather_brake, abs(error) / 30.0))
+        closing = following or limit_capped or exit_capped
+        self._hold_cruise_from_above(dt, error, closing=closing)
+        self._announce_cruise_grade_verdict(dt, error, closing=closing)
+
+    def _hold_cruise_from_above(self, dt: float, error: float, *, closing: bool) -> None:
+        """Bring the truck back down to the target: retarder first, drums last.
+
+        Cutting fuel was cruise's whole answer to being over the target, which
+        works on the flat and fails on every downgrade: gravity carried the
+        truck past the set speed and simply held it there, and the service
+        brake only ever came out while a cap or a lead was already pulling the
+        target down. Cruise now reaches for the engine brake against the
+        overspeed, and snubs the drums when that is not enough.
+
+        Closing on a lead or easing down to a lower posted limit keeps the old
+        proportional service-brake trim and no retarder at all. That is a
+        deliberate limit: the jake is a loud device, and reaching for it on
+        every piece of traffic would put its bark in the player's ears several
+        times a mile for a job the drums do quietly.
+        """
+        t = self.truck
+        over = -error
+        self._cruise_jake_cooldown_s = max(0.0, self._cruise_jake_cooldown_s - dt)
+        if self._cruise_jake_on and not t.engine_brake:
+            # The accelerator key, or the driver's own J, took it back off.
+            self._cruise_jake_on = False
+        if closing:
+            if over > 2.0:
+                weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
+                t.brake = max(t.brake, min(weather_brake, over / 30.0))
+            self._cruise_snubbing = False
+            return
+        # Never release a retarder the driver's own switch is holding -- only
+        # the one cruise raised itself.
+        driver_owns_jake = t.engine_brake and not self._cruise_jake_on
+        if not driver_owns_jake:
+            wanted = t.engine_brake
+            if over > CRUISE_JAKE_OVER_MPH and t.throttle <= 0.05:
+                wanted = True
+            elif over < -CRUISE_JAKE_RELEASE_MPH or t.grade > -0.005:
+                # Under the target, or the hill is behind us. The switch stays
+                # on for the length of a descent the way a driver leaves it on:
+                # any throttle cruise puts down takes the jake out of the
+                # physics anyway, so the speed is modulated without the device
+                # barking on and off every few seconds.
+                wanted = False
+            # Changes wait out a cooldown so a rolling grade does not make the
+            # jake chatter -- it is a loud device. Coming off it because the
+            # truck has fallen under the target goes through at once: holding
+            # retard the truck no longer needs is what drags it below the speed
+            # cruise is supposed to be keeping.
+            if wanted != t.engine_brake and (not wanted or self._cruise_jake_cooldown_s <= 0.0):
+                t.engine_brake = wanted
+                self._cruise_jake_on = wanted
+                self._cruise_jake_cooldown_s = CRUISE_JAKE_STEP_S
+        # Holding a grade. The drums only come out once the retarder is doing
+        # everything it can, and then as a snub that finishes and lets go.
+        if self._cruise_snubbing:
+            self._cruise_snubbing = over > -CRUISE_SNUB_UNDER_MPH
+        elif t.engine_brake and over > CRUISE_BRAKE_OVER_MPH:
+            self._cruise_snubbing = True
+        if self._cruise_snubbing:
+            t.brake = max(t.brake, CRUISE_SNUB_BRAKE)
+
+    def _announce_cruise_grade_verdict(self, dt: float, error: float, *, closing: bool) -> None:
+        """Say when the grade has beaten cruise, rather than drifting silently.
+
+        A player who cannot see the speedometer had no way to know cruise had
+        given up on its number -- the truck simply ran fifteen mph over down a
+        hill (playtest, 2026-07-27). Once per grade, and it clears when the
+        road hands the speed back. Silent while cruise is deliberately coming
+        down to a lead or a lower limit: that gap is the plan, not a failure.
+        """
+        t = self.truck
+        if closing:
+            self._cruise_grade_said = 0
+            self._cruise_beaten_s = 0.0
+            return
+        grade_pct = t.grade * 100.0
+        # The verdict follows the road, not the sign of the error. Reading the
+        # error alone announced "the climb has beaten cruise" on a downgrade,
+        # purely because the truck happened to be under its number there
+        # (bench trace, 2026-07-27: mile 69.5, road at -0.8 percent). The floor
+        # keeps it off road the G key calls level.
+        grade_sign = (
+            1
+            if grade_pct >= CRUISE_GRADE_BEATEN_PCT
+            else -1
+            if grade_pct <= -CRUISE_GRADE_BEATEN_PCT
+            else 0
+        )
+        if grade_sign > 0:
+            # A climb has only beaten cruise once the pedal is on the floor
+            # and the hill is still winning. Without that, every time the
+            # driver dialed the target up -- or a limit rise raised it --
+            # cruise announced defeat while it was simply accelerating toward
+            # a speed it would have reached.
+            beaten = (
+                error >= CRUISE_GRADE_BEATEN_MPH
+                and t.throttle >= 0.95
+                and not t.transmission.shifting
+                and t.drive_force() <= t.resistance_force()
+            )
+        elif grade_sign < 0:
+            beaten = error <= -CRUISE_GRADE_BEATEN_MPH
+        else:
+            beaten = False
+        # One frame is not evidence -- the driveline opens on every gear change
+        # -- so the grade has to keep winning for a few seconds before cruise
+        # concedes out loud.
+        self._cruise_beaten_s = self._cruise_beaten_s + dt if beaten else 0.0
+        if self._cruise_beaten_s < CRUISE_GRADE_BEATEN_S:
+            if abs(error) < CRUISE_GRADE_BEATEN_MPH * 0.5:
+                self._cruise_grade_said = 0
+            return
+        if self._cruise_grade_said == grade_sign:
+            return
+        self._cruise_grade_said = grade_sign
+        speed = self.ctx.settings.speed_text(t.speed_mph)
+        terse = self._terse_speech()
+        if grade_sign < 0:
+            self.ctx.audio.play("ui/notify", volume=0.55)
+            # Terse keeps the fact and drops the instruction, the way the
+            # hazard cue drops its "Brake now!" -- a driver on terse speech
+            # knows what to do and wants the number sooner.
+            if terse:
+                message = f"Cruise losing the downgrade; {speed}."
+            else:
+                # Braking is what an automatic driver has -- and braking is
+                # also what hands the truck back from cruise, so it leads
+                # either way.
+                take_over = "Brake" if t.transmission.automatic else "Brake or gear down"
+                message = f"Cruise cannot hold this downgrade; {speed} and building. {take_over}."
+        elif terse:
+            message = f"Cruise losing the climb; {speed}."
+        else:
+            message = f"The climb has beaten cruise; holding {speed}."
+        self.ctx.say_event(message, interrupt=False)
 
     def _handle_out_of_fuel(self) -> None:
         if self._rescue_offered:
@@ -932,6 +1159,8 @@ class DrivingEventMixin:
         fee = 750.0
         p.money -= fee  # can go negative: the rescue is not optional
         self.truck.refuel(30.0)
+        self.truck.recover_from_fuel_depletion()
+        self._cancel_cruise()
         self._rescue_offered = False
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(
@@ -967,6 +1196,7 @@ class DrivingEventMixin:
             self.trip.game_minutes += 20.0
             self.trip.position_mi = max(0.0, exit_details[0] - self._exit_window_mi())
             self._destination_exit_announced_key = None
+            self._destination_exit_response_s = 0.0
             if self._terse_speech():
                 reroute_text = "Safe turnaround. Destination exit ahead again."
             else:

@@ -193,8 +193,8 @@ class MainMenuState(MenuState):
         self.ctx.say(
             f"Welcome to Freight Fate, version {updater.spoken_version(__version__)}. "
             f"An audio trucking adventure across America. {warning}"
-            f"{self.current_text()}",
         )
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
@@ -494,7 +494,9 @@ class CareerActionsState(MenuState):
 
     def announce_entry(self) -> None:
         self.ctx.say(
-            f"Actions for {_career_summary(self.path, self.profile)}. {self.current_text()}"
+            f"Actions for {_career_summary(self.path, self.profile)}. {self.current_text()}",
+            interrupt=False,
+            review=False,
         )
 
     def build_items(self) -> list[MenuItem]:
@@ -549,7 +551,8 @@ class ConfirmCareerActionState(MenuState):
         else:
             detail = "Deleting permanently removes this saved career."
         self.ctx.say(
-            f"Confirm {self._action_label} for {self.profile.name}. {detail} {self.current_text()}"
+            f"Confirm {self._action_label} for {self.profile.name}. {detail} {self.current_text()}",
+            review=False,
         )
 
     def build_items(self) -> list[MenuItem]:
@@ -586,6 +589,7 @@ class ConfirmCareerActionState(MenuState):
 class NameEntryState(State):
     """Accessible text entry: characters are echoed as you type."""
 
+    captures_text_input = True
     MAX_LEN = 24
 
     def __init__(self, ctx) -> None:
@@ -606,16 +610,16 @@ class NameEntryState(State):
         elif event.key == pygame.K_BACKSPACE:
             if self.name:
                 removed, self.name = self.name[-1], self.name[:-1]
-                self.ctx.say(f"Deleted {removed}. " + (self.name or "Empty."))
+                self.ctx.say(f"Deleted {removed}. " + (self.name or "Empty."), review=False)
             else:
                 self.ctx.audio.play("ui/error")
         elif event.key == pygame.K_F2:
-            self.ctx.say(self.name if self.name else "Empty.")
+            self.ctx.say(self.name if self.name else "Empty.", review=False)
         elif event.unicode and event.unicode.isprintable() and len(self.name) < self.MAX_LEN:
             self.name += event.unicode
             self.ctx.audio.play("ui/tick")
             spoken = "space" if event.unicode == " " else event.unicode
-            self.ctx.say(spoken)
+            self.ctx.say(spoken, review=False)
 
     def _confirm(self) -> None:
         name = self.name.strip() or "Driver"
@@ -676,10 +680,8 @@ class HomeTerminalState(MenuState):
             self.index = self._regions.index(default)
 
     def announce_entry(self) -> None:
-        self.ctx.say(
-            "Home region. Pick the part of the country where your "
-            f"career starts. {self.current_text()}"
-        )
+        self.ctx.say("Home region. Pick the part of the country where your career starts.")
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
@@ -723,9 +725,8 @@ class HomeCityState(MenuState):
 
     def announce_entry(self) -> None:
         region = _region_menu_name(self.region)
-        self.ctx.say(
-            f"{region} terminals. Pick the city where your career starts. {self.current_text()}"
-        )
+        self.ctx.say(f"{region} terminals. Pick the city where your career starts.")
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
@@ -751,9 +752,9 @@ class HomeCityState(MenuState):
         terminal = self.ctx.world.home_terminal(city)
         self.ctx.profile = profile
         profile.save()
-        self.ctx.pop_state()  # this city picker
-        self.ctx.pop_state()  # region picker
-        self.ctx.pop_state()  # name entry
+        self.ctx.pop_state(True, False)  # this city picker
+        self.ctx.pop_state(True, False)  # region picker
+        self.ctx.pop_state(True, False)  # name entry
         self.ctx.push_state(CityMenuState(self.ctx))
         loaded_over = (
             f"Loaded over existing driver named {name}. " if name.lower() in existing else ""

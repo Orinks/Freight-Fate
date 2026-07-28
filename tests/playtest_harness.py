@@ -12,6 +12,7 @@ os.environ.setdefault("FREIGHT_FATE_NO_SPEECH", "1")
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pygame
+from speech_capture import speech_stub
 
 
 def key_event(key: int, unicode: str = ""):
@@ -32,8 +33,11 @@ class PlaytestResult:
     remaining_miles: float = 0.0
     speeding_strikes: int = 0
     speeding_tickets: int = 0
+    inspection_fines: int = 0
     speed_control_transitions: list[str] = field(default_factory=list)
     max_speeding_timer_s: float = 0.0
+    construction_entry_speed_mph: float | None = None
+    heavy_traffic_entry_speed_mph: float | None = None
     destination_exit_speed_mph: float | None = None
 
     @property
@@ -67,19 +71,16 @@ class PlaytestHarness:
         from freight_fate.app import App
 
         self.app = App()
-        self.monkeypatch.setattr(self.app.ctx, "say", self._say)
-        self.monkeypatch.setattr(self.app.ctx, "say_event", self._say_event)
+        transcript = self.result.transcript
+        self.monkeypatch.setattr(self.app.ctx, "say", speech_stub(transcript))
+        self.monkeypatch.setattr(
+            self.app.ctx, "say_event", speech_stub(transcript, prefix="[event] ")
+        )
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
         if self.app is not None:
             self.app.shutdown()
-
-    def _say(self, text: str, interrupt: bool = True) -> None:
-        self.result.transcript.append(text)
-
-    def _say_event(self, text: str, interrupt: bool = True) -> None:
-        self.result.transcript.append(f"[event] {text}")
 
     def start_delivery(
         self,
@@ -241,6 +242,11 @@ class PlaytestHarness:
                 self.result.max_speeding_timer_s,
                 driving._speeding_timer,
             )
+            _, zone_reason = driving.trip.speed_limit_at(driving.trip.position_mi)
+            if zone_reason == "construction" and self.result.construction_entry_speed_mph is None:
+                self.result.construction_entry_speed_mph = driving.truck.speed_mph
+            if zone_reason == "heavy traffic" and self.result.heavy_traffic_entry_speed_mph is None:
+                self.result.heavy_traffic_entry_speed_mph = driving.truck.speed_mph
             if driving.trip.position_mi >= end_mi:
                 break
         else:
@@ -251,6 +257,7 @@ class PlaytestHarness:
 
         self.result.speeding_strikes = driving.speeding_strikes
         self.result.speeding_tickets = driving.speeding_tickets
+        self.result.inspection_fines = driving.hos_fine_count
         return self.result
 
     def settle_delivery_after_segment(self) -> PlaytestResult:
