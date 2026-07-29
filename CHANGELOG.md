@@ -24,8 +24,10 @@
   are on with Ctrl+C, whether you are driving or sitting in a menu. Older
   messages are announced with how far back they are, the last 200 are kept,
   and moving through menus is no longer mixed into the history, so what you
-  step back through is what actually happened. Typing a driver name still
-  takes punctuation as punctuation. Raised by wleicht
+  step back through is what actually happened. Checking the pause menu
+  mid-run no longer leaves a "Paused" and a "Resumed" between every pair of
+  announcements. Typing a driver name still takes punctuation as
+  punctuation. Raised by wleicht
   ([@wleicht](https://github.com/wleicht)) in
   [issue #134](https://github.com/Orinks/Freight-Fate/issues/134).
 

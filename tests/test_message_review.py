@@ -138,6 +138,42 @@ def test_menu_navigation_stays_out_of_the_review_log():
         app.shutdown()
 
 
+def test_pausing_mid_run_leaves_no_trace_in_the_history():
+    """Checking the pause menu is where you are, not something that happened."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    app = App()
+    monkeypatch_free_speech(app)
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        app.ctx.message_log.messages.clear()
+        app.ctx.message_log.index = -1
+
+        for index in range(3):
+            driving._handle_trip_event(
+                TripEvent(TripEventKind.HAZARD, f"Announcement {index}.", {"deadline_s": 9.0})
+            )
+            driving._hazard_active = False
+            app.dispatch_to_state(key_event(pygame.K_ESCAPE))  # open the pause menu
+            app.dispatch_to_state(key_event(pygame.K_RETURN))  # resume
+
+        assert [message.text for message in app.ctx.message_log.messages] == [
+            "Announcement 0.",
+            "Announcement 1.",
+            "Announcement 2.",
+        ]
+    finally:
+        app.shutdown()
+
+
+def monkeypatch_free_speech(app):
+    app.ctx.speech.say = lambda text, interrupt=True: None
+    app.ctx.speech.say_event = lambda text, interrupt=True: None
+    app.ctx.award_achievement = lambda *args, **kwargs: None
+
+
 def test_review_jumps_to_first_and_last(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.base import State
