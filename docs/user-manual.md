@@ -145,10 +145,9 @@ a driver name, where the punctuation keys type instead.
 | Left bracket or right bracket | Switch between all messages, general messages, and driving events. |
 | Ctrl+C | Copy the message you are on to the clipboard. |
 
-Messages older than the newest one are announced with how far back they are,
-so `3 back` means three messages before the latest. The game keeps the last
-200 messages. Moving through menus is not kept, so the history holds what
-happened rather than where you walked.
+Each key press reads the message itself, with nothing added. The game keeps
+the last 200 messages. Moving through menus is not kept, so the history holds
+what happened rather than where you walked.
 
 While you are reviewing, new announcements do not move your place. Once you
 have left the review keys alone for ten seconds the game takes you as done,

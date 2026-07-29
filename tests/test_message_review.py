@@ -45,7 +45,7 @@ def test_hazard_warning_and_outcome_replay_on_a_comma_and_period(monkeypatch):
         app.dispatch_to_state(key_event(pygame.K_COMMA))
         assert main_speech[-1] == outcome
         app.dispatch_to_state(key_event(pygame.K_COMMA))
-        assert main_speech[-1] == f"1 back: {warning}"
+        assert main_speech[-1] == warning
         app.dispatch_to_state(key_event(pygame.K_PERIOD))
         assert main_speech[-1] == outcome
     finally:
@@ -77,7 +77,7 @@ def test_collision_outcome_replays_on_a_and_message_review(monkeypatch):
         app.dispatch_to_state(key_event(pygame.K_COMMA))
         assert main_speech[-1] == outcome
         app.dispatch_to_state(key_event(pygame.K_COMMA))
-        assert main_speech[-1] == f"1 back: {warning}"
+        assert main_speech[-1] == warning
     finally:
         app.shutdown()
 
@@ -116,7 +116,7 @@ def test_review_works_outside_driving(monkeypatch):
         app.dispatch_to_state(key_event(pygame.K_COMMA))
         assert main_speech[-1] == "Weigh station ahead."
         app.dispatch_to_state(key_event(pygame.K_COMMA))
-        assert main_speech[-1] == "1 back: Fuel is running low."
+        assert main_speech[-1] == "Fuel is running low."
     finally:
         app.shutdown()
 
@@ -181,8 +181,8 @@ def test_review_jumps_to_first_and_last(monkeypatch):
     app = App()
     main_speech = []
     try:
-        # A bare state speaks nothing on entry, so the log holds only what this
-        # test puts in it and the "N back" counts are exact.
+        # A bare state speaks nothing on entry, so the log holds only what
+        # this test puts in it.
         app.push_state(State(app.ctx))
         for text in ("One.", "Two.", "Three."):
             app.ctx.say(text)
@@ -191,7 +191,7 @@ def test_review_jumps_to_first_and_last(monkeypatch):
         )
 
         app.dispatch_to_state(ctrl_key_event(pygame.K_COMMA))
-        assert main_speech[-1] == "2 back: One."
+        assert main_speech[-1] == "One."
         app.dispatch_to_state(ctrl_key_event(pygame.K_PERIOD))
         assert main_speech[-1] == "Three."
     finally:

@@ -192,15 +192,6 @@ class MessageLog:
         self.index = len(messages) - 1
         return messages[self.index]
 
-    def position_from_latest(self) -> int:
-        """How many messages back the cursor sits, 0 being the newest."""
-        messages = self.filtered_messages()
-
-        if not messages or self.index < 0:
-            return 0
-
-        return max(0, len(messages) - 1 - self.index)
-
     def previous_category(self) -> str | None:
         self._begin_review()
         position = self._FILTERS.index(self.filter)

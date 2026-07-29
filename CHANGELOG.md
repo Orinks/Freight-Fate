@@ -21,10 +21,10 @@
   period moves forward, and you can now also jump to the oldest or newest
   message with Ctrl and those same keys, switch between all messages, general
   messages and driving events with the bracket keys, and copy the message you
-  are on with Ctrl+C, whether you are driving or sitting in a menu. Older
-  messages are announced with how far back they are, the last 200 are kept,
-  and moving through menus is no longer mixed into the history, so what you
-  step back through is what actually happened. Checking the pause menu
+  are on with Ctrl+C, whether you are driving or sitting in a menu. Each
+  press reads the message and nothing else, the last 200 are kept, and moving
+  through menus is no longer mixed into the history, so what you step back
+  through is what actually happened. Checking the pause menu
   mid-run no longer leaves a "Paused" and a "Resumed" between every pair of
   announcements. New announcements do not move your place while you are
   reviewing, and once you have left the keys alone for ten seconds the next

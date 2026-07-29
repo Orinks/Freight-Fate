@@ -63,21 +63,6 @@ def test_stepping_forward_does_not_repeat() -> None:
     assert log.previous_message().text == "One"
 
 
-def test_position_from_latest_counts_back_from_the_newest() -> None:
-    log = MessageLog()
-
-    for text in ("One", "Two", "Three"):
-        log.add(text, MessageCategory.GENERAL)
-
-    assert log.position_from_latest() == 0
-    log.previous_message()  # repeats the newest
-    assert log.position_from_latest() == 0
-    log.previous_message()
-    assert log.position_from_latest() == 1
-    log.first_message()
-    assert log.position_from_latest() == 2
-
-
 def test_category_change_moves_to_latest_matching_message() -> None:
     log = MessageLog()
 
@@ -168,7 +153,6 @@ def test_a_lapsed_review_session_starts_again_at_the_newest() -> None:
         log.add(text, MessageCategory.GENERAL)
 
     assert log.previous_message().text == "Five."
-    assert log.position_from_latest() == 0
 
 
 def test_an_active_review_session_is_not_dragged_forward() -> None:

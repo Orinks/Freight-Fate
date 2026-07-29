@@ -169,9 +169,7 @@ class State:
         # Reviewing is a deliberate act: silence the event voice first, or a
         # hazard call still playing talks over the line being reviewed.
         self.ctx.stop_event_speech()
-        back = self.ctx.message_log.position_from_latest()
-        text = message.text if back == 0 else f"{back} back: {message.text}"
-        self.ctx.say(text, review=False)
+        self.ctx.say(message.text, review=False)
 
 
 @dataclass
