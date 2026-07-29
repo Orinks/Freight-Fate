@@ -1976,6 +1976,7 @@ class DrivingUpdateMixin:
                 if self._hazard_dodgeable
                 else "Hazard avoided. Well done."
             )
+            self._last_event_message = message
             self.ctx.say_event(message, interrupt=False)
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
@@ -2005,7 +2006,9 @@ class DrivingUpdateMixin:
             self.truck.brake = max(self.truck.brake, 1.0)
             if not self._automatic_braking_announced:
                 self._automatic_braking_announced = True
-                self.ctx.say_event("Emergency braking engaged.", interrupt=True)
+                # Kept out of the repeat ring: this line interrupts the hazard
+                # warning, and the repeat key exists to give that warning back.
+                self.ctx.say_event("Emergency braking engaged.", interrupt=True, remember=False)
             if self._cruise_mph is not None:
                 self._cancel_cruise()
         if self._hazard_deadline <= 0:
@@ -2016,11 +2019,12 @@ class DrivingUpdateMixin:
             severity *= tuning_for_time_scale(self.trip.time_scale).collision_damage
             self.ctx.controller.rumble.impact(severity)
             self.truck.apply_collision(severity)
-            self.ctx.say_event(
+            message = (
                 f"Collision! The truck took damage. "
-                f"Total damage {self.truck.damage_pct:.0f} percent.",
-                interrupt=True,
+                f"Total damage {self.truck.damage_pct:.0f} percent."
             )
+            self._last_event_message = message
+            self.ctx.say_event(message, interrupt=True)
 
     # -- microsleeps (severe fatigue) ----------------------------------------------
 

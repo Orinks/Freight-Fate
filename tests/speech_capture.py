@@ -50,7 +50,9 @@ def speech_stub(
     stub, so that ``ctx.say``'s signature has exactly one definition.
     """
 
-    def _speak(text: str, interrupt: bool = True, review: bool = True) -> None:
+    def _speak(
+        text: str, interrupt: bool = True, review: bool = True, remember: bool = True
+    ) -> None:
         if record is not None:
             record(text, interrupt)
             return

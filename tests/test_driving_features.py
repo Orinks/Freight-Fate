@@ -201,6 +201,43 @@ def test_passing_hazard_plays_clear_sound(monkeypatch):
         app.shutdown()
 
 
+def test_fuel_rescue_stops_the_truck_before_restart(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        truck = driving.truck
+        truck.start_engine()
+        truck.set_air_ready(parking_brake=False)
+        truck.transmission.gear = 10
+        truck.velocity_mps = 65.0 / 2.2369362920544
+        truck.throttle = 0.8
+        truck.brake = 0.4
+        truck.engine_brake = True
+        truck.emergency_brake = True
+        truck.fuel_gal = 0.0
+
+        driving.update(1 / 60)
+
+        assert truck.fuel_gal == pytest.approx(30.0)
+        assert truck.speed_mph == 0.0
+        assert not truck.engine_on
+        assert truck.rpm == 0.0
+        assert truck.parking_brake
+        assert truck.throttle == truck.brake == 0.0
+        assert not truck.engine_brake and not truck.emergency_brake
+        assert truck.transmission.in_neutral
+
+        driving.handle_event(key_event(pygame.K_e))
+
+        assert truck.engine_on
+        assert truck.speed_mph == 0.0
+    finally:
+        app.shutdown()
+
+
 def test_control_stops_event_voice_without_flushing_main_speech():
     from freight_fate.app import App
 

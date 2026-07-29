@@ -317,8 +317,9 @@ class DrivingState(
         self._acc_weather_gap_said = False
         self._acc_limit_capped = False
         self._acc_limit_cap_said: float | None = None
-        # (end mile, limit) of a work zone cruise has begun slowing for.
-        self._construction_slowdown: tuple[float, float] | None = None
+        # (end mile, limit, reason) of a restricted zone cruise has begun
+        # slowing for -- a work zone or heavy traffic.
+        self._construction_slowdown: tuple[float, float, str] | None = None
         self._acc_follow_cue_s = 0.0  # quiet window between "Traffic ahead" cues
         self._descent_control_active = False
         self._descent_limit_state = ""

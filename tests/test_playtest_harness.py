@@ -272,6 +272,24 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
     assert "resuming" in transcript
 
 
+def test_playtest_transcript_preserves_hazard_warning_and_outcome(monkeypatch):
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_SAFE_MPH
+
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Hazard Review")
+        driving = harness.driving
+        assert driving is not None
+        warning = "Brake now! A slow vehicle ahead."
+        driving._handle_trip_event(TripEvent(TripEventKind.HAZARD, warning, {"deadline_s": 3.0}))
+        driving.truck.velocity_mps = (HAZARD_SAFE_MPH - 1.0) / 2.2369362920544
+        driving._update_hazard(1 / 60)
+
+    warning_index = result.transcript.index(f"[event] {warning}")
+    outcome_index = result.transcript.index("[event] Hazard avoided. Well done.")
+    assert warning_index < outcome_index
+
+
 @pytest.mark.smoke
 @pytest.mark.parametrize(
     (
@@ -424,6 +442,22 @@ def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
         # The keeper takes over at the merge taper, whose own limit is 55; the
         # work zone behind it is the 45 cruise has already eased to.
         handoff = result.transcript_text.index("Speed keeper holding")
+        resumed = result.transcript_text.index("Adaptive cruise resuming")
+        assert warning < easing < handoff < resumed
+    if zone_reason == "heavy traffic":
+        assert result.heavy_traffic_entry_speed_mph is not None
+        assert result.heavy_traffic_entry_speed_mph <= 50.5
+        assert (
+            result.transcript_text.count(
+                "Heavy traffic ahead; adaptive cruise easing to 50 miles per hour"
+            )
+            == 1
+        )
+        warning = result.transcript_text.index("heavy traffic ahead. Speed limit 50")
+        easing = result.transcript_text.index(
+            "Heavy traffic ahead; adaptive cruise easing to 50 miles per hour"
+        )
+        handoff = result.transcript_text.index("Speed keeper holding 50 miles per hour")
         resumed = result.transcript_text.index("Adaptive cruise resuming")
         assert warning < easing < handoff < resumed
 

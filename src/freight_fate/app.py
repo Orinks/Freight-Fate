@@ -192,12 +192,16 @@ class GameContext:
         back, line = step
         if back == 0:
             transcript.info("[repeat] %s", line)
+            self.stop_event_speech()
             self.speech.say(line, interrupt=True)
         else:
             transcript.info("[repeat -%d] %s", back, line)
+            self.stop_event_speech()
             self.speech.say(f"{back} back: {line}", interrupt=True)
 
-    def say_event(self, text: str, interrupt: bool = True, review: bool = True) -> None:
+    def say_event(
+        self, text: str, interrupt: bool = True, review: bool = True, remember: bool = True
+    ) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
 
         With the dedicated SAPI event voice enabled, events speak on their own
@@ -212,10 +216,18 @@ class GameContext:
         Queued events ride an anti-backlog projection either way: a line that
         would start speaking well after the moment it described flushes the
         expired backlog and speaks now instead of joining the recital.
+
+        ``remember`` keeps a line out of the repeat key's ring. An assist that
+        interrupts to say it is acting would otherwise land exactly where the
+        warning it cut off should be, so the one key that exists to rescue an
+        interrupted line would hand back the interruption instead. Such a line
+        still reaches the message log, where it is browsed on purpose rather
+        than stumbled over.
         """
         transcript.info("[event] %s", text)
         self.last_spoken = text
-        self._speech_history.record(text)
+        if remember:
+            self._speech_history.record(text)
         if self.settings.sapi_events:
             if interrupt:
                 self._event_pacer.note_interrupt(text)
@@ -249,17 +261,17 @@ class GameContext:
 
     # -- state stack ------------------------------------------------------------
 
-    def push_state(self, state: State) -> None:
-        self._app.push_state(state)
+    def push_state(self, state: State, should_enter: bool = True) -> None:
+        self._app.push_state(state, should_enter)
 
-    def pop_state(self) -> None:
-        self._app.pop_state()
+    def pop_state(self, should_exit: bool = True, reentry: bool = True) -> None:
+        self._app.pop_state(should_exit, reentry)
 
-    def replace_state(self, state: State) -> None:
-        self._app.replace_state(state)
+    def replace_state(self, state: State, should_exit: bool = True, reentry: bool = True) -> None:
+        self._app.replace_state(state, should_exit, reentry)
 
-    def reset_to(self, state: State) -> None:
-        self._app.reset_to(state)
+    def reset_to(self, state: State, should_exit: bool = True, reentry: bool = True) -> None:
+        self._app.reset_to(state, should_exit, reentry)
 
     def quit(self) -> None:
         self._app.running = False
@@ -516,27 +528,39 @@ class App:
     def state(self) -> State | None:
         return self.states[-1] if self.states else None
 
-    def push_state(self, state: State) -> None:
+    def push_state(self, state: State, should_enter: bool = True) -> None:
         self.states.append(state)
-        state.enter()
+        if should_enter:
+            state.enter()
 
-    def pop_state(self) -> None:
+    def _take_top(self, should_exit: bool = True) -> None:
+        """Lift the top state off the stack, without deciding what follows.
+
+        Emptying the stack only ends the game when the player backed out of the
+        last state; the rebuilding methods below empty it on their way to a new
+        state, so they use this instead of pop_state.
+        """
         if self.states:
-            self.states.pop().exit()
+            state = self.states.pop()
+            if should_exit:
+                state.exit()
+
+    def pop_state(self, should_exit: bool = True, reentry: bool = True) -> None:
+        self._take_top(should_exit)
         if self.state is not None:
-            self.state.enter()
+            if reentry:
+                self.state.enter()
         else:
             self.running = False
 
-    def replace_state(self, state: State) -> None:
-        if self.states:
-            self.states.pop().exit()
-        self.push_state(state)
+    def replace_state(self, state: State, should_exit: bool = True, reentry: bool = True) -> None:
+        self._take_top(should_exit)
+        self.push_state(state, reentry)
 
-    def reset_to(self, state: State) -> None:
+    def reset_to(self, state: State, should_exit: bool = True, reentry: bool = True) -> None:
         while self.states:
-            self.states.pop().exit()
-        self.push_state(state)
+            self._take_top(should_exit)
+        self.push_state(state, reentry)
 
     def _dispatch_controller(self, event: pygame.event.Event) -> None:
         """Feed a controller event to the manager, then to the active state.
@@ -600,18 +624,13 @@ class App:
                             # message log keeps these keys: while driving they
                             # walk the categorised log, which is the same
                             # gesture doing a fuller job.
-                            reviews_messages = getattr(self.state, "reviews_messages", False)
-                            if (
-                                event.key == pygame.K_COMMA
-                                and not reviews_messages
-                                and not getattr(self.state, "captures_text_input", False)
+                            if event.key == pygame.K_COMMA and not getattr(
+                                self.state, "captures_text_input", False
                             ):
                                 self.ctx.repeat_last_spoken()
                                 continue
-                            if (
-                                event.key == pygame.K_PERIOD
-                                and not reviews_messages
-                                and not getattr(self.state, "captures_text_input", False)
+                            if event.key == pygame.K_PERIOD and not getattr(
+                                self.state, "captures_text_input", False
                             ):
                                 self.ctx.step_forward_spoken()
                                 continue

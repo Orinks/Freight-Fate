@@ -350,6 +350,11 @@ ACC_LIMIT_OFFSET_MPH = 5.0  # predictive ACC holds this far over the posted
 # driver for a speed cruise itself had picked; the grade band is bounded now
 # (see CRUISE_JAKE_OVER_MPH and the snub constants) rather than the pace
 # being cut.
+# Zones the driver is warned about in advance and that cruise pre-brakes for,
+# holding their limit exactly rather than the usual with-traffic offset. The
+# construction merge taper is deliberately absent: it posts a higher limit
+# ahead of the work zone, and aiming at it reached the barrels too fast.
+RESTRICTED_ZONE_REASONS = frozenset({"construction", "heavy traffic"})
 ACC_LIMIT_LOOKAHEAD_MIN_MI = 0.25
 ACC_LIMIT_LOOKAHEAD_MAX_MI = 1.5
 ACC_LIMIT_LOOKAHEAD_STEP_MI = 0.1

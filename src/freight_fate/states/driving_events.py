@@ -85,7 +85,7 @@ class DrivingEventMixin:
                 # The two-mile advance for a place earns nothing at any tier:
                 # a town is not actionable the way an exit or toll is.
                 return
-        if event.message:
+        if event.message and kind != TripEventKind.HAZARD:
             self._last_event_message = event.message  # replayable with A
         if kind == TripEventKind.HAZARD:
             if self._ramp_mi is not None:
@@ -121,6 +121,7 @@ class DrivingEventMixin:
             message = terse_hazard_message(event.message) if self._terse_speech() else event.message
             if speed_control_was_active:
                 message = f"{message} Automatic speed control canceled."
+            self._last_event_message = message
             self.ctx.say_event(message, interrupt=True)
         elif kind == TripEventKind.INSPECTION:
             self._handle_inspection(event)
@@ -2114,9 +2115,9 @@ class DrivingEventMixin:
             if limit < lowest_limit and probe - start <= braking_mi:
                 lowest_limit, lowest_reason = limit, reason
             probe += ACC_LIMIT_LOOKAHEAD_STEP_MI
-        construction_limit = self._construction_limit_ahead()
-        if construction_limit is not None and construction_limit <= lowest_limit:
-            return construction_limit, "construction"
+        restricted = self._restricted_zone_limit_ahead()
+        if restricted is not None and restricted[0] <= lowest_limit:
+            return restricted[0], restricted[1]
         return lowest_limit, lowest_reason
 
     def _grade_samples(self, distance_mi: float) -> list[float]:
@@ -2396,7 +2397,9 @@ class DrivingEventMixin:
         # tickets, and trooper stops -- all of which now exist. The "Speed limit X"
         # cue still names the number; this cue says cruise is handling it.
         posted, limit_reason = self._acc_posted_limit_ahead()
-        cap_mph = posted if limit_reason == "construction" else posted + ACC_LIMIT_OFFSET_MPH
+        cap_mph = (
+            posted if limit_reason in RESTRICTED_ZONE_REASONS else posted + ACC_LIMIT_OFFSET_MPH
+        )
         # Measured against the working target, not the set speed, so this cap
         # can only ever lower it. Against the set speed it overwrote a stricter
         # ramp cap: cruise announced it was easing to 45 for the exit and then
@@ -2415,11 +2418,10 @@ class DrivingEventMixin:
             # the barrels.
             if self._acc_limit_cap_said is None or cap_mph < self._acc_limit_cap_said - 0.5:
                 self._acc_limit_cap_said = cap_mph
-                reason = (
-                    "Construction zone ahead"
-                    if limit_reason == "construction"
-                    else "Posted limit lower"
-                )
+                reason = {
+                    "construction": "Construction zone ahead",
+                    "heavy traffic": "Heavy traffic ahead",
+                }.get(limit_reason, "Posted limit lower")
                 self.ctx.say_event(
                     f"{reason}; adaptive cruise easing to {self.ctx.settings.speed_text(cap_mph)}.",
                     interrupt=False,
@@ -2660,6 +2662,8 @@ class DrivingEventMixin:
             p.career.reputation = max(0.0, p.career.reputation - 2.0)
             billing = "on the carrier account, and dispatch noted the service call"
         self.truck.refuel(30.0)
+        self.truck.recover_from_fuel_depletion()
+        self._cancel_cruise()
         self._rescue_offered = False
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(

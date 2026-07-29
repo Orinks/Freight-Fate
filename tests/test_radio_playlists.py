@@ -8,12 +8,15 @@ player and the terrestrial section.
 
 from pathlib import Path
 
+import pytest
+
 from freight_fate.radio import (
     DEFAULT_RADIO_CATALOG,
     PERSONAL_PLAYLIST_SOURCE_TYPE,
     RadioPlaybackError,
     RadioState,
     RadioStation,
+    _absolute_anywhere,
     _dial_group,
     _parse_m3u,
     load_personal_playlists,
@@ -51,6 +54,30 @@ def test_parse_m3u_resolves_paths_and_reads_title(tmp_path):
         r"C:\music\second.flac",
         str(tmp_path / "third.opus"),
     )
+
+
+@pytest.mark.parametrize(
+    "line, absolute",
+    [
+        ("songs/first.mp3", False),
+        ("third.opus", False),
+        ("../next door/track.mp3", False),
+        ("/home/driver/music/song.mp3", True),
+        (r"C:\music\second.flac", True),
+        ("D:/media/third.flac", True),
+        (r"\\media-box\share\fourth.mp3", True),
+    ],
+)
+def test_playlist_entries_are_absolute_on_the_machine_that_wrote_them(line, absolute):
+    """A Windows playlist read on Linux keeps its drive paths.
+
+    ``Path.is_absolute`` answers for the host, so on Linux a ``C:\\...`` entry
+    read as relative and got the playlist's own folder glued in front of it.
+    That invented a path the player never had, and buried the real one when the
+    track would not play. This has to hold identically on either platform,
+    which is why it is asserted here and not through a tmp_path playlist.
+    """
+    assert _absolute_anywhere(line) is absolute
 
 
 def test_parse_m3u_survives_a_missing_file(tmp_path):

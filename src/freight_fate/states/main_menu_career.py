@@ -34,7 +34,8 @@ class CareerStartState(MenuState):
         self.driver_name = driver_name
 
     def announce_entry(self) -> None:
-        self.ctx.say(f"Career start. Pick a carrier or owner-operator start. {self.current_text()}")
+        self.ctx.say("Career start. Pick a carrier or owner-operator start.")
+        self.ctx.say(self.current_text(), interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         return [
@@ -94,8 +95,9 @@ class HomeTerminalState(MenuState):
         option = start_option(self.start_key)
         self.ctx.say(
             "Home region. Pick the part of the country where your "
-            f"{option.carrier_name} career starts. {self.current_text()}"
+            f"{option.carrier_name} career starts."
         )
+        self.ctx.say(self.current_text(), interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
@@ -148,9 +150,8 @@ class HomeCityState(MenuState):
 
     def announce_entry(self) -> None:
         region = _region_menu_name(self.region)
-        self.ctx.say(
-            f"{region} terminals. Pick the city where your career starts. {self.current_text()}"
-        )
+        self.ctx.say(f"{region} terminals. Pick the city where your career starts.")
+        self.ctx.say(self.current_text(), interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         items: list[MenuItem] = []
@@ -177,10 +178,12 @@ class HomeCityState(MenuState):
         apply_start_option(profile, option)
         self.ctx.profile = profile
         profile.save()
-        self.ctx.pop_state()  # this city picker
-        self.ctx.pop_state()  # region picker
-        self.ctx.pop_state()  # career start
-        self.ctx.pop_state()  # name entry
+        # Drop the whole new-career chain without re-entering any of it: each
+        # revealed picker would otherwise announce itself again on the way past.
+        self.ctx.pop_state(True, False)  # this city picker
+        self.ctx.pop_state(True, False)  # region picker
+        self.ctx.pop_state(True, False)  # career start
+        self.ctx.pop_state(True, False)  # name entry
         self.ctx.push_state(CityMenuState(self.ctx))
         loaded_over = (
             f"Loaded over existing driver named {name}. " if name.lower() in existing else ""

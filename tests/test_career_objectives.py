@@ -20,6 +20,17 @@ def key_event(key, unicode=""):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
 
 
+def entry_announcement(spoken: list[str]) -> str:
+    """What the player hears on entering a menu.
+
+    ``announce_entry`` speaks the context and the focused item as two events
+    so that moving through a menu stays out of the message review history.
+    They go out back to back and uninterrupted, so to the listener they are
+    one announcement, and that is what these tests read.
+    """
+    return " ".join(spoken[-2:])
+
+
 def _job(*, miles: float, pay: float = 900.0, cargo: str = "general") -> Job:
     return Job(
         CARGO_CATALOG[cargo],
@@ -192,9 +203,9 @@ def test_dispatch_board_speaks_objective_and_marks_recommended_job(monkeypatch):
             )
         )
 
-        assert "Career objective: Run like a senior company driver" in spoken[-1]
-        assert "pick your own loads" in spoken[-1]
-        assert "routing is still assigned" in spoken[-1]
+        assert "Career objective: Run like a senior company driver" in entry_announcement(spoken)
+        assert "pick your own loads" in entry_announcement(spoken)
+        assert "routing is still assigned" in entry_announcement(spoken)
         recommended = next(
             item.text for item in app.state.items if item.text.startswith("Recommended dispatch")
         )
@@ -231,9 +242,9 @@ def test_dispatch_board_speaks_authority_level_recommendation(monkeypatch):
             )
         )
 
-        assert "Career objective: Grow a freight business" in spoken[-1]
-        assert "direct freight" in spoken[-1]
-        assert "direct freight with margin" in spoken[-1]
+        assert "Career objective: Grow a freight business" in entry_announcement(spoken)
+        assert "direct freight" in entry_announcement(spoken)
+        assert "direct freight with margin" in entry_announcement(spoken)
     finally:
         app.shutdown()
 
@@ -264,7 +275,7 @@ def test_first_day_terminal_entry_speaks_training_arc_without_tutorial_language(
 
         app.push_state(CityMenuState(app.ctx))
 
-        entry = spoken[-1]
+        entry = entry_announcement(spoken)
         assert "First-day objective" in entry
         assert "trainer-recommended" in entry
         assert "probation" not in entry.lower()
@@ -285,7 +296,7 @@ def test_out_of_sync_company_terminal_entry_uses_first_week_guidance(monkeypatch
 
         app.push_state(CityMenuState(app.ctx))
 
-        entry = spoken[-1]
+        entry = entry_announcement(spoken)
         assert "First-day objective" not in entry
         assert "Career objective:" in entry
         assert "steady service, not perfection" in entry
@@ -340,12 +351,14 @@ def test_dispatch_board_recommendation_label_is_spoken_and_visible(monkeypatch):
             )
         )
 
-        assert "Career objective: Run like a senior company driver" in spoken[-1]
-        assert "First-day objective" not in spoken[-1]
-        assert "senior company lane" in spoken[-1]
-        assert "Recommended dispatch: senior company lane" not in spoken[-1]
-        assert "Recommended dispatch, senior company lane: Job 1 of 2:" in spoken[-1]
-        assert "Recommended dispatch is Recommended dispatch" not in spoken[-1]
+        assert "Career objective: Run like a senior company driver" in entry_announcement(spoken)
+        assert "First-day objective" not in entry_announcement(spoken)
+        assert "senior company lane" in entry_announcement(spoken)
+        assert "Recommended dispatch: senior company lane" not in entry_announcement(spoken)
+        assert "Recommended dispatch, senior company lane: Job 1 of 2:" in entry_announcement(
+            spoken
+        )
+        assert "Recommended dispatch is Recommended dispatch" not in entry_announcement(spoken)
         assert app.state.index == 0
         assert app.state.current_text().startswith(
             "Recommended dispatch, senior company lane: Job 1 of 2:"
@@ -378,7 +391,7 @@ def test_owner_operator_first_day_terminal_keeps_cash_cushion_guidance(monkeypat
 
         app.push_state(CityMenuState(app.ctx))
 
-        entry = spoken[-1]
+        entry = entry_announcement(spoken)
         assert "First-day objective" in entry
         assert "cash cushion" in entry
         assert "trainer-recommended" not in entry
@@ -399,7 +412,7 @@ def test_out_of_sync_owner_operator_uses_career_guidance(monkeypatch):
 
         app.push_state(CityMenuState(app.ctx))
 
-        terminal_entry = spoken[-1]
+        terminal_entry = entry_announcement(spoken)
         labels = [item.text for item in app.state.items]
         assert "First-day objective" not in terminal_entry
         assert "Career objective:" in terminal_entry
@@ -417,7 +430,7 @@ def test_out_of_sync_owner_operator_uses_career_guidance(monkeypatch):
             )
         )
 
-        board_entry = spoken[-1]
+        board_entry = entry_announcement(spoken)
         assert "First-day objective" not in board_entry
         assert "Career objective:" in board_entry
         assert "cash-positive load" in board_entry
@@ -448,7 +461,7 @@ def test_owner_operator_first_day_dispatch_board_keeps_business_cost_guidance(mo
             )
         )
 
-        entry = spoken[-1]
+        entry = entry_announcement(spoken)
         assert "owner-operator gross revenue" in entry
         assert "cash cushion" in entry
         assert "trainer-recommended" not in entry

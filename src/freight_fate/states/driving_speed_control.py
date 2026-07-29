@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from .driving_core import KEEPER_MIN_MPH
+from .driving_core import KEEPER_MIN_MPH, RESTRICTED_ZONE_REASONS
 
 
 class SpeedControlStateMixin:
@@ -133,31 +133,38 @@ class SpeedControlStateMixin:
         else:
             self._disarm_speed_control()
 
-    def _construction_limit_ahead(self) -> float | None:
-        """A lower work-zone limit inside the player's advance-warning window."""
+    def _restricted_zone_limit_ahead(self) -> tuple[float, str] | None:
+        """A lower restricted-zone limit inside the player's advance-warning window.
+
+        Returns ``(limit_mph, zone_reason)`` for the nearest construction or
+        heavy-traffic zone that is closer than the spoken advance-warning
+        distance and whose limit is lower than the current corridor limit.
+        Returns ``None`` when there is nothing to pre-brake for.
+        """
         if not self._speed_control_armed or not self.ctx.settings.speed_keeper:
             self._construction_slowdown = None
             return None
         held = self._construction_slowdown
         if held is not None and self.trip.position_mi < held[0]:
-            # Keep aiming at a work zone already being slowed for. The warning
+            # Keep aiming at a zone already being slowed for. The warning
             # window is sized in real seconds, so it retracts as cruise slows:
             # without this the zone dropped back out of sight and cruise wound
             # the truck up again on the approach to the barrels.
-            limit_mph = held[1]
+            limit_mph, reason = held[1], held[2]
         else:
             self._construction_slowdown = None
             lookahead_mi = self.trip._zone_warning_lookahead_mi()
-            # Aim at the work zone itself, skipping the merge taper in front
-            # of it exactly as the spoken zone warning does. The taper starts
-            # earlier and posts a higher limit: slowing to the taper's number
-            # still reached the barrels too fast, and slowing on the taper's
-            # position had cruise easing before the player was told why.
+            # Aim at the zone itself, skipping the merge taper in front of a
+            # work zone exactly as the spoken zone warning does. The taper
+            # starts earlier and posts a higher limit: slowing to the taper's
+            # number still reached the barrels too fast, and slowing on the
+            # taper's position had cruise easing before the player was told
+            # why. Heavy traffic posts no taper, so it is simply the zone.
             zone = min(
                 (
                     z
                     for z in self.trip.zones
-                    if z.reason == "construction"
+                    if z.reason in RESTRICTED_ZONE_REASONS
                     and 0 < z.start_mi - self.trip.position_mi <= lookahead_mi
                 ),
                 key=lambda z: z.start_mi,
@@ -171,7 +178,7 @@ class SpeedControlStateMixin:
 
             if _zone_key(zone) not in self.trip._announced_zone_warnings:
                 return None
-            limit_mph = zone.limit_mph
-            self._construction_slowdown = (zone.end_mi, limit_mph)
+            limit_mph, reason = zone.limit_mph, zone.reason
+            self._construction_slowdown = (zone.end_mi, limit_mph, reason)
         current_limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
-        return limit_mph if limit_mph < current_limit else None
+        return (limit_mph, reason) if limit_mph < current_limit else None
