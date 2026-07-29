@@ -267,6 +267,12 @@ class PauseMenuState(MenuState):
                 "voices, update channel, and trip pacing.",
             ),
             MenuItem(
+                "Drivers board",
+                self._drivers_board,
+                help="Hear who is hauling right now on the public orinks.net "
+                "drivers board. Viewing the board shares nothing about you.",
+            ),
+            MenuItem(
                 "Abandon job",
                 self._abandon,
                 help="Give up this job. Costs five hundred dollars and "
@@ -394,6 +400,11 @@ class PauseMenuState(MenuState):
         from .main_menu import SettingsState
 
         self.ctx.push_state(SettingsState(self.ctx))
+
+    def _drivers_board(self) -> None:
+        from .online_states import DriversOnlineState
+
+        self.ctx.push_state(DriversOnlineState(self.ctx))
 
     def _abandon(self) -> None:
         # Abandoning is destructive and one keystroke away, so confirm first.

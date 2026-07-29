@@ -131,6 +131,10 @@ From a batch of player reports:
   lists S/A/U. The manual is also exported to `USER_MANUAL.html` (a small
   dependency-free Markdown->HTML converter, `tools/manual_html.py`) and shipped
   in portable builds beside `USER_MANUAL.md`.
+- [x] **Drivers board reachable from the pause menu.** The "Drivers board"
+  item now sits in the pause menu (between Settings and Abandon job), so a
+  player can see who is hauling mid-drive without quitting to the main menu.
+  Viewing shares nothing about the paused driver.
 - [ ] **Ambient-cue spacing (anti-stacking).** Priority handling fixes the
   critical case; still worth spacing or coalescing simultaneous low-priority
   cues so a burst of chatter does not pile up. Lower priority than the above.

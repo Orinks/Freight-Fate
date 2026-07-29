@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Added
+
+- **The drivers board is now reachable from the pause menu.** You can hear
+  who is hauling right now without quitting to the main menu. The new
+  "Drivers board" item sits between Settings and Abandon job in the pause
+  menu. Viewing the board shares nothing about you.
+
 ## 1.8.6.1 - 2026-07-28
 
 ### Fixed
