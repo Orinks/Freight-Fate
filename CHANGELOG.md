@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+
+- **The drivers board is now reachable from the pause menu.** You can hear
+  who is hauling right now without quitting to the main menu. The new
+  "Drivers board" item sits between Settings and Abandon job in the pause
+  menu. Viewing the board shares nothing about you. Contributed by wleicht
+  ([@wleicht](https://github.com/wleicht)) in
+  [PR #136](https://github.com/Orinks/Freight-Fate/pull/136).
+
 ### Changed
 
 - **Your online driver token is now kept in your computer's password store.**
