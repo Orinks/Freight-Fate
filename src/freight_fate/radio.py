@@ -7,7 +7,7 @@ import json
 import math
 import re
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Protocol
 
 from .data.data_resources import read_data_text
@@ -171,6 +171,18 @@ def personal_playlists_dir() -> Path:
     return data_dir() / PLAYLISTS_DIR_NAME
 
 
+def _absolute_anywhere(line: str) -> bool:
+    """Absolute on the machine that wrote the playlist, not just on this one.
+
+    A playlist copied off a Windows machine carries entries like
+    ``C:\\music\\song.flac``, which POSIX does not read as absolute -- joining
+    one to the playlist's own folder would invent a path nobody ever meant, and
+    hide the real one when the track cannot be found. A drive letter or a UNC
+    share is absolute wherever the playlist is read.
+    """
+    return PurePosixPath(line).is_absolute() or PureWindowsPath(line).is_absolute()
+
+
 def _parse_m3u(path: Path) -> tuple[tuple[str, ...], str]:
     """Media file paths and the optional #PLAYLIST title from one M3U file.
 
@@ -195,7 +207,7 @@ def _parse_m3u(path: Path) -> tuple[tuple[str, ...], str]:
         if line.lower().startswith(("http://", "https://")):
             continue
         entry = Path(line)
-        if not entry.is_absolute():
+        if not _absolute_anywhere(line):
             entry = path.parent / entry
         files.append(str(entry))
     return tuple(files), title
