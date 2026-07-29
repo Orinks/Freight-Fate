@@ -26,8 +26,12 @@
   and moving through menus is no longer mixed into the history, so what you
   step back through is what actually happened. Checking the pause menu
   mid-run no longer leaves a "Paused" and a "Resumed" between every pair of
-  announcements. Typing a driver name still takes punctuation as
-  punctuation. Raised by wleicht
+  announcements. New announcements do not move your place while you are
+  reviewing, and once you have left the keys alone for ten seconds the next
+  press starts fresh from the newest message with all categories showing, so
+  comma always repeats what was just said instead of picking up where you
+  left off earlier in the run. Typing a driver name still takes punctuation
+  as punctuation. Raised by wleicht
   ([@wleicht](https://github.com/wleicht)) in
   [issue #134](https://github.com/Orinks/Freight-Fate/issues/134).
 

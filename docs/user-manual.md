@@ -150,6 +150,12 @@ so `3 back` means three messages before the latest. The game keeps the last
 200 messages. Moving through menus is not kept, so the history holds what
 happened rather than where you walked.
 
+While you are reviewing, new announcements do not move your place. Once you
+have left the review keys alone for ten seconds the game takes you as done,
+so the next press starts fresh from the newest message with all categories
+showing again. That way comma always repeats what was just said, rather than
+picking up wherever you left off earlier in the run.
+
 New career name entry supports Backspace to delete, F2 to review the current
 name, Enter to confirm, and Escape to cancel.
 

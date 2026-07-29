@@ -1,4 +1,15 @@
-from freight_fate.message_log import MessageCategory, MessageLog
+from freight_fate.message_log import REVIEW_WINDOW_S, MessageCategory, MessageLog
+
+
+class FakeClock:
+    def __init__(self) -> None:
+        self.now = 1000.0
+
+    def __call__(self) -> float:
+        return self.now
+
+    def advance(self, seconds: float) -> None:
+        self.now += seconds
 
 
 def test_messages_can_be_reviewed() -> None:
@@ -137,6 +148,75 @@ def test_the_same_line_twice_running_is_logged_once() -> None:
         "Fuel is low.",
         "Speed limit 55.",
     ]
+
+
+def test_a_lapsed_review_session_starts_again_at_the_newest() -> None:
+    """The playtest case: glance at the history mid-run, drive on, press again."""
+    clock = FakeClock()
+    log = MessageLog(clock=clock)
+
+    for text in ("One.", "Two.", "Three."):
+        log.add(text, MessageCategory.GENERAL)
+
+    log.previous_message()  # repeats "Three."
+    log.previous_message()  # steps to "Two."
+    assert log.current_message().text == "Two."
+
+    # Back to driving. More happens while the cursor sits in the past.
+    clock.advance(REVIEW_WINDOW_S + 1)
+    for text in ("Four.", "Five."):
+        log.add(text, MessageCategory.GENERAL)
+
+    assert log.previous_message().text == "Five."
+    assert log.position_from_latest() == 0
+
+
+def test_an_active_review_session_is_not_dragged_forward() -> None:
+    clock = FakeClock()
+    log = MessageLog(clock=clock)
+
+    for text in ("One.", "Two.", "Three."):
+        log.add(text, MessageCategory.GENERAL)
+
+    log.previous_message()
+    log.previous_message()
+    assert log.current_message().text == "Two."
+
+    # Still browsing: a message arriving must not move the cursor.
+    clock.advance(REVIEW_WINDOW_S / 2)
+    log.add("Four.", MessageCategory.GENERAL)
+
+    assert log.previous_message().text == "One."
+
+
+def test_a_lapsed_session_also_clears_the_category_filter() -> None:
+    """A filter left on Event hid the whole delivery settlement in playtest."""
+    clock = FakeClock()
+    log = MessageLog(clock=clock)
+
+    log.add("Hazard ahead.", MessageCategory.EVENT)
+    assert log.next_category() == "General"
+    assert log.next_category() == "Event"
+
+    clock.advance(REVIEW_WINDOW_S + 1)
+    log.add("Delivery complete.", MessageCategory.GENERAL)
+
+    assert log.previous_message().text == "Delivery complete."
+    assert log.category_name() == "All"
+
+
+def test_copying_after_a_lapse_copies_the_newest() -> None:
+    clock = FakeClock()
+    log = MessageLog(clock=clock)
+
+    log.add("One.", MessageCategory.GENERAL)
+    log.add("Two.", MessageCategory.GENERAL)
+    log.previous_message()
+    log.previous_message()
+    assert log.current_message().text == "One."
+
+    clock.advance(REVIEW_WINDOW_S + 1)
+    assert log.message_in_review().text == "Two."
 
 
 def test_empty_log_returns_none() -> None:

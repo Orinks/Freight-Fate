@@ -153,7 +153,7 @@ class State:
             return True
 
         if key == pygame.K_c and ctrl:
-            message = log.current_message()
+            message = log.message_in_review()
             if message is None:
                 return True
             from .online_states import write_clipboard_text

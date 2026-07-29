@@ -8,12 +8,20 @@ as they arrow past them, the review announcements themselves -- is spoken with
 noise out of the history.
 """
 
+import time
 from dataclasses import dataclass
 from enum import Enum
 
 # How many messages to keep. Long careers speak a lot, and a log that grows for
 # the whole session is both unbounded memory and a history nobody can walk.
 DEFAULT_LIMIT = 200
+
+# How long a review session stays open after the last review key. Inside the
+# window the player is browsing, so new speech must not drag the cursor out
+# from under them. Outside it they have gone back to driving, and the next
+# press means "repeat what was just said" rather than "resume where I left
+# off twenty messages ago".
+REVIEW_WINDOW_S = 10.0
 
 
 class MessageCategory(Enum):
@@ -34,9 +42,14 @@ class MessageLog:
         MessageCategory.EVENT,
     )
 
-    def __init__(self, limit: int = DEFAULT_LIMIT) -> None:
+    def __init__(self, limit: int = DEFAULT_LIMIT, clock=None) -> None:
         self.messages: list[Message] = []
         self.limit = limit
+        self._clock = clock or time.monotonic
+
+        # When the last review key was pressed, or None if the player has not
+        # reviewed yet. Drives the review-session window.
+        self._reviewed_at: float | None = None
 
         # None means show messages from every category.
         self.filter: MessageCategory | None = None
@@ -93,7 +106,35 @@ class MessageLog:
         self._clamp_index()
         return messages[self.index]
 
+    def _begin_review(self) -> None:
+        """Open or extend a review session.
+
+        A press that arrives after the window has closed starts over: back at
+        the newest message, showing every category. Without this a player who
+        glanced at the history mid-run stays parked there for the rest of the
+        drive, and the next press reads them something from twenty messages
+        ago -- or, with a category filter still set, silently hides half of
+        what has happened since.
+        """
+        now = self._clock()
+        lapsed = self._reviewed_at is None or now - self._reviewed_at > REVIEW_WINDOW_S
+        self._reviewed_at = now
+        if lapsed:
+            self.filter = None
+            self._move_to_latest()
+
+    def message_in_review(self) -> Message | None:
+        """The message a review action acts on, opening a session first.
+
+        ``current_message`` stays a plain query; this is what a key press
+        should use, so copying after a long silence copies what was just said
+        rather than wherever the cursor was left.
+        """
+        self._begin_review()
+        return self.current_message()
+
     def previous_message(self) -> Message | None:
+        self._begin_review()
         messages = self.filtered_messages()
 
         if not messages:
@@ -113,6 +154,7 @@ class MessageLog:
         return messages[self.index]
 
     def next_message(self) -> Message | None:
+        self._begin_review()
         messages = self.filtered_messages()
         self._fresh = False
 
@@ -127,6 +169,7 @@ class MessageLog:
         return messages[self.index]
 
     def first_message(self) -> Message | None:
+        self._begin_review()
         messages = self.filtered_messages()
         self._fresh = False
 
@@ -138,6 +181,7 @@ class MessageLog:
         return messages[self.index]
 
     def last_message(self) -> Message | None:
+        self._begin_review()
         messages = self.filtered_messages()
         self._fresh = False
 
@@ -158,6 +202,7 @@ class MessageLog:
         return max(0, len(messages) - 1 - self.index)
 
     def previous_category(self) -> str | None:
+        self._begin_review()
         position = self._FILTERS.index(self.filter)
         if position <= 0:
             return None
@@ -166,6 +211,7 @@ class MessageLog:
         return self.category_name()
 
     def next_category(self) -> str | None:
+        self._begin_review()
         position = self._FILTERS.index(self.filter)
         if position >= len(self._FILTERS) - 1:
             return None
