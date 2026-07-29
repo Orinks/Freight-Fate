@@ -58,6 +58,9 @@ def isolated_keyring(monkeypatch):
     from freight_fate import online_presence
 
     monkeypatch.setattr(online_presence, "keyring", FakeKeyring())
+    # Resolved tokens are cached for the life of the process, which outlives
+    # any one test's data directory.
+    monkeypatch.setattr(online_presence.OnlineIdentity, "_token_cache", {})
     yield
 
 

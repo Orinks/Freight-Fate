@@ -347,6 +347,11 @@ def test_saved_identity_keeps_the_token_out_of_the_json_file():
     assert not OnlineIdentity.token_path().exists()
 
 
+def _next_session() -> None:
+    """Forget the process-lifetime token cache, as restarting the game would."""
+    OnlineIdentity._token_cache.clear()
+
+
 def test_identity_falls_back_to_an_owner_only_file_without_a_secret_store(monkeypatch):
     monkeypatch.setattr(online_presence, "keyring", None)
     identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
@@ -355,9 +360,30 @@ def test_identity_falls_back_to_an_owner_only_file_without_a_secret_store(monkey
     token_file = OnlineIdentity.token_path()
     assert token_file.read_text(encoding="utf-8") == identity.driver_token
     assert "driver_token" not in OnlineIdentity.path().read_text(encoding="utf-8")
+    _next_session()
     assert OnlineIdentity.load() == identity
     if os.name != "nt":
         assert stat.S_IMODE(token_file.stat().st_mode) == 0o600
+
+
+def test_the_secret_store_is_read_once_and_not_once_per_menu_frame(monkeypatch):
+    reads = []
+    store = FakeKeyring()
+    get_password = store.get_password
+
+    def counted(service, username):
+        reads.append(username)
+        return get_password(service, username)
+
+    monkeypatch.setattr(store, "get_password", counted)
+    monkeypatch.setattr(online_presence, "keyring", store)
+
+    identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
+    identity.save()
+    _next_session()
+
+    assert [OnlineIdentity.load() for _ in range(20)] == [identity] * 20
+    assert len(reads) == 1
 
 
 def test_a_secret_store_that_refuses_falls_back_instead_of_failing(monkeypatch):
@@ -376,6 +402,7 @@ def test_a_secret_store_that_refuses_falls_back_instead_of_failing(monkeypatch):
 
     assert OnlineIdentity.token_path().read_text(encoding="utf-8") == identity.driver_token
     assert "driver_token" not in OnlineIdentity.path().read_text(encoding="utf-8")
+    _next_session()
     assert OnlineIdentity.load() == identity
 
 
@@ -402,6 +429,7 @@ def test_a_fallback_token_file_is_cleared_once_a_secret_store_appears(monkeypatc
     assert OnlineIdentity.token_path().exists()
 
     monkeypatch.setattr(online_presence, "keyring", FakeKeyring())
+    _next_session()
     assert OnlineIdentity.load() == identity
     assert not OnlineIdentity.token_path().exists()
     assert OnlineIdentity.load() == identity

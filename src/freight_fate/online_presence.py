@@ -35,6 +35,7 @@ import urllib.error
 import urllib.request
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import ClassVar
 
 try:
     import keyring
@@ -166,6 +167,13 @@ class OnlineIdentity:
     driver_id: str
     driver_token: str
 
+    # Resolved tokens, by Driver ID, for the life of the process. The Online
+    # hub's menu labels call load() while the screen is drawn, so this runs
+    # several times a frame; on Linux every miss would be a D-Bus round trip
+    # to the keyring daemon. A hit also means the one-time migration below has
+    # already happened, so it is not retried on every frame either.
+    _token_cache: ClassVar[dict[str, str]] = {}
+
     @staticmethod
     def path():
         from .models.profile import data_dir
@@ -235,6 +243,7 @@ class OnlineIdentity:
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump({"driver_id": self.driver_id}, f, indent=2)
         tmp.replace(path)
+        OnlineIdentity._token_cache[self.driver_id] = self.driver_token
         if self._store_token(self.driver_id, self.driver_token):
             # An earlier run on this machine may have had no store and left a
             # copy on disk. The point of all this is that it stops existing.
@@ -270,20 +279,26 @@ class OnlineIdentity:
         if not isinstance(driver_id, str):
             return None
 
-        driver_token = cls._read_stored_token(driver_id)
-        from_store = driver_token is not None
-        if driver_token is None:
-            driver_token = cls._read_token_file()
-        if driver_token is None and isinstance(legacy_token, str):
-            driver_token = legacy_token
+        from_store = True
+        driver_token = cls._token_cache.get(driver_id)
+        first_look = driver_token is None
+        if first_look:
+            driver_token = cls._read_stored_token(driver_id)
+            from_store = driver_token is not None
+            if driver_token is None:
+                driver_token = cls._read_token_file()
+            if driver_token is None and isinstance(legacy_token, str):
+                driver_token = legacy_token
         if not isinstance(driver_token, str):
             return None
         if len(driver_id) < 8 or len(driver_token) < 24:
             return None
 
         identity = cls(driver_id=driver_id, driver_token=driver_token)
-        if not from_store:
-            identity._upgrade_storage(token_in_json=isinstance(legacy_token, str))
+        if first_look:
+            cls._token_cache[driver_id] = driver_token
+            if not from_store:
+                identity._upgrade_storage(token_in_json=isinstance(legacy_token, str))
         return identity
 
 
