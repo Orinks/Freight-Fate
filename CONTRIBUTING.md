@@ -4,6 +4,18 @@ Thanks for helping make Freight Fate better. This project is audio-first and
 accessibility-first, so contributions should keep blind and low-vision players
 at the center of every change.
 
+## What Is Being Accepted Right Now
+
+Freight Fate 1.9 is in development on its own branch, and preview snapshots of
+it will start appearing before long. Until they do, the 1.8 line is in
+maintenance: pull requests are being accepted only for major and minor bug
+fixes, not new features.
+
+Feature work is still welcome in principle -- open an issue describing it, and
+it can be picked up for 1.9 or later. This is about where the code lands, not
+about the idea. Feature pull requests are welcome again once 1.9 preview
+snapshots begin.
+
 ## Branch Targets
 
 - Open feature, fix, data, and documentation pull requests against `dev`.

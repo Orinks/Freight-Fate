@@ -178,10 +178,12 @@ class HomeCityState(MenuState):
         apply_start_option(profile, option)
         self.ctx.profile = profile
         profile.save()
-        self.ctx.pop_state()  # this city picker
-        self.ctx.pop_state()  # region picker
-        self.ctx.pop_state()  # career start
-        self.ctx.pop_state()  # name entry
+        # Drop the whole new-career chain without re-entering any of it: each
+        # revealed picker would otherwise announce itself again on the way past.
+        self.ctx.pop_state(True, False)  # this city picker
+        self.ctx.pop_state(True, False)  # region picker
+        self.ctx.pop_state(True, False)  # career start
+        self.ctx.pop_state(True, False)  # name entry
         self.ctx.push_state(CityMenuState(self.ctx))
         loaded_over = (
             f"Loaded over existing driver named {name}. " if name.lower() in existing else ""

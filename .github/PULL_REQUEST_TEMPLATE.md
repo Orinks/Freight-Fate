@@ -1,5 +1,11 @@
 <!-- Thanks for contributing! See CONTRIBUTING.md for branch targets,
-     test commands, and accessibility expectations. -->
+     test commands, and accessibility expectations.
+
+     Heads up: the 1.8 line is in maintenance until 1.9 preview snapshots
+     begin, so only major and minor bug fixes are being accepted for now.
+     Have a feature in mind? Open an issue for it instead and it can be
+     picked up for 1.9. See "What Is Being Accepted Right Now" in
+     CONTRIBUTING.md. -->
 
 ## What changed and why
 

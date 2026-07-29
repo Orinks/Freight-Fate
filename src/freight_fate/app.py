@@ -251,17 +251,17 @@ class GameContext:
 
     # -- state stack ------------------------------------------------------------
 
-    def push_state(self, state: State) -> None:
-        self._app.push_state(state)
+    def push_state(self, state: State, should_enter: bool = True) -> None:
+        self._app.push_state(state, should_enter)
 
-    def pop_state(self) -> None:
-        self._app.pop_state()
+    def pop_state(self, should_exit: bool = True, reentry: bool = True) -> None:
+        self._app.pop_state(should_exit, reentry)
 
-    def replace_state(self, state: State) -> None:
-        self._app.replace_state(state)
+    def replace_state(self, state: State, should_exit: bool = True, reentry: bool = True) -> None:
+        self._app.replace_state(state, should_exit, reentry)
 
-    def reset_to(self, state: State) -> None:
-        self._app.reset_to(state)
+    def reset_to(self, state: State, should_exit: bool = True, reentry: bool = True) -> None:
+        self._app.reset_to(state, should_exit, reentry)
 
     def quit(self) -> None:
         self._app.running = False
@@ -518,27 +518,39 @@ class App:
     def state(self) -> State | None:
         return self.states[-1] if self.states else None
 
-    def push_state(self, state: State) -> None:
+    def push_state(self, state: State, should_enter: bool = True) -> None:
         self.states.append(state)
-        state.enter()
+        if should_enter:
+            state.enter()
 
-    def pop_state(self) -> None:
+    def _take_top(self, should_exit: bool = True) -> None:
+        """Lift the top state off the stack, without deciding what follows.
+
+        Emptying the stack only ends the game when the player backed out of the
+        last state; the rebuilding methods below empty it on their way to a new
+        state, so they use this instead of pop_state.
+        """
         if self.states:
-            self.states.pop().exit()
+            state = self.states.pop()
+            if should_exit:
+                state.exit()
+
+    def pop_state(self, should_exit: bool = True, reentry: bool = True) -> None:
+        self._take_top(should_exit)
         if self.state is not None:
-            self.state.enter()
+            if reentry:
+                self.state.enter()
         else:
             self.running = False
 
-    def replace_state(self, state: State) -> None:
-        if self.states:
-            self.states.pop().exit()
-        self.push_state(state)
+    def replace_state(self, state: State, should_exit: bool = True, reentry: bool = True) -> None:
+        self._take_top(should_exit)
+        self.push_state(state, reentry)
 
-    def reset_to(self, state: State) -> None:
+    def reset_to(self, state: State, should_exit: bool = True, reentry: bool = True) -> None:
         while self.states:
-            self.states.pop().exit()
-        self.push_state(state)
+            self._take_top(should_exit)
+        self.push_state(state, reentry)
 
     def _dispatch_controller(self, event: pygame.event.Event) -> None:
         """Feed a controller event to the manager, then to the active state.
