@@ -435,6 +435,54 @@ def test_a_fallback_token_file_is_cleared_once_a_secret_store_appears(monkeypatc
     assert OnlineIdentity.load() == identity
 
 
+# -- packaging guard --------------------------------------------------------------
+
+
+def test_the_secret_store_report_passes_on_a_source_checkout():
+    ok, detail = online_presence.secret_store_report()
+    assert ok, detail
+    assert detail
+
+
+def test_the_secret_store_report_fails_when_the_backends_are_not_packaged(monkeypatch):
+    """What a build that dropped keyring's entry points would look like.
+
+    This is the whole value of the check: without it a packaged build would
+    keep every driver token in the fallback file and say nothing.
+    """
+    from importlib import metadata
+
+    monkeypatch.setattr(metadata, "entry_points", lambda **kwargs: [])
+    ok, detail = online_presence.secret_store_report()
+    assert not ok
+    assert "not registered in this build" in detail
+
+
+def test_the_secret_store_report_fails_without_keyring_at_all(monkeypatch):
+    monkeypatch.setattr(online_presence, "keyring", None)
+    ok, detail = online_presence.secret_store_report()
+    assert not ok
+    assert "not installed" in detail
+
+
+def test_the_release_build_asks_for_keyrings_backends_and_metadata():
+    """The packaging flags and the CI probe must not drift apart."""
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root))
+    from tools.build_release import KEYRING_NUITKA_ARGS, build_nuitka_command
+
+    assert KEYRING_NUITKA_ARGS == [
+        "--include-package=keyring.backends",
+        "--include-distribution-metadata=keyring",
+    ]
+    command = build_nuitka_command(root / "tools" / "_entry.py")
+    for arg in KEYRING_NUITKA_ARGS:
+        assert arg in command
+
+
 def test_missing_or_malformed_identity_loads_as_none():
     assert OnlineIdentity.load() is None
     path = OnlineIdentity.path()

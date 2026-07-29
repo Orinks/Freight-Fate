@@ -29,6 +29,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import sys
 import threading
 import time
 import urllib.error
@@ -146,6 +147,56 @@ def _http_json(
 # macOS Keychain, so it reads as a sentence, not a slug. Changing it strands
 # every already-stored token, which then falls back to a re-paste.
 _TOKEN_SERVICE = "Freight Fate driver token"
+
+# The keyring backend each platform's build has to be able to reach. Naming
+# them is the whole point of the check below: keyring resolves backends
+# through entry points, which a compiled build drops unless both the modules
+# and the distribution metadata are included. Nothing about that failure is
+# visible while playing -- every driver token would simply go to the fallback
+# file, on every platform -- so the build smoke test asserts it instead.
+_EXPECTED_BACKENDS = {
+    "win32": "Windows",
+    "darwin": "macOS",
+    "linux": "SecretService",
+}
+
+
+def secret_store_report() -> tuple[bool, str]:
+    """Whether this build can reach a platform secret store, and what it found.
+
+    Two different things can go wrong here and only one of them is a build
+    problem. A machine with no keyring daemon -- a headless Linux box, most
+    often -- is fine: the token falls back to an owner-only file, by design.
+    A build that cannot even load the backend for its own platform is not
+    fine, because it would take that fallback everywhere and never say so.
+    Only the second returns False.
+    """
+    if keyring is None:
+        return False, "keyring is not installed in this build"
+    expected = _EXPECTED_BACKENDS.get(sys.platform)
+    if expected is None:
+        return True, f"no platform secret store is expected on {sys.platform}"
+    from importlib import metadata
+
+    try:
+        entries = {ep.name: ep for ep in metadata.entry_points(group="keyring.backends")}
+    except Exception as e:
+        return False, f"keyring's backend metadata is missing from this build ({e!r})"
+    entry = entries.get(expected)
+    if entry is None:
+        return False, (
+            f"the {expected} keyring backend is not registered in this build; "
+            f"found {sorted(entries) or 'no backends at all'}"
+        )
+    try:
+        entry.load()
+    except Exception as e:
+        return False, f"the {expected} keyring backend did not load: {e!r}"
+    try:
+        active = type(keyring.get_keyring()).__name__
+    except Exception as e:
+        active = f"unavailable on this machine ({e!r})"
+    return True, f"{expected} backend is packaged; the store in use is {active}"
 
 
 @dataclass
