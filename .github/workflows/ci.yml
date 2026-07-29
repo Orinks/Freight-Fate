@@ -92,8 +92,16 @@ jobs:
       - name: Check the secret store from the compiled probe
         shell: bash
         run: |
-          probe=build/probe/check_keyring_packaging.dist/check_keyring_packaging
-          [ -x "$probe" ] || probe="$probe.exe"
+          # Nuitka names the binary .exe on Windows and .bin elsewhere, so
+          # find it rather than guessing the suffix per runner.
+          dist=build/probe/check_keyring_packaging.dist
+          probe=$(find "$dist" -maxdepth 1 -type f -name 'check_keyring_packaging*' -perm -u+x | head -1)
+          if [ -z "$probe" ]; then
+            echo "no compiled probe found in $dist:"
+            ls -l "$dist"
+            exit 1
+          fi
+          echo "running $probe"
           "$probe"
 
   changelog:
