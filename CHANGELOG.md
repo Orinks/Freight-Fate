@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.6.2 - 2026-07-29
+
 ### Fixed
 
 - **Accepting a dispatch after an update no longer closes the game.** The
