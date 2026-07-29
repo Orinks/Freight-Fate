@@ -435,3 +435,53 @@ def test_build_workflow_uses_curated_nightly_decision_and_notes():
     assert "--exclude-stable-notes latest-stable-notes.md" in workflow
     assert "tools/release_notes.py nightly" in workflow
     assert 'git diff --name-only "$LAST_TAG"..HEAD' not in workflow
+
+
+def test_auto_base_follows_the_release_line_the_branch_was_cut_from(tmp_path, monkeypatch):
+    """A hotfix is cut from main and never contains dev.
+
+    Resolving its base to dev counted dev's bullets as already present and
+    rejected the push over a changelog entry that was right there -- which is
+    what the 1.8.6.2 hotfix hit. Ancestry cannot decide it either, since the
+    two lines each carry commits the other does not.
+    """
+    release_notes = load_release_notes_module()
+    repo = make_repo(tmp_path, changelog("- Seed entry."))
+    monkeypatch.setattr(release_notes, "ROOT", repo)
+    seed = git(repo, "rev-parse", "HEAD")  # git init's branch name varies
+    # dev moves ahead of main, as it always is between releases...
+    git(repo, "checkout", "-q", "-b", "dev")
+    for n in range(4):
+        (repo / f"dev{n}.txt").write_text("dev work\n", encoding="utf-8")
+        commit(repo, f"feat: dev only {n}")
+    git(repo, "update-ref", "refs/remotes/origin/dev", "HEAD")
+
+    # ...and main carries release commits of its own that dev never sees, so
+    # neither branch contains the other. That is the shape this has to read.
+    git(repo, "checkout", "-q", "-b", "stable-line", seed)
+    (repo / "release.txt").write_text("1.0\n", encoding="utf-8")
+    commit(repo, "release: 1.0")
+    git(repo, "update-ref", "refs/remotes/origin/main", "HEAD")
+
+    git(repo, "checkout", "-q", "-b", "hotfix/1.0.1", "refs/remotes/origin/main")
+    (repo / "fix.txt").write_text("hotfix\n", encoding="utf-8")
+    commit(repo, "fix: stable only")
+    assert release_notes.nearest_release_line() == "origin/main"
+    assert release_notes.resolve_base("auto") == "origin/main"
+
+    # An ordinary branch off dev still resolves to dev...
+    git(repo, "checkout", "-q", "-b", "feat/thing", "refs/remotes/origin/dev")
+    (repo / "feature.txt").write_text("feature\n", encoding="utf-8")
+    commit(repo, "feat: a feature")
+    assert release_notes.nearest_release_line() == "origin/dev"
+
+    # ...and still does once dev has moved on without it.
+    git(repo, "checkout", "-q", "dev")
+    (repo / "more.txt").write_text("more dev work\n", encoding="utf-8")
+    commit(repo, "feat: more dev")
+    git(repo, "update-ref", "refs/remotes/origin/dev", "HEAD")
+    git(repo, "checkout", "-q", "feat/thing")
+    assert release_notes.nearest_release_line() == "origin/dev"
+
+    # An explicit base is never second-guessed.
+    assert release_notes.resolve_base("origin/main") == "origin/main"
