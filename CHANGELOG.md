@@ -48,6 +48,14 @@
 
 ### Fixed
 
+- **Automatic speed control no longer says it is resuming as you pull up to
+  a pickup.** Rolling up to the gate with cruise or the speed keeper on, you
+  were told speed control was paused and would resume after you departed with
+  the load, and then a moment later heard it announce that it was resuming
+  after all, before it switched off again. It was genuinely re-engaging for a
+  fraction of a second. It now stays put until you actually depart, so the
+  announcement you hear at the gate is the one about arriving.
+
 - **Accepting a dispatch after an update no longer closes the game.** The
   dispatch board is kept in your career, so the board you were looking at
   before an update could still list a pickup that the update had closed.
