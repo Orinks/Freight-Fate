@@ -193,7 +193,11 @@ def secret_store_report() -> tuple[bool, str]:
     except Exception as e:
         return False, f"the {expected} keyring backend did not load: {e!r}"
     try:
-        active = type(keyring.get_keyring()).__name__
+        # Qualified: keyring names the macOS and Secret Service backend
+        # classes both plain "Keyring", and this line is read out of a CI log
+        # to tell the platforms apart.
+        store = type(keyring.get_keyring())
+        active = f"{store.__module__}.{store.__qualname__}"
     except Exception as e:
         active = f"unavailable on this machine ({e!r})"
     return True, f"{expected} backend is packaged; the store in use is {active}"
