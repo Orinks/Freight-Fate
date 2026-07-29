@@ -23,6 +23,22 @@ PICKUP_CHECK_IN_MIN = 15.0
 PICKUP_LOADING_MIN = 60.0
 
 
+def job_origin_exists(job: Job, world) -> bool:
+    """Whether this job's pickup facility is still in the world data.
+
+    A dispatch board is cached into the save, so it can outlive the world the
+    offers were built from: an update that renames or retires a facility
+    leaves a job nobody can be sent to. Accepting one is the only place that
+    resolves the pickup facility, so this is what stands between a stale save
+    and a hard failure there.
+    """
+    try:
+        world.facility_location(job.origin, job.origin_location)
+    except KeyError:
+        return False
+    return True
+
+
 def _sleeps_needed(drive_h: float, first_shift_h: float, shift_h: float) -> int:
     """10-hour sleeps required to cover ``drive_h``, given the driving hours
     left in the current shift and full-shift capacity after each sleep."""
@@ -107,9 +123,9 @@ class JobBoardState(MenuState):
             hos_note = self._hos_board_note()
             self.ctx.say(
                 f"Dispatch board. {n} dispatch{'es' if n != 1 else ''} available. "
-                f"{self.ctx.profile.market.summary()} {hos_note}")
+                f"{self.ctx.profile.market.summary()} {hos_note}"
+            )
             self.ctx.say(self.current_text(), interrupt=False, review=False)
-
 
     def build_items(self) -> list[MenuItem]:
         items = []
@@ -165,7 +181,23 @@ class JobBoardState(MenuState):
         self._confirm_risky_job = None
         from .driving import DRIVE_PHASE_PICKUP, DrivingState
 
-        route = self.ctx.world.facility_approach_route(job.origin, job.origin_location)
+        try:
+            route = self.ctx.world.facility_approach_route(job.origin, job.origin_location)
+        except KeyError:
+            # The pickup facility is gone from the world data -- an old save's
+            # board outliving a map update. Clearing the cache is what fixes
+            # it: the next visit builds the board from the current world.
+            p.dispatch_board_cache = None
+            self.ctx.save_profile()
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                "That dispatch is no longer available. The board was put "
+                "together before the last update and this pickup has since "
+                "closed. Go back to the terminal and open the dispatch board "
+                "again for the current loads.",
+                interrupt=True,
+            )
+            return
         terminal = self.ctx.world.home_terminal(p.current_city)
         driving = DrivingState(self.ctx, job, route, phase=DRIVE_PHASE_PICKUP)
         p.dispatch_board_cache = None

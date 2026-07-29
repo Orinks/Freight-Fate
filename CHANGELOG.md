@@ -15,6 +15,17 @@
   token is kept in a private file that only your account can read. Thanks to
   trodick, [PR #133](https://github.com/Orinks/Freight-Fate/pull/133).
 
+### Fixed
+
+- **Accepting a dispatch after an update no longer closes the game.** The
+  dispatch board is kept in your career, so the board you were looking at
+  before an update could still list a pickup that the update had closed.
+  Pressing Enter on one of those loads shut the game down without a word. The
+  board is now rebuilt from the current world the first time you open it after
+  an update, so you see loads you can actually take. If you somehow reach a
+  closed pickup anyway, the game says so and sends you back for a fresh board
+  instead of quitting.
+
 ## 1.8.6.1 - 2026-07-28
 
 ### Fixed
