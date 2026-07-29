@@ -13,6 +13,22 @@
 
 ### Changed
 
+- **Reviewing what the game said now works the same way everywhere.** Comma
+  and period stepped through recent speech on every screen, while a fuller set
+  of review keys only ever worked while driving, and the two kept separate
+  histories. There is one history now, and every review key works on every
+  screen. Comma still repeats what was just said and steps back from there,
+  period moves forward, and you can now also jump to the oldest or newest
+  message with Ctrl and those same keys, switch between all messages, general
+  messages and driving events with the bracket keys, and copy the message you
+  are on with Ctrl+C, whether you are driving or sitting in a menu. Older
+  messages are announced with how far back they are, the last 200 are kept,
+  and moving through menus is no longer mixed into the history, so what you
+  step back through is what actually happened. Typing a driver name still
+  takes punctuation as punctuation. Raised by wleicht
+  ([@wleicht](https://github.com/wleicht)) in
+  [issue #134](https://github.com/Orinks/Freight-Fate/issues/134).
+
 - **Your online driver token is now kept in your computer's password store.**
   If you have linked the game to an Orinks account, the secret half of those
   credentials used to sit in a plain text file alongside your saves, readable

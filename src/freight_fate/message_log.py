@@ -1,15 +1,31 @@
+"""The reviewable log of everything the game has said.
+
+One log backs every review control. ``GameContext.say`` and ``say_event`` file
+each spoken line here under its category, and ``State.handle_message_review``
+walks it. Text the player does not need to review a second time -- menu items
+as they arrow past them, the review announcements themselves -- is spoken with
+``review=False`` and never reaches the log, which is what keeps navigation
+noise out of the history.
+"""
+
 from dataclasses import dataclass
 from enum import Enum
+
+# How many messages to keep. Long careers speak a lot, and a log that grows for
+# the whole session is both unbounded memory and a history nobody can walk.
+DEFAULT_LIMIT = 200
 
 
 class MessageCategory(Enum):
     GENERAL = "general"
     EVENT = "event"
 
+
 @dataclass
 class Message:
     text: str
     category: MessageCategory
+
 
 class MessageLog:
     _FILTERS = (
@@ -18,8 +34,9 @@ class MessageLog:
         MessageCategory.EVENT,
     )
 
-    def __init__(self) -> None:
+    def __init__(self, limit: int = DEFAULT_LIMIT) -> None:
         self.messages: list[Message] = []
+        self.limit = limit
 
         # None means show messages from every category.
         self.filter: MessageCategory | None = None
@@ -28,35 +45,43 @@ class MessageLog:
         # -1 means there is no current message.
         self.index = -1
 
+        # True while the cursor sits on a message the player has not reviewed
+        # yet. The first press of the back key then re-speaks it rather than
+        # stepping past it, so the key reads as "repeat what was just said"
+        # before it reads as "go back one".
+        self._fresh = False
+
     def add(self, text: str, category: MessageCategory) -> None:
         if not text:
             return
+        # The same line twice running is one thing to review, not two: a status
+        # key pressed twice should not make the reviewer step over a duplicate.
+        if self.messages and self.messages[-1].text == text:
+            return
 
         old_filtered = self.filtered_messages()
-        was_at_latest = (
-            not old_filtered
-            or self.index >= len(old_filtered) - 1
-        )
+        was_at_latest = not old_filtered or self.index >= len(old_filtered) - 1
+        current = old_filtered[self.index] if 0 <= self.index < len(old_filtered) else None
 
         self.messages.append(Message(text, category))
+        self._trim()
 
         new_filtered = self.filtered_messages()
 
         # Follow new messages only when the reviewer was already at the end.
         if was_at_latest and new_filtered:
             self.index = len(new_filtered) - 1
+            self._fresh = True
         else:
-            self._clamp_index()
+            # Trimming can drop messages from under a reviewer who has walked
+            # back, so track the message itself rather than its old position.
+            self.index = self._locate(current, new_filtered)
 
     def filtered_messages(self) -> list[Message]:
         if self.filter is None:
             return self.messages
 
-        return [
-            message
-            for message in self.messages
-            if message.category is self.filter
-        ]
+        return [message for message in self.messages if message.category is self.filter]
 
     def current_message(self) -> Message | None:
         messages = self.filtered_messages()
@@ -75,6 +100,12 @@ class MessageLog:
             self.index = -1
             return None
 
+        # The first press after new speech repeats it instead of stepping back.
+        if self._fresh:
+            self._fresh = False
+            self._clamp_index()
+            return messages[self.index]
+
         if self.index <= 0:
             return None
         self.index -= 1
@@ -83,6 +114,7 @@ class MessageLog:
 
     def next_message(self) -> Message | None:
         messages = self.filtered_messages()
+        self._fresh = False
 
         if not messages:
             self.index = -1
@@ -96,6 +128,7 @@ class MessageLog:
 
     def first_message(self) -> Message | None:
         messages = self.filtered_messages()
+        self._fresh = False
 
         if not messages:
             self.index = -1
@@ -106,6 +139,7 @@ class MessageLog:
 
     def last_message(self) -> Message | None:
         messages = self.filtered_messages()
+        self._fresh = False
 
         if not messages:
             self.index = -1
@@ -114,17 +148,26 @@ class MessageLog:
         self.index = len(messages) - 1
         return messages[self.index]
 
+    def position_from_latest(self) -> int:
+        """How many messages back the cursor sits, 0 being the newest."""
+        messages = self.filtered_messages()
+
+        if not messages or self.index < 0:
+            return 0
+
+        return max(0, len(messages) - 1 - self.index)
+
     def previous_category(self) -> str | None:
         position = self._FILTERS.index(self.filter)
         if position <= 0:
             return None
-        self.filter = self._FILTERS[position-1]
+        self.filter = self._FILTERS[position - 1]
         self._move_to_latest()
         return self.category_name()
 
     def next_category(self) -> str | None:
         position = self._FILTERS.index(self.filter)
-        if position >= len(self._FILTERS)-1:
+        if position >= len(self._FILTERS) - 1:
             return None
         self.filter = self._FILTERS[position + 1]
         self._move_to_latest()
@@ -136,8 +179,27 @@ class MessageLog:
 
         return self.filter.value.capitalize()
 
+    def _trim(self) -> None:
+        if self.limit > 0 and len(self.messages) > self.limit:
+            del self.messages[: len(self.messages) - self.limit]
+
+    @staticmethod
+    def _locate(message: Message | None, messages: list[Message]) -> int:
+        if not messages:
+            return -1
+        if message is not None:
+            for position, candidate in enumerate(messages):
+                if candidate is message:
+                    return position
+        # The message the player was on has aged out; the oldest kept one is
+        # the closest place to leave them.
+        return 0
+
     def _move_to_latest(self) -> None:
         messages = self.filtered_messages()
+        # Landing on a category shows its newest message, which the player has
+        # not heard in this category yet.
+        self._fresh = bool(messages)
 
         if messages:
             self.index = len(messages) - 1

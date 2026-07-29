@@ -130,6 +130,26 @@ Most menus use the same keyboard pattern:
 Menus provide the title, selected item, and item position, such as `2 of 6`.
 F1 help explains what the current item does.
 
+### Reviewing what the game said
+
+The review keys work on every screen, whether you are driving, in a menu, or
+reading a report. The exception is a box you are typing into, such as entering
+a driver name, where the punctuation keys type instead.
+
+| Key | Action |
+| --- | --- |
+| Comma | Repeat what was just said, then keep stepping back. |
+| Period | Move toward newer messages. |
+| Ctrl+Comma | Jump to the oldest message kept. |
+| Ctrl+Period | Jump back to the newest message. |
+| Left bracket or right bracket | Switch between all messages, general messages, and driving events. |
+| Ctrl+C | Copy the message you are on to the clipboard. |
+
+Messages older than the newest one are announced with how far back they are,
+so `3 back` means three messages before the latest. The game keeps the last
+200 messages. Moving through menus is not kept, so the history holds what
+happened rather than where you walked.
+
 New career name entry supports Backspace to delete, F2 to review the current
 name, Enter to confirm, and Escape to cancel.
 
@@ -266,7 +286,7 @@ Driving controls are active while the road view is focused:
 | A | Repeat the last driving announcement, in case you missed it. |
 | U | Report what is coming up: imposed speed limits, stops, and exits ahead. |
 | F1 | Show the driving control list and current objective. |
-| Comma | Review earlier speech. |
+| Comma | Review earlier speech. The full review keys are listed under "Reviewing what the game said". |
 | Period | Move toward newer speech. |
 | Escape | Open the pause menu. |
 
