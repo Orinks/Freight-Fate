@@ -13,6 +13,28 @@
 
 ### Changed
 
+- **Reviewing what the game said now works the same way everywhere.** Comma
+  and period stepped through recent speech on every screen, while a fuller set
+  of review keys only ever worked while driving, and the two kept separate
+  histories. There is one history now, and every review key works on every
+  screen. Comma still repeats what was just said and steps back from there,
+  period moves forward, and you can now also jump to the oldest or newest
+  message with Ctrl and those same keys, switch between all messages, general
+  messages and driving events with the bracket keys, and copy the message you
+  are on with Ctrl+C, whether you are driving or sitting in a menu. Each
+  press reads the message and nothing else, the last 200 are kept, and moving
+  through menus is no longer mixed into the history, so what you step back
+  through is what actually happened. Checking the pause menu
+  mid-run no longer leaves a "Paused" and a "Resumed" between every pair of
+  announcements. New announcements do not move your place while you are
+  reviewing, and once you have left the keys alone for ten seconds the next
+  press starts fresh from the newest message with all categories showing, so
+  comma always repeats what was just said instead of picking up where you
+  left off earlier in the run. Typing a driver name still takes punctuation
+  as punctuation. Raised by wleicht
+  ([@wleicht](https://github.com/wleicht)) in
+  [issue #134](https://github.com/Orinks/Freight-Fate/issues/134).
+
 - **Your online driver token is now kept in your computer's password store.**
   If you have linked the game to an Orinks account, the secret half of those
   credentials used to sit in a plain text file alongside your saves, readable
@@ -25,6 +47,14 @@
   trodick, [PR #133](https://github.com/Orinks/Freight-Fate/pull/133).
 
 ### Fixed
+
+- **Automatic speed control no longer says it is resuming as you pull up to
+  a pickup.** Rolling up to the gate with cruise or the speed keeper on, you
+  were told speed control was paused and would resume after you departed with
+  the load, and then a moment later heard it announce that it was resuming
+  after all, before it switched off again. It was genuinely re-engaging for a
+  fraction of a second. It now stays put until you actually depart, so the
+  announcement you hear at the gate is the one about arriving.
 
 - **Accepting a dispatch after an update no longer closes the game.** The
   dispatch board is kept in your career, so the board you were looking at

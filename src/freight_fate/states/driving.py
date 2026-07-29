@@ -154,6 +154,10 @@ class DrivingState(
         # restricted zones, while this target remembers what cruise should
         # resume at after the zone ends.
         self._speed_control_armed = False
+        # Set while an armed session is held at a pickup or delivery gate. The
+        # session is remembered but must not re-engage on its own: it resumes
+        # when the player departs, or when they arm it again by hand.
+        self._speed_control_paused_at_stop = False
         self._speed_control_target_mph: float | None = None
         self._acc_following = False
         self._acc_weather_gap_said = False

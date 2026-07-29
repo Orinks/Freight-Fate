@@ -4,6 +4,7 @@ from __future__ import annotations
 import time
 
 from ..sim.timezones import to_local
+from .base import end_sentence
 from .driving_core import *
 from .driving_rest_states import ShoulderSleepConfirmationState
 
@@ -222,6 +223,13 @@ class PauseMenuState(MenuState):
         self.driving._reverse_cue_active = False
         super().enter()
 
+    def announce_entry(self) -> None:
+        # Pausing and resuming is where the player is, not something that
+        # happened on the road. Logging it would leave a "Paused." between
+        # every pair of announcements for anyone who checks the menu mid-run.
+        self.ctx.say(f"{end_sentence(self.title)}", review=False)
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
+
     def presence(self):
         from ..discord_presence import PresenceState
 
@@ -369,7 +377,7 @@ class PauseMenuState(MenuState):
     def _resume(self) -> None:
         self.ctx.audio.play("ui/unpause")
         self.ctx.pop_state()
-        self.ctx.say("Resumed.", interrupt=False)
+        self.ctx.say("Resumed.", interrupt=False, review=False)
 
     def _status(self) -> None:
         d = self.driving
@@ -1074,7 +1082,8 @@ class ArrivalState(MenuState):
                 "I could not copy to the clipboard. The summary lines above "
                 "can still be read one at a time.",
                 interrupt=True,
-            review=False)
+                review=False,
+            )
 
     def go_back(self) -> None:
         self._continue()

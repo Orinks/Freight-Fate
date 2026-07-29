@@ -709,6 +709,7 @@ class DrivingEventMixin:
         """Start adaptive cruise as part of the armed speed-control session."""
         t = self.truck
         self._speed_control_armed = True
+        self._speed_control_paused_at_stop = False
         self._cruise_mph = max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, target_mph))
         self._speed_control_target_mph = self._cruise_mph
         self._cruise_throttle = t.throttle
@@ -785,6 +786,7 @@ class DrivingEventMixin:
             self.ctx.say("The speed keeper needs the engine running and the truck rolling.")
             return
         self._speed_control_armed = True
+        self._speed_control_paused_at_stop = False
         self._keeper_mph = min(t.speed_mph if target_mph is None else target_mph, limit_mph)
         self._keeper_zone = zone_reason
         self._keeper_throttle = t.throttle

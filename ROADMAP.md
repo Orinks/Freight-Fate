@@ -452,6 +452,14 @@ Net-new realism candidates, roughly by area:
   approaches after the highway portion.
 - **Business realism.** The company-driver→owner-operator arc, loans, and
   insurance already sketched under Business.
+- [x] **One message-review system, working on every screen.** The two
+  overlapping histories (the app-level speech ring and the driving state's
+  message log) are now a single bounded log; every review key -- step, jump to
+  oldest/newest, filter by category, copy to clipboard -- is offered to each
+  state by the app rather than wired into individual screens (issue #134).
+  Remaining: an in-game review screen that lists the history rather than
+  stepping through it one message at a time, and a player setting for how many
+  messages to keep.
 - [x] **National hub network fill (407 → 623 cities).** Audit-driven map
   expansion on the 1.8.x nightly line (community PR #68): every >10,000-pop
   independent city without a bigger neighbor within ~30 miles was built with

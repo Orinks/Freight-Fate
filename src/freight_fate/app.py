@@ -26,7 +26,7 @@ from .music import music_track_duration_s
 from .online_journal import JournalOutbox, queue_achievement
 from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
-from .speech import Speech, SpeechHistory
+from .speech import Speech
 from .states.base import State
 
 log = logging.getLogger(__name__)
@@ -97,8 +97,6 @@ class GameContext:
         self.achievement_notice = ""
         self.achievement_notice_timer = 0.0
         self.message_log = app.message_log
-        self.message_category = app.message_category
-        self._speech_history = SpeechHistory()
 
     def real_weather_provider(self):
         """Shared NWS provider when real weather is enabled, else None.
@@ -115,26 +113,9 @@ class GameContext:
 
     def say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         transcript.info("%s", text)
-        self._speech_history.record(text)
         self.speech.say(text, interrupt)
         if review:
             self.message_log.add(text, MessageCategory.GENERAL)
-
-    def repeat_last_spoken(self) -> None:
-        """Walk back through recent speech with the comma key."""
-        self._speak_history_step(self._speech_history.step_back())
-
-    def step_forward_spoken(self) -> None:
-        """Walk forward through recent speech with the period key."""
-        self._speak_history_step(self._speech_history.step_forward())
-
-    def _speak_history_step(self, step: tuple[int, str] | None) -> None:
-        if step is None:
-            return
-        back, line = step
-        transcript.info("[repeat%s] %s", f" -{back}" if back else "", line)
-        self.stop_event_speech()
-        self.speech.say(line if back == 0 else f"{back} back: {line}", interrupt=True)
 
     def say_event(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
@@ -149,7 +130,6 @@ class GameContext:
         as a fresh queued utterance so old messages do not bury the warning.
         """
         transcript.info("[event] %s", text)
-        self._speech_history.record(text)
         if self.settings.sapi_events:
             self.speech.say_event(text, interrupt)
         else:
@@ -377,7 +357,6 @@ class App:
         self.settings = Settings.load()
         self.speech = Speech()
         self.message_log = MessageLog()
-        self.message_category = None
         self.audio = AudioEngine()
         self.world = get_world()
         self.economy = Economy()
@@ -475,6 +454,22 @@ class App:
         if forward and self.controller.active and self.state is not None:
             self.state.handle_controller(event, self.controller)
 
+    def dispatch_to_state(self, event: pygame.event.Event) -> None:
+        """Hand a keyboard/window event to the active state.
+
+        Message review gets first refusal on every key press, which is what
+        makes the review controls work on every screen instead of only the ones
+        that remembered to call ``handle_message_review``. A state that takes
+        typed text declines them itself.
+        """
+        if self.state is None:
+            return
+        if event.type == pygame.KEYDOWN:
+            self.controller.note_keyboard()
+            if self.state.handle_message_review(event):
+                return
+        self.state.handle_event(event)
+
     # -- main loop ------------------------------------------------------------
 
     def run(self, max_frames: int | None = None) -> None:
@@ -517,19 +512,7 @@ class App:
                     elif event.type in _CONTROLLER_EVENTS:
                         self._dispatch_controller(event)
                     elif self.state is not None:
-                        if event.type == pygame.KEYDOWN:
-                            self.controller.note_keyboard()
-                            if event.key == pygame.K_COMMA and not getattr(
-                                self.state, "captures_text_input", False
-                            ):
-                                self.ctx.repeat_last_spoken()
-                                continue
-                            if event.key == pygame.K_PERIOD and not getattr(
-                                self.state, "captures_text_input", False
-                            ):
-                                self.ctx.step_forward_spoken()
-                                continue
-                        self.state.handle_event(event)
+                        self.dispatch_to_state(event)
                 # Auto-repeat (held D-pad left/right) and analog smoothing.
                 # Synthetic repeats go straight to the state (bypassing the
                 # manager, whose press state must not be reset) and only where
