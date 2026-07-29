@@ -305,7 +305,33 @@ def current_branch() -> str:
 def resolve_base(base: str) -> str:
     if base != "auto":
         return base
-    return "origin/main" if current_branch() == "main" else "origin/dev"
+    if current_branch() == "main":
+        return "origin/main"
+    return nearest_release_line()
+
+
+def nearest_release_line() -> str:
+    """Which release line the current branch was cut from.
+
+    Feature and fix branches sit on dev, but a hotfix is cut from main and
+    never contains dev -- so comparing it against dev counts dev's bullets as
+    already present and rejects the push over a changelog entry that is right
+    there. This is measured as the nearest branch point rather than plain
+    ancestry, because main is an ancestor of dev as well: ancestry alone would
+    send every dev branch that has fallen behind to main instead.
+    """
+    candidates = []
+    for ref in ("origin/dev", "origin/main"):
+        try:
+            counts = run_git(["rev-list", "--count", "--left-right", f"{ref}...HEAD"])
+        except Exception:
+            continue  # a clone without that remote branch
+        # Both sides of the divergence, not just ours: a hotfix is zero
+        # commits behind main and a long way behind dev, which is the whole
+        # signal. Counting only our own side would call those two the same.
+        candidates.append((sum(int(n) for n in counts.split()), ref))
+    # Ties favour dev, which sorts first and is where ordinary work belongs.
+    return min(candidates)[1] if candidates else "origin/dev"
 
 
 def ref_is_ancestor(ancestor: str, descendant: str) -> bool:
