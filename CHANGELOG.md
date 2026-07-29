@@ -7,7 +7,33 @@
 - **The drivers board is now reachable from the pause menu.** You can hear
   who is hauling right now without quitting to the main menu. The new
   "Drivers board" item sits between Settings and Abandon job in the pause
-  menu. Viewing the board shares nothing about you.
+  menu. Viewing the board shares nothing about you. Contributed by wleicht
+  ([@wleicht](https://github.com/wleicht)) in
+  [PR #136](https://github.com/Orinks/Freight-Fate/pull/136).
+
+### Changed
+
+- **Your online driver token is now kept in your computer's password store.**
+  If you have linked the game to an Orinks account, the secret half of those
+  credentials used to sit in a plain text file alongside your saves, readable
+  by anything that could reach the folder. It now lives in Windows Credential
+  Manager, the macOS Keychain, or your Linux keyring, the same places your
+  browser keeps saved passwords. The change happens by itself the next time
+  the game starts, and your Driver ID stays where it was, so there is nothing
+  to re-enter and nothing to set up. On a computer with no password store the
+  token is kept in a private file that only your account can read. Thanks to
+  trodick, [PR #133](https://github.com/Orinks/Freight-Fate/pull/133).
+
+### Fixed
+
+- **Accepting a dispatch after an update no longer closes the game.** The
+  dispatch board is kept in your career, so the board you were looking at
+  before an update could still list a pickup that the update had closed.
+  Pressing Enter on one of those loads shut the game down without a word. The
+  board is now rebuilt from the current world the first time you open it after
+  an update, so you see loads you can actually take. If you somehow reach a
+  closed pickup anyway, the game says so and sends you back for a fresh board
+  instead of quitting.
 
 ## 1.8.6.1 - 2026-07-28
 
