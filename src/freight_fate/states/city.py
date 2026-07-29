@@ -22,6 +22,7 @@ from .city_dispatch import (
     JobDetailState,
     PickupFacilityState,
     RouteSelectState,
+    job_origin_exists,
     pickup_snapshot,
     route_departure_summary,
     route_planning_summary,
@@ -98,10 +99,9 @@ class CityMenuState(MenuState):
         terminal = self.ctx.world.home_terminal(p.current_city)
         self.ctx.say(
             f"Parked at {terminal.spoken_name} in the {city.name} "
-            f"service area, {city.state}. You have {p.money:,.0f} dollars.")
-        self.ctx.say(
-            f"{self.current_text()}", interrupt=False, review=False
+            f"service area, {city.state}. You have {p.money:,.0f} dollars."
         )
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
 
     def build_items(self) -> list[MenuItem]:
         items = [
@@ -175,12 +175,15 @@ class CityMenuState(MenuState):
         market_changed = p.market.advance_to(p.market_day())
         key = self._dispatch_cache_key()
         cache = p.dispatch_board_cache if not market_changed else None
+        jobs = None
         if cache and cache.get("key") == key:
-            jobs = [
+            restored = [
                 normalize_job_cities(job_from_payload(payload), self.ctx.world)
                 for payload in cache.get("jobs", [])
             ]
-        else:
+            if all(job_origin_exists(job, self.ctx.world) for job in restored):
+                jobs = restored
+        if jobs is None:
             jobs = self._board.offers(
                 p.current_city, p.career.endorsements, level=p.career.level, market=p.market
             )
