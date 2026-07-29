@@ -1119,7 +1119,7 @@ def test_automatic_emergency_braking_engages_once_and_cancels_cruise(monkeypatch
 
     app = App()
     spoken = []
-    app.ctx.say_event = lambda text, interrupt=False: spoken.append((text, interrupt))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken, with_interrupt=True))
     try:
         driving = start_drive(app)
         driving.truck.velocity_mps = 25.0

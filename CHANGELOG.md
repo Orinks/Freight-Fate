@@ -869,6 +869,15 @@
 
 ### Fixed
 
+- **The repeat key gives back the hazard warning, not the assist that talked
+  over it.** With automatic emergency braking on, "Emergency braking engaged."
+  cuts in over the warning that set it off. Stepping back with the repeat key
+  then handed you the assist announcement, so the warning you actually missed
+  sat one press further away than you would expect. The assist no longer takes
+  a place in the repeat history, and one step back from a collision reaches
+  "Brake now!" again. You still hear it at the time, and it stays in the
+  message review list.
+
 - **Cruise control holds your speed down a hill instead of running away
   with it.** Coasting was all cruise could do about going too fast, so a
   downgrade just carried the truck past the speed you set and kept it

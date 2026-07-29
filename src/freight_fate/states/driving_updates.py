@@ -1796,7 +1796,9 @@ class DrivingUpdateMixin:
             self.truck.brake = max(self.truck.brake, 1.0)
             if not self._automatic_braking_announced:
                 self._automatic_braking_announced = True
-                self.ctx.say_event("Emergency braking engaged.", interrupt=True)
+                # Kept out of the repeat ring: this line interrupts the hazard
+                # warning, and the repeat key exists to give that warning back.
+                self.ctx.say_event("Emergency braking engaged.", interrupt=True, remember=False)
             if self._cruise_mph is not None:
                 self._cancel_cruise()
         if self._hazard_deadline <= 0:

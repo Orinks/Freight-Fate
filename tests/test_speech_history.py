@@ -258,6 +258,48 @@ def test_collision_outcome_replays_on_a_and_speech_history(monkeypatch):
         app.shutdown()
 
 
+def test_emergency_braking_does_not_bury_the_warning_it_interrupted(monkeypatch):
+    """The assist speaks over the hazard call, so it stays out of the ring.
+
+    Automatic emergency braking announces itself with an interrupt, cutting
+    off the very warning the repeat key exists to give back. Walking back from
+    the collision has to reach the warning, not the assist that talked over it.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    app = App()
+    main_speech = []
+    events = []
+    monkeypatch.setattr(
+        app.ctx.speech, "say", lambda text, interrupt=True: main_speech.append(text)
+    )
+    monkeypatch.setattr(
+        app.ctx.speech, "say_event", lambda text, interrupt=True: events.append(text)
+    )
+    try:
+        app.ctx.settings.automatic_emergency_braking = True
+        driving = start_drive(app)
+        quiet_trip(driving)
+        warning = "Brake now! Debris on the road."
+        driving._handle_trip_event(TripEvent(TripEventKind.HAZARD, warning, {"deadline_s": 0.0}))
+        driving.truck.velocity_mps = 40.0 / 2.2369362920544
+        driving._hazard_deadline = 0.0
+        driving._update_hazard(1 / 60)
+
+        # The player still hears it, and it is still in the browsable log.
+        assert "Emergency braking engaged." in events
+        logged = [m.text for m in app.ctx.message_log.messages]
+        assert "Emergency braking engaged." in logged
+
+        # One step back from the collision lands on the warning, not the assist.
+        app.ctx.repeat_last_spoken()
+        app.ctx.repeat_last_spoken()
+        assert main_speech[-1] == f"1 back: {warning}"
+    finally:
+        app.shutdown()
+
+
 def test_name_entry_keeps_punctuation_for_driver_names():
     from freight_fate.app import App
     from freight_fate.states.main_menu import NameEntryState

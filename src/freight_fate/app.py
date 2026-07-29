@@ -199,7 +199,9 @@ class GameContext:
             self.stop_event_speech()
             self.speech.say(f"{back} back: {line}", interrupt=True)
 
-    def say_event(self, text: str, interrupt: bool = True, review: bool = True) -> None:
+    def say_event(
+        self, text: str, interrupt: bool = True, review: bool = True, remember: bool = True
+    ) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
 
         With the dedicated SAPI event voice enabled, events speak on their own
@@ -214,10 +216,18 @@ class GameContext:
         Queued events ride an anti-backlog projection either way: a line that
         would start speaking well after the moment it described flushes the
         expired backlog and speaks now instead of joining the recital.
+
+        ``remember`` keeps a line out of the repeat key's ring. An assist that
+        interrupts to say it is acting would otherwise land exactly where the
+        warning it cut off should be, so the one key that exists to rescue an
+        interrupted line would hand back the interruption instead. Such a line
+        still reaches the message log, where it is browsed on purpose rather
+        than stumbled over.
         """
         transcript.info("[event] %s", text)
         self.last_spoken = text
-        self._speech_history.record(text)
+        if remember:
+            self._speech_history.record(text)
         if self.settings.sapi_events:
             if interrupt:
                 self._event_pacer.note_interrupt(text)
