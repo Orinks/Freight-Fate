@@ -672,9 +672,17 @@ def main() -> int:
             # sound assets are readable (frozen builds ship a pack file).
             from .audio import verify_sound_assets
             from .data.world import get_world
+            from .online_presence import secret_store_report
 
             get_world()
             verify_sound_assets()
+            # And that the online driver token can still reach the platform
+            # secret store: keyring finds its backends through entry points,
+            # which a packaged build loses silently (see secret_store_report).
+            store_ok, store_detail = secret_store_report()
+            log.info("Secret store: %s", store_detail)
+            if not store_ok:
+                raise RuntimeError(f"Secret store unreachable in this build: {store_detail}")
         App().run(max_frames=5 if smoke else None)
     except Exception:
         log.exception("Fatal error")
