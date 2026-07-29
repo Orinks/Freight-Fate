@@ -36,6 +36,14 @@ import urllib.request
 from collections.abc import Callable
 from dataclasses import dataclass
 
+try:
+    import keyring
+except Exception:  # pragma: no cover - only a broken install gets here
+    # Defensive, like every other optional import in this module: a machine
+    # that cannot even load keyring still plays, it just keeps the driver
+    # token in a private file instead of the platform secret store.
+    keyring = None  # type: ignore[assignment]
+
 from .discord_presence import PresenceState
 from .net import ssl_context
 
@@ -132,6 +140,12 @@ def _http_json(
 
 # -- driver identity ----------------------------------------------------------
 
+# The name the driver token is filed under in the platform secret store. It is
+# shown to the player if they ever browse Windows Credential Manager or the
+# macOS Keychain, so it reads as a sentence, not a slug. Changing it strands
+# every already-stored token, which then falls back to a re-paste.
+_TOKEN_SERVICE = "Freight Fate driver token"
+
 
 @dataclass
 class OnlineIdentity:
@@ -141,6 +155,12 @@ class OnlineIdentity:
     signs in there: ``driver_id`` is public (it names the profile page on
     Orinks); ``driver_token`` is the posting secret, shown once at issuance,
     and never leaves this machine except inside authenticated requests.
+
+    Only the public half is written to :meth:`path`. The secret goes to the
+    platform store -- Windows Credential Manager, the macOS Keychain, Secret
+    Service or KWallet on Linux -- and only falls back to an owner-only file
+    beside it when the machine has no working store at all, which is the
+    normal state of a headless Linux box.
     """
 
     driver_id: str
@@ -152,13 +172,91 @@ class OnlineIdentity:
 
         return data_dir() / "online.json"
 
+    @classmethod
+    def token_path(cls):
+        """Where the token lives when no platform secret store answers."""
+        return cls.path().with_suffix(".token")
+
+    @staticmethod
+    def _store_token(driver_id: str, token: str) -> bool:
+        """Put the token in the platform store. False if there isn't one."""
+        if keyring is None:
+            return False
+        try:
+            keyring.set_password(_TOKEN_SERVICE, driver_id, token)
+        except Exception:
+            log.debug("no usable secret store for the driver token", exc_info=True)
+            return False
+        return True
+
+    @staticmethod
+    def _read_stored_token(driver_id: str) -> str | None:
+        if keyring is None:
+            return None
+        try:
+            token = keyring.get_password(_TOKEN_SERVICE, driver_id)
+        except Exception:
+            log.debug("could not read the driver token from the secret store", exc_info=True)
+            return None
+        return token if isinstance(token, str) and token else None
+
+    @classmethod
+    def _read_token_file(cls) -> str | None:
+        try:
+            token = cls.token_path().read_text(encoding="utf-8").strip()
+        except (OSError, UnicodeDecodeError):
+            return None
+        return token or None
+
+    @classmethod
+    def _write_token_file(cls, token: str) -> None:
+        path = cls.token_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".token.tmp")
+        # Opened owner-only rather than written and then chmod'ed: the latter
+        # leaves a window where the token is world-readable. Windows ignores
+        # the mode and inherits the data directory's ACL, which is per-user.
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with open(fd, "w", encoding="utf-8") as f:
+            f.write(token)
+        tmp.replace(path)
+
+    @classmethod
+    def _remove_token_file(cls) -> None:
+        try:
+            cls.token_path().unlink(missing_ok=True)
+        except OSError:
+            log.debug("could not remove the fallback token file", exc_info=True)
+
     def save(self) -> None:
         path = self.path()
         path.parent.mkdir(parents=True, exist_ok=True)
         tmp = path.with_suffix(".json.tmp")
         with open(tmp, "w", encoding="utf-8") as f:
-            json.dump({"driver_id": self.driver_id, "driver_token": self.driver_token}, f, indent=2)
+            json.dump({"driver_id": self.driver_id}, f, indent=2)
         tmp.replace(path)
+        if self._store_token(self.driver_id, self.driver_token):
+            # An earlier run on this machine may have had no store and left a
+            # copy on disk. The point of all this is that it stops existing.
+            self._remove_token_file()
+            return
+        self._write_token_file(self.driver_token)
+
+    def _upgrade_storage(self, *, token_in_json: bool) -> None:
+        """Move a token found outside the secret store into it.
+
+        Builds before 1.8.7 wrote the token straight into ``online.json``, and
+        a machine with no store keeps it in ``online.token``. Either way the
+        first load that can do better cleans up after the old one, so nobody
+        has to re-paste their credentials to get the safer storage.
+        """
+        try:
+            if token_in_json:
+                self.save()
+            elif self._store_token(self.driver_id, self.driver_token):
+                self._remove_token_file()
+        except OSError:
+            log.debug("could not move the driver token into the secret store", exc_info=True)
 
     @classmethod
     def load(cls) -> OnlineIdentity | None:
@@ -166,14 +264,27 @@ class OnlineIdentity:
             with open(cls.path(), encoding="utf-8") as f:
                 data = json.load(f)
             driver_id = data["driver_id"]
-            driver_token = data["driver_token"]
+            legacy_token = data.get("driver_token")
         except (FileNotFoundError, KeyError, json.JSONDecodeError, OSError, TypeError):
             return None
-        if not isinstance(driver_id, str) or not isinstance(driver_token, str):
+        if not isinstance(driver_id, str):
+            return None
+
+        driver_token = cls._read_stored_token(driver_id)
+        from_store = driver_token is not None
+        if driver_token is None:
+            driver_token = cls._read_token_file()
+        if driver_token is None and isinstance(legacy_token, str):
+            driver_token = legacy_token
+        if not isinstance(driver_token, str):
             return None
         if len(driver_id) < 8 or len(driver_token) < 24:
             return None
-        return cls(driver_id=driver_id, driver_token=driver_token)
+
+        identity = cls(driver_id=driver_id, driver_token=driver_token)
+        if not from_store:
+            identity._upgrade_storage(token_in_json=isinstance(legacy_token, str))
+        return identity
 
 
 def verify_identity(identity: OnlineIdentity, *, transport: Transport = _http_json) -> str:

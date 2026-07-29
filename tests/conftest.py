@@ -29,6 +29,38 @@ def isolated_data_dir(tmp_path, monkeypatch):
     yield
 
 
+class FakeKeyring:
+    """An in-memory stand-in for the platform secret store."""
+
+    def __init__(self) -> None:
+        self.passwords: dict[tuple[str, str], str] = {}
+
+    def set_password(self, service: str, username: str, password: str) -> None:
+        self.passwords[(service, username)] = password
+
+    def get_password(self, service: str, username: str) -> str | None:
+        return self.passwords.get((service, username))
+
+    def delete_password(self, service: str, username: str) -> None:
+        del self.passwords[(service, username)]
+
+
+@pytest.fixture(autouse=True)
+def isolated_keyring(monkeypatch):
+    """Keep the online driver token out of the real secret store.
+
+    Unlike the data directory there is no per-test Credential Manager or
+    Keychain to point at, so a test that reached the real one would leave
+    credentials behind on the machine that ran it -- and a leftover from an
+    earlier run could bleed a token into a later test's fresh data directory.
+    Tests that need the no-store path patch this to ``None`` themselves.
+    """
+    from freight_fate import online_presence
+
+    monkeypatch.setattr(online_presence, "keyring", FakeKeyring())
+    yield
+
+
 @pytest.fixture(scope="session")
 def world():
     from freight_fate.data import get_world

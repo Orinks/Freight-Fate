@@ -10,8 +10,13 @@ every test deterministic and free of real sockets.
 from __future__ import annotations
 
 import json
+import os
+import stat
 import urllib.error
 
+from conftest import FakeKeyring
+
+from freight_fate import online_presence
 from freight_fate.discord_presence import PresenceState
 from freight_fate.online_presence import (
     HEARTBEAT_INTERVAL_S,
@@ -325,6 +330,81 @@ def test_identity_round_trips_through_disk():
     identity.save()
     loaded = OnlineIdentity.load()
     assert loaded == identity
+
+
+def test_saved_identity_keeps_the_token_out_of_the_json_file():
+    """The public Driver ID stays on disk; the secret never does.
+
+    Contributed by trodick in https://github.com/Orinks/Freight-Fate/pull/133.
+    """
+    identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
+    identity.save()
+
+    payload = OnlineIdentity.path().read_text(encoding="utf-8")
+    assert '"driver_id"' in payload
+    assert "driver_token" not in payload
+    assert identity.driver_token not in payload
+    assert not OnlineIdentity.token_path().exists()
+
+
+def test_identity_falls_back_to_an_owner_only_file_without_a_secret_store(monkeypatch):
+    monkeypatch.setattr(online_presence, "keyring", None)
+    identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
+    identity.save()
+
+    token_file = OnlineIdentity.token_path()
+    assert token_file.read_text(encoding="utf-8") == identity.driver_token
+    assert "driver_token" not in OnlineIdentity.path().read_text(encoding="utf-8")
+    assert OnlineIdentity.load() == identity
+    if os.name != "nt":
+        assert stat.S_IMODE(token_file.stat().st_mode) == 0o600
+
+
+def test_a_secret_store_that_refuses_falls_back_instead_of_failing(monkeypatch):
+    """The real headless-Linux shape: keyring imports, every call raises."""
+
+    class RefusingKeyring:
+        def set_password(self, service, username, password):
+            raise RuntimeError("no recommended backend was available")
+
+        def get_password(self, service, username):
+            raise RuntimeError("no recommended backend was available")
+
+    monkeypatch.setattr(online_presence, "keyring", RefusingKeyring())
+    identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
+    identity.save()
+
+    assert OnlineIdentity.token_path().read_text(encoding="utf-8") == identity.driver_token
+    assert "driver_token" not in OnlineIdentity.path().read_text(encoding="utf-8")
+    assert OnlineIdentity.load() == identity
+
+
+def test_a_token_written_by_an_older_build_moves_into_the_secret_store():
+    path = OnlineIdentity.path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps({"driver_id": "road-star-abcd1234", "driver_token": "s" * 68}),
+        encoding="utf-8",
+    )
+
+    loaded = OnlineIdentity.load()
+    assert loaded == OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
+    # Loading is what migrates: nobody has to re-paste their credentials.
+    assert "driver_token" not in path.read_text(encoding="utf-8")
+    assert not OnlineIdentity.token_path().exists()
+    assert OnlineIdentity.load() == loaded
+
+
+def test_a_fallback_token_file_is_cleared_once_a_secret_store_appears(monkeypatch):
+    identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
+    monkeypatch.setattr(online_presence, "keyring", None)
+    identity.save()
+    assert OnlineIdentity.token_path().exists()
+
+    monkeypatch.setattr(online_presence, "keyring", FakeKeyring())
+    assert OnlineIdentity.load() == identity
+    assert not OnlineIdentity.token_path().exists()
+    assert OnlineIdentity.load() == identity
 
 
 def test_missing_or_malformed_identity_loads_as_none():

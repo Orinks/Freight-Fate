@@ -329,6 +329,12 @@ def build_nuitka_command(entry: Path) -> list[str]:
         # and sounds ship as a masked pack (tools/pack_sounds.py), never as
         # editable files next to it.
         "--include-module=freight_fate.data._baked_world",
+        # keyring locates its platform backends through entry points, so
+        # following imports never reaches them. Ship the modules *and* the
+        # metadata that names them, or the built game silently falls back to
+        # a file for the online driver token.
+        "--include-package=keyring.backends",
+        "--include-distribution-metadata=keyring",
         f"--output-dir={output_dir.as_posix()}",
         f"--output-filename={APP_NAME}",
         f"--product-name={APP_NAME}",
