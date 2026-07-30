@@ -141,7 +141,8 @@ From a batch of player reports:
   summary, career stats, or the on-screen HUD, so a metric player heard
   kilometers on the road and miles everywhere else. All of those now go through
   the shared `units` helpers, and `sim.trip` delegates to them too rather than
-  keeping its own copy of the conversion (one of which used a rounded factor).
+  keeping its own copy of the conversion (one of which used a rounded factor)
+  (PR #142).
 - [ ] **Remaining imperial-only readouts.** Fuel is always gallons and a price
   per gallon, air pressure is always psi, and `weather.describe` omits the
   "Fahrenheit" that `season.py` says, so its temperature reads bare "degrees".

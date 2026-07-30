@@ -76,6 +76,8 @@
   chose. Career stats also says "Lifetime kilometers" instead of labelling
   kilometers as miles, and the pay rate reads as dollars per kilometer with
   the figure recalculated to match. Nothing changes if you play in miles.
+  Contributed by otaviols ([@otaviols](https://github.com/otaviols)) in
+  [PR #142](https://github.com/Orinks/Freight-Fate/pull/142).
 
 ## 1.8.6.1 - 2026-07-28
 
