@@ -490,6 +490,7 @@ def test_a_fallback_token_file_is_cleared_once_a_secret_store_appears(monkeypatc
 
     identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
     monkeypatch.setattr(online_presence, "keyring", None)
+    OnlineIdentity.path().parent.mkdir(parents=True, exist_ok=True)
     OnlineIdentity.path().write_text(
         json.dumps({"driver_id": identity.driver_id}),
         encoding="utf-8",
