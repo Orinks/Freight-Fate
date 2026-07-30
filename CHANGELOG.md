@@ -42,9 +42,11 @@
   Manager, the macOS Keychain, or your Linux keyring, the same places your
   browser keeps saved passwords. The change happens by itself the next time
   the game starts, and your Driver ID stays where it was, so there is nothing
-  to re-enter and nothing to set up. On a computer with no password store the
-  token is kept in a private file that only your account can read. Thanks to
-  trodick, [PR #133](https://github.com/Orinks/Freight-Fate/pull/133).
+  to re-enter and nothing to set up. If secure storage is unavailable, the
+  old credentials remain intact instead of being removed, and Windows will
+  not put a new token into a plain text fallback file. The setup menu explains
+  how to retry without claiming that unsaved credentials connected. Thanks
+  to trodick, [PR #133](https://github.com/Orinks/Freight-Fate/pull/133).
 
 ### Fixed
 

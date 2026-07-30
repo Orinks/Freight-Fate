@@ -30,12 +30,14 @@ import json
 import logging
 import os
 import sys
+import tempfile
 import threading
 import time
 import urllib.error
 import urllib.request
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 from typing import ClassVar
 
 try:
@@ -271,18 +273,30 @@ class OnlineIdentity:
             return None
         return token or None
 
-    @classmethod
-    def _write_token_file(cls, token: str) -> None:
-        path = cls.token_path()
+    def _write_identity_file(self, *, include_token: bool) -> None:
+        path = self.path()
         path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_suffix(".token.tmp")
-        # Opened owner-only rather than written and then chmod'ed: the latter
-        # leaves a window where the token is world-readable. Windows ignores
-        # the mode and inherits the data directory's ACL, which is per-user.
-        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-        with open(fd, "w", encoding="utf-8") as f:
-            f.write(token)
-        tmp.replace(path)
+        payload = {"driver_id": self.driver_id}
+        if include_token:
+            payload["driver_token"] = self.driver_token
+        # The fallback pair is one owner-only atomic record. Keeping the ID and
+        # token together prevents a failed second write from mismatching them.
+        fd, tmp_name = tempfile.mkstemp(
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            dir=path.parent,
+        )
+        tmp = Path(tmp_name)
+        try:
+            os.chmod(tmp, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                fd = -1
+                json.dump(payload, f, indent=2)
+            tmp.replace(path)
+        finally:
+            if fd >= 0:
+                os.close(fd)
+            tmp.unlink(missing_ok=True)
 
     @classmethod
     def _remove_token_file(cls) -> None:
@@ -292,19 +306,18 @@ class OnlineIdentity:
             log.debug("could not remove the fallback token file", exc_info=True)
 
     def save(self) -> None:
-        path = self.path()
-        path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_suffix(".json.tmp")
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump({"driver_id": self.driver_id}, f, indent=2)
-        tmp.replace(path)
-        OnlineIdentity._token_cache[self.driver_id] = self.driver_token
+        # Make the secret durable before removing a legacy plaintext copy from
+        # online.json. If neither destination works, the old file remains
+        # untouched and the player can retry without losing the one-time token.
         if self._store_token(self.driver_id, self.driver_token):
-            # An earlier run on this machine may have had no store and left a
-            # copy on disk. The point of all this is that it stops existing.
+            self._write_identity_file(include_token=False)
             self._remove_token_file()
-            return
-        self._write_token_file(self.driver_token)
+        else:
+            if os.name == "nt":
+                raise OSError("plaintext credential fallback is disabled on Windows")
+            self._write_identity_file(include_token=True)
+            self._remove_token_file()
+        OnlineIdentity._token_cache[self.driver_id] = self.driver_token
 
     def _upgrade_storage(self, *, token_in_json: bool) -> None:
         """Move a token found outside the secret store into it.

@@ -14,6 +14,7 @@ import os
 import stat
 import urllib.error
 
+import pytest
 from conftest import FakeKeyring
 
 from freight_fate import online_presence
@@ -355,15 +356,68 @@ def _next_session() -> None:
 def test_identity_falls_back_to_an_owner_only_file_without_a_secret_store(monkeypatch):
     monkeypatch.setattr(online_presence, "keyring", None)
     identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
+    if os.name == "nt":
+        with pytest.raises(OSError, match="disabled on Windows"):
+            identity.save()
+        assert not OnlineIdentity.token_path().exists()
+        assert not OnlineIdentity.path().exists()
+        return
+
     identity.save()
 
-    token_file = OnlineIdentity.token_path()
-    assert token_file.read_text(encoding="utf-8") == identity.driver_token
-    assert "driver_token" not in OnlineIdentity.path().read_text(encoding="utf-8")
+    identity_file = OnlineIdentity.path()
+    assert json.loads(identity_file.read_text(encoding="utf-8")) == {
+        "driver_id": identity.driver_id,
+        "driver_token": identity.driver_token,
+    }
+    assert not OnlineIdentity.token_path().exists()
     _next_session()
     assert OnlineIdentity.load() == identity
-    if os.name != "nt":
-        assert stat.S_IMODE(token_file.stat().st_mode) == 0o600
+    assert stat.S_IMODE(identity_file.stat().st_mode) == 0o600
+
+
+def test_fallback_ignores_a_stale_permissive_temp_file(monkeypatch):
+    if os.name == "nt":
+        pytest.skip("Windows never writes a plaintext fallback identity")
+
+    monkeypatch.setattr(online_presence, "keyring", None)
+    stale = OnlineIdentity.path().with_suffix(".json.tmp")
+    stale.parent.mkdir(parents=True, exist_ok=True)
+    stale.write_text("stale, non-secret data", encoding="utf-8")
+    stale.chmod(0o644)
+
+    identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
+    identity.save()
+
+    assert stale.read_text(encoding="utf-8") == "stale, non-secret data"
+    assert stat.S_IMODE(OnlineIdentity.path().stat().st_mode) == 0o600
+
+
+def test_failed_legacy_migration_keeps_the_original_token(monkeypatch):
+    path = OnlineIdentity.path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    token = "s" * 68
+    path.write_text(
+        json.dumps({"driver_id": "road-star-abcd1234", "driver_token": token}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(OnlineIdentity, "_store_token", lambda *_args: False)
+    monkeypatch.setattr(
+        OnlineIdentity,
+        "_write_identity_file",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("storage unavailable")),
+    )
+
+    assert OnlineIdentity.load() == OnlineIdentity(
+        driver_id="road-star-abcd1234", driver_token=token
+    )
+    _next_session()
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["driver_token"] == token
+    assert OnlineIdentity.load() == OnlineIdentity(
+        driver_id="road-star-abcd1234", driver_token=token
+    )
 
 
 def test_the_secret_store_is_read_once_and_not_once_per_menu_frame(monkeypatch):
@@ -398,10 +452,18 @@ def test_a_secret_store_that_refuses_falls_back_instead_of_failing(monkeypatch):
 
     monkeypatch.setattr(online_presence, "keyring", RefusingKeyring())
     identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
+    if os.name == "nt":
+        with pytest.raises(OSError, match="disabled on Windows"):
+            identity.save()
+        assert not OnlineIdentity.token_path().exists()
+        assert not OnlineIdentity.path().exists()
+        return
+
     identity.save()
 
-    assert OnlineIdentity.token_path().read_text(encoding="utf-8") == identity.driver_token
-    assert "driver_token" not in OnlineIdentity.path().read_text(encoding="utf-8")
+    payload = json.loads(OnlineIdentity.path().read_text(encoding="utf-8"))
+    assert payload["driver_token"] == identity.driver_token
+    assert not OnlineIdentity.token_path().exists()
     _next_session()
     assert OnlineIdentity.load() == identity
 
@@ -423,9 +485,16 @@ def test_a_token_written_by_an_older_build_moves_into_the_secret_store():
 
 
 def test_a_fallback_token_file_is_cleared_once_a_secret_store_appears(monkeypatch):
+    if os.name == "nt":
+        pytest.skip("Windows never writes a plaintext fallback token")
+
     identity = OnlineIdentity(driver_id="road-star-abcd1234", driver_token="s" * 68)
     monkeypatch.setattr(online_presence, "keyring", None)
-    identity.save()
+    OnlineIdentity.path().write_text(
+        json.dumps({"driver_id": identity.driver_id}),
+        encoding="utf-8",
+    )
+    OnlineIdentity.token_path().write_text(identity.driver_token, encoding="utf-8")
     assert OnlineIdentity.token_path().exists()
 
     monkeypatch.setattr(online_presence, "keyring", FakeKeyring())
@@ -433,6 +502,27 @@ def test_a_fallback_token_file_is_cleared_once_a_secret_store_appears(monkeypatc
     assert OnlineIdentity.load() == identity
     assert not OnlineIdentity.token_path().exists()
     assert OnlineIdentity.load() == identity
+
+
+def test_failed_fallback_replacement_keeps_the_existing_identity(monkeypatch):
+    if os.name == "nt":
+        pytest.skip("Windows never writes a plaintext fallback identity")
+
+    monkeypatch.setattr(online_presence, "keyring", None)
+    original = OnlineIdentity(driver_id="road-star-original", driver_token="a" * 68)
+    original.save()
+    replacement = OnlineIdentity(driver_id="road-star-replaced", driver_token="b" * 68)
+    monkeypatch.setattr(
+        replacement,
+        "_write_identity_file",
+        lambda **_kwargs: (_ for _ in ()).throw(OSError("metadata unavailable")),
+    )
+
+    with pytest.raises(OSError, match="metadata unavailable"):
+        replacement.save()
+    _next_session()
+
+    assert OnlineIdentity.load() == original
 
 
 # -- packaging guard --------------------------------------------------------------
