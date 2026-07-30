@@ -135,6 +135,18 @@ From a batch of player reports:
   item now sits in the pause menu (between Settings and Abandon job), so a
   player can see who is hauling mid-drive without quitting to the main menu.
   Viewing shares nothing about the paused driver.
+- [x] **Metric units applied consistently.** The units setting converted the
+  driving cues but not the dispatch board, job details, pay rate, departure and
+  deadhead summaries, exit and hazard callouts, pickup distance, delivery
+  summary, career stats, or the on-screen HUD, so a metric player heard
+  kilometers on the road and miles everywhere else. All of those now go through
+  the shared `units` helpers, and `sim.trip` delegates to them too rather than
+  keeping its own copy of the conversion (one of which used a rounded factor).
+- [ ] **Remaining imperial-only readouts.** Fuel is always gallons and a price
+  per gallon, air pressure is always psi, and `weather.describe` omits the
+  "Fahrenheit" that `season.py` says, so its temperature reads bare "degrees".
+  Adding litres, bar/kPa, and a consistent temperature phrase is a feature
+  rather than a units-setting bug, so it wants its own pass on the 1.9 line.
 - [ ] **Ambient-cue spacing (anti-stacking).** Priority handling fixes the
   critical case; still worth spacing or coalescing simultaneous low-priority
   cues so a burst of chatter does not pile up. Lower priority than the above.

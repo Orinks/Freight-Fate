@@ -65,6 +65,18 @@
   closed pickup anyway, the game says so and sends you back for a fresh board
   instead of quitting.
 
+- **Kilometers are now used everywhere, not just out on the road.** With units
+  set to metric, the driving cues spoke kilometers but several other screens
+  still read miles, so the same trip was measured two different ways depending
+  on where you asked. The dispatch board's job details, the distance and rate
+  it quotes, the summary you hear when you take a load or deadhead to a
+  pickup, the exit and hazard callouts, your remaining distance to a pickup,
+  the delivery summary's credited distance, your lifetime distance in career
+  stats, and the on-screen speed and trip readouts now all use the unit you
+  chose. Career stats also says "Lifetime kilometers" instead of labelling
+  kilometers as miles, and the pay rate reads as dollars per kilometer with
+  the figure recalculated to match. Nothing changes if you play in miles.
+
 ## 1.8.6.1 - 2026-07-28
 
 ### Fixed

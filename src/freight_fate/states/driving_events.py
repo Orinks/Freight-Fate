@@ -289,7 +289,7 @@ class DrivingEventMixin:
         else:
             head = f"Signaling for the {stop.spoken_name} exit,"
         message = (
-            f"{head} {ahead:.1f} miles ahead. Slow to "
+            f"{head} {self.ctx.settings.gap_text(ahead)} ahead. Slow to "
             f"{self.ctx.settings.speed_text(RAMP_MAX_MPH)} or less for the ramp."
             + self._cap_cruise_for_ramp()
         )
@@ -407,7 +407,7 @@ class DrivingEventMixin:
 
     def _destination_exit_announcement(self, stop, ahead: float) -> str:
         labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
-        distance = f"{ahead:.0f} miles" if round(ahead) != 1 else "1 mile"
+        distance = self.ctx.settings.distance_text(ahead)
         core = (
             f"In {distance}, {labeled}, destination exit."
             if labeled
@@ -1342,15 +1342,17 @@ class DrivingEventMixin:
             if self.phase == DRIVE_PHASE_PICKUP
             else f"Driving loaded to {self.job.spoken_destination}"
         )
+        s = self.ctx.settings
+        decimals = 1 if self.phase == DRIVE_PHASE_PICKUP else 0
         remaining = (
-            f"{self.trip.remaining_miles:.1f} of {self.trip.total_miles:.1f} miles"
-            if self.phase == DRIVE_PHASE_PICKUP
-            else f"{self.trip.remaining_miles:.0f} of {self.trip.total_miles:.0f} miles"
+            f"{s.distance_value(self.trip.remaining_miles, decimals)} of "
+            f"{s.distance_value(self.trip.total_miles, decimals)} {s.distance_unit_text()}"
         )
         return [
             title,
             "",
-            f"Speed: {t.speed_mph:.0f} mph (limit {limit:.0f}{', ' + reason if reason else ''})",
+            f"Speed: {s.hud_speed_text(t.speed_mph)} "
+            f"(limit {s.distance_value(limit)}{', ' + reason if reason else ''})",
             f"Gear: {gear}   RPM: {t.rpm:.0f}   {'ENGINE ON' if t.engine_on else 'engine off'}"
             + (f"   CRUISE {self._cruise_mph:.0f}" if self._cruise_mph is not None else ""),
             f"Air: {t.air_pressure_psi:.0f} psi   "

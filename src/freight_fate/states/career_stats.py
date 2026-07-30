@@ -37,6 +37,7 @@ class CareerStatsState(MenuState):
 
     def _lines(self) -> list[str]:
         p = self.ctx.profile
+        s = self.ctx.settings
         career = p.career
         pct = (100 * career.on_time_deliveries / career.deliveries) if career.deliveries else 100
         rest = "fully rested" if fully_rested(p) else f"fatigue {p.fatigue:.0f} percent"
@@ -44,7 +45,8 @@ class CareerStatsState(MenuState):
             f"Level {career.level} driver, {career.xp:.0f} experience",
             f"Reputation: {career.reputation:.0f} out of 100",
             f"Deliveries: {career.deliveries}, {pct:.0f} percent on time",
-            f"Lifetime miles: {career.total_miles:,.0f}",
+            f"Lifetime {s.distance_unit_text()}: "
+            f"{s.distance_value(career.total_miles, grouped=True)}",
             f"Lifetime earnings: {career.total_earnings:,.0f} dollars",
             f"Rest: {rest}",
             f"Hours: {p.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}",
