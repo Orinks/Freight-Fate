@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.7 - 2026-07-30
+
 ### Added
 
 - **The drivers board is now reachable from the pause menu.** You can hear
@@ -57,6 +59,10 @@
   after all, before it switched off again. It was genuinely re-engaging for a
   fraction of a second. It now stays put until you actually depart, so the
   announcement you hear at the gate is the one about arriving.
+
+## 1.8.6.2 - 2026-07-29
+
+### Fixed
 
 - **Accepting a dispatch after an update no longer closes the game.** The
   dispatch board is kept in your career, so the board you were looking at
