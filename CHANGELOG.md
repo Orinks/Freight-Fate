@@ -21,7 +21,7 @@
 Several inconsistencies when saving and restoring games:
 
 * The calendar should now remain synchronised and announce the correct date when restoring a game.
-* Restoring a game no longer gives you a new deadline unconditionally.
+* Restoring a game no longer gives you a new deadline unconditionally, but will instead give you a one-time deadline extension for compatibility reasons.
 * Quitting mid-drive should no longer save your current HOS and fatigue stats.
 
 ## 1.8.7 - 2026-07-30
