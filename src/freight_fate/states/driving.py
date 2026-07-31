@@ -461,11 +461,13 @@ class DrivingState(
 
 
 from .driving_menu_states import (  # noqa: E402,F401
-    AbandonJobConfirmationState,
     ArrivalState,
     DrivingStatusScreenState,
     DrivingStatusState,
     FacilityArrivalState,
+)
+from .driving_pause_states import (  # noqa: E402,F401
+    AbandonJobConfirmationState,
     PauseMenuState,
 )
 from .driving_rest_states import (  # noqa: E402,F401
