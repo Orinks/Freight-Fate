@@ -281,6 +281,16 @@ class DrivingState(
                 target_mph=None if target is None else float(target),
             )
             state.trip.restore(position_mi, game_minutes)
+
+# WeatherSystem starts at the profile's pre-trip calendar time. Restore the
+# elapsed active-trip time as well so the spoken date, season, and simulated
+# weather use the same instant as the trip clock.
+
+            if state.weather.game_hours is not None:
+                state.weather.game_hours = (
+                    ctx.profile.calendar_game_hours + game_minutes / 60.0
+                )
+
             planned_key = data.get("planned_stop_key") or None
             if planned_key is None:
                 # Saved before plans carried a stop identity: a bare name cannot
