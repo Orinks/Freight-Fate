@@ -4,6 +4,18 @@
 
 ### Changed
 
+- **Automatic Mastodon posts moved to their own hashtag.** Deliveries shared
+  to your Mastodon account now carry the FreightFateRuns hashtag instead of
+  the FreightFate one. Players use the FreightFate tag to share their own
+  thoughts about the game, so anyone who had muted it to keep the automatic
+  posts out of their timeline was quietly losing those conversations too.
+  The two are separate now: FreightFate is for people talking, FreightFateRuns
+  is for the game posting. There is nothing to change in the game. If you
+  muted the FreightFate tag because of the delivery posts, you can unmute it
+  and mute FreightFateRuns instead, and if you liked following other drivers'
+  runs, follow FreightFateRuns to keep seeing them. The change is on the
+  orinks.net side, so it already applies to every version of the game.
+
 - **The automatic transmission works each gear harder before shifting up.**
   Pulling a load, the engine now runs into a higher, more realistic RPM range
   in every gear instead of grabbing the next one early, so climbs sound and
@@ -94,6 +106,20 @@
   an update, so you see loads you can actually take. If you somehow reach a
   closed pickup anyway, the game says so and sends you back for a fresh board
   instead of quitting.
+
+- **Kilometers are now used everywhere, not just out on the road.** With units
+  set to metric, the driving cues spoke kilometers but several other screens
+  still read miles, so the same trip was measured two different ways depending
+  on where you asked. The dispatch board's job details, the distance and rate
+  it quotes, the summary you hear when you take a load or deadhead to a
+  pickup, the exit and hazard callouts, your remaining distance to a pickup,
+  the delivery summary's credited distance, your lifetime distance in career
+  stats, and the on-screen speed and trip readouts now all use the unit you
+  chose. Career stats also says "Lifetime kilometers" instead of labelling
+  kilometers as miles, and the pay rate reads as dollars per kilometer with
+  the figure recalculated to match. Nothing changes if you play in miles.
+  Contributed by otaviols ([@otaviols](https://github.com/otaviols)) in
+  [PR #142](https://github.com/Orinks/Freight-Fate/pull/142).
 
 ## 1.8.6.1 - 2026-07-28
 

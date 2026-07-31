@@ -136,6 +136,19 @@ From a batch of player reports:
   item now sits in the pause menu (between Settings and Abandon job), so a
   player can see who is hauling mid-drive without quitting to the main menu.
   Viewing shares nothing about the paused driver.
+- [x] **Metric units applied consistently.** The units setting converted the
+  driving cues but not the dispatch board, job details, pay rate, departure and
+  deadhead summaries, exit and hazard callouts, pickup distance, delivery
+  summary, career stats, or the on-screen HUD, so a metric player heard
+  kilometers on the road and miles everywhere else. All of those now go through
+  the shared `units` helpers, and `sim.trip` delegates to them too rather than
+  keeping its own copy of the conversion (one of which used a rounded factor)
+  (PR #142).
+- [ ] **Remaining imperial-only readouts.** Fuel is always gallons and a price
+  per gallon, air pressure is always psi, and `weather.describe` omits the
+  "Fahrenheit" that `season.py` says, so its temperature reads bare "degrees".
+  Adding litres, bar/kPa, and a consistent temperature phrase is a feature
+  rather than a units-setting bug, so it wants its own pass on the 1.9 line.
 - [ ] **Ambient-cue spacing (anti-stacking).** Priority handling fixes the
   critical case; still worth spacing or coalescing simultaneous low-priority
   cues so a burst of chatter does not pile up. Lower priority than the above.
@@ -815,7 +828,7 @@ fit for an audio-first game.
 - [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)
 - [x] Copy the delivery summary to the clipboard from the delivery complete screen (verified by read-back before the game says "copied")
 - [x] Delete a career's cloud backups from the Cloud backup menu: a confirmed, safe-default-first delete removes every kept revision from the account (server DELETE route + existing `deleteSaveSlot` mutation); local saves untouched, sync state forgotten so a still-local career starts a fresh slot on its next save
-- [x] Opt-in Mastodon sharing of notable deliveries: the player links their own Mastodon account on orinks.net (any instance, dynamic app registration, `read:accounts write:statuses` scope), and the game offers deliveries that earned an achievement, level, or streak milestone; the server composes the public post from allowlisted facts and adds the #FreightFate hashtag. Off by default, separate consent from Profile sharing, durable outbox client-side
+- [x] Opt-in Mastodon sharing of notable deliveries: the player links their own Mastodon account on orinks.net (any instance, dynamic app registration, `read:accounts write:statuses` scope), and the game offers deliveries that earned an achievement, level, or streak milestone; the server composes the public post from allowlisted facts and adds the #FreightFateRuns hashtag (deliberately not the bare #FreightFate, which players use for their own posts -- muting the bot must not mute the conversation). Off by default, separate consent from Profile sharing, durable outbox client-side
 - [ ] Mastodon sharing follow-ups: unlink from inside the game (today the orinks.net page is the only unlink), and consider per-post visibility choice (public vs unlisted) if players ask
 - [x] Idle drivers age off the live board: a truck parked with the game left running (not paused) signs off after 30 minutes without a snapshot change and stops heartbeating (`online_presence.py` IDLE_SIGNOFF_S); the server hides still-beating idle rows on the same clock for older builds (orinks-net `PRESENCE_IDLE_MS` + per-row `changedAt`), and deadhead presence now carries progress so a long empty run never reads as idle
 - [x] Online hub: the drivers board, orinks.net account, cloud backup and restore, and all sharing toggles moved from Settings into one Online menu on the main menu (`states/online_hub.py`); Settings keeps an Online pointer that opens the same menu for a release or two
