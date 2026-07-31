@@ -16,6 +16,26 @@
   runs, follow FreightFateRuns to keep seeing them. The change is on the
   orinks.net side, so it already applies to every version of the game.
 
+- **The automatic transmission works each gear harder before shifting up.**
+  Pulling a load, the engine now runs into a higher, more realistic RPM range
+  in every gear instead of grabbing the next one early, so climbs sound and
+  feel like the truck is actually working. Running empty, the two-gear jumps
+  the box likes on flat ground now land far enough above the downshift point
+  that it no longer shifts up and immediately drops back down. Contributed by
+  corykad ([@corykad](https://github.com/corykad)) in
+  [PR #144](https://github.com/Orinks/Freight-Fate/pull/144).
+
+### Fixed
+
+- **Picking a lower gear with the clutch held no longer damages the engine.**
+  Downshifting several gears at highway speed used to bring the redline
+  warning and engine damage the moment the gear was selected, even with the
+  clutch to the floor and the engine disconnected from the wheels. The
+  warning and the damage now begin only if you release the clutch while the
+  gear is too low for your road speed. Contributed by corykad
+  ([@corykad](https://github.com/corykad)) in
+  [PR #144](https://github.com/Orinks/Freight-Fate/pull/144).
+
 ## 1.8.7 - 2026-07-30
 
 ### Added

@@ -12,7 +12,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
-from .transmission import PROGRESSIVE_UPSHIFT_RPM, Transmission
+from .transmission import AUTO_DOWNSHIFT_RPM, PROGRESSIVE_UPSHIFT_RPM, Transmission
 
 G = 9.81
 AIR_DENSITY = 1.225
@@ -174,7 +174,7 @@ class TruckState:
         rpm_est = max(rpm_est, self.specs.idle_rpm * (0.5 + 0.5 * self.throttle))
         braking = self.brake > 0.01 or self.emergency_brake or self.air_brakes_holding
         load_fraction = min(1.0, max(0.0, self.cargo_kg / REFERENCE_CARGO_KG))
-        minimum_shift_interval_s = 1.75 if braking else 1.25 + 0.35 * load_fraction
+        minimum_shift_interval_s = 1.75 if braking else 1.25 + 0.55 * load_fraction
         start_gear = 1 if self.grade >= 0.02 or load_fraction >= 0.75 else 2
         if load_fraction <= 0.2 and self.grade <= 0.01:
             start_gear = 3
@@ -186,7 +186,7 @@ class TruckState:
         upshift_steps = 1
         if 0 < tr.gear < tr.num_gears and load_fraction <= 0.2 and self.grade <= 0.01:
             skip_gear = min(tr.num_gears, tr.gear + 2)
-            if skip_gear > tr.gear + 1 and self.coupled_rpm(skip_gear) >= 900.0:
+            if skip_gear > tr.gear + 1 and self.coupled_rpm(skip_gear) >= AUTO_DOWNSHIFT_RPM:
                 upshift_steps = 2
         can_upshift = True
         target_gear = min(tr.num_gears, max(1, tr.gear) + upshift_steps)
@@ -591,7 +591,11 @@ class TruckState:
         Reaching the normal fuel governor under power is safe; damage begins
         only when road speed mechanically drives the engine beyond its limit.
         """
-        return self.engine_on and self.coupled_rpm() > self.specs.max_rpm * 1.05
+        return (
+            self.engine_on
+            and self.transmission.drive_ratio != 0.0
+            and self.coupled_rpm() > self.specs.max_rpm * 1.05
+        )
 
     @property
     def speed_mph(self) -> float:
