@@ -263,7 +263,8 @@ class DrivingState(
 # Fix: fair_active_deadline was called unconditionally, allowing Late deliveries to quit and calculate a new deadline.
 # current saves created before the fix remain indistinguishable from genuinely old mileage-deadline saves.
 
-            if int(data.get("deadline_model", 0)) < ACTIVE_TRIP_DEADLINE_MODEL:
+            deadline_model = int(data.get("deadline_model", 0))
+            if deadline_model < ACTIVE_TRIP_DEADLINE_MODEL:
                 job.deadline_game_h = fair_active_deadline(
                     job,
                     route,
@@ -271,6 +272,11 @@ class DrivingState(
                     position_mi=position_mi,
                     world=ctx.world,
                 )
+
+                # Persist the one-time migration into the active-trip snapshot.
+                data["job"]["deadline_game_h"] = job.deadline_game_h
+                data["deadline_model"] = ACTIVE_TRIP_DEADLINE_MODEL
+
             state = cls(
                 ctx,
                 job,
