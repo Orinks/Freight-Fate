@@ -16,6 +16,14 @@
   runs, follow FreightFateRuns to keep seeing them. The change is on the
   orinks.net side, so it already applies to every version of the game.
 
+### Fixed
+
+Several inconsistencies when saving and restoring games:
+
+* The calendar should now remain synchronised and announce the correct date when restoring a game.
+* Restoring a game no longer gives you a new deadline unconditionally.
+* Quitting mid-drive should no longer save your current HOS and fatigue stats.
+
 ## 1.8.7 - 2026-07-30
 
 ### Added
