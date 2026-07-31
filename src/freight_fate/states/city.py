@@ -464,7 +464,8 @@ class BobtailDestState(MenuState):
         self.ctx.save_profile()
         spoken_dest = job.spoken_destination
         self.ctx.say(
-            f"Bobtailing empty to {spoken_dest}, {route.miles:.0f} miles on "
+            f"Bobtailing empty to {spoken_dest}, "
+            f"{self.ctx.settings.distance_text(route.miles)} on "
             f"{route.highways[0]}. No load and no pay -- you will see the "
             f"{spoken_dest} dispatch board on arrival. Check in at the city "
             "terminal when you get there.",

@@ -14,6 +14,7 @@ from ..models.jobs import (
     route_drive_hours,
 )
 from ..music import select_menu_music_sequence
+from ..settings import Settings
 from ..sim.hos import LIMITS
 from ..sim.timezones import appointment_text, city_zone
 from ..sim.vehicle import TruckState
@@ -88,14 +89,15 @@ def route_planning_summary(route: Route) -> str:
     )
 
 
-def route_departure_summary(route: Route) -> str:
+def route_departure_summary(route: Route, settings: Settings) -> str:
     toll_text = (
         f" Carrier toll estimate {route.estimated_tolls:,.0f} dollars."
         if route.estimated_tolls > 0
         else ""
     )
     return (
-        f"Loaded trip is {route.miles:.0f} miles via {', then '.join(route.highways)}.{toll_text}"
+        f"Loaded trip is {settings.distance_text(route.miles)} "
+        f"via {', then '.join(route.highways)}.{toll_text}"
     )
 
 
@@ -205,7 +207,8 @@ class JobBoardState(MenuState):
         self.ctx.save_profile()
         self.ctx.say(
             f"Dispatch accepted from {terminal.name}. Deadhead "
-            f"{route.miles:.1f} miles on {route.highways[0]} to pickup at "
+            f"{self.ctx.settings.gap_text(route.miles)} on "
+            f"{route.highways[0]} to pickup at "
             f"{job.origin_facility_text()}. "
             "Check in with the shipper when you arrive.",
             interrupt=True,
@@ -338,6 +341,7 @@ class JobDetailState(MenuState):
         job = self.job
         p = self.ctx.profile
         world = self.ctx.world
+        s = self.ctx.settings
         dollars_per_mile = job.pay / max(job.distance_mi, 1.0)
         # The detail view is the "tell me more" surface, so it always names the
         # state -- board offers stay short, but a player who does not know
@@ -358,9 +362,10 @@ class JobDetailState(MenuState):
             f"Cargo: {job.cargo.label}.",
             f"Origin: {origin_text}.",
             f"Destination: {destination_text}.",
-            f"Distance: {job.distance_mi:.0f} miles.",
+            f"Distance: {s.distance_text(job.distance_mi)}.",
             f"Pay: {job.pay:,.0f} dollars.",
-            f"Dollars per mile: {dollars_per_mile:.2f}.",
+            f"Dollars per {s.distance_unit_text(plural=False)}: "
+            f"{s.per_distance(dollars_per_mile):.2f}.",
             # The appointment reads in the receiver's local time, the way real
             # dispatch quotes it. "About" because the clock starts at pickup
             # departure, after check-in and loading.
@@ -669,7 +674,7 @@ class PickupFacilityState(MenuState):
             f"Cargo: {self.job.weight_tons:.0f} tons of {self.job.cargo.label}",
             f"Destination: {self.job.spoken_destination}",
             f"Status: {state}",
-            f"Speed: {self.truck.speed_mph:.0f} mph",
+            f"Speed: {self.ctx.settings.hud_speed_text(self.truck.speed_mph)}",
             f"Air: {self.truck.air_pressure_psi:.0f} psi   "
             f"{'parking set' if self.truck.parking_brake else 'parking released'}",
         ]
@@ -847,7 +852,8 @@ class RouteSelectState(MenuState):
         next_context = driving.trip.next_navigation_context()
         self.ctx.say(
             f"Navigation set for {self.job.destination_facility_text()}. "
-            f"{route_departure_summary(route)} {next_context} Departing now.",
+            f"{route_departure_summary(route, self.ctx.settings)} "
+            f"{next_context} Departing now.",
             interrupt=True,
         )
         self.ctx.push_state(driving)

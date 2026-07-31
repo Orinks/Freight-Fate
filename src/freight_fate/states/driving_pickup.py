@@ -89,7 +89,7 @@ class DrivingPickupMixin:
 
     def _pickup_progress_summary(self) -> str:
         return (
-            f"{self.trip.remaining_miles:.1f} miles remaining of "
-            f"{self.trip.total_miles:.1f} to pickup at "
+            f"{self.ctx.settings.gap_text(self.trip.remaining_miles)} remaining of "
+            f"{self.ctx.settings.distance_value(self.trip.total_miles, 1)} to pickup at "
             f"{self._pickup_facility_text()}."
         )
