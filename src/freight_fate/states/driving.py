@@ -11,6 +11,7 @@ from .driving_pickup import DrivingPickupMixin
 from .driving_speed_control import SpeedControlStateMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 
+ACTIVE_TRIP_DEADLINE_MODEL = 1
 
 class DrivingState(
     DrivingControlsMixin,
@@ -203,6 +204,7 @@ class DrivingState(
         kind = "pickup_drive" if self.phase == DRIVE_PHASE_PICKUP else "delivery"
         return {
             "kind": kind,
+            "deadline_model": ACTIVE_TRIP_DEADLINE_MODEL,
             "job": job_payload(job),
             "route_cities": list(self.route.cities),
             "route_kind": (
@@ -257,13 +259,18 @@ class DrivingState(
             job = normalize_job_cities(job_from_payload(j), ctx.world)
             position_mi = float(data.get("position_mi", 0.0))
             game_minutes = float(data.get("game_minutes", 0.0))
-            job.deadline_game_h = fair_active_deadline(
-                job,
-                route,
-                hours_used=game_minutes / 60.0,
-                position_mi=position_mi,
-                world=ctx.world,
-            )
+
+# Fix: fair_active_deadline was called unconditionally, allowing Late deliveries to quit and calculate a new deadline.
+# current saves created before the fix remain indistinguishable from genuinely old mileage-deadline saves.
+
+            if int(data.get("deadline_model", 0)) < ACTIVE_TRIP_DEADLINE_MODEL:
+                job.deadline_game_h = fair_active_deadline(
+                    job,
+                    route,
+                    hours_used=game_minutes / 60.0,
+                    position_mi=position_mi,
+                    world=ctx.world,
+                )
             state = cls(
                 ctx,
                 job,
