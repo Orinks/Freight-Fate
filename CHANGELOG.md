@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### Changed
+
+- **Automatic Mastodon posts moved to their own hashtag.** Deliveries shared
+  to your Mastodon account now carry the FreightFateRuns hashtag instead of
+  the FreightFate one. Players use the FreightFate tag to share their own
+  thoughts about the game, so anyone who had muted it to keep the automatic
+  posts out of their timeline was quietly losing those conversations too.
+  The two are separate now: FreightFate is for people talking, FreightFateRuns
+  is for the game posting. There is nothing to change in the game. If you
+  muted the FreightFate tag because of the delivery posts, you can unmute it
+  and mute FreightFateRuns instead, and if you liked following other drivers'
+  runs, follow FreightFateRuns to keep seeing them. The change is on the
+  orinks.net side, so it already applies to every version of the game.
+
 ## 1.8.7 - 2026-07-30
 
 ### Added
