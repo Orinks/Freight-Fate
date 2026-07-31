@@ -120,6 +120,37 @@ def quit_to_menu(app):
 
 
 @pytest.mark.smoke
+def test_quit_mid_drive_restores_checkpoint_hos_and_fatigue():
+    """Quitting must not mix live driver state with the saved road checkpoint."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        profile = app.ctx.profile
+        checkpoint = profile.active_trip
+        assert checkpoint is not None
+
+        checkpoint_hos = checkpoint["hos"]
+        checkpoint_fatigue = checkpoint["fatigue"]
+
+        # Simulate driver state accumulated after leaving the saved stop.
+        driving.hos.driving_min = 218.9
+        driving.hos.duty_min = 219.9
+        driving.hos.since_break_min = 218.9
+        profile.fatigue = 25.18
+
+        assert driving.hos.to_dict() != checkpoint_hos
+        assert profile.fatigue != checkpoint_fatigue
+
+        quit_to_menu(app)
+
+        assert profile.hos.to_dict() == checkpoint_hos
+        assert profile.fatigue == pytest.approx(checkpoint_fatigue)
+    finally:
+        app.shutdown()
+
+@pytest.mark.smoke
 def test_quit_mid_drive_resumes_from_the_last_stop():
     # Saving is stops-only: quitting mid-drive does not persist the in-progress
     # position, so Continue resumes the leg from where it was last departed

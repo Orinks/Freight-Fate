@@ -5,6 +5,32 @@ from .base import end_sentence
 from .driving_core import *
 from .driving_rest_states import ShoulderSleepConfirmationState
 
+
+def _restore_checkpoint_driver_state(ctx: GameContext, driving: DrivingState) -> None:
+    """Discard unsaved driver state before returning to the title.
+
+    The active-trip snapshot represents the last durable route checkpoint.
+    HOS and fatigue are mutated directly on the profile while driving, so they
+    must be restored before a later application shutdown saves the profile.
+    """
+    profile = getattr(ctx, "profile", None)
+    if profile is None:
+        return
+    snapshot = profile.active_trip
+
+    if not isinstance(snapshot, dict):
+        return
+
+    saved_hos = snapshot.get("hos")
+    if isinstance(saved_hos, dict):
+        profile.hos = HosClock.from_dict(saved_hos)
+        driving.hos = profile.hos
+
+    saved_fatigue = snapshot.get("fatigue")
+    if saved_fatigue is not None:
+        profile.fatigue = max(0.0, min(100.0, float(saved_fatigue)))
+
+
 class PauseMenuState(MenuState):
     title = "Paused"
 
@@ -219,6 +245,7 @@ class PauseMenuState(MenuState):
         # Saving happens only at stops, so a mid-drive quit writes nothing: the
         # on-disk save still points at your last stop, and Continue resumes the
         # leg from there. In-progress leg driving is intentionally not preserved.
+        _restore_checkpoint_driver_state(self.ctx, self.driving)
         drive_label = "pickup drive" if self.driving.phase == DRIVE_PHASE_PICKUP else "delivery"
         self.ctx.say(
             f"Returning to the title. You can only save at a stop, so this "
