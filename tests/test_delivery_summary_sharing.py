@@ -233,7 +233,12 @@ def test_mastodon_toggle_flips_and_discloses_when_linked(monkeypatch):
         cat.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.mastodon_sharing is True
         assert app.mastodon.enabled is True
-        assert any("FreightFate hashtag" in text for text in spoken)
+        # The disclosure names the automated tag, and names it as distinct from
+        # the tag players use themselves -- someone muting the delivery posts
+        # should not have to mute the conversation to do it.
+        disclosure = next(t for t in spoken if "hashtag" in t)
+        assert "Freight Fate Runs hashtag" in disclosure
+        assert "separate from the Freight Fate tag" in disclosure
         cat.handle_event(key_event(pygame.K_LEFT))
         assert app.ctx.settings.mastodon_sharing is False
         assert app.mastodon.enabled is False
