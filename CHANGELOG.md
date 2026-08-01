@@ -4,6 +4,14 @@
 
 ### Added
 
+- **A new song on the country stations.** "Dust on the Highway" opens on a
+  lone slide guitar over a rumbling bass, the drums lock in, and organ and
+  harmonica trade fills through a gritty lead-guitar solo before the band
+  slams back in for the finish. Three and a half minutes with no vocals, so
+  it plays under the road without talking over it. You will hear it on The
+  Rawhide out of Dallas, Big Wheel Country out of Nashville, Prairie Line
+  out of Kansas City, and Big Sky Country out of Billings.
+
 - **G also names the next grade ahead.** Alongside the slope under the wheels
   and the truck's verdict on it, G now tells you what the next steep grade is,
   how far off, and how long it runs -- so one press answers both what you are
