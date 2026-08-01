@@ -243,10 +243,14 @@ class Settings:
     @classmethod
     def load(cls) -> Settings:
         s = cls()
+        defaults = cls()
         data = None
         try:
             with open(s.path, encoding="utf-8") as f:
                 data = json.load(f)
+            if not isinstance(data, dict):
+                log.warning("Settings file is not a settings object; using defaults")
+                data = {}
             for k, v in data.items():
                 if hasattr(s, k):
                     setattr(s, k, v)
@@ -348,7 +352,21 @@ class Settings:
             "speech_pitch",
             "speech_volume",
         ):
-            setattr(s, attr, max(0.0, min(1.0, float(getattr(s, attr)))))
+            value = getattr(s, attr)
+            # A level that is not a number -- null, true, a list, a word --
+            # used to raise straight out of load() and take the game's whole
+            # startup with it. It falls back to the default instead. A bool
+            # counts as damage, not as a level: false would read as silence.
+            if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+                log.warning("Setting %s is not a level (%r); using the default", attr, value)
+                value = getattr(defaults, attr)
+            else:
+                try:
+                    value = float(value)
+                except ValueError:
+                    log.warning("Setting %s is not a level (%r); using the default", attr, value)
+                    value = getattr(defaults, attr)
+            setattr(s, attr, max(0.0, min(1.0, float(value))))
         if not isinstance(s.radio_station_id, str) or not s.radio_station_id:
             s.radio_station_id = "route_playlist"
         return s

@@ -1000,6 +1000,13 @@
 
 ### Fixed
 
+- **A damaged settings file no longer takes the game down with it.** If your
+  settings file was left half-written by a crash, or ended up holding
+  something that is not a volume level where a volume level belongs, the game
+  could refuse to start at all. Anything it cannot read as a level now falls
+  back to that setting's normal value, and it says so in its log. A level you
+  really did set is untouched -- turning something down to nothing still
+  means nothing.
 - **The engine keeps one voice.** When the game's sound file was older than
   the game itself, the engine could take part of its voice from the old file
   and part from the new one, crossfading between two different recordings as
