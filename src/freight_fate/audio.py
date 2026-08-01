@@ -928,10 +928,14 @@ class _BassBackend:
         except Exception:  # diagnostics must never be the thing that fails
             log.info("Audio output device: could not be identified", exc_info=True)
             return
-        if index == BASS_NO_SOUND_DEVICE:
-            log.warning("Audio output is the BASS no-sound device; nothing will be audible")
-        else:
+        if index != BASS_NO_SOUND_DEVICE:
             log.info("Audio output device %d: %s", index, name)
+        elif os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
+            # Asked for: headless runs, tests, and the release smoke check.
+            log.info("Audio output: no-sound device, as asked for by this run")
+        else:
+            # Not asked for, and the reason a player hears nothing.
+            log.warning("Audio output is the BASS no-sound device; nothing will be audible")
 
     def _load_plugins(self) -> None:
         """Load optional BASS addon plugins (currently BASSHLS).
