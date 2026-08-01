@@ -909,8 +909,29 @@ class _BassBackend:
             except BassError:
                 log.warning("No audio device; using the BASS no-sound device")
                 self._output = Output(device=BASS_NO_SOUND_DEVICE)
+        self._log_output_device()
         self._load_plugins()
         self.enabled = True
+
+    def _log_output_device(self) -> None:
+        """Name the output device the game is about to play through.
+
+        A player reporting silence is far more often pointed at the wrong
+        device -- speech on one output, the game on the system default -- or
+        muted, than missing a sound file. The log could not tell those apart
+        without naming the device, so it names it.
+        """
+        try:
+            index = self._output.get_device()
+            names = self._output.get_device_names()
+            name = names[index - 1] if 0 < index <= len(names) else "unknown"
+        except Exception:  # diagnostics must never be the thing that fails
+            log.info("Audio output device: could not be identified", exc_info=True)
+            return
+        if index == BASS_NO_SOUND_DEVICE:
+            log.warning("Audio output is the BASS no-sound device; nothing will be audible")
+        else:
+            log.info("Audio output device %d: %s", index, name)
 
     def _load_plugins(self) -> None:
         """Load optional BASS addon plugins (currently BASSHLS).
@@ -1739,6 +1760,7 @@ class AudioEngine:
         self._bank_order: dict[str, list[str]] = {}  # base -> remaining shuffled cuts
         self._last_bank_key: dict[str, str] = {}  # base -> cut played last
         self._asset_known: dict[str, bool] = {}  # key -> resolves anywhere
+        self._logged_volumes: tuple[float | None, ...] | None = None
         log.info("Audio backend: %s", self._impl.name)
 
     @staticmethod
@@ -2043,6 +2065,16 @@ class AudioEngine:
         ui: float | None = None,
     ) -> None:
         self._impl.set_volumes(master, sfx, music, weather, engine, ui)
+        # The other half of a silence report: a healthy backend playing at
+        # zero looks exactly like a broken one until the levels are written
+        # down. Logged on change only, so it cannot flood the file.
+        levels = (master, sfx, music, weather, engine, ui)
+        if levels != self._logged_volumes:
+            self._logged_volumes = levels
+            log.info(
+                "Volumes: master=%s sfx=%s music=%s weather=%s engine=%s ui=%s",
+                *levels,
+            )
 
     def shutdown(self) -> None:
         self._impl.shutdown()
