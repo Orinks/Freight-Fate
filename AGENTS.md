@@ -62,6 +62,9 @@ code, in the same change:
   spoken information with visual-only cues.
 - If you touch menu items, prompts, warnings, settings, or status text, test
   the spoken result and say how in the PR.
+- Use the canonical spoken noun for each concept from `docs/ontology.md`.
+  Synonyms for one thing cost screen reader users a re-read. Adding a concept
+  means adding a row there in the same change.
 
 ## World and route data
 
