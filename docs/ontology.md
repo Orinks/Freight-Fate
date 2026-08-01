@@ -36,16 +36,40 @@ This file catalogues the game layer, and then the spoken vocabulary for both.
 | --- | --- | --- |
 | Profile | `Profile` | `models/profile.py` |
 | Truck condition | `TruckCondition` | `models/trucks.py` |
+| Duty log | `DutyLog` | `sim/hos.py` |
+| Loyalty account | `LoyaltyAccount` | `models/loyalty.py` |
 | Save migration | `migrate_save_data`, `SAVE_VERSION` | `models/save_migration.py` |
 | Integrity signature | `SIGNATURE_FIELD`, `ProfileIntegrityError` | `models/profile.py` |
 | Profile invariants | -- | `profile_invariants.py`, `profile_integrity_invariants.py` |
 
 `Profile` is the root of everything persisted. It *holds* a `Career`, a
-`Market`, an `HosClock`, per-truck `TruckCondition` records, the money, the
-in-game clock, the achievement list, and an `active_trip` snapshot. It is the
-one object whose shape is a compatibility contract in three directions at once:
-older saves, the cloud validator, and the integrity signature. Add fields with
-defaults; never reorder or repurpose.
+`Market`, an `HosClock`, a `DutyLog`, a `LoyaltyAccount`, per-truck
+`TruckCondition` records, the business standing (status, carrier, start mode,
+authority readiness), owned and programme trailers, active buffs, the money,
+the in-game clock, the achievement list, and an `active_trip` snapshot. It is
+the one object whose shape is a compatibility contract in three directions at
+once: older saves, the cloud validator, and the integrity signature. Add fields
+with defaults; never reorder or repurpose.
+
+The business fields are the ones to be most careful with, because they are read
+by the cloud validator as well as by the game. The allow-list there is a
+superset and the required set is only what the checks actually read -- exact
+field matching rejects both older and newer builds.
+
+### Carrier and equipment
+
+| Concept | Class | Module |
+| --- | --- | --- |
+| Fleet tier | `FleetTier` | `models/carrier_fleet.py` |
+| Trailer unit | `TrailerUnit` | `models/trailer_yard.py` |
+| Pickup plan | `PickupPlan` | `models/trailer_yard.py` |
+| Delivery plan | `DeliveryPlan` | `models/trailer_yard.py` |
+
+A `FleetTier` is what a carrier *assigns* at a level band: a company driver
+does not choose a tractor, they are given one. An owner-operator owns theirs.
+The same `truck` field on the profile means "assigned tractor" or "active owned
+tractor" depending on business status, which is worth remembering before
+writing any sentence about "your truck".
 
 `TruckCondition` is per-truck persistent state -- fuel, damage, tire wear,
 grime -- keyed by catalog key. It is deliberately *not* portable: condition
@@ -57,9 +81,25 @@ belongs to the truck you own in this game, not to the driver.
 | --- | --- | --- |
 | Trip | `Trip` | `sim/trip.py` |
 | Route helpers | -- | `sim/trip_route_helpers.py` |
+| Road events | `TripRoadEventMixin` | `sim/trip_road_events.py` |
+| Traffic on the trip | `TripTrafficMixin` | `sim/trip_traffic.py` |
 | Lane keeping | `LaneKeeping` | `sim/lane.py` |
+| Driving mode tuning | `DrivingModeTuning` | `sim/driving_modes.py` |
+| Pedal latch | `PedalLatch` | `sim/pedal_latch.py` |
+| Traffic vehicle | `TrafficVehicle`, `TrafficSituation`, `TrafficManager` | `sim/traffic_manager.py` |
+| Live traffic | `TrafficEvent`, `TrafficData`, `RealTrafficProvider` | `sim/real_traffic.py` |
+| Truck parking | `TruckParkingLocation`, `ParkingData`, `TruckParkingProvider` | `sim/truck_parking.py` |
 | Time zone | `TimeZone` | `sim/timezones.py` |
 | Live weather | `RealWeatherProvider` | `sim/real_weather.py` |
+
+Two kinds of traffic exist and they are not the same concept. `TrafficManager`
+simulates the vehicles around the truck right now -- the ones a player hears
+and reacts to. `RealTrafficProvider` fetches real-world incident data for the
+route ahead. A sentence about "traffic" should make clear which one it means.
+
+Three providers -- weather, traffic and parking -- reach the network. All of
+them must degrade to the baked data silently; nothing in the drive may block on
+one.
 
 `Trip` is the binding entity: it joins a driver, a truck, a job and a route
 into one moving thing, and it owns the clock. Everything the player hears while
@@ -72,9 +112,29 @@ time is a view, via `Trip.local_hour`.
 | --- | --- | --- |
 | Achievement | `Achievement`, `AchievementAward` | `achievements.py` |
 | Message | `Message`, `MessageCategory`, `MessageLog` | `message_log.py` |
+| Engine voice | `EngineVoice`, `EngineReading` | `engine_audio.py` |
 | Settings | -- | `settings.py` |
 | Speech | -- | `speech.py` |
 | States | `State` and subclasses | `states/` |
+| Playtest levers | -- | `playtest_levers.py` |
+
+### Roadside colour
+
+Curated flavour data. It has no mechanical effect except where noted, but it is
+player-facing text and therefore bound by the vocabulary rules below.
+
+| Concept | Class or catalogue | Module |
+| --- | --- | --- |
+| Buff | `Buff`, `BUFF_CATALOG` | `data/buffs.py` |
+| Brand | `Brand`, `BRANDS` | `data/amenities.py` |
+| Billboard | `CORRIDOR_BILLBOARDS` and the roadside sets | `data/billboards.py` |
+| Curve | `CurveRecord`, `RouteCurve` | `data/curves.py` |
+| Welcome sign | `WELCOME_SIGNS` | `data/state_welcome.py` |
+
+A **buff** is a purchasable consumable -- a shower, a meal, an oil service --
+that changes a fatigue, engine or tire accrual rate for a time or for a trip.
+Curves are the exception to "no mechanical effect": a `RouteCurve` carries an
+advisory speed, and hairpins, sharp and moderate bands have real limits.
 
 ### Online
 
@@ -92,13 +152,17 @@ has to degrade silently when offline.
 
 Not classes, but part of the ontology, because the shape is load-bearing:
 
-- Tools edit `src/freight_fate/data/world.json`.
-- The game loads the split `src/freight_fate/data/world_data/` tree.
-- `tools/index_world.py` regenerates the split; `--check` verifies the two are
+- Tools edit `src/freight_fate/data/world_source/`, never directly: go through
+  `tools/world_source.py`, where `load_world()` returns the whole world as one
+  dict and `save_world(data)` writes it back as per-state shards.
+- The game loads the indexed `src/freight_fate/data/world_data/` tree.
+- `tools/index_world.py` regenerates the index; `--check` verifies the two are
   in sync, and CI and tests expect that.
 
-There is no automatic sync. An edit to `world.json` that is not re-split is a
-change the game will never see.
+Both trees shard by the state a leg starts in (`legs/TX.json`), so a one-leg
+edit is a small reviewable diff rather than a sixty-megabyte blob. There is no
+automatic sync: a source edit that is not re-indexed is a change the game will
+never see.
 
 ## Spoken vocabulary
 
@@ -118,6 +182,11 @@ from the words, and synonyms cost them a re-read.
 | A truck stop or service POI | stop | POI, waypoint | `Stop`, `RoadStop` |
 | The level band | rank | tier, grade | `CareerRank` |
 | A license add-on | endorsement | certification, licence | `ENDORSEMENT_LEVELS` |
+| A purchasable consumable | its own name: "shower", "energy drink" | buff, item, power-up | `Buff` |
+| The tractor a carrier gave you | your assigned truck | your truck (when leased) | `FleetTier` |
+| Vehicles around you now | traffic | NPCs, cars | `TrafficManager` |
+| Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
+| A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |
 
 Notes on the entries that are not simple:
 
@@ -140,6 +209,17 @@ stopping the truck, and the command to do so. Where the sentence could be read
 either way, name the thing: "the truck stop ahead", "bring the truck to a
 stop".
 
+**"Buff" is an internal word and must never be spoken.** The catalogue calls
+them buffs; the player buys a shower, an energy drink, an Iron Skillet dinner.
+Every spoken string goes through `Buff.label`, which is what makes that work.
+Game-shop jargon in a trucking sim breaks the fiction and, more practically,
+tells a screen reader user nothing about what they just bought.
+
+**"Traffic" needs a qualifier.** Simulated vehicles around the truck and
+reported incidents on the road ahead are different systems the player can act
+on differently. "Traffic is heavy" and "there is a wreck reported ahead" are
+not interchangeable.
+
 ## Open naming decisions
 
 Recorded rather than silently resolved, because changing any of them changes
@@ -156,6 +236,12 @@ what players hear.
 - **`TruckCondition` lives in `models/trucks.py`**, a portable-layer module,
   despite being game-owned save state. It should probably move next to
   `Profile`. Cheap to do, and it removes a boundary exception.
+- **One spoken "buff" leak exists.** `states/driving_updates.py` falls back to
+  the literal word when a worn-off record has no label:
+  `worn.get("label", "buff")`. Every catalogued buff has a label, so it should
+  not fire, but if it ever does the player hears "The buff has worn off." A
+  better fallback is the group name -- "the coffee", "the tire service" -- or
+  saying nothing at all.
 
 ## Working rule
 
