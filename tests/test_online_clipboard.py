@@ -174,3 +174,49 @@ def test_account_setup_connects_with_both_sharing_toggles_off(monkeypatch):
     assert ("server_profile", False) in calls
     assert ("profile", False) in calls
     assert ("cloud", False) in calls
+
+
+def test_account_setup_saves_the_exact_verified_credentials(monkeypatch):
+    pending = []
+    saved = []
+
+    class DeferredThread:
+        def __init__(self, *, target, **_kwargs):
+            pending.append(target)
+
+        def start(self):
+            return None
+
+    settings = Settings()
+    ctx = SimpleNamespace(
+        settings=settings,
+        audio=SimpleNamespace(play=lambda _sound: None),
+        say=lambda *_args, **_kwargs: None,
+        pop_state=lambda: None,
+        adopt_online_identity=lambda identity: saved.append(identity),
+        apply_online_presence=lambda: None,
+        apply_cloud_saves=lambda: None,
+    )
+    monkeypatch.setattr(online_states.threading, "Thread", DeferredThread)
+    monkeypatch.setattr(online_states.online_presence, "verify_identity", lambda _identity: "ok")
+    monkeypatch.setattr(
+        online_states.online_presence,
+        "set_profile_sharing",
+        lambda _identity, _enabled: "ok",
+    )
+    monkeypatch.setattr(online_states.OnlineIdentity, "save", lambda identity: None)
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+    verified = online_states.OnlineIdentity(
+        driver_id="road-star-abcd1234", driver_token="ffd_" + "a" * 64
+    )
+    state._driver_id = verified.driver_id
+    state._token = verified.driver_token
+
+    state._connect()
+    state._driver_id = "road-star-replaced"
+    state._token = "ffd_" + "b" * 64
+    pending[0]()
+    state.update(0)
+
+    assert saved == [verified]

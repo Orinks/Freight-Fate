@@ -438,6 +438,43 @@ def test_accepting_stale_cached_offer_drops_it_instead_of_crashing():
         app.shutdown()
 
 
+def test_speed_control_stays_paused_until_departure(monkeypatch):
+    """It said it would wait for departure, so it must not re-engage at the gate."""
+    from freight_fate.app import App
+
+    app = App()
+    events: list[str] = []
+    try:
+        driving = accept_pickup_drive(app)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+
+        # An armed session, rolling toward the pickup gate.
+        driving.truck.start_engine()
+        driving.truck.set_air_ready(parking_brake=False)
+        driving._engage_cruise(30.0)
+        assert driving._speed_control_armed
+
+        driving.trip.position_mi = driving.trip.total_miles
+        driving.trip.finished = True
+        driving.truck.velocity_mps = 8.0  # still rolling, above the gate stop speed
+        driving.update(1 / 60)
+
+        assert driving._speed_control_paused_at_stop
+        assert any("paused for pickup" in text for text in events)
+
+        # Several frames of still rolling up to the gate.
+        events.clear()
+        for _ in range(30):
+            driving.update(1 / 60)
+
+        assert not any("resuming" in text for text in events)
+        assert driving._cruise_mph is None
+        assert driving._keeper_mph is None
+    finally:
+        app.shutdown()
+
+
 def test_drop_and_hook_gets_the_truck_out_in_a_fraction_of_the_time(monkeypatch):
     """A preloaded trailer means no dock and no hour standing at one."""
     from freight_fate.app import App
@@ -611,4 +648,30 @@ def test_an_unrefused_defect_is_what_the_inspector_finds(monkeypatch):
         assert driving._hooked_trailer_defect() == unit.defect
     finally:
         trailer_yard.preloaded_trailer = original
+        app.shutdown()
+
+
+def test_arming_by_hand_at_the_gate_still_works(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = accept_pickup_drive(app)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+
+        driving.truck.start_engine()
+        driving.truck.set_air_ready(parking_brake=False)
+        driving._engage_cruise(30.0)
+        driving.trip.position_mi = driving.trip.total_miles
+        driving.trip.finished = True
+        driving.truck.velocity_mps = 8.0
+        driving.update(1 / 60)
+        assert driving._speed_control_paused_at_stop
+
+        # The player overrides the hold themselves.
+        driving._engage_cruise(20.0)
+        assert not driving._speed_control_paused_at_stop
+        assert driving._cruise_mph is not None
+    finally:
         app.shutdown()

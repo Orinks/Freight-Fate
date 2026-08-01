@@ -26,7 +26,7 @@ from .music import music_track_duration_s
 from .online_journal import JournalOutbox, queue_achievement
 from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
-from .speech import EventSpeechPacer, Speech, SpeechHistory
+from .speech import EventSpeechPacer, Speech
 from .states.base import State
 
 log = logging.getLogger(__name__)
@@ -98,10 +98,6 @@ class GameContext:
         self._music_rotation_elapsed_s = 0.0
         self.achievement_notice = ""
         self.achievement_notice_timer = 0.0
-        # Recent spoken lines, for the global repeat key (comma): one press
-        # repeats the newest, quick further presses walk back through the ring.
-        self._speech_history = SpeechHistory()
-        self.last_spoken = ""
         # Anti-backlog projection for the dedicated event voice: queued
         # driving events that would start speaking stale get flushed instead.
         self._event_pacer = EventSpeechPacer()
@@ -109,7 +105,6 @@ class GameContext:
         # playtest_levers.apply_continue_levers); save_profile honors it.
         self.playtest_sandbox = False
         self.message_log = app.message_log
-        self.message_category = app.message_category
 
     def _online_enabled(self, setting: bool) -> bool:
         """True when both the master ``online_services`` switch and the
@@ -157,51 +152,11 @@ class GameContext:
 
     def say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         transcript.info("%s", text)
-        self.last_spoken = text
-        self._speech_history.record(text)
         self.speech.say(text, interrupt)
         if review:
             self.message_log.add(text, MessageCategory.GENERAL)
 
-    def repeat_last_spoken(self) -> None:
-        """Walk back through recent speech (the comma key, from anywhere).
-
-        Speech is the whole interface, and a line lost to a cough or an
-        overlapping announcement should never be gone for good. The first
-        press re-speaks the newest line; quick further presses step one
-        line older each, spoken as "2 back: ..." so the player always knows
-        where in the history they stand. Any fresh announcement resets the
-        walk. Repeats ride the main channel and stay out of the transcript's
-        way beyond a marker, so a replay never reads as a fresh game event."""
-        step = self._speech_history.step_back()
-        self._speak_history_step(step)
-
-    def step_forward_spoken(self) -> None:
-        """Walk forward through recent speech (the period key).
-
-        The mirror of the comma walk, the same pairing screen-reader
-        players know from Civilization VI: comma steps older, period
-        steps back toward the newest line, and period out of the blue
-        simply re-speaks the newest line."""
-        step = self._speech_history.step_forward()
-        self._speak_history_step(step)
-
-    def _speak_history_step(self, step: tuple[int, str] | None) -> None:
-        if step is None:
-            return
-        back, line = step
-        if back == 0:
-            transcript.info("[repeat] %s", line)
-            self.stop_event_speech()
-            self.speech.say(line, interrupt=True)
-        else:
-            transcript.info("[repeat -%d] %s", back, line)
-            self.stop_event_speech()
-            self.speech.say(f"{back} back: {line}", interrupt=True)
-
-    def say_event(
-        self, text: str, interrupt: bool = True, review: bool = True, remember: bool = True
-    ) -> None:
+    def say_event(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
 
         With the dedicated SAPI event voice enabled, events speak on their own
@@ -217,17 +172,12 @@ class GameContext:
         would start speaking well after the moment it described flushes the
         expired backlog and speaks now instead of joining the recital.
 
-        ``remember`` keeps a line out of the repeat key's ring. An assist that
-        interrupts to say it is acting would otherwise land exactly where the
-        warning it cut off should be, so the one key that exists to rescue an
-        interrupted line would hand back the interruption instead. Such a line
-        still reaches the message log, where it is browsed on purpose rather
-        than stumbled over.
+        ``review`` keeps a line out of the reviewable message log. An assist
+        that interrupts to say it is acting would otherwise land exactly where
+        the warning it cut off should be, so the review keys that exist to
+        rescue an interrupted line would hand back the interruption instead.
         """
         transcript.info("[event] %s", text)
-        self.last_spoken = text
-        if remember:
-            self._speech_history.record(text)
         if self.settings.sapi_events:
             if interrupt:
                 self._event_pacer.note_interrupt(text)
@@ -476,7 +426,6 @@ class App:
         self.settings = Settings.load()
         self.speech = Speech()
         self.message_log = MessageLog()
-        self.message_category = None
         self.audio = AudioEngine()
         self.world = get_world()
         self.economy = Economy()
@@ -574,6 +523,22 @@ class App:
         if forward and self.controller.active and self.state is not None:
             self.state.handle_controller(event, self.controller)
 
+    def dispatch_to_state(self, event: pygame.event.Event) -> None:
+        """Hand a keyboard/window event to the active state.
+
+        Message review gets first refusal on every key press, which is what
+        makes the review controls work on every screen instead of only the ones
+        that remembered to call ``handle_message_review``. A state that takes
+        typed text declines them itself.
+        """
+        if self.state is None:
+            return
+        if event.type == pygame.KEYDOWN:
+            self.controller.note_keyboard()
+            if self.state.handle_message_review(event):
+                return
+        self.state.handle_event(event)
+
     # -- main loop ------------------------------------------------------------
 
     def run(self, max_frames: int | None = None) -> None:
@@ -616,25 +581,7 @@ class App:
                     elif event.type in _CONTROLLER_EVENTS:
                         self._dispatch_controller(event)
                     elif self.state is not None:
-                        if event.type == pygame.KEYDOWN:
-                            self.controller.note_keyboard()
-                            # Global repeat-last-spoken. Text entry keeps its
-                            # commas; menus are safe (first-letter jump is
-                            # alphanumeric only). A state that reviews its own
-                            # message log keeps these keys: while driving they
-                            # walk the categorised log, which is the same
-                            # gesture doing a fuller job.
-                            if event.key == pygame.K_COMMA and not getattr(
-                                self.state, "captures_text_input", False
-                            ):
-                                self.ctx.repeat_last_spoken()
-                                continue
-                            if event.key == pygame.K_PERIOD and not getattr(
-                                self.state, "captures_text_input", False
-                            ):
-                                self.ctx.step_forward_spoken()
-                                continue
-                        self.state.handle_event(event)
+                        self.dispatch_to_state(event)
                 # Auto-repeat (held D-pad left/right) and analog smoothing.
                 # Synthetic repeats go straight to the state (bypassing the
                 # manager, whose press state must not be reset) and only where
@@ -780,6 +727,7 @@ def main() -> int:
             # sound assets are readable (frozen builds ship a pack file).
             from .audio import verify_sound_assets
             from .data.world import get_world
+            from .online_presence import secret_store_report
 
             get_world()
             verify_sound_assets()
@@ -800,6 +748,13 @@ def main() -> int:
             if not load_facility_approaches():
                 raise RuntimeError("smoke: facility approaches are empty")
             load_radio_catalog()
+            # And that the online driver token can still reach the platform
+            # secret store: keyring finds its backends through entry points,
+            # which a packaged build loses silently (see secret_store_report).
+            store_ok, store_detail = secret_store_report()
+            log.info("Secret store: %s", store_detail)
+            if not store_ok:
+                raise RuntimeError(f"Secret store unreachable in this build: {store_detail}")
         App().run(max_frames=5 if smoke else None)
     except Exception:
         log.exception("Fatal error")

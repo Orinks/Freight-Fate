@@ -317,6 +317,21 @@ def stage_release_docs(build_dir: Path) -> None:
     (root / "USER_MANUAL.html").write_text(manual_html, encoding="utf-8")
 
 
+# keyring locates its platform backends through entry points rather than
+# imports, so a build that loses either the backend modules or the metadata
+# naming them keeps the online driver token in the fallback file instead -- on
+# every platform, and with no visible symptom. Nuitka 4.1 was measured to
+# include both on its own, so these are belt and braces, not a fix for a known
+# break: they state the requirement so a future Nuitka cannot quietly drop it.
+# What actually proves the outcome is tools/check_keyring_packaging.py, which
+# CI compiles with these same flags on all three platforms -- so read them
+# from here rather than repeating them in the workflow.
+KEYRING_NUITKA_ARGS = [
+    "--include-package=keyring.backends",
+    "--include-distribution-metadata=keyring",
+]
+
+
 def build_nuitka_command(entry: Path) -> list[str]:
     """Build the Nuitka command for the current platform."""
     system = platform.system()
@@ -338,6 +353,7 @@ def build_nuitka_command(entry: Path) -> list[str]:
         # editable files next to it.
         "--include-module=freight_fate.data._baked_world",
         "--include-module=freight_fate.data._baked_data",
+        *KEYRING_NUITKA_ARGS,
         f"--output-dir={output_dir.as_posix()}",
         f"--output-filename={APP_NAME}",
         f"--product-name={APP_NAME}",

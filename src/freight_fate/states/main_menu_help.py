@@ -34,8 +34,11 @@ HELP_PAGES = [
             "Home and End jump to the first and last option.",
             "Type a letter to jump to options starting with that letter.",
             "Press F1 in any menu for contextual help.",
-            "Comma replays the latest speech from any non-text-entry screen; press it again within ten seconds "
-            "to step backward through earlier announcements. Period steps forward again.",
+            "Comma repeats what was just said, from any screen that is not a text box; "
+            "press it again to keep stepping back through earlier messages, and Period moves forward again.",
+            "Control with Comma or Period jumps to the oldest or newest message. "
+            "The bracket keys switch between all messages, general messages, and driving events. "
+            "Control C copies the message you are on to the clipboard.",
             "Manage careers on the main menu lets you reset or delete saved careers,",
             "with a confirmation screen before anything destructive happens.",
             "Corrupted career saves may be moved aside at the main menu. A save",
@@ -156,7 +159,9 @@ HELP_PAGES = [
             "A softer chime confirms when you are centered again.",
             "V speaks the weather and the forecast.",
             "A repeats the last driving announcement, in case you missed it.",
-            "Comma reviews recent speech backward, and Period moves forward again.",
+            "Comma repeats what was just said and keeps stepping back, and Period moves forward again. "
+            "Control with Comma or Period jumps to the oldest or newest message, the bracket keys switch "
+            "between all messages, general messages, and driving events, and Control C copies the one you are on.",
             "U speaks what is coming up: imposed speed limits, stops, and exits ahead.",
             "Left or Right Control stops the driving event voice.",
             "Escape opens the pause menu.",

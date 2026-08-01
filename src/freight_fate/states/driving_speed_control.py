@@ -47,6 +47,7 @@ class SpeedControlStateMixin:
         self._clear_cruise()
         self._clear_keeper()
         self._speed_control_armed = False
+        self._speed_control_paused_at_stop = False
         self._speed_control_target_mph = None
 
     def _resume_cruise(self) -> None:
@@ -78,18 +79,25 @@ class SpeedControlStateMixin:
         was_active = self._cruise_mph is not None or self._keeper_mph is not None
         self._clear_cruise()
         self._clear_keeper()
+        # Held until departure. Clearing the controllers alone is not enough:
+        # the truck is still rolling toward the gate, so the resume check would
+        # re-engage the keeper on the very next frame and announce it -- right
+        # after telling the player it would wait until they departed.
+        self._speed_control_paused_at_stop = True
         return was_active
 
     def _restore_speed_control_session(self, *, armed: bool, target_mph: float | None) -> None:
         self._clear_cruise()
         self._clear_keeper()
         self._speed_control_armed = armed
+        self._speed_control_paused_at_stop = False
         self._speed_control_target_mph = target_mph if armed else None
 
     def _resume_speed_control_if_ready(self, *, braking: bool) -> None:
         """Resume a paused job-scoped session once the player is rolling again."""
         if (
             not self._speed_control_armed
+            or self._speed_control_paused_at_stop
             or self._cruise_mph is not None
             or self._keeper_mph is not None
         ):

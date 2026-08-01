@@ -1906,6 +1906,7 @@ class DrivingEventMixin:
         """Start adaptive cruise as part of the armed speed-control session."""
         t = self.truck
         self._speed_control_armed = True
+        self._speed_control_paused_at_stop = False
         self._cruise_mph = max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, target_mph))
         self._speed_control_target_mph = self._cruise_mph
         self._cruise_throttle = t.throttle
@@ -1993,6 +1994,7 @@ class DrivingEventMixin:
             self.ctx.say("The speed keeper needs the engine running and the truck rolling.")
             return
         self._speed_control_armed = True
+        self._speed_control_paused_at_stop = False
         self._keeper_mph = min(t.speed_mph if target_mph is None else target_mph, limit_mph)
         self._keeper_zone = zone_reason
         self._keeper_throttle = t.throttle
@@ -2969,17 +2971,17 @@ class DrivingEventMixin:
             if self.phase == DRIVE_PHASE_PICKUP
             else f"Driving loaded to {self.job.spoken_destination}"
         )
+        s = self.ctx.settings
+        decimals = 1 if self.phase == DRIVE_PHASE_PICKUP else 0
         remaining = (
-            f"{self.ctx.settings.distance_text(self.trip.remaining_miles, precise=True)}"
-            f" of {self.ctx.settings.distance_text(self.trip.total_miles, precise=True)}"
-            if self.phase == DRIVE_PHASE_PICKUP
-            else f"{self.ctx.settings.distance_text(self.trip.remaining_miles)}"
-            f" of {self.ctx.settings.distance_text(self.trip.total_miles)}"
+            f"{s.distance_value(self.trip.remaining_miles, decimals)} of "
+            f"{s.distance_value(self.trip.total_miles, decimals)} {s.distance_unit_text()}"
         )
         return [
             title,
             "",
-            f"Speed: {t.speed_mph:.0f} mph (limit {limit:.0f}{', ' + reason if reason else ''})"
+            f"Speed: {s.hud_speed_text(t.speed_mph)} "
+            f"(limit {s.distance_value(limit)}{', ' + reason if reason else ''})"
             f"   Lane: {self.lane.lane_name}",
             f"Gear: {gear}   RPM: {t.rpm:.0f}   {'ENGINE ON' if t.engine_on else 'engine off'}"
             + (f"   CRUISE {self._cruise_mph:.0f}" if self._cruise_mph is not None else ""),

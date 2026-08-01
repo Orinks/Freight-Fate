@@ -8,12 +8,29 @@ from ..models.dispatch_policy import dispatch_policy
 from ..models.jobs import Job, job_from_payload, job_payload, plan_hos
 from ..models.trailer_yard import TRAILER_SWAP_MIN
 from ..music import select_menu_music_sequence
+from ..settings import Settings
 from ..sim.vehicle import TruckState
 from .base import MenuItem, MenuState, TimedMessageState
 
 PICKUP_CHECK_IN_MIN = 15.0
 PICKUP_LOADING_MIN = 60.0
 PICKUP_LOADING_WAIT_S = 1.5
+
+
+def job_origin_exists(job: Job, world) -> bool:
+    """Whether this job's pickup facility is still in the world data.
+
+    A dispatch board is cached into the save, so it can outlive the world the
+    offers were built from: an update that renames or retires a facility
+    leaves a job nobody can be sent to. Accepting one is the only place that
+    resolves the pickup facility, so this is what stands between a stale save
+    and a hard failure there.
+    """
+    try:
+        world.facility_location(job.origin, job.origin_location)
+    except KeyError:
+        return False
+    return True
 
 
 def pickup_snapshot(
@@ -60,14 +77,16 @@ def route_planning_summary(route: Route) -> str:
     )
 
 
-def route_departure_summary(route: Route, distance_text: str = "") -> str:
+def route_departure_summary(route: Route, settings: Settings) -> str:
     toll_text = (
         f" Carrier toll estimate {route.estimated_tolls:,.0f} dollars."
         if route.estimated_tolls > 0
         else ""
     )
-    distance = distance_text or f"{route.miles:.0f} miles"
-    return f"Loaded trip is {distance} via {', then '.join(route.highways)}.{toll_text}"
+    return (
+        f"Loaded trip is {settings.distance_text(route.miles)} "
+        f"via {', then '.join(route.highways)}.{toll_text}"
+    )
 
 
 def start_loaded_drive(
@@ -105,8 +124,7 @@ def start_loaded_drive(
     ctx.save_profile()
     next_context = driving.trip.next_navigation_context()
     ctx.say(
-        f"{lead}{route_departure_summary(route, ctx.settings.distance_text(route.miles))} "
-        f"{next_context} Departing now.",
+        f"{lead}{route_departure_summary(route, ctx.settings)} {next_context} Departing now.",
         interrupt=True,
     )
     ctx.push_state(driving)
@@ -614,7 +632,7 @@ class PickupFacilityState(MenuState):
             f"Cargo: {self.job.weight_tons:.0f} tons of {self.job.cargo.label}",
             f"Destination: {self.job.spoken_destination}",
             f"Status: {state}",
-            f"Speed: {self.truck.speed_mph:.0f} mph",
+            f"Speed: {self.ctx.settings.hud_speed_text(self.truck.speed_mph)}",
             f"Air: {self.truck.air_pressure_psi:.0f} psi   "
             f"{'parking set' if self.truck.parking_brake else 'parking released'}",
         ]

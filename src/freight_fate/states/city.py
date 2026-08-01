@@ -61,6 +61,7 @@ from .city_pickup import (  # noqa: F401
     PICKUP_LOADING_MIN,
     PickupFacilityState,
     RouteSelectState,
+    job_origin_exists,
     pickup_snapshot,
     route_planning_summary,
 )
@@ -633,14 +634,21 @@ def open_freight_market(ctx) -> list[Job]:
     key = dispatch_cache_key(p)
     cache = p.dispatch_board_cache if not market_changed else None
     lever_note = ""
+    jobs = None
     if cache and cache.get("key") == key:
         # Cached payloads may predate the slug migration; normalize their
         # city references so a restored board keeps resolving.
-        jobs = [
+        restored = [
             normalize_job_cities(_job_from_payload(payload), ctx.world)
             for payload in cache.get("jobs", [])
         ]
-    else:
+        # A board cached into the save can outlive the world it was built
+        # from: an update that retires a pickup facility leaves an offer
+        # nobody can be sent to, and accepting it is where that fails. One
+        # stale offer retires the whole cached board.
+        if all(job_origin_exists(job, ctx.world) for job in restored):
+            jobs = restored
+    if jobs is None:
         jobs = board.offers(
             p.current_city,
             p.career.endorsements,
@@ -1506,6 +1514,7 @@ class JobDetailState(MenuState):
             reputation=p.career.reputation,
         )
         dollars_per_mile = business.gross_pay / max(job.distance_mi, 1.0)
+        s = self.ctx.settings
         world = self.ctx.world
         # The detail view is the "tell me more" surface, so it always names the
         # state -- board offers stay short, but a player who does not know
@@ -1522,7 +1531,8 @@ class JobDetailState(MenuState):
             f"Destination: {destination_text}.",
             f"Distance: {self.ctx.settings.distance_text(job.distance_mi)}.",
             f"{pay_label(p.business_status)}: {business.gross_pay:,.0f} dollars.",
-            f"Dollars per mile: {dollars_per_mile:.2f}.",
+            f"Dollars per {s.distance_unit_text(plural=False)}: "
+            f"{s.per_distance(dollars_per_mile):.2f}.",
             # The appointment reads in the receiver's local time, the way real
             # dispatch quotes it. "About" because the clock starts at pickup
             # departure, after check-in and loading.

@@ -1,6 +1,10 @@
 <!-- Thanks for contributing! See CONTRIBUTING.md for branch targets,
      test commands, and accessibility expectations.
 
+     Target the `dev` branch, not `main`. GitHub defaults new PRs to
+     `main`, but `main` is only for stable release work -- change the
+     base branch to `dev` before opening this PR.
+
      Heads up: the 1.8 line is in maintenance until 1.9 preview snapshots
      begin, so only major and minor bug fixes are being accepted for now.
      Have a feature in mind? Open an issue for it instead and it can be

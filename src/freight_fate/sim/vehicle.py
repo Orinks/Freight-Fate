@@ -410,7 +410,7 @@ class TruckState:
         bobtail = not self.trailer_attached
         load_fraction = min(1.0, max(0.0, self.cargo_kg / REFERENCE_CARGO_KG))
         base_interval = 1.1 if bobtail else 1.25
-        minimum_shift_interval_s = 1.75 if braking else base_interval + 0.35 * load_fraction
+        minimum_shift_interval_s = 1.75 if braking else base_interval + 0.55 * load_fraction
         start_gear = 1 if self.grade >= 0.02 or load_fraction >= 0.75 else 2
         if load_fraction <= 0.2 and self.grade <= 0.01:
             start_gear = 3
@@ -1152,7 +1152,11 @@ class TruckState:
         Reaching the normal fuel governor under power is safe; damage begins
         only when road speed mechanically drives the engine beyond its limit.
         """
-        return self.engine_on and self.coupled_rpm() > self.specs.max_rpm * 1.05
+        return (
+            self.engine_on
+            and self.transmission.drive_ratio != 0.0
+            and self.coupled_rpm() > self.specs.max_rpm * 1.05
+        )
 
     @property
     def speed_mph(self) -> float:
