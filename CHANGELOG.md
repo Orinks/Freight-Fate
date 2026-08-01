@@ -1000,6 +1000,16 @@
 
 ### Fixed
 
+- **The engine keeps one voice.** When the game's sound file was older than
+  the game itself, the engine could take part of its voice from the old file
+  and part from the new one, crossfading between two different recordings as
+  the revs climbed. The engine now takes every layer of its voice from the
+  same place, so it sounds like one engine again.
+- **A bad sound file no longer costs you every sound.** If the game's sound
+  file is damaged -- a download that stopped short, a copy that did not
+  finish -- the game used to go completely silent. Now it says so in its log
+  and plays whatever sound it can still find, and a single unreadable sound
+  inside the file costs only that one sound instead of all of them.
 - **Cruise no longer claims a hill has beaten it while it is winning.** When
   a rising speed limit or a higher set speed put the target well above the
   truck, cruise flooring the pedal to catch up could be announced as losing

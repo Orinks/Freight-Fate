@@ -96,6 +96,7 @@ ENGINE_BANDS = (
     ("engine/midhigh", 1425.0),
     ("engine/high", 1900.0),
 )
+ENGINE_BAND_KEYS = frozenset(key for key, _native in ENGINE_BANDS)
 # Crossfades live in a narrow window around each adjacent pair's GEOMETRIC
 # midpoint (log-space), this fraction of the gap wide. Two things follow:
 # a cut never plays far from its recorded speed (rate excursions stay under
@@ -169,14 +170,36 @@ def _asset_path(key: str, extensions: tuple[str, ...]) -> Path | None:
     return None
 
 
+def _pack_carries_whole_ring(pack) -> bool:
+    """Whether ``pack`` holds every engine band cut.
+
+    Cached on the pack itself; membership only, so nothing is decompressed.
+    """
+    complete = getattr(pack, "_ff_whole_ring", None)
+    if complete is None:
+        complete = all(
+            any(pack.has(f"{key}.{ext}") for ext in ("ogg", "wav")) for key in ENGINE_BAND_KEYS
+        )
+        pack._ff_whole_ring = complete
+    return complete
+
+
 def _asset_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | None:
     """Bytes and extension for a sound key, from the shipped pack or loose files.
 
     Frozen builds carry the sounds packed into ``sounds.pak``
     (see ``assets_pack``); source checkouts read the editable
     ``assets/sounds`` tree.
+
+    The engine bands are the one exception to pack-then-loose: they crossfade
+    into each other, so they have to come from one recording. A pack that
+    predates the checkout beside it would otherwise serve four bands from the
+    pack and the fifth off disk, blending two different engines. Unless the
+    pack carries the whole ring, the ring reads from the loose tree.
     """
     pack = assets_pack.open_default()
+    if pack is not None and key in ENGINE_BAND_KEYS and not _pack_carries_whole_ring(pack):
+        pack = None
     if pack is not None:
         for ext in extensions:
             data = pack.read(f"{key}.{ext}")

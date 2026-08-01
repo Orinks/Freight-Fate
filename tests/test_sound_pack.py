@@ -122,6 +122,116 @@ def test_verify_sound_assets_passes_in_source_checkout():
     audio.verify_sound_assets()
 
 
+def _reset_default_pack(monkeypatch, path: Path) -> None:
+    monkeypatch.setattr(assets_pack, "DEFAULT_PACK_PATH", path)
+    monkeypatch.setattr(assets_pack, "_default_pack", None)
+    monkeypatch.setattr(assets_pack, "_default_pack_missing", False)
+
+
+def test_unreadable_pack_falls_back_to_loose_files(tmp_path, monkeypatch):
+    # A truncated or half-copied pack must not take the sound with it: a
+    # source checkout still has the real tree, and it has to keep playing.
+    broken = tmp_path / "sounds.pak"
+    broken.write_bytes(assets_pack.PACK_MAGIC + b"not a zip, only noise")
+    _reset_default_pack(monkeypatch, broken)
+    assert assets_pack.open_default() is None
+    found = audio._asset_bytes("ui/menu_select", ("ogg", "wav"))
+    assert found is not None
+    audio.verify_sound_assets()
+
+
+def test_pack_from_another_program_falls_back_to_loose_files(tmp_path, monkeypatch):
+    # Wrong magic entirely -- someone renamed an unrelated file into place.
+    stranger = tmp_path / "sounds.pak"
+    stranger.write_bytes(b"PK\x03\x04 whatever this is")
+    _reset_default_pack(monkeypatch, stranger)
+    assert assets_pack.open_default() is None
+    assert audio._asset_bytes("ui/menu_select", ("ogg", "wav")) is not None
+
+
+def test_damaged_entry_costs_only_its_own_sound(tmp_path, monkeypatch):
+    sounds = _write_fixture_sounds(tmp_path)
+    out = assets_pack.write_pack(sounds, tmp_path / "sounds.pak")
+    pack = assets_pack.SoundPack(out)
+
+    real_read = pack._zip.read
+
+    def read(name):
+        if name == "ui/menu_select.ogg":
+            raise zipfile.BadZipFile("bad CRC")
+        return real_read(name)
+
+    monkeypatch.setattr(pack._zip, "read", read)
+    assert pack.read("ui/menu_select.ogg") is None  # damaged, reported as absent
+    assert pack.read("music/open_road.wav") == b"fake wav for open road"  # unharmed
+
+    # And the loader treats that absence as a miss, so the loose tree answers.
+    monkeypatch.setattr(assets_pack, "open_default", lambda: pack)
+    found = audio._asset_bytes("ui/menu_select", ("ogg", "wav"))
+    assert found is not None
+    assert found[0] == (SOUNDS_DIR / "ui" / f"menu_select.{found[1]}").read_bytes()
+
+
+def _pack_with_partial_ring(tmp_path: Path) -> assets_pack.SoundPack:
+    """A pack carrying every engine band but one -- an older pack's ring."""
+    sounds = _write_fixture_sounds(tmp_path)
+    (sounds / "engine").mkdir()
+    for key in sorted(audio.ENGINE_BAND_KEYS):
+        if key == "engine/midhigh":
+            continue  # the band the checkout added later
+        name = key.split("/", 1)[1]
+        (sounds / "engine" / f"{name}.ogg").write_bytes(f"old {name} band".encode())
+    return assets_pack.SoundPack(assets_pack.write_pack(sounds, tmp_path / "sounds.pak"))
+
+
+def test_partial_ring_in_pack_is_not_blended_with_the_loose_tree(tmp_path, monkeypatch):
+    # Bands crossfade into each other, so a pack that is missing one band must
+    # not supply the other four: the whole ring comes off the loose tree.
+    pack = _pack_with_partial_ring(tmp_path)
+    monkeypatch.setattr(assets_pack, "open_default", lambda: pack)
+    for key in sorted(audio.ENGINE_BAND_KEYS):
+        found = audio._asset_bytes(key, ("ogg", "wav"))
+        assert found is not None, key
+        data, ext = found
+        assert not data.startswith(b"old "), f"{key} came from the partial pack"
+        # Whichever loose file answers -- licensed overlay or committed tree.
+        loose = audio._asset_path(key, ("ogg", "wav"))
+        assert loose is not None and loose.suffix == f".{ext}"
+        assert data == loose.read_bytes()
+    # Everything outside the ring still prefers the pack, as before.
+    assert audio._asset_bytes("ui/menu_select", ("ogg", "wav")) == (
+        b"fake ogg for menu select",
+        "ogg",
+    )
+
+
+def test_complete_ring_in_pack_is_used(tmp_path, monkeypatch):
+    sounds = _write_fixture_sounds(tmp_path)
+    (sounds / "engine").mkdir()
+    for key in sorted(audio.ENGINE_BAND_KEYS):
+        name = key.split("/", 1)[1]
+        (sounds / "engine" / f"{name}.ogg").write_bytes(f"packed {name} band".encode())
+    pack = assets_pack.SoundPack(assets_pack.write_pack(sounds, tmp_path / "sounds.pak"))
+    monkeypatch.setattr(assets_pack, "open_default", lambda: pack)
+    for key in sorted(audio.ENGINE_BAND_KEYS):
+        name = key.split("/", 1)[1]
+        assert audio._asset_bytes(key, ("ogg", "wav")) == (f"packed {name} band".encode(), "ogg")
+
+
+def test_older_pack_still_serves_the_keys_it_has(tmp_path, monkeypatch):
+    # munchkinbear's case: an older pack alongside a current checkout. Keys the
+    # old pack carries play from it; keys added since come off the loose tree.
+    old = _write_fixture_sounds(tmp_path)
+    pack = assets_pack.SoundPack(assets_pack.write_pack(old, tmp_path / "sounds.pak"))
+    monkeypatch.setattr(assets_pack, "open_default", lambda: pack)
+    assert audio._asset_bytes("ui/menu_select", ("ogg", "wav")) == (
+        b"fake ogg for menu select",
+        "ogg",
+    )
+    newer = audio._asset_bytes("vehicle/edge_strip", ("ogg", "wav"))
+    assert newer is not None  # not in the old pack; comes from the checkout
+
+
 def test_real_assets_tree_round_trips(tmp_path):
     out = assets_pack.write_pack(SOUNDS_DIR, tmp_path / "sounds.pak")
     pack = assets_pack.SoundPack(out)
