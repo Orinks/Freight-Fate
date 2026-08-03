@@ -16,13 +16,65 @@
   runs, follow FreightFateRuns to keep seeing them. The change is on the
   orinks.net side, so it already applies to every version of the game.
 
+- **The automatic transmission works each gear harder before shifting up.**
+  Pulling a load, the engine now runs into a higher, more realistic RPM range
+  in every gear instead of grabbing the next one early, so climbs sound and
+  feel like the truck is actually working. Running empty, the two-gear jumps
+  the box likes on flat ground now land far enough above the downshift point
+  that it no longer shifts up and immediately drops back down. Contributed by
+  corykad ([@corykad](https://github.com/corykad)) in
+  [PR #144](https://github.com/Orinks/Freight-Fate/pull/144).
+
 ### Fixed
 
-Several inconsistencies when saving and restoring games:
+- **Picking a lower gear with the clutch held no longer damages the engine.**
+  Downshifting several gears at highway speed used to bring the redline
+  warning and engine damage the moment the gear was selected, even with the
+  clutch to the floor and the engine disconnected from the wheels. The
+  warning and the damage now begin only if you release the clutch while the
+  gear is too low for your road speed. Contributed by corykad
+  ([@corykad](https://github.com/corykad)) in
+  [PR #144](https://github.com/Orinks/Freight-Fate/pull/144).
 
-* The calendar should now remain synchronised and announce the correct date when restoring a game.
-* Restoring a game no longer gives you a new deadline unconditionally, but will instead give you a one-time deadline extension for compatibility reasons.
-* Quitting mid-drive should no longer save your current HOS and fatigue stats.
+- **The clipboard works on Linux.** On Linux, pasting your Driver ID or driver
+  token during online setup always said nothing could be read, and copying a
+  delivery summary or a reviewed message always said the copy did not take,
+  however carefully you had copied the text first. Linux desktops and browsers
+  offer clipboard text under a different name than Windows does, and the game
+  was only ever asking for the Windows one. It now asks for the names Linux
+  really uses, so pasting into the game and copying out of it both work.
+  Windows and Mac are unchanged. Thanks to a player report.
+
+- **Continuing a saved run announces the right date and season again.** When
+  you picked a run back up, the calendar went back to the day you set out on
+  rather than the day you had driven into, so a haul that had rolled past
+  midnight came back on yesterday's date, and a long run that had carried you
+  into a new season heard the old one, with the weather to match. Continuing a
+  drive now puts the calendar at the same moment your trip clock is at, so the
+  date, the season and the weather all agree. Contributed by Day Garwood
+  ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #146](https://github.com/Orinks/Freight-Fate/pull/146).
+
+- **Continuing a saved run no longer pushes your deadline further out.** Every
+  time a delivery was picked back up, the game worked the deadline out again
+  from where you were and how long you had been going, which quietly gave you
+  more hours than dispatch had agreed to. A run you were running late on could
+  be rescued just by saving at a stop and continuing. Deadlines now stay where
+  dispatch set them. A run already under way gets one last recalculation the
+  first time you continue it after this update, so nobody loses hours they had
+  been counting on, and it is fixed from then on. Contributed by Day Garwood
+  ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #146](https://github.com/Orinks/Freight-Fate/pull/146).
+
+- **Quitting mid-drive writes a save that agrees with itself.** Quitting to the
+  title mid-drive puts you back at the stop you last saved at, but the save was
+  still being written with the hours of service and the fatigue you had built
+  up since leaving that stop. Continuing always put them back, so the drive you
+  returned to was correct either way, and this only mattered to the cloud
+  backup, which was storing a shift that never happened. The save now records
+  the stop you will actually resume from. Contributed by Day Garwood
+  ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #146](https://github.com/Orinks/Freight-Fate/pull/146).
 
 ## 1.8.7 - 2026-07-30
 

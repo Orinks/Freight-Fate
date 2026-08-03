@@ -150,6 +150,7 @@ def test_quit_mid_drive_restores_checkpoint_hos_and_fatigue():
     finally:
         app.shutdown()
 
+
 @pytest.mark.smoke
 def test_quit_mid_drive_resumes_from_the_last_stop():
     # Saving is stops-only: quitting mid-drive does not persist the in-progress
@@ -546,12 +547,62 @@ def test_old_active_trip_gets_deadline_floor_and_model_marker():
         assert app.state.job.deadline_game_h == expected
         assert app.state.job.deadline_game_h > original_deadline
         assert profile.active_trip["job"]["deadline_game_h"] == expected
-        assert (
-            profile.active_trip["deadline_model"]
-            == ACTIVE_TRIP_DEADLINE_MODEL
+        assert profile.active_trip["deadline_model"] == ACTIVE_TRIP_DEADLINE_MODEL
+    finally:
+        app.shutdown()
+
+
+def test_current_active_trip_keeps_its_deadline_across_resumes():
+    """The fair-deadline floor is a migration, not a per-resume top-up.
+
+    Recalculating it every time a run was continued let a late driver buy back
+    hours by saving at a stop and continuing, so a snapshot already written at
+    the current deadline model must come back with the deadline untouched.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.driving import ACTIVE_TRIP_DEADLINE_MODEL, DrivingState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        snapshot = driving.snapshot()
+        assert snapshot["deadline_model"] == ACTIVE_TRIP_DEADLINE_MODEL
+        deadline = driving.job.deadline_game_h
+
+        # Deep into the run and out of hours: the old unconditional floor keyed
+        # off hours used, so this is exactly where it used to hand out more.
+        snapshot["position_mi"] = driving.trip.total_miles * 0.9
+        snapshot["game_minutes"] = deadline * 60.0 * 2.0
+
+        resumed = DrivingState.from_snapshot(app.ctx, snapshot)
+
+        assert resumed is not None
+        assert resumed.job.deadline_game_h == deadline
+        assert snapshot["job"]["deadline_game_h"] == deadline
+    finally:
+        app.shutdown()
+
+
+def test_resumed_drive_advances_the_calendar_by_the_time_already_driven():
+    """Season, date, and simulated weather share the trip clock, not the start hour."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        snapshot = driving.snapshot()
+        snapshot["game_minutes"] = 30.0 * 60.0  # a day and a bit on the road
+
+        resumed = DrivingState.from_snapshot(app.ctx, snapshot)
+
+        assert resumed is not None
+        assert resumed.weather.game_hours == pytest.approx(
+            app.ctx.profile.calendar_game_hours + 30.0
         )
     finally:
         app.shutdown()
+
 
 def test_bare_city_job_snapshot_gets_facility_fallback():
     from freight_fate.app import App

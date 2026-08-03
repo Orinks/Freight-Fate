@@ -46,6 +46,17 @@ _ID_CHARS = frozenset("abcdefghijklmnopqrstuvwxyz0123456789-_")
 _TOKEN_PREFIX = "ffd_"
 
 
+# pygame.SCRAP_TEXT is the plain string "text/plain". Windows resolves that to
+# its own text format, so one type is all Windows ever needs -- but on X11 a
+# scrap type names the selection target the clipboard owner advertises, and
+# pygame maps "text/plain;charset=utf-8" onto UTF8_STRING, which is what every
+# desktop app and browser offers. SCRAP_TEXT reaches none of them: it reads
+# back nothing and is refused outright on write, which is why Linux copies and
+# pastes used to fall through to a Tk fallback that a stock Linux desktop does
+# not even have installed. Windows keeps its own type first, untouched.
+_SCRAP_TEXT_TYPES = (pygame.SCRAP_TEXT, "text/plain;charset=utf-8")
+
+
 def _clean_clip(text: str) -> str:
     """Strip the junk Windows clipboards attach: NULs, CR/LF, whitespace."""
     return text.replace("\x00", "").strip()
@@ -62,9 +73,10 @@ def _clipboard_once() -> str | None:
         else:  # legacy scrap: bytes with possible trailing NULs
             if not scrap.get_init():
                 scrap.init()  # needs the display up; raises when called early
-            raw = scrap.get(pygame.SCRAP_TEXT)
-            if raw:
-                return _clean_clip(raw.decode("utf-8", "ignore"))
+            for scrap_type in _SCRAP_TEXT_TYPES:
+                raw = scrap.get(scrap_type)
+                if raw:
+                    return _clean_clip(raw.decode("utf-8", "ignore"))
     except Exception:
         pass
     # macOS fallback: pbpaste ships with the OS and needs no GUI toolkit.
@@ -114,8 +126,13 @@ def _clipboard_write_once(text: str) -> bool:
             return True
         if not scrap.get_init():
             scrap.init()  # needs the display up; raises when called early
-        scrap.put(pygame.SCRAP_TEXT, text.encode("utf-8"))
-        return True
+        data = text.encode("utf-8")
+        for scrap_type in _SCRAP_TEXT_TYPES:
+            try:
+                scrap.put(scrap_type, data)
+                return True
+            except Exception:
+                continue  # X11 refuses the types its clipboard does not carry
     except Exception:
         pass
     if sys.platform == "darwin":

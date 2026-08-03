@@ -11,7 +11,11 @@ from .driving_pickup import DrivingPickupMixin
 from .driving_speed_control import SpeedControlStateMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 
+# Bumped when the meaning of a snapshot's deadline changes. A snapshot written
+# under an older model gets the one-time fair-deadline floor on resume; one at
+# the current model keeps the deadline exactly as saved.
 ACTIVE_TRIP_DEADLINE_MODEL = 1
+
 
 class DrivingState(
     DrivingControlsMixin,
@@ -259,10 +263,11 @@ class DrivingState(
             job = normalize_job_cities(job_from_payload(j), ctx.world)
             position_mi = float(data.get("position_mi", 0.0))
             game_minutes = float(data.get("game_minutes", 0.0))
-
-# Fix: fair_active_deadline was called unconditionally, allowing Late deliveries to quit and calculate a new deadline.
-# current saves created before the fix remain indistinguishable from genuinely old mileage-deadline saves.
-
+            # fair_active_deadline is a one-time compatibility floor, but it
+            # used to run on every resume: a late run could buy hours simply by
+            # saving at a stop and continuing. Snapshots now carry the deadline
+            # model they were written under, so the floor is applied once to a
+            # save that predates the marker and never again.
             deadline_model = int(data.get("deadline_model", 0))
             if deadline_model < ACTIVE_TRIP_DEADLINE_MODEL:
                 job.deadline_game_h = fair_active_deadline(
@@ -294,16 +299,12 @@ class DrivingState(
                 target_mph=None if target is None else float(target),
             )
             state.trip.restore(position_mi, game_minutes)
-
-# WeatherSystem starts at the profile's pre-trip calendar time. Restore the
-# elapsed active-trip time as well so the spoken date, season, and simulated
-# weather use the same instant as the trip clock.
-
+            # WeatherSystem starts at the profile's pre-trip calendar time, and
+            # the profile clock only moves when the run ends. Add the elapsed
+            # trip time back so the spoken date, season, and simulated weather
+            # use the same instant as the trip clock.
             if state.weather.game_hours is not None:
-                state.weather.game_hours = (
-                    ctx.profile.calendar_game_hours + game_minutes / 60.0
-                )
-
+                state.weather.game_hours = ctx.profile.calendar_game_hours + game_minutes / 60.0
             planned_key = data.get("planned_stop_key") or None
             if planned_key is None:
                 # Saved before plans carried a stop identity: a bare name cannot

@@ -3,6 +3,10 @@
 The macOS path matters most: creating a hidden Tk root inside a running SDL
 app aborts the whole process at the C level, so on darwin the fallback must
 be pbpaste and tkinter must never be touched.
+
+The X11 tests matter for the opposite reason: on Linux there is no fallback
+worth having (tkinter is not installed on a stock desktop and is not in the
+release build), so scrap itself has to succeed.
 """
 
 from __future__ import annotations
@@ -19,6 +23,55 @@ from freight_fate.states import online_states
 def _no_scrap(monkeypatch):
     """Make the pygame scrap path fail so the platform fallback runs."""
     monkeypatch.setattr(online_states, "pygame", SimpleNamespace(scrap=None))
+
+
+class _X11Scrap:
+    """pygame's X11 scrap, which the Windows one does not resemble.
+
+    A scrap type on X11 is the selection target the clipboard owner really
+    advertises. Desktop apps and browsers advertise "text/plain;charset=utf-8";
+    none of them advertise the bare "text/plain" that pygame.SCRAP_TEXT is. So
+    a read for SCRAP_TEXT comes back empty and a write for it is refused.
+    """
+
+    TYPE = "text/plain;charset=utf-8"
+
+    def __init__(self, held: bytes | None = None):
+        self.held = held
+
+    def get_init(self) -> bool:
+        return True
+
+    def init(self) -> None:
+        pass
+
+    def get(self, scrap_type: str) -> bytes | None:
+        return self.held if scrap_type == self.TYPE else None
+
+    def put(self, scrap_type: str, data: bytes) -> None:
+        if scrap_type != self.TYPE:
+            # pygame.error, which subclasses RuntimeError.
+            raise RuntimeError("content could not be placed in clipboard.")
+        self.held = data
+
+
+def _linux_with_scrap(monkeypatch, scrap):
+    """A stock Linux desktop: scrap works, and there is no Tk to fall back to."""
+    monkeypatch.setattr(online_states, "pygame", SimpleNamespace(scrap=scrap))
+    monkeypatch.setattr(online_states.sys, "platform", "linux")
+    monkeypatch.setitem(sys.modules, "tkinter", None)  # import tkinter -> ImportError
+
+
+def test_x11_read_uses_the_type_the_clipboard_actually_offers(monkeypatch):
+    _linux_with_scrap(monkeypatch, _X11Scrap(b"road-star-abcd1234\n"))
+    assert online_states.read_clipboard_text() == "road-star-abcd1234"
+
+
+def test_x11_write_uses_the_type_x11_accepts(monkeypatch):
+    scrap = _X11Scrap()
+    _linux_with_scrap(monkeypatch, scrap)
+    assert online_states.write_clipboard_text("ffd_" + "a" * 64)
+    assert scrap.held == b"ffd_" + b"a" * 64
 
 
 def test_mac_fallback_reads_pbpaste(monkeypatch):
