@@ -36,6 +36,15 @@
   ([@corykad](https://github.com/corykad)) in
   [PR #144](https://github.com/Orinks/Freight-Fate/pull/144).
 
+- **The clipboard works on Linux.** On Linux, pasting your Driver ID or driver
+  token during online setup always said nothing could be read, and copying a
+  delivery summary or a reviewed message always said the copy did not take,
+  however carefully you had copied the text first. Linux desktops and browsers
+  offer clipboard text under a different name than Windows does, and the game
+  was only ever asking for the Windows one. It now asks for the names Linux
+  really uses, so pasting into the game and copying out of it both work.
+  Windows and Mac are unchanged. Thanks to a player report.
+
 ## 1.8.7 - 2026-07-30
 
 ### Added
