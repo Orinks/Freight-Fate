@@ -45,6 +45,37 @@
   really uses, so pasting into the game and copying out of it both work.
   Windows and Mac are unchanged. Thanks to a player report.
 
+- **Continuing a saved run announces the right date and season again.** When
+  you picked a run back up, the calendar went back to the day you set out on
+  rather than the day you had driven into, so a haul that had rolled past
+  midnight came back on yesterday's date, and a long run that had carried you
+  into a new season heard the old one, with the weather to match. Continuing a
+  drive now puts the calendar at the same moment your trip clock is at, so the
+  date, the season and the weather all agree. Contributed by Day Garwood
+  ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #146](https://github.com/Orinks/Freight-Fate/pull/146).
+
+- **Continuing a saved run no longer pushes your deadline further out.** Every
+  time a delivery was picked back up, the game worked the deadline out again
+  from where you were and how long you had been going, which quietly gave you
+  more hours than dispatch had agreed to. A run you were running late on could
+  be rescued just by saving at a stop and continuing. Deadlines now stay where
+  dispatch set them. A run already under way gets one last recalculation the
+  first time you continue it after this update, so nobody loses hours they had
+  been counting on, and it is fixed from then on. Contributed by Day Garwood
+  ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #146](https://github.com/Orinks/Freight-Fate/pull/146).
+
+- **Quitting mid-drive writes a save that agrees with itself.** Quitting to the
+  title mid-drive puts you back at the stop you last saved at, but the save was
+  still being written with the hours of service and the fatigue you had built
+  up since leaving that stop. Continuing always put them back, so the drive you
+  returned to was correct either way, and this only mattered to the cloud
+  backup, which was storing a shift that never happened. The save now records
+  the stop you will actually resume from. Contributed by Day Garwood
+  ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #146](https://github.com/Orinks/Freight-Fate/pull/146).
+
 ## 1.8.7 - 2026-07-30
 
 ### Added

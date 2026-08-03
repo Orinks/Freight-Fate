@@ -449,6 +449,20 @@ Net-new realism candidates, roughly by area:
   `truck_conditions` shape.** The client invariants and docs are updated for
   save version 5, but the server plausibility rules still describe the flat
   pre-v5 condition fields.
+- [x] **Mid-drive quit writes a self-consistent save.** Quit to main menu now
+  rolls hours of service and fatigue back to the active-trip checkpoint the
+  player will actually resume from, instead of persisting the shift accrued
+  since the last stop (PR #146).
+- [ ] **Close the same gap on the window-close path.** `App.shutdown()` saves
+  the profile unconditionally, so closing the window mid-drive still writes the
+  drifted hours of service and fatigue. Resuming re-restores both from the
+  active-trip snapshot, so gameplay is unaffected, but the on-disk save and its
+  cloud backup disagree with their own checkpoint until then.
+- [ ] **Decide whether mid-drive money should roll back too.** Speeding fines
+  and roadside fees deduct from the profile as they happen, so a mid-drive quit
+  keeps money lost after the last stop while the position, hours, and fatigue
+  all rewind to it. Either commit the charge deliberately or restore it with
+  the rest of the checkpoint.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
   acceleration, grade lugging, fuel burn, and now braking: the foundation
   brakes have a fixed force ceiling sized for the rated gross, so loads over
