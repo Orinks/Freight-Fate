@@ -1000,6 +1000,21 @@
 
 ### Fixed
 
+- **The stop bar's steady tone is calmer.** The tone that means you are on top
+  of the stop bar was high and sharp -- hard to sit through for the seconds it
+  is meant to hold. It is now a much lower, steadier tone, easy on the ear
+  while still carrying over the engine. It stays just as easy to tell from
+  the ticks leading up to it: where those quicken, this one drops.
+- **The stop bar's steady tone always stops.** The continuous tone that means
+  you are on top of the stop bar could be left sounding for the rest of the
+  drive: reach it creeping up to a red light, and once you crossed the bar
+  the tone stayed on, straight through the menus, until the game was closed.
+  It now ends the moment the bar is behind you, whether you waited out the
+  red, crossed on the green, or stopped for a sign, and it goes quiet on its
+  own if anything else ever gets in the way of ending it -- pausing or
+  arriving silences it at once. The tone comes back only when the next stop
+  bar is under your bumper. Rumble strip sound left playing when you paused
+  on the strip is gone the same way.
 - **A damaged settings file no longer takes the game down with it.** If your
   settings file was left half-written by a crash, or ended up holding
   something that is not a volume level where a volume level belongs, the game

@@ -1195,6 +1195,12 @@ class DrivingEventMixin:
 
     def _update_ramp_light(self, dt: float) -> None:
         """Advance the terminal light in real time and speak state changes."""
+        # The bar's cues run first and unconditionally. They are the only code
+        # that stops the solid tone, and every early return below used to skip
+        # them: a driver who reached the tone and then crossed the bar --
+        # green, red, or stop sign -- carried it through the rest of the run
+        # and out into the menus (Shane, 2026-08-03).
+        self._update_ramp_bar_ticks(dt)
         if self._ramp_mi is None or self._ramp_terminal_done:
             return
         if self._ramp_control == "stop":
@@ -1205,14 +1211,12 @@ class DrivingEventMixin:
             # 2026-07-22, Milwaukee grain elevator, 15 percent).
             self._update_ramp_queue_guidance()
             self._update_ramp_gap_countdown()
-            self._update_ramp_bar_ticks(dt)
             return
         if self._ramp_control != "signal":
             return
         self._ramp_light_timer += dt
         self._update_ramp_queue_guidance()
         self._update_ramp_gap_countdown()
-        self._update_ramp_bar_ticks(dt)
         phase = self._ramp_light_phase()
         if not self._ramp_light_announced or phase == self._ramp_light_last_phase:
             return
@@ -1344,14 +1348,16 @@ class DrivingEventMixin:
                 return
 
     def _set_bar_solid(self, on: bool) -> None:
-        """The continuous tone of the bar's final zone, started and stopped
-        idempotently so every early exit can just turn it off."""
-        from ..audio import CH_ALERT
+        """The continuous tone of the bar's final zone.
 
-        if on and not self._bar_solid_on:
-            self.ctx.audio.start_loop(CH_ALERT, "vehicle/bar_solid", volume=0.85, fade_ms=60)
-        elif not on and self._bar_solid_on:
-            self.ctx.audio.stop_loop(CH_ALERT, fade_ms=120)
+        Held, not started: the tone is re-asserted on every tick it applies
+        to and lapses on its own as soon as it is not, so it cannot survive
+        this state losing the frame to a menu or an arrival screen. Turning
+        it back off here is still instant."""
+        if on:
+            self.ctx.audio.hold_alert("vehicle/bar_solid", volume=0.85)
+        elif self._bar_solid_on:
+            self.ctx.audio.release_alert()
         self._bar_solid_on = on
 
     def _update_ramp_bar_ticks(self, dt: float) -> None:

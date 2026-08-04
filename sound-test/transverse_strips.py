@@ -108,12 +108,20 @@ def build_bar_solid() -> np.ndarray:
 
     Owner spec (written straight into the manual, 2026-07-27): ticks
     quicken from 300 feet, and AT the bar, still moving, the tone goes
-    continuous -- your last leeway to be nearly stopped. Same pitch family
-    as the bink so it reads as the ticks fusing. Seamless by integer
-    cycles: 1250 Hz and its octave both complete exactly on the loop."""
+    continuous -- your last leeway to be nearly stopped.
+
+    Pitched DOWN to 400 Hz (owner call 2026-08-03, on a playtester's
+    report: at 1250 it was piercing, and a tone you hold for seconds at a
+    time has to be one you can stand). It no longer sits in the bink's
+    pitch family, so the fuse now reads as a change of register rather
+    than the ticks running together -- a clearer "you are there" than a
+    faster version of the same beep, and calm enough to hold. The octave
+    stays, quietly: it keeps the tone speaking over engine noise instead
+    of humming underneath it. Seamless by integer cycles: 400 Hz and its
+    octave both complete exactly on the loop."""
     seconds = 0.5
     t = np.arange(int(SR * seconds)) / SR
-    sig = np.sin(2.0 * np.pi * 1250.0 * t) + 0.3 * np.sin(2.0 * np.pi * 2500.0 * t)
+    sig = np.sin(2.0 * np.pi * 400.0 * t) + 0.3 * np.sin(2.0 * np.pi * 800.0 * t)
     top = float(np.max(np.abs(sig))) or 1.0
     return sig / top * 0.7
 

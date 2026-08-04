@@ -65,7 +65,7 @@ current idle, start, and shutdown cues.
 | Lane locator tock | `vehicle/lane_locator.wav` | Original synthesized soft position tock (`sound-test/transverse_strips.py`), panned by the game to the truck's place in its lane |
 | Curve cue bink | `vehicle/curve_bink.wav` | Original synthesized bright cue tone (`sound-test/transverse_strips.py`); carries the pacenote call, the curve entry, and the stop-bar closing tick -- the beep the old ui/tick placeholder note asked for |
 | Lane-line marker roll | `vehicle/lane_line_cross.wav` | Original synthesized raised-marker crossing (`sound-test/transverse_strips.py`): the five-hit axle roll of a tractor-trailer crossing a lane line, panned to the crossed side |
-| Stop-bar solid tone | `vehicle/bar_solid.wav` | Original synthesized continuous alert (`sound-test/transverse_strips.py`): the parking-sensor beeps fusing solid in the bar's final leeway |
+| Stop-bar solid tone | `vehicle/bar_solid.wav` | Original synthesized continuous alert (`sound-test/transverse_strips.py`): the parking-sensor beeps going solid in the bar's final leeway, a calm 400 Hz you can hold for seconds at a time (pitched down from 1250 by ear, 2026-08-03) |
 
 ## Licensed Driving Sounds (release builds only)
 

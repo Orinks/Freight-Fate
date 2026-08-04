@@ -79,6 +79,14 @@ CH_ALERT = 16  # continuous alert tones: the stop bar's solid zone
 RESERVED = 14
 NUM_CHANNELS = 32
 
+# A held alert tone is a dead man's switch. Its owner re-asserts it every
+# frame through hold_alert, and it stops on its own the moment that stops --
+# a menu opening over the drive, the moment it warned about ending, an owner
+# that lost track of it. A continuous tone in a blind player's headphones
+# must never be able to outlive the thing it is warning about: the stop bar's
+# solid tone once ran until the game was killed (Shane, 2026-08-03).
+ALERT_HOLD_TIMEOUT_S = 0.4
+
 # Horn sustain loop points (samples, at the asset's 44100 Hz). The horn is an
 # attack -> sustain -> release sound: play the attack, loop this tuned interior
 # region while the key/button is held, then let the release tail ring out.
@@ -1765,6 +1773,8 @@ class AudioEngine:
         self._last_bank_key: dict[str, str] = {}  # base -> cut played last
         self._asset_known: dict[str, bool] = {}  # key -> resolves anywhere
         self._logged_volumes: tuple[float | None, ...] | None = None
+        self._alert_hold_key = ""  # continuous alert tone being re-asserted
+        self._alert_hold_s = 0.0  # time left before the hold lapses
         log.info("Audio backend: %s", self._impl.name)
 
     @staticmethod
@@ -1941,6 +1951,29 @@ class AudioEngine:
         """Stop looping ``channel`` and let its release tail play to the end."""
         self._impl.release_sustain_loop(channel, fade_ms)
 
+    # -- held alert tones ------------------------------------------------------
+
+    def hold_alert(self, key: str, volume: float = 1.0, fade_ms: int = 60) -> None:
+        """Sound the continuous alert tone ``key`` for the next moment only.
+
+        Call this every frame for as long as the alert applies. The tone
+        starts on the first call and stops itself a fraction of a second
+        after the calls stop, so it can never be left ringing by a caller
+        that returned early, ended, or lost the frame to a menu. Calling it
+        again after a silencing transition brings the same tone back.
+        """
+        self.start_loop(CH_ALERT, key, volume=volume, fade_ms=fade_ms)
+        self._alert_hold_key = key
+        self._alert_hold_s = ALERT_HOLD_TIMEOUT_S
+
+    def release_alert(self, fade_ms: int = 120) -> None:
+        """Stop a held alert tone now, rather than waiting for it to lapse."""
+        if not self._alert_hold_key:
+            return
+        self._alert_hold_key = ""
+        self._alert_hold_s = 0.0
+        self.stop_loop(CH_ALERT, fade_ms=fade_ms)
+
     # -- truck engine ----------------------------------------------------------------
 
     def engine_start(self, play_start_sound: bool = True) -> None:
@@ -1961,6 +1994,13 @@ class AudioEngine:
     def update(self, dt: float) -> None:
         """Advance time-based audio fades. Call once per frame from the main loop."""
         self._impl.update(dt)
+        # The held-alert watchdog. This runs from the app loop no matter which
+        # screen is up, so a tone whose owner stopped updating goes quiet on
+        # its own instead of running until the player quits the game.
+        if self._alert_hold_s > 0.0:
+            self._alert_hold_s -= dt
+            if self._alert_hold_s <= 0.0:
+                self.release_alert()
 
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None:
         self._impl.set_engine_rpm(rpm, throttle)
@@ -2020,8 +2060,12 @@ class AudioEngine:
         self._impl.reverse_stop()
 
     def stop_world(self) -> None:
-        """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
+        """Stop engine, road, weather, ambience, and any held alert tone
+        (leaving UI sfx alone)."""
         self.engine_stop(shutdown_sound=False)
+        # A pause or an arrival cuts the alert now, without the watchdog's
+        # fraction of a second of tone over the top of the menu.
+        self.release_alert(fade_ms=200)
         for ch in (
             CH_ROAD,
             CH_WEATHER,
@@ -2031,6 +2075,10 @@ class AudioEngine:
             CH_AIR,
             CH_JAKE,
             CH_RADIO_FX,
+            # The edge texture is road noise like the rest: left out, a driver
+            # who paused with a tire on the rumble strip took the strip into
+            # the menu with them. It comes back on its own when the drive does.
+            CH_EDGE,
         ):
             self.stop_loop(ch, fade_ms=400)
 
