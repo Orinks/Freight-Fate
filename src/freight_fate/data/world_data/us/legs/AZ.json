@@ -737,7 +737,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "bullhead_city_az_us",
@@ -2195,7 +2196,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "camp_verde_az_us",
@@ -3294,7 +3296,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "camp_verde_az_us",
@@ -4288,7 +4291,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": false
     },
     {
       "from": "casa_grande_az_us",
@@ -5016,7 +5020,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "cottonwood_az_us",
@@ -5467,7 +5472,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "douglas_az_us",
@@ -6275,7 +6281,8 @@
           "lon": -110.31176,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "douglas_az_us",
@@ -7835,7 +7842,8 @@
           "lon": -110.95683,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "flagstaff_az_us",
@@ -9972,7 +9980,8 @@
           "at_mi": 147.0,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "flagstaff_az_us",
@@ -11630,7 +11639,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": false
     },
     {
       "from": "flagstaff_az_us",
@@ -12424,7 +12434,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "globe_az_us",
@@ -13630,7 +13641,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": false
     },
     {
       "from": "holbrook_az_us",
@@ -14790,7 +14802,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "kingman_az_us",
@@ -16783,7 +16796,8 @@
           "at_mi": 202.0,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kingman_az_us",
@@ -17252,7 +17266,8 @@
           "lon": -114.00679,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kingman_az_us",
@@ -18004,7 +18019,8 @@
           "lon": -114.14576,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kingman_az_us",
@@ -19403,7 +19419,8 @@
           "lon": -114.9161635,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lake_havasu_city_az_us",
@@ -20837,7 +20854,8 @@
           "lon": -114.5834,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "payson_az_us",
@@ -22801,7 +22819,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": false
     },
     {
       "from": "phoenix_az_us",
@@ -24455,7 +24474,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "phoenix_az_us",
@@ -25211,7 +25231,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "phoenix_az_us",
@@ -28874,7 +28895,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": true
     },
     {
       "from": "phoenix_az_us",
@@ -30058,7 +30080,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "prescott_az_us",
@@ -31618,7 +31641,8 @@
           "lon": -111.61797,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "prescott_az_us",
@@ -33284,7 +33308,8 @@
           "lon": -112.15116,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "show_low_az_us",
@@ -34039,7 +34064,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": false
     },
     {
       "from": "sierra_vista_az_us",
@@ -35249,7 +35275,8 @@
           "lon": -110.96625,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "tucson_az_us",
@@ -36200,7 +36227,8 @@
           "lon": -110.96625,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tucson_az_us",
@@ -37184,7 +37212,8 @@
           "lon": -110.43259,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "winslow_az_us",
@@ -37550,7 +37579,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "yuma_az_us",
@@ -38975,7 +39005,8 @@
           "lon": -112.205449,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

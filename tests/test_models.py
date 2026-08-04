@@ -648,6 +648,42 @@ def test_legacy_hos_off_setting_loads_as_realistic():
     assert loaded.hos_mode == "realistic"
 
 
+@pytest.mark.parametrize(
+    "payload",
+    [
+        '{"sfx_volume": null, "master_volume": null}',
+        '{"sfx_volume": false, "master_volume": false}',
+        '{"sfx_volume": "loud", "master_volume": [1]}',
+        '{"sfx_volume": 0.8, "master_vol',  # truncated mid-write
+        "[1, 2, 3]",  # not a settings object at all
+        "",
+    ],
+)
+def test_damaged_settings_fall_back_to_defaults(payload):
+    # A settings file damaged by a crash mid-write, or hand-edited into a bad
+    # shape, must not take the game's startup with it -- and must not read as
+    # silence. Anything that is not a level falls back to the default.
+    defaults = Settings()
+    path = Settings().path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(payload, encoding="utf-8")
+    loaded = Settings.load()
+    assert loaded.master_volume == defaults.master_volume
+    assert loaded.sfx_volume == defaults.sfx_volume
+    assert loaded.speech_volume == defaults.speech_volume
+
+
+def test_settings_keep_a_level_the_player_really_set():
+    # The fallback must not undo a deliberate choice: zero stays zero.
+    s = Settings()
+    s.sfx_volume = 0.0
+    s.master_volume = 0.25
+    s.save()
+    loaded = Settings.load()
+    assert loaded.sfx_volume == 0.0
+    assert loaded.master_volume == 0.25
+
+
 def test_legacy_chatty_verbosity_loads_as_normal():
     # The chatty level (2) is gone; it only sped up the speed-callout timer.
     # Saved chatty falls to normal instead of indexing off the label list.

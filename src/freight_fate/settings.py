@@ -119,6 +119,9 @@ class Settings:
     # lane keeping, tap lane changes), because the easiest preset must not
     # leave a manual steering task running.
     steering_assist: str = "off"  # off/light/realistic lane drift
+    # How loud the lane and edge cues speak: the edge-boundary textures,
+    # the lane locator, and the dead-man's-curve strips all scale by it.
+    lane_cue_loudness: str = "standard"  # subtle/standard/prominent
     driving_assistance_preset: str = "realistic"
     automatic_emergency_braking: bool = True
     lane_departure_warning: bool = True
@@ -247,10 +250,14 @@ class Settings:
     @classmethod
     def load(cls) -> Settings:
         s = cls()
+        defaults = cls()
         data = None
         try:
             with open(s.path, encoding="utf-8") as f:
                 data = json.load(f)
+            if not isinstance(data, dict):
+                log.warning("Settings file is not a settings object; using defaults")
+                data = {}
             for k, v in data.items():
                 if hasattr(s, k):
                     setattr(s, k, v)
@@ -269,6 +276,8 @@ class Settings:
         # below. debug_off stays valid as an internal dev/test bypass only.
         if s.hos_mode not in HOS_MODES:
             s.hos_mode = "realistic"
+        if s.lane_cue_loudness not in ("subtle", "standard", "prominent"):
+            s.lane_cue_loudness = "standard"
         if s.steering_assist not in ("off", "light", "realistic"):
             s.steering_assist = "off"
             s.lane_departure_warning = False
@@ -350,7 +359,21 @@ class Settings:
             "speech_pitch",
             "speech_volume",
         ):
-            setattr(s, attr, max(0.0, min(1.0, float(getattr(s, attr)))))
+            value = getattr(s, attr)
+            # A level that is not a number -- null, true, a list, a word --
+            # used to raise straight out of load() and take the game's whole
+            # startup with it. It falls back to the default instead. A bool
+            # counts as damage, not as a level: false would read as silence.
+            if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+                log.warning("Setting %s is not a level (%r); using the default", attr, value)
+                value = getattr(defaults, attr)
+            else:
+                try:
+                    value = float(value)
+                except ValueError:
+                    log.warning("Setting %s is not a level (%r); using the default", attr, value)
+                    value = getattr(defaults, attr)
+            setattr(s, attr, max(0.0, min(1.0, float(value))))
         if not isinstance(s.radio_station_id, str) or not s.radio_station_id:
             s.radio_station_id = "route_playlist"
         return s

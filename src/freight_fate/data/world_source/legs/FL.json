@@ -1172,7 +1172,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "cape_coral_fl_us",
@@ -2431,7 +2432,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "cape_coral_fl_us",
@@ -3784,7 +3786,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "coral_springs_fl_us",
@@ -5031,7 +5034,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "crestview_fl_us",
@@ -6329,7 +6333,8 @@
           "lon": -85.39989,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "crestview_fl_us",
@@ -7008,7 +7013,8 @@
           "lon": -87.08629,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "daytona_beach_fl_us",
@@ -8115,7 +8121,8 @@
           "lon": -81.29126,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "daytona_beach_fl_us",
@@ -8531,7 +8538,8 @@
           "lon": -81.13445,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_myers_fl_us",
@@ -9271,7 +9279,8 @@
           "lon": -81.78899,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "gainesville_fl_us",
@@ -10119,7 +10128,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "gainesville_fl_us",
@@ -11876,7 +11886,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "gainesville_fl_us",
@@ -13250,7 +13261,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "jacksonville_fl_us",
@@ -14113,7 +14125,8 @@
           "lon": -81.66612,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jacksonville_fl_us",
@@ -14769,7 +14782,8 @@
           "lon": -82.4025,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jacksonville_fl_us",
@@ -17446,7 +17460,8 @@
           "lon": -80.4000025,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jacksonville_fl_us",
@@ -18612,7 +18627,8 @@
           "lon": -82.1978336,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lake_city_fl_us",
@@ -19471,7 +19487,8 @@
           "lon": -83.30976,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lakeland_fl_us",
@@ -20557,7 +20574,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "miami_fl_us",
@@ -22893,7 +22911,8 @@
           "lon": -80.37332,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "north_port_fl_us",
@@ -23689,7 +23708,8 @@
           "lon": -81.81492,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ocala_fl_us",
@@ -24927,7 +24947,8 @@
           "lon": -82.21192,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "orlando_fl_us",
@@ -26520,7 +26541,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "orlando_fl_us",
@@ -27922,7 +27944,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "palm_bay_fl_us",
@@ -29418,7 +29441,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "palm_bay_fl_us",
@@ -30411,7 +30435,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "palm_coast_fl_us",
@@ -31143,7 +31168,8 @@
           "lon": -81.4037,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "panama_city_fl_us",
@@ -32277,7 +32303,8 @@
           "lon": -86.50809,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "panama_city_fl_us",
@@ -33792,7 +33819,8 @@
           "lon": -85.03788,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "pensacola_fl_us",
@@ -34818,7 +34846,8 @@
           "lon": -87.61683,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "port_saint_lucie_fl_us",
@@ -35596,7 +35625,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "port_saint_lucie_fl_us",
@@ -36862,7 +36892,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "port_saint_lucie_fl_us",
@@ -37597,7 +37628,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "sarasota_fl_us",
@@ -38113,7 +38145,8 @@
           "lon": -82.45593,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "spring_hill_fl_us",
@@ -39222,7 +39255,8 @@
           "lon": -82.1591,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "spring_hill_fl_us",
@@ -40125,7 +40159,8 @@
           "lon": -82.49301,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tallahassee_fl_us",
@@ -41702,7 +41737,8 @@
           "lon": -86.50809,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tallahassee_fl_us",
@@ -43228,7 +43264,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tallahassee_fl_us",
@@ -44372,7 +44409,8 @@
           "lon": -82.9601701,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tampa_fl_us",
@@ -46838,7 +46876,8 @@
           "lon": -81.1320866,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tampa_fl_us",
@@ -47763,7 +47802,8 @@
           "lon": -82.42041,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "west_palm_beach_fl_us",
@@ -49021,7 +49061,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "west_palm_beach_fl_us",
@@ -50244,7 +50285,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "west_palm_beach_fl_us",
@@ -51307,7 +51349,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     }
   ]
 }

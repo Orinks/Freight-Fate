@@ -99,6 +99,13 @@ def first_dispatch_done(profile) -> bool:
     return "first_dispatch" in getattr(profile, "achievements", ())
 
 
+# Gated off the 1.9 release line (owner + Josh, 2026-07-27): the school is
+# not finished and 1.9 is feature-frozen. The code stays -- reverting
+# woven-in work mid-freeze invites regressions -- and the 2.0 line flips
+# this flag to finish it properly.
+DRIVING_SCHOOL_ENABLED = False
+
+
 def first_day_guidance_active(profile) -> bool:
     deliveries = int(getattr(profile.career, "deliveries", 0))
     return not first_dispatch_done(profile) and deliveries <= 0
@@ -272,12 +279,18 @@ class CityMenuState(MenuState):
                 "refrigerated, heavy-haul, or high-value freight before "
                 "the carrier sponsors it at the listed level.",
             ),
-            MenuItem(
-                "Driving school",
-                self._driving_school,
-                help="Spoken lessons on a practice road where nothing "
-                "counts: no money, no wear, no hours. Learn the "
-                "controls or test new equipment consequence-free.",
+            *(
+                [
+                    MenuItem(
+                        "Driving school",
+                        self._driving_school,
+                        help="Spoken lessons on a practice road where nothing "
+                        "counts: no money, no wear, no hours. Learn the "
+                        "controls or test new equipment consequence-free.",
+                    )
+                ]
+                if DRIVING_SCHOOL_ENABLED
+                else []
             ),
             MenuItem(
                 "Truck status",
@@ -452,7 +465,15 @@ class CityMenuState(MenuState):
             else "poor"
         )
         if not p.owns_equipment():
-            lead = f"Assigned {carrier_name(p)} tractor: {truck.label}."
+            from ..models.carrier_fleet import fleet_assignment_text, slip_seats
+
+            lead = f"Assigned {carrier_name(p)} tractor. {fleet_assignment_text(p)}"
+            if slip_seats(p):
+                lead += (
+                    " You slip-seat: dispatch matches one of the yard's spare "
+                    "tractors to each load, and each spare keeps its own fuel "
+                    "and wear between draws. A dedicated seat comes at level 9."
+                )
         else:
             lead = f"Owned tractor: {truck.label}."
         compound = "winter" if p.tire_type == "winter" else "all-season"

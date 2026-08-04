@@ -4,6 +4,47 @@
 
 ### Added
 
+- **Steer through curves by ear.** With steering assist on, the road sound
+  now leans toward where the wheel should go: it slides into a bend as the
+  bend arrives and leads you through it, and when you drift it sits toward
+  lane center so you can follow it home. Centered on a straight road it
+  stays put and nothing new plays. Drift to the road edge and the boundary
+  answers with real textures from the side it happens on: a ragged stutter
+  as your tires clip the rumble strip, a steady buzz fully on it, and
+  loose gravel once you are off the pavement. On an undivided road the
+  warning tells the truth: past the centerline you are in the oncoming
+  lane, and there is no gravel out there. Ahead of a true hairpin, warning
+  bars cut across the whole lane wake you up the way the real ones do --
+  three hard grouped rumbles under all your tires, far enough out that
+  braking after them still makes the curve. The I key adds an on-demand
+  lane locator: a soft repeating tock from wherever you sit in your lane,
+  and pressing I again turns it off. Entering a demanding bend ticks a
+  bright cue from the bend's side, and coming out the far side the
+  co-driver gives the verdict: held your line, caught the edge, or
+  through it hot. Changing lanes, your tires roll over the lane line's
+  raised markers -- the front-to-back thump-roll of a real crossing,
+  from the side you crossed. A new setting, lane and edge cue loudness,
+  sets how loud all of it speaks: subtle, standard, or prominent.
+
+- **The road tells you how many lanes it has.** Your road status now says
+  the lanes on your side of the road -- "divided, three lanes your side" on
+  an interstate, "two lanes your side" on a smaller highway -- and your trip
+  briefing sums it up before you roll. As the road widens or narrows, you
+  hear it: "road widens to three lanes", "down to two lanes your side". It
+  reads the real road, so where the map has no lane data it stays quiet
+  rather than guess, and the extra callouts hush in terse speech. Lane
+  numbers only for now -- passing and lane changes come later.
+- **A warning before every steep grade.** Any climb or descent of three percent
+  or more that runs for at least three quarters of a mile is now called out
+  before you reach it, with how steep it is, how far it runs, and -- going down
+  -- what to do about it before it starts. In a manual that is picking your
+  gear and setting the engine brake; in an automatic it is setting the engine
+  brake and braking down to speed, which is what puts the transmission in a
+  lower gear for you. Short dips stay quiet, so on a mountain route you hear
+  the hills that matter and nothing else. Terse speech does not get these
+  announcements at all -- press G whenever you want the grade instead. The
+  advisory is there so you can decide before the hill starts: when in doubt,
+  take manual control of the speed rather than leaving it to cruise.
 - **A new song on the country stations.** "Dust on the Highway" opens on a
   lone slide guitar over a rumbling bass, the drums lock in, and organ and
   harmonica trade fills through a gritty lead-guitar solo before the band
@@ -227,6 +268,32 @@
   Phoenix, Chicago, Houston, Atlanta, Nashville, Des Moines, Columbus,
   and Gainesville, and more. Wherever one is in range, it is right there
   on the band with everything else.
+
+- **Community radio joins the dial.** With streamer-safe mode off, the
+  radio now carries the volunteer-run and student stations that give a
+  place its own voice, right alongside the public and NPR ones -- freeform,
+  Pacifica, college, and tribal community radio, from the big cities down
+  to small towns in the mountains and plains. Tune across a market and you
+  come across the local independents, not just the network feed: WORT in
+  Madison, WFMU-style freeform on WTJU and WRFL, the Pacifica stations in
+  Los Angeles, New York, and Washington, and the college institutions --
+  Berkeley, Stanford, Chapel Hill, Georgia Tech, Austin -- that have been
+  on the air for decades. As always, where a town's only community station
+  broadcasts solely through a phone app the game cannot reach, the dial
+  stays quiet there rather than invent a signal.
+
+- **The loneliest highways have a signal now.** With streamer-safe mode
+  off, the emptiest stretches of the map catch a real public-radio
+  station where there used to be only static. Across the Nevada high
+  desert -- Winnemucca, Battle Mountain, and Elko on Interstate 80,
+  Eureka and Ely on US-50 -- the radio now finds the local NPR signal
+  as you pass through, and it fades the way a small mountaintop signal
+  really does, coming up out of the noise and slipping back into it
+  between the ranges. Down in the Big Bend country of far West Texas,
+  Marfa, Alpine, Marathon, Presidio, and Del Rio pick up their own
+  border-country public stations. A few places stay silent on purpose:
+  out where no station truly reaches, the band stays empty rather than
+  pretend otherwise.
 
 - **The engine brake grew its real cylinder selector.** J is now the
   dash switch: it turns the engine brake on at whatever stage you last
@@ -457,6 +524,25 @@
 
 ### Changed
 
+- **Turn signals play a clear tone instead of a soft click.** The blinker,
+  the exit signal, and the pull-over signal now mark themselves with a
+  clean indicator tone panned to the side you are signaling -- the sound a
+  modern cab actually makes -- so the cue carries even for players who
+  could not hear the old relay click.
+
+- **Truck status now explains whose truck you are in.** Company drivers
+  hear which carrier fleet their tractor comes from and what it is good at.
+  Junior drivers also hear that they slip-seat: dispatch matches one of the
+  yard's spare tractors to each load, and every spare keeps its own fuel and
+  wear between draws, so a fresh truck after a turn is the yard handing you
+  a different unit, not your wear disappearing. The level 4 and level 9 rank
+  announcements now say the same in plain words, including that a dedicated
+  seat of your own comes with seniority.
+
+- **The driving school steps out of this release to finish training.**
+  The Driving school item leaves the terminal menu for now: the lessons
+  are not complete, and this release locks its features down. The school
+  returns finished in the next major version.
 - **Automatic Mastodon posts moved to their own hashtag.** Deliveries shared
   to your Mastodon account now carry the FreightFateRuns hashtag instead of
   the FreightFate one. Players use the FreightFate tag to share their own
@@ -489,6 +575,49 @@
   and step through recent speech everywhere else in the game. From the cab
   they now walk the message log instead, which is the same gesture doing a
   fuller job: the lines are kept by category and you can copy one out.
+
+- **The R key now answers just "where am I".** Two short sentences: how far
+  along you are and how far is left, then the road you are on with its
+  direction, the state you are in, and the city it is taking you toward. If
+  you have planned a stop, the distance counts down to that stop instead of
+  the destination, so R tells you how far to the place you are actually
+  driving at. The nearest named place, the grade, the zone, and the next
+  maneuver are gone from it, because each of those already has its own key
+  or lives in the Tab status menu. U still reads what is coming up, and
+  Shift R still reads the next exit.
+- **Shorter driving readouts that fit a braille display.** The clock, route,
+  weather, and fuel reports now put the answer in the first few words, so a
+  one-line braille display shows what matters without panning. The C key
+  leads with the time and whether you are on schedule instead of burying the
+  verdict at the end, and on the terse speech setting it skips the calendar,
+  the appointment restatement, and the stop-planning advice, all of which
+  the Tab status menu still carries.
+
+- **Speech verbosity is now a simple choice between terse and normal.** The
+  chatty level never said anything normal did not; it only repeated your
+  speed a little more often. If you had chatty selected, the game now uses
+  normal, and everything you heard before is still there.
+
+- **Rest stops no longer let you sleep twice for nothing.** When you are
+  already fully rested at a rest stop, choosing a sleep option now warns you
+  that it would only move the clock and your deadline forward, and asks you to
+  press Enter again to confirm. This is the same safeguard the terminal bunk
+  room already had.
+
+- **Walking away from a parked truck now takes you off the drivers board.**
+  If your truck sits stopped with nothing changing for half an hour, you
+  leave the public board just as if you had paused the game, and the board
+  stops calling you a driver who is on duty. The moment anything changes,
+  like rolling again or pulling into a stop, you are back on the board within
+  seconds. Deadhead drives also now say how far along they are, on the board
+  and in Discord, so a long empty run never looks like a parked truck.
+
+- **The streets into town speak their real speed limit now.** Heading in
+  to a customer or a truck stop, the posted limit you hear on each
+  approach street comes from the real road -- an arterial posted 35 or 45
+  no longer reads as a blanket 25 for miles. Where a street's limit isn't
+  on record the sensible default stays, and the slow crawl right at the
+  gate is unchanged.
 
 - **Gear changes are quicker, like a modern automated box.** Power
   upshifts now take a quarter second in the low gears and half a second
@@ -898,6 +1027,65 @@
 
 ### Fixed
 
+- **The stop bar's steady tone is calmer.** The tone that means you are on top
+  of the stop bar was high and sharp -- hard to sit through for the seconds it
+  is meant to hold. It is now a much lower, steadier tone, easy on the ear
+  while still carrying over the engine. It stays just as easy to tell from
+  the ticks leading up to it: where those quicken, this one drops.
+- **The stop bar's steady tone always stops.** The continuous tone that means
+  you are on top of the stop bar could be left sounding for the rest of the
+  drive: reach it creeping up to a red light, and once you crossed the bar
+  the tone stayed on, straight through the menus, until the game was closed.
+  It now ends the moment the bar is behind you, whether you waited out the
+  red, crossed on the green, or stopped for a sign, and it goes quiet on its
+  own if anything else ever gets in the way of ending it -- pausing or
+  arriving silences it at once. The tone comes back only when the next stop
+  bar is under your bumper. Rumble strip sound left playing when you paused
+  on the strip is gone the same way.
+- **A damaged settings file no longer takes the game down with it.** If your
+  settings file was left half-written by a crash, or ended up holding
+  something that is not a volume level where a volume level belongs, the game
+  could refuse to start at all. Anything it cannot read as a level now falls
+  back to that setting's normal value, and it says so in its log. A level you
+  really did set is untouched -- turning something down to nothing still
+  means nothing.
+- **The engine keeps one voice.** When the game's sound file was older than
+  the game itself, the engine could take part of its voice from the old file
+  and part from the new one, crossfading between two different recordings as
+  the revs climbed. The engine now takes every layer of its voice from the
+  same place, so it sounds like one engine again.
+- **A bad sound file no longer costs you every sound.** If the game's sound
+  file is damaged -- a download that stopped short, a copy that did not
+  finish -- the game used to go completely silent. Now it says so in its log
+  and plays whatever sound it can still find, and a single unreadable sound
+  inside the file costs only that one sound instead of all of them.
+- **Cruise no longer claims a hill has beaten it while it is winning.** When
+  a rising speed limit or a higher set speed put the target well above the
+  truck, cruise flooring the pedal to catch up could be announced as losing
+  the grade -- even as the truck accelerated. The call now waits for a real
+  grade, ignores the moment of a gear change, and has to stay true for a few
+  seconds before it speaks.
+- **The engine's voice is now longer than your memory.** The deepest
+  layer of the repeating-engine problem: each layer of the engine sound
+  was a short recording whose rise and fall a careful ear could learn
+  and anticipate. Every layer has been rebuilt three times longer from
+  its own recording -- same voice, same working rhythm, but the fine
+  texture never repeats, so there is no pattern left to learn.
+- **Public-radio stations that had gone silent play again.** A sweep of
+  every stream in the catalog turned up a batch that had drifted to stale
+  addresses -- big public stations among them, like KUAR Little Rock, WBFO
+  Buffalo, Maine Public, South Dakota Public Broadcasting, and Texas Public
+  Radio -- and pointed them back at their current feeds, so they tune and
+  play instead of coming up quiet. A few whose streams have genuinely gone
+  away are set aside for now, so the dial does not hand you dead air where a
+  station used to be.
+
+- **The engine never repeats itself exactly anymore.** Even with clean
+  loops, a careful ear could catch the engine sound recurring on a
+  perfectly fixed cycle at steady revs. Each layer of the engine voice
+  now wanders very slightly in speed and level -- the way a real
+  engine's rhythm breathes -- so there is no fixed cycle left to
+  notice.
 - **Picking a lower gear with the clutch held no longer damages the engine.**
   Downshifting several gears at highway speed used to bring the redline
   warning and engine damage the moment the gear was selected, even with the
@@ -988,9 +1176,10 @@
 - **The engine stopped ticking and the jake stopped breathing.** A faint
   click repeated in the engine sound at cruise -- speeding up and slowing
   down with the revs -- and the jake brake's growl carried a little dip
-  that pulsed on every cycle. Both came from the seams where those sounds
-  loop, and both seams are now clean: no tick in the cruise, no pulse in
-  the growl.
+  that pulsed on every cycle. Two culprits, both fixed: the seams where
+  those sounds loop are now clean, and a stray click that had been
+  recorded inside the engine sound itself -- repeating on every pass --
+  has been patched out. No tick at any speed, no pulse in the growl.
 
 - **Curve warnings now come with time to act on them.** At compressed
   time pacing, "Curve right, half a mile" could go from spoken to "too

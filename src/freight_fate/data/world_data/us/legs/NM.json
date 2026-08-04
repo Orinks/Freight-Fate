@@ -756,7 +756,8 @@
           "lon": -105.96062,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "alamogordo_nm_us",
@@ -4122,7 +4123,8 @@
           "lon": -107.89992,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "albuquerque_nm_us",
@@ -9635,7 +9637,8 @@
           "lon": -111.8543,
           "note": "Camp Verde on I-17 -- pins the run to I-40 west to Flagstaff then I-17 south. ORS otherwise takes the US-60/AZ-77 diagonal through Show Low and Globe, stranding the curated I-40 stops (Joseph City)."
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "albuquerque_nm_us",
@@ -10726,7 +10729,8 @@
           "lon": -106.15621,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "albuquerque_nm_us",
@@ -11621,7 +11625,8 @@
           "parking_spaces": 8,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "albuquerque_nm_us",
@@ -13424,7 +13429,8 @@
           "at_mi": 174.0,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "carlsbad_nm_us",
@@ -13922,7 +13928,8 @@
           "lon": -103.18376,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "carlsbad_nm_us",
@@ -15170,7 +15177,8 @@
           "lon": -102.30244,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "clovis_nm_us",
@@ -16205,7 +16213,8 @@
           "lon": -101.87341,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "clovis_nm_us",
@@ -17067,7 +17076,8 @@
           "lon": -104.52381,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "farmington_nm_us",
@@ -18062,7 +18072,8 @@
           "lon": -107.87154,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "farmington_nm_us",
@@ -19734,7 +19745,8 @@
           "lon": -108.756,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hobbs_nm_us",
@@ -21049,7 +21061,8 @@
           "lon": -101.84162,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hobbs_nm_us",
@@ -22019,7 +22032,8 @@
           "lon": -102.30244,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "las_cruces_nm_us",
@@ -22656,7 +22670,8 @@
           "lon": -106.81034,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "las_cruces_nm_us",
@@ -23434,7 +23449,8 @@
           "lon": -106.5864,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "las_cruces_nm_us",
@@ -26744,7 +26760,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "las_cruces_nm_us",
@@ -28881,7 +28898,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "las_vegas_nm_us",
@@ -29974,7 +29992,8 @@
           "lon": -104.4329,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "raton_nm_us",
@@ -30447,7 +30466,8 @@
           "lon": -104.52024,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "roswell_nm_us",
@@ -31096,7 +31116,8 @@
           "lon": -104.21546,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "roswell_nm_us",
@@ -32869,7 +32890,8 @@
           "lon": -101.84162,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "santa_fe_nm_us",
@@ -33916,7 +33938,8 @@
           "lon": -105.20816,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "socorro_nm_us",
@@ -35262,7 +35285,8 @@
           "lon": -106.81034,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tucumcari_nm_us",
@@ -36529,7 +36553,8 @@
           "lon": -101.87341,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

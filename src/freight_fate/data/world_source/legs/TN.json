@@ -709,7 +709,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "chattanooga_tn_us",
@@ -3445,7 +3446,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "chattanooga_tn_us",
@@ -5530,7 +5532,8 @@
           "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "clarksville_tn_us",
@@ -8162,7 +8165,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "clarksville_tn_us",
@@ -11211,7 +11215,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "clarksville_tn_us",
@@ -12210,7 +12215,8 @@
           "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cookeville_tn_us",
@@ -13675,7 +13681,8 @@
           "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dyersburg_tn_us",
@@ -14475,7 +14482,8 @@
           "lon": -89.06987,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dyersburg_tn_us",
@@ -15910,7 +15918,8 @@
           "lon": -89.66999,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jackson_tn_us",
@@ -18035,7 +18044,8 @@
           "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "johnson_city_tn_us",
@@ -19441,7 +19451,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "johnson_city_tn_us",
@@ -21672,7 +21683,8 @@
           "lon": -82.60554,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "johnson_city_tn_us",
@@ -23656,7 +23668,8 @@
           "lon": -81.06797,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kingsport_tn_us",
@@ -24793,7 +24806,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "knoxville_tn_us",
@@ -30557,7 +30571,8 @@
           "lon": -85.50395,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "knoxville_tn_us",
@@ -31515,7 +31530,8 @@
           "lon": -83.23972,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "memphis_tn_us",
@@ -32924,7 +32940,8 @@
           "lon": -89.8334,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "memphis_tn_us",
@@ -34205,7 +34222,8 @@
           "lon": -89.0562,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "memphis_tn_us",
@@ -35502,7 +35520,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": true
     },
     {
       "from": "memphis_tn_us",
@@ -38461,7 +38480,8 @@
           "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "memphis_tn_us",
@@ -41422,7 +41442,8 @@
           "lon": -90.13134,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "morristown_tn_us",
@@ -42683,7 +42704,8 @@
           "lon": -82.7747,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "morristown_tn_us",
@@ -44644,7 +44666,8 @@
           "lon": -84.11525,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "murfreesboro_tn_us",
@@ -46269,7 +46292,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "murfreesboro_tn_us",
@@ -47680,7 +47704,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "nashville_tn_us",
@@ -51689,7 +51714,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "nashville_tn_us",
@@ -52473,7 +52499,8 @@
           "lon": -86.3928,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

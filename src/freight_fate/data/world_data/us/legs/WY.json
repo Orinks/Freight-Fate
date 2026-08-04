@@ -987,7 +987,8 @@
           "lon": -105.49567,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "casper_wy_us",
@@ -3792,7 +3793,8 @@
           "lon": -108.416727,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "casper_wy_us",
@@ -4956,7 +4958,8 @@
           "lon": -106.6416532,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "casper_wy_us",
@@ -6549,7 +6552,8 @@
           "lon": -105.4953,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "cheyenne_wy_us",
@@ -8781,7 +8785,8 @@
           "lon": -106.2694685,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cheyenne_wy_us",
@@ -10542,7 +10547,8 @@
           "lon": -104.98371,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cheyenne_wy_us",
@@ -11302,7 +11308,8 @@
           "lon": -105.61119,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cheyenne_wy_us",
@@ -16565,7 +16572,8 @@
           "lon": -111.94614,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cheyenne_wy_us",
@@ -17197,7 +17205,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "gillette_wy_us",
@@ -18662,7 +18671,8 @@
           "lon": -105.82111,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "gillette_wy_us",
@@ -19925,7 +19935,8 @@
           "lon": -105.49567,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "laramie_wy_us",
@@ -21044,7 +21055,8 @@
           "lon": -107.30883,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lusk_wy_us",
@@ -22155,7 +22167,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": false
     },
     {
       "from": "rawlins_wy_us",
@@ -23193,7 +23206,8 @@
           "lon": -108.78575,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rock_springs_wy_us",
@@ -26005,7 +26019,8 @@
           "lon": -104.8487,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "rock_springs_wy_us",
@@ -28905,7 +28920,8 @@
           "lon": -111.94614,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sheridan_wy_us",
@@ -29561,7 +29577,8 @@
           "lon": -106.68462,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wheatland_wy_us",

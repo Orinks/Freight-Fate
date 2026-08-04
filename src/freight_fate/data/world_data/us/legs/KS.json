@@ -694,7 +694,8 @@
           "lon": -102.2769,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dodge_city_ks_us",
@@ -1312,7 +1313,8 @@
           "lon": -100.88502,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "dodge_city_ks_us",
@@ -2340,7 +2342,8 @@
           "lon": -99.31823,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "dodge_city_ks_us",
@@ -3781,7 +3784,8 @@
           "lon": -97.61382,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "dodge_city_ks_us",
@@ -5988,7 +5992,8 @@
           "lon": -96.86361,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "emporia_ks_us",
@@ -7065,7 +7070,8 @@
           "parking_spaces": 65,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "garden_city_ks_us",
@@ -9476,7 +9482,8 @@
           "lon": -101.05271,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "great_bend_ks_us",
@@ -10172,7 +10179,8 @@
           "lon": -99.30932,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "great_bend_ks_us",
@@ -10750,7 +10758,8 @@
           "lon": -97.94255,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "hays_ks_us",
@@ -11672,7 +11681,8 @@
           "lon": -101.05271,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hutchinson_ks_us",
@@ -12389,7 +12399,8 @@
           "lon": -97.61382,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hutchinson_ks_us",
@@ -12979,7 +12990,8 @@
           "lon": -97.42567,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "junction_city_ks_us",
@@ -13729,7 +13741,8 @@
           "lon": -97.61382,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lawrence_ks_us",
@@ -14849,7 +14862,8 @@
           "lon": -94.8811,
           "note": "Bonner Springs on US-40"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "liberal_ks_us",
@@ -15621,7 +15635,8 @@
           "lon": -99.98016,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "liberal_ks_us",
@@ -16140,7 +16155,8 @@
           "lon": -100.88502,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "salina_ks_us",
@@ -17432,7 +17448,8 @@
           "lon": -98.85597,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "salina_ks_us",
@@ -18579,7 +18596,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "topeka_ks_us",
@@ -19493,7 +19511,8 @@
           "lon": -96.23738,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "topeka_ks_us",
@@ -20740,7 +20759,8 @@
           "lon": -96.86361,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "topeka_ks_us",
@@ -21462,7 +21482,8 @@
           "lon": -95.3897,
           "note": "Lecompton on US-40"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "topeka_ks_us",
@@ -26401,7 +26422,8 @@
           "lon": -94.92843,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "wichita_ks_us",
@@ -28167,7 +28189,8 @@
           "lon": -97.3492411,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

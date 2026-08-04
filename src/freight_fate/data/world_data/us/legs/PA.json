@@ -3034,7 +3034,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "allentown_pa_us",
@@ -6111,7 +6112,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "allentown_pa_us",
@@ -8413,7 +8415,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "allentown_pa_us",
@@ -9924,7 +9927,8 @@
           "lon": -75.1279,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "altoona_pa_us",
@@ -11022,7 +11026,8 @@
           "lon": -78.18522,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "carlisle_pa_us",
@@ -12170,7 +12175,8 @@
           "lon": -77.78268,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "erie_pa_us",
@@ -13577,7 +13583,8 @@
           "parking_spaces": 40,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "erie_pa_us",
@@ -15246,7 +15253,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "erie_pa_us",
@@ -16215,7 +16223,8 @@
           "lon": -80.17712,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "harrisburg_pa_us",
@@ -17816,7 +17825,8 @@
           "lon": -75.55856,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "harrisburg_pa_us",
@@ -19554,7 +19564,8 @@
           "lon": -76.54885,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "harrisburg_pa_us",
@@ -20354,7 +20365,8 @@
           "lon": -77.14084,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "harrisburg_pa_us",
@@ -22264,7 +22276,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "harrisburg_pa_us",
@@ -25515,7 +25528,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "harrisburg_pa_us",
@@ -27791,7 +27805,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "harrisburg_pa_us",
@@ -29526,7 +29541,8 @@
           "lon": -76.01509,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "meadville_pa_us",
@@ -31304,7 +31320,8 @@
           "lon": -80.1281,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "philadelphia_pa_us",
@@ -32681,7 +32698,8 @@
           "lon": -75.55856,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "philadelphia_pa_us",
@@ -34782,7 +34800,8 @@
           "lon": -76.54885,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "philadelphia_pa_us",
@@ -39207,7 +39226,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "pittsburgh_pa_us",
@@ -41060,7 +41080,8 @@
           "lon": -78.73313,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "pittsburgh_pa_us",
@@ -43974,7 +43995,8 @@
           "lon": -77.14084,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "pittsburgh_pa_us",
@@ -46453,7 +46475,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "pittsburgh_pa_us",
@@ -49341,7 +49364,8 @@
           "lon": -77.78268,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "scranton_pa_us",
@@ -50932,7 +50956,8 @@
           "lon": -75.55856,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "scranton_pa_us",
@@ -52333,7 +52358,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "state_college_pa_us",
@@ -53780,7 +53806,8 @@
           "lon": -77.36965,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "williamsport_pa_us",
@@ -55533,7 +55560,8 @@
           "lon": -76.4174,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "williamsport_pa_us",
@@ -57081,7 +57109,8 @@
           "lon": -76.98296,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "williamsport_pa_us",
@@ -58243,7 +58272,8 @@
           "lon": -77.51558,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

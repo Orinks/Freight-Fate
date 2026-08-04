@@ -212,6 +212,49 @@ class GradeSegment:
     source: str = ""
 
 
+# Spoken lane counts stay small; a lookup keeps the words natural for a
+# screen reader instead of a bare digit.
+LANE_WORD = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight"}
+
+
+def lane_word(n: int) -> str:
+    return LANE_WORD.get(n, str(n))
+
+
+@dataclass(frozen=True)
+class LaneSegment:
+    """Real OSM lane count over ``[start_mi, end_mi)`` in the leg's native
+    (a->b) direction. ``lanes`` follows OSM semantics: on a divided-carriageway
+    ``oneway`` way it is the count in that direction; on an undivided two-way it
+    is the total both ways. ``lanes_forward`` / ``lanes_backward`` are the
+    directional split when OSM tags it (0 = absent). Baked by
+    ``tools/bake_lane_segments.py``; the runtime never sees a raw OSM string."""
+
+    start_mi: float
+    end_mi: float
+    lanes: int
+    lanes_forward: int = 0
+    lanes_backward: int = 0
+    oneway: bool = False
+    source: str = ""
+
+    @property
+    def divided(self) -> bool:
+        return self.oneway
+
+    def your_side(self, forward: bool) -> int:
+        """Lanes in the driver's direction of travel."""
+        if forward and self.lanes_forward:
+            return self.lanes_forward
+        if not forward and self.lanes_backward:
+            return self.lanes_backward
+        if self.oneway:
+            # A divided carriageway: the tagged count is already one direction.
+            return self.lanes
+        # Undivided two-way: split the total, floor at one lane your side.
+        return max(1, self.lanes // 2)
+
+
 @dataclass(frozen=True)
 class SpeedLimitSample:
     """A posted speed limit in effect from ``at_mi`` until the next sample.
@@ -578,6 +621,13 @@ class Leg:
     landmarks: tuple[Landmark, ...] = ()
     # Posted clearance/weight advisories (OSM bake), spoken ahead like tolls.
     restrictions: tuple[RouteRestriction, ...] = ()
+    # Real OSM lane counts along the leg (a->b native direction); empty where
+    # the bake found no tag. Spoken, not a mechanic (Track D, 1.9).
+    lane_segments: tuple[LaneSegment, ...] = ()
+    # Whether the leg runs on a divided carriageway, baked from real OSM
+    # oneway-pair geometry (Track D2). None where the bake was mixed or
+    # thin -- honest absence; the runtime infers from road class instead.
+    divided: bool | None = None
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
@@ -679,13 +729,46 @@ class Route:
             return "mountainous in places"
         return "rolling hills"
 
+    @property
+    def lane_summary(self) -> str:
+        """Miles-weighted lane picture for the route briefing, in the travel
+        direction, or empty where too little of the route carries lane data.
+
+        Honest absence: legs with no baked lane counts contribute nothing, so a
+        route the bake never reached simply says nothing about lanes."""
+        miles_by_lanes: dict[int, float] = {}
+        divided_mi = total_mi = 0.0
+        for i, leg in enumerate(self.legs):
+            forward = self.cities[i] == leg.a
+            for seg in leg.lane_segments:
+                span = max(0.0, seg.end_mi - seg.start_mi)
+                n = seg.your_side(forward)
+                miles_by_lanes[n] = miles_by_lanes.get(n, 0.0) + span
+                total_mi += span
+                if seg.divided:
+                    divided_mi += span
+        # Need a meaningful sample of the route before summarizing.
+        if total_mi < max(1.0, 0.2 * self.miles):
+            return ""
+        ranked = sorted(miles_by_lanes.items(), key=lambda kv: -kv[1])
+        top = ranked[0][0]
+        divided = divided_mi >= 0.5 * total_mi
+        lead = "mostly divided, " if divided else ""
+        # A clear second value that holds real distance earns a range.
+        if len(ranked) > 1 and ranked[1][1] >= 0.25 * total_mi:
+            lo, hi = sorted((ranked[0][0], ranked[1][0]))
+            return f"{lead}{lane_word(lo)} to {lane_word(hi)} lanes your side"
+        return f"{lead}{lane_word(top)} lane{'s' if top != 1 else ''} your side"
+
     def describe(self, distance_text: str = "") -> str:
         via = " then ".join(self.highways)
         distance = distance_text or f"{self.miles:.0f} miles"
+        lane_text = self.lane_summary
+        lane_part = f", {lane_text}" if lane_text else ""
         return (
             f"{distance} via {via}, "
             f"{len(self.legs)} leg{'s' if len(self.legs) != 1 else ''}, "
-            f"terrain {self.terrain_summary}"
+            f"terrain {self.terrain_summary}{lane_part}"
         )
 
     def metadata_complete(self, world: World) -> bool:

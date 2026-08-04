@@ -14,8 +14,12 @@ files, so development is unchanged.
 from __future__ import annotations
 
 import io
+import logging
 import zipfile
+import zlib
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 PACK_MAGIC = b"FFPK1\x00"
 DEFAULT_PACK_PATH = Path(__file__).parent / "sounds.pak"
@@ -86,15 +90,30 @@ class SoundPack:
         if not raw.startswith(PACK_MAGIC):
             raise ValueError(f"Not a Freight Fate sound pack: {path}")
         self._zip = zipfile.ZipFile(io.BytesIO(_mask(raw[len(PACK_MAGIC) :])))
+        self._name_set: set[str] | None = None
 
     def names(self) -> list[str]:
         return self._zip.namelist()
 
+    def has(self, name: str) -> bool:
+        """Whether the pack carries ``name``, without decompressing it."""
+        if self._name_set is None:
+            self._name_set = set(self._zip.namelist())
+        return name in self._name_set
+
     def read(self, name: str) -> bytes | None:
-        """Bytes for a pack-relative posix path, or None if absent."""
+        """Bytes for a pack-relative posix path, or None if absent.
+
+        A damaged entry counts as absent, not as an error: the caller then
+        falls back to the loose sound tree, so one corrupt member costs its
+        own sound instead of every sound after it.
+        """
         try:
             return self._zip.read(name)
         except KeyError:
+            return None
+        except (OSError, zipfile.BadZipFile, zlib.error, EOFError):
+            log.warning("Damaged entry in sound pack: %s", name, exc_info=True)
             return None
 
 
@@ -103,11 +122,32 @@ _default_pack_missing = False
 
 
 def open_default() -> SoundPack | None:
-    """The shipped pack, or None in source checkouts (no pack file)."""
+    """The shipped pack, or None when there is no usable pack file.
+
+    An unreadable pack -- a truncated copy, a half-finished download, a file
+    from another build -- is treated as no pack at all rather than raised.
+    A source checkout still has its loose sound tree to fall back on, so the
+    game keeps its sound; a frozen build has nothing to fall back to, but it
+    says so in the log instead of failing on the first sound it plays.
+    """
     global _default_pack, _default_pack_missing
     if _default_pack is None and not _default_pack_missing:
         if DEFAULT_PACK_PATH.exists():
-            _default_pack = SoundPack(DEFAULT_PACK_PATH)
+            try:
+                _default_pack = SoundPack(DEFAULT_PACK_PATH)
+            except Exception:
+                log.warning(
+                    "Unreadable sound pack at %s; reading loose sound files instead",
+                    DEFAULT_PACK_PATH,
+                    exc_info=True,
+                )
+                _default_pack_missing = True
+            else:
+                log.info(
+                    "Sound pack loaded: %s (%d entries)",
+                    DEFAULT_PACK_PATH,
+                    len(_default_pack.names()),
+                )
         else:
             _default_pack_missing = True
     return _default_pack

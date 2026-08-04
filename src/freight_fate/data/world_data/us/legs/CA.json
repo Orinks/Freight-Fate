@@ -1119,7 +1119,8 @@
           "lon": -117.08088,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bakersfield_ca_us",
@@ -1881,7 +1882,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bakersfield_ca_us",
@@ -3861,7 +3863,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "barstow_ca_us",
@@ -5312,7 +5315,8 @@
           "lon": -115.1862984,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "barstow_ca_us",
@@ -5887,7 +5891,8 @@
           "lon": -117.08699,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bishop_ca_us",
@@ -6595,7 +6600,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "blythe_ca_us",
@@ -7572,7 +7578,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "chico_ca_us",
@@ -11623,7 +11630,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": false
     },
     {
       "from": "crescent_city_ca_us",
@@ -13232,7 +13240,8 @@
           "lon": -123.35202,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "el_centro_ca_us",
@@ -13765,7 +13774,8 @@
           "lon": -114.5834,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "eureka_ca_us",
@@ -15138,7 +15148,8 @@
           "lon": -124.07446,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "eureka_ca_us",
@@ -17377,7 +17388,8 @@
           "lon": -122.9432247,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "fairfield_ca_us",
@@ -19728,7 +19740,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "fairfield_ca_us",
@@ -21467,7 +21480,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "fortuna_ca_us",
@@ -21878,7 +21892,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "fresno_ca_us",
@@ -23221,7 +23236,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fresno_ca_us",
@@ -23677,7 +23693,8 @@
           "lon": -119.42492,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "indio_ca_us",
@@ -24378,7 +24395,8 @@
           "lon": -114.52379,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "indio_ca_us",
@@ -25205,7 +25223,8 @@
           "lon": -115.57133,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lancaster_ca_us",
@@ -26209,7 +26228,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "lancaster_ca_us",
@@ -27104,7 +27124,8 @@
           "lon": -117.08088,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lancaster_ca_us",
@@ -28073,7 +28094,8 @@
           "lon": -118.03597,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "lone_pine_ca_us",
@@ -29296,7 +29318,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "los_angeles_ca_us",
@@ -31336,7 +31359,8 @@
           "lon": -119.52145,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "los_angeles_ca_us",
@@ -33765,7 +33789,8 @@
           "at_mi": 123.0,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "los_angeles_ca_us",
@@ -35318,7 +35343,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": true
     },
     {
       "from": "los_angeles_ca_us",
@@ -39673,7 +39699,8 @@
           "lon": -122.47894,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mammoth_lakes_ca_us",
@@ -40297,7 +40324,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "merced_ca_us",
@@ -40812,7 +40840,8 @@
           "lon": -119.95249,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "modesto_ca_us",
@@ -41326,7 +41355,8 @@
           "lon": -120.73845,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mojave_ca_us",
@@ -41711,7 +41741,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "mount_shasta_ca_us",
@@ -42465,7 +42496,8 @@
           "lon": -122.52857,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "oceanside_ca_us",
@@ -44552,7 +44584,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "oceanside_ca_us",
@@ -46731,7 +46764,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "oxnard_ca_us",
@@ -48278,7 +48312,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "oxnard_ca_us",
@@ -49504,7 +49539,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "oxnard_ca_us",
@@ -51535,7 +51571,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "oxnard_ca_us",
@@ -52382,7 +52419,8 @@
           "lon": -118.62045,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "redding_ca_us",
@@ -54390,7 +54428,8 @@
           "lon": -121.79855,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "redding_ca_us",
@@ -55652,7 +55691,8 @@
           "lon": -122.31709,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ridgecrest_ca_us",
@@ -57203,7 +57243,8 @@
           "lon": -118.3947,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ridgecrest_ca_us",
@@ -57902,7 +57943,8 @@
           "lon": -118.1767,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "riverside_ca_us",
@@ -59285,7 +59327,8 @@
           "lon": -116.17153,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "riverside_ca_us",
@@ -62358,7 +62401,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "riverside_ca_us",
@@ -64692,7 +64736,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "riverside_ca_us",
@@ -65891,7 +65936,8 @@
           "lon": -117.39864,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sacramento_ca_us",
@@ -72794,7 +72840,8 @@
           "lon": -123.3417,
           "note": "Roseburg, OR on I-5"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sacramento_ca_us",
@@ -74428,7 +74475,8 @@
           "lon": -122.26096,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sacramento_ca_us",
@@ -76983,7 +77031,8 @@
           "vehicle_access": "tractor_trailer",
           "parking_spaces": 12
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sacramento_ca_us",
@@ -78851,7 +78900,8 @@
           "lon": -122.47894,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sacramento_ca_us",
@@ -79268,7 +79318,8 @@
           "lon": -121.54971,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "salinas_ca_us",
@@ -80788,7 +80839,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "salinas_ca_us",
@@ -82185,7 +82237,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "salinas_ca_us",
@@ -83642,7 +83695,8 @@
           "lon": -120.6918,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "salinas_ca_us",
@@ -85441,7 +85495,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "san_diego_ca_us",
@@ -87244,7 +87299,8 @@
           "lon": -115.57133,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_diego_ca_us",
@@ -90653,7 +90709,8 @@
           "lon": -112.5921,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_diego_ca_us",
@@ -92728,7 +92785,8 @@
           "lon": -117.25539763748645,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_francisco_ca_us",
@@ -100589,7 +100647,8 @@
           "lon": -123.3417,
           "note": "Roseburg, OR on I-5"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_francisco_ca_us",
@@ -107957,7 +108016,8 @@
           "lon": -111.94614,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_francisco_ca_us",
@@ -109226,7 +109286,8 @@
           "lon": -122.5645,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_jose_ca_us",
@@ -110660,7 +110721,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_jose_ca_us",
@@ -112792,7 +112854,8 @@
           "lon": -122.11263,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_jose_ca_us",
@@ -113692,7 +113755,8 @@
           "lon": -121.56942,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_jose_ca_us",
@@ -114582,7 +114646,8 @@
           "lon": -122.47894,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_jose_ca_us",
@@ -115874,7 +115939,8 @@
           "lon": -121.43404,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_luis_obispo_ca_us",
@@ -116531,7 +116597,8 @@
           "lon": -120.6159,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "santa_ana_ca_us",
@@ -118887,7 +118954,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "santa_ana_ca_us",
@@ -120742,7 +120810,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "santa_ana_ca_us",
@@ -122758,7 +122827,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "santa_barbara_ca_us",
@@ -123468,7 +123538,8 @@
           "lon": -119.27331,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "santa_maria_ca_us",
@@ -124717,7 +124788,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": false
     },
     {
       "from": "santa_maria_ca_us",
@@ -125836,7 +125908,8 @@
           "lon": -120.27585,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "santa_maria_ca_us",
@@ -127503,7 +127576,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": false
     },
     {
       "from": "santa_rosa_ca_us",
@@ -129190,7 +129264,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "santa_rosa_ca_us",
@@ -130958,7 +131033,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "santa_rosa_ca_us",
@@ -132483,7 +132559,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "santa_rosa_ca_us",
@@ -133590,7 +133667,8 @@
           "lon": -123.0165,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "stockton_ca_us",
@@ -133985,7 +134063,8 @@
           "lon": -121.14427,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "stockton_ca_us",
@@ -134558,7 +134637,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "stockton_ca_us",
@@ -136265,7 +136345,8 @@
           "lon": -122.47894,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "susanville_ca_us",
@@ -137783,7 +137864,8 @@
           "vehicle_access": "tractor_trailer",
           "parking_spaces": 1
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "susanville_ca_us",
@@ -138874,7 +138956,8 @@
           "lon": -119.99992,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "ukiah_ca_us",
@@ -141699,7 +141782,8 @@
           "lon": -124.16263,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "ukiah_ca_us",
@@ -142202,7 +142286,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "valencia_ca_us",
@@ -143118,7 +143203,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "valencia_ca_us",
@@ -144561,7 +144647,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "victorville_ca_us",
@@ -146245,7 +146332,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "visalia_ca_us",
@@ -148516,7 +148604,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "visalia_ca_us",
@@ -150531,7 +150620,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "willits_ca_us",
@@ -152761,7 +152851,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": false
     },
     {
       "from": "yreka_ca_us",
@@ -153593,7 +153684,8 @@
           "lon": -122.81104,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "yuba_city_ca_us",

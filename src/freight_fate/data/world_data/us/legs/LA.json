@@ -999,7 +999,8 @@
           "lon": -92.03849,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "alexandria_la_us",
@@ -2071,7 +2072,8 @@
           "lon": -92.40098,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "alexandria_la_us",
@@ -2649,7 +2651,8 @@
           "lon": -93.03419,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "baton_rouge_la_us",
@@ -4053,7 +4056,8 @@
           "lon": -89.13832,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "baton_rouge_la_us",
@@ -5023,7 +5027,8 @@
           "lon": -91.24251,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "baton_rouge_la_us",
@@ -7110,7 +7115,8 @@
           "lon": -93.1622739,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hammond_la_us",
@@ -7876,7 +7882,8 @@
           "lon": -91.24251,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hammond_la_us",
@@ -8528,7 +8535,8 @@
           "lon": -90.44426,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "houma_la_us",
@@ -10061,7 +10069,8 @@
           "lon": -90.20838,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lafayette_la_us",
@@ -10849,7 +10858,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "lafayette_la_us",
@@ -12283,7 +12293,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "lafayette_la_us",
@@ -13667,7 +13678,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "lake_charles_la_us",
@@ -14393,7 +14405,8 @@
           "lon": -92.03849,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lake_charles_la_us",
@@ -14879,7 +14892,8 @@
           "lon": -93.58844,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "monroe_la_us",
@@ -15572,7 +15586,8 @@
           "lon": -91.75983,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "natchitoches_la_us",
@@ -16646,7 +16661,8 @@
           "lon": -93.80356,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "new_orleans_la_us",
@@ -19954,7 +19970,8 @@
           "lon": -95.36956,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ruston_la_us",
@@ -20482,7 +20499,8 @@
           "lon": -92.19338,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "shreveport_la_us",
@@ -23068,7 +23086,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "shreveport_la_us",
@@ -24100,7 +24119,8 @@
           "lon": -93.24664,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "shreveport_la_us",
@@ -25224,7 +25244,8 @@
           "lon": -94.05542,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sulphur_la_us",
@@ -25507,7 +25528,8 @@
           "lon": -93.24839,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

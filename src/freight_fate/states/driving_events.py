@@ -56,6 +56,8 @@ class DrivingEventMixin:
             return
         kind = event.kind
         sound = _route_event_sound(event)
+        if kind == TripEventKind.LANE and self._terse_speech():
+            return  # lane-count callouts are a normal-verbosity nicety, muted whole
         if kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
             # Ambient roadside color, filtered by the player's chatter
             # switches at speak time so a mid-trip settings change applies
@@ -166,7 +168,7 @@ class DrivingEventMixin:
             # is auditioned (docs/sound-hunt-brief.md, need 1).
             if curve is not None:
                 pan = -PACENOTE_CUE_PAN if curve.direction == "L" else PACENOTE_CUE_PAN
-                self.ctx.audio.play("ui/tick", volume=0.9, pan=pan)
+                self.ctx.audio.play("vehicle/curve_bink", volume=0.9, pan=pan)
             # A curve well above the cruise set point: with curve speed
             # assistance on, the bend is cruise's job -- cap the working
             # target to the advisory the way an armed exit caps for its
@@ -209,6 +211,10 @@ class DrivingEventMixin:
                 self._critical_call_age_s = 0.0
                 self._critical_respeak_at = None
         elif kind in (TripEventKind.LANDMARK, TripEventKind.BILLBOARD):
+            self._speak_ambient_event(event.message)
+        elif kind == TripEventKind.LANE:
+            # Road-status color: how many lanes the road just became. Ambient,
+            # so it yields to safety cues and is muted whole in terse speech.
             self._speak_ambient_event(event.message)
         elif kind == TripEventKind.ARRIVED:
             pass  # handled by _arrive()
@@ -544,7 +550,7 @@ class DrivingEventMixin:
         # this the milestones already spoken stay marked and the second
         # approach runs silent.
         self._exit_countdown_said = set()
-        self.ctx.audio.play("vehicle/turn_signal", volume=0.7)
+        self.ctx.audio.play("vehicle/signal_tone", volume=0.7, pan=0.6)
         if stop.type == "delivery_destination":
             labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
             head = (
@@ -1128,7 +1134,7 @@ class DrivingEventMixin:
         self.lane.lane = 0
         self.lane.offset = 0.0
         merge_leg = highway.route.legs[0]
-        self.ctx.audio.play("vehicle/turn_signal", volume=0.6, pan=-0.6)
+        self.ctx.audio.play("vehicle/signal_tone", volume=0.6, pan=-0.6)
         self.ctx.say_event(
             f"Up the ramp and onto {merge_leg.highway}. Merge left when clear.",
             interrupt=False,
@@ -1189,6 +1195,12 @@ class DrivingEventMixin:
 
     def _update_ramp_light(self, dt: float) -> None:
         """Advance the terminal light in real time and speak state changes."""
+        # The bar's cues run first and unconditionally. They are the only code
+        # that stops the solid tone, and every early return below used to skip
+        # them: a driver who reached the tone and then crossed the bar --
+        # green, red, or stop sign -- carried it through the rest of the run
+        # and out into the menus (Shane, 2026-08-03).
+        self._update_ramp_bar_ticks(dt)
         if self._ramp_mi is None or self._ramp_terminal_done:
             return
         if self._ramp_control == "stop":
@@ -1199,14 +1211,12 @@ class DrivingEventMixin:
             # 2026-07-22, Milwaukee grain elevator, 15 percent).
             self._update_ramp_queue_guidance()
             self._update_ramp_gap_countdown()
-            self._update_ramp_bar_ticks(dt)
             return
         if self._ramp_control != "signal":
             return
         self._ramp_light_timer += dt
         self._update_ramp_queue_guidance()
         self._update_ramp_gap_countdown()
-        self._update_ramp_bar_ticks(dt)
         phase = self._ramp_light_phase()
         if not self._ramp_light_announced or phase == self._ramp_light_last_phase:
             return
@@ -1337,31 +1347,55 @@ class DrivingEventMixin:
                 self.ctx.say_event(f"{threshold} {unit_word} to the bar.", interrupt=False)
                 return
 
+    def _set_bar_solid(self, on: bool) -> None:
+        """The continuous tone of the bar's final zone.
+
+        Held, not started: the tone is re-asserted on every tick it applies
+        to and lapses on its own as soon as it is not, so it cannot survive
+        this state losing the frame to a menu or an arrival screen. Turning
+        it back off here is still instant."""
+        if on:
+            self.ctx.audio.hold_alert("vehicle/bar_solid", volume=0.85)
+        elif self._bar_solid_on:
+            self.ctx.audio.release_alert()
+        self._bar_solid_on = on
+
     def _update_ramp_bar_ticks(self, dt: float) -> None:
         """Parking-sensor tick for the stop bar's last few hundred feet.
 
         Rate carries the distance -- faster is closer -- and silence means
         stopped, so the cue never nags a driver holding at the bar. Center
         pan, unlike the side-panned curve cues, so the two never read as
-        the same instrument (owner ask, 2026-07-19)."""
+        the same instrument (owner ask, 2026-07-19). Inside the last
+        stretch of leeway, still moving, the ticks fuse into a continuous
+        tone (owner spec, written into the manual 2026-07-27): at the
+        solid tone you had better be close to stopped."""
         if not self._ramp_light_announced or self._ramp_waiting_at_light:
+            self._set_bar_solid(False)
             return
         if self._ramp_mi is None or self._ramp_terminal_done:
+            self._set_bar_solid(False)
             return
         if self.truck.speed_mph <= RED_STOP_MPH:
+            self._set_bar_solid(False)
             return
         gap_mi = self._ramp_mi - RAMP_ACCESS_MI
         if gap_mi > RAMP_BAR_TICK_RANGE_MI or gap_mi < 0:
+            self._set_bar_solid(False)
             return
+        if gap_mi <= RAMP_BAR_SOLID_MI:
+            self._set_bar_solid(True)
+            return
+        self._set_bar_solid(False)
         closeness = 1.0 - gap_mi / RAMP_BAR_TICK_RANGE_MI
         period = RAMP_BAR_TICK_SLOW_S - closeness * (RAMP_BAR_TICK_SLOW_S - RAMP_BAR_TICK_FAST_S)
         self._ramp_bar_tick_timer += dt
         if self._ramp_bar_tick_timer >= period:
             self._ramp_bar_tick_timer = 0.0
             # Full volume: at 0.5 the owner judged it missable by someone
-            # not listening for it (2026-07-19). A dedicated short beep is
-            # on the sound-hunt list; until then the tick carries the job.
-            self.ctx.audio.play("ui/tick", volume=0.9)
+            # not listening for it (2026-07-19). The dedicated beep the old
+            # note asked for arrived with the curve bink (2026-07-27).
+            self.ctx.audio.play("vehicle/curve_bink", volume=0.9)
 
     def _ramp_light_query_text(self) -> str | None:
         """Light phase and bar distance on demand, for the info keys.
@@ -2521,15 +2555,23 @@ class DrivingEventMixin:
         self._climb_cue_s = max(0.0, self._climb_cue_s - dt)
         t = self.truck
         # error is target minus speed, so a positive error is the truck
-        # sitting below the number cruise is working to.
+        # sitting below the number cruise is working to. The three ported
+        # guards (see CRUISE_GRADE_BEATEN_* in driving_core): a real grade,
+        # not mid-shift, and the condition holding rather than one frame.
         beaten = (
             self._cruise_applied >= CRUISE_FLOORED_THROTTLE
-            and t.grade > 0.0
+            and t.grade * 100.0 >= CRUISE_GRADE_BEATEN_PCT
             and error > CRUISE_DROOP_MPH
         )
         if not beaten:
+            self._climb_beaten_s = 0.0
             if error < CRUISE_DROOP_MPH * 0.5:
                 self._climb_cue_said = False  # back on its number: arm again
+            return
+        if t.transmission.shifting:
+            return  # an open driveline is no evidence either way; hold the count
+        self._climb_beaten_s += dt
+        if self._climb_beaten_s < CRUISE_GRADE_BEATEN_S:
             return
         if self._climb_cue_said or self._climb_cue_s > 0.0 or self._terse_speech():
             return

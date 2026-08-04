@@ -54,8 +54,13 @@ def test_surface_zones_follow_the_street_speeds(world):
     # Zones tile the whole route and carry the baked street speeds.
     assert street_zones[0].start_mi == 0.0
     assert street_zones[-1].end_mi == pytest.approx(trip.total_miles)
+    # The bake now carries REAL posted limits (30s, 35s, 45s...), so the
+    # invariant is the test's own name: each zone speaks a speed that the
+    # baked street data actually holds, inside the plausible street band.
+    baked_speeds = {segment.speed_mph for segment in _geometry.segments}
     for zone in street_zones:
-        assert zone.limit_mph in {15.0, 25.0}
+        assert zone.limit_mph in baked_speeds
+        assert 5.0 <= zone.limit_mph <= 65.0
     # Adjacent same-speed streets merge: no zero-length or duplicate zones.
     for a, b in zip(street_zones, street_zones[1:], strict=False):
         assert b.start_mi == pytest.approx(a.end_mi)

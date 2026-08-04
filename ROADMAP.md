@@ -1,5 +1,17 @@
 # Freight Fate Roadmap
 
+
+> **RELEASE SCOPE (amended 2026-07-27, owner + Josh):** the 1.9 line
+> takes FIXES plus exactly the final slate Josh named -- (1) the easy
+> multilane slice (wiring the already-baked lane counts into speech),
+> (2) curve navigation with steering, (3) rumble strips (one system
+> with curve nav), (4) the engine-ring spectra rebuild, and (5) the
+> NPR translator radio batch. Nothing else: every other unchecked
+> FEATURE bullet below targets the `feat/career-2.0` line (worktree
+> `C:/dev/ff-2.0`). The driving school stays gated off 1.9
+> (`DRIVING_SCHOOL_ENABLED`) and reopens on 2.0 to be finished.
+> Track plan: `docs/plan-1.9-final-slate.md`.
+
 > Current stable: **1.8.7** (shipped 2026-07-30). Next release: **1.9.0**, in
 > flight on the `feat/career-1.9` branch -- driving realism between the exits
 > (discrete lanes, ramp terminals, congestion, real surface streets) plus the
@@ -172,25 +184,18 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       speed it is holding. Once a hill (a re-arm at half droop plus a two
       minute floor), and terse speech keeps it -- the engine note and the
       downshifts already say the truck is working.
-- [ ] **MUST FIX BEFORE 1.9 SHIPS: that climb cue fires when cruise is
-      winning.** `_say_cruise_out_of_truck` asks only for the pedal on the
-      floor, a positive grade, and an error past the droop band. It never
-      asks whether the truck is actually losing ground, so any moment the
-      target jumps well above current speed -- a posted limit rising, the
-      driver dialing the set point up with plus -- has cruise floor the
-      throttle on a slight grade and the cue call that a defeat while the
-      truck is accelerating through it. Caught on dev 2026-07-27 from a
-      playtest transcript: 71 mph and climbing to 77 after a 50-to-75 limit
-      rise, announced as losing the grade. Dev's fix (commit f23a97ec, in
-      `_announce_cruise_grade_verdict`) is three guards worth porting onto
-      1.9's version: a grade floor of `CRUISE_GRADE_BEATEN_PCT` so it never
-      fires on road the G key calls level, a `not t.transmission.shifting`
-      guard because `drive_ratio` is 0 mid-shift and makes `drive_force()`
-      read as 0, and a `CRUISE_GRADE_BEATEN_S` debounce so the condition has
-      to hold rather than catch one frame. 1.9's cooldown and terse
-      suppression stay as they are. Reproduce with
-      `uv run python tools/playtest_road.py --find limit-drop --cruise 80
-      --verbosity 2 --headless 6`.
+- [x] **Climb cue no longer fires when cruise is winning (dev guards
+      ported 2026-07-27, same day as the flag).** `_say_cruise_out_of_truck`
+      now carries dev's three guards (f23a97ec): a `CRUISE_GRADE_BEATEN_PCT`
+      floor so it never fires on road the G key calls level, a mid-shift
+      hold (an open driveline is no evidence either way -- the debounce
+      pauses rather than resets, so a shift-heavy climb still gets its cue),
+      and a `CRUISE_GRADE_BEATEN_S` debounce so one frame is never enough.
+      Cooldown and terse suppression unchanged. Pinned by
+      `test_climb_cue_stays_quiet_when_cruise_is_winning` (target jumped
+      well above speed on near-level road: silence while accelerating);
+      the original repro (`tools/playtest_road.py --find limit-drop
+      --cruise 80 --verbosity 2 --headless 6`) runs clean.
 - [x] **Predictive cruise (2026-07-25).** Cruise reads `Trip.grade_at` a
       mile and a half ahead -- the baked grade segments resolve to a median
       half a mile, so this is a real road profile, not a smoothed guess --
@@ -365,9 +370,19 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       + comfortable-braking distance, floor a third of a mile), silent
       when already slow enough, linked "then right" tails, U lists the
       next bends, D folds the bend into its number, Settings toggle
-      outside presets. Remaining slices: the required-slowdown
-      consequence tier (hot entries pay physics), the pursuit guide and
-      edge textures (audio assets), steering-input feel, cue previews.
+      outside presets. PURSUIT GUIDE + EDGE LADDER SHIPPED (2026-07-27,
+      Track B): the road bed pans along the arc toward the needed steer
+      (community ruling honored -- the existing bed, never a new tone;
+      silence-is-centered with drift/curve wake-sleep hysteresis), and
+      the lane edges answer with structural textures synthesized from
+      the edge_nav audition machinery -- intermittent clip / periodic
+      strip / aperiodic gravel, panned to the side, with boundary truth
+      from the baked lane data (no gravel past an undivided centerline;
+      the spoken warning names the oncoming lane; graded haptics
+      unchanged). Turn signals now speak as panned tones (owner call
+      2026-07-27); the relay click stays for a future vintage-equipment
+      option. Remaining slices: the required-slowdown consequence tier
+      (hot entries pay physics), steering-input feel, cue previews.
 - [x] **Real lane counts from OSM (owner ask 2026-07-16) -- DATA LAYER
       BAKED 2026-07-23.** `corridor.lane_segments` now carries real OSM
       lane counts (`lanes`, `lanes:forward`/`backward`, `oneway`) for every
@@ -381,13 +396,34 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       I-40 widens to 3+ lanes through Albuquerque and holds 2 rural.
       Guarded by `tests/test_lane_data.py`. No mechanic reads it yet: the
       wiring job below carries the player-facing changelog.
-- [ ] **Wire lane data into play (follows the bake above).** REAL LANE
-      DROPS as genuine merge events at real mileposts (three lanes become
-      two = a located merge, not a scripted taper), real widths spoken/
-      enforced, exit-lane guidance, and keep-right pressure that knows how
-      many lanes exist. Reads `corridor.lane_segments`; advisory guidance
-      may run on partial data, punitive consequences only where lane data
-      is real (see `docs/lanes-harvest-brief.md`).
+- [x] **Lane counts spoken (Track D multilane slice) -- SHIPPED
+      2026-07-27.** The baked `corridor.lane_segments` now reach the player
+      as speech: the road-status readout and the route briefing say the
+      lanes in the travel direction ("divided, three lanes your side"),
+      and a callout fires when the count changes mid-leg ("road widens to
+      three lanes", "down to two lanes your side"). Direction-aware (your
+      side flips with travel direction), verbosity-aware (change callouts
+      hush in terse; status readout keeps them), and honest-absence (legs
+      with no baked lane data say nothing). Runs shorter than two miles
+      collapse so a passing-lane blip is not announced. Speech only -- no
+      traffic, no lane-position mechanic. `tests/test_multilane_speech.py`.
+- [x] **Divided-highway flag baked (Track D2, for curve nav) -- SHIPPED
+      2026-07-27.** Each leg carries `divided: true/false` from real OSM
+      carriageway geometry (`tools/bake_divided.py`, PBF cache, oneway
+      pairing), so curve nav's LEFT edge can sound like a median on a
+      divided highway vs the centerline with oncoming traffic on an
+      undivided one -- instead of inferring it from road class. 1005
+      divided, 196 undivided, 86 genuinely-mixed legs omitted (honest
+      absence, inference stays the fallback). Data only; curve nav reads
+      it. `tests/test_divided_data.py`.
+- [ ] **Lane data as a mechanic (Track B / 2.0, follows the speech
+      above).** REAL LANE DROPS as genuine merge events tied to lateral
+      position, real widths enforced, exit-lane guidance, and keep-right
+      pressure that knows how many lanes exist. Reads the same
+      `corridor.lane_segments`; advisory guidance may run on partial data,
+      punitive consequences only where lane data is real (see
+      `docs/lanes-harvest-brief.md`). Lateral position belongs to the
+      curve-navigation track.
 - [ ] **Assistance-mode assessment: accessibility features that drive the
       truck right (Josh's ask to the owner, 2026-07-22).** The automatic
       driving aids -- adaptive cruise, the speed keeper, curve speed
@@ -1305,15 +1341,20 @@ section below and the Unreleased changelog; the release-line view:
       stream yet; market covered by KWMU), WFSU Tallahassee (mount refuses
       BASS), the far Montana Hi-Line, the Texas border west of the Valley,
       and interior US-50 Nevada -- genuinely thin country, left dark rather
-      than faked.
-- [ ] **Montana Hi-Line via translators (owner lead, 2026-07-22).** The
-      Hi-Line gap may not be as dark as the license map suggests: Montana
-      Public Radio and Yellowstone Public Radio blanket the state through
-      low-power FM translators, and the parent streams are real, licensed,
-      and likely BASS-friendly. Next radio pass: map which translator
-      (parent network) actually covers each Hi-Line dispatch city and seat
-      the parent stream there under the local translator's dial position,
-      the same honest-coverage rule as everywhere else.
+      than faked. (Interior Nevada and the Texas border were later lit by the
+      2026-07-27 NPR translator dark-corridor sweep -- see below; the truly
+      stationless spots, Wells/Austin NV and Malta MT, stay dark.)
+- [x] **Montana Hi-Line via translators (owner lead, 2026-07-22) --
+      resolved 2026-07-27.** The Hi-Line east of Havre was already lit by
+      Yellowstone Public Radio in the catalog (Havre, Glasgow, Wolf Point,
+      Glendive, Miles City). The 2026-07-27 sweep confirmed the remaining
+      gap honestly: Malta, Chinook, and Saco have no reliable public-radio
+      signal (Malta's only in-town FMs are religious and commercial), so
+      they stay dark rather than faked. The one real find is KGVA 88.1
+      (Aaniiih Nakoda College, Fort Belknap), a full-power tribal NPR
+      station that covers the Harlem/Dodson stretch -- carried forward as
+      the follow-up in the dark-corridor bullet above (its stream needs a
+      Chrome network-sniff to extract).
 - [x] **Deadlines respect the hours you already burned -- SHIPPED
       same day (owner question, 2026-07-24).** Dispatch deadlines model HOS honestly for
       a FRESH clock (route-aware driving + breaks + a 10-hour sleep per
@@ -1392,6 +1433,23 @@ section below and the Unreleased changelog; the release-line view:
       bakes, self-hosted Overpass, honest absence: keep the current
       defaults only where OSM is untagged). A short 25 or 15 right at
       the gate stays exactly as it is -- that part is true.
+
+- [x] **Real speed limits for facility approach streets (owner ask,
+      2026-07-24) -- SHIPPED 2026-07-24.** Every facility approach
+      street chain now carries its real OSM `maxspeed` where the road is
+      tagged; the 25 (named) / 15 (unnamed) defaults stay only where OSM
+      is untagged (honest absence). Read from the local per-state PBF
+      cache the facility builder already uses, NOT the self-hosted
+      Overpass -- that extract is the corridor extract (motorway..
+      tertiary) and carries none of the residential/service streets
+      these approaches run on. `tools/build_local_geometry.py` gained a
+      maxspeed read threaded through its own osmium graph, so the limit
+      comes from the exact way that defines each segment. Labels only: a
+      full rebuild changed nothing but `speed_mph` (0 structural diffs
+      across all 6,910 targets). 1,457 of 12,820 segments moved off the
+      blanket default to a real limit -- 593 to 30, 404 to 35, 245 to
+      40/45 -- the mis-blanketed arterials the owner flagged. The short
+      25/15 and the 15 mph gate zone right at the dock are untouched.
 - [ ] **Reefer rules for the reefer feature (owner spec, 2026-07-24).**
       Two rulings to build into the queued reefer-temp feature: (1) a
       refrigerated load means the engine NEVER shuts down at rests --
@@ -1450,15 +1508,51 @@ section below and the Unreleased changelog; the release-line view:
       same beat and likely cuts the release sound before it plays (owner,
       Merced delivery). The arrival pssht deserves to finish; it is the
       punctuation on the whole drive.
-- [ ] **Shift transient lands AFTER the band crossfade (owner ear,
-      2026-07-24, for the audio session).** On automatic around 7->8 the
-      owner hears the ring crossfade to the higher band FIRST, then the
-      tsh/shift sound arrives late. The locked design is gap-then-
-      re-entry: hold the voice at pre-shift rpm through the interrupt,
-      transient AT the gap, one quick slide at hook-up. Something now
-      slides the ring (or crossfades) before the transient fires --
-      check trigger order between the shift bank one-shot and the
-      rpm-follow path, upper gears especially (quick 0.5s interrupts).
+- [x] **Shift transient lands AFTER the band crossfade (owner ear,
+      2026-07-24) -- SUPERSEDED by the shift sigh (shipped same day).**
+      The gap-then-re-entry hold this bullet defends was replaced at
+      the owner's direction: the voice now follows the physics rpm
+      falling through the interrupt (ducked -- the real between-gears
+      sigh), the start clunk fires the same frame the interrupt begins,
+      and engagement got its own soft end clunk. The voice moving
+      during the interrupt is now intentional; re-open only if the
+      owner still hears the start clunk arriving late.
+- [ ] **Quitting at speed should confirm before discarding the leg
+      (owner loss, 2026-07-27).** Save-at-stops is the right design,
+      but the "this delivery will resume from your last stop" warning
+      speaks WHILE the quit executes -- too late to matter. The owner
+      quit at 76 mph on I-80 (relaunching for an audio test) and lost
+      67 miles back to the trip start. Quit-to-menu while moving should
+      ask first, and say the cost in miles: "You will lose 67 miles
+      since your last stop. Quit anyway?" Parked quits stay instant.
+      Same session, related surprise worth a product look with Josh:
+      resuming always starts you parked with the brake set even when
+      the save context was mid-corridor -- honest, but it should
+      narrate itself ("pulled to the shoulder at your last checkpoint")
+      so the stopped truck makes story sense.
+- [x] **Randomize sound loop edges (owner + ChatGPT ideas, 2026-07-27,
+      SHIPPED same day as the engine-ring wobble).** The suggestions were
+      reviewed in the audio session: seam/phase advice was already done
+      (WAV + circular splice), and micro-variation won as the cure for
+      the fixed-period signature. Each engine band's rate and gain now
+      takes a slow bounded random walk (~5 cents / ~0.5 dB, sqrt(dt)
+      diffusion in the BASS backend) so the loop period never lands
+      where the ear predicted. STILL OPEN if the ear still catches it:
+      spectral loop EXTENSION -- regenerate the formant-model cuts at
+      4-6 s with continuous harmonics over a fresh-random noise floor,
+      shrinking the fingerprint itself; and the dual-loop LCM overlap
+      idea stays deferred (doubles the stream count).
+- [x] **Ring rebuild: longer spectrally-extended cuts -- SHIPPED
+      2026-07-27 (final-slate Track A, owner ear sign-off: "chef's
+      kiss").** tools/engine_ring_extend.py resynthesizes each driving
+      band FROM its own approved cut at ~5 s: partials detected at
+      revolution-rate harmonics (firing lines AND lope sidebands),
+      rebuilt as exact circular sinusoids with slow per-octave wander,
+      over a fresh-random-phase noise floor shaped by the residual PSD.
+      No splice, no seam, no repeating envelope. Measured: envelope
+      self-similarity 0.30-0.52 -> 0.10-0.15, chug modulation
+      preserved, transients clean. Idle stays the real recording;
+      jakes untouched. Rumble-strip synthesis rides Track B.
 - [ ] **Lay on the horn (owner ask, 2026-07-23).** H plays one shortish
       horn sample today. Holding H should hold the horn -- attack, a
       seamless sustain loop for as long as the key is down, then the
@@ -1479,6 +1573,30 @@ section below and the Unreleased changelog; the release-line view:
       on a cadence (streams die: KDHX did), report dead mounts for
       re-pointing, and keep honest-coverage rules: a dead stream goes
       dark or gets a verified replacement, never a fake.
+      Two findings from the first full 741-station run (2026-07-27):
+      (1) the single-threaded `--radio` pass FALSE-DEATHS on StreamTheWorld
+      -- rapid sequential probes get rate-limited, so it must host-partition
+      or space same-host hits the way the sweep gate does, else it cries
+      wolf; verify any dead list with a serial clean-session re-gate before
+      acting. (2) The most common REAL rot is stored StreamTheWorld
+      *numbered-edge* URLs (`NNNNN.live.streamtheworld.com/<MOUNT>`) that
+      expire; auto-repair could rewrite those to the stable canonical
+      `playerservices.streamtheworld.com/api/livestream-redirect/<MOUNT>`
+      form and re-gate, healing most deaths without a hand pass. First heal
+      pass done by hand (3a81da73): 13 restored, 6 unsupported honestly.
+- [ ] **NPR translator/repeater hunt for the remaining dark zones
+      (owner leads, 2026-07-27 -- next radio pass, 2.0 line).** The
+      Hi-Line pattern generalizes: query the FCC facility database for
+      service class FX (FM translator) along each dark corridor; every
+      translator record names its PRIMARY station -- resolve to the
+      parent network, BASS-verify the parent stream, seat it at the
+      translator's dial position. Owner's concrete leads: KQEI-FM 89.3
+      Sacramento (KQED repeater -- NPR flagship programming for the
+      Sacramento dial) and Winnemucca, likely a KUNR Reno translator --
+      which would start lighting the interior I-80 Nevada dark zone.
+      Full-power repeaters (like KQEI) surface in the ordinary FM query;
+      the FX class search is what catches the low-power translators
+      Wikipedia and the first sweeps missed.
 - [ ] **Fringe reception should burst, not fade (owner spec, 2026-07-23,
       ham-ear ruling).** Today the edge of a station's range plays static
       at a volume scaled by signal -- a knob, not a radio. Real analog
@@ -1672,6 +1790,50 @@ section below and the Unreleased changelog; the release-line view:
       16. Every stream BASS-gated 3/3 spaced from a clean session; Mississippi
       RRS, Omaha RTBS, and Detroit DRIS stay out honestly (closed-circuit /
       subcarrier / part-time only).
+- [x] **NPR translator dark-corridor sweep (2026-07-27).** The map's
+      genuinely dark stretches got their first public-radio signal, each
+      seated at the real FCC translator or repeater serving the town and
+      carrying its parent network's BASS-verified live stream. Interior
+      Nevada now catches NPR along Interstate 80 (Winnemucca K217AX, Battle
+      Mountain K263AB, Elko KNCC) and US-50 (Eureka K215CM via KUNR; Ely
+      KWPR via Nevada Public Radio); the Big Bend of far West Texas picks up
+      Marfa Public Radio (Marfa KRTS, Alpine KRTP, Marathon KDKY, Presidio
+      KOJP) and Texas Public Radio at Del Rio (KTPD). Translator ranges are
+      honestly short, so the signals fade in and out between the mountain
+      ranges the way low-power translators really do. Every parent stream was
+      re-checked on the BASS live gate three times from a clean session.
+      Honestly still dark, no real signal, not faked: Wells and Austin,
+      Nevada (US-50's loneliest stretch -- a test asserts Austin stays dark),
+      Malta on the Montana Hi-Line (only a religious and a commercial FM in
+      town), and Eagle Pass and Van Horn on the Texas border. Follow-up:
+      KGVA 88.1, the Aaniiih Nakoda College tribal NPR station, reliably
+      covers the dark Harlem/Dodson stretch of the Hi-Line, but its stream
+      hides behind a JavaScript player -- a Chrome network-sniff pass could
+      add it, and it pairs naturally with the planned tribal-nation crossing
+      callouts.
+- [x] **Community-radio second sweep (2026-07-27).** The dial skewed heavily
+      to NPR and public-radio news (306 public locals vs 129 community), so
+      this pass added the volunteer-run and student side. 162 community,
+      college, freeform, Pacifica, and tribal stations joined the catalog
+      (579 -> 741 stations), each FCC-call-checked and verified on the BASS
+      live gate (parallel-gate false deaths re-confirmed serially from a
+      clean session before anything was dropped). Twelve states that had
+      public radio but no community station are now covered -- New York
+      (WBAI, WNYU, WHCR), Wisconsin (WORT, WSUM), Virginia (WTJU, WUVT,
+      WDCE), Kentucky (WRFL, WLXU), Vermont (WRUV, WGDR), Indiana (WFHB),
+      South Carolina (WUSC), and more -- and the Pacifica flagships (KPFK,
+      WBAI, WPFW) and the marquee college freeforms (KALX Berkeley, KDVS
+      Davis, KZSU Stanford, WREK Georgia Tech, WXYC Chapel Hill, KVRX
+      Austin) are on the air. Honest omissions, not faked: stations that
+      stream only through phone apps (Live365, Mixlr, Zeno), internet-only
+      outfits with no FCC license, and simulcasts of stations already
+      carried were left out (77 such cases logged by the research pass).
+      KDHX St. Louis was confirmed defunct (88.1 license reissued) and
+      dropped. Follow-up: a handful of real stations whose stream the game's
+      audio engine cannot open -- WRAS Atlanta (Georgia State), KNON Dallas,
+      KUCI Irvine, WEGL Auburn, KRUI Iowa, plus WRIR Richmond and WVUA
+      Tuscaloosa whose mounts would not resolve -- want a Chrome
+      network-sniff pass, same as the KGVA follow-up.
 - [ ] **Reading Services dial category with a "nearest" jump.** The data +
       tag are in; the feature is a new dial category whose bracket-jump
       tunes the geographically NEAREST reading service (not first-by-call),
@@ -1682,6 +1844,14 @@ section below and the Unreleased changelog; the release-line view:
       as categories, reading services nested per state, International/AFN
       their own groups. Needs `state` on the RadioStation dataclass +
       backfill on pre-sweep locals. Accessibility-critical spoken menu.
+      A `station_type` tag (public / community / college / tribal /
+      reading_service / international / afn / regional / built_in / satellite)
+      is now baked on every catalog record (data-only, loader ignores it for
+      now) -- pre-wiring a browse filter that separates NPR/public from
+      community and college. Whether the Radio Player exposes those as
+      categories/tabs is a product call raised by the owner (2026-07-27) and
+      forwarded to Josh; the in-cab driving dial deliberately stays a single
+      scan-what's-in-range band (no genre tabs, matching a real car radio).
 - [ ] **Radio cleanup pass: JS-locked holdouts + a real trucking station.**
       Chase the stations the sweep flagged but could not extract a mount
       for -- WABE Atlanta, KWBU Waco, the Richmond/Huntsville public and

@@ -74,8 +74,18 @@ CH_AIR = 11  # compressor charging the tanks below governor release
 CH_BRAKE = 12  # brake-release air bleed: the hiss bed shaped per release
 CH_JAKE = 13  # engine-brake growl: synthesized loop, stage- and rpm-keyed
 CH_RADIO_FX = 14  # FM fringe hiss bed under a thinning station
+CH_EDGE = 15  # edge-boundary ladder loops: clip / strip / shoulder textures
+CH_ALERT = 16  # continuous alert tones: the stop bar's solid zone
 RESERVED = 14
 NUM_CHANNELS = 32
+
+# A held alert tone is a dead man's switch. Its owner re-asserts it every
+# frame through hold_alert, and it stops on its own the moment that stops --
+# a menu opening over the drive, the moment it warned about ending, an owner
+# that lost track of it. A continuous tone in a blind player's headphones
+# must never be able to outlive the thing it is warning about: the stop bar's
+# solid tone once ran until the game was killed (Shane, 2026-08-03).
+ALERT_HOLD_TIMEOUT_S = 0.4
 
 # Horn sustain loop points (samples, at the asset's 44100 Hz). The horn is an
 # attack -> sustain -> release sound: play the attack, loop this tuned interior
@@ -94,6 +104,7 @@ ENGINE_BANDS = (
     ("engine/midhigh", 1425.0),
     ("engine/high", 1900.0),
 )
+ENGINE_BAND_KEYS = frozenset(key for key, _native in ENGINE_BANDS)
 # Crossfades live in a narrow window around each adjacent pair's GEOMETRIC
 # midpoint (log-space), this fraction of the gap wide. Two things follow:
 # a cut never plays far from its recorded speed (rate excursions stay under
@@ -123,6 +134,18 @@ ENGINE_SLIDE_MS = 120
 ENGINE_SLIDE_SNAP_MS = 25
 ENGINE_SLIDE_SNAP_RPM = 150.0
 ENGINE_LOOP_GAIN = 1.0
+# Loop-repetition camouflage (owner + outside review, 2026-07-27): even a
+# seam-clean 1-2 s loop is recognizable -- the ear locks onto its spectral
+# fingerprint recurring at a perfectly fixed period. Each band's playback
+# rate and gain take a slow, bounded random walk, so the loop period is
+# never exactly the same twice and the recurrence stops landing where the
+# ear predicted. Rate stays within ~5 cents (well under the formant-smear
+# threshold); gain within ~0.5 dB. BASS ring only -- the pygame fallback
+# has no per-channel rate control.
+ENGINE_WOBBLE_RATE_MAX = 0.003  # +/- fraction of playback rate (~5 cents)
+ENGINE_WOBBLE_RATE_STEP = 0.004  # random-walk speed, fraction per second
+ENGINE_WOBBLE_GAIN_MAX = 0.06  # +/- fraction of band gain (~0.5 dB)
+ENGINE_WOBBLE_GAIN_STEP = 0.10
 
 # Ignition crossfade. When the engine is deliberately started, the "engine/start"
 # one-shot plays at full volume while the idle loop is held silent; near the tail
@@ -155,14 +178,36 @@ def _asset_path(key: str, extensions: tuple[str, ...]) -> Path | None:
     return None
 
 
+def _pack_carries_whole_ring(pack) -> bool:
+    """Whether ``pack`` holds every engine band cut.
+
+    Cached on the pack itself; membership only, so nothing is decompressed.
+    """
+    complete = getattr(pack, "_ff_whole_ring", None)
+    if complete is None:
+        complete = all(
+            any(pack.has(f"{key}.{ext}") for ext in ("ogg", "wav")) for key in ENGINE_BAND_KEYS
+        )
+        pack._ff_whole_ring = complete
+    return complete
+
+
 def _asset_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | None:
     """Bytes and extension for a sound key, from the shipped pack or loose files.
 
     Frozen builds carry the sounds packed into ``sounds.pak``
     (see ``assets_pack``); source checkouts read the editable
     ``assets/sounds`` tree.
+
+    The engine bands are the one exception to pack-then-loose: they crossfade
+    into each other, so they have to come from one recording. A pack that
+    predates the checkout beside it would otherwise serve four bands from the
+    pack and the fifth off disk, blending two different engines. Unless the
+    pack carries the whole ring, the ring reads from the loose tree.
     """
     pack = assets_pack.open_default()
+    if pack is not None and key in ENGINE_BAND_KEYS and not _pack_carries_whole_ring(pack):
+        pack = None
     if pack is not None:
         for ext in extensions:
             data = pack.read(f"{key}.{ext}")
@@ -291,6 +336,7 @@ class _PygameBackend:
         self.ui_volume = 0.9
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
+        self._loop_pans: dict[int, float] = {}  # channel -> stereo pan, -1 left .. 1 right
         # channel -> sustain-loop state (segment Sounds + phase); see
         # start_sustain_loop. Kept separate from _loops so per-frame update()
         # can re-queue the loop body for gapless repetition.
@@ -374,6 +420,10 @@ class _PygameBackend:
             self._loops[channel] = (key, volume)
             self._apply_channel_volume(channel)
 
+    def set_loop_pan(self, channel: int, pan: float) -> None:
+        self._loop_pans[channel] = max(-1.0, min(1.0, pan))
+        self._apply_channel_volume(channel)
+
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
         if not self.enabled:
             return
@@ -383,6 +433,7 @@ class _PygameBackend:
         if channel in self._loops:
             pygame.mixer.Channel(channel).fadeout(fade_ms)
             del self._loops[channel]
+        self._loop_pans.pop(channel, None)
 
     def _build_segments(self, key: str, loop_start: int, loop_end: int):
         """Slice a decoded sound into (head, body, tail) Sounds; cached per key.
@@ -521,7 +572,13 @@ class _PygameBackend:
             0.0,
             min(1.0, gain * self._category_volume(_loop_category(channel)) * self.master_volume),
         )
-        pygame.mixer.Channel(channel).set_volume(vol)
+        pan = self._loop_pans.get(channel, 0.0)
+        if pan:
+            left = vol * (1.0 - max(0.0, pan))
+            right = vol * (1.0 + min(0.0, pan))
+            pygame.mixer.Channel(channel).set_volume(left, right)
+        else:
+            pygame.mixer.Channel(channel).set_volume(vol)
 
     # -- truck engine crossfade ----------------------------------------------
 
@@ -849,6 +906,8 @@ class _BassBackend:
         self._engine_last_throttle = 0.0
         self._engine_duck = 1.0  # shift-gap disengage: below the load floor
         self._fades = FadeScheduler()
+        self._engine_wobble: list[list[float]] = []
+        self._wobble_rng = random.Random()
 
         if os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
             self._output = Output(device=BASS_NO_SOUND_DEVICE)
@@ -858,8 +917,33 @@ class _BassBackend:
             except BassError:
                 log.warning("No audio device; using the BASS no-sound device")
                 self._output = Output(device=BASS_NO_SOUND_DEVICE)
+        self._log_output_device()
         self._load_plugins()
         self.enabled = True
+
+    def _log_output_device(self) -> None:
+        """Name the output device the game is about to play through.
+
+        A player reporting silence is far more often pointed at the wrong
+        device -- speech on one output, the game on the system default -- or
+        muted, than missing a sound file. The log could not tell those apart
+        without naming the device, so it names it.
+        """
+        try:
+            index = self._output.get_device()
+            names = self._output.get_device_names()
+            name = names[index - 1] if 0 < index <= len(names) else "unknown"
+        except Exception:  # diagnostics must never be the thing that fails
+            log.info("Audio output device: could not be identified", exc_info=True)
+            return
+        if index != BASS_NO_SOUND_DEVICE:
+            log.info("Audio output device %d: %s", index, name)
+        elif os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
+            # Asked for: headless runs, tests, and the release smoke check.
+            log.info("Audio output: no-sound device, as asked for by this run")
+        else:
+            # Not asked for, and the reason a player hears nothing.
+            log.warning("Audio output is the BASS no-sound device; nothing will be audible")
 
     def _load_plugins(self) -> None:
         """Load optional BASS addon plugins (currently BASSHLS).
@@ -1012,6 +1096,16 @@ class _BassBackend:
             self._loops[channel] = (key, volume, stream)
             self._apply_loop_volume(channel)
 
+    def set_loop_pan(self, channel: int, pan: float) -> None:
+        if channel not in self._loops:
+            return
+        stream = self._loops[channel][2]
+        # A dying stream drops its pan silently; the volume path logs.
+        with contextlib.suppress(self._BassError):
+            self._bass_call(
+                self._set_attr, stream.handle, self._ATTRIB_PAN, max(-1.0, min(1.0, pan))
+            )
+
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
         releasing = self._releasing.pop(channel, None)
         if releasing is not None:
@@ -1157,6 +1251,7 @@ class _BassBackend:
                 )
             )
         self._engine_bands = []
+        self._engine_wobble = []
         if not self.engine_voice_classic:
             for key, native in ENGINE_BANDS:
                 band_stream = self._sfx_stream(key, looping=True)
@@ -1169,6 +1264,7 @@ class _BassBackend:
                 except self._BassError:
                     continue
                 self._engine_bands.append((native, band_stream, base_freq))
+                self._engine_wobble.append([0.0, 0.0])  # [rate walk, gain walk]
         if len(self._engine_bands) < 2:
             # Not enough cuts for a crossfade ring (a clean clone carries only
             # the synthesized engine/idle): legacy single pitched loop.
@@ -1285,6 +1381,20 @@ class _BassBackend:
 
     def update(self, dt: float) -> None:
         self._fades.update(dt)
+        # Advance the per-band anti-repetition walks; set_engine_rpm applies
+        # them. Diffusion scales with sqrt(dt) so the walk speed is frame-rate
+        # independent; the clamp keeps each walk meandering inside its box.
+        if self._engine_wobble and dt > 0.0:
+            scale = math.sqrt(dt)
+            for wob in self._engine_wobble:
+                for i, (step, bound) in enumerate(
+                    (
+                        (ENGINE_WOBBLE_RATE_STEP, ENGINE_WOBBLE_RATE_MAX),
+                        (ENGINE_WOBBLE_GAIN_STEP, ENGINE_WOBBLE_GAIN_MAX),
+                    )
+                ):
+                    wob[i] += self._wobble_rng.uniform(-step, step) * scale
+                    wob[i] = max(-bound, min(bound, wob[i]))
 
     def engine_stop(self, shutdown_sound: bool = True) -> None:
         self.reverse_stop()
@@ -1299,6 +1409,7 @@ class _BassBackend:
         for _native, stream, _freq in self._engine_bands:
             self._fade_out(stream, 250)
         self._engine_bands = []
+        self._engine_wobble = []
         if self._engine_stream is not None:
             self._fade_out(self._engine_stream, 250)
             self._engine_stream = None
@@ -1341,8 +1452,11 @@ class _BassBackend:
         if self._engine_bands:
             natives = tuple(native for native, _stream, _freq in self._engine_bands)
             weights = engine_band_weights(rpm, natives)
-            for (native, stream, base_freq), w in zip(self._engine_bands, weights, strict=True):
+            for (native, stream, base_freq), w, wob in zip(
+                self._engine_bands, weights, self._engine_wobble, strict=True
+            ):
                 rate = max(ENGINE_BAND_RATE_MIN, min(ENGINE_BAND_RATE_MAX, rpm / native))
+                rate *= 1.0 + wob[0]
                 try:
                     self._bass_call(
                         self._slide,
@@ -1351,7 +1465,7 @@ class _BassBackend:
                         base_freq * rate,
                         slide_ms,
                     )
-                    stream.set_volume(level * w)
+                    stream.set_volume(level * w * (1.0 + wob[1]))
                 except self._BassError:
                     self._engine_bands = []
                     return
@@ -1593,6 +1707,7 @@ class _NullBackend:
         self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300
     ) -> None: ...
     def set_loop_volume(self, channel: int, volume: float) -> None: ...
+    def set_loop_pan(self, channel: int, pan: float) -> None: ...
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None: ...
     def start_sustain_loop(
         self,
@@ -1657,6 +1772,9 @@ class AudioEngine:
         self._bank_order: dict[str, list[str]] = {}  # base -> remaining shuffled cuts
         self._last_bank_key: dict[str, str] = {}  # base -> cut played last
         self._asset_known: dict[str, bool] = {}  # key -> resolves anywhere
+        self._logged_volumes: tuple[float | None, ...] | None = None
+        self._alert_hold_key = ""  # continuous alert tone being re-asserted
+        self._alert_hold_s = 0.0  # time left before the hold lapses
         log.info("Audio backend: %s", self._impl.name)
 
     @staticmethod
@@ -1801,6 +1919,9 @@ class AudioEngine:
     def set_loop_volume(self, channel: int, volume: float) -> None:
         self._impl.set_loop_volume(channel, volume)
 
+    def set_loop_pan(self, channel: int, pan: float) -> None:
+        self._impl.set_loop_pan(channel, pan)
+
     def stop_loop(self, channel: int, fade_ms: int = 300) -> None:
         self._impl.stop_loop(channel, fade_ms)
 
@@ -1830,6 +1951,29 @@ class AudioEngine:
         """Stop looping ``channel`` and let its release tail play to the end."""
         self._impl.release_sustain_loop(channel, fade_ms)
 
+    # -- held alert tones ------------------------------------------------------
+
+    def hold_alert(self, key: str, volume: float = 1.0, fade_ms: int = 60) -> None:
+        """Sound the continuous alert tone ``key`` for the next moment only.
+
+        Call this every frame for as long as the alert applies. The tone
+        starts on the first call and stops itself a fraction of a second
+        after the calls stop, so it can never be left ringing by a caller
+        that returned early, ended, or lost the frame to a menu. Calling it
+        again after a silencing transition brings the same tone back.
+        """
+        self.start_loop(CH_ALERT, key, volume=volume, fade_ms=fade_ms)
+        self._alert_hold_key = key
+        self._alert_hold_s = ALERT_HOLD_TIMEOUT_S
+
+    def release_alert(self, fade_ms: int = 120) -> None:
+        """Stop a held alert tone now, rather than waiting for it to lapse."""
+        if not self._alert_hold_key:
+            return
+        self._alert_hold_key = ""
+        self._alert_hold_s = 0.0
+        self.stop_loop(CH_ALERT, fade_ms=fade_ms)
+
     # -- truck engine ----------------------------------------------------------------
 
     def engine_start(self, play_start_sound: bool = True) -> None:
@@ -1850,6 +1994,13 @@ class AudioEngine:
     def update(self, dt: float) -> None:
         """Advance time-based audio fades. Call once per frame from the main loop."""
         self._impl.update(dt)
+        # The held-alert watchdog. This runs from the app loop no matter which
+        # screen is up, so a tone whose owner stopped updating goes quiet on
+        # its own instead of running until the player quits the game.
+        if self._alert_hold_s > 0.0:
+            self._alert_hold_s -= dt
+            if self._alert_hold_s <= 0.0:
+                self.release_alert()
 
     def set_engine_rpm(self, rpm: float, throttle: float = 0.0) -> None:
         self._impl.set_engine_rpm(rpm, throttle)
@@ -1909,8 +2060,12 @@ class AudioEngine:
         self._impl.reverse_stop()
 
     def stop_world(self) -> None:
-        """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
+        """Stop engine, road, weather, ambience, and any held alert tone
+        (leaving UI sfx alone)."""
         self.engine_stop(shutdown_sound=False)
+        # A pause or an arrival cuts the alert now, without the watchdog's
+        # fraction of a second of tone over the top of the menu.
+        self.release_alert(fade_ms=200)
         for ch in (
             CH_ROAD,
             CH_WEATHER,
@@ -1920,6 +2075,10 @@ class AudioEngine:
             CH_AIR,
             CH_JAKE,
             CH_RADIO_FX,
+            # The edge texture is road noise like the rest: left out, a driver
+            # who paused with a tire on the rumble strip took the strip into
+            # the menu with them. It comes back on its own when the drive does.
+            CH_EDGE,
         ):
             self.stop_loop(ch, fade_ms=400)
 
@@ -1958,6 +2117,16 @@ class AudioEngine:
         ui: float | None = None,
     ) -> None:
         self._impl.set_volumes(master, sfx, music, weather, engine, ui)
+        # The other half of a silence report: a healthy backend playing at
+        # zero looks exactly like a broken one until the levels are written
+        # down. Logged on change only, so it cannot flood the file.
+        levels = (master, sfx, music, weather, engine, ui)
+        if levels != self._logged_volumes:
+            self._logged_volumes = levels
+            log.info(
+                "Volumes: master=%s sfx=%s music=%s weather=%s engine=%s ui=%s",
+                *levels,
+            )
 
     def shutdown(self) -> None:
         self._impl.shutdown()

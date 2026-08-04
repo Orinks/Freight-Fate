@@ -386,7 +386,8 @@
           "lon": -85.56582,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "bloomington_in_us",
@@ -2006,7 +2007,8 @@
           "lon": -87.1705,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbus_in_us",
@@ -2835,7 +2837,8 @@
           "lon": -86.13311,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "elkhart_in_us",
@@ -5072,7 +5075,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "evansville_in_us",
@@ -6920,7 +6924,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "evansville_in_us",
@@ -9411,7 +9416,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "fort_wayne_in_us",
@@ -10600,7 +10606,8 @@
           "lon": -86.00502,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "fort_wayne_in_us",
@@ -12239,7 +12246,8 @@
           "lon": -87.35407,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_wayne_in_us",
@@ -14028,7 +14036,8 @@
           "lon": -84.98905,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "gary_in_us",
@@ -14898,7 +14907,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "gary_in_us",
@@ -16064,7 +16074,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "gary_in_us",
@@ -17140,7 +17151,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "indianapolis_in_us",
@@ -18103,7 +18115,8 @@
           "lon": -86.01981,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "indianapolis_in_us",
@@ -19330,7 +19343,8 @@
           "lon": -86.40318,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "indianapolis_in_us",
@@ -20899,7 +20913,8 @@
           "lon": -85.18469,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "indianapolis_in_us",
@@ -21999,7 +22014,8 @@
           "lon": -86.12954,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "indianapolis_in_us",
@@ -25595,7 +25611,8 @@
           "lon": -86.81813,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "indianapolis_in_us",
@@ -26727,7 +26744,8 @@
           "lon": -85.55814,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "indianapolis_in_us",
@@ -28396,7 +28414,8 @@
           "lon": -86.26436,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "indianapolis_in_us",
@@ -31278,7 +31297,8 @@
           "lon": -90.2026,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "indianapolis_in_us",
@@ -32527,7 +32547,8 @@
           "lon": -87.12776,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kokomo_in_us",
@@ -34331,7 +34352,8 @@
           "lon": -86.13311,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "muncie_in_us",
@@ -35417,7 +35439,8 @@
           "lon": -85.18469,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "muncie_in_us",
@@ -36363,7 +36386,8 @@
           "lon": -84.93278,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "richmond_in_us",
@@ -37385,7 +37409,8 @@
           "lon": -84.20907,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "south_bend_in_us",
@@ -38935,7 +38960,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "south_bend_in_us",
@@ -40418,7 +40444,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "south_bend_in_us",
@@ -42076,7 +42103,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "terre_haute_in_us",
@@ -42982,7 +43010,8 @@
           "lon": -88.57234,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "vincennes_in_us",
@@ -43813,7 +43842,8 @@
           "lon": -87.55236,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "vincennes_in_us",
@@ -44667,7 +44697,8 @@
           "lon": -87.41432,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

@@ -60,6 +60,7 @@ from ..sim import hos
 from ..sim.driving_modes import tuning_for_time_scale
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.lane import CURVE_RATE, LaneKeeping, lane_label
+from ..sim.lane_guidance import LaneGuidance
 from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
@@ -175,6 +176,10 @@ RAMP_GAP_MILESTONES_M = (300, 150, 100, 50)
 # the distance, silence means stopped. Placeholder ui/tick until the
 # audio-design pass gives the bar its own voice (steering-sound RFC).
 RAMP_BAR_TICK_RANGE_MI = 300.0 / 5280.0
+# The bar's final leeway: inside this, still rolling, the ticks fuse into a
+# continuous tone -- be nearly stopped or eat the intersection (owner spec,
+# written straight into the manual, 2026-07-27). About sixty feet.
+RAMP_BAR_SOLID_MI = 0.012
 RAMP_BAR_TICK_SLOW_S = 1.1  # period at the edge of the range
 RAMP_BAR_TICK_FAST_S = 0.15  # period at the bar
 # Safety-call re-arm: Ctrl always silences (a screen-reader reflex must
@@ -269,6 +274,14 @@ CRUISE_COAST_MPH = 2.0  # feed-forward eases to nothing across this much overspe
 CRUISE_DROOP_MPH = 6.0
 CRUISE_FLOORED_THROTTLE = 0.98  # pedal genuinely on the floor, not merely deep
 CLIMB_CUE_COOLDOWN_S = 120.0  # a mountain is many pulls; say it once a hill
+# ...and only once the grade has genuinely won (dev fix f23a97ec, ported):
+# a road the G key calls level never counts as a climb, a shift's open
+# driveline is not evidence (drive_ratio is 0 mid-shift), and the condition
+# has to hold rather than catch one frame -- a limit rise raising the target
+# had cruise flooring the pedal on a slight grade and announcing defeat at
+# 71 mph while accelerating to 77 (playtest transcript, 2026-07-27).
+CRUISE_GRADE_BEATEN_PCT = 1.5
+CRUISE_GRADE_BEATEN_S = 3.0
 # Holding the target from above. Cutting fuel was cruise's only answer, so any
 # downgrade gentler than the descent assist's 2.5 percent trigger carried the
 # truck past the set speed and kept it there (bench trace: 2 percent down, 62

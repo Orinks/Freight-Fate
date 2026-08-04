@@ -1264,7 +1264,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "akron_oh_us",
@@ -3416,7 +3417,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "akron_oh_us",
@@ -4650,7 +4652,8 @@
           "lon": -80.71572,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "chillicothe_oh_us",
@@ -5940,7 +5943,8 @@
           "lon": -83.84591,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "chillicothe_oh_us",
@@ -6865,7 +6869,8 @@
           "lon": -82.93836,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cincinnati_oh_us",
@@ -8724,7 +8729,8 @@
           "lon": -86.13311,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cincinnati_oh_us",
@@ -10434,7 +10440,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cleveland_oh_us",
@@ -13669,7 +13676,8 @@
           "lon": -87.69442,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cleveland_oh_us",
@@ -14998,7 +15006,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbus_oh_us",
@@ -16630,7 +16639,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbus_oh_us",
@@ -18876,7 +18886,8 @@
           "lon": -86.13311,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbus_oh_us",
@@ -20091,7 +20102,8 @@
           "lon": -82.83077,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "columbus_oh_us",
@@ -21191,7 +21203,8 @@
           "lon": -82.53668,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dayton_oh_us",
@@ -22605,7 +22618,8 @@
           "parking_spaces": 20,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dayton_oh_us",
@@ -23859,7 +23873,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "dayton_oh_us",
@@ -25278,7 +25293,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "findlay_oh_us",
@@ -25919,7 +25935,8 @@
           "lon": -83.96419,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lima_oh_us",
@@ -27043,7 +27060,8 @@
           "lon": -84.20907,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mansfield_oh_us",
@@ -28606,7 +28624,8 @@
           "lon": -81.90834,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "marion_oh_us",
@@ -29543,7 +29562,8 @@
           "lon": -82.99221,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "marion_oh_us",
@@ -30207,7 +30227,8 @@
           "lon": -83.61164,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "toledo_oh_us",
@@ -31490,7 +31511,8 @@
           "lon": -83.07455,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "toledo_oh_us",
@@ -32792,7 +32814,8 @@
           "lon": -86.00502,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "toledo_oh_us",
@@ -33544,7 +33567,8 @@
           "lon": -83.64694,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "toledo_oh_us",
@@ -34405,7 +34429,8 @@
           "lon": -85.18469,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "youngstown_oh_us",
@@ -36002,7 +36027,8 @@
           "lon": -80.34546,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "zanesville_oh_us",
@@ -37663,7 +37689,8 @@
           "lon": -81.05056,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

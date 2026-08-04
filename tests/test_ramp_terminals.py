@@ -723,10 +723,10 @@ def test_stop_sign_bar_has_position():
         assert len(bar_calls) == len(RAMP_GAP_MILESTONES_FT)
         assert bar_calls[0] == "1000 feet to the bar."
 
-        # Parking-sensor ticks run for the sign too.
+        # Parking-sensor beeps run for the sign too (outside the solid zone).
         played = []
         d.ctx.audio.play = lambda *a, **k: played.append(a)
-        d._ramp_mi = RAMP_ACCESS_MI + 50 / 5280.0
+        d._ramp_mi = RAMP_ACCESS_MI + 100 / 5280.0
         d._ramp_bar_tick_timer = 0.0
         for _ in range(40):
             d._update_ramp_light(0.05)
@@ -767,15 +767,110 @@ def test_bar_ticks_speed_up_as_the_bar_closes():
                 d._update_ramp_bar_ticks(dt)
             return len(played)
 
-        far, near = ticks_over(280), ticks_over(30)
+        far, near = ticks_over(280), ticks_over(80)
         assert near > far > 0
 
-        # Beyond the range, and at a standstill, the tick is silent.
+        # Inside the final leeway the beeps fuse into the continuous tone
+        # (owner spec 2026-07-27): no discrete beeps, the alert loop runs.
+        loops = []
+        d.ctx.audio.start_loop = lambda ch, key, volume=1.0, fade_ms=300: loops.append(key)
+        d.ctx.audio.stop_loop = lambda ch, fade_ms=300: None
+        assert ticks_over(30) == 0
+        assert "vehicle/bar_solid" in loops
+
+        # Beyond the range, and at a standstill, everything is silent.
         assert ticks_over(600) == 0
         d.truck.velocity_mps = 0.0
+        d._bar_solid_on = False
+        loops.clear()
         assert ticks_over(50) == 0
+        assert not loops
     finally:
         app.shutdown()
+
+
+@pytest.mark.parametrize("control", ["signal", "stop"])
+def test_the_bar_tone_ends_when_the_bar_is_behind_the_truck(control):
+    """Shane, 2026-08-03: creep up to the bar on a red, reach the solid tone,
+    and it never stopped -- not when he got moving again, not in the menus,
+    not until he killed the game. The tone's only off-switch sat behind the
+    early return that fires the moment the terminal is done, so crossing the
+    bar left it sounding with nothing on the road able to end it."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import RAMP_BAR_SOLID_MI
+
+    app = App()
+    try:
+        d = _driving(app)
+        _on_ramp(d, control, red=True, mph=5.0)
+        held: list[str] = []
+        released: list[bool] = []
+        d.ctx.audio.hold_alert = lambda key, volume=1.0, fade_ms=60: held.append(key)
+        d.ctx.audio.release_alert = lambda fade_ms=120: released.append(True)
+        d.ctx.audio.play = lambda *a, **k: None
+        d.ctx.say_event = lambda *a, **k: None
+
+        # Creeping inside the last leeway: the tone sounds, and keeps being
+        # asserted for as long as it applies.
+        d._ramp_mi = RAMP_ACCESS_MI + RAMP_BAR_SOLID_MI / 2.0
+        for _ in range(10):
+            d._update_ramp_light(0.05)
+        assert held.count("vehicle/bar_solid") == 10
+        assert d._bar_solid_on
+
+        # The bar is crossed and the terminal is settled. From here the road
+        # has nothing left to warn about: the tone stops, and stays stopped.
+        d._ramp_terminal_done = True
+        d._ramp_mi = RAMP_ACCESS_MI - 0.01
+        held.clear()
+        for _ in range(20):
+            d._update_ramp_light(0.05)
+        assert released, "the solid tone was left sounding past the stop bar"
+        assert not held
+        assert not d._bar_solid_on
+
+        # And once the ramp itself is over, still silent.
+        d._ramp_mi = None
+        d._update_ramp_light(0.05)
+        assert not held
+    finally:
+        app.shutdown()
+
+
+def test_a_held_alert_tone_stops_when_nobody_is_holding_it():
+    """The tone is a dead man's switch at the audio layer too: whatever else
+    goes wrong -- a menu taking the frame, a state ending mid-alert -- a
+    continuous tone in a player's headphones lapses on its own."""
+    from freight_fate.audio import ALERT_HOLD_TIMEOUT_S, CH_ALERT, AudioEngine
+
+    audio = AudioEngine()
+    started: list[tuple[int, str]] = []
+    stopped: list[int] = []
+    audio.start_loop = lambda ch, key, volume=1.0, fade_ms=300: started.append((ch, key))
+    audio.stop_loop = lambda ch, fade_ms=300: stopped.append(ch)
+
+    audio.hold_alert("vehicle/bar_solid", volume=0.85)
+    assert started == [(CH_ALERT, "vehicle/bar_solid")]
+
+    # Re-asserted every frame, it holds.
+    for _ in range(20):
+        audio.hold_alert("vehicle/bar_solid", volume=0.85)
+        audio.update(0.05)
+    assert not stopped
+
+    # The holder stops calling: the tone goes quiet on its own, promptly.
+    elapsed = 0.0
+    while not stopped and elapsed < 5.0:
+        audio.update(0.05)
+        elapsed += 0.05
+    assert stopped == [CH_ALERT]
+    assert elapsed <= ALERT_HOLD_TIMEOUT_S + 0.1
+
+    # Silent stays silent: no repeat stops, and no tone the player never asked
+    # for coming back.
+    for _ in range(20):
+        audio.update(0.05)
+    assert stopped == [CH_ALERT]
 
 
 def test_hairpin_approach_pins_the_clock_to_real_time():

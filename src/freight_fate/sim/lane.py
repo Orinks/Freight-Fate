@@ -162,6 +162,10 @@ class LaneKeeping:
             min(1.0, (self._edge_excursion() - RUMBLE_START) / (RUMBLE_FULL - RUMBLE_START)),
         )
 
+    def edge_excursion(self) -> float:
+        """Public read of how far past center toward a true road edge."""
+        return self._edge_excursion()
+
     def describe(self) -> str:
         lane_part = f"In the {self.lane_name} lane"
         side = "left" if self.offset < 0 else "right"

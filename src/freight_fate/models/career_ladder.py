@@ -43,8 +43,9 @@ CAREER_RANKS: tuple[CareerRank, ...] = (
         4,
         "Regional Company Driver",
         "Company driver",
-        "High-value freight endorsement, and dispatch upgrades your "
-        "assigned tractor to a newer regional fleet unit.",
+        "High-value freight endorsement, and dispatch moves you up to the "
+        "regional fleet: you slip-seat between a few newer spare tractors, "
+        "matched to each load.",
         "Working broader lanes while the carrier still owns the business risk.",
     ),
     CareerRank(
@@ -80,8 +81,8 @@ CAREER_RANKS: tuple[CareerRank, ...] = (
         9,
         "High-Value Company Driver",
         "Company driver",
-        "Dispatch upgrades your assigned tractor to a long-haul sleeper, "
-        "with priority access to fragile and high-value lanes.",
+        "A dedicated long-haul sleeper tractor of your own, so slip-seating "
+        "ends, with priority access to fragile and high-value lanes.",
         "Dispatch trusts the driver with higher-consequence freight.",
     ),
     CareerRank(

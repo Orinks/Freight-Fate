@@ -1491,7 +1491,8 @@
           "lon": -112.08127,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cedar_city_ut_us",
@@ -2548,7 +2549,8 @@
           "lon": -113.58201,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "green_river_ut_us",
@@ -4333,7 +4335,8 @@
           "lon": -112.08127,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "logan_ut_us",
@@ -5305,7 +5308,8 @@
           "lon": -112.01917,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "logan_ut_us",
@@ -6624,7 +6628,8 @@
           "lon": -112.20649,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "moab_ut_us",
@@ -8028,7 +8033,8 @@
           "lon": -108.6478089,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "moab_ut_us",
@@ -8775,7 +8781,8 @@
           "lon": -110.14842,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "nephi_ut_us",
@@ -9696,7 +9703,8 @@
           "lon": -111.76978,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ogden_ut_us",
@@ -11297,7 +11305,8 @@
           "lon": -112.20649,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "provo_ut_us",
@@ -15932,7 +15941,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "provo_ut_us",
@@ -18457,7 +18467,8 @@
           "lon": -113.05205,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "provo_ut_us",
@@ -24211,7 +24222,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "provo_ut_us",
@@ -26328,7 +26340,8 @@
           "lon": -110.14842,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "provo_ut_us",
@@ -30667,7 +30680,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "provo_ut_us",
@@ -31850,7 +31864,8 @@
           "lon": -111.94614,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "richfield_ut_us",
@@ -34565,7 +34580,8 @@
           "lon": -114.89699,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "salt_lake_city_ut_us",
@@ -39569,7 +39585,8 @@
           "lon": -114.06289,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "salt_lake_city_ut_us",
@@ -40601,7 +40618,8 @@
           "lon": -112.01917,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

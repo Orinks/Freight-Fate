@@ -701,6 +701,7 @@ class TripEventKind(Enum):
     LANDMARK = "landmark"
     BILLBOARD = "billboard"
     CURVE = "curve"
+    LANE = "lane"
     ARRIVED = "arrived"
 
 

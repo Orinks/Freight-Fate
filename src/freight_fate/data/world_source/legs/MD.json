@@ -5588,7 +5588,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "baltimore_md_us",
@@ -8916,7 +8917,8 @@
           "lon": -77.44977,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "baltimore_md_us",
@@ -10198,7 +10200,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cumberland_md_us",
@@ -11585,7 +11588,8 @@
           "lon": -77.78268,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "cumberland_md_us",
@@ -12972,7 +12976,8 @@
           "lon": -78.29892,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "hagerstown_md_us",
@@ -14656,7 +14661,8 @@
           "lon": -76.54885,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hagerstown_md_us",
@@ -16175,7 +16181,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "salisbury_md_us",
@@ -17808,7 +17815,8 @@
           "lon": -76.54885,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

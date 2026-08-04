@@ -2282,7 +2282,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "abilene_tx_us",
@@ -3524,7 +3525,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "amarillo_tx_us",
@@ -6329,7 +6331,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "amarillo_tx_us",
@@ -10631,7 +10634,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "amarillo_tx_us",
@@ -11242,7 +11246,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "austin_tx_us",
@@ -14681,7 +14686,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "austin_tx_us",
@@ -17063,7 +17069,8 @@
           "lon": -95.36954,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "austin_tx_us",
@@ -19194,7 +19201,8 @@
           "lon": -99.0261622,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "austin_tx_us",
@@ -20844,7 +20852,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "austin_tx_us",
@@ -22325,7 +22334,8 @@
           "lon": -97.56008,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "beaumont_tx_us",
@@ -24322,7 +24332,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "beaumont_tx_us",
@@ -25502,7 +25513,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "beaumont_tx_us",
@@ -26106,7 +26118,8 @@
           "lon": -93.81929,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "big_spring_tx_us",
@@ -27521,7 +27534,8 @@
           "lon": -99.8719078,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "brownsville_tx_us",
@@ -28881,7 +28895,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "brownsville_tx_us",
@@ -31222,7 +31237,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "brownsville_tx_us",
@@ -32134,7 +32150,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "brownwood_tx_us",
@@ -33149,7 +33166,8 @@
           "lon": -99.76999,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "brownwood_tx_us",
@@ -34149,7 +34167,8 @@
           "lon": -98.17864,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "brownwood_tx_us",
@@ -36153,7 +36172,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "clarendon_tx_us",
@@ -36956,7 +36976,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "college_station_tx_us",
@@ -40549,7 +40570,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "college_station_tx_us",
@@ -44203,7 +44225,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "corpus_christi_tx_us",
@@ -46153,7 +46176,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "dallas_tx_us",
@@ -53372,7 +53396,8 @@
           "lon": -106.64893,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dallas_tx_us",
@@ -54330,7 +54355,8 @@
           "lon": -97.11508,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dallas_tx_us",
@@ -63730,7 +63756,8 @@
           "lon": -93.2982,
           "note": "Springfield, MO on I-44 -- pins the run to the I-44 route (I-35 to OKC, then I-44 through Tulsa, Joplin, Springfield, Rolla). ORS otherwise prefers I-30/US-67 through Little Rock, which strands this leg's curated I-44 stops."
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dallas_tx_us",
@@ -65766,7 +65793,8 @@
           "lon": -98.48299,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "del_rio_tx_us",
@@ -68368,7 +68396,8 @@
           "lon": -104.82957,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "dumas_tx_us",
@@ -68635,7 +68664,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "eagle_pass_tx_us",
@@ -69261,7 +69291,8 @@
           "lon": -100.90576,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "eagle_pass_tx_us",
@@ -69867,7 +69898,8 @@
           "lon": -99.77339,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "el_paso_tx_us",
@@ -72675,7 +72707,8 @@
           "lon": -106.64893,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "el_paso_tx_us",
@@ -75371,7 +75404,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "el_paso_tx_us",
@@ -76590,7 +76624,8 @@
           "at_mi": 117.0,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_stockton_tx_us",
@@ -77639,7 +77674,8 @@
           "lon": -104.81931,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_worth_tx_us",
@@ -80768,7 +80804,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "fort_worth_tx_us",
@@ -84103,7 +84140,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hereford_tx_us",
@@ -84670,7 +84708,8 @@
           "lon": -101.87341,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "hereford_tx_us",
@@ -88464,7 +88503,8 @@
           "lon": -96.44763,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "houston_tx_us",
@@ -90248,7 +90288,8 @@
           "lon": -93.63752,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "houston_tx_us",
@@ -92675,7 +92716,8 @@
           "lon": -98.03467,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jacksboro_tx_us",
@@ -93476,7 +93518,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "junction_tx_us",
@@ -94549,7 +94592,8 @@
           "lon": -99.77683,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kerrville_tx_us",
@@ -95502,7 +95546,8 @@
           "lon": -99.77683,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "killeen_tx_us",
@@ -96947,7 +96992,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "killeen_tx_us",
@@ -101230,7 +101276,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "killeen_tx_us",
@@ -101863,7 +101910,8 @@
           "lon": -97.47495,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lampasas_tx_us",
@@ -103047,7 +103095,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "laredo_tx_us",
@@ -104683,7 +104732,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "laredo_tx_us",
@@ -106539,7 +106589,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "longview_tx_us",
@@ -109362,7 +109413,8 @@
           "lon": -94.09963,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "lubbock_tx_us",
@@ -110850,7 +110902,8 @@
           "lon": -100.2094,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lubbock_tx_us",
@@ -112650,7 +112703,8 @@
           "lon": -101.8544,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lufkin_tx_us",
@@ -116627,7 +116681,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "mckinney_tx_us",
@@ -118192,7 +118247,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "mckinney_tx_us",
@@ -122727,7 +122783,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "midland_tx_us",
@@ -125121,7 +125178,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "midland_tx_us",
@@ -125781,7 +125839,8 @@
           "lon": -101.47538,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "midland_tx_us",
@@ -127133,7 +127192,8 @@
           "lon": -102.25231,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "mineral_wells_tx_us",
@@ -127672,7 +127732,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "odessa_tx_us",
@@ -128908,7 +128969,8 @@
           "lon": -93.58844,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "ozona_tx_us",
@@ -130178,7 +130240,8 @@
           "lon": -102.88554,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "palestine_tx_us",
@@ -131669,7 +131732,8 @@
           "lon": -96.60242,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "palestine_tx_us",
@@ -133019,7 +133083,8 @@
           "lon": -94.69909,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "palestine_tx_us",
@@ -133874,7 +133939,8 @@
           "lon": -95.27202,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "pampa_tx_us",
@@ -134450,7 +134516,8 @@
           "lon": -101.87341,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "pampa_tx_us",
@@ -134926,7 +134993,8 @@
           "lon": -100.97217,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "paris_tx_us",
@@ -136223,7 +136291,8 @@
           "lon": -94.09963,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "plainview_tx_us",
@@ -137239,7 +137308,8 @@
           "lon": -101.87341,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_angelo_tx_us",
@@ -138251,7 +138321,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "san_angelo_tx_us",
@@ -139990,7 +140061,8 @@
           "lon": -100.90501,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "san_angelo_tx_us",
@@ -141224,7 +141296,8 @@
           "lon": -102.88554,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "san_angelo_tx_us",
@@ -145707,7 +145780,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": true
     },
     {
       "from": "san_antonio_tx_us",
@@ -147022,7 +147096,8 @@
           "lon": -98.90224,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "san_antonio_tx_us",
@@ -150597,7 +150672,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "sherman_tx_us",
@@ -151251,7 +151327,8 @@
           "lon": -96.58437,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "sherman_tx_us",
@@ -152178,7 +152255,8 @@
           "lon": -95.55549,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "stephenville_tx_us",
@@ -152830,7 +152908,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": false
     },
     {
       "from": "stratford_tx_us",
@@ -153201,7 +153280,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "temple_tx_us",
@@ -154010,7 +154090,8 @@
           "lon": -97.17118,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "tyler_tx_us",
@@ -155599,7 +155680,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "tyler_tx_us",
@@ -156523,7 +156605,8 @@
           "lon": -95.06313,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "tyler_tx_us",
@@ -158450,7 +158533,8 @@
           "lon": -94.09963,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "uvalde_tx_us",
@@ -159168,7 +159252,8 @@
           "lon": -100.90576,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "vernon_tx_us",
@@ -159796,7 +159881,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "victoria_tx_us",
@@ -160575,7 +160661,8 @@
           "lon": -97.41982,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "victoria_tx_us",
@@ -163742,7 +163829,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "waco_tx_us",
@@ -165594,7 +165682,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "waco_tx_us",
@@ -167150,7 +167239,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "waco_tx_us",
@@ -171109,7 +171199,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "wichita_falls_tx_us",
@@ -173244,7 +173335,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "wichita_falls_tx_us",
@@ -175486,7 +175578,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "wichita_falls_tx_us",
@@ -176167,7 +176260,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     }
   ]
 }

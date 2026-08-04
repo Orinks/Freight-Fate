@@ -5780,7 +5780,8 @@
           "lon": -122.3921652,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "boise_id_us",
@@ -9930,7 +9931,8 @@
           "lon": -111.94614,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "coeur_d_alene_id_us",
@@ -10644,7 +10646,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "coeur_d_alene_id_us",
@@ -14456,7 +14459,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "idaho_falls_id_us",
@@ -15153,7 +15157,8 @@
           "lon": -112.41346,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "idaho_falls_id_us",
@@ -17860,7 +17865,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "idaho_falls_id_us",
@@ -19711,7 +19717,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "kellogg_id_us",
@@ -21051,7 +21058,8 @@
           }
         ]
       },
-      "terrain": "mountain"
+      "terrain": "mountain",
+      "divided": true
     },
     {
       "from": "lewiston_id_us",
@@ -23018,7 +23026,8 @@
           "lon": -116.87248,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "lewiston_id_us",
@@ -25299,7 +25308,8 @@
           "lon": -116.09732,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "mccall_id_us",
@@ -26826,7 +26836,8 @@
           "lon": -116.1895,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "mccall_id_us",
@@ -28344,7 +28355,8 @@
           "lon": -116.97604,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "pocatello_id_us",
@@ -31310,7 +31322,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "pocatello_id_us",
@@ -33630,7 +33643,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "pocatello_id_us",
@@ -35040,7 +35054,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "sandpoint_id_us",
@@ -36249,7 +36264,8 @@
           "lon": -116.99769,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "twin_falls_id_us",
@@ -37957,7 +37973,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "twin_falls_id_us",
@@ -39728,7 +39745,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": false
     },
     {
       "from": "twin_falls_id_us",
@@ -42181,7 +42199,8 @@
           "lon": -112.01917,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "twin_falls_id_us",
@@ -43506,7 +43525,8 @@
           "lon": -114.95445,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     }
   ]
 }

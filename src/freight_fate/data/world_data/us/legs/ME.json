@@ -3032,7 +3032,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bangor_me_us",
@@ -5205,7 +5206,8 @@
           "vehicle_access": "tractor_trailer",
           "parking_spaces": 45
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lewiston_me_us",
@@ -6845,7 +6847,8 @@
           "lon": -70.86261,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "lewiston_me_us",
@@ -7757,7 +7760,8 @@
           "lon": -70.32017,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "portland_me_us",
@@ -9695,7 +9699,8 @@
           "lon": -70.8184263,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "portland_me_us",
@@ -11259,7 +11264,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "portland_me_us",
@@ -14773,7 +14779,8 @@
           "lon": -72.13246,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     }
   ]
 }

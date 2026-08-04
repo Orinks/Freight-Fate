@@ -1364,7 +1364,8 @@
           "lon": -100.72868,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bismarck_nd_us",
@@ -2415,7 +2416,8 @@
           "lon": -100.2867,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bismarck_nd_us",
@@ -3840,7 +3842,8 @@
           "lon": -101.35022,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "devils_lake_nd_us",
@@ -4464,7 +4467,8 @@
           "lon": -97.09338,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "dickinson_nd_us",
@@ -8415,7 +8419,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "fargo_nd_us",
@@ -9739,7 +9744,8 @@
           "lon": -97.04742,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "grand_forks_nd_us",
@@ -10715,7 +10721,8 @@
           "lon": -95.40925,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "grand_forks_nd_us",
@@ -11425,7 +11432,8 @@
           "lon": -97.05964,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jamestown_nd_us",
@@ -12552,7 +12560,8 @@
           "lon": -96.78684,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "minot_nd_us",
@@ -13360,7 +13369,8 @@
           "lon": -98.86603,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "williston_nd_us",
@@ -14351,7 +14361,8 @@
           "lon": -104.17622,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "williston_nd_us",
@@ -15760,7 +15771,8 @@
           "lon": -101.35022,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

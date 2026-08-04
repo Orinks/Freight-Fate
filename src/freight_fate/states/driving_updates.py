@@ -2,16 +2,15 @@
 from __future__ import annotations
 
 from .. import engine_audio
-from ..audio import CH_AIR, CH_BRAKE, CH_JAKE, CH_RADIO_FX
+from ..audio import CH_AIR, CH_BRAKE, CH_EDGE, CH_JAKE, CH_RADIO_FX, CH_ROAD
 from ..audio_fades import curve as _resolve_curve
 from ..radio import truck_elevation_ft
 from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
 from .driving_rest_states import EnforcementStopState, FelonyStopState, TrafficStopState
 
-LANE_GUIDANCE_DRIFT_START = 0.3
-LANE_GUIDANCE_CENTER_MAX = 0.18
-LANE_GUIDANCE_PAN = 0.85
+# Re-crossings inside this window are pinballing, not lane changes.
+LANE_CROSS_REPEAT_S = 4.0
 
 # FM fringe rendering. The bed creeps in below full quieting (signal 0.6,
 # radio.SIGNAL_FULL_VOLUME) and deepens quadratically; pickets begin below
@@ -118,7 +117,7 @@ class DrivingUpdateMixin:
         if ahead <= 0 or speed <= curve.advisory_mph + PACENOTE_MARGIN_MPH:
             return
         pan = -PACENOTE_CUE_PAN if curve.direction == "L" else PACENOTE_CUE_PAN
-        self.ctx.audio.play("ui/tick", volume=0.9, pan=pan)
+        self.ctx.audio.play("vehicle/curve_bink", volume=0.9, pan=pan)
         self.ctx.say_event(self._pacenote_text(curve, ahead, speed), interrupt=True)
 
     def _note_critical_speech_stopped(self) -> None:
@@ -162,7 +161,6 @@ class DrivingUpdateMixin:
         keys = pygame.key.get_pressed()
         ramp = dt * 2.2
         self._brake_lockout_cue_timer = max(0.0, self._brake_lockout_cue_timer - dt)
-        self._lane_rumble_timer = max(0.0, self._lane_rumble_timer - dt)
         # Controller triggers/clutch are analog held positions blended in below;
         # the keyboard keys keep their ramped behavior so both devices work.
         pad = self.ctx.controller
@@ -674,7 +672,7 @@ class DrivingUpdateMixin:
         # drives the street legs, not the highway legs.
         leg = self.trip.route.legs[self.trip.current_leg_index]
         # The exit ramp is a single lane; the mainline keeps its leg count.
-        self.lane.set_lane_count(1 if self._ramp_mi is not None else leg_lane_count(leg))
+        self.lane.set_lane_count(1 if self._ramp_mi is not None else self._lane_count_here(leg))
         # Use the real baked curve data when the truck is inside a curve.
         # The curve force pushes the lane offset outward proportionally to
         # how much the truck's speed exceeds the advisory speed, scaled by
@@ -683,14 +681,16 @@ class DrivingUpdateMixin:
         if active is not None and not active.connector:
             excess = max(0.0, self.truck.speed_mph - active.advisory_mph)
             tightness = max(0.2, 1.0 - active.min_radius_ft / 5000.0)
-            # Curve push: full CURVE_RATE at advisory, ramping with excess.
-            # A heavier load pushes harder (more inertia to pull wide);
-            # worn or icy grip means less lateral resistance.
+            # Curve push severity: around 1.0 at advisory in a tight bend,
+            # ramping with excess speed. A heavier load pushes harder (more
+            # inertia to pull wide); worn or icy grip means less resistance.
             load = min(1.5, self.truck.gross_mass_kg / self.truck.specs.mass_kg)
             grip_factor = min(1.0, self.truck.effective_grip)
-            curve_push = (
-                CURVE_RATE * tightness * (1.0 + excess * 0.05) * load / max(0.2, grip_factor)
-            )
+            # Raw severity only: the lane model applies CURVE_RATE itself.
+            # Scaling here too made every bend ~8x weaker than designed --
+            # a 30-advisory curve at 45 could be no-hands (owner-caught on
+            # Camp Verde-Payson: "didn't hear or have to turn").
+            curve_push = tightness * (1.0 + excess * 0.05) * load / max(0.2, grip_factor)
             # Centrifugal force pushes the truck OUTSIDE the curve: a left
             # curve pushes right (positive offset), a right curve pushes left
             # (negative offset). The lane model's positive offset = rightward.
@@ -711,6 +711,7 @@ class DrivingUpdateMixin:
             curve += 0.35
         if active is None and self._curve_slip_active:
             self._curve_slip_active = False
+        self._update_curve_run(active)
         # Curve speed assist: use the real advisory speed when one is active
         # instead of the old terrain heuristic. Hysteresis both places:
         # engage above advisory + 5, but once slowing, hold until the truck
@@ -793,16 +794,21 @@ class DrivingUpdateMixin:
                 return
             self.ctx.audio.play("vehicle/rumble_strip", volume=1.0, pan=self._lane_pan())
             self.truck.damage_pct = min(100.0, self.truck.damage_pct + 1.0)
-            message = self.lane.describe()
+            boundary = self._edge_boundary()
+            if boundary == "oncoming":
+                # Past an undivided centerline is not a shoulder: say the
+                # real danger, on the side it lives.
+                message = "Across the centerline, in the oncoming lane!"
+            elif boundary == "median":
+                message = "Off the pavement, into the median on the left!"
+            else:
+                message = self.lane.describe()
             if not self._terse_speech():
                 message += " Steer back toward the lane center."
             self.ctx.say_event(message, interrupt=True)
+        self._cross_repeat_s = max(0.0, self._cross_repeat_s - dt)
         if self.lane.crossed:
-            # A held drift carried the truck across the line: the wheel was
-            # the lane change. One signal click marks the commit.
-            pan = -0.6 if self.lane.crossed > 0 else 0.6
-            self.ctx.audio.play("vehicle/turn_signal", volume=0.6, pan=pan)
-            self._finish_lane_change()
+            self._on_lane_crossed()
         self._update_tap_lane_change(dt)
         self._update_merge(dt)
         self._update_keep_right(dt)
@@ -816,14 +822,39 @@ class DrivingUpdateMixin:
         self._lane_signal_timer += dt
         if self._lane_signal_timer >= LANE_SIGNAL_CLICK_S:
             self._lane_signal_timer = 0.0
-            self.ctx.audio.play("vehicle/turn_signal", volume=0.8, pan=pan)
+            self.ctx.audio.play("vehicle/signal_tone", volume=0.8, pan=pan)
         self._lane_change_timer -= dt
         if self._lane_change_timer <= 0:
             self._lane_change_target = None
             self.lane.lane = min(target, self.lane.lane_count - 1)
+            # The tap change crosses the same painted line: same marker roll.
+            self.ctx.audio.play(
+                "vehicle/lane_line_cross",
+                volume=min(1.0, 0.7 * self._cue_loudness()),
+                pan=pan,
+            )
             self._finish_lane_change()
 
-    def _finish_lane_change(self) -> None:
+    def _on_lane_crossed(self) -> None:
+        """A held drift carried the truck across a line: the wheel was the
+        lane change. The tires roll the line's raised markers every time --
+        physics does not rate-limit -- but the signal tone and the spoken
+        lane name mark a DELIBERATE change only. Pinballing back and forth
+        across the same line mid-bend repeats just the quieter thump
+        (owner: "the thing dings at you as you're going")."""
+        repeat = self._cross_repeat_s > 0.0
+        self._cross_repeat_s = LANE_CROSS_REPEAT_S
+        pan = -0.6 if self.lane.crossed > 0 else 0.6
+        self.ctx.audio.play(
+            "vehicle/lane_line_cross",
+            volume=min(1.0, (0.4 if repeat else 0.7) * self._cue_loudness()),
+            pan=pan,
+        )
+        if not repeat:
+            self.ctx.audio.play("vehicle/signal_tone", volume=0.6, pan=pan)
+        self._finish_lane_change(quiet=repeat)
+
+    def _finish_lane_change(self, quiet: bool = False) -> None:
         """The truck has just arrived in a new lane: check the space it moved
         into, resolve any dodgeable hazard, and reset keep-right pressure."""
         self._left_lane_s = 0.0
@@ -857,7 +888,8 @@ class DrivingUpdateMixin:
             self.ctx.say_event("You swerve around it. Well done.", interrupt=False)
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
-        self.ctx.say_event(f"In the {lane.lane_name} lane.", interrupt=False)
+        if not quiet:
+            self.ctx.say_event(f"In the {lane.lane_name} lane.", interrupt=False)
 
     def _update_merge(self, dt: float) -> None:
         """Riding a coned-off lane: one urgent warning, then the barrels win."""
@@ -949,32 +981,214 @@ class DrivingUpdateMixin:
         on is the side to steer away from."""
         return max(-1.0, min(1.0, self.lane.offset))
 
-    def _lane_guidance_zone(self) -> str:
-        offset = self.lane.offset
-        if offset <= -LANE_GUIDANCE_DRIFT_START:
-            return "left"
-        if offset >= LANE_GUIDANCE_DRIFT_START:
-            return "right"
-        if abs(offset) <= LANE_GUIDANCE_CENTER_MAX:
-            return "center"
-        if self._lane_guidance_state in {"left", "right"}:
-            return self._lane_guidance_state
-        return "center"
+    def _edge_boundary(self) -> str:
+        """What lies past the road edge the truck is drifting toward.
 
-    def _update_lane_guidance_audio(self) -> None:
+        The divided flag prefers the baked lane segment at the current mile,
+        then the leg's carriageway-geometry flag (Track D2), then the
+        classifier's honest inference (interstates are divided by
+        definition; one lane per side means a centerline).
+        """
+        from ..sim.lane_guidance import classify_boundaries
+        from ..sim.trip_models import _highway_class
+
+        baked = self.trip.lanes_at()
+        leg = self.trip.route.legs[self.trip.current_leg_index]
+        divided = baked[1] if baked is not None else getattr(leg, "divided", None)
+        left, right = classify_boundaries(
+            self.lane.lane,
+            self.lane.lane_count,
+            divided=divided,
+            interstate=_highway_class(getattr(leg, "highway", "")) == "interstate",
+        )
+        return left if self.lane.offset < 0 else right
+
+    def _update_curve_run(self, active) -> None:
+        """Close the loop the pacenote opens: a soft tick on the bend's side
+        as the curve begins, and a spoken verdict once you are through --
+        held your line, caught the edge, or through it hot. The windshield
+        gives a sighted driver this for free; the co-driver owes it to ours
+        (owner ask 2026-07-27: "nothing tells you that you made it through
+        well"). Chained bends hold their verdict for the last link."""
+        if active is not None and active.connector:
+            active = None
+        run = self._curve_run
+        if active is not None:
+            if run is None or run["curve"] is not active:
+                limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+                demanding = (
+                    active.advisory_mph < limit and getattr(active, "severity", "") != "gentle"
+                )
+                touched = hot = False
+                if run is not None:
+                    # A chained link: carry what the earlier bends earned.
+                    demanding = demanding or run["demanding"]
+                    touched, hot = run["touched"], run["hot"]
+                self._curve_run = run = {
+                    "curve": active,
+                    "demanding": demanding,
+                    "touched": touched,
+                    "hot": hot,
+                }
+                if demanding and self.ctx.settings.curve_callouts:
+                    pan = -PACENOTE_CUE_PAN if active.direction == "L" else PACENOTE_CUE_PAN
+                    self.ctx.audio.play(
+                        "vehicle/curve_bink", volume=min(1.0, 0.65 * self._cue_loudness()), pan=pan
+                    )
+            if self.lane.rumble_level() > 0.0:
+                run["touched"] = True
+            if self.truck.speed_mph > run["curve"].advisory_mph + 15:
+                run["hot"] = True
+            return
+        if run is None:
+            return
+        if self.trip.curve_ahead_mi(0.2) is not None:
+            return  # linked "then right": the verdict waits for the last bend
+        self._curve_run = None
+        if not run["demanding"] or not self.ctx.settings.curve_callouts:
+            return
+        if self._terse_speech():
+            self.ctx.audio.play("vehicle/lane_centered", volume=0.5, pan=0.0)
+            return
+        if run["touched"]:
+            text = "Through the bend. You caught the edge."
+        elif run["hot"]:
+            text = "Through the bend, hot."
+        elif self.ctx.settings.steering_assist != "off":
+            text = "Through the bend, held your line."
+        else:
+            text = "Through the bend."
+        self.ctx.say_event(text, interrupt=False)
+
+    def _lane_count_here(self, leg) -> int:
+        """Lanes on our side, from the best data available at this mile.
+
+        The baked lane segments (real OSM counts) rule where they exist;
+        else an undivided leg (carriageway-geometry flag) is one lane our
+        side -- the old default of two invented a phantom passing lane on
+        every rural two-lane, which swallowed the curve push as fake lane
+        changes and silenced the whole edge ladder (owner-caught on Camp
+        Verde-Payson). The HPMS leg count remains the last word elsewhere.
+        """
+        baked = self.trip.lanes_at()
+        if baked is not None:
+            return max(1, baked[0])
+        if getattr(leg, "divided", None) is False:
+            return 1
+        return leg_lane_count(leg)
+
+    def _cue_loudness(self) -> float:
+        from ..sim.lane_guidance import CUE_LOUDNESS
+
+        return CUE_LOUDNESS.get(self.ctx.settings.lane_cue_loudness, 1.0)
+
+    def _update_transverse_strips(self) -> None:
+        """Fixed dead-man's-curve bars ahead of hairpins: cross them, hear
+        them -- at any speed, in any assist mode, because they are cut into
+        the road. Louder when faster, like the real hits."""
+        from ..sim.lane_guidance import TRANSVERSE_KEY
+
+        if self.truck.speed_mph < 2.0:
+            return
+        position = self.trip.position_mi
+        for strip_mi in self._transverse_strip_miles:
+            if strip_mi in self._transverse_fired or position < strip_mi:
+                continue
+            if position - strip_mi > 0.5:
+                self._transverse_fired.add(strip_mi)  # resumed past it; stay quiet
+                continue
+            self._transverse_fired.add(strip_mi)
+            volume = min(1.0, (0.65 + self.truck.speed_mph / 150.0) * self._cue_loudness())
+            self.ctx.audio.play(TRANSVERSE_KEY, volume=volume, pan=0.0)
+            self.ctx.controller.rumble.impact(0.5)
+
+    def _update_lane_locator_audio(self, dt: float) -> None:
+        """The I-key locator: a soft tock every beat, panned to where the
+        truck sits in its lane. Player-summoned, so it keeps ticking until
+        they shut it off or lane drift goes away."""
+        if not self._lane_locator_on:
+            return
+        if self.ctx.settings.steering_assist == "off" or self.truck.speed_mph < 2.0:
+            return
+        self._lane_locator_timer -= dt
+        if self._lane_locator_timer > 0.0:
+            return
+        self._lane_locator_timer = 0.9
+        pan = max(-1.0, min(1.0, self.lane.offset))
+        self.ctx.audio.play(
+            "vehicle/lane_locator", volume=min(1.0, 0.5 * self._cue_loudness()), pan=pan
+        )
+
+    def _update_edge_ladder_audio(self, audio) -> None:
+        """Run the edge-boundary ladder: structural loops, not louder beeps.
+
+        Clipping the strip is intermittent, fully on it is periodic, off the
+        pavement is aperiodic gravel -- states a driver can tell apart under
+        engine noise. Panned to the drift side. Past an undivided centerline
+        the strip stays the outermost texture (there is no gravel out there;
+        the spoken warning carries the oncoming danger)."""
+        from ..sim.lane_guidance import edge_rung
+
+        if self.ctx.settings.steering_assist == "off" or self.truck.speed_mph < 2.0:
+            rung = None  # tires that are not rolling make no groove noise
+        else:
+            rung = edge_rung(
+                self.lane.edge_excursion(),
+                boundary=self._edge_boundary(),
+                loudness=self._cue_loudness(),
+            )
+        if rung is None:
+            if self._edge_loop_key is not None:
+                audio.stop_loop(CH_EDGE, fade_ms=150)
+                self._edge_loop_key = None
+            return
+        key, volume = rung
+        audio.start_loop(CH_EDGE, key, volume=volume, fade_ms=120)
+        audio.set_loop_volume(CH_EDGE, volume)
+        audio.set_loop_pan(CH_EDGE, self._lane_pan())
+        self._edge_loop_key = key
+
+    def _curve_steer_demand(self) -> float:
+        """Signed steer the active bend asks for, -1 full left .. 1 full right.
+
+        Direction leads into the curve (a left bend wants left); magnitude
+        follows the same tightness/overspeed shape the curve push uses, so
+        the guide leans harder exactly when the bend pulls harder."""
+        active = self.trip.curve_at(self.trip.position_mi)
+        if active is None or active.connector:
+            return 0.0
+        tightness = max(0.2, 1.0 - active.min_radius_ft / 5000.0)
+        excess = max(0.0, self.truck.speed_mph - active.advisory_mph)
+        magnitude = min(1.0, tightness * (1.0 + excess * 0.04))
+        return -magnitude if active.direction == "L" else magnitude
+
+    def _update_lane_guidance_audio(self, dt: float) -> None:
+        """Run the guidance director: the road bed leans toward where the
+        wheel should go (pursuit guide -- follow the sound), wakes for drift
+        or a bend, and slews home on the centered straight. Never a new
+        tone: the community ruling keeps the guide on the existing bed."""
+        from ..sim.lane_guidance import CURVE_LEAD_MI
+
         if not self.ctx.settings.lane_departure_warning:
-            self._lane_guidance_state = "center"
-            return
-        zone = self._lane_guidance_zone()
-        previous = self._lane_guidance_state
-        if zone == previous:
-            return
-        self._lane_guidance_state = zone
-        if zone == "left":
-            self.ctx.audio.play("vehicle/lane_drift", volume=0.45, pan=-LANE_GUIDANCE_PAN)
-        elif zone == "right":
-            self.ctx.audio.play("vehicle/lane_drift", volume=0.45, pan=LANE_GUIDANCE_PAN)
-        elif previous in {"left", "right"}:
+            frame = self.lane_guidance.update(
+                self.lane, dt, assist_on=False, curve_steer=0.0, curve_ahead_mi=None
+            )
+        else:
+            frame = self.lane_guidance.update(
+                self.lane,
+                dt,
+                assist_on=(
+                    self.ctx.settings.steering_assist != "off"
+                    and self.truck.speed_mph >= LANE_MIN_MPH
+                ),
+                curve_steer=self._curve_steer_demand(),
+                curve_ahead_mi=self.trip.curve_ahead_mi(CURVE_LEAD_MI),
+            )
+        if frame.pan != self._road_pan_applied:
+            self.ctx.audio.set_loop_pan(CH_ROAD, frame.pan)
+            self._road_pan_applied = frame.pan
+        if frame.centered:
+            # The drift settled: the old centered earcon still says so.
             self.ctx.audio.play("vehicle/lane_centered", volume=0.45, pan=0.0)
 
     def _auto_jake_max_stage(self) -> int:
@@ -1177,15 +1391,11 @@ class DrivingUpdateMixin:
         eff = self.weather.effects
         audio.set_weather(eff.sound)
         audio.set_wind(eff.wind)
-        self._update_lane_guidance_audio()
+        self._update_lane_guidance_audio(dt)
         rumble = self.lane.rumble_level()
-        if (
-            rumble > 0.0
-            and self.ctx.settings.steering_assist != "off"
-            and self._lane_rumble_timer <= 0.0
-        ):
-            self._lane_rumble_timer = 0.8
-            audio.play("vehicle/rumble_strip", volume=0.25 + rumble * 0.45, pan=self._lane_pan())
+        self._update_edge_ladder_audio(audio)
+        self._update_transverse_strips()
+        self._update_lane_locator_audio(dt)
         if rumble > 0.0 and self.ctx.settings.steering_assist != "off":
             # Harsh, continuous pad buzz while over the rumble strip; refreshed
             # each frame, it stops on its own once steered back off.
@@ -2202,7 +2412,7 @@ class DrivingUpdateMixin:
                 self._pull_over_compliance = min(
                     1.0, self._pull_over_compliance + PULL_OVER_SIGNAL_BOOST
                 )
-            self.ctx.audio.play("vehicle/turn_signal", volume=0.7)
+            self.ctx.audio.play("vehicle/signal_tone", volume=0.7, pan=0.6)
             self.ctx.say("Signaling and easing onto the shoulder. Brake to a full stop.")
         else:
             self.ctx.say("Pulling over. Brake to a full stop on the shoulder.")

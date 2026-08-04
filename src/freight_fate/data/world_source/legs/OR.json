@@ -273,7 +273,8 @@
           }
         ]
       },
-      "stops": []
+      "stops": [],
+      "divided": false
     },
     {
       "from": "albany_or_us",
@@ -723,7 +724,8 @@
           "lon": -123.05711,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "astoria_or_us",
@@ -2527,7 +2529,8 @@
           "lon": -122.940692,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "astoria_or_us",
@@ -4304,7 +4307,8 @@
           "lon": -122.62288,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "baker_city_or_us",
@@ -5401,7 +5405,8 @@
           "lon": -116.97604,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bend_or_us",
@@ -7276,7 +7281,8 @@
           "lon": -122.22067,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "coos_bay_or_us",
@@ -9027,7 +9033,8 @@
           "lon": -123.36509,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "corvallis_or_us",
@@ -9568,7 +9575,8 @@
           "lon": -123.05711,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "eugene_or_us",
@@ -10759,7 +10767,8 @@
           "parking_spaces": 9,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "eugene_or_us",
@@ -15288,7 +15297,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "grants_pass_or_us",
@@ -16518,7 +16528,8 @@
           "lon": -123.29057,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "klamath_falls_or_us",
@@ -17661,7 +17672,8 @@
           "lon": -121.47412,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "klamath_falls_or_us",
@@ -19733,7 +19745,8 @@
           "lon": -122.59336,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "la_grande_or_us",
@@ -20361,7 +20374,8 @@
           "lon": -117.81306,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "mcminnville_or_us",
@@ -21102,7 +21116,8 @@
           "lon": -123.13254,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "medford_or_us",
@@ -21633,7 +21648,8 @@
           "lon": -122.89901,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "medford_or_us",
@@ -22785,7 +22801,8 @@
           "lon": -121.79855,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "newberg_or_us",
@@ -24545,7 +24562,8 @@
           "lon": -123.27543,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "newport_or_us",
@@ -27222,7 +27240,8 @@
           "lon": -123.91516,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "newport_or_us",
@@ -28296,7 +28315,8 @@
           "lon": -123.26542,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "ontario_or_us",
@@ -29281,7 +29301,8 @@
           "lon": -116.19958,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "pendleton_or_us",
@@ -30232,7 +30253,8 @@
           "lon": -118.04344,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "pendleton_or_us",
@@ -31263,7 +31285,8 @@
           "lon": -119.15931,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "portland_or_us",
@@ -32237,7 +32260,8 @@
           "lon": -122.70277,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "portland_or_us",
@@ -41533,7 +41557,8 @@
           "lon": -111.94614,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "portland_or_us",
@@ -44599,7 +44624,8 @@
           "lon": -122.38459,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "portland_or_us",
@@ -46508,7 +46534,8 @@
           "lon": -121.50539,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "portland_or_us",
@@ -47365,7 +47392,8 @@
           "lon": -122.80965,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "roseburg_or_us",
@@ -48998,7 +49026,8 @@
           "lon": -122.81104,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "salem_or_us",
@@ -49628,7 +49657,8 @@
           "lon": -123.05517,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "salem_or_us",
@@ -51727,7 +51757,8 @@
           "lon": -121.54846,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "salem_or_us",
@@ -52346,7 +52377,8 @@
           "lon": -123.187,
           "note": "Independence on OR-99W"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "the_dalles_or_us",
@@ -53959,7 +53991,8 @@
           "lon": -119.20606,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "woodburn_or_us",
@@ -54395,7 +54428,8 @@
           "lon": -122.9753,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     }
   ]
 }

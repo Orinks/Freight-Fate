@@ -5292,7 +5292,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "albany_ny_us",
@@ -8093,7 +8094,8 @@
           "lon": -72.97664,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "albany_ny_us",
@@ -10605,7 +10607,8 @@
           }
         ]
       },
-      "terrain": "hills"
+      "terrain": "hills",
+      "divided": true
     },
     {
       "from": "binghamton_ny_us",
@@ -13077,7 +13080,8 @@
           "lon": -73.75477,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "binghamton_ny_us",
@@ -14563,7 +14567,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "binghamton_ny_us",
@@ -16259,7 +16264,8 @@
           "lon": -75.20535,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "buffalo_ny_us",
@@ -18938,7 +18944,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "buffalo_ny_us",
@@ -26632,7 +26639,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "jamestown_ny_us",
@@ -29036,7 +29044,8 @@
           "lon": -79.926,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "new_york_ny_us",
@@ -31729,7 +31738,8 @@
           "lon": -73.75477,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "new_york_ny_us",
@@ -35684,7 +35694,8 @@
           "curation": "curated",
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "new_york_ny_us",
@@ -37081,7 +37092,8 @@
           ],
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "new_york_ny_us",
@@ -39247,7 +39259,8 @@
             "source": "OpenStreetMap lanes tags on the corridor highway ways (Overpass), development-time; total per the OSM lanes semantics (directional on oneway carriageways). ODbL, (c) OpenStreetMap contributors."
           }
         ]
-      }
+      },
+      "divided": true
     },
     {
       "from": "rochester_ny_us",
@@ -47114,7 +47127,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "syracuse_ny_us",
@@ -49029,7 +49043,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "syracuse_ny_us",
@@ -50454,7 +50469,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "syracuse_ny_us",
@@ -51335,7 +51351,8 @@
           "lon": -75.41449,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "utica_ny_us",
@@ -53120,7 +53137,8 @@
           "lon": -73.75477,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "watertown_ny_us",
@@ -54444,7 +54462,8 @@
           "lon": -76.13309,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "watertown_ny_us",
@@ -55883,7 +55902,8 @@
           "lon": -75.9229,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     }
   ]
 }

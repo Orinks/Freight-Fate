@@ -5171,7 +5171,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "billings_mt_us",
@@ -10747,7 +10748,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "billings_mt_us",
@@ -12404,7 +12406,8 @@
           "lon": -105.82111,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "billings_mt_us",
@@ -19761,7 +19764,8 @@
           "lon": -106.93397,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "bozeman_mt_us",
@@ -21263,7 +21267,8 @@
           "lon": -108.7035666,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "butte_mt_us",
@@ -22318,7 +22323,8 @@
           "lon": -112.61253,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "butte_mt_us",
@@ -23264,7 +23270,8 @@
           "lon": -112.61253,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "butte_mt_us",
@@ -25205,7 +25212,8 @@
           "lon": -112.13159,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "glasgow_mt_us",
@@ -25526,7 +25534,8 @@
           "lon": -105.64327,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "glendive_mt_us",
@@ -27114,7 +27123,8 @@
           "lon": -102.78872,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "great_falls_mt_us",
@@ -28021,7 +28031,8 @@
           "lon": -110.1118344,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "great_falls_mt_us",
@@ -28815,7 +28826,8 @@
           "lon": -111.87273,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "havre_mt_us",
@@ -29689,7 +29701,8 @@
           "lon": -106.64118,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "helena_mt_us",
@@ -32120,7 +32133,8 @@
           "lon": -111.36114,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "kalispell_mt_us",
@@ -33363,7 +33377,8 @@
           "lon": -114.64818,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "libby_mt_us",
@@ -34804,7 +34819,8 @@
           "lon": -116.55303,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "miles_city_mt_us",
@@ -35771,7 +35787,8 @@
           "lon": -104.70848,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "missoula_mt_us",
@@ -39117,7 +39134,8 @@
           "lon": -108.7035666,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "missoula_mt_us",
@@ -40201,7 +40219,8 @@
           "lon": -112.61253,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": true
     },
     {
       "from": "missoula_mt_us",
@@ -43306,7 +43325,8 @@
           "lon": -114.2777464,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "shelby_mt_us",
@@ -44100,7 +44120,8 @@
           "lon": -109.6653,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "shelby_mt_us",
@@ -46117,7 +46138,8 @@
           "lon": -114.31102,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "superior_mt_us",
@@ -46984,7 +47006,8 @@
           }
         ]
       },
-      "terrain": "flat"
+      "terrain": "flat",
+      "divided": true
     },
     {
       "from": "wolf_point_mt_us",
@@ -47951,7 +47974,8 @@
           "lon": -104.73727,
           "vehicle_access": "tractor_trailer"
         }
-      ]
+      ],
+      "divided": false
     },
     {
       "from": "wolf_point_mt_us",
@@ -48812,7 +48836,8 @@
           "lon": -103.60341,
           "vehicle_access": "bobtail_only"
         }
-      ]
+      ],
+      "divided": false
     }
   ]
 }
