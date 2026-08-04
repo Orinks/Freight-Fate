@@ -195,6 +195,7 @@ class OnlineSetupState(MenuState):
         self._check_started = 0.0
         self._still_checking_said = False
         self._outcome: str | None = None  # worker -> update() mailbox
+        self._checked_identity: OnlineIdentity | None = None
         self._opened_browser = False
 
     # -- static menu ----------------------------------------------------------
@@ -376,6 +377,7 @@ class OnlineSetupState(MenuState):
         self.refresh()
         self.ctx.say("Checking your credentials with orinks.net.", interrupt=True)
         identity = OnlineIdentity(driver_id=self._driver_id, driver_token=self._token)
+        self._checked_identity = identity
 
         def worker() -> None:
             outcome = online_presence.verify_identity(identity)
@@ -397,11 +399,22 @@ class OnlineSetupState(MenuState):
         outcome, self._outcome = self._outcome, None
         if outcome is None:
             return
+        identity, self._checked_identity = self._checked_identity, None
         self._checking = False
         self.refresh()
-        if outcome == "ok" and self._driver_id and self._token:
-            identity = OnlineIdentity(driver_id=self._driver_id, driver_token=self._token)
-            identity.save()
+        if outcome == "ok" and identity is not None:
+            try:
+                identity.save()
+            except OSError:
+                self.ctx.audio.play("ui/error")
+                self.ctx.say(
+                    "Your credentials were verified, but this computer could "
+                    "not save the driver token securely. Nothing was changed. "
+                    "Check that your password store is available, then choose "
+                    "Connect and save to try again.",
+                    interrupt=True,
+                )
+                return
             self.ctx.settings.online_presence = False
             self.ctx.settings.cloud_saves = False
             self.ctx.settings.profile_sharing_consent_version = 0

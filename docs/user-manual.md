@@ -165,6 +165,31 @@ Most menus use the same keyboard pattern:
 Menus provide the title, selected item, and item position, such as `2 of 6`.
 F1 help explains what the current item does.
 
+### Reviewing what the game said
+
+The review keys work on every screen, whether you are driving, in a menu, or
+reading a report. The exception is a box you are typing into, such as entering
+a driver name, where the punctuation keys type instead.
+
+| Key | Action |
+| --- | --- |
+| Comma | Repeat what was just said, then keep stepping back. |
+| Period | Move toward newer messages. |
+| Ctrl+Comma | Jump to the oldest message kept. |
+| Ctrl+Period | Jump back to the newest message. |
+| Left bracket or right bracket | Switch between all messages, general messages, and driving events. |
+| Ctrl+C | Copy the message you are on to the clipboard. |
+
+Each key press reads the message itself, with nothing added. The game keeps
+the last 200 messages. Moving through menus is not kept, so the history holds
+what happened rather than where you walked.
+
+While you are reviewing, new announcements do not move your place. Once you
+have left the review keys alone for ten seconds the game takes you as done,
+so the next press starts fresh from the newest message with all categories
+showing again. That way comma always repeats what was just said, rather than
+picking up wherever you left off earlier in the run.
+
 New career name entry supports Backspace to delete, F2 to review the current
 name, Enter to confirm, and Escape to cancel.
 
@@ -429,7 +454,7 @@ Driving controls are active while the road view is focused:
 | Comma | Review earlier speech. |
 | U | Report what is coming up: imposed speed limits, patrols, stops, exits, and the next few bends ahead with their advisory speeds. |
 | F1 | Show the driving control list and current objective. |
-| Comma | Review earlier speech. |
+| Comma | Review earlier speech. The full review keys are listed under "Reviewing what the game said". |
 | Period | Move toward newer speech. |
 | Escape | Open the pause menu. |
 
@@ -925,7 +950,7 @@ your orinks.net account, cloud backup, and every sharing choice in one place:
 | Profile sharing | One optional public setting covers the drivers board, eligible profile details, official achievements, automatic road-journal posts, and the updates feed. It is off until you connect your orinks.net driver and turn it on. The game never publishes the full save, money, coordinates, active cargo details, real name, or precise live location. Detailed career statistics appear only after orinks.net accepts a validated private cloud backup; without one, the public profile remains available but omits those statistics. Turning Profile sharing off stops local posting immediately and hides the public profile independently of Cloud backup. |
 | Back up saves to your orinks.net account | After each game save, upload that career to your own orinks.net account so you can restore it on another computer or after losing this one. Off until you turn it on, and separate from Profile sharing: backups are private to your account and never become public downloads. orinks.net validates each revision before accepting and signing it. It uses the same one-time sign-in as your driver profile, so set that up first. The last ten accepted backups of each career are kept. |
 | Restore a cloud backup | Lists the careers backed up to your account, newest first, and brings one onto this computer. Freight Fate verifies the server signature before replacing anything. A missing, altered, or unsupported signature leaves the local save untouched. A successful restore keeps the replaced save beside it as a fallback file and signs the restored copy for this computer. If the same career was played on two computers, this menu is also where you choose which accepted copy wins. |
-| Share notable deliveries to Mastodon | When on, finishing a delivery that earns an achievement, a level, or a perfect streak posts a short public summary to your own Mastodon account with the FreightFate hashtag. Routine deliveries are never posted. Off until you link a Mastodon account. |
+| Share notable deliveries to Mastodon | When on, finishing a delivery that earns an achievement, a level, or a perfect streak posts a short public summary to your own Mastodon account with the FreightFateRuns hashtag. That tag is only used by these automatic posts; the FreightFate tag is where players talk about the game, so you can mute one without losing the other. Routine deliveries are never posted. Off until you link a Mastodon account. |
 | Link a Mastodon account | Opens a page on orinks.net where you authorize your own Mastodon server, using the same orinks.net sign-in as driver setup. Unlinking happens on the same page. |
 | Discord presence | Show broad activity in Discord (menu, terminal, driving, resting, delivering) with high-level route and cargo. Only general game status is shared, never your saves or personal details. On by default; no effect if Discord is closed. Works without a driver profile. |
 

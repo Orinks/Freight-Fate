@@ -27,6 +27,12 @@ dependencies = [
     # Optional Discord Rich Presence. Imported defensively: if it is ever
     # absent, or Discord is closed, the game still starts, plays, and exits.
     "pypresence>=4.3",
+    # Platform secret store for the online driver token: Windows Credential
+    # Manager, macOS Keychain, Secret Service on Linux. keyring pulls its own
+    # per-platform backends, so this one line covers all three builds.
+    # Imported defensively -- a machine with no working store falls back to a
+    # private file (see freight_fate.online_presence).
+    "keyring>=25.0",
 ]
 
 [project.scripts]

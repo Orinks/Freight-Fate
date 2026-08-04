@@ -225,8 +225,9 @@ def queue_mastodon_share(
     perfect-streak milestone. An empty list means the delivery was routine,
     and routine runs are never posted: the server refuses reason-free shares
     too, so the quiet path is enforced on both ends. The server composes the
-    actual post text from these allowlisted facts and adds the FreightFate
-    hashtag; nothing free-form leaves the game."""
+    actual post text from these allowlisted facts and adds the FreightFateRuns
+    hashtag -- kept off the bare FreightFate tag so players muting the automated
+    posts keep the human conversation; nothing free-form leaves the game."""
     if not reasons:
         return False
     event_id = stable_event_id(

@@ -276,7 +276,9 @@ class OnlineHubState(MenuState):
             self.ctx.say(
                 "Only deliveries that earn an achievement, a level, or a perfect "
                 "streak are posted. Posts are public on your own Mastodon "
-                "account and carry the FreightFate hashtag.",
+                "account and carry the Freight Fate Runs hashtag, which is "
+                "separate from the Freight Fate tag players use to talk about "
+                "the game.",
                 interrupt=False,
             )
 

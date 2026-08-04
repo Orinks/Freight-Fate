@@ -240,44 +240,6 @@ def test_driving_help_describes_x_as_signal_not_take_exit(monkeypatch):
         app.shutdown()
 
 
-def test_comma_repeats_the_last_spoken_line():
-    """The global repeat key: whatever spoke last -- menu item, status
-    readout, or event -- comes back on demand, anywhere in the game."""
-    from freight_fate.app import App
-
-    app = App()
-    try:
-        spoken = []
-        app.ctx.speech.say = speech_stub(spoken)
-
-        app.ctx.say("Fuel 62 gallons.")
-        assert app.ctx.last_spoken == "Fuel 62 gallons."
-        app.ctx.repeat_last_spoken()
-        assert spoken[-1] == "Fuel 62 gallons."
-
-        # Event speech is repeatable too, through the main channel.
-        app.ctx.settings.sapi_events = False
-        app.ctx.say_event("Crossing the Agua Fria River.")
-        app.ctx.repeat_last_spoken()
-        assert spoken[-1] == "Crossing the Agua Fria River."
-
-    finally:
-        app.shutdown()
-
-
-def test_comma_with_nothing_spoken_stays_silent():
-    from freight_fate.app import App
-
-    app = App()
-    try:
-        spoken = []
-        app.ctx.speech.say = speech_stub(spoken)
-        app.ctx.repeat_last_spoken()
-        assert spoken == []
-    finally:
-        app.shutdown()
-
-
 def test_name_entry_keeps_its_commas():
     from freight_fate.states.main_menu import NameEntryState
 

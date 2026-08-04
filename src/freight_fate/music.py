@@ -145,6 +145,12 @@ COUNTRY_TRACKS: tuple[MusicTrack, ...] = (
         "Tender heirloom-radio country ballad",
         163.0,
     ),
+    MusicTrack(
+        "radio_country_dust_on_the_highway",
+        "Dust on the Highway",
+        "Driving outlaw country-rock instrumental",
+        219.6,
+    ),
 )
 
 CLASSIC_ROCK_TRACKS: tuple[MusicTrack, ...] = (

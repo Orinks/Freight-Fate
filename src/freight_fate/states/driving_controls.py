@@ -16,17 +16,11 @@ SAFE_SPEED_CURVE_MI = 0.5
 
 
 class DrivingControlsMixin:
-    # Comma and period walk the categorised message log from the cab rather
-    # than the app-wide speech repeat: same gesture, fuller job.
-    reviews_messages = True
-
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYUP and event.key == pygame.K_h:
             self.ctx.audio.horn_stop()
             return
         if event.type != pygame.KEYDOWN:
-            return
-        if self.handle_message_review(event):
             return
 
         key = event.key
@@ -279,10 +273,12 @@ class DrivingControlsMixin:
             "C clock, deadline, and hours of service. "
             "R progress, distance left, and where you are. "
             "Shift R next listed highway exit. "
-            "V weather. L lane position. "
-            "A repeats the last driving announcement. Comma reviews recent speech "
-            "backward, and Period moves forward again. U reads what is "
-            "coming up: imposed limits, stops, exits, and bends ahead. "
+            "V weather. L lane position. A repeats the last driving announcement. "
+            "Comma repeats what was just said and keeps stepping back, and Period moves forward again. "
+            "Control with Comma or Period jumps to the oldest or newest message. "
+            "The bracket keys switch between all messages, general messages, and driving events. "
+            "Control C copies the message you are on. "
+            "U reads what is coming up: imposed limits, stops, exits, and bends ahead. "
             "Curves that demand slowing are called before they arrive, "
             "like Sharp left, half a mile, advise 35; D folds the bend "
             "into its one safe-speed number. "
@@ -752,9 +748,11 @@ class DrivingControlsMixin:
         """A: replay the last driving announcement, for one you missed."""
         if self._last_event_message:
             self.ctx.stop_event_speech()
-            self.ctx.say(self._last_event_message)
+            # Already in the log from when it was first announced; logging the
+            # replay too would leave a duplicate for the reviewer to step over.
+            self.ctx.say(self._last_event_message, review=False)
         else:
-            self.ctx.say("No recent announcement to repeat.")
+            self.ctx.say("No recent announcement to repeat.", review=False)
 
     def _toggle_lane_locator(self) -> None:
         """I: a periodic panned tock marking where the truck sits in its lane.

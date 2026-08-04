@@ -34,10 +34,6 @@ def end_sentence(text: str) -> str:
 class State:
     """Base class for all game screens."""
 
-    # Set on a state that routes comma and period into its own message-log
-    # review; the app-level repeat key stands aside for it.
-    reviews_messages = False
-
     def __init__(self, ctx: GameContext) -> None:
         self.ctx = ctx
 
@@ -112,7 +108,16 @@ class State:
         return None
 
     def handle_message_review(self, event: pygame.event.Event) -> bool:
+        """Walk the message log. True when the key belonged to review.
+
+        The app offers every key event here before the active state sees it, so
+        the review controls work on every screen without a state opting in.
+        Screens that take typed text are the exception: a driver name may well
+        contain a comma, and punctuation has to reach the field.
+        """
         if event.type != pygame.KEYDOWN:
+            return False
+        if getattr(self, "captures_text_input", False):
             return False
 
         key = event.key
@@ -148,7 +153,7 @@ class State:
             return True
 
         if key == pygame.K_c and ctrl:
-            message = log.current_message()
+            message = log.message_in_review()
             if message is None:
                 return True
             from .online_states import write_clipboard_text
@@ -161,6 +166,9 @@ class State:
     def _speak_review_message(self, message: Message | None) -> None:
         if message is None:
             return
+        # Reviewing is a deliberate act: silence the event voice first, or a
+        # hazard call still playing talks over the line being reviewed.
+        self.ctx.stop_event_speech()
         self.ctx.say(message.text, review=False)
 
 

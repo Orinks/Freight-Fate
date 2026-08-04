@@ -67,6 +67,26 @@ def test_manual_governor_holds_low_gear_without_engine_damage():
     assert truck.damage_pct == pytest.approx(damage_at_governor)
 
 
+def test_manual_downshift_with_clutch_in_does_not_overrev_or_damage_engine():
+    truck = TruckState()
+    truck.start_engine()
+    truck.set_air_ready(parking_brake=False)
+    truck.velocity_mps = 60.0 / 2.23694
+    truck.rpm = truck.specs.idle_rpm
+    truck.transmission.clutch = 1.0
+    truck.transmission.gear = 10
+
+    assert truck.transmission.request_gear(1).ok
+    assert truck.coupled_rpm() > truck.specs.max_rpm * 1.05
+    assert not truck.over_revving
+
+    for _ in range(5 * 60):
+        truck.update(1 / 60)
+
+    assert truck.rpm < truck.specs.max_rpm * 0.6
+    assert truck.damage_pct == pytest.approx(0.0)
+
+
 @pytest.mark.parametrize("grade", [0.04, 0.06, 0.08])
 def test_loaded_automatic_avoids_steep_grade_shift_hunting(grade):
     from freight_fate.sim.vehicle import KG_PER_TON
@@ -107,6 +127,27 @@ def test_loaded_automatic_uses_progressive_early_upshifts():
     early_times = [when for when, gear in shifts if 2 <= gear <= 5]
     assert len(early_times) == 4
     assert all(b - a >= 1.5 for a, b in zip(early_times, early_times[1:], strict=False))
+
+
+def test_loaded_automatic_upper_range_uses_realistic_working_rpm():
+    truck = make_auto_truck()
+    truck.set_air_ready(parking_brake=False)
+    truck.throttle = 1.0
+    previous_gear = truck.transmission.gear
+    upper_shift_rpm = []
+    for _ in range(120 * 60):
+        truck.auto_shift()
+        truck.update(1 / 60)
+        if truck.transmission.gear != previous_gear:
+            if truck.transmission.gear >= 6:
+                upper_shift_rpm.append(truck.rpm)
+            previous_gear = truck.transmission.gear
+        if truck.transmission.gear == 10:
+            break
+
+    assert len(upper_shift_rpm) >= 5
+    assert min(upper_shift_rpm) >= 1800.0
+    assert max(upper_shift_rpm) <= truck.specs.max_rpm
 
 
 def test_empty_automatic_shifts_low_range_faster_than_loaded():

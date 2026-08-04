@@ -54,7 +54,7 @@ def shift_time_for(gear: int) -> float:
 # that would spin the engine past the ceiling.
 JAKE_PRESELECT_RPM = 1700
 JAKE_MAX_RPM = 2150
-PROGRESSIVE_UPSHIFT_RPM = (1000, 1300, 1400, 1500, 1600, 1700, 1700, 1700, 1700, 1800)
+PROGRESSIVE_UPSHIFT_RPM = (1450, 1550, 1650, 1700, 1750, 1800, 1800, 1800, 1800, 1850)
 
 
 @dataclass

@@ -4,7 +4,7 @@ from __future__ import annotations
 import time
 
 from ..sim.timezones import to_local
-from .base import TimedMessageState
+from .base import TimedMessageState, end_sentence
 from .driving_core import *
 from .driving_rest_states import ShoulderSleepConfirmationState
 
@@ -518,6 +518,13 @@ class PauseMenuState(MenuState):
         self.driving._jake_cue_key = None
         super().enter()
 
+    def announce_entry(self) -> None:
+        # Pausing and resuming is where the player is, not something that
+        # happened on the road. Logging it would leave a "Paused." between
+        # every pair of announcements for anyone who checks the menu mid-run.
+        self.ctx.say(f"{end_sentence(self.title)}", review=False)
+        self.ctx.say(f"{self.current_text()}", interrupt=False, review=False)
+
     def presence(self):
         from ..discord_presence import PresenceState
 
@@ -587,6 +594,12 @@ class PauseMenuState(MenuState):
                 )
             )
         items += [
+            MenuItem(
+                "Drivers board",
+                self._drivers_board,
+                help="Hear who is hauling right now on the public orinks.net "
+                "drivers board. Viewing the board shares nothing about you.",
+            ),
             MenuItem(
                 "Abandon job",
                 self._abandon,
@@ -756,7 +769,7 @@ class PauseMenuState(MenuState):
     def _resume(self) -> None:
         self.ctx.audio.play("ui/unpause")
         self.ctx.pop_state()
-        self.ctx.say("Resumed.", interrupt=False)
+        self.ctx.say("Resumed.", interrupt=False, review=False)
 
     def _status(self) -> None:
         d = self.driving
@@ -787,6 +800,11 @@ class PauseMenuState(MenuState):
         from .main_menu import SettingsState
 
         self.ctx.push_state(SettingsState(self.ctx))
+
+    def _drivers_board(self) -> None:
+        from .online_states import DriversOnlineState
+
+        self.ctx.push_state(DriversOnlineState(self.ctx))
 
     def _abandon(self) -> None:
         # Abandoning is destructive and one keystroke away, so confirm first.
@@ -1078,7 +1096,7 @@ class FacilityArrivalState(MenuState):
             self.title,
             "",
             f"Facility: {self.facility}",
-            f"Speed: {self.driving.truck.speed_mph:.0f} mph",
+            f"Speed: {self.ctx.settings.hud_speed_text(self.driving.truck.speed_mph)}",
             "Stopping required before delivery settlement.",
             "",
         ] + [("> " if i == self.index else "  ") + item.text for i, item in enumerate(self.items)]

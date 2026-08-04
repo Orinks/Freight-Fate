@@ -117,7 +117,7 @@ class DrivingPickupMixin:
         # not hear miles here just because this handler moved modules.
         s = self.ctx.settings
         return (
-            f"{s.distance_text(self.trip.remaining_miles, precise=True)} remaining of "
-            f"{s.distance_text(self.trip.total_miles, precise=True)} to pickup at "
+            f"{s.gap_text(self.trip.remaining_miles)} remaining of "
+            f"{s.distance_value(self.trip.total_miles, 1)} to pickup at "
             f"{self._pickup_facility_text()}."
         )

@@ -12,7 +12,7 @@
 > (`DRIVING_SCHOOL_ENABLED`) and reopens on 2.0 to be finished.
 > Track plan: `docs/plan-1.9-final-slate.md`.
 
-> Current stable: **1.8.0** (shipped 2026-07-05). Next release: **1.9.0**, in
+> Current stable: **1.8.7** (shipped 2026-07-30). Next release: **1.9.0**, in
 > flight on the `feat/career-1.9` branch -- driving realism between the exits
 > (discrete lanes, ramp terminals, congestion, real surface streets) plus the
 > highway-spider world expansion, roadside narration, and real time zones.
@@ -2312,6 +2312,23 @@ From a batch of player reports:
   lists S/A/U. The manual is also exported to `USER_MANUAL.html` (a small
   dependency-free Markdown->HTML converter, `tools/manual_html.py`) and shipped
   in portable builds beside `USER_MANUAL.md`.
+- [x] **Drivers board reachable from the pause menu.** The "Drivers board"
+  item now sits in the pause menu (between Settings and Abandon job), so a
+  player can see who is hauling mid-drive without quitting to the main menu.
+  Viewing shares nothing about the paused driver.
+- [x] **Metric units applied consistently.** The units setting converted the
+  driving cues but not the dispatch board, job details, pay rate, departure and
+  deadhead summaries, exit and hazard callouts, pickup distance, delivery
+  summary, career stats, or the on-screen HUD, so a metric player heard
+  kilometers on the road and miles everywhere else. All of those now go through
+  the shared `units` helpers, and `sim.trip` delegates to them too rather than
+  keeping its own copy of the conversion (one of which used a rounded factor)
+  (PR #142).
+- [ ] **Remaining imperial-only readouts.** Fuel is always gallons and a price
+  per gallon, air pressure is always psi, and `weather.describe` omits the
+  "Fahrenheit" that `season.py` says, so its temperature reads bare "degrees".
+  Adding litres, bar/kPa, and a consistent temperature phrase is a feature
+  rather than a units-setting bug, so it wants its own pass on the 1.9 line.
 - [x] **Ambient-cue spacing (anti-stacking).** Shipped: priority handling fixes
   the critical case, and low-priority route chatter now has a short spacing
   window with one pending newest cue. Hazards, construction, checkpoints, pull-
@@ -2667,6 +2684,19 @@ Net-new realism candidates, roughly by area:
 - **Business realism.** The grounded 30-level company-driver to independent
   owner-operator arc is shipped; true-authority depth, trailer polish,
   operating-cost tuning, and market pricing are tracked under Business.
+- **Local delivery realism.** The destination-local approach legs already
+  sketched under World: surface-street miles, gate speeds, and dock
+  approaches after the highway portion.
+- **Business realism.** The company-driver→owner-operator arc, loans, and
+  insurance already sketched under Business.
+- [x] **One message-review system, working on every screen.** The two
+  overlapping histories (the app-level speech ring and the driving state's
+  message log) are now a single bounded log; every review key -- step, jump to
+  oldest/newest, filter by category, copy to clipboard -- is offered to each
+  state by the app rather than wired into individual screens (issue #134).
+  Remaining: an in-game review screen that lists the history rather than
+  stepping through it one message at a time, and a player setting for how many
+  messages to keep.
 - [x] **National hub network fill (407 → 623 cities).** Audit-driven map
   expansion on the 1.8.x nightly line (community PR #68): every >10,000-pop
   independent city without a bigger neighbor within ~30 miles was built with
@@ -3285,10 +3315,12 @@ fit for an audio-first game.
 - [ ] Ship a stable release carrying the packed save container, so players are not split across two save formats. Until one exists, a career backed up from a developer snapshot cannot be restored onto 1.8.3: the snapshot writes the newer format, and the stable build drops the fields it does not recognise. Moving forward (stable career onto a snapshot) is fine. Fixing the backwards direction in the client was considered and deliberately declined — too many edge cases for the value; the stable release is the fix. Told players so on issue #97, without naming a date.
 - [x] Cloud backup accepts every shipped save shape, not just the newest build's: the orinks.net validator matches uploads against a superset allow-list and a supported version range, and only requires the fields it actually reads. It had demanded an exact match with whichever build the invariants export was last generated from, which refused newer and older saves in turn — most recently every save from 1.8.3, the stable release, leaving those players unable to back up at all (issue #97)
 - [ ] Server absolution for `integrity_modified`: a profile that passes full server validation may have the client mark cleared on the next verified restore, so honest cross-machine movers are not marked forever (`docs/server-integrity-handoff.md`)
+- [x] Driver token in the platform secret store: the secret half of the online credentials goes to Windows Credential Manager, the macOS Keychain, or Secret Service/KWallet on Linux via `keyring`, leaving only the public Driver ID in `online.json`. Tokens written by earlier builds migrate on the next load, with no re-paste. A machine with no working store (headless Linux) falls back to an owner-only `online.token` opened at 0600 (community PR #133, reworked cross-platform)
+- [ ] Sign out from inside the game: there is no way to unlink a computer from the game side, so the stored token outlives an uninstall. Needs a Cloud/Online menu action that clears `online.json`, the secret-store entry, and any fallback token file, plus the corresponding revoke on the orinks.net computer list
 - [x] Per-computer driver tokens on orinks.net: each computer gets its own token from a named, revocable computer list on the driver setup page, so connecting a second computer no longer retires the first one's sign-in (issue #64; game-side reconnect guidance points at the computer list)
 - [x] Copy the delivery summary to the clipboard from the delivery complete screen (verified by read-back before the game says "copied")
 - [x] Delete a career's cloud backups from the Cloud backup menu: a confirmed, safe-default-first delete removes every kept revision from the account (server DELETE route + existing `deleteSaveSlot` mutation); local saves untouched, sync state forgotten so a still-local career starts a fresh slot on its next save
-- [x] Opt-in Mastodon sharing of notable deliveries: the player links their own Mastodon account on orinks.net (any instance, dynamic app registration, `read:accounts write:statuses` scope), and the game offers deliveries that earned an achievement, level, or streak milestone; the server composes the public post from allowlisted facts and adds the #FreightFate hashtag. Off by default, separate consent from Profile sharing, durable outbox client-side
+- [x] Opt-in Mastodon sharing of notable deliveries: the player links their own Mastodon account on orinks.net (any instance, dynamic app registration, `read:accounts write:statuses` scope), and the game offers deliveries that earned an achievement, level, or streak milestone; the server composes the public post from allowlisted facts and adds the #FreightFateRuns hashtag (deliberately not the bare #FreightFate, which players use for their own posts -- muting the bot must not mute the conversation). Off by default, separate consent from Profile sharing, durable outbox client-side
 - [ ] Mastodon sharing follow-ups: unlink from inside the game (today the orinks.net page is the only unlink), and consider per-post visibility choice (public vs unlisted) if players ask
 - [x] Idle drivers age off the live board: a truck parked with the game left running (not paused) signs off after 30 minutes without a snapshot change and stops heartbeating (`online_presence.py` IDLE_SIGNOFF_S); the server hides still-beating idle rows on the same clock for older builds (orinks-net `PRESENCE_IDLE_MS` + per-row `changedAt`), and deadhead presence now carries progress so a long empty run never reads as idle
 - [x] Online hub: the drivers board, orinks.net account, cloud backup and restore, and all sharing toggles moved from Settings into one Online menu on the main menu (`states/online_hub.py`); Settings keeps an Online pointer that opens the same menu for a release or two

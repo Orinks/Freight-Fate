@@ -186,6 +186,7 @@ redistributed. A source checkout falls back to the committed cues above.
 | Paper Town | `music/radio_country_paper_town.ogg` | Suno-composed wistful small-town country song for the in-game radio (2026-07 Zero batch) |
 | Tailgate Summer | `music/radio_country_tailgate_summer.ogg` | Suno-composed rowdy lakeside party country song for the in-game radio (2026-07 Zero batch) |
 | Grandpa's Radio | `music/radio_country_grandpas_radio.ogg` | Suno-composed tender heirloom-radio country ballad for the in-game radio (2026-07 Zero batch) |
+| Dust on the Highway | `music/radio_country_dust_on_the_highway.opus` | Suno-composed driving outlaw country-rock instrumental for the in-game radio (2026-08) |
 | Thunder County | `music/radio_rock_thunder_county.ogg` | Suno-composed storm-charged seventies rock anthem for the in-game radio (2026-07 Zero batch) |
 | Midnight Arcade | `music/radio_rock_midnight_arcade.ogg` | Suno-composed neon eighties arena rock song for the in-game radio (2026-07 Zero batch) |
 | Neon Avenue | `music/radio_rock_neon_avenue.ogg` | Suno-composed late-night organ-driven rock groove for the in-game radio (2026-07 Zero batch) |

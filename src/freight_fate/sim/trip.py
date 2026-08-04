@@ -9,7 +9,7 @@ from dataclasses import replace
 
 from ..data.curves import RouteCurve, route_curves
 from ..data.world import Leg, Route, get_world, lane_word
-from ..units import spoken_distance
+from ..units import distance_unit, spoken_distance, spoken_gap, to_distance
 from .hos import clock_text, is_night
 from .season import is_weekend
 from .timezones import appointment_text, city_zone, zone_for
@@ -286,19 +286,16 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.traffic_manager.vehicles = vehicles
 
     def _distance_text(self, miles: float) -> str:
-        if self.imperial:
-            return _spoken_distance(miles, "mile")
-        return _spoken_distance(miles * 1.609344, "kilometer")
+        return _spoken_distance(
+            to_distance(miles, self.imperial),
+            distance_unit(self.imperial, plural=False),
+        )
 
     def _gap_text(self, miles: float) -> str:
-        if self.imperial:
-            return f"{miles:.1f} miles"
-        return f"{miles * 1.609344:.1f} kilometers"
+        return spoken_gap(miles, self.imperial)
 
     def _speed_value(self, mph: float) -> str:
-        if self.imperial:
-            return f"{mph:.0f}"
-        return f"{mph * 1.609344:.0f}"
+        return f"{to_distance(mph, self.imperial):.0f}"
 
     def _speed_text(self, mph: float) -> str:
         units = "miles per hour" if self.imperial else "kilometers per hour"
@@ -1694,16 +1691,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         return max(0, min(100, round(100.0 * self.position_mi / total)))
 
     def progress_summary(self, imperial: bool = True) -> str:
-        if imperial:
-            dist = (
-                f"{_spoken_distance(self.remaining_miles, 'mile')} "
-                f"remaining of {self.total_miles:.0f}"
-            )
-        else:
-            dist = (
-                f"{_spoken_distance(self.remaining_miles * 1.609, 'kilometer')} "
-                f"remaining of {self.total_miles * 1.609:.0f}"
-            )
+        remaining = _spoken_distance(
+            to_distance(self.remaining_miles, imperial),
+            distance_unit(imperial, plural=False),
+        )
+        dist = f"{remaining} remaining of {to_distance(self.total_miles, imperial):.0f}"
         leg = self.route.legs[self.current_leg_index]
         next_context = self.next_navigation_context(imperial)
         terrain_text = self._current_grade_text()
@@ -1744,10 +1736,8 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 return f"Destination {self.destination_label} ahead."
             return f"Destination {get_world().spoken_city(self.route.cities[-1])} ahead."
         ahead = max(0.0, cue.at_mi - self.position_mi)
-        ahead_text = (
-            _spoken_distance(ahead, "mile")
-            if imperial
-            else _spoken_distance(ahead * 1.609344, "kilometer")
+        ahead_text = _spoken_distance(
+            to_distance(ahead, imperial), distance_unit(imperial, plural=False)
         )
         if cue.kind == "rest_stop":
             return f"Next stop in {ahead_text}: {cue.text}."
