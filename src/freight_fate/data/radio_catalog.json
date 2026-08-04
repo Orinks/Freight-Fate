@@ -123,8 +123,8 @@
       "source": "Radio Browser checked AFN GO TOKYO entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://22963.live.streamtheworld.com/AFNP_TKO_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNP_TKO.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 35.6762,
       "lon": 139.6503,
@@ -135,7 +135,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-guantanamo-bay",
@@ -145,8 +145,8 @@
       "source": "Radio Browser checked AFN 360 Guantanamo Bay entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://27783.live.streamtheworld.com:3690/AFNE_GMO_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_GMO.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 19.906,
       "lon": -75.207,
@@ -157,7 +157,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-humphreys",
@@ -167,9 +167,9 @@
       "source": "Radio Browser checked AFN GO HUMPHREYS entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://14993.live.streamtheworld.com/AFNP_OSNAAC_SC",
-      "stream_format": "streamtheworld-resolved",
-      "codec": "aac+",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNP_OSN.mp3",
+      "stream_format": "streamtheworld-redirect",
+      "codec": "mp3",
       "lat": 36.962,
       "lon": 127.031,
       "range_miles": 0,
@@ -179,7 +179,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-daegu",
@@ -189,9 +189,9 @@
       "source": "Radio Browser checked AFN GO DAEGU entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "https://22963.live.streamtheworld.com/AFNP_DGUAAC.aac",
-      "stream_format": "streamtheworld-resolved",
-      "codec": "aac+",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNP_DGU.mp3",
+      "stream_format": "streamtheworld-redirect",
+      "codec": "mp3",
       "lat": 35.8722,
       "lon": 128.6025,
       "range_miles": 0,
@@ -201,7 +201,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-kaiserslautern",
@@ -211,8 +211,8 @@
       "source": "Radio Browser checked AFN 360 Kaiserslautern entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://27793.live.streamtheworld.com:3690/AFNE_KTN_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_KTN.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 49.4401,
       "lon": 7.7491,
@@ -223,7 +223,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-bahrain",
@@ -233,8 +233,8 @@
       "source": "Radio Browser checked AFN 360 Bahrain entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://27863.live.streamtheworld.com/AFNE_BHN_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_BHN.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 26.0667,
       "lon": 50.5577,
@@ -245,7 +245,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-naples",
@@ -255,8 +255,8 @@
       "source": "Radio Browser checked AFN 360 Naples entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://25503.live.streamtheworld.com:3690/AFNE_NAP_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_NAP.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 40.8518,
       "lon": 14.2681,
@@ -267,7 +267,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-aviano",
@@ -277,8 +277,8 @@
       "source": "Radio Browser checked AFN 360 Aviano entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://25453.live.streamtheworld.com:3690/AFNE_AVN_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_AVN.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 46.0319,
       "lon": 12.5969,
@@ -289,7 +289,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-bavaria",
@@ -299,8 +299,8 @@
       "source": "Radio Browser checked AFN 360 Bavaria entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://28563.live.streamtheworld.com/AFNE_BAV_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_BAV.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 49.4403,
       "lon": 11.8622,
@@ -311,7 +311,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-benelux",
@@ -321,8 +321,8 @@
       "source": "Radio Browser checked AFN 360 Benelux entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://28993.live.streamtheworld.com:3690/AFNE_BLX_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_BLX.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 50.4542,
       "lon": 3.9523,
@@ -333,7 +333,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-incirlik",
@@ -343,8 +343,8 @@
       "source": "Radio Browser checked AFN 360 Incirlik entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://25503.live.streamtheworld.com:3690/AFNE_ICK_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_ICK.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 37.0021,
       "lon": 35.4259,
@@ -355,7 +355,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-rota",
@@ -365,8 +365,8 @@
       "source": "Radio Browser checked AFN 360 Rota entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://25603.live.streamtheworld.com/AFNE_RTA_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_RTA.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 36.6239,
       "lon": -6.3606,
@@ -377,7 +377,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-sigonella",
@@ -387,8 +387,8 @@
       "source": "Radio Browser checked AFN 360 Sigonella entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://23543.live.streamtheworld.com/AFNE_SIG_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_SIG.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 37.4014,
       "lon": 14.9224,
@@ -399,7 +399,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-souda-bay",
@@ -409,8 +409,8 @@
       "source": "Radio Browser checked AFN 360 Souda Bay entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://21633.live.streamtheworld.com:3690/AFNE_SDB_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_SDB.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 35.5317,
       "lon": 24.1497,
@@ -421,7 +421,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-spangdahlem",
@@ -431,8 +431,8 @@
       "source": "Radio Browser checked AFN 360 Spangdahlem entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://25453.live.streamtheworld.com:3690/AFNE_SPG_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_SPG.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 49.9727,
       "lon": 6.6925,
@@ -443,7 +443,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-stuttgart",
@@ -453,8 +453,8 @@
       "source": "Radio Browser checked AFN 360 Stuttgart entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://25533.live.streamtheworld.com/AFNE_STU_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_STU.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 48.7758,
       "lon": 9.1829,
@@ -465,7 +465,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-vicenza",
@@ -475,8 +475,8 @@
       "source": "Radio Browser checked AFN 360 Vicenza entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://23543.live.streamtheworld.com/AFNE_VIC_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_VIC.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 45.5455,
       "lon": 11.5354,
@@ -487,7 +487,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "afn-wiesbaden",
@@ -497,8 +497,8 @@
       "source": "Radio Browser checked AFN 360 Wiesbaden entry",
       "source_type": "afn",
       "station_type": "afn",
-      "stream_url": "http://25453.live.streamtheworld.com:3690/AFNE_WBN_SC",
-      "stream_format": "streamtheworld-resolved",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNE_WBN.mp3",
+      "stream_format": "streamtheworld-redirect",
       "codec": "mp3",
       "lat": 50.0782,
       "lon": 8.2398,
@@ -509,7 +509,7 @@
       "always_available": true,
       "real_stream": true,
       "supported": true,
-      "notes": "Radio Browser lastcheckok=1 and BASS live smoke passed during catalog refresh; included as satellite-style fallback choice in the US game map."
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "krwl-dallas",
@@ -801,6 +801,116 @@
       "real_stream": true,
       "supported": false,
       "notes": "StreamTheWorld geo-blocks the AFN 360 Global mounts outside overseas military regions: US IPs get HTTP 403 on every URL form (direct SC, redirect API, HLS) during the 2026-07-13 smoke with BASSHLS loaded. Base AFN stations are not blocked. Keep unsupported unless AFN opens access."
+    },
+    {
+      "id": "afn-iwakuni",
+      "call_sign": "AFN",
+      "name": "AFN Iwakuni",
+      "format": "regional AFN service",
+      "source": "AFN station list supplied by a player, AFNP_IWA mount",
+      "source_type": "afn",
+      "station_type": "afn",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNP_IWA.mp3",
+      "stream_format": "streamtheworld-redirect",
+      "codec": "mp3",
+      "lat": 34.1439,
+      "lon": 132.2361,
+      "range_miles": 0,
+      "market": "Iwakuni",
+      "country": "JP",
+      "safe_for_streaming": false,
+      "always_available": true,
+      "real_stream": true,
+      "supported": true,
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
+    },
+    {
+      "id": "afn-kunsan",
+      "call_sign": "AFN",
+      "name": "AFN Kunsan",
+      "format": "regional AFN service",
+      "source": "AFN station list supplied by a player, AFNP_KSN mount",
+      "source_type": "afn",
+      "station_type": "afn",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNP_KSN.mp3",
+      "stream_format": "streamtheworld-redirect",
+      "codec": "mp3",
+      "lat": 35.9038,
+      "lon": 126.6157,
+      "range_miles": 0,
+      "market": "Kunsan",
+      "country": "KR",
+      "safe_for_streaming": false,
+      "always_available": true,
+      "real_stream": true,
+      "supported": true,
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
+    },
+    {
+      "id": "afn-misawa",
+      "call_sign": "AFN",
+      "name": "AFN Misawa",
+      "format": "regional AFN service",
+      "source": "AFN station list supplied by a player, AFNP_MSW mount",
+      "source_type": "afn",
+      "station_type": "afn",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNP_MSW.mp3",
+      "stream_format": "streamtheworld-redirect",
+      "codec": "mp3",
+      "lat": 40.7032,
+      "lon": 141.3686,
+      "range_miles": 0,
+      "market": "Misawa",
+      "country": "JP",
+      "safe_for_streaming": false,
+      "always_available": true,
+      "real_stream": true,
+      "supported": true,
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
+    },
+    {
+      "id": "afn-okinawa",
+      "call_sign": "AFN",
+      "name": "AFN Okinawa",
+      "format": "regional AFN service",
+      "source": "AFN station list supplied by a player, AFNP_OKN mount",
+      "source_type": "afn",
+      "station_type": "afn",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNP_OKN.mp3",
+      "stream_format": "streamtheworld-redirect",
+      "codec": "mp3",
+      "lat": 26.3516,
+      "lon": 127.7692,
+      "range_miles": 0,
+      "market": "Okinawa",
+      "country": "JP",
+      "safe_for_streaming": false,
+      "always_available": true,
+      "real_stream": true,
+      "supported": true,
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
+    },
+    {
+      "id": "afn-sasebo",
+      "call_sign": "AFN",
+      "name": "AFN Sasebo",
+      "format": "regional AFN service",
+      "source": "AFN station list supplied by a player, AFNP_SBO mount",
+      "source_type": "afn",
+      "station_type": "afn",
+      "stream_url": "https://playerservices.streamtheworld.com/api/livestream-redirect/AFNP_SBO.mp3",
+      "stream_format": "streamtheworld-redirect",
+      "codec": "mp3",
+      "lat": 33.1592,
+      "lon": 129.7133,
+      "range_miles": 0,
+      "market": "Sasebo",
+      "country": "JP",
+      "safe_for_streaming": false,
+      "always_available": true,
+      "real_stream": true,
+      "supported": true,
+      "notes": "Live smoke 2026-08-04 from a US connection: HTTP 200, audio/mpeg, audio flowing. Uses the StreamTheWorld redirect endpoint rather than a pinned edge host so the mount re-resolves if Triton moves it."
     },
     {
       "id": "kexp-seattle",

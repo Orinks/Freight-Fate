@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Five more AFN bases on the dial.** Iwakuni, Kunsan, Misawa, Okinawa,
+  and Sasebo join the AFN section, all of them Pacific stations carrying
+  The Eagle. That brings the AFN list to twenty-three bases you can tune
+  from anywhere on the map when nothing local is in range.
+
 - **Steer through curves by ear.** With steering assist on, the road sound
   now leans toward where the wheel should go: it slides into a bend as the
   bend arrives and leads you through it, and when you drift it sits toward

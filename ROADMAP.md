@@ -1326,7 +1326,24 @@ section below and the Unreleased changelog; the release-line view:
 - [ ] **AFN 360 Global channels stay unsupported.** StreamTheWorld
       geo-blocks those mounts outside overseas military regions (HTTP 403
       from US IPs on every URL form, HLS included); revisit only if AFN
-      opens access.
+      opens access. Re-checked 2026-08-04 against a fresh station list from
+      a player in Europe: the fourteen Global channels they can play (Hall
+      of Fame, Freedom Rock, The Groove, Mach 5, Jazz+, Country, Fans, The
+      Blend, Joe, Legacy, Holiday and the Pacific variants) all 403 with
+      `x-stw-error: 430 Invalid Mount` from here, on the same edge hosts
+      that serve them audio, and the provisioning API reports the station
+      keys as 404 from a US connection. Six more (Gravity, PowerTalk,
+      Voice, and the Blend/Joe/Legacy Pacific feeds) 404 at the redirect
+      endpoint from both continents, so those mounts are simply gone. The
+      talk and news channels are all in those two groups -- there is no
+      AFN talk station we can carry.
+- [x] **Five more AFN Pacific bases (2026-08-04).** Iwakuni, Kunsan,
+      Misawa, Okinawa, and Sasebo joined the AFN section from a
+      player-supplied station list, each verified streaming from a US
+      connection. All twenty-three regional AFN stations moved to the
+      canonical StreamTheWorld redirect form, which is the numbered-edge
+      auto-repair the 2026-07-27 refresh-tool findings called for, applied
+      by hand to the AFN block.
 - [x] **Community/college/NPR coverage sweep (2026-07-22).** Fifty-one
       real stations joined the dial, each gated on the BASS live check,
       lifting real-station reach from 78% to 93% of the 623 dispatchable
