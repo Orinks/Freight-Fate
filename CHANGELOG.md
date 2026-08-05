@@ -4,6 +4,14 @@
 
 ### Changed
 
+- **Connecting a computer to orinks.net no longer involves copying and
+  pasting anything.** Setting up online features used to mean copying a
+  Driver ID and a token from the website and pasting each one into the
+  game. Now the game shows an activation code, reads it out loud, and can
+  spell it letter by letter or copy it to the clipboard if you would
+  rather type it into the browser yourself. Once you confirm the code on
+  orinks.net, the game finishes connecting on its own.
+
 - **Automatic Mastodon posts moved to their own hashtag.** Deliveries shared
   to your Mastodon account now carry the FreightFateRuns hashtag instead of
   the FreightFate one. Players use the FreightFate tag to share their own
