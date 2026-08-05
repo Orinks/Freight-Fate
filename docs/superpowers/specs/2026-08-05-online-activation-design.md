@@ -124,6 +124,32 @@ setup page already uses), records the label, and sets `status: "claimed"` with
 
 Claim does **not** mint a token.
 
+**Claim resets the clock.** When status flips to claimed, `expiresAt` is set
+to now plus a short collection window of two minutes. The ten-minute window
+exists to bound how long a *guessable* code stays live; once claimed, the row
+is bound to a driver and only the holder of the secret can collect it, so that
+purpose is spent. Without the reset, a claim made near the original deadline
+strands itself: the player sees "Computer connected" while the game's next
+poll finds an expired row and gets nothing. Found in the first human-paced run
+on preview, where a claim landed 56 seconds before expiry and no token was
+ever minted.
+
+**Claim also creates the driver when there isn't one.** A signed-in player
+with no driver is the normal state on first run, and sending them elsewhere to
+make one before they can continue is a dead end — the page did exactly that in
+its first version. Instead `/activate` shows a driver-name field alongside the
+code, and one submit creates the driver and completes the activation.
+
+This must be a **single mutation**, not two calls. Convex mutations are
+serializable transactions, so with all validation ahead of any write, either
+everything commits or nothing does — there is no state where a driver exists
+but the activation failed, and therefore no recovery path to design or explain.
+Splitting it into two calls reintroduces exactly that state.
+
+Drivers created this way default to private, matching what the setup page
+already does for a new driver. A public-sharing consent decision does not
+belong on a first-run page the player did not choose to land on.
+
 **Poll** -- `POST /api/freight-fate/activate/poll`, authenticated by the
 `device_code` alone. Reads the row by `deviceCodeHash`:
 
@@ -164,7 +190,8 @@ mishearable ones removed: `O`, `I`, `L`, `S` and `Z` from the letters, `0`,
 Case-insensitive on entry; the dash is optional on entry. That is roughly
 2.8e11 combinations against a ten-minute window, which is ample.
 
-Ten-minute expiry.
+Ten-minute expiry while pending, reset to a two-minute collection window when
+claimed (see Claim, above).
 
 `userCode` must be unique among rows that are still pending. Start re-mints on
 collision rather than failing, retrying a small fixed number of times.
@@ -175,7 +202,13 @@ The existing limiter in `convex/freightFateRateLimit.ts` keys counters by
 `driverId`, which does not exist yet at start time. Therefore:
 
 - **Start**: keyed by client IP at the route layer.
-- **Claim**: keyed by Clerk `authSubject` through the existing limiter.
+- **Claim**: keyed by the driver id through the existing limiter. Claim must
+  **return** its failures rather than throwing: a Convex mutation that throws
+  rolls back every write it made, including the limiter's increment, and
+  claim's failing path is the guessing path. A throwing claim would discard
+  the count on exactly the calls the limit exists to count, leaving guessing
+  uncapped. `authenticatedSharingDriver` in `convex/freightFate.ts` already
+  returns `{ error: ... }` for this reason.
 - **Poll**: not rate limited server-side, and not counted. A caller can only
   poll a code whose secret it already holds, so fast polling harms nobody and
   reveals nothing; adding a counter would mean a write per poll, which is
