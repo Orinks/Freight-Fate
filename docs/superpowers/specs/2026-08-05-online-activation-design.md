@@ -329,53 +329,53 @@ replaced in the same release.
 
 ## Rollout
 
-Order matters: **the whole flow is verified on an isolated preview before
-anything reaches production**, and then the website goes first. A game that
-starts an activation against a server without the endpoint would strand new
-players with no way to connect.
+Order matters: **the whole flow is verified on a preview before anything
+reaches production**, and then the website goes first. A game that starts an
+activation against a server without the endpoint would strand new players with
+no way to connect.
 
-1. `orinks-net` branch `feat/activation-codes` to its own preview, with an
-   isolated Convex backend (below). Walk the manual pass there.
-2. `orinks-net` to production once that passes.
-3. Freight Fate to `dev`, reaching players through the nightly channel.
-4. 1.9 picks it up at the next merge from `dev`.
-
-The work must **not** go to `orinks-net` `dev` before step 2. See below for
-why that is not the safe staging step it looks like.
+1. `orinks-net` `feat/activation-codes` to its preview. Walk the manual pass
+   there.
+2. Merge to `orinks-net` `dev` and re-check, since that is the branch the
+   change will live on before release.
+3. `orinks-net` to production.
+4. Freight Fate to `dev`, reaching players through the nightly channel.
+5. 1.9 picks it up at the next merge from `dev`.
 
 ## End-to-end testing on preview
 
 Both halves must be testable together before anything reaches production.
 
-### The dev branch is not an isolated backend
+### How the backends are split
 
-`vercel.json` runs `npx convex deploy --cmd "npm run build"` whenever
-`CONVEX_DEPLOY_KEY` is set. In Vercel that key exists in exactly one scope,
-**Preview (dev)**, and it is a *production* deploy key -- confirmed by
-`README.md`, which describes it as such and separately notes that "preview/dev
-traffic can share the same Convex deployment". `CONVEX_URL` and
-`NEXT_PUBLIC_CONVEX_URL` are also pinned by hand for that scope, which a real
-preview key would set itself.
+`vercel.json` runs `npx convex deploy` before the Next.js build whenever
+`CONVEX_DEPLOY_KEY` is set, and that key alone decides which deployment gets
+written. Production holds a production deploy key; the Preview scope holds a
+**preview** deploy key, which builds a fresh deployment named for the branch
+and cannot write to production. Preview branches leave `CONVEX_URL` and
+`NEXT_PUBLIC_CONVEX_URL` unset so the deploy fills them in, and `vercel.json`
+names that variable explicitly rather than relying on framework detection.
 
-So a push to `dev` deploys Convex functions to the **production** deployment.
-The site is a preview; the backend it deploys is not. For a schema change this
-is the difference between a test and an outage.
+This is worth stating because it was fixed as part of this work
+(`orinks-net` `f4561aa`). The Preview scope previously held a *production*
+key scoped to the `dev` branch, so every push to `dev` deployed Convex
+functions straight to production while only the site was a preview. For a
+schema change that is the difference between a test and an outage. If a deploy
+ever lands somewhere unexpected, check which kind of key that scope holds
+before looking anywhere else.
 
-### Isolating this branch
+### What this branch needs
 
-The `orinks-net` work happens on `feat/activation-codes`, whose Preview
-environment needs its own values (this is dashboard work -- see the checklist
-handed over with this spec):
+Nothing Convex-specific: `feat/activation-codes` inherits the preview deploy
+key from the bare Preview scope like any other branch, and gets its own
+deployment automatically.
 
-- `CONVEX_DEPLOY_KEY`: a **preview** deploy key, from the Convex dashboard
-  under Project Settings, Deploy Keys. It makes `npx convex deploy` create a
-  fresh deployment named for the branch and cannot write to production.
-- `CONVEX_URL` and `NEXT_PUBLIC_CONVEX_URL`: left **unset** for this branch,
-  so the deploy fills them in from the deployment it just created.
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY`: the
-  **development** instance keys (`pk_test_`/`sk_test_`). Vercel currently has
-  no branch-agnostic Preview value for `CLERK_SECRET_KEY`, so without this the
-  branch has no server-side auth and claim cannot work at all.
+Clerk is the one gap. Vercel has a branch-agnostic Preview value for
+`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` but **not** for `CLERK_SECRET_KEY`, so a
+new preview branch has no server-side auth until that is set for its scope and
+claim cannot work at all. Setting `CLERK_SECRET_KEY` once on the bare Preview
+scope, from the development instance (`sk_test_`), removes the gap for every
+future branch.
 
 Clerk's development instance has test mode on by default: any
 `you+clerk_test@example.com` address and any fictional phone number verify
