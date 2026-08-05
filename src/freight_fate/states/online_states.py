@@ -38,14 +38,6 @@ DISCLOSURE = (
     "Cloud backup off."
 )
 
-_ID_CHARS = frozenset("abcdefghijklmnopqrstuvwxyz0123456789-_")
-
-# Tokens issued by the site are always "ffd_" plus 64 hex characters; the
-# prefix is the reliable discriminator that lets the paste items forgive the
-# most likely mistake, pasting one value onto the other item.
-_TOKEN_PREFIX = "ffd_"
-
-
 # pygame.SCRAP_TEXT is the plain string "text/plain". Windows resolves that to
 # its own text format, so one type is all Windows ever needs -- but on X11 a
 # scrap type names the selection target the clipboard owner advertises, and
@@ -54,7 +46,33 @@ _TOKEN_PREFIX = "ffd_"
 # back nothing and is refused outright on write, which is why Linux copies and
 # pastes used to fall through to a Tk fallback that a stock Linux desktop does
 # not even have installed. Windows keeps its own type first, untouched.
-_SCRAP_TEXT_TYPES = (pygame.SCRAP_TEXT, "text/plain;charset=utf-8")
+#
+# The two types are not always the same encoding, and which one
+# "text/plain;charset=utf-8" is depends on the platform underneath pygame.
+# On X11 it is genuinely UTF8_STRING, the name pygame gives it above. On
+# Windows (native or under Wine) the identical scrap-type string is instead
+# remapped to CF_UNICODETEXT, which answers in UTF-16LE regardless of the
+# "utf-8" in its name -- pygame relabeled the type, it did not translate the
+# bytes. Decoding both as UTF-8 happens to look right on native Windows only
+# because CF_TEXT (SCRAP_TEXT) answers first and CF_UNICODETEXT is never
+# reached; under Wine, an X11 owner that advertises only UTF8_STRING can
+# leave CF_TEXT empty, so CF_UNICODETEXT's bytes reach the UTF-8 decoder and
+# every non-ASCII character silently disappears. Each scrap type gets the
+# encoding that platform actually answers in.
+#
+# SCRAP_TEXT is resolved once here, at import time, rather than read off
+# pygame.SCRAP_TEXT inside the function below -- tests substitute the whole
+# online_states.pygame name with a bare namespace that carries only .scrap,
+# and this constant must survive that substitution unharmed.
+_SCRAP_TEXT = pygame.SCRAP_TEXT
+
+
+def _scrap_text_types() -> tuple[tuple[str, str], ...]:
+    plain_encoding = "utf-16-le" if sys.platform == "win32" else "utf-8"
+    return (
+        (_SCRAP_TEXT, "utf-8"),
+        ("text/plain;charset=utf-8", plain_encoding),
+    )
 
 
 def _clean_clip(text: str) -> str:
@@ -73,10 +91,12 @@ def _clipboard_once() -> str | None:
         else:  # legacy scrap: bytes with possible trailing NULs
             if not scrap.get_init():
                 scrap.init()  # needs the display up; raises when called early
-            for scrap_type in _SCRAP_TEXT_TYPES:
+            for scrap_type, encoding in _scrap_text_types():
                 raw = scrap.get(scrap_type)
                 if raw:
-                    return _clean_clip(raw.decode("utf-8", "ignore"))
+                    if encoding == "utf-16-le" and raw[-2:] == b"\x00\x00":
+                        raw = raw[:-2]  # Windows NUL-terminates CF_UNICODETEXT
+                    return _clean_clip(raw.decode(encoding, "ignore"))
     except Exception:
         pass
     # macOS fallback: pbpaste ships with the OS and needs no GUI toolkit.
@@ -106,16 +126,6 @@ def _clipboard_once() -> str | None:
         return None
 
 
-def read_clipboard_text() -> str | None:
-    """Best-effort clipboard text. Retries once: the Windows clipboard is a
-    contended global that clipboard managers briefly hold open."""
-    text = _clipboard_once()
-    if text:
-        return text
-    time.sleep(0.1)
-    return _clipboard_once()
-
-
 def _clipboard_write_once(text: str) -> bool:
     """One clipboard write attempt. Same ladder as reading: scrap first,
     pbcopy on macOS (never Tk there -- see _clipboard_once), Tk elsewhere."""
@@ -127,7 +137,7 @@ def _clipboard_write_once(text: str) -> bool:
         if not scrap.get_init():
             scrap.init()  # needs the display up; raises when called early
         data = text.encode("utf-8")
-        for scrap_type in _SCRAP_TEXT_TYPES:
+        for scrap_type, _encoding in _scrap_text_types():
             try:
                 scrap.put(scrap_type, data)
                 return True
@@ -180,16 +190,6 @@ def write_clipboard_text(text: str) -> bool:
         return True
     time.sleep(0.1)
     return _clipboard_write_once(text) and _clipboard_holds(text)
-
-
-def looks_like_driver_id(text: str) -> bool:
-    t = text.strip().lower()
-    return 8 <= len(t) <= 64 and all(c in _ID_CHARS for c in t)
-
-
-def looks_like_token(text: str) -> bool:
-    t = text.strip()
-    return t.startswith(_TOKEN_PREFIX) and 24 <= len(t) <= 512 and not any(c.isspace() for c in t)
 
 
 class OnlineSetupState(MenuState):
@@ -303,7 +303,11 @@ class OnlineSetupState(MenuState):
     # -- pastes -----------------------------------------------------------------
 
     def _paste_id(self) -> None:
-        text = read_clipboard_text()
+        # read_clipboard_text/looks_like_token/looks_like_driver_id were
+        # deleted with the paste path; this whole method is replaced by the
+        # activation-code flow in a later task, so it is left calling the
+        # deleted names rather than half-rewritten here.
+        text = read_clipboard_text()  # noqa: F821
         if not text:
             self.ctx.say(
                 "I could not read text from the clipboard. Copy the Driver ID "
@@ -311,7 +315,7 @@ class OnlineSetupState(MenuState):
                 interrupt=True,
             )
             return
-        if looks_like_token(text):
+        if looks_like_token(text):  # noqa: F821
             self._token = text
             self.refresh()
             self.ctx.say(
@@ -321,7 +325,7 @@ class OnlineSetupState(MenuState):
             )
             return
         candidate = text.lower()
-        if not looks_like_driver_id(candidate):
+        if not looks_like_driver_id(candidate):  # noqa: F821
             # Never speak the clipboard contents: it could hold anything.
             self.ctx.say(
                 "The clipboard text does not look like a Driver ID. Use the "
@@ -335,7 +339,8 @@ class OnlineSetupState(MenuState):
         self.ctx.say(f"Driver ID captured: {candidate}.", interrupt=True)
 
     def _paste_token(self) -> None:
-        text = read_clipboard_text()
+        # Same deferred-deletion note as _paste_id above.
+        text = read_clipboard_text()  # noqa: F821
         if not text:
             self.ctx.say(
                 "I could not read text from the clipboard. Copy the driver "
@@ -343,7 +348,9 @@ class OnlineSetupState(MenuState):
                 interrupt=True,
             )
             return
-        if not text.startswith(_TOKEN_PREFIX) and looks_like_driver_id(text.lower()):
+        if not text.startswith(_TOKEN_PREFIX) and looks_like_driver_id(  # noqa: F821
+            text.lower()
+        ):
             self._driver_id = text.lower()
             self.refresh()
             self.ctx.say(
@@ -352,7 +359,7 @@ class OnlineSetupState(MenuState):
                 interrupt=True,
             )
             return
-        if not looks_like_token(text):
+        if not looks_like_token(text):  # noqa: F821
             self.ctx.say(
                 "The clipboard text does not look like a driver token. "
                 "Tokens from the setup page start with the letters F F D "

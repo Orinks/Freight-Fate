@@ -14,6 +14,7 @@ from __future__ import annotations
 import sys
 from types import SimpleNamespace
 
+import pygame
 from speech_capture import speech_stub
 
 from freight_fate.settings import Settings
@@ -64,7 +65,7 @@ def _linux_with_scrap(monkeypatch, scrap):
 
 def test_x11_read_uses_the_type_the_clipboard_actually_offers(monkeypatch):
     _linux_with_scrap(monkeypatch, _X11Scrap(b"road-star-abcd1234\n"))
-    assert online_states.read_clipboard_text() == "road-star-abcd1234"
+    assert online_states._clipboard_once() == "road-star-abcd1234"
 
 
 def test_x11_write_uses_the_type_x11_accepts(monkeypatch):
@@ -175,14 +176,24 @@ def test_read_back_forgives_windows_crlf(monkeypatch):
     assert online_states._clipboard_holds("line one\nline two")
 
 
-def test_token_paste_requires_the_site_prefix():
-    # Site tokens are always "ffd_" plus 64 hex characters. Issue 63: an
-    # 87-character wrong paste used to pass this check and reach the server,
-    # which refused it with an HTTP 400 the player could not interpret.
-    assert online_states.looks_like_token("ffd_" + "a" * 64)
-    assert not online_states.looks_like_token("a" * 87)
-    assert not online_states.looks_like_token("ffd_token with spaces")
-    assert not online_states.looks_like_token("ffd_x")  # far too short
+def test_utf16_clipboard_payload_round_trips(monkeypatch):
+    """The charset=utf-8 scrap type is CF_UNICODETEXT on Windows and answers
+    in UTF-16LE. Decoding it as UTF-8 silently eats every non-ASCII character."""
+    text = "Delivered to Montréal — 12 tonnes"
+
+    class FakeScrap:
+        @staticmethod
+        def get_init():
+            return True
+
+        @staticmethod
+        def get(scrap_type):
+            if scrap_type == pygame.SCRAP_TEXT:
+                return None  # what Wine yields when the owner offers only UTF8_STRING
+            return text.encode("utf-16-le")
+
+    monkeypatch.setattr(pygame, "scrap", FakeScrap)
+    assert online_states._clipboard_once() == text
 
 
 def test_account_setup_connects_with_both_sharing_toggles_off(monkeypatch):
