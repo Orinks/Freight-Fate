@@ -133,12 +133,27 @@ Claim does **not** mint a token.
 | `status: "pending"` | `pending` |
 | `status: "claimed"` | mint device token, return it once, delete the row |
 
-Minting at poll rather than at claim is the security core of the design. A
-plain token never rests in the database -- it exists for exactly one response
-and is stored only as a hash on the new `freightFateDeviceTokens` row. It also
-means someone who overhears a spoken activation code and claims it first gains
-nothing: the token is returned only to the holder of the secret `device_code`,
-and the real player's activation simply fails and can be retried.
+Minting at poll rather than at claim keeps a plain token out of the database:
+it exists for exactly one response and is stored only as a hash on the new
+`freightFateDeviceTokens` row. It also means the token is returned only to the
+holder of the secret `device_code`, so overhearing the spoken code does not let
+anyone else collect a token for the player's account.
+
+**What the two codes do not protect against.** If someone overhears the spoken
+code and claims it on *their own* account before the player does, the claim
+succeeds and the game is handed a token for the eavesdropper's driver. The
+player is not robbed -- nothing of theirs is exposed -- but their game is now
+signed in as someone else, and deliveries would post to that stranger's
+profile. This is inherent to the device flow: the short code's only assurance
+is that whoever types it is the person holding the device. A longer code would
+not help, since the attack needs the code to be heard, not guessed.
+
+The mitigation is to make it obvious rather than to prevent it. On success the
+game speaks the display name it connected as -- "Connected to orinks.net as
+Rig Hauler" -- so a wrong name is heard immediately, at the one moment the
+player is paying attention to this flow. The ten-minute expiry bounds the
+window, and disconnecting is already possible from the setup page's computer
+list.
 
 ### Code format
 
