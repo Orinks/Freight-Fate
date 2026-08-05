@@ -55,6 +55,12 @@ def test_spell_code_accepts_an_undashed_code():
     assert online_activation.spell_code("WKQR3468").startswith("Whiskey, Kilo")
 
 
+def test_spell_code_accepts_a_lowercase_code():
+    assert online_activation.spell_code("wkqr-3468") == (
+        "Whiskey, Kilo, Quebec, Romeo, dash, three, four, six, eight"
+    )
+
+
 def test_spell_code_covers_the_whole_activation_alphabet():
     # ABCDEFGHJKMNPQRTUVWXY346789 -- deliberately excludes O I L S Z 0 1 2 5,
     # chosen so no two phonetic words could ever be confused for each other.
@@ -176,6 +182,34 @@ def test_poll_never_raises_on_network_trouble():
 def test_poll_never_raises_on_malformed_200():
     def transport(url, payload, headers, method=None):
         return {"status": "some-unexpected-shape"}
+
+    result = online_activation.poll_activation(_an_activation(), transport=transport)
+    assert result.status == "error"
+
+
+def test_poll_never_raises_on_a_null_200_body():
+    """Regression: reply.get(...) ran unguarded on whatever the transport
+    returned, so a 200 with a non-mapping body (None here) raised straight
+    into the caller instead of coming back as an error result."""
+
+    def transport(url, payload, headers, method=None):
+        return None
+
+    result = online_activation.poll_activation(_an_activation(), transport=transport)
+    assert result.status == "error"
+
+
+def test_poll_never_raises_on_a_list_200_body():
+    def transport(url, payload, headers, method=None):
+        return ["not", "a", "mapping"]
+
+    result = online_activation.poll_activation(_an_activation(), transport=transport)
+    assert result.status == "error"
+
+
+def test_poll_never_raises_on_a_dict_missing_status():
+    def transport(url, payload, headers, method=None):
+        return {"driver_id": "rig-hauler"}
 
     result = online_activation.poll_activation(_an_activation(), transport=transport)
     assert result.status == "error"

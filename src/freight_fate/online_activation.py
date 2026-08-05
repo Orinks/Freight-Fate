@@ -221,18 +221,28 @@ def poll_activation(activation: Activation, *, transport: Transport = _http_json
         log.warning("Activation poll failed: %s", e)
         return PollResult(status="error")
 
-    status = reply.get("status")
-    if status == "ready":
-        return PollResult(
-            status="ready",
-            driver_id=reply.get("driver_id"),
-            token=reply.get("token"),
-            display_name=reply.get("display_name"),
-        )
-    if status == "pending":
-        return PollResult(status="pending")
-    # An unrecognised 200 body is not something a retry can fix either, but
-    # it is also not evidence the code expired -- treat it like any other
-    # answer the game can't make sense of.
+    # A 200 body that isn't even a mapping (None, a list, a bare string --
+    # anything a broken deploy or a middlebox could hand back) must land here
+    # too, not raise: this whole block, not just the HTTPError branch above,
+    # is the "never let an exception escape" guarantee the docstring makes.
+    try:
+        status = reply.get("status")
+        if status == "ready":
+            return PollResult(
+                status="ready",
+                driver_id=reply.get("driver_id"),
+                token=reply.get("token"),
+                display_name=reply.get("display_name"),
+            )
+        if status == "pending":
+            return PollResult(status="pending")
+    except AttributeError:
+        log.warning("Activation poll returned a non-object reply: %r", reply)
+        return PollResult(status="error")
+
+    # An unrecognised 200 body (a mapping missing "status", or an unknown
+    # value) is not something a retry can fix either, but it is also not
+    # evidence the code expired -- treat it like any other answer the game
+    # can't make sense of.
     log.warning("Activation poll returned an unexpected status: %r", status)
     return PollResult(status="error")
