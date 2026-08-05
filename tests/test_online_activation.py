@@ -1,13 +1,15 @@
 """Tests for the device-code activation flow (replaces clipboard paste).
 
 A fake transport keeps every test free of real sockets, matching the pattern
-in ``test_online_presence.py``. The three contract points that matter most:
-410 means "expired, get a new code" while 400 means "this device_code is
-malformed and retrying it never helps" (they must not collapse to the same
-status); an over-cap redeem also answers 410, because the real reason lives
-on the website at claim time; and ``display_name`` must survive a ready poll
-uncorrupted, because it is the player's only signal that the code was
-claimed on the wrong account.
+in ``test_online_presence.py``. The contract points that matter most: 410
+means "expired, get a new code" while 400 means "this device_code is
+malformed and retrying it never helps" -- "error" is reserved for exactly
+that 400 case, and everything else unrecognised (other HTTP statuses,
+network trouble, an unparseable 200 body) is "retry" instead, so the two
+must never collapse to the same status; an over-cap redeem also answers 410,
+because the real reason lives on the website at claim time; and
+``display_name`` must survive a ready poll uncorrupted, because it is the
+player's only signal that the code was claimed on the wrong account.
 """
 
 from __future__ import annotations
@@ -156,7 +158,8 @@ def test_poll_pending_carries_no_identity():
 
 def test_poll_maps_410_to_expired_and_400_to_corrupt():
     """410 means the code timed out and a new one will fix it. 400 means the
-    stored secret is malformed, which retrying the same code never fixes."""
+    stored secret is malformed, which retrying the same code never fixes --
+    "error" is reserved for exactly this case and nothing else."""
     assert _poll_raising(_http_error(410)).status == "expired"
     assert _poll_raising(_http_error(400)).status == "error"
 
@@ -168,15 +171,28 @@ def test_poll_over_cap_redeem_reads_as_expired():
     assert _poll_raising(_http_error(410)).status == "expired"
 
 
-def test_poll_maps_503_to_error():
-    assert _poll_raising(_http_error(503)).status == "error"
+def test_poll_maps_503_to_retry_not_error():
+    """A 5xx is the server's own trouble, not a verdict on this device_code --
+    unlike a 400, the same code is worth polling again on the next tick."""
+    assert _poll_raising(_http_error(503)).status == "retry"
+
+
+def test_poll_maps_other_http_statuses_to_retry():
+    """Nothing except 400 and 410 is meaningful here; nothing else should be
+    "error" (terminal) either -- nearly anything else the server could answer
+    with is worth polling again rather than sending the player back through
+    a whole new activation code."""
+    for code in (401, 403, 404, 429, 500, 502):
+        assert _poll_raising(_http_error(code)).status == "retry"
 
 
 def test_poll_never_raises_on_network_trouble():
     """Polling runs on a timer while the player waits; a transient blip must
-    not crash the menu."""
+    not crash the menu, and must not be presented as the terminal "error"
+    that only a malformed device_code (HTTP 400) gets -- the next poll, a
+    few seconds later, may well succeed on its own."""
     result = _poll_raising(OSError("connection reset"))
-    assert result.status == "error"
+    assert result.status == "retry"
 
 
 def test_poll_never_raises_on_malformed_200():
@@ -184,19 +200,19 @@ def test_poll_never_raises_on_malformed_200():
         return {"status": "some-unexpected-shape"}
 
     result = online_activation.poll_activation(_an_activation(), transport=transport)
-    assert result.status == "error"
+    assert result.status == "retry"
 
 
 def test_poll_never_raises_on_a_null_200_body():
     """Regression: reply.get(...) ran unguarded on whatever the transport
     returned, so a 200 with a non-mapping body (None here) raised straight
-    into the caller instead of coming back as an error result."""
+    into the caller instead of coming back as a retryable result."""
 
     def transport(url, payload, headers, method=None):
         return None
 
     result = online_activation.poll_activation(_an_activation(), transport=transport)
-    assert result.status == "error"
+    assert result.status == "retry"
 
 
 def test_poll_never_raises_on_a_list_200_body():
@@ -204,7 +220,7 @@ def test_poll_never_raises_on_a_list_200_body():
         return ["not", "a", "mapping"]
 
     result = online_activation.poll_activation(_an_activation(), transport=transport)
-    assert result.status == "error"
+    assert result.status == "retry"
 
 
 def test_poll_never_raises_on_a_dict_missing_status():
@@ -212,7 +228,7 @@ def test_poll_never_raises_on_a_dict_missing_status():
         return {"driver_id": "rig-hauler"}
 
     result = online_activation.poll_activation(_an_activation(), transport=transport)
-    assert result.status == "error"
+    assert result.status == "retry"
 
 
 def test_base_url_reused_from_online_presence():

@@ -148,10 +148,14 @@ class PollResult:
     ``status`` is one of ``"pending"`` (keep waiting), ``"ready"`` (claimed
     -- ``driver_id``, ``token`` and ``display_name`` are all set),
     ``"expired"`` (the code timed out, or was over an account's device cap;
-    either way the fix is the same: start over with a new code), or
-    ``"error"`` (network trouble, or a device_code the server rejected as
-    malformed -- retrying the same code can never fix the latter, so it must
-    not be presented to the player as "expired").
+    either way the fix is the same: start over with a new code),
+    ``"retry"`` (a transient failure -- network trouble, an HTTP status other
+    than 400/410, or a reply the caller could not parse -- that a caller
+    should just poll again on the next tick, exactly like "pending"), or
+    ``"error"`` (HTTP 400 specifically: the server rejected the stored
+    device_code as malformed. Retrying the same code can never fix this, so
+    it must not be presented to the player as "expired" or as something a
+    moment's wait will resolve, the way "retry" is).
     """
 
     status: str
@@ -195,6 +199,13 @@ def poll_activation(activation: Activation, *, transport: Transport = _http_json
     exception may ever escape to the caller -- a transient network blip must
     not crash the menu. Never logs or otherwise surfaces
     ``activation.device_code``.
+
+    "error" is reserved for HTTP 400 alone. Everything else this function
+    cannot make sense of -- a dropped connection, a timeout, an SSL error, a
+    5xx, an unexpected status code, a 200 body that is not even a mapping --
+    comes back as "retry" instead, so a caller (``OnlineSetupState``) can
+    just poll again on the next tick rather than forcing the player through
+    a fresh activation code for what is very likely a momentary blip.
     """
     try:
         reply = transport(
@@ -210,16 +221,22 @@ def poll_activation(activation: Activation, *, transport: Transport = _http_json
             # treats both as "get a new code".
             return PollResult(status="expired")
         if e.code == 400:
+            # Malformed device_code is not "expired": retrying the same code
+            # can never fix it, so it must surface as a distinct status
+            # rather than telling the player to just wait it out.
             log.warning("Activation poll rejected the stored device_code as malformed")
-        else:
-            log.warning("Activation poll failed: HTTP %s", e.code)
-        # 400 (malformed device_code) is not "expired": retrying the same
-        # code can never fix it, so it must surface as a distinct status
-        # rather than telling the player to just wait it out.
-        return PollResult(status="error")
+            return PollResult(status="error")
+        # Any other HTTP status (429, 5xx, ...) is treated as transient: none
+        # of them mean the code itself is bad, so the same code can just be
+        # polled again.
+        log.warning("Activation poll failed: HTTP %s", e.code)
+        return PollResult(status="retry")
     except Exception as e:
+        # URLError, socket timeouts, SSL errors, and anything else that is
+        # not an HTTPError are all connectivity trouble, not a verdict on the
+        # code -- transient, same as an HTTP 5xx above.
         log.warning("Activation poll failed: %s", e)
-        return PollResult(status="error")
+        return PollResult(status="retry")
 
     # A 200 body that isn't even a mapping (None, a list, a bare string --
     # anything a broken deploy or a middlebox could hand back) must land here
@@ -238,11 +255,11 @@ def poll_activation(activation: Activation, *, transport: Transport = _http_json
             return PollResult(status="pending")
     except AttributeError:
         log.warning("Activation poll returned a non-object reply: %r", reply)
-        return PollResult(status="error")
+        return PollResult(status="retry")
 
     # An unrecognised 200 body (a mapping missing "status", or an unknown
-    # value) is not something a retry can fix either, but it is also not
-    # evidence the code expired -- treat it like any other answer the game
-    # can't make sense of.
+    # value) is most plausibly a transient server or proxy hiccup rather than
+    # evidence about the code itself, so it gets the same "poll again" status
+    # as a network blip -- not the terminal "error" that only HTTP 400 gets.
     log.warning("Activation poll returned an unexpected status: %r", status)
-    return PollResult(status="error")
+    return PollResult(status="retry")

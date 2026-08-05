@@ -9,7 +9,9 @@ package -- so nothing in this file touches the network or a real browser.
 
 from __future__ import annotations
 
+import threading
 import time
+import urllib.error
 from types import SimpleNamespace
 
 from speech_capture import speech_stub
@@ -63,6 +65,33 @@ class ImmediateThread:
 
     def start(self):
         self.target()
+
+
+def _http_error(code: int) -> urllib.error.HTTPError:
+    return urllib.error.HTTPError("https://orinks.net", code, "err", None, None)
+
+
+def _run_real_poll_loop(monkeypatch, state, activation, transport, stop_event=None):
+    """Wire a fake transport through the *real* poll_activation dispatch
+    logic and drive it through the *real* _poll_loop -- not a hand-built
+    PollResult -- so a regression in either function's status mapping (the
+    exact kind of bug that let 5xx and 400 collapse to the same outcome)
+    would fail these tests instead of only the ones that bypass the mapping
+    by setting state._outcome directly.
+
+    The real function is captured *before* patching: online_states.online_
+    activation and this module's own online_activation name are the same
+    module object, so setting the attribute on one overwrites it for both --
+    a lambda that referenced online_activation.poll_activation at call time,
+    instead of a captured reference, would end up calling itself.
+    """
+    real_poll_activation = online_activation.poll_activation
+    monkeypatch.setattr(
+        online_states.online_activation,
+        "poll_activation",
+        lambda act: real_poll_activation(act, transport=transport),
+    )
+    state._poll_loop(activation, stop_event or threading.Event())
 
 
 # -- starting ---------------------------------------------------------------
@@ -188,6 +217,122 @@ def test_copy_item_never_claims_a_failed_copy(monkeypatch):
 
     assert not any("copied" in line.lower() and "could not" not in line.lower() for line in spoken)
     assert any("could not copy" in line.lower() for line in spoken)
+
+
+# -- polling dispatch, driven through the real poll_activation --------------
+#
+# These inject a fake *transport* and let the real online_activation.poll_
+# activation turn it into a PollResult, then feed that through the real
+# _poll_loop -- covering the status-to-outcome mapping end to end, which the
+# mailbox-driven tests below (by design) do not.
+
+
+def test_poll_loop_reaches_ready_with_the_result_intact(monkeypatch):
+    activation = _an_activation()
+
+    def transport(url, payload, headers, method=None):
+        return {
+            "status": "ready",
+            "driver_id": "rig-hauler",
+            "token": "ffd_" + "b" * 64,
+            "display_name": "Rig Hauler",
+        }
+
+    ctx = _make_ctx([])
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+
+    _run_real_poll_loop(monkeypatch, state, activation, transport)
+
+    kind, result = state._outcome
+    assert kind == "ready"
+    assert result.driver_id == "rig-hauler"
+    assert result.display_name == "Rig Hauler"
+
+
+def test_poll_loop_stops_on_expired_from_a_410(monkeypatch):
+    activation = _an_activation()
+
+    def transport(url, payload, headers, method=None):
+        raise _http_error(410)
+
+    ctx = _make_ctx([])
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+
+    _run_real_poll_loop(monkeypatch, state, activation, transport)
+
+    assert state._outcome == ("expired", None)
+
+
+def test_poll_loop_stops_on_expired_from_the_deadline_without_polling(monkeypatch):
+    """The code's own expires_at passing is checked before the network call --
+    an activation that arrived already past its deadline never has to ask
+    the server at all."""
+    activation = _an_activation(expires_at=time.time() - 1.0)
+    poll_calls = []
+
+    def transport(url, payload, headers, method=None):
+        poll_calls.append(1)
+        return {"status": "pending"}
+
+    ctx = _make_ctx([])
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+
+    _run_real_poll_loop(monkeypatch, state, activation, transport)
+
+    assert state._outcome == ("expired", None)
+    assert poll_calls == []
+
+
+def test_poll_loop_stops_on_a_400_corrupt_code(monkeypatch):
+    activation = _an_activation()
+
+    def transport(url, payload, headers, method=None):
+        raise _http_error(400)
+
+    ctx = _make_ctx([])
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+
+    _run_real_poll_loop(monkeypatch, state, activation, transport)
+
+    assert state._outcome == ("error", None)
+
+
+def test_poll_loop_survives_transient_failures_and_still_reaches_ready(monkeypatch):
+    """The regression finding 1 fixes: a 503 and a dropped connection must
+    not be terminal the way a 400 is -- the loop keeps polling the same code
+    and still reaches "ready" once the network recovers."""
+    monkeypatch.setattr(online_states, "_ACTIVATION_POLL_INTERVAL_FIRST", 0.001)
+    monkeypatch.setattr(online_states, "_ACTIVATION_POLL_INTERVAL_LATER", 0.001)
+    activation = _an_activation()
+    calls = {"n": 0}
+
+    def transport(url, payload, headers, method=None):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise _http_error(503)
+        if calls["n"] == 2:
+            raise OSError("connection reset")
+        return {
+            "status": "ready",
+            "driver_id": "rig-hauler",
+            "token": "ffd_" + "b" * 64,
+            "display_name": "Rig Hauler",
+        }
+
+    ctx = _make_ctx([])
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+
+    _run_real_poll_loop(monkeypatch, state, activation, transport)
+
+    assert calls["n"] == 3
+    kind, result = state._outcome
+    assert kind == "ready"
+    assert result.driver_id == "rig-hauler"
 
 
 # -- polling outcomes, driven directly through the update() mailbox ---------
@@ -389,3 +534,69 @@ def test_cancel_while_waiting_says_canceled_and_still_goes_back():
 
     assert any("canceled" in line.lower() for line in spoken if isinstance(line, str))
     assert popped == ["pop"]
+
+
+def test_cancel_while_starting_also_says_canceled():
+    """A player who backs out before the activation code even arrives (still
+    contacting orinks.net) gets the same confirmation as one who backs out
+    mid-poll -- not just the generic menu-back sound and no word on it."""
+    spoken: list[str] = []
+    popped: list[str] = []
+    ctx = _make_ctx(spoken, pop_state=lambda: popped.append("pop"))
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+    state._phase = "starting"
+
+    state.go_back()
+
+    assert any("canceled" in line.lower() for line in spoken if isinstance(line, str))
+    assert popped == ["pop"]
+
+
+def test_cancel_while_idle_stays_silent_about_canceling():
+    """No request is in flight yet, so there is nothing to confirm canceling
+    -- only "starting" and "waiting" get the extra line."""
+    spoken: list[str] = []
+    ctx = _make_ctx(spoken)
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+    assert state._phase == "idle"
+
+    state.go_back()
+
+    assert not any("canceled" in line.lower() for line in spoken if isinstance(line, str))
+
+
+# -- only one worker at a time -------------------------------------------------
+
+
+def test_choosing_setup_twice_starts_only_one_worker_thread(monkeypatch):
+    """The guard in _start_setup, not real threading, is what is under test
+    here: a second press while a request is already under way must not spin
+    up a second background worker."""
+    started_targets: list = []
+
+    class CountingThread:
+        def __init__(self, *, target, **_kwargs):
+            self.target = target
+
+        def start(self):
+            started_targets.append(self.target)
+            # Deliberately never runs the target -- this test only cares
+            # whether a second Thread gets constructed while phase is
+            # "starting" or "waiting", not what the worker would do.
+
+    monkeypatch.setattr(online_states.threading, "Thread", CountingThread)
+    ctx = _make_ctx([])
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+
+    state._start_setup()  # phase -> "starting"; thread #1 recorded
+    state._start_setup()  # still "starting": guard must skip a new thread
+    assert len(started_targets) == 1
+
+    # Simulate the activation having already arrived (phase "waiting").
+    state._phase = "waiting"
+    state.activation = _an_activation()
+    state._start_setup()  # a status repeat, not a fresh request
+    assert len(started_targets) == 1

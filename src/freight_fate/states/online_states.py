@@ -329,13 +329,17 @@ class OnlineSetupState(MenuState):
     def _poll_loop(
         self, activation: online_activation.Activation, stop_event: threading.Event
     ) -> None:
-        """Poll until claimed, expired, or told to stop.
+        """Poll until claimed, expired, told to stop, or terminally rejected.
 
         Runs entirely on the worker thread. Every reachable exit posts to
         ``self._outcome`` -- except "keep waiting", which posts nothing:
         update() times the "still waiting" line off ``self._poll_started``,
         not off a worker message, so a silent pending poll needs no mailbox
-        entry at all.
+        entry at all. "retry" (a transient network blip or 5xx -- see
+        ``online_activation.poll_activation``) is folded into "keep waiting"
+        too: the whole point of splitting it from "error" is that a dropped
+        connection three seconds from now should not force the player back
+        through a fresh activation code.
         """
         first_phase_deadline = time.monotonic() + _ACTIVATION_POLL_FIRST_PHASE_SECONDS
         while not stop_event.is_set():
@@ -354,6 +358,8 @@ class OnlineSetupState(MenuState):
             if result.status == "error":
                 self._outcome = ("error", None)
                 return
+            # "pending" and "retry" both fall through here: nothing to post,
+            # just wait out the interval and poll again.
             interval = (
                 _ACTIVATION_POLL_INTERVAL_FIRST
                 if time.monotonic() < first_phase_deadline
@@ -521,7 +527,11 @@ class OnlineSetupState(MenuState):
         self.ctx.pop_state()
 
     def go_back(self) -> None:
-        if self._phase == "waiting":
+        # "starting" included, not just "waiting": a player who backs out
+        # while the game is still contacting orinks.net for a code gets the
+        # same confirmation as one who backs out mid-poll, rather than just
+        # the generic menu-back sound and no word on what happened.
+        if self._phase in ("starting", "waiting"):
             self.ctx.say("Setup canceled. Nothing was saved.")
         super().go_back()
 
