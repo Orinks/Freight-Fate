@@ -75,6 +75,25 @@ def test_spell_code_covers_the_whole_activation_alphabet():
     assert all(words)
 
 
+# -- the device_code never leaves this module ----------------------------------
+
+
+def test_activation_repr_never_carries_the_device_code():
+    """The polling secret must never reach a log line or the session
+    transcript. Keeping it out by convention is not enough: a dataclass repr
+    is what a stray ``log.warning("... %r", activation)`` would print, and
+    nothing would fail. ``repr=False`` makes the invariant structural."""
+    activation = _an_activation(device_code="s3cret" + "a" * 58)
+
+    text = repr(activation)
+
+    assert activation.device_code not in text
+    assert "s3cret" not in text
+    # The player-facing code is not a secret and is still there, so a repr
+    # remains useful for diagnosing which activation is in play.
+    assert "WKQR-3468" in text
+
+
 # -- start_activation ------------------------------------------------------------
 
 
@@ -143,6 +162,32 @@ def test_poll_ready_carries_the_display_name():
     assert result.driver_id == "rig-hauler"
     assert result.token == "ffd_" + "b" * 64
     assert result.display_name == "Rig Hauler"
+
+
+def test_poll_ready_without_an_identity_is_a_retry_not_a_claim():
+    """A "ready" body with no driver_id or token is not something the caller
+    can act on. Trusting it would save a null identity and tell the player
+    "Connected to orinks.net" while every later heartbeat sent no token at
+    all -- a silent, unactionable failure. "retry" instead of "error" because
+    a broken deploy or a rewriting middlebox is transient from the game's
+    side: polling should keep going until the code really expires."""
+    bodies = (
+        {"status": "ready"},
+        {"status": "ready", "driver_id": "rig-hauler"},
+        {"status": "ready", "token": "ffd_" + "b" * 64},
+        {"status": "ready", "driver_id": "", "token": "ffd_" + "b" * 64},
+        {"status": "ready", "driver_id": "rig-hauler", "token": ""},
+        {"status": "ready", "driver_id": None, "token": None, "display_name": "Rig Hauler"},
+    )
+    for body in bodies:
+
+        def transport(url, payload, headers, method=None, body=body):
+            return body
+
+        result = online_activation.poll_activation(_an_activation(), transport=transport)
+        assert result.status == "retry", body
+        assert result.driver_id is None
+        assert result.token is None
 
 
 def test_poll_pending_carries_no_identity():

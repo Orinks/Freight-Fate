@@ -305,6 +305,15 @@ class OnlineSetupState(MenuState):
                     f"activation code is {self.activation.user_code}.",
                     interrupt=True,
                 )
+            else:
+                # Phase "starting": the request is in flight and there is no
+                # code to repeat yet. Returning in silence here would read as
+                # "did that keypress even register" -- this game has no visual
+                # fallback to check against.
+                self.ctx.say(
+                    "Still contacting orinks.net for an activation code.",
+                    interrupt=True,
+                )
             return
         self._phase = "starting"
         self.activation = None
@@ -443,7 +452,14 @@ class OnlineSetupState(MenuState):
             and time.monotonic() - self._poll_started > _ACTIVATION_STILL_WAITING_AFTER
         ):
             self._still_waiting_said = True
-            self.ctx.say("Still waiting.")
+            # interrupt=False, deliberately: this fires five seconds after the
+            # activation announcement *starts*, and the browser-failed variant
+            # of that announcement (code, address, and both fallback menu
+            # items) takes far longer than five seconds to speak. Interrupting
+            # would cut a player off mid-address on exactly the path -- a
+            # remote or streamed session where the browser never opens --
+            # where the spoken address is the only way to finish setup.
+            self.ctx.say("Still waiting.", interrupt=False)
         outcome, self._outcome = self._outcome, None
         if outcome is None:
             return
@@ -456,10 +472,14 @@ class OnlineSetupState(MenuState):
         if kind == "activation":
             self.activation = payload
             self._phase = "waiting"
-            self._poll_started = time.monotonic()
             self._still_waiting_said = False
             self.refresh()
             self._announce_activation(payload)
+            # Clock starts *after* the announcement is queued, not before, so
+            # _ACTIVATION_STILL_WAITING_AFTER measures five seconds of actual
+            # waiting rather than five seconds of the announcement still
+            # being spoken.
+            self._poll_started = time.monotonic()
             return
         if kind == "ready":
             self._finish_success(payload)
@@ -478,13 +498,14 @@ class OnlineSetupState(MenuState):
             self.activation = None
             self._phase = "error"
             self.refresh()
-            # Deliberately does not say "try again" or "wait" -- a 400 here
-            # means the stored device_code is malformed, and retrying the
-            # same one can never succeed. The only fix is a fresh code.
+            # A 400 here means the stored device_code is malformed, so the
+            # only fix is a fresh code. Heard aloud, saying "trying again
+            # will not fix it" and then naming a menu item to choose again
+            # reads as a contradiction -- the two halves have to agree, so
+            # this names the fresh code as the fix and leaves it there.
             self.ctx.say(
-                "orinks.net could not use that activation code, and trying "
-                "again will not fix it. Choose Set up this computer with "
-                "orinks.net again to start over with a new code.",
+                "That activation code cannot be used. Choose Set up this "
+                "computer with orinks.net for a fresh code.",
                 interrupt=True,
             )
             return

@@ -386,6 +386,51 @@ def test_still_waiting_is_spoken_once_after_five_seconds():
     assert len(waits) == 1
 
 
+def test_still_waiting_never_interrupts_the_code_announcement():
+    """The line fires five seconds after the announcement *starts*, and the
+    browser-failed announcement (code, address, and both fallback menu items)
+    takes far longer than that to speak. Interrupting would cut the player off
+    mid-address on the one path -- a remote session where no browser opens --
+    where hearing the address is the only way to finish setup."""
+    spoken: list[tuple[str, bool]] = []
+    ctx = _make_ctx(spoken, say=speech_stub(spoken, with_interrupt=True))
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+    state.activation = _an_activation()
+    state._phase = "waiting"
+    state._poll_started = time.monotonic() - 6.0
+
+    state.update(0.0)
+
+    assert ("Still waiting.", False) in spoken
+
+
+def test_still_waiting_clock_starts_after_the_announcement(monkeypatch):
+    """The interval has to measure five seconds of actual waiting, not five
+    seconds of the announcement still being spoken -- so the clock starts
+    once the code has been announced, not before."""
+    _no_real_browser(monkeypatch)
+    activation = _an_activation()
+    monkeypatch.setattr(online_states.threading, "Thread", ImmediateThread)
+    monkeypatch.setattr(online_states.online_activation, "start_activation", lambda: activation)
+
+    ctx = _make_ctx([])
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+    monkeypatch.setattr(state, "_poll_loop", lambda *_a, **_k: None)
+
+    started_when_spoken: list[float] = []
+    ctx.say = lambda _text, interrupt=True, review=True: started_when_spoken.append(
+        state._poll_started
+    )
+
+    state._start_setup()
+    state.update(0.0)  # drains the "activation" outcome: announce, then start the clock
+
+    assert started_when_spoken[-1] == 0.0  # clock not yet running while the code is spoken
+    assert state._poll_started > 0.0
+
+
 def test_ready_poll_adopts_identity_and_speaks_the_display_name(monkeypatch):
     # The save stub records the identity it was called on rather than
     # discarding it: driver_id reaching adopt_online_identity is not enough
@@ -481,6 +526,10 @@ def test_corrupt_code_error_does_not_suggest_waiting():
 
     last = [line for line in spoken if isinstance(line, str)][-1]
     assert "wait" not in last.lower()
+    # ...and the two halves have to agree: telling the player retrying will
+    # not help, then naming a menu item to choose again, is a contradiction
+    # heard aloud with no way to scroll back and re-read it.
+    assert "not fix" not in last.lower()
     assert "Set up this computer with orinks.net" in last
     assert state.activation is None
     assert state._phase == "error"
@@ -610,3 +659,31 @@ def test_choosing_setup_twice_starts_only_one_worker_thread(monkeypatch):
     state.activation = _an_activation()
     state._start_setup()  # a status repeat, not a fresh request
     assert len(started_targets) == 1
+
+
+def test_pressing_setup_again_before_the_code_arrives_is_never_silent(monkeypatch):
+    """Phase "starting" with no activation yet: there is no code to repeat,
+    but returning in silence reads as "did that keypress register" in a game
+    with no visual fallback to check against."""
+
+    class NeverRunsThread:
+        def __init__(self, *, target, **_kwargs):
+            self.target = target
+
+        def start(self):
+            pass
+
+    monkeypatch.setattr(online_states.threading, "Thread", NeverRunsThread)
+    spoken: list[str] = []
+    ctx = _make_ctx(spoken)
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+
+    state._start_setup()  # phase -> "starting", no activation yet
+    spoken.clear()
+    state._start_setup()  # the second press
+
+    assert state.activation is None
+    assert [line for line in spoken if isinstance(line, str)] == [
+        "Still contacting orinks.net for an activation code."
+    ]

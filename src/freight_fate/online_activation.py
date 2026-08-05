@@ -26,7 +26,7 @@ from __future__ import annotations
 import logging
 import time
 import urllib.error
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .online_presence import Transport, _http_json, base_url
 
@@ -125,7 +125,11 @@ class Activation:
 
     ``device_code`` is the polling secret -- it is bound to this device and
     never shown to the player, so it must never be logged or included in any
-    spoken or transcript-bound string. ``user_code`` is the short code the
+    spoken or transcript-bound string. It is ``repr=False`` so that invariant
+    is structural rather than a rule every future caller has to remember: a
+    stray ``log.warning("... %r", activation)`` would otherwise write the
+    secret straight into the session log with nothing failing.
+    ``user_code`` is the short code the
     player reads back and types into a browser. ``expires_at`` is a
     ``time.time()``-based deadline (the server gives a relative
     ``expires_in`` in seconds; this module resolves it to an absolute time
@@ -133,7 +137,7 @@ class Activation:
     when the request was made).
     """
 
-    device_code: str
+    device_code: str = field(repr=False)
     user_code: str
     verification_uri: str
     verification_uri_complete: str
@@ -150,7 +154,8 @@ class PollResult:
     ``"expired"`` (the code timed out, or was over an account's device cap;
     either way the fix is the same: start over with a new code),
     ``"retry"`` (a transient failure -- network trouble, an HTTP status other
-    than 400/410, or a reply the caller could not parse -- that a caller
+    than 400/410, a reply the caller could not parse, or a "ready" body with
+    no ``driver_id``/``token`` in it -- that a caller
     should just poll again on the next tick, exactly like "pending"), or
     ``"error"`` (HTTP 400 specifically: the server rejected the stored
     device_code as malformed. Retrying the same code can never fix this, so
@@ -245,10 +250,24 @@ def poll_activation(activation: Activation, *, transport: Transport = _http_json
     try:
         status = reply.get("status")
         if status == "ready":
+            driver_id = reply.get("driver_id")
+            token = reply.get("token")
+            if not driver_id or not token:
+                # A "ready" that carries no identity is not a claim the caller
+                # can act on: saving it would write a null identity, tell the
+                # player "Connected to orinks.net", and then quietly send
+                # "Bearer None" on every heartbeat until the next launch drops
+                # it. Treat it the same as any other body this module cannot
+                # make sense of -- transient, keep polling -- so a broken
+                # deploy or a body-rewriting middlebox resolves itself once
+                # the real claim lands, and expiry (not a wrong success) is
+                # the worst outcome.
+                log.warning("Activation poll returned a ready reply with no identity")
+                return PollResult(status="retry")
             return PollResult(
                 status="ready",
-                driver_id=reply.get("driver_id"),
-                token=reply.get("token"),
+                driver_id=driver_id,
+                token=token,
                 display_name=reply.get("display_name"),
             )
         if status == "pending":
