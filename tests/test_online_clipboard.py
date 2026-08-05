@@ -63,6 +63,13 @@ def _linux_with_scrap(monkeypatch, scrap):
     monkeypatch.setitem(sys.modules, "tkinter", None)  # import tkinter -> ImportError
 
 
+def _win32_with_scrap(monkeypatch, scrap):
+    """Native Windows, or Wine standing in for it: scrap answers before any
+    Tk fallback is ever tried."""
+    monkeypatch.setattr(online_states, "pygame", SimpleNamespace(scrap=scrap))
+    monkeypatch.setattr(online_states.sys, "platform", "win32")
+
+
 def test_x11_read_uses_the_type_the_clipboard_actually_offers(monkeypatch):
     _linux_with_scrap(monkeypatch, _X11Scrap(b"road-star-abcd1234\n"))
     assert online_states._clipboard_once() == "road-star-abcd1234"
@@ -176,9 +183,11 @@ def test_read_back_forgives_windows_crlf(monkeypatch):
     assert online_states._clipboard_holds("line one\nline two")
 
 
-def test_utf16_clipboard_payload_round_trips(monkeypatch):
-    """The charset=utf-8 scrap type is CF_UNICODETEXT on Windows and answers
-    in UTF-16LE. Decoding it as UTF-8 silently eats every non-ASCII character."""
+def test_utf16_clipboard_payload_round_trips_on_windows(monkeypatch):
+    """On Windows (native or under Wine), the charset=utf-8 scrap type is
+    really CF_UNICODETEXT and answers in UTF-16LE despite its name, NUL
+    -terminated like every Windows clipboard string. Decoding it as UTF-8
+    silently eats every non-ASCII character -- this is the bug under test."""
     text = "Delivered to Montréal — 12 tonnes"
 
     class FakeScrap:
@@ -190,9 +199,19 @@ def test_utf16_clipboard_payload_round_trips(monkeypatch):
         def get(scrap_type):
             if scrap_type == pygame.SCRAP_TEXT:
                 return None  # what Wine yields when the owner offers only UTF8_STRING
-            return text.encode("utf-16-le")
+            return text.encode("utf-16-le") + b"\x00\x00"  # Windows NUL-terminates
 
-    monkeypatch.setattr(pygame, "scrap", FakeScrap)
+    _win32_with_scrap(monkeypatch, FakeScrap)
+    assert online_states._clipboard_once() == text
+
+
+def test_utf8_clipboard_payload_round_trips_on_linux(monkeypatch):
+    """The identical scrap type is genuinely UTF8_STRING on X11 -- not
+    UTF-16LE. If the per-platform encoding table were ever "simplified" into
+    always treating that type as UTF-16, this would silently corrupt every
+    non-ASCII paste on native Linux, the opposite of the Windows/Wine bug."""
+    text = "Delivered to Montréal — 12 tonnes"
+    _linux_with_scrap(monkeypatch, _X11Scrap(text.encode("utf-8")))
     assert online_states._clipboard_once() == text
 
 
