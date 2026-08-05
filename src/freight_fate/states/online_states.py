@@ -1,10 +1,12 @@
 """Menus for the orinks.net drivers board: setup flow and the live list.
 
-Setup follows the account model: the player signs in on orinks.net, the
-site's driver setup page issues a public Driver ID and a one-time posting
-token, and the player copies each into the clipboard and pastes it here.
-Nothing is transmitted until the player activates "Connect and save", and
-the spoken disclosure below tells them exactly what sharing will send.
+Setup uses the device-code activation flow (see ``online_activation.py``):
+the game asks orinks.net for a short activation code, speaks it, and the
+player enters that code in any browser on any device -- no clipboard paste
+between the two apps. The game polls in the background and adopts the
+resulting driver identity once the code is claimed. Nothing is transmitted
+until a code is claimed, and the spoken disclosure below tells the player
+exactly what sharing will send.
 
 All network calls run on daemon threads; the menu states poll a small result
 slot from ``update`` so the game loop and speech stay responsive throughout.
@@ -20,10 +22,18 @@ import webbrowser
 
 import pygame
 
-from .. import online_presence
+from .. import online_activation, online_presence
 from ..online_presence import OnlineIdentity
 from ..settings import PROFILE_SHARING_CONSENT_VERSION
 from .base import MenuItem, MenuState
+
+# Polling schedule for OnlineSetupState (module-level so tests can shrink
+# them to make a real background thread finish fast, instead of monkeypatching
+# time.sleep globally and risking every other timed test in the same run).
+_ACTIVATION_POLL_INTERVAL_FIRST = 3.0
+_ACTIVATION_POLL_INTERVAL_LATER = 8.0
+_ACTIVATION_POLL_FIRST_PHASE_SECONDS = 30.0
+_ACTIVATION_STILL_WAITING_AFTER = 5.0
 
 DISCLOSURE = (
     "Profile sharing is optional and off until you turn it on. When on, orinks.net can "
@@ -193,304 +203,334 @@ def write_clipboard_text(text: str) -> bool:
 
 
 class OnlineSetupState(MenuState):
-    """Paste and verify account credentials without enabling either toggle.
+    """Request and track an orinks.net activation code for this computer.
 
-    The menu is deliberately STATIC — the same six items for the
+    The menu is deliberately STATIC — the same five items for the
     whole flow, with labels that carry the captured state — because players
     build positional memory of spoken menus and refresh() preserves indices,
-    not item identity. On success it saves the credentials while Profile
-    sharing and Cloud backup remain off.
+    not item identity. Only item 1's label carries progress; items 2-5 are
+    fixed text.
+
+    The game has no screen reader review cursor — a player cannot step
+    through a spoken string character by character the way they can in a
+    browser or an editor — so items 2 and 3 exist purely to let a player
+    replay the activation code as many times as they need: item 2 spells it
+    phonetically, item 3 puts it on the clipboard (a write, the direction
+    that still works even when the game and the player's browser do not
+    share a clipboard). Both stay available for as long as an activation is
+    outstanding, and both double as the fallback path for when
+    ``webbrowser.open`` does nothing. On success the identity is saved while
+    Profile sharing and Cloud backup remain off.
     """
 
     title = "orinks.net account setup"
 
     def __init__(self, ctx) -> None:
         super().__init__(ctx)
-        self._driver_id: str | None = None
-        self._token: str | None = None
-        self._checking = False
-        self._check_started = 0.0
-        self._still_checking_said = False
-        self._outcome: str | None = None  # worker -> update() mailbox
-        self._checked_identity: OnlineIdentity | None = None
-        self._opened_browser = False
+        self.activation: online_activation.Activation | None = None
+        self._phase = "idle"  # idle | starting | waiting | expired | error
+        self._poll_started = 0.0
+        self._still_waiting_said = False
+        self._outcome: tuple[str, object] | None = None  # worker -> update() mailbox
+        # A fresh Event per run, replaced in _start_setup: exit() must always
+        # have *something* to .set(), even if the player never starts setup.
+        self._stop_event = threading.Event()
 
     # -- static menu ----------------------------------------------------------
 
     def build_items(self) -> list[MenuItem]:
         return [
             MenuItem(
-                "Open the driver setup page in my browser",
-                self._open_page,
-                help="Sign in on orinks.net, set up your driver there, then "
-                "copy your Driver ID first.",
+                self._setup_label,
+                self._start_setup,
+                help="Asks orinks.net for an activation code, tries to open "
+                "your browser with it filled in, and waits for you to sign "
+                "in there.",
             ),
             MenuItem(
-                self._id_label,
-                self._paste_id,
-                help="Copies are taken from the clipboard. Use the Copy "
-                "Driver ID button on the setup page, then choose this item.",
+                "Say my activation code again",
+                self._repeat_code,
+                help="Spells out the activation code letter by letter, so "
+                "you can copy it by ear as many times as you need.",
             ),
             MenuItem(
-                self._token_label,
-                self._paste_token,
-                help="Use the Copy token button on the setup page, then "
-                "choose this item. The token is never spoken aloud.",
-            ),
-            MenuItem(
-                self._connect_label,
-                self._connect,
-                help="Checks your pasted credentials with orinks.net, saves "
-                "them, and leaves Profile sharing and Cloud backup off.",
+                "Copy my activation code",
+                self._copy_code,
+                help="Puts the activation code on the clipboard, for when "
+                "the browser did not open on its own.",
             ),
             MenuItem("Hear what gets shared", self._speak_disclosure),
             MenuItem("Cancel", self.go_back, help="Leave without connecting this account."),
         ]
 
-    def _id_label(self) -> str:
-        if self._driver_id:
-            return f"Driver ID: {self._driver_id} — paste again to replace"
-        return "Paste Driver ID from clipboard"
-
-    def _token_label(self) -> str:
-        if self._token:
-            return "Driver token: captured — paste again to replace"
-        return "Paste driver token from clipboard"
-
-    def _connect_label(self) -> str:
-        return "Checking your credentials" if self._checking else "Connect and save"
+    def _setup_label(self) -> str:
+        if self._phase == "starting":
+            return "Starting setup with orinks.net"
+        if self._phase == "waiting" and self.activation is not None:
+            return f"Waiting for code {self.activation.user_code} to be entered"
+        if self._phase == "expired":
+            return "Activation code expired — choose to get a new one"
+        if self._phase == "error":
+            return "Setup could not continue — choose to start over"
+        return "Set up this computer with orinks.net"
 
     def announce_entry(self) -> None:
         self.ctx.say(
             f"{self.title}. This connects the game to your orinks.net account. "
             "Profile sharing and Cloud backup remain off until you turn each "
-            "one on separately. Nothing is saved until you choose Connect and "
-            "save at the end of this menu. The items below "
-            f"walk you through it in order. {self.current_text()}"
+            "one on separately. The first item asks orinks.net for an "
+            f"activation code. {self.current_text()}"
         )
 
     def _speak_disclosure(self) -> None:
         self.ctx.say(DISCLOSURE)
 
-    # -- the two-app dance ------------------------------------------------------
-
-    def _open_page(self) -> None:
-        url = f"{online_presence.base_url()}/freight-fate/online/setup"
-        try:
-            webbrowser.open(url)
-        except Exception:
-            self.ctx.say(
-                "The browser could not be opened. In your browser, go to "
-                "orinks.net, open Freight Fate, then Online setup.",
-                interrupt=True,
-            )
-            return
-        self._opened_browser = True
-        self.ctx.say(
-            "Opening the setup page in your browser. Sign in, set up your "
-            "driver, and copy your Driver ID first. Then come back here.",
-            interrupt=True,
-        )
-
     def handle_event(self, event) -> None:
         # Re-orient after the browser round trip: this flow is a two-app
         # dance, and "where was I" is the first question on every return.
-        if event.type == pygame.WINDOWFOCUSGAINED and self._opened_browser and not self._checking:
+        if event.type == pygame.WINDOWFOCUSGAINED and self._phase == "waiting":
             self.ctx.say(f"Back in Freight Fate. {self.current_text()}")
             return
         super().handle_event(event)
 
-    # -- pastes -----------------------------------------------------------------
+    # -- starting -------------------------------------------------------------
 
-    def _paste_id(self) -> None:
-        # read_clipboard_text/looks_like_token/looks_like_driver_id were
-        # deleted with the paste path; this whole method is replaced by the
-        # activation-code flow in a later task, so it is left calling the
-        # deleted names rather than half-rewritten here.
-        text = read_clipboard_text()  # noqa: F821
-        if not text:
-            self.ctx.say(
-                "I could not read text from the clipboard. Copy the Driver ID "
-                "on the setup page, then choose this item again.",
-                interrupt=True,
-            )
-            return
-        if looks_like_token(text):  # noqa: F821
-            self._token = text
-            self.refresh()
-            self.ctx.say(
-                "That looks like your driver token, so I saved it as the "
-                "token. Now copy your Driver ID and paste it on this item.",
-                interrupt=True,
-            )
-            return
-        candidate = text.lower()
-        if not looks_like_driver_id(candidate):  # noqa: F821
-            # Never speak the clipboard contents: it could hold anything.
-            self.ctx.say(
-                "The clipboard text does not look like a Driver ID. Use the "
-                "Copy button next to it on the setup page, then choose this "
-                "item again.",
-                interrupt=True,
-            )
-            return
-        self._driver_id = candidate
-        self.refresh()
-        self.ctx.say(f"Driver ID captured: {candidate}.", interrupt=True)
-
-    def _paste_token(self) -> None:
-        # Same deferred-deletion note as _paste_id above.
-        text = read_clipboard_text()  # noqa: F821
-        if not text:
-            self.ctx.say(
-                "I could not read text from the clipboard. Copy the driver "
-                "token on the setup page, then choose this item again.",
-                interrupt=True,
-            )
-            return
-        if not text.startswith(_TOKEN_PREFIX) and looks_like_driver_id(  # noqa: F821
-            text.lower()
-        ):
-            self._driver_id = text.lower()
-            self.refresh()
-            self.ctx.say(
-                "That looks like your Driver ID, so I saved it as the Driver "
-                "ID. Now copy your driver token and paste it on this item.",
-                interrupt=True,
-            )
-            return
-        if not looks_like_token(text):  # noqa: F821
-            self.ctx.say(
-                "The clipboard text does not look like a driver token. "
-                "Tokens from the setup page start with the letters F F D "
-                "and an underscore. Use the Copy token button on the setup "
-                "page, then choose this item again.",
-                interrupt=True,
-            )
-            return
-        self._token = text
-        self.refresh()
-        # Spoken length must match what the site showed; text is already
-        # trimmed. The token itself is never spoken.
-        self.ctx.say(f"Token captured, {len(text)} characters.", interrupt=True)
-
-    # -- connect ------------------------------------------------------------------
-
-    def _connect(self) -> None:
-        if self._checking:
-            return
-        if not self._driver_id or not self._token:
-            have_id = "You have the Driver ID" if self._driver_id else "The Driver ID is missing"
-            have_tok = (
-                "the driver token is still missing" if not self._token else "you have the token"
-            )
-            if not self._driver_id and not self._token:
-                message = (
-                    "Not ready yet. Both values are missing. Choose Paste "
-                    "Driver ID from clipboard first."
+    def _start_setup(self) -> None:
+        if self._phase in ("starting", "waiting"):
+            # Already under way -- repeat the code rather than burning a
+            # second activation request the player did not ask for.
+            if self.activation is not None:
+                self.ctx.say(
+                    "Still waiting for you to enter the code. Your "
+                    f"activation code is {self.activation.user_code}.",
+                    interrupt=True,
                 )
-            elif not self._token:
-                message = f"Not ready yet. {have_id}; {have_tok}. Choose Paste driver token from clipboard first."
-            else:
-                message = f"Not ready yet. {have_id}; {have_tok}. Choose Paste Driver ID from clipboard first."
-            self.ctx.say(message, interrupt=True)
             return
-        self._checking = True
-        self._check_started = time.monotonic()
-        self._still_checking_said = False
+        self._phase = "starting"
+        self.activation = None
+        self._still_waiting_said = False
         self.refresh()
-        self.ctx.say("Checking your credentials with orinks.net.", interrupt=True)
-        identity = OnlineIdentity(driver_id=self._driver_id, driver_token=self._token)
-        self._checked_identity = identity
+        self.ctx.say("Contacting orinks.net for an activation code.", interrupt=True)
+        self._stop_event = threading.Event()
+        stop_event = self._stop_event
 
         def worker() -> None:
-            outcome = online_presence.verify_identity(identity)
-            if outcome == "ok":
-                outcome = online_presence.set_profile_sharing(identity, False)
-            self._outcome = outcome
+            activation = online_activation.start_activation()
+            if stop_event.is_set():  # player already backed out
+                return
+            if activation is None:
+                self._outcome = ("start_failed", None)
+                return
+            self._outcome = ("activation", activation)
+            self._poll_loop(activation, stop_event)
 
-        threading.Thread(target=worker, name="online-verify", daemon=True).start()
+        threading.Thread(target=worker, name="online-activation", daemon=True).start()
+
+    def _poll_loop(
+        self, activation: online_activation.Activation, stop_event: threading.Event
+    ) -> None:
+        """Poll until claimed, expired, or told to stop.
+
+        Runs entirely on the worker thread. Every reachable exit posts to
+        ``self._outcome`` -- except "keep waiting", which posts nothing:
+        update() times the "still waiting" line off ``self._poll_started``,
+        not off a worker message, so a silent pending poll needs no mailbox
+        entry at all.
+        """
+        first_phase_deadline = time.monotonic() + _ACTIVATION_POLL_FIRST_PHASE_SECONDS
+        while not stop_event.is_set():
+            if time.time() >= activation.expires_at:
+                self._outcome = ("expired", None)
+                return
+            result = online_activation.poll_activation(activation)
+            if stop_event.is_set():  # player backed out while the request was in flight
+                return
+            if result.status == "ready":
+                self._outcome = ("ready", result)
+                return
+            if result.status == "expired":
+                self._outcome = ("expired", None)
+                return
+            if result.status == "error":
+                self._outcome = ("error", None)
+                return
+            interval = (
+                _ACTIVATION_POLL_INTERVAL_FIRST
+                if time.monotonic() < first_phase_deadline
+                else _ACTIVATION_POLL_INTERVAL_LATER
+            )
+            if stop_event.wait(interval):  # True means stop was requested during the wait
+                return
+
+    def _announce_activation(self, activation: online_activation.Activation) -> None:
+        code = activation.user_code
+        try:
+            webbrowser.open(activation.verification_uri_complete)
+            opened = True
+        except Exception:
+            opened = False
+        if opened:
+            self.ctx.say(
+                f"Your activation code is {code}. I opened your browser to "
+                f"{activation.verification_uri} with the code filled in. "
+                "Sign in there to finish setup.",
+                interrupt=True,
+            )
+        else:
+            # webbrowser.open() can also silently do nothing without raising
+            # (a remote/streamed session is the common case) -- items 2 and 3
+            # are the fallback for that case too, not only this one, but this
+            # is the one moment the game knows for certain that opening
+            # failed, so it is worth naming them here.
+            self.ctx.say(
+                "The browser could not be opened. Your activation code is "
+                f"{code}. In any browser, go to {activation.verification_uri} "
+                "and enter it. Choose Say my activation code again to hear "
+                "it spelled out, or Copy my activation code to put it on "
+                "the clipboard.",
+                interrupt=True,
+            )
+
+    # -- review affordances -----------------------------------------------------
+
+    def _repeat_code(self) -> None:
+        if self.activation is None:
+            self.ctx.say(
+                "There is no activation code right now. Choose Set up this "
+                "computer with orinks.net first.",
+                interrupt=True,
+            )
+            return
+        self.ctx.say(
+            "Your activation code, spelled out: "
+            f"{online_activation.spell_code(self.activation.user_code)}.",
+            interrupt=True,
+        )
+
+    def _copy_code(self) -> None:
+        if self.activation is None:
+            self.ctx.say(
+                "There is no activation code right now. Choose Set up this "
+                "computer with orinks.net first.",
+                interrupt=True,
+            )
+            return
+        # Never claim a copy that failed -- the write is verified (see
+        # write_clipboard_text) before this ever says "copied".
+        if write_clipboard_text(self.activation.user_code):
+            self.ctx.say("Activation code copied to the clipboard.", interrupt=True)
+        else:
+            self.ctx.say(
+                "I could not copy the activation code to the clipboard. "
+                "Choose Say my activation code again to hear it spelled "
+                "out instead.",
+                interrupt=True,
+            )
+
+    # -- polling result -----------------------------------------------------------
 
     def update(self, dt: float) -> None:
         super().update(dt)
         if (
-            self._checking
-            and not self._still_checking_said
-            and time.monotonic() - self._check_started > 5.0
+            self._phase == "waiting"
+            and not self._still_waiting_said
+            and time.monotonic() - self._poll_started > _ACTIVATION_STILL_WAITING_AFTER
         ):
-            self._still_checking_said = True
-            self.ctx.say("Still checking.")
+            self._still_waiting_said = True
+            self.ctx.say("Still waiting.")
         outcome, self._outcome = self._outcome, None
         if outcome is None:
             return
-        identity, self._checked_identity = self._checked_identity, None
-        self._checking = False
-        self.refresh()
-        if outcome == "ok" and identity is not None:
-            try:
-                identity.save()
-            except OSError:
-                self.ctx.audio.play("ui/error")
-                self.ctx.say(
-                    "Your credentials were verified, but this computer could "
-                    "not save the driver token securely. Nothing was changed. "
-                    "Check that your password store is available, then choose "
-                    "Connect and save to try again.",
-                    interrupt=True,
-                )
-                return
-            self.ctx.settings.online_presence = False
-            self.ctx.settings.cloud_saves = False
-            self.ctx.settings.profile_sharing_consent_version = 0
-            self.ctx.settings.profile_sharing_pending_off = False
-            self.ctx.settings.save()
-            self.ctx.adopt_online_identity(identity)
-            self.ctx.apply_online_presence()
-            self.ctx.apply_cloud_saves()
-            self.ctx.audio.play("ui/menu_select")
-            self.ctx.say(
-                "orinks.net account connected. Profile sharing remains off. Cloud backup remains "
-                "off until you turn it on.",
-                interrupt=True,
-            )
-            self.ctx.pop_state()
+        kind, payload = outcome
+        if kind == "start_failed":
+            self._phase = "idle"
+            self.refresh()
+            self.ctx.say("Could not reach orinks.net. Try again.", interrupt=True)
             return
-        if outcome == "driver_not_found":
+        if kind == "activation":
+            self.activation = payload
+            self._phase = "waiting"
+            self._poll_started = time.monotonic()
+            self._still_waiting_said = False
+            self.refresh()
+            self._announce_activation(payload)
+            return
+        if kind == "ready":
+            self._finish_success(payload)
+            return
+        if kind == "expired":
+            self.activation = None
+            self._phase = "expired"
+            self.refresh()
             self.ctx.say(
-                "orinks.net does not know that Driver ID. Re-copy the Driver ID "
-                "from the setup page and paste it again.",
+                "Your activation code expired. Choose Set up this computer "
+                "with orinks.net again for a new code.",
                 interrupt=True,
             )
-        elif outcome == "unauthorized":
+            return
+        if kind == "error":
+            self.activation = None
+            self._phase = "error"
+            self.refresh()
+            # Deliberately does not say "try again" or "wait" -- a 400 here
+            # means the stored device_code is malformed, and retrying the
+            # same one can never succeed. The only fix is a fresh code.
             self.ctx.say(
-                "The token does not match. If you rotated the token on the "
-                "site, copy the new one and paste it again.",
+                "orinks.net could not use that activation code, and trying "
+                "again will not fix it. Choose Set up this computer with "
+                "orinks.net again to start over with a new code.",
                 interrupt=True,
             )
-        elif outcome == "rejected":
+            return
+
+    def _finish_success(self, result: online_activation.PollResult) -> None:
+        self.activation = None
+        self._phase = "idle"
+        self.refresh()
+        identity = OnlineIdentity(driver_id=result.driver_id, driver_token=result.token)
+        try:
+            identity.save()
+        except OSError:
+            self.ctx.audio.play("ui/error")
             self.ctx.say(
-                "orinks.net answered, but did not accept the pasted Driver ID "
-                "and token. Re-copy each one from the setup page with its "
-                "Copy button, paste them again, and try Connect once more. "
-                "Nothing was saved.",
+                "Your activation code was accepted, but this computer could "
+                "not save the driver token securely. Nothing was changed. "
+                "Check that your password store is available, then choose "
+                "Set up this computer with orinks.net to try again.",
                 interrupt=True,
             )
-        else:
-            self.ctx.say(
-                "Could not reach orinks.net. Check your connection and try "
-                "Connect again. Nothing was saved.",
-                interrupt=True,
-            )
+            return
+        self.ctx.settings.online_presence = False
+        self.ctx.settings.cloud_saves = False
+        self.ctx.settings.profile_sharing_consent_version = 0
+        self.ctx.settings.profile_sharing_pending_off = False
+        self.ctx.settings.save()
+        self.ctx.adopt_online_identity(identity)
+        self.ctx.apply_online_presence()
+        self.ctx.apply_cloud_saves()
+        self.ctx.audio.play("ui/menu_select")
+        # The display name is not decoration: it is the only way a player
+        # finds out someone else claimed the code they spoke or copied, and
+        # that the token just saved belongs to a stranger's driver, not theirs.
+        display = result.display_name or "your driver"
+        self.ctx.say(
+            f"Connected to orinks.net as {display}. Profile sharing remains "
+            "off. Cloud backup remains off until you turn it on.",
+            interrupt=True,
+        )
+        self.ctx.pop_state()
 
     def go_back(self) -> None:
-        if self._checking:
-            self.ctx.say(
-                "Account setup is still checking. Stay here for the result.", interrupt=True
-            )
-            return
-        if self._driver_id or self._token:
-            self.ctx.say("Setup closed. Nothing was saved.")
+        if self._phase == "waiting":
+            self.ctx.say("Setup canceled. Nothing was saved.")
         super().go_back()
+
+    def exit(self) -> None:
+        # Stops the poll worker no matter how this state is left (Cancel,
+        # Escape, or a programmatic pop elsewhere) -- backing out must never
+        # leave a thread polling into a dead state.
+        self._stop_event.set()
+        super().exit()
 
 
 class ProfileSharingSyncState(MenuState):

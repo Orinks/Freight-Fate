@@ -1,4 +1,4 @@
-"""Clipboard fallback behavior for the online setup paste items.
+"""Clipboard fallback behavior underlying the activation-code review items.
 
 The macOS path matters most: creating a hidden Tk root inside a running SDL
 app aborts the whole process at the C level, so on darwin the fallback must
@@ -7,6 +7,11 @@ be pbpaste and tkinter must never be touched.
 The X11 tests matter for the opposite reason: on Linux there is no fallback
 worth having (tkinter is not installed on a stock desktop and is not in the
 release build), so scrap itself has to succeed.
+
+The clipboard is a write-only channel now (see ``write_clipboard_text`` and
+``OnlineSetupState._copy_code`` in ``online_states.py``) -- the game no
+longer parses anything a player pastes in, but the read path stays because
+``write_clipboard_text`` verifies its own write by reading it back.
 """
 
 from __future__ import annotations
@@ -15,9 +20,7 @@ import sys
 from types import SimpleNamespace
 
 import pygame
-from speech_capture import speech_stub
 
-from freight_fate.settings import Settings
 from freight_fate.states import online_states
 
 
@@ -213,93 +216,3 @@ def test_utf8_clipboard_payload_round_trips_on_linux(monkeypatch):
     text = "Delivered to Montréal — 12 tonnes"
     _linux_with_scrap(monkeypatch, _X11Scrap(text.encode("utf-8")))
     assert online_states._clipboard_once() == text
-
-
-def test_account_setup_connects_with_both_sharing_toggles_off(monkeypatch):
-    calls: list[tuple[str, object]] = []
-
-    class ImmediateThread:
-        def __init__(self, *, target, **_kwargs):
-            self.target = target
-
-        def start(self):
-            self.target()
-
-    settings = Settings(online_presence=True, cloud_saves=True)
-    ctx = SimpleNamespace(
-        settings=settings,
-        audio=SimpleNamespace(play=lambda sound: calls.append(("sound", sound))),
-        say=speech_stub(calls, tag="say"),
-        pop_state=lambda: calls.append(("pop", None)),
-        adopt_online_identity=lambda identity: calls.append(("identity", identity.driver_id)),
-        apply_online_presence=lambda: calls.append(("profile", settings.online_presence)),
-        apply_cloud_saves=lambda: calls.append(("cloud", settings.cloud_saves)),
-    )
-    monkeypatch.setattr(online_states.threading, "Thread", ImmediateThread)
-    monkeypatch.setattr(online_states.online_presence, "verify_identity", lambda _identity: "ok")
-
-    def turn_public_sharing_off(_identity, enabled):
-        calls.append(("server_profile", enabled))
-        return "ok"
-
-    monkeypatch.setattr(
-        online_states.online_presence, "set_profile_sharing", turn_public_sharing_off
-    )
-    state = online_states.OnlineSetupState(ctx)
-    state.enter()
-    state._driver_id = "road-star-abcd1234"
-    state._token = "ffd_" + "a" * 64
-    state._connect()
-    state.update(0)
-
-    assert settings.online_presence is False
-    assert settings.cloud_saves is False
-    assert ("server_profile", False) in calls
-    assert ("profile", False) in calls
-    assert ("cloud", False) in calls
-
-
-def test_account_setup_saves_the_exact_verified_credentials(monkeypatch):
-    pending = []
-    saved = []
-
-    class DeferredThread:
-        def __init__(self, *, target, **_kwargs):
-            pending.append(target)
-
-        def start(self):
-            return None
-
-    settings = Settings()
-    ctx = SimpleNamespace(
-        settings=settings,
-        audio=SimpleNamespace(play=lambda _sound: None),
-        say=lambda *_args, **_kwargs: None,
-        pop_state=lambda: None,
-        adopt_online_identity=lambda identity: saved.append(identity),
-        apply_online_presence=lambda: None,
-        apply_cloud_saves=lambda: None,
-    )
-    monkeypatch.setattr(online_states.threading, "Thread", DeferredThread)
-    monkeypatch.setattr(online_states.online_presence, "verify_identity", lambda _identity: "ok")
-    monkeypatch.setattr(
-        online_states.online_presence,
-        "set_profile_sharing",
-        lambda _identity, _enabled: "ok",
-    )
-    monkeypatch.setattr(online_states.OnlineIdentity, "save", lambda identity: None)
-    state = online_states.OnlineSetupState(ctx)
-    state.enter()
-    verified = online_states.OnlineIdentity(
-        driver_id="road-star-abcd1234", driver_token="ffd_" + "a" * 64
-    )
-    state._driver_id = verified.driver_id
-    state._token = verified.driver_token
-
-    state._connect()
-    state._driver_id = "road-star-replaced"
-    state._token = "ffd_" + "b" * 64
-    pending[0]()
-    state.update(0)
-
-    assert saved == [verified]
