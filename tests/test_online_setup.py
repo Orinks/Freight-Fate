@@ -387,7 +387,14 @@ def test_still_waiting_is_spoken_once_after_five_seconds():
 
 
 def test_ready_poll_adopts_identity_and_speaks_the_display_name(monkeypatch):
-    monkeypatch.setattr(online_states.OnlineIdentity, "save", lambda self: None)
+    # The save stub records the identity it was called on rather than
+    # discarding it: driver_id reaching adopt_online_identity is not enough
+    # to prove the right token was saved -- a bug that adopted the correct
+    # driver with a wrong, truncated, or empty token would still pass every
+    # other assertion here, and would only surface later, silently, at the
+    # next presence heartbeat.
+    saved: list[online_states.OnlineIdentity] = []
+    monkeypatch.setattr(online_states.OnlineIdentity, "save", lambda self: saved.append(self))
     spoken: list[str] = []
     ctx = _make_ctx(spoken)
     ctx.settings.online_presence = True
@@ -412,6 +419,9 @@ def test_ready_poll_adopts_identity_and_speaks_the_display_name(monkeypatch):
     assert ctx.settings.cloud_saves is False
     assert ("identity", "rig-hauler") in spoken
     assert ("pop",) in spoken
+    assert len(saved) == 1
+    assert saved[0].driver_id == "rig-hauler"
+    assert saved[0].driver_token == result.token
 
 
 def test_token_save_failure_reuses_the_keyring_failure_wording(monkeypatch):
