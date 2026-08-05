@@ -303,12 +303,38 @@ never touch the network.
 
 `OnlineSetupState` keeps a static menu, as its docstring requires -- players
 build positional memory of spoken menus and `refresh()` preserves indices, not
-item identity. Four items:
+item identity. Five items:
 
 1. **Set up this computer with orinks.net** (label carries progress)
 2. **Say my activation code again** (spells the code phonetically)
-3. **Hear what gets shared**
-4. **Cancel**
+3. **Copy my activation code** (puts the code on the clipboard)
+4. **Hear what gets shared**
+5. **Cancel**
+
+### Reviewing the code
+
+The game has no screen reader review cursor -- a player cannot step through a
+spoken string character by character the way they can in a browser or an
+editor. So the game has to provide that itself, and the code is useless if it
+is only ever spoken once as a word.
+
+**Say my activation code again** spells it: each character on its own, using
+NATO phonetics for letters (`Whiskey, Kilo, Quebec, Romeo, dash, three, four,
+six, eight`). Phonetics are what make `B` and `D`, or `M` and `N`, survive a
+synthesizer. Digits are said as digits. The item repeats on every activation,
+so a player can hear it as many times as they need without restarting setup.
+
+**Copy my activation code** puts the code on the clipboard. This is a
+clipboard *write*, which is the direction that still works everywhere -- the
+whole design exists because the game cannot usefully *read* a clipboard it
+does not share with the player's browser. It exists for the case where
+`webbrowser.open` does nothing: on a normal desktop the player pastes the code
+straight into the page, and on a streamed session where the write lands in a
+container clipboard, nothing is lost that was not already lost. Speak whether
+the copy succeeded; never claim a copy that failed.
+
+Both items are also the fallback path when the browser cannot be opened at
+all, alongside the spoken address.
 
 ### Polling
 
