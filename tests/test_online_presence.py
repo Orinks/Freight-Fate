@@ -587,9 +587,55 @@ def test_missing_or_malformed_identity_loads_as_none():
 # -- verification and board helpers ----------------------------------------------
 
 
+class _FakeJsonResponse:
+    """A minimal `urlopen` result: reads back a fixed JSON body."""
+
+    def __init__(self, body: dict) -> None:
+        self._body = json.dumps(body).encode("utf-8")
+
+    def read(self) -> bytes:
+        return self._body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
 def test_base_url_env_override(monkeypatch):
     monkeypatch.setenv("FREIGHT_FATE_ONLINE_URL", "http://localhost:3000/")
     assert base_url() == "http://localhost:3000"
+
+
+def test_bypass_header_absent_without_the_env_var(monkeypatch):
+    import urllib.request
+
+    monkeypatch.delenv("FREIGHT_FATE_ONLINE_BYPASS", raising=False)
+    captured = {}
+
+    def fake_urlopen(req, timeout=None, context=None):
+        captured["headers"] = dict(req.header_items())
+        return _FakeJsonResponse({"ok": True})
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    online_presence._http_json("https://example.test/api", None, {})
+    assert "X-vercel-protection-bypass" not in captured["headers"]
+
+
+def test_bypass_header_present_when_the_env_var_is_set(monkeypatch):
+    import urllib.request
+
+    monkeypatch.setenv("FREIGHT_FATE_ONLINE_BYPASS", "secret-bypass-token")
+    captured = {}
+
+    def fake_urlopen(req, timeout=None, context=None):
+        captured["headers"] = dict(req.header_items())
+        return _FakeJsonResponse({"ok": True})
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    online_presence._http_json("https://example.test/api", None, {})
+    assert captured["headers"]["X-vercel-protection-bypass"] == "secret-bypass-token"
 
 
 def _http_error(code: int) -> urllib.error.HTTPError:

@@ -137,6 +137,13 @@ def _http_json(
         "Content-Type": "application/json",
         **headers,
     }
+    bypass = os.environ.get("FREIGHT_FATE_ONLINE_BYPASS")
+    if bypass:
+        # Vercel preview deployments are behind Deployment Protection, which
+        # answers an unauthenticated API call with a redirect to SSO. This
+        # lets a test build reach one without the project having to turn that
+        # protection off for everybody. Unset in every shipped build.
+        all_headers["x-vercel-protection-bypass"] = bypass
     req = urllib.request.Request(url, data=data, headers=all_headers, method=method)
     with urllib.request.urlopen(req, timeout=_REQUEST_TIMEOUT_S, context=ssl_context()) as resp:
         return json.loads(resp.read().decode("utf-8"))
