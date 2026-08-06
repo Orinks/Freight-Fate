@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import bisect
 import random
 
 from ..data.world import Leg, Route, get_world
@@ -201,6 +202,73 @@ class Trip:
             else:
                 break
         return zone
+
+    def _geo_samples(self) -> tuple[list[float], list[tuple[float, float]]]:
+        """Mileposts and their coordinates along the route, built once.
+
+        Same geometry the time-zone crossings read -- city endpoints plus each
+        leg's baked polyline -- so a route with no route points still has its
+        two city ends to interpolate between. Built lazily because most runs
+        never ask: only the radio needs to know where the truck actually is.
+        """
+        cached = getattr(self, "_geo_cache", None)
+        if cached is not None:
+            return cached
+        world = get_world()
+        samples: list[tuple[float, float, float]] = []
+        for i, (start, leg) in enumerate(zip(self._leg_starts, self.route.legs, strict=True)):
+            forward = self.route.cities[i] == leg.a
+            city = world.cities.get(self.route.cities[i])
+            if city is not None and (city.lat or city.lon):
+                samples.append((start, city.lat, city.lon))
+            for pt in leg.route_points:
+                offset = _stop_offset_for_direction(pt.at_mi, leg.miles, forward)
+                samples.append((start + offset, pt.lat, pt.lon))
+        last = world.cities.get(self.route.cities[-1])
+        if last is not None and (last.lat or last.lon):
+            samples.append((self.total_miles, last.lat, last.lon))
+        # A leg's baked polyline can run a fraction of a mile past the leg
+        # length it is filed under, which would otherwise leave a point sitting
+        # beyond the destination. The run ends where the route says it ends.
+        samples = [s for s in samples if 0.0 <= s[0] <= self.total_miles]
+        samples.sort(key=lambda s: s[0])
+        # A polyline point and a city anchor routinely land on the same
+        # milepost. Keep one per milepost so a lookup cannot pick whichever of
+        # them happened to sort first; the city wins because the sort is stable
+        # and cities are appended after the geometry.
+        deduped: list[tuple[float, float, float]] = []
+        for sample in samples:
+            if deduped and deduped[-1][0] == sample[0]:
+                deduped[-1] = sample
+            else:
+                deduped.append(sample)
+        cached = ([s[0] for s in deduped], [(s[1], s[2]) for s in deduped])
+        self._geo_cache = cached
+        return cached
+
+    def position_latlon(self, mile: float | None = None) -> tuple[float, float] | None:
+        """Where the truck is on the map, interpolated along the route.
+
+        Defaults to the current position. Returns None for a route with no
+        usable geometry at all, which callers must treat as "position unknown"
+        rather than as a point at zero, zero.
+        """
+        miles, points = self._geo_samples()
+        if not miles:
+            return None
+        at = self.position_mi if mile is None else mile
+        index = bisect.bisect_left(miles, at)
+        if index <= 0:
+            return points[0]
+        if index >= len(miles):
+            return points[-1]
+        before, after = miles[index - 1], miles[index]
+        span = after - before
+        if span <= 0.0:
+            return points[index]
+        t = (at - before) / span
+        (lat_a, lon_a), (lat_b, lon_b) = points[index - 1], points[index]
+        return (lat_a + (lat_b - lat_a) * t, lon_a + (lon_b - lon_a) * t)
 
     @property
     def current_timezone(self) -> TimeZone:
