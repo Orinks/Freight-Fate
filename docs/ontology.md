@@ -60,6 +60,7 @@ belongs to the truck you own in this game, not to the driver.
 | Lane keeping | `LaneKeeping` | `sim/lane.py` |
 | Time zone | `TimeZone` | `sim/timezones.py` |
 | Live weather | `RealWeatherProvider` | `sim/real_weather.py` |
+| Radio reception and tuning | `RadioTuner`, `Station` | `sim/radio.py`, `data/radio_catalog.py` |
 
 `Trip` is the binding entity: it joins a driver, a truck, a job and a route
 into one moving thing, and it owns the clock. Everything the player hears while
@@ -100,6 +101,14 @@ Not classes, but part of the ontology, because the shape is load-bearing:
 There is no automatic sync. An edit to `world.json` that is not re-split is a
 change the game will never see.
 
+The radio catalog is the same shape one stage shorter:
+
+- `tools/build_radio_catalog.py` joins the source dumps in `data/radio-cache/`
+  into `src/freight_fate/data/radio/stations.json`, which is checked in.
+- The game reads that file; `tools/bake_radio.py` compiles it into the release
+  build, because packaged builds ship no editable data files.
+- `--check` verifies the catalog still matches its sources.
+
 ## Spoken vocabulary
 
 The canonical player-facing noun for each concept. This is an accessibility
@@ -118,6 +127,10 @@ from the words, and synonyms cost them a re-read.
 | A truck stop or service POI | stop | POI, waypoint | `Stop`, `RoadStop` |
 | The level band | rank | tier, grade | `CareerRank` |
 | A license add-on | endorsement | certification, licence | `ENDORSEMENT_LEVELS` |
+| The in-cab receiver | radio | stereo, tuner, head unit | `RadioTuner` |
+| One broadcaster | station | channel | `Station` |
+| A part of the dial | band | waveband, frequency band | `BANDS` |
+| How well it comes in | signal | reception, bars, strength | `signal_strength` |
 
 Notes on the entries that are not simple:
 
@@ -134,6 +147,17 @@ label of one truck model ("standard rig"). Keep it out of functional text.
 **"Corridor" is an explanatory word.** It belongs in help and manual text
 describing where the map comes from ("routes made from real highway
 corridors"). Per-drive navigation says leg.
+
+**"Station" is a broadcaster, never a place.** The map already has weigh
+stations and fuel stations, so a radio station is only ever called a station
+where the sentence is plainly about the radio; elsewhere name it ("the station
+you are tuned to", "the weigh station ahead").
+
+**"Band" covers more than FM and AM.** Web radio and satellite are not
+wavebands in the real sense, but the player selects them with the same control
+and the same word, and inventing a second noun for "the thing Y switches
+between" would cost more than the inaccuracy does. FM and AM are spoken as
+spaced letters ("F M") so a screen reader says the letters.
 
 **"Stop" is the most overloaded word in the game** -- the POI, the act of
 stopping the truck, and the command to do so. Where the sentence could be read

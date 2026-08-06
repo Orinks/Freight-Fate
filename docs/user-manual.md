@@ -290,6 +290,10 @@ Driving controls are active while the road view is focused:
 | L | Report lane position when lane drift is enabled. |
 | A | Repeat the last driving announcement, in case you missed it. |
 | U | Report what is coming up: imposed speed limits, stops, and exits ahead. |
+| M | Switch the radio on or off. Pressing it again is the quickest way to silence a station. |
+| I / O | Step down or up the dial. Each step names the station, its frequency, its format, and the signal. |
+| Y | Change band: FM, AM, web radio, satellite. |
+| Shift+M | Open the radio screen: the full station list, the bands, and your favorites. |
 | F1 | Show the driving control list and current objective. |
 | Comma | Review earlier speech. The full review keys are listed under "Reviewing what the game said". |
 | Period | Move toward newer speech. |
@@ -645,9 +649,53 @@ Audio is layered by category:
 | Route events | Hazards, construction zones, inspections, state crossings, traffic slowing, and toll charges. |
 | Facilities and stops | Facility gates, docks, rest stops, and weigh station lanes. |
 | Music | Menu, facility, day-driving, and night-driving music pools. |
+| Radio | Real radio stations, when you switch the radio on. |
 
 Speech, gameplay cues, and warnings are the primary access path. Music and
 ambience sit behind those cues and can be adjusted separately.
+
+### The radio
+
+The truck has a radio you can tune while you drive. It works like a car radio:
+it picks up real stations, and which ones you can pick up depends on where you
+are. Drive far enough and a station fades out and the next town's stations come
+in.
+
+Switch it on under Settings, Audio, Radio stations. It is off until you do,
+and there are two reasons for that. It needs an internet connection, and the
+music a station plays belongs to whoever made it, so if you record or stream
+your driving, a station in the background can get your video taken down.
+Leaving the radio off keeps you clear of that.
+
+There are four bands, and Y steps between them:
+
+| Band | What is on it |
+| --- | --- |
+| FM | Real FM stations near you. What you hear changes as you drive. |
+| AM | Real AM stations near you. AM carries further than FM. |
+| Web radio | Internet-only stations. These reach you anywhere. |
+| Satellite | One always-available station, and where the radio falls back to. |
+
+M switches the radio on and off, I and O step down and up the dial, and each
+step tells you the station, its frequency, what it plays, and how strong the
+signal is. Shift+M opens the radio screen, where the whole station list, the
+bands and your favorites are ordinary menu items. F on a station keeps it as a
+favorite, and your favorites stay at the top of the list in every career save.
+
+While a station is playing, the game's own music stays quiet. Switch the radio
+off and the music bed comes back. Radio and music have separate volumes under
+Settings, Audio.
+
+Stations do go quiet. A public stream can be shut down, moved, or blocked to
+outside players, and the game has no way to know until it tries. When that
+happens the radio says so and moves you to the next station on the same band,
+and drops that station from the dial for the rest of the session so you do not
+keep landing back on it. Only when nothing on the band is left does it fall
+back to the satellite station.
+
+Two stations can share a frequency in the real world if they are far enough
+apart. On your dial you get whichever one actually reaches you, so the same
+frequency never turns up twice.
 
 Useful accessibility patterns:
 

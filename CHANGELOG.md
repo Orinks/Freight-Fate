@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+### Added
+
+- **The truck has a radio.** Switch it on under Settings, Audio, Radio
+  stations, then press M while driving, and I and O to step down and up the
+  dial. It tunes real stations, and which ones you can pick up depends on where
+  you are, the way a car radio does: drive far enough and a station fades out
+  while the next town's stations come in. Every step tells you the station, its
+  frequency, what it plays, and how strong the signal is. Y changes band
+  between FM, AM, web radio, and one satellite station that reaches you
+  anywhere. Shift+M opens a radio screen with the full station list and your
+  favorites, and it is also in the pause menu under Radio. Press F on a station
+  there to keep it; favorites are saved with your career.
+- **The radio starts switched off, on purpose.** It needs an internet
+  connection, and the music a station plays belongs to whoever made it, so if
+  you record or stream your driving a station in the background can get your
+  video taken down. Leaving it off keeps you clear of that, and pressing M
+  again while driving silences a station immediately.
+- **The music stops while a station plays, and comes back when you switch the
+  radio off.** A station and a music bed at the same time is a wall of sound to
+  listen through, so whichever one you chose is the one you hear.
+- **Stations that go quiet no longer leave you with silence.** A station's
+  stream can be shut down or blocked to outside players at any time. When that
+  happens the radio says so and moves you to the next station on the same band,
+  and that station leaves the dial for the rest of the session so you do not
+  keep landing back on it. Only when nothing on the band is left does it fall
+  back to the satellite station.
+- **One frequency, one station.** Where two distant transmitters share a
+  frequency, you get the one that actually comes in where you are, the way a
+  real dial works, instead of three different stations all announcing
+  themselves as 88.3.
+
 ### Changed
 
 - **Automatic Mastodon posts moved to their own hashtag.** Deliveries shared

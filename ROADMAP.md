@@ -737,78 +737,61 @@ Deliver -> Earn and level up -> Repeat
       local trucking terms, hours-of-service rules, weather fallbacks, legal
       routing, and border-crossing behavior before routes can ship.
 
-### In-cab radio (1.8 / 1.9 candidate)
+### In-cab radio (shipped)
 
-A truck radio you can tune as you drive: pull in the local FM stations for
-wherever you are on the map, with a satellite-style network as the
-always-available fallback when you are out of range of anything local. A
-community suggestion; the right kind of immersion for long hauls and a natural
-fit for an audio-first game.
+A truck radio you can tune as you drive: real stations, gated by where you are
+on the map, with an always-available satellite station as the fallback. A
+community suggestion, and the right kind of immersion for long hauls.
 
-- **Direction (decided):** use real stations via their public internet stream
-  URLs (a friend has a curated list). The game is free and non-commercial, and
-  it acts as a *tuner* -- it points the player's own client at a stream the
-  station already broadcasts publicly, not hosting or rebroadcasting audio
-  (the TuneIn / car-head-unit model). Free and non-commercial is not a blanket
-  copyright exemption, but the tuner-to-public-stream posture plus no money
-  changing hands keeps practical risk low for a small game.
+- [x] **Tuner, not a broadcaster.** The game points the player's own client at
+      a stream the station already broadcasts publicly (the TuneIn /
+      car-head-unit model). It hosts and rebroadcasts nothing.
+- [x] **Off by default, for streamers.** `radio_enabled` starts off, so a
+      player recording or streaming a session never picks up someone else's
+      licensed music by accident. M while driving is the instant mute.
+- [x] **Geography-gated reception.** `src/freight_fate/data/radio/stations.json`
+      carries call sign, band, frequency, format, stream URL and codec,
+      transmitter latitude/longitude, and a coverage radius. `sim/radio.py`
+      answers what reaches a position and how strongly; the signal is full
+      through the inner 60 percent of the circle and falls off linearly to the
+      edge. `Trip.position_latlon` interpolates the truck's position along the
+      route polyline.
+- [x] **Satellite fallback: AFN 360.** Always in range, and where a lost
+      signal or a dead stream hands over.
+- [x] **Streams rot, and that is a normal outcome.** A failed connect is
+      announced and handed to the satellite station rather than left as
+      silence. HLS streams are excluded at build time because BASS cannot open
+      them.
+- [x] **Fully spoken and keyboard-driven.** M on and off, I and O down and up
+      the dial, Y for band, Shift+M for the radio screen, F to keep a favorite
+      (saved per career), plus a dedicated radio volume in Settings, Audio.
+- [x] **Catalog pipeline.** `tools/build_radio_catalog.py` joins Radio Browser
+      (stream URLs) with Wikidata (transmitter coordinates and frequency, CC0)
+      on the call sign parsed from the station name, and `tools/bake_radio.py`
+      compiles the result into release builds. Shipped: 1,037 local stations
+      (900 FM, 137 AM) over 1,074 transmitter sites, 5,181 web stations, and
+      one satellite station. At the shipped radii that puts at least one local
+      station in reach of 519 of the map's 623 cities, median three.
 
-- **Streamer-safe toggle still required.** Independent of the game's own
-  posture: a player who streams a session to YouTube/Twitch with copyrighted
-  station audio can still get the VOD struck. So real-stream radio stays an
-  explicit toggle (and a "mute radio for streaming" switch), with an owned
-  royalty-free station and the satellite fallback as the always-safe default
-  audio, so streamers are protected unless they opt in.
+Still open:
 
-- **Geography-gated reception.** Stations are data, not magic: a JSON catalog
-  per station with call sign, format/genre, public stream URL and its audio
-  format (so the loader can skip unsupported transports), transmitter
-  latitude/longitude, ERP (effective radiated power), and antenna HAAT, plus a
-  derived `range_miles`. Range is estimated from public FCC license data (FM Query /
-  LMS) using the F(50,50) protected-contour idea -- power and antenna height,
-  refined by terrain -- so you can only pull in stations whose coverage
-  actually reaches you. The truck's geo-position is interpolated in
-  latitude/longitude along the current route leg (cities already carry
-  lat/lon), signal strength falls off toward the edge of a station's contour,
-  and reception fades into static and drops out as you leave range -- then the
-  next town's stations fade in.
-
-- **Satellite fallback: AFN.** An always-available station for when no local
-  FM is in range -- AFN (American Forces Network), which has exactly the right
-  always-on, ad-free, slightly-institutional vibe. AFN's *overseas over-the-air
-  and decoder-box* broadcasts are encrypted, but its internet radio (AFN 360)
-  is publicly streamable to anyone, so it can be used directly. Public stream
-  URL (Triton/StreamTheWorld, AFN Pacific):
-  `https://playerservices.streamtheworld.com/api/livestream-redirect/AFNP_OKN_SC`.
-  AFN is ad-free and U.S. government-produced, but the music it airs is still
-  commercially licensed, so the streamer-safe toggle still applies to it. This
-  is the one station that is always in range, so it doubles as the graceful
-  fallback when a local stream rots or drops out.
-
-- **Audio sourcing: real streams, with the real work being technical not
-  legal.** The friend's stream-URL list is the primary source. The gotchas to
-  build around: (1) streams rot -- URLs change and stations go dark, so
-  reception must fail gracefully and fall back to the satellite/owned station,
-  never dead air or a crash; (2) codec/transport -- the BASS/sound_lib backend
-  handles Icecast/Shoutcast MP3/AAC easily, but HLS (`.m3u8`) needs more work,
-  so the catalog should record stream format and the loader should skip
-  unsupported ones; (3) some stations geo-block or require their own app, so a
-  few URLs won't work for a third-party player and the catalog needs a
-  reachable/working flag. Keep an owned royalty-free station and the satellite
-  fallback for offline play and the streamer-safe default.
-
-- **Accessibility is the feature, not a checkbox.** Tuning must be fully
-  spoken and keyboard-driven: seek/scan up and down the dial, announce call
-  sign + format + signal strength, audibly fade as you move in and out of
-  range, a station list and favorites, and a dedicated radio volume in
-  Settings. This is core UX for the game's audience, designed in from the
-  start.
-
-- **Ties to existing systems.** Reuses regions and city lat/lon, the music
-  backend, and the day/night + seasons clock (programming could shift by time
-  of day or season). Open questions: ship the full FCC-derived dataset or a
-  curated subset; how granular the range/terrain model needs to be; and
-  per-genre licensing for any owned music library.
+- [ ] **Real FCC coverage contours.** Coverage radius is a game constant today
+      (FM 40 miles, AM 90 miles), recorded per station as
+      `radius_source: "default"`. Every fcc.gov host refuses scripted access,
+      so the ERP and antenna-height data needed for real F(50,50) contours has
+      to be downloaded by hand once; the catalog format already carries the
+      field, so an overlay can replace the radii per station without a rebuild
+      of anything else.
+- [ ] **The curated stream-URL list** a contributor offered, layered over the
+      automatic join through `build_radio_catalog.py --overlay`.
+- [ ] **A catalog refresh pass.** A sample of shipped stream URLs measured
+      about three quarters reachable; the rest are dead or geo-blocked. Worth
+      a periodic re-check that prunes them, rather than leaving it to the
+      in-game fallback.
+- [ ] **Presets on the number keys**, the one car-radio affordance still
+      missing.
+- [ ] **Programming that follows the clock** -- the day/night and seasons
+      clock could shift what a station is presented as playing.
 
 ### Business
 - [ ] Company-driver to owner-operator career arc. Resolve the current
