@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.8 - 2026-08-05
+
 ### Changed
 
 - **Connecting a computer to orinks.net no longer involves copying and
@@ -44,14 +46,13 @@
   ([@corykad](https://github.com/corykad)) in
   [PR #144](https://github.com/Orinks/Freight-Fate/pull/144).
 
-- **The clipboard works on Linux.** On Linux, pasting your Driver ID or driver
-  token during online setup always said nothing could be read, and copying a
-  delivery summary or a reviewed message always said the copy did not take,
-  however carefully you had copied the text first. Linux desktops and browsers
-  offer clipboard text under a different name than Windows does, and the game
-  was only ever asking for the Windows one. It now asks for the names Linux
-  really uses, so pasting into the game and copying out of it both work.
-  Windows and Mac are unchanged. Thanks to a player report.
+- **Copying to the clipboard works on Linux.** On Linux, copying a delivery
+  summary, a reviewed message or a link always said the copy did not take.
+  Linux desktops offer clipboard text under a different name than Windows
+  does, and the game was only ever asking for the Windows one. It now asks for
+  the names Linux really uses, so copying out of the game works, including
+  copying your activation code during online setup. Windows and Mac are
+  unchanged. Thanks to a player report.
 
 - **Continuing a saved run announces the right date and season again.** When
   you picked a run back up, the calendar went back to the day you set out on
