@@ -120,6 +120,38 @@ def quit_to_menu(app):
 
 
 @pytest.mark.smoke
+def test_quit_mid_drive_restores_checkpoint_hos_and_fatigue():
+    """Quitting must not mix live driver state with the saved road checkpoint."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        profile = app.ctx.profile
+        checkpoint = profile.active_trip
+        assert checkpoint is not None
+
+        checkpoint_hos = checkpoint["hos"]
+        checkpoint_fatigue = checkpoint["fatigue"]
+
+        # Simulate driver state accumulated after leaving the saved stop.
+        driving.hos.driving_min = 218.9
+        driving.hos.duty_min = 219.9
+        driving.hos.since_break_min = 218.9
+        profile.fatigue = 25.18
+
+        assert driving.hos.to_dict() != checkpoint_hos
+        assert profile.fatigue != checkpoint_fatigue
+
+        quit_to_menu(app)
+
+        assert profile.hos.to_dict() == checkpoint_hos
+        assert profile.fatigue == pytest.approx(checkpoint_fatigue)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_quit_mid_drive_resumes_from_the_last_stop():
     # Saving is stops-only: quitting mid-drive does not persist the in-progress
     # position, so Continue resumes the leg from where it was last departed
@@ -463,16 +495,20 @@ def test_old_map_snapshot_still_resumes():
         app.shutdown()
 
 
-def test_old_active_trip_gets_fair_deadline_floor():
+def test_old_active_trip_gets_deadline_floor_and_model_marker():
     from freight_fate.app import App
     from freight_fate.models.jobs import fair_active_deadline, job_from_payload
     from freight_fate.models.profile import Profile
-    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.driving import (
+        ACTIVE_TRIP_DEADLINE_MODEL,
+        DrivingState,
+    )
     from freight_fate.states.main_menu import enter_world
 
     app = App()
     try:
         route_cities = ["San Antonio", "Dallas"]
+        original_deadline = 3.0
         job_payload = {
             "cargo": "general",
             "weight_tons": 14.0,
@@ -481,11 +517,11 @@ def test_old_active_trip_gets_fair_deadline_floor():
             "destination": "Dallas",
             "distance_mi": 275.0,
             "pay": 1200.0,
-            "deadline_game_h": 3.0,
+            "deadline_game_h": original_deadline,
             "market_mult": 1.0,
         }
-        p = Profile(name="Deadline Floor")
-        p.active_trip = {
+        profile = Profile(name="Deadline Migration")
+        profile.active_trip = {
             "job": job_payload,
             "route_cities": route_cities,
             "trip_seed": 1234,
@@ -494,10 +530,11 @@ def test_old_active_trip_gets_fair_deadline_floor():
             "start_damage": 0.0,
             "speeding_strikes": 0,
         }
-        app.ctx.profile = p
+        app.ctx.profile = profile
+
         route = app.ctx.world.route_from_cities(route_cities)
         expected = fair_active_deadline(
-            job_from_payload(job_payload),
+            job_from_payload(job_payload.copy()),
             route,
             hours_used=3.0,
             position_mi=50.0,
@@ -508,7 +545,61 @@ def test_old_active_trip_gets_fair_deadline_floor():
 
         assert isinstance(app.state, DrivingState)
         assert app.state.job.deadline_game_h == expected
-        assert app.state.job.deadline_game_h > job_payload["deadline_game_h"]
+        assert app.state.job.deadline_game_h > original_deadline
+        assert profile.active_trip["job"]["deadline_game_h"] == expected
+        assert profile.active_trip["deadline_model"] == ACTIVE_TRIP_DEADLINE_MODEL
+    finally:
+        app.shutdown()
+
+
+def test_current_active_trip_keeps_its_deadline_across_resumes():
+    """The fair-deadline floor is a migration, not a per-resume top-up.
+
+    Recalculating it every time a run was continued let a late driver buy back
+    hours by saving at a stop and continuing, so a snapshot already written at
+    the current deadline model must come back with the deadline untouched.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.driving import ACTIVE_TRIP_DEADLINE_MODEL, DrivingState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        snapshot = driving.snapshot()
+        assert snapshot["deadline_model"] == ACTIVE_TRIP_DEADLINE_MODEL
+        deadline = driving.job.deadline_game_h
+
+        # Deep into the run and out of hours: the old unconditional floor keyed
+        # off hours used, so this is exactly where it used to hand out more.
+        snapshot["position_mi"] = driving.trip.total_miles * 0.9
+        snapshot["game_minutes"] = deadline * 60.0 * 2.0
+
+        resumed = DrivingState.from_snapshot(app.ctx, snapshot)
+
+        assert resumed is not None
+        assert resumed.job.deadline_game_h == deadline
+        assert snapshot["job"]["deadline_game_h"] == deadline
+    finally:
+        app.shutdown()
+
+
+def test_resumed_drive_advances_the_calendar_by_the_time_already_driven():
+    """Season, date, and simulated weather share the trip clock, not the start hour."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        snapshot = driving.snapshot()
+        snapshot["game_minutes"] = 30.0 * 60.0  # a day and a bit on the road
+
+        resumed = DrivingState.from_snapshot(app.ctx, snapshot)
+
+        assert resumed is not None
+        assert resumed.weather.game_hours == pytest.approx(
+            app.ctx.profile.calendar_game_hours + 30.0
+        )
     finally:
         app.shutdown()
 

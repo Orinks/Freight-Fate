@@ -209,49 +209,6 @@ def pick_event_backend(ctx, main_backend, name: str = EVENT_BACKEND):
     return backend if _usable(backend) else None
 
 
-class SpeechHistory:
-    """A bounded review ring shared by normal and driving-event speech."""
-
-    KEPT = 20
-    STEP_WINDOW_S = 10.0
-
-    def __init__(self, clock=None) -> None:
-        import time
-        from collections import deque
-
-        self._clock = clock or time.monotonic
-        self._lines: deque[str] = deque(maxlen=self.KEPT)
-        self._cursor = -1
-        self._pressed_at = 0.0
-
-    def record(self, text: str) -> None:
-        if text and (not self._lines or self._lines[-1] != text):
-            self._lines.append(text)
-        self._cursor = -1
-
-    def step_back(self) -> tuple[int, str] | None:
-        if not self._lines:
-            return None
-        now = self._clock()
-        if self._cursor < 0 or now - self._pressed_at > self.STEP_WINDOW_S:
-            self._cursor = 0
-        else:
-            self._cursor = min(self._cursor + 1, len(self._lines) - 1)
-        self._pressed_at = now
-        return self._cursor, self._lines[-1 - self._cursor]
-
-    def step_forward(self) -> tuple[int, str] | None:
-        if not self._lines:
-            return None
-        now = self._clock()
-        if self._cursor <= 0 or now - self._pressed_at > self.STEP_WINDOW_S:
-            self._cursor = 0
-        else:
-            self._cursor -= 1
-        self._pressed_at = now
-        return self._cursor, self._lines[-1 - self._cursor]
-
-
 class Speech:
     """Speech output channel for the whole game.
 

@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from .driving_core import *
-from .driving_menu_states import DrivingStatusState, PauseMenuState
+from .driving_menu_states import DrivingStatusState
+from .driving_pause_states import PauseMenuState
 
 
 class DrivingControlsMixin:
@@ -11,8 +12,6 @@ class DrivingControlsMixin:
             self.ctx.audio.horn_stop()
             return
         if event.type != pygame.KEYDOWN:
-            return
-        if self.handle_message_review(event):
             return
 
         key = event.key
@@ -148,7 +147,10 @@ class DrivingControlsMixin:
             "R progress, distance left, and where you are. "
             "Shift R next listed highway exit. "
             "V weather. L lane position. A repeats the last driving announcement. "
-            "Comma reviews recent speech backward, and Period moves forward again. "
+            "Comma repeats what was just said and keeps stepping back, and Period moves forward again. "
+            "Control with Comma or Period jumps to the oldest or newest message. "
+            "The bracket keys switch between all messages, general messages, and driving events. "
+            "Control C copies the message you are on. "
             "U reads what is coming up: "
             "imposed limits, stops, and exits ahead. "
             "Left or Right Control stops the driving event voice. "
@@ -447,9 +449,11 @@ class DrivingControlsMixin:
         """A: replay the last driving announcement, for one you missed."""
         if self._last_event_message:
             self.ctx.stop_event_speech()
-            self.ctx.say(self._last_event_message)
+            # Already in the log from when it was first announced; logging the
+            # replay too would leave a duplicate for the reviewer to step over.
+            self.ctx.say(self._last_event_message, review=False)
         else:
-            self.ctx.say("No recent announcement to repeat.")
+            self.ctx.say("No recent announcement to repeat.", review=False)
 
     def _speak_grade(self) -> None:
         """G: the grade under the wheels, the next one, and what they mean.
