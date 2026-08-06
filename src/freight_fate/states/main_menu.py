@@ -53,12 +53,22 @@ def _first_state_after_career_creation(ctx) -> State:
     return CityMenuState(ctx, queue_entry_announcement=True)
 
 
-def enter_world(ctx) -> None:
-    """Resume a saved mid-trip delivery if there is one, else the terminal hub."""
-    ctx.push_state(pending_notice_state(ctx) or _world_entry_state(ctx))
+def enter_world(ctx, *, queue_entry_announcement: bool = False) -> None:
+    """Resume a saved mid-trip delivery if there is one, else the terminal hub.
+
+    ``queue_entry_announcement`` reaches the city menu only -- see
+    ``_world_entry_state``. A resumed drive already queues its own entry lines
+    (``DrivingState.enter`` always speaks with ``interrupt=False``), and a
+    pending save notice is a separate, unrelated screen, so neither needs the
+    flag threaded through.
+    """
+    ctx.push_state(
+        pending_notice_state(ctx)
+        or _world_entry_state(ctx, queue_entry_announcement=queue_entry_announcement)
+    )
 
 
-def _world_entry_state(ctx) -> State:
+def _world_entry_state(ctx, *, queue_entry_announcement: bool = False) -> State:
     """Build the first playable state for the current profile."""
     from .city import CityMenuState, PickupFacilityState
     from .driving import DrivingState
@@ -72,7 +82,10 @@ def _world_entry_state(ctx) -> State:
         if state is not None:
             return state
         p.active_trip = None  # unreadable snapshot; do not retry every load
-    return CityMenuState(ctx)
+    # The welcome that names this driver (from Continue or Choose career) is
+    # spoken just before this state is chosen, so its entry announcement
+    # queues behind that line instead of cutting it off.
+    return CityMenuState(ctx, queue_entry_announcement=queue_entry_announcement)
 
 
 def _loadable_saves() -> list[tuple[Path, Profile]]:
@@ -298,7 +311,10 @@ class MainMenuState(MenuState):
                 f"with {p.money:,.0f} dollars.",
                 interrupt=True,
             )
-        enter_world(self.ctx)
+        # This welcome is spoken first; a resumed drive already queues its own
+        # lines, and only the plain city-menu hand-off needs telling not to
+        # cut it off (see _world_entry_state).
+        enter_world(self.ctx, queue_entry_announcement=True)
 
     def _load_menu(self) -> None:
         self.ctx.push_state(LoadDriverState(self.ctx))
@@ -463,7 +479,12 @@ class LoadDriverState(MenuState):
     def _pick(self, profile: Profile) -> None:
         self.ctx.profile = profile
         self.ctx.say(f"Welcome back, {profile.name}.")
-        self.ctx.replace_state(pending_notice_state(self.ctx) or _world_entry_state(self.ctx))
+        # The welcome above must be heard in full before the city menu's own
+        # "Parked at..." announcement -- see _world_entry_state.
+        self.ctx.replace_state(
+            pending_notice_state(self.ctx)
+            or _world_entry_state(self.ctx, queue_entry_announcement=True)
+        )
 
 
 class ManageCareersState(MenuState):
@@ -837,8 +858,11 @@ class SettingsState(MenuState):
     def go_back(self) -> None:
         self.ctx.settings.save()
         self.ctx.audio.play("ui/menu_back")
-        self.ctx.say("Settings saved.")
+        # Popping first lets the revealed menu's own entry announcement play,
+        # then "Settings saved." interrupts and wins -- said after the pop,
+        # not before it, so it is not the one left cancelled by the other.
         self.ctx.pop_state()
+        self.ctx.say("Settings saved.", interrupt=True)
 
 
 class SettingsCategoryState(MenuState):

@@ -81,6 +81,21 @@ From a batch of player reports:
   sweep would upgrade. Regen should run offline from the cached PBFs like
   the overlay pipeline, targeting trunk/primary junction nodes on the 533
   unlabeled legs.
+- [x] **Loading a career cut off its own welcome -- FIXED 2026-08-05.**
+  Continue latest career and Choose career spoke "Welcome back" and then
+  pushed the city menu, whose own "Parked at..." announcement interrupted and
+  cancelled it before a player heard where they were or how much money they
+  had. Same defect as the 2026-08-05 orinks.net-offer fix (`8baae687`),
+  applied to the load path via `CityMenuState`'s existing one-shot
+  `queue_entry_announcement`.
+- [ ] Same welcome-truncation defect remains open on two rarer hand-offs out
+  of Continue/Choose career: resuming an in-progress pickup (`PickupFacilityState`,
+  which still announces with `interrupt=True`) and a pending save notice
+  (`SaveMigrationNoticeState` / `SaveModifiedNoticeState`, same default).
+  Both would need their own one-shot queue flag, mirroring `CityMenuState`'s;
+  left out of the 2026-08-05 fix as lower-value (the lost line is just the
+  short "Welcome back, name" greeting, not new information) and higher-risk
+  to thread through `_world_entry_state`'s snapshot-resume branches untested.
 - [x] **State lines repeated at intermediate cities -- FIXED 2026-07-19
   (player transcript).** Mapped state-boundary cues are now authoritative, so
   passing the next major city no longer claims that the truck crossed the same

@@ -14,6 +14,20 @@
   time later from Online on the main menu, where cloud backup and the
   drivers board each stay off until you turn them on yourself.
 
+### Fixed
+
+- **Loading a career no longer cuts off its own welcome.** Choosing a saved
+  career from Continue latest career or Choose career used to say "Welcome
+  back" and then get cut off mid-sentence by the terminal announcing where
+  you are parked, so you never heard your money or which terminal you loaded
+  into. The welcome is now heard in full before the terminal speaks.
+
+- **Backing all the way out of Settings now speaks "Settings saved."**
+  Pressing Escape from the settings categories used to say it and then get
+  cut off by the main menu announcing itself again, so it was never actually
+  heard. It now plays after the main menu's own announcement, so you get the
+  confirmation.
+
 ## 1.8.8 - 2026-08-05
 
 ### Changed
