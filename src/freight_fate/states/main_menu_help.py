@@ -140,6 +140,13 @@ HELP_PAGES = [
             "Control with Comma or Period jumps to the oldest or newest message, the bracket keys switch "
             "between all messages, general messages, and driving events, and Control C copies the one you are on.",
             "U speaks what is coming up: imposed speed limits, stops, and exits ahead.",
+            "M switches the radio on and off. Pressing it again is also the fastest way to silence a station.",
+            "I and O step down and up the dial, and Y changes band between F M, A M, web radio, and satellite. "
+            "Each step names the station, its frequency, its format, and how strong the signal is.",
+            "Shift M opens the radio screen, with the full station list, the bands, and your favorites.",
+            "Local stations only reach so far. As you drive out of range a station fades and hands over to the "
+            "satellite station, and the next town brings its own stations in.",
+            "Switch the radio on first under Settings, Audio, Radio stations.",
             "Left or Right Control stops the driving event voice.",
             "Escape opens the pause menu.",
         ],

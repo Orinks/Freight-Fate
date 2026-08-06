@@ -82,6 +82,22 @@ class DrivingControlsMixin:
             self._speak_grade()
         elif key == pygame.K_u:
             self._speak_upcoming()
+        elif key == pygame.K_m:
+            # M is the radio, and Shift+M opens its menu -- the same shape as
+            # R and Shift+R above.
+            if event.mod & pygame.KMOD_SHIFT:
+                self._open_radio_menu()
+            else:
+                self._toggle_radio()
+        elif key == pygame.K_i:
+            self._seek_radio(-1)
+        elif key == pygame.K_o:
+            # I and O sit side by side: left steps down the dial, right steps
+            # up. The obvious comma and period are not available -- message
+            # review claims them on every screen (State.handle_message_review).
+            self._seek_radio(1)
+        elif key == pygame.K_y:
+            self._cycle_radio_band()
         elif key == pygame.K_F1:
             self._speak_driving_help()
 
@@ -153,6 +169,10 @@ class DrivingControlsMixin:
             "Control C copies the message you are on. "
             "U reads what is coming up: "
             "imposed limits, stops, and exits ahead. "
+            "M radio on and off. I and O step down and up the dial, Y changes "
+            "band, and Shift M opens the radio screen with the station list "
+            "and your favorites. Switch the radio on first under Settings, "
+            "Audio. "
             "Left or Right Control stops the driving event voice. "
             "Left and Right arrows steer when lane drift is enabled. "
             "T route POI menu when already stopped "

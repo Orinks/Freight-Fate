@@ -463,6 +463,10 @@ class Profile:
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock
     achievements: list[str] = field(default_factory=list)
     achievement_stats: dict = field(default_factory=dict)
+    # Radio stations the driver keeps, as catalog station ids. Additive with a
+    # default, so older saves load unchanged and need no migration; a favorite
+    # whose station has left the catalog is simply skipped when the list is read.
+    radio_favorites: list[str] = field(default_factory=list)
 
     # Set on the instance by from_dict when the raw dict needed a format
     # migration, so load() can rewrite the converted save to disk. Never

@@ -3,8 +3,11 @@
 import pygame
 
 
-def key_event(key, unicode=""):
-    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
+def key_event(key, unicode="", mod=0):
+    # Real pygame key events always carry ``mod``; leaving it off made this
+    # helper build an event no player can generate, and any handler that reads
+    # a modifier crashed on it.
+    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode, mod=mod)
 
 
 def release_air_brakes(driving):

@@ -179,6 +179,7 @@ class DrivingUpdateMixin:
 
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)
+        self._update_radio(dt)
         self._update_announcements(dt)
         self._update_hazard(dt)
         self._update_grade_advisory()
@@ -597,6 +598,11 @@ class DrivingUpdateMixin:
         return self._day_music_sequence[self._day_music_index]
 
     def _play_current_music(self, fade_ms: int = 4000) -> None:
+        # A station and a music bed are both music; the radio wins while it is
+        # on. Every path that starts a drive bed comes through here, so this is
+        # the one place that has to know.
+        if self.radio_owns_audio():
+            return
         self.ctx.audio.play_music(self._current_music_track(), fade_ms=fade_ms)
 
     def tick_covered_music(self, dt: float) -> None:

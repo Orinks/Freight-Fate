@@ -96,6 +96,13 @@ class PauseMenuState(MenuState):
                 "voices, update channel, and trip pacing.",
             ),
             MenuItem(
+                "Radio",
+                self._radio,
+                help="Choose a band and a station, and keep the ones you like. "
+                "Local stations come and go as you drive, so what you can pick "
+                "up changes with where you are.",
+            ),
+            MenuItem(
                 "Drivers board",
                 self._drivers_board,
                 help="Hear who is hauling right now on the public orinks.net "
@@ -229,6 +236,11 @@ class PauseMenuState(MenuState):
         from .main_menu import SettingsState
 
         self.ctx.push_state(SettingsState(self.ctx))
+
+    def _radio(self) -> None:
+        from .radio_states import RadioState
+
+        self.ctx.push_state(RadioState(self.ctx, self.driving))
 
     def _drivers_board(self) -> None:
         from .online_states import DriversOnlineState

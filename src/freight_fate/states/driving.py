@@ -8,6 +8,7 @@ from .driving_controls import DrivingControlsMixin
 from .driving_events import DrivingEventMixin
 from .driving_location import DrivingLocationMixin
 from .driving_pickup import DrivingPickupMixin
+from .driving_radio import DrivingRadioMixin
 from .driving_speed_control import SpeedControlStateMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 
@@ -23,6 +24,7 @@ class DrivingState(
     SpeedControlStateMixin,
     DrivingLocationMixin,
     DrivingPickupMixin,
+    DrivingRadioMixin,
     DrivingEventMixin,
     State,
 ):
