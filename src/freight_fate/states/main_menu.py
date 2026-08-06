@@ -960,6 +960,23 @@ class SettingsCategoryState(MenuState):
                     lambda: self._volume("ui_volume", 0.1),
                     help="Menu movement, selection, warning, and cash sounds.",
                 ),
+                MenuItem(
+                    lambda: f"Radio stations: {'on' if s.radio_enabled else 'off'}",
+                    self._toggle_radio_enabled,
+                    help="Listen to real radio stations while you drive. The "
+                    "game tunes in each station's own public stream, the way a "
+                    "car radio does, and picks up local stations near wherever "
+                    "you are on the map. It needs an internet connection. Off "
+                    "by default: if you record or stream your driving, the "
+                    "music a station plays belongs to someone else and can get "
+                    "your video taken down. Press M while driving to switch the "
+                    "radio on and off.",
+                ),
+                MenuItem(
+                    lambda: f"Radio volume: {round(s.radio_volume * 100)} percent",
+                    lambda: self._volume("radio_volume", 0.1),
+                    help="How loud radio stations are against the engine and the road.",
+                ),
                 MenuItem("Back", self.go_back),
             ]
         if self.category == "speech":
@@ -1032,6 +1049,8 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("engine_volume", 0.1 * d),
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("ui_volume", 0.1 * d),
+                    lambda _d: self._toggle_radio_enabled(),  # a switch, not a slider
+                    lambda d: self._volume("radio_volume", 0.1 * d),
                 ],
                 "updates": [self._toggle_update_channel],
                 # Reading the log's location is an action, not a value to
@@ -1218,6 +1237,14 @@ class SettingsCategoryState(MenuState):
     def _toggle_haptics(self, _d: int) -> None:
         self.ctx.settings.haptics_enabled = not self.ctx.settings.haptics_enabled
         self.ctx.apply_haptics()
+        self._announce()
+
+    def _toggle_radio_enabled(self) -> None:
+        settings = self.ctx.settings
+        settings.radio_enabled = not settings.radio_enabled
+        settings.save()
+        if not settings.radio_enabled:
+            self.ctx.audio.stop_radio()
         self._announce()
 
     def _cycle_verbosity(self, d: int) -> None:

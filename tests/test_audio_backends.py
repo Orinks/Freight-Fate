@@ -52,7 +52,14 @@ def exercise(a: AudioEngine) -> None:
     a.play_music("menu_theme")
     a.play_music("open_road")
     a.play_music("not_a_track")
-    a.set_volumes(master=0.5, sfx=0.5, music=0.5)
+    # A URL BASS rejects without opening a socket, so this never touches the
+    # network and leaves no connect in flight for the shutdown below. The real
+    # refused-connection path is exercised in tests/test_radio_audio.py.
+    a.play_radio("notaurl://nothing/here")
+    a.play_radio("")
+    a.set_radio_gain(0.4)
+    a.set_volumes(master=0.5, sfx=0.5, music=0.5, radio=0.5)
+    a.stop_radio()
     a.stop_world()
     a.stop_music()
     a.shutdown()
@@ -114,8 +121,10 @@ def test_split_volume_settings_apply_to_silent_backend():
         weather=0.5,
         engine=0.4,
         ui=0.9,
+        radio=0.3,
     )
 
+    assert backend.radio_volume == 0.3
     assert backend.master_volume == 0.8
     assert backend.sfx_volume == 0.7
     assert backend.music_volume == 0.6

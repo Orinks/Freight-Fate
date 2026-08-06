@@ -181,6 +181,7 @@ class GameContext:
             weather=self.settings.weather_volume,
             engine=self.settings.engine_volume,
             ui=self.settings.ui_volume,
+            radio=self.settings.radio_volume,
         )
 
     def apply_presence(self) -> None:

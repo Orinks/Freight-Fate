@@ -25,6 +25,8 @@ import contextlib
 import io
 import logging
 import os
+import threading
+import time
 from pathlib import Path
 
 import pygame
@@ -90,6 +92,15 @@ ENGINE_START_SETTLE_S = 0.6  # ease from crank level down to idle load
 ENGINE_START_SETTLE_CURVE = "ease_out"  # key into audio_fades.CURVES
 
 BASS_NO_SOUND_DEVICE = 0
+
+# Radio streaming (BASS only). A station that has gone dark can leave a connect
+# attempt hanging on the operating system's own TCP timeout, which is far
+# longer than a player will wait and longer than it is safe to keep a worker
+# inside BASS while the game is quitting. These bound it.
+RADIO_CONNECT_TIMEOUT_MS = 8000  # give up on a station that will not answer
+RADIO_READ_TIMEOUT_MS = 10000  # and on one that answers then stalls
+# How long shutdown waits for a connect still in flight before freeing BASS.
+RADIO_SHUTDOWN_JOIN_S = 2.0
 
 
 def _asset_path(key: str, extensions: tuple[str, ...]) -> Path | None:
@@ -179,6 +190,11 @@ class _PygameBackend:
     """The original pygame.mixer implementation (engine band crossfade)."""
 
     name = "pygame"
+    # pygame.mixer can only play a whole file it has already loaded; it has no
+    # way to open a live internet stream. The radio therefore needs BASS, and
+    # says so once rather than failing silently.
+    radio_supported = False
+    radio_state = "unsupported"
 
     def __init__(self) -> None:
         self.enabled = False
@@ -188,6 +204,7 @@ class _PygameBackend:
         self.weather_volume = 0.65
         self.engine_volume = 0.55
         self.ui_volume = 0.9
+        self.radio_volume = 0.6
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
         # channel -> sustain-loop state (segment Sounds + phase); see
@@ -594,6 +611,12 @@ class _PygameBackend:
         pygame.mixer.music.fadeout(fade_ms)
         self._music_track = None
 
+    # -- radio ------------------------------------------------------------------
+
+    def play_radio(self, url: str, fade_ms: int = 1200) -> None: ...
+    def stop_radio(self, fade_ms: int = 600) -> None: ...
+    def set_radio_gain(self, gain: float) -> None: ...
+
     # -- volume control ---------------------------------------------------------
 
     def _category_volume(self, category: str) -> float:
@@ -611,6 +634,7 @@ class _PygameBackend:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        radio: float | None = None,
     ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
@@ -624,6 +648,8 @@ class _PygameBackend:
             self.engine_volume = max(0.0, min(1.0, engine))
         if ui is not None:
             self.ui_volume = max(0.0, min(1.0, ui))
+        if radio is not None:
+            self.radio_volume = max(0.0, min(1.0, radio))
         if not self.enabled:
             return
         for ch in list(self._loops):
@@ -647,6 +673,7 @@ class _BassBackend:
     """
 
     name = "bass"
+    radio_supported = True
 
     def __init__(self) -> None:
         from sound_lib.external.pybass import (
@@ -661,9 +688,10 @@ class _BassBackend:
         )
         from sound_lib.main import BassError, bass_call
         from sound_lib.output import Output
-        from sound_lib.stream import FileStream
+        from sound_lib.stream import FileStream, URLStream
 
         self._FileStream = FileStream
+        self._URLStream = URLStream
         self._BassError = BassError
         self._bass_call = bass_call
         self._slide = BASS_ChannelSlideAttribute
@@ -681,6 +709,7 @@ class _BassBackend:
         self.weather_volume = 0.65
         self.engine_volume = 0.55
         self.ui_volume = 0.9
+        self.radio_volume = 0.6
         self._loops: dict[int, tuple[str, float, object]] = {}  # slot -> (key, gain, stream)
         self._sustains: dict[int, SustainLoop] = {}  # slot -> active sustain loop
         # slot -> (key, stream) still ringing out its release tail after a
@@ -690,6 +719,16 @@ class _BassBackend:
         self._retained: list = []  # streams kept alive until BASS finishes them
         self._music_track: str | None = None
         self._music_stream = None
+        # Radio. The stream is opened on a worker thread (see play_radio), so
+        # every field below is guarded by _radio_lock, and _radio_generation
+        # tells a finished worker whether its request is still the current one.
+        self._radio_lock = threading.Lock()
+        self._radio_generation = 0
+        self._radio_stream = None
+        self._radio_url: str | None = None
+        self._radio_gain = 1.0  # signal strength, on top of the radio volume
+        self._radio_threads: list[threading.Thread] = []
+        self.radio_state = "idle"  # idle/connecting/playing/failed
         self._engine_running = False
         self._engine_stream = None
         self._engine_base_freq = 0.0
@@ -699,6 +738,15 @@ class _BassBackend:
         self._engine_starting = False  # True only during the ignition crossfade
         self._engine_last_rpm = ENGINE_RPM_IDLE
         self._fades = FadeScheduler()
+
+        from sound_lib.external.pybass import (
+            BASS_CONFIG_NET_READTIMEOUT,
+            BASS_CONFIG_NET_TIMEOUT,
+            BASS_SetConfig,
+        )
+
+        BASS_SetConfig(BASS_CONFIG_NET_TIMEOUT, RADIO_CONNECT_TIMEOUT_MS)
+        BASS_SetConfig(BASS_CONFIG_NET_READTIMEOUT, RADIO_READ_TIMEOUT_MS)
 
         if os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
             self._output = Output(device=BASS_NO_SOUND_DEVICE)
@@ -1139,9 +1187,7 @@ class _BassBackend:
                     base_freq = stream.get_frequency()
                     stream._road_base_freq = base_freq
                 target = base_freq * mult
-                self._bass_call(
-                    self._slide, stream.handle, self._ATTRIB_FREQ, target, 120
-                )
+                self._bass_call(self._slide, stream.handle, self._ATTRIB_FREQ, target, 120)
             except self._BassError:
                 pass
 
@@ -1192,6 +1238,102 @@ class _BassBackend:
         self._music_stream = None
         self._music_track = None
 
+    # -- radio ------------------------------------------------------------------
+
+    def _radio_level(self) -> float:
+        return max(0.0, min(1.0, self.radio_volume * self.master_volume * self._radio_gain))
+
+    def play_radio(self, url: str, fade_ms: int = 1200) -> None:
+        """Tune a live internet stream, connecting off the game thread.
+
+        ``BASS_StreamCreateURL`` blocks until the server answers, which on a
+        slow or dead station is seconds -- far too long to spend in a frame.
+        The connect therefore runs on a worker; the generation counter means a
+        driver who keeps seeking cannot be caught by an older station arriving
+        late.
+        """
+        url = (url or "").strip()
+        if not url:
+            return
+        with self._radio_lock:
+            if url == self._radio_url and self.radio_state in ("connecting", "playing"):
+                return
+            self._radio_generation += 1
+            generation = self._radio_generation
+            previous, self._radio_stream = self._radio_stream, None
+            self._radio_url = url
+            self.radio_state = "connecting"
+        if previous is not None:
+            self._fade_out(previous, 400)
+        thread = threading.Thread(
+            target=self._radio_worker,
+            args=(url, generation, fade_ms),
+            name="radio-connect",
+            daemon=True,
+        )
+        with self._radio_lock:
+            self._radio_threads = [t for t in self._radio_threads if t.is_alive()]
+            self._radio_threads.append(thread)
+        thread.start()
+
+    def _radio_worker(self, url: str, generation: int, fade_ms: int) -> None:
+        """Open and start a stream, unless the driver has moved on since."""
+        stream = None
+        try:
+            stream = self._URLStream(url=url)
+            stream.set_volume(0.0)
+            stream.play()
+        except Exception:  # BassError, but a bad URL can raise from ctypes too
+            log.info("Radio stream unavailable: %s", url, exc_info=True)
+            with self._radio_lock:
+                if generation == self._radio_generation:
+                    self.radio_state = "failed"
+            return
+        with self._radio_lock:
+            if generation != self._radio_generation:
+                stale, level = stream, None  # a newer request already won
+            else:
+                self._radio_stream = stream
+                self.radio_state = "playing"
+                stale, level = None, self._radio_level()
+        if stale is not None:
+            self._fade_out(stale, 0)
+            return
+        with contextlib.suppress(self._BassError):
+            self._bass_call(
+                self._slide,
+                stream.handle,
+                self._ATTRIB_VOL,
+                level,
+                max(0, int(fade_ms)),
+            )
+
+    def stop_radio(self, fade_ms: int = 600) -> None:
+        with self._radio_lock:
+            self._radio_generation += 1  # orphan any connect still in flight
+            stream, self._radio_stream = self._radio_stream, None
+            self._radio_url = None
+            self.radio_state = "idle"
+        if stream is not None:
+            self._fade_out(stream, fade_ms)
+
+    def set_radio_gain(self, gain: float) -> None:
+        """Scale the radio by signal strength, so reception fades at the edge."""
+        gain = max(0.0, min(1.0, gain))
+        with self._radio_lock:
+            if abs(gain - self._radio_gain) < 0.01:
+                return
+            self._radio_gain = gain
+            stream, level = self._radio_stream, self._radio_level()
+        if stream is None:
+            return
+        try:
+            stream.set_volume(level)
+        except self._BassError:
+            with self._radio_lock:
+                self._radio_stream = None
+                self.radio_state = "failed"
+
     # -- volume control ---------------------------------------------------------
 
     def _category_volume(self, category: str) -> float:
@@ -1209,6 +1351,7 @@ class _BassBackend:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        radio: float | None = None,
     ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
@@ -1222,6 +1365,16 @@ class _BassBackend:
             self.engine_volume = max(0.0, min(1.0, engine))
         if ui is not None:
             self.ui_volume = max(0.0, min(1.0, ui))
+        if radio is not None:
+            self.radio_volume = max(0.0, min(1.0, radio))
+            with self._radio_lock:
+                stream, level = self._radio_stream, self._radio_level()
+            if stream is not None:
+                try:
+                    stream.set_volume(level)
+                except self._BassError:
+                    with self._radio_lock:
+                        self._radio_stream = None
         for ch in list(self._loops):
             self._apply_loop_volume(ch)
         if self._engine_stream is not None:
@@ -1254,10 +1407,34 @@ class _BassBackend:
             self.stop_loop(ch, fade_ms=0)
         self.engine_stop(shutdown_sound=False)
         self.stop_music(fade_ms=0)
+        self.stop_radio(fade_ms=0)
         self._retained.clear()
-        with contextlib.suppress(self._BassError):
-            self._output.free()
+        if self._radio_connects_finished():
+            with contextlib.suppress(self._BassError):
+                self._output.free()
         self.enabled = False
+
+    def _radio_connects_finished(self) -> bool:
+        """Wait briefly for a connect still inside BASS. False if one remains.
+
+        Freeing the output from under a thread that is still in
+        ``BASS_StreamCreateURL`` crashes the process, and a station that has
+        gone dark can hold that thread for seconds. So the wait is short --
+        nobody quitting a game should be made to sit through a dead station --
+        and when it runs out the device is simply left to the operating system
+        instead. Leaking it at exit costs nothing; crashing costs the player
+        their session.
+        """
+        with self._radio_lock:
+            threads = [t for t in self._radio_threads if t.is_alive()]
+            self._radio_threads = []
+        deadline = time.monotonic() + RADIO_SHUTDOWN_JOIN_S
+        for thread in threads:
+            thread.join(max(0.0, deadline - time.monotonic()))
+        if any(thread.is_alive() for thread in threads):
+            log.info("A radio stream is still connecting; leaving the audio device alone")
+            return False
+        return True
 
 
 class _NullBackend:
@@ -1267,6 +1444,8 @@ class _NullBackend:
     enabled = False
     engine_running = False
     engine_starting = False
+    radio_supported = False
+    radio_state = "unsupported"
 
     def __init__(self) -> None:
         self.master_volume = 1.0
@@ -1275,6 +1454,7 @@ class _NullBackend:
         self.weather_volume = 0.65
         self.engine_volume = 0.55
         self.ui_volume = 0.9
+        self.radio_volume = 0.6
 
     def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None: ...
     def start_loop(
@@ -1302,6 +1482,9 @@ class _NullBackend:
     def reverse_stop(self) -> None: ...
     def play_music(self, track: str, fade_ms: int = 1500) -> None: ...
     def stop_music(self, fade_ms: int = 1000) -> None: ...
+    def play_radio(self, url: str, fade_ms: int = 1200) -> None: ...
+    def stop_radio(self, fade_ms: int = 600) -> None: ...
+    def set_radio_gain(self, gain: float) -> None: ...
     def set_volumes(
         self,
         master: float | None = None,
@@ -1310,6 +1493,7 @@ class _NullBackend:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        radio: float | None = None,
     ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
@@ -1323,6 +1507,8 @@ class _NullBackend:
             self.engine_volume = max(0.0, min(1.0, engine))
         if ui is not None:
             self.ui_volume = max(0.0, min(1.0, ui))
+        if radio is not None:
+            self.radio_volume = max(0.0, min(1.0, radio))
 
     def shutdown(self) -> None: ...
 
@@ -1380,6 +1566,10 @@ class AudioEngine:
     @property
     def ui_volume(self) -> float:
         return self._impl.ui_volume
+
+    @property
+    def radio_volume(self) -> float:
+        return self._impl.radio_volume
 
     # -- one-shots and loops ------------------------------------------------------
 
@@ -1501,8 +1691,14 @@ class AudioEngine:
         self._impl.reverse_stop()
 
     def stop_world(self) -> None:
-        """Stop engine, road, weather, and ambience (leaving UI sfx alone)."""
+        """Stop engine, road, weather, ambience, and radio (UI sfx stay).
+
+        The radio goes with the world rather than with the music: menu speech
+        has to be the clearest thing in the mix, and a station talking under it
+        is exactly the noise a screen reader user cannot filter out.
+        """
         self.engine_stop(shutdown_sound=False)
+        self.stop_radio(fade_ms=400)
         for ch in (CH_ROAD, CH_WEATHER, CH_WEATHER_B, CH_AMBIENT, CH_HORN):
             self.stop_loop(ch, fade_ms=400)
 
@@ -1515,6 +1711,37 @@ class AudioEngine:
     def stop_music(self, fade_ms: int = 1000) -> None:
         self._impl.stop_music(fade_ms)
 
+    # -- radio ------------------------------------------------------------------
+
+    @property
+    def radio_supported(self) -> bool:
+        """Whether this backend can play a live internet stream at all.
+
+        Only BASS can. On the pygame fallback the radio has to tell the player
+        why it is silent instead of pretending to tune.
+        """
+        return self._impl.radio_supported
+
+    @property
+    def radio_state(self) -> str:
+        """``idle``, ``connecting``, ``playing``, ``failed`` or ``unsupported``.
+
+        ``failed`` is an ordinary outcome, not a bug: public stream URLs rot,
+        and some stations refuse third-party players.
+        """
+        return self._impl.radio_state
+
+    def play_radio(self, url: str, fade_ms: int = 1200) -> None:
+        """Tune a station's live stream. Connects in the background."""
+        self._impl.play_radio(url, fade_ms)
+
+    def stop_radio(self, fade_ms: int = 600) -> None:
+        self._impl.stop_radio(fade_ms)
+
+    def set_radio_gain(self, gain: float) -> None:
+        """Scale the radio by signal strength (1.0 full, 0.0 silent)."""
+        self._impl.set_radio_gain(gain)
+
     # -- volume control ---------------------------------------------------------
 
     def set_volumes(
@@ -1525,8 +1752,9 @@ class AudioEngine:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        radio: float | None = None,
     ) -> None:
-        self._impl.set_volumes(master, sfx, music, weather, engine, ui)
+        self._impl.set_volumes(master, sfx, music, weather, engine, ui, radio)
 
     def shutdown(self) -> None:
         self._impl.shutdown()

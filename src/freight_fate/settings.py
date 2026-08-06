@@ -52,6 +52,12 @@ class Settings:
     weather_volume: float = 0.65
     engine_volume: float = 0.55
     ui_volume: float = 0.9
+    radio_volume: float = 0.6
+    # Real radio stations, streamed live from each station's own public feed.
+    # Off by default: it is the one thing in the game that plays audio someone
+    # else owns, so a player streaming their session to Twitch or YouTube is
+    # protected unless they deliberately switch it on.
+    radio_enabled: bool = False
     speech_verbosity: int = 1  # 0 terse, 1 normal
     announce_menu_position: bool = True  # speak "N of M" position in menus
     sapi_events: bool = True  # driving events on a separate voice
@@ -154,6 +160,8 @@ class Settings:
             s.mastodon_linked_handle = ""
         if not isinstance(s.live_weather_controls_calendar, bool):
             s.live_weather_controls_calendar = True
+        if not isinstance(s.radio_enabled, bool):
+            s.radio_enabled = False
         for attr in (
             "master_volume",
             "sfx_volume",
@@ -161,6 +169,7 @@ class Settings:
             "weather_volume",
             "engine_volume",
             "ui_volume",
+            "radio_volume",
             "speech_rate",
             "speech_pitch",
             "speech_volume",
