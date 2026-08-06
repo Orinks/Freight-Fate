@@ -48,7 +48,9 @@ def _first_state_after_career_creation(ctx) -> State:
 
     if should_offer_online(ctx):
         return OnlineOfferState(ctx)
-    return CityMenuState(ctx)
+    # The welcome is spoken just before this state is pushed, so its entry
+    # announcement queues behind it rather than cutting it off.
+    return CityMenuState(ctx, queue_entry_announcement=True)
 
 
 def enter_world(ctx) -> None:
@@ -763,10 +765,15 @@ class HomeCityState(MenuState):
         self.ctx.pop_state(True, False)  # this city picker
         self.ctx.pop_state(True, False)  # region picker
         self.ctx.pop_state(True, False)  # name entry
-        self.ctx.push_state(_first_state_after_career_creation(self.ctx))
         loaded_over = (
             f"Loaded over existing driver named {name}. " if name.lower() in existing else ""
         )
+        # Welcome first, then whatever comes next -- every state announces
+        # itself on entry, so speaking this after the push meant one of the two
+        # lines was always cut off. Cutting the city menu's "parked at" was
+        # harmless because the welcome repeats it; cutting the orinks.net offer
+        # left the player being asked a question they never heard. Both states
+        # built here queue their announcement behind this line.
         self.ctx.say(
             f"{loaded_over}Welcome aboard, {name}. Your truck is parked at "
             f"{terminal.spoken_name} in the {self.ctx.world.spoken_city(city)} "
@@ -774,6 +781,7 @@ class HomeCityState(MenuState):
             "Your first stop is the dispatch board.",
             interrupt=True,
         )
+        self.ctx.push_state(_first_state_after_career_creation(self.ctx))
 
 
 class SettingsState(MenuState):

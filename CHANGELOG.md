@@ -7,7 +7,7 @@
 - **Creating your first career now offers to connect this computer to an
   orinks.net account.** Right after you hear "Welcome aboard" and where your
   truck is parked, the game asks once whether to connect this computer to an
-  orinks.net account, in a code and a browser confirmation. It only asks the
+  orinks.net account, with a code and a browser confirmation. It only asks the
   once -- decline with Not now, or just press Escape, and driving starts
   right away with nothing else to answer. Connecting links the computer to an
   account; it does not turn anything on by itself, and you can connect any

@@ -42,9 +42,11 @@ def _online_offer_already_seen(isolated_data_dir):
     so FREIGHT_FATE_DATA_DIR is guaranteed set first, even if fixture order
     is ever reshuffled.
 
-    tests/test_online_offer.py builds its own in-memory Settings() through
-    _make_ctx and never constructs an App(), so it never reads this file and
-    needs no opt-back-in.
+    A test that is about the offer opts back out: the state-level tests in
+    tests/test_online_offer.py build their own in-memory Settings() through
+    _make_ctx and never read this file, and its two spoken-order tests, which
+    do construct an App(), clear online_offer_seen on ctx.settings afterwards
+    so career creation offers exactly as it does on a fresh install.
     """
     from freight_fate.settings import Settings
 
