@@ -769,7 +769,7 @@ community suggestion, and the right kind of immersion for long hauls.
       (stream URLs) with Wikidata (transmitter coordinates and frequency, CC0)
       on the call sign parsed from the station name, and `tools/bake_radio.py`
       compiles the result into release builds. Shipped: 1,037 local stations
-      (900 FM, 137 AM) over 1,074 transmitter sites, 5,181 web stations, and
+      (900 FM, 137 AM) at 1,006 transmitter sites, 5,179 web stations, and
       one satellite station. At the shipped radii that puts at least one local
       station in reach of 519 of the map's 623 cities, median three.
 
