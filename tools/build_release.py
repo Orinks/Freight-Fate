@@ -340,10 +340,12 @@ def build_nuitka_command(entry: Path) -> list[str]:
         "--noinclude-pytest-mode=nofollow",
         "--include-package-data=prism:_native/*",
         "--include-package-data=sound_lib",
-        # World data ships baked into the executable (tools/bake_world.py)
-        # and sounds ship as a masked pack (tools/pack_sounds.py), never as
-        # editable files next to it.
+        # World data and the radio catalog ship baked into the executable
+        # (tools/bake_world.py, tools/bake_radio.py) and sounds ship as a
+        # masked pack (tools/pack_sounds.py), never as editable files next
+        # to it.
         "--include-module=freight_fate.data._baked_world",
+        "--include-module=freight_fate.data._baked_radio",
         *KEYRING_NUITKA_ARGS,
         f"--output-dir={output_dir.as_posix()}",
         f"--output-filename={APP_NAME}",
@@ -387,12 +389,15 @@ def run_nuitka() -> Path:
     entry = write_entrypoint()
     output_dir = BUILD / "nuitka"
     baked = _load_tool("bake_world").bake()
+    baked_radio = _load_tool("bake_radio").bake()
     try:
         subprocess.run(build_nuitka_command(entry), cwd=ROOT, check=True)
     finally:
-        # A leftover baked module would shadow later edits to world_data/
-        # in this source checkout, so it must not outlive the compile.
+        # A leftover baked module would shadow later edits to world_data/ or
+        # the radio catalog in this source checkout, so neither may outlive
+        # the compile.
         baked.unlink(missing_ok=True)
+        baked_radio.unlink(missing_ok=True)
 
     source_dir, output_kind = find_nuitka_output(output_dir)
     build_dir = DIST / (f"{APP_NAME}.app" if output_kind == "app" else APP_NAME)

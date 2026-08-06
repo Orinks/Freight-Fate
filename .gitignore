@@ -14,6 +14,11 @@ venv/
 .ruff_cache/
 .hypothesis/
 .route-cache/
+# Downloaded radio-station source data (Radio Browser and Wikidata dumps, tens
+# of megabytes, refetchable at any time). Build-time input for the station and
+# coverage table; only the baked, curated result belongs in the repo, never
+# these raw third-party dumps.
+data/radio-cache/
 .coverage
 coverage.xml
 htmlcov/
@@ -35,6 +40,7 @@ live_*.txt
 # Release packaging
 tools/_entry.py
 src/freight_fate/data/_baked_world.py
+src/freight_fate/data/_baked_radio.py
 src/freight_fate/sounds.pak
 
 # Purchased SFX libraries (Big Fish Audio / Pro Sound Effects and similar)
