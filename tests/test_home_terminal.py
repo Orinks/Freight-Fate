@@ -94,6 +94,8 @@ def test_picking_a_city_sets_the_profile_start_city():
             city_picker.handle_event(key_event(pygame.K_DOWN))
         ambient.clear()
         city_picker.handle_event(key_event(pygame.K_RETURN))
+        if type(app.state).__name__ == "OnlineOfferState":
+            app.state.handle_event(key_event(pygame.K_RETURN))  # decline (default item)
         assert isinstance(app.state, CityMenuState)
         p = app.ctx.profile
         assert p.name == "Southerner"

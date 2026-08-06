@@ -851,6 +851,15 @@ fit for an audio-first game.
       pasted into the game; the game polls and finishes connecting on its
       own once the code is confirmed in the browser (`online_activation.py`,
       device-code exchange already live on orinks.net)
+- [x] First-career onboarding offer: creating a first career now offers,
+      once, to connect the computer to an orinks.net account -- right after
+      "Welcome aboard" and before the dispatch board (`states/online_offer.py`,
+      gated by the per-install `Settings.online_offer_seen`, never asked again
+      once seen or once a computer is already connected). Declining (or
+      Escape, which behaves the same) and accepting both continue straight
+      into the city menu either way. The offer deliberately does not claim
+      connecting turns on cloud backup or the drivers board -- both stay off
+      until chosen separately, from Online.
 - [x] Idle drivers age off the live board: a truck parked with the game left running (not paused) signs off after 30 minutes without a snapshot change and stops heartbeating (`online_presence.py` IDLE_SIGNOFF_S); the server hides still-beating idle rows on the same clock for older builds (orinks-net `PRESENCE_IDLE_MS` + per-row `changedAt`), and deadhead presence now carries progress so a long empty run never reads as idle
 - [x] Online hub: the drivers board, orinks.net account, cloud backup and restore, and all sharing toggles moved from Settings into one Online menu on the main menu (`states/online_hub.py`); Settings keeps an Online pointer that opens the same menu for a release or two
 - [ ] Remove the Settings Online pointer once players have had a release or two to relearn the location

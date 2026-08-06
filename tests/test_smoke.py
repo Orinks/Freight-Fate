@@ -85,6 +85,8 @@ def test_full_game_flow_headless(monkeypatch):
         app.state.handle_event(key_event(pygame.K_RETURN))  # default region: Great Lakes
         assert isinstance(app.state, HomeCityState)
         app.state.handle_event(key_event(pygame.K_RETURN))  # default city: Chicago
+        if type(app.state).__name__ == "OnlineOfferState":
+            app.state.handle_event(key_event(pygame.K_RETURN))  # decline (default item)
         assert isinstance(app.state, CityMenuState)
         assert app.ctx.profile is not None
         assert app.ctx.profile.name == "Smoke"
@@ -253,6 +255,8 @@ def test_garage_upgrade_and_truck_purchase_flow():
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
         app.state.handle_event(key_event(pygame.K_RETURN))  # default region
         app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
+        if type(app.state).__name__ == "OnlineOfferState":
+            app.state.handle_event(key_event(pygame.K_RETURN))  # decline (default item)
         assert isinstance(app.state, CityMenuState)
         p = app.ctx.profile
         p.money = 200_000.0
@@ -453,6 +457,8 @@ def test_pause_and_abandon_returns_to_city():
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
         app.state.handle_event(key_event(pygame.K_RETURN))  # default region
         app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
+        if type(app.state).__name__ == "OnlineOfferState":
+            app.state.handle_event(key_event(pygame.K_RETURN))  # decline (default item)
         app.state.handle_event(key_event(pygame.K_RETURN))  # job board
         board = app.state
         while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
@@ -515,6 +521,8 @@ def test_abandon_prompt_no_returns_to_pause_menu():
         app.state.handle_event(key_event(pygame.K_RETURN))  # default name
         app.state.handle_event(key_event(pygame.K_RETURN))  # default region
         app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
+        if type(app.state).__name__ == "OnlineOfferState":
+            app.state.handle_event(key_event(pygame.K_RETURN))  # decline (default item)
         app.state.handle_event(key_event(pygame.K_RETURN))  # job board
         board = app.state
         while board.jobs[board.index].cargo.endorsement:  # skip locked teasers

@@ -41,6 +41,16 @@ def pending_notice_state(ctx) -> State | None:
     return None
 
 
+def _first_state_after_career_creation(ctx) -> State:
+    """The city menu, or the one-time orinks.net offer ahead of it."""
+    from .city import CityMenuState
+    from .online_offer import OnlineOfferState, should_offer_online
+
+    if should_offer_online(ctx):
+        return OnlineOfferState(ctx)
+    return CityMenuState(ctx)
+
+
 def enter_world(ctx) -> None:
     """Resume a saved mid-trip delivery if there is one, else the terminal hub."""
     ctx.push_state(pending_notice_state(ctx) or _world_entry_state(ctx))
@@ -744,8 +754,6 @@ class HomeCityState(MenuState):
         return items
 
     def _pick(self, city: str) -> None:
-        from .city import CityMenuState
-
         name = self.driver_name
         existing = {p.stem.lower() for p in Profile.list_saves()}
         profile = Profile(name=name, current_city=city)
@@ -755,7 +763,7 @@ class HomeCityState(MenuState):
         self.ctx.pop_state(True, False)  # this city picker
         self.ctx.pop_state(True, False)  # region picker
         self.ctx.pop_state(True, False)  # name entry
-        self.ctx.push_state(CityMenuState(self.ctx))
+        self.ctx.push_state(_first_state_after_career_creation(self.ctx))
         loaded_over = (
             f"Loaded over existing driver named {name}. " if name.lower() in existing else ""
         )

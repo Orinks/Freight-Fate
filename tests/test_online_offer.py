@@ -143,3 +143,24 @@ def test_accepting_pushes_setup_with_activation_already_started():
     # And the city menu is still reachable underneath, via replace_state on
     # the original offer state.
     assert ("replace", "CityMenuState") in spoken
+
+
+def test_creating_a_first_career_reaches_the_offer(monkeypatch):
+    """The offer replaces the city menu at career creation; its own exits put
+    the city menu back, so a player lands in the same place either way."""
+    from freight_fate.states import main_menu
+
+    monkeypatch.setattr(online_offer, "_stored_identity", lambda: None)
+    ctx = _make_ctx([])
+    assert (
+        main_menu._first_state_after_career_creation(ctx).__class__.__name__ == "OnlineOfferState"
+    )
+
+
+def test_creating_a_later_career_goes_straight_to_the_city_menu(monkeypatch):
+    from freight_fate.states import main_menu
+
+    monkeypatch.setattr(online_offer, "_stored_identity", lambda: None)
+    ctx = _make_ctx([])
+    ctx.settings.online_offer_seen = True
+    assert main_menu._first_state_after_career_creation(ctx).__class__.__name__ == "CityMenuState"
