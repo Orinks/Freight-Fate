@@ -712,3 +712,42 @@ def test_without_autostart_entry_starts_nothing(monkeypatch):
     ctx = _make_ctx([])
     online_states.OnlineSetupState(ctx).enter()
     assert started == []
+
+
+def test_autostart_skips_the_menu_intro_and_speaks_setup_starting(monkeypatch):
+    """A player who just said "Set up now" already knows what this state is
+    for. Announcing the five-item menu and then talking over it a moment
+    later with "Contacting orinks.net..." (from the real _start_setup) would
+    read as the game losing its place mid-sentence -- so autostart must go
+    straight to that line instead of announcing the menu first."""
+
+    class NeverRunsThread:
+        def __init__(self, *, target, **_kwargs):
+            self.target = target
+
+        def start(self):
+            pass  # the network request itself is not what this test checks
+
+    monkeypatch.setattr(online_states.threading, "Thread", NeverRunsThread)
+    spoken: list[str] = []
+    ctx = _make_ctx(spoken)
+
+    online_states.OnlineSetupState(ctx, autostart=True).enter()
+
+    said = [line for line in spoken if isinstance(line, str)]
+    assert said == ["Contacting orinks.net for an activation code."]
+    assert not any("orinks.net account setup" in line for line in said)
+
+
+def test_without_autostart_entry_still_speaks_the_menu_intro():
+    """The Online-menu path is unchanged: a player choosing setup from a
+    menu has not already committed, so the five-item menu is announced as
+    before."""
+    spoken: list[str] = []
+    ctx = _make_ctx(spoken)
+
+    online_states.OnlineSetupState(ctx).enter()
+
+    said = [line for line in spoken if isinstance(line, str)]
+    assert any("orinks.net account setup" in line for line in said)
+    assert "Contacting orinks.net for an activation code." not in said

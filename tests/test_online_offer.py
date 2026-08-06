@@ -85,25 +85,30 @@ def test_the_offer_names_where_to_find_it_later():
 
 def test_the_offer_does_not_promise_backup_or_the_board():
     """Connecting does not switch either feature on -- it only lets the
-    player turn each on separately later. A rewrite like "Online keeps your
-    career safe automatically" would pass a check that only bans the words
-    "backed up" and "backing up" while reintroducing exactly the promise
-    those words guard against. Anchor positively on the actual claim the
-    copy must make -- that connecting *lets you turn on* the features --
-    so a rewrite has to keep that claim intact, not just dodge two phrases.
+    player turn each on separately later.
+
+    A substring check can never close this gap, in either direction: a
+    rewrite that keeps "lets you turn on cloud backup" and "appear on the
+    drivers board" verbatim, then adds a clause -- "...so your career is
+    already protected" -- still passes both a word-ban and a positive
+    substring check while reintroducing exactly the false promise a player
+    could act on. So this pins the entire spoken line, word for word. Any
+    future edit to this copy -- even one that keeps the two required
+    phrases -- has to update this literal string, which forces the person
+    making the edit to read what the offer now claims before it can ship.
     """
     spoken: list = []
     ctx = _make_ctx(spoken)
     online_offer.OnlineOfferState(ctx).enter()
-    said = " ".join(line for line in spoken if isinstance(line, str)).lower()
+    said = [line for line in spoken if isinstance(line, str)]
 
-    assert "lets you turn on cloud backup" in said
-    assert "appear on the drivers board" in said
-
-    # Kept as a second line of defense: even with the anchor above, nothing
-    # should also claim the backup itself has already happened.
-    assert "backed up" not in said
-    assert "backing up" not in said
+    assert said == [
+        "Before you set off. You can connect this computer to an "
+        "orinks.net account. That is what lets you turn on cloud backup "
+        "for your career and appear on the drivers board later, from "
+        "Online on the main menu. It takes a code and your browser, and "
+        "you can do it any time instead. Not now. 1 of 2."
+    ]
 
 
 def test_not_now_is_the_starting_item():

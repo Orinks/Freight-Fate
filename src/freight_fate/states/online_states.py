@@ -286,6 +286,13 @@ class OnlineSetupState(MenuState):
         return "Set up this computer with orinks.net"
 
     def announce_entry(self) -> None:
+        if self.autostart:
+            # The player already said "Set up now" on the offer -- hearing
+            # this five-item menu introduced, only to have _start_setup talk
+            # over it a moment later with "Contacting orinks.net...", reads
+            # as the game losing its place. Say nothing here; _start_setup
+            # (called right after enter() finishes) speaks first instead.
+            return
         self.ctx.say(
             f"{self.title}. This connects the game to your orinks.net account. "
             "Profile sharing and Cloud backup remain off until you turn each "
