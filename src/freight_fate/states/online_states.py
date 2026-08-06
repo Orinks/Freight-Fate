@@ -225,7 +225,7 @@ class OnlineSetupState(MenuState):
 
     title = "orinks.net account setup"
 
-    def __init__(self, ctx) -> None:
+    def __init__(self, ctx, *, autostart: bool = False) -> None:
         super().__init__(ctx)
         self.activation: online_activation.Activation | None = None
         self._phase = "idle"  # idle | starting | waiting | expired | error
@@ -235,8 +235,19 @@ class OnlineSetupState(MenuState):
         # A fresh Event per run, replaced in _start_setup: exit() must always
         # have *something* to .set(), even if the player never starts setup.
         self._stop_event = threading.Event()
+        # Set when this state is pushed straight from the offer's "Set up
+        # now" answer: the player already said yes, so entry starts the
+        # request itself instead of making them choose the first menu item
+        # to confirm a decision they already made. Public so callers (and
+        # tests) can see whether a given push will autostart.
+        self.autostart = autostart
 
     # -- static menu ----------------------------------------------------------
+
+    def enter(self) -> None:
+        super().enter()
+        if self.autostart:
+            self._start_setup()
 
     def build_items(self) -> list[MenuItem]:
         return [

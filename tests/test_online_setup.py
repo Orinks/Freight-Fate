@@ -687,3 +687,28 @@ def test_pressing_setup_again_before_the_code_arrives_is_never_silent(monkeypatc
     assert [line for line in spoken if isinstance(line, str)] == [
         "Still contacting orinks.net for an activation code."
     ]
+
+
+# -- autostart from the offer's accept path ------------------------------------
+
+
+def test_autostart_begins_setup_on_entry(monkeypatch):
+    """A player who just said yes must not be asked to confirm again."""
+    started: list = []
+    monkeypatch.setattr(
+        online_states.OnlineSetupState, "_start_setup", lambda self: started.append(True)
+    )
+    ctx = _make_ctx([])
+    online_states.OnlineSetupState(ctx, autostart=True).enter()
+    assert started == [True]
+
+
+def test_without_autostart_entry_starts_nothing(monkeypatch):
+    """Reaching setup from the Online menu must still wait for the player."""
+    started: list = []
+    monkeypatch.setattr(
+        online_states.OnlineSetupState, "_start_setup", lambda self: started.append(True)
+    )
+    ctx = _make_ctx([])
+    online_states.OnlineSetupState(ctx).enter()
+    assert started == []

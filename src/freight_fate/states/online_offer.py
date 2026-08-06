@@ -73,10 +73,17 @@ class OnlineOfferState(MenuState):
         self._enter_world()
 
     def _accept(self) -> None:
-        # Task 2 wires this into the activation flow. For now it only spends
-        # the offer and continues into the world, same as declining.
+        # The player already said "Set up now" -- pushing OnlineSetupState
+        # with autostart=True starts activation immediately instead of
+        # asking them to confirm the same decision again from a menu. The
+        # city menu goes underneath (replace, not push) so that backing out
+        # of setup lands the player in the world, not back on this offer.
+        from .city import CityMenuState
+        from .online_states import OnlineSetupState
+
         self._spend_the_offer()
-        self._enter_world()
+        self.ctx.replace_state(CityMenuState(self.ctx))
+        self.ctx.push_state(OnlineSetupState(self.ctx, autostart=True))
 
     def go_back(self) -> None:
         # Escape means Not now. The player must never be stuck here, and

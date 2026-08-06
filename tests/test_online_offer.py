@@ -84,12 +84,24 @@ def test_the_offer_names_where_to_find_it_later():
 
 
 def test_the_offer_does_not_promise_backup_or_the_board():
-    """Connecting does not switch either on. Promising them would leave a
-    player believing their career is backed up when nothing is."""
+    """Connecting does not switch either feature on -- it only lets the
+    player turn each on separately later. A rewrite like "Online keeps your
+    career safe automatically" would pass a check that only bans the words
+    "backed up" and "backing up" while reintroducing exactly the promise
+    those words guard against. Anchor positively on the actual claim the
+    copy must make -- that connecting *lets you turn on* the features --
+    so a rewrite has to keep that claim intact, not just dodge two phrases.
+    """
     spoken: list = []
     ctx = _make_ctx(spoken)
     online_offer.OnlineOfferState(ctx).enter()
     said = " ".join(line for line in spoken if isinstance(line, str)).lower()
+
+    assert "lets you turn on cloud backup" in said
+    assert "appear on the drivers board" in said
+
+    # Kept as a second line of defense: even with the anchor above, nothing
+    # should also claim the backup itself has already happened.
     assert "backed up" not in said
     assert "backing up" not in said
 
@@ -101,3 +113,28 @@ def test_not_now_is_the_starting_item():
     state = online_offer.OnlineOfferState(_make_ctx(spoken))
     state.enter()
     assert "Not now" in state.current_text()
+
+
+def test_accepting_pushes_setup_with_activation_already_started():
+    # OnlineSetupState must go on top via push_state (not replace_state),
+    # so the CityMenuState underneath survives -- that is what makes
+    # backing out of setup land in the world instead of back on this offer.
+    spoken: list = []
+    ctx = _make_ctx(spoken)
+    pushed: list = []
+    ctx.push_state = lambda state: pushed.append(state)
+
+    state = online_offer.OnlineOfferState(ctx)
+    state.enter()
+    state._accept()
+
+    assert ctx.settings.online_offer_seen is True
+    names = [type(s).__name__ for s in pushed]
+    assert "OnlineSetupState" in names
+    setup = next(s for s in pushed if type(s).__name__ == "OnlineSetupState")
+    # The flag, not just the state: pushing setup without autostart would
+    # leave the player confirming a decision they already made.
+    assert setup.autostart is True
+    # And the city menu is still reachable underneath, via replace_state on
+    # the original offer state.
+    assert ("replace", "CityMenuState") in spoken
