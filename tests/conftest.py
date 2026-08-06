@@ -29,6 +29,30 @@ def isolated_data_dir(tmp_path, monkeypatch):
     yield
 
 
+@pytest.fixture(autouse=True)
+def _online_offer_already_seen(isolated_data_dir):
+    """Seed the one-time first-run orinks.net offer as already spent.
+
+    The offer is on by default in real play: a fresh install has not seen it,
+    so career creation shows it. A test that is not about that offer should
+    not have to know it exists just to drive a career through App() -- so
+    write settings.json with the gate already spent into this test's isolated
+    data dir before any App() is constructed and reads it via
+    Settings.load(). Depends on isolated_data_dir (not just autouse ordering)
+    so FREIGHT_FATE_DATA_DIR is guaranteed set first, even if fixture order
+    is ever reshuffled.
+
+    tests/test_online_offer.py builds its own in-memory Settings() through
+    _make_ctx and never constructs an App(), so it never reads this file and
+    needs no opt-back-in.
+    """
+    from freight_fate.settings import Settings
+
+    game_settings = Settings()
+    game_settings.online_offer_seen = True
+    game_settings.save()
+
+
 class FakeKeyring:
     """An in-memory stand-in for the platform secret store."""
 

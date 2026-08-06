@@ -24,12 +24,6 @@ def start_drive(app):
     app.state.handle_event(key_event(pygame.K_RETURN))  # default name
     app.state.handle_event(key_event(pygame.K_RETURN))  # default region
     app.state.handle_event(key_event(pygame.K_RETURN))  # default home terminal
-    # The one-time orinks.net offer lands here on a fresh install. It shares
-    # this test's data dir, so a second App() built later in the same test
-    # will find the gate already spent and skip straight past it -- check
-    # rather than assume it shows.
-    if type(app.state).__name__ == "OnlineOfferState":
-        app.state.handle_event(key_event(pygame.K_RETURN))  # decline (default item)
     app.state.handle_event(key_event(pygame.K_RETURN))  # job board
     board = app.state
     while board.jobs[board.index].cargo.endorsement:  # skip locked teasers
