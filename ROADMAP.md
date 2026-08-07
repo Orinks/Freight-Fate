@@ -93,6 +93,10 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Rest-stop sleep selection and stopping recovery.** T now plans and
+      names the exact nearby sleep stop without silently taking its exit, and
+      an independent default-off assist can finish the entrance stop only
+      after the player signals and takes that selected exit.
 - [x] Add one driving-assistance preset selector with independently adjustable emergency braking, lane, stop-and-go, descent, exit, destination, curve, and route-transition support while preserving player confirmation and control.
 - [ ] Add future individual yard-entry guidance and assisted docking; no current preset navigates a yard or completes a delivery.
 - [x] **Spoken-message review from the cab (PR #122, Day Garwood).**

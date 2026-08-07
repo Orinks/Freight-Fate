@@ -1223,6 +1223,11 @@ class SettingsCategoryState(MenuState):
                 "Slows and stops at the selected facility arrival point; it never enters the yard or docks.",
             ),
             (
+                "selected_stop_assist",
+                "Planned rest-stop stopping assistance",
+                "After T plans a sleep-capable route stop and X signals for its exit, this assistance stops at the entrance so the rest-stop menu can open. You still set the exit lane. It never chooses, signals, takes, or cancels an exit. Presets never change it.",
+            ),
+            (
                 "curve_speed_assist",
                 "Curve speed assistance",
                 "Reduces speed workload for mapped curves; you still steer.",
@@ -1281,7 +1286,13 @@ class SettingsCategoryState(MenuState):
             )
 
     def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
-        if field in ("speed_keeper", "pedal_latch", "curve_callouts", "predictive_cruise"):
+        if field in (
+            "speed_keeper",
+            "pedal_latch",
+            "curve_callouts",
+            "predictive_cruise",
+            "selected_stop_assist",
+        ):
             # Input-accessibility aids and information layers, not realism
             # choices: they live outside the presets, so toggling one never
             # reads as Custom.

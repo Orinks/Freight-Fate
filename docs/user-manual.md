@@ -435,7 +435,7 @@ Driving controls are active while the road view is focused:
 | K | Start or cancel automatic speed control. It uses adaptive cruise on open roads and speed keeper in low-speed zones. It pauses through the planned pickup and resumes once the loaded truck is rolling. Braking elsewhere also cancels it. |
 | Plus / Minus | Raise or lower the open-road cruise target by 5 mph while automatic speed control is active. The keypad Plus and Minus keys work too. |
 | X | Signal for or cancel the next announced route exit. The truck takes the ramp when speed, lane setup, and route intent are valid. |
-| T | When fully stopped, open the route point-of-interest menu or, away from route points, the emergency shoulder-sleep confirmation. |
+| T | While rolling, plan the next nearby sleep-capable stop and hear its distance, exit, and stopping-assistance state. T never signals or takes the exit; press X for that. When fully stopped at a supported route stop, T opens its menu; away from route points, it opens the emergency shoulder-sleep confirmation. |
 | J | Toggle the engine brake. It engages at the stage you last selected, like a real dash switch. |
 | 1 / 2 / 3 | Select the engine brake stage -- two, four, or six cylinders of retard -- while it is on. With the engine brake off these keys do nothing. |
 | H | Hold to sound the horn; release to stop it. |
@@ -729,6 +729,13 @@ down, pull into the scale lane, stop, then press T for inspection check-in.
 Parking labels describe confidence, not a live guarantee that a space is open
 right now. Late at night, a sleep-capable stop may be full.
 
+When a sleep-capable stop is close enough ahead, press T to plan that exact
+stop. The game names it, its exit, and the next action. Press X separately to
+signal for the exit; T never chooses to leave the highway by itself. The
+default-off Planned rest-stop stopping assistance setting can then brake to a
+complete stop at the entrance after you have set the exit lane and cleared any
+ramp light or stop sign. It never selects, signals, takes, or cancels an exit.
+
 ## Hours Of Service And Fatigue
 
 Freight Fate tracks an ELD-style hours clock. In realistic mode:
@@ -876,7 +883,7 @@ Late delivery and cargo damage reduce pay.
 
 Three driving assistance presets are available: Realistic, Balanced, and All assists. Changing an individual assist is shown as Custom. Adaptive cruise always follows traffic, anticipates large posted-limit drops, and increases its following gap in poor weather. Realistic adds modern safety support: automatic emergency braking, lane-departure warning, supported stop-and-go behavior, and realistic descent control. Balanced adds light lane centering and lets braking capture a lower descent target. All assists adds automatic safe descent targets and stronger intervention. These presets do not change trip pacing, hours rules, transmission, weather, or hazard frequency.
 
-The individual controls are Automatic emergency braking, Lane-departure warning, Stop-and-go assistance, Lane centering assistance, Descent speed control, Exit speed assistance, Destination approach assistance, Curve speed assistance, and Route-transition assistance. Descent speed control has four levels: Off, Realistic, Balanced, and Interactive. Interactive is a descent-control level, not a preset. Exit speed assistance slows for an already-selected exit, destination approach assistance slows and stops at the selected facility arrival point, curve speed assistance reduces speed workload for mapped curves, and route-transition assistance helps manage speed and lane workload at confirmed route transitions. Assists never choose a route, take an exit, enter a yard, dock, or complete a delivery: you still steer, confirm route choices and exits, initiate lane changes, leave long stops, and handle every precision task.
+The individual controls are Automatic emergency braking, Lane-departure warning, Stop-and-go assistance, Lane centering assistance, Descent speed control, Exit speed assistance, Destination approach assistance, Planned rest-stop stopping assistance, Curve speed assistance, and Route-transition assistance. Descent speed control has four levels: Off, Realistic, Balanced, and Interactive. Interactive is a descent-control level, not a preset. Exit speed assistance slows for an already-selected exit, destination approach assistance slows and stops at the selected facility arrival point, and the separate default-off planned-stop control stops at a sleep stop only after T plans it and X signals for it. Curve speed assistance reduces speed workload for mapped curves, and route-transition assistance helps manage speed and lane workload at confirmed route transitions. Assists never silently choose a route or optional exit, enter a yard, dock, or complete a delivery: you still steer, confirm route choices and exits, initiate lane changes, leave long stops, and handle every precision task.
 
 Lane drift also lives in this category and, like the speed keeper, sits outside the presets. It chooses whether the lane-position task runs at all: Off keeps the truck centered with no lane work, Light drifts gently with centering help, and Realistic drifts like a real wheel. When lane drift is on, a short beep comes from the side you drift toward, so steer away from the beep; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. With lane drift on, taking an exit needs your turn signal set and the exit lane held. Choosing Light or Realistic turns the matching lane support on. The All assists preset switches lane drift off, so lanes are kept for you and a tap changes lanes; other presets never change it.
 
@@ -1066,8 +1073,9 @@ If your save is missing after extracting or updating, look for another nearby
 If the engine will not start because the tank is empty, the out-of-fuel rescue
 can bring enough fuel to continue and charges the career balance.
 
-If you miss a rest stop, slow down, back up carefully, stop at the route point
-of interest, and press T when the stop supports a menu.
+If you miss a rest stop, continue safely and press T to plan the next
+sleep-capable stop. If you are already safely stopped at the missed route point,
+T opens its menu when the stop supports one.
 
 ## Release Notes And More Data
 

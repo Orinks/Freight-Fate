@@ -86,6 +86,7 @@ belongs to the truck you own in this game, not to the driver.
 | Lane keeping | `LaneKeeping` | `sim/lane.py` |
 | Driving mode tuning | `DrivingModeTuning` | `sim/driving_modes.py` |
 | Pedal latch | `PedalLatch` | `sim/pedal_latch.py` |
+| Planned rest-stop stopping assistance | `selected_stop_assist` | `settings.py`, `states/driving_events.py` |
 | Traffic vehicle | `TrafficVehicle`, `TrafficSituation`, `TrafficManager` | `sim/traffic_manager.py` |
 | Live traffic | `TrafficEvent`, `TrafficData`, `RealTrafficProvider` | `sim/real_traffic.py` |
 | Truck parking | `TruckParkingLocation`, `ParkingData`, `TruckParkingProvider` | `sim/truck_parking.py` |

@@ -1044,6 +1044,12 @@
   weather reports say when conditions are live, still loading, last known, or
   simulated because the live service is unavailable. Old failed-refresh rain
   now expires instead of lingering as if it were current.
+- **Rest-stop sleep no longer turns into a dead end at the exit.** Pressing T
+  while rolling toward a sleep-capable stop now plans and names that exact
+  stop, then tells you to press X before leaving the highway. A new optional,
+  default-off stopping aid can finish the stop at the entrance after you take
+  the selected exit; it never chooses or signals an exit for you. Missing or
+  canceling the stop clears the aid and gives spoken recovery guidance.
 
 - **The stop bar's steady tone is calmer.** The tone that means you are on top
   of the stop bar was high and sharp -- hard to sit through for the seconds it

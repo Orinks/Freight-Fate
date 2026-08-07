@@ -344,6 +344,14 @@ class DrivingUpdateMixin:
         self.trip.on_ramp = self._ramp_mi is not None
         for event in self.trip.update(dt):
             self._handle_trip_event(event)
+        if (
+            self._selected_stop_key is not None
+            and self.trip.planned_stop_key != self._selected_stop_key
+            and self._ramp_stop is None
+        ):
+            # The trip model canceled a passed plan. Do not leave explicit
+            # intent or its stopping assist armed for a later optional exit.
+            self._clear_selected_stop_intent()
         self._check_weigh_station_enforcement(pos_before)
         self._check_unsafe_damage_enforcement()
         self._check_destination_exit()

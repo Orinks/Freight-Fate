@@ -394,6 +394,32 @@ def test_driving_assistance_presets_apply_complete_mappings():
         assert settings.driving_assistance_preset == preset
 
 
+def test_selected_stop_assist_keyboard_toggle_persists_outside_presets():
+    from freight_fate.app import App
+    from freight_fate.settings import Settings
+
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, **_kwargs: spoken.append(text)
+    try:
+        assert app.ctx.settings.selected_stop_assist is False
+        cat = open_settings_category(app, "Driving assistance")
+        while not cat.items[cat.index].text.startswith("Planned rest-stop stopping assistance"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        assert cat.items[cat.index].text.endswith(": off")
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.selected_stop_assist is True
+        assert cat.items[cat.index].text.endswith(": on")
+        assert "Planned rest-stop stopping assistance: on." in spoken[-1]
+        assert Settings.load().selected_stop_assist is True
+
+        cat.handle_event(key_event(pygame.K_HOME))
+        cat.handle_event(key_event(pygame.K_RIGHT))
+        assert app.ctx.settings.selected_stop_assist is True
+    finally:
+        app.shutdown()
+
+
 def test_all_assists_preset_switches_lane_drift_off():
     from freight_fate.settings import Settings
 

@@ -442,28 +442,153 @@ class DrivingEventMixin:
         self.ctx.save_profile()
 
     def _try_rest_stop(self) -> None:
-        stop = self.trip.nearest_stop_within()
-        if self.truck.speed_mph > DOCKING_MAX_MPH:
-            self.ctx.say("Come to a complete stop first.")
-            return
-        if stop is None:
-            if not _secure_truck_for_stopped_menu(self):
-                self.ctx.say("Come to a complete stop first.")
-                return
-            reason = self.emergency_shoulder_sleep_reason()
-            if reason is None:
-                self.ctx.say(
-                    "Emergency shoulder sleep is not available here. "
-                    "Use a route stop for normal breaks and sleep."
-                )
-                return
-            self.ctx.push_state(
-                ShoulderSleepConfirmationState(self.ctx, self, reason, self.trip.position_mi)
+        rest_hint = self.ctx.control_hint("rest")
+        exit_hint = self.ctx.control_hint("take_exit")
+        status_hint = self.ctx.control_hint("status_menu")
+        if self._pull_over is not None:
+            self._set_status("Rest-stop planning unavailable during a police stop.")
+            self.ctx.say(
+                "Resolve the police stop before planning a rest stop. "
+                f"Press {exit_hint} to signal the trooper stop."
             )
             return
-        self._open_poi_stop(stop)
+        stop = self.trip.nearest_stop_within()
+        if self.truck.speed_mph <= DOCKING_MAX_MPH:
+            if stop is None:
+                if not _secure_truck_for_stopped_menu(self):
+                    self.ctx.say("Come to a complete stop first.")
+                    return
+                reason = self.emergency_shoulder_sleep_reason()
+                if reason is None:
+                    self.ctx.say(
+                        "Emergency shoulder sleep is not available here. "
+                        "Use a route stop for normal breaks and sleep."
+                    )
+                    return
+                self.ctx.push_state(
+                    ShoulderSleepConfirmationState(self.ctx, self, reason, self.trip.position_mi)
+                )
+                return
+            self._open_poi_stop(stop)
+            return
 
-    def _open_poi_stop(self, stop, *, settle: bool = False) -> None:
+        if self._ramp_stop is not None and self._is_selected_stop(self._ramp_stop):
+            active = self._ramp_stop
+            assist = (
+                "assistance is armed and will stop at the entrance after the ramp control is clear"
+                if self._selected_stop_assist_armed and self.ctx.settings.selected_stop_assist
+                else "assistance is off; brake to a complete stop at the entrance"
+            )
+            message = f"On the selected ramp for {active.spoken_name}; {assist}."
+            self._set_status(message)
+            self.ctx.say(message)
+            return
+
+        selected = self._selected_sleep_stop()
+        if selected is not None:
+            ahead = selected.at_mi - self.trip.position_mi
+            if ahead <= 0:
+                self.ctx.say(
+                    f"{selected.spoken_name} is behind you. Assistance is off. "
+                    "Continue safely and plan the next sleep-capable stop with "
+                    f"{rest_hint}. If you are already safely stopped at this route "
+                    f"point, press {rest_hint} to open its menu."
+                )
+                return
+            self._speak_selected_sleep_stop(selected, repeated=True)
+            return
+
+        if stop is not None and stop.at_mi <= self.trip.position_mi:
+            self.ctx.say(
+                f"{stop.spoken_name} is behind you. Continue safely and plan the next "
+                f"sleep-capable stop with {rest_hint}. If you are already safely stopped "
+                f"at this route point, press {rest_hint} to open its menu."
+            )
+            return
+
+        if self._exit_stop is not None and self._exit_signal_on:
+            active = self._exit_stop
+            self._set_status(f"Exit signal active for {active.spoken_name}.")
+            self.ctx.say(
+                f"The exit for {active.spoken_name} is already selected. "
+                f"Press {exit_hint} to cancel it before planning a different sleep stop."
+            )
+            return
+
+        candidates = [
+            candidate
+            for candidate in self.trip.stops
+            if 0 < candidate.at_mi - self.trip.position_mi <= self._exit_window_mi()
+            and "sleep" in candidate.actions
+            and candidate.parking != "none"
+        ]
+        candidates.sort(key=lambda candidate: candidate.at_mi)
+        if not candidates:
+            self._set_status("No sleep-capable route stop close enough ahead to plan.")
+            self.ctx.say(
+                "No sleep-capable route stop is close enough ahead to plan. "
+                f"Open the driving status menu with {status_hint} and review upcoming "
+                "route points. If you must rest, stop "
+                "safely away from a route point and use emergency shoulder sleep."
+            )
+            return
+        candidate = candidates[0]
+        current = self.trip.planned_stop
+        if current is not None and current.key != candidate.key:
+            self._set_status(f"Planned stop remains {current.spoken_name}.")
+            self.ctx.say(
+                f"Your planned stop remains {current.spoken_name}. "
+                f"{candidate.spoken_name} is also ahead. Open the stop details from "
+                "the route map to move the plan before selecting it."
+            )
+            return
+        self.trip.planned_stop_key = candidate.key
+        self._selected_stop_key = candidate.key
+        self._selected_stop_assist_armed = False
+        self._selected_stop_assist_said = False
+        self._speak_selected_sleep_stop(candidate, repeated=False)
+
+    def _selected_sleep_stop(self):
+        key = self._selected_stop_key
+        if key is None:
+            return None
+        return next((stop for stop in self.trip.stops if stop.key == key), None)
+
+    def _is_selected_stop(self, stop) -> bool:
+        return self._selected_stop_key is not None and self._selected_stop_key == getattr(
+            stop, "key", None
+        )
+
+    def _speak_selected_sleep_stop(self, stop, *, repeated: bool) -> None:
+        ahead = max(0.0, stop.at_mi - self.trip.position_mi)
+        distance = self.ctx.settings.distance_text(ahead, precise=True)
+        exit_text = f" at {stop.exit_label}" if stop.exit_label else ""
+        assist = (
+            "Planned rest-stop stopping assistance is on; after you signal and set "
+            "the exit lane, it will stop at the entrance."
+            if self.ctx.settings.selected_stop_assist
+            else "Planned rest-stop stopping assistance is off; brake to a complete stop at the entrance."
+        )
+        prefix = "Still selected" if repeated else "Planned sleep stop selected"
+        message = (
+            f"{prefix}: {stop.spoken_name}, {distance} ahead{exit_text}. "
+            f"Press {self.ctx.control_hint('take_exit')} to signal for this exit. {assist}"
+        )
+        self._set_status(message)
+        self.ctx.say(message)
+
+    def _clear_selected_stop_intent(self) -> None:
+        if self._selected_stop_assist_brake > 0.0:
+            if self.truck.brake <= self._selected_stop_assist_brake + 1e-6:
+                self.truck.brake = 0.0
+            self._selected_stop_assist_brake = 0.0
+        self._selected_stop_key = None
+        self._selected_stop_assist_armed = False
+        self._selected_stop_assist_said = False
+
+    def _open_poi_stop(
+        self, stop, *, settle: bool = False, prefer_sleep: bool | None = None
+    ) -> None:
         # Secure the truck before handing off to the stop menu: zero the
         # throttle, apply the service brake, and set the parking brake. A truck
         # that rolled in just under the docking threshold (or idled in gear)
@@ -472,6 +597,11 @@ class DrivingEventMixin:
         if not _secure_truck_for_stopped_menu(self):
             self.ctx.say("Come to a complete stop first.")
             return
+        selected_sleep_intent = self._is_selected_stop(stop)
+        if prefer_sleep is None:
+            prefer_sleep = selected_sleep_intent
+        if selected_sleep_intent:
+            self._clear_selected_stop_intent()
         if self.trip.is_planned(stop):
             # Plan fulfilled; the stop menu announces itself.
             self.trip.planned_stop_key = None
@@ -484,16 +614,16 @@ class DrivingEventMixin:
 
             def complete() -> None:
                 self.ctx.pop_state()
-                self._open_poi_stop(stop, settle=False)
+                self._open_poi_stop(stop, settle=False, prefer_sleep=prefer_sleep)
 
             self.ctx.push_state(
                 TimedMessageState(
                     self.ctx,
                     title="Pulling into stop",
                     message=(
-                        f"Pulling into {stop.spoken_name}. Brakes set; menu opening in a moment."
+                        f"Stopped at {stop.spoken_name}. Brakes set; menu opening in a moment."
                     ),
-                    status="Pulling into the route stop. Please wait.",
+                    status=f"Stopped at {stop.spoken_name}; menu opening. Please wait.",
                     seconds=STOP_PULL_IN_WAIT_S,
                     on_complete=complete,
                     sound_key="ui/notify",
@@ -507,7 +637,7 @@ class DrivingEventMixin:
         ):
             self.ctx.push_state(ParkingFullState(self.ctx, self, stop))
             return
-        self.ctx.push_state(RestStopState(self.ctx, self, stop))
+        self.ctx.push_state(RestStopState(self.ctx, self, stop, prefer_sleep=prefer_sleep))
         self.ctx.award_achievement("first_rest_stop")
 
     def _take_exit(self) -> None:
@@ -517,10 +647,18 @@ class DrivingEventMixin:
         if self._ramp_mi is not None:
             self.ctx.say("You are already on the exit ramp. Brake to a stop.")
             return
-        stop = self._exit_stop or self._upcoming_exit_stop()
+        selected = self._selected_sleep_stop()
+        selected_ahead = (
+            selected is not None
+            and 0 < selected.at_mi - self.trip.position_mi <= self._exit_window_mi()
+        )
+        # Explicit T selection outranks inferred destination bookkeeping.
+        stop = selected if selected_ahead else self._exit_stop or self._upcoming_exit_stop()
         if stop is None:
             self.ctx.say(
-                "No route exit to signal for yet. Exits are announced as you approach them."
+                "No route exit to signal for yet. Press "
+                f"{self.ctx.control_hint('rest')} to plan an upcoming "
+                "sleep-capable stop, or wait for an exit announcement."
             )
             return
         responding_to_destination_callout = (
@@ -553,7 +691,18 @@ class DrivingEventMixin:
             # at ramp speed down the open highway after the driver begged off.
             self._cruise_exit_mph = None
             self._destination_exit_response_s = 0.0
-            self.ctx.say("Signal canceled. Keep following the highway.")
+            canceled_selected = self._is_selected_stop(stop)
+            if canceled_selected:
+                self._clear_selected_stop_intent()
+            planned = (
+                " Planned rest-stop stopping assistance disarmed. Your planned stop "
+                "remains on the route map."
+                if canceled_selected
+                else ""
+            )
+            message = f"Signal canceled. Keep following the highway.{planned}"
+            self._set_status(message)
+            self.ctx.say(message)
             return
         self._exit_signal_on = True
         self._exit_cancel_armed = False
@@ -600,6 +749,19 @@ class DrivingEventMixin:
                 "Move right for the exit lane, then slow to "
                 f"{ramp_text} or less for the ramp.{ending}" + self._cap_cruise_for_ramp()
             )
+        if self._is_selected_stop(stop):
+            self._selected_stop_assist_armed = self.ctx.settings.selected_stop_assist
+            if self._selected_stop_assist_armed:
+                lane_action = (
+                    "Set the exit lane; " if self.ctx.settings.steering_assist != "off" else ""
+                )
+                message += (
+                    " Planned rest-stop stopping assistance armed. "
+                    f"{lane_action}After the ramp control is clear, it will stop at the entrance."
+                )
+            else:
+                message += " Brake to a complete stop at the entrance."
+        self._set_status(message)
         if responding_to_destination_callout:
             # Queue behind whichever event is currently speaking. Usually that
             # is the exit callout; if a critical warning preempted it, the
@@ -1691,6 +1853,8 @@ class DrivingEventMixin:
             if not self._ramp_light_announced and self._ramp_mi <= RAMP_CONTROL_ANNOUNCE_MI:
                 self._announce_ramp_terminal()
             self._update_ramp_terminal_assist()
+            if self._update_selected_stop_assist():
+                return
             if not self._ramp_terminal_done and self._ramp_mi <= RAMP_ACCESS_MI:
                 self._update_ramp_terminal()
             if self._ramp_mi > 0:
@@ -1783,6 +1947,8 @@ class DrivingEventMixin:
                 planned = self.trip.is_planned(stop)
                 if planned:
                     self.trip.planned_stop_key = None
+                if self._is_selected_stop(stop):
+                    self._clear_selected_stop_intent()
                 exit_ref = (
                     f"{stop.exit_label} for {stop.spoken_name}"
                     if stop.exit_label
@@ -1795,6 +1961,10 @@ class DrivingEventMixin:
                 )
                 if planned:
                     line += " Plan cancelled."
+                line += (
+                    " Planned rest-stop stopping assistance is off. Continue safely and "
+                    f"press {self.ctx.control_hint('rest')} to plan the next sleep-capable stop."
+                )
                 self.ctx.say_event(line, interrupt=True)
                 return
             return
@@ -1818,6 +1988,8 @@ class DrivingEventMixin:
         if self.trip.position_mi > stop.at_mi + EXIT_COMMIT_WINDOW_MI:
             self._reset_exit_lane_state()
             self._exit_signal_on = False
+            if self._is_selected_stop(stop):
+                self._clear_selected_stop_intent()
             pressure = self._active_exit_pressure(stop)
             if pressure is not None and pressure.intensity >= 0.35:
                 self.ctx.say_event(
@@ -1829,6 +2001,8 @@ class DrivingEventMixin:
         if not self._exit_intent_ready(stop):
             self._reset_exit_lane_state()
             self._exit_signal_on = False
+            if self._is_selected_stop(stop):
+                self._clear_selected_stop_intent()
             place = self._missed_exit_phrase(stop)
             self.ctx.say_event(
                 f"You missed {place}: the turn signal was not set. "
@@ -1838,6 +2012,8 @@ class DrivingEventMixin:
         if not self._exit_lane_ready():
             self._reset_exit_lane_state()
             self._exit_signal_on = False
+            if self._is_selected_stop(stop):
+                self._clear_selected_stop_intent()
             missed = self._missed_exit_phrase(stop)
             pressure = self._active_exit_pressure(stop)
             if pressure is not None:
@@ -1904,9 +2080,61 @@ class DrivingEventMixin:
                 # also emit a "drove past your planned stop" warning next tick.
                 self.trip.planned_stop_key = None
                 line += " Plan cancelled."
+            if self._is_selected_stop(stop):
+                self._clear_selected_stop_intent()
             self.ctx.say_event(line, interrupt=True)
             self._exit_signal_on = False
             self._reset_exit_lane_state()
+
+    def _update_selected_stop_assist(self) -> bool:
+        """Brake an explicitly selected optional stop at its entrance."""
+        stop = self._ramp_stop
+        if (
+            stop is None
+            or not self._selected_stop_assist_armed
+            or not self._is_selected_stop(stop)
+            or not self.ctx.settings.selected_stop_assist
+            or not self._ramp_terminal_done
+        ):
+            return False
+        if self._ramp_mi is not None and self._ramp_mi <= -RAMP_OVERSHOOT_MI:
+            return False
+        gap_mi = max(0.0, self._ramp_mi or 0.0)
+        speed = self.truck.speed_mph
+        if speed <= DOCKING_MAX_MPH and gap_mi <= 0.08:
+            self.truck.throttle = 0.0
+            self.truck.brake = 1.0
+            self.truck.set_parking_brake()
+            self._ramp_mi = None
+            self._ramp_stop = None
+            self._ramp_control = ""
+            self._exit_signal_on = False
+            self._cruise_exit_mph = None
+            self._reset_exit_lane_state()
+            self._open_poi_stop(stop, settle=True)
+            return True
+        if speed <= DOCKING_MAX_MPH:
+            # Stopped short of the entrance: never trap the driver in a brake
+            # hold. The ramp guidance tells them to pull ahead.
+            self.truck.brake = 0.0
+            return False
+        gap_m = max(0.5, gap_mi * 1609.344)
+        v_mps = max(0.0, self.truck.velocity_mps)
+        needed = (v_mps * v_mps) / (2.0 * gap_m)
+        if needed < RAMP_ASSIST_DECEL_START_MPS2 and gap_mi > 0.08:
+            return False
+        self.truck.throttle = 0.0
+        assist_brake = min(1.0, max(0.3, needed / RAMP_ASSIST_FULL_DECEL_MPS2))
+        self.truck.brake = max(self.truck.brake, assist_brake)
+        self._selected_stop_assist_brake = max(self._selected_stop_assist_brake, assist_brake)
+        if not self._selected_stop_assist_said:
+            self._selected_stop_assist_said = True
+            self._pause_speed_control()
+            self.ctx.say_event(
+                f"Planned rest-stop stopping assistance braking for the entrance to {stop.spoken_name}.",
+                interrupt=False,
+            )
+        return False
 
     def _toggle_cruise(self) -> None:
         t = self.truck

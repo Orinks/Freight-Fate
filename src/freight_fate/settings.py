@@ -130,6 +130,10 @@ class Settings:
     descent_speed_control: str = "realistic"
     exit_speed_assist: bool = True
     destination_approach_assist: bool = False
+    # An explicit-plan accessibility aid, separate from the realism presets:
+    # T plans a sleep stop, X signals for it, and only then may this bring the
+    # truck to a complete stop at the entrance. Presets never turn it on.
+    selected_stop_assist: bool = False
     curve_speed_assist: bool = True
     route_transition_assist: bool = True
     # Lets an armed speed-control session cover low-speed zones without a held
@@ -296,6 +300,8 @@ class Settings:
                 continue
             if not isinstance(getattr(s, field), bool):
                 setattr(s, field, getattr(cls(), field))
+        if not isinstance(s.selected_stop_assist, bool):
+            s.selected_stop_assist = False
         if s.descent_speed_control not in ("off", "realistic", "balanced", "interactive"):
             s.descent_speed_control = "realistic"
         if s.driving_assistance_preset not in (*DRIVING_ASSIST_PRESETS, "custom"):

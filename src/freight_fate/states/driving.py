@@ -228,6 +228,13 @@ class DrivingState(
         self._rescue_offered = False
         self._signal_timer = 0.0
         self._exit_stop = None  # active route exit
+        # Stable proof that the player explicitly selected an optional sleep
+        # stop with T. _exit_stop is not enough: destination approaches infer
+        # it automatically, and a canceled signal can leave it populated.
+        self._selected_stop_key: str | None = None
+        self._selected_stop_assist_armed = False
+        self._selected_stop_assist_said = False
+        self._selected_stop_assist_brake = 0.0
         self._exit_signal_on = False
         self._exit_signal_canceled = False
         self._exit_lane_alignment = 0.0
@@ -499,6 +506,7 @@ class DrivingState(
             # Mid-departure-chain saves resume on the origin's streets.
             "departure_chain": self._departure_chain,
             "planned_stop_key": self.trip.planned_stop_key,
+            "selected_stop_key": self._selected_stop_key,
             # Kept for a save opened by an older build, which knows only the name.
             "planned_stop": self.trip.planned_stop_label or None,
         }
@@ -575,6 +583,10 @@ class DrivingState(
                 legacy_name = data.get("planned_stop") or None
                 planned_key = state.trip.resolve_stop_key(legacy_name) if legacy_name else None
             state.trip.planned_stop_key = planned_key
+            selected_key = data.get("selected_stop_key") or None
+            state._selected_stop_key = (
+                selected_key if selected_key == state.trip.planned_stop_key else None
+            )
             state.trip.restore_toll_charges(list(data.get("toll_charges", ())))
             if bool(data.get("surface_chain", False)):
                 # The save was made on the facility's street chain: re-enter

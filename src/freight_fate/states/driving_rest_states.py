@@ -352,10 +352,11 @@ class RestStopState(MenuState):
         "clock, and your delivery deadline keeps counting."
     )
 
-    def __init__(self, ctx, driving: DrivingState, stop) -> None:
+    def __init__(self, ctx, driving: DrivingState, stop, *, prefer_sleep: bool = False) -> None:
         super().__init__(ctx)
         self.driving = driving
         self.stop = stop
+        self._prefer_sleep = prefer_sleep
         self._fueled_here = False  # a fuel purchase this visit (free showers)
         self._confirm_sleep_rested = False
 
@@ -365,7 +366,19 @@ class RestStopState(MenuState):
 
     def enter(self) -> None:
         self._confirm_sleep_rested = False
-        super().enter()
+        self.items = self.build_items()
+        if self._prefer_sleep:
+            self.index = next(
+                (i for i, item in enumerate(self.items) if item.text.startswith("Sleep ")),
+                0,
+            )
+            # This is an arrival hint, not a permanent focus policy. Returning
+            # from a submenu must preserve the row the player invoked.
+            self._prefer_sleep = False
+        else:
+            self.index = min(self.index, max(0, len(self.items) - 1))
+        self.ctx.audio.play(self.open_sound_key)
+        self.announce_entry()
 
     # Moving off a sleep item withdraws its pending double-press confirmation,
     # so a stale "press Enter again" can never sleep you silently later.
