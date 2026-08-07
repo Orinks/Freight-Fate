@@ -1224,7 +1224,7 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
 
         open_driver_app(app, "Weather")
         weather_lines = [item.text for item in app.state.items]
-        assert any(line.startswith("Weather:") for line in weather_lines)
+        assert any(line.startswith("Weather source:") for line in weather_lines)
         assert any(line.startswith("Safe speed guidance:") for line in weather_lines)
         weather_screen = app.state
 
@@ -1245,11 +1245,11 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         driving.weather.city = "current-route-cell"
         selected = weather_screen.index
         assert weather_screen.items[0].text.startswith(
-            "Weather: Live weather is loading for your current route position"
+            "Weather source: Live weather is loading for your current route position"
         )
         weather_screen.handle_event(key_event(pygame.K_RETURN))
         assert spoken[-1][0].startswith(
-            "Weather: Live weather is loading for your current route position"
+            "Weather source: Live weather is loading for your current route position"
         )
         assert weather_screen.index == selected
 
@@ -1257,10 +1257,14 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
         weather_screen.update(1 / 60)
         assert spoken[-1][0].startswith("Weather updated. Live weather: rain")
         assert spoken[-1][1] is False
-        assert weather_screen.items[0].text.startswith("Weather: Live weather: rain")
+        assert weather_screen.items[0].text.startswith(
+            "Weather source: Live weather for your current route position"
+        )
         assert driving.trip._weather_source_status == "live"
         weather_screen.handle_event(key_event(pygame.K_RETURN))
-        assert spoken[-1][0].startswith("Weather: Live weather: rain")
+        assert spoken[-1][0].startswith(
+            "Weather source: Live weather for your current route position"
+        )
         assert weather_screen.index == selected
         app.state.handle_event(key_event(pygame.K_ESCAPE))  # app -> tablet
 

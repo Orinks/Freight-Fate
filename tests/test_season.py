@@ -342,3 +342,52 @@ def test_terminal_identifies_intentionally_disabled_online_weather(monkeypatch):
         assert "Simulated fallback weather" not in spoken[-1]
     finally:
         app.shutdown()
+
+
+def test_terminal_reports_old_fresh_observation_as_live_without_updating(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.sim.weather import WeatherKind
+    from freight_fate.states.city import CityMenuState
+
+    class FreshOldProvider:
+        def request(self, *args):
+            pass
+
+        def get(self, *args):
+            return WeatherKind.RAIN
+
+        def get_temperature(self, *args):
+            return 18.0
+
+        def stale(self, *args):
+            return False
+
+        def observation_age_s(self, *args):
+            return 12 * 60
+
+        def refreshing(self, *args):
+            return False
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: FreshOldProvider())
+    app.ctx.settings.real_weather = True
+    app.ctx.profile = Profile(name="Fresh Old Weather Driver")
+    try:
+        terminal = CityMenuState(app.ctx)
+        terminal.enter()
+        while terminal.items[terminal.index].text != "Time and weather":
+            terminal.handle_event(
+                pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN, unicode="", mod=0)
+            )
+        terminal.handle_event(
+            pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, unicode="", mod=0)
+        )
+        assert "Live weather" in spoken[-1]
+        assert "Last-known" not in spoken[-1]
+        assert "The observation is 12 minutes old" in spoken[-1]
+        assert "updating" not in spoken[-1].lower()
+    finally:
+        app.shutdown()

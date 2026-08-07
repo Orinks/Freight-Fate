@@ -1482,6 +1482,7 @@ def test_v_reports_live_weather_from_multiple_current_route_positions(monkeypatc
 
 def test_v_distinguishes_loading_last_known_and_fallback(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.sim.trip import TripEventKind
     from freight_fate.sim.weather import WeatherKind
     from freight_fate.states.driving_menu_states import DriverAppScreenState
 
@@ -1489,6 +1490,8 @@ def test_v_distinguishes_loading_last_known_and_fallback(monkeypatch):
         kind = None
         is_stale = False
         is_unavailable = False
+        is_refreshing = False
+        is_failed = False
 
         def request(self, *args):
             pass
@@ -1501,6 +1504,15 @@ def test_v_distinguishes_loading_last_known_and_fallback(monkeypatch):
 
         def unavailable(self, key):
             return self.is_unavailable
+
+        def refreshing(self, key):
+            return self.is_refreshing
+
+        def observation_age_s(self, key):
+            return 12 * 60 if self.kind is not None else None
+
+        def refresh_failed(self, key):
+            return self.is_failed
 
     provider = StatefulProvider()
     app = App()
@@ -1521,16 +1533,45 @@ def test_v_distinguishes_loading_last_known_and_fallback(monkeypatch):
         provider.is_stale = True
         driving.handle_event(event)
         assert spoken[-1].startswith("Last-known live weather: heavy rain")
+        assert "The observation is 12 minutes old" in spoken[-1]
+        assert "updating" not in spoken[-1].lower()
         assert "Ahead:" not in spoken[-1]
         status_weather = next(
             line for line in driving.status_lines() if line.startswith("Weather:")
         )
         assert "Last-known live weather" in status_weather
         tablet = DriverAppScreenState(app.ctx, driving, "weather")
-        assert tablet._weather_lines()[0].startswith("Weather: Last-known live weather: heavy rain")
+        assert [line.split(":", 1)[0] for line in tablet._weather_lines()] == [
+            "Weather source",
+            "Observation age",
+            "Conditions",
+            "Safe speed guidance",
+            "Forecast ahead",
+        ]
+        assert tablet._weather_lines()[0].startswith(
+            "Weather source: Last-known live weather for your current route position"
+        )
+        assert tablet._weather_lines()[1] == "Observation age: 12 minutes old."
         tablet.enter()
         selected = tablet.index
-        assert tablet.items[0].text.startswith("Weather: Last-known live weather: heavy rain")
+        assert tablet.items[0].text.startswith("Weather source: Last-known live weather")
+
+        provider.is_refreshing = True
+        driving.handle_event(event)
+        assert "Live weather is updating for your current location" in spoken[-1]
+        provider.is_refreshing = False
+
+        provider.is_failed = True
+        tablet.update(0.0)
+        assert "The latest live weather check failed" in spoken[-1]
+        assert driving.trip._weather_refresh_issue_announced
+        duplicate_events = driving.trip.update(0.0)
+        assert not any(
+            event.kind is TripEventKind.WEATHER_CHANGE
+            and "latest live weather check failed" in event.message
+            for event in duplicate_events
+        )
+        provider.is_failed = False
 
         provider.kind = None
         provider.is_unavailable = True
@@ -1538,12 +1579,70 @@ def test_v_distinguishes_loading_last_known_and_fallback(monkeypatch):
         driving.handle_event(event)
         assert spoken[-1].startswith("Simulated fallback weather:")
         assert "Ahead:" in spoken[-1]
-        assert tablet.items[0].text.startswith("Weather: Simulated fallback weather:")
+        assert tablet.items[0].text.startswith("Weather source: Simulated fallback weather")
         tablet.handle_event(
             pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, unicode="", mod=0)
         )
-        assert spoken[-1].startswith("Weather: Simulated fallback weather:")
+        assert spoken[-1].startswith("Weather source: Simulated fallback weather")
         assert tablet.index == selected
+    finally:
+        app.shutdown()
+
+
+def test_old_but_freshly_fetched_weather_is_live_across_v_status_and_tablet(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+    from freight_fate.states.driving_menu_states import DriverAppScreenState
+
+    class FreshOldProvider:
+        def request(self, *args):
+            pass
+
+        def get(self, key):
+            return WeatherKind.RAIN
+
+        def stale(self, key):
+            return False
+
+        def unavailable(self, key):
+            return False
+
+        def refreshing(self, key):
+            return False
+
+        def refresh_failed(self, key):
+            return False
+
+        def observation_age_s(self, key):
+            return 12 * 60
+
+    app = App()
+    spoken = []
+    provider = FreshOldProvider()
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: provider)
+    app.ctx.settings.real_weather = True
+    try:
+        driving = start_drive(app)
+        driving.trip.update(0.0)
+        driving.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_v, unicode="v", mod=0))
+        assert spoken[-1].startswith("Live weather: rain")
+        assert "The observation is 12 minutes old" in spoken[-1]
+        assert "updating" not in spoken[-1].lower()
+
+        weather_status = next(
+            line for line in driving.status_lines() if line.startswith("Weather:")
+        )
+        assert "Live weather: rain" in weather_status
+        assert "The observation is 12 minutes old" in weather_status
+        assert "updating" not in weather_status.lower()
+
+        tablet = DriverAppScreenState(app.ctx, driving, "weather")
+        assert tablet._weather_lines()[0].startswith(
+            "Weather source: Live weather for your current route position"
+        )
+        assert tablet._weather_lines()[1] == "Observation age: 12 minutes old."
+        assert "updating" not in " ".join(tablet._weather_lines()).lower()
     finally:
         app.shutdown()
 

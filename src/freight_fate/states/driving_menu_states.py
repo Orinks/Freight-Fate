@@ -352,6 +352,10 @@ class DriverAppScreenState(MenuState):
         self.driving = driving
         self.app_key = app_key
         self._weather_status = driving.weather.source_status if app_key == "weather" else None
+        self._weather_refresh_failed = (
+            driving.weather.live_weather_refresh_failed if app_key == "weather" else False
+        )
+        self._weather_refresh_issue_announced = False
 
     @property
     def title(self) -> str:  # type: ignore[override]
@@ -360,7 +364,7 @@ class DriverAppScreenState(MenuState):
     def build_items(self) -> list[MenuItem]:
         if self.app_key == "weather":
             items = []
-            for index in range(4):
+            for index in range(len(self._weather_lines())):
 
                 def label(index=index):
                     return self._weather_lines()[index]
@@ -398,23 +402,40 @@ class DriverAppScreenState(MenuState):
         weather = self.driving.weather
         changed = weather.update(0.0)
         status = weather.source_status
-        if changed is None and status == self._weather_status:
+        refresh_failed = weather.live_weather_refresh_failed
+        refresh_failure_started = refresh_failed and not self._weather_refresh_failed
+        if changed is None and status == self._weather_status and not refresh_failure_started:
+            self._weather_refresh_failed = refresh_failed
             return
         previous_status = self._weather_status
         self._weather_status = status
+        self._weather_refresh_failed = refresh_failed
         if status not in ("live", "last_known", "fallback"):
             return
-        if changed is not None or previous_status != status:
+        suppress_routine_refresh = (status == "last_known" and weather.live_weather_refreshing) or (
+            status == "live"
+            and previous_status == "last_known"
+            and not self._weather_refresh_issue_announced
+        )
+        if (changed is not None or previous_status != status or refresh_failure_started) and not (
+            suppress_routine_refresh
+        ):
+            prefix = "Weather updated" if changed is not None else "Weather status changed"
             self.ctx.say(
-                f"Weather updated. {weather.report_lead(self.ctx.settings.imperial_units)}.",
+                f"{prefix}. {weather.report_lead(self.ctx.settings.imperial_units)}.",
                 interrupt=False,
             )
+            self._weather_refresh_issue_announced = status == "last_known" and refresh_failed
             # The active tablet consumed this provider update. Keep the paused
             # trip's source tracker aligned so returning to driving does not
             # repeat a generic readiness announcement.
             self.driving.trip._weather_source_status = status
+            self.driving.trip._weather_refresh_issue_announced = (
+                status == "last_known" and refresh_failed
+            )
             if status in ("live", "fallback"):
                 self.driving.trip._weather_location_refreshing = False
+                self._weather_refresh_issue_announced = False
 
     def _lines(self) -> list[str]:
         if self.app_key == "weather":
@@ -441,10 +462,15 @@ class DriverAppScreenState(MenuState):
     def _weather_lines(self) -> list[str]:
         d = self.driving
         settings = self.ctx.settings
+        source = d.weather.source_label()
+        if d.weather.live_weather_refreshing:
+            source += ". Live weather is updating for your current location"
+        elif d.weather.live_weather_refresh_failed:
+            source += ". The latest live weather check failed"
         lines = [
-            f"Weather: {d.weather.report_lead(settings.imperial_units)}.",
-            f"{d.weather.conditions_label()}: "
-            f"{d.weather.source_conditions(settings.imperial_units)}",
+            f"Weather source: {source}.",
+            f"Observation age: {d.weather.observation_age_value()}.",
+            f"Conditions: {d.weather.source_conditions(settings.imperial_units)}",
             f"Safe speed guidance: about {settings.speed_text(d.weather.effects.safe_speed_mph)}.",
         ]
         if d.weather.has_simulated_forecast:

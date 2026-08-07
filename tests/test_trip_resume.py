@@ -112,6 +112,55 @@ def test_active_drive_snapshot_restores_paused_speed_control_session(monkeypatch
         app.shutdown()
 
 
+def test_resumed_drive_reports_old_fresh_observation_as_live(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+    from freight_fate.states.driving import DrivingState
+
+    class FreshOldProvider:
+        def request(self, *args):
+            pass
+
+        def get(self, *args):
+            return WeatherKind.RAIN
+
+        def stale(self, *args):
+            return False
+
+        def unavailable(self, *args):
+            return False
+
+        def refreshing(self, *args):
+            return False
+
+        def refresh_failed(self, *args):
+            return False
+
+        def observation_age_s(self, *args):
+            return 12 * 60
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        driving = start_drive(app)
+        resumed = DrivingState.from_snapshot(app.ctx, driving.snapshot())
+        assert resumed is not None
+        resumed.weather.provider = FreshOldProvider()
+        resumed.weather.live = False
+        resumed.weather.city = None
+        resumed.trip.update(0.0)
+
+        resumed.enter()
+
+        resume_message = next(text for text in spoken if text.startswith("Resuming your"))
+        assert "Live weather: rain" in resume_message
+        assert "The observation is 12 minutes old" in resume_message
+        assert "updating" not in resume_message.lower()
+    finally:
+        app.shutdown()
+
+
 def quit_to_menu(app):
     from freight_fate.states.driving import PauseMenuState
     from freight_fate.states.main_menu import MainMenuState

@@ -487,10 +487,80 @@ class WeatherSystem:
         return {
             "live": "Live weather for your current route position",
             "loading": "Live weather is loading for your current route position",
-            "last_known": "Last-known live weather while this location updates",
+            "last_known": "Last-known live weather for your current route position",
             "fallback": "Simulated fallback weather; live weather is unavailable",
             "simulated": "Simulated weather",
         }[self.source_status]
+
+    @property
+    def live_weather_refreshing(self) -> bool:
+        """Whether the provider is actively fetching the tracked location."""
+        if self.provider is None or self.city is None:
+            return False
+        checker = getattr(self.provider, "refreshing", None)
+        if checker is None:
+            return False
+        try:
+            return bool(checker(self.city))
+        except Exception:  # pragma: no cover - defensive
+            return False
+
+    @property
+    def live_weather_refresh_failed(self) -> bool:
+        """Whether the tracked location's most recent refresh attempt failed."""
+        if self.provider is None or self.city is None:
+            return False
+        checker = getattr(self.provider, "refresh_failed", None)
+        if checker is None:
+            return False
+        try:
+            return bool(checker(self.city))
+        except Exception:  # pragma: no cover - defensive
+            return False
+
+    def observation_age_text(self) -> str | None:
+        """A standalone age sentence for the current station observation."""
+        if self.provider is None or self.city is None:
+            return None
+        getter = getattr(self.provider, "observation_age_s", None)
+        if getter is None:
+            return None
+        try:
+            age_s = getter(self.city)
+        except Exception:  # pragma: no cover - defensive
+            return None
+        if age_s is None:
+            return None
+        minutes = max(0, int(float(age_s) // 60))
+        if minutes < 1:
+            return "The observation is less than a minute old"
+        unit = "minute" if minutes == 1 else "minutes"
+        return f"The observation is {minutes} {unit} old"
+
+    def last_known_notice(self) -> str:
+        """Honest last-known status for announcements and source reports."""
+        parts = []
+        age = self.observation_age_text()
+        if age:
+            parts.append(age)
+        if self.live_weather_refreshing:
+            parts.append("Live weather is updating for your current location")
+        elif self.live_weather_refresh_failed:
+            parts.append("The latest live weather check failed")
+        return ". ".join(parts) or "Observation age is unavailable"
+
+    def observation_age_value(self) -> str:
+        """Stable value for a dedicated status or tablet observation-age row."""
+        if self.source_status in ("simulated", "fallback"):
+            return "not applicable"
+        age = self.observation_age_text()
+        if age is None:
+            return "unavailable"
+        return age.removeprefix("The observation is ")
+
+    def live_observation_notice(self) -> str:
+        """Standalone age text for a live observation, when available."""
+        return self.observation_age_text() or "Observation age is unavailable"
 
     def report_lead(self, imperial: bool = True) -> str:
         status = self.source_status
@@ -498,9 +568,12 @@ class WeatherSystem:
         if status == "loading":
             return f"{self.source_label()}. Temporary neutral driving conditions are in use"
         if status == "live":
-            return f"Live weather: {conditions}, near your current route position"
+            return (
+                f"Live weather: {conditions}, near your current route position. "
+                f"{self.live_observation_notice()}"
+            )
         if status == "last_known":
-            return f"Last-known live weather: {conditions}. Updating for your current location"
+            return f"Last-known live weather: {conditions}. {self.last_known_notice()}"
         if status == "fallback":
             return f"Simulated fallback weather: {conditions}. Live weather is unavailable"
         return f"Simulated weather: {conditions}"
@@ -560,6 +633,7 @@ class WeatherSystem:
         self.provider.request(self.city, lat, lon)
         kind = self.provider.get(self.city)
         if kind is None:
+            self._carried_last_known = self._carried_last_known or self.live
             self.live = False
             self._live_raw = None
             self._live_city = None

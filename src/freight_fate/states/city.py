@@ -506,6 +506,8 @@ class CityMenuState(MenuState):
         hour = to_local(p.game_hours, zone) % 24.0
         day = p.market_day() + 1
         desc, live, loading, last_known = None, False, False, False
+        observation_age = None
+        refreshing = False
         provider = self.ctx.real_weather_provider()
         if provider is not None:
             # Keyed by the city key, not the spoken name: two cities can share
@@ -516,6 +518,12 @@ class CityMenuState(MenuState):
                 desc, live = kind.value, True
                 stale = getattr(provider, "stale", None)
                 last_known = stale is not None and stale(city.key)
+                age_getter = getattr(provider, "observation_age_s", None)
+                if age_getter is not None:
+                    observation_age = age_getter(city.key)
+                refresh_checker = getattr(provider, "refreshing", None)
+                if refresh_checker is not None:
+                    refreshing = bool(refresh_checker(city.key))
             else:
                 unavailable = getattr(provider, "unavailable", None)
                 loading = unavailable is None or not unavailable(city.key)
@@ -576,11 +584,22 @@ class CityMenuState(MenuState):
             source = "Simulated weather; online services are off"
         else:
             source = "Simulated weather"
+        freshness = ""
+        if live and observation_age is not None:
+            minutes = max(0, int(float(observation_age) // 60))
+            age = (
+                "less than a minute"
+                if minutes < 1
+                else f"{minutes} {'minute' if minutes == 1 else 'minutes'}"
+            )
+            freshness = f" The observation is {age} old."
+        if last_known and refreshing:
+            freshness += " Live weather is updating."
         self.ctx.say(
             f"It is {clock_text(hour)} {zone.name}, {time_of_day(hour)}, "
             f"{date_text(season_hours)}, in {season(season_hours)}, "
             f"day {day} of your career. "
-            f"{source} in {city.name}: {desc}."
+            f"{source} in {city.name}: {desc}.{freshness}"
         )
 
     def _sleep(self) -> None:

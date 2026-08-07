@@ -256,17 +256,37 @@ class RealWeatherProvider:
             return entry.temperature_c
 
     def stale(self, city: str) -> bool:
-        """Whether a usable observation is past its refresh interval."""
+        """Whether usable cached data is due for a network refresh.
+
+        Refresh cadence follows when the response was fetched. The station's
+        observation timestamp is reported separately and does not make a
+        freshly fetched, still-usable response last-known.
+        """
         with self._lock:
             entry = self._cache.get(city)
             return (
                 entry is not None
                 and self._usable(entry)
-                and (
-                    self._clock() - entry.fetched_at >= CACHE_TTL_S
-                    or self._wall_clock() - entry.observed_at >= CACHE_TTL_S
-                )
+                and self._clock() - entry.fetched_at >= CACHE_TTL_S
             )
+
+    def refreshing(self, city: str) -> bool:
+        """Whether a network request for this location is actually in flight."""
+        with self._lock:
+            return city in self._inflight
+
+    def observation_age_s(self, city: str) -> float | None:
+        """Age of the cached station observation, separate from fetch activity."""
+        with self._lock:
+            entry = self._cache.get(city)
+            if entry is None:
+                return None
+            return max(0.0, self._wall_clock() - entry.observed_at)
+
+    def refresh_failed(self, city: str) -> bool:
+        """Whether the most recent completed refresh attempt failed."""
+        with self._lock:
+            return city not in self._inflight and city in self._failed_at
 
     def _usable(self, entry: _CachedObservation) -> bool:
         return (

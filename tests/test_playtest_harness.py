@@ -162,8 +162,17 @@ def test_playtest_harness_weather_shortcut_and_tablet_share_live_source(monkeypa
         harness.press_key(pygame.K_TAB)
         open_driver_apps(harness.app)
         weather_screen = open_driver_app(harness.app, "Weather")
-        assert weather_screen.items[0].text.startswith("Weather: Live weather: rain")
-        assert weather_screen.items[1].text.startswith("Live conditions: rain")
+        assert weather_screen.items[0].text.startswith(
+            "Weather source: Live weather for your current route position"
+        )
+        assert [item.text.split(":", 1)[0] for item in weather_screen.items[:-1]] == [
+            "Weather source",
+            "Observation age",
+            "Conditions",
+            "Safe speed guidance",
+            "Forecast ahead",
+        ]
+        assert weather_screen.items[2].text.startswith("Conditions: rain")
 
 
 def test_company_driver_first_delivery_transcript_builds_dispatch_trust(monkeypatch):
