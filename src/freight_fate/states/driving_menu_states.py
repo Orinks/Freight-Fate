@@ -351,12 +351,35 @@ class DriverAppScreenState(MenuState):
         super().__init__(ctx)
         self.driving = driving
         self.app_key = app_key
+        self._weather_status = driving.weather.source_status if app_key == "weather" else None
 
     @property
     def title(self) -> str:  # type: ignore[override]
         return self.TITLES.get(self.app_key, "Driver app")
 
     def build_items(self) -> list[MenuItem]:
+        if self.app_key == "weather":
+            items = []
+            for index in range(4):
+
+                def label(index=index):
+                    return self._weather_lines()[index]
+
+                items.append(
+                    MenuItem(
+                        label,
+                        lambda label=label: self.ctx.say(label()),
+                        help="Repeat this app line.",
+                    )
+                )
+            items.append(
+                MenuItem(
+                    "Back to Driver apps",
+                    self.go_back,
+                    help="Return to the driver tablet app list.",
+                )
+            )
+            return items
         items = [
             MenuItem(line, lambda line=line: self.ctx.say(line), help="Repeat this app line.")
             for line in self._lines()
@@ -367,6 +390,31 @@ class DriverAppScreenState(MenuState):
             )
         )
         return items
+
+    def update(self, dt: float) -> None:
+        """Keep asynchronous live weather current while its app is open."""
+        if self.app_key != "weather":
+            return
+        weather = self.driving.weather
+        changed = weather.update(0.0)
+        status = weather.source_status
+        if changed is None and status == self._weather_status:
+            return
+        previous_status = self._weather_status
+        self._weather_status = status
+        if status not in ("live", "last_known", "fallback"):
+            return
+        if changed is not None or previous_status != status:
+            self.ctx.say(
+                f"Weather updated. {weather.report_lead(self.ctx.settings.imperial_units)}.",
+                interrupt=False,
+            )
+            # The active tablet consumed this provider update. Keep the paused
+            # trip's source tracker aligned so returning to driving does not
+            # repeat a generic readiness announcement.
+            self.driving.trip._weather_source_status = status
+            if status in ("live", "fallback"):
+                self.driving.trip._weather_location_refreshing = False
 
     def _lines(self) -> list[str]:
         if self.app_key == "weather":
@@ -393,19 +441,17 @@ class DriverAppScreenState(MenuState):
     def _weather_lines(self) -> list[str]:
         d = self.driving
         settings = self.ctx.settings
-        source = (
-            "live conditions from the weather service"
-            if d.weather.live
-            else "simulated route forecast"
-        )
         lines = [
-            f"Weather: {source}.",
-            f"Current conditions: {d.weather.describe(settings.imperial_units)}",
+            f"Weather: {d.weather.report_lead(settings.imperial_units)}.",
+            f"{d.weather.conditions_label()}: "
+            f"{d.weather.source_conditions(settings.imperial_units)}",
             f"Safe speed guidance: about {settings.speed_text(d.weather.effects.safe_speed_mph)}.",
         ]
-        if not d.weather.live:
+        if d.weather.has_simulated_forecast:
             forecast = ", then ".join(kind.value for kind in d.weather.forecast(2))
             lines.append(f"Forecast ahead: {forecast}.")
+        else:
+            lines.append("Forecast ahead: unavailable for this weather source.")
         return lines
 
     def _traffic_lines(self) -> list[str]:

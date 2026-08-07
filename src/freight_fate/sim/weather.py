@@ -275,6 +275,10 @@ class WeatherSystem:
         self._live_raw: WeatherKind | None = None
         self._live_city: str | None = None
         self._live_kind: WeatherKind | None = None
+        self._last_observed_kind: WeatherKind | None = None
+        self._last_observed_temperature: float | None = None
+        self._carried_last_known = False
+        self._fallback_active = False
         # With real weather enabled, start neutral and wait for live data rather
         # than showing a simulated warm-up condition that the real data would
         # immediately replace. Simulated weather only appears if the provider
@@ -358,6 +362,13 @@ class WeatherSystem:
 
     def set_city(self, city: str, lat: float, lon: float) -> None:
         """Track the city whose real weather should apply (provider mode)."""
+        if city != self.city:
+            self._carried_last_known = self._carried_last_known or self.live
+            self.live = False
+            self._live_raw = None
+            self._live_city = None
+            self._live_kind = None
+            self._fallback_active = False
         self.city = city
         self.city_coords = (lat, lon)
 
@@ -400,6 +411,7 @@ class WeatherSystem:
 
         changed = self._poll_provider()
         if self.live:
+            self._fallback_active = False
             return changed
 
         if self.provider is not None and not self._provider_offline():
@@ -408,6 +420,15 @@ class WeatherSystem:
             # simulated warm-up. Only fall through to simulation when the
             # provider is genuinely offline.
             return None
+
+        if self.provider is not None and not self._fallback_active:
+            self._fallback_active = True
+            self._carried_last_known = False
+            self.minutes_until_change = self._rng.uniform(25, 70)
+            new = self._seasonal(self._sample(self.region, near=self.current))
+            if new != self.current:
+                self.current = new
+                return new
 
         self.minutes_until_change -= game_minutes
         if self.minutes_until_change > 0:
@@ -441,6 +462,92 @@ class WeatherSystem:
         """Whether live weather is selected but no observation is ready yet."""
         return self.provider is not None and not self.live and not self._provider_offline()
 
+    @property
+    def source_status(self) -> str:
+        """Canonical source state for speech, menus, and event labels."""
+        if self.provider is None:
+            return "simulated"
+        if self.live:
+            stale = getattr(self.provider, "stale", None)
+            if stale is not None:
+                try:
+                    if stale(self.city):
+                        return "last_known"
+                except Exception:  # pragma: no cover - defensive
+                    pass
+            return "live"
+        if self._carried_last_known and not self._provider_offline():
+            return "last_known"
+        if self._provider_offline():
+            return "fallback"
+        return "loading"
+
+    def source_label(self) -> str:
+        """Short, source-first wording shared by every player-facing report."""
+        return {
+            "live": "Live weather for your current route position",
+            "loading": "Live weather is loading for your current route position",
+            "last_known": "Last-known live weather while this location updates",
+            "fallback": "Simulated fallback weather; live weather is unavailable",
+            "simulated": "Simulated weather",
+        }[self.source_status]
+
+    def report_lead(self, imperial: bool = True) -> str:
+        status = self.source_status
+        conditions = self.source_conditions(imperial)
+        if status == "loading":
+            return f"{self.source_label()}. Temporary neutral driving conditions are in use"
+        if status == "live":
+            return f"Live weather: {conditions}, near your current route position"
+        if status == "last_known":
+            return f"Last-known live weather: {conditions}. Updating for your current location"
+        if status == "fallback":
+            return f"Simulated fallback weather: {conditions}. Live weather is unavailable"
+        return f"Simulated weather: {conditions}"
+
+    def event_source_label(self) -> str:
+        return {
+            "live": "Live weather",
+            "loading": "Live weather",
+            "last_known": "Last-known live weather",
+            "fallback": "Live weather is unavailable. Simulated fallback weather",
+            "simulated": "Simulated weather",
+        }[self.source_status]
+
+    def conditions_label(self) -> str:
+        return {
+            "live": "Live conditions",
+            "loading": "Temporary conditions while live weather loads",
+            "last_known": "Last-known conditions",
+            "fallback": "Simulated fallback conditions",
+            "simulated": "Simulated conditions",
+        }[self.source_status]
+
+    def source_conditions(self, imperial: bool = True) -> str:
+        """Describe conditions without presenting modeled data as observed."""
+        status = self.source_status
+        if status == "loading":
+            return "neutral conditions"
+        if status not in ("live", "last_known"):
+            return self.describe(imperial)
+        observed_kind = self._live_raw if self.live else self._last_observed_kind
+        observed_kind = observed_kind or self.current
+        parts = [observed_kind.value]
+        observed = self._observed_temperature() if self.live else self._last_observed_temperature
+        if observed is not None:
+            if imperial:
+                parts.append(f"{observed * 9 / 5 + 32:.0f} degrees")
+            else:
+                parts.append(f"{observed:.0f} degrees Celsius")
+        observation = ", ".join(parts)
+        if observed_kind != self.current:
+            return f"observation {observation}; treated as {self.current.value} for driving"
+        return observation
+
+    @property
+    def has_simulated_forecast(self) -> bool:
+        return self.source_status in ("simulated", "fallback")
+
     def _poll_provider(self) -> WeatherKind | None:
         """Apply real-world conditions when a provider is attached.
 
@@ -459,6 +566,10 @@ class WeatherSystem:
             self._live_kind = None
             return None
         self.live = True
+        self._carried_last_known = False
+        if kind != self._live_raw or self.city != self._live_city:
+            self._last_observed_kind = kind
+            self._last_observed_temperature = self._observed_temperature()
         # Reconcile the raw observation to the career season once, when the
         # observation (or the city it is for) changes -- not every tick. The
         # season temperature swings across freezing on a diurnal cycle, so
@@ -531,10 +642,15 @@ class WeatherSystem:
             out.append(cur)
         return out
 
-    def describe(self, imperial: bool = True) -> str:
+    def describe(
+        self,
+        imperial: bool = True,
+        *,
+        observed_temperature_only: bool = False,
+    ) -> str:
         eff = self.effects
         parts = [self.current.value]
-        temp_c = self._temperature()
+        temp_c = self._observed_temperature() if observed_temperature_only else self._temperature()
         if temp_c is not None:
             if imperial:
                 parts.append(f"{temp_c * 9 / 5 + 32:.0f} degrees")

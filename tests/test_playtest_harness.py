@@ -126,6 +126,46 @@ def test_playtest_harness_records_headless_delivery_transcript(monkeypatch):
     result.assert_no_known_destination_exit_regressions()
 
 
+def test_playtest_harness_weather_shortcut_and_tablet_share_live_source(monkeypatch):
+    from driving_feature_helpers import open_driver_app, open_driver_apps
+
+    from freight_fate.sim.weather import WeatherKind
+
+    class LiveRain:
+        def request(self, *args):
+            pass
+
+        def get(self, key):
+            return WeatherKind.RAIN
+
+        def stale(self, key):
+            return False
+
+        def unavailable(self, key):
+            return False
+
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Harness Live Weather")
+        harness.driving.weather.provider = LiveRain()
+        harness.driving.weather.city = None
+        harness.driving.weather.live = False
+        harness.driving.trip.update(0.0)
+
+        before = len(result.spoken)
+        harness.press_key(pygame.K_v, "v")
+        shortcut_entries = result.spoken[before:]
+        assert len(shortcut_entries) == 1
+        assert shortcut_entries[0].channel == "main"
+        assert shortcut_entries[0].text.startswith("Live weather: rain")
+        assert harness.app.state is harness.driving
+
+        harness.press_key(pygame.K_TAB)
+        open_driver_apps(harness.app)
+        weather_screen = open_driver_app(harness.app, "Weather")
+        assert weather_screen.items[0].text.startswith("Weather: Live weather: rain")
+        assert weather_screen.items[1].text.startswith("Live conditions: rain")
+
+
 def test_company_driver_first_delivery_transcript_builds_dispatch_trust(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
         result = harness.start_delivery(

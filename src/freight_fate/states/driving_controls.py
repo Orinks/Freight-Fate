@@ -971,7 +971,7 @@ class DrivingControlsMixin:
             f"Route: {progress}",
             f"Fuel: {t.fuel_fraction * 100:.0f} percent",
             f"Air brakes: {self._air_status_text(detailed=True)}",
-            f"Weather: {self.weather.describe(self.ctx.settings.imperial_units)}",
+            f"Weather: {self.weather.report_lead(self.ctx.settings.imperial_units)}",
             f"Radio: {self.radio.status_text()}",
             f"Calendar: {self._calendar_phrase() or 'unknown'}",
             f"Clock: {clock_text(self.trip.local_hour)} {self.trip.current_timezone.name} "
@@ -1230,17 +1230,9 @@ class DrivingControlsMixin:
         """V: conditions first -- the answer must lead for braille displays."""
         safe_speed = self.ctx.settings.speed_text(self.weather.effects.safe_speed_mph)
         tod = time_of_day(self.trip.local_hour)
-        if self.weather.live_weather_loading:
-            self.ctx.say(
-                f"Live weather is still loading. Safe speed about {safe_speed}. It is {tod}."
-            )
-            return
-        conditions = self.weather.describe(self.ctx.settings.imperial_units)
-        lead = (
-            f"Live: {conditions}" if self.weather.live else conditions[:1].upper() + conditions[1:]
-        )
-        parts = [f"{lead}.", f"Safe speed about {safe_speed}."]
-        if not self.weather.live:
+        parts = [f"{self.weather.report_lead(self.ctx.settings.imperial_units)}."]
+        parts.append(f"Safe speed about {safe_speed}.")
+        if self.weather.has_simulated_forecast:
             ahead = ", then ".join(k.value for k in self.weather.forecast(2))
             parts.append(f"Ahead: {ahead}.")
         parts.append(f"It is {tod}.")

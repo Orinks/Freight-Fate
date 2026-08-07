@@ -26,6 +26,8 @@ import time
 import urllib.parse
 import urllib.request
 from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import datetime
 
 from ..net import ssl_context
 from .weather import WeatherKind
@@ -180,8 +182,10 @@ def _visibility_to_mi(vis: dict | None) -> float | None:
     return value / 1609.344  # metres (wmoUnit:m, the NWS default)
 
 
-def _default_fetch(lat: float, lon: float) -> tuple[str, float, float | None, float | None]:
-    """Fetch (condition_text, wind_speed_kmh, temperature_c, visibility_mi)
+def _default_fetch(
+    lat: float, lon: float
+) -> tuple[str, float, float | None, float | None, float | None]:
+    """Fetch (condition, wind, temperature, visibility, observation time)
     from NWS.
 
     The temperature and visibility are None when the station reports no
@@ -193,7 +197,22 @@ def _default_fetch(lat: float, lon: float) -> tuple[str, float, float | None, fl
     wind_kmh = _wind_to_kmh(props.get("windSpeed"))
     temp_c = _temp_to_c(props.get("temperature"))
     visibility_mi = _visibility_to_mi(props.get("visibility"))
-    return text, wind_kmh, temp_c, visibility_mi
+    timestamp = props.get("timestamp")
+    observed_at = None
+    if timestamp:
+        try:
+            observed_at = datetime.fromisoformat(str(timestamp).replace("Z", "+00:00")).timestamp()
+        except (TypeError, ValueError):
+            log.warning("NWS observation carried an invalid timestamp: %r", timestamp)
+    return text, wind_kmh, temp_c, visibility_mi, observed_at
+
+
+@dataclass(frozen=True)
+class _CachedObservation:
+    kind: WeatherKind
+    temperature_c: float | None
+    fetched_at: float
+    observed_at: float
 
 
 class RealWeatherProvider:
@@ -209,24 +228,22 @@ class RealWeatherProvider:
         fetch: Callable[[float, float], tuple[str, float, float | None, float | None]]
         | None = None,
         clock: Callable[[], float] = time.monotonic,
+        wall_clock: Callable[[], float] = time.time,
     ) -> None:
         self._fetch = fetch or _default_fetch
         self._clock = clock
+        self._wall_clock = wall_clock
         self._lock = threading.Lock()
-        # city -> (condition, temperature_c or None, fetched_at)
-        self._cache: dict[str, tuple[WeatherKind, float | None, float]] = {}
+        self._cache: dict[str, _CachedObservation] = {}
         self._failed_at: dict[str, float] = {}
         self._inflight: set[str] = set()
 
     def get(self, city: str) -> WeatherKind | None:
         with self._lock:
             entry = self._cache.get(city)
-            if entry is None:
+            if entry is None or not self._usable(entry):
                 return None
-            kind, _temp_c, fetched_at = entry
-            if self._clock() - fetched_at > STALE_AFTER_S:
-                return None  # too stale to trust
-            return kind
+            return entry.kind
 
     def get_temperature(self, city: str) -> float | None:
         """The last real observed temperature in Celsius, or None when there is
@@ -234,12 +251,28 @@ class RealWeatherProvider:
         omitted it. Callers fall back to the seasonal model on None."""
         with self._lock:
             entry = self._cache.get(city)
-            if entry is None:
+            if entry is None or not self._usable(entry):
                 return None
-            _kind, temp_c, fetched_at = entry
-            if self._clock() - fetched_at > STALE_AFTER_S:
-                return None
-            return temp_c
+            return entry.temperature_c
+
+    def stale(self, city: str) -> bool:
+        """Whether a usable observation is past its refresh interval."""
+        with self._lock:
+            entry = self._cache.get(city)
+            return (
+                entry is not None
+                and self._usable(entry)
+                and (
+                    self._clock() - entry.fetched_at >= CACHE_TTL_S
+                    or self._wall_clock() - entry.observed_at >= CACHE_TTL_S
+                )
+            )
+
+    def _usable(self, entry: _CachedObservation) -> bool:
+        return (
+            self._clock() - entry.fetched_at <= STALE_AFTER_S
+            and self._wall_clock() - entry.observed_at <= STALE_AFTER_S
+        )
 
     def unavailable(self, city: str) -> bool:
         """True when live data is not usable *and* a fetch has failed.
@@ -249,7 +282,10 @@ class RealWeatherProvider:
         weather). False while a request is in flight or data is cached.
         """
         with self._lock:
-            if city in self._cache or city in self._inflight:
+            if city in self._inflight:
+                return False
+            entry = self._cache.get(city)
+            if entry is not None and self._usable(entry):
                 return False
             return city in self._failed_at
 
@@ -260,7 +296,7 @@ class RealWeatherProvider:
             if city in self._inflight:
                 return
             entry = self._cache.get(city)
-            if entry is not None and now - entry[2] < CACHE_TTL_S:
+            if entry is not None and self._usable(entry) and now - entry.fetched_at < CACHE_TTL_S:
                 return
             failed = self._failed_at.get(city)
             if failed is not None and now - failed < RETRY_AFTER_S:
@@ -273,10 +309,18 @@ class RealWeatherProvider:
 
     def _worker(self, city: str, lat: float, lon: float) -> None:
         try:
-            text, wind, temp_c, visibility_mi = self._fetch(lat, lon)
+            fetched = self._fetch(lat, lon)
+            text, wind, temp_c, visibility_mi = fetched[:4]
+            observed_at = fetched[4] if len(fetched) > 4 else None
+            if observed_at is None:
+                observed_at = self._wall_clock()
+            if self._wall_clock() - float(observed_at) > STALE_AFTER_S:
+                raise ValueError("NWS observation is too old to use")
             kind = map_condition(text, wind, visibility_mi)
             with self._lock:
-                self._cache[city] = (kind, temp_c, self._clock())
+                self._cache[city] = _CachedObservation(
+                    kind, temp_c, self._clock(), float(observed_at)
+                )
                 self._failed_at.pop(city, None)
             log.info(
                 "Real weather for %s: %s (NWS %r, wind %.0f km/h, temp %s, vis %s)",

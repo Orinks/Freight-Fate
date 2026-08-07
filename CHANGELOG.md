@@ -1032,6 +1032,12 @@
 
 ### Fixed
 
+- **Real-world weather now follows the truck instead of the next city.** Live
+  National Weather Service conditions update as you move along a route, and
+  weather reports say when conditions are live, still loading, last known, or
+  simulated because the live service is unavailable. Old failed-refresh rain
+  now expires instead of lingering as if it were current.
+
 - **The stop bar's steady tone is calmer.** The tone that means you are on top
   of the stop bar was high and sharp -- hard to sit through for the seconds it
   is meant to hold. It is now a much lower, steadier tone, easy on the ear

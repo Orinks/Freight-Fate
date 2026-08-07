@@ -416,8 +416,9 @@ option lists:
 - Parking confidence notes.
 
 Press W on a route option to check weather along it. With real-world weather
-enabled, the game uses live city conditions when available. Otherwise it uses
-the simulated forecast.
+enabled, route planning uses live conditions at cities along the route when
+available. Once you are driving, live weather follows your current route
+position. Otherwise the game uses the simulated forecast.
 
 ## Driving Controls
 
@@ -655,7 +656,7 @@ regional temperature follows the time of year and time of day. The current
 date and season are announced with the clock (press C while driving), in the
 Tab status menu, and at the city terminal. With live weather turned on, the
 default is for the date, season, and temperature to follow the real-world
-calendar. Turn **Live weather controls calendar** off to keep live city
+calendar. Turn **Live weather controls calendar** off to keep live weather
 conditions while the career date advances at midnight and its seasons pass.
 For an established career, turning it off begins the independent calendar on
 today's date so the date does not jump backward. A newly created career still
@@ -934,7 +935,7 @@ Speech and weather settings include:
 | Speech pitch | Appears only when the current voice source supports pitch changes. |
 | Speech volume | Appears only when the current voice source supports volume changes. |
 | Speech voice | Appears only when selectable voices are available. |
-| Weather source | Switches between simulated weather and live city conditions when available. |
+| Weather source | Switches between simulated weather and live conditions for your current route position while driving. Route planning checks live city conditions along the route when available. |
 | Live weather controls calendar | When on, live weather uses today's real date and season. When off, live conditions continue while the career date advances at midnight and its seasons pass. |
 
 Online features live in their own Online menu on the main menu rather than

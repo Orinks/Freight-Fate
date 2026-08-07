@@ -3,7 +3,13 @@ is injected everywhere."""
 
 import threading
 
-from freight_fate.sim.real_weather import CACHE_TTL_S, RealWeatherProvider, map_condition
+from freight_fate.sim.real_weather import (
+    CACHE_TTL_S,
+    RETRY_AFTER_S,
+    STALE_AFTER_S,
+    RealWeatherProvider,
+    map_condition,
+)
 from freight_fate.sim.weather import WeatherKind, WeatherSystem
 
 # -- NWS condition mapping -----------------------------------------------------
@@ -134,6 +140,85 @@ def test_provider_refetches_after_ttl():
     assert p.get("Dallas") is WeatherKind.THUNDERSTORM
 
 
+def test_failed_refresh_expires_last_known_observation_instead_of_loading_forever():
+    monotonic = [0.0]
+    wall = [1_000_000.0]
+    calls = [0]
+
+    def fetch(lat, lon):
+        calls[0] += 1
+        if calls[0] == 1:
+            return "Heavy Rain", 5.0, 12.0, 1.0, wall[0]
+        raise OSError("offline")
+
+    p = SyncProvider(fetch=fetch, clock=lambda: monotonic[0], wall_clock=lambda: wall[0])
+    p.request("route-cell", 40.0, -80.0)
+    assert p.get("route-cell") is WeatherKind.HEAVY_RAIN
+
+    monotonic[0] = wall[0] = CACHE_TTL_S + 1
+    wall[0] += 1_000_000.0
+    p.request("route-cell", 40.0, -80.0)
+    assert p.stale("route-cell")
+    assert not p.unavailable("route-cell")
+
+    monotonic[0] = STALE_AFTER_S + 1
+    wall[0] = 1_000_000.0 + STALE_AFTER_S + 1
+    p.request("route-cell", 40.0, -80.0)
+    assert p.get("route-cell") is None
+    assert p.unavailable("route-cell")
+    assert p.unavailable("route-cell")
+
+
+def test_old_nws_observation_timestamp_is_never_treated_as_live():
+    now = [2_000_000.0]
+    old = now[0] - STALE_AFTER_S - 1
+    p = SyncProvider(
+        fetch=lambda lat, lon: ("Heavy Rain", 5.0, 12.0, 1.0, old),
+        clock=lambda: 0.0,
+        wall_clock=lambda: now[0],
+    )
+    p.request("route-cell", 40.0, -80.0)
+    assert p.get("route-cell") is None
+
+
+def test_expired_observation_retries_then_recovers_to_live_weather():
+    monotonic = [0.0]
+    wall = [2_000_000.0]
+    calls = [0]
+
+    def fetch(lat, lon):
+        calls[0] += 1
+        observed_at = wall[0]
+        if calls[0] == 1:
+            observed_at -= STALE_AFTER_S + 1
+        return "Clear", 0.0, 10.0, 10.0, observed_at
+
+    provider = SyncProvider(
+        fetch=fetch,
+        clock=lambda: monotonic[0],
+        wall_clock=lambda: wall[0],
+    )
+    weather = WeatherSystem("great_lakes", seed=1, provider=provider)
+    weather.set_city("route-cell", 40.0, -80.0)
+
+    weather.update(0.0)
+    assert calls == [1]
+    assert weather.source_status == "fallback"
+
+    monotonic[0] = RETRY_AFTER_S - 0.1
+    wall[0] += RETRY_AFTER_S - 0.1
+    weather.update(0.0)
+    assert calls == [1]
+    assert weather.source_status == "fallback"
+
+    monotonic[0] = RETRY_AFTER_S + 0.1
+    wall[0] += 0.2
+    weather.update(0.0)
+    assert calls == [2]
+    assert weather.source_status == "live"
+    assert weather.current is WeatherKind.CLEAR
+
+
 # -- temperature ---------------------------------------------------------------
 
 
@@ -192,6 +277,32 @@ def test_weather_system_reports_real_observed_temperature():
     assert "36 degrees" in ws.describe(imperial=True)  # 2 C -> 35.6 F -> "36"
 
 
+def test_live_report_omits_modeled_temperature_when_observation_has_none():
+    class ConditionsOnlyProvider:
+        def request(self, *args):
+            pass
+
+        def get(self, key):
+            return WeatherKind.HEAVY_RAIN
+
+        def stale(self, key):
+            return False
+
+        def unavailable(self, key):
+            return False
+
+    ws = WeatherSystem("desert_southwest", seed=1, provider=ConditionsOnlyProvider())
+    ws.set_city("route-cell", 33.45, -112.07)
+    ws.update(1.0)
+
+    assert ws.source_status == "live"
+    assert ws.temperature_c is not None  # The seasonal model remains available to mechanics.
+    assert "degrees" not in ws.report_lead(imperial=True)
+    assert "degrees" not in ws.source_conditions(imperial=True)
+    assert "visibility" not in ws.source_conditions(imperial=True)
+    assert "slick roads" not in ws.source_conditions(imperial=True)
+
+
 # -- weather system integration ------------------------------------------------
 
 
@@ -203,10 +314,40 @@ def test_weather_system_applies_live_conditions():
     assert ws.live
     assert ws.current is WeatherKind.HEAVY_RAIN
     assert changed is WeatherKind.HEAVY_RAIN
-    # stable live data: no further changes, simulation stays paused
+    # Stable live data: no further changes, simulation stays paused.
     for _ in range(100):
         assert ws.update(30.0) is None
     assert ws.current is WeatherKind.HEAVY_RAIN
+
+
+def test_late_observation_for_previous_route_cell_cannot_replace_current_cell():
+    class LocationProvider:
+        data = {"cell-a": None, "cell-b": WeatherKind.RAIN}
+
+        def request(self, *args):
+            pass
+
+        def get(self, key):
+            return self.data.get(key)
+
+        def stale(self, key):
+            return False
+
+        def unavailable(self, key):
+            return False
+
+    provider = LocationProvider()
+    ws = WeatherSystem("great_lakes", seed=1, provider=provider)
+    ws.set_city("cell-a", 41.0, -87.0)
+    ws.update(0.0)
+    ws.set_city("cell-b", 40.0, -86.0)
+    ws.update(0.0)
+    assert ws.current is WeatherKind.RAIN
+
+    provider.data["cell-a"] = WeatherKind.HEAVY_RAIN
+    ws.update(0.0)
+    assert ws.city == "cell-b"
+    assert ws.current is WeatherKind.RAIN
 
 
 def test_live_conditions_do_not_evolve_simulated_weather_with_independent_calendar():
@@ -231,6 +372,12 @@ def test_live_conditions_do_not_evolve_simulated_weather_with_independent_calend
     # window lands as freezing rain. What matters here is that it settles once
     # and then holds -- it must not wander on its own.
     assert ws.current is WeatherKind.ICE
+    assert ws.source_conditions(imperial=True) == (
+        "observation rain, 64 degrees; treated as freezing rain for driving"
+    )
+    assert ws.report_lead(imperial=True).startswith(
+        "Live weather: observation rain, 64 degrees; treated as freezing rain for driving"
+    )
 
     for _ in range(200):
         assert ws.update(30.0) is None
