@@ -209,7 +209,7 @@ it" on the keyboard becomes "press D-pad down to take it" on a controller.
 | J | Engine brake toggle |
 | H | Horn |
 | X | Arm / cancel the next actionable exit |
-| T | Refuel and rest (stopped at a rest stop) |
+| T | Open a route stop, or emergency shoulder sleep away from stops, when fully stopped. |
 | Space | Speak speed, gear, RPM |
 | Tab | Driving status menu |
 | F | Fuel and range |
@@ -272,7 +272,7 @@ Hold the right bumper (RB) as a modifier for a second layer of driving bindings:
 | RB + B | Fuel and range |
 | RB + Y | Release / set parking brake |
 | RB + D-pad Up | Next listed highway exit |
-| RB + D-pad Down | Refuel and rest (stopped at a rest stop) |
+| RB + D-pad Down | Open a route stop, or emergency shoulder sleep away from stops, when fully stopped. |
 | RB + D-pad Left / Right | Lower / raise the open-road cruise target |
 | RB + Start | Driving status menu |
 

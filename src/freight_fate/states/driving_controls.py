@@ -291,9 +291,10 @@ class DrivingControlsMixin:
             "right lane. Hazards called out as brake or change lanes are "
             "fixed objects in your lane: dodge with a clear lane beside "
             "you, or brake nearly to a stop and ease around. "
-            "T route POI menu when already stopped "
-            "at one: available actions may include fuel, break, sleep, "
-            "inspect, roadside assistance, or save when source-backed. H horn. "
+            "T when fully stopped: at a route POI it opens that stop's actions, "
+            "which may include fuel, break, sleep, inspect, roadside assistance, "
+            "or save. Away from route POIs, T opens the emergency shoulder-sleep "
+            "warning instead. H horn. "
             "J engine brake; on an automatic it manages its own stage to hold "
             "your speed, and 1, 2, 3 take manual control. Alt J chooses "
             "whether J runs the automatic mode. Alt T switches between "
@@ -352,7 +353,8 @@ class DrivingControlsMixin:
             "Hold the right bumper for the second layer: plus A starts or stops "
             "the engine, plus B reads fuel, plus Y sets or releases the parking "
             "brake, plus D-pad up reads the next listed exit, plus D-pad down "
-            "opens rest-stop actions, and plus Start opens the status menu. "
+            "opens route-stop actions or emergency shoulder sleep when fully "
+            "stopped away from route POIs, and plus Start opens the status menu. "
             "Start pauses and unpauses. The Back button repeats this help. "
             f"{self._objective_help()}"
         )
@@ -611,12 +613,15 @@ class DrivingControlsMixin:
                 interrupt=True,
             )
             return
+        if speed <= PARKING_BRAKE_SETTLE_MAX_MPH:
+            _secure_truck_for_stopped_menu(self, max_mph=PARKING_BRAKE_SETTLE_MAX_MPH)
         # The player's own brake press means deliberate waiting; auto-sets at
         # trip start, rest stops, and arrivals never arm the fast-forward.
         self.trip.waiting = True
         self.ctx.audio.play("vehicle/brake_set", volume=0.65)
         self._set_status("Parking brake set.")
-        self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.")
+        slowing = " Truck still slowing." if t.speed_mph > DOCKING_MAX_MPH else ""
+        self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.{slowing}")
 
     def _manual_shift(self, gear: int) -> None:
         result = self.truck.transmission.request_gear(gear)
@@ -1200,7 +1205,7 @@ class DrivingControlsMixin:
         a driver can always choose to pull over and rest, urgently or not. The
         wording escalates with urgency (severe fatigue, or an HOS limit closing
         in with no reachable stop) but the option itself is always there."""
-        if self.truck.speed_mph > 3:
+        if self.truck.speed_mph > DOCKING_MAX_MPH:
             return None
         if self.trip.nearest_stop_within() is not None:
             return None  # a POI is right here; use its rest menu instead

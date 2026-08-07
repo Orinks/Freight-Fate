@@ -10,7 +10,7 @@ class ShoulderSleepConfirmationState(MenuState):
     title = "Emergency shoulder sleep"
     intro_help = (
         "Use up and down arrows to navigate, Enter to select. "
-        "Escape cancels and returns to the previous menu."
+        "Escape cancels and returns to the previous screen."
     )
 
     def __init__(
@@ -20,6 +20,7 @@ class ShoulderSleepConfirmationState(MenuState):
         self.driving = driving
         self.reason = reason
         self.anchor_mi = anchor_mi
+        self.direct_from_driving = ctx._app.state is driving
 
     def announce_entry(self) -> None:
         self.ctx.say(
@@ -36,7 +37,7 @@ class ShoulderSleepConfirmationState(MenuState):
             MenuItem(
                 "Cancel and keep looking for a safe stop",
                 self.go_back,
-                help="Return to the previous menu without resting here.",
+                help="Return to the previous screen without resting here.",
             ),
             MenuItem(
                 "Sleep on the shoulder anyway",
@@ -46,15 +47,32 @@ class ShoulderSleepConfirmationState(MenuState):
             ),
         ]
 
+    def go_back(self) -> None:
+        if not self.direct_from_driving:
+            super().go_back()
+            return
+        self.ctx.audio.play("ui/menu_back")
+        self.ctx.pop_state()
+        self.ctx.say(
+            "Shoulder sleep canceled. Back on the road. The parking brake is set; "
+            f"press {self.ctx.control_hint('parking_brake')} to release it when ready.",
+            interrupt=True,
+        )
+
     def _sleep(self) -> None:
+        if not _secure_truck_for_stopped_menu(self.driving):
+            self.ctx.say(
+                "Come to a complete stop first. Cancel, finish stopping, "
+                "then try Emergency shoulder sleep again."
+            )
+            return
         anchor = self.anchor_mi
         if anchor is None:
             anchor = self.driving.trip.position_mi
         text = _perform_shoulder_sleep(self.driving, anchor)
-        self.ctx.pop_state()
-        if self.ctx._app.state is not self.driving:
-            self.ctx.pop_state()
-        self.ctx.say(text, interrupt=False)
+        while self.ctx._app.state is not self.driving:
+            self.ctx.pop_state(reentry=False)
+        self.ctx.say(text, interrupt=True)
 
 
 class TrafficStopState(MenuState):

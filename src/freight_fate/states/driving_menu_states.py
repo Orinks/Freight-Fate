@@ -822,6 +822,13 @@ class PauseMenuState(MenuState):
             )
             self.refresh()
             return
+        if not _secure_truck_for_stopped_menu(self.driving):
+            self.ctx.say(
+                "Come to a complete stop first. Resume driving, finish stopping, "
+                "then reopen the pause menu."
+            )
+            self.refresh()
+            return
         self.ctx.push_state(
             ShoulderSleepConfirmationState(
                 self.ctx, self.driving, reason, self.driving.trip.position_mi

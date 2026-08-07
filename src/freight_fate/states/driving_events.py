@@ -4,7 +4,7 @@ from __future__ import annotations
 from .base import TimedMessageState
 from .driving_core import *
 from .driving_menu_states import ArrivalState, FacilityArrivalState
-from .driving_rest_states import ParkingFullState, RestStopState
+from .driving_rest_states import ParkingFullState, RestStopState, ShoulderSleepConfirmationState
 
 
 class DrivingEventMixin:
@@ -443,11 +443,23 @@ class DrivingEventMixin:
 
     def _try_rest_stop(self) -> None:
         stop = self.trip.nearest_stop_within()
-        if stop is None:
-            self.ctx.say("There is no route POI here. Stops are announced as you approach them.")
-            return
         if self.truck.speed_mph > DOCKING_MAX_MPH:
             self.ctx.say("Come to a complete stop first.")
+            return
+        if stop is None:
+            if not _secure_truck_for_stopped_menu(self):
+                self.ctx.say("Come to a complete stop first.")
+                return
+            reason = self.emergency_shoulder_sleep_reason()
+            if reason is None:
+                self.ctx.say(
+                    "Emergency shoulder sleep is not available here. "
+                    "Use a route stop for normal breaks and sleep."
+                )
+                return
+            self.ctx.push_state(
+                ShoulderSleepConfirmationState(self.ctx, self, reason, self.trip.position_mi)
+            )
             return
         self._open_poi_stop(stop)
 
@@ -457,9 +469,9 @@ class DrivingEventMixin:
         # that rolled in just under the docking threshold (or idled in gear)
         # would otherwise keep creeping while the driver rests -- napping while
         # the rig drifts down the freeway. Mirrors the pickup/delivery arrivals.
-        self.truck.throttle = 0.0
-        self.truck.brake = 1.0
-        self.truck.set_parking_brake()
+        if not _secure_truck_for_stopped_menu(self):
+            self.ctx.say("Come to a complete stop first.")
+            return
         if self.trip.is_planned(stop):
             # Plan fulfilled; the stop menu announces itself.
             self.trip.planned_stop_key = None

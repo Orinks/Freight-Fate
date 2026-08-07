@@ -435,7 +435,7 @@ Driving controls are active while the road view is focused:
 | K | Start or cancel automatic speed control. It uses adaptive cruise on open roads and speed keeper in low-speed zones. It pauses through the planned pickup and resumes once the loaded truck is rolling. Braking elsewhere also cancels it. |
 | Plus / Minus | Raise or lower the open-road cruise target by 5 mph while automatic speed control is active. The keypad Plus and Minus keys work too. |
 | X | Signal for or cancel the next announced route exit. The truck takes the ramp when speed, lane setup, and route intent are valid. |
-| T | Open the route point-of-interest menu when stopped at a supported stop. |
+| T | When fully stopped, open the route point-of-interest menu or, away from route points, the emergency shoulder-sleep confirmation. |
 | J | Toggle the engine brake. It engages at the stage you last selected, like a real dash switch. |
 | 1 / 2 / 3 | Select the engine brake stage -- two, four, or six cylinders of retard -- while it is on. With the engine brake off these keys do nothing. |
 | H | Hold to sound the horn; release to stop it. |
@@ -765,6 +765,10 @@ more; a proper 10-hour sleep clears it. Plan your rest before you get there.
 
 Emergency shoulder sleep is a fallback, not normal rest. It can appear in the
 pause menu when you are stopped away from a route point of interest. The game
+also opens the same confirmation when you press T while fully stopped away
+from a route point. Pressing T while the truck is still moving tells you to
+finish stopping first. The truck is secured before either sleep menu opens.
+The game
 uses stronger warnings when hours are tight or fatigue is severe. The
 confirmation explains that 10 hours pass, the hours clock resets, fatigue only
 improves to a poor-rest floor, a parking ticket is possible, minor truck damage

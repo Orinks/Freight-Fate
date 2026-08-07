@@ -1206,8 +1206,169 @@ def test_emergency_shoulder_sleep_pause_menu_constraints(monkeypatch):
         assert "If hours of service are enforced" in spoken[-1]
         assert "minor truck damage" in spoken[-1]
         assert app.state.items[app.state.index].text == ("Cancel and keep looking for a safe stop")
-        assert "previous menu" in app.state.intro_help
+        assert "previous screen" in app.state.intro_help
         assert "returns to the road" not in app.state.intro_help
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+@pytest.mark.parametrize(
+    ("speed_mph", "cancel_key"),
+    [(0.0, pygame.K_RETURN), (0.5, pygame.K_ESCAPE)],
+)
+def test_t_opens_roadside_sleep_confirmation_at_safe_stop(monkeypatch, speed_mph, cancel_key):
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState, ShoulderSleepConfirmationState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        driving = start_drive(app)
+        stop = park_at_first_stop(driving)
+        park_away_from_stops(driving, after_stop=stop)
+        driving.truck.velocity_mps = speed_mph / 2.23694
+        driving.truck.throttle = 0.4
+
+        driving.handle_event(key_event(pygame.K_t))
+
+        assert isinstance(app.state, ShoulderSleepConfirmationState)
+        assert app.state.items[app.state.index].text.startswith("Cancel")
+        assert "poor rest" in spoken[-1]
+        assert "minor truck damage" in spoken[-1]
+        assert driving.truck.velocity_mps == 0.0
+        assert driving.truck.throttle == 0.0
+        assert driving.truck.brake == 1.0
+        assert driving.truck.parking_brake
+
+        spoken.clear()
+        app.state.handle_event(key_event(cancel_key))
+        assert isinstance(app.state, DrivingState)
+        assert spoken[-1].startswith("Shoulder sleep canceled. Back on the road.")
+        assert "parking brake is set" in spoken[-1]
+        assert "press P to release it" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+@pytest.mark.parametrize("speed_mph", [0.5001, 1.0, 3.0])
+def test_t_rejects_roadside_sleep_while_moving(monkeypatch, speed_mph):
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        driving = start_drive(app)
+        stop = park_at_first_stop(driving)
+        park_away_from_stops(driving, after_stop=stop)
+        driving.truck.velocity_mps = speed_mph / 2.23694
+        minutes_before = driving.trip.game_minutes
+
+        driving.handle_event(key_event(pygame.K_t))
+
+        assert isinstance(app.state, DrivingState)
+        assert spoken[-1] == "Come to a complete stop first."
+        assert driving.trip.game_minutes == minutes_before
+        assert not driving.truck.parking_brake
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_parking_brake_settles_walking_pace_before_pause(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import PauseMenuState, RestStopState
+
+    app = App()
+    monkeypatch.setattr("freight_fate.sim.hos.parking_is_full", lambda *a, **k: False)
+    try:
+        driving = start_drive(app)
+        park_at_first_stop(driving)
+        driving.truck.velocity_mps = 1.0 / 2.23694
+
+        driving.handle_event(key_event(pygame.K_p))
+        assert driving.truck.velocity_mps == 0.0
+        assert driving.truck.parking_brake
+
+        driving.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, PauseMenuState)
+        assert "Emergency shoulder sleep" not in [item.text for item in app.state.items]
+
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        driving.handle_event(key_event(pygame.K_t))
+        assert isinstance(app.state, RestStopState)
+        assert driving.truck.velocity_mps == 0.0
+        assert driving.truck.brake == 1.0
+        assert driving.truck.parking_brake
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_shoulder_sleep_revalidates_stop_and_unwinds_without_stale_pause_speech(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import (
+        DrivingState,
+        PauseMenuState,
+        ShoulderSleepConfirmationState,
+    )
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    try:
+        driving = start_drive(app)
+        stop = park_at_first_stop(driving)
+        park_away_from_stops(driving, after_stop=stop)
+        driving.truck.velocity_mps = 0.0
+        driving.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, PauseMenuState)
+        select(app.state, "Emergency shoulder sleep")
+        assert isinstance(app.state, ShoulderSleepConfirmationState)
+
+        driving.truck.velocity_mps = 0.5001 / 2.23694
+        minutes_before = driving.trip.game_minutes
+        select(app.state, "Sleep on the shoulder")
+        assert isinstance(app.state, ShoulderSleepConfirmationState)
+        assert driving.trip.game_minutes == minutes_before
+        assert "complete stop first" in spoken[-1].lower()
+
+        driving.truck.velocity_mps = 0.0
+        spoken.clear()
+        select(app.state, "Sleep on the shoulder")
+        assert isinstance(app.state, DrivingState)
+        assert driving.trip.game_minutes == minutes_before + hos.SLEEP_MIN
+        assert driving.truck.velocity_mps == 0.0
+        assert driving.truck.parking_brake
+        assert not any(text == "Paused." for text in spoken)
+        assert "Press E" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_controller_rest_binding_opens_roadside_sleep_confirmation(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import ShoulderSleepConfirmationState
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        stop = park_at_first_stop(driving)
+        park_away_from_stops(driving, after_stop=stop)
+        driving.truck.velocity_mps = 0.0
+        event = pygame.event.Event(
+            pygame.CONTROLLERBUTTONDOWN,
+            button=pygame.CONTROLLER_BUTTON_DPAD_DOWN,
+        )
+
+        driving.handle_controller(event, SimpleNamespace(modifier=True))
+
+        assert isinstance(app.state, ShoulderSleepConfirmationState)
     finally:
         app.shutdown()
 

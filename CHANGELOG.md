@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Roadside sleep now works from T when the truck is fully stopped.** Away
+  from a route stop, T opens the existing emergency shoulder-sleep warning
+  instead of saying there is no point of interest. Route stops still take
+  priority. The truck is secured before a sleep menu opens, so setting the
+  parking brake at walking pace and pausing cannot leave you rolling between
+  two unavailable choices.
+
 - **Five more AFN bases on the dial.** Iwakuni, Kunsan, Misawa, Okinawa,
   and Sasebo join the AFN section, all of them Pacific stations carrying
   The Eagle. That brings the AFN list to twenty-three bases you can tune

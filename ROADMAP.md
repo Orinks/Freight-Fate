@@ -2814,6 +2814,10 @@ not skip the first spoken option.
 
 Follow-ups for a later facility/keyboard polish pass:
 
+- [x] Let T open emergency shoulder sleep away from route stops, with one
+  complete-stop threshold and an atomic brake-set handoff before menus freeze
+  driving physics.
+
 - Keep the future cargo loading/securing minigame optional and audio-first,
   with a simple timed loading path preserved for players who do not want an
   extra ritual at every dock.

@@ -640,6 +640,7 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         assert "press and hold it again" in spoken[-1]
         assert "holds the truck" in spoken[-1]
         assert "R progress, distance left, and where you are" in spoken[-1]
+        assert "Away from route POIs, T opens the emergency shoulder-sleep" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_keyboard_help()
@@ -652,6 +653,7 @@ def test_driving_help_explains_selected_automatic_direction_style(monkeypatch):
         assert "simple direction changes" in spoken[-1]
         assert "press and hold it again" in spoken[-1]
         assert "D-pad up reads your route and current location" in spoken[-1]
+        assert "emergency shoulder sleep when fully stopped away" in spoken[-1]
 
         app.ctx.settings.automatic_direction_changes = "deliberate"
         driving._speak_controller_help()

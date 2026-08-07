@@ -365,6 +365,7 @@ ACC_STOPPED_CANCEL_S = 20.0  # hand control back this many seconds before stoppe
 ENGINE_SHUTDOWN_SAFE_MPH = 5.0  # prevent accidental kill-switch use at speed
 DELIVERY_PARK_MPH = 3.0  # within this, the gate prompts you to stop
 DOCKING_MAX_MPH = 0.5  # dock/settle/rest actions need a complete stop
+PARKING_BRAKE_SETTLE_MAX_MPH = 3.0  # spring brakes finish a walking-pace stop immediately
 # How often a facility gate re-speaks its stop instruction while the truck is
 # still rolling past it. The one-shot warnings latch, so without a cadence a
 # player who overshot the gate at speed heard them once, minutes ago, and got
@@ -758,6 +759,21 @@ def _advance_rest_clock(
             driving._logbook_location(),
             note,
         )
+
+
+def _secure_truck_for_stopped_menu(
+    driving: DrivingState, *, max_mph: float = DOCKING_MAX_MPH
+) -> bool:
+    """Atomically secure a slow truck before a menu freezes driving physics."""
+    truck = driving.truck
+    if truck.speed_mph > max_mph:
+        return False
+    truck.velocity_mps = 0.0
+    truck.throttle = 0.0
+    truck.brake = 1.0
+    truck.set_parking_brake()
+    driving._cancel_cruise()
+    return True
 
 
 def _shut_down_engine(driving: DrivingState) -> str:

@@ -42,6 +42,16 @@ def test_controls_help_page_points_at_the_driving_keys():
     assert "Left or Right Control stops the driving event voice" in joined
 
 
+def test_help_pages_explain_t_roadside_sleep_and_poi_priority():
+    from freight_fate.states.main_menu import HELP_PAGES
+
+    joined = " ".join(line for _title, lines in HELP_PAGES for line in lines)
+    assert "T opens the emergency shoulder-sleep warning" in joined
+    assert "nearby route points always take priority" in joined
+    assert "T or the pause menu offers emergency shoulder sleep" in joined
+    assert "plus D-pad down opens route-stop actions or emergency shoulder sleep" in joined
+
+
 def test_help_state_opens_to_a_chosen_page():
     from freight_fate.app import App
     from freight_fate.states.main_menu import HelpState, controls_help_page
