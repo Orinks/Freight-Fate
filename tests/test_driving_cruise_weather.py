@@ -934,7 +934,7 @@ def test_live_weather_calendar_off_does_not_announce_simulated_forecast_while_lo
     try:
         driving = start_drive(app)
         driving._speak_weather()
-        assert "Live weather is still loading" in spoken[-1]
+        assert "Live weather is loading for your current route position" in spoken[-1]
         assert "Ahead:" not in spoken[-1]
     finally:
         app.shutdown()
@@ -958,6 +958,129 @@ def test_real_weather_applies_and_awards_live_condition(monkeypatch):
         assert driving.weather.live is True
         assert driving.weather.current is WeatherKind.RAIN
         assert "rain_driver" in driving.ctx.profile.achievements
+    finally:
+        app.shutdown()
+
+
+def test_v_reports_live_weather_from_multiple_current_route_positions(monkeypatch):
+    """Real V-key reports follow stable route cells instead of the destination."""
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+
+    class SpatialProvider:
+        def __init__(self):
+            self.requests = []
+            self.conditions = {}
+
+        def request(self, key, lat, lon):
+            if key not in self.conditions:
+                kinds = (WeatherKind.CLEAR, WeatherKind.RAIN, WeatherKind.HEAVY_RAIN)
+                self.conditions[key] = kinds[min(len(self.conditions), 2)]
+                self.requests.append((key, lat, lon))
+
+        def get(self, key):
+            return self.conditions.get(key)
+
+        def stale(self, key):
+            return False
+
+        def unavailable(self, key):
+            return False
+
+    provider = SpatialProvider()
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: provider)
+    app.ctx.settings.real_weather = True
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        from freight_fate.sim.trip import Trip
+
+        route = app.ctx.world.route_options("chicago_il_us", "indianapolis_in_us")[0]
+        driving.route = route
+        driving.trip = Trip(
+            route,
+            driving.truck,
+            driving.weather,
+            time_scale=driving.ctx.settings.time_scale,
+            seed=driving.trip_seed,
+        )
+        provider.requests.clear()
+        provider.conditions.clear()
+        driving.weather.live = False
+        driving.weather._live_raw = None
+        driving.weather._live_city = None
+        driving.weather._live_kind = None
+        positions = (0.0, 40.0, 80.0)
+        expected = ("clear", "rain", "heavy rain")
+        for position, condition in zip(positions, expected, strict=True):
+            driving.trip.position_mi = position
+            driving.trip.update(0.0)
+            driving.handle_event(
+                pygame.event.Event(pygame.KEYDOWN, key=pygame.K_v, unicode="v", mod=0)
+            )
+            assert spoken[-1].startswith(f"Live weather: {condition}")
+        assert len({key for key, _lat, _lon in provider.requests}) == 3
+        destination = app.ctx.world.city(driving.route.cities[-1])
+        assert provider.requests[0][1:] != (destination.lat, destination.lon)
+        assert app.state is driving
+    finally:
+        app.shutdown()
+
+
+def test_v_distinguishes_loading_last_known_and_fallback(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+
+    class StatefulProvider:
+        kind = None
+        is_stale = False
+        is_unavailable = False
+
+        def request(self, *args):
+            pass
+
+        def get(self, key):
+            return self.kind
+
+        def stale(self, key):
+            return self.is_stale
+
+        def unavailable(self, key):
+            return self.is_unavailable
+
+    provider = StatefulProvider()
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: provider)
+    app.ctx.settings.real_weather = True
+    try:
+        driving = start_drive(app)
+        event = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_v, unicode="v", mod=0)
+        driving.trip.update(0.0)
+        driving.handle_event(event)
+        assert spoken[-1].startswith("Live weather is loading for your current route position")
+        assert "Ahead:" not in spoken[-1]
+
+        provider.kind = WeatherKind.HEAVY_RAIN
+        driving.trip.update(0.0)
+        provider.is_stale = True
+        driving.handle_event(event)
+        assert spoken[-1].startswith("Last-known live weather: heavy rain")
+        assert "Ahead:" not in spoken[-1]
+        status_weather = next(
+            line for line in driving.status_lines() if line.startswith("Weather:")
+        )
+        assert "Last-known live weather" in status_weather
+        provider.kind = None
+        provider.is_unavailable = True
+        driving.trip.update(0.0)
+        driving.handle_event(event)
+        assert spoken[-1].startswith("Simulated fallback weather:")
+        assert "Ahead:" in spoken[-1]
     finally:
         app.shutdown()
 

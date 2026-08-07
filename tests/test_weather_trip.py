@@ -98,6 +98,183 @@ def test_weather_eventually_changes():
     assert any(c is not None for c in changes)
 
 
+def test_route_weather_coordinates_follow_multiple_points_on_long_leg(world):
+    route = world.route_options("chicago_il_us", "indianapolis_in_us")[0]
+    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
+
+    start = trip.latlon_at(0.0)
+    middle = trip.latlon_at(route.miles / 2)
+    end = trip.latlon_at(route.miles)
+
+    assert start == pytest.approx(
+        (world.city("chicago_il_us").lat, world.city("chicago_il_us").lon), abs=0.001
+    )
+    assert end == pytest.approx(
+        (
+            world.city("indianapolis_in_us").lat,
+            world.city("indianapolis_in_us").lon,
+        ),
+        abs=0.001,
+    )
+    assert start[0] > middle[0] > end[0]
+    assert start[1] < middle[1] < end[1]
+
+    keys = []
+    for position in (0.0, 19.9, 20.0, 59.9, 60.0, route.miles - 1):
+        trip.position_mi = position
+        keys.append(trip._weather_location()[0])
+    assert keys[0] == keys[1]
+    assert keys[1] != keys[2]
+    assert keys[3] != keys[4]
+    assert len(set(keys)) == 5
+
+
+def test_route_weather_coordinates_reverse_with_travel_direction(world):
+    route = world.route_options("chicago_il_us", "indianapolis_in_us")[0]
+    from freight_fate.data.world_models import Route
+
+    reverse = Route(list(reversed(route.cities)), list(reversed(route.legs)))
+    trip = Trip(reverse, TruckState(), WeatherSystem("corn_belt", seed=1), seed=2)
+    assert trip.latlon_at(0.0) == pytest.approx(
+        (
+            world.city("indianapolis_in_us").lat,
+            world.city("indianapolis_in_us").lon,
+        ),
+        abs=0.001,
+    )
+    assert trip.latlon_at(reverse.miles) == pytest.approx(
+        (
+            world.city("chicago_il_us").lat,
+            world.city("chicago_il_us").lon,
+        ),
+        abs=0.001,
+    )
+
+
+def test_route_weather_location_switches_at_multi_leg_boundary(world):
+    from freight_fate.data.world_models import Leg, Route, RoutePoint
+
+    leg_one = Leg(
+        "chicago_il_us",
+        "indianapolis_in_us",
+        40.0,
+        "I-65",
+        "flat",
+        (),
+        route_points=(RoutePoint(0.0, 41.8781, -87.6298), RoutePoint(40.0, 39.7684, -86.1581)),
+    )
+    leg_two = Leg(
+        "indianapolis_in_us",
+        "columbus_oh_us",
+        40.0,
+        "I-70",
+        "flat",
+        (),
+        route_points=(RoutePoint(0.0, 39.7684, -86.1581), RoutePoint(40.0, 39.9612, -82.9988)),
+    )
+    route = Route(["chicago_il_us", "indianapolis_in_us", "columbus_oh_us"], [leg_one, leg_two])
+    trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
+
+    trip.position_mi = 39.9
+    before = trip._weather_location()[0]
+    trip.position_mi = 40.0
+    boundary = trip._weather_location()[0]
+    trip.position_mi = 40.1
+    after = trip._weather_location()[0]
+
+    assert before != boundary
+    assert boundary == after
+    assert "indianapolis_in_us:columbus_oh_us" in boundary
+
+
+def test_normal_route_cell_refresh_is_silent_but_fallback_is_announced(world):
+    class MovingProvider:
+        data = {}
+        failed = set()
+
+        def request(self, *args):
+            pass
+
+        def get(self, key):
+            return self.data.get(key)
+
+        def stale(self, key):
+            return False
+
+        def unavailable(self, key):
+            return key in self.failed
+
+    route = world.route_options("chicago_il_us", "indianapolis_in_us")[0]
+    provider = MovingProvider()
+    weather = WeatherSystem("great_lakes", seed=1, provider=provider)
+    trip = Trip(route, TruckState(), weather, seed=2)
+
+    trip.position_mi = 0.0
+    first_key = trip._weather_location()[0]
+    provider.data[first_key] = WeatherKind.CLEAR
+    trip.update(0.0)
+
+    trip.position_mi = 20.0
+    second_key = trip._weather_location()[0]
+    weather_events = [
+        event for event in trip.update(0.0) if event.kind is TripEventKind.WEATHER_CHANGE
+    ]
+    assert weather_events == []
+    provider.data[second_key] = WeatherKind.CLEAR
+    weather_events = [
+        event for event in trip.update(0.0) if event.kind is TripEventKind.WEATHER_CHANGE
+    ]
+    assert weather_events == []
+
+    trip.position_mi = 40.0
+    third_key = trip._weather_location()[0]
+    provider.failed.add(third_key)
+    events = [event for event in trip.update(0.0) if event.kind is TripEventKind.WEATHER_CHANGE]
+    assert len(events) == 1
+    assert events[0].message.startswith("Live weather is unavailable")
+
+
+def test_live_change_omits_modeled_temperature_and_does_not_hide_later_stale_status(world):
+    class MovingProvider:
+        data = {}
+        stale_keys = set()
+
+        def request(self, *args):
+            pass
+
+        def get(self, key):
+            return self.data.get(key)
+
+        def stale(self, key):
+            return key in self.stale_keys
+
+        def unavailable(self, key):
+            return False
+
+    route = world.route_options("chicago_il_us", "indianapolis_in_us")[0]
+    provider = MovingProvider()
+    weather = WeatherSystem("great_lakes", seed=1, provider=provider)
+    trip = Trip(route, TruckState(), weather, seed=2)
+
+    trip.position_mi = 0.0
+    first_key = trip._weather_location()[0]
+    provider.data[first_key] = WeatherKind.CLEAR
+    trip.update(0.0)
+
+    trip.position_mi = 20.0
+    second_key = trip._weather_location()[0]
+    provider.data[second_key] = WeatherKind.HEAVY_RAIN
+    changed = [event for event in trip.update(0.0) if event.kind is TripEventKind.WEATHER_CHANGE]
+    assert len(changed) == 1
+    assert changed[0].message.startswith("Live weather changing: heavy rain")
+    assert "degrees" not in changed[0].message
+
+    provider.stale_keys.add(second_key)
+    delayed = [event for event in trip.update(0.0) if event.kind is TripEventKind.WEATHER_CHANGE]
+    assert len(delayed) == 1
+    assert delayed[0].message.startswith("Live weather update delayed")
+
+
 def test_offline_live_weather_change_is_identified_as_simulated_fallback(world):
     class OfflineProvider:
         def request(self, *args):
@@ -117,7 +294,9 @@ def test_offline_live_weather_change_is_identified_as_simulated_fallback(world):
     events = trip.update(1.0)
 
     change = next(event for event in events if event.kind is TripEventKind.WEATHER_CHANGE)
-    assert change.message.startswith("Simulated fallback weather changing: rain")
+    assert change.message.startswith(
+        "Live weather is unavailable. Simulated fallback weather changing: rain"
+    )
 
 
 def test_bad_weather_reduces_grip():

@@ -16,6 +16,12 @@
 
 ### Fixed
 
+- **Real-world weather now follows the truck instead of the next city.** Live
+  National Weather Service conditions update as you move along a route, and
+  weather reports say when conditions are live, still loading, last known, or
+  simulated because the live service is unavailable. Old failed-refresh rain
+  now expires instead of lingering as if it were current.
+
 - **Loading a career no longer cuts off its own welcome.** Choosing a saved
   career from Continue latest career or Choose career used to say "Welcome
   back" and then get cut off mid-sentence by the terminal announcing where
