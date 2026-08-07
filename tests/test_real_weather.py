@@ -3,7 +3,13 @@ is injected everywhere."""
 
 import threading
 
-from freight_fate.sim.real_weather import CACHE_TTL_S, RealWeatherProvider, map_condition
+from freight_fate.sim.real_weather import (
+    CACHE_TTL_S,
+    RETRY_AFTER_S,
+    STALE_AFTER_S,
+    RealWeatherProvider,
+    map_condition,
+)
 from freight_fate.sim.weather import WeatherKind, WeatherSystem
 
 # -- NWS condition mapping -----------------------------------------------------
@@ -121,6 +127,160 @@ def test_provider_refetches_after_ttl():
     now[0] = CACHE_TTL_S + 1
     p.request("Dallas", 32.8, -96.8)
     assert p.get("Dallas") is WeatherKind.THUNDERSTORM
+
+
+def test_newly_fetched_old_observation_stays_live_without_claiming_update():
+    """An old station reading can arrive in a fresh response. The five-minute
+    fetch throttle means that response is not itself evidence of another active
+    update, so speech must separate observation age from request activity."""
+    wall = [2_000_000.0]
+    observed_at = wall[0] - 12 * 60
+    calls = []
+
+    def fetch(lat, lon):
+        calls.append((lat, lon))
+        return "Light Rain", 5.0, 14.0, 6.0, observed_at
+
+    provider = SyncProvider(
+        fetch=fetch,
+        clock=lambda: 0.0,
+        wall_clock=lambda: wall[0],
+    )
+    weather = WeatherSystem("great_lakes", seed=1, provider=provider)
+    weather.set_city("route-cell", 40.0, -80.0)
+
+    weather.update(0.0)
+
+    assert weather.source_status == "live"
+    assert provider.observation_age_s("route-cell") == 12 * 60
+    assert not provider.refreshing("route-cell")
+    provider.request("route-cell", 40.0, -80.0)
+    assert len(calls) == 1  # fresh fetch timestamp still enforces the throttle
+    report = weather.report_lead()
+    assert "The observation is 12 minutes old" in report
+    assert report.startswith("Live weather:")
+    assert "updating" not in report.lower()
+
+
+def test_last_known_report_says_updating_only_during_true_inflight_refresh():
+    monotonic = [0.0]
+    wall = [2_000_000.0]
+    refresh_started = threading.Event()
+    release_refresh = threading.Event()
+    calls = [0]
+
+    def fetch(lat, lon):
+        calls[0] += 1
+        if calls[0] == 1:
+            return "Light Rain", 5.0, 14.0, 6.0, wall[0] - 12 * 60
+        refresh_started.set()
+        assert release_refresh.wait(timeout=5)
+        return "Clear", 0.0, 15.0, 10.0, wall[0]
+
+    provider = RealWeatherProvider(
+        fetch=fetch,
+        clock=lambda: monotonic[0],
+        wall_clock=lambda: wall[0],
+    )
+    weather = WeatherSystem("great_lakes", seed=1, provider=provider)
+    weather.set_city("route-cell", 40.0, -80.0)
+    provider.request("route-cell", 40.0, -80.0)
+    for thread in threading.enumerate():
+        if thread.name == "weather-route-cell":
+            thread.join(timeout=5)
+    weather.update(0.0)
+
+    monotonic[0] = CACHE_TTL_S + 1
+    wall[0] += CACHE_TTL_S + 1
+    weather.update(0.0)
+    assert refresh_started.wait(timeout=5)
+    assert provider.refreshing("route-cell")
+    assert "Live weather is updating for your current location" in weather.report_lead()
+
+    release_refresh.set()
+    for thread in threading.enumerate():
+        if thread.name == "weather-route-cell":
+            thread.join(timeout=5)
+    assert not provider.refreshing("route-cell")
+
+
+def test_failed_refresh_expires_last_known_observation_instead_of_loading_forever():
+    monotonic = [0.0]
+    wall = [1_000_000.0]
+    calls = [0]
+
+    def fetch(lat, lon):
+        calls[0] += 1
+        if calls[0] == 1:
+            return "Heavy Rain", 5.0, 12.0, 1.0, wall[0]
+        raise OSError("offline")
+
+    p = SyncProvider(fetch=fetch, clock=lambda: monotonic[0], wall_clock=lambda: wall[0])
+    p.request("route-cell", 40.0, -80.0)
+    assert p.get("route-cell") is WeatherKind.HEAVY_RAIN
+
+    monotonic[0] = wall[0] = CACHE_TTL_S + 1
+    wall[0] += 1_000_000.0
+    p.request("route-cell", 40.0, -80.0)
+    assert p.stale("route-cell")
+    assert not p.unavailable("route-cell")
+
+    monotonic[0] = STALE_AFTER_S + 1
+    wall[0] = 1_000_000.0 + STALE_AFTER_S + 1
+    p.request("route-cell", 40.0, -80.0)
+    assert p.get("route-cell") is None
+    assert p.unavailable("route-cell")
+    assert p.unavailable("route-cell")
+
+
+def test_old_nws_observation_timestamp_is_never_treated_as_live():
+    now = [2_000_000.0]
+    old = now[0] - STALE_AFTER_S - 1
+    p = SyncProvider(
+        fetch=lambda lat, lon: ("Heavy Rain", 5.0, 12.0, 1.0, old),
+        clock=lambda: 0.0,
+        wall_clock=lambda: now[0],
+    )
+    p.request("route-cell", 40.0, -80.0)
+    assert p.get("route-cell") is None
+
+
+def test_expired_observation_retries_then_recovers_to_live_weather():
+    monotonic = [0.0]
+    wall = [2_000_000.0]
+    calls = [0]
+
+    def fetch(lat, lon):
+        calls[0] += 1
+        observed_at = wall[0]
+        if calls[0] == 1:
+            observed_at -= STALE_AFTER_S + 1
+        return "Clear", 0.0, 10.0, 10.0, observed_at
+
+    provider = SyncProvider(
+        fetch=fetch,
+        clock=lambda: monotonic[0],
+        wall_clock=lambda: wall[0],
+    )
+    weather = WeatherSystem("great_lakes", seed=1, provider=provider)
+    weather.set_city("route-cell", 40.0, -80.0)
+
+    weather.update(0.0)
+    assert calls == [1]
+    assert weather.source_status == "fallback"
+
+    monotonic[0] = RETRY_AFTER_S - 0.1
+    wall[0] += RETRY_AFTER_S - 0.1
+    weather.update(0.0)
+    assert calls == [1]
+    assert weather.source_status == "fallback"
+
+    monotonic[0] = RETRY_AFTER_S + 0.1
+    wall[0] += 0.2
+    weather.update(0.0)
+    assert calls == [2]
+    assert weather.source_status == "live"
+    assert weather.current is WeatherKind.CLEAR
 
 
 # -- temperature ---------------------------------------------------------------

@@ -47,6 +47,7 @@ class Trip:
         self.weather = weather
         self._weather_source_status = weather.source_status
         self._weather_location_refreshing = False
+        self._weather_refresh_issue_announced = False
         self.time_scale = time_scale
         self.hazard_scale = max(0.0, hazard_scale)
         self.start_hour = start_hour  # clock hour of day at departure
@@ -683,7 +684,19 @@ class Trip:
         state = _leg_state_at(leg, native_offset)
         lat, lon = self.latlon_at(mile)
         if state and (lat or lon):
-            return classify_region(state, lat, lon)
+            world = get_world()
+            state_codes = getattr(self, "_state_codes_for_weather", None)
+            if state_codes is None:
+                state_codes = {
+                    name: city.state_code
+                    for city in world.cities.values()
+                    for name in (city.state, city.state_code)
+                    if name
+                }
+                self._state_codes_for_weather = state_codes
+            code = state_codes.get(state, state)
+            if len(code) == 2:
+                return classify_region(code, lat, lon)
         nearer = leg_i if route_offset < leg.miles / 2 else leg_i + 1
         return get_world().cities[self.route.cities[nearer]].region
 
@@ -960,36 +973,66 @@ class Trip:
         changed = self.weather.update(game_min)
         source_status = self.weather.source_status
         if changed is not None:
+            source_details = self.weather.source_conditions(self.imperial)
+            if source_status == "live":
+                source_details += f". {self.weather.live_observation_notice()}"
+            elif source_status == "last_known":
+                source_details += f". {self.weather.last_known_notice()}"
             self._emit(
                 TripEventKind.WEATHER_CHANGE,
-                f"{self.weather.event_source_label()} changing: "
-                f"{self.weather.source_conditions(self.imperial)}",
+                f"{self.weather.event_source_label()} changing: {source_details}",
                 weather=changed,
             )
             if source_status in ("live", "fallback"):
                 self._weather_location_refreshing = False
-        elif source_status != self._weather_source_status:
-            suppress_location_refresh = self._weather_location_refreshing and source_status in (
-                "live",
-                "last_known",
+        else:
+            refresh_failure_started = (
+                source_status == "last_known"
+                and self.weather.live_weather_refresh_failed
+                and not self._weather_refresh_issue_announced
             )
-            if not suppress_location_refresh and source_status in (
-                "live",
-                "last_known",
-                "fallback",
-            ):
-                message = {
-                    "live": "Live weather is ready for your current route position.",
-                    "last_known": (
-                        "Live weather update delayed. Last-known conditions remain in use."
-                    ),
-                    "fallback": (
-                        "Live weather is unavailable. Simulated fallback weather is now in use."
-                    ),
-                }[source_status]
-                self._emit(TripEventKind.WEATHER_CHANGE, message, weather=self.weather.current)
-            if source_status in ("live", "fallback"):
-                self._weather_location_refreshing = False
+            source_changed = source_status != self._weather_source_status
+            if source_changed or refresh_failure_started:
+                suppress_location_refresh = self._weather_location_refreshing and source_status in (
+                    "live",
+                    "last_known",
+                )
+                suppress_routine_refresh = (
+                    source_status == "last_known" and self.weather.live_weather_refreshing
+                ) or (
+                    source_status == "live"
+                    and self._weather_source_status == "last_known"
+                    and not self._weather_refresh_issue_announced
+                )
+                if (
+                    not suppress_location_refresh
+                    and source_status in ("live", "last_known", "fallback")
+                    and not suppress_routine_refresh
+                ):
+                    message = {
+                        "live": (
+                            "Live weather is ready for your current route position. "
+                            f"{self.weather.live_observation_notice()}."
+                        ),
+                        "last_known": (
+                            f"{self.weather.last_known_notice()}. "
+                            "Last-known conditions remain in use."
+                        ),
+                        "fallback": (
+                            "Live weather is unavailable. Simulated fallback weather is now in use."
+                        ),
+                    }[source_status]
+                    self._emit(
+                        TripEventKind.WEATHER_CHANGE,
+                        message,
+                        weather=self.weather.current,
+                    )
+                    self._weather_refresh_issue_announced = (
+                        source_status == "last_known" and self.weather.live_weather_refresh_failed
+                    )
+                if source_status in ("live", "fallback"):
+                    self._weather_location_refreshing = False
+                    self._weather_refresh_issue_announced = False
         self._weather_source_status = source_status
         self.truck.grip = self.weather.effects.grip
         self.truck.drag_mult = self.weather.effects.drag_mult

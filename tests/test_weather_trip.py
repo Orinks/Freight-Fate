@@ -238,6 +238,7 @@ def test_live_change_omits_modeled_temperature_and_does_not_hide_later_stale_sta
     class MovingProvider:
         data = {}
         stale_keys = set()
+        failed_keys = set()
 
         def request(self, *args):
             pass
@@ -250,6 +251,15 @@ def test_live_change_omits_modeled_temperature_and_does_not_hide_later_stale_sta
 
         def unavailable(self, key):
             return False
+
+        def observation_age_s(self, key):
+            return 12 * 60 if key in self.stale_keys else 0
+
+        def refreshing(self, key):
+            return False
+
+        def refresh_failed(self, key):
+            return key in self.failed_keys
 
     route = world.route_options("chicago_il_us", "indianapolis_in_us")[0]
     provider = MovingProvider()
@@ -270,9 +280,44 @@ def test_live_change_omits_modeled_temperature_and_does_not_hide_later_stale_sta
     assert "degrees" not in changed[0].message
 
     provider.stale_keys.add(second_key)
+    provider.failed_keys.add(second_key)
     delayed = [event for event in trip.update(0.0) if event.kind is TripEventKind.WEATHER_CHANGE]
     assert len(delayed) == 1
-    assert delayed[0].message.startswith("Live weather update delayed")
+    assert delayed[0].message.startswith("The observation is 12 minutes old")
+    assert "Last-known conditions remain in use" in delayed[0].message
+    assert "updat" not in delayed[0].message.lower()
+
+
+def test_freshly_fetched_old_observation_change_stays_live_and_announces_age(world):
+    class OldObservationProvider:
+        def request(self, *args):
+            pass
+
+        def get(self, key):
+            return WeatherKind.HEAVY_RAIN
+
+        def stale(self, key):
+            return False
+
+        def unavailable(self, key):
+            return False
+
+        def observation_age_s(self, key):
+            return 12 * 60
+
+        def refreshing(self, key):
+            return False
+
+    route = world.route_options("chicago_il_us", "indianapolis_in_us")[0]
+    weather = WeatherSystem("great_lakes", seed=1, provider=OldObservationProvider())
+    trip = Trip(route, TruckState(), weather, seed=2)
+
+    changes = [event for event in trip.update(0.0) if event.kind is TripEventKind.WEATHER_CHANGE]
+
+    assert len(changes) == 1
+    assert changes[0].message.startswith("Live weather changing: heavy rain")
+    assert "The observation is 12 minutes old" in changes[0].message
+    assert "updat" not in changes[0].message.lower()
 
 
 def test_offline_live_weather_change_is_identified_as_simulated_fallback(world):
