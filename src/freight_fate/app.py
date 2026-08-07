@@ -103,7 +103,7 @@ class GameContext:
 
         Created lazily and kept for the whole session so its cache spans trips.
         """
-        if not self.settings.real_weather:
+        if not self.settings.real_weather or not self.settings.online_services:
             return None
         if self._real_weather is None:
             from .sim.real_weather import RealWeatherProvider

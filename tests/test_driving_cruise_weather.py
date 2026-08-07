@@ -1038,6 +1038,8 @@ def test_v_distinguishes_loading_last_known_and_fallback(monkeypatch):
         kind = None
         is_stale = False
         is_unavailable = False
+        is_refreshing = False
+        is_failed = False
 
         def request(self, *args):
             pass
@@ -1050,6 +1052,15 @@ def test_v_distinguishes_loading_last_known_and_fallback(monkeypatch):
 
         def unavailable(self, key):
             return self.is_unavailable
+
+        def refreshing(self, key):
+            return self.is_refreshing
+
+        def observation_age_s(self, key):
+            return 12 * 60 if self.kind is not None else None
+
+        def refresh_failed(self, key):
+            return self.is_failed
 
     provider = StatefulProvider()
     app = App()
@@ -1070,17 +1081,74 @@ def test_v_distinguishes_loading_last_known_and_fallback(monkeypatch):
         provider.is_stale = True
         driving.handle_event(event)
         assert spoken[-1].startswith("Last-known live weather: heavy rain")
+        assert "The observation is 12 minutes old" in spoken[-1]
+        assert "updating" not in spoken[-1].lower()
         assert "Ahead:" not in spoken[-1]
         status_weather = next(
             line for line in driving.status_lines() if line.startswith("Weather:")
         )
         assert "Last-known live weather" in status_weather
+        provider.is_refreshing = True
+        driving.handle_event(event)
+        assert "Live weather is updating for your current location" in spoken[-1]
+        provider.is_refreshing = False
         provider.kind = None
         provider.is_unavailable = True
         driving.trip.update(0.0)
         driving.handle_event(event)
         assert spoken[-1].startswith("Simulated fallback weather:")
         assert "Ahead:" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_old_but_freshly_fetched_weather_is_live_across_v_and_status(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.sim.weather import WeatherKind
+
+    class FreshOldProvider:
+        def request(self, *args):
+            pass
+
+        def get(self, key):
+            return WeatherKind.RAIN
+
+        def stale(self, key):
+            return False
+
+        def unavailable(self, key):
+            return False
+
+        def refreshing(self, key):
+            return False
+
+        def refresh_failed(self, key):
+            return False
+
+        def observation_age_s(self, key):
+            return 12 * 60
+
+    app = App()
+    spoken = []
+    provider = FreshOldProvider()
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: provider)
+    app.ctx.settings.real_weather = True
+    try:
+        driving = start_drive(app)
+        driving.trip.update(0.0)
+        driving.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_v, unicode="v", mod=0))
+        assert spoken[-1].startswith("Live weather: rain")
+        assert "The observation is 12 minutes old" in spoken[-1]
+        assert "updating" not in spoken[-1].lower()
+
+        weather_status = next(
+            line for line in driving.status_lines() if line.startswith("Weather:")
+        )
+        assert "Live weather: rain" in weather_status
+        assert "The observation is 12 minutes old" in weather_status
+        assert "updating" not in weather_status.lower()
+
     finally:
         app.shutdown()
 
