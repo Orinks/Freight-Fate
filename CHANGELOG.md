@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Career 1.9 now uses the approved sound mix everywhere.** Source checkouts
+  and packaged builds carry the same sound pack, while the original sound
+  library recordings remain private and are not distributed in the repository.
+
 - **Roadside sleep now works from T when the truck is fully stopped.** Away
   from a route stop, T opens the existing emergency shoulder-sleep warning
   instead of saying there is no point of interest. Route stops still take

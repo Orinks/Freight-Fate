@@ -231,6 +231,24 @@ def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
     )
 
 
+def test_encrypted_sound_pack_is_staged_verbatim(tmp_path, monkeypatch):
+    build_release = load_build_release_module()
+    package_dir = tmp_path / "package"
+    credits = package_dir / "assets" / "sounds" / "CREDITS.md"
+    credits.parent.mkdir(parents=True)
+    credits.write_text("# Sound Credits\n", encoding="utf-8")
+    encrypted_pack = b"FFPK1\x00encrypted-test-payload"
+    (package_dir / "sounds.pak").write_bytes(encrypted_pack)
+    monkeypatch.setattr(build_release, "PACKAGE_DIR", package_dir)
+
+    build_dir = tmp_path / "FreightFate"
+    build_dir.mkdir()
+    build_release.stage_sound_pack(build_dir)
+
+    assert (build_dir / "freight_fate" / "sounds.pak").read_bytes() == encrypted_pack
+    assert (build_dir / "SOUND_CREDITS.md").read_text(encoding="utf-8") == ("# Sound Credits\n")
+
+
 def test_strip_user_data_removes_saves_and_logs(tmp_path):
     build_release = load_build_release_module()
     build_dir = tmp_path / "FreightFate"

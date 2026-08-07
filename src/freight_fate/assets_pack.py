@@ -4,8 +4,8 @@ Release builds ship the ``assets/sounds`` tree as a single masked pack file
 (``freight_fate/sounds.pak``) instead of a browsable folder. The pack is a
 deflated zip XOR-masked with a fixed key, so renaming it does not turn it
 back into an openable archive; this deters casual editing, nothing more.
-Source checkouts have no pack file and the audio engine reads the loose
-files, so development is unchanged.
+Career 1.9 source checkouts receive the encrypted pack through Git LFS. Tests
+can explicitly disable the default pack and exercise the loose-file fallback.
 
 ``tools/pack_sounds.py`` writes the pack; the audio engine reads it through
 ``open_default``. The pack payload is deterministic for identical inputs.
@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import io
 import logging
+import os
 import zipfile
 import zlib
 from pathlib import Path
@@ -131,6 +132,8 @@ def open_default() -> SoundPack | None:
     says so in the log instead of failing on the first sound it plays.
     """
     global _default_pack, _default_pack_missing
+    if os.environ.get("FREIGHT_FATE_IGNORE_SOUND_PACK") == "1":
+        return None
     if _default_pack is None and not _default_pack_missing:
         if DEFAULT_PACK_PATH.exists():
             try:

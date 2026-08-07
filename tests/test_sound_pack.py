@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import os
 import zipfile
 from pathlib import Path
 
@@ -110,12 +112,22 @@ def test_asset_bytes_prefers_pack(tmp_path, monkeypatch):
 
 
 def test_asset_bytes_reads_loose_files_without_pack():
-    # Source checkouts never have a pack file; the loose tree is the source.
-    assert not assets_pack.DEFAULT_PACK_PATH.exists()
+    # The test environment explicitly exercises the loose-file fallback.
+    assert os.environ["FREIGHT_FATE_IGNORE_SOUND_PACK"] == "1"
     found = audio._asset_bytes("ui/menu_select", ("ogg", "wav"))
     assert found is not None
     data, ext = found
     assert data == (SOUNDS_DIR / "ui" / f"menu_select.{ext}").read_bytes()
+
+
+def test_committed_pack_has_freight_fate_header():
+    assert assets_pack.DEFAULT_PACK_PATH.exists()
+    pack_bytes = assets_pack.DEFAULT_PACK_PATH.read_bytes()
+    assert len(pack_bytes) == 152_695_101
+    assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
+    assert hashlib.sha256(pack_bytes).hexdigest() == (
+        "df798d41a1d90695fe91508da6b861683b8705a8ea6d174d45d5edb1e5d7c704"
+    )
 
 
 def test_verify_sound_assets_passes_in_source_checkout():

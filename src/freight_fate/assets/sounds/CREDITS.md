@@ -3,12 +3,12 @@
 Sound effects in this directory come from a few sources, documented per file in
 the tables below: original effects created for Freight Fate (no third-party
 recordings or samples), weather and road loops produced with ElevenLabs sound
-effects tooling, and -- in release builds only -- driving sounds cut from
+effects tooling, and driving sounds cut from
 commercially licensed sample libraries (see "Licensed Driving Sounds" below).
 A number of in-cab cues were shared by Darren Duff early in the project; he
 holds no license for that material (owner ruling 2026-07-22), so every Duff
 row below is scheduled for replacement, not attribution -- most are already
-superseded in release builds by the licensed overlay. The main menu, Open
+superseded by the Career 1.9 sound pack. The main menu, Open
 Road, and Night Haul themes are Suno remakes created by the project owner. The July 2026 radio-station batch
 (fifty-two tracks marked "2026-07 Zero batch" below) was composed with Suno V5
 through the
@@ -57,7 +57,7 @@ current idle, start, and shutdown cues.
 | Turn signal | `vehicle/turn_signal.ogg` | ElevenLabs-generated in-cab indicator clicks for exit and pull-over signaling |
 | Tire screech | `vehicle/tire_screech.ogg` | ElevenLabs-generated emergency-braking skid for microsleep forced stops |
 | Brake squeal | `vehicle/brake_squeal.ogg` | ElevenLabs-generated overheated-brake squeal past the fade temperature |
-| Air pressurization fill | `vehicle/air_pressurize.ogg` | Original parametric DSP loop (seeded frequency-domain synthesis, `sound-test/air_fallback.py`); superseded in release builds by the licensed overlay version |
+| Air pressurization fill | `vehicle/air_pressurize.ogg` | Original parametric DSP loop (seeded frequency-domain synthesis, `sound-test/air_fallback.py`); superseded by the Career 1.9 sound-pack version |
 | Jake brake growl | `engine/jake_1200.ogg` ... `engine/jake_2200.ogg` | Original synthesized engine-brake loops at six rpm points (deterministic pulse-train DSP, `sound-test/jake_v2.py` family; approved by ear 2026-07-18) |
 | Edge-boundary ladder | `vehicle/edge_clip.wav`, `vehicle/edge_strip.wav`, `vehicle/edge_shoulder.wav` | Original synthesized boundary loops (deterministic pulse-train DSP from the `sound-test/edge_nav.py` audition machinery, baked by `sound-test/edge_ladder.py`); intermittent / periodic / aperiodic structural states |
 | Turn-signal tone | `vehicle/signal_tone.wav` | Original synthesized indicator tick-tone (`sound-test/signal_tone.py`), the designed modern-cab indicator sound; supersedes the relay click for signaling (the click remains for a future vintage-equipment option) |
@@ -67,25 +67,12 @@ current idle, start, and shutdown cues.
 | Lane-line marker roll | `vehicle/lane_line_cross.wav` | Original synthesized raised-marker crossing (`sound-test/transverse_strips.py`): the five-hit axle roll of a tractor-trailer crossing a lane line, panned to the crossed side |
 | Stop-bar solid tone | `vehicle/bar_solid.wav` | Original synthesized continuous alert (`sound-test/transverse_strips.py`): the parking-sensor beeps going solid in the bar's final leeway, a calm 400 Hz you can hold for seconds at a time (pitched down from 1250 by ear, 2026-08-03) |
 
-## Licensed Driving Sounds (release builds only)
+## Licensed Driving Sounds
 
-These assets ship inside release builds via the local `sounds-licensed/`
-overlay and are never committed to the repository: they are cut from
-commercially licensed sample-library recordings (Splice subscriptions held by
-the project maintainers) whose license covers synchronized use in the finished
-game but is per-seat and non-transferable, so the source samples cannot be
-redistributed. A source checkout falls back to the committed cues above.
-
-| Game file(s) | Built from | Source pack |
-| --- | --- | --- |
-| `engine/idle`, `engine/rev_launch`, `engine/rev_load` | Real idle hold and acceleration pulls cut from the `SemiTruckMac_S08IN.896` interior driving take | Splice -- Large Vehicles |
-| `engine/mid` | The ring's anchor: the hiss-free span of the flattened 896 mid hold, re-looped (`sound-test/engine_band_flatten.py`, `engine_ring_formant.py`) | Splice -- Large Vehicles |
-| `engine/low`, `engine/midhigh`, `engine/high` | Formant-preserving resyntheses of the clean anchor at 950, 1425, and 1900 rpm (`sound-test/engine_ring_formant.py`; no take in the library holds a real steady high rpm) | Splice -- Large Vehicles |
-| `vehicle/shift_manual_01`..`15`, `vehicle/shift_auto_01`..`15` | Real gear changes (manual: clutch squeaks; automatic: shorter disengage) cut from `SemiTruck_S08IN.854/.855/.859` and `SemiTruckMac_S08IN.896` | Splice -- Large Vehicles |
-| `vehicle/brake_clunk_01`..`14` | Percussive valve/actuation onsets from `SemiTruckBrake_S08IN.913`-`.917` and `BantamBrakeMach_S08IN.62` (`sound-test/brake_banks.py`) | Splice -- Large Vehicles / Industry Vol. 1 |
-| `vehicle/ebrake` | The full sustained Bantam air event, `BantamBrakeMach_S08IN.62` | Splice -- Industry Vol. 1 |
-| `vehicle/brake_hiss_bed` | Resynthesized (frequency-domain, seeded phase) from the de-whistled averaged spectra of `SemiTruckBrake_S08IN.917`, `SemiTruckAirBrake_BWU.95`, `AirBrake_BW.20321` (`sound-test/brake_hiss_synth.py`) | Splice -- Large Vehicles / Industry Vol. 1 |
-| `vehicle/air_pressurize` | Resynthesized air-fill hiss from a licensed air-release spectrum with a compressor-pump whisper (`sound-test/pressurize.py`) | Splice -- Large Vehicles / Industry Vol. 1 |
+The encrypted Career 1.9 sound pack includes commercially licensed sounds
+obtained through Splice. The original source recordings remain local and are
+not distributed in this repository. Local Splice data does not reliably name
+an additional publisher, so this credit is intentionally company-level.
 
 ## Weather
 

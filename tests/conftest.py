@@ -8,6 +8,7 @@ import os
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
 os.environ["FREIGHT_FATE_NO_SPEECH"] = "1"
+os.environ["FREIGHT_FATE_IGNORE_SOUND_PACK"] = "1"
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pytest

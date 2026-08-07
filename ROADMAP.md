@@ -911,9 +911,10 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       the compressor builds air (physics change, vehicle.py), with the
       fill hiss and the settle as the drive-ready flip. Brake press
       plays the clunk bank leveled by force; release breathes the air
-      back out, scaled by how hard you braked. All licensed cuts live
-      in the gitignored sounds-licensed/ overlay; a clean clone keeps
-      the old synthesized cues everywhere. (3) SHIPPED 2026-07-24: the
+      back out, scaled by how hard you braked. Career 1.9 now carries
+      the approved encrypted sound pack through Git LFS, so source and
+      release builds use the same audio without distributing the raw
+      library recordings. (3) SHIPPED 2026-07-24: the
       engagement clunk at shift END, together with the shift SIGH --
       the voice now follows the physics rpm falling toward the new
       gear through the interrupt (ducked, unloaded) instead of the

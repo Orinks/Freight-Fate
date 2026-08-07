@@ -283,9 +283,16 @@ def _load_tool(name: str):
 
 
 def stage_sound_pack(build_dir: Path) -> None:
-    """Pack the sound assets into the runtime and keep the credits readable."""
+    """Stage the approved encrypted pack and keep the credits readable."""
     root = runtime_root(build_dir)
-    _load_tool("pack_sounds").pack(output=root / "freight_fate" / "sounds.pak")
+    destination = root / "freight_fate" / "sounds.pak"
+    committed_pack = PACKAGE_DIR / "sounds.pak"
+    if committed_pack.exists():
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(committed_pack, destination)
+    else:
+        # Retain the loose-asset fallback for branches that do not carry a pack.
+        _load_tool("pack_sounds").pack(output=destination)
     credits = PACKAGE_DIR / "assets" / "sounds" / "CREDITS.md"
     if not credits.exists():
         raise RuntimeError(f"Sound credits were not found: {credits}")

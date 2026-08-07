@@ -1,3 +1,6 @@
 # AppImage launcher runs on Linux; a CRLF checkout would break its shebang.
 tools/appimage/AppRun text eol=lf
 tools/appimage/*.desktop text eol=lf
+
+# Career 1.9 ships its encrypted sound pack through Git LFS. Raw audio stays local.
+src/freight_fate/sounds.pak filter=lfs diff=lfs merge=lfs -text

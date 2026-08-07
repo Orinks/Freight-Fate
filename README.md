@@ -371,8 +371,9 @@ or when a commit message includes `nightly: build` or `[nightly build]` for an
 intentional snapshot refresh. Use `changelog: none` or `[skip changelog]` only
 when every commit in the change set is non-user-facing.
 
-Bundled audio assets ship as Ogg Vorbis files under
-`src/freight_fate/assets/sounds/` — see
+Career 1.9 ships its approved audio mix in the encrypted
+`src/freight_fate/sounds.pak`; loose fallback cues remain under
+`src/freight_fate/assets/sounds/`. See
 [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md) for provenance and
 licensing.
 
