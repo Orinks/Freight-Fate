@@ -1254,7 +1254,7 @@ def test_t_opens_roadside_sleep_confirmation_at_safe_stop(monkeypatch, speed_mph
 
 @pytest.mark.smoke
 @pytest.mark.parametrize("speed_mph", [0.5001, 1.0, 3.0])
-def test_t_rejects_roadside_sleep_while_moving(monkeypatch, speed_mph):
+def test_t_plans_rest_instead_of_opening_roadside_sleep_while_moving(monkeypatch, speed_mph):
     from freight_fate.app import App
     from freight_fate.states.driving import DrivingState
 
@@ -1271,7 +1271,8 @@ def test_t_rejects_roadside_sleep_while_moving(monkeypatch, speed_mph):
         driving.handle_event(key_event(pygame.K_t))
 
         assert isinstance(app.state, DrivingState)
-        assert spoken[-1] == "Come to a complete stop first."
+        assert spoken[-1].startswith("No sleep-capable route stop is close enough ahead to plan")
+        assert "stop safely away from a route point" in spoken[-1]
         assert driving.trip.game_minutes == minutes_before
         assert not driving.truck.parking_brake
     finally:
