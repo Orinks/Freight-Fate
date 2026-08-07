@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Real-world weather now follows the truck instead of the next city.** Live
+  National Weather Service conditions update as you move along a route, and
+  weather reports say when conditions are live, still loading, last known, or
+  simulated because the live service is unavailable. Old failed-refresh rain
+  now expires instead of lingering as if it were current.
+
 ## 1.8.8 - 2026-08-05
 
 ### Changed

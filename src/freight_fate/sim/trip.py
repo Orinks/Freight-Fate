@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import random
 
+from ..data.regions import classify_region
 from ..data.world import Leg, Route, get_world
 from ..units import distance_unit, spoken_distance, spoken_gap, to_distance
 from .hos import clock_text, is_night
@@ -44,6 +45,8 @@ class Trip:
         self.route = route
         self.truck = truck
         self.weather = weather
+        self._weather_source_status = weather.source_status
+        self._weather_location_refreshing = False
         self.time_scale = time_scale
         self.hazard_scale = max(0.0, hazard_scale)
         self.start_hour = start_hour  # clock hour of day at departure
@@ -140,6 +143,54 @@ class Trip:
             starts.append(acc)
             acc += leg.miles
         return starts
+
+    @staticmethod
+    def _leg_latlon_at(leg, at_mi: float) -> tuple[float, float]:
+        """Linear lat/lon along a leg's route points at an A-to-B offset."""
+        pts = leg.route_points
+        if not pts:
+            return 0.0, 0.0
+        prev = pts[0]
+        for pt in pts:
+            if pt.at_mi >= at_mi:
+                span = pt.at_mi - prev.at_mi
+                fraction = (at_mi - prev.at_mi) / span if span > 0 else 0.0
+                return (
+                    prev.lat + (pt.lat - prev.lat) * fraction,
+                    prev.lon + (pt.lon - prev.lon) * fraction,
+                )
+            prev = pt
+        return prev.lat, prev.lon
+
+    def latlon_at(self, mile: float | None = None) -> tuple[float, float]:
+        """Interpolated road coordinate at a trip position."""
+        sample_mile = self.position_mi if mile is None else mile
+        leg_i, leg_start = self._leg_at_mile(sample_mile)
+        leg = self.route.legs[leg_i]
+        route_offset = max(0.0, min(leg.miles, sample_mile - leg_start))
+        forward = self.route.cities[leg_i] == leg.a
+        native_offset = route_offset if forward else leg.miles - route_offset
+        if len(leg.route_points) >= 2:
+            return self._leg_latlon_at(leg, native_offset)
+        world = get_world()
+        start = world.cities[self.route.cities[leg_i]]
+        end = world.cities[self.route.cities[leg_i + 1]]
+        fraction = route_offset / leg.miles if leg.miles > 0 else 0.0
+        return (
+            start.lat + (end.lat - start.lat) * fraction,
+            start.lon + (end.lon - start.lon) * fraction,
+        )
+
+    def _weather_location(self) -> tuple[str, float, float]:
+        """Stable 20-mile route cell plus its current-road coordinate."""
+        leg_i, leg_start = self._leg_at_mile(self.position_mi)
+        leg = self.route.legs[leg_i]
+        route_offset = max(0.0, min(leg.miles, self.position_mi - leg_start))
+        cell = int(route_offset // 20.0)
+        sample_mile = min(leg_start + cell * 20.0, leg_start + leg.miles)
+        lat, lon = self.latlon_at(sample_mile)
+        direction = f"{self.route.cities[leg_i]}:{self.route.cities[leg_i + 1]}"
+        return f"route:{direction}:{cell}", lat, lon
 
     def _timezone_samples(self) -> list[tuple[float, TimeZone]]:
         """(trip mile, zone) along the route, from city and route-point geometry.
@@ -624,9 +675,17 @@ class Trip:
         return self._corridor_limit_at(mile), None
 
     def _region_at(self, mile: float) -> str:
-        leg_i, _ = self._leg_at_mile(mile)
-        city = self.route.cities[min(leg_i + 1, len(self.route.cities) - 1)]
-        return get_world().cities[city].region
+        leg_i, leg_start = self._leg_at_mile(mile)
+        leg = self.route.legs[leg_i]
+        forward = self.route.cities[leg_i] == leg.a
+        route_offset = max(0.0, min(leg.miles, mile - leg_start))
+        native_offset = route_offset if forward else leg.miles - route_offset
+        state = _leg_state_at(leg, native_offset)
+        lat, lon = self.latlon_at(mile)
+        if state and (lat or lon):
+            return classify_region(state, lat, lon)
+        nearer = leg_i if route_offset < leg.miles / 2 else leg_i + 1
+        return get_world().cities[self.route.cities[nearer]].region
 
     def _near_city(self, mile: float) -> bool:
         return any(abs(mile - mp) <= URBAN_RADIUS_MI for mp in self._city_mileposts)
@@ -891,24 +950,47 @@ class Trip:
         scale = self.effective_time_scale
         game_min = dt * scale / 60.0
         self.game_minutes += game_min
-        target = self.current_target_city
-        self.weather.set_region(target.region)
-        # Identity for the live-weather cache: cities sharing a spoken name
-        # ("Jackson") are still different places with different skies.
-        self.weather.set_city(target.key, target.lat, target.lon)
+        self.weather.set_region(self._region_at(self.position_mi))
+        weather_key, weather_lat, weather_lon = self._weather_location()
+        previous_weather_key = self.weather.city
+        location_changed = weather_key != previous_weather_key
+        if location_changed and previous_weather_key is not None:
+            self._weather_location_refreshing = True
+        self.weather.set_city(weather_key, weather_lat, weather_lon)
         changed = self.weather.update(game_min)
+        source_status = self.weather.source_status
         if changed is not None:
-            if self.weather.live:
-                source = f"Live weather near {target.spoken_qualified}"
-            elif self.weather.provider is not None:
-                source = "Simulated fallback weather"
-            else:
-                source = "Weather"
             self._emit(
                 TripEventKind.WEATHER_CHANGE,
-                f"{source} changing: {self.weather.describe(self.imperial)}",
+                f"{self.weather.event_source_label()} changing: "
+                f"{self.weather.source_conditions(self.imperial)}",
                 weather=changed,
             )
+            if source_status in ("live", "fallback"):
+                self._weather_location_refreshing = False
+        elif source_status != self._weather_source_status:
+            suppress_location_refresh = self._weather_location_refreshing and source_status in (
+                "live",
+                "last_known",
+            )
+            if not suppress_location_refresh and source_status in (
+                "live",
+                "last_known",
+                "fallback",
+            ):
+                message = {
+                    "live": "Live weather is ready for your current route position.",
+                    "last_known": (
+                        "Live weather update delayed. Last-known conditions remain in use."
+                    ),
+                    "fallback": (
+                        "Live weather is unavailable. Simulated fallback weather is now in use."
+                    ),
+                }[source_status]
+                self._emit(TripEventKind.WEATHER_CHANGE, message, weather=self.weather.current)
+            if source_status in ("live", "fallback"):
+                self._weather_location_refreshing = False
+        self._weather_source_status = source_status
         self.truck.grip = self.weather.effects.grip
         self.truck.drag_mult = self.weather.effects.drag_mult
         self.truck.grade = self.grade_at(self.position_mi)

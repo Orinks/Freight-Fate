@@ -2,6 +2,7 @@
 
 import datetime
 
+import pygame
 import pytest
 from speech_capture import speech_stub
 
@@ -291,9 +292,36 @@ def test_terminal_does_not_present_modeled_temperature_while_live_weather_loads(
     app.ctx.settings.live_weather_controls_calendar = False
     app.ctx.profile = Profile(name="Loading Weather Driver")
     try:
-        CityMenuState(app.ctx)._time_weather()
+        terminal = CityMenuState(app.ctx)
+        terminal.enter()
+        while terminal.items[terminal.index].text != "Time and weather":
+            terminal.handle_event(
+                pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN, unicode="", mod=0)
+            )
+        terminal.handle_event(
+            pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, unicode="", mod=0)
+        )
         assert "Live weather" in spoken[-1]
         assert "still loading" in spoken[-1]
         assert "degrees" not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_terminal_identifies_intentionally_disabled_online_weather(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+    app.ctx.settings.real_weather = True
+    app.ctx.settings.online_services = False
+    app.ctx.profile = Profile(name="Offline Weather Driver")
+    try:
+        CityMenuState(app.ctx)._time_weather()
+        assert "Simulated weather; online services are off" in spoken[-1]
+        assert "Simulated fallback weather" not in spoken[-1]
     finally:
         app.shutdown()

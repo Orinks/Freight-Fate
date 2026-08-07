@@ -295,7 +295,7 @@ class CityMenuState(MenuState):
         zone = city_zone(city)
         hour = to_local(p.game_hours, zone) % 24.0
         day = p.market_day() + 1
-        desc, live, loading = None, False, False
+        desc, live, loading, last_known = None, False, False, False
         provider = self.ctx.real_weather_provider()
         if provider is not None:
             # Keyed by the city key, not the spoken name: two cities can share
@@ -304,6 +304,8 @@ class CityMenuState(MenuState):
             kind = provider.get(city.key)
             if kind is not None:
                 desc, live = kind.value, True
+                stale = getattr(provider, "stale", None)
+                last_known = stale is not None and stale(city.key)
             else:
                 unavailable = getattr(provider, "unavailable", None)
                 loading = unavailable is None or not unavailable(city.key)
@@ -352,7 +354,18 @@ class CityMenuState(MenuState):
             desc = WeatherSystem(city.region, seed=seed, game_hours=season_hours).describe(
                 self.ctx.settings.imperial_units
             )
-        source = "Live weather" if live or loading else "Weather"
+        if last_known:
+            source = "Last-known live weather"
+        elif live:
+            source = "Live weather"
+        elif loading:
+            source = "Live weather loading"
+        elif self.ctx.settings.real_weather and self.ctx.settings.online_services:
+            source = "Simulated fallback weather"
+        elif self.ctx.settings.real_weather:
+            source = "Simulated weather; online services are off"
+        else:
+            source = "Simulated weather"
         self.ctx.say(
             f"It is {clock_text(hour)} {zone.name}, {time_of_day(hour)}, "
             f"{date_text(season_hours)}, in {season(season_hours)}, "
