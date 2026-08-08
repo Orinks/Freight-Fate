@@ -8,6 +8,11 @@ import threading
 from pathlib import Path
 from types import SimpleNamespace
 
+# The POSIX-payload tests fake sys.platform as "linux" and then load modules
+# that import numpy lazily; numpy's own import probes sys.platform and calls
+# os.uname() on "linux", which does not exist on Windows. Importing it here,
+# under the real platform, keeps the fake from ever reaching that probe.
+import numpy  # noqa: F401
 import pytest
 from speech_capture import speech_stub
 
