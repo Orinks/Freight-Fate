@@ -42,6 +42,14 @@ FETCH_TIMEOUT_S = 8.0
 # turns over, and quick enough to catch off-schedule SPECI observations.
 CACHE_TTL_S = 5 * 60.0
 STALE_AFTER_S = 30 * 60.0  # keep serving cached data this long if refreshes fail
+# NWS stations file routine METAR observations once an hour (off-schedule
+# SPECIs are the exception), and dissemination adds minutes on top, so the
+# newest observation a healthy station offers is 30-60 minutes old for most
+# of every hour. That is what "current conditions" means; rejecting it as
+# stale pushed players onto simulated fallback weather for no reason. Only
+# an observation well past the hourly cycle -- a dead or parked station --
+# is unusable.
+OBSERVATION_MAX_AGE_S = 2 * 60 * 60.0
 RETRY_AFTER_S = 60.0  # wait before retrying a failed city
 STRONG_WIND_KMH = 38.0
 # The game's fog is a sub-half-mile, 40-mph event with fog horns, but NWS
@@ -291,7 +299,7 @@ class RealWeatherProvider:
     def _usable(self, entry: _CachedObservation) -> bool:
         return (
             self._clock() - entry.fetched_at <= STALE_AFTER_S
-            and self._wall_clock() - entry.observed_at <= STALE_AFTER_S
+            and self._wall_clock() - entry.observed_at <= OBSERVATION_MAX_AGE_S
         )
 
     def unavailable(self, city: str) -> bool:
@@ -334,7 +342,7 @@ class RealWeatherProvider:
             observed_at = fetched[4] if len(fetched) > 4 else None
             if observed_at is None:
                 observed_at = self._wall_clock()
-            if self._wall_clock() - float(observed_at) > STALE_AFTER_S:
+            if self._wall_clock() - float(observed_at) > OBSERVATION_MAX_AGE_S:
                 raise ValueError("NWS observation is too old to use")
             kind = map_condition(text, wind, visibility_mi)
             with self._lock:

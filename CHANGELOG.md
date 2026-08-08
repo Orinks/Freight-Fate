@@ -1060,6 +1060,14 @@
 
 ### Fixed
 
+- **Live weather no longer gives up on a healthy weather service.** Weather
+  stations file their reports once an hour, but the game treated any report
+  more than thirty minutes old as a failure -- so for most of every hour it
+  quietly switched to simulated fallback weather even when the service was
+  fine. A report now stays current until it is well past the hourly cycle,
+  so live weather stays live, and the weather app still tells you exactly
+  how old the reading is.
+
 - **Rest-stop sleep no longer turns into a dead end at the exit.** Pressing T
   while rolling toward a sleep-capable stop now plans and names that exact
   stop, then tells you to press X before leaving the highway. A new optional,
