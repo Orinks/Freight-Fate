@@ -644,13 +644,21 @@ def main(argv: list[str] | None = None) -> int:
         real_menu = main_menu.MainMenuState
         served = []
 
-        def _drive_then_menu(ctx):
-            if served:
-                return real_menu(ctx)
-            served.append(True)
-            return driving
+        class _DriveThenMenu(real_menu):
+            """First construction hands over the staged drive; later ones the
+            real menu. A subclass, not a function: game code also reaches
+            MainMenuState for its classmethods (arm_update_check), and a bare
+            function shim crashed the save-and-quit path."""
 
-        main_menu.MainMenuState = _drive_then_menu
+            def __new__(cls, ctx):
+                if not served:
+                    served.append(True)
+                    # Not an instance of cls, so __init__ is skipped -- the
+                    # drive is already fully built.
+                    return driving
+                return super().__new__(cls)
+
+        main_menu.MainMenuState = _DriveThenMenu
         print("\n  G grade, J engine brake, K cruise, Down arrow brakes (hands cruise back).")
         print("  To leave: Escape pauses; quit to the main menu, then Exit as usual.")
         print(f"  Transcript: {log_path}\n")
