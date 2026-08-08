@@ -8,6 +8,11 @@ import threading
 from pathlib import Path
 from types import SimpleNamespace
 
+# The POSIX-payload tests fake sys.platform as "linux" and then load modules
+# that import numpy lazily; numpy's own import probes sys.platform and calls
+# os.uname() on "linux", which does not exist on Windows. Importing it here,
+# under the real platform, keeps the fake from ever reaching that probe.
+import numpy  # noqa: F401
 import pytest
 
 from freight_fate import updater
@@ -228,6 +233,39 @@ def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
         .read_text(encoding="utf-8")
         .startswith("# Freight Fate User Manual")
     )
+
+
+def test_mingw_job_cap_gives_each_compiler_two_gigabytes():
+    build_release = load_build_release_module()
+    gib = 1024**3
+
+    assert build_release.mingw_safe_job_count(16, 8 * gib) == 4
+    assert build_release.mingw_safe_job_count(4, 32 * gib) == 4  # never above CPU count
+    assert build_release.mingw_safe_job_count(8, 2 * gib) == 1
+    assert build_release.mingw_safe_job_count(8, 1 * gib) == 1  # always at least one job
+    assert build_release.mingw_safe_job_count(8, None) == 8  # unknown RAM: Nuitka default
+
+
+def test_windows_build_without_msvc_caps_nuitka_compile_jobs(monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.setattr(build_release.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(build_release, "windows_msvc_available", lambda: False)
+    monkeypatch.setattr(build_release, "windows_total_memory_bytes", lambda: 8 * 1024**3)
+    monkeypatch.setattr(build_release.os, "cpu_count", lambda: 16)
+
+    cmd = build_release.build_nuitka_command(build_release.ROOT / "tools" / "_entry.py")
+
+    assert "--jobs=4" in cmd
+
+
+def test_windows_build_with_msvc_keeps_nuitka_default_jobs(monkeypatch):
+    build_release = load_build_release_module()
+    monkeypatch.setattr(build_release.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(build_release, "windows_msvc_available", lambda: True)
+
+    cmd = build_release.build_nuitka_command(build_release.ROOT / "tools" / "_entry.py")
+
+    assert not any(arg.startswith("--jobs=") for arg in cmd)
 
 
 def test_strip_user_data_removes_saves_and_logs(tmp_path):
