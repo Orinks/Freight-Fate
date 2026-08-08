@@ -776,6 +776,10 @@ def test_playtest_harness_drives_a_specific_route(monkeypatch):
     assert "New Jersey into New York" not in transcript
 
 
+# Each case is a full simulated delivery; the long-route cases straddle the
+# default 120-second timeout under coverage on a contended runner, and the
+# thread timeout kills the whole xdist worker ("node down").
+@pytest.mark.timeout(600)
 @pytest.mark.smoke
 @pytest.mark.parametrize(
     ("route_cities", "state", "passing_city", "expected_crossings"),
