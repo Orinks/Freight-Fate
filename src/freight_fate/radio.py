@@ -298,6 +298,12 @@ def load_personal_playlists(directory: Path | None = None) -> tuple[RadioStation
     return tuple(stations)
 
 
+# Saved stations pull forward to this dial group (RadioState._group): with
+# thousands of stations on the dial, the driver's own picks sit right after
+# their playlists, one category jump from anywhere.
+FAVORITES_GROUP = 3
+
+
 def _dial_group(station: RadioStation) -> int:
     """Dial order and category identity, shared by sort and category jump."""
     if station.id == SAFE_ROUTE_PLAYLIST:
@@ -307,34 +313,35 @@ def _dial_group(station: RadioStation) -> int:
     if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
         return 2
     if station.fallback:
-        return 7
+        return 8
     if station.source_type in {"local", "regional", "imported"}:
-        return 3
-    if station.source_type == "afn":
         return 4
-    if station.source_type == "satellite":
+    if station.source_type == "afn":
         return 5
-    if station.source_type == "international":
+    if station.source_type == "satellite":
         return 6
+    if station.source_type == "international":
+        return 7
     # Web radio sits last on the dial, past everything with a place or a
     # story: thousands of stations, in listener-vote order (the dial sort is
     # stable and their call signs are empty), one category jump to skip.
     if station.source_type == "web":
-        return 8
-    return 9
+        return 9
+    return 10
 
 
 DIAL_CATEGORY_NAMES = {
     0: "Route playlist",
     1: "Freight Fate stations",
     2: "Your playlists",
-    3: "Terrestrial",
-    4: "AFN",
-    5: "Satellite",
-    6: "International",
-    7: "Fallback",
-    8: "Web radio",
-    9: "Other stations",
+    3: "Favorites",
+    4: "Terrestrial",
+    5: "AFN",
+    6: "Satellite",
+    7: "International",
+    8: "Fallback",
+    9: "Web radio",
+    10: "Other stations",
 }
 
 
@@ -520,6 +527,7 @@ class RadioState:
         real_streams_enabled: bool = False,
         streamer_safe: bool = True,
         position: tuple[float, float] | None = None,
+        favorite_ids: set[str] | None = None,
     ) -> None:
         self.catalog = catalog
         self.enabled = enabled
@@ -529,9 +537,10 @@ class RadioState:
         self.streamer_safe = streamer_safe
         self.position = position
         self.elevation_ft: float | None = None
+        self.favorite_ids: set[str] = set(favorite_ids or ())
 
     @classmethod
-    def from_settings(cls, settings) -> RadioState:
+    def from_settings(cls, settings, profile=None) -> RadioState:
         return cls(
             catalog=DEFAULT_RADIO_CATALOG + load_personal_playlists(),
             enabled=bool(getattr(settings, "radio_enabled", True)),
@@ -539,6 +548,7 @@ class RadioState:
             volume=float(getattr(settings, "radio_volume", 0.25)),
             real_streams_enabled=bool(getattr(settings, "radio_real_streams", False)),
             streamer_safe=bool(getattr(settings, "radio_streamer_safe", True)),
+            favorite_ids=set(getattr(profile, "radio_favorites", ()) or ()),
         )
 
     def apply_settings(self, settings) -> None:
@@ -677,16 +687,16 @@ class RadioState:
         receptions = self.receivable_stations()
         groups: list[int] = []
         for reception in receptions:
-            group = _dial_group(reception.station)
+            group = self._group(reception.station)
             if group not in groups:
                 groups.append(group)
-        current_group = _dial_group(self.current_station())
+        current_group = self._group(self.current_station())
         if current_group in groups:
             index = groups.index(current_group)
             target = groups[(index + direction) % len(groups)]
         else:
             target = groups[0]
-        reception = next(r for r in receptions if _dial_group(r.station) == target)
+        reception = next(r for r in receptions if self._group(r.station) == target)
         self.station_id = reception.station.id
         label = DIAL_CATEGORY_NAMES.get(target, "Radio")
         if not self.enabled:
@@ -809,10 +819,32 @@ class RadioState:
         ]
         return ". ".join(parts) + "."
 
-    @staticmethod
-    def _reception_sort_key(reception: RadioReception) -> tuple[int, str]:
+    def _group(self, station: RadioStation) -> int:
+        """The station's dial group, with saved stations pulled forward.
+
+        Only later categories promote: the route playlist, Freight Fate
+        stations, and personal playlists already sit ahead of Favorites, and
+        demoting them there would reorder the front of the dial for no gain.
+        """
+        group = _dial_group(station)
+        if group > FAVORITES_GROUP and station.id in self.favorite_ids:
+            return FAVORITES_GROUP
+        return group
+
+    def toggle_favorite(self) -> str:
+        """Save or unsave the current station; the spoken confirmation."""
+        station = self.current_station()
+        if station.fallback:
+            return "The safety fallback is always on the dial."
+        if station.id in self.favorite_ids:
+            self.favorite_ids.discard(station.id)
+            return f"Removed {station.display_name} from favorites."
+        self.favorite_ids.add(station.id)
+        return f"Saved {station.display_name} to favorites."
+
+    def _reception_sort_key(self, reception: RadioReception) -> tuple[int, str]:
         station = reception.station
-        return (_dial_group(station), station.call_sign)
+        return (self._group(station), station.call_sign)
 
     @staticmethod
     def _stop(backend: RadioPlaybackBackend | None) -> None:

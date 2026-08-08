@@ -279,8 +279,12 @@ class DrivingStatusScreenState(MenuState):
                 if settings.radio_real_streams and not settings.radio_streamer_safe
                 else "Real public streams are hidden unless real streams are on and streamer-safe mode is off."
             ),
-            "Tune with semicolon and apostrophe. Press M to toggle radio from the cab.",
+            "Tune with semicolon and apostrophe, jump categories with Control "
+            "held, and press O to save the current station as a favorite. "
+            "Press M to toggle radio from the cab.",
         ]
+        if d.radio.favorite_ids:
+            lines.append(f"Favorites saved: {len(d.radio.favorite_ids)}.")
         if position is not None:
             lines.append(f"Approximate truck radio position: {position[0]:.2f}, {position[1]:.2f}.")
         lines.append("Receivable stations:")

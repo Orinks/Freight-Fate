@@ -155,7 +155,8 @@ def test_playlists_sit_between_built_in_and_terrestrial_on_the_dial():
     assert groups == sorted(groups), "dial order is category order"
     assert 2 in groups, "the personal playlist is on the dial"
     assert groups.index(2) > groups.index(1)
-    assert groups.index(2) < groups.index(3)
+    # Terrestrial moved to group 4 when Favorites took 3.
+    assert groups.index(2) < groups.index(4)
 
 
 # -- the category jump -------------------------------------------------------

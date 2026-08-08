@@ -124,6 +124,8 @@ class DrivingControlsMixin:
             self._speak_upcoming()
         elif key == pygame.K_m:
             self._toggle_radio()
+        elif key == pygame.K_o:
+            self._toggle_radio_favorite()
         elif key == pygame.K_SEMICOLON:
             # Semicolon and apostrophe walk the dial; with Ctrl they leap a
             # whole category (25 AFN stations in a row buried terrestrial for
@@ -259,6 +261,8 @@ class DrivingControlsMixin:
             "that can cancel the active load. "
             "C also speaks the date and season. "
             "M toggles the in-cab radio, semicolon and apostrophe tune it, "
+            "with Control they jump a whole category, O saves or unsaves the "
+            "current station as a favorite, "
             "and Y speaks radio station, volume, and streamer-safe status. "
             "The Tab status menu includes a radio screen with the currently "
             "receivable stations. "

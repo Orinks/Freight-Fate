@@ -117,7 +117,7 @@ class DrivingState(
             self.route, self.trip_seed, 0.0, self.weather.current
         )
         self._music_night = is_night(self.trip.local_start_hour)
-        self.radio = RadioState.from_settings(ctx.settings)
+        self.radio = RadioState.from_settings(ctx.settings, ctx.profile)
         self._radio_backend = _DrivingRadioBackend(self)
         # Station rotation: per-station shuffled song order, with host breaks
         # every few songs on the stations that have a live host.

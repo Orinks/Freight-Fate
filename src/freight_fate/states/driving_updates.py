@@ -1796,6 +1796,14 @@ class DrivingUpdateMixin:
         self._sync_radio_settings()
         self.ctx.say(self.radio.status_text())
 
+    def _toggle_radio_favorite(self) -> None:
+        self._sync_radio_settings()
+        message = self.radio.toggle_favorite()
+        if self.ctx.profile is not None:
+            self.ctx.profile.radio_favorites = sorted(self.radio.favorite_ids)
+            self.ctx.save_profile()
+        self.ctx.say(message)
+
     def _sync_weather_source(self) -> None:
         real = self.ctx.settings.real_weather
         controls_calendar = self.ctx.settings.live_weather_controls_calendar

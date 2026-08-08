@@ -794,8 +794,9 @@ Use these keys when you need status without leaving the road:
 | Shift+R | Next listed highway exit. |
 | V | Weather and forecast. |
 | M | Toggle the in-cab radio. |
-| [ / ] | Tune the radio down or up. |
-| Ctrl+[ / Ctrl+] | Jump to the previous or next radio category: route playlist, Freight Fate stations, your playlists, terrestrial, AFN, satellite. |
+| ; / ' | Tune the radio down or up. |
+| Ctrl+; / Ctrl+' | Jump to the previous or next radio category: route playlist, Freight Fate stations, your playlists, favorites, terrestrial, AFN, satellite, international, web radio. |
+| O | Save or unsave the current station as a favorite. Favorites become their own early dial category. |
 | Y | Speak radio station, source, signal or fallback state, volume, and streamer-safe status. |
 | Tab | Grouped driving status screens. |
 
@@ -1002,10 +1003,12 @@ Audio is layered by category:
 
 Speech, gameplay cues, and warnings are the primary access path. Radio, music,
 and ambience sit behind those cues and can be adjusted separately. The in-cab
-radio defaults to built-in Freight Fate music and streamer-safe mode. Bracket
+radio defaults to built-in Freight Fate music and streamer-safe mode. Dial
 tuning moves through stations the truck can currently receive from the checked-in
 catalog, using the route's approximate position and each station's range. The
-Radio status screen lists the currently receivable stations.
+Radio status screen lists the currently receivable stations. Saving a station
+with O keeps it in the Favorites category, one category jump from anywhere on
+the dial.
 
 The Freight Fate Roadhouse and the Night Line have their own hosts, who break
 in between songs. Fictional regional stations cover markets across the map --

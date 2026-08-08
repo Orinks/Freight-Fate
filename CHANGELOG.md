@@ -15,6 +15,13 @@
   stations and your playlists. Built on the station catalog contributed by
   CatalystForChaos in pull request 150.
 
+- **Save your stations with O.** While driving, O keeps the current
+  station as a favorite, and pressing it again lets the station go.
+  Favorites are their own dial category right after your playlists, one
+  category jump from anywhere, so the stations you like are never buried
+  in a dial of thousands. A favorite only plays where it can be received,
+  and favorites stay with your career save.
+
 - **Tuning a dead station no longer freezes the cab.** The radio now
   connects to a stream in the background and gives up on a station that
   will not answer, so the drive keeps moving while it tries. A station

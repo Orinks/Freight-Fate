@@ -1362,10 +1362,18 @@ section below and the Unreleased changelog; the release-line view:
       on the dial, one category jump to skip. The BASS connect also moved
       off the game thread with real timeouts (their pattern), so a dead
       station no longer freezes a frame.
+- [x] **Radio favorites (2026-08-07).** O saves or unsaves the current
+      station; favorites are dial category 3 ("Favorites"), pulled forward
+      from wherever they normally live, receivable rules unchanged. Stored
+      on the profile as `radio_favorites` (additive, no migration; PR #150's
+      approach). The imported/web tiers made this necessary: the dial is
+      six and a half thousand stations now.
 - [ ] **Imported-tier follow-ups.** Re-sweep the 371 HLS streams PR #150's
       build dropped (we bundle BASSHLS, so they play here); consider real
       FCC contour radii or curated `range_miles`/`site_elev_ft` overlays
-      for high-listener imported stations.
+      for high-listener imported stations. `radio_favorites` joins the
+      profile shape: regenerate the cloud invariants export at the 1.9
+      cutover (already on the cutover checklist).
 - [x] **Community/college/NPR coverage sweep (2026-07-22).** Fifty-one
       real stations joined the dial, each gated on the BASS live check,
       lifting real-station reach from 78% to 93% of the 623 dispatchable

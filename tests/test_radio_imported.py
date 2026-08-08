@@ -56,10 +56,10 @@ def test_web_band_sits_last_on_the_dial_and_jumpable():
     from freight_fate.radio import DIAL_CATEGORY_NAMES, _dial_group
 
     groups = {_dial_group(s) for s in WEB}
-    assert groups == {8}
-    assert DIAL_CATEGORY_NAMES[8] == "Web radio"
+    assert groups == {9}
+    assert DIAL_CATEGORY_NAMES[9] == "Web radio"
     # Everything with a place or a story sorts ahead of the web band.
-    assert all(_dial_group(s) < 8 for s in DEFAULT_RADIO_CATALOG if s.source_type not in {"web"})
+    assert all(_dial_group(s) < 9 for s in DEFAULT_RADIO_CATALOG if s.source_type not in {"web"})
     radio = RadioState(streamer_safe=False, real_streams_enabled=True, position=DALLAS)
     stations = radio.available_stations()
     first_web = next(i for i, s in enumerate(stations) if s.source_type == "web")

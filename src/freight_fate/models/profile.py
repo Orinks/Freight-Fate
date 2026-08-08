@@ -643,6 +643,10 @@ class Profile:
     loyalty: LoyaltyAccount = field(default_factory=LoyaltyAccount)  # truck stop loyalty program
     achievements: list[str] = field(default_factory=list)
     achievement_stats: dict = field(default_factory=dict)
+    # Station ids the driver saved with the favorite key; they surface as the
+    # radio dial's early Favorites category. Additive with a default, so older
+    # saves load unchanged and from_dict simply fills it in.
+    radio_favorites: list[str] = field(default_factory=list)
     # Last few delivered from:to lanes, newest first -- assigned dispatch
     # prefers a lane not in this list so short-haul careers stop bouncing
     # between the same two cities forever.
