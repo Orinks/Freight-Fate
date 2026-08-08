@@ -12,7 +12,7 @@
 > (`DRIVING_SCHOOL_ENABLED`) and reopens on 2.0 to be finished.
 > Track plan: `docs/plan-1.9-final-slate.md`.
 
-> Current stable: **1.8.7** (shipped 2026-07-30). Next release: **1.9.0**, in
+> Current stable: **1.8.8.1** (hotfix shipped 2026-08-08). Next release: **1.9.0**, in
 > flight on the `feat/career-1.9` branch -- driving realism between the exits
 > (discrete lanes, ramp terminals, congestion, real surface streets) plus the
 > highway-spider world expansion, roadside narration, and real time zones.

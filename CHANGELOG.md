@@ -564,16 +564,6 @@
   still hauls your empty trailer, and a loaded run still weighs what the
   freight weighs.
 
-- **Creating your first career now offers to connect this computer to an
-  orinks.net account.** Right after you hear "Welcome aboard" and where your
-  truck is parked, the game asks once whether to connect this computer to an
-  orinks.net account, with a code and a browser confirmation. It only asks the
-  once -- decline with Not now, or just press Escape, and driving starts
-  right away with nothing else to answer. Connecting links the computer to an
-  account; it does not turn anything on by itself, and you can connect any
-  time later from Online on the main menu, where cloud backup and the
-  drivers board each stay off until you turn them on yourself.
-
 ### Changed
 
 - **Turn signals play a clear tone instead of a soft click.** The blinker,
@@ -1059,14 +1049,6 @@
   axles, and now the game tells you so.
 
 ### Fixed
-
-- **Live weather no longer gives up on a healthy weather service.** Weather
-  stations file their reports once an hour, but the game treated any report
-  more than thirty minutes old as a failure -- so for most of every hour it
-  quietly switched to simulated fallback weather even when the service was
-  fine. A report now stays current until it is well past the hourly cycle,
-  so live weather stays live, and the weather app still tells you exactly
-  how old the reading is.
 
 - **Rest-stop sleep no longer turns into a dead end at the exit.** Pressing T
   while rolling toward a sleep-capable stop now plans and names that exact
@@ -1652,6 +1634,30 @@
   holding you still, the engine answers the throttle across its whole
   range -- so you can warm it up, build air faster, or just listen to it
   come alive -- and it settles back to a steady idle when you let off.
+
+## 1.8.8.1 - 2026-08-08
+
+### Added
+
+- **Creating your first career now offers to connect this computer to an
+  orinks.net account.** Right after you hear "Welcome aboard" and where your
+  truck is parked, the game asks once whether to connect this computer to an
+  orinks.net account, with a code and a browser confirmation. It only asks the
+  once -- decline with Not now, or just press Escape, and driving starts
+  right away with nothing else to answer. Connecting links the computer to an
+  account; it does not turn anything on by itself, and you can connect any
+  time later from Online on the main menu, where cloud backup and the
+  drivers board each stay off until you turn them on yourself.
+
+### Fixed
+
+- **Live weather no longer gives up on a healthy weather service.** Weather
+  stations file their reports once an hour, but the game treated any report
+  more than thirty minutes old as a failure -- so for most of every hour it
+  quietly switched to simulated fallback weather even when the service was
+  fine. A report now stays current until it is well past the hourly cycle,
+  so live weather stays live, and the weather app still tells you exactly
+  how old the reading is.
 
 - **Real-world weather now follows the truck instead of the next city.** Live
   National Weather Service conditions update as you move along a route, and
