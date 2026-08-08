@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.8.1 - 2026-08-08
+
 ### Added
 
 - **Creating your first career now offers to connect this computer to an

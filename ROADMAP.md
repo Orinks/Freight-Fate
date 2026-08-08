@@ -1,12 +1,11 @@
 # Freight Fate Roadmap
 
-> Current stable: **1.8.7** (shipped 2026-07-30). Next release: **1.9.0**, in
-> flight on the `feat/career-1.9` branch, whose ROADMAP carries the full
-> 1.9-in-flight feature view; it lands here when that line merges for
-> release. After this stable release, `pyproject` on `dev` advances to
-> 1.8.8.dev0 for nightly snapshots. Keep
-> this file current: when a feature lands, check it off or add it in the
-> same change (see the Roadmap upkeep section in `AGENTS.md`).
+> Current stable: **1.8.8.1** (hotfix shipped 2026-08-08). Next release:
+> **1.9.0**, in flight on the `feat/career-1.9` branch, whose ROADMAP
+> carries the full 1.9-in-flight feature view; it lands here when that line
+> merges for release. `pyproject` on `dev` stays at 1.8.9.dev0 for nightly
+> snapshots. Keep this file current: when a feature lands, check it off or
+> add it in the same change (see the Roadmap upkeep section in `AGENTS.md`).
 
 ## Shipped in 1.6.0
 
