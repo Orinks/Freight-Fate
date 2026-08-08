@@ -1373,7 +1373,11 @@ section below and the Unreleased changelog; the release-line view:
       FCC contour radii or curated `range_miles`/`site_elev_ft` overlays
       for high-listener imported stations. `radio_favorites` joins the
       profile shape: regenerate the cloud invariants export at the 1.9
-      cutover (already on the cutover checklist).
+      cutover (already on the cutover checklist). Port PR #150's remaining
+      dead-station manners (seen in the 2026-08-07 manual session: a dead
+      web stream falls back to the silent satellite): hand over to the next
+      station on the same band instead, and take a stream that refused to
+      play off the dial for the rest of the session.
 - [x] **Community/college/NPR coverage sweep (2026-07-22).** Fifty-one
       real stations joined the dial, each gated on the BASS live check,
       lifting real-station reach from 78% to 93% of the 623 dispatchable
