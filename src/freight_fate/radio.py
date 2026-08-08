@@ -67,6 +67,9 @@ class RadioStation:
         # Web stations have no call sign; they are named, not lettered.
         if not self.call_sign:
             return self.name
+        # A name that only repeats the call sign is spoken once, not twice.
+        if not self.name or self.name.upper() == self.call_sign.upper():
+            return self.call_sign
         return f"{self.call_sign}, {self.name}"
 
     @property

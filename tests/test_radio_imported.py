@@ -46,6 +46,23 @@ def test_imported_urls_never_duplicate_the_dial():
     assert not curated_urls.intersection(imported_urls)
 
 
+def test_terrestrial_names_never_lead_with_dial_junk():
+    # "& FM 95.7 & FM 93.1" reached a real drive's readout (2026-08-07):
+    # the source cleaner strands conjunctions and band-first frequencies.
+    for station in IMPORTED:
+        assert not station.name.startswith(("&", ",", "-", "/", "and ", "And ")), station.name
+        assert not re.fullmatch(
+            r"(?:(?:FM|AM)\s*)?\d{2,4}(?:\.\d)?\s*(?:FM|AM)?", station.name, re.IGNORECASE
+        ), station.name
+
+
+def test_a_name_that_repeats_the_call_sign_speaks_once():
+    doubled = [s for s in IMPORTED if s.name.upper() == s.call_sign.upper()]
+    assert doubled, "the catalog carries call-sign-only stations"
+    for station in doubled[:20]:
+        assert station.display_name == station.call_sign
+
+
 def test_web_station_names_carry_no_stream_jargon():
     jargon = re.compile(r"\b(?:kbps|kbit|aac|mp3|\d{2,3}\s?kb?)\b", re.IGNORECASE)
     for station in WEB:

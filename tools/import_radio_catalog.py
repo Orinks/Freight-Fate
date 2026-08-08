@@ -78,6 +78,38 @@ def curated_call_signs(curated: dict) -> set[str]:
     return {call_sign_base(row.get("call_sign", "")) for row in curated["stations"]}
 
 
+# Leftovers the source file's name cleaning can strand at the front of a
+# local station's name once a sibling frequency or call sign is stripped:
+# conjunctions, separators, and dial positions written band-first ("FM 95.7"),
+# which its number-first patterns never matched. Branding like "Jack FM 107.1"
+# stays: only names that LEAD with junk, or contain nothing else, change.
+_LEADING_JUNK = re.compile(r"^\s*(?:[&,\-/|:;]+|and\b)\s*", re.IGNORECASE)
+_DIAL_ONLY = re.compile(r"^\s*(?:(?:FM|AM)?\s*\d{2,4}(?:\.\d)?\s*(?:FM|AM)?[\s&,\-/]*)+$", re.I)
+_LEADING_BARE_FREQ = re.compile(r"^\s*\d{2,4}(?:\.\d)?\s+")
+
+
+def clean_local_name(raw: str) -> str:
+    """A local station name with stranded leading junk taken out.
+
+    Returns "" when nothing but dial positions is left; the caller falls back
+    to the call sign, and the readout then speaks the call sign once.
+    """
+    name = re.sub(r"\s+", " ", raw).strip()
+    while True:
+        stripped = _LEADING_JUNK.sub("", name)
+        if stripped == name:
+            break
+        name = stripped
+    if _DIAL_ONLY.match(name):
+        return ""
+    # "& 104.3 Cutten, CA" -> "Cutten, CA": a bare frequency stranded at the
+    # front by the junk strip duplicates nothing a listener needs first.
+    bare = _LEADING_BARE_FREQ.sub("", name)
+    if bare != name and bare:
+        name = _LEADING_JUNK.sub("", bare)
+    return name.strip(" -|/,:;&")
+
+
 def convert_station(row: dict) -> dict:
     """One PR #150 local-tier record in the curated catalog's schema."""
     band = row["band"]
@@ -87,7 +119,9 @@ def convert_station(row: dict) -> dict:
         # Spoken as letters either way, but a dash in the middle is read as
         # the word "dash" by some screen readers.
         "call_sign": row["call_sign"].replace("-", " "),
-        "name": row["name"],
+        # An emptied name falls back to the call sign; display_name then
+        # speaks the call sign once instead of twice.
+        "name": clean_local_name(row["name"]) or row["call_sign"].replace("-", " "),
         "format": tags or f"{band} radio",
         "source": IMPORTED_SOURCE_TEXT,
         "source_type": "imported",
