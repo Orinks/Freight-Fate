@@ -4,6 +4,21 @@
 
 ### Added
 
+- **Over eight hundred more real stations on the dial.** Most of the map
+  now has its real local radio around it: commercial country, rock,
+  sports, talk and oldies stations that come in only near their real
+  transmitters, layered under the curated public, community, college, and
+  AFN stations already there. Real streams stay behind the same switch as
+  before, and streamer-safe mode still keeps to the game's own stations
+  and your playlists. Built on the station catalog contributed by
+  CatalystForChaos in pull request 150.
+
+- **Tuning a dead station no longer freezes the cab.** The radio now
+  connects to a stream in the background and gives up on a station that
+  will not answer, so the drive keeps moving while it tries. A station
+  that cannot come back is announced and the radio falls back the way it
+  always has.
+
 - **Career 1.9 now uses the approved sound mix everywhere.** Source checkouts
   and packaged builds carry the same sound pack, while the original sound
   library recordings remain private and are not distributed in the repository.

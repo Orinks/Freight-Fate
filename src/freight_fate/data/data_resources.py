@@ -28,6 +28,7 @@ BAKED_DATA_FILES = (
     "local_approaches.json",
     "local_geometry.json",
     "radio_catalog.json",
+    "radio_imported.json",
     "world_data/us/gameplay/curves.jsonl",
 )
 

@@ -15,6 +15,7 @@ from .data.data_resources import read_data_text
 SAFE_ROUTE_PLAYLIST = "route_playlist"
 SAFE_FALLBACK_STATION_ID = "ff-safety-satellite"
 RADIO_CATALOG_RESOURCE = "radio_catalog.json"
+RADIO_IMPORTED_RESOURCE = "radio_imported.json"
 EARTH_RADIUS_MI = 3958.8
 # Personal M3U playlists: files dropped into the Playlists folder become
 # stations on the dial. A folder, not a file picker, on purpose -- screen
@@ -162,7 +163,42 @@ def _optional_float(value) -> float | None:
     return float(value)
 
 
-DEFAULT_RADIO_CATALOG: tuple[RadioStation, ...] = load_radio_catalog()
+def _call_sign_base(call_sign: str) -> str:
+    """WNYC-FM, "WNYC FM" and WNYC are one place on the dial."""
+    return call_sign.replace("-", " ").split()[0].upper() if call_sign.strip() else ""
+
+
+def load_imported_stations(
+    curated: tuple[RadioStation, ...],
+) -> tuple[RadioStation, ...]:
+    """The automated tier under the curated catalog, if this build carries one.
+
+    tools/import_radio_catalog.py drops call-sign collisions when the file is
+    built; the filter here repeats that against the curated catalog actually
+    loaded, so hand-adding a curated station never puts its call sign on the
+    dial twice while the imported file waits for a rebuild.
+    """
+    text = read_data_text(RADIO_IMPORTED_RESOURCE)
+    if text is None:
+        return ()
+    reserved = {_call_sign_base(station.call_sign) for station in curated}
+    return tuple(
+        station
+        for station in (_station_from_dict(row) for row in json.loads(text)["stations"])
+        if _call_sign_base(station.call_sign) not in reserved
+    )
+
+
+def _full_catalog() -> tuple[RadioStation, ...]:
+    curated = load_radio_catalog()
+    stations = curated + load_imported_stations(curated)
+    ids = [station.id for station in stations]
+    if len(ids) != len(set(ids)):
+        raise ValueError("imported stations collide with curated station ids")
+    return stations
+
+
+DEFAULT_RADIO_CATALOG: tuple[RadioStation, ...] = _full_catalog()
 
 
 def personal_playlists_dir() -> Path:
@@ -269,7 +305,7 @@ def _dial_group(station: RadioStation) -> int:
         return 2
     if station.fallback:
         return 7
-    if station.source_type in {"local", "regional"}:
+    if station.source_type in {"local", "regional", "imported"}:
         return 3
     if station.source_type == "afn":
         return 4

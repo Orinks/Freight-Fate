@@ -144,8 +144,10 @@ def test_tuning_uses_receivable_stations_not_global_catalog():
     )
     backend = RecordingBackend()
 
+    # Walk the whole receivable ring once: every stop must be a Seattle-area
+    # signal, never Boston's, however many imported stations share the dial.
     seen = []
-    for _ in range(4):
+    for _ in range(len(radio.receivable_stations())):
         action = radio.tune(1, backend)
         seen.append(action.station.id)
 

@@ -102,3 +102,5 @@ nul
 # definition can still be committed; only the local-only bits are ignored.
 .claude/settings.local.json
 .claude/worktrees/
+# Cached source dumps for tools/import_radio_catalog.py
+data/radio-cache/
