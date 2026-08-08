@@ -371,9 +371,22 @@ or when a commit message includes `nightly: build` or `[nightly build]` for an
 intentional snapshot refresh. Use `changelog: none` or `[skip changelog]` only
 when every commit in the change set is non-user-facing.
 
-Career 1.9 ships its approved audio mix in the encrypted
-`src/freight_fate/sounds.pak`; loose fallback cues remain under
-`src/freight_fate/assets/sounds/`. See
+### Sound pack for source builds
+
+Career 1.9 stores its approved encrypted sound pack at
+`src/freight_fate/sounds.pak` using [Git Large File Storage](https://git-lfs.com/).
+Install Git LFS before cloning or updating the project, then run `git lfs install`
+once for your user account.
+
+A plain `git fetch` updates Git references and the small LFS pointer, but does
+not update the working tree or download the pack. With Git LFS installed, a
+normal `git pull` or checkout downloads the pack automatically; a separate
+`git lfs pull` is not normally needed. If `sounds.pak` contains text beginning
+with `version https://git-lfs.github.com/spec/v1` instead of binary pack data,
+run `git lfs install` followed by `git lfs pull` from the repository root.
+
+GitHub Actions uses an LFS-enabled checkout for jobs that test or package the
+project. Loose fallback cues remain under `src/freight_fate/assets/sounds/`. See
 [CREDITS.md](src/freight_fate/assets/sounds/CREDITS.md) for provenance and
 licensing.
 

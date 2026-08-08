@@ -71,8 +71,7 @@ current idle, start, and shutdown cues.
 
 The encrypted Career 1.9 sound pack includes commercially licensed sounds
 obtained through Splice. The original source recordings remain local and are
-not distributed in this repository. Local Splice data does not reliably name
-an additional publisher, so this credit is intentionally company-level.
+not distributed in this repository.
 
 ## Weather
 
