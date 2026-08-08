@@ -100,7 +100,7 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       the build failed with a GCC error (elevation never helps -- no build
       step needs admin). `tools/build_release.py` now caps compile jobs to
       one per 2 GB of RAM on such machines and says so; MSVC machines and CI
-      keep Nuitka's defaults. Port to `dev` with the next sync.
+      keep Nuitka's defaults. Ported to `dev` via PR #151.
 - [x] **Rest-stop sleep selection and stopping recovery.** T now plans and
       names the exact nearby sleep stop without silently taking its exit, and
       an independent default-off assist can finish the entrance stop only
