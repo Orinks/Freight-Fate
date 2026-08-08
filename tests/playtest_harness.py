@@ -139,6 +139,24 @@ class PlaytestHarness:
 
     def __enter__(self) -> PlaytestHarness:
         from freight_fate.app import App
+        from freight_fate.settings import Settings
+
+        # The one-time orinks.net offer (should_offer_online) is gated on
+        # settings.online_offer_seen OR a stored account identity -- and that
+        # identity lives in the platform secret store (keyring), not under
+        # FREIGHT_FATE_DATA_DIR. So a fresh/temp data dir alone does not make
+        # a playtest deterministic: on a machine with no stored identity the
+        # offer appears and start_delivery's `isinstance(..., CityMenuState)`
+        # assert fails; on a developer's own machine with a stored identity it
+        # happens to be skipped, silently masking the gap. Seed the gate
+        # before App() reads settings so every run behaves the same regardless
+        # of who is signed in -- a playtest must not depend on the operator's
+        # login state, and the harness must never press through the offer
+        # itself (that would silently answer a consent prompt on the player's
+        # behalf and make the transcript misleading).
+        settings = Settings.load()
+        settings.online_offer_seen = True
+        settings.save()
 
         self.app = App()
         self.monkeypatch.setattr(self.app.ctx, "say", speech_stub(record=self._record_main))

@@ -490,7 +490,7 @@ def test_paused_speed_control_can_be_canceled_by_keyboard_or_controller(monkeypa
 
 def test_controller_disconnect_pauses_driving():
     from freight_fate.app import App
-    from freight_fate.states.driving_menu_states import PauseMenuState
+    from freight_fate.states.driving_pause_states import PauseMenuState
 
     app = App()
     force_controller(app)

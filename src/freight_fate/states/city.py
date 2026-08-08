@@ -142,11 +142,19 @@ def first_day_orientation_message(ctx, prefix: str = "") -> str:
 class CityMenuState(MenuState):
     """The hub screen while parked at a company terminal or yard."""
 
-    def __init__(self, ctx) -> None:
+    def __init__(self, ctx, *, queue_entry_announcement: bool = False) -> None:
         super().__init__(ctx)
         self._board = JobBoard(ctx.world, hos=ctx.profile.hos)
         self._jobs_cache: list[Job] | None = None
         self._confirm_sleep_rested = False
+        # One-shot, set by the paths that speak a line the player must hear in
+        # full just before this state is pushed -- the welcome at career
+        # creation, the line answering "Not now" on the orinks.net offer. Those
+        # lines are spoken first and this state's own announcement queues behind
+        # them instead of cutting them off mid-word. Later re-entries into the
+        # same instance (coming back from the dispatch board, say) interrupt as
+        # usual, so stale speech never delays where-you-are.
+        self._queue_entry_announcement = queue_entry_announcement
 
     @property
     def title(self) -> str:  # type: ignore[override]
@@ -188,6 +196,8 @@ class CityMenuState(MenuState):
         p = self.ctx.profile
         city = self.ctx.world.city(p.current_city)
         terminal = self.ctx.world.home_terminal(p.current_city)
+        interrupt = not self._queue_entry_announcement
+        self._queue_entry_announcement = False
         business = status_label(p.business_status)
         rank = p.career.rank
         first_day = ""
@@ -224,7 +234,8 @@ class CityMenuState(MenuState):
             f"service area, {city.state}. {business.capitalize()} with "
             f"level {rank.level}, {rank.title}. "
             f"You have {p.money:,.0f} dollars. "
-            f"{first_day}"
+            f"{first_day}",
+            interrupt=interrupt,
         )
         self.ctx.say(self.current_text(), interrupt=False, review=False)
 

@@ -74,6 +74,7 @@
   reads the real road, so where the map has no lane data it stays quiet
   rather than guess, and the extra callouts hush in terse speech. Lane
   numbers only for now -- passing and lane changes come later.
+
 - **A warning before every steep grade.** Any climb or descent of three percent
   or more that runs for at least three quarters of a mile is now called out
   before you reach it, with how steep it is, how far it runs, and -- going down
@@ -85,6 +86,7 @@
   announcements at all -- press G whenever you want the grade instead. The
   advisory is there so you can decide before the hill starts: when in doubt,
   take manual control of the speed rather than leaving it to cruise.
+
 - **A new song on the country stations.** "Dust on the Highway" opens on a
   lone slide guitar over a rumbling bass, the drums lock in, and organ and
   harmonica trade fills through a gritty lead-guitar solo before the band
@@ -562,6 +564,16 @@
   still hauls your empty trailer, and a loaded run still weighs what the
   freight weighs.
 
+- **Creating your first career now offers to connect this computer to an
+  orinks.net account.** Right after you hear "Welcome aboard" and where your
+  truck is parked, the game asks once whether to connect this computer to an
+  orinks.net account, with a code and a browser confirmation. It only asks the
+  once -- decline with Not now, or just press Escape, and driving starts
+  right away with nothing else to answer. Connecting links the computer to an
+  account; it does not turn anything on by itself, and you can connect any
+  time later from Online on the main menu, where cloud backup and the
+  drivers board each stay off until you turn them on yourself.
+
 ### Changed
 
 - **Turn signals play a clear tone instead of a soft click.** The blinker,
@@ -583,26 +595,6 @@
   The Driving school item leaves the terminal menu for now: the lessons
   are not complete, and this release locks its features down. The school
   returns finished in the next major version.
-- **Automatic Mastodon posts moved to their own hashtag.** Deliveries shared
-  to your Mastodon account now carry the FreightFateRuns hashtag instead of
-  the FreightFate one. Players use the FreightFate tag to share their own
-  thoughts about the game, so anyone who had muted it to keep the automatic
-  posts out of their timeline was quietly losing those conversations too.
-  The two are separate now: FreightFate is for people talking, FreightFateRuns
-  is for the game posting. There is nothing to change in the game. If you
-  muted the FreightFate tag because of the delivery posts, you can unmute it
-  and mute FreightFateRuns instead, and if you liked following other drivers'
-  runs, follow FreightFateRuns to keep seeing them. The change is on the
-  orinks.net side, so it already applies to every version of the game.
-
-- **The automatic transmission works each gear harder before shifting up.**
-  Pulling a load, the engine now runs into a higher, more realistic RPM range
-  in every gear instead of grabbing the next one early, so climbs sound and
-  feel like the truck is actually working. Running empty, the two-gear jumps
-  the box likes on flat ground now land far enough above the downshift point
-  that it no longer shifts up and immediately drops back down. Contributed by
-  corykad ([@corykad](https://github.com/corykad)) in
-  [PR #144](https://github.com/Orinks/Freight-Fate/pull/144).
 
 - **The radio dial moved to semicolon and apostrophe.** The brackets used to
   tune it; they now switch categories in the new message review, so the dial
@@ -625,6 +617,7 @@
   maneuver are gone from it, because each of those already has its own key
   or lives in the Tab status menu. U still reads what is coming up, and
   Shift R still reads the next exit.
+
 - **Shorter driving readouts that fit a braille display.** The clock, route,
   weather, and fuel reports now put the answer in the first few words, so a
   one-line braille display shows what matters without panning. The C key
@@ -1067,11 +1060,6 @@
 
 ### Fixed
 
-- **Real-world weather now follows the truck instead of the next city.** Live
-  National Weather Service conditions update as you move along a route, and
-  weather reports say when conditions are live, still loading, last known, or
-  simulated because the live service is unavailable. Old failed-refresh rain
-  now expires instead of lingering as if it were current.
 - **Rest-stop sleep no longer turns into a dead end at the exit.** Pressing T
   while rolling toward a sleep-capable stop now plans and names that exact
   stop, then tells you to press X before leaving the highway. A new optional,
@@ -1084,6 +1072,7 @@
   is meant to hold. It is now a much lower, steadier tone, easy on the ear
   while still carrying over the engine. It stays just as easy to tell from
   the ticks leading up to it: where those quicken, this one drops.
+
 - **The stop bar's steady tone always stops.** The continuous tone that means
   you are on top of the stop bar could be left sounding for the rest of the
   drive: reach it creeping up to a red light, and once you crossed the bar
@@ -1094,6 +1083,7 @@
   arriving silences it at once. The tone comes back only when the next stop
   bar is under your bumper. Rumble strip sound left playing when you paused
   on the strip is gone the same way.
+
 - **A damaged settings file no longer takes the game down with it.** If your
   settings file was left half-written by a crash, or ended up holding
   something that is not a volume level where a volume level belongs, the game
@@ -1101,28 +1091,33 @@
   back to that setting's normal value, and it says so in its log. A level you
   really did set is untouched -- turning something down to nothing still
   means nothing.
+
 - **The engine keeps one voice.** When the game's sound file was older than
   the game itself, the engine could take part of its voice from the old file
   and part from the new one, crossfading between two different recordings as
   the revs climbed. The engine now takes every layer of its voice from the
   same place, so it sounds like one engine again.
+
 - **A bad sound file no longer costs you every sound.** If the game's sound
   file is damaged -- a download that stopped short, a copy that did not
   finish -- the game used to go completely silent. Now it says so in its log
   and plays whatever sound it can still find, and a single unreadable sound
   inside the file costs only that one sound instead of all of them.
+
 - **Cruise no longer claims a hill has beaten it while it is winning.** When
   a rising speed limit or a higher set speed put the target well above the
   truck, cruise flooring the pedal to catch up could be announced as losing
   the grade -- even as the truck accelerated. The call now waits for a real
   grade, ignores the moment of a gear change, and has to stay true for a few
   seconds before it speaks.
+
 - **The engine's voice is now longer than your memory.** The deepest
   layer of the repeating-engine problem: each layer of the engine sound
   was a short recording whose rise and fall a careful ear could learn
   and anticipate. Every layer has been rebuilt three times longer from
   its own recording -- same voice, same working rhythm, but the fine
   texture never repeats, so there is no pattern left to learn.
+
 - **Public-radio stations that had gone silent play again.** A sweep of
   every stream in the catalog turned up a batch that had drifted to stale
   addresses -- big public stations among them, like KUAR Little Rock, WBFO
@@ -1138,14 +1133,6 @@
   now wanders very slightly in speed and level -- the way a real
   engine's rhythm breathes -- so there is no fixed cycle left to
   notice.
-- **Picking a lower gear with the clutch held no longer damages the engine.**
-  Downshifting several gears at highway speed used to bring the redline
-  warning and engine damage the moment the gear was selected, even with the
-  clutch to the floor and the engine disconnected from the wheels. The
-  warning and the damage now begin only if you release the clutch while the
-  gear is too low for your road speed. Contributed by corykad
-  ([@corykad](https://github.com/corykad)) in
-  [PR #144](https://github.com/Orinks/Freight-Fate/pull/144).
 
 - **The repeat key gives back the hazard warning, not the assist that talked
   over it.** With automatic emergency braking on, "Emergency braking engaged."
@@ -1657,6 +1644,107 @@
   holding you still, the engine answers the throttle across its whole
   range -- so you can warm it up, build air faster, or just listen to it
   come alive -- and it settles back to a steady idle when you let off.
+
+- **Real-world weather now follows the truck instead of the next city.** Live
+  National Weather Service conditions update as you move along a route, and
+  weather reports say when conditions are live, still loading, last known, or
+  simulated because the live service is unavailable. Old failed-refresh rain
+  now expires instead of lingering as if it were current.
+
+- **Loading a career no longer cuts off its own welcome.** Choosing a saved
+  career from Continue latest career or Choose career used to say "Welcome
+  back" and then get cut off mid-sentence by the terminal announcing where
+  you are parked, so you never heard your money or which terminal you loaded
+  into. The welcome is now heard in full before the terminal speaks.
+
+- **Backing all the way out of Settings now speaks "Settings saved."**
+  Pressing Escape from the settings categories used to say it and then get
+  cut off by the main menu announcing itself again, so it was never actually
+  heard. It now plays after the main menu's own announcement, so you get the
+  confirmation.
+
+## 1.8.8 - 2026-08-05
+
+### Changed
+
+- **Connecting a computer to orinks.net no longer involves copying and
+  pasting anything.** Setting up online features used to mean copying a
+  Driver ID and a token from the website and pasting each one into the
+  game. Now the game shows an activation code, reads it out loud, and can
+  spell it letter by letter or copy it to the clipboard if you would
+  rather type it into the browser yourself. Once you confirm the code on
+  orinks.net, the game finishes connecting on its own.
+
+- **Automatic Mastodon posts moved to their own hashtag.** Deliveries shared
+  to your Mastodon account now carry the FreightFateRuns hashtag instead of
+  the FreightFate one. Players use the FreightFate tag to share their own
+  thoughts about the game, so anyone who had muted it to keep the automatic
+  posts out of their timeline was quietly losing those conversations too.
+  The two are separate now: FreightFate is for people talking, FreightFateRuns
+  is for the game posting. There is nothing to change in the game. If you
+  muted the FreightFate tag because of the delivery posts, you can unmute it
+  and mute FreightFateRuns instead, and if you liked following other drivers'
+  runs, follow FreightFateRuns to keep seeing them. The change is on the
+  orinks.net side, so it already applies to every version of the game.
+
+- **The automatic transmission works each gear harder before shifting up.**
+  Pulling a load, the engine now runs into a higher, more realistic RPM range
+  in every gear instead of grabbing the next one early, so climbs sound and
+  feel like the truck is actually working. Running empty, the two-gear jumps
+  the box likes on flat ground now land far enough above the downshift point
+  that it no longer shifts up and immediately drops back down. Contributed by
+  corykad ([@corykad](https://github.com/corykad)) in
+  [PR #144](https://github.com/Orinks/Freight-Fate/pull/144).
+
+### Fixed
+
+- **Picking a lower gear with the clutch held no longer damages the engine.**
+  Downshifting several gears at highway speed used to bring the redline
+  warning and engine damage the moment the gear was selected, even with the
+  clutch to the floor and the engine disconnected from the wheels. The
+  warning and the damage now begin only if you release the clutch while the
+  gear is too low for your road speed. Contributed by corykad
+  ([@corykad](https://github.com/corykad)) in
+  [PR #144](https://github.com/Orinks/Freight-Fate/pull/144).
+
+- **Copying to the clipboard works on Linux.** On Linux, copying a delivery
+  summary, a reviewed message or a link always said the copy did not take.
+  Linux desktops offer clipboard text under a different name than Windows
+  does, and the game was only ever asking for the Windows one. It now asks for
+  the names Linux really uses, so copying out of the game works, including
+  copying your activation code during online setup. Windows and Mac are
+  unchanged. Thanks to a player report.
+
+- **Continuing a saved run announces the right date and season again.** When
+  you picked a run back up, the calendar went back to the day you set out on
+  rather than the day you had driven into, so a haul that had rolled past
+  midnight came back on yesterday's date, and a long run that had carried you
+  into a new season heard the old one, with the weather to match. Continuing a
+  drive now puts the calendar at the same moment your trip clock is at, so the
+  date, the season and the weather all agree. Contributed by Day Garwood
+  ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #146](https://github.com/Orinks/Freight-Fate/pull/146).
+
+- **Continuing a saved run no longer pushes your deadline further out.** Every
+  time a delivery was picked back up, the game worked the deadline out again
+  from where you were and how long you had been going, which quietly gave you
+  more hours than dispatch had agreed to. A run you were running late on could
+  be rescued just by saving at a stop and continuing. Deadlines now stay where
+  dispatch set them. A run already under way gets one last recalculation the
+  first time you continue it after this update, so nobody loses hours they had
+  been counting on, and it is fixed from then on. Contributed by Day Garwood
+  ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #146](https://github.com/Orinks/Freight-Fate/pull/146).
+
+- **Quitting mid-drive writes a save that agrees with itself.** Quitting to the
+  title mid-drive puts you back at the stop you last saved at, but the save was
+  still being written with the hours of service and the fatigue you had built
+  up since leaving that stop. Continuing always put them back, so the drive you
+  returned to was correct either way, and this only mattered to the cloud
+  backup, which was storing a shift that never happened. The save now records
+  the stop you will actually resume from. Contributed by Day Garwood
+  ([@day-garwood](https://github.com/day-garwood)) in
+  [PR #146](https://github.com/Orinks/Freight-Fate/pull/146).
 
 ## 1.8.7 - 2026-07-30
 

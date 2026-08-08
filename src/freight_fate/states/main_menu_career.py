@@ -169,7 +169,8 @@ class HomeCityState(MenuState):
         return items
 
     def _pick(self, city: str) -> None:
-        from .city import CityMenuState, first_day_orientation_message
+        from .city import first_day_orientation_message
+        from .main_menu import _first_state_after_career_creation
 
         name = self.driver_name
         existing = {p.stem.lower() for p in Profile.list_saves()}
@@ -184,9 +185,15 @@ class HomeCityState(MenuState):
         self.ctx.pop_state(True, False)  # region picker
         self.ctx.pop_state(True, False)  # career start
         self.ctx.pop_state(True, False)  # name entry
-        self.ctx.push_state(CityMenuState(self.ctx))
         loaded_over = (
             f"Loaded over existing driver named {name}. " if name.lower() in existing else ""
         )
+        # Welcome first, then whatever comes next -- every state announces
+        # itself on entry, so speaking this after the push meant one of the two
+        # lines was always cut off. Cutting the city menu's "parked at" was
+        # harmless because the welcome repeats it; cutting the orinks.net offer
+        # left the player being asked a question they never heard. Both states
+        # built here queue their announcement behind this line.
         message = first_day_orientation_message(self.ctx, loaded_over)
         self.ctx.say(message, interrupt=True)
+        self.ctx.push_state(_first_state_after_career_creation(self.ctx))

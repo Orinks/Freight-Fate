@@ -267,6 +267,105 @@ def test_choose_career_loads_an_older_save_without_deleting_the_newest():
         app.shutdown()
 
 
+# -- what a returning player actually hears -------------------------------------
+#
+# The tests above assert state types and menu text, not what reaches the
+# speech layer. LoadDriverState._pick and MainMenuState._continue each speak a
+# "Welcome back" line and then hand off to the city menu, which announces
+# itself on entry -- with interrupt=True by default. Speech is last-writer-
+# wins, so that entry announcement cancelled the welcome before a screen
+# reader could finish it. These drive the real menus through App and key
+# events and assert what was said, in order, including each line's interrupt
+# flag -- a state-type assertion cannot see the difference between "queued
+# behind" and "cancelled".
+
+
+def test_choosing_a_career_hears_the_welcome_in_full(monkeypatch):
+    """Choose career > pick a save must speak the welcome, then the city menu.
+
+    Regression test for LoadDriverState._pick: it said "Welcome back, X." and
+    then replaced the state with the city menu, whose own "Parked at..." line
+    interrupted and cancelled the welcome.
+    """
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+    from freight_fate.states.main_menu import LoadDriverState, MainMenuState
+
+    spoken: list[tuple[str, bool]] = []
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken, with_interrupt=True))
+    try:
+        older = Profile(name="Veteran", current_city="Denver", money=12345.0)
+        older_path = older.save()
+        newer = Profile(name="Rookie", current_city="Atlanta", money=5000.0)
+        newer_path = newer.save()
+        os.utime(older_path, (1_700_000_000, 1_700_000_000))
+        os.utime(newer_path, (1_800_000_000, 1_800_000_000))
+
+        app.push_state(MainMenuState(app.ctx))
+        while app.state.items[app.state.index].text != "Choose career":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, LoadDriverState)
+        while not app.state.items[app.state.index].text.startswith("Veteran:"):
+            app.state.handle_event(key_event(pygame.K_DOWN))
+
+        spoken.clear()
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, CityMenuState)
+
+        lines = [text for text, _interrupt in spoken]
+        assert lines[0] == "Welcome back, Veteran."
+        assert lines[1].startswith("Parked at")
+        assert "Denver Company Yard" in lines[1]
+        # The 1.9 announcement carries on past the money line (rank and career
+        # objective), so the money is in the line rather than ending it.
+        assert "You have 12,345 dollars." in lines[1]
+        # The welcome opens the sequence; everything after it queues rather
+        # than cancelling it, so all of it is heard end to end.
+        assert [interrupt for _text, interrupt in spoken] == [True] + [False] * (len(spoken) - 1)
+        assert len(spoken) == 3
+    finally:
+        app.shutdown()
+
+
+def test_continuing_the_latest_career_hears_the_welcome_in_full(monkeypatch):
+    """Continue latest career must speak the welcome, then the city menu.
+
+    Regression test for MainMenuState._continue: the same defect as Choose
+    career, on the other path into a saved career with no trip in progress.
+    """
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+    from freight_fate.states.main_menu import MainMenuState
+
+    spoken: list[tuple[str, bool]] = []
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken, with_interrupt=True))
+    try:
+        Profile(name="Rookie", current_city="Denver", money=5000.0).save()
+
+        app.push_state(MainMenuState(app.ctx))
+        while not app.state.items[app.state.index].text.startswith("Continue latest career"):
+            app.state.handle_event(key_event(pygame.K_DOWN))
+
+        spoken.clear()
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, CityMenuState)
+
+        lines = [text for text, _interrupt in spoken]
+        assert lines[0].startswith("Welcome back, Rookie. You are parked at")
+        assert lines[0].endswith("with 5,000 dollars.")
+        assert lines[1].startswith("Parked at")
+        assert "Denver Company Yard" in lines[1]
+        assert [interrupt for _text, interrupt in spoken] == [True] + [False] * (len(spoken) - 1)
+        assert len(spoken) == 3
+    finally:
+        app.shutdown()
+
+
 def test_manage_careers_deletes_selected_save_without_touching_others():
     from freight_fate.app import App
     from freight_fate.models.profile import Profile

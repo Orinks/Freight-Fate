@@ -322,12 +322,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         for pt in pts:
             if pt.at_mi >= at_mi:
                 span = pt.at_mi - prev.at_mi
-                if span <= 0:
-                    return pt.lat, pt.lon
-                t = (at_mi - prev.at_mi) / span
+                fraction = (at_mi - prev.at_mi) / span if span > 0 else 0.0
                 return (
-                    prev.lat + (pt.lat - prev.lat) * t,
-                    prev.lon + (pt.lon - prev.lon) * t,
+                    prev.lat + (pt.lat - prev.lat) * fraction,
+                    prev.lon + (pt.lon - prev.lon) * fraction,
                 )
             prev = pt
         return prev.lat, prev.lon

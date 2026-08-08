@@ -189,6 +189,8 @@ from the words, and synonyms cost them a re-read.
 | Vehicles around you now | traffic | NPCs, cars | `TrafficManager` |
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
 | A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |
+| The short code a player reads and types into a browser to connect a computer | activation code | user code, device code, pairing code | `Activation.user_code` |
+| The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
 
 Notes on the entries that are not simple:
 
@@ -205,6 +207,11 @@ label of one truck model ("standard rig"). Keep it out of functional text.
 **"Corridor" is an explanatory word.** It belongs in help and manual text
 describing where the map comes from ("routes made from real highway
 corridors"). Per-drive navigation says leg.
+
+**"Device code" is never spoken.** It is the polling secret bound to this
+device, not something a player ever reads back or types anywhere -- only the
+activation code crosses to the player. Keep it out of every spoken and
+transcript-bound string; if a screen reads it out loud, that is a bug.
 
 **"Stop" is the most overloaded word in the game** -- the POI, the act of
 stopping the truck, and the command to do so. Where the sentence could be read

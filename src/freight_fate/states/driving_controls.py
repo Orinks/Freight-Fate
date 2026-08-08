@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from .driving_core import *
-from .driving_menu_states import DrivingStatusState, PauseMenuState
+from .driving_menu_states import DrivingStatusState
+from .driving_pause_states import PauseMenuState
 
 # Wear meters join the status readout once they're worth planning around.
 WEAR_STATUS_PCT = 50.0

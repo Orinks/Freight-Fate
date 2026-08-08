@@ -480,6 +480,42 @@ def test_exactly_one_driving_assistance_preset_selector():
         app.shutdown()
 
 
+def test_settings_saved_is_heard_and_not_cancelled_by_the_main_menu_welcome(monkeypatch):
+    """Backing all the way out of Settings must not swallow "Settings saved.".
+
+    SettingsState.go_back used to speak "Settings saved." and then pop back to
+    the main menu, whose own entry announcement -- interrupt=True by default
+    -- cancelled it before a screen reader finished the word "saved". A test
+    that only checks the text is present in what was spoken (as the sibling
+    test above does) cannot see that: the text was always in the list, it was
+    just never actually heard. This asserts order and each line's interrupt
+    flag, so "Settings saved." must be the last line spoken and the one that
+    wins, not the one cut off.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import MainMenuState, SettingsState
+
+    spoken: list[tuple[str, bool]] = []
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", speech_stub(spoken, with_interrupt=True))
+    try:
+        app.push_state(MainMenuState(app.ctx))
+        while app.state.items[app.state.index].text != "Settings":
+            app.state.handle_event(key_event(pygame.K_DOWN))
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, SettingsState)
+
+        spoken.clear()
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+
+        assert spoken, "nothing was spoken on the way out of Settings"
+        text, interrupt = spoken[-1]
+        assert text == "Settings saved."
+        assert interrupt is True
+    finally:
+        app.shutdown()
+
+
 def test_speech_setting_adjustment_previews_adjusted_voice(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.main_menu import SettingsCategoryState

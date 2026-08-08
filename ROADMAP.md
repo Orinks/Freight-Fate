@@ -93,6 +93,15 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Dev sync 2026-08-08 (through the 1.8.8 release).** Merged from `dev`:
+      activation-code online setup replacing clipboard paste, the one-time
+      first-run orinks.net offer (spoken after 1.9's first-day briefing, with
+      the city menu's announcement queued so nothing is cut off), corykad's
+      transmission and clutch-damage fixes, Day Garwood's save-restore fixes
+      (date/season, deadline, and quit-mid-drive saves), live weather that
+      follows the truck and reports its freshness honestly, and the pause
+      states' move into `driving_pause_states.py` -- carrying 1.9's snow
+      chains and carrier repair billing along.
 - [x] **Standalone builds no longer die midway on machines without Visual
       Studio (tester report, 2026-08-08).** Nuitka falls back to a downloaded
       MinGW64 GCC there and ran one compiler per CPU core; the parallel
@@ -2315,6 +2324,21 @@ From a batch of player reports:
   sweep would upgrade. Regen should run offline from the cached PBFs like
   the overlay pipeline, targeting trunk/primary junction nodes on the 533
   unlabeled legs.
+- [x] **Loading a career cut off its own welcome -- FIXED 2026-08-05.**
+  Continue latest career and Choose career spoke "Welcome back" and then
+  pushed the city menu, whose own "Parked at..." announcement interrupted and
+  cancelled it before a player heard where they were or how much money they
+  had. Same defect as the 2026-08-05 orinks.net-offer fix (`8baae687`),
+  applied to the load path via `CityMenuState`'s existing one-shot
+  `queue_entry_announcement`.
+- [ ] Same welcome-truncation defect remains open on two rarer hand-offs out
+  of Continue/Choose career: resuming an in-progress pickup (`PickupFacilityState`,
+  which still announces with `interrupt=True`) and a pending save notice
+  (`SaveMigrationNoticeState` / `SaveModifiedNoticeState`, same default).
+  Both would need their own one-shot queue flag, mirroring `CityMenuState`'s;
+  left out of the 2026-08-05 fix as lower-value (the lost line is just the
+  short "Welcome back, name" greeting, not new information) and higher-risk
+  to thread through `_world_entry_state`'s snapshot-resume branches untested.
 - [x] **State lines repeated at intermediate cities -- FIXED 2026-07-19
   (player transcript).** Mapped state-boundary cues are now authoritative, so
   passing the next major city no longer claims that the truck crossed the same
@@ -2706,6 +2730,20 @@ Net-new realism candidates, roughly by area:
   `truck_conditions` shape.** The client invariants and docs are updated for
   save version 5, but the server plausibility rules still describe the flat
   pre-v5 condition fields.
+- [x] **Mid-drive quit writes a self-consistent save.** Quit to main menu now
+  rolls hours of service and fatigue back to the active-trip checkpoint the
+  player will actually resume from, instead of persisting the shift accrued
+  since the last stop (PR #146).
+- [ ] **Close the same gap on the window-close path.** `App.shutdown()` saves
+  the profile unconditionally, so closing the window mid-drive still writes the
+  drifted hours of service and fatigue. Resuming re-restores both from the
+  active-trip snapshot, so gameplay is unaffected, but the on-disk save and its
+  cloud backup disagree with their own checkpoint until then.
+- [ ] **Decide whether mid-drive money should roll back too.** Speeding fines
+  and roadside fees deduct from the profile as they happen, so a mid-drive quit
+  keeps money lost after the last stop while the position, hours, and fatigue
+  all rewind to it. Either commit the charge deliberately or restore it with
+  the rest of the checkpoint.
 - **Physics and the truck.** Cargo-weight-aware gross mass is done for
   acceleration, grade lugging, fuel burn, and now braking: the foundation
   brakes have a fixed force ceiling sized for the rated gross, so loads over
@@ -3385,6 +3423,22 @@ fit for an audio-first game.
 - [x] Delete a career's cloud backups from the Cloud backup menu: a confirmed, safe-default-first delete removes every kept revision from the account (server DELETE route + existing `deleteSaveSlot` mutation); local saves untouched, sync state forgotten so a still-local career starts a fresh slot on its next save
 - [x] Opt-in Mastodon sharing of notable deliveries: the player links their own Mastodon account on orinks.net (any instance, dynamic app registration, `read:accounts write:statuses` scope), and the game offers deliveries that earned an achievement, level, or streak milestone; the server composes the public post from allowlisted facts and adds the #FreightFateRuns hashtag (deliberately not the bare #FreightFate, which players use for their own posts -- muting the bot must not mute the conversation). Off by default, separate consent from Profile sharing, durable outbox client-side
 - [ ] Mastodon sharing follow-ups: unlink from inside the game (today the orinks.net page is the only unlink), and consider per-post visibility choice (public vs unlisted) if players ask
+- [x] Activation-code setup replaces clipboard-paste credentials: connecting
+      a computer to orinks.net now shows a short activation code (spoken,
+      spellable phonetically, and copyable to the clipboard) instead of
+      requiring a Driver ID and token to be copied from the website and
+      pasted into the game; the game polls and finishes connecting on its
+      own once the code is confirmed in the browser (`online_activation.py`,
+      device-code exchange already live on orinks.net)
+- [x] First-career onboarding offer: creating a first career now offers,
+      once, to connect the computer to an orinks.net account -- right after
+      "Welcome aboard" and before the dispatch board (`states/online_offer.py`,
+      gated by the per-install `Settings.online_offer_seen`, never asked again
+      once seen or once a computer is already connected). Declining (or
+      Escape, which behaves the same) and accepting both continue straight
+      into the city menu either way. The offer deliberately does not claim
+      connecting turns on cloud backup or the drivers board -- both stay off
+      until chosen separately, from Online.
 - [x] Idle drivers age off the live board: a truck parked with the game left running (not paused) signs off after 30 minutes without a snapshot change and stops heartbeating (`online_presence.py` IDLE_SIGNOFF_S); the server hides still-beating idle rows on the same clock for older builds (orinks-net `PRESENCE_IDLE_MS` + per-row `changedAt`), and deadhead presence now carries progress so a long empty run never reads as idle
 - [x] Online hub: the drivers board, orinks.net account, cloud backup and restore, and all sharing toggles moved from Settings into one Online menu on the main menu (`states/online_hub.py`); Settings keeps an Online pointer that opens the same menu for a release or two
 - [ ] Remove the Settings Online pointer once players have had a release or two to relearn the location

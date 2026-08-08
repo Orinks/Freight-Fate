@@ -276,9 +276,11 @@ def test_new_company_career_choice_creates_company_profile():
         assert profile.carrier_name == "Prairie Link Regional"
         assert profile.business_status == COMPANY_DRIVER
         assert profile.visible_owned_trucks() == ()
-        assert "First-day briefing" in spoken[-1]
-        assert "Prairie Link Regional" in spoken[-1]
-        assert "same-region lanes" in spoken[-1]
+        # The briefing is spoken first now; the city menu's own announcement
+        # queues behind it instead of being cut off, so it is not the last line.
+        briefing = next(line for line in spoken if "First-day briefing" in line)
+        assert "Prairie Link Regional" in briefing
+        assert "same-region lanes" in briefing
         assert any(item.text == "First-day briefing" for item in app.state.items)
     finally:
         app.shutdown()

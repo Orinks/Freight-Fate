@@ -225,6 +225,12 @@ class Settings:
     mastodon_linked_handle: str = ""
     controller_enabled: bool = True  # accept game-controller input alongside the keyboard
     haptics_enabled: bool = True  # rumble/vibration feedback on the controller
+    # Whether the one-time first-run offer to connect this computer to
+    # orinks.net has been made. Per install, not per career: the connection
+    # belongs to the computer, so a second career must not ask again. Set on
+    # either answer, so declining is respected and the prompt cannot reappear
+    # after a mid-prompt quit.
+    online_offer_seen: bool = False
 
     @property
     def path(self):
