@@ -7,9 +7,10 @@ terrestrial broadcast stations with transmitter coordinates, receivable only
 near their transmitter, every one gated behind the real-streams switch and
 hidden in streamer-safe mode.
 
-Only the ``local`` tier of the source file is taken. The web tier (5,000+
-everywhere-available streams) would swamp the dial without adding any sense
-of place, and the satellite tier duplicates the curated AFN lineup.
+The ``local`` tier becomes geo-ranged terrestrial stations; the ``web`` tier
+becomes an always-available "Web radio" dial band, kept in the source file's
+listener-vote order so seeking into the band hears the popular ones first.
+The satellite tier is skipped: it duplicates the curated AFN lineup.
 
 An imported station whose call sign matches a curated station's call sign is
 dropped here (and again at load time, in case the curated file grows between
@@ -30,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -40,6 +42,31 @@ DEFAULT_OUTPUT = ROOT / "src" / "freight_fate" / "data" / "radio_imported.json"
 
 # Spoken in station lists and status lines; player language, no tooling names.
 IMPORTED_SOURCE_TEXT = "community radio directory"
+
+# Stream-technical noise in contributor-typed web station names ("(EU) 320k
+# AAC"). None of it means anything to a listener, and a screen reader speaks
+# all of it on every seek. Ported from PR #150's name hygiene, which the
+# source file only applied to call-sign stations.
+_NOISE_WORDS = re.compile(
+    r"\b(?:aac\+?|mp3|ogg|opus|flac|hd\d?|hi-?fi|stereo|kbps|kbit|"
+    r"\d{2,3}\s?k(?:bps|bit|b)?|stream(?:ing)?)\b",
+    re.IGNORECASE,
+)
+_NAME_SPLIT = re.compile(r"\s*(?:\||-\s*-\s*-|/{2,})\s*")
+_MAX_NAME_CHARS = 60
+
+
+def clean_web_name(raw: str) -> str:
+    """A web station name with the stream jargon taken out."""
+    name = _NAME_SPLIT.split(raw.strip())[0]
+    name = _NOISE_WORDS.sub(" ", name)
+    name = re.sub(r"[(\[][^A-Za-z0-9]*[)\]]", " ", name)
+    name = re.sub(r"\s+", " ", name).strip(" -|/,:;")
+    if len(name) > _MAX_NAME_CHARS:
+        head = name[:_MAX_NAME_CHARS]
+        cut = max(head.rfind(","), head.rfind(" - "))
+        name = (head[:cut] if cut > 20 else head).strip(" -,:;")
+    return name or raw.strip()
 
 
 def call_sign_base(call_sign: str) -> str:
@@ -82,16 +109,54 @@ def convert_station(row: dict) -> dict:
     return station
 
 
+def convert_web_station(row: dict) -> dict:
+    """One PR #150 web-tier record: no transmitter, receivable anywhere."""
+    tags = (row.get("tags") or "").strip()
+    return {
+        "id": f"rb-web-{row['id']}",
+        # No call sign: web stations are named, not lettered. display_name
+        # and the dial sort both handle the empty string, and the sort's
+        # stability is what preserves the listener-vote order below.
+        "call_sign": "",
+        "name": clean_web_name(row["name"]),
+        "format": tags or "web radio",
+        "source": IMPORTED_SOURCE_TEXT,
+        "source_type": "web",
+        "station_type": "web",
+        "stream_url": row["url"],
+        "stream_format": (row.get("codec") or "").lower(),
+        "safe_for_streaming": False,
+        "real_stream": True,
+        "always_available": True,
+        "supported": True,
+    }
+
+
 def build(source: dict, curated: dict) -> dict:
     reserved = curated_call_signs(curated)
+    curated_urls = {
+        (row.get("stream_url") or "").strip()
+        for row in curated["stations"]
+        if row.get("stream_url")
+    }
     stations = []
     dropped = 0
+    seen_urls = set(curated_urls)
     for row in source["local"]:
-        if call_sign_base(row["call_sign"]) in reserved:
+        if call_sign_base(row["call_sign"]) in reserved or row["url"] in seen_urls:
             dropped += 1
             continue
+        seen_urls.add(row["url"])
         stations.append(convert_station(row))
     stations.sort(key=lambda s: (s["call_sign"], s["id"]))
+    web_dropped = 0
+    for row in source["web"]:  # already in listener-vote order; keep it
+        if row["url"] in seen_urls:
+            web_dropped += 1
+            continue
+        seen_urls.add(row["url"])
+        stations.append(convert_web_station(row))
+    dropped += web_dropped
     return {
         "schema": 1,
         "notes": (
@@ -102,7 +167,7 @@ def build(source: dict, curated: dict) -> dict:
             "are that catalog's per-band defaults, not FCC contours. Curated "
             "call signs win: collisions are dropped at build and load time."
         ),
-        "counts": {"stations": len(stations), "dropped_curated_collisions": dropped},
+        "counts": {"stations": len(stations), "dropped_collisions": dropped},
         "stations": stations,
     }
 

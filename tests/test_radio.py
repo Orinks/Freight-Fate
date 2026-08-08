@@ -262,6 +262,9 @@ def test_truck_position_uses_route_geometry(world):
 def test_catalog_entries_have_spoken_identity(station):
     assert station.id
     assert station.name
-    assert station.call_sign
+    # Web stations are named, not lettered; everything else leads with a
+    # call sign, and display_name copes with either shape.
+    assert station.call_sign or station.source_type == "web"
+    assert station.display_name and not station.display_name.startswith(",")
     assert station.format
     assert station.source

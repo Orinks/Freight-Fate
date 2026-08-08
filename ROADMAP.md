@@ -1349,22 +1349,23 @@ section below and the Unreleased changelog; the release-line view:
       canonical StreamTheWorld redirect form, which is the numbered-edge
       auto-repair the 2026-07-27 refresh-tool findings called for, applied
       by hand to the AFN block.
-- [x] **Imported broadcast tier from PR #150 (2026-08-07).** 829 real
-      commercial and independent stations joined the dial under the curated
-      catalog, converted by `tools/import_radio_catalog.py` from the
-      Radio Browser x Wikidata call-sign join CatalystForChaos built in
-      PR #150. Curated call signs always win; every imported station is a
-      real stream (hidden in streamer-safe mode) with the source catalog's
-      default per-band radius (FM 40 mi, AM 90 mi) and no site elevation,
-      so the terrain model's lift term simply stays off for them. The BASS
-      connect also moved off the game thread with real timeouts (their
-      pattern), so a dead station no longer freezes a frame.
+- [x] **Imported broadcast and web tiers from PR #150 (2026-08-07).** 829
+      real commercial and independent stations joined the dial under the
+      curated catalog, plus a Web radio band of 5,023 internet streams in
+      listener-vote order, all converted by `tools/import_radio_catalog.py`
+      from the Radio Browser x Wikidata call-sign join CatalystForChaos
+      built in PR #150. Curated call signs and stream URLs always win;
+      every imported station is a real stream (hidden in streamer-safe
+      mode). Terrestrial imports use the source catalog's default per-band
+      radius (FM 40 mi, AM 90 mi) with no site elevation, so the terrain
+      model's lift term simply stays off for them; the web band sits last
+      on the dial, one category jump to skip. The BASS connect also moved
+      off the game thread with real timeouts (their pattern), so a dead
+      station no longer freezes a frame.
 - [ ] **Imported-tier follow-ups.** Re-sweep the 371 HLS streams PR #150's
       build dropped (we bundle BASSHLS, so they play here); consider real
       FCC contour radii or curated `range_miles`/`site_elev_ft` overlays
-      for high-listener imported stations; decide whether any of the 5,179
-      web-tier streams earn a place (left out: everywhere-available streams
-      dilute the sense of place).
+      for high-listener imported stations.
 - [x] **Community/college/NPR coverage sweep (2026-07-22).** Fifty-one
       real stations joined the dial, each gated on the BASS live check,
       lifting real-station reach from 78% to 93% of the 623 dispatchable

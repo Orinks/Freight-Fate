@@ -64,6 +64,9 @@ class RadioStation:
 
     @property
     def display_name(self) -> str:
+        # Web stations have no call sign; they are named, not lettered.
+        if not self.call_sign:
+            return self.name
         return f"{self.call_sign}, {self.name}"
 
     @property
@@ -313,7 +316,12 @@ def _dial_group(station: RadioStation) -> int:
         return 5
     if station.source_type == "international":
         return 6
-    return 8
+    # Web radio sits last on the dial, past everything with a place or a
+    # story: thousands of stations, in listener-vote order (the dial sort is
+    # stable and their call signs are empty), one category jump to skip.
+    if station.source_type == "web":
+        return 8
+    return 9
 
 
 DIAL_CATEGORY_NAMES = {
@@ -325,7 +333,8 @@ DIAL_CATEGORY_NAMES = {
     5: "Satellite",
     6: "International",
     7: "Fallback",
-    8: "Other stations",
+    8: "Web radio",
+    9: "Other stations",
 }
 
 

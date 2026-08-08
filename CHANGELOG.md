@@ -4,13 +4,15 @@
 
 ### Added
 
-- **Over eight hundred more real stations on the dial.** Most of the map
-  now has its real local radio around it: commercial country, rock,
-  sports, talk and oldies stations that come in only near their real
+- **Thousands more real stations on the dial.** Most of the map now has
+  its real local radio around it: over eight hundred commercial country,
+  rock, sports, talk and oldies stations that come in only near their real
   transmitters, layered under the curated public, community, college, and
-  AFN stations already there. Real streams stay behind the same switch as
-  before, and streamer-safe mode still keeps to the game's own stations
-  and your playlists. Built on the station catalog contributed by
+  AFN stations already there. Past everything local, a new Web radio band
+  carries five thousand internet stations from everywhere, most popular
+  first, one category jump to skip past. Real streams stay behind the same
+  switch as before, and streamer-safe mode still keeps to the game's own
+  stations and your playlists. Built on the station catalog contributed by
   CatalystForChaos in pull request 150.
 
 - **Tuning a dead station no longer freezes the cab.** The radio now
