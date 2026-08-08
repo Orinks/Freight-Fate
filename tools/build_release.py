@@ -339,6 +339,75 @@ KEYRING_NUITKA_ARGS = [
 ]
 
 
+# Nuitka compiles one C file per CPU core in parallel. On a Windows machine
+# without Visual Studio's C++ toolchain it silently falls back to a downloaded
+# MinGW64 GCC whose processes each peak at over half a gigabyte, so one per
+# core exhausts memory midway through the ~360-module compile on typical
+# 8-16 GB machines -- the failure surfaces as GCC dying partway, and elevation
+# does not help. One job per this many bytes keeps the compile inside physical
+# memory; MSVC machines (CI, dev boxes) keep Nuitka's default.
+MINGW_JOB_MEMORY_BYTES = 2 * 1024**3
+
+
+def mingw_safe_job_count(cpu_count: int, memory_bytes: int | None) -> int:
+    """Parallel compile jobs the MinGW64 fallback can afford on this machine."""
+    if not memory_bytes:
+        return cpu_count
+    return max(1, min(cpu_count, memory_bytes // MINGW_JOB_MEMORY_BYTES))
+
+
+def windows_total_memory_bytes() -> int | None:
+    """Total physical RAM on Windows, or None when the query fails."""
+    import ctypes
+
+    class MemoryStatusEx(ctypes.Structure):
+        _fields_ = [
+            ("dwLength", ctypes.c_uint32),
+            ("dwMemoryLoad", ctypes.c_uint32),
+            ("ullTotalPhys", ctypes.c_uint64),
+            ("ullAvailPhys", ctypes.c_uint64),
+            ("ullTotalPageFile", ctypes.c_uint64),
+            ("ullAvailPageFile", ctypes.c_uint64),
+            ("ullTotalVirtual", ctypes.c_uint64),
+            ("ullAvailVirtual", ctypes.c_uint64),
+            ("ullAvailExtendedVirtual", ctypes.c_uint64),
+        ]
+
+    status = MemoryStatusEx()
+    status.dwLength = ctypes.sizeof(MemoryStatusEx)
+    if not ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)):
+        return None
+    return int(status.ullTotalPhys)
+
+
+def windows_msvc_available() -> bool:
+    """Whether Nuitka will find Visual Studio's C++ toolchain."""
+    vswhere = (
+        Path(os.environ.get("PROGRAMFILES(X86)", r"C:\Program Files (x86)"))
+        / "Microsoft Visual Studio"
+        / "Installer"
+        / "vswhere.exe"
+    )
+    if not vswhere.exists():
+        return False
+    result = subprocess.run(
+        [
+            str(vswhere),
+            "-products",
+            "*",
+            "-latest",
+            "-requires",
+            "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+            "-property",
+            "installationPath",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0 and bool(result.stdout.strip())
+
+
 def build_nuitka_command(entry: Path) -> list[str]:
     """Build the Nuitka command for the current platform."""
     system = platform.system()
@@ -372,6 +441,14 @@ def build_nuitka_command(entry: Path) -> list[str]:
 
     if system == "Windows":
         cmd.append("--windows-console-mode=disable")
+        if not windows_msvc_available():
+            jobs = mingw_safe_job_count(os.cpu_count() or 1, windows_total_memory_bytes())
+            cmd.append(f"--jobs={jobs}")
+            print(
+                "No Visual Studio C++ toolchain found; Nuitka will compile with its "
+                f"downloaded MinGW64 GCC, capped at {jobs} parallel job(s) to fit "
+                "this machine's memory."
+            )
     elif system == "Darwin":
         cmd.append(f"--macos-app-name={APP_NAME}")
 

@@ -93,6 +93,14 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Standalone builds no longer die midway on machines without Visual
+      Studio (tester report, 2026-08-08).** Nuitka falls back to a downloaded
+      MinGW64 GCC there and ran one compiler per CPU core; the parallel
+      compilers exhausted memory partway through the ~360-module compile and
+      the build failed with a GCC error (elevation never helps -- no build
+      step needs admin). `tools/build_release.py` now caps compile jobs to
+      one per 2 GB of RAM on such machines and says so; MSVC machines and CI
+      keep Nuitka's defaults. Port to `dev` with the next sync.
 - [x] **Rest-stop sleep selection and stopping recovery.** T now plans and
       names the exact nearby sleep stop without silently taking its exit, and
       an independent default-off assist can finish the entrance stop only
