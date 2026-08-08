@@ -5,6 +5,7 @@ import threading
 
 from freight_fate.sim.real_weather import (
     CACHE_TTL_S,
+    OBSERVATION_MAX_AGE_S,
     RETRY_AFTER_S,
     STALE_AFTER_S,
     RealWeatherProvider,
@@ -233,9 +234,25 @@ def test_failed_refresh_expires_last_known_observation_instead_of_loading_foreve
     assert p.unavailable("route-cell")
 
 
+def test_hourly_metar_cadence_is_still_live():
+    """NWS stations file routine observations once an hour, so the newest
+    available observation is 30-60 minutes old for most of every hour. That is
+    what "current conditions" means; it must never read as an NWS failure and
+    push the player onto simulated fallback weather."""
+    now = [2_000_000.0]
+    p = SyncProvider(
+        fetch=lambda lat, lon: ("Heavy Rain", 5.0, 12.0, 1.0, now[0] - 45 * 60.0),
+        clock=lambda: 0.0,
+        wall_clock=lambda: now[0],
+    )
+    p.request("route-cell", 40.0, -80.0)
+    assert p.get("route-cell") is WeatherKind.HEAVY_RAIN
+    assert not p.unavailable("route-cell")
+
+
 def test_old_nws_observation_timestamp_is_never_treated_as_live():
     now = [2_000_000.0]
-    old = now[0] - STALE_AFTER_S - 1
+    old = now[0] - OBSERVATION_MAX_AGE_S - 1
     p = SyncProvider(
         fetch=lambda lat, lon: ("Heavy Rain", 5.0, 12.0, 1.0, old),
         clock=lambda: 0.0,
@@ -254,7 +271,7 @@ def test_expired_observation_retries_then_recovers_to_live_weather():
         calls[0] += 1
         observed_at = wall[0]
         if calls[0] == 1:
-            observed_at -= STALE_AFTER_S + 1
+            observed_at -= OBSERVATION_MAX_AGE_S + 1
         return "Clear", 0.0, 10.0, 10.0, observed_at
 
     provider = SyncProvider(
