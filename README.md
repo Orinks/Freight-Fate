@@ -162,6 +162,14 @@ check, and archives it as `dist/FreightFate-<version>-windows-portable.zip`
 - `--tag <label>` — override the version label in the archive name, as the
   nightly workflow does.
 
+On Windows the build compiles with Visual Studio's C++ toolchain when
+one is installed. Without it, Nuitka downloads a MinGW64 GCC toolchain
+on first build, and the script caps compile parallelism to one job per
+2 GB of RAM — the parallel compilers otherwise exhaust memory midway
+through and the build dies with a GCC error. No build step needs
+administrator rights, so if a build fails, re-run it in a normal
+prompt and report the first error line rather than retrying elevated.
+
 If the build succeeds but the archive seems to vanish on Windows, check
 your antivirus: freshly built unsigned executables are sometimes
 quarantined on sight. Add an exclusion for the `dist/` folder or restore
