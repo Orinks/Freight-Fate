@@ -30,6 +30,8 @@ import math
 import os
 import random
 import sys
+import threading
+import time
 from pathlib import Path
 
 import pygame
@@ -166,6 +168,16 @@ ENGINE_START_SETTLE_S = 0.6  # ease from crank level down to idle load
 ENGINE_START_SETTLE_CURVE = "ease_out"  # key into audio_fades.CURVES
 
 BASS_NO_SOUND_DEVICE = 0
+
+# Radio streaming (BASS only). Opening a URL blocks until the server answers;
+# on a station that has gone dark that is the operating system's own TCP
+# timeout, far longer than a player will wait and far too long to spend
+# inside a frame. The connect runs on a worker thread, bounded by these.
+# (Pattern from PR #150 by CatalystForChaos.)
+RADIO_CONNECT_TIMEOUT_MS = 8000  # give up on a station that will not answer
+RADIO_READ_TIMEOUT_MS = 10000  # and on one that answers then stalls
+# How long shutdown waits for a connect still in flight before freeing BASS.
+RADIO_SHUTDOWN_JOIN_S = 2.0
 
 
 def _asset_path(key: str, extensions: tuple[str, ...]) -> Path | None:
@@ -851,15 +863,21 @@ class _BassBackend:
             BASS_ATTRIB_FREQ,
             BASS_ATTRIB_PAN,
             BASS_ATTRIB_VOL,
+            BASS_CONFIG_NET_READTIMEOUT,
+            BASS_CONFIG_NET_TIMEOUT,
             BASS_POS_BYTE,
             BASS_ChannelBytes2Seconds,
             BASS_ChannelGetLength,
             BASS_ChannelSetAttribute,
             BASS_ChannelSlideAttribute,
+            BASS_SetConfig,
         )
         from sound_lib.main import BassError, bass_call
         from sound_lib.output import Output
         from sound_lib.stream import FileStream, URLStream
+
+        BASS_SetConfig(BASS_CONFIG_NET_TIMEOUT, RADIO_CONNECT_TIMEOUT_MS)
+        BASS_SetConfig(BASS_CONFIG_NET_READTIMEOUT, RADIO_READ_TIMEOUT_MS)
 
         self._FileStream = FileStream
         self._URLStream = URLStream
@@ -908,6 +926,17 @@ class _BassBackend:
         self._fades = FadeScheduler()
         self._engine_wobble: list[list[float]] = []
         self._wobble_rng = random.Random()
+        # Radio connects happen on worker threads (see play_radio_stream);
+        # every field below is guarded by _radio_lock. The generation counter
+        # tells a finished worker whether its request is still the current
+        # one; the pending slot is how an opened stream crosses back to the
+        # game thread, which alone touches _music_stream.
+        self._radio_lock = threading.Lock()
+        self._radio_generation = 0
+        self._radio_pending: tuple[str, int, object] | None = None  # (url, fade_ms, stream)
+        self._radio_connecting_url: str | None = None
+        self._radio_failed_url: str | None = None
+        self._radio_threads: list[threading.Thread] = []
 
         if os.environ.get("SDL_AUDIODRIVER", "").lower() == "dummy":
             self._output = Output(device=BASS_NO_SOUND_DEVICE)
@@ -1002,15 +1031,6 @@ class _BassBackend:
             log.warning("Missing sound: %s", key)
             return None
         return self._stream(found[0], key, looping)
-
-    def _url_stream(self, url: str):
-        if not url:
-            return None
-        try:
-            return self._URLStream(url=url, autofree=True)
-        except self._BassError:
-            log.warning("Could not open radio stream: %s", url, exc_info=True)
-            return None
 
     def _retain(self, stream) -> None:
         """Keep a reference until BASS finishes with the stream.
@@ -1380,6 +1400,7 @@ class _BassBackend:
         self._engine_starting = False
 
     def update(self, dt: float) -> None:
+        self._collect_radio_stream()
         self._fades.update(dt)
         # Advance the per-band anti-repetition walks; set_engine_rpm applies
         # them. Diffusion scales with sqrt(dt) so the walk speed is frame-rate
@@ -1521,6 +1542,7 @@ class _BassBackend:
     def play_music(self, track: str, fade_ms: int = 1500) -> None:
         if self._music_track == track:
             return
+        self._cancel_radio_connect()
         # Music ships as Opus (tools/encode_music_opus.py): far smaller for
         # background beds at the same perceived quality. Ogg stays in the
         # preference list so a partial migration and the effects tree, which
@@ -1553,18 +1575,81 @@ class _BassBackend:
         self._music_track = track
 
     def play_radio_stream(self, url: str, fade_ms: int = 1500) -> None:
+        """Tune a live internet stream, connecting off the game thread.
+
+        Opening a URL blocks until the server answers, which on a dead or
+        stalling station is seconds -- too long to spend inside a frame. The
+        connect runs on a worker; update() collects the opened stream back on
+        the game thread. A failed connect raises on the NEXT call for the
+        same URL, which is exactly when the driving state's reconnect loop
+        retries a silent radio -- the fallback machinery still gets its
+        exception and speaks, just without the freeze.
+        """
         # Same URL only dedupes while the stream is actually producing audio;
         # a stalled or dead connection must be torn down and recreated, or a
         # re-tune to the same station silently does nothing.
         if self._music_track == url and self.music_playing():
             return
+        with self._radio_lock:
+            if url == self._radio_connecting_url:
+                return  # already on its way; silence is the caller's retry cue
+            if self._radio_failed_url == url:
+                # The last attempt never produced audio; say so now, and let
+                # a later tune back to this station start a fresh attempt.
+                self._radio_failed_url = None
+                raise RuntimeError("radio stream unavailable")
+            self._radio_generation += 1
+            generation = self._radio_generation
+            self._radio_pending = None
+            self._radio_connecting_url = url
         if self._music_stream is not None:
             self._fade_out(self._music_stream, 800)
             self._music_stream = None
             self._music_track = None
-        stream = self._url_stream(url)
-        if stream is None:
-            raise RuntimeError("radio stream unavailable")
+        thread = threading.Thread(
+            target=self._radio_worker,
+            args=(url, generation, max(0, int(fade_ms))),
+            name="radio-connect",
+            daemon=True,
+        )
+        with self._radio_lock:
+            self._radio_threads = [t for t in self._radio_threads if t.is_alive()]
+            self._radio_threads.append(thread)
+        thread.start()
+
+    def _radio_worker(self, url: str, generation: int, fade_ms: int) -> None:
+        """Open a stream off-thread, unless the driver has moved on since."""
+        try:
+            stream = self._URLStream(url=url, autofree=True)
+        except Exception:  # BassError, but a bad URL can raise from ctypes too
+            log.info("Radio stream unavailable: %s", url, exc_info=True)
+            with self._radio_lock:
+                if generation == self._radio_generation:
+                    self._radio_failed_url = url
+                    self._radio_connecting_url = None
+            return
+        with self._radio_lock:
+            if generation == self._radio_generation:
+                self._radio_pending = (url, fade_ms, stream)
+                self._radio_connecting_url = None
+                stream = None  # handed over to the game thread
+        if stream is not None:  # a newer request already won
+            with contextlib.suppress(Exception):
+                stream.free()
+
+    def _collect_radio_stream(self) -> None:
+        """Wire up a stream a worker finished opening; game thread only."""
+        with self._radio_lock:
+            pending, self._radio_pending = self._radio_pending, None
+        if pending is None:
+            return
+        url, fade_ms, stream = pending
+        if self._music_track is not None:
+            # Something else claimed the music channel while the station was
+            # connecting (a menu bed, another tune); the late arrival loses.
+            with contextlib.suppress(Exception):
+                stream.free()
+            return
         try:
             stream.set_volume(0.0)
             stream.play()
@@ -1573,13 +1658,26 @@ class _BassBackend:
                 stream.handle,
                 self._ATTRIB_VOL,
                 max(0.0, min(1.0, self.music_volume * self.master_volume)),
-                max(0, int(fade_ms)),
+                fade_ms,
             )
-        except self._BassError as exc:
+        except self._BassError:
             log.warning("Could not play radio stream: %s", url, exc_info=True)
-            raise RuntimeError("radio stream unavailable") from exc
+            with self._radio_lock:
+                self._radio_failed_url = url
+            return
         self._music_stream = stream
         self._music_track = url
+
+    def _cancel_radio_connect(self) -> None:
+        """Orphan any connect in flight; its stream is freed, not wired up."""
+        with self._radio_lock:
+            self._radio_generation += 1
+            pending, self._radio_pending = self._radio_pending, None
+            self._radio_connecting_url = None
+            self._radio_failed_url = None
+        if pending is not None:
+            with contextlib.suppress(Exception):
+                pending[2].free()
 
     def play_music_file(self, path: str, fade_ms: int = 1200) -> None:
         """Play one media file from disk on the music channel.
@@ -1589,6 +1687,7 @@ class _BassBackend:
         Raises RuntimeError when the file cannot be read or decoded, so the
         radio layer can skip to the next playlist entry."""
         key = f"file:{path}"
+        self._cancel_radio_connect()
         try:
             with open(path, "rb") as f:
                 data = f.read()
@@ -1625,6 +1724,9 @@ class _BassBackend:
             return False
 
     def stop_music(self, fade_ms: int = 1000) -> None:
+        # Cancel before the early return: a radio still connecting has no
+        # stream yet, and stopping the radio must orphan that connect too.
+        self._cancel_radio_connect()
         if self._music_stream is None:
             return
         self._fade_out(self._music_stream, fade_ms)
@@ -1681,6 +1783,13 @@ class _BassBackend:
         self.engine_stop(shutdown_sound=False)
         self.stop_music(fade_ms=0)
         self._retained.clear()
+        # A connect still in flight holds a worker inside BASS; freeing BASS
+        # underneath it is a crash. Give it a bounded moment to come back.
+        with self._radio_lock:
+            threads = [t for t in self._radio_threads if t.is_alive()]
+        deadline = time.monotonic() + RADIO_SHUTDOWN_JOIN_S
+        for thread in threads:
+            thread.join(max(0.0, deadline - time.monotonic()))
         with contextlib.suppress(self._BassError):
             self._output.free()
         self.enabled = False

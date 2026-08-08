@@ -1,5 +1,8 @@
 """Audio backend selection, the BASS engine model, and the pygame fallback."""
 
+import threading
+import time
+
 import pytest
 
 from freight_fate import audio
@@ -227,6 +230,22 @@ def test_pygame_music_never_loops_catalog_tracks(monkeypatch):
     assert calls == [(0, 123)] * len(ALL_MUSIC_TRACKS)
 
 
+def _init_radio_fields(backend):
+    """The async radio-connect state a bare __new__ backend is missing."""
+    backend._radio_lock = threading.Lock()
+    backend._radio_generation = 0
+    backend._radio_pending = None
+    backend._radio_connecting_url = None
+    backend._radio_failed_url = None
+    backend._radio_threads = []
+
+
+def _join_radio_workers(backend, timeout=5.0):
+    deadline = time.monotonic() + timeout
+    for thread in list(backend._radio_threads):
+        thread.join(max(0.0, deadline - time.monotonic()))
+
+
 def test_bass_music_never_loops_catalog_tracks(monkeypatch):
     class FakeStream:
         handle = 1
@@ -247,6 +266,7 @@ def test_bass_music_never_loops_catalog_tracks(monkeypatch):
     backend._ATTRIB_VOL = 0
     backend._slide = object()
     backend._bass_call = lambda *args: None
+    _init_radio_fields(backend)
 
     def fake_stream(data, label, looping):
         loop_flags.append(looping)
@@ -287,14 +307,18 @@ def test_bass_radio_stream_uses_url_stream(monkeypatch):
     backend._ATTRIB_VOL = 0
     backend._slide = object()
     backend._bass_call = lambda *args: slides.append(args)
+    _init_radio_fields(backend)
 
-    def fake_url_stream(url):
+    def fake_url_stream(url, autofree):
         opened.append(url)
         return FakeStream()
 
-    monkeypatch.setattr(backend, "_url_stream", fake_url_stream)
+    monkeypatch.setattr(backend, "_URLStream", fake_url_stream, raising=False)
 
     backend.play_radio_stream("https://example.test/live.mp3", fade_ms=321)
+    assert backend._music_track is None  # the connect happens off-thread
+    _join_radio_workers(backend)
+    backend._collect_radio_stream()
 
     assert opened == ["https://example.test/live.mp3"]
     assert backend._music_track == "https://example.test/live.mp3"
@@ -335,6 +359,7 @@ def test_bass_engine_wobble_meanders_and_shapes_the_ring(monkeypatch):
     backend._engine_bands = [(950.0, FakeStream(), 44100.0)]
     backend._engine_wobble = [[0.0, 0.0]]
     backend._wobble_rng = __import__("random").Random(7)
+    _init_radio_fields(backend)
 
     for _ in range(120):  # ~2 s of frames
         backend.update(1.0 / 60.0)
@@ -345,9 +370,7 @@ def test_bass_engine_wobble_meanders_and_shapes_the_ring(monkeypatch):
     backend.set_engine_rpm(950.0, 0.0)
     assert slides[-1] == pytest.approx(44100.0 * (1.0 + rate_walk))
     base_level = audio.engine_load_gain(0.0)
-    assert backend._engine_bands[0][1].volume == pytest.approx(
-        base_level * (1.0 + gain_walk)
-    )
+    assert backend._engine_bands[0][1].volume == pytest.approx(base_level * (1.0 + gain_walk))
 
 
 def test_bass_radio_stream_recreates_a_stalled_stream(monkeypatch):
@@ -375,17 +398,21 @@ def test_bass_radio_stream_recreates_a_stalled_stream(monkeypatch):
     backend._fade_out = lambda stream, fade_ms: None
     backend._music_stream = FakeStream(playing=False)
     backend._music_track = "https://example.test/live.mp3"
+    _init_radio_fields(backend)
 
     opened = []
 
-    def fake_url_stream(url):
+    def fake_url_stream(url, autofree):
         opened.append(url)
         return FakeStream(playing=True)
 
-    monkeypatch.setattr(backend, "_url_stream", fake_url_stream)
+    monkeypatch.setattr(backend, "_URLStream", fake_url_stream, raising=False)
 
     backend.play_radio_stream("https://example.test/live.mp3", fade_ms=100)
+    _join_radio_workers(backend)
+    backend._collect_radio_stream()
     assert opened == ["https://example.test/live.mp3"]
+    assert backend._music_stream.is_playing
 
     backend.play_radio_stream("https://example.test/live.mp3", fade_ms=100)
     assert opened == ["https://example.test/live.mp3"]
