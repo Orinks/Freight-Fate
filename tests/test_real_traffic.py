@@ -473,6 +473,32 @@ def test_trip_announces_nearby_real_incident():
     assert len(trip._events) == before
 
 
+def test_trip_does_not_announce_construction_as_traffic_alert():
+    """Construction-typed events near the truck stay out of traffic alerts.
+
+    The WZDx states return their whole work-zone feed from request(), so
+    the incident announcer must leave construction to the zone system or
+    every drive through a worked-on corridor becomes an alert flood."""
+    provider = RealTrafficProvider()
+    _seed_ohio_cache(
+        provider,
+        TrafficEvent(
+            id="wz-1",
+            event_type="construction",
+            severity="medium",
+            description="Lane closed on I-71 northbound",
+            county="Franklin",
+            latitude=39.95,
+            longitude=-83.0,
+        ),
+    )
+    trip = _incident_trip(provider)
+
+    trip._check_real_traffic_events()
+
+    assert not any("Traffic alert" in e.message for e in trip._events)
+
+
 def test_trip_skips_incident_beyond_radius():
     """Incidents are filtered against the truck's position, not a fixed point.
 
