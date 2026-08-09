@@ -155,7 +155,12 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       are an orinks-net feature and inherit the stats-pinned-to-first-
       career ownership guard -- settle per-driver vs per-career identity
       first. Test against an orinks-net preview branch cut from dev; the
-      game can already target a protected preview deployment.
+      game can already target a protected preview deployment. Owner
+      decision 2026-08-09: profiles and presence ship first; leaderboards
+      get their own pass (and their identity decision) once the 1.9
+      baseline has real data. Sequenced behind the no-legacy-career gate
+      -- both touch the validator allow-list, the signature fixtures,
+      and the profile shape.
 - [x] **Country-originals music batch (2026-08-08).** Thirty-one tracks
       from the owner's originals zip: five day beds, eight night beds, ten
       country-station songs, the seven-track Nashville After Hours jazz
