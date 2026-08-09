@@ -9,7 +9,12 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
-from freight_fate.data.curves import leg_curves
+from freight_fate.data.curves import (
+    INTERSTATE_MAX_DEFLECTION_DEG,
+    INTERSTATE_MIN_RADIUS_FT,
+    leg_curves,
+    route_curves,
+)
 from freight_fate.data.world import Route, World
 from freight_fate.sim.trip import Trip
 from freight_fate.sim.trip_models import TripEventKind
@@ -31,6 +36,98 @@ class TestCurveLoading:
         assert any(c.connector for c in everything), (
             "this leg's interchange arcs should be present when asked for"
         )
+
+
+class TestInterstateArtifactScreen:
+    """Geometry artifacts never reach an interstate mainline.
+
+    The dense sweep baked departure geometry and interchange vertices as
+    mainline on some interstate legs, which read as 80-250 ft "hairpins" on
+    roads that physically cannot bend that hard. The loader screens them.
+    """
+
+    def test_no_impossibly_sharp_interstate_mainline_curve(self, world: World) -> None:
+        offenders = []
+        for leg in world.legs:
+            if not (leg.highway or "").upper().startswith("I-"):
+                continue
+            for rec in leg_curves(f"{leg.a}:{leg.b}"):
+                if rec.min_radius_ft < INTERSTATE_MIN_RADIUS_FT:
+                    offenders.append((leg.highway, f"{leg.a}:{leg.b}", rec))
+        assert not offenders, (
+            f"{len(offenders)} interstate mainline curves below "
+            f"{INTERSTATE_MIN_RADIUS_FT} ft: {offenders[:5]}"
+        )
+
+    def test_no_switchback_deflection_on_interstate_mainline(self, world: World) -> None:
+        """A 150-degree bend on interstate mainline is a mis-tagged loop ramp."""
+        offenders = []
+        for leg in world.legs:
+            if not (leg.highway or "").upper().startswith("I-"):
+                continue
+            for rec in leg_curves(f"{leg.a}:{leg.b}"):
+                if rec.deflection_deg >= INTERSTATE_MAX_DEFLECTION_DEG:
+                    offenders.append((leg.highway, f"{leg.a}:{leg.b}", rec))
+        assert not offenders, f"{len(offenders)} interstate switchbacks: {offenders[:5]}"
+
+    def test_no_hairpin_severity_on_interstate_mainline(self, world: World) -> None:
+        """The screen's whole point: no interstate mainline hairpin calls.
+
+        Driven through ``route_curves`` -- the path every consumer takes --
+        one leg at a time, so a mixed-class route cannot mask or fake a
+        failure with some other road's legitimately sharp bend.
+        """
+        for leg in world.legs:
+            if not (leg.highway or "").upper().startswith("I-"):
+                continue
+            route = Route([leg.a, leg.b], [leg])
+            for cur in route_curves(route, route.cities):
+                assert cur.severity != "hairpin", (
+                    f"{leg.highway} {leg.a}:{leg.b} still calls a hairpin at "
+                    f"mile {cur.apex_mi:.2f} (radius {cur.min_radius_ft} ft)"
+                )
+
+    def test_abilene_fort_worth_mile_four_hairpins_are_gone(self) -> None:
+        """Flat I-20 had three 104-111 ft "hairpins" at mile 4."""
+        recs = leg_curves("abilene_tx_us:fort_worth_tx_us")
+        assert recs, "this leg is swept and should still have real curves"
+        near_four = [r for r in recs if 3.5 <= r.apex_mi <= 4.5]
+        assert not near_four, f"artifact cluster survived: {near_four}"
+        assert min(r.min_radius_ft for r in recs) >= INTERSTATE_MIN_RADIUS_FT
+
+    def test_akron_cleveland_mile_thirty_seven_hairpin_is_gone(self) -> None:
+        """I-77 carried two 82 ft "hairpins" from interchange geometry."""
+        recs = leg_curves("akron_oh_us:cleveland_oh_us")
+        assert recs
+        assert not [r for r in recs if r.min_radius_ft < INTERSTATE_MIN_RADIUS_FT]
+        # The real bends on this leg stay.
+        assert len(recs) >= 15
+
+    def test_interstate_connector_arcs_are_untouched(self) -> None:
+        """Ramps really are that sharp; physics still wants them."""
+        everything = leg_curves("abilene_tx_us:fort_worth_tx_us", mainline_only=False)
+        tight = [r for r in everything if r.connector and r.min_radius_ft < 150]
+        assert tight, "interchange ramp arcs should survive the screen"
+
+    def test_million_dollar_highway_switchbacks_survive(self) -> None:
+        """US-550 Durango-Montrose really does switch back. Never screen it."""
+        recs = leg_curves("durango_co_us:montrose_co_us")
+        assert len(recs) >= 250
+        assert min(r.min_radius_ft for r in recs) < 100
+        assert max(r.deflection_deg for r in recs) >= 150.0
+
+    def test_glenwood_canyon_interstate_curves_survive(self) -> None:
+        """Real I-70 canyon geometry sits above the floor and must stay."""
+        recs = leg_curves("glenwood_springs_co_us:grand_junction_co_us")
+        assert len(recs) >= 55
+        assert min(r.min_radius_ft for r in recs) < 500, (
+            "Glenwood Canyon's genuinely sharp bends should still be here"
+        )
+
+    def test_us_highway_mountain_hairpins_survive(self) -> None:
+        """US-40 over the Rockies keeps its sharp curves -- only I- is screened."""
+        recs = leg_curves("denver_co_us:salt_lake_city_ut_us")
+        assert [r for r in recs if r.min_radius_ft < INTERSTATE_MIN_RADIUS_FT]
 
 
 class _MockWeather(WeatherSystem):
@@ -81,6 +178,24 @@ class TestTripCurveIntegration:
         weather = _MockWeather()
         trip = Trip(route, truck, weather, time_scale=10.0, seed=42)
         assert trip.curves == []
+
+    def test_interstate_artifact_never_reaches_trip_curves(self) -> None:
+        """The Abilene I-20 mile-4 artifacts stay out of the live trip.
+
+        ``Trip._place_curves`` keeps connectors for physics, so this checks
+        the deepest consumer path, not just the spoken one.
+        """
+        world = World.load()
+        route = world.supported_route("abilene_tx_us", "fort_worth_tx_us")
+        assert route is not None
+        assert all((leg.highway or "").startswith("I-") for leg in route.legs), (
+            "this fixture route is meant to be interstate the whole way"
+        )
+        trip = Trip(route, TruckState(), _MockWeather(), time_scale=10.0, seed=42)
+        mainline = [c for c in trip.curves if not c.connector]
+        assert mainline, "the route should still have real curves"
+        assert not [c for c in mainline if c.severity == "hairpin"]
+        assert not [c for c in mainline if 3.5 <= c.apex_mi <= 4.5]
 
     def test_place_curves_highway_route(self) -> None:
         """A highway route resolves curves from leg-relative to trip miles."""

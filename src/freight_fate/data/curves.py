@@ -9,6 +9,9 @@ speech and the future curve-nav layer owns them.
 Severity bands come from the advisory speed the bake computed at 0.3 g
 lateral -- the same number a posted yellow diamond would show -- with
 deflection promoting true switchbacks to hairpins regardless of radius.
+
+Interstate mainline records are screened for sweep artifacts on the way in
+(see ``INTERSTATE_MIN_RADIUS_FT``); the raw bake keeps every row.
 """
 
 from __future__ import annotations
@@ -22,6 +25,19 @@ HAIRPIN_MAX_MPH = 25
 SHARP_MAX_MPH = 35
 MODERATE_MAX_MPH = 50
 HAIRPIN_DEFLECTION_DEG = 150.0
+
+# Interstate mainline geometry screen. The dense sweep baked some city
+# departure geometry and interchange vertices as mainline rather than as
+# connectors, which put 80-250 ft "hairpins" on roads that cannot bend that
+# hard: an interstate is designed for 50 mph even in mountainous terrain, so
+# its tightest real mainline curve is roughly 500-600 ft of radius (the
+# notorious urban exceptions, posted 35, sit right about there). Anything
+# under 300 ft, or turning more than a switchback's worth, is a digitizing
+# artifact. Only the interstate class is screened -- US and state routes
+# really do switch back (US-550 over Red Mountain Pass, US-40 in the
+# Rockies) and their sharp records are kept exactly as baked.
+INTERSTATE_MIN_RADIUS_FT = 300
+INTERSTATE_MAX_DEFLECTION_DEG = 150.0
 
 
 @dataclass(frozen=True)
@@ -65,6 +81,28 @@ class RouteCurve:
 _CACHE: dict[str, tuple[CurveRecord, ...]] | None = None
 
 
+def _interstate_leg_keys() -> frozenset[str]:
+    """``"a:b"`` keys, both directions, for interstate-class legs."""
+    # Imported inside the function: the world module is heavy and has no need
+    # of curve data, so the dependency is kept one-way.
+    from .world import get_world
+
+    keys: set[str] = set()
+    for leg in get_world().legs:
+        if (leg.highway or "").upper().startswith("I-"):
+            keys.add(f"{leg.a}:{leg.b}")
+            keys.add(f"{leg.b}:{leg.a}")
+    return frozenset(keys)
+
+
+def _is_interstate_artifact(row: dict) -> bool:
+    """True for a record no interstate mainline could physically hold."""
+    return (
+        row["min_radius_ft"] < INTERSTATE_MIN_RADIUS_FT
+        or row["deflection_deg"] >= INTERSTATE_MAX_DEFLECTION_DEG
+    )
+
+
 def _load() -> dict[str, tuple[CurveRecord, ...]]:
     global _CACHE
     if _CACHE is not None:
@@ -72,10 +110,18 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
     by_leg: dict[str, list[CurveRecord]] = {}
     text = read_data_text("world_data/us/gameplay/curves.jsonl")
     if text is not None:
+        interstate_legs = _interstate_leg_keys()
         for line in text.splitlines():
             if line.strip():
                 row = json.loads(line)
                 if "meta" in row:
+                    continue
+                connector = bool(row.get("connector", False))
+                # Screen sweep artifacts off interstate mainline before they
+                # can reach any consumer: a bogus hairpin call, a physics
+                # shove, and a time-decompression stall all read the same
+                # records. Ramps are exempt -- they really are that sharp.
+                if not connector and row["leg"] in interstate_legs and _is_interstate_artifact(row):
                     continue
                 # Connector arcs (interchange ramps) stay in the data with
                 # their flag: curve physics wants them, spoken layers skip
@@ -89,7 +135,7 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
                         advisory_mph=row["advisory_mph"],
                         min_radius_ft=row["min_radius_ft"],
                         deflection_deg=row["deflection_deg"],
-                        connector=bool(row.get("connector", False)),
+                        connector=connector,
                     )
                 )
     _CACHE = {key: tuple(rows) for key, rows in by_leg.items()}
@@ -108,9 +154,7 @@ def leg_curves(leg_key: str, mainline_only: bool = True) -> tuple[CurveRecord, .
 _MIRROR = {"L": "R", "R": "L"}
 
 
-def route_curves(
-    route, cities: list[str], mainline_only: bool = True
-) -> tuple[RouteCurve, ...]:
+def route_curves(route, cities: list[str], mainline_only: bool = True) -> tuple[RouteCurve, ...]:
     """Every curve on the route, in travel order and direction.
 
     ``cities`` is the route's city sequence; each leg is mirrored when the
