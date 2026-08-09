@@ -193,6 +193,9 @@ from the words, and synonyms cost them a re-read.
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
 | A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |
 | The short code a player reads and types into a browser to connect a computer | activation code | user code, device code, pairing code | `Activation.user_code` |
+| The retarder | engine brake; "jake" in short control feedback ("Jake on, stage two") | retarder | `TruckState.engine_brake_stage` |
+| A stretch of road where a town bans the engine brake | no engine brake zone | jake brake zone, engine brake restriction, quiet zone | `Trip.engine_brake_ban_at` |
+| The fine for engine braking in one | engine brake citation | jake ticket, noise fine | `EngineBrakeZoneMixin._fine_engine_braking` |
 | The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
 
 Notes on the entries that are not simple:

@@ -1,0 +1,147 @@
+# ruff: noqa: F403,F405
+"""No-engine-brake zones: town noise ordinances around route cities.
+
+Engine brakes are legal under federal and state law; what exists in the real
+world is hundreds of municipal noise ordinances, posted NO ENGINE BRAKE at
+the city limits, with exemptions for emergencies -- and the legitimate use of
+the retarder, holding a heavy truck back on a real downgrade, stays legal
+everywhere. Fines run roughly 100 to 500 dollars and escalate for repeat
+offenders (LegalClarity municipal-ordinance survey, 2026; e.g. Snyder, Texas
+ordinance 1043). The game maps those ordinances onto the same urban radius
+that already lowers the speed limit near a route city.
+
+A blind player cannot see the sign, so the spoken cue is the sign: the zone
+announces itself ahead when the retarder is on, a violation warns with a
+grace window before any money moves, and the citation names the amount and
+the reason.
+"""
+
+from __future__ import annotations
+
+from .driving_core import *
+
+# How far out the spoken NO ENGINE BRAKE sign reads when the retarder is on.
+JAKE_ZONE_WARN_MI = 2.0
+# Real seconds between the violation warning and the citation -- time to hear
+# the warning and reach the switch, mirroring the hazard reaction windows.
+JAKE_ZONE_GRACE_S = 10.0
+# Municipal-ordinance range, escalating per citation and capped at the top.
+JAKE_ZONE_FINES = (150.0, 300.0, 500.0)
+# A descent a driver genuinely needs the retarder for is exempt everywhere.
+# Matches GRADE_WARN_CLEAR_PCT: under this, the G key calls the road level,
+# so the exemption and the spoken grade readout agree.
+JAKE_ZONE_EXEMPT_GRADE_PCT = 2.0
+# Below this the retarder is not barking at road speed; a truck creeping a
+# gate queue or parked with the switch on is not what the ordinance is for.
+JAKE_ZONE_MIN_MPH = 10.0
+
+
+class EngineBrakeZoneMixin:
+    def _update_engine_brake_zone(self, dt: float) -> None:
+        """Warn, then fine, for engine braking inside a town's ban zone."""
+        t = self.truck
+        if self._ramp_mi is not None or self.trip.finished or self._pull_over is not None:
+            return
+        # The switch alone is not the offense; the bark is. The vehicle already
+        # knows whether the retarder is genuinely retarding (stage selected,
+        # engine on, off the fuel, in gear), so ask it rather than re-deriving.
+        barking = t.jake_retard_torque_nm() > 0.0 and t.speed_mph >= JAKE_ZONE_MIN_MPH
+        # Cruise and the curve assist raise the retarder themselves and release
+        # it themselves; their bark is not the driver's doing, and cruise only
+        # reaches for it on descents anyway. Auto mode on an AMT is different:
+        # the driver armed the stalk with J, so its bark is theirs.
+        driver_owns_jake = barking and self._cruise_jake_stage == 0 and not self._curve_assist_jake
+        city = self.trip.engine_brake_ban_at(self.trip.position_mi)
+        if city is None:
+            self._jake_violation_deadline_s = None
+            self._jake_citation_latched = False
+            self._maybe_warn_jake_zone_ahead(driver_owns_jake)
+            return
+        if not driver_owns_jake or self._jake_zone_exempt():
+            self._jake_violation_deadline_s = None
+            if not t.engine_brake:
+                # The engagement is over; a fresh one can earn a fresh citation.
+                self._jake_citation_latched = False
+            return
+        if self._jake_citation_latched:
+            return  # one citation per continuous engagement
+        if self._jake_violation_deadline_s is None:
+            self._jake_violation_deadline_s = JAKE_ZONE_GRACE_S
+            self._speak_jake_zone_warning(city)
+            return
+        self._jake_violation_deadline_s -= dt
+        if self._jake_violation_deadline_s <= 0.0:
+            self._jake_violation_deadline_s = None
+            self._jake_citation_latched = True
+            self._fine_engine_braking(city)
+
+    def _jake_zone_exempt(self) -> bool:
+        """The ordinance's own carve-outs: emergencies and real downgrades."""
+        # A live hazard warning or the emergency brake is the game's "avoiding
+        # imminent danger" -- every well-drafted ordinance excuses that.
+        if self.truck.emergency_brake or self._hazard_deadline is not None:
+            return True
+        grade_pct = self.trip.grade_at(self.trip.position_mi) * 100.0
+        return grade_pct <= -JAKE_ZONE_EXEMPT_GRADE_PCT
+
+    def _maybe_warn_jake_zone_ahead(self, driver_owns_jake: bool) -> None:
+        """Read the NO ENGINE BRAKE sign out loud while it still helps.
+
+        Only when the driver's own retarder is on: with it off there is
+        nothing to do, and every route city would otherwise add a callout on
+        top of the urban limit changes already announced there. Terse speech
+        skips the advisory -- the in-zone warning still comes before any fine,
+        so a terse driver risks nothing but a later cue.
+        """
+        if not driver_owns_jake or self._terse_speech():
+            return
+        ahead = self.trip.next_engine_brake_ban(JAKE_ZONE_WARN_MI)
+        if ahead is None:
+            return
+        start_mi, city = ahead
+        key = f"{start_mi:.1f}"
+        if key == self._jake_zone_warned_key:
+            return
+        self._jake_zone_warned_key = key
+        distance = self.ctx.settings.distance_text(start_mi - self.trip.position_mi)
+        spoken = self.ctx.world.spoken_city(city, qualified=False)
+        self.ctx.audio.play("ui/notify", volume=0.6)
+        self.ctx.say_event(
+            f"No engine brake zone in {distance}, coming into {spoken}. "
+            "Switch the engine brake off before the zone.",
+            interrupt=False,
+        )
+
+    def _speak_jake_zone_warning(self, city: str) -> None:
+        """The warning that always precedes the first fine -- the audio sign."""
+        self.ctx.audio.play("ui/warning")
+        self.ctx.controller.rumble.alert()
+        if self._terse_speech():
+            message = "No engine brake zone. Switch it off."
+        else:
+            spoken = self.ctx.world.spoken_city(city, qualified=False)
+            hint = self.ctx.control_hint("engine_brake")
+            message = (
+                f"No engine brakes in {spoken}; local noise rules. Switch the "
+                f"engine brake off with {hint} or you will be fined."
+            )
+        self.ctx.say_event(message, interrupt=True)
+
+    def _fine_engine_braking(self, city: str) -> None:
+        """The citation: paid on the spot, escalating like repeat offenses do."""
+        fine = JAKE_ZONE_FINES[min(self.jake_zone_fines, len(JAKE_ZONE_FINES) - 1)]
+        self.jake_zone_fines += 1
+        self.jake_fines_paid += fine
+        self.ctx.profile.money -= fine  # can go negative; never a game over
+        self.ctx.audio.play("ui/error")
+        self.ctx.controller.rumble.alert()
+        if self._terse_speech():
+            message = f"Engine brake citation: {fine:,.0f} dollars."
+        else:
+            spoken = self.ctx.world.spoken_city(city, qualified=False)
+            message = (
+                f"A local officer cites you for engine braking in {spoken}: "
+                f"a {fine:,.0f} dollar fine under the town noise rules, paid "
+                "on the spot."
+            )
+        self.ctx.say_event(message, interrupt=True)

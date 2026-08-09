@@ -136,6 +136,8 @@ HELP_PAGES = [
             "J toggles the engine brake for long downhill grades, and while it",
             "is on, 1, 2, and 3 select two, four, or six cylinders of retard.",
             "J re-engages at the stage you last selected, like a real dash switch.",
+            "Towns ban engine braking as noise: inside a no engine brake zone you are",
+            "warned first, then fined if it stays on. Downgrades and emergencies are exempt.",
             "Hold H to sound the horn; release H to stop it.",
         ],
     ),
