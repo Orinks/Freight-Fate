@@ -245,6 +245,35 @@ def test_failed_refresh_expires_last_known_observation_instead_of_loading_foreve
     assert p.unavailable("route-cell")
 
 
+def test_same_place_keys_share_one_observation():
+    # Observations belong to stations, not to request-key strings: the city
+    # menu's warm-up and the trip's first route cell are the same place, so
+    # the second key must ride the first key's fetch instead of refetching.
+    calls = []
+
+    def fetch(lat, lon):
+        calls.append((lat, lon))
+        return "Light Rain", 5.0, 14.0, 6.0, 2_000_000.0
+
+    p = SyncProvider(fetch=fetch, clock=lambda: 0.0, wall_clock=lambda: 2_000_000.0)
+    p.request("city:newark", 40.7357, -74.1724)
+    p.request("route:newark:philadelphia:0", 40.7357, -74.1724)
+    assert p.get("route:newark:philadelphia:0") is WeatherKind.RAIN
+    assert p.get_temperature("route:newark:philadelphia:0") == 14.0
+    assert len(calls) == 1
+
+
+def test_provider_reports_session_observation_history():
+    p = SyncProvider(
+        fetch=lambda lat, lon: ("Clear", 0.0, 20.0, 10.0, 2_000_000.0),
+        clock=lambda: 0.0,
+        wall_clock=lambda: 2_000_000.0,
+    )
+    assert not p.has_any_observation()
+    p.request("route-cell", 40.0, -80.0)
+    assert p.has_any_observation()
+
+
 def test_hourly_metar_cadence_is_still_live():
     """NWS stations file routine observations once an hour, so the newest
     available observation is 30-60 minutes old for most of every hour. That is

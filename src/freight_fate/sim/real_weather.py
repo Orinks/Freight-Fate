@@ -242,13 +242,31 @@ class RealWeatherProvider:
         self._clock = clock
         self._wall_clock = wall_clock
         self._lock = threading.Lock()
-        self._cache: dict[str, _CachedObservation] = {}
+        # Observations belong to stations, not to request keys: the city menu
+        # warms "city:denver", the trip then asks for "route:denver:x:0", and
+        # both are the same place. Observations are cached per station
+        # identity (the same coordinate rounding the station-URL cache uses)
+        # with request keys as aliases, so same-place keys share one fetch.
+        self._obs_by_station: dict[str, _CachedObservation] = {}
+        self._station_for_key: dict[str, str] = {}
         self._failed_at: dict[str, float] = {}
         self._inflight: set[str] = set()
 
+    @staticmethod
+    def _station_identity(lat: float, lon: float) -> str:
+        return f"{round(lat, 2)},{round(lon, 2)}"
+
+    def _entry_for(self, city: str) -> _CachedObservation | None:
+        """The aliased station observation for a request key. Caller holds
+        the lock."""
+        station = self._station_for_key.get(city)
+        if station is None:
+            return None
+        return self._obs_by_station.get(station)
+
     def get(self, city: str) -> WeatherKind | None:
         with self._lock:
-            entry = self._cache.get(city)
+            entry = self._entry_for(city)
             if entry is None or not self._usable(entry):
                 return None
             return entry.kind
@@ -258,7 +276,7 @@ class RealWeatherProvider:
         no fresh reading -- still loading, offline, too stale, or the station
         omitted it. Callers fall back to the seasonal model on None."""
         with self._lock:
-            entry = self._cache.get(city)
+            entry = self._entry_for(city)
             if entry is None or not self._usable(entry):
                 return None
             return entry.temperature_c
@@ -271,12 +289,21 @@ class RealWeatherProvider:
         freshly fetched, still-usable response last-known.
         """
         with self._lock:
-            entry = self._cache.get(city)
+            entry = self._entry_for(city)
             return (
                 entry is not None
                 and self._usable(entry)
                 and self._clock() - entry.fetched_at >= CACHE_TTL_S
             )
+
+    def has_any_observation(self) -> bool:
+        """Whether any live observation has been seen this session.
+
+        The weather layer uses this to tell "the network is having a moment"
+        (hold last-known conditions) apart from "this session has never been
+        online" (the only case where simulated fallback is honest)."""
+        with self._lock:
+            return bool(self._obs_by_station)
 
     def refreshing(self, city: str) -> bool:
         """Whether a network request for this location is actually in flight."""
@@ -286,7 +313,7 @@ class RealWeatherProvider:
     def observation_age_s(self, city: str) -> float | None:
         """Age of the cached station observation, separate from fetch activity."""
         with self._lock:
-            entry = self._cache.get(city)
+            entry = self._entry_for(city)
             if entry is None:
                 return None
             return max(0.0, self._wall_clock() - entry.observed_at)
@@ -312,7 +339,7 @@ class RealWeatherProvider:
         with self._lock:
             if city in self._inflight:
                 return False
-            entry = self._cache.get(city)
+            entry = self._entry_for(city)
             if entry is not None and self._usable(entry):
                 return False
             return city in self._failed_at
@@ -320,11 +347,15 @@ class RealWeatherProvider:
     def request(self, city: str, lat: float, lon: float) -> None:
         """Ensure fresh data for ``city`` is available or being fetched."""
         now = self._clock()
+        station = self._station_identity(lat, lon)
         with self._lock:
             if city in self._inflight:
                 return
-            entry = self._cache.get(city)
+            entry = self._obs_by_station.get(station)
             if entry is not None and self._usable(entry) and now - entry.fetched_at < CACHE_TTL_S:
+                # Another key already fetched this place: alias and serve it.
+                self._station_for_key[city] = station
+                self._failed_at.pop(city, None)
                 return
             failed = self._failed_at.get(city)
             if failed is not None and now - failed < RETRY_AFTER_S:
@@ -336,6 +367,7 @@ class RealWeatherProvider:
         thread.start()
 
     def _worker(self, city: str, lat: float, lon: float) -> None:
+        station = self._station_identity(lat, lon)
         try:
             fetched = self._fetch(lat, lon)
             text, wind, temp_c, visibility_mi = fetched[:4]
@@ -346,9 +378,10 @@ class RealWeatherProvider:
                 raise ValueError("NWS observation is too old to use")
             kind = map_condition(text, wind, visibility_mi)
             with self._lock:
-                self._cache[city] = _CachedObservation(
+                self._obs_by_station[station] = _CachedObservation(
                     kind, temp_c, self._clock(), float(observed_at)
                 )
+                self._station_for_key[city] = station
                 self._failed_at.pop(city, None)
             log.info(
                 "Real weather for %s: %s (NWS %r, wind %.0f km/h, temp %s, vis %s)",
