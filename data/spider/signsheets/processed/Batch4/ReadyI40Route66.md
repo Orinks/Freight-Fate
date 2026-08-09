@@ -48,26 +48,26 @@ kingman_az_us` (151).
 - spoken: Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.
 
 ### Wigwam Motel
-- treatment: billboard
+- treatment: skip
 - leg: gallup_nm_us -> flagstaff_az_us
 - at_mi: 90
 - spoken: Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?
 
 ### Jack Rabbit Trading Post
-- treatment: billboard
+- treatment: skip
 - leg: gallup_nm_us -> flagstaff_az_us
 - at_mi: 100
 - spoken: Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.
 - describe: That giant rabbit and its one-word sign, HERE IT IS, have pointed drivers off Route sixty-six since your grandparents drove by. See the rabbit, trade at the rabbit -- you'll find things you never knew you needed, probably not made in the good ol' U.S.A., but come anyway.
 
 ### Standin' on the Corner
-- treatment: billboard
+- treatment: skip
 - leg: gallup_nm_us -> flagstaff_az_us
 - at_mi: 123
 - spoken: Billboard: Winslow, Arizona, is ahead. Stand on the corner, and a girl in a flatbed Ford may slow down to look. You know the song.
 
 ### Meteor Crater
-- treatment: billboard
+- treatment: skip
 - leg: gallup_nm_us -> flagstaff_az_us
 - at_mi: 140
 - spoken: Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.
@@ -80,7 +80,7 @@ kingman_az_us` (151).
 - spoken: Billboard: Grand Canyon Caverns is ahead near Peach Springs. The country's largest dry cavern lies two hundred feet down, with one motel room at the very bottom for the very brave.
 
 ### Entering the Navajo Nation
-- treatment: landmark
+- treatment: skip
 - leg: gallup_nm_us -> flagstaff_az_us
 - at_mi: 5
 - spoken: You are entering the Navajo Nation, the largest reservation in the United States and a sovereign nation with its own government. It reaches across Arizona, New Mexico, and Utah and observes daylight saving time even when most of Arizona does not, so check the clock before dinner checks you.
@@ -89,7 +89,7 @@ kingman_az_us` (151).
 ---
 
 ### Two Guns
-- treatment: billboard
+- treatment: skip
 - leg: gallup_nm_us -> flagstaff_az_us
 - at_mi: 165
 - spoken: Billboard: The ghost town of Two Guns is ahead. It has stone ruins, an old zoo, a canyon, and enough Route sixty-six legends to make every abandoned wall suspicious.

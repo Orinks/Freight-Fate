@@ -50,7 +50,7 @@ grand_rapids_mi_us` (382), `bemidji_mn_us -> grand_rapids_mn_us` (72).
 - describe: Cedar Point, on a Lake Erie peninsula at Sandusky, holds one of the largest collections of roller coasters on earth and a string of record-breaking rides. Amusement-park fans treat it as a pilgrimage.
 
 ### Toledo, Glass and Klinger
-- treatment: billboard
+- treatment: skip
 - leg: toledo_oh_us -> lima_oh_us
 - at_mi: 3
 - spoken: Billboard: Toledo is the Glass City, where they build Jeeps and blow glass. Do not leave without a Hungarian hot dog from Tony Packo's, the place Corporal Klinger would not shut up about.

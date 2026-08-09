@@ -21,7 +21,7 @@ miami_fl_us` (71).
 `cape_coral_fl_us -> lakeland_fl_us` (118), `cape_coral_fl_us -> tampa_fl_us` (134), `daytona_beach_fl_us -> jacksonville_fl_us` (93), `daytona_beach_fl_us -> orlando_fl_us` (56), `fort_myers_fl_us -> naples_fl_us` (43), `gainesville_fl_us -> jacksonville_fl_us` (71), `gainesville_fl_us -> lakeland_fl_us` (144), `gainesville_fl_us -> orlando_fl_us` (115), `jacksonville_fl_us -> miami_fl_us` (346), `jacksonville_fl_us -> ocala_fl_us` (103), `lakeland_fl_us -> port_saint_lucie_fl_us` (127), `naples_fl_us -> miami_fl_us` (122), `ocala_fl_us -> tampa_fl_us` (100), `orlando_fl_us -> jacksonville_fl_us` (141), `orlando_fl_us -> tampa_fl_us` (84), `palm_bay_fl_us -> lakeland_fl_us` (107), `palm_bay_fl_us -> orlando_fl_us` (74), `port_saint_lucie_fl_us -> miami_fl_us` (115), `port_saint_lucie_fl_us -> palm_bay_fl_us` (65), `tampa_fl_us -> fort_myers_fl_us` (133), `tampa_fl_us -> miami_fl_us` (265), `west_palm_beach_fl_us -> cape_coral_fl_us` (138), `west_palm_beach_fl_us -> miami_fl_us` (71), `west_palm_beach_fl_us -> palm_bay_fl_us` (110)
 
 ### The World Center of Racing
-- treatment: billboard
+- treatment: skip
 - leg: daytona_beach_fl_us -> jacksonville_fl_us
 - at_mi: 3
 - spoken: Billboard: Daytona Beach is the World Center of Racing and home of the Daytona Five Hundred. The beach is so hard and flat that you can drive a car right onto the sand, which is how the racing started.
@@ -56,7 +56,7 @@ miami_fl_us` (71).
 - describe: Weeki Wachee Springs is a roadside attraction where performers have staged underwater mermaid shows since nineteen forty-seven, sipping air from concealed hoses in the clear spring while audiences watch through a submerged theater window. It is now a state park.
 
 ### The Cigar City
-- treatment: billboard
+- treatment: skip
 - leg: tampa_fl_us -> fort_myers_fl_us
 - at_mi: 3
 - spoken: Billboard: Tampa is the Cigar City, where Ybor City once rolled the world's cigars by hand. A pirate ship invades the bay each winter for Gasparilla, while beer, roller coasters, and giraffes coexist at Busch Gardens.

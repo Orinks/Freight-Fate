@@ -17,7 +17,7 @@ dothan_al_us` (138).
 `albany_ga_us -> tallahassee_fl_us` (88), `albany_ga_us -> valdosta_ga_us` (81), `columbus_ga_us -> albany_ga_us` (86), `columbus_ga_us -> dothan_al_us` (99), `columbus_ga_us -> montgomery_al_us` (82), `crestview_fl_us -> dothan_al_us` (111), `dothan_al_us -> albany_ga_us` (84), `dothan_al_us -> tallahassee_fl_us` (109), `montgomery_al_us -> dothan_al_us` (103), `tallahassee_fl_us -> crestview_fl_us` (150), `valdosta_ga_us -> dothan_al_us` (138), `valdosta_ga_us -> tallahassee_fl_us` (87)
 
 ### Peanut Capital of the World
-- treatment: billboard
+- treatment: skip
 - leg: montgomery_al_us -> dothan_al_us
 - at_mi: 98
 - spoken: Billboard: Dothan is the Peanut Capital of the World. A quarter of the nation's peanuts pass through here, and downtown is decorated with giant painted peanuts wearing hats.
@@ -31,14 +31,14 @@ dothan_al_us` (138).
 - describe: A large gilded peanut statue greets visitors to Dothan, the town's cheerful civic symbol of the crop that built it.
 
 ### The Boll Weevil Monument
-- treatment: billboard
+- treatment: skip
 - leg: montgomery_al_us -> dothan_al_us
 - at_mi: 82
 - spoken: Billboard: Enterprise, west of here, built a monument to the boll weevil, the bug that ate its cotton. The disaster forced farmers to plant peanuts, peanuts made them rich, and gratitude to a pest became a statue.
 - describe: Enterprise, Alabama, is the only town on earth with a monument honoring an agricultural pest. When the boll weevil devastated cotton, farmers switched to peanuts and prospered, so in nineteen nineteen they erected a statue of a woman holding the weevil aloft, in thanks.
 
 ### Fort Novosel
-- treatment: landmark
+- treatment: skip
 - leg: montgomery_al_us -> dothan_al_us
 - at_mi: 80
 - spoken: You are passing Ozark beside Fort Novosel, the home of Army Aviation, where every Army helicopter pilot learns to fly.
@@ -59,14 +59,14 @@ dothan_al_us` (138).
 - describe: Kolomoki Mounds, near Blakely, is one of the oldest and largest woodland Indian mound sites in the Southeast, its temple mound rising above the Georgia pines from more than a thousand years ago.
 
 ### Troy
-- treatment: billboard
+- treatment: skip
 - leg: montgomery_al_us -> dothan_al_us
 - at_mi: 47
 - spoken: Billboard: Troy University is ahead, home of the Trojans and a surprisingly world-class art collection out among the pines.
 - describe: Troy, home to Troy University and its Trojans, anchors this stretch of US Two Thirty-One and hosts a well-regarded art museum an hour from any big city.
 
 ### World's Smallest City Block
-- treatment: billboard
+- treatment: skip
 - leg: montgomery_al_us -> dothan_al_us
 - at_mi: 100
 - spoken: Billboard: Dothan has the world's smallest city block. It contains one monument, several streets, and almost enough room to parallel park badly.
