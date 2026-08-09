@@ -269,6 +269,11 @@ class WeatherSystem:
         self.city: str | None = None
         self.city_coords: tuple[float, float] = (0.0, 0.0)
         self.live = False  # True while real-world data is driving conditions
+        # True once any live observation has driven conditions this session.
+        # From then on a failing provider holds last-known conditions --
+        # simulated weather never takes over a sky the player has heard live
+        # (owner ruling, 2026-08-08).
+        self._session_had_live = False
         # The last raw live observation and the city it was for, plus the
         # season-reconciled condition it produced. Held so live weather is
         # reconciled once per observation instead of re-evaluated every tick.
@@ -421,6 +426,12 @@ class WeatherSystem:
             # provider is genuinely offline.
             return None
 
+        if self.provider is not None and self._session_had_live:
+            # The sky has been live this session: a failing provider holds
+            # the last known conditions while the retry cadence keeps trying.
+            # Simulated transitions never take over from real weather.
+            return None
+
         if self.provider is not None and not self._fallback_active:
             self._fallback_active = True
             self._carried_last_known = False
@@ -476,7 +487,10 @@ class WeatherSystem:
                 except Exception:  # pragma: no cover - defensive
                     pass
             return "live"
-        if self._carried_last_known and not self._provider_offline():
+        if self._carried_last_known or self._session_had_live:
+            # Live conditions have driven this sky before; whatever is wrong
+            # with the network right now, the player keeps them as last-known
+            # (with their honest age) rather than a simulated substitute.
             return "last_known"
         if self._provider_offline():
             return "fallback"
@@ -640,6 +654,7 @@ class WeatherSystem:
             self._live_kind = None
             return None
         self.live = True
+        self._session_had_live = True
         self._carried_last_known = False
         if kind != self._live_raw or self.city != self._live_city:
             self._last_observed_kind = kind

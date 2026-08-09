@@ -205,7 +205,7 @@ def test_route_weather_location_switches_at_multi_leg_boundary(world):
     assert "indianapolis_in_us:columbus_oh_us" in boundary
 
 
-def test_normal_route_cell_refresh_is_silent_but_fallback_is_announced(world):
+def test_normal_route_cell_refresh_is_silent_and_failures_hold_last_known(world):
     class MovingProvider:
         data = {}
         failed = set()
@@ -248,8 +248,12 @@ def test_normal_route_cell_refresh_is_silent_but_fallback_is_announced(world):
     third_key = trip._weather_location()[0]
     provider.failed.add(third_key)
     events = [event for event in trip.update(0.0) if event.kind is TripEventKind.WEATHER_CHANGE]
-    assert len(events) == 1
-    assert events[0].message.startswith("Live weather is unavailable")
+    # One dropped request at a cell boundary never simulates: the sky holds
+    # the last live conditions silently and the retry cadence keeps trying
+    # (owner ruling, 2026-08-08). The weather app still answers honestly.
+    assert events == []
+    assert trip.weather.source_status == "last_known"
+    assert trip.weather.current is WeatherKind.CLEAR
 
 
 def test_live_change_omits_modeled_temperature_and_does_not_hide_later_stale_status(world):

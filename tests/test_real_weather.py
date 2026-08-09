@@ -302,6 +302,49 @@ def test_old_nws_observation_timestamp_is_never_treated_as_live():
     assert p.get("route-cell") is None
 
 
+def test_new_cell_fetch_failure_holds_last_known_not_fallback():
+    """One dropped request at a route-cell boundary must never simulate.
+
+    The truck crosses into a fresh 20-mile cell, that cell's first fetch
+    fails, and the previous cell's live conditions are seconds old: the
+    weather holds them as last-known and retries -- it does not flip to
+    simulated fallback while NWS is fine (owner ruling, 2026-08-08)."""
+    boom = [False]
+
+    def fetch(lat, lon):
+        if boom[0]:
+            raise OSError("transient")
+        return "Heavy Rain", 5.0, 12.0, 1.0, 2_000_000.0
+
+    provider = SyncProvider(fetch=fetch, clock=lambda: 0.0, wall_clock=lambda: 2_000_000.0)
+    weather = WeatherSystem("great_lakes", seed=1, provider=provider)
+    weather.set_city("cell-0", 40.0, -80.0)
+    weather.update(0.0)
+    assert weather.source_status == "live"
+    assert weather.current is WeatherKind.HEAVY_RAIN
+
+    boom[0] = True
+    weather.set_city("cell-1", 41.0, -81.0)
+    weather.update(0.0)
+    assert weather.source_status == "last_known"
+    assert weather.current is WeatherKind.HEAVY_RAIN  # held, not resimulated
+    # And it stays held on later ticks rather than drifting to fallback.
+    weather.update(1.0)
+    assert weather.source_status == "last_known"
+    assert weather.current is WeatherKind.HEAVY_RAIN
+
+
+def test_cold_session_with_failing_provider_still_reaches_fallback():
+    def fetch(lat, lon):
+        raise OSError("offline")
+
+    provider = SyncProvider(fetch=fetch, clock=lambda: 0.0, wall_clock=lambda: 2_000_000.0)
+    weather = WeatherSystem("great_lakes", seed=1, provider=provider)
+    weather.set_city("cell-0", 40.0, -80.0)
+    weather.update(0.0)
+    assert weather.source_status == "fallback"
+
+
 def test_expired_observation_retries_then_recovers_to_live_weather():
     monotonic = [0.0]
     wall = [2_000_000.0]

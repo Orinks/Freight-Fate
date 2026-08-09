@@ -1577,13 +1577,15 @@ def test_v_distinguishes_loading_last_known_and_fallback(monkeypatch):
         provider.is_unavailable = True
         driving.trip.update(0.0)
         driving.handle_event(event)
-        assert spoken[-1].startswith("Simulated fallback weather:")
-        assert "Ahead:" in spoken[-1]
-        assert tablet.items[0].text.startswith("Weather source: Simulated fallback weather")
+        # The session has heard live weather, so an unavailable provider holds
+        # last-known conditions -- simulated fallback never takes over mid-run
+        # (owner ruling, 2026-08-08).
+        assert spoken[-1].startswith("Last-known live weather")
+        assert tablet.items[0].text.startswith("Weather source: Last-known live weather")
         tablet.handle_event(
             pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, unicode="", mod=0)
         )
-        assert spoken[-1].startswith("Weather source: Simulated fallback weather")
+        assert spoken[-1].startswith("Weather source: Last-known live weather")
         assert tablet.index == selected
     finally:
         app.shutdown()
