@@ -4,6 +4,13 @@
 
 ### Added
 
+- **Thirty-one new original songs and beds across the game.** The country
+  originals batch joins the music: new daytime and nighttime driving beds,
+  ten more songs on the country stations, and a brand-new station --
+  Nashville After Hours -- playing late-night Nashville jazz and crossover
+  instrumentals. Careers that reach level 21 also get a new menu theme of
+  their own.
+
 - **Thousands more real stations on the dial.** Most of the map now has
   its real local radio around it: over eight hundred commercial country,
   rock, sports, talk and oldies stations that come in only near their real
@@ -566,6 +573,13 @@
 
 ### Changed
 
+- **Every Freight Fate music station now plays everywhere.** The Rawhide,
+  Big Wheel Country, The Grind, The Delta, and the rest of the game's own
+  stations no longer fade out past their home cities. They sit together
+  with Roadhouse and Night Line in the Freight Fate stations category on
+  the dial, and they play anywhere on the map, in streamer-safe mode, with
+  real streams off -- every player can hear the game's music.
+
 - **Turn signals play a clear tone instead of a soft click.** The blinker,
   the exit signal, and the pull-over signal now mark themselves with a
   clean indicator tone panned to the side you are signaling -- the sound a
@@ -1049,6 +1063,21 @@
   axles, and now the game tells you so.
 
 ### Fixed
+
+- **Live weather is ready when you start driving, and it never quietly
+  hands your sky to simulated weather.** The game now starts fetching real
+  conditions while you are still parked at the terminal, so a drive begins
+  on live weather instead of waiting for it to load. And when a weather
+  check fails mid-drive -- a dropped connection, a moment of bad signal --
+  the game keeps the last real conditions, says they are last-known, and
+  keeps trying. Simulated weather only ever appears when the game has had
+  no connection at all since it started.
+
+- **A dead radio stream no longer drops you to silence.** When a real
+  stream refuses to play, the radio now says which station went off the
+  air, moves you to the next station in the same part of the dial, and
+  keeps the dead stream off the dial for the rest of the session instead
+  of letting you land on it again.
 
 - **Rest-stop sleep no longer turns into a dead end at the exit.** Pressing T
   while rolling toward a sleep-capable stop now plans and names that exact

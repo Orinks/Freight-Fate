@@ -36,7 +36,11 @@ def test_favorite_pulls_a_web_station_ahead_of_terrestrial():
     stations = radio.available_stations()
     favorite_index = stations.index(web)
     first_terrestrial = next(
-        i for i, s in enumerate(stations) if s.source_type in {"imported", "local", "regional"}
+        i
+        for i, s in enumerate(stations)
+        # Playlist-backed fictional stations are Freight Fate stations now,
+        # sorted ahead of favorites by design; terrestrial means the real dial.
+        if s.source_type in {"imported", "local", "regional"} and not s.playlist
     )
     assert favorite_index < first_terrestrial
     assert radio._group(web) == FAVORITES_GROUP

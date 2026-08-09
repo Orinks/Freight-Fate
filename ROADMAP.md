@@ -93,6 +93,23 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Country-originals music batch (2026-08-08).** Thirty-one tracks
+      from the owner's originals zip: five day beds, eight night beds, ten
+      country-station songs, the seven-track Nashville After Hours jazz
+      station, and a seventh menu milestone bed at level 21. The repo now
+      ships `sounds.pak` only (LFS); the loose `assets/sounds` tree stays
+      builder-local and tests fall back to the pack on clean clones.
+- [x] **Freight Fate stations play everywhere (2026-08-08).** The twelve
+      fictional stations plus Nashville After Hours are always available --
+      no transmitter bubbles, every mode -- grouped with Roadhouse and
+      Night Line on the dial. Reception physics stays covered by fixtures.
+- [x] **Live weather immediate and never simulated mid-run (2026-08-08).**
+      Station-shared observation cache, city-menu warm-up, first fetch at
+      trip construction, and failures hold last-known conditions; simulated
+      fallback survives only for a session that was never online.
+- [x] **Dead streams hand over instead of going silent (2026-08-08).** A
+      stream that refuses to play announces itself off the air, hands over
+      within its dial category, and leaves the dial for the session.
 - [x] **Dev sync 2026-08-08 (through the 1.8.8 release).** Merged from `dev`:
       activation-code online setup replacing clipboard paste, the one-time
       first-run orinks.net offer (spoken after 1.9's first-day briefing, with
@@ -1390,11 +1407,9 @@ section below and the Unreleased changelog; the release-line view:
       FCC contour radii or curated `range_miles`/`site_elev_ft` overlays
       for high-listener imported stations. `radio_favorites` joins the
       profile shape: regenerate the cloud invariants export at the 1.9
-      cutover (already on the cutover checklist). Port PR #150's remaining
-      dead-station manners (seen in the 2026-08-07 manual session: a dead
-      web stream falls back to the silent satellite): hand over to the next
-      station on the same band instead, and take a stream that refused to
-      play off the dial for the rest of the session.
+      cutover (already on the cutover checklist). Dead-station manners
+      SHIPPED 2026-08-08: a stream that refuses to play hands over to the
+      next station on its band and leaves the dial for the session.
 - [x] **Community/college/NPR coverage sweep (2026-07-22).** Fifty-one
       real stations joined the dial, each gated on the BASS live check,
       lifting real-station reach from 78% to 93% of the 623 dispatchable
