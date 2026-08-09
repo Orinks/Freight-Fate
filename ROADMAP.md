@@ -93,6 +93,20 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [ ] **Bake the remaining curated billboard sheets (no new writing
+      needed).** Only 42 curated `billboard_sign` records are baked,
+      covering five regions; eleven regions (Florida, the Northeast, the
+      Pacific Northwest, the Great Lakes, Appalachia, and more) have
+      none -- yet the copy already exists and is finished:
+      `data/spider/signsheets/processed/` holds four batches, 266 spoken
+      entries, all through the audio-first editorial pass (see
+      `SpokenCopyAuditSummary.md`), each block complete with treatment,
+      leg, milepost, and spoken text. Only Batch 4's "Ready" sheets were
+      ever baked. Work is mechanical: honor each sheet's Comments file,
+      run `tools/bake_billboards.py --sheet <sheet> --write` per sheet,
+      re-index world data, and update the pinned landmark/coverage
+      counts. Owner rule: no new sign copy gets authored in this pass --
+      the sheets are the source of truth.
 - [ ] **Achievement categories, on Saltwake's model.** The 145-badge
       catalog is one flat list; Saltwake (133 marks) browses in two
       levels and it reads far better under a screen reader. Adopt its
