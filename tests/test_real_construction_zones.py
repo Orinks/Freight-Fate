@@ -504,10 +504,23 @@ class TestRealTrafficProviderConstruction:
 
     def test_all_states_have_parser(self):
         """Every state in STATE_APIS has a valid parser key."""
-        valid_parsers = {"ohgo", "iteris", "wzdx", "no_api"}
+        valid_parsers = {"ohgo", "iteris", "wzdx", "cars", "no_api"}
         for key, config in STATE_APIS.items():
             assert "parser" in config, f"{key} missing parser"
             assert config["parser"] in valid_parsers, f"{key} has unknown parser {config['parser']}"
+
+    def test_cars_states_have_bounds_and_layer_slugs(self):
+        """CARS GraphQL states carry a parseable bounding box and layer slugs."""
+        cars_keys = [key for key, config in STATE_APIS.items() if config["parser"] == "cars"]
+        assert set(cars_keys) == {"indiana", "minnesota", "colorado"}
+        for key in cars_keys:
+            config = STATE_APIS[key]
+            south, west, north, east = (float(v) for v in config["bounds"].split(","))
+            assert south < north, f"{key} bounds south/north swapped"
+            assert west < east, f"{key} bounds west/east swapped"
+            # Layer slugs are bare words, not URL paths
+            assert not config["events_endpoint"].startswith("/"), key
+            assert not config["construction_endpoint"].startswith("/"), key
 
     def test_parse_construction_ohgo_format(self):
         """Parse OHGO construction format from sample API response."""
@@ -574,20 +587,15 @@ class TestRealTrafficProviderConstruction:
 class TestIterisParser:
     """Shared Iteris-platform parser covers WI, NY, GA, AZ, CT."""
 
-    def test_iteris_platform_states_in_state_apis(self):
-        """Live Iteris states are listed in STATE_APIS with parser='iteris'.
+    def test_no_state_rides_the_iteris_rest_api(self):
+        """No state is configured with parser='iteris' any more.
 
-        Wisconsin left this list 2026-07-23: 511wi.gov's REST API is gone
-        (every path 404s), so it runs as no_api until a working endpoint
-        is found -- same treatment as Indiana."""
-        for key in ("new york", "georgia", "arizona", "connecticut"):
-            assert key in STATE_APIS, f"Missing {key} in STATE_APIS"
-            assert STATE_APIS[key]["parser"] == "iteris", f"{key} parser not iteris"
-            assert "base_url" in STATE_APIS[key], f"{key} missing base_url"
-            assert "events_endpoint" in STATE_APIS[key], f"{key} missing events_endpoint"
-            assert "construction_endpoint" in STATE_APIS[key], (
-                f"{key} missing construction_endpoint"
-            )
+        The 2026-08-09 live sweep found every Iteris-platform /api/events
+        REST endpoint gone (404); those sites now publish WZDx v4 feeds at
+        /api/wzdx instead.  The parser stays because the CARS parser reuses
+        its closure and location helpers."""
+        for key, config in STATE_APIS.items():
+            assert config["parser"] != "iteris", f"{key} still rides the dead Iteris REST API"
 
     def test_parse_iteris_events_basic(self):
         """Parse a simple Iteris-format event list."""
@@ -734,21 +742,20 @@ class TestIterisParser:
         assert provider._determine_iteris_closure({}, "right shoulder closed") == "shoulder"
         assert provider._determine_iteris_closure({}, "left lane closed") == "single lane"
 
-    def test_fetch_construction_routes_to_iteris_parser(self):
-        """fetch_construction for an Iteris state uses the correct parser."""
+    def test_fetch_construction_recognises_live_state(self):
+        """fetch_construction for a live state returns a TrafficData shell.
+
+        Without network, should fall through to empty data.  The parser
+        routing happens inside _fetch_construction_from_api which is called
+        by _fetch_construction_background.  What we can test: a live state
+        is recognised as supported."""
         provider = RealTrafficProvider()
-        # Without network, should fall through to empty data.
-        # The parser routing happens inside _fetch_construction_from_api which
-        # is called by _fetch_construction_background.  What we can test:
-        # an Iteris state is recognised as supported. (Wisconsin left the
-        # Iteris roster 2026-07-23 -- dead REST API -- so Georgia carries
-        # this check now.)
         data = provider.fetch_construction("georgia")
         assert data.state == "georgia"
         assert isinstance(data, TrafficData)
 
-    def test_request_routes_to_iteris_parser(self):
-        """request() for an Iteris state uses the correct parser."""
+    def test_request_recognises_live_state(self):
+        """request() for a live state returns a TrafficData shell."""
         provider = RealTrafficProvider()
         data = provider.request("new york")
         assert data.state == "new york"
@@ -762,33 +769,33 @@ class TestWZDxParser:
     """WZDx v4.0 GeoJSON FeatureCollection parser."""
 
     def test_wzdx_states_in_state_apis(self):
-        """WZDx states are listed with parser='wzdx'."""
-        # Indiana left this list 2026-07-22: 511in.org answers every REST
-        # path with its SPA shell (the data is behind GraphQL), so it runs
-        # as no_api until a GraphQL client exists.
+        """WZDx states are listed with parser='wzdx' and read /api/wzdx.
+
+        This is the live roster from the 2026-08-09 sweep: the old per-site
+        /api/events endpoints are gone everywhere, but these sites publish a
+        WZDx v4.x feed at /api/wzdx, so both fetches read it.  Colorado and
+        Minnesota moved to the CARS GraphQL parser; the rest of the old
+        roster (California, Maryland, Michigan, Missouri, New Jersey,
+        Oregon, Tennessee, Texas, Virginia, Washington) went dark and sits
+        on no_api."""
         wzdx_keys = (
-            "california",
-            "colorado",
+            "arizona",
+            "connecticut",
             "florida",
+            "georgia",
             "idaho",
-            "maryland",
-            "michigan",
-            "minnesota",
-            "missouri",
             "nevada",
-            "new jersey",
+            "new york",
             "north carolina",
-            "oregon",
             "pennsylvania",
-            "tennessee",
-            "texas",
             "utah",
-            "virginia",
-            "washington",
+            "wisconsin",
         )
         for key in wzdx_keys:
             assert key in STATE_APIS, f"Missing {key} in STATE_APIS"
             assert STATE_APIS[key]["parser"] == "wzdx", f"{key} parser not wzdx"
+            assert STATE_APIS[key]["events_endpoint"] == "/api/wzdx", key
+            assert STATE_APIS[key]["construction_endpoint"] == "/api/wzdx", key
 
     def test_parse_wzdx_feature_collection(self):
         """Parse a WZDx FeatureCollection with one work zone."""
@@ -973,3 +980,305 @@ class TestWZDxParser:
             assert data.events == []
             data = provider.fetch_construction(key)
             assert data.events == []
+
+
+# --- Test WZDx v4 (snake_case core_details) parser ---------------------------
+
+
+class TestWZDxV4Parser:
+    """WZDx v4.x layout: snake_case properties under core_details.
+
+    The fixture is a real feature recorded 2026-08-09 from
+    https://511wi.gov/api/wzdx (v4.2), trimmed to what the parser reads.
+    """
+
+    WI_FEATURE = {
+        "id": "ca261ca8-7974-6058-ab4d-25b80def22e6",
+        "type": "Feature",
+        "geometry": {
+            "type": "LineString",
+            "coordinates": [
+                [-87.938228, 43.381435],
+                [-87.93815776899706, 43.381493952295386],
+                [-87.93795762587283, 43.381571379674995],
+            ],
+        },
+        "properties": {
+            "core_details": {
+                "event_type": "work-zone",
+                "data_source_id": "ATMS-ExtEvent",
+                "road_names": ["WIS 33 EB"],
+                "direction": "eastbound",
+                "name": "WisLCS-273413-1",
+                "description": (
+                    "Mainline Right Lane Closed on WIS 33 EB from MILWAUKEE RIVER "
+                    "OVERFLOW (BRIDGE CROSSING) to WIS 33 WB (END DIVIDED)"
+                ),
+            },
+            "start_date": "2026-06-15T11:00:00+00:00",
+            "end_date": "2026-09-03T04:59:59+00:00",
+            "vehicle_impact": "some-lanes-closed",
+            "lanes": [
+                {"order": 1, "type": "shoulder", "status": "open"},
+                {"order": 2, "type": "general", "status": "open"},
+                {"order": 3, "type": "general", "status": "closed"},
+                {"order": 4, "type": "shoulder", "status": "closed"},
+            ],
+            "beginning_cross_street": "MILWAUKEE RIVER OVERFLOW (BRIDGE CROSSING)",
+            "ending_cross_street": "WIS 33 WB (END DIVIDED)",
+        },
+    }
+
+    def test_parse_v4_work_zone(self):
+        """A v4.2 work-zone feature parses with core_details fields."""
+        provider = RealTrafficProvider()
+        sample = {"type": "FeatureCollection", "features": [self.WI_FEATURE]}
+        events = provider._parse_wzdx_events(sample, "wisconsin")
+        assert len(events) == 1
+        event = events[0]
+        assert event.id == "ca261ca8-7974-6058-ab4d-25b80def22e6"
+        assert event.event_type == "construction"
+        assert event.road_name == "WIS 33 EB"
+        assert event.description.startswith("Mainline Right Lane Closed on WIS 33 EB")
+        assert event.closure == "single lane"
+        assert event.severity == "medium"
+        assert event.start_time == "2026-06-15T11:00:00+00:00"
+        assert event.estimated_end == "2026-09-03T04:59:59+00:00"
+        # LineString midpoint
+        assert event.latitude == 43.381493952295386
+        assert event.longitude == -87.93815776899706
+
+    def test_v4_lane_description_counts_general_lanes(self):
+        """Closed-lane counts skip shoulders."""
+        provider = RealTrafficProvider()
+        events = provider._parse_wzdx_events({"features": [self.WI_FEATURE]}, "wisconsin")
+        assert events[0].lanes_affected == "1 of 2 lanes closed"
+
+    def test_v4_shoulder_only_closure(self):
+        """A shoulder-only closure reads as shoulder closed."""
+        provider = RealTrafficProvider()
+        feature = {
+            "id": "wz-shoulder",
+            "geometry": {"type": "Point", "coordinates": [-88.0, 43.0]},
+            "properties": {
+                "core_details": {"event_type": "work-zone", "road_names": ["I-94"]},
+                "vehicle_impact": "shoulder-closed",
+                "lanes": [
+                    {"order": 1, "type": "shoulder", "status": "closed"},
+                    {"order": 2, "type": "general", "status": "open"},
+                ],
+            },
+        }
+        events = provider._parse_wzdx_events({"features": [feature]}, "wisconsin")
+        assert events[0].lanes_affected == "shoulder closed"
+        assert events[0].closure == "shoulder"
+        assert events[0].severity == "low"
+
+    def test_v4_cross_street_location_text(self):
+        """Location text is built from the v4 cross-street fields."""
+        provider = RealTrafficProvider()
+        events = provider._parse_wzdx_events({"features": [self.WI_FEATURE]}, "wisconsin")
+        assert events[0].location_text == (
+            "Between MILWAUKEE RIVER OVERFLOW (BRIDGE CROSSING) and WIS 33 WB (END DIVIDED)"
+        )
+
+    def test_v4_construction_filter_keeps_work_zones(self):
+        """The construction fetch keeps v4 work-zone events."""
+        provider = RealTrafficProvider()
+        events = provider._parse_wzdx_construction_events(
+            {"features": [self.WI_FEATURE]}, "wisconsin"
+        )
+        assert len(events) == 1
+
+    def test_v4_multipoint_geometry(self):
+        """MultiPoint geometry (511ny.org's layout) yields coordinates.
+
+        Trimmed from a real feature recorded 2026-08-09 from
+        https://511ny.org/api/wzdx."""
+        provider = RealTrafficProvider()
+        feature = {
+            "id": "ny-1",
+            "geometry": {"type": "MultiPoint", "coordinates": [[-73.797869, 41.019265]]},
+            "properties": {
+                "core_details": {"event_type": "work-zone", "road_names": ["NY 100"]},
+                "vehicle_impact": "some-lanes-closed",
+            },
+        }
+        events = provider._parse_wzdx_events({"features": [feature]}, "new york")
+        assert events[0].latitude == 41.019265
+        assert events[0].longitude == -73.797869
+
+
+# --- Test Castle Rock CARS GraphQL parser ------------------------------------
+
+
+class TestCarsParser:
+    """CARS MapFeatures parser covers Indiana, Minnesota, and Colorado.
+
+    Fixtures are real map features recorded 2026-08-09 from
+    https://511in.org/api/graphql and https://511mn.org/api/graphql,
+    trimmed to what the parser reads.
+    """
+
+    IN_LANE_CLOSED = {
+        "bbox": [-86.84936, 41.68731, -86.84715, 41.68742],
+        "title": "US 20 (Mile Point 42.5 - 42.61): Lane closed.",
+        "tooltip": "US 20: Lane closed.",
+        "uri": "event/CARSy-30",
+        "features": [
+            {
+                "id": "CARSy-30-1184291760",
+                "geometry": {"type": "Point", "coordinates": [-86.84825, 41.68732]},
+                "properties": {},
+            }
+        ],
+        "priority": 5,
+        "__typename": "Event",
+    }
+
+    IN_ROAD_CLOSED = {
+        "bbox": [-86.1268, 38.08214, -85.82829, 38.30399],
+        "title": "IN 11 (Mile Point 12.4 - 12.34): Road closed.",
+        "tooltip": "IN 11: Road closed, see map for detour(s).",
+        "uri": "event/CARSy-34",
+        "features": [
+            {
+                "id": "CARSy-34-2192814423",
+                "geometry": {"type": "Point", "coordinates": [-86.03935, 38.08253]},
+                "properties": {},
+            }
+        ],
+        "priority": 2,
+        "__typename": "Event",
+    }
+
+    MN_CRASH = {
+        "bbox": [-93.03416, 45.21468, -93.03416, 45.21468],
+        "title": "I-35W southbound: Crash.",
+        "tooltip": "I-35W southbound: Crash.",
+        "uri": "event/MSPCAD-129052",
+        "features": [
+            {
+                "id": "MSPCAD-129052-2307205820",
+                "geometry": {"type": "Point", "coordinates": [-93.03416, 45.21468]},
+                "properties": {},
+            }
+        ],
+        "priority": 5,
+        "__typename": "Event",
+    }
+
+    MN_FUTURE = {
+        "bbox": [-92.48837, 43.88284, -92.23476, 43.97919],
+        "title": "STARTS FRIDAY. I-90 eastbound: Bridge construction.",
+        "tooltip": "STARTS FRIDAY. I-90 eastbound: Bridge construction.",
+        "uri": "event/CARSx-128079",
+        "features": [
+            {
+                "id": "CARSx-128079-132200140",
+                "geometry": {"type": "Point", "coordinates": [-92.35459, 43.95132]},
+                "properties": {},
+            }
+        ],
+        "priority": 5,
+        "__typename": "Event",
+    }
+
+    @staticmethod
+    def _response(*features):
+        return {"data": {"mapFeaturesQuery": {"mapFeatures": list(features), "error": None}}}
+
+    def test_parse_cars_construction(self):
+        """A construction-layer batch parses with road, mile range, closure."""
+        provider = RealTrafficProvider()
+        events = provider._parse_cars_events(
+            self._response(self.IN_LANE_CLOSED), "indiana", construction=True
+        )
+        assert len(events) == 1
+        event = events[0]
+        assert event.id == "CARSy-30"
+        assert event.event_type == "construction"
+        assert event.road_name == "US 20"
+        assert event.location_text == "Mile Point 42.5 - 42.61"
+        assert event.description == "US 20 (Mile Point 42.5 - 42.61): Lane closed."
+        assert event.latitude == 41.68732
+        assert event.longitude == -86.84825
+
+    def test_parse_cars_road_closure_is_high_severity(self):
+        """A road-closed construction event maps to a full closure."""
+        provider = RealTrafficProvider()
+        events = provider._parse_cars_events(
+            self._response(self.IN_ROAD_CLOSED), "indiana", construction=True
+        )
+        assert events[0].closure == "full closure"
+        assert events[0].severity == "high"
+        assert events[0].lanes_affected == "all lanes closed"
+
+    def test_parse_cars_incident(self):
+        """An incidents-layer batch parses as incidents with priority severity."""
+        provider = RealTrafficProvider()
+        events = provider._parse_cars_events(
+            self._response(self.MN_CRASH), "minnesota", construction=False
+        )
+        assert len(events) == 1
+        event = events[0]
+        assert event.id == "MSPCAD-129052"
+        assert event.event_type == "incident"
+        assert event.road_name == "I-35W"  # direction suffix stripped
+        assert event.description == "I-35W southbound: Crash."
+        assert event.severity == "medium"  # priority 5
+
+    def test_cars_priority_severity_mapping(self):
+        """Priority 1 is most urgent; 1-2 high, 3-5 medium, rest low."""
+        provider = RealTrafficProvider()
+        assert provider._cars_priority_severity(1) == "high"
+        assert provider._cars_priority_severity(2) == "high"
+        assert provider._cars_priority_severity(3) == "medium"
+        assert provider._cars_priority_severity(5) == "medium"
+        assert provider._cars_priority_severity(8) == "low"
+        assert provider._cars_priority_severity(None) == "low"
+
+    def test_cars_skips_scheduled_events(self):
+        """Events with a STARTS prefix are not on the road yet."""
+        provider = RealTrafficProvider()
+        events = provider._parse_cars_events(
+            self._response(self.MN_FUTURE, self.MN_CRASH), "minnesota", construction=False
+        )
+        assert [e.id for e in events] == ["MSPCAD-129052"]
+
+    def test_cars_skips_non_event_features(self):
+        """Cluster and Sign features are skipped."""
+        provider = RealTrafficProvider()
+        cluster = {
+            "bbox": [-86.9, 41.0, -86.8, 41.1],
+            "title": "12 events",
+            "uri": "cluster/1",
+            "features": [],
+            "__typename": "Cluster",
+        }
+        events = provider._parse_cars_events(
+            self._response(cluster, self.IN_LANE_CLOSED), "indiana", construction=True
+        )
+        assert [e.id for e in events] == ["CARSy-30"]
+
+    def test_cars_bbox_fallback_coordinates(self):
+        """Without a Point feature the bbox midpoint is used."""
+        provider = RealTrafficProvider()
+        item = dict(self.IN_LANE_CLOSED, features=[])
+        events = provider._parse_cars_events(self._response(item), "indiana", construction=True)
+        assert events[0].latitude == (41.68731 + 41.68742) / 2
+        assert events[0].longitude == (-86.84936 + -86.84715) / 2
+
+    def test_cars_empty_and_malformed_responses(self):
+        """Empty or malformed GraphQL responses return no events."""
+        provider = RealTrafficProvider()
+        assert provider._parse_cars_events({}, "indiana", construction=True) == []
+        assert provider._parse_cars_events({"data": {}}, "indiana", construction=True) == []
+        assert (
+            provider._parse_cars_events(
+                {"data": {"mapFeaturesQuery": {"mapFeatures": None, "error": None}}},
+                "indiana",
+                construction=True,
+            )
+            == []
+        )

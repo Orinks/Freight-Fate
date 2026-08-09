@@ -343,6 +343,46 @@ def test_empty_data_creation():
     assert empty.source == "empty"
 
 
+def test_no_api_state_serves_fresh_cache():
+    """no_api states never fetch but still serve a fresh cache entry.
+
+    Ohio moved to no_api 2026-08-09 (OHGO now requires an API key), and the
+    trip tests seed its cache directly, so the cache check must run before
+    the no_api short-circuit."""
+    assert STATE_APIS["ohio"]["parser"] == "no_api"
+    provider = RealTrafficProvider()
+    now = time.time()
+    event = TrafficEvent(
+        id="seeded-1",
+        event_type="incident",
+        severity="low",
+        description="Seeded event",
+        county="Franklin",
+    )
+    provider._cache["ohio"] = TrafficData(
+        state="ohio", events=[event], last_updated=now, cache_time=now, source="test"
+    )
+    provider._cache["ohio:construction"] = TrafficData(
+        state="ohio", events=[event], last_updated=now, cache_time=now, source="test"
+    )
+
+    assert provider.request("ohio").events[0].id == "seeded-1"
+    assert provider.fetch_construction("ohio").events[0].id == "seeded-1"
+    # And still no fetch machinery engaged
+    assert provider._failed_until == {}
+
+
+def test_no_api_state_returns_empty_without_cache():
+    """no_api states with no cache return empty data without fetching."""
+    provider = RealTrafficProvider()
+    data = provider.request("ohio")
+    assert data.events == []
+    assert data.source == "empty"
+    data = provider.fetch_construction("ohio")
+    assert data.events == []
+    assert data.source == "empty"
+
+
 # --- Trip-level incident announcements ---------------------------------------
 
 
