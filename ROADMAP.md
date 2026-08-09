@@ -93,6 +93,22 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [ ] **Achievement categories, on Saltwake's model.** The 145-badge
+      catalog is one flat list; Saltwake (133 marks) browses in two
+      levels and it reads far better under a screen reader. Adopt its
+      shape: a categories table in the catalog (id, short titled
+      personality line, description), every badge tagged with a category
+      id, and the Achievements screen becomes category menu first --
+      each row spoken as "title, earned of total" -- then arrows through
+      that category's badges. Unlocked badges speak name and story,
+      locked ones their goal, hidden ones a single keeping-the-secret
+      line until earned (Saltwake: "a secret the sea is keeping"; ours
+      needs trucking language). Candidate categories from the catalog's
+      own clusters: the road (driving feats), the working day (HOS,
+      rest, inspections), career and rank, the radio and song-city
+      arrivals, weather and seasons, and a hidden-cuts bucket. Category
+      titles and descriptions ride the existing achievement copy tests;
+      the category noun joins docs/ontology.md in the same change.
 - [ ] **Screen artifact curves out of the highway bake (found
       2026-08-08).** About 3,200 of the 27,393 interstate mainline curve
       records are geometry artifacts, not roads: 80-250 ft radii and
