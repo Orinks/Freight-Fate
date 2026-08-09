@@ -164,8 +164,11 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       deliberately NOT here: they get their own pass (and the per-driver
       vs per-career identity decision) once the 1.9 baseline has real
       data -- they inherit the stats-pinned-to-first-career guard.
-      Still gated on the standing 1.9 cutover invariants regen before a
-      real 1.9 build's uploads validate.
+      The cutover invariants regen landed on the same preview branch
+      (ceiling 5 to 11, stable saves keep validating), so a real 1.9
+      build pointed at the preview validates end to end; at dev cutover,
+      re-regen if fields drifted and replay stored prod blobs before the
+      prod deploy.
 - [x] **Country-originals music batch (2026-08-08).** Thirty-one tracks
       from the owner's originals zip: five day beds, eight night beds, ten
       country-station songs, the seven-track Nashville After Hours jazz
