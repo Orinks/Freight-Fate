@@ -1574,16 +1574,35 @@ class SettingsCategoryState(MenuState):
         self.ctx.settings.real_weather = not self.ctx.settings.real_weather
         self.ctx.settings.save()
         self._announce()
+        self._warn_online_services_gate(self.ctx.settings.real_weather, "weather stays simulated")
 
     def _toggle_real_traffic(self, _d: int) -> None:
         self.ctx.settings.real_traffic = not self.ctx.settings.real_traffic
         self.ctx.settings.save()
         self._announce()
+        self._warn_online_services_gate(
+            self.ctx.settings.real_traffic, "road reports stay simulated"
+        )
 
     def _toggle_real_parking(self, _d: int) -> None:
         self.ctx.settings.real_parking = not self.ctx.settings.real_parking
         self.ctx.settings.save()
         self._announce()
+        self._warn_online_services_gate(self.ctx.settings.real_parking, "parking stays simulated")
+
+    def _warn_online_services_gate(self, turned_on: bool, consequence: str) -> None:
+        """Say why a live-data source will not go live when the master is off.
+
+        Two testers flipped Weather source to real world with Online services
+        off and heard nothing but simulated weather, with no clue at the
+        moment of the toggle (2026-08-08). The row must say so itself.
+        """
+        if turned_on and not self.ctx.settings.online_services:
+            self.ctx.say(
+                f"Online services are off, so {consequence}. Turn them on "
+                "under Online on the main menu.",
+                interrupt=False,
+            )
 
     def _toggle_live_weather_calendar(self, _d: int) -> None:
         turning_off = self.ctx.settings.live_weather_controls_calendar

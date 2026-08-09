@@ -274,6 +274,10 @@ class WeatherSystem:
         # simulated weather never takes over a sky the player has heard live
         # (owner ruling, 2026-08-08).
         self._session_had_live = False
+        # Why the sky is simulated despite the player's settings, when the
+        # driving layer knows (e.g. "online services are off"). Spoken as part
+        # of every simulated-source report; empty when simulation is chosen.
+        self.simulated_reason = ""
         # The last raw live observation and the city it was for, plus the
         # season-reconciled condition it produced. Held so live weather is
         # reconciled once per observation instead of re-evaluated every tick.
@@ -498,12 +502,18 @@ class WeatherSystem:
 
     def source_label(self) -> str:
         """Short, source-first wording shared by every player-facing report."""
+        simulated = "Simulated weather"
+        if self.simulated_reason:
+            # The driving layer sets this when a player asked for real weather
+            # but a master switch stands it down: every report then says why
+            # the sky is simulated instead of leaving the toggle looking dead.
+            simulated = f"Simulated weather; {self.simulated_reason}"
         return {
             "live": "Live weather for your current route position",
             "loading": "Live weather is loading for your current route position",
             "last_known": "Last-known live weather for your current route position",
             "fallback": "Simulated fallback weather; live weather is unavailable",
-            "simulated": "Simulated weather",
+            "simulated": simulated,
         }[self.source_status]
 
     @property

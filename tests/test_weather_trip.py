@@ -1817,3 +1817,50 @@ def test_city_menu_warms_the_weather_provider(monkeypatch):
         assert lat == _pytest.approx(39.7392, abs=0.01)
     finally:
         app.shutdown()
+
+
+def test_simulated_reason_names_the_online_services_gate():
+    # Two testers flipped Weather source to real world with the Online
+    # services master off and heard plain "Simulated weather" with no clue
+    # why (2026-08-08). Every simulated-source report now carries the reason
+    # when the driving layer knows it.
+    weather = WeatherSystem("great_lakes", seed=1)
+    assert weather.source_label() == "Simulated weather"
+    weather.simulated_reason = "online services are off"
+    assert weather.source_label() == "Simulated weather; online services are off"
+
+
+def test_real_weather_toggle_warns_when_online_services_master_is_off(monkeypatch):
+    import pygame
+    from speech_capture import speech_stub
+
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    def key_event(key):
+        return pygame.event.Event(pygame.KEYDOWN, key=key, unicode="", mod=0)
+
+    spoken: list = []
+    app = App()
+    try:
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+        app.ctx.settings.online_services = False
+        app.ctx.settings.real_weather = False
+        menu = SettingsCategoryState(app.ctx, "speech")
+        menu.enter()
+        while not menu.items[menu.index].text.startswith("Weather source:"):
+            menu.handle_event(key_event(pygame.K_DOWN))
+        spoken.clear()
+        menu.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.real_weather is True
+        said = " ".join(spoken)
+        assert "Online services are off" in said
+        assert "weather stays simulated" in said
+
+        # Turning it back off is not gated and must not nag.
+        spoken.clear()
+        menu.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.real_weather is False
+        assert "Online services are off" not in " ".join(spoken)
+    finally:
+        app.shutdown()
