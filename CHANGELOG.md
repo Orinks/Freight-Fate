@@ -4,6 +4,15 @@
 
 ### Added
 
+- **Public profiles now tell more of your career, and the drivers board
+  hears your radio.** With Profile sharing on, your board line names the
+  station you are tuned to while you drive, and your public career
+  statistics grow to include lifetime career earnings, badges earned,
+  endorsements, and, for company drivers, your carrier fleet tier.
+  Lifetime earnings is the running total your career has ever earned;
+  the money you currently have is never published, and the sharing
+  disclosure now says both halves plainly.
+
 - **The whole map got its roadside signs.** The curated billboard sweep
   is baked everywhere now: two hundred thirty-three real-place signs
   across every region -- up from forty-two in five regions -- so

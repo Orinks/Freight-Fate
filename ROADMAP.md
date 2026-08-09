@@ -148,26 +148,24 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       ships, and the full invariants-export regen (version ceiling to
       11) is still the existing cutover checklist item -- today's dev
       validator still rejects 1.9 uploads as unsupported_version.
-- [ ] **1.9 data on online profiles, and maybe leaderboards.** Surface
-      1.9-specific career data on orinks.net: the tuned radio station on
-      the drivers-board presence line ("listening to Nashville After
-      Hours" -- a detail-string change game-side, a structured field if
-      the API grows one), and durable profile additions from the career
-      arc (badges, fleet tier, endorsements; per-truck condition ships in
-      the snapshot already), plus lifetime earnings
-      (`Career.total_earnings`, already tracked at settlement) -- the
-      public copy must say the bank balance stays private and only the
-      career lifetime total is shown. Snapshot fields must follow the validator
-      superset rule and the 1.9 cutover invariants regen. Leaderboards
-      are an orinks-net feature and inherit the stats-pinned-to-first-
-      career ownership guard -- settle per-driver vs per-career identity
-      first. Test against an orinks-net preview branch cut from dev; the
-      game can already target a protected preview deployment. Owner
-      decision 2026-08-09: profiles and presence ship first; leaderboards
-      get their own pass (and their identity decision) once the 1.9
-      baseline has real data. Sequenced behind the no-legacy-career gate
-      -- both touch the validator allow-list, the signature fixtures,
-      and the profile shape.
+- [x] **1.9 data on online profiles -- SHIPPED 2026-08-09** (game merge
+      plus orinks-net branch `feat/profile-1-9-fields`). The drivers-board
+      line names the tuned station while driving with the radio on
+      (detail-string append, board only, display name never a stream
+      URL). Durable profile career statistics add lifetime career
+      earnings (`Career.total_earnings`, rounded), badges earned out of
+      the catalog, endorsements in unlock order, and -- company drivers
+      only -- the carrier fleet tier; the server derives all display from
+      the invariants export (`endorsements` + `fleetTiers` tables now in
+      it), and no new field entered the signed payload. The disclosure,
+      Online-hub help, and manual all say it plainly: lifetime earnings
+      is public, the current money balance is never published. Pre-1.9
+      snapshots render exactly as before (test-pinned). Leaderboards
+      deliberately NOT here: they get their own pass (and the per-driver
+      vs per-career identity decision) once the 1.9 baseline has real
+      data -- they inherit the stats-pinned-to-first-career guard.
+      Still gated on the standing 1.9 cutover invariants regen before a
+      real 1.9 build's uploads validate.
 - [x] **Country-originals music batch (2026-08-08).** Thirty-one tracks
       from the owner's originals zip: five day beds, eight night beds, ten
       country-station songs, the seven-track Nashville After Hours jazz
