@@ -10,6 +10,8 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 from freight_fate.data.curves import (
+    HAIRPIN_DEFLECTION_DEG,
+    HAIRPIN_MAX_MPH,
     INTERSTATE_MAX_DEFLECTION_DEG,
     INTERSTATE_MIN_RADIUS_FT,
     leg_curves,
@@ -125,9 +127,89 @@ class TestInterstateArtifactScreen:
         )
 
     def test_us_highway_mountain_hairpins_survive(self) -> None:
-        """US-40 over the Rockies keeps its sharp curves -- only I- is screened."""
+        """US-40 over the Rockies keeps its real sharp curves.
+
+        The interstate screen never applies to US routes; the separate
+        flat-terrain screen (below) only takes the one Denver-departure
+        artifact, so the mountain bends this leg is famous for stay.
+        """
         recs = leg_curves("denver_co_us:salt_lake_city_ut_us")
         assert [r for r in recs if r.min_radius_ft < INTERSTATE_MIN_RADIUS_FT]
+
+
+def _is_hairpin(rec) -> bool:
+    """Same test ``RouteCurve.severity`` uses, for the plain ``CurveRecord``
+    tuples ``leg_curves`` returns."""
+    return rec.advisory_mph <= HAIRPIN_MAX_MPH or rec.deflection_deg >= HAIRPIN_DEFLECTION_DEG
+
+
+class TestUSRouteArtifactScreen:
+    """A second, narrower screen for artifacts road class alone can't catch.
+
+    US and state routes can carry the same city-departure sweep artifact an
+    interstate can, but they also carry real switchbacks the interstate
+    screen would wrongly delete (US-550, the Salt River Canyon) -- so this
+    screen is gated on local terrain (flat ground can't hold a real
+    hairpin), not on road class. See ``tools/screen_curve_artifacts.py``.
+    """
+
+    def test_denver_us40_departure_kink_is_gone(self) -> None:
+        """The flat-Denver-metro kink at mile 1.7 was the reported case."""
+        recs = leg_curves("denver_co_us:salt_lake_city_ut_us")
+        near_departure = [r for r in recs if r.apex_mi < 2.0]
+        assert not [r for r in near_departure if _is_hairpin(r)], (
+            f"flat-terrain departure artifact survived: {near_departure}"
+        )
+
+    def test_flagged_artifacts_are_absent_from_every_leg(self, world: World) -> None:
+        """Every ``(leg, seq)`` the offline screen names is actually gone.
+
+        Round-trips ``curve_artifacts.jsonl`` against the loaded data so a
+        stale baked file (screen re-run, loader not updated, or vice versa)
+        fails loudly instead of silently drifting.
+        """
+        import json
+
+        from freight_fate.data.data_resources import read_data_text
+
+        text = read_data_text("world_data/us/gameplay/curve_artifacts.jsonl")
+        assert text, "curve_artifacts.jsonl should exist once artifacts are flagged"
+        flagged_legs: set[str] = set()
+        count = 0
+        for line in text.splitlines():
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            if "meta" in row:
+                continue
+            flagged_legs.add(row["leg"])
+            count += 1
+        assert count > 0
+
+        by_key = {f"{leg.a}:{leg.b}": leg for leg in world.legs}
+        for leg_key in flagged_legs:
+            leg = by_key.get(leg_key)
+            if leg is None:
+                continue
+            assert not (leg.highway or "").upper().startswith("I-"), (
+                f"{leg_key} is flagged but is interstate mainline -- "
+                "that screen is a separate, unconditional rule"
+            )
+
+    def test_million_dollar_highway_untouched_by_the_new_screen(self) -> None:
+        """A mountain corridor keeps every switchback under the new screen too."""
+        recs = leg_curves("durango_co_us:montrose_co_us")
+        assert len(recs) >= 250
+        assert [r for r in recs if _is_hairpin(r)], (
+            "US-550's real hairpins must survive the flat-terrain screen"
+        )
+
+    def test_salt_river_canyon_untouched_by_the_new_screen(self) -> None:
+        """Globe->Show Low (US-60) keeps its mountain switchbacks too."""
+        recs = leg_curves("globe_az_us:show_low_az_us")
+        assert [r for r in recs if _is_hairpin(r)], (
+            "the Salt River Canyon's real hairpins must survive the screen"
+        )
 
 
 class _MockWeather(WeatherSystem):
