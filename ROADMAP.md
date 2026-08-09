@@ -267,14 +267,11 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       cruise drives the bend instead of fighting the assist brake.
       Manual handoff survives only for advisories under the 20 mph
       cruise floor.
-- [ ] **Air buzzer once after a shoulder rest (owner playtest, night of
-      2026-07-22, UNCLAIMED).** Sleeping on the shoulder then starting
-      the engine issued one low-air buzzer. Might be honest (parked
-      leak-down leaves the tanks low after a rest, and one buzzer while
-      pressure builds is what a real dash does) or the cold-start
-      buzzer-defer may not cover the rest-resume path the way it covers
-      first ignition. Read the owner's session log before deciding;
-      diagnosis first, no reflex fix.
+- [x] **Air buzzer once after a shoulder rest -- RULED OUT 2026-08-09.**
+      Owner ruling: not worth chasing; the one-off buzzer read as
+      unrealistic and the item is closed without a fix. The honest
+      low-pressure warnings and the cold-start buzzer-defer stay as
+      they are.
 - [x] **Cruise sags on a loaded pull instead of revving out (owner
       playtest, night of 2026-07-22) -- FIXED 2026-07-25.** Two causes,
       both confirmed on the bench. The controller was integral-only at
