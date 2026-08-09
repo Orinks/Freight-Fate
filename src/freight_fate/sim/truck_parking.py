@@ -204,7 +204,9 @@ class TruckParkingProvider:
         # Normalize state key
         state_key = state.lower().strip()
         if state_key not in TPIMS_APIS:
-            log.warning(f"State {state} not supported for truck parking data")
+            # Most states have no TPIMS feed; rest-stop entries ask about
+            # wherever the truck is, so this is routine rather than warning-worthy.
+            log.debug(f"State {state} not supported for truck parking data")
             return ParkingData(
                 state=state_key, locations=[], last_updated=0, cache_time=0, source="unsupported"
             )
