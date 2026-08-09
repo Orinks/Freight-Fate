@@ -12,7 +12,6 @@ from freight_fate.audio import (
     ENGINE_RPM_IDLE,
     ENGINE_RPM_MAX,
     AudioEngine,
-    _asset_path,
     engine_freq_mult,
     engine_load_gain,
 )
@@ -168,43 +167,49 @@ def test_split_volume_settings_apply_to_silent_backend():
 
 
 def test_sound_lookup_prefers_ogg_when_available():
-    assert _asset_path("weather/rain_light", ("ogg", "wav")).name == "rain_light.ogg"
-    assert _asset_path("weather/snow_wind", ("ogg", "wav")).name == "snow_wind.ogg"
-    assert _asset_path("vehicle/brake_air", ("ogg", "wav")).name == "brake_air.ogg"
-    assert _asset_path("vehicle/brake_release", ("ogg", "wav")).name == "brake_release.ogg"
-    assert _asset_path("vehicle/brake_set", ("ogg", "wav")).name == "brake_set.ogg"
-    assert _asset_path("vehicle/horn", ("ogg", "wav")).name == "horn.ogg"
-    assert _asset_path("vehicle/gear_shift", ("ogg", "wav")).name == "gear_shift.ogg"
-    assert _asset_path("vehicle/road", ("ogg", "wav")).name == "road.ogg"
+    # _asset_bytes answers from the pack on clean clones and from the loose
+    # tree on builder machines; the extension preference holds either way.
+    for key in (
+        "weather/rain_light",
+        "weather/snow_wind",
+        "vehicle/brake_air",
+        "vehicle/brake_release",
+        "vehicle/brake_set",
+        "vehicle/horn",
+        "vehicle/gear_shift",
+        "vehicle/road",
+    ):
+        found = audio._asset_bytes(key, ("ogg", "wav"))
+        assert found is not None, key
+        assert found[1] == "ogg", key
 
 
 def test_engine_recordings_resolve_for_the_ring_and_one_shots():
     # Looping beds may resolve to WAV (lossy edges break loop seams --
     # tools/fix_loop_seams.py); the licensed overlay's file wins where
     # present. One-shots stay ogg.
-    assert _asset_path("engine/idle", ("ogg", "wav")).name in {"idle.ogg", "idle.wav"}
-    assert _asset_path("engine/start", ("ogg", "wav")).name == "start.ogg"
-    assert _asset_path("engine/shutdown", ("ogg", "wav")).name == "shutdown.ogg"
+    assert audio._asset_bytes("engine/idle", ("ogg", "wav"))[1] in {"ogg", "wav"}
+    assert audio._asset_bytes("engine/start", ("ogg", "wav"))[1] == "ogg"
+    assert audio._asset_bytes("engine/shutdown", ("ogg", "wav"))[1] == "ogg"
+
+
+def _shipped_duration_s(key: str) -> float:
+    import io
+
+    import soundfile as sf
+
+    data, _ext = audio._asset_bytes(key, ("ogg", "wav"))
+    info = sf.info(io.BytesIO(data))
+    return info.frames / info.samplerate
 
 
 def test_engine_start_recording_is_short_one_shot():
-    import soundfile as sf
-
-    info = sf.info(str(_asset_path("engine/start", ("ogg", "wav"))))
-    duration = info.frames / info.samplerate
-    assert duration <= 4.25
+    assert _shipped_duration_s("engine/start") <= 4.25
 
 
 def test_vehicle_horn_and_shift_recordings_are_short_one_shots():
-    import soundfile as sf
-
-    horn = sf.info(str(_asset_path("vehicle/horn", ("ogg", "wav"))))
-    horn_duration = horn.frames / horn.samplerate
-    assert horn_duration <= 1.0
-
-    shift = sf.info(str(_asset_path("vehicle/gear_shift", ("ogg", "wav"))))
-    shift_duration = shift.frames / shift.samplerate
-    assert shift_duration <= 0.8
+    assert _shipped_duration_s("vehicle/horn") <= 1.0
+    assert _shipped_duration_s("vehicle/gear_shift") <= 0.8
 
 
 def test_pygame_music_never_loops_catalog_tracks(monkeypatch):
