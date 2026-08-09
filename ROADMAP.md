@@ -93,6 +93,18 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [ ] **1.9 data on online profiles, and maybe leaderboards.** Surface
+      1.9-specific career data on orinks.net: the tuned radio station on
+      the drivers-board presence line ("listening to Nashville After
+      Hours" -- a detail-string change game-side, a structured field if
+      the API grows one), and durable profile additions from the career
+      arc (badges, fleet tier, endorsements; per-truck condition ships in
+      the snapshot already). Snapshot fields must follow the validator
+      superset rule and the 1.9 cutover invariants regen. Leaderboards
+      are an orinks-net feature and inherit the stats-pinned-to-first-
+      career ownership guard -- settle per-driver vs per-career identity
+      first. Test against an orinks-net preview branch cut from dev; the
+      game can already target a protected preview deployment.
 - [x] **Country-originals music batch (2026-08-08).** Thirty-one tracks
       from the owner's originals zip: five day beds, eight night beds, ten
       country-station songs, the seven-track Nashville After Hours jazz
