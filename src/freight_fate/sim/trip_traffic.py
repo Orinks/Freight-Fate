@@ -152,6 +152,11 @@ class TripTrafficMixin:
         for event in events:
             if event.severity not in ("high", "medium"):
                 continue
+            # Construction is spoken through the construction-zone system;
+            # announcing it here too would flood the driver now that the
+            # WZDx states return their whole work-zone feed from request().
+            if event.event_type == "construction":
+                continue
             event_key = f"real_traffic:{event.id}"
             if event_key in self._announced_real_traffic:
                 continue

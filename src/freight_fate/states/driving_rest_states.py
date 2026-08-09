@@ -451,15 +451,18 @@ class RestStopState(MenuState):
             return None
 
         try:
-            # Get the state/region for this stop
-            # This is a simplified approach - in production we'd need proper geocoding
-            state = "ohio"  # Default to Ohio for now as reference implementation
+            # Ask about the state and position the truck is actually at; the
+            # provider answers empty for states without a live TPIMS feed.
+            state = self.driving.trip.state_at()
+            if not state:
+                return None
+            latitude, longitude = self.driving.trip.latlon_at()
 
             # Get nearby parking locations
             locations = self.driving.trip.parking_provider.get_available_locations_near(
                 state,
-                latitude=40.0,  # Placeholder - need real coordinates
-                longitude=-83.0,
+                latitude=latitude,
+                longitude=longitude,
                 radius_mi=25.0,
             )
 
