@@ -8,7 +8,13 @@ from pathlib import Path
 import pygame
 
 from .. import __version__, updater
-from ..achievements import ACHIEVEMENTS, earned_ids
+from ..achievements import (
+    ACHIEVEMENTS,
+    achievements_in_category,
+    categories,
+    earned_ids,
+    entry_text,
+)
 from ..models.profile import Profile, ProfileIntegrityError
 from ..models.start_options import apply_start_option, option_for_profile
 from ..music import select_menu_music_sequence
@@ -412,10 +418,11 @@ class AchievementCareerState(MenuState):
 
 
 class AchievementsState(MenuState):
+    """The category menu: pick a category, then browse its achievements."""
+
     intro_help = (
-        "Use up and down arrows to review achievements. Earned and "
-        "locked entries are both shown. Enter repeats the selected "
-        "entry. Escape goes back."
+        "Use up and down arrows to choose a category. Enter opens it "
+        "and lists its achievements. Escape goes back."
     )
 
     def __init__(self, ctx, profile: Profile) -> None:
@@ -431,7 +438,7 @@ class AchievementsState(MenuState):
         total = len(ACHIEVEMENTS)
         self.ctx.say(
             f"Achievements for {self.profile.name}. {earned} of {total} earned. "
-            "Locked achievements are shown as goals, with no story spoilers. "
+            "Enter a category to browse it. "
             f"{self.current_text()}"
         )
 
@@ -442,19 +449,21 @@ class AchievementsState(MenuState):
                 self._summary_label, self._summary, help="Hear the total earned achievement count."
             )
         ]
-        for achievement in ACHIEVEMENTS:
-            unlocked = achievement.id in earned
-            if unlocked:
-                label = f"Earned: {achievement.name} - {achievement.description}"
-                help_text = f"{achievement.category}. {achievement.description}"
-            else:
-                # Locked entries show only the title; the description stays
-                # hidden until the achievement is earned.
-                label = f"Locked: {achievement.name}"
-                help_text = f"{achievement.category}. Keep playing to unlock it."
-            items.append(MenuItem(label, lambda text=label: self.ctx.say(text), help=help_text))
+        for category in categories():
+            achs = achievements_in_category(category.id)
+            done = sum(1 for a in achs if a.id in earned)
+            items.append(
+                MenuItem(
+                    f"{category.title}. {done} of {len(achs)}",
+                    lambda c=category, a=achs: self._open_category(c, a),
+                    help=category.description,
+                )
+            )
         items.append(MenuItem("Back", self.go_back))
         return items
+
+    def _open_category(self, category, achs) -> None:
+        self.ctx.push_state(AchievementCategoryState(self.ctx, self.profile, category, achs))
 
     def _summary_label(self) -> str:
         earned = len(earned_ids(self.profile))
@@ -465,6 +474,59 @@ class AchievementsState(MenuState):
         earned = len(earned_ids(self.profile))
         total = len(ACHIEVEMENTS)
         self.ctx.say(f"{self.profile.name} has earned {earned} of {total} achievements.")
+
+
+class AchievementCategoryState(MenuState):
+    """One category's achievements: earned ones tell their story, locked
+    ones show their goal, and hidden ones keep the secret until earned.
+    """
+
+    intro_help = (
+        "Use up and down arrows to review this category's achievements. "
+        "Enter repeats the selected entry. Escape goes back to the "
+        "category list."
+    )
+
+    def __init__(self, ctx, profile: Profile, category, achs) -> None:
+        super().__init__(ctx)
+        self.profile = profile
+        self.category = category
+        self.achs = achs
+
+    @property
+    def title(self) -> str:  # type: ignore[override]
+        return self.category.title
+
+    def _earned_count(self) -> int:
+        earned = earned_ids(self.profile)
+        return sum(1 for a in self.achs if a.id in earned)
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            f"{self.category.title}. {self._earned_count()} of {len(self.achs)} earned. "
+            f"{self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        earned = earned_ids(self.profile)
+        items = []
+        for achievement in self.achs:
+            unlocked = achievement.id in earned
+            name, description = entry_text(achievement, unlocked)
+            if unlocked:
+                label = f"Earned: {name} - {description}"
+                help_text = description
+            elif achievement.hidden:
+                label = f"Locked: {name}"
+                help_text = description
+            else:
+                # Locked, non-hidden entries show only the title; the
+                # description stays hidden until the achievement is earned.
+                label = f"Locked: {name}"
+                help_text = "Keep playing to unlock it."
+            items.append(MenuItem(label, lambda text=label: self.ctx.say(text), help=help_text))
+        items.append(MenuItem("Back to the categories", self.go_back))
+        return items
 
 
 class LoadDriverState(MenuState):

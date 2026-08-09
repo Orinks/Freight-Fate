@@ -113,6 +113,7 @@ time is a view, via `Trip.local_hour`.
 | Concept | Class | Module |
 | --- | --- | --- |
 | Achievement | `Achievement`, `AchievementAward` | `achievements.py` |
+| Achievement category | `AchievementCategory` | `achievements.py` |
 | Message | `Message`, `MessageCategory`, `MessageLog` | `message_log.py` |
 | Engine voice | `EngineVoice`, `EngineReading` | `engine_audio.py` |
 | Settings | -- | `settings.py` |
@@ -183,6 +184,7 @@ from the words, and synonyms cost them a re-read.
 | One drive, start to finish | run | trip, haul | `Trip` |
 | A truck stop or service POI | stop | POI, waypoint | `Stop`, `RoadStop` |
 | The level band | rank | tier, grade | `CareerRank` |
+| A group of related achievements | category | group, section, tab | `AchievementCategory` |
 | A license add-on | endorsement | certification, licence | `ENDORSEMENT_LEVELS` |
 | A purchasable consumable | its own name: "shower", "energy drink" | buff, item, power-up | `Buff` |
 | The tractor a carrier gave you | your assigned truck | your truck (when leased) | `FleetTier` |

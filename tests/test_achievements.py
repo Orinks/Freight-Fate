@@ -44,6 +44,58 @@ def test_catalog_tops_one_hundred_with_unique_ids():
     assert len(ids) > 100
 
 
+def test_every_achievement_has_exactly_one_valid_category():
+    from freight_fate.achievements import ACHIEVEMENTS, CATEGORY_BY_ID
+
+    for achievement in ACHIEVEMENTS:
+        assert achievement.category in CATEGORY_BY_ID, achievement.id
+
+
+def test_every_category_is_non_empty():
+    from freight_fate.achievements import CATEGORIES, achievements_in_category
+
+    for category in CATEGORIES:
+        assert achievements_in_category(category.id), category.id
+
+
+def test_category_copy_is_speech_sized_and_quote_free():
+    from freight_fate.achievements import CATEGORIES
+
+    seen_ids = set()
+    for category in CATEGORIES:
+        assert category.id not in seen_ids, "category ids must be unique"
+        seen_ids.add(category.id)
+        assert "\n" not in category.title
+        assert "\n" not in category.description
+        assert '"' not in category.title
+        assert '"' not in category.description
+        assert category.title
+        assert 20 <= len(category.description) <= 120
+
+
+def test_hidden_achievement_keeps_its_secret_until_earned():
+    from freight_fate.achievements import ACHIEVEMENTS, HIDDEN_HELP, HIDDEN_NAME, entry_text
+
+    hidden = [a for a in ACHIEVEMENTS if a.hidden]
+    assert hidden  # the deep-cuts bucket carries at least one hidden badge
+    for achievement in hidden:
+        locked_name, locked_detail = entry_text(achievement, unlocked=False)
+        assert locked_name == HIDDEN_NAME
+        assert locked_detail == HIDDEN_HELP
+        earned_name, earned_detail = entry_text(achievement, unlocked=True)
+        assert earned_name == achievement.name
+        assert earned_detail == achievement.description
+
+
+def test_non_hidden_locked_achievement_speaks_its_own_title():
+    from freight_fate.achievements import ACHIEVEMENTS, entry_text
+
+    visible = next(a for a in ACHIEVEMENTS if not a.hidden)
+    name, detail = entry_text(visible, unlocked=False)
+    assert name == visible.name
+    assert detail == visible.description
+
+
 def test_increment_stat_counts_and_survives_bad_values():
     from freight_fate.achievements import increment_stat, int_stat
     from freight_fate.models.profile import Profile
@@ -159,6 +211,7 @@ def test_main_menu_achievement_path_is_keyboard_accessible(monkeypatch):
     from freight_fate.models.profile import Profile
     from freight_fate.states.main_menu import (
         AchievementCareerState,
+        AchievementCategoryState,
         AchievementsState,
         MainMenuState,
     )
@@ -176,12 +229,55 @@ def test_main_menu_achievement_path_is_keyboard_accessible(monkeypatch):
         assert isinstance(app.state, AchievementCareerState)
         assert app.state.items[app.state.index].text.startswith("Menu Badges: 1 of")
         app.state.handle_event(key_event(pygame.K_RETURN))
+
+        # The career picker opens the category menu, not a flat badge list.
         assert isinstance(app.state, AchievementsState)
         assert app.state.current_text().startswith("Summary: 1 of")
+
+        # first_delivery ("Signed, Sealed, Hauled") lives in "Out on the Road";
+        # the still-locked first_dispatch ("Breaker, Breaker") lives in
+        # "Career and Rank" -- reaching both proves categories actually route
+        # to different badges, not just a relabelled flat list.
+        select(app.state, "Out on the Road")
+        assert isinstance(app.state, AchievementCategoryState)
+        assert app.state.category.id == "road"
+        assert app.state.title == "Out on the Road"
         assert any(item.text.startswith("Earned: Signed") for item in app.state.items)
-        assert any(item.text.startswith("Locked: Breaker, Breaker") for item in app.state.items)
         select(app.state, "Earned: Signed")
         assert spoken[-1].startswith("Earned: Signed")
+
+        app.state.handle_event(key_event(pygame.K_ESCAPE))
+        assert isinstance(app.state, AchievementsState)
+
+        select(app.state, "Career and Rank")
+        assert isinstance(app.state, AchievementCategoryState)
+        assert app.state.category.id == "career"
+        assert any(item.text.startswith("Locked: Breaker, Breaker") for item in app.state.items)
+    finally:
+        app.shutdown()
+
+
+def test_category_with_nothing_earned_still_reads_naturally(monkeypatch):
+    from freight_fate.achievements import achievements_in_category, categories
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.main_menu import AchievementCategoryState
+
+    app = App()
+    try:
+        profile = Profile(name="Fresh Driver")
+        category = next(c for c in categories() if c.id == "hidden")
+        achs = achievements_in_category(category.id)
+        spoken = []
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+
+        app.push_state(AchievementCategoryState(app.ctx, profile, category, achs))
+
+        assert spoken[-1].startswith(f"Deep Cuts. 0 of {len(achs)} earned.")
+        assert all(
+            item.text.startswith("Locked: A Secret the Manifest Is Keeping")
+            for item in app.state.items[:-1]
+        )
     finally:
         app.shutdown()
 
