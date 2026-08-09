@@ -168,6 +168,10 @@ class CityMenuState(MenuState):
         sequence = select_menu_music_sequence(self.ctx.profile)
         self.ctx.play_music_sequence("menu", sequence)
         self.ctx.audio.set_ambient("poi/facility_gate")
+        # Parked at the terminal the truck's location is known: warm the live
+        # weather now so the next drive starts on real conditions, not
+        # "loading" (the provider shares observations per station).
+        self.ctx.warm_real_weather(self.ctx.profile.current_city)
         super().enter()
 
     # Moving off the Sleep item withdraws its pending double-press

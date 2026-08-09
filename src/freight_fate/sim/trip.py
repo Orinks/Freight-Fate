@@ -240,6 +240,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._conditions_check_mi = CONDITIONS_CHECK_MI
         self._traffic_warning_mi = 1.0
         self._announced_enforcement: set[str] = set()
+        # Start the first route cell's live-weather fetch now rather than on
+        # the first update tick: the drive-start speech overlaps the network
+        # instead of the player holding "loading" into the drive, and after a
+        # warmed city menu the observation is already cached station-side.
+        weather_key, weather_lat, weather_lon = self._weather_location()
+        self.weather.set_city(weather_key, weather_lat, weather_lon)
+        if self.weather.provider is not None:
+            self.weather.provider.request(weather_key, weather_lat, weather_lon)
 
     @property
     def effective_time_scale(self) -> float:

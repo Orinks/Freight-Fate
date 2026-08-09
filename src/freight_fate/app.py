@@ -124,6 +124,25 @@ class GameContext:
             self._real_weather = RealWeatherProvider()
         return self._real_weather
 
+    def warm_real_weather(self, city_key: str) -> None:
+        """Start fetching a city's live weather before any drive needs it.
+
+        The provider caches observations per station, so a trip leaving this
+        city finds its first route cell already answered and starts live
+        instead of holding "loading". Quietly a no-op when real weather is
+        off or the city is unknown.
+        """
+        provider = self.real_weather_provider()
+        if provider is None:
+            return
+        try:
+            key = self.world.resolve_city_key(city_key)
+            city = self.world.cities[key]
+        except (KeyError, AttributeError):
+            return
+        if city.lat or city.lon:
+            provider.request(f"city:{key}", city.lat, city.lon)
+
     def real_traffic_provider(self):
         """Shared state 511 provider when real traffic is enabled, else None.
 

@@ -1755,3 +1755,65 @@ def test_same_city_highway_dispatch_is_not_a_facility_approach(world):
         ],
     )
     assert trip_for(street_chain)._is_facility_approach_route() is True
+
+
+def test_trip_requests_first_cell_weather_at_construction(world):
+    # The first fetch must not wait for the first driving tick: construction
+    # fires it so the drive-start speech overlaps the network instead of the
+    # player holding "loading" into the drive.
+    class RecordingProvider:
+        def __init__(self):
+            self.requests = []
+
+        def request(self, key, lat, lon):
+            self.requests.append((key, lat, lon))
+
+        def get(self, key):
+            return None
+
+        def stale(self, key):
+            return False
+
+        def unavailable(self, key):
+            return False
+
+    route = world.route_options("chicago_il_us", "indianapolis_in_us")[0]
+    provider = RecordingProvider()
+    weather = WeatherSystem("great_lakes", seed=1, provider=provider)
+    Trip(route, TruckState(), weather, seed=2)
+
+    assert provider.requests, "trip construction should start the first weather fetch"
+    key, lat, lon = provider.requests[0]
+    assert key.startswith("route:chicago_il_us:")
+    assert lat != 0.0 or lon != 0.0
+
+
+def test_city_menu_warms_the_weather_provider(monkeypatch):
+    # Parked at the terminal the game already knows where the truck is, so
+    # the station observation is cached before any dispatch is accepted and
+    # the drive starts live.
+    import pytest as _pytest
+
+    from freight_fate.app import App
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    try:
+        monkeypatch.setattr(app.ctx, "say", lambda *a, **k: None)
+        app.ctx.settings.real_weather = True
+        app.ctx.profile = Profile(name="Warmup", current_city="Denver")
+        provider = app.ctx.real_weather_provider()
+        assert provider is not None
+        requested = []
+        monkeypatch.setattr(
+            provider, "request", lambda key, lat, lon: requested.append((key, lat, lon))
+        )
+        state = CityMenuState(app.ctx)
+        state.enter()
+        assert requested, "entering the terminal should warm the weather provider"
+        key, lat, lon = requested[0]
+        assert key == "city:denver_co_us"
+        assert lat == _pytest.approx(39.7392, abs=0.01)
+    finally:
+        app.shutdown()
