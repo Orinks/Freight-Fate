@@ -1003,11 +1003,20 @@ def test_radio_controls_are_keyboard_reachable(monkeypatch):
         assert harness.driving.radio.enabled is not before_enabled
         assert result.transcript[-1].lower().startswith("radio ")
         before_station = harness.driving.radio.station_id
-        harness.press_key(pygame.K_QUOTE, "'")
+        harness.press_key(pygame.K_PAGEDOWN)
         assert harness.driving.radio.station_id != before_station
         assert (
             "selected" in result.transcript[-1].lower() or "tuned" in result.transcript[-1].lower()
         )
+        harness.press_key(pygame.K_PAGEUP)
+        assert harness.driving.radio.station_id == before_station
+        # Semicolon and apostrophe stay as secondary dial keys: Page Up and
+        # Page Down are Fn chords on many laptops and missing on 60 percent
+        # keyboards, and there is no user-facing key remapping.
+        harness.press_key(pygame.K_QUOTE, "'")
+        assert harness.driving.radio.station_id != before_station
+        harness.press_key(pygame.K_SEMICOLON, ";")
+        assert harness.driving.radio.station_id == before_station
         harness.press_key(pygame.K_y, "y")
         assert result.transcript[-1].startswith("Radio ")
 

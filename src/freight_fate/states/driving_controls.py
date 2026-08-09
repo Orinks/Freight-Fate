@@ -127,16 +127,20 @@ class DrivingControlsMixin:
             self._toggle_radio()
         elif key == pygame.K_o:
             self._toggle_radio_favorite()
-        elif key == pygame.K_SEMICOLON:
-            # Semicolon and apostrophe walk the dial; with Ctrl they leap a
-            # whole category (25 AFN stations in a row buried terrestrial for
-            # a linear tune). The dial used to live on the brackets, which
-            # message review now uses to switch categories.
+        elif key in (pygame.K_PAGEUP, pygame.K_SEMICOLON):
+            # Page Down walks to the next station, Page Up to the previous,
+            # matching the help browser's Page Up and Page Down paging; with
+            # Ctrl they leap a whole category (25 AFN stations in a row buried
+            # terrestrial for a linear tune). Semicolon and apostrophe stay as
+            # secondary dial keys: Page keys are Fn chords on many laptops and
+            # missing on 60 percent keyboards, and there is no key remapping.
+            # The dial originally lived on the brackets, which message review
+            # now uses to switch categories.
             if event.mod & pygame.KMOD_CTRL:
                 self._jump_radio_category(-1)
             else:
                 self._tune_radio(-1)
-        elif key == pygame.K_QUOTE:
+        elif key in (pygame.K_PAGEDOWN, pygame.K_QUOTE):
             if event.mod & pygame.KMOD_CTRL:
                 self._jump_radio_category(1)
             else:
@@ -261,8 +265,10 @@ class DrivingControlsMixin:
             "gives staged failure-to-stop warnings, then a felony stop "
             "that can cancel the active load. "
             "C also speaks the date and season. "
-            "M toggles the in-cab radio, semicolon and apostrophe tune it, "
-            "with Control they jump a whole category, O saves or unsaves the "
+            "M toggles the in-cab radio. Page Down tunes to the next station "
+            "and Page Up to the previous; the semicolon and apostrophe keys "
+            "still work. "
+            "With Control the tuning keys jump a whole category, O saves or unsaves the "
             "current station as a favorite, "
             "and Y speaks radio station, volume, and streamer-safe status. "
             "The Tab status menu includes a radio screen with the currently "

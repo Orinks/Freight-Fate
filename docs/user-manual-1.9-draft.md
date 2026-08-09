@@ -55,7 +55,7 @@ Add these rows:
 | G | Report the grade under the wheels: the slope, how far it runs, and whether the truck is holding it -- including whether the jake has the descent or is about to lose it. G also names the next steep grade ahead: how far off and how long it runs. |
 | Comma and Period | Walk back and forward through recent spoken messages -- a line lost under an overlapping announcement is no longer gone. Ctrl with either jumps to the oldest or newest; the brackets switch between all messages, general ones, and driving events; Ctrl+C copies the message you are on. |
 | M | Toggle the in-cab radio. |
-| Semicolon and apostrophe | Tune the radio down and up the dial. Ctrl with either leaps a whole category. |
+| Page Down and Page Up | Tune the radio to the next and previous station. Ctrl with either leaps a whole category. The semicolon and apostrophe keys still work. |
 | Y | Report the radio station, volume, and streamer-safe status. |
 | R | Report how far along the route you are. |
 
@@ -122,7 +122,8 @@ networks carry the empty country. Real streams are not streamer-safe --
 station-side music licensing does not cover a re-broadcast -- which is why
 they sit behind both the real-streams setting and the streamer-safe switch.
 
-M toggles the radio, semicolon and apostrophe tune it, Y speaks what is
+M toggles the radio. Page Down tunes to the next station and Page Up to
+the previous; the semicolon and apostrophe keys still work. Y speaks what is
 playing, and the
 Tab status menu has a Radio screen listing every receivable station with
 signal strength, distance, and source.

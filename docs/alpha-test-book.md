@@ -96,8 +96,8 @@ first load. Chapter 9.
 close calls, mishaps, and career milestones. Chapter 9 covers the spot
 checks.
 
-**The radio follows the map.** M toggles it, semicolon and apostrophe tune
-the stations
+**The radio follows the map.** M toggles it, Page Down and Page Up tune
+to the next and previous of the stations
 you can actually receive, twelve fictional regional stations fade to
 static at the edge of their range and hand back to the Roadhouse.
 Streamer-safe by default; real public streams behind an explicit opt-in.
@@ -576,11 +576,12 @@ Pass when: each lands once, speaks its line, and nothing awards twice.
 
 Setup: a long leg crossing regions; radio on (M).
 
-Do: tune with semicolon and apostrophe, ask for status with Y, open the
+Do: tune with Page Down and Page Up (semicolon and apostrophe still
+work), ask for status with Y, open the
 Radio screen
 from Tab. Drive a regional station to the edge of its market.
 
-Listen for: only receivable stations in the bracket rotation; the
+Listen for: only receivable stations in the dial rotation; the
 regional station fading to static at the fringe and the Roadhouse taking
 back over when the signal drops; hosts on the Roadhouse and Night Line
 at their hours.
@@ -702,7 +703,8 @@ readout, Left/Right lane change with assist off, R progress, Shift+R
 next exit, U upcoming, A repeat last announcement, comma repeat the
 last spoken line (press again quickly to walk back through the last
 twenty), M radio with
-semicolon and apostrophe to tune and Y for status, T stop at an announced service, F
+Page Down and Page Up to tune (semicolon and apostrophe still work) and
+Y for status, T stop at an announced service, F
 fuel, Enter accept a city-service arrival, F1 the full key help.
 
 ### Scenario levers
