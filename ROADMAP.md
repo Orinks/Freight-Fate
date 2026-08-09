@@ -93,6 +93,17 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [ ] **No career transfer from 1.8 and earlier (owner ruling,
+      2026-08-08).** The rebalanced arc starts everyone fresh: old-scale
+      careers (some level 50+) would make 1.9 progression unfair, and a
+      clean baseline keeps the planned profiles/leaderboards honest.
+      Needs, before release: a load gate that detects pre-1.9 careers
+      and offers a fresh start with kind spoken wording (the old save
+      stays on disk, playable by 1.8.x builds -- nothing is deleted); the
+      same refusal on cloud restores of 1.8-era snapshots (the validator
+      reads version first); and a created-on-version marker for new
+      careers (absence of the marker = pre-1.9). Settings and the
+      orinks.net account link carry over; careers do not.
 - [ ] **1.9 data on online profiles, and maybe leaderboards.** Surface
       1.9-specific career data on orinks.net: the tuned radio station on
       the drivers-board presence line ("listening to Nashville After
