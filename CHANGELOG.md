@@ -5,12 +5,15 @@
 ### Added
 
 - **The whole map got its roadside signs.** The curated billboard sweep
-  is baked everywhere now: two hundred seventeen real-place signs across
-  every region -- up from forty-two in five regions -- so Florida, the
-  Northeast, the Pacific Northwest, the Great Lakes, Appalachia, and the
-  rest finally pass their own roadside culture, from the Overseas
-  Highway to Route 66, each sign at its attraction's real milepost.
-  Fifty-five respectful landmark callouts ride along.
+  is baked everywhere now: two hundred thirty-three real-place signs
+  across every region -- up from forty-two in five regions -- so
+  Florida, the Northeast, the Pacific Northwest, the Great Lakes,
+  Appalachia, and the rest finally pass their own roadside culture, from
+  the Overseas Highway to Route 66, each sign at its attraction's real
+  milepost. Meteor Crater, Standin' on the Corner, the Wigwam Motel, the
+  Boll Weevil Monument, Little America, and Leavenworth's Bavarian
+  village all made the cut, and fifty-nine respectful landmark callouts
+  ride along.
 
 - **Achievements are now browsed by category.** The achievements screen
   opens on seven categories -- Out on the Road, The Working Day, Career
