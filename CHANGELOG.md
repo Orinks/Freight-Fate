@@ -594,6 +594,16 @@
 
 ### Changed
 
+- **Careers from earlier versions stay in their own era.** Version 1.9
+  rebalances the whole career -- pay, trucks, levels -- so every driver
+  starts fresh. A career made in Freight Fate 1.8 or earlier still shows
+  in your career list, clearly labeled, and picking it explains what
+  changed and offers a new career instead; the old save is never touched,
+  never deleted, and still works in Freight Fate 1.8. Cloud backups from
+  earlier versions stay safe in your account the same way, restorable by
+  the version that made them. Careers you started on 1.9 test builds
+  carry on unaffected.
+
 - **Every Freight Fate music station now plays everywhere.** The Rawhide,
   Big Wheel Country, The Grind, The Delta, and the rest of the game's own
   stations no longer fade out past their home cities. They sit together

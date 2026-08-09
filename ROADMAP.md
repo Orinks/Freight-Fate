@@ -130,17 +130,24 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       same Denver departure artifact rides the US-40 leg, and no measured
       signal separates artifact from real switchback on that class -- a
       future US/state pass needs a different discriminator.
-- [ ] **No career transfer from 1.8 and earlier (owner ruling,
-      2026-08-08).** The rebalanced arc starts everyone fresh: old-scale
-      careers (some level 50+) would make 1.9 progression unfair, and a
-      clean baseline keeps the planned profiles/leaderboards honest.
-      Needs, before release: a load gate that detects pre-1.9 careers
-      and offers a fresh start with kind spoken wording (the old save
-      stays on disk, playable by 1.8.x builds -- nothing is deleted); the
-      same refusal on cloud restores of 1.8-era snapshots (the validator
-      reads version first); and a created-on-version marker for new
-      careers (absence of the marker = pre-1.9). Settings and the
-      orinks.net account link carry over; careers do not.
+- [x] **No career transfer from 1.8 and earlier -- SHIPPED 2026-08-09
+      (owner ruling 2026-08-08).** `created_line` marker on every new
+      save; pre-marker 1.9 tester careers pass via the save-version
+      discriminator (versions 6+ exist only on the 1.9 line; dev/main
+      stopped at 5) and get stamped on first load. The load gate raises
+      before migration or resave so old files stay byte-for-byte intact
+      and 1.8-playable; legacy careers stay listed with a clear label
+      and open a kind notice offering a fresh start; a same-named new
+      career refuses to overwrite a legacy save. Cloud restores refuse
+      pre-1.9 snapshots three layers deep without deleting anything, and
+      orinks-net (branch feat/legacy-restore-gate) pre-clears the marker
+      in the validator allow-list. KNOWN IRREDUCIBLE: a 1.8 career a
+      tester already continued on an early 1.9 dev build was rewritten
+      as v6+ back then and passes the gate -- that history is gone.
+      CUTOVER REMINDERS: Convex deploys before any build with the marker
+      ships, and the full invariants-export regen (version ceiling to
+      11) is still the existing cutover checklist item -- today's dev
+      validator still rejects 1.9 uploads as unsupported_version.
 - [ ] **1.9 data on online profiles, and maybe leaderboards.** Surface
       1.9-specific career data on orinks.net: the tuned radio station on
       the drivers-board presence line ("listening to Nashville After
