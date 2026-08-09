@@ -198,7 +198,10 @@ def test_no_regional_signal_still_has_safe_and_afn_fallback_choices():
     assert not any(station.source_type == "local" for station in stations)
 
 
-def test_radio_falls_back_when_backend_cannot_play_selected_station():
+def test_dead_stream_hands_over_inside_its_own_band():
+    # A stream that refuses to play must not drop the player to the silent
+    # fallback while its band still has stations: the radio hands over to
+    # the next receivable station in the same dial category.
     radio = RadioState(
         enabled=True,
         station_id="afn-tokyo",
@@ -210,11 +213,51 @@ def test_radio_falls_back_when_backend_cannot_play_selected_station():
     action = radio.play(backend)
 
     assert action.fallback_used is True
+    assert action.station.id != "afn-tokyo"
+    assert action.station.source_type == "afn"  # same band as the dead stream
+    assert radio.station_id == action.station.id
+    assert backend.played == [(action.station.id, 0.25)]
+    assert "off the air" in action.message
+    assert "handover" in action.message.lower()
+
+
+def test_dead_stream_leaves_the_dial_for_the_session():
+    radio = RadioState(
+        enabled=True,
+        station_id="afn-tokyo",
+        real_streams_enabled=True,
+        streamer_safe=False,
+    )
+    backend = RecordingBackend(fail_ids={"afn-tokyo"})
+    radio.play(backend)
+
+    ids = {reception.station.id for reception in radio.receivable_stations()}
+    assert "afn-tokyo" not in ids
+    # Tuning back to it lands elsewhere instead of retrying the dead stream.
+    action = radio.select_station("afn-tokyo", backend)
+    assert action.station.id != "afn-tokyo"
+
+
+def test_dead_stream_with_empty_band_still_reaches_the_fallback():
+    radio = RadioState(
+        enabled=True,
+        station_id="afn-tokyo",
+        real_streams_enabled=True,
+        streamer_safe=False,
+    )
+    afn_ids = {s.id for s in DEFAULT_RADIO_CATALOG if s.source_type == "afn"}
+    backend = RecordingBackend(fail_ids=afn_ids)
+
+    # Every AFN stream is dead: repeated failures burn through the band and
+    # the last handover lands on the safe fallback station.
+    action = radio.play(backend)
+    for _ in range(len(afn_ids)):
+        if action.station.source_type != "afn":
+            break
+        action = radio.play(backend)
+
     assert action.station.id == SAFE_FALLBACK_STATION_ID
     assert radio.station_id == SAFE_FALLBACK_STATION_ID
-    assert backend.played == [(SAFE_FALLBACK_STATION_ID, 0.25)]
-    assert "unavailable" in action.message
-    assert "fallback" in action.message
 
 
 def test_driving_radio_backend_plays_real_stream_url():

@@ -545,6 +545,9 @@ class RadioState:
         self.position = position
         self.elevation_ft: float | None = None
         self.favorite_ids: set[str] = set(favorite_ids or ())
+        # Stations that refused to play this session: off the dial until the
+        # next session rather than a dead stop on every pass of the band.
+        self.unplayable_ids: set[str] = set()
 
     @classmethod
     def from_settings(cls, settings, profile=None) -> RadioState:
@@ -751,30 +754,56 @@ class RadioState:
         try:
             backend.play_station(station, self.volume)
         except Exception:
+            # A stream that refuses to play leaves the dial for the rest of
+            # the session (it returns next session; streams have bad days),
+            # and the radio hands over to the next station on the same band
+            # rather than dropping the player to the silent fallback.
             original = reception
-            fallback = self.fallback_reception()
-            self.station_id = fallback.station.id
+            self.mark_unplayable(original.station.id)
+            replacement = self._same_band_replacement(original.station)
+            if replacement is None:
+                replacement = self.fallback_reception()
+            self.station_id = replacement.station.id
             try:
-                backend.play_station(fallback.station, self.volume)
+                backend.play_station(replacement.station, self.volume)
             except Exception:
                 self._stop(backend)
             return RadioAction(
                 self._play_message(
-                    "Radio fallback.",
-                    fallback,
-                    extra=f"{original.station.display_name} is unavailable.",
+                    "Radio fallback." if replacement.fallback else "Radio handover.",
+                    replacement,
+                    extra=(
+                        f"{original.station.display_name} is off the air; it is "
+                        "off the dial for the rest of this session."
+                    ),
                 ),
-                fallback.station,
+                replacement.station,
                 enabled=True,
-                reception=fallback,
+                reception=replacement,
                 fallback_used=True,
             )
         return RadioAction(
             self._play_message(prefix, reception), station, enabled=True, reception=reception
         )
 
+    def mark_unplayable(self, station_id: str) -> None:
+        """Take a station that refused to play off the dial for this session."""
+        self.unplayable_ids.add(station_id)
+
+    def _same_band_replacement(self, failed: RadioStation) -> RadioReception | None:
+        """The next receivable station in the failed station's dial category."""
+        group = _dial_group(failed)
+        for reception in self.receivable_stations():
+            if reception.fallback or reception.station.id == failed.id:
+                continue
+            if _dial_group(reception.station) == group:
+                return reception
+        return None
+
     def _station_allowed(self, station: RadioStation) -> bool:
         if not station.supported:
+            return False
+        if station.id in self.unplayable_ids:
             return False
         if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
             # Personal media rides the streamer-safe gate like real streams
