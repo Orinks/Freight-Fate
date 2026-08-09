@@ -1819,48 +1819,26 @@ def test_city_menu_warms_the_weather_provider(monkeypatch):
         app.shutdown()
 
 
-def test_simulated_reason_names_the_online_services_gate():
-    # Two testers flipped Weather source to real world with the Online
-    # services master off and heard plain "Simulated weather" with no clue
-    # why (2026-08-08). Every simulated-source report now carries the reason
-    # when the driving layer knows it.
-    weather = WeatherSystem("great_lakes", seed=1)
-    assert weather.source_label() == "Simulated weather"
-    weather.simulated_reason = "online services are off"
-    assert weather.source_label() == "Simulated weather; online services are off"
-
-
-def test_real_weather_toggle_warns_when_online_services_master_is_off(monkeypatch):
-    import pygame
-    from speech_capture import speech_stub
-
+def test_live_data_providers_ignore_the_online_services_master_switch():
+    # The Online services switch governs the orinks.net and sharing services
+    # only (owner ruling, 2026-08-08). Weather, traffic, and parking follow
+    # their own Settings toggles: two testers flipped real weather on with
+    # the master off and were silently stuck on simulated skies.
     from freight_fate.app import App
-    from freight_fate.states.main_menu import SettingsCategoryState
 
-    def key_event(key):
-        return pygame.event.Event(pygame.KEYDOWN, key=key, unicode="", mod=0)
-
-    spoken: list = []
     app = App()
     try:
-        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.settings.online_services = False
-        app.ctx.settings.real_weather = False
-        menu = SettingsCategoryState(app.ctx, "speech")
-        menu.enter()
-        while not menu.items[menu.index].text.startswith("Weather source:"):
-            menu.handle_event(key_event(pygame.K_DOWN))
-        spoken.clear()
-        menu.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.real_weather is True
-        said = " ".join(spoken)
-        assert "Online services are off" in said
-        assert "weather stays simulated" in said
+        app.ctx.settings.real_weather = True
+        app.ctx.settings.real_traffic = True
+        app.ctx.settings.real_parking = True
+        assert app.ctx.real_weather_provider() is not None
+        assert app.ctx.real_traffic_provider() is not None
+        assert app.ctx.truck_parking_provider() is not None
 
-        # Turning it back off is not gated and must not nag.
-        spoken.clear()
-        menu.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.real_weather is False
-        assert "Online services are off" not in " ".join(spoken)
+        # The orinks.net side stays governed by the master switch.
+        assert app.ctx._online_enabled(True) is False
+        app.ctx.settings.online_services = True
+        assert app.ctx._online_enabled(True) is True
     finally:
         app.shutdown()

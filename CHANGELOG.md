@@ -1073,12 +1073,14 @@
   keeps trying. Simulated weather only ever appears when the game has had
   no connection at all since it started.
 
-- **The game now says when Online services are keeping weather simulated.**
-  Turning on real-world weather, traffic, or parking while the Online
-  services master switch is off used to change nothing and say nothing.
-  The toggle now tells you the master switch is off and where to turn it
-  on, and every weather report says "Simulated weather; online services
-  are off" instead of leaving the setting looking broken.
+- **The Online services switch no longer touches weather, traffic, or
+  parking.** Two testers turned on real-world weather and heard nothing
+  but simulated skies because the Online services master switch was
+  quietly standing it down. That switch now governs only the orinks.net
+  and sharing services -- the drivers board, profile sharing, cloud
+  backup, Mastodon, and Discord presence. Real-world weather, traffic,
+  and parking follow their own toggles under Settings, and turning one
+  on works no matter how the Online switch is set.
 
 - **A dead radio stream no longer drops you to silence.** When a real
   stream refuses to play, the radio now says which station went off the

@@ -108,7 +108,14 @@ class GameContext:
 
     def _online_enabled(self, setting: bool) -> bool:
         """True when both the master ``online_services`` switch and the
-        individual ``setting`` are enabled."""
+        individual ``setting`` are enabled.
+
+        The master governs the orinks.net and sharing services only (drivers
+        board, profile sharing, cloud backup, Mastodon, Discord presence).
+        Live-data simulation sources -- weather, traffic, parking -- follow
+        their own Settings toggles and are deliberately NOT gated here
+        (owner ruling, 2026-08-08: two testers lost real weather to the
+        master switch without a word of explanation)."""
         return self.settings.online_services and setting
 
     def real_weather_provider(self):
@@ -116,7 +123,7 @@ class GameContext:
 
         Created lazily and kept for the whole session so its cache spans trips.
         """
-        if not self._online_enabled(self.settings.real_weather):
+        if not self.settings.real_weather:
             return None
         if self._real_weather is None:
             from .sim.real_weather import RealWeatherProvider
@@ -148,7 +155,7 @@ class GameContext:
 
         Created lazily and kept for the whole session so its cache spans trips.
         """
-        if not self._online_enabled(self.settings.real_traffic):
+        if not self.settings.real_traffic:
             return None
         if self._real_traffic is None:
             from .sim.real_traffic import RealTrafficProvider
@@ -161,7 +168,7 @@ class GameContext:
 
         Created lazily and kept for the whole session so its cache spans trips.
         """
-        if not self._online_enabled(self.settings.real_parking):
+        if not self.settings.real_parking:
             return None
         if self._truck_parking is None:
             from .sim.truck_parking import TruckParkingProvider

@@ -325,7 +325,7 @@ def test_terminal_does_not_present_modeled_temperature_while_live_weather_loads(
         app.shutdown()
 
 
-def test_terminal_identifies_intentionally_disabled_online_weather(monkeypatch):
+def test_terminal_weather_source_ignores_the_online_services_master(monkeypatch):
     from freight_fate.app import App
     from freight_fate.models.profile import Profile
     from freight_fate.states.city import CityMenuState
@@ -334,12 +334,15 @@ def test_terminal_identifies_intentionally_disabled_online_weather(monkeypatch):
     spoken = []
     monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     app.ctx.settings.real_weather = True
+    # The Online services master governs orinks.net services only (owner
+    # ruling, 2026-08-08): turning it off must not change the weather source.
     app.ctx.settings.online_services = False
+    monkeypatch.setattr(app.ctx, "real_weather_provider", lambda: None)
     app.ctx.profile = Profile(name="Offline Weather Driver")
     try:
         CityMenuState(app.ctx)._time_weather()
-        assert "Simulated weather; online services are off" in spoken[-1]
-        assert "Simulated fallback weather" not in spoken[-1]
+        assert "Simulated fallback weather" in spoken[-1]
+        assert "online services" not in spoken[-1]
     finally:
         app.shutdown()
 

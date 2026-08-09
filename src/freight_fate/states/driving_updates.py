@@ -1815,9 +1815,6 @@ class DrivingUpdateMixin:
         self._weather_source_real = real
         self._live_weather_controls_calendar = controls_calendar
         self.weather.provider = self.ctx.real_weather_provider() if real else None
-        self.weather.simulated_reason = (
-            "online services are off" if real and not self.ctx.settings.online_services else ""
-        )
         self.weather.live_weather_controls_calendar = controls_calendar
         if not controls_calendar:
             # Include time already driven when the active trip switches back

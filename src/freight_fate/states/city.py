@@ -593,10 +593,8 @@ class CityMenuState(MenuState):
             source = "Live weather"
         elif loading:
             source = "Live weather loading"
-        elif self.ctx.settings.real_weather and self.ctx.settings.online_services:
-            source = "Simulated fallback weather"
         elif self.ctx.settings.real_weather:
-            source = "Simulated weather; online services are off"
+            source = "Simulated fallback weather"
         else:
             source = "Simulated weather"
         freshness = ""

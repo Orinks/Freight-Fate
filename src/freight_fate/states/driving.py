@@ -77,8 +77,6 @@ class DrivingState(
             live_weather_controls_calendar=ctx.settings.live_weather_controls_calendar,
         )
         self._weather_source_real = ctx.settings.real_weather
-        if ctx.settings.real_weather and not ctx.settings.online_services:
-            self.weather.simulated_reason = "online services are off"
         self._live_weather_controls_calendar = ctx.settings.live_weather_controls_calendar
         self._traffic_source_real = ctx.settings.real_traffic
         self._parking_source_real = ctx.settings.real_parking

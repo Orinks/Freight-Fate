@@ -78,12 +78,14 @@ DRIVING_ASSIST_PRESETS = {
 
 @dataclass
 class Settings:
-    # Master switch for all online/live-data features.
-    # When off, ``real_weather``, ``real_traffic``, ``real_parking``,
-    # ``online_presence``, ``cloud_saves``, and Discord presence all behave
-    # as if disabled regardless of their individual settings.  Individual
-    # toggles stay visible in the menu (and keep their saved values) so the
-    # player can turn the master back on without reconfiguring each service.
+    # Master switch for the orinks.net and sharing services: the drivers
+    # board, ``online_presence``, ``cloud_saves``, Mastodon sharing, and
+    # Discord presence behave as disabled while it is off, without losing
+    # their individual settings. Live-data simulation sources
+    # (``real_weather``, ``real_traffic``, ``real_parking``) are
+    # deliberately NOT gated here -- they follow their own Settings toggles
+    # (owner ruling, 2026-08-08: two testers lost real weather to this
+    # switch with no explanation at the weather toggle).
     online_services: bool = True
     imperial_units: bool = True
     # The engine voice: "real" plays the multisample recorded-cab ring

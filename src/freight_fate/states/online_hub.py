@@ -37,16 +37,18 @@ class OnlineHubState(MenuState):
                 help="Hear who is hauling right now on the public orinks.net "
                 "drivers board. Viewing the board shares nothing about you.",
             ),
-            # This line's online-enhancement master switch survives the move
-            # into the hub: one row that stands every live service down (or
+            # This line's master switch survives the move into the hub: one
+            # row that stands every orinks.net and sharing service down (or
             # back up) without losing the individual consents beneath it.
             MenuItem(
                 lambda: f"Online services: {'on' if s.online_services else 'off'}",
                 lambda: self._toggle_online_services(1),
-                help="Master switch for all online/live-data features. "
-                "When off, real-time weather, traffic, parking, Discord "
-                "presence, Mastodon sharing, and cloud backup all behave as "
-                "disabled without losing their individual settings.",
+                help="Master switch for the orinks.net and sharing services. "
+                "When off, the drivers board, profile sharing, cloud backup, "
+                "Mastodon sharing, and Discord presence all behave as "
+                "disabled without losing their individual settings. Live "
+                "weather, traffic, and parking are separate: they follow "
+                "their own toggles under Settings.",
             ),
             MenuItem(
                 lambda: (
