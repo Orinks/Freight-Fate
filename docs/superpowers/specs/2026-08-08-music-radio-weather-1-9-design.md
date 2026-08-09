@@ -182,6 +182,28 @@ State tests: entering the city menu issues a provider request with the
 city's coordinates; a trip constructed after a warmed menu reports
 `source_status == "live"` on its first update tick.
 
+## 4. Dead-stream manners (roadmap item, added by owner 2026-08-08)
+
+Today a real stream that fails to play falls back to the silent
+satellite station — the 2026-08-07 manual session's complaint. New
+behavior when a stream refuses to play or dies:
+
+- The failed station is remembered as unplayable for the rest of the
+  session and leaves the dial (it returns next session; streams have
+  bad days).
+- The radio hands over to the next receivable station in the same dial
+  category (same `_dial_group`), announcing the handover in one line:
+  the dead station is named as off the air, then the replacement plays.
+  Only when the whole category is exhausted does the old fallback
+  station take over.
+
+### Testing
+
+A failing stream is excluded from `receivable_stations()` afterward; the
+handover picks the next same-group receivable station; category
+exhaustion still lands on the fallback; the spoken line names both
+stations.
+
 ## Out of scope
 
 - Porting any of this to dev (owner decision, 2026-08-08).
