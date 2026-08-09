@@ -93,20 +93,22 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
-- [ ] **Bake the remaining curated billboard sheets (no new writing
-      needed).** Only 42 curated `billboard_sign` records are baked,
-      covering five regions; eleven regions (Florida, the Northeast, the
-      Pacific Northwest, the Great Lakes, Appalachia, and more) have
-      none -- yet the copy already exists and is finished:
-      `data/spider/signsheets/processed/` holds four batches, 266 spoken
-      entries, all through the audio-first editorial pass (see
-      `SpokenCopyAuditSummary.md`), each block complete with treatment,
-      leg, milepost, and spoken text. Only Batch 4's "Ready" sheets were
-      ever baked. Work is mechanical: honor each sheet's Comments file,
-      run `tools/bake_billboards.py --sheet <sheet> --write` per sheet,
-      re-index world data, and update the pinned landmark/coverage
-      counts. Owner rule: no new sign copy gets authored in this pass --
-      the sheets are the source of truth.
+- [x] **Bake the remaining curated billboard sheets -- SHIPPED
+      2026-08-09.** All 23 sheets baked with zero copy changes:
+      `billboard_sign` 42 -> 217 (five regions -> all sixteen),
+      `highway_marker` -> 55, index regenerated and verified. Owner
+      leftovers, all mechanical or editorial, none blocking: (1) sixteen
+      blocks skipped because their sheet header names a leg that has
+      since split into a multi-hop chain (Meteor Crater, Standin' on the
+      Corner, the Wigwam Motel, the Boll Weevil Monument, Fort Novosel,
+      and friends) -- picking the new sub-leg and milepost re-enables
+      each; (2) five blocks whose own review notes say the generic copy
+      must not ship as written were held back (The Orange Show,
+      Constitution Oak, The Big Boy Statue, Uranus Indiana, Ape Cave) --
+      they need rewritten copy from the owner or a contributor, never
+      from an agent; (3) twenty-odd baked blocks still carry soft
+      "verify" notes in their sheets, preserved in place for an
+      eventual fact pass.
 - [x] **Achievement categories, on Saltwake's model -- SHIPPED
       2026-08-09.** The catalog (172 badges, grown past the planned 145)
       now carries seven categories with per-category earned counts, and

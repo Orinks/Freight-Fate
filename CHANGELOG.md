@@ -4,6 +4,14 @@
 
 ### Added
 
+- **The whole map got its roadside signs.** The curated billboard sweep
+  is baked everywhere now: two hundred seventeen real-place signs across
+  every region -- up from forty-two in five regions -- so Florida, the
+  Northeast, the Pacific Northwest, the Great Lakes, Appalachia, and the
+  rest finally pass their own roadside culture, from the Overseas
+  Highway to Route 66, each sign at its attraction's real milepost.
+  Fifty-five respectful landmark callouts ride along.
+
 - **Achievements are now browsed by category.** The achievements screen
   opens on seven categories -- Out on the Road, The Working Day, Career
   and Rank, The Dial and Song Towns, Weather and the Calendar, Places on
