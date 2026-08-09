@@ -368,6 +368,7 @@ class DrivingUpdateMixin:
         self._update_microsleep(keys, dt)
         self._update_overrev(dt)
         self._update_speeding(dt, accelerator_held=accel_held)
+        self._update_engine_brake_zone(dt)
         self._update_pull_over(dt, service_braking=braking or emergency)
         self._update_brake_heat_cue(dt)
         self._update_traction_cues()

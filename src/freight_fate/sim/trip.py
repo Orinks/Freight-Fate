@@ -1621,6 +1621,28 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 best, best_mp, best_d = self.route.cities[i], mp, d
         return None if best is None else (best, best_mp)
 
+    def engine_brake_ban_at(self, mile: float) -> str | None:
+        """The route city whose no-engine-brake ordinance covers this mile.
+
+        There is no state or federal law against engine braking; towns ban it
+        by local noise ordinance, posted at the city limits. The ban rides the
+        same urban radius that lowers the speed limit near a route city.
+        """
+        if not self._near_city(mile):
+            return None
+        nearest = self._nearest_urban_city(mile)
+        return None if nearest is None else nearest[0]
+
+    def next_engine_brake_ban(self, within_mi: float) -> tuple[float, str] | None:
+        """Start mile and city of the next ban zone ahead, inside the window."""
+        pos = self.position_mi
+        best: tuple[float, str] | None = None
+        for i, mp in enumerate(self._city_mileposts):
+            start = mp - URBAN_RADIUS_MI
+            if pos < start <= pos + within_mi and (best is None or start < best[0]):
+                best = (start, self.route.cities[min(i, len(self.route.cities) - 1)])
+        return best
+
     def _corridor_limit_at(self, mile: float) -> float:
         leg_i, leg_start = self._leg_at_mile(mile)
         leg = self.route.legs[leg_i]

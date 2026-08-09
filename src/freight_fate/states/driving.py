@@ -6,6 +6,7 @@ from __future__ import annotations
 from ..sim.pedal_latch import PedalLatch
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
+from .driving_engine_brake import EngineBrakeZoneMixin
 from .driving_events import DrivingEventMixin
 from .driving_location import DrivingLocationMixin
 from .driving_pacenotes import DrivingPacenoteMixin
@@ -22,6 +23,7 @@ ACTIVE_TRIP_DEADLINE_MODEL = 1
 class DrivingState(
     DrivingControlsMixin,
     DrivingUpdateMixin,
+    EngineBrakeZoneMixin,
     SpeedControlStateMixin,
     DrivingLocationMixin,
     DrivingPickupMixin,
@@ -204,6 +206,12 @@ class DrivingState(
         # for an immediate ticket, separate from the silent at-delivery strikes.
         self.speeding_tickets = 0
         self.ticket_fines_paid = 0.0
+        # No-engine-brake zones: town noise ordinances around route cities.
+        self.jake_zone_fines = 0  # citations this trip; escalates the fine
+        self.jake_fines_paid = 0.0
+        self._jake_violation_deadline_s: float | None = None  # grace after the warning
+        self._jake_citation_latched = False  # one citation per continuous engagement
+        self._jake_zone_warned_key: str | None = None  # approach callout latch
         self._pull_over: str | None = None  # None | "lights" | "stopping"
         self._pull_over_start_mi = 0.0
         self._pull_over_signaled = False
@@ -504,6 +512,8 @@ class DrivingState(
             "speeding_tickets": self.speeding_tickets,
             "ticket_fines_paid": self.ticket_fines_paid,
             "failure_to_stop_count": self.failure_to_stop_count,
+            "jake_zone_fines": self.jake_zone_fines,
+            "jake_fines_paid": self.jake_fines_paid,
             "lane_offset": self.lane.offset,
             "lane_index": self.lane.lane,
             # Mid-surface-chain saves resume on the street chain; absent on
@@ -652,6 +662,8 @@ class DrivingState(
             state.speeding_tickets = int(data.get("speeding_tickets", 0))
             state.ticket_fines_paid = float(data.get("ticket_fines_paid", 0.0))
             state.failure_to_stop_count = int(data.get("failure_to_stop_count", 0))
+            state.jake_zone_fines = int(data.get("jake_zone_fines", 0))
+            state.jake_fines_paid = float(data.get("jake_fines_paid", 0.0))
             state.lane.offset = float(data.get("lane_offset", 0.0))
             state.lane.lane = max(0, int(data.get("lane_index", 0)))
             return state

@@ -916,6 +916,13 @@ class ArrivalState(MenuState):
                 f"On-the-spot speeding tickets this trip: {d.speeding_tickets}, "
                 f"already paid, {d.ticket_fines_paid:,.0f} dollars."
             )
+        # Engine brake citations were also paid on the spot; reported here for
+        # the same transparency, never deducted again.
+        if d.jake_zone_fines:
+            self.summary_parts.append(
+                f"Engine brake citations this trip: {d.jake_zone_fines}, "
+                f"already paid, {d.jake_fines_paid:,.0f} dollars."
+            )
         if business.business_charges:
             self.summary_parts.append(
                 f"Owner-operator business costs: {business.business_charge_summary}."
