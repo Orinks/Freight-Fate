@@ -4,6 +4,14 @@
 
 ### Added
 
+- **Live traffic and truck parking cover far more of the map.** Real
+  incident and road-work reports are back in Indiana and now on in
+  Minnesota and Colorado, and real work-zone reports arrive in ten more
+  states, from Florida to New York to Arizona. Live truck-parking
+  counts moved to Wisconsin's real-time sites and now work wherever a
+  state publishes them, instead of only near one test area. States
+  without a public feed keep the usual simulated traffic.
+
 - **Public profiles now tell more of your career, and the drivers board
   hears your radio.** With Profile sharing on, your board line names the
   station you are tuned to while you drive, and your public career

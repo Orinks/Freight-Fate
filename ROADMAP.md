@@ -251,13 +251,25 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       5, hold until within 2) and the spoken cues carry a 15-second
       cooldown, so a cruise-vs-curve-brake fight can no longer chant
       slowing/released seven times a second.
-- [ ] Indiana and Wisconsin real-traffic feeds are dead and need new
-      clients: 511in.org serves its SPA shell for every REST path
-      (checked 2026-07-22; data is behind GraphQL) and 511wi.gov's REST
-      API 404s on every path (checked 2026-07-23, warning-spammed two
-      live playtests). Both states now run as no_api -- silently
-      simulated. A sweep of the other 511 configs for the same rot is
-      probably worth an afternoon.
+- [x] **Indiana and Wisconsin real-traffic feeds rebuilt -- SHIPPED
+      2026-08-09**, with the full-registry sweep. Indiana, Minnesota,
+      and Colorado now ride the CARS GraphQL platform
+      (`POST /api/graphql`, `MapFeatures` query, incidents +
+      construction); Wisconsin and nine more states (AZ, CT, FL, GA,
+      ID, NV, NY, NC, PA, UT) read WZDx v4 work-zone feeds at
+      `/api/wzdx` -- the old camelCase WZDx parser could not read v4,
+      so this fixed every live WZDx state at once. TPIMS truck parking
+      rebuilt on Wisconsin's 13 live sites (Ohio's keyless endpoint is
+      gone), and the rest-stop parking consumer no longer hardcodes
+      Ohio at a fixed coordinate -- the feature is reachable anywhere a
+      feed exists. Eleven states stay no_api with dated notes: OH, TX,
+      OR, WA (key walls -- could return if the project ever ships API
+      keys), CA and TN (dead DNS), MD, MI, MO, NJ, VA (404/403/SPA).
+- [ ] **Incidents for the WZDx-only states.** The platform-wide death
+      of the old `/api/events` endpoints means the ten WZDx states get
+      construction only; live incidents work on the three CARS states.
+      Find per-state incident feeds (or CARS siblings) for the big
+      WZDx states, FL and NY first.
 - [x] Cruise vs. curve brake, the deeper fix -- SHIPPED 2026-07-22
       (owner direction, same-day playtest): a pacenote now caps the
       cruise working target to the bend's advisory (like the armed-exit
