@@ -39,7 +39,7 @@ def select_shop_item(shop, prefix):
     )
 
 
-def write_v4_save(
+def write_flat_condition_save(
     name="Legacy",
     truck="heavy_hauler",
     owned=("rig", "heavy_hauler"),
@@ -48,11 +48,15 @@ def write_v4_save(
     tires=10.0,
     grime=60.0,
     signed=True,
+    version=10,
 ):
-    """Write a save shaped exactly like the pre-per-truck (version 4) format.
+    """Write a save with flat condition fields, as builds before version 11 did.
 
-    Version-4 saves predate the packed container, so this writes plain JSON
-    at the legacy ``.json`` path, exactly as a real old install left it.
+    The default version 10 is a 1.9-line save from before per-truck condition
+    records (a real tester career shape); these must keep migrating. Version 4
+    and earlier is the 1.8 line, which the load gate refuses -- see
+    test_legacy_career_gate.py. Written as plain JSON at the legacy ``.json``
+    path, the oldest container shape every one of these builds could read.
     """
     p = Profile(name=name)
     packed_path = p.save()
@@ -62,9 +66,10 @@ def write_v4_save(
     data.pop("migration_notice_pending", None)
     data.pop("integrity_modified", None)
     data.pop("integrity_notice_pending", None)
+    data.pop("created_line", None)  # the marker postdates every flat-field build
     data.pop("_signature", None)
     data.pop("_signature_version", None)
-    data["version"] = 4
+    data["version"] = version
     # The fan-out only treats ``truck`` as the driven tractor for an
     # owner-operator; a company driver runs whatever the carrier assigned.
     data["business_status"] = LEASED_OWNER_OPERATOR
@@ -82,8 +87,8 @@ def write_v4_save(
     return path
 
 
-def test_v4_save_converts_to_per_truck_records():
-    path = write_v4_save()
+def test_pre_condition_1_9_save_converts_to_per_truck_records():
+    path = write_flat_condition_save()
     loaded = Profile.load(path)
 
     # Condition records are plain dicts on this line.
@@ -102,12 +107,14 @@ def test_v4_save_converts_to_per_truck_records():
     # Road grime is a profile field here, not part of a truck's record.
     assert loaded.road_grime_pct == 60.0
 
-    assert loaded.migration_notice_pending is True
+    # The one-time conversion notice belongs to the 1.8-and-earlier format;
+    # a 1.9-line save just converts quietly.
+    assert loaded.migration_notice_pending is False
     assert not check_profile_invariants(loaded)
 
 
-def test_v4_save_is_rewritten_to_disk_on_load():
-    path = write_v4_save()
+def test_pre_condition_1_9_save_is_rewritten_to_disk_on_load():
+    path = write_flat_condition_save()
     loaded = Profile.load(path)
     # The conversion re-homes the career in the packed container; the old
     # plain-JSON file stays behind only as a .json.bak rollback copy.
@@ -121,21 +128,26 @@ def test_v4_save_is_rewritten_to_disk_on_load():
     # Grime rides on the truck that got dirty, like every other kind of wear,
     # so the migrated figure lands in the records rather than on the profile.
     assert on_disk["truck_conditions"]["heavy_hauler"]["grime_pct"] == 60.0
+    # The rewrite also stamps the created-on marker, so this career never
+    # needs the save-version backfill test again.
+    assert on_disk["created_line"] == "1.9"
     # The rewritten save loads cleanly, is validly signed, and migrates no more.
     again = Profile.load(path)
     assert again.needs_migration_resave is False
     assert again.truck_conditions["heavy_hauler"]["fuel_gal"] == 120.0
 
 
-def test_signed_v4_save_is_not_quarantined():
-    path = write_v4_save(signed=True)
+def test_signed_flat_condition_save_is_not_quarantined():
+    path = write_flat_condition_save(signed=True)
     loaded = Profile.load(path)  # a signature mismatch would raise and quarantine
     assert loaded.name == "Legacy"
     assert not path.with_suffix(path.suffix + ".invalid").exists()
 
 
 def test_migration_clamps_impossible_legacy_values():
-    path = write_v4_save(truck="rig", owned=("rig",), fuel=9_000.0, damage=250.0, tires=-5.0)
+    path = write_flat_condition_save(
+        truck="rig", owned=("rig",), fuel=9_000.0, damage=250.0, tires=-5.0
+    )
     loaded = Profile.load(path)
     rig = loaded.truck_conditions["rig"]
     assert rig["fuel_gal"] == TruckSpecs().fuel_tank_gal
@@ -172,18 +184,29 @@ def test_current_saves_pass_through_unchanged():
     assert migrated is data
 
 
+def _profile_with_pending_migration_notice(name):
+    """A saved career still carrying the one-time conversion notice.
+
+    The notice flag was only ever set for 1.8-and-earlier saves, which the
+    load gate now refuses -- but a 1.9 tester who converted one back then and
+    never dismissed the notice still has the flag signed into their save.
+    """
+    p = Profile(name=name)
+    p.migration_notice_pending = True
+    return Profile.load(p.save())
+
+
 def test_migration_notice_shows_once_then_enters_world(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.city import CityMenuState
     from freight_fate.states.main_menu import enter_world
     from freight_fate.states.save_notice import SaveMigrationNoticeState
 
-    path = write_v4_save(name="Notice")
     app = App()
     try:
         spoken = []
         monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
-        app.ctx.profile = Profile.load(path)
+        app.ctx.profile = _profile_with_pending_migration_notice("Notice")
 
         enter_world(app.ctx)
         assert isinstance(app.state, SaveMigrationNoticeState)
@@ -195,7 +218,6 @@ def test_migration_notice_shows_once_then_enters_world(monkeypatch):
         assert app.ctx.profile.migration_notice_pending is False
 
         # The dismissal is saved: a fresh load goes straight into the world.
-        # (The conversion moved the career into its packed .ffsave file.)
         app.ctx.profile = Profile.load(app.ctx.profile.path)
         assert app.ctx.profile.migration_notice_pending is False
         enter_world(app.ctx)
@@ -210,11 +232,10 @@ def test_migration_notice_escape_also_acknowledges(monkeypatch):
     from freight_fate.states.main_menu import enter_world
     from freight_fate.states.save_notice import SaveMigrationNoticeState
 
-    path = write_v4_save(name="Escape Notice")
     app = App()
     try:
         monkeypatch.setattr(app.ctx, "say", speech_stub())
-        app.ctx.profile = Profile.load(path)
+        app.ctx.profile = _profile_with_pending_migration_notice("Escape Notice")
         enter_world(app.ctx)
         assert isinstance(app.state, SaveMigrationNoticeState)
         app.state.handle_event(key_event(pygame.K_ESCAPE))

@@ -1,4 +1,10 @@
-"""Saves from older nightly/stable builds keep loading on this snapshot."""
+"""Old save dicts keep parsing through Profile.from_dict on this snapshot.
+
+Profile.load refuses pre-1.9 files outright (see test_legacy_career_gate.py),
+but the dict-level tolerance pinned here still matters: cloud verification
+and every future migration run through from_dict, which must keep absorbing
+missing, extra, and malformed fields without crashing.
+"""
 
 from freight_fate.models.business import COMPANY_DRIVER
 from freight_fate.models.dispatch_policy import dispatch_policy

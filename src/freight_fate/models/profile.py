@@ -63,6 +63,21 @@ log = logging.getLogger(__name__)
 # The 1.9 line's per-truck condition records are plain dicts, so the
 # TruckCondition dataclass the mainline introduced is not imported here.
 SAVE_VERSION = 11
+
+# The release line careers are created on, stamped into every save (the
+# ``created_line`` field below). 1.9 rebalanced the whole career arc, so
+# careers from earlier lines do not carry over (owner ruling, 2026-08-08):
+# the load gate turns them away without touching the file, which stays
+# playable by the 1.8 builds that wrote it.
+CREATED_LINE = "1.9"
+
+# The first save version only 1.9 builds ever wrote. The 1.8 line (dev and
+# every stable release) stops at SAVE_VERSION 5; versions 6 and up were
+# introduced by the 1.9 career arc (grounded start choices, 2026-06-27) and
+# exist nowhere else. Saves from 1.9 dev builds that predate the
+# ``created_line`` marker are recognized by this threshold instead, so
+# testers' existing 1.9 careers are not locked out.
+FIRST_1_9_SAVE_VERSION = 6
 STARTING_MONEY = 5_000.0
 DEFAULT_CITY = "chicago_il_us"
 DEFAULT_FUEL_GAL = 150.0
@@ -334,6 +349,50 @@ class ProfileIntegrityError(ValueError):
     """A save file failed its integrity signature check."""
 
 
+class LegacyCareerError(Exception):
+    """A career from the 1.8 line (or earlier) that 1.9 does not continue.
+
+    Raised by the load gate *before* any migration or resave machinery runs:
+    the file on disk stays byte-for-byte intact, still loadable by the build
+    that wrote it. Carries the driver name so menus can label the career
+    instead of letting it vanish from the list.
+    """
+
+    def __init__(self, name: str, path: Path | None = None) -> None:
+        super().__init__(f"{name}: career created before the 1.9 line")
+        self.name = name
+        self.path = path
+
+
+def is_pre_1_9_save(data: dict) -> bool:
+    """Whether a raw save dict was created on the 1.8 line or earlier.
+
+    The explicit ``created_line`` marker decides when present. Saves written
+    before the marker existed are judged by their save version: the 1.8 line
+    never wrote a version past 5, while every 1.9 build has written 6 or
+    higher since the career arc landed -- so existing 1.9 tester careers pass
+    and are stamped with the marker on their next save.
+    """
+    if data.get("created_line"):
+        return False
+    version = data.get("version")
+    return not (isinstance(version, int) and version >= FIRST_1_9_SAVE_VERSION)
+
+
+def is_pre_1_9_save_file(path: Path) -> bool:
+    """Whether an on-disk save was created before the 1.9 line.
+
+    Unreadable files are not legacy saves -- they fail the load gate on their
+    own terms. Used by the new-career flow so starting over with the same
+    driver name can never overwrite a career an earlier build still owns.
+    """
+    try:
+        data, _ = _decode_save_bytes(path.read_bytes())
+    except (OSError, ProfileIntegrityError):
+        return False
+    return is_pre_1_9_save(data)
+
+
 def _secret_path() -> Path:
     return data_dir() / SECRET_FILE
 
@@ -594,6 +653,12 @@ class Profile:
     name: str = "Driver"
     money: float = STARTING_MONEY
     current_city: str = DEFAULT_CITY
+    # The release line this career was created on. New careers stamp the
+    # current line; a save without the field is judged by its save version
+    # instead (see is_pre_1_9_save), and pre-1.9 saves never get this far --
+    # the load gate turns them away before from_dict, so the default here can
+    # only ever backfill a 1.9 career from before the marker existed.
+    created_line: str = CREATED_LINE
     # road_grime_pct is a property over the active truck's record (below), not
     # a field: grime belongs to the tractor that got dirty, same as every other
     # kind of wear.
@@ -671,6 +736,11 @@ class Profile:
         from .save_migration import migrate_save_data
 
         d, migrated = migrate_save_data(dict(d))
+        # A 1.9 career from before the created-on marker existed: the load
+        # gate already vouched for it by save version, so stamp the explicit
+        # marker on the resave and the version threshold is needed only once.
+        if "created_line" not in d:
+            migrated = True
         d.pop("version", None)
         d.pop(SIGNATURE_FIELD, None)
         d.pop(SIGNATURE_VERSION_FIELD, None)
@@ -1010,6 +1080,13 @@ class Profile:
             # warning stays truthful and the file is not re-tried every visit.
             _quarantine(path)
             raise
+        if is_pre_1_9_save(data):
+            # A career from the 1.8 line or earlier. 1.9 starts everyone
+            # fresh (the rebalanced arc cannot absorb old-scale careers), so
+            # refuse before any signature check, migration, or resave can
+            # touch the file: it stays intact on disk, still playable by the
+            # build that wrote it.
+            raise LegacyCareerError(str(data.get("name") or "Driver"), path)
         signed = SIGNATURE_FIELD in data
         resign = False
         tampered = False

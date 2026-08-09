@@ -66,3 +66,12 @@ def test_exported_condition_fields_match_a_real_record():
     written = sorted(profile.truck_conditions["rig"])
 
     assert invariant_data()["truckConditionFields"] == written
+
+
+def test_exported_profile_fields_include_the_created_on_marker():
+    """The 1.9 cutover regen must teach the server allow-list ``created_line``.
+
+    Every 1.9 upload carries the marker, so a validator built from an export
+    without it would reject every honest backup on the schema check.
+    """
+    assert "created_line" in invariant_data()["profileFields"]

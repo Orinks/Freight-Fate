@@ -34,6 +34,56 @@ class SaveModifiedNoticeState(MenuState):
         self._acknowledge()
 
 
+class LegacyCareerNoticeState(MenuState):
+    """A career from before 1.9 was picked from the list: explain, offer a
+    fresh start, and leave the old save exactly as it is.
+
+    Unlike the two notices above, no profile is loaded here -- the load gate
+    refused the file without touching it, and this state only knows the
+    driver name it carried.
+    """
+
+    title = "Career from an earlier version"
+    intro_help = (
+        "This career cannot continue in version 1.9. Enter on Start a new "
+        "career begins a fresh one; Escape goes back to the career list."
+    )
+
+    def __init__(self, ctx, driver_name: str) -> None:
+        super().__init__(ctx)
+        self.driver_name = driver_name
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            f"{self.driver_name} was made in an earlier version of Freight "
+            "Fate. Version 1.9 rebalances the whole career, from pay to "
+            "trucks to levels, so every driver starts fresh, and careers "
+            "from earlier versions stay where they are. Nothing was lost: "
+            "the save is still on this computer, untouched, and it still "
+            "works in Freight Fate 1.8. Whenever you are ready, start a new "
+            f"career and try the new road. {self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem(
+                "Start a new career",
+                self._new_career,
+                help="Begin a fresh 1.9 career with a new driver name.",
+            ),
+            MenuItem(
+                "Back to the career list",
+                self.go_back,
+                help="Return to the saved careers without changing anything.",
+            ),
+        ]
+
+    def _new_career(self) -> None:
+        from .main_menu import NameEntryState
+
+        self.ctx.replace_state(NameEntryState(self.ctx))
+
+
 class SaveMigrationNoticeState(MenuState):
     title = "Save file updated"
     intro_help = "Press Enter on OK to continue to your career."

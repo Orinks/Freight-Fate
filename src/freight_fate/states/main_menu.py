@@ -15,7 +15,7 @@ from ..achievements import (
     earned_ids,
     entry_text,
 )
-from ..models.profile import Profile, ProfileIntegrityError
+from ..models.profile import LegacyCareerError, Profile, ProfileIntegrityError
 from ..models.start_options import apply_start_option, option_for_profile
 from ..music import select_menu_music_sequence
 from ..playtest_levers import apply_continue_levers
@@ -38,6 +38,11 @@ from .main_menu_help import (
 from .update import UpdateChecker, UpdateCheckState, UpdatePromptState
 
 _last_invalid_saves: list[Path] = []
+# Careers the load gate refused because they were created before the 1.9
+# line. They must stay visible in the career list with a spoken label -- a
+# missing career reads as data loss to a blind player -- so _loadable_saves
+# collects them here for the menus to show alongside the loadable ones.
+_legacy_saves: list[LegacyCareerError] = []
 
 
 def pending_notice_state(ctx) -> State | None:
@@ -102,12 +107,15 @@ def _world_entry_state(ctx, *, queue_entry_announcement: bool = False) -> State:
 
 def _loadable_saves() -> list[tuple[Path, Profile]]:
     """Return readable saves in newest-first order."""
-    global _last_invalid_saves
+    global _last_invalid_saves, _legacy_saves
     _last_invalid_saves = []
+    _legacy_saves = []
     saves = []
     for path in Profile.list_saves():
         try:
             profile = Profile.load(path)
+        except LegacyCareerError as legacy:
+            _legacy_saves.append(legacy)
         except ProfileIntegrityError:
             _last_invalid_saves.append(path)
         except Exception:
@@ -230,6 +238,15 @@ class MainMenuState(MenuState):
                 if count == 1
                 else f"{count} saved careers could not be read and were moved aside. "
             )
+        if not _loadable_saves() and _legacy_saves:
+            # Every saved career predates 1.9, so there is no Continue item
+            # where the player expects one. Say where the careers went before
+            # that silence reads as data loss; once a 1.9 career exists, the
+            # labels in Choose career carry the explanation instead.
+            warning += (
+                "Your saved careers are from an earlier version of Freight "
+                "Fate; they are listed under Choose career. "
+            )
         self.ctx.say(
             f"Welcome to Freight Fate, version {updater.spoken_version(__version__)}. "
             f"An audio trucking adventure across America. {warning}".rstrip()
@@ -249,6 +266,10 @@ class MainMenuState(MenuState):
                     help=f"Load the newest save for {latest_profile.name}.",
                 )
             )
+        if saves or _legacy_saves:
+            # Careers from earlier versions cannot continue, but they still
+            # belong on the list: even with nothing loadable, Choose career is
+            # where a player finds them and hears what happened.
             items.append(
                 MenuItem(
                     "Choose career",
@@ -256,6 +277,7 @@ class MainMenuState(MenuState):
                     help="Choose any saved career instead of only the newest one.",
                 )
             )
+        if saves:
             items.append(
                 MenuItem(
                     "Manage careers", self._manage_careers, help="Reset or delete saved careers."
@@ -547,8 +569,26 @@ class LoadDriverState(MenuState):
                     help=f"Load {profile.name}, {_career_location(profile)}.",
                 )
             )
+        # Careers the 1.9 load gate refused stay on the list with a spoken
+        # label -- silently dropping them reads as data loss. Picking one
+        # opens the notice that explains and offers a fresh start.
+        for legacy in _legacy_saves:
+            items.append(
+                MenuItem(
+                    f"{legacy.name}: career from an earlier version of Freight Fate",
+                    lambda e=legacy: self._explain_legacy(e),
+                    help="This career cannot continue in version 1.9. Enter "
+                    "explains why and offers a new career; the save itself "
+                    "is not touched.",
+                )
+            )
         items.append(MenuItem("Back", self.go_back))
         return items
+
+    def _explain_legacy(self, legacy: LegacyCareerError) -> None:
+        from .save_notice import LegacyCareerNoticeState
+
+        self.ctx.push_state(LegacyCareerNoticeState(self.ctx, legacy.name))
 
     def _pick(self, profile: Profile) -> None:
         self.ctx.profile = profile
