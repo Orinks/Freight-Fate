@@ -93,6 +93,22 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [ ] **Screen artifact curves out of the highway bake (found
+      2026-08-08).** About 3,200 of the 27,393 interstate mainline curve
+      records are geometry artifacts, not roads: 80-250 ft radii and
+      sub-1,000 ft footprints (one is 53 ft long), clustered in the first
+      1-4 miles of legs -- city-anchor departure geometry and interchange
+      vertices baked as mainline (samples: an 82 ft "hairpin" on I-77
+      near Akron; three at mile 4 of flat I-20 out of Abilene). Players
+      rarely hear them only because departures are driven below the
+      advisory-plus-margin gate; at speed one fires a bogus "Hairpin
+      right, advise 20", shoves the truck with curve physics, and pins
+      the clock to real time. Fix is data hygiene, not advisory tuning
+      (the 0.3 g posted-diamond math is right): an artifact screen in the
+      bake or loader dropping mainline records with implausible radii for
+      the road class (nothing under ~300 ft belongs on interstate
+      mainline) plus the near-anchor cluster; re-verify the legit
+      mountain corridors (I-70 Glenwood, I-40 grades) survive the screen.
 - [ ] **No career transfer from 1.8 and earlier (owner ruling,
       2026-08-08).** The rebalanced arc starts everyone fresh: old-scale
       careers (some level 50+) would make 1.9 progression unfair, and a
