@@ -160,6 +160,37 @@ not distributed in this repository.
 | High Beam Hush | `music/night_high_beam_hush.ogg` | Suno-composed hushed strings-and-piano night bed for the in-game radio (2026-07 Zero batch) |
 | Last Diner Open | `music/radio_night_last_diner.ogg` | Suno-composed quiet late-night diner ballad for the in-game radio (2026-07 Zero batch) |
 | Third Shift Waltz | `music/radio_night_third_shift_waltz.ogg` | Suno-composed gentle waltz for night workers for the in-game radio (2026-07 Zero batch) |
+| More Nashville Jazzicals | `music/radio_jazz_nashville_jazzicals.opus` | Suno-composed smoky Nashville crossover jazz instrumental for the in-game radio (2026-08 originals batch) |
+| When Some Nashville Cats Got Jazzy | `music/radio_jazz_nashville_cats.opus` | Suno-composed playful swing-country jazz instrumental for the in-game radio (2026-08 originals batch) |
+| That Nashville Sound in the 80's | `music/radio_jazz_eighties_sound.opus` | Suno-composed smooth eighties countrypolitan instrumental for the in-game radio (2026-08 originals batch) |
+| That Nashville Sound in the 90's | `music/radio_jazz_nineties_sound.opus` | Suno-composed polished nineties Nashville-pop instrumental for the in-game radio (2026-08 originals batch) |
+| Happens in Nashville Tonight | `music/radio_jazz_nashville_tonight.opus` | Suno-composed after-hours downtown jazz instrumental for the in-game radio (2026-08 originals batch) |
+| A Caring Touch | `music/radio_jazz_caring_touch.opus` | Suno-composed gentle late-evening ballad instrumental for the in-game radio (2026-08 originals batch) |
+| Penny for Your Thoughts | `music/radio_jazz_penny_thoughts.opus` | Suno-composed thoughtful brushed-drums jazz instrumental for the in-game radio (2026-08 originals batch) |
+| Texico Station Fill Up | `music/radio_country_texico_fill_up.opus` | Suno-composed bouncy truck-stop country instrumental for the in-game radio (2026-08 originals batch) |
+| Crucial Load Needed in Arkansas | `music/radio_country_arkansas_load.opus` | Suno-composed urgent dispatch-run country instrumental for the in-game radio (2026-08 originals batch) |
+| Kentucky Rain Called Me Home | `music/radio_country_kentucky_rain.opus` | Suno-composed rain-soaked homecoming country instrumental for the in-game radio (2026-08 originals batch) |
+| Texian Style | `music/radio_country_texian_style.opus` | Suno-composed swaggering Texas country instrumental for the in-game radio (2026-08 originals batch) |
+| Texas Country on a Tuesday Evening | `music/radio_country_tuesday_texas.opus` | Suno-composed easygoing weeknight Texas country instrumental for the in-game radio (2026-08 originals batch) |
+| Thursday Night in Fort Worth | `music/radio_country_fort_worth_thursday.opus` | Suno-composed honky-tonk Thursday-night country instrumental for the in-game radio (2026-08 originals batch) |
+| Texas Wants You Back, and So Do I | `music/radio_country_texas_wants_you.opus` | Suno-composed yearning Texas ballad instrumental for the in-game radio (2026-08 originals batch) |
+| Alabama Called | `music/radio_country_alabama_called.opus` | Suno-composed southbound homesick country instrumental for the in-game radio (2026-08 originals batch) |
+| Carolina Groovin | `music/radio_country_carolina_groovin.opus` | Suno-composed funky Carolina country-groove instrumental for the in-game radio (2026-08 originals batch) |
+| Over Yonder | `music/radio_country_over_yonder.opus` | Suno-composed front-porch country stroll instrumental for the in-game radio (2026-08 originals batch) |
+| Canoe Trail | `music/drive_canoe_trail.opus` | Suno-composed easy pastoral fingerpicked bed for the daytime driving rotation (2026-08 originals batch) |
+| On the Gunflint | `music/drive_gunflint.opus` | Suno-composed wide northwoods Americana bed for the daytime driving rotation (2026-08 originals batch) |
+| A Little Boat Trip I Took Once | `music/drive_little_boat_trip.opus` | Suno-composed lazy riverside country bed for the daytime driving rotation (2026-08 originals batch) |
+| Dancing Firelight | `music/drive_dancing_firelight.opus` | Suno-composed warm campfire country-folk bed for the daytime driving rotation (2026-08 originals batch) |
+| Always Around When You Need Me | `music/drive_always_around.opus` | Suno-composed steady companionable country bed for the daytime driving rotation (2026-08 originals batch) |
+| Under the Starlight | `music/night_under_starlight.opus` | Suno-composed open-sky nighttime country bed for the night driving rotation (2026-08 originals batch) |
+| Gettin Ever So Slightly Darker Tonight | `music/night_slightly_darker.opus` | Suno-composed moody dusk-into-night country bed for the night driving rotation (2026-08 originals batch) |
+| Why the Stars Said I Love You That Night | `music/night_stars_said_love.opus` | Suno-composed tender starlit country waltz bed for the night driving rotation (2026-08 originals batch) |
+| Her Real Words to Me That Night | `music/night_her_real_words.opus` | Suno-composed slow confessional night ballad bed for the night driving rotation (2026-08 originals batch) |
+| When You Were on My Mind | `music/night_on_my_mind.opus` | Suno-composed wistful late-night country bed for the night driving rotation (2026-08 originals batch) |
+| Call Me When You Get This | `music/night_call_me.opus` | Suno-composed quiet waiting-by-the-phone night bed for the night driving rotation (2026-08 originals batch) |
+| Maroon Coloured Scarf | `music/night_maroon_scarf.opus` | Suno-composed soft keepsake night ballad bed for the night driving rotation (2026-08 originals batch) |
+| When We Took That Train I Knew It Was It | `music/night_train_knew.opus` | Suno-composed rolling nighttime train-memory bed for the night driving rotation (2026-08 originals batch) |
+| Progress for Progress's Sake | `music/menu_progress.opus` | Suno-composed seasoned late-career country bed for the menu milestone rotation (2026-08 originals batch) |
 | County Fair | `music/radio_country_county_fair.ogg` | Suno-composed upbeat county-fair country song for the in-game radio (2026-07 Zero batch) |
 | Porch Light | `music/radio_country_porch_light.ogg` | Suno-composed warm homecoming country song for the in-game radio (2026-07 Zero batch) |
 | Wildflower Mile | `music/radio_country_wildflower_mile.ogg` | Suno-composed hopeful springtime country song for the in-game radio (2026-07 Zero batch) |

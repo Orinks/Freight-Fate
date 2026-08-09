@@ -23,6 +23,12 @@ MENU_TRACKS: tuple[MusicTrack, ...] = (
     MusicTrack("menu_fleet_owner", "Yard Lights", "Steady fleet-owner menu bed", 94.6),
     MusicTrack("menu_coast_to_coast", "Coast To Coast Ledger", "Broad road-trip menu bed", 104.7),
     MusicTrack("menu_legendary_haul", "Million Mile Morning", "Late-career Americana bed", 117.5),
+    MusicTrack(
+        "menu_progress",
+        "Progress for Progress's Sake",
+        "Seasoned late-career country bed",
+        212.3,
+    ),
 )
 
 MENU_ROTATION_TRACKS: tuple[MusicTrack, ...] = (
@@ -60,6 +66,23 @@ DAY_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
     MusicTrack(
         "drive_silver_current", "Silver Current", "Sparkling slide-guitar morning bed", 149.0
     ),
+    MusicTrack("drive_canoe_trail", "Canoe Trail", "Easy pastoral fingerpicked bed", 205.0),
+    MusicTrack("drive_gunflint", "On the Gunflint", "Wide northwoods Americana bed", 240.0),
+    MusicTrack(
+        "drive_little_boat_trip",
+        "A Little Boat Trip I Took Once",
+        "Lazy riverside country bed",
+        212.1,
+    ),
+    MusicTrack(
+        "drive_dancing_firelight", "Dancing Firelight", "Warm campfire country-folk bed", 237.5
+    ),
+    MusicTrack(
+        "drive_always_around",
+        "Always Around When You Need Me",
+        "Steady companionable country bed",
+        201.9,
+    ),
 )
 
 NIGHT_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
@@ -77,6 +100,48 @@ NIGHT_DRIVE_TRACKS: tuple[MusicTrack, ...] = (
     ),
     MusicTrack(
         "night_high_beam_hush", "High Beam Hush", "Hushed strings-and-piano night bed", 172.3
+    ),
+    MusicTrack(
+        "night_under_starlight", "Under the Starlight", "Open-sky nighttime country bed", 165.7
+    ),
+    MusicTrack(
+        "night_slightly_darker",
+        "Gettin Ever So Slightly Darker Tonight",
+        "Moody dusk-into-night country bed",
+        174.9,
+    ),
+    MusicTrack(
+        "night_stars_said_love",
+        "Why the Stars Said I Love You That Night",
+        "Tender starlit country waltz bed",
+        163.8,
+    ),
+    MusicTrack(
+        "night_her_real_words",
+        "Her Real Words to Me That Night",
+        "Slow confessional night ballad bed",
+        242.5,
+    ),
+    MusicTrack(
+        "night_on_my_mind",
+        "When You Were on My Mind",
+        "Wistful late-night country bed",
+        211.9,
+    ),
+    MusicTrack(
+        "night_call_me",
+        "Call Me When You Get This",
+        "Quiet waiting-by-the-phone night bed",
+        187.0,
+    ),
+    MusicTrack(
+        "night_maroon_scarf", "Maroon Coloured Scarf", "Soft keepsake night ballad bed", 222.3
+    ),
+    MusicTrack(
+        "night_train_knew",
+        "When We Took That Train I Knew It Was It",
+        "Rolling nighttime train-memory bed",
+        273.9,
     ),
 )
 
@@ -150,6 +215,66 @@ COUNTRY_TRACKS: tuple[MusicTrack, ...] = (
         "Dust on the Highway",
         "Driving outlaw country-rock instrumental",
         219.6,
+    ),
+    MusicTrack(
+        "radio_country_texico_fill_up",
+        "Texico Station Fill Up",
+        "Bouncy truck-stop country instrumental",
+        176.3,
+    ),
+    MusicTrack(
+        "radio_country_arkansas_load",
+        "Crucial Load Needed in Arkansas",
+        "Urgent dispatch-run country instrumental",
+        195.0,
+    ),
+    MusicTrack(
+        "radio_country_kentucky_rain",
+        "Kentucky Rain Called Me Home",
+        "Rain-soaked homecoming country instrumental",
+        181.0,
+    ),
+    MusicTrack(
+        "radio_country_texian_style",
+        "Texian Style",
+        "Swaggering Texas country instrumental",
+        184.4,
+    ),
+    MusicTrack(
+        "radio_country_tuesday_texas",
+        "Texas Country on a Tuesday Evening",
+        "Easygoing weeknight Texas country instrumental",
+        248.0,
+    ),
+    MusicTrack(
+        "radio_country_fort_worth_thursday",
+        "Thursday Night in Fort Worth",
+        "Honky-tonk Thursday-night country instrumental",
+        221.9,
+    ),
+    MusicTrack(
+        "radio_country_texas_wants_you",
+        "Texas Wants You Back, and So Do I",
+        "Yearning Texas ballad instrumental",
+        248.3,
+    ),
+    MusicTrack(
+        "radio_country_alabama_called",
+        "Alabama Called",
+        "Southbound homesick country instrumental",
+        270.9,
+    ),
+    MusicTrack(
+        "radio_country_carolina_groovin",
+        "Carolina Groovin",
+        "Funky Carolina country-groove instrumental",
+        288.3,
+    ),
+    MusicTrack(
+        "radio_country_over_yonder",
+        "Over Yonder",
+        "Front-porch country stroll instrumental",
+        165.8,
     ),
 )
 
@@ -243,6 +368,53 @@ BLUES_TRACKS: tuple[MusicTrack, ...] = (
     MusicTrack("radio_blues_levee_moon", "Levee Moon", "Smoky riverside delta soul", 166.6),
 )
 
+# Nashville jazz-crossover instrumentals: the Nashville After Hours station
+# pool, the originals batch's second color after straight country.
+JAZZ_TRACKS: tuple[MusicTrack, ...] = (
+    MusicTrack(
+        "radio_jazz_nashville_jazzicals",
+        "More Nashville Jazzicals",
+        "Smoky Nashville crossover jazz instrumental",
+        280.0,
+    ),
+    MusicTrack(
+        "radio_jazz_nashville_cats",
+        "When Some Nashville Cats Got Jazzy",
+        "Playful swing-country jazz instrumental",
+        231.5,
+    ),
+    MusicTrack(
+        "radio_jazz_eighties_sound",
+        "That Nashville Sound in the 80's",
+        "Smooth eighties countrypolitan instrumental",
+        220.0,
+    ),
+    MusicTrack(
+        "radio_jazz_nineties_sound",
+        "That Nashville Sound in the 90's",
+        "Polished nineties Nashville-pop instrumental",
+        194.5,
+    ),
+    MusicTrack(
+        "radio_jazz_nashville_tonight",
+        "Happens in Nashville Tonight",
+        "After-hours downtown jazz instrumental",
+        195.8,
+    ),
+    MusicTrack(
+        "radio_jazz_caring_touch",
+        "A Caring Touch",
+        "Gentle late-evening ballad instrumental",
+        173.8,
+    ),
+    MusicTrack(
+        "radio_jazz_penny_thoughts",
+        "Penny for Your Thoughts",
+        "Thoughtful brushed-drums jazz instrumental",
+        195.0,
+    ),
+)
+
 NIGHT_JAZZ_TRACK = MusicTrack(
     "radio_night_low_beams", "Low Beams", "Late-night instrumental jazz", 180.0
 )
@@ -303,6 +475,7 @@ STATION_PLAYLISTS: dict[str, tuple[MusicTrack, ...]] = {
     "country": COUNTRY_TRACKS,
     "classic_rock": CLASSIC_ROCK_TRACKS,
     "blues": BLUES_TRACKS,
+    "jazz": JAZZ_TRACKS,
     "night": NIGHT_DRIVE_TRACKS + (NIGHT_JAZZ_TRACK,) + NIGHT_LINE_VOCAL_TRACKS,
 }
 
@@ -324,6 +497,7 @@ ALL_MUSIC_TRACKS: tuple[MusicTrack, ...] = (
     + COUNTRY_TRACKS
     + CLASSIC_ROCK_TRACKS
     + BLUES_TRACKS
+    + JAZZ_TRACKS
     + (NIGHT_JAZZ_TRACK,)
     + NIGHT_LINE_VOCAL_TRACKS
 )
@@ -368,6 +542,8 @@ def _menu_milestone_index(profile) -> int:
     else:
         owned = set(getattr(profile, "owned_trucks", ()))
         truck = getattr(profile, "truck", "rig")
+    if level >= 21 or deliveries >= 75 or miles >= 40_000:
+        return 6
     if level >= 9 or deliveries >= 40 or miles >= 20_000:
         return 5
     if level >= 7 or miles >= 10_000:

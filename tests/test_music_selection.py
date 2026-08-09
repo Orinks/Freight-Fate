@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from asset_helpers import asset_exists, find_asset
+from asset_helpers import asset_bytes, asset_exists
 
 from freight_fate.music import (
     ALL_MUSIC_TRACKS,
@@ -496,14 +496,47 @@ def test_all_cataloged_music_tracks_exist():
     assert not missing
 
 
+def test_jazz_pool_exists_and_ships_assets():
+    from freight_fate import music
+
+    assert len(music.JAZZ_TRACKS) == 7
+    assert music.STATION_PLAYLISTS["jazz"] == music.JAZZ_TRACKS
+    missing = [
+        track.key for track in music.JAZZ_TRACKS if not asset_exists(ASSETS / "music", track.key)
+    ]
+    assert not missing
+
+
+def test_seventh_menu_milestone_unlocks_at_level_21():
+    from types import SimpleNamespace
+
+    from freight_fate import music
+
+    assert music.MENU_TRACKS[6].key == "menu_progress"
+    high = SimpleNamespace(
+        career=SimpleNamespace(level=21, deliveries=0, total_miles=0),
+        owned_trucks=(),
+        truck="rig",
+    )
+    assert music._menu_milestone_index(high) == 6
+    mid = SimpleNamespace(
+        career=SimpleNamespace(level=9, deliveries=40, total_miles=20_000),
+        owned_trucks=(),
+        truck="rig",
+    )
+    assert music._menu_milestone_index(mid) == 5
+
+
 def test_all_cataloged_music_tracks_are_at_least_one_minute():
+    import io
+
     import soundfile as sf
 
     too_short = []
     for track in ALL_MUSIC_TRACKS:
-        path = find_asset(ASSETS / "music", track.key)
-        assert path is not None, track.key
-        info = sf.info(str(path))
+        data = asset_bytes(ASSETS / "music", track.key)
+        assert data is not None, track.key
+        info = sf.info(io.BytesIO(data))
         duration = info.frames / info.samplerate
         if duration < 60.0:
             too_short.append((track.key, duration))

@@ -7,10 +7,20 @@ import os
 import zipfile
 from pathlib import Path
 
+import pytest
+
 from freight_fate import assets_pack, audio
 
 ROOT = Path(__file__).resolve().parents[1]
 SOUNDS_DIR = ROOT / "src" / "freight_fate" / "assets" / "sounds"
+
+# The loose sound tree is builder-local source material (the repo ships only
+# sounds.pak). Fallback-path tests that read it run where it exists and skip
+# on clean clones, where the pack is the only source.
+needs_loose_tree = pytest.mark.skipif(
+    not (SOUNDS_DIR / "ui").exists(),
+    reason="builder-local loose sound tree not present",
+)
 
 
 def _write_fixture_sounds(tmp_path: Path) -> Path:
@@ -111,6 +121,7 @@ def test_asset_bytes_prefers_pack(tmp_path, monkeypatch):
     assert found == (b"fake ogg for menu select", "ogg")
 
 
+@needs_loose_tree
 def test_asset_bytes_reads_loose_files_without_pack():
     # The test environment explicitly exercises the loose-file fallback.
     assert os.environ["FREIGHT_FATE_IGNORE_SOUND_PACK"] == "1"
@@ -123,10 +134,10 @@ def test_asset_bytes_reads_loose_files_without_pack():
 def test_committed_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_PACK_PATH.read_bytes()
-    assert len(pack_bytes) == 152_695_101
+    assert len(pack_bytes) == 224_884_245
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "df798d41a1d90695fe91508da6b861683b8705a8ea6d174d45d5edb1e5d7c704"
+        "cad82d380f73c98a6cfb84527ee09f59c6579dfac8a9fddb5200100a7f85a3b3"
     )
 
 
@@ -140,6 +151,7 @@ def _reset_default_pack(monkeypatch, path: Path) -> None:
     monkeypatch.setattr(assets_pack, "_default_pack_missing", False)
 
 
+@needs_loose_tree
 def test_unreadable_pack_falls_back_to_loose_files(tmp_path, monkeypatch):
     # A truncated or half-copied pack must not take the sound with it: a
     # source checkout still has the real tree, and it has to keep playing.
@@ -152,6 +164,7 @@ def test_unreadable_pack_falls_back_to_loose_files(tmp_path, monkeypatch):
     audio.verify_sound_assets()
 
 
+@needs_loose_tree
 def test_pack_from_another_program_falls_back_to_loose_files(tmp_path, monkeypatch):
     # Wrong magic entirely -- someone renamed an unrelated file into place.
     stranger = tmp_path / "sounds.pak"
@@ -161,6 +174,7 @@ def test_pack_from_another_program_falls_back_to_loose_files(tmp_path, monkeypat
     assert audio._asset_bytes("ui/menu_select", ("ogg", "wav")) is not None
 
 
+@needs_loose_tree
 def test_damaged_entry_costs_only_its_own_sound(tmp_path, monkeypatch):
     sounds = _write_fixture_sounds(tmp_path)
     out = assets_pack.write_pack(sounds, tmp_path / "sounds.pak")
@@ -196,6 +210,7 @@ def _pack_with_partial_ring(tmp_path: Path) -> assets_pack.SoundPack:
     return assets_pack.SoundPack(assets_pack.write_pack(sounds, tmp_path / "sounds.pak"))
 
 
+@needs_loose_tree
 def test_partial_ring_in_pack_is_not_blended_with_the_loose_tree(tmp_path, monkeypatch):
     # Bands crossfade into each other, so a pack that is missing one band must
     # not supply the other four: the whole ring comes off the loose tree.
@@ -230,6 +245,7 @@ def test_complete_ring_in_pack_is_used(tmp_path, monkeypatch):
         assert audio._asset_bytes(key, ("ogg", "wav")) == (f"packed {name} band".encode(), "ogg")
 
 
+@needs_loose_tree
 def test_older_pack_still_serves_the_keys_it_has(tmp_path, monkeypatch):
     # munchkinbear's case: an older pack alongside a current checkout. Keys the
     # old pack carries play from it; keys added since come off the loose tree.
@@ -244,6 +260,7 @@ def test_older_pack_still_serves_the_keys_it_has(tmp_path, monkeypatch):
     assert newer is not None  # not in the old pack; comes from the checkout
 
 
+@needs_loose_tree
 def test_real_assets_tree_round_trips(tmp_path):
     out = assets_pack.write_pack(SOUNDS_DIR, tmp_path / "sounds.pak")
     pack = assets_pack.SoundPack(out)

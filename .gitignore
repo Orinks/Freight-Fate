@@ -57,9 +57,12 @@ src/freight_fate/data/_baked_data.py
 src/freight_fate/assets/sounds-licensed/
 sound-source/
 *.wav
-# ...except shipped game assets: looping beds are committed as WAV because
-# lossy edges break loop seams (tools/fix_loop_seams.py, 2026-07-24).
-!src/freight_fate/assets/sounds/**/*.wav
+# The shipped audio is src/freight_fate/sounds.pak (tools/pack_sounds.py).
+# The loose assets/sounds tree is builder-local source material and never
+# ships through the repo (owner, 2026-08-08); only the credits ride along
+# so licensing stays reviewable in a clean clone.
+src/freight_fate/assets/sounds/**
+!src/freight_fate/assets/sounds/CREDITS.md
 
 # Prototype/audition renders (regenerate from sound-test/*.py, all deterministic)
 sound-test/*.wav

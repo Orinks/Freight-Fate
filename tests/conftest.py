@@ -8,7 +8,14 @@ import os
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
 os.environ["FREIGHT_FATE_NO_SPEECH"] = "1"
-os.environ["FREIGHT_FATE_IGNORE_SOUND_PACK"] = "1"
+# Builder machines carry the loose assets/sounds tree (it is not in the repo;
+# the shipped audio is sounds.pak). Where the tree exists, tests exercise the
+# loose-file path the sound authors rely on; a clean clone (CI) runs the same
+# suite against the committed pack instead.
+from pathlib import Path as _Path  # noqa: E402
+
+if (_Path(__file__).parents[1] / "src" / "freight_fate" / "assets" / "sounds" / "ui").exists():
+    os.environ["FREIGHT_FATE_IGNORE_SOUND_PACK"] = "1"
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pytest
