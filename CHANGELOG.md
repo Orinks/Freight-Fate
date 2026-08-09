@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Changed
+
+- **Test builds use a staging server for online services.** While 1.9 is
+  in testing, the drivers board, profile sharing, and cloud backup talk
+  to a separate staging copy of orinks.net with its own accounts and
+  data. Connect a fresh account there to help test; nothing you do on
+  staging touches your real orinks.net driver, and staging careers and
+  backups will not carry over when 1.9 releases.
+
 ### Added
 
 - **Live traffic and truck parking cover far more of the map.** Real

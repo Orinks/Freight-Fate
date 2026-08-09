@@ -17,6 +17,10 @@ from .models.profile import Profile
 
 PUBLIC_KEYS = {
     "2026-07": base64.b64decode("RJ1PR6fVDk98eb3uMysfmvzfURO/wPkLX5O52OapNoY="),
+    # Staging-only key: the 1.9 test line signs against the staged
+    # orinks-net deployment (see DEFAULT_BASE_URL in online_presence.py).
+    # Remove alongside the base-URL flip in the pre-release checklist.
+    "2026-08-staging": base64.b64decode("dReX+JwU/e3iAWFQI/8F/CUXX5ICaV3PT5k3tyBZO88="),
 }
 SUPPORTED_VALIDATOR_VERSION = 1
 

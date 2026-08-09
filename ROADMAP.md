@@ -169,6 +169,13 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       build pointed at the preview validates end to end; at dev cutover,
       re-regen if fields drifted and replay stored prod blobs before the
       prod deploy.
+- [ ] **PRE-RELEASE MUST-DO: point the game back at production.** The
+      1.9 test line defaults its online services to the staged
+      deployment (dev.orinks.net, the orinks-net dev branch on its own
+      Convex backend). Before the 1.9 release: flip DEFAULT_BASE_URL in
+      online_presence.py back to PRODUCTION_BASE_URL and drop the
+      2026-08-staging entry from PUBLIC_KEYS in cloud_save_integrity.py.
+      Staged accounts and backups are test data and do not migrate.
 - [x] **Country-originals music batch (2026-08-08).** Thirty-one tracks
       from the owner's originals zip: five day beds, eight night beds, ten
       country-station songs, the seven-track Nashville After Hours jazz

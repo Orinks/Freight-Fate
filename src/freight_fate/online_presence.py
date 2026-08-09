@@ -56,7 +56,14 @@ log = logging.getLogger(__name__)
 # The www host, deliberately: the apex orinks.net answers API calls with a
 # 307 redirect to www, and urllib will not re-send a POST body through a
 # redirect -- so heartbeats against the apex fail with HTTPError 307.
-DEFAULT_BASE_URL = "https://www.orinks.net"
+PRODUCTION_BASE_URL = "https://www.orinks.net"
+
+# The 1.9 test line talks to the staged orinks-net deployment (the dev
+# branch on its own backend) so testers exercise the 1.9 validator and
+# profile fields without touching production accounts or the live board.
+# MUST flip back to PRODUCTION_BASE_URL before the 1.9 release -- there
+# is a release-checklist bullet for this in ROADMAP.md.
+DEFAULT_BASE_URL = "https://dev.orinks.net"
 
 # Presence is by far the biggest source of backend reads and writes -- a
 # driver on a long haul beats for hours, and it is the single largest line in
