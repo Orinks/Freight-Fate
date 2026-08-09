@@ -631,6 +631,10 @@ class CloudSaves:
     @property
     def status(self) -> str:
         """Short persistent player-facing result for the Cloud backup menu."""
+        # Never claim readiness while the service is off: 1.9 testers heard
+        # "ready" with the setting off and believed they were backed up.
+        if not self._enabled:
+            return "Cloud backup is off. Saves on this computer are not backed up."
         with self._lock:
             return self._status
 

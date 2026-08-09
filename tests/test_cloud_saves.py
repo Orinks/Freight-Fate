@@ -194,6 +194,18 @@ def test_enabled_without_identity_stays_dormant():
     assert transport.requests == []
 
 
+def test_status_says_off_while_backups_are_disabled():
+    # The menu's status line must never claim readiness while the service is
+    # off: signed-in 1.9 testers heard "Cloud backup is ready" and believed
+    # they were backed up when nothing was ever uploaded.
+    transport = FakeTransport()
+    clock = Clock()
+    service = make_service(transport, clock, enabled=False)
+    assert service.status == "Cloud backup is off. Saves on this computer are not backed up."
+    service.set_enabled(True)
+    assert service.status == "Cloud backup is ready."
+
+
 # -- upload scheduling ------------------------------------------------------------
 
 
@@ -772,6 +784,47 @@ def test_delete_menu_flow_confirms_then_forgets_the_slot(monkeypatch):
         assert any("removed from your orinks.net account" in t for t in spoken)
         # The slot menu no longer offers a delete for backups that are gone.
         assert not any(item.text.startswith("Delete") for item in slot.items)
+    finally:
+        app.shutdown()
+
+
+def test_backup_menu_says_off_and_offers_the_opt_in(monkeypatch):
+    import pygame
+
+    from freight_fate import cloud_saves as cloud_saves_module
+    from freight_fate.app import App
+    from freight_fate.states.cloud_save_states import CloudBackupState
+
+    IDENTITY.save()
+    app = App()
+    spoken = []
+    app.ctx.say = speech_stub(spoken)
+    try:
+        monkeypatch.setattr(cloud_saves_module, "list_saves", lambda identity, **kw: [])
+        state = CloudBackupState(app.ctx)
+        app.push_state(state)
+        assert state._fetched.wait(5.0)
+        state.update(0.0)
+
+        assert any(item.text.startswith("Status: Cloud backup is off") for item in state.items)
+        while state.items[state.index].text != "Turn Cloud backup on":
+            state.handle_event(key_event(pygame.K_DOWN))
+        state.handle_event(key_event(pygame.K_RETURN))
+
+        consent = app.state
+        assert consent.title == "Turn Cloud backup on?"
+        consent.handle_event(key_event(pygame.K_DOWN))
+        consent.handle_event(key_event(pygame.K_RETURN))
+
+        assert app.ctx.settings.cloud_saves is True
+        assert app.cloud.enabled
+        # Back on the rebuilt backup menu: the opt-in is gone and the status
+        # line reports readiness instead of off.
+        assert app.state is state
+        assert state._fetched.wait(5.0)
+        state.update(0.0)
+        assert not any(item.text == "Turn Cloud backup on" for item in state.items)
+        assert any(item.text == "Status: Cloud backup is ready." for item in state.items)
     finally:
         app.shutdown()
 

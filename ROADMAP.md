@@ -176,6 +176,33 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       online_presence.py back to PRODUCTION_BASE_URL and drop the
       2026-08-staging entry from PUBLIC_KEYS in cloud_save_integrity.py.
       Staged accounts and backups are test data and do not migrate.
+- [x] **Staging cloud backups fixed for 1.9 careers (2026-08-09).** Day
+      one of staged testing surfaced it: every company-driver backup was
+      silently refused as `invalid_possession`, because the validator's
+      possession rule still demanded the career own the trainer rig and
+      its active truck -- the 1.8 model that 1.9's dispatch-assigned
+      fleet ended (fresh careers own nothing until the level-18 buy-in,
+      and the buy-in keeps the assigned tractor, not the rig). Fixed on
+      orinks-net dev (4616cf5): possession now checks only that truck
+      keys are real and listed once, the forensics-first stance the money
+      rule already took. Rides to prod with the normal dev-to-main merge
+      at cutover. The game's Cloud backup menu also stops claiming
+      "ready" while the setting is off and offers the opt-in in place.
+      LESSON FOR THE CUTOVER AUDIT: the invariants-export regen was
+      byte-identical and still missed this, because the stale half was
+      rule LOGIC, not data -- and replaying stored prod blobs cannot
+      catch it either, since every stored blob predates the new model.
+      At the dev cutover, replay freshly played 1.9 careers (company new
+      hire, slip-seat level 4+, post-buy-in owner-operator) against the
+      validator, not just the stored-blob corpus.
+- [ ] **Speak refused backups where the player can hear it.** A
+      non-transient upload rejection only lands in the Cloud backup
+      menu's status line; nothing is spoken at save time, so a refused
+      backup sounds exactly like a working one until the player goes
+      looking (this is also what kept the possession bug invisible --
+      and the same silence family as the sticky-conflict case from
+      Jessie's stale prod save). Consider a one-time spoken notice when
+      a slot's backups stop being accepted.
 - [x] **Country-originals music batch (2026-08-08).** Thirty-one tracks
       from the owner's originals zip: five day beds, eight night beds, ten
       country-station songs, the seven-track Nashville After Hours jazz

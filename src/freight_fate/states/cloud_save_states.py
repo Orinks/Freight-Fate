@@ -146,6 +146,14 @@ class CloudBackupState(MenuState):
                 help="This stays here so you can review the latest Cloud backup result.",
             )
         ]
+        if not self._service().enabled:
+            items.append(
+                MenuItem(
+                    "Turn Cloud backup on",
+                    self._turn_on,
+                    help="Hear how cloud backup works, then choose whether to turn it on.",
+                )
+            )
         if self._auth_failed:
             items.append(
                 MenuItem(
@@ -196,6 +204,9 @@ class CloudBackupState(MenuState):
 
     def _speak_disclosure(self) -> None:
         self.ctx.say(CLOUD_DISCLOSURE)
+
+    def _turn_on(self) -> None:
+        self.ctx.push_state(CloudBackupConsentState(self.ctx))
 
     def _refresh_list(self) -> None:
         self._status = "Checking your cloud backups."

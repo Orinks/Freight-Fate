@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Cloud backups of 1.9 careers are accepted again.** The server was
+  quietly refusing every backup of a company-driver career because it
+  still expected drivers to own their truck, which 1.9's assigned
+  tractors ended. Your next save after this fix backs up normally; no
+  game update is needed. The Cloud backup menu also now says plainly
+  when cloud backup is turned off instead of claiming it is ready, and
+  offers to turn it on right there.
+
 ### Changed
 
 - **Test builds use a staging server for online services.** While 1.9 is
