@@ -317,6 +317,10 @@ def _dial_group(station: RadioStation) -> int:
         return 2
     if station.fallback:
         return 8
+    # Freight Fate's own music stations (playlist-backed, no stream) sit with
+    # Roadhouse and Night Line: always on the dial, everywhere, in every mode.
+    if station.playlist and not station.real_stream:
+        return 1
     if station.source_type in {"local", "regional", "imported"}:
         return 4
     if station.source_type == "afn":

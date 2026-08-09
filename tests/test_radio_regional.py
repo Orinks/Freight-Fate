@@ -34,15 +34,39 @@ def _station(station_id):
     return next(s for s in DEFAULT_RADIO_CATALOG if s.id == station_id)
 
 
-def test_regional_stations_are_streamer_safe_fiction_with_real_ranges():
+# Reception-physics fixtures: the fictional catalog stations are always
+# available now (every player hears the FF music), so range, fringe, and
+# elevation behavior is pinned on stations built here with the old contours.
+def _ranged_fixture(
+    station_id="kfix-dallas",
+    lat=DALLAS[0],
+    lon=DALLAS[1],
+    range_miles=120.0,
+    site_elev_ft=None,
+    playlist="",
+):
+    return RadioStation(
+        station_id,
+        "Fixture FM",
+        "KFIX",
+        "country",
+        "reception fixture",
+        lat=lat,
+        lon=lon,
+        range_miles=range_miles,
+        site_elev_ft=site_elev_ft,
+        playlist=playlist,
+    )
+
+
+def test_regional_stations_are_streamer_safe_fiction_available_everywhere():
     assert len(REGIONAL) >= 10
     for station in REGIONAL:
         assert not station.real_stream
         assert station.safe_for_streaming
         assert station.supported
-        assert station.lat is not None and station.lon is not None
-        # realistic FM contours: strong regional stations, not continent-wide
-        assert 80 <= station.range_miles <= 150
+        # Every player hears the FF music: no transmitter bubble, no mode gate.
+        assert station.always_available
         assert station.playlist in STATION_PLAYLISTS
         # US call-sign convention: K west of the Mississippi, W east
         assert station.call_sign[0] in {"K", "W"}
@@ -86,7 +110,7 @@ def test_new_afn_globals_are_cataloged_with_checked_sources():
 
 
 def test_signal_volume_factor_fades_with_distance():
-    station = _station("krwl-dallas")
+    station = _ranged_fixture()
     at_tower = estimate_signal(station, DALLAS)
     assert signal_volume_factor(at_tower) == 1.0
 
@@ -110,8 +134,9 @@ def test_elevation_extends_fm_range_like_the_rim(  # the owner's ham anchor
     # From high ground you receive far past the flat contour: line-of-sight
     # FM, 4/3-earth radio horizon. Desert Rock Phoenix (site 1086 ft, range
     # 125 mi) at ~200 miles: silent on the flats, clear from ~7000 ft.
-    station = _station("kdrt-phoenix")
-    assert station.frequency_mhz == pytest.approx(101.5)
+    station = _ranged_fixture(
+        "kfix-phoenix", lat=33.4484, lon=-112.074, range_miles=125.0, site_elev_ft=1086.0
+    )
     far_north = (station.lat + 2.9, station.lon)  # ~200 miles out
 
     flat = estimate_signal(station, far_north, elevation_ft=station.site_elev_ft)
@@ -130,7 +155,9 @@ def test_below_the_tower_site_is_neutral_never_a_penalty():
     # A mountain-top transmitter looks straight down into its own valley:
     # every in-market listener sits below the site, and that must never
     # shrink the contour (KJZZ on South Mountain serving Phoenix).
-    station = _station("krdg-denver")  # site 5280 ft, range 125 mi
+    station = _ranged_fixture(
+        "kfix-denver", lat=39.7392, lon=-104.9903, range_miles=125.0, site_elev_ft=5280.0
+    )
     at_100mi = (station.lat + 1.45, station.lon)
 
     at_site_level = estimate_signal(station, at_100mi, elevation_ft=station.site_elev_ft)
@@ -140,7 +167,7 @@ def test_below_the_tower_site_is_neutral_never_a_penalty():
 
 
 def test_fringe_factor_is_monotonic_toward_the_range_edge():
-    station = _station("krwl-dallas")
+    station = _ranged_fixture()
     factors = []
     for east in (0.0, 0.6, 1.2, 1.8):
         reception = estimate_signal(station, (DALLAS[0], DALLAS[1] + east))
@@ -148,16 +175,18 @@ def test_fringe_factor_is_monotonic_toward_the_range_edge():
     assert factors == sorted(factors, reverse=True)
 
 
-def test_regional_station_receivable_only_near_its_market():
-    radio = RadioState(position=DALLAS)
+def test_ranged_station_receivable_only_near_its_market():
+    dallas_fix = _ranged_fixture("kfix-dallas")
+    chicago_fix = _ranged_fixture("wfix-chicago", lat=CHICAGO[0], lon=CHICAGO[1])
+    radio = RadioState(catalog=DEFAULT_RADIO_CATALOG + (dallas_fix, chicago_fix), position=DALLAS)
     ids_near_dallas = {r.station.id for r in radio.receivable_stations()}
-    assert "krwl-dallas" in ids_near_dallas
-    assert "wgrx-chicago" not in ids_near_dallas
+    assert "kfix-dallas" in ids_near_dallas
+    assert "wfix-chicago" not in ids_near_dallas
 
     radio.update_position(CHICAGO)
     ids_near_chicago = {r.station.id for r in radio.receivable_stations()}
-    assert "wgrx-chicago" in ids_near_chicago
-    assert "krwl-dallas" not in ids_near_chicago
+    assert "wfix-chicago" in ids_near_chicago
+    assert "kfix-dallas" not in ids_near_chicago
 
 
 def test_station_playlist_selection_is_deterministic_and_complete():
@@ -234,8 +263,10 @@ def test_regional_station_plays_its_format_pool_while_in_range(denver_driving):
 
 def test_station_fades_out_of_range_and_falls_back_to_roadhouse(denver_driving):
     app, driving, played_music, played_effects, events = denver_driving
+    ranged = _ranged_fixture("kfix-denver", lat=39.7392, lon=-104.9903, playlist="classic_rock")
+    driving.radio.catalog = driving.radio.catalog + (ranged,)
     driving.radio.update_position((39.7392, -104.9903))
-    driving.radio.select_station("krdg-denver", driving._radio_backend)
+    driving.radio.select_station("kfix-denver", driving._radio_backend)
 
     # drive far beyond The Ridge's contour: reception check retunes safely
     def far_from_denver(route, position_mi, world):
@@ -260,7 +291,9 @@ def test_fringe_signal_thins_radio_volume(denver_driving):
     app, driving, _music, played_effects, _events = denver_driving
     applied = []
     driving.ctx.audio.set_volumes = lambda **kw: applied.append(kw)
-    driving.radio.select_station("krdg-denver", driving._radio_backend)
+    ranged = _ranged_fixture("kfix-denver", lat=39.7392, lon=-104.9903, playlist="classic_rock")
+    driving.radio.catalog = driving.radio.catalog + (ranged,)
+    driving.radio.select_station("kfix-denver", driving._radio_backend)
 
     fringe = (39.7392, -104.9903 + 2.1)  # ~110 miles east of the Denver tower
 

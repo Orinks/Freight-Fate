@@ -519,9 +519,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 32.7767,
-      "lon": -96.797,
-      "range_miles": 120,
       "market": "Dallas",
       "region": "south_central",
       "frequency_mhz": 98.1,
@@ -529,7 +526,8 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "country"
+      "playlist": "country",
+      "always_available": true
     },
     {
       "id": "whwy-nashville",
@@ -539,9 +537,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 36.1627,
-      "lon": -86.7816,
-      "range_miles": 115,
       "market": "Nashville",
       "region": "mid_south",
       "frequency_mhz": 104.5,
@@ -549,7 +544,8 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "country"
+      "playlist": "country",
+      "always_available": true
     },
     {
       "id": "kpln-kansas-city",
@@ -559,9 +555,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 39.0997,
-      "lon": -94.5786,
-      "range_miles": 120,
       "market": "Kansas City",
       "region": "central_plains",
       "frequency_mhz": 95.7,
@@ -569,7 +562,8 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "country"
+      "playlist": "country",
+      "always_available": true
     },
     {
       "id": "kbsk-billings",
@@ -579,9 +573,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 45.7833,
-      "lon": -108.5007,
-      "range_miles": 135,
       "market": "Billings",
       "region": "northern_rockies",
       "frequency_mhz": 99.3,
@@ -589,7 +580,8 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "country"
+      "playlist": "country",
+      "always_available": true
     },
     {
       "id": "wgrx-chicago",
@@ -599,9 +591,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 41.8781,
-      "lon": -87.6298,
-      "range_miles": 110,
       "market": "Chicago",
       "region": "great_lakes",
       "frequency_mhz": 97.9,
@@ -609,7 +598,8 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "classic_rock"
+      "playlist": "classic_rock",
+      "always_available": true
     },
     {
       "id": "kdrt-phoenix",
@@ -619,9 +609,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 33.4484,
-      "lon": -112.074,
-      "range_miles": 125,
       "market": "Phoenix",
       "region": "desert_southwest",
       "frequency_mhz": 101.5,
@@ -629,7 +616,8 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "classic_rock"
+      "playlist": "classic_rock",
+      "always_available": true
     },
     {
       "id": "kchm-los-angeles",
@@ -639,9 +627,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 34.0522,
-      "lon": -118.2437,
-      "range_miles": 110,
       "market": "Los Angeles",
       "region": "west_coast",
       "frequency_mhz": 106.3,
@@ -649,7 +634,8 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "classic_rock"
+      "playlist": "classic_rock",
+      "always_available": true
     },
     {
       "id": "krdg-denver",
@@ -659,9 +645,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 39.7392,
-      "lon": -104.9903,
-      "range_miles": 125,
       "market": "Denver",
       "region": "mountain_west",
       "frequency_mhz": 103.7,
@@ -669,7 +652,8 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "classic_rock"
+      "playlist": "classic_rock",
+      "always_available": true
     },
     {
       "id": "ksnd-seattle",
@@ -679,9 +663,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 47.6062,
-      "lon": -122.3321,
-      "range_miles": 105,
       "market": "Seattle",
       "region": "pacific_northwest",
       "frequency_mhz": 102.1,
@@ -689,7 +670,8 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "classic_rock"
+      "playlist": "classic_rock",
+      "always_available": true
     },
     {
       "id": "wdlt-memphis",
@@ -699,9 +681,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 35.1495,
-      "lon": -90.049,
-      "range_miles": 110,
       "market": "Memphis",
       "region": "mid_south",
       "frequency_mhz": 94.3,
@@ -709,7 +688,8 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "blues"
+      "playlist": "blues",
+      "always_available": true
     },
     {
       "id": "wbyu-new-orleans",
@@ -719,9 +699,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 29.9511,
-      "lon": -90.0715,
-      "range_miles": 110,
       "market": "New Orleans",
       "region": "gulf_coast",
       "frequency_mhz": 100.9,
@@ -729,7 +706,8 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "blues"
+      "playlist": "blues",
+      "always_available": true
     },
     {
       "id": "wsol-atlanta",
@@ -739,9 +717,6 @@
       "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
       "source_type": "regional",
       "station_type": "regional",
-      "lat": 33.749,
-      "lon": -84.388,
-      "range_miles": 115,
       "market": "Atlanta",
       "region": "southeast",
       "frequency_mhz": 96.5,
@@ -749,7 +724,18 @@
       "safe_for_streaming": true,
       "real_stream": false,
       "supported": true,
-      "playlist": "blues"
+      "playlist": "blues",
+      "always_available": true
+    },
+    {
+      "id": "wnah-nashville",
+      "name": "Nashville After Hours 92.9",
+      "call_sign": "WNAH",
+      "format": "late-night jazz and crossover",
+      "source": "Freight Fate original station; Suno-composed Nashville jazz-crossover instrumentals (2026-08 originals batch)",
+      "source_type": "regional",
+      "always_available": true,
+      "playlist": "jazz"
     },
     {
       "id": "afn-global-fans",

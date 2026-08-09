@@ -155,6 +155,34 @@ def test_tuning_uses_receivable_stations_not_global_catalog():
     assert "wbur-boston" not in seen
 
 
+def test_ff_music_stations_receivable_everywhere_in_every_mode():
+    # No truck position, streamer-safe on, real streams off: the strictest
+    # possible dial must still carry every Freight Fate original-music station.
+    state = RadioState(position=None, streamer_safe=True, real_streams_enabled=False)
+    names = {reception.station.name for reception in state.receivable_stations()}
+    for expected in (
+        "The Rawhide 98.1",
+        "Big Sky Country 99.3",
+        "The Delta 94.3",
+        "Nashville After Hours 92.9",
+        "Freight Fate Roadhouse",
+    ):
+        assert expected in names, expected
+
+
+def test_ff_music_stations_share_the_ff_dial_group():
+    from freight_fate.radio import _dial_group
+
+    playlist_backed = [
+        station
+        for station in DEFAULT_RADIO_CATALOG
+        if station.playlist and not station.real_stream and station.id != SAFE_ROUTE_PLAYLIST
+    ]
+    assert len(playlist_backed) == 14
+    assert {_dial_group(station) for station in playlist_backed} == {1}
+    assert all(station.always_available for station in playlist_backed)
+
+
 def test_no_regional_signal_still_has_safe_and_afn_fallback_choices():
     # Interior Nevada on US-50: real radio darkness even after the
     # 623-city coverage fill (central South Dakota is SDPB country now).
