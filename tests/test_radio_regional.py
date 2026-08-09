@@ -61,8 +61,8 @@ def test_host_segments_have_generated_voice_clips_on_disk():
     assert len(ALL_HOST_SEGMENTS) == 12
     for segment in ALL_HOST_SEGMENTS:
         assert asset_exists(sounds, segment.key), segment.key
-    static = resources.files("freight_fate.assets") / "sounds" / "radio" / "static_burst.ogg"
-    assert static.is_file()
+    static = resources.files("freight_fate.assets") / "sounds" / "radio"
+    assert asset_exists(static, "static_burst")
 
 
 def test_builtin_stations_have_hosts_and_playlists():
