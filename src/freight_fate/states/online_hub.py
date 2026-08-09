@@ -77,7 +77,9 @@ class OnlineHubState(MenuState):
                 lambda: self._toggle_online_presence(1),
                 help="Profile sharing is one optional public setting for your driver profile, "
                 "official achievements, automatic road-journal posts, updates feed, "
-                "and on-duty board activity. Nothing is shared until you set it up: "
+                "and on-duty board activity. Career statistics on the public profile "
+                "include lifetime career earnings; the money you currently have is "
+                "never published. Nothing is shared until you set it up: "
                 "Set up the orinks.net account first. Cloud saves remain private and separate.",
             ),
             MenuItem(

@@ -3242,7 +3242,20 @@ class DrivingEventMixin:
         )
 
     def online_presence(self):
-        return self.presence()
+        # The drivers board line adds what the cab radio is playing; Discord
+        # presence (above) does not, so the clause rides only the board copy.
+        # Station display names are curated public catalog data (call sign and
+        # name), never a stream URL, and the clause disappears the moment the
+        # radio is switched off -- the board only ever hears what a passenger
+        # in the cab would.
+        base = self.presence()
+        if base is None or not self.radio.enabled:
+            return base
+        from ..discord_presence import PresenceState
+
+        clause = f"listening to {self.radio.current_station().display_name}"
+        detail = f"{base.detail}, {clause}" if base.detail else clause
+        return PresenceState(base.activity, detail)
 
     def lines(self) -> list[str]:
         t = self.truck

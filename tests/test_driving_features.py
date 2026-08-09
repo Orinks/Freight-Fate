@@ -3383,6 +3383,31 @@ def test_pause_menu_reports_off_duty_to_the_drivers_board():
         app.shutdown()
 
 
+def test_drivers_board_line_names_the_station_playing_in_the_cab():
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        driving.radio.enabled = True
+        station = driving.radio.current_station()
+        listening = f"listening to {station.display_name}"
+        board = driving.online_presence()
+        assert board.detail.endswith(listening)
+        # The clause is board-only color: Discord presence keeps the plain
+        # route/cargo detail, and no stream URL ever leaves the game.
+        assert listening not in driving.presence().detail
+        assert not station.stream_url or station.stream_url not in board.detail
+
+        # Radio off, clause gone -- the board hears only what the cab plays.
+        driving.radio.enabled = False
+        assert "listening to" not in driving.online_presence().detail
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_can_back_up_to_a_missed_rest_stop_with_t_menu():
     from freight_fate.app import App

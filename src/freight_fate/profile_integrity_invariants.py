@@ -8,6 +8,8 @@ from pathlib import Path
 from .achievements import ACHIEVEMENTS
 from .models.career import (
     DELIVERY_COMPLETION_XP,
+    ENDORSEMENT_LABELS_SPOKEN,
+    ENDORSEMENT_LEVELS,
     LEVEL_XP,
     XP_CLEAN_BONUS,
     XP_PER_MILE_ON_TIME,
@@ -15,6 +17,7 @@ from .models.career import (
     XP_STREAK_MAX_BONUS,
     Career,
 )
+from .models.carrier_fleet import FLEET_TIERS
 from .models.economy import PAY_ADVANCE_LIMIT
 from .models.market import MARKET_CARGO_KEYS
 from .models.profile import SAVE_VERSION, STARTING_MONEY, Profile, _fresh_condition
@@ -121,6 +124,16 @@ def invariant_data() -> dict:
         "marketCargoKeys": sorted(MARKET_CARGO_KEYS),
         "profileFields": _profile_fields(),
         "careerFields": sorted(Career.__dataclass_fields__),
+        # Public-profile display data: orinks.net derives each driver's
+        # endorsements (level-earned plus self-paid courses) and, for company
+        # drivers, the carrier fleet tier straight from the validated career.
+        # Exported rather than copied so the site's projection moves with the
+        # next balance pass instead of drifting behind it.
+        "endorsements": {
+            key: {"level": ENDORSEMENT_LEVELS[key], "label": ENDORSEMENT_LABELS_SPOKEN[key]}
+            for key in sorted(ENDORSEMENT_LEVELS)
+        },
+        "fleetTiers": [{"minLevel": tier.min_level, "label": tier.label} for tier in FLEET_TIERS],
         "truckConditionFields": _truck_condition_fields(),
         "sourceSaveVersion": SAVE_VERSION,
         "truckLabels": {key: truck.label for key, truck in TRUCK_CATALOG.items()},
