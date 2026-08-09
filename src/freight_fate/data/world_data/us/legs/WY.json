@@ -16004,13 +16004,6 @@
             "spoken": "Passing Granger"
           },
           {
-            "name": "The Big Boy Statue",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 300.0,
-            "spoken": "Billboard: Green River is ahead, where roadside diners, trona mines, and the desert wind all agree that you should stop before the next hundred miles of nothing."
-          },
-          {
             "name": "Lyman",
             "at_mi": 320.9,
             "off_mi": 2.74,

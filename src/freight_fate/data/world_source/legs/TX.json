@@ -23804,13 +23804,6 @@
             "spoken": "Entering Nome"
           },
           {
-            "name": "The Orange Show",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 30.0,
-            "spoken": "Billboard: Southeast Texas is ahead, where petrochemical towers glow at night and roadside attractions occasionally make perfect sense only after several hundred miles."
-          },
-          {
             "name": "Devers",
             "at_mi": 30.9,
             "off_mi": 0.01,

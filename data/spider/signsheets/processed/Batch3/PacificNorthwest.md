@@ -81,7 +81,7 @@ coeur_d_alene_id_us` (116).
 - describe: Enchanted Forest is a handmade family amusement park south of Salem, filled with fairy-tale scenes and quirky rides.
 
 ### Ape Cave
-- treatment: billboard
+- treatment: skip
 - leg: seattle_wa_us -> wenatchee_wa_us
 - at_mi: 60
 - spoken: Billboard: Washington has an Ape Cave. It contains lava, darkness, and no confirmed apes, which is exactly what an ape would want you to believe.

@@ -32165,13 +32165,6 @@
             "spoken": "Passing Greencastle"
           },
           {
-            "name": "Uranus, Indiana",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 45.0,
-            "spoken": "Billboard: Roadside fudge is ahead. No, this is not that Uranus. The Midwest has apparently decided one Uranus is not enough."
-          },
-          {
             "name": "Eel River",
             "category": "river",
             "kind": "point",

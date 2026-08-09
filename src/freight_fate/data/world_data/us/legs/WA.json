@@ -15110,13 +15110,6 @@
             "spoken": "Approaching Windy Pass"
           },
           {
-            "name": "Ape Cave",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 60.0,
-            "spoken": "Billboard: Washington has an Ape Cave. It contains lava, darkness, and no confirmed apes, which is exactly what an ape would want you to believe."
-          },
-          {
             "name": "Okanogan-Wenatchee National Forest",
             "category": "national_forest",
             "kind": "zone",

@@ -18094,13 +18094,6 @@
             "spoken": "Crossing the Ochlockonee River"
           },
           {
-            "name": "Constitution Oak",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 105.0,
-            "spoken": "Billboard: Tallahassee is ahead, where Florida wrote its first constitution beneath an oak tree and then wisely moved government indoors with air conditioning."
-          },
-          {
             "name": "Woodville",
             "at_mi": 108.9,
             "off_mi": 8.78,

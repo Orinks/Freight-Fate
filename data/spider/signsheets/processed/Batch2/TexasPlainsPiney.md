@@ -97,7 +97,7 @@ beaumont_tx_us` (108), `college_station_tx_us -> temple_tx_us` (91),
 - describe: West, Texas, is famous for Czech bakeries and sausage-filled pastries served around the clock to Interstate Thirty-Five travelers.
 
 ### The Orange Show
-- treatment: billboard
+- treatment: skip
 - leg: beaumont_tx_us -> college_station_tx_us
 - at_mi: 30
 - spoken: Billboard: Southeast Texas is ahead, where petrochemical towers glow at night and roadside attractions occasionally make perfect sense only after several hundred miles.

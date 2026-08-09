@@ -73,7 +73,7 @@ dothan_al_us` (138).
 - describe: A tiny triangular parcel in downtown Dothan is promoted as the world's smallest city block.
 
 ### Constitution Oak
-- treatment: billboard
+- treatment: skip
 - leg: dothan_al_us -> tallahassee_fl_us
 - at_mi: 105
 - spoken: Billboard: Tallahassee is ahead, where Florida wrote its first constitution beneath an oak tree and then wisely moved government indoors with air conditioning.
