@@ -40,6 +40,7 @@ This file catalogues the game layer, and then the spoken vocabulary for both.
 | Loyalty account | `LoyaltyAccount` | `models/loyalty.py` |
 | Radio favorite (spoken "favorites", a saved station) | `RadioState.favorite_ids` | `radio.py` |
 | Save migration | `migrate_save_data`, `SAVE_VERSION` | `models/save_migration.py` |
+| Career from an earlier version (the 1.9 cutover gate; never "legacy" in spoken text) | `created_line`, `LegacyCareerError` | `models/profile.py` |
 | Integrity signature | `SIGNATURE_FIELD`, `ProfileIntegrityError` | `models/profile.py` |
 | Profile invariants | -- | `profile_invariants.py`, `profile_integrity_invariants.py` |
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from ..data.regions import REGION_LABELS
-from ..models.profile import DEFAULT_CITY, Profile
+from ..models.profile import DEFAULT_CITY, Profile, find_save_path, is_pre_1_9_save_file
 from ..models.start_options import all_start_options, apply_start_option, start_option
 from .base import MenuItem, MenuState
 
@@ -173,6 +173,21 @@ class HomeCityState(MenuState):
         from .main_menu import _first_state_after_career_creation
 
         name = self.driver_name
+        # Loading over a same-named 1.9 career is a deliberate restart, but a
+        # same-named career from an earlier version must never be overwritten:
+        # the legacy notice just promised that save stays safe on disk for
+        # 1.8, and this is the only path that could break the promise.
+        same_name = find_save_path(name)
+        if same_name is not None and is_pre_1_9_save_file(same_name):
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(
+                f"There is already a career named {name} from an earlier "
+                "version of Freight Fate. That save stays as it is, so this "
+                "new career needs a different driver name. Press Escape to "
+                "go back and change the name.",
+                interrupt=True,
+            )
+            return
         existing = {p.stem.lower() for p in Profile.list_saves()}
         option = start_option(self.start_key)
         profile = Profile(name=name, current_city=city)

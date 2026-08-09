@@ -424,10 +424,18 @@ def restore_to_disk(payload: dict, sync_state: SyncState | None = None) -> Path:
     from .models.profile import (
         LEGACY_SAVE_SUFFIX,
         SAVE_SUFFIX,
+        LegacyCareerError,
         encode_save_bytes,
+        is_pre_1_9_save,
         save_path_for,
     )
 
+    # Careers created before the 1.9 line do not restore here, for the same
+    # reason the load gate refuses their local files: 1.9 starts everyone
+    # fresh. Checked before anything touches disk; the cloud copy stays in
+    # the account, still restorable by the 1.8 builds that made it.
+    if is_pre_1_9_save(payload["profile"]):
+        raise LegacyCareerError(str(payload["profile"].get("name") or "Driver"))
     profile = verify_cloud_revision(payload["profile"], payload)
     # Absolution. The server grants this only on a revision it signed and
     # fully validated, so a career that was marked purely for moving between

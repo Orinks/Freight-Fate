@@ -12,8 +12,32 @@ import time
 
 from .. import cloud_saves
 from ..cloud_save_integrity import CloudSaveIntegrityError
+from ..models.profile import FIRST_1_9_SAVE_VERSION, LegacyCareerError
 from ..online_presence import OnlineIdentity
 from .base import MenuItem, MenuState
+
+# Spoken when a backup made before the 1.9 line is picked for restore: the
+# same fresh-start rule as the local load gate, said kindly, with the backup
+# left exactly where it is.
+LEGACY_BACKUP_NOTICE = (
+    "This backup was made by an earlier version of Freight Fate. Version "
+    "1.9 rebalances the whole career, so every driver starts fresh, and "
+    "earlier careers cannot be restored here. The backup stays safe in "
+    "your orinks.net account, and Freight Fate 1.8 can still restore it."
+)
+
+
+def _is_legacy_snapshot(entry: dict) -> bool:
+    """Whether a cloud revision's metadata says it predates the 1.9 line.
+
+    The server records the save version of every upload (the validator reads
+    it first), so the list can label old backups without downloading them.
+    Metadata-free entries pass; the restore path checks the downloaded
+    profile itself either way.
+    """
+    version = entry.get("saveVersion")
+    return isinstance(version, int) and 0 < version < FIRST_1_9_SAVE_VERSION
+
 
 CLOUD_DISCLOSURE = (
     "Your full career is stored privately in your orinks.net account. orinks.net "
@@ -154,6 +178,8 @@ class CloudBackupState(MenuState):
                 if entry.get("summary"):
                     bits.append(entry["summary"])
                 bits.append(_backed_up_text(entry.get("createdAt")))
+                if _is_legacy_snapshot(entry):
+                    bits.append("from an earlier version of Freight Fate")
                 if name in conflicts:
                     bits.append("needs attention: this computer has a different copy")
                 items.append(
@@ -280,7 +306,12 @@ class CloudSlotState(MenuState):
                 items.append(
                     MenuItem(
                         f"Restore an older backup: {_backed_up_text(entry.get('createdAt'))}"
-                        + (f". {entry['summary']}" if entry.get("summary") else ""),
+                        + (f". {entry['summary']}" if entry.get("summary") else "")
+                        + (
+                            ". From an earlier version of Freight Fate"
+                            if _is_legacy_snapshot(entry)
+                            else ""
+                        ),
                         lambda e=entry: self._confirm_restore(e),
                         help="Replaces the local save with this older backup.",
                     )
@@ -304,7 +335,8 @@ class CloudSlotState(MenuState):
         latest = self.revisions[0] if self.revisions else None
         if latest is None:
             return "No backups for this career yet"
-        return f"Restore the latest backup, {_backed_up_text(latest.get('createdAt'))}"
+        legacy = ", from an earlier version of Freight Fate" if _is_legacy_snapshot(latest) else ""
+        return f"Restore the latest backup, {_backed_up_text(latest.get('createdAt'))}{legacy}"
 
     def _conflict_label(self, conflict: dict) -> str:
         summary = conflict.get("latestSummary")
@@ -319,6 +351,11 @@ class CloudSlotState(MenuState):
             return
         if entry is None:
             self.ctx.say("There is no backup to restore for this career.", interrupt=True)
+            return
+        if _is_legacy_snapshot(entry):
+            # Refused before the confirmation step: there is no yes to offer.
+            # Nothing was downloaded and nothing on either side changes.
+            self.ctx.say(LEGACY_BACKUP_NOTICE, interrupt=True)
             return
         self.ctx.push_state(ConfirmRestoreState(self.ctx, self, entry))
 
@@ -353,6 +390,12 @@ class CloudSlotState(MenuState):
                 path = cloud_saves.restore_to_disk(
                     payload, self.ctx.cloud_saves_service().sync_state
                 )
+            except LegacyCareerError:
+                # The metadata gate above missed it (an entry without a save
+                # version); restore_to_disk checked the downloaded profile
+                # itself and refused before touching disk.
+                self._outcome = "legacy_refused"
+                return
             except Exception:
                 self._outcome = "restore_failed"
                 return
@@ -415,6 +458,14 @@ class CloudSlotState(MenuState):
             if path is None:
                 raise FileNotFoundError(self.save_name)
             profile_dict = Profile.load(path).to_dict()
+        except LegacyCareerError:
+            self.ctx.say(
+                "This computer's save for that career is from an earlier "
+                "version of Freight Fate, so it cannot be uploaded. The save "
+                "stays as it is, and you can still use the cloud copy.",
+                interrupt=True,
+            )
+            return
         except Exception:
             self.ctx.say(
                 "This computer's save for that career could not be read, so "
@@ -503,6 +554,12 @@ class CloudSlotState(MenuState):
             self._status = "Backup needs a newer Freight Fate version. Nothing restored."
             self.ctx.say(
                 "This backup needs a newer Freight Fate version. Update the game and try again. Nothing was restored.",
+                interrupt=True,
+            )
+        elif outcome == "legacy_refused":
+            self._status = "Backup is from an earlier version. Nothing was restored."
+            self.ctx.say(
+                f"{LEGACY_BACKUP_NOTICE} Your local save was not touched.",
                 interrupt=True,
             )
         elif outcome == "auth_failed":

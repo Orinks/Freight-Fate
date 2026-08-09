@@ -99,7 +99,11 @@ def test_old_save_without_achievements_loads_with_defaults(tmp_path):
     from freight_fate.models.profile import Profile
 
     path = tmp_path / "old.json"
-    path.write_text(json.dumps({"name": "Old Timer", "money": 5000.0}), encoding="utf-8")
+    # A sparse 1.9-line save from before achievements had fields (version 10
+    # keeps it past the pre-1.9 load gate, which is tested elsewhere).
+    path.write_text(
+        json.dumps({"name": "Old Timer", "money": 5000.0, "version": 10}), encoding="utf-8"
+    )
 
     loaded = Profile.load(path)
 

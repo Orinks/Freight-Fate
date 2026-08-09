@@ -774,3 +774,87 @@ def test_delete_menu_flow_confirms_then_forgets_the_slot(monkeypatch):
         assert not any(item.text.startswith("Delete") for item in slot.items)
     finally:
         app.shutdown()
+
+
+# -- the 1.9 cutover gate (careers from the 1.8 line do not restore here) --------
+
+
+def make_legacy_profile_dict(name="Road Star", money=77_000.0) -> dict:
+    """A cloud snapshot as a 1.8-line build would have uploaded it:
+    save version 5, no created-on marker."""
+    data = Profile(name=name, money=money).to_dict()
+    data.pop("created_line", None)
+    data["version"] = 5
+    return data
+
+
+def test_legacy_cloud_restore_refuses_without_touching_anything():
+    from freight_fate.models.profile import LegacyCareerError
+
+    local = Profile(name="Road Star", money=5.0)
+    path = local.save()
+    before = path.read_bytes()
+    reply = make_cloud_reply(make_legacy_profile_dict())
+    payload = download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
+    assert payload is not None
+    sync_state = SyncState()
+
+    with pytest.raises(LegacyCareerError):
+        restore_to_disk(payload, sync_state)
+
+    # Refused before anything was written: the local save is byte-for-byte
+    # intact, no fallback file appeared, and the sync state never moved.
+    # (The cloud copy is only ever read here; deleting is a separate,
+    # confirmed menu action.)
+    assert path.read_bytes() == before
+    assert not path.with_suffix(".ffsave.bak").exists()
+    assert sync_state.slots() == {}
+
+
+def test_current_line_backup_without_marker_still_restores():
+    # A 1.9 tester's backup from before the created-on marker existed: the
+    # save version vouches for it, exactly as the local load gate does.
+    data = Profile(name="Road Star", money=77_000.0).to_dict()
+    data.pop("created_line", None)
+    reply = make_cloud_reply(data)
+    payload = download_save(IDENTITY, save_name="Road Star", transport=FakeTransport(reply=reply))
+    path = restore_to_disk(payload, SyncState())
+    restored = Profile.load(path)
+    assert restored.money == 77_000.0
+    assert restored.created_line == "1.9"
+
+
+def test_legacy_snapshot_is_labeled_and_refused_before_the_confirm_step():
+    import pygame
+
+    from freight_fate.app import App
+    from freight_fate.states.cloud_save_states import LEGACY_BACKUP_NOTICE, CloudSlotState
+
+    IDENTITY.save()
+    app = App()
+    spoken = []
+    app.ctx.say = speech_stub(spoken)
+    try:
+        entry = {
+            "saveName": "Old Timer",
+            "revision": 3,
+            "saveVersion": 5,
+            "createdAt": 1_700_000_000_000,
+            "summary": "Old Timer, level 50",
+        }
+        slot = CloudSlotState(app.ctx, "Old Timer", [entry])
+        app.push_state(slot)
+        restore_items = [item.text for item in slot.items if item.text.startswith("Restore")]
+        assert any("from an earlier version of Freight Fate" in text for text in restore_items)
+
+        while not slot.items[slot.index].text.startswith("Restore"):
+            slot.handle_event(key_event(pygame.K_DOWN))
+        slot.handle_event(key_event(pygame.K_RETURN))
+
+        # No confirmation screen opened, nothing was downloaded or deleted;
+        # the refusal is spoken kindly and the menu stays put.
+        assert app.state is slot
+        assert any(LEGACY_BACKUP_NOTICE in text for text in spoken)
+        assert any("stays safe in your orinks.net account" in text for text in spoken)
+    finally:
+        app.shutdown()
