@@ -4,6 +4,16 @@
 
 ### Added
 
+- **Achievements are now browsed by category.** The achievements screen
+  opens on seven categories -- Out on the Road, The Working Day, Career
+  and Rank, The Dial and Song Towns, Weather and the Calendar, Places on
+  the Map, and Deep Cuts -- each spoken with how many you have earned of
+  its total. Enter a category to review its badges: earned ones tell
+  their story, locked ones keep to their title, and a few hidden ones
+  stay a secret the manifest is keeping until you find them. With the
+  catalog past one hundred seventy badges, one flat list had become a
+  long listen.
+
 - **Thirty-one new original songs and beds across the game.** The country
   originals batch joins the music: new daytime and nighttime driving beds,
   ten more songs on the country stations, and a brand-new station --

@@ -107,22 +107,18 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       re-index world data, and update the pinned landmark/coverage
       counts. Owner rule: no new sign copy gets authored in this pass --
       the sheets are the source of truth.
-- [ ] **Achievement categories, on Saltwake's model.** The 145-badge
-      catalog is one flat list; Saltwake (133 marks) browses in two
-      levels and it reads far better under a screen reader. Adopt its
-      shape: a categories table in the catalog (id, short titled
-      personality line, description), every badge tagged with a category
-      id, and the Achievements screen becomes category menu first --
-      each row spoken as "title, earned of total" -- then arrows through
-      that category's badges. Unlocked badges speak name and story,
-      locked ones their goal, hidden ones a single keeping-the-secret
-      line until earned (Saltwake: "a secret the sea is keeping"; ours
-      needs trucking language). Candidate categories from the catalog's
-      own clusters: the road (driving feats), the working day (HOS,
-      rest, inspections), career and rank, the radio and song-city
-      arrivals, weather and seasons, and a hidden-cuts bucket. Category
-      titles and descriptions ride the existing achievement copy tests;
-      the category noun joins docs/ontology.md in the same change.
+- [x] **Achievement categories, on Saltwake's model -- SHIPPED
+      2026-08-09.** The catalog (172 badges, grown past the planned 145)
+      now carries seven categories with per-category earned counts, and
+      the Achievements screen browses in two levels exactly on the
+      Saltwake shape: category menu first ("title, earned of total"),
+      then that category's badges -- earned ones tell their story,
+      locked ones keep to their title (the existing no-spoiler idiom),
+      and five hidden calendar/number badges stay "a secret the manifest
+      is keeping" until earned. Copy tests cover category titles and
+      descriptions; the category noun joined docs/ontology.md. Owner
+      voice pass over the seven titles/descriptions still worth a
+      listen before release.
 - [x] **Screen artifact curves out of the highway bake -- SHIPPED
       2026-08-09.** Loader-side screen in `data/curves.py`: interstate
       mainline records under 300 ft radius or over 150 degrees of
