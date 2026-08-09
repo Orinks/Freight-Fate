@@ -27805,6 +27805,13 @@
             "spoken": "Passing Sun Prairie"
           },
           {
+            "name": "The Great Falls",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "You are leaving Great Falls, where Lewis and Clark hauled their boats a brutal eighteen miles around the falls of the Missouri. It was the hardest portage of their entire journey west."
+          },
+          {
             "name": "Missouri River",
             "category": "river",
             "kind": "point",
@@ -27851,6 +27858,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151363205, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Beaver Creek"
+          },
+          {
+            "name": "Havre Beneath the Streets",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 111.0,
+            "spoken": "Billboard: Havre is ahead. After a fire, the town rebuilt underground and ran its shops, along with several vices, in tunnels beneath the sidewalks. You can still tour them."
           }
         ],
         "speed_limits": [
@@ -30620,6 +30634,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 8226859332, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Four Corners"
+          },
+          {
+            "name": "Museum of the Rockies",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 93.0,
+            "spoken": "Billboard: Bozeman is ahead, home to the Museum of the Rockies and one of the greatest dinosaur collections on Earth. Its fossils include a Tyrannosaurus dug from the Montana badlands, and Yellowstone waits beyond."
           },
           {
             "name": "King Arthur Park",

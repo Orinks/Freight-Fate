@@ -801,6 +801,13 @@
             "spoken": "Passing Portage Lakes"
           },
           {
+            "name": "Rubber City",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Akron is the Rubber City, where the world's tires were born and the Goodyear blimp still lives. It is also home to the Soap Box Derby and a kid named LeBron."
+          },
+          {
             "name": "Barberton",
             "at_mi": 3.7,
             "off_mi": 3.83,
@@ -3022,6 +3029,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154208399, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Mifflin"
+          },
+          {
+            "name": "Grandpa's Cheesebarn",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.0,
+            "spoken": "Billboard: Grandpa's Cheesebarn is ahead. It offers cheese, fudge, smoked meat, and free samples arranged to defeat every promise you made at breakfast."
           },
           {
             "name": "Lucas",
@@ -14483,6 +14497,13 @@
         ],
         "landmarks": [
           {
+            "name": "The Rock and Roll Hall of Fame",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Cleveland rocks. The Rock and Roll Hall of Fame stands in a glass pyramid on the lake, in the city where a disc jockey first shouted the words rock and roll."
+          },
+          {
             "name": "Cuyahoga Heights",
             "at_mi": 3.1,
             "off_mi": 3.59,
@@ -14680,6 +14701,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154212083, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Berlin Heights"
+          },
+          {
+            "name": "Roller Coaster Capital",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.0,
+            "spoken": "Billboard: Sandusky is home to Cedar Point, the Roller Coaster Capital of the world. Some of the tallest and fastest coasters ever built stand in a row over Lake Erie, and you can hear the screaming from the highway."
           },
           {
             "name": "Castalia",
@@ -16051,6 +16079,13 @@
           }
         ],
         "landmarks": [
+          {
+            "name": "The Horseshoe",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Columbus is home to Ohio State and the Horseshoe. More than a hundred thousand people spell out O H I O while the band marches Script Ohio and a sousaphone player dots the i."
+          },
           {
             "name": "Urbancrest",
             "at_mi": 6.9,
@@ -22087,6 +22122,13 @@
             "spoken": "Passing Cheviot"
           },
           {
+            "name": "The Three-Way",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 50.0,
+            "spoken": "Billboard: Cincinnati puts cinnamon in its chili and serves it over spaghetti. Order a three-way with cheese piled on top, and do not argue with a city once called Porkopolis."
+          },
+          {
             "name": "Villa Hills",
             "at_mi": 52.9,
             "off_mi": 4.45,
@@ -26475,6 +26517,13 @@
             "spoken": "Passing Moulton"
           },
           {
+            "name": "First on the Moon",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: Wapakoneta is ahead, birthplace of Neil Armstrong, the first human to set foot on the moon. A museum shaped like a moon base waits out here among the Ohio corn."
+          },
+          {
             "name": "New Knoxville",
             "at_mi": 19.5,
             "off_mi": 7.63,
@@ -26660,6 +26709,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154186972, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Englewood"
+          },
+          {
+            "name": "Where Flight Began",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.0,
+            "spoken": "Billboard: Dayton is home to the Wright Brothers. Two bicycle makers taught the world to fly here, and the Air Force keeps the planet's largest aviation museum just up the road."
           },
           {
             "name": "Trotwood",
@@ -32440,6 +32496,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153539013, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bristol"
+          },
+          {
+            "name": "The RV Capital of the World",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 135.0,
+            "spoken": "Billboard: Elkhart is ahead, the RV Capital of the world. Four out of five recreational vehicles in America roll out of this one Indiana county, which even has a hall of fame for the motorhome."
           },
           {
             "name": "Osceola",

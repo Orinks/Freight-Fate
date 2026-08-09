@@ -5725,6 +5725,13 @@
             "spoken": "Passing Beachmont"
           },
           {
+            "name": "Boston, Where It Started",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: You are leaving Boston, where the Freedom Trail follows a red line past the places the Revolution began and Paul Revere rode. The Red Sox also chase fly balls off a green wall thirty-seven feet tall."
+          },
+          {
             "name": "Newton Corner",
             "at_mi": 3.8,
             "off_mi": 5.48,

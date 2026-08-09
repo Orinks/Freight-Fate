@@ -15878,7 +15878,7 @@
             "category": "highway_marker",
             "kind": "point",
             "at_mi": 30.0,
-            "spoken": "Ahead beside Interstate eighty stands the Tree in the Rock, a lone limber pine growing out of solid granite, old enough that the railroad and the highway both chose to bend around it."
+            "spoken": "Ahead beside Interstate eighty stands the Tree in the Rock, a lone limber pine growing from solid granite. It is old enough that both the railroad and the highway chose to bend around it."
           },
           {
             "name": "Laramie River",
@@ -15933,7 +15933,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 230.0,
-            "spoken": "Billboard: Little America ahead. Cheap fuel, famous ice cream cones, a stuffed penguin, and a sign every mile reminding you it is coming. A Wyoming tradition in the middle of nowhere."
+            "spoken": "Billboard: Little America is ahead. It offers cheap fuel, famous ice cream cones, a stuffed penguin, and a sign every mile reminding you that it is still ahead. That is how traditions survive in the middle of nowhere."
           },
           {
             "name": "Superior",
@@ -23081,6 +23081,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151515039, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Superior"
+          },
+          {
+            "name": "Little America",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 100.0,
+            "spoken": "Billboard: Little America is ahead, a vast travel plaza in the middle of nowhere. A man who nearly froze here in a blizzard built it, a giant penguin guards it, and the ice cream cones are famously cheap."
           },
           {
             "name": "North Rock Springs",

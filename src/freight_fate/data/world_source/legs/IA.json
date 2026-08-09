@@ -8109,6 +8109,13 @@
             "spoken": "Passing Bernard"
           },
           {
+            "name": "Is This Heaven?",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.0,
+            "spoken": "Billboard: The Field of Dreams is ahead at Dyersville. The baseball diamond carved from a cornfield for the movie is still here and still mowed. Is this heaven? No, it is Iowa."
+          },
+          {
             "name": "Peosta",
             "at_mi": 59.7,
             "off_mi": 5.58,
@@ -8828,6 +8835,13 @@
             "spoken": "Passing Palo"
           },
           {
+            "name": "American Gothic",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Cedar Rapids is home to Grant Wood, who painted American Gothic, the stern farm couple with the pitchfork that the whole world has parodied."
+          },
+          {
             "name": "Atkins",
             "at_mi": 3.8,
             "off_mi": 9.63,
@@ -8921,6 +8935,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151328321, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Oxford"
+          },
+          {
+            "name": "City of Literature",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Iowa City is one of the world's few Cities of Literature. Its Writers' Workshop has trained enough Pulitzer winners to fill a shelf."
           },
           {
             "name": "Hills",
@@ -21933,6 +21954,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151528478, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Saint Donatus"
+          },
+          {
+            "name": "Grant's Galena",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 16.0,
+            "spoken": "Billboard: Galena is ahead, the town Ulysses Grant called home. Its brick main street and steep hills remain beautifully preserved from the days before the Civil War general saved the Union."
           },
           {
             "name": "Rice",

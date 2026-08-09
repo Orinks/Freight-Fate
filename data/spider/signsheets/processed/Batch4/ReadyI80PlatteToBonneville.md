@@ -78,7 +78,7 @@ when approved. Facts from public data; copy invented. Three built legs:
 **** substantial detour from Interstate eighty; decide whether billboard reach is acceptable.
 
 ### The Big Boy Statue
-- treatment: billboard
+- treatment: skip
 - leg: cheyenne_wy_us -> salt_lake_city_ut_us
 - at_mi: 300
 - spoken: Billboard: Green River is ahead, where roadside diners, trona mines, and the desert wind all agree that you should stop before the next hundred miles of nothing.

@@ -20603,6 +20603,13 @@
             "spoken": "Passing Inez"
           },
           {
+            "name": "Butcher Hollow",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.0,
+            "spoken": "Billboard: Van Lear is ahead near Paintsville. Loretta Lynn grew up here in Butcher Hollow, a coal miner's daughter for real, in the cabin that named the song."
+          },
+          {
             "name": "Blaine",
             "at_mi": 51.8,
             "off_mi": 9.02,
@@ -23256,6 +23263,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154050828, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Fayetteville"
+          },
+          {
+            "name": "The New River Gorge Bridge",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 150.0,
+            "spoken": "Billboard: New River Gorge is ahead. Its great steel arch was the longest in the Western Hemisphere when it opened, and once a year they let people leap off it with parachutes."
           },
           {
             "name": "Oak Hill",

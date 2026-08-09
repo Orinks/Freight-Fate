@@ -11137,6 +11137,13 @@
             "spoken": "Crossing the Potomac River"
           },
           {
+            "name": "Sideling Hill",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 45.0,
+            "spoken": "You are cutting through Sideling Hill, where the highway sliced the mountain open and revealed hundreds of feet of rock folded like a rumpled blanket. It is a geology lesson at seventy miles an hour."
+          },
+          {
             "name": "Hedgesville",
             "at_mi": 49.5,
             "off_mi": 4.85,

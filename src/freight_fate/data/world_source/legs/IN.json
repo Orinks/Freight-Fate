@@ -3177,6 +3177,13 @@
             "spoken": "Passing Lakeville"
           },
           {
+            "name": "Touchdown Jesus",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 18.0,
+            "spoken": "Billboard: South Bend is home to Notre Dame, the Golden Dome, and the Fighting Irish. A library mural of Christ with arms raised overlooks the stadium, where everyone calls it Touchdown Jesus."
+          },
+          {
             "name": "St. Joseph River",
             "category": "river",
             "kind": "point",
@@ -42602,6 +42609,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153774564, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Westfield"
+          },
+          {
+            "name": "Big Things in a Small Town",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 37.0,
+            "spoken": "Billboard: Casey is ahead, a tiny town that decided to build the world's largest things. Its main street holds the largest wind chime, rocking chair, mailbox, golf tee, and wooden shoes, because one record was not enough."
           },
           {
             "name": "Embarras River",

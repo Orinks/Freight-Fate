@@ -15693,6 +15693,13 @@
             "spoken": "Passing Enterprise"
           },
           {
+            "name": "Seven Magic Mountains",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: Seven Magic Mountains is ahead, where fluorescent boulders are stacked into towers in the desert. Las Vegas apparently ran out of indoor places to put bright colors."
+          },
+          {
             "name": "Primm",
             "at_mi": 43.1,
             "off_mi": 0.16,
@@ -15706,28 +15713,35 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 50.0,
-            "spoken": "Billboard: The world's tallest thermometer ahead in Baker. Over a hundred feet of neon telling you exactly how hot the Mojave is. The answer is always too hot."
+            "spoken": "Billboard: The world's tallest thermometer is ahead in Baker. More than a hundred feet of neon will tell you exactly how hot the Mojave is, and the answer is always too hot."
           },
           {
             "name": "Alien Fresh Jerky",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 70.0,
-            "spoken": "Billboard: Alien Fresh Jerky, next exit in Baker. They will not say who the jerky is made from. The little green fellow on the sign is not talking."
+            "spoken": "Billboard: Alien Fresh Jerky is at the next exit in Baker. They will not say who the jerky is made from, and the little green fellow on the sign is not talking."
           },
           {
             "name": "The Mad Greek",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 88.0,
-            "spoken": "Billboard: The Mad Greek ahead in Baker. Gyros and baklava in the middle of the desert. Trust the Mojave -- it has surprised you before."
+            "spoken": "Billboard: The Mad Greek is ahead in Baker, serving gyros and baklava in the middle of the desert. Trust the Mojave; it has surprised you before."
           },
           {
             "name": "Zzyzx Road",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 100.0,
-            "spoken": "Billboard: Coming up, the exit for Zzyzx Road -- the last word in the dictionary, out here in the sand. There is a strange story behind that name, and a lake you would never expect."
+            "spoken": "Billboard: The exit for Zzyzx Road is coming up, with the last word in the dictionary sitting out here in the sand. A strange story and a lake you would never expect wait behind that name."
+          },
+          {
+            "name": "EddieWorld",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 145.0,
+            "spoken": "Billboard: EddieWorld is ahead near Yermo. It offers fuel, pizza, candy, ice cream, and a giant sundae declaring that this is no ordinary gas stop."
           },
           {
             "name": "Daggett",
@@ -15750,7 +15764,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 155.0,
-            "spoken": "Billboard: Peggy Sue's fifties diner ahead near Yermo. Chrome, a jukebox, a diner cat, and a pond full of concrete dinosaurs out back. Rock and roll never checked out."
+            "spoken": "Billboard: Peggy Sue's Fifties Diner is ahead near Yermo. It has chrome, a jukebox, a diner cat, and a pond full of concrete dinosaurs out back. Rock and roll never checked out."
           },
           {
             "name": "Lenwood",
@@ -15773,7 +15787,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 165.0,
-            "spoken": "Billboard: Calico Ghost Town ahead near Barstow -- a real silver boomtown, half restored and half falling down, and, they will tell you, thoroughly haunted."
+            "spoken": "Billboard: Calico Ghost Town is ahead near Barstow. It is a real silver boomtown, half restored and half falling down, and, they will tell you, thoroughly haunted."
           },
           {
             "name": "Oak Hills",
@@ -28683,6 +28697,13 @@
             "kind": "point",
             "at_mi": 38.3,
             "spoken": "Approaching Silverzone Pass"
+          },
+          {
+            "name": "Wendover Will",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.0,
+            "spoken": "Billboard: Wendover Will welcomes you ahead. This giant neon cowboy waves from the desert with the confidence of a man who has never paid an electric bill."
           }
         ],
         "tollway_detected": false,
@@ -29991,6 +30012,13 @@
         ],
         "restrictions": [],
         "landmarks": [
+          {
+            "name": "The Nevada Northern Railway",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 115.0,
+            "spoken": "Billboard: Ely is ahead, where the old Nevada Northern Railway still fires up its steam locomotives. This copper-country railroad is frozen in time and will even let you drive the train."
+          },
           {
             "name": "Ruth",
             "at_mi": 120.0,
@@ -31977,6 +32005,13 @@
             "kind": "point",
             "at_mi": 114.9,
             "spoken": "Crossing the Carson River"
+          },
+          {
+            "name": "Topgun",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 122.0,
+            "spoken": "Billboard: Fallon is the Oasis of Nevada and home to the Navy's Top Gun fighter school. If a jet just shook your windows, that is the sound of freedom practicing."
           },
           {
             "name": "Fallon Station",

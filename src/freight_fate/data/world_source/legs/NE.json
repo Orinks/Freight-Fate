@@ -4942,6 +4942,13 @@
             "spoken": "Passing Riverdale"
           },
           {
+            "name": "The Great Platte River Road Archway",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Kearney has a museum built as a giant arch over the entire interstate. It tells the story of wagon trains, the Pony Express, and the railroad, all of which followed this river valley west."
+          },
+          {
             "name": "Platte River",
             "category": "river",
             "kind": "point",
@@ -11597,6 +11604,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151406179, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Pleasant Dale"
+          },
+          {
+            "name": "Nebraska's Tower on the Plains",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "You are leaving Lincoln, where the state capitol rises four hundred feet above the flat prairie. A bronze sower stands on top, scattering seed into the wind."
           },
           {
             "name": "Denton",
@@ -23027,7 +23041,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 180.0,
-            "spoken": "Billboard: Ahead near Kearney, a whole museum arches clear over Interstate eighty -- the Great Platte River Road Archway. You drive right under it. You genuinely cannot miss it."
+            "spoken": "Billboard: The Great Platte River Road Archway is ahead near Kearney. This entire museum stretches over Interstate eighty, so you drive directly beneath it and genuinely cannot miss it."
           },
           {
             "name": "Elm Creek",
@@ -23068,7 +23082,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 250.0,
-            "spoken": "Billboard: An original Pony Express station ahead in Gothenburg, where teenage riders once swapped horses at a gallop to carry the mail west."
+            "spoken": "Billboard: An original Pony Express station is ahead in Gothenburg. Teenage riders once swapped horses here at a gallop while carrying the mail west."
           },
           {
             "name": "Maxwell",
@@ -23084,7 +23098,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 280.0,
-            "spoken": "Billboard: The Golden Spike Tower ahead in North Platte, above Bailey Yard -- the largest railroad yard on Earth. Watch ten thousand rail cars a day sorted like a giant toy set."
+            "spoken": "Billboard: The Golden Spike Tower is ahead in North Platte, overlooking Bailey Yard, the largest railroad yard on Earth. From above, you can watch ten thousand rail cars a day being sorted like a giant toy set."
           },
           {
             "name": "Hershey",
@@ -23139,11 +23153,18 @@
             "spoken": "Passing Lodgepole"
           },
           {
+            "name": "Carhenge",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 390.0,
+            "spoken": "Billboard: Carhenge is ahead in western Nebraska. Vintage cars are arranged like Stonehenge and painted gray, yet the result is still easier to understand than most modern roundabouts."
+          },
+          {
             "name": "The Original Cabela's",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 410.0,
-            "spoken": "Billboard: The original Cabela's ahead in Sidney. Where the whole outdoor empire began, with a mountain of gear and an ark's worth of taxidermy watching you shop."
+            "spoken": "Billboard: The original Cabela's is ahead in Sidney, where the outdoor empire began. Inside waits a mountain of gear and an ark's worth of taxidermy, all watching you shop."
           },
           {
             "name": "Dix",

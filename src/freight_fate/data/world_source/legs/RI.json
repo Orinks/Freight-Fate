@@ -4357,6 +4357,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158918112, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gales Ferry"
+          },
+          {
+            "name": "The First Nuclear Submarine",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "Billboard: Groton is the submarine capital, across the river from New London. The Nautilus, first nuclear submarine and first vessel to reach the North Pole beneath the ice, is tied up here for you to walk through."
           }
         ],
         "interchanges": [

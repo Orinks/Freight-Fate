@@ -88,7 +88,7 @@ st_louis_mo_us` (101), `indianapolis_in_us -> terre_haute_in_us` (77),
 - describe: Casey, Illinois, is filled with certified and claimed giant objects, including an enormous rocking chair.
 
 ### Uranus, Indiana
-- treatment: billboard
+- treatment: skip
 - leg: indianapolis_in_us -> terre_haute_in_us
 - at_mi: 45
 - spoken: Billboard: Roadside fudge is ahead. No, this is not that Uranus. The Midwest has apparently decided one Uranus is not enough.

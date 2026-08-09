@@ -6619,6 +6619,13 @@
             "spoken": "Crossing the Gasconade River"
           },
           {
+            "name": "The Best Fudge Comes From Uranus",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.0,
+            "spoken": "Billboard: Uranus, Missouri, is ahead, home to the Uranus Fudge Factory and a motto the whole family will regret reading aloud. The fudge, they swear, is excellent."
+          },
+          {
             "name": "Saint James",
             "at_mi": 90.8,
             "off_mi": 8.09,
@@ -17693,7 +17700,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 90.0,
-            "spoken": "Billboard: The Oz Museum ahead in Wamego. Follow the yellow brick road off Interstate seventy. There's no place like home."
+            "spoken": "Billboard: The Oz Museum is ahead in Wamego. Follow the yellow brick road off Interstate seventy, because there is no place like home and apparently no place like Kansas either."
           },
           {
             "name": "Paxico",
@@ -17759,14 +17766,14 @@
             "category": "highway_marker",
             "kind": "point",
             "at_mi": 200.0,
-            "spoken": "Off Interstate seventy ahead stand the Mushroom Rocks, giant sandstone toadstools balanced on the prairie, carved by wind and time -- once trail markers for wagons on the old Smoky Hill route."
+            "spoken": "The Mushroom Rocks stand off Interstate seventy ahead, with giant sandstone caps balanced on narrow stems. Wind and time carved these prairie toadstools, which once guided wagons along the old Smoky Hill route."
           },
           {
             "name": "World's Largest Czech Egg",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 225.0,
-            "spoken": "Billboard: The world's largest Czech egg ahead in Wilson, the Czech Capital of Kansas. Twenty feet of hand-painted folk art, because every small town deserves one enormous thing."
+            "spoken": "Billboard: The world's largest Czech egg is ahead in Wilson, the Czech Capital of Kansas. It stands twenty feet tall and is covered in hand-painted folk art, because every small town deserves one enormous thing."
           },
           {
             "name": "Dorrance",
@@ -17782,7 +17789,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 235.0,
-            "spoken": "Billboard: The Garden of Eden ahead in Lucas -- concrete Bible scenes and populist politics in a front yard, roadside folk art like nowhere else."
+            "spoken": "Billboard: The Garden of Eden is ahead in Lucas. Its front yard mixes concrete Bible scenes, populist politics, and roadside folk art unlike anything else."
           },
           {
             "name": "Gorham",
@@ -17792,6 +17799,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151892911, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gorham"
+          },
+          {
+            "name": "Cathedral of the Plains",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 270.0,
+            "spoken": "Billboard: The Cathedral of the Plains is ahead at Victoria. Twin limestone spires rise over wheat country as though somebody imported Europe and forgot to return it."
           },
           {
             "name": "Ellis",
@@ -17852,7 +17866,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 330.0,
-            "spoken": "Billboard: See the world's largest prairie dog ahead near Oakley -- eight thousand pounds of concrete rodent, plus live rattlesnakes and a genuine five-legged cow. Roadside science at its very finest."
+            "spoken": "Billboard: The world's largest prairie dog is ahead near Oakley. Eight thousand pounds of concrete rodent stands beside live rattlesnakes and a genuine five-legged cow. Roadside science is proceeding normally."
           },
           {
             "name": "Grainfield",
@@ -17877,7 +17891,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 350.0,
-            "spoken": "Billboard: A giant Buffalo Bill on horseback ahead near Oakley, forever charging a bronze buffalo. Bigger than life, and life on the plains was already pretty big. Please stop for real buffalos."
+            "spoken": "Billboard: A giant Buffalo Bill is ahead near Oakley, forever charging a bronze buffalo on horseback. He is bigger than life, and life on the plains was already pretty big. Please stop for real buffalo too."
           },
           {
             "name": "Fick Fossil and History Museum",
@@ -17891,7 +17905,14 @@
             "category": "highway_marker",
             "kind": "point",
             "at_mi": 368.0,
-            "spoken": "South of Interstate seventy near Oakley stand Monument Rocks, chalk spires and arches left by an ancient inland sea, or was it really a sea  -- the first national natural landmark, standing alone on the high plains."
+            "spoken": "South of Interstate seventy near Oakley stand Monument Rocks, chalk spires and arches left by an ancient inland sea. They rise alone from the high plains as Kansas's first National Natural Landmark."
+          },
+          {
+            "name": "World's Largest Easel",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 400.0,
+            "spoken": "Billboard: The world's largest easel is ahead in Goodland, holding a giant sunflower painting because Kansas found ordinary roadside art too close to the ground."
           },
           {
             "name": "Kanorado",
@@ -23776,6 +23797,13 @@
             "kind": "point",
             "at_mi": 152.0,
             "spoken": "Crossing the Little Sac River"
+          },
+          {
+            "name": "The Throwed Rolls",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 158.0,
+            "spoken": "Billboard: Lambert's Cafe is ahead, home of the throwed rolls. Waiters hurl hot dinner rolls across the room, and you are expected to catch them. Raise a hand or wear one."
           }
         ],
         "speed_limits": [
@@ -39404,6 +39432,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151602926, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Rockaway Beach"
+          },
+          {
+            "name": "Branson",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Billboard: Branson is ahead, a little Ozark town with more theater seats than Broadway. Country music shows line the strip, and a theme park waits up on the mountain. Bring the grandparents."
           },
           {
             "name": "Branson West",

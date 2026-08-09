@@ -3882,6 +3882,13 @@
             "spoken": "Crossing the Edisto River"
           },
           {
+            "name": "The Lowcountry",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 50.0,
+            "spoken": "You are crossing the Lowcountry, a landscape of salt marsh and sea islands. It is home to the Gullah Geechee people and their language, to shrimp and grits, and to the Marine boot camp at Parris Island, where recruits are made life-long Marines or sent home with tales to tell teh grandkids."
+          },
+          {
             "name": "Yemassee",
             "at_mi": 61.3,
             "off_mi": 3.4,
@@ -3921,6 +3928,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153898291, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Port Wentworth"
+          },
+          {
+            "name": "The City of Squares",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 105.0,
+            "spoken": "Billboard: Savannah is the city of squares, most of which are draped in Spanish Moss. Don't worry, if you're a square, you're welcome too.  Visit Savannah's oldest suarre, famous for Forrest Gump's curious display of his life changing box of chocolates. The cobbled downtown is even one whole historic site. Check it out!"
           },
           {
             "name": "Garden City",
@@ -5768,6 +5782,13 @@
             "spoken": "Passing Carolina Bay"
           },
           {
+            "name": "Charleston, Where the War Began",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 113.0,
+            "spoken": "Billboard: Charleston is the Holy City of steeples, where the first shots of the Civil War were fired at Sumter's famous harbor  . Walk the Battery past the pastel mansions of Rainbow Row."
+          },
+          {
             "name": "Sullivan's Island",
             "at_mi": 116.0,
             "off_mi": 5.68,
@@ -7336,6 +7357,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153872437, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing South Congaree"
+          },
+          {
+            "name": "Famously Hot",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "You are leaving Columbia, the South Carolina capital that calls itself Famously Hot. It is home to the Gamecocks and the gateway to Congaree, where the tallest hardwood forest left in the East lights up with synchronized fireflies."
           },
           {
             "name": "Arcadia Lakes",

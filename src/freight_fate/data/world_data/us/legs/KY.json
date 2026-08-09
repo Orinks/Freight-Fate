@@ -9405,6 +9405,20 @@
             "spoken": "Passing Willisburg"
           },
           {
+            "name": "Bourbon Capital of the World",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 42.0,
+            "spoken": "Billboard: Bardstown is the Bourbon Capital of the world. More barrels of whiskey age in these hills than there are people in Kentucky. Do not drive and taste."
+          },
+          {
+            "name": "My Old Kentucky Home",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 44.0,
+            "spoken": "My Old Kentucky Home stands at Bardstown. The mansion gave Stephen Foster his song and the entire state its anthem."
+          },
+          {
             "name": "Taylorsville",
             "at_mi": 47.5,
             "off_mi": 11.18,
@@ -14000,6 +14014,13 @@
             "spoken": "Passing Jamestown"
           },
           {
+            "name": "Kentucky's Giant Fork",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 85.0,
+            "spoken": "Billboard: A giant fork is ahead. Kentucky already had bourbon barrels and racehorses, so it apparently needed silverware tall enough to threaten low aircraft."
+          },
+          {
             "name": "Edmonton",
             "at_mi": 94.0,
             "off_mi": 1.44,
@@ -14091,6 +14112,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153512635, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plum Springs"
+          },
+          {
+            "name": "The Corvette Sinkhole",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 140.0,
+            "spoken": "Billboard: Bowling Green is home to the Corvette. A sinkhole once opened under the museum floor and swallowed eight of them whole, so naturally they saved the hole."
           },
           {
             "name": "Woodburn",
@@ -20809,6 +20837,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154349975, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Buckhorn"
+          },
+          {
+            "name": "Hazard, Not the One on TV",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 88.0,
+            "spoken": "Billboard: Hazard, Kentucky, is a real coal town, not the fictional county with the orange car. It hosts the Black Gold Festival and is prouder of the coal than the confusion."
           },
           {
             "name": "Hyden",
@@ -28284,6 +28319,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154032354, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing McDowell"
+          },
+          {
+            "name": "Hatfield and McCoy Country",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Pikeville is ahead in Hatfield and McCoy country. The feud is history now, but the gift shops remain fully operational."
           }
         ],
         "speed_limits": [

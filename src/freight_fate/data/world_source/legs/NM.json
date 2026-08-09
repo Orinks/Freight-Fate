@@ -12859,7 +12859,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 60.0,
-            "spoken": "Billboard: Cline's Corners ahead. Fudge, moccasins, rubber tomahawks, and every polished rock you never needed. A New Mexico institution since the road was young."
+            "spoken": "Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young."
           },
           {
             "name": "Pecos River",
@@ -16817,6 +16817,20 @@
             "kind": "point",
             "at_mi": 98.8,
             "spoken": "Crossing the Lost River"
+          },
+          {
+            "name": "Roswell",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 105.0,
+            "spoken": "Billboard: Roswell is ahead, where something crashed in the desert in nineteen forty-seven and the Air Force has been explaining it ever since. Even the streetlights and the McDonald's are shaped like aliens."
+          },
+          {
+            "name": "We Are Not Alone",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 108.0,
+            "spoken": "Billboard: Welcome to Roswell, where little green men became big green money. The Main Street gift shops sell aliens in every size, so beam yourself up a T-shirt."
           }
         ],
         "speed_limits": [
@@ -35085,6 +35099,13 @@
         "restrictions": [],
         "landmarks": [
           {
+            "name": "The Very Large Array",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: West of Socorro, twenty-seven giant white dish antennas listen to the universe together across the Plains of San Agustin. You have seen them in the movies, aimed at the stars."
+          },
+          {
             "name": "Elephant Butte",
             "at_mi": 67.3,
             "off_mi": 1.7,
@@ -36009,7 +36030,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 8.0,
-            "spoken": "Billboard: Cadillac Ranch ahead. Ten Cadillacs buried nose-down in a field, tailfins to the sky, and you are invited to spray-paint them. Bring a can."
+            "spoken": "Billboard: Cadillac Ranch is ahead. Ten Cadillacs are buried nose-down in a field with their tailfins to the sky, and you are invited to spray-paint them. Bring a can."
           },
           {
             "name": "San Jon",
@@ -36064,13 +36085,6 @@
             "spoken": "Passing Coulter Acres"
           },
           {
-            "name": "Tucumcari Tonite",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 108.0,
-            "spoken": "Billboard: Tucumcari tonight. Two thousand motel rooms and a mile of neon on Route sixty-six. From fleebag to fo-tel, Tucumcari's got you covered."
-          },
-          {
             "name": "Catalpa",
             "at_mi": 108.0,
             "off_mi": 4.48,
@@ -36087,6 +36101,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151713181, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Timbercreek Canyon"
+          },
+          {
+            "name": "Tucumcari Tonite",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 108.0,
+            "spoken": "Billboard: Stay in Tucumcari tonight, with two thousand motel rooms and a mile of neon on Route sixty-six. From fleabag to fo-tel, Tucumcari has you covered."
           },
           {
             "name": "Palisades",

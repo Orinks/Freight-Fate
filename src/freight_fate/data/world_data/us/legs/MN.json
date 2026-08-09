@@ -1886,6 +1886,13 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Paul Bunyan and Babe",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "You are leaving Bemidji, where giant statues of Paul Bunyan and Babe the Blue Ox guard the lake. They are among the oldest roadside colossi in America and have been watching over the north woods for generations."
+          },
+          {
             "name": "Mississippi River",
             "category": "river",
             "kind": "point",

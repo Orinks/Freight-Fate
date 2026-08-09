@@ -9347,6 +9347,13 @@
             "spoken": "Entering Concord"
           },
           {
+            "name": "Appomattox",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 22.0,
+            "spoken": "You are passing near Appomattox Court House, the quiet village where Lee surrendered to Grant and the Civil War, at long last, began to end."
+          },
+          {
             "name": "Buckingham",
             "at_mi": 45.2,
             "off_mi": 0.04,
@@ -12115,6 +12122,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158313642, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Isle of Wight"
+          },
+          {
+            "name": "Smithfield Ham",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Billboard: Smithfield is ahead, and it calls itself the Ham Capital. A salt-cured Virginia ham must age in this town by law to earn the name. The whole place smells, wonderfully, of hog."
           },
           {
             "name": "Pagan River",
@@ -35876,6 +35890,13 @@
             "spoken": "Passing Ferrum"
           },
           {
+            "name": "Moonshine Capital",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Franklin County is the Moonshine Capital of the world. They ran white liquor out of these hills by the trunkload, and the fast driving used to outrun the law helped give birth to stock car racing."
+          },
+          {
             "name": "Smith River",
             "category": "river",
             "kind": "point",
@@ -36057,6 +36078,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158486063, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Oak Ridge"
+          },
+          {
+            "name": "Mayberry",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 90.0,
+            "spoken": "Billboard: Mount Airy is the real Mayberry. It is Andy Griffith's hometown and the model for his television town, complete with a squad car you can ride and Snappy Lunch serving its famous pork chop sandwich."
           },
           {
             "name": "Walnut Cove",
@@ -43385,6 +43413,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154288335, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Bland"
+          },
+          {
+            "name": "The World's Largest Pencil",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Wytheville is home to a pencil the size of a telephone pole, leaning against an office building. Outside town, an old lead-shot tower marks where molten metal was dropped until gravity made it round."
           },
           {
             "name": "Ivanhoe",

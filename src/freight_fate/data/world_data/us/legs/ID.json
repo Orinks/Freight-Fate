@@ -11124,6 +11124,13 @@
             "spoken": "Passing Post Falls"
           },
           {
+            "name": "The Floating Green",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Coeur d'Alene has a golf green that floats on the lake, and a boat ferries you out to your ball. Miss the island and you feed the fish."
+          },
+          {
             "name": "Hayden Lake",
             "at_mi": 6.1,
             "off_mi": 1.58,
@@ -43222,6 +43229,20 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150935685, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Jerome"
+          },
+          {
+            "name": "Evel Knievel's Canyon",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Twin Falls is where Evel Knievel tried to rocket across the Snake River Canyon on a steam-powered cycle. He came up short but alive, while today's base jumpers leap from the bridge for fun."
+          },
+          {
+            "name": "Shoshone Falls",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "At Twin Falls, the Snake River drops over Shoshone Falls, which is taller than Niagara and known as the Niagara of the West."
           },
           {
             "name": "Buhl",
