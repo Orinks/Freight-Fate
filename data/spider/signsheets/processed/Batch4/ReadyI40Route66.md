@@ -48,28 +48,28 @@ kingman_az_us` (151).
 - spoken: Billboard: Cline's Corners is ahead. It sells fudge, moccasins, rubber tomahawks, and every polished rock you never knew you needed. It has been a New Mexico institution since the road was young.
 
 ### Wigwam Motel
-- treatment: skip
-- leg: gallup_nm_us -> flagstaff_az_us
-- at_mi: 90
+- treatment: billboard
+- leg: holbrook_az_us -> gallup_nm_us
+- at_mi: 2
 - spoken: Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?
 
 ### Jack Rabbit Trading Post
-- treatment: skip
-- leg: gallup_nm_us -> flagstaff_az_us
-- at_mi: 100
+- treatment: billboard
+- leg: winslow_az_us -> holbrook_az_us
+- at_mi: 17
 - spoken: Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is.
 - describe: That giant rabbit and its one-word sign, HERE IT IS, have pointed drivers off Route sixty-six since your grandparents drove by. See the rabbit, trade at the rabbit -- you'll find things you never knew you needed, probably not made in the good ol' U.S.A., but come anyway.
 
 ### Standin' on the Corner
-- treatment: skip
-- leg: gallup_nm_us -> flagstaff_az_us
-- at_mi: 123
+- treatment: billboard
+- leg: winslow_az_us -> holbrook_az_us
+- at_mi: 5
 - spoken: Billboard: Winslow, Arizona, is ahead. Stand on the corner, and a girl in a flatbed Ford may slow down to look. You know the song.
 
 ### Meteor Crater
-- treatment: skip
-- leg: gallup_nm_us -> flagstaff_az_us
-- at_mi: 140
+- treatment: billboard
+- leg: flagstaff_az_us -> winslow_az_us
+- at_mi: 38
 - spoken: Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger.
 - describe: Meteor Crater, near Winslow, is a bowl almost a mile across and some five hundred feet deep, blasted out about fifty thousand years ago by an iron meteorite. Astronauts trained on its rim for the trip to the moon. Sit and consider what would happen to civilization should another city-sized rock hit greater Sheboygan, or ... St. Louis, for Pete's sake.
 
@@ -80,18 +80,18 @@ kingman_az_us` (151).
 - spoken: Billboard: Grand Canyon Caverns is ahead near Peach Springs. The country's largest dry cavern lies two hundred feet down, with one motel room at the very bottom for the very brave.
 
 ### Entering the Navajo Nation
-- treatment: skip
-- leg: gallup_nm_us -> flagstaff_az_us
-- at_mi: 5
+- treatment: landmark
+- leg: holbrook_az_us -> gallup_nm_us
+- at_mi: 90
 - spoken: You are entering the Navajo Nation, the largest reservation in the United States and a sovereign nation with its own government. It reaches across Arizona, New Mexico, and Utah and observes daylight saving time even when most of Arizona does not, so check the clock before dinner checks you.
 - verify: exact boundary crossing near Lupton on I-40 -- confirm against OSM boundary=aboriginal_lands before the final bake; the checkerboard makes the entry point fuzzy. Respectful, factual register -- never parody.
 
 ---
 
 ### Two Guns
-- treatment: skip
-- leg: gallup_nm_us -> flagstaff_az_us
-- at_mi: 165
+- treatment: billboard
+- leg: flagstaff_az_us -> winslow_az_us
+- at_mi: 35
 - spoken: Billboard: The ghost town of Two Guns is ahead. It has stone ruins, an old zoo, a canyon, and enough Route sixty-six legends to make every abandoned wall suspicious.
 - describe: Two Guns is a decaying Route sixty-six roadside site near Canyon Diablo with ruins from trading posts, a zoo, and tourist attractions.
 **** verify safe public access; much of the property is private or unstable.

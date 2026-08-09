@@ -87,13 +87,12 @@ st_louis_mo_us` (101), `indianapolis_in_us -> terre_haute_in_us` (77),
 - spoken: Billboard: The world's largest rocking chair is ahead in Casey. It does not rock, because at that size rocking becomes a municipal emergency.
 - describe: Casey, Illinois, is filled with certified and claimed giant objects, including an enormous rocking chair.
 
-### Uranus, Indiana
-- treatment: skip
+### The Town That Shaped the Bottle
+- treatment: billboard
 - leg: indianapolis_in_us -> terre_haute_in_us
-- at_mi: 45
-- spoken: Billboard: Roadside fudge is ahead. No, this is not that Uranus. The Midwest has apparently decided one Uranus is not enough.
-- describe: This is a possible regional echo of the Missouri attraction rather than a confirmed Indiana destination.
-**** probably skip; included as a workshop joke only, because duplicating Uranus without a real attraction would be cheating.
+- at_mi: 68
+- spoken: Billboard: Terre Haute is ahead, the town that gave the Coca-Cola bottle its curves. The Root Glass Company drew the contour bottle here in nineteen fifteen, working from a picture of a cocoa pod, and the whole world has been holding it ever since.
+- describe: The hobble-skirt Coca-Cola contour bottle was designed and patented at the Root Glass Company of Terre Haute in nineteen fifteen; the designers, working from an encyclopedia illustration of a cocoa pod, produced one of the most recognized shapes on earth. Terre Haute also raised the labor leader Eugene V. Debs and the entertainer Scatman Crothers.
 
 ## Held for later / notes
 - Metropolis, Illinois (Superman's home, big Superman statue) sits off the

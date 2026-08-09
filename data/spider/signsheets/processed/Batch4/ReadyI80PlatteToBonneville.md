@@ -77,13 +77,12 @@ when approved. Facts from public data; copy invented. Three built legs:
 - describe: Carhenge near Alliance recreates Stonehenge with old American automobiles planted and stacked in the prairie.
 **** substantial detour from Interstate eighty; decide whether billboard reach is acceptable.
 
-### The Big Boy Statue
-- treatment: skip
+### Little America
+- treatment: billboard
 - leg: cheyenne_wy_us -> salt_lake_city_ut_us
-- at_mi: 300
-- spoken: Billboard: Green River is ahead, where roadside diners, trona mines, and the desert wind all agree that you should stop before the next hundred miles of nothing.
-- describe: A general Green River travel-stop concept.
-**** workshop a specific current attraction or restaurant before bake; generic copy should not survive final review.
+- at_mi: 291
+- spoken: Billboard: Little America is ahead. A sheepherder caught out here in a blizzard swore this spot would have shelter someday, and now it has rooms, a forest of gas pumps, and famously cheap soft-serve. The penguin on the sign has never once complained about the wind.
+- describe: Little America, Wyoming, is a travel stop the size of a village on Interstate Eighty, founded in the nineteen thirties after its founder was stranded near the spot in a winter storm as a young sheepherder. Its penguin mascot and its soft-serve cones are Interstate Eighty institutions, and the complex is large enough to be its own census-designated place.
 
 ## Held / notes
 - Signs span three legs; the San Francisco leg's two are near its Salt Lake end.

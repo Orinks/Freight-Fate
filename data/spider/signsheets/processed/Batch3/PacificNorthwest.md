@@ -88,6 +88,13 @@ coeur_d_alene_id_us` (116).
 - describe: Ape Cave is a long lava tube near Mount Saint Helens, named for a local outdoor club rather than an animal discovery.
 **** wrong side of the Cascades for this leg; likely skip and hold for a future Mount Saint Helens route.
 
+### The Bavarian Village
+- treatment: billboard
+- leg: seattle_wa_us -> wenatchee_wa_us
+- at_mi: 126
+- spoken: Billboard: Leavenworth is ahead, a logging town that saved itself by turning Bavarian. The whole main street is alpine gables and bratwurst, the mountains behind it do a fine impression of the Alps, and nobody has regretted the lederhosen yet.
+- describe: Leavenworth, Washington, remade itself as a Bavarian alpine village in the nineteen sixties after the railroad and the timber work moved on -- architecture codes, murals, and a winter lighting festival included. Set under the Cascades on US Two, it is now one of the state's biggest tourist draws.
+
 ## Held for later / notes
 - The Oregon Dunes and Sea Lion Caves (US-One-Oh-One south of the built legs);
   Palouse rolling wheat hills (Lewiston-Spokane country); Yakima wine and hops;

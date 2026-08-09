@@ -54,8 +54,8 @@ brunswick_ga_us` (69), `charleston_sc_us -> savannah_ga_us` (108),
 - describe: Charleston is where the Civil War  really started, with Confederate guns firing on the federal garrison at Fort Sumter in April eighteen sixty-one. Nicknamed the Holy City for its many church spires, it charms visitors with the waterfront Battery, the pastel row houses of Rainbow Row, horse carriages, and Lowcountry cooking like she-crab soup which must be tried to completely understand that you're not eating one famous she crab just for fun.
 
 ### The Angel Oak
-- treatment: skip
-- leg: charleston_sc_us -> wilmington_nc_us
+- treatment: landmark
+- leg: charleston_sc_us -> myrtle_beach_sc_us
 - at_mi: 3
 - spoken: You are leaving Charleston near the Angel Oak, a live oak said to be four or five centuries old. Its enormous limbs droop to the ground and rise again, making one tree look like a small forest.
 - describe: The Angel Oak on Johns Island near Charleston is a Southern live oak estimated to be several hundred years old, with a canopy spreading over seventeen thousand square feet and massive limbs that rest on the earth. It is one of the most photographed trees in the South.

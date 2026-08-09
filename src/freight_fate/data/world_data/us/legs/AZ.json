@@ -12388,6 +12388,20 @@
             "kind": "zone",
             "at_mi": 13.9,
             "spoken": "Entering Coconino National Forest"
+          },
+          {
+            "name": "Two Guns",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 35.0,
+            "spoken": "Billboard: The ghost town of Two Guns is ahead. It has stone ruins, an old zoo, a canyon, and enough Route sixty-six legends to make every abandoned wall suspicious."
+          },
+          {
+            "name": "Meteor Crater",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "Billboard: Meteor Crater is ahead, a hole in the desert nearly a mile wide that was punched out by a rock from space. It is bigger than it sounds. Much bigger."
           }
         ],
         "speed_limits": [
@@ -14642,6 +14656,13 @@
             "spoken": "Passing Joseph City"
           },
           {
+            "name": "Wigwam Motel",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.0,
+            "spoken": "Billboard: Sleep in a wigwam tonight in Holbrook. The motel has concrete teepees, a classic car at every door, and the old question on the sign: have you slept in a wigwam lately?"
+          },
+          {
             "name": "Petrified Forest National Park",
             "category": "national_park",
             "kind": "zone",
@@ -14726,6 +14747,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151351290, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hunters Point"
+          },
+          {
+            "name": "Entering the Navajo Nation",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 90.0,
+            "spoken": "You are entering the Navajo Nation, the largest reservation in the United States and a sovereign nation with its own government. It reaches across Arizona, New Mexico, and Utah and observes daylight saving time even when most of Arizona does not, so check the clock before dinner checks you."
           },
           {
             "name": "Red Rock",
@@ -37558,6 +37586,20 @@
             "kind": "point",
             "at_mi": 4.1,
             "spoken": "Crossing the Little Colorado River"
+          },
+          {
+            "name": "Standin' on the Corner",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: Winslow, Arizona, is ahead. Stand on the corner, and a girl in a flatbed Ford may slow down to look. You know the song."
+          },
+          {
+            "name": "Jack Rabbit Trading Post",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 17.0,
+            "spoken": "Billboard: The Jack Rabbit Trading Post is ahead. A giant rabbit waits out front beneath a sign that says, simply, Here It Is."
           }
         ],
         "speed_limits": [

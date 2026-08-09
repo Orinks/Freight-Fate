@@ -8325,6 +8325,13 @@
             "spoken": "Passing Samsula-Spruce Creek"
           },
           {
+            "name": "The World Center of Racing",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Daytona Beach is the World Center of Racing and home of the Daytona Five Hundred. The beach is so hard and flat that you can drive a car right onto the sand, which is how the racing started."
+          },
+          {
             "name": "Ormond Beach",
             "at_mi": 9.8,
             "off_mi": 4.03,
@@ -47464,6 +47471,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 154363165, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Temple Terrace"
+          },
+          {
+            "name": "The Cigar City",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Tampa is the Cigar City, where Ybor City once rolled the world's cigars by hand. A pirate ship invades the bay each winter for Gasparilla, while beer, roller coasters, and giraffes coexist at Busch Gardens."
           },
           {
             "name": "East Lake",

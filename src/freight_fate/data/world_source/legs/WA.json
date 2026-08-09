@@ -15181,6 +15181,13 @@
             "spoken": "Approaching Old Blewett Pass"
           },
           {
+            "name": "The Bavarian Village",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 126.0,
+            "spoken": "Billboard: Leavenworth is ahead, a logging town that saved itself by turning Bavarian. The whole main street is alpine gables and bratwurst, the mountains behind it do a fine impression of the Alps, and nobody has regretted the lederhosen yet."
+          },
+          {
             "name": "Leavenworth",
             "at_mi": 129.5,
             "off_mi": 4.01,

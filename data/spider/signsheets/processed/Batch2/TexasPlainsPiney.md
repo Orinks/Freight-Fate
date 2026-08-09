@@ -96,13 +96,12 @@ beaumont_tx_us` (108), `college_station_tx_us -> temple_tx_us` (91),
 - spoken: Billboard: Czech Stop is ahead in West. It serves kolaches, klobasniky, and a parking lot proving that pastry can overpower interstate discipline.
 - describe: West, Texas, is famous for Czech bakeries and sausage-filled pastries served around the clock to Interstate Thirty-Five travelers.
 
-### The Orange Show
-- treatment: skip
+### The Blues Capital of Texas
+- treatment: billboard
 - leg: beaumont_tx_us -> college_station_tx_us
-- at_mi: 30
-- spoken: Billboard: Southeast Texas is ahead, where petrochemical towers glow at night and roadside attractions occasionally make perfect sense only after several hundred miles.
-- describe: A general regional placeholder for Piney Woods and Gulf industrial roadside culture.
-**** workshop a more specific operating attraction on this leg; do not bake this generic copy unchanged.
+- at_mi: 147
+- spoken: Billboard: Navasota is ahead, the Blues Capital of Texas. Mance Lipscomb played these porches for sixty years before anybody thought to bring a tape recorder, and the town has been making up for lost time ever since.
+- describe: Navasota holds the official state designation of Blues Capital of Texas in honor of Mance Lipscomb, the songster born and buried there, who farmed by day, played all night, and was first recorded at age sixty-five. A bronze statue of him with his guitar sits in Mance Lipscomb Park.
 
 ## Held for later / notes
 - Waco Mammoth National Monument; the Alamo and River Walk in San Antonio (major

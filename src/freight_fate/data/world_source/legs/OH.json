@@ -33095,6 +33095,13 @@
             "spoken": "Passing Ottawa Hills"
           },
           {
+            "name": "Toledo, Glass and Klinger",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Toledo is the Glass City, where they build Jeeps and blow glass. Do not leave without a Hungarian hot dog from Tony Packo's, the place Corporal Klinger would not shut up about."
+          },
+          {
             "name": "Northwood",
             "at_mi": 3.2,
             "off_mi": 3.73,

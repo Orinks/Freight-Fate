@@ -50,8 +50,8 @@ grand_rapids_mi_us` (382), `bemidji_mn_us -> grand_rapids_mn_us` (72).
 - describe: Cedar Point, on a Lake Erie peninsula at Sandusky, holds one of the largest collections of roller coasters on earth and a string of record-breaking rides. Amusement-park fans treat it as a pilgrimage.
 
 ### Toledo, Glass and Klinger
-- treatment: skip
-- leg: toledo_oh_us -> lima_oh_us
+- treatment: billboard
+- leg: toledo_oh_us -> findlay_oh_us
 - at_mi: 3
 - spoken: Billboard: Toledo is the Glass City, where they build Jeeps and blow glass. Do not leave without a Hungarian hot dog from Tony Packo's, the place Corporal Klinger would not shut up about.
 - describe: Toledo is the Glass City, a historic center of glassmaking, and the home of the Jeep. Tony Packo's, the Hungarian hot dog joint, got a nationwide plug from Toledo native Klinger on the show M*A*S*H, and now displays celebrity-signed hot dog buns.

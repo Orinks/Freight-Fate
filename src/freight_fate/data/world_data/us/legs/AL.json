@@ -18094,6 +18094,13 @@
             "spoken": "Crossing the Ochlockonee River"
           },
           {
+            "name": "The Canopy Roads",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 105.0,
+            "spoken": "Billboard: Tallahassee is ahead, where five old plantation roads run for miles under live oaks that meet overhead. The state does its governing down here in the shade, and the canopy roads are protected by law."
+          },
+          {
             "name": "Woodville",
             "at_mi": 108.9,
             "off_mi": 8.78,
@@ -37313,6 +37320,13 @@
             "spoken": "Crossing the Alabama River"
           },
           {
+            "name": "Selma",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 49.0,
+            "spoken": "You are crossing the Edmund Pettus Bridge at Selma. Marchers for voting rights were beaten here on Bloody Sunday in nineteen sixty-five, and the conscience of the nation turned."
+          },
+          {
             "name": "Valley Grande",
             "at_mi": 49.9,
             "off_mi": 7.25,
@@ -38141,6 +38155,13 @@
             "kind": "point",
             "at_mi": 45.5,
             "spoken": "Crossing the Conecuh River"
+          },
+          {
+            "name": "Troy",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: Troy University is ahead, home of the Trojans and a surprisingly world-class art collection out among the pines."
           },
           {
             "name": "Goshen",
@@ -41926,6 +41947,20 @@
             "spoken": "Passing Ariton"
           },
           {
+            "name": "Fort Novosel",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "You are passing Ozark beside Fort Novosel, the home of Army Aviation, where every Army helicopter pilot learns to fly."
+          },
+          {
+            "name": "The Boll Weevil Monument",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Enterprise, west of here, built a monument to the boll weevil, the bug that ate its cotton. The disaster forced farmers to plant peanuts, peanuts made them rich, and gratitude to a pest became a statue."
+          },
+          {
             "name": "Ozark",
             "at_mi": 30.7,
             "off_mi": 1.22,
@@ -42003,6 +42038,13 @@
             "spoken": "Passing Grimes"
           },
           {
+            "name": "Peanut Capital of the World",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.0,
+            "spoken": "Billboard: Dothan is the Peanut Capital of the World. A quarter of the nation's peanuts pass through here, and downtown is decorated with giant painted peanuts wearing hats."
+          },
+          {
             "name": "Headland",
             "at_mi": 46.6,
             "off_mi": 8.37,
@@ -42010,6 +42052,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153704460, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Headland"
+          },
+          {
+            "name": "World's Smallest City Block",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 48.0,
+            "spoken": "Billboard: Dothan has the world's smallest city block. It contains one monument, several streets, and almost enough room to parallel park badly."
           },
           {
             "name": "Malvern",

@@ -75,9 +75,9 @@ meridian_ms_us` (157), `jackson_ms_us -> hattiesburg_ms_us` (91).
 - describe: Louisiana State University's Tiger Stadium, nicknamed Death Valley, is among the loudest in college football; a nineteen eighty-eight touchdown celebration literally registered on a campus seismograph. A live Bengal tiger, always named Mike, lives beside the stadium.
 
 ### Selma
-- treatment: skip
-- leg: montgomery_al_us -> meridian_ms_us
-- at_mi: 50
+- treatment: landmark
+- leg: montgomery_al_us -> selma_al_us
+- at_mi: 49
 - spoken: You are crossing the Edmund Pettus Bridge at Selma. Marchers for voting rights were beaten here on Bloody Sunday in nineteen sixty-five, and the conscience of the nation turned.
 - describe: In Selma, the Edmund Pettus Bridge was the site of Bloody Sunday in March nineteen sixty-five, when peaceful voting-rights marchers were attacked by state troopers. The images shocked the country and helped pass the Voting Rights Act. The bridge is a sacred place of the civil rights movement.
 

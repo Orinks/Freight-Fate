@@ -24068,6 +24068,13 @@
             "spoken": "Passing Plantersville"
           },
           {
+            "name": "The Blues Capital of Texas",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 147.0,
+            "spoken": "Billboard: Navasota is ahead, the Blues Capital of Texas. Mance Lipscomb played these porches for sixty years before anybody thought to bring a tape recorder, and the town has been making up for lost time ever since."
+          },
+          {
             "name": "Millican",
             "at_mi": 149.1,
             "off_mi": 2.03,

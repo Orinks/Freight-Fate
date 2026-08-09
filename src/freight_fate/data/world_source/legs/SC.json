@@ -2190,6 +2190,13 @@
             "spoken": "Passing Hanahan"
           },
           {
+            "name": "The Angel Oak",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "You are leaving Charleston near the Angel Oak, a live oak said to be four or five centuries old. Its enormous limbs droop to the ground and rise again, making one tree look like a small forest."
+          },
+          {
             "name": "Sullivan's Island",
             "at_mi": 7.3,
             "off_mi": 3.7,

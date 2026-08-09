@@ -32226,6 +32226,13 @@
             "spoken": "Passing Seelyville"
           },
           {
+            "name": "The Town That Shaped the Bottle",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 68.0,
+            "spoken": "Billboard: Terre Haute is ahead, the town that gave the Coca-Cola bottle its curves. The Root Glass Company drew the contour bottle here in nineteen fifteen, working from a picture of a cocoa pod, and the whole world has been holding it ever since."
+          },
+          {
             "name": "Riley",
             "at_mi": 68.6,
             "off_mi": 2.77,

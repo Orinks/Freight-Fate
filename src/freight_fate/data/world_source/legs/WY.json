@@ -15929,13 +15929,6 @@
             "spoken": "Entering Sinclair"
           },
           {
-            "name": "Little America",
-            "category": "billboard_sign",
-            "kind": "point",
-            "at_mi": 230.0,
-            "spoken": "Billboard: Little America is ahead. It offers cheap fuel, famous ice cream cones, a stuffed penguin, and a sign every mile reminding you that it is still ahead. That is how traditions survive in the middle of nowhere."
-          },
-          {
             "name": "Superior",
             "at_mi": 238.7,
             "off_mi": 5.86,
@@ -15993,6 +15986,13 @@
             "kind": "point",
             "at_mi": 287.0,
             "spoken": "Crossing the Blacks Fork River"
+          },
+          {
+            "name": "Little America",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 291.0,
+            "spoken": "Billboard: Little America is ahead. A sheepherder caught out here in a blizzard swore this spot would have shelter someday, and now it has rooms, a forest of gas pumps, and famously cheap soft-serve. The penguin on the sign has never once complained about the wind."
           },
           {
             "name": "Granger",
