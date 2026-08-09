@@ -99,7 +99,10 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       Hours" -- a detail-string change game-side, a structured field if
       the API grows one), and durable profile additions from the career
       arc (badges, fleet tier, endorsements; per-truck condition ships in
-      the snapshot already). Snapshot fields must follow the validator
+      the snapshot already), plus lifetime earnings
+      (`Career.total_earnings`, already tracked at settlement) -- the
+      public copy must say the bank balance stays private and only the
+      career lifetime total is shown. Snapshot fields must follow the validator
       superset rule and the 1.9 cutover invariants regen. Leaderboards
       are an orinks-net feature and inherit the stats-pinned-to-first-
       career ownership guard -- settle per-driver vs per-career identity
