@@ -75,3 +75,53 @@ def test_exported_profile_fields_include_the_created_on_marker():
     without it would reject every honest backup on the schema check.
     """
     assert "created_line" in invariant_data()["profileFields"]
+
+
+def test_exported_public_profile_fields_ride_the_allow_lists():
+    """orinks.net's public career projection reads these from the payload.
+
+    The employment status rides the top-level allow-list and self-paid
+    endorsement courses ride the career allow-list; drop either and every
+    honest 1.9 backup fails the exact-field check, taking the public
+    profile's career statistics with it.
+    """
+    data = invariant_data()
+    assert "business_status" in data["profileFields"]
+    assert "purchased_endorsements" in data["careerFields"]
+
+
+def test_exported_endorsements_match_what_the_career_actually_unlocks():
+    """The site derives each driver's endorsements from this table.
+
+    Hold it to the real unlock path: a career levelled to each exported
+    threshold must hold exactly the endorsements the export promises at that
+    level, or the public profile starts crediting training the carrier never
+    sponsored (or hiding training it did).
+    """
+    from freight_fate.models.career import LEVEL_XP
+
+    data = invariant_data()
+    endorsements = data["endorsements"]
+    for level in range(1, len(LEVEL_XP) + 1):
+        career = Career(xp=float(LEVEL_XP[level - 1]))
+        assert career.level == level
+        expected = {key for key, entry in endorsements.items() if level >= entry["level"]}
+        assert career.endorsements == expected
+
+    # A self-paid course unlocks ahead of the sponsored level, which is why
+    # purchased_endorsements has to reach the server at all.
+    early = Career(xp=0.0, purchased_endorsements=["heavy_haul"])
+    assert "heavy_haul" in early.endorsements
+
+
+def test_exported_fleet_tiers_match_the_carrier_fleet_bands():
+    """The site names a company driver's fleet tier from these bands."""
+    from freight_fate.models.carrier_fleet import fleet_tier_for_level
+
+    tiers = invariant_data()["fleetTiers"]
+    assert tiers[0]["minLevel"] == 1  # every level maps to a band
+    assert [t["minLevel"] for t in tiers] == sorted(t["minLevel"] for t in tiers)
+    for level in range(1, 31):
+        expected = fleet_tier_for_level(level).label
+        banded = [t["label"] for t in tiers if level >= t["minLevel"]][-1]
+        assert banded == expected

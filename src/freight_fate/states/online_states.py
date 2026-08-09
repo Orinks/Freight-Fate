@@ -42,10 +42,11 @@ DISCLOSURE = (
     "generated from gameplay. Public updates can also appear in the Freight Fate updates "
     "feed. Each post also tells orinks.net which game version you are running, used only "
     "for moderation and troubleshooting and never shown publicly. Freight Fate does not "
-    "publish your real name, full save, money, coordinates, active cargo details, or precise "
+    "publish your real name, full save, coordinates, active cargo details, or precise "
     "real-world location. Detailed career statistics come only from your latest accepted "
-    "private backup. Turning Profile sharing off hides public details but does not turn "
-    "Cloud backup off."
+    "private backup and include lifetime career earnings, the running total your career "
+    "has ever earned; the money you currently have is never published. Turning Profile "
+    "sharing off hides public details but does not turn Cloud backup off."
 )
 
 # pygame.SCRAP_TEXT is the plain string "text/plain". Windows resolves that to
