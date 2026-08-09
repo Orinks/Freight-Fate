@@ -371,6 +371,130 @@ def test_tpims_api_config():
     assert "parking_endpoint" in ohio_config
     assert "name" in ohio_config
     assert ohio_config["name"] == "Ohio OHGO TPIMS"
+    # OHGO's keyless API is gone (checked 2026-08-09), so Ohio never fetches
+    assert ohio_config["parser"] == "no_api"
+
+
+def test_wisconsin_tpims_config():
+    """Wisconsin joined TPIMS 2026-08-09 with the two-endpoint 511wi.gov join."""
+    config = TPIMS_APIS["wisconsin"]
+    assert config["parser"] == "wi511"
+    assert config["parking_endpoint"] == "/List/GetData/truckparking"
+    assert config["icons_endpoint"] == "/map/mapIcons/TruckParking"
+
+
+def test_no_api_state_serves_fresh_cache_without_fetching():
+    """no_api states never fetch but still serve a fresh cache entry."""
+    provider = TruckParkingProvider()
+    now = time.time()
+    location = TruckParkingLocation(id="seed-1", name="Seeded", location="I-70")
+    provider._cache["ohio"] = ParkingData(
+        state="ohio", locations=[location], last_updated=now, cache_time=now, source="test"
+    )
+    assert provider.request("ohio").locations[0].id == "seed-1"
+
+    fresh_provider = TruckParkingProvider()
+    data = fresh_provider.request("ohio")
+    assert data.locations == []
+    assert data.source == "empty"
+    assert fresh_provider._failed_until == {}
+
+
+# Trimmed real responses recorded 2026-08-09 from 511wi.gov:
+# POST /List/GetData/truckparking (site names and live counts) and
+# GET /map/mapIcons/TruckParking (coordinates keyed by the same site ids).
+WI511_LIST_DATA = {
+    "draw": 1,
+    "recordsTotal": 13,
+    "recordsFiltered": 13,
+    "data": [
+        {
+            "DT_RowId": "1",
+            "tooltipUrl": "/tooltip/TruckParking/1?lang=%7Blang%7D&noCss=true",
+            "lastUpdated": "8/9/26, 11:00 AM",
+            "organization": "WI-TPIMS",
+            "name": "Portage Rest Area #11",
+            "pageName": "Columbia County, WI",
+            "roadway": "I-39/90/94 EB",
+            "exit": "",
+            "availableParkingSpaces": 68,
+            "totalParkingSpaces": 68,
+            "trend": "CLEARING",
+            "trustData": "Yes",
+            "open": "Yes",
+        },
+        {
+            "DT_RowId": "2",
+            "lastUpdated": "8/9/26, 11:00 AM",
+            "organization": "WI-TPIMS",
+            "name": "Millston Rest Area #22",
+            "roadway": "I-94 EB",
+            "availableParkingSpaces": 0,
+            "totalParkingSpaces": 35,
+            "open": "No",
+        },
+    ],
+}
+
+WI511_ICONS_DATA = {
+    "item1": {"size": [29, 35], "origin": [0, 0], "anchor": [14, 34]},
+    "item2": [
+        {
+            "itemId": "1",
+            "location": [43.428772, -89.483492],
+            "icon": {"url": "/Generated/Content/Images/511/map_truckParking.svg"},
+            "title": "",
+        },
+        {
+            "itemId": "2",
+            "location": [44.225922, -90.707871],
+            "icon": {"url": "/Generated/Content/Images/511/map_truckParking.svg"},
+            "title": "",
+        },
+    ],
+}
+
+
+def test_parse_wi511_locations_joins_counts_and_coordinates():
+    """The WI parser joins list rows with map icon coordinates by site id."""
+    provider = TruckParkingProvider()
+    locations = provider._parse_wi511_locations(WI511_LIST_DATA, WI511_ICONS_DATA)
+    assert len(locations) == 2
+
+    portage = locations[0]
+    assert portage.id == "1"
+    assert portage.name == "Portage Rest Area #11"
+    assert portage.location == "I-39/90/94 EB"
+    assert portage.capacity == 68
+    assert portage.available == 68
+    assert portage.latitude == 43.428772
+    assert portage.longitude == -89.483492
+    assert portage.open is True
+    assert portage.last_reported == "8/9/26, 11:00 AM"
+    assert portage.availability_status == "available"
+
+    millston = locations[1]
+    assert millston.available == 0
+    assert millston.open is False
+    assert millston.availability_status == "closed"
+
+
+def test_parse_wi511_locations_without_matching_icon():
+    """A list row with no map icon still parses, just without coordinates."""
+    provider = TruckParkingProvider()
+    icons = {"item1": {}, "item2": []}
+    locations = provider._parse_wi511_locations(WI511_LIST_DATA, icons)
+    assert len(locations) == 2
+    assert locations[0].latitude is None
+    assert locations[0].longitude is None
+
+
+def test_parse_wi511_locations_malformed_data():
+    """Malformed WI responses return no locations instead of raising."""
+    provider = TruckParkingProvider()
+    assert provider._parse_wi511_locations({}, {}) == []
+    assert provider._parse_wi511_locations({"data": None}, {"item2": None}) == []
+    assert provider._parse_wi511_locations({"data": [None, {}]}, WI511_ICONS_DATA) == []
 
 
 def test_retry_cooldown_after_failure():

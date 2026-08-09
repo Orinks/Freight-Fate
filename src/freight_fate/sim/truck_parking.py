@@ -1,9 +1,10 @@
 """Truck parking availability via TPIMS (Truck Parking Information Management System).
 
 Fetches real-time truck parking availability from state TPIMS APIs, which provide
-live parking space counts at public and private truck stops. Currently supports
-Ohio (OHGO) as the reference implementation, with the architecture designed for
-easy addition of other TPIMS states (Kansas, Wisconsin, Iowa, Minnesota, Missouri).
+live parking space counts at public and private truck stops. Wisconsin (511WI)
+is the live implementation; Ohio (OHGO) keeps its keyless-era config on the
+no_api bench until an API-key story exists. The architecture is designed for
+easy addition of other TPIMS states (Kansas, Iowa, Minnesota, Missouri).
 
 Like the real_weather and real_traffic systems, this is non-blocking with caching
 and graceful fallback to static parking data when APIs are unavailable.
@@ -11,6 +12,7 @@ and graceful fallback to static parking data when APIs are unavailable.
 
 from __future__ import annotations
 
+import gzip
 import json
 import logging
 import threading
@@ -29,14 +31,29 @@ log = logging.getLogger(__name__)
 
 # TPIMS API endpoints for supported states
 TPIMS_APIS = {
+    # publicapi.ohgo.com's keyless v1 endpoints are gone (404, checked
+    # 2026-08-09; the replacement API answers 401 without a registered key),
+    # so Ohio sits on no_api until a key story exists.  The endpoint stays
+    # listed for when it does.
     "ohio": {
         "base_url": "https://publicapi.ohgo.com",
         "parking_endpoint": "/v1/truck-parking",
         "name": "Ohio OHGO TPIMS",
+        "parser": "no_api",
+    },
+    # 511wi.gov TPIMS sites (found 2026-08-09): live counts and site names
+    # come from the list endpoint (POST /List/GetData/truckparking, a
+    # DataTables-style form post), coordinates from the map icon layer
+    # (GET /map/mapIcons/TruckParking); the parser joins the two by site id.
+    "wisconsin": {
+        "base_url": "https://511wi.gov",
+        "parking_endpoint": "/List/GetData/truckparking",
+        "icons_endpoint": "/map/mapIcons/TruckParking",
+        "name": "Wisconsin 511WI TPIMS",
+        "parser": "wi511",
     },
     # Future TPIMS states can be added here:
     # "kansas": {"base_url": "https://...", "parking_endpoint": "...", "name": "Kansas TPIMS"},
-    # "wisconsin": {"base_url": "https://...", "parking_endpoint": "...", "name": "Wisconsin TPIMS"},
 }
 
 # Cache settings
@@ -202,6 +219,10 @@ class TruckParkingProvider:
         if cached and cached.is_fresh():
             return cached
 
+        # no_api: never fetch, but honour any (test-seeded) cache entry
+        if TPIMS_APIS[state_key].get("parser") == "no_api":
+            return cached if cached else self._empty_data(state_key)
+
         # Spawn background fetch
         self._fetch_background(state_key)
 
@@ -235,19 +256,24 @@ class TruckParkingProvider:
         base_url = api_config["base_url"]
         parking_endpoint = api_config["parking_endpoint"]
 
-        url = f"{base_url}{parking_endpoint}"
-        req = urllib.request.Request(
-            url,
-            headers={
-                "User-Agent": self._default_user_agent,
-                "Accept": "application/json",
-            },
-        )
+        if api_config.get("parser") == "wi511":
+            locations = self._fetch_wi511_locations(state)
+        else:
+            url = f"{base_url}{parking_endpoint}"
+            req = urllib.request.Request(
+                url,
+                headers={
+                    "User-Agent": self._default_user_agent,
+                    "Accept": "application/json",
+                },
+            )
 
-        with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S, context=ssl_context()) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+            with urllib.request.urlopen(
+                req, timeout=FETCH_TIMEOUT_S, context=ssl_context()
+            ) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
 
-        locations = self._parse_locations(data, state)
+            locations = self._parse_locations(data, state)
         return ParkingData(
             state=state,
             locations=locations,
@@ -255,6 +281,108 @@ class TruckParkingProvider:
             cache_time=time.time(),
             source=api_config["name"],
         )
+
+    def _fetch_wi511_locations(self, state: str) -> list[TruckParkingLocation]:
+        """Fetch and join the two 511wi.gov TPIMS endpoints.
+
+        The list endpoint is a DataTables-style form post that returns site
+        names and live counts but no coordinates; the map icon layer returns
+        the coordinates keyed by the same site ids.
+        """
+        api_config = TPIMS_APIS[state]
+        base_url = api_config["base_url"]
+
+        list_req = urllib.request.Request(
+            f"{base_url}{api_config['parking_endpoint']}",
+            data=urllib.parse.urlencode(
+                {"draw": 1, "start": 0, "length": 500, "lang": "en"}
+            ).encode("ascii"),
+            headers={
+                "User-Agent": self._default_user_agent,
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        )
+        with urllib.request.urlopen(
+            list_req, timeout=FETCH_TIMEOUT_S, context=ssl_context()
+        ) as resp:
+            list_data = self._read_json_body(resp)
+
+        icons_req = urllib.request.Request(
+            f"{base_url}{api_config['icons_endpoint']}",
+            headers={
+                "User-Agent": self._default_user_agent,
+                "Accept": "application/json",
+            },
+        )
+        with urllib.request.urlopen(
+            icons_req, timeout=FETCH_TIMEOUT_S, context=ssl_context()
+        ) as resp:
+            icons_data = self._read_json_body(resp)
+
+        return self._parse_wi511_locations(list_data, icons_data)
+
+    def _read_json_body(self, resp) -> dict:
+        """Read a JSON response body, gunzipping when the server compresses.
+
+        511wi.gov gzips the map icon layer even without Accept-Encoding."""
+        body = resp.read()
+        if body[:2] == b"\x1f\x8b":
+            body = gzip.decompress(body)
+        return json.loads(body.decode("utf-8"))
+
+    def _parse_wi511_locations(
+        self, list_data: dict, icons_data: dict
+    ) -> list[TruckParkingLocation]:
+        """Join 511wi.gov list rows with map icon coordinates by site id."""
+        coords: dict[str, tuple[float, float]] = {}
+        icon_items = icons_data.get("item2", []) if isinstance(icons_data, dict) else []
+        if isinstance(icon_items, list):
+            for item in icon_items:
+                if not isinstance(item, dict):
+                    continue
+                location = item.get("location")
+                if not (isinstance(location, list) and len(location) >= 2):
+                    continue
+                try:
+                    coords[str(item.get("itemId", ""))] = (
+                        float(location[0]),
+                        float(location[1]),
+                    )
+                except (TypeError, ValueError):
+                    continue
+
+        locations: list[TruckParkingLocation] = []
+        rows = list_data.get("data", []) if isinstance(list_data, dict) else []
+        if not isinstance(rows, list):
+            return locations
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            try:
+                location_id = str(row.get("DT_RowId", "") or "")
+                if not location_id:
+                    continue
+                latitude, longitude = coords.get(location_id, (None, None))
+                capacity = row.get("totalParkingSpaces")
+                available = row.get("availableParkingSpaces")
+                locations.append(
+                    TruckParkingLocation(
+                        id=location_id,
+                        name=str(row.get("name", "")),
+                        location=str(row.get("roadway", "")),
+                        capacity=int(capacity) if capacity is not None else None,
+                        available=int(available) if available is not None else None,
+                        latitude=latitude,
+                        longitude=longitude,
+                        open=str(row.get("open", "Yes")).lower() != "no",
+                        last_reported=row.get("lastUpdated"),
+                    )
+                )
+            except (TypeError, ValueError, KeyError) as e:
+                log.debug(f"Failed to parse WI truck parking row: {e}")
+                continue
+        return locations
 
     def _parse_locations(self, data: dict, state: str) -> list[TruckParkingLocation]:
         """Parse parking locations from API response.
