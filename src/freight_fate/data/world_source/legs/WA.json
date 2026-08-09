@@ -15110,6 +15110,13 @@
             "spoken": "Approaching Windy Pass"
           },
           {
+            "name": "Ape Cave",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "Billboard: Washington has an Ape Cave. It contains lava, darkness, and no confirmed apes, which is exactly what an ape would want you to believe."
+          },
+          {
             "name": "Okanogan-Wenatchee National Forest",
             "category": "national_forest",
             "kind": "zone",
@@ -15158,6 +15165,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 48661528, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Thorp"
+          },
+          {
+            "name": "Bavarian Leavenworth",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 100.0,
+            "spoken": "Billboard: Leavenworth is ahead, a fading timber town that reinvented itself as a Bavarian village. Every building went alpine, every waiter found lederhosen, and Christmas now brings half a million lights and a heroic amount of bratwurst."
           },
           {
             "name": "Teanaway River",
@@ -32088,6 +32102,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 48698281, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hobart"
+          },
+          {
+            "name": "Mount Rainier",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "You are climbing toward Mount Rainier, the great glacier-covered volcano that looms over Seattle on clear days and hides in cloud on the rest."
           },
           {
             "name": "Preston",

@@ -14087,6 +14087,13 @@
             "spoken": "Entering Lorena"
           },
           {
+            "name": "Czech Stop",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.0,
+            "spoken": "Billboard: Czech Stop is ahead in West. It serves kolaches, klobasniky, and a parking lot proving that pastry can overpower interstate discipline."
+          },
+          {
             "name": "Robinson",
             "at_mi": 96.3,
             "off_mi": 2.7,
@@ -18470,6 +18477,13 @@
             "spoken": "Passing Hornsby Bend"
           },
           {
+            "name": "The Hill Country German",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: You are entering the Hill Country, where Fredericksburg's German settlers left behind biergartens, peach orchards, and, oddly, the national museum of the war in the Pacific. Admiral Nimitz grew up here, which explains at least one of those things."
+          },
+          {
             "name": "Creedmoor",
             "at_mi": 4.1,
             "off_mi": 8.87,
@@ -18592,6 +18606,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151726187, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Woodcreek"
+          },
+          {
+            "name": "The LBJ Ranch",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "You are passing through the Hill Country of Lyndon Johnson. His ranch on the Pedernales became the Texas White House, where the President worked cattle and the nation's business at the same time."
           },
           {
             "name": "Blanco",
@@ -23781,6 +23802,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151629294, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Nome"
+          },
+          {
+            "name": "The Orange Show",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Southeast Texas is ahead, where petrochemical towers glow at night and roadside attractions occasionally make perfect sense only after several hundred miles."
           },
           {
             "name": "Devers",
@@ -41434,6 +41462,13 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
+          {
+            "name": "Home of the Aggies",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: College Station is home to Texas A and M and the Twelfth Man. The Aggies stand for the entire game, bury their mascots near the stadium, and once built bonfires that touched the sky."
+          },
           {
             "name": "Kurten",
             "at_mi": 7.7,
@@ -62661,14 +62696,14 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 255.0,
-            "spoken": "Billboard: The Blue Whale ahead at Catoosa. A giant smiling blue whale in a swimming hole, built by a man for his wife who loved whales. Route sixty-six's gentlest giant."
+            "spoken": "Billboard: The Blue Whale is ahead at Catoosa. A man built this giant smiling whale in a swimming hole for his wife, who loved whales. It may be Route sixty-six's gentlest giant."
           },
           {
             "name": "World's Largest Totem Pole",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 290.0,
-            "spoken": "Billboard: The world's largest totem pole ahead at Foyil. Ninety feet of hand-poured concrete, covered in carvings. One man, eleven years, and nobody asked him to, but you'll wish you would have."
+            "spoken": "Billboard: The world's largest totem pole is ahead at Foyil. One man spent eleven years hand-pouring and carving ninety feet of concrete, although nobody asked him to. You will be glad he did."
           },
           {
             "name": "Arkansas River",
@@ -62676,6 +62711,13 @@
             "kind": "point",
             "at_mi": 304.1,
             "spoken": "Crossing the Arkansas River"
+          },
+          {
+            "name": "The Big Blue Whale's Cousin",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 330.0,
+            "spoken": "Billboard: You are on Route sixty-six, where every town has a giant animal, a neon sign, or a firm opinion about fudge. Sometimes it has all three."
           },
           {
             "name": "Big Cabin",
@@ -62691,7 +62733,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 350.0,
-            "spoken": "Billboard: Galena ahead, an old Route sixty-six mining town where three states meet in a few miles. That rusty tow truck out front may look familiar if you have seen a certain cartoon."
+            "spoken": "Billboard: Galena is ahead, an old Route sixty-six mining town where three states meet within a few miles. That rusty tow truck out front may look familiar if you have seen a certain cartoon."
           },
           {
             "name": "Redings Mill",
@@ -62707,14 +62749,21 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 400.0,
-            "spoken": "Billboard: Gay Parita ahead near Paris Springs -- a lovingly rebuilt nineteen-thirties filling station, green dinosaur and all, kept alive by folks who simply love the old road."
+            "spoken": "Billboard: Gay Parita is ahead near Paris Springs. This lovingly rebuilt nineteen-thirties filling station, green dinosaur and all, survives because some folks simply refuse to let the old road die."
           },
           {
             "name": "Lambert's Cafe",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 415.0,
-            "spoken": "Billboard: Lambert's Cafe ahead near Springfield -- Home of Throwed Rolls. Raise a hand and a waiter will throw a hot dinner roll clear across the room at you. Catch it. Those are the rules."
+            "spoken": "Billboard: Lambert's Cafe is ahead near Springfield, home of the throwed rolls. Raise a hand and a waiter will throw a hot dinner roll clear across the room at you. Catch it; those are the rules."
+          },
+          {
+            "name": "Route Sixty-Six Car Museum",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 430.0,
+            "spoken": "Billboard: The Route Sixty-Six Car Museum is ahead near Springfield. It has chrome, fins, muscle, and enough polished paint to make your truck feel underdressed."
           },
           {
             "name": "Halltown",
@@ -62730,7 +62779,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 445.0,
-            "spoken": "Billboard: The Munger Moss Motel ahead in Lebanon -- a Route sixty-six classic with a neon sign the size of a house, still glowing every night for travelers who like the old way."
+            "spoken": "Billboard: The Munger Moss Motel is ahead in Lebanon, with a Route sixty-six neon sign the size of a house. It still glows every night for travelers who prefer the old way."
           },
           {
             "name": "Strafford",
@@ -62746,7 +62795,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 480.0,
-            "spoken": "Billboard: The best fudge in the world comes from Uranus. We did not name the town. Bring the kids, bring the jokes, next exit."
+            "spoken": "Billboard: The best fudge in the world comes from Uranus. We did not name the town. Bring the kids, bring the jokes, and take the next exit."
           },
           {
             "name": "Phillipsburg",
@@ -62787,7 +62836,7 @@
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 560.0,
-            "spoken": "Billboard: Meramec Caverns ahead. Five stories of underground rooms where Jesse James is said to have hidden. Now with a gift shop, because of course."
+            "spoken": "Billboard: Meramec Caverns is ahead, with five stories of underground rooms where Jesse James is said to have hidden. It has a gift shop now, because of course it does."
           },
           {
             "name": "Cuba",
@@ -65270,6 +65319,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151836907, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Jolly"
+          },
+          {
+            "name": "The World's Littlest Skyscraper",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 135.0,
+            "spoken": "Billboard: Wichita Falls is home to the World's Littlest Skyscraper, a four-story swindle. A con man sold shares in a tower, built it four stories tall instead of four hundred feet, and pocketed the difference."
           },
           {
             "name": "Lakeside City",
@@ -114022,6 +114078,13 @@
             "spoken": "Passing Bevil Oaks"
           },
           {
+            "name": "The Cajun Line",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 100.0,
+            "spoken": "You are nearing Beaumont and the Louisiana line, where Texas turns into bayou. Oil derricks and rice fields share the view, while refinery smells ride the Gulf wind."
+          },
+          {
             "name": "China",
             "at_mi": 101.1,
             "off_mi": 11.54,
@@ -115452,6 +115515,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 151404736, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Diboll"
+          },
+          {
+            "name": "Oldest Town in Texas",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Nacogdoches, east of here, is the oldest town in Texas. It has flown nine flags where most places managed only six, and it was already old before Texas became a state."
           },
           {
             "name": "Redland",
@@ -139770,6 +139840,13 @@
             "spoken": "Crossing the Dry Devils River"
           },
           {
+            "name": "The Law West of the Pecos",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 150.0,
+            "spoken": "Billboard: Beyond Del Rio lies Langtry, where Judge Roy Bean held court in a saloon and called himself the Law West of the Pecos. He once fined a dead man for carrying a concealed weapon and kept the money."
+          },
+          {
             "name": "Val Verde Park",
             "at_mi": 157.0,
             "off_mi": 4.01,
@@ -152090,6 +152167,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151662881, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brookston"
+          },
+          {
+            "name": "The Eiffel Tower, With a Hat",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 62.0,
+            "spoken": "Billboard: Paris, Texas, has the second-tallest Eiffel Tower in the second-largest Paris. It wears a giant red cowboy hat because Paris, Tennessee, built one too, and this is how Texas wins."
           },
           {
             "name": "Reno",
@@ -168524,6 +168608,20 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151723242, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Hewitt"
+          },
+          {
+            "name": "Magnolia",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Waco is home to Magnolia Market at the Silos. Chip and Joanna turned an old cotton mill into shiplap heaven, and the buses of shoppers have not stopped since."
+          },
+          {
+            "name": "The Home of Dr Pepper",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: Waco is the birthplace of Dr Pepper, the oldest major soft drink in America. It was mixed at a drugstore soda fountain here before Coke was even a gleam, and the museum occupies the old bottling plant."
           },
           {
             "name": "Lacy Lakeview",

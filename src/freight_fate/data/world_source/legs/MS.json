@@ -2638,6 +2638,13 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Tennessee Williams' Columbus",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Columbus is the birthplace of Tennessee Williams. The rectory where the playwright of A Streetcar Named Desire was born still stands. Stella is not included."
+          },
+          {
             "name": "Caledonia",
             "at_mi": 5.5,
             "off_mi": 10.28,
@@ -2654,6 +2661,13 @@
             "spoken": "Crossing the Tombigbee River"
           },
           {
+            "name": "Waverley Mansion",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 12.0,
+            "spoken": "Billboard: Waverley Mansion is ahead. This antebellum house has a soaring octagonal cupola and was lost to the woods for fifty years before being found again."
+          },
+          {
             "name": "New Hamilton",
             "at_mi": 12.1,
             "off_mi": 10.57,
@@ -2661,6 +2675,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153492079, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing New Hamilton"
+          },
+          {
+            "name": "The Prairie",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "You are rolling through the Black Prairie, a curving belt of dark, rich soil that once grew cotton and now grows cattle and catfish."
           },
           {
             "name": "Aberdeen",
@@ -2688,6 +2709,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153434089, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Nettleton"
+          },
+          {
+            "name": "Elvis, again",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "Billboard: Tupelo is the home of Elvis. He got his first guitar here instead of the bicycle his family could not afford. The rest you know."
           },
           {
             "name": "Verona",
@@ -3761,6 +3789,13 @@
             "kind": "point",
             "at_mi": 51.8,
             "spoken": "Crossing the Black Warrior River"
+          },
+          {
+            "name": "Dreamland Bar-B-Que",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.0,
+            "spoken": "Billboard: Tuscaloosa is ahead, home to Dreamland ribs, white bread, sauce, and no unnecessary vegetables attempting to supervise the meal."
           },
           {
             "name": "Holt",
@@ -8743,6 +8778,13 @@
             "spoken": "Passing Pass Christian"
           },
           {
+            "name": "The Beach and the Lighthouse",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.0,
+            "spoken": "Billboard: Welcome to the Mississippi Coast. It has twenty-six miles of white man-made beach, the tall iron Biloxi Lighthouse standing in the highway median, casinos on the water, and shrimp fresh off the boats."
+          },
+          {
             "name": "Biloxi River",
             "category": "river",
             "kind": "point",
@@ -11766,6 +11808,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153560683, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Gautier"
+          },
+          {
+            "name": "The Shed Barbecue",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "Billboard: The Shed Barbecue is ahead. It offers smoke, sauce, blues, and a building assembled from whatever did not run away fast enough."
           },
           {
             "name": "Escatawpa",
@@ -26932,6 +26981,20 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Jimmie Rodgers, the Singing Brakeman",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Meridian is home to Jimmie Rodgers, the father of country music. He was a railroad man who yodeled the blues and helped start it all."
+          },
+          {
+            "name": "Dentzel Carousel",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Meridian keeps the world's only surviving two-row stationary Dentzel menagerie carousel. Its hand-carved animals still spin inside their own gingerbread house."
+          },
+          {
             "name": "Marion",
             "at_mi": 5.4,
             "off_mi": 0.27,
@@ -27009,6 +27072,13 @@
             "spoken": "Entering Crawford"
           },
           {
+            "name": "The Birthplace of the Blues Marker",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.0,
+            "spoken": "Billboard: You are in Mississippi music country, where blues, gospel, country, and rock and roll traded notes along roads like this before anyone argued over who invented what."
+          },
+          {
             "name": "Starkville",
             "at_mi": 84.5,
             "off_mi": 8.96,
@@ -27070,6 +27140,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153440235, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Verona"
+          },
+          {
+            "name": "Elvis Presley Birthplace",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 138.0,
+            "spoken": "Billboard: Tupelo is ahead, home to the two-room shotgun shack where Elvis Presley was born. The King started here, poor as dirt, with a guitar from the hardware store."
           },
           {
             "name": "Saltillo",

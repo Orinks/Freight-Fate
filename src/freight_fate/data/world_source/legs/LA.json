@@ -3179,6 +3179,20 @@
             "spoken": "Passing Addis"
           },
           {
+            "name": "The Tallest Capitol",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Baton Rouge has the tallest state capitol in the nation, a thirty-four-story tower built by Huey Long. The Kingfish himself was shot dead in the marble halls he raised."
+          },
+          {
+            "name": "Tiger Stadium",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "You are leaving Baton Rouge and LSU, where Tiger Stadium is known as Death Valley. A night-game crowd once registered as an earthquake, and a live tiger named Mike watches from his habitat."
+          },
+          {
             "name": "Saint George",
             "at_mi": 9.6,
             "off_mi": 4.81,

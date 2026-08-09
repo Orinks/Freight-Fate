@@ -891,6 +891,13 @@
             "spoken": "Passing Weaverville"
           },
           {
+            "name": "The Biltmore",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Asheville is home to the Biltmore, the largest private house in America. A Vanderbilt built its two hundred fifty rooms as a country cottage, then added a winery and an entire forest for a yard."
+          },
+          {
             "name": "Candler",
             "at_mi": 5.4,
             "off_mi": 4.12,
@@ -14857,6 +14864,13 @@
             "spoken": "Passing Midway"
           },
           {
+            "name": "World's Largest Chest of Drawers",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 65.0,
+            "spoken": "Billboard: High Point is ahead, the furniture capital of the world and home to a giant chest of drawers with socks hanging out. Subtle advertising was not selected."
+          },
+          {
             "name": "Thomasville",
             "at_mi": 67.9,
             "off_mi": 1.4,
@@ -27917,6 +27931,13 @@
             "spoken": "Passing Matthews"
           },
           {
+            "name": "NASCAR's Capital",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Charlotte is the capital of NASCAR. Nearly every race team is based within an hour, and the Hall of Fame downtown lets you sit in the cars and feel the noise."
+          },
+          {
             "name": "Mint Hill",
             "at_mi": 6.6,
             "off_mi": 10.15,
@@ -28125,6 +28146,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 153902907, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Clemmons"
+          },
+          {
+            "name": "Krispy Kreme, the Original",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 74.0,
+            "spoken": "Billboard: Winston-Salem is where Krispy Kreme was born. When the Hot Now sign glows, glazed doughnuts are coming off the line, and you are legally required to stop."
           },
           {
             "name": "Kernersville",
@@ -35335,6 +35363,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 157590340, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Entering Spring Lake"
+          },
+          {
+            "name": "Fort Liberty",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 90.0,
+            "spoken": "You are nearing Fayetteville and Fort Liberty, home of the Eighty-Second Airborne and the Green Berets. It is one of the largest military bases on Earth."
           },
           {
             "name": "Rockfish",
@@ -53944,6 +53979,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158510749, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wrightsville Beach"
+          },
+          {
+            "name": "The Battleship",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Wilmington is where the battleship North Carolina rides at anchor on the Cape Fear. So many movies are filmed here that the city also calls itself Hollywood East."
           },
           {
             "name": "Cape Fear River",

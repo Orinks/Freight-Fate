@@ -1425,6 +1425,13 @@
             "spoken": "Passing Walkersville"
           },
           {
+            "name": "Gettysburg",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "You are passing Gettysburg, the small Pennsylvania town where the greatest battle of the Civil War was fought over three July days. Months later, Lincoln spoke here for two minutes and defined the nation."
+          },
+          {
             "name": "Thurmont",
             "at_mi": 64.1,
             "off_mi": 0.33,
@@ -3735,6 +3742,13 @@
             "spoken": "Entering Brandy Station"
           },
           {
+            "name": "Dinosaur Land",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 70.0,
+            "spoken": "Billboard: Dinosaur Land is ahead. Fiberglass monsters have ruled this Virginia roadside since your grandparents were children, and extinction has not slowed ticket sales."
+          },
+          {
             "name": "Brightwood",
             "at_mi": 85.6,
             "off_mi": 0.07,
@@ -3799,6 +3813,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158647510, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Hollymead"
+          },
+          {
+            "name": "Monticello",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 112.0,
+            "spoken": "Billboard: Charlottesville is home to Thomas Jefferson's Monticello, the hilltop house he designed and redesigned throughout his life. His university lies below, and both places wound up on the back of the nickel."
           }
         ],
         "speed_limits": [

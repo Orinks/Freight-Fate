@@ -7311,6 +7311,13 @@
             "spoken": "Passing North Bennington"
           },
           {
+            "name": "The Bennington Monument",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "At Bennington stands Vermont's tallest structure, a stone battle monument three hundred feet high. Nearby, the poet Robert Frost lies buried in the churchyard."
+          },
+          {
             "name": "Old Bennington",
             "at_mi": 38.2,
             "off_mi": 1.48,
@@ -7506,6 +7513,20 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 158851899, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Northfield"
+          },
+          {
+            "name": "Ben and Jerry's",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 150.0,
+            "spoken": "Billboard: Waterbury is ahead, home to the Ben and Jerry's factory tour. The ice cream is made here, and retired flavors rest in a real graveyard with little headstones. The samples are free, but the tombstones are emotionally complicated."
+          },
+          {
+            "name": "The Smallest Capital",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 156.0,
+            "spoken": "You are reaching Montpelier, the smallest state capital in the nation and the only one without a single fast-food chain restaurant. A gold dome rises over a town of about ten thousand."
           }
         ],
         "speed_limits": [
@@ -15884,6 +15905,13 @@
             "spoken": "Passing Sherburne"
           },
           {
+            "name": "Cooperstown",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 60.0,
+            "spoken": "Billboard: Turn off for Cooperstown and the Baseball Hall of Fame. This lakeside village is where the game was supposedly born and where its immortals are enshrined in bronze."
+          },
+          {
             "name": "Edmeston",
             "at_mi": 63.9,
             "off_mi": 3.55,
@@ -15954,6 +15982,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158605826, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Waterville"
+          },
+          {
+            "name": "Dinosaur Bar-B-Que",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "Billboard: Central New York barbecue is ahead. Dinosaurs are extinct, but apparently they left enough sauce behind to open several restaurants."
           },
           {
             "name": "Marshall",

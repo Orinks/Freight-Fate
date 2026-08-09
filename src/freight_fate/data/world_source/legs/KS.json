@@ -2038,6 +2038,13 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "Boot Hill",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Dodge City was once the wickedest little city in the West. Wyatt Earp and Bat Masterson kept the peace badly, while the losers went up to Boot Hill with their boots on. Get out of Dodge, or stay a while."
+          },
+          {
             "name": "Wilroads Gardens",
             "at_mi": 3.1,
             "off_mi": 2.64,

@@ -8435,6 +8435,13 @@
             "spoken": "Passing Bishop"
           },
           {
+            "name": "Athens Sound",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Athens is the birthplace of R E M and the B-Fifty-Twos. This college town produced more good bands than it had any right to."
+          },
+          {
             "name": "Hull",
             "at_mi": 3.4,
             "off_mi": 5.42,
@@ -11685,6 +11692,13 @@
             "spoken": "Crossing the Chattahoochee River"
           },
           {
+            "name": "The Big Chicken",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.0,
+            "spoken": "Billboard: The Big Chicken is ahead near Marietta. This fifty-six-foot chicken-shaped restaurant rolls its eyes, moves its beak, and has confused Atlanta families giving directions for generations."
+          },
+          {
             "name": "Fair Oaks",
             "at_mi": 76.3,
             "off_mi": 2.75,
@@ -11724,6 +11738,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153872087, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing White"
+          },
+          {
+            "name": "Goats on the Roof",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 115.0,
+            "spoken": "Billboard: Goats on the Roof is ahead. There are real goats on a real roof, because ground-level goats were failing to stop traffic."
           },
           {
             "name": "Adairsville",
@@ -17471,6 +17492,13 @@
             "spoken": "Passing Colbert"
           },
           {
+            "name": "The Tree That Owns Itself",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Athens is home to the Tree That Owns Itself, a white oak said to hold the deed to the ground where it grows. That tree owns more property than most people."
+          },
+          {
             "name": "Bogart",
             "at_mi": 5.7,
             "off_mi": 7.66,
@@ -17548,6 +17576,13 @@
             "spoken": "Passing Bostwick"
           },
           {
+            "name": "The Town Sherman Spared",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 29.0,
+            "spoken": "Billboard: Madison is ahead, the town said to have been too pretty to burn. Sherman marched past and left the mansions standing, and they stand yet."
+          },
+          {
             "name": "Rutledge",
             "at_mi": 32.8,
             "off_mi": 8.81,
@@ -17580,6 +17615,13 @@
             "kind": "point",
             "at_mi": 51.8,
             "spoken": "Bledsoe-Green House Museum ahead"
+          },
+          {
+            "name": "Uncle Remus Country",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 53.0,
+            "spoken": "Billboard: Eatonton is home to Br'er Rabbit. The old Uncle Remus tales were set down here, and a statue of the rabbit himself stands watch at the courthouse."
           },
           {
             "name": "Crooked Creek",
@@ -31797,6 +31839,13 @@
             "spoken": "Passing Evans"
           },
           {
+            "name": "A Tradition Unlike Any Other",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Augusta is home to the Masters. Every April, the golf world comes to Augusta National for the green jacket, the azaleas, Amen Corner, and a pimento cheese sandwich that somehow still costs almost nothing."
+          },
+          {
             "name": "Clearwater",
             "at_mi": 3.3,
             "off_mi": 2.46,
@@ -36038,6 +36087,13 @@
             "spoken": "Passing Gloverville"
           },
           {
+            "name": "The Godfather of Soul",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "You are leaving Augusta, hometown of James Brown, the Godfather of Soul and the hardest-working man in show business. He shined shoes on these streets before he made the whole world get up offa that thing, and his statue now stands downtown."
+          },
+          {
             "name": "Evans",
             "at_mi": 4.9,
             "off_mi": 10.1,
@@ -37040,6 +37096,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153934679, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Midway"
+          },
+          {
+            "name": "Peach World",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.0,
+            "spoken": "Billboard: Peach World is ahead. It sells peaches, pecans, preserves, boiled peanuts, and enough peach-flavored merchandise to prove Georgia takes branding personally."
           },
           {
             "name": "Henderson",
@@ -41566,6 +41629,13 @@
             "spoken": "Passing Pittsview"
           },
           {
+            "name": "Lake Eufaula",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 47.0,
+            "spoken": "Billboard: Eufaula is ahead, the Big Bass Capital. The lake is full of largemouth bass, and the town is full of columned antebellum mansions."
+          },
+          {
             "name": "Georgetown",
             "at_mi": 48.0,
             "off_mi": 2.15,
@@ -41600,6 +41670,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153355352, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Webb"
+          },
+          {
+            "name": "The Golden Peanut",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.0,
+            "spoken": "Billboard: Dothan is ahead. Look for the great golden peanut on its pedestal, the town's shining monument to the humble goober."
           },
           {
             "name": "Napier Field",
@@ -43558,6 +43635,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153975965, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Wenona"
+          },
+          {
+            "name": "Watermelon Capital, Georgia's Claim",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Cordele calls itself the Watermelon Capital of the world. Arkansas may argue, but the melons here do not care who wins."
           },
           {
             "name": "Arabi",
@@ -54623,6 +54707,20 @@
             "spoken": "Passing Bolingbroke"
           },
           {
+            "name": "Macon Music",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Macon is home to Little Richard, Otis Redding, and the Allman Brothers. This red-clay town wrote a shocking share of American music."
+          },
+          {
+            "name": "Cherry Blossom Capital",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: Macon is the Cherry Blossom Capital of the world. About three hundred fifty thousand Yoshino cherry trees bloom pink every March, which is more than Washington and Tokyo have to spare."
+          },
+          {
             "name": "Robins Air Force Base",
             "at_mi": 15.3,
             "off_mi": 10.29,
@@ -54718,6 +54816,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 154085659, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Waverly Hall"
+          },
+          {
+            "name": "Coca-Cola's Inventor",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 96.0,
+            "spoken": "Billboard: Columbus is the hometown of John Pemberton, the pharmacist who mixed the first Coca-Cola. The formula left, but the pride stayed."
           },
           {
             "name": "Smiths Station",
@@ -56555,6 +56660,13 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "The Capitoline Wolf",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.0,
+            "spoken": "Billboard: Rome, Georgia, was built on seven hills and has a bronze she-wolf suckling Romulus and Remus. It was a gift from Rome, Italy. Yes, that Rome."
+          },
+          {
             "name": "Etowah River",
             "category": "river",
             "kind": "point",
@@ -57736,6 +57848,13 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
+          {
+            "name": "Berry College",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 5.0,
+            "spoken": "Billboard: Berry College is ahead near Rome. Its twenty-seven thousand acres of forest and fields make it the largest college campus on Earth, and its stone mill wheel is taller than a house."
+          },
           {
             "name": "Oostanaula River",
             "category": "river",

@@ -6034,6 +6034,13 @@
             "spoken": "Passing Fulton"
           },
           {
+            "name": "The Corn Palace, again",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: You just passed the world's only Corn Palace in Mitchell. It is a palace made of corn, redecorated yearly by the bushel. There is nothing else to say, yet somehow they keep finding more corn."
+          },
+          {
             "name": "Plano",
             "at_mi": 6.9,
             "off_mi": 5.28,
@@ -6111,6 +6118,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151642313, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Lake Preston"
+          },
+          {
+            "name": "World's Largest Ball of Twine",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.0,
+            "spoken": "Billboard: A giant ball of twine is ahead. Thousands of pounds of string were wound together so future generations could ask the correct question: why?"
           },
           {
             "name": "Oldham",
@@ -7277,6 +7291,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151672156, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Plano"
+          },
+          {
+            "name": "The Corn Palace",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 168.0,
+            "spoken": "Billboard: Mitchell is home to the Corn Palace, an entire building covered in murals made from thousands of ears of corn. They redecorate it fresh every single year, because apparently corn has seasons."
           },
           {
             "name": "Fulton",
@@ -8903,6 +8924,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 3510949764, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Box Elder"
+          },
+          {
+            "name": "Gateway to Rushmore",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 176.0,
+            "spoken": "Billboard: Rapid City is the gateway to the Black Hills and Mount Rushmore. Life-size bronze statues of every President stand on downtown corners, waiting for you to shake a cold metal hand."
           },
           {
             "name": "Black Hawk",

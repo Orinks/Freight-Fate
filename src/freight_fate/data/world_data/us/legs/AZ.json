@@ -9372,11 +9372,18 @@
             "spoken": "Entering Ash Fork"
           },
           {
+            "name": "Delgadillo's Snow Cap",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 75.0,
+            "spoken": "Billboard: Delgadillo's Snow Cap is ahead in Seligman. It serves burgers, shakes, fake mustard, practical jokes, and a menu delivered by people who consider confusion part of the service."
+          },
+          {
             "name": "Grand Canyon Caverns",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 95.0,
-            "spoken": "Billboard: Grand Canyon Caverns ahead, near Peach Springs. The largest dry cavern in the country, two hundred feet down, with a single motel room at the very bottom for the very brave."
+            "spoken": "Billboard: Grand Canyon Caverns is ahead near Peach Springs. The country's largest dry cavern lies two hundred feet down, with one motel room at the very bottom for the very brave."
           },
           {
             "name": "Pine Lake",

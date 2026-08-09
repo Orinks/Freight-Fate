@@ -10831,6 +10831,13 @@
             "spoken": "Passing Momauguin"
           },
           {
+            "name": "Pizza and Yale",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 44.0,
+            "spoken": "Billboard: New Haven is ahead, home to Yale and fierce claims that it invented both the hamburger and American apizza. The coal-fired white clam pie is not up for debate."
+          },
+          {
             "name": "Montowese",
             "at_mi": 46.0,
             "off_mi": 4.02,

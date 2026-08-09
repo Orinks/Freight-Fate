@@ -880,6 +880,13 @@
             "spoken": "Passing Egypt"
           },
           {
+            "name": "Noccalula Falls",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 58.0,
+            "spoken": "Billboard: Gadsden is home to Noccalula Falls, a ninety-foot waterfall in a city park. A bronze Cherokee maiden stands at the brink, recalling an old and sorrowful legend."
+          },
+          {
             "name": "Reece City",
             "at_mi": 60.1,
             "off_mi": 3.29,
@@ -10191,6 +10198,13 @@
             "spoken": "Passing Vincent"
           },
           {
+            "name": "Talladega",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Billboard: Talladega is ahead, home to the biggest and fastest superspeedway in NASCAR. Cars run flat out in a pack around two and a half miles of high banking, and a movie taught the nation that if you ain't first, you're last."
+          },
+          {
             "name": "Coosa River",
             "category": "river",
             "kind": "point",
@@ -16468,6 +16482,13 @@
             "spoken": "Old Cabin Jail Museum ahead"
           },
           {
+            "name": "Kolomoki Mounds",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 32.0,
+            "spoken": "Near Blakely stand the Kolomoki Mounds, great earthworks raised by Native peoples more than a thousand years ago. They are older than any European map of this land."
+          },
+          {
             "name": "Damascus",
             "at_mi": 42.0,
             "off_mi": 8.63,
@@ -18071,6 +18092,13 @@
             "kind": "point",
             "at_mi": 95.6,
             "spoken": "Crossing the Ochlockonee River"
+          },
+          {
+            "name": "Constitution Oak",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 105.0,
+            "spoken": "Billboard: Tallahassee is ahead, where Florida wrote its first constitution beneath an oak tree and then wisely moved government indoors with air conditioning."
           },
           {
             "name": "Woodville",
@@ -22288,6 +22316,13 @@
             "spoken": "Passing Powell"
           },
           {
+            "name": "Home of the Band Alabama",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Fort Payne is the Sock Capital of the world and the hometown of the band Alabama. This town once wove one American sock in eight, then raised the best-selling country group of all time. Mountain music, indeed."
+          },
+          {
             "name": "Fyffe",
             "at_mi": 31.2,
             "off_mi": 7.68,
@@ -22320,6 +22355,13 @@
             "kind": "point",
             "at_mi": 37.7,
             "spoken": "Fort Payne Depot and Museum ahead"
+          },
+          {
+            "name": "Little River Canyon",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 38.0,
+            "spoken": "You are passing Little River Canyon atop Lookout Mountain, one of the deepest gorges east of the Mississippi. A river that runs its entire length on top of a mountain carved it."
           },
           {
             "name": "Sylvania",
@@ -28449,6 +28491,13 @@
             "spoken": "Passing Daphne"
           },
           {
+            "name": "Mobile's Mardi Gras",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Mobile is the birthplace of American Mardi Gras. It started here, not in New Orleans, back in the early seventeen hundreds. Mobile brought the floats, the moon pies thrown from them, and the whole raucous carnival to America first."
+          },
+          {
             "name": "Chickasaw",
             "at_mi": 5.9,
             "off_mi": 1.06,
@@ -30216,6 +30265,13 @@
             "spoken": "Passing Daphne"
           },
           {
+            "name": "USS Alabama",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 4.0,
+            "spoken": "Billboard: Mobile Bay is home to the battleship U S S Alabama, a steel giant of the Second World War. You can walk it from bow to gun turret."
+          },
+          {
             "name": "Chickasaw",
             "at_mi": 5.9,
             "off_mi": 1.06,
@@ -30322,6 +30378,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153769052, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Enterprise"
+          },
+          {
+            "name": "Jimmie Rodgers, from the south",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 128.0,
+            "spoken": "Billboard: Meridian is ahead, where the father of country music first yodeled his way from brakeman to legend. There is a museum and a whole lot of guitars."
           },
           {
             "name": "Toomsuba",
@@ -32310,6 +32373,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153523100, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Castleberry"
+          },
+          {
+            "name": "Bates House of Turkey",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 95.0,
+            "spoken": "Billboard: Bates House of Turkey is ahead. It serves turkey sandwiches, turkey plates, turkey pie, and proof that Thanksgiving does not require permission from November."
           },
           {
             "name": "Sepulga River",

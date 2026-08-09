@@ -1004,6 +1004,13 @@
             "spoken": "Passing Kanarraville"
           },
           {
+            "name": "Utah's Shakespeare",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Cedar City hosts a Tony-winning Shakespeare festival in the red-rock desert. It is also the gateway to Zion, Bryce, and the pink cliffs of Cedar Breaks."
+          },
+          {
             "name": "Brian Head",
             "at_mi": 12.3,
             "off_mi": 9.19,
@@ -7643,6 +7650,13 @@
             "spoken": "Crossing the Colorado River"
           },
           {
+            "name": "Hole N' the Rock",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: Hole N' the Rock is ahead. It is a five-thousand-square-foot home blasted into sandstone, with souvenirs, animals, and punctuation that has survived every editor."
+          },
+          {
             "name": "McInnis Canyons National Conservation Area",
             "category": "protected_area",
             "kind": "zone",
@@ -8542,6 +8556,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 151402850, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Castle Valley"
+          },
+          {
+            "name": "Arches and Canyonlands",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Moab is the gateway to Arches and Canyonlands, where red rock forms stone rainbows and impossible balanced boulders. The town has also hosted a thousand Westerns and car commercials."
           },
           {
             "name": "Colorado River",

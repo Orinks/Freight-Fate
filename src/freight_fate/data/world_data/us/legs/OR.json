@@ -1929,11 +1929,25 @@
             "spoken": "Passing Gearhart"
           },
           {
+            "name": "The Goonies",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Astoria is where they filmed The Goonies and Kindergarten Cop. The oldest American town west of the Rockies climbs a hill toward a tall column you can climb from the inside."
+          },
+          {
             "name": "John Day River",
             "category": "river",
             "kind": "point",
             "at_mi": 12.2,
             "spoken": "Crossing the John Day River"
+          },
+          {
+            "name": "The Longest Beach",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: The Long Beach Peninsula has a ribbon of hard sand you can drive on and one of the longest continuous beaches in the country. It also has a museum of things washed ashore and a giant frying pan, in case the ocean was not enough."
           },
           {
             "name": "Cathlamet",
@@ -22610,6 +22624,13 @@
             "kind": "zone",
             "at_mi": 42.1,
             "spoken": "Entering Fremont-Winema National Forest"
+          },
+          {
+            "name": "Crater Lake",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 55.0,
+            "spoken": "Billboard: Crater Lake is ahead and uphill. The deepest lake in the country fills the blasted crater of a fallen volcano and glows an impossible blue. There is nothing else like it."
           }
         ],
         "speed_limits": [
@@ -24136,6 +24157,13 @@
         ],
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
+          {
+            "name": "Free Willy Lived Here",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Newport is home to the Oregon Coast Aquarium, where Keiko, the orca from Free Willy, once lived before they set him free for real."
+          },
           {
             "name": "Yaquina River",
             "category": "river",
@@ -49075,6 +49103,13 @@
             "spoken": "Passing Aumsville"
           },
           {
+            "name": "The Enchanted Forest",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "Billboard: Enchanted Forest is ahead. One family built its storybook castles, crooked houses, and rides into the Oregon woods over a suspicious number of productive weekends."
+          },
+          {
             "name": "Turner",
             "at_mi": 9.2,
             "off_mi": 2.73,
@@ -51414,6 +51449,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150972687, projected onto the leg's OpenRouteService driving-hgv route, placed ahead of the speed zone it explains",
             "spoken": "Entering Tumalo"
+          },
+          {
+            "name": "The High Desert",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 128.0,
+            "spoken": "Billboard: Bend is ahead, where the wet green Willamette gives way to sagebrush, lava, and high desert beneath snowy peaks. A brewery waits on nearly every corner."
           }
         ],
         "state_miles": [

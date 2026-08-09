@@ -18253,6 +18253,13 @@
             "spoken": "Passing Shumway"
           },
           {
+            "name": "The Cross at the Crossroads",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Effingham has a white cross nearly two hundred feet tall where the interstates meet. It rises high enough to be seen for miles across the flat."
+          },
+          {
             "name": "Watson",
             "at_mi": 4.6,
             "off_mi": 4.7,
@@ -18294,6 +18301,20 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153410174, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Brownstown"
+          },
+          {
+            "name": "World's Largest Rocking Chair",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: The world's largest rocking chair is ahead in Casey. It does not rock, because at that size rocking becomes a municipal emergency."
+          },
+          {
+            "name": "Lincoln's Vandalia",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.0,
+            "spoken": "Billboard: Vandalia was the old state capital where a young lawyer named Lincoln first served. The statehouse still stands, and so does the pioneer mother out front."
           },
           {
             "name": "Shafter",

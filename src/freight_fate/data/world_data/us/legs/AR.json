@@ -4775,6 +4775,13 @@
             "spoken": "Entering Saint Joe"
           },
           {
+            "name": "The Buffalo River",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 90.0,
+            "spoken": "You are nearing Harrison and the Buffalo National River, the first river in the country protected as undammed and wild. It still runs clear beneath limestone bluffs."
+          },
+          {
             "name": "Western Grove",
             "at_mi": 94.6,
             "off_mi": 0.32,

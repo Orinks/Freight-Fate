@@ -21364,6 +21364,13 @@
             "spoken": "Passing Wise"
           },
           {
+            "name": "The Country Music Highway",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 80.0,
+            "spoken": "This stretch of U S Twenty-Three is the Country Music Highway. Loretta Lynn, Dwight Yoakam, the Judds, Ricky Skaggs, and a dozen more were all raised within a holler of this road."
+          },
+          {
             "name": "Pound",
             "at_mi": 85.3,
             "off_mi": 0.79,
@@ -44257,6 +44264,13 @@
             "spoken": "Approaching Cumberland Gap"
           },
           {
+            "name": "Cumberland Gap",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 46.0,
+            "spoken": "Billboard: Cumberland Gap is ahead. Daniel Boone led the first settlers west through this notch in the mountains; now you drive under it through a tunnel."
+          },
+          {
             "name": "Pineville",
             "at_mi": 57.7,
             "off_mi": 0.11,
@@ -44359,6 +44373,13 @@
             "kind": "point",
             "at_mi": 89.6,
             "spoken": "Crossing the Laurel River"
+          },
+          {
+            "name": "The First Kentucky Fried Chicken",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 92.0,
+            "spoken": "Billboard: Corbin is where Colonel Sanders fried the first Kentucky Fried Chicken at a roadside cafe and gas station. The original recipe was born right here."
           },
           {
             "name": "Hopewell",

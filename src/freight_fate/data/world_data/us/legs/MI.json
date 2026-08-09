@@ -4668,6 +4668,13 @@
             "spoken": "Passing Genoa Charter Township"
           },
           {
+            "name": "Hell, Michigan",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: Turn off for Hell, Michigan. You can get married, mail a postcard, buy a souvenir, and announce that Hell froze over when you visit in winter."
+          },
+          {
             "name": "Oceola Township",
             "at_mi": 25.1,
             "off_mi": 4.55,
@@ -7604,6 +7611,13 @@
             "spoken": "Passing Highland Park"
           },
           {
+            "name": "The Henry Ford",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 8.0,
+            "spoken": "You are passing Dearborn and the Henry Ford, a vast museum of American ingenuity. It holds the bus Rosa Parks sat in, the chair Lincoln was shot in, and an entire village of history moved here brick by brick."
+          },
+          {
             "name": "Hazel Park",
             "at_mi": 8.2,
             "off_mi": 5.89,
@@ -7814,6 +7828,13 @@
             "kind": "point",
             "at_mi": 39.1,
             "spoken": "Crossing the Huron River"
+          },
+          {
+            "name": "The Big House",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Billboard: Ann Arbor is home to Michigan and the Big House, the largest stadium in the country. More than a hundred thousand fans wear maize and blue and sing The Victors."
           },
           {
             "name": "Scio Township",
@@ -14491,6 +14512,13 @@
         ],
         "landmarks": [
           {
+            "name": "The Motor City and Motown",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Detroit is the Motor City that put the world on wheels and gave it Motown. From a little house called Hitsville came the Supremes, the Temptations, Stevie Wonder, and the sound of young America."
+          },
+          {
             "name": "Ecorse River",
             "category": "river",
             "kind": "point",
@@ -20739,6 +20767,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153946440, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Montrose"
+          },
+          {
+            "name": "Bronner's CHRISTmas Wonderland",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: Frankenmuth is ahead, Michigan's Little Bavaria and home to Bronner's, the world's largest Christmas store. It stays open all year, covers several football fields, and glows like the North Pole in July."
           },
           {
             "name": "Birch Run",
@@ -32464,6 +32499,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 153961600, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Olivet"
+          },
+          {
+            "name": "Cereal City",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 33.0,
+            "spoken": "Billboard: Battle Creek is the Cereal City. The Kellogg brothers invented corn flakes here by accident, and some mornings the whole town smells like toasting grain. Tony the Tiger says it is grreat."
           },
           {
             "name": "Bellevue",
@@ -56033,6 +56075,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 11584679842, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing East Bay Charter Township"
+          },
+          {
+            "name": "Cherry Capital",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: You are leaving Traverse City, the Cherry Capital of the world. Orchards run down to a turquoise bay, and every July the town throws a National Cherry Festival."
           },
           {
             "name": "Long Lake Charter Township",

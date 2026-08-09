@@ -21848,6 +21848,13 @@
             "spoken": "Passing Royalton"
           },
           {
+            "name": "The Shoe House",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 25.0,
+            "spoken": "Billboard: The Haines Shoe House is ahead. This five-story house is shaped like a work boot and was built by a shoe salesman who understood that subtlety does not sell footwear."
+          },
+          {
             "name": "Mount Gretna",
             "at_mi": 25.9,
             "off_mi": 1.3,
@@ -28969,6 +28976,13 @@
             "spoken": "Passing Royalton"
           },
           {
+            "name": "Chocolate Town",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 20.0,
+            "spoken": "Billboard: Hershey is ahead, the sweetest place on Earth. The chocolate bar built this town, where the streetlights are shaped like Kisses and the air itself can smell like cocoa."
+          },
+          {
             "name": "State Game Lands Number 145",
             "category": "protected_area",
             "kind": "zone",
@@ -28999,6 +29013,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 158600904, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Clay"
+          },
+          {
+            "name": "Amish Country",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Billboard: This is Lancaster County and Amish country, where horse-drawn buggies share the road and barns are raised by hand. The whoopie pies and shoofly pie are worth the stop, but slow down for the buggies."
           },
           {
             "name": "Reinholds",

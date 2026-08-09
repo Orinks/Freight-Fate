@@ -851,6 +851,13 @@
         "source": "Development-time OpenRouteService driving-hgv (truck) route geometry and elevation over OpenStreetMap, with Census/OpenStreetMap state context and curated corridor POIs checked in for offline runtime use.",
         "landmarks": [
           {
+            "name": "The Bakersfield Sound",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 3.0,
+            "spoken": "Billboard: Bakersfield is home to the Bakersfield Sound. Buck Owens and Merle Haggard built a twangier, harder kind of country music here, a world away from Nashville. The Crystal Palace still swings."
+          },
+          {
             "name": "Lamont",
             "at_mi": 9.4,
             "off_mi": 6.25,
@@ -876,6 +883,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150942502, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Arvin"
+          },
+          {
+            "name": "The Tehachapi Loop",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "You are climbing Tehachapi Pass beside the famous railroad Loop. A freight train long enough can pass directly over its own tail as it spirals up the grade."
           },
           {
             "name": "Golden Hills",
@@ -23501,6 +23515,13 @@
             "spoken": "Entering Kingsburg"
           },
           {
+            "name": "Bravo Farms Treehouse",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 23.0,
+            "spoken": "Billboard: Bravo Farms is ahead in Traver. It offers cheese, barbecue, antiques, miniature golf, and a seven-story treehouse built because one story was apparently cowardice."
+          },
+          {
             "name": "Delft Colony",
             "at_mi": 24.2,
             "off_mi": 3.99,
@@ -23542,6 +23563,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150947098, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Tulare"
+          },
+          {
+            "name": "Sequoia Country",
+            "category": "highway_marker",
+            "kind": "point",
+            "at_mi": 40.0,
+            "spoken": "Visalia is the gateway to Sequoia, where the largest living things on Earth still stand. The trees are so vast that a road once ran through the trunk of one."
           },
           {
             "name": "Farmersville",
@@ -40629,6 +40657,13 @@
             "spoken": "Crossing the San Joaquin River"
           },
           {
+            "name": "The Underground Gardens",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 52.0,
+            "spoken": "Billboard: Fresno has a villa hidden beneath the valley heat. A Sicilian immigrant spent forty years digging its courtyards, cool rooms, and citrus groves out of hardpan by hand."
+          },
+          {
             "name": "Clovis",
             "at_mi": 55.9,
             "off_mi": 7.61,
@@ -41260,6 +41295,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150964588, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Winton"
+          },
+          {
+            "name": "Gateway to Yosemite",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 36.0,
+            "spoken": "Billboard: Merced is the gateway to Yosemite. Turn east and climb into the granite cathedral of the Sierra, where waterfalls and cliffs wait about an hour up the road."
           },
           {
             "name": "Planada",
@@ -83322,6 +83364,13 @@
             "spoken": "Passing Prunedale"
           },
           {
+            "name": "Giant Artichoke",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 15.0,
+            "spoken": "Billboard: You are entering giant artichoke country. Castroville calls itself the Artichoke Center of the World and has supplied enough thorny vegetables to make dip a regional industry."
+          },
+          {
             "name": "Mission Soledad Museum",
             "category": "museum",
             "kind": "point",
@@ -83436,6 +83485,13 @@
             "kind": "point",
             "at_mi": 122.3,
             "spoken": "Approaching Cuesta Pass"
+          },
+          {
+            "name": "The Madonna Inn",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 124.0,
+            "spoken": "Billboard: San Luis Obispo is home to the Madonna Inn, a pink palace where every room is a different fever dream. Even the men's room waterfall is a tourist attraction in its own right."
           },
           {
             "name": "Los Osos",
@@ -107152,7 +107208,7 @@
             "category": "highway_marker",
             "kind": "point",
             "at_mi": 180.0,
-            "spoken": "Ahead the highway climbs Donner Pass, high in the Sierra Nevada, where a wagon party bound for California was trapped by deep snow in the winter of eighteen forty-six and survived only by the grimmest of means. Beautiful country, and a hard history."
+            "spoken": "Ahead, the highway climbs Donner Pass high in the Sierra Nevada. A wagon party bound for California was trapped here by deep snow in the winter of eighteen forty-six and survived only by the grimmest of means. It is beautiful country with a hard history."
           },
           {
             "name": "Lockwood",
@@ -107232,14 +107288,14 @@
             "category": "highway_marker",
             "kind": "point",
             "at_mi": 690.0,
-            "spoken": "Ahead lie the Bonneville Salt Flats, a blinding white plain of hard-packed salt where land-speed records are chased, so flat and empty you can nearly see the curve of the Earth. Unfortunately, speed limits on this road are, sadly, still controlled and patrolled."
+            "spoken": "Ahead lie the Bonneville Salt Flats, a blinding white plain of hard-packed salt where drivers chase land-speed records. The land is so flat and empty that you can nearly see the curve of Earth, although the speed limit on this road remains disappointingly enforced."
           },
           {
             "name": "Tree of Utah",
             "category": "billboard_sign",
             "kind": "point",
             "at_mi": 705.0,
-            "spoken": "Billboard: Out on the salt flats ahead stands the Tree of Utah, an eighty-foot concrete tree sprouting from the salt in the middle of nowhere. How do you think this thing happened?"
+            "spoken": "Billboard: The Tree of Utah stands ahead on the salt flats, an eighty-foot concrete tree sprouting from the middle of nowhere. How do you suppose this happened?"
           },
           {
             "name": "Stansbury Park",
@@ -116408,6 +116464,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=village node 150952956, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Los Osos"
+          },
+          {
+            "name": "Bubblegum Alley",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 2.0,
+            "spoken": "Billboard: San Luis Obispo has an entire downtown alley walled from floor to ceiling in decades of chewed bubblegum. It is a landmark you can smell. Bring a piece, or make the healthier choice and do not."
           },
           {
             "name": "Avila Beach",
@@ -125653,6 +125716,20 @@
             "spoken": "Crossing the Santa Ynez River"
           },
           {
+            "name": "Split Pea Soup",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 30.0,
+            "spoken": "Billboard: Pea Soup Andersen's is ahead in Buellton. It has served world-famous split pea soup since your grandparents drove this road. Hap-pea and Pea-wee are waiting, and the soup is all you can eat."
+          },
+          {
+            "name": "Solvang",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 32.0,
+            "spoken": "Billboard: Solvang is ahead. A whole Danish village appears in the California hills, complete with windmills, half-timbered houses, warm aebleskiver, and Hans Christian Andersen watching over it all."
+          },
+          {
             "name": "Solvang",
             "at_mi": 34.0,
             "off_mi": 3.06,
@@ -133917,6 +133994,13 @@
             "kind": "point",
             "source": "OpenStreetMap place=town node 150966866, projected onto the leg's OpenRouteService driving-hgv route",
             "spoken": "Passing Escalon"
+          },
+          {
+            "name": "American Graffiti",
+            "category": "billboard_sign",
+            "kind": "point",
+            "at_mi": 28.0,
+            "spoken": "Billboard: Modesto is the hometown of George Lucas. Before the spaceships, he made American Graffiti about cruising these streets on a summer night. The town motto promises water, wealth, contentment, and health, apparently in that order."
           },
           {
             "name": "Riverbank",
