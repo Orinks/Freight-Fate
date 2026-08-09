@@ -94,21 +94,18 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 ## 1.9 in flight (`feat/career-1.9`)
 
 - [x] **Bake the remaining curated billboard sheets -- SHIPPED
-      2026-08-09.** All 23 sheets baked with zero copy changes:
-      `billboard_sign` 42 -> 217 (five regions -> all sixteen),
-      `highway_marker` -> 55, index regenerated and verified. Owner
-      leftovers, all mechanical or editorial, none blocking: (1) sixteen
-      blocks skipped because their sheet header names a leg that has
-      since split into a multi-hop chain (Meteor Crater, Standin' on the
-      Corner, the Wigwam Motel, the Boll Weevil Monument, Fort Novosel,
-      and friends) -- picking the new sub-leg and milepost re-enables
-      each; (2) five blocks whose own review notes say the generic copy
-      must not ship as written were held back (The Orange Show,
-      Constitution Oak, The Big Boy Statue, Uranus Indiana, Ape Cave) --
-      they need rewritten copy from the owner or a contributor, never
-      from an agent; (3) twenty-odd baked blocks still carry soft
-      "verify" notes in their sheets, preserved in place for an
-      eventual fact pass.
+      2026-08-09.** All 23 sheets baked with zero copy changes; blockers
+      finished the same day at the owner's direction: the sixteen
+      stale-leg blocks re-pointed onto today's split corridors (approved
+      copy untouched, exit-verified Route 66 placements), and the five
+      do-not-bake blocks replaced with new in-style signs (Navasota
+      blues capital, Tallahassee canopy roads, Little America, Terre
+      Haute's Coca-Cola bottle, Leavenworth's Bavarian village). Final
+      tally: `billboard_sign` 42 -> 233 across all sixteen regions,
+      `highway_marker` 59; index regenerated and verified. Still open,
+      non-blocking: Ape Cave stays held for a future Mount St. Helens
+      route per its note, and twenty-odd baked blocks carry soft
+      "verify" fact-notes in their sheets for an eventual fact pass.
 - [x] **Achievement categories, on Saltwake's model -- SHIPPED
       2026-08-09.** The catalog (172 badges, grown past the planned 145)
       now carries seven categories with per-category earned counts, and
