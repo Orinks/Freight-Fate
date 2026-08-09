@@ -12,6 +12,16 @@ deflection promoting true switchbacks to hairpins regardless of radius.
 
 Interstate mainline records are screened for sweep artifacts on the way in
 (see ``INTERSTATE_MIN_RADIUS_FT``); the raw bake keeps every row.
+
+US and state routes get a second, narrower screen: sweep artifacts also
+land on non-interstate mainline (the same city-departure kink that hits an
+interstate can ride the US-route out of the same city), but road class
+alone cannot tell those apart from a real switchback -- US-550 and the Salt
+River Canyon really are that sharp. ``curve_artifacts.jsonl``
+(``tools/screen_curve_artifacts.py``) names the specific ``(leg, seq)``
+records an offline terrain check flagged as sitting on flat local ground,
+where no real hairpin can exist; everything else, sharp or not, is left
+alone.
 """
 
 from __future__ import annotations
@@ -103,6 +113,28 @@ def _is_interstate_artifact(row: dict) -> bool:
     )
 
 
+def _flagged_artifact_keys() -> frozenset[tuple[str, int]]:
+    """``(leg, seq)`` pairs a US/state-route terrain check flagged as flat.
+
+    Baked offline by ``tools/screen_curve_artifacts.py`` -- see that tool's
+    docstring for the discriminator (flat local ground under a hairpin-
+    severity curve, checked against the dense archived elevation profile).
+    Missing file reads as "nothing flagged" rather than an error, the same
+    fail-open the interstate screen takes when curves.jsonl itself is absent.
+    """
+    text = read_data_text("world_data/us/gameplay/curve_artifacts.jsonl")
+    if text is None:
+        return frozenset()
+    keys: set[tuple[str, int]] = set()
+    for line in text.splitlines():
+        if line.strip():
+            row = json.loads(line)
+            if "meta" in row:
+                continue
+            keys.add((row["leg"], row["seq"]))
+    return frozenset(keys)
+
+
 def _load() -> dict[str, tuple[CurveRecord, ...]]:
     global _CACHE
     if _CACHE is not None:
@@ -111,6 +143,7 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
     text = read_data_text("world_data/us/gameplay/curves.jsonl")
     if text is not None:
         interstate_legs = _interstate_leg_keys()
+        flagged_artifacts = _flagged_artifact_keys()
         for line in text.splitlines():
             if line.strip():
                 row = json.loads(line)
@@ -122,6 +155,13 @@ def _load() -> dict[str, tuple[CurveRecord, ...]]:
                 # shove, and a time-decompression stall all read the same
                 # records. Ramps are exempt -- they really are that sharp.
                 if not connector and row["leg"] in interstate_legs and _is_interstate_artifact(row):
+                    continue
+                # Second screen: US/state-route mainline records an offline
+                # terrain check flagged as sitting on flat ground (see
+                # _flagged_artifact_keys). Keyed by (leg, seq) rather than a
+                # runtime rule, because the discriminator needs the dense
+                # elevation archive this loader has no reason to carry.
+                if not connector and (row["leg"], row.get("seq")) in flagged_artifacts:
                     continue
                 # Connector arcs (interchange ramps) stay in the data with
                 # their flag: curve physics wants them, spoken layers skip

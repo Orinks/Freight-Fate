@@ -30,6 +30,7 @@ BAKED_DATA_FILES = (
     "radio_catalog.json",
     "radio_imported.json",
     "world_data/us/gameplay/curves.jsonl",
+    "world_data/us/gameplay/curve_artifacts.jsonl",
 )
 
 
