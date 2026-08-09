@@ -1082,6 +1082,16 @@
   and parking follow their own toggles under Settings, and turning one
   on works no matter how the Online switch is set.
 
+- **No more phantom hairpins on the interstate.** The dense road-geometry
+  sweep had baked a few thousand impossible curves onto interstate
+  mainline -- city-departure kinks and interchange corners recorded as if
+  the highway itself bent that hard. At speed one could fire a bogus
+  "Hairpin right, advise twenty", shove the truck toward the shoulder,
+  and pin the clock to real time on a road that runs straight. Those
+  records are now screened out on load. Real mountain interstates keep
+  every genuine bend, and the sharp stuff on two-lane passes -- the
+  Million Dollar Highway's switchbacks included -- is untouched.
+
 - **A dead radio stream no longer drops you to silence.** When a real
   stream refuses to play, the radio now says which station went off the
   air, moves you to the next station in the same part of the dial, and

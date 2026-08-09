@@ -123,22 +123,18 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       arrivals, weather and seasons, and a hidden-cuts bucket. Category
       titles and descriptions ride the existing achievement copy tests;
       the category noun joins docs/ontology.md in the same change.
-- [ ] **Screen artifact curves out of the highway bake (found
-      2026-08-08).** About 3,200 of the 27,393 interstate mainline curve
-      records are geometry artifacts, not roads: 80-250 ft radii and
-      sub-1,000 ft footprints (one is 53 ft long), clustered in the first
-      1-4 miles of legs -- city-anchor departure geometry and interchange
-      vertices baked as mainline (samples: an 82 ft "hairpin" on I-77
-      near Akron; three at mile 4 of flat I-20 out of Abilene). Players
-      rarely hear them only because departures are driven below the
-      advisory-plus-margin gate; at speed one fires a bogus "Hairpin
-      right, advise 20", shoves the truck with curve physics, and pins
-      the clock to real time. Fix is data hygiene, not advisory tuning
-      (the 0.3 g posted-diamond math is right): an artifact screen in the
-      bake or loader dropping mainline records with implausible radii for
-      the road class (nothing under ~300 ft belongs on interstate
-      mainline) plus the near-anchor cluster; re-verify the legit
-      mountain corridors (I-70 Glenwood, I-40 grades) survive the screen.
+- [x] **Screen artifact curves out of the highway bake -- SHIPPED
+      2026-08-09.** Loader-side screen in `data/curves.py`: interstate
+      mainline records under 300 ft radius or over 150 degrees of
+      deflection are sweep artifacts (city-anchor departure geometry and
+      interchange vertices baked as mainline) and are dropped on load --
+      3,113 records, taking interstate mainline hairpins from 1,604 to
+      zero. The raw bake keeps every row; ramps/connectors and all
+      US/state-route records are untouched (US-550's 36 switchbacks and
+      Glenwood Canyon survive verbatim, verified). Known residue: the
+      same Denver departure artifact rides the US-40 leg, and no measured
+      signal separates artifact from real switchback on that class -- a
+      future US/state pass needs a different discriminator.
 - [ ] **No career transfer from 1.8 and earlier (owner ruling,
       2026-08-08).** The rebalanced arc starts everyone fresh: old-scale
       careers (some level 50+) would make 1.9 progression unfair, and a
