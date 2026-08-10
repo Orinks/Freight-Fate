@@ -186,12 +186,22 @@ def _slam_reverse():
         rig.prepare(speed_mph=60.0, gear=10)
         rig.held.add(rig.pygame.K_LSHIFT)  # clutch in
         rig.step(8)
-        result = d.truck.transmission.request_gear(REVERSE)
+        # Through TruckState, which is the path the gear keys take
+        # (states/driving_controls.py). Calling Transmission.request_gear
+        # directly reaches past the road-speed guard that lives one layer up,
+        # and reported a bug no player can reach for the harness's first run.
+        damage_before = d.truck.damage_pct
+        result = d.truck.request_gear(REVERSE)
         rig.held.discard(rig.pygame.K_LSHIFT)
         if result.ok:
             findings.append(
                 "reverse engaged at 60 mph forward with only the clutch pressed: no speed "
                 "guard, no grind, no driveline damage model"
+            )
+        elif d.truck.damage_pct <= damage_before:
+            findings.append(
+                "reverse at 60 mph was refused but cost the driveline nothing: a real box "
+                "would be short some teeth for the attempt"
             )
         rig.step(900)
         if d.truck.transmission.in_reverse and d.truck.velocity_mps > 1.0:
@@ -231,18 +241,33 @@ def _neutral_coast():
         result = d.truck.transmission.request_gear(0)  # neutral needs no clutch
         if not result.ok:
             findings.append(f"could not select neutral while rolling: {result.message}")
+        # Reaching three figures in neutral down a long grade is not the bug --
+        # that IS a runaway, and the sim is right to allow it. What would be a
+        # bug is a truck that survives one. The first run of this harness
+        # reported "no mechanical failure, no runaway-truck event" as a
+        # finding, which was an editorial claim the scenario never checked and
+        # its own transcript disproves: the run walks reduced power, limp
+        # mode, the last call, and out of service. So check for the
+        # consequence rather than asserting its absence.
+        from freight_fate.sim.vehicle import RUNAWAY_SPEED_MPH
+
         max_mph = 0.0
+        damage_before = d.truck.damage_pct
         for _ in range(5400):
             d.update(DT)
             max_mph = max(max_mph, d.truck.speed_mph)
             rig.check_invariants()
             if d.trip.position_mi >= d.trip.total_miles - 8.0:
                 break
-        if max_mph > 110.0:
+        runaway = max_mph > RUNAWAY_SPEED_MPH
+        took_damage = d.truck.damage_pct > damage_before or bool(
+            rig.lines_with("Out of service") or rig.lines_with("Limp mode")
+        )
+        if runaway and not took_damage:
             findings.append(
-                f"neutral coast reached {max_mph:.0f} mph: no mechanical failure, no "
-                "runaway-truck event -- the only pushback is the overspeed chime and "
-                "settlement fines"
+                f"neutral coast reached {max_mph:.0f} mph, past the {RUNAWAY_SPEED_MPH:.0f} mph "
+                "runaway threshold, and the truck took no damage at all: tires past their "
+                "rated speed and an unloaded driveline cost nothing"
             )
         strike_count = rig.said("Speeding strike")
         # Try to stop it on the service brakes alone from whatever speed remains.

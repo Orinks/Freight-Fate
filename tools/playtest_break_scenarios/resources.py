@@ -135,13 +135,14 @@ def _hos_probe():
             findings.append(f"parked waiting logged as {d.hos.status}")
         if d.hos.off_duty_min > 0.0:
             findings.append("parked waiting accrued off-duty rest (it must stay on duty)")
-        else:
-            findings.append(
-                f"parked in-cab waiting logged {waited_min / 60.0:.1f}h as on-duty: the duty "
-                "window burns at double speed and no amount of waiting ever rests the driver, "
-                "while the FREIGHT_FATE_FORCE_CLOCK lever calls the same 10-hour wait a full "
-                "break -- two clocks, two rulings"
-            )
+        # No else. Deliberate waiting staying on duty is the DESIGN -- the line
+        # above asserts it -- so an else here reported a finding on the healthy
+        # path and could never come back clean. That is what it did on the
+        # harness's first run, and an always-odd scenario teaches a reader to
+        # ignore the column. Waiting must still cost the duty window rather
+        # than rest the driver; a driver who wants rest sleeps.
+        if waited_min <= 0.0:
+            findings.append("ten game-hours of parked waiting burned no duty time at all")
         del hos_mod
         return _outcome(
             "hos_marathon_and_rest_cheese",

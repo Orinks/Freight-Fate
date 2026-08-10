@@ -128,6 +128,13 @@ def _hazard_ignore():
         rig.prepare(speed_mph=70.0)
         rig.held.add(rig.pygame.K_UP)
         collisions = 0
+        # Each spoken number is checked against the damage the truck carried at
+        # the moment it was said. Comparing the LAST line to the truck's state
+        # at the END of the run is what made the harness's first pass report a
+        # lie that was not one: this scenario drives the truck to out of
+        # service, and the automatic roadside rescue then patches it down to
+        # BREAKDOWN_REPAIR_DAMAGE_PCT, long after the line was honest.
+        spoken_vs_actual: list[tuple[float, float]] = []
         for _ in range(16):
             if t.damage_pct >= 100.0:
                 break
@@ -135,19 +142,24 @@ def _hazard_ignore():
                 TripEvent(TripEventKind.HAZARD, "Debris on the road ahead. Brake!", {})
             )
             before = collisions
+            seen_lines = len(rig.lines_with("Total damage"))
             rig.step(1200, until=lambda n=before: rig.said("Collision!") > n)
             collisions = rig.said("Collision!")
             if collisions == before:
                 break
+            fresh = rig.lines_with("Total damage")[seen_lines:]
+            for line in fresh:
+                m = re.search(r"Total damage (\d+) percent", line)
+                if m:
+                    spoken_vs_actual.append((float(m.group(1)), t.damage_pct))
             rig.step(600, until=lambda: t.speed_mph >= 55.0)  # power back up
-        damage_lines = rig.lines_with("Total damage")
-        if damage_lines:
-            m = re.search(r"Total damage (\d+) percent", damage_lines[-1])
-            if m and abs(float(m.group(1)) - round(t.damage_pct)) > 1.0:
+        for said_pct, actual_pct in spoken_vs_actual:
+            if abs(said_pct - round(actual_pct)) > 1.0:
                 findings.append(
-                    f"last collision spoke {m.group(1)}% total damage, truck is at "
-                    f"{t.damage_pct:.0f}%"
+                    f"a collision spoke {said_pct:.0f}% total damage while the truck was at "
+                    f"{actual_pct:.0f}%"
                 )
+                break
         if collisions == 0:
             findings.append("ignored hazards never produced a collision")
         if t.damage_pct > 100.0:
