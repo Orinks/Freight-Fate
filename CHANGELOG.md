@@ -21,6 +21,17 @@
 
 ### Changed
 
+- **Three new keys answer one hours question each.** C used to read the
+  clock, the deadline, and your whole hours-of-service position in one
+  long breath. Now Alt A says how long you have been at the wheel this
+  shift, Alt S says when your break is due, and Alt D says how much
+  driving time and duty window you have left. Left to right, they follow
+  the shape of a shift, and each starts with a different word so you
+  always know which one you pressed. C still works and still opens the
+  same way; it now ends with just the limit that matters next, and it
+  reminds you about the new keys the first three times you press it. On
+  a controller, the clock button still reads the full report.
+
 - **Street corners now ask you to slow down for them.** The approach
   names the turn, the street, the distance, and the speed to be under,
   and arriving too fast means you go by it: the game takes you to the
