@@ -199,6 +199,13 @@ from the words, and synonyms cost them a re-read.
 | The highway exit for the delivery | destination exit | final exit, last exit, your exit | `_destination_exit_stop` |
 | The loop-back after missing the destination exit or the facility gate | safe turnaround | U-turn, turnaround point, loop | `_handle_missed_destination_exit`, `_handle_missed_facility_gate` |
 | The fine for engine braking in one | engine brake citation | jake ticket, noise fine | `EngineBrakeZoneMixin._fine_engine_braking` |
+| An offense that counts toward losing the CDL | serious violation | strike, point, demerit, infraction | `DrivingRecord.record_serious_violation` |
+| The career-long enforcement history | your record | rap sheet, history, file | `DrivingRecord` |
+| The CDL being off the road for a set time | CDL suspension; "suspended" in short status | ban, revocation, lockout | `DrivingRecord.suspended` |
+| The permanent version of it, after a second major offense | lifetime disqualification | permaban, career over, blacklist | `DrivingRecord.lifetime_disqualified` |
+| An offense heavy enough to disqualify a CDL outright | major offense | felony (as the game's own noun), big one | `DrivingRecord.record_major_offense` |
+| Running off the road asleep | fatigue event | microsleep (that is the warning, not the event), nod-off | `DrivingRecord.record_fatigue_event` |
+| How far dispatch will work with you right now | dispatch trust | standing, rep level, tier | `enforcement.trust_band` |
 | The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
 
 Notes on the entries that are not simple:

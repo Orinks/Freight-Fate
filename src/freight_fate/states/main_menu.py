@@ -55,6 +55,10 @@ def pending_notice_state(ctx) -> State | None:
         from .save_notice import SaveModifiedNoticeState
 
         return SaveModifiedNoticeState(ctx)
+    if ctx.profile.driving_record.notice_pending:
+        from .save_notice import DrivingRecordNoticeState
+
+        return DrivingRecordNoticeState(ctx)
     return None
 
 

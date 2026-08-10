@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import time
 
+from ..models import enforcement
 from ..sim.timezones import to_local
 from .base import TimedMessageState
 from .driving_core import *
@@ -186,6 +187,9 @@ class DrivingStatusScreenState(MenuState):
             f"Truck: fuel {t.fuel_fraction * 100:.0f} percent, damage {t.damage_pct:.0f} percent",
             f"Transmission: {'automatic' if t.transmission.automatic else 'manual'}, {d._gear_text()}",
             f"Fatigue: {profile.fatigue:.0f} percent",
+            # Standing is spoken when it changes and whenever it is asked for,
+            # never on a timer.
+            enforcement.standing_text(profile),
             f"Hours: {d.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}",
             time_line,
         ]
@@ -866,7 +870,8 @@ class ArrivalState(MenuState):
         toll_expense = d.trip.toll_expense
         accessorials = carrier_accessorial_charges(job, p)
         carrier_charges = toll_expense + charge_total(accessorials)
-        driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        # Anything a previous load could not cover comes out of this one first.
+        driver_charges = _speeding_settlement_fine(d.speeding_strikes) + p.fines_owed
         business = build_business_settlement(
             p.business_status,
             job,
@@ -905,11 +910,23 @@ class ArrivalState(MenuState):
         gross_pay = business.gross_pay
         on_time_bonus_paid = max(0.0, gross_pay - no_on_time_bonus_business.gross_pay)
         early_bonus = max(0.0, gross_pay - deadline_business.gross_pay)
+        # Say what actually moved. A load too cheap to cover the fines used to
+        # be told it paid them in full and then quietly forgiven the rest.
+        collected = driver_charges - business.uncollected_charges
+        p.fines_owed = business.uncollected_charges
         if driver_charges:
-            self.summary_parts.append(
-                f"Driver-responsibility charges: speeding fines cost you "
-                f"{driver_charges:,.0f} dollars."
-            )
+            if business.uncollected_charges > 0:
+                self.summary_parts.append(
+                    f"Driver-responsibility charges: speeding fines of "
+                    f"{driver_charges:,.0f} dollars. This load only covered "
+                    f"{collected:,.0f} of it, so {business.uncollected_charges:,.0f} "
+                    "dollars stays owed and comes out of your next settlement."
+                )
+            else:
+                self.summary_parts.append(
+                    f"Driver-responsibility charges: speeding fines cost you "
+                    f"{driver_charges:,.0f} dollars."
+                )
         # Tickets from being pulled over were already paid on the spot; report
         # them for transparency but don't deduct again at settlement.
         if d.speeding_tickets:
@@ -924,6 +941,10 @@ class ArrivalState(MenuState):
                 f"Engine brake citations this trip: {d.jake_zone_fines}, "
                 f"already paid, {d.jake_fines_paid:,.0f} dollars."
             )
+        # Anything the trip did to your standing is said once more here, so a
+        # suspension heard out on the road is not the last word on it.
+        for line in d.record_events:
+            self.summary_parts.append(line)
         if business.business_charges:
             self.summary_parts.append(
                 f"Owner-operator business costs: {business.business_charge_summary}."

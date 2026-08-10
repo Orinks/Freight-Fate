@@ -143,6 +143,16 @@ def _speed_for(d, over=20.0):
     return limit
 
 
+def _past_grace(d):
+    """Skip the spoken-instruction grace so a test can judge the tracker.
+
+    Nothing about the stop is judged until the trigger message has had time
+    to be read out; every test below that exercises compliance is asking
+    about what happens after that.
+    """
+    d._pull_over_grace_s = 0.0
+
+
 def test_speeding_in_a_patrol_window_starts_a_pull_over(monkeypatch):
     from freight_fate.app import App
 
@@ -208,10 +218,8 @@ def test_debug_off_mode_never_pulls_you_over(monkeypatch):
 
 def test_stopping_issues_an_immediate_ticket(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.states.driving import (
-        SPEEDING_TICKET_FINES,
-        TrafficStopState,
-    )
+    from freight_fate.models.enforcement import speeding_citation_fine
+    from freight_fate.states.driving import TrafficStopState
 
     app = App()
     try:
@@ -225,9 +233,12 @@ def test_stopping_issues_an_immediate_ticket(monkeypatch):
         d._update_pull_over(1.0)
         assert isinstance(app.state, TrafficStopState)
         assert d.speeding_tickets == 1
-        assert d.ticket_fines_paid == SPEEDING_TICKET_FINES[0]
-        assert p.money == money_before - SPEEDING_TICKET_FINES[0]
+        expected = speeding_citation_fine(app.state.over, 0)
+        assert d.ticket_fines_paid == expected
+        assert p.money == money_before - expected
         assert p.career.reputation < rep_before
+        # 25 over is a serious traffic violation, and the record says so.
+        assert p.driving_record.serious_in_window(p.game_hours) == 1
     finally:
         app.shutdown()
 
@@ -280,9 +291,19 @@ class _Roll:
         return self.value
 
 
-def test_accelerating_away_zeroes_compliance_and_evades(monkeypatch):
+def test_accelerating_away_ends_in_a_forced_stop_not_a_felony(monkeypatch):
+    """Not stopping is not running: troopers force it and write a citation.
+
+    Reaching a felony by never braking used to be possible in about five
+    seconds, while the trigger message was still being spoken. A pursuit is
+    now only reachable by holding the run key on purpose.
+    """
     from freight_fate.app import App
-    from freight_fate.states.driving import FAILURE_TO_STOP_FINE, FelonyStopState
+    from freight_fate.states.driving import (
+        FAILURE_TO_STOP_CITATION_FINE,
+        EnforcementStopState,
+        FelonyStopState,
+    )
 
     app = App()
     try:
@@ -290,23 +311,54 @@ def test_accelerating_away_zeroes_compliance_and_evades(monkeypatch):
         _quiet(app, monkeypatch)
         limit = _speed_for(d, over=25.0)
         assert d._pull_over == "lights"
+        _past_grace(d)
         p = app.ctx.profile
         money_before = p.money
         rep_before = p.career.reputation
-        # Keep accelerating after the lights: compliance drains to zero -> felony,
-        # with no distance rolled (position holds), so this exercises the tracker.
         base = (limit + 25.0) / 2.23694
-        for i in range(6):
+        for i in range(40):
             d.truck.velocity_mps = base + (i + 1) * 1.0 / 2.23694
             d._update_pull_over(1.0)
             if d._pull_over is None:
                 break
-        assert isinstance(app.state, FelonyStopState)
-        assert d._pull_over is None
-        assert d.failure_to_stop_count == 1
-        assert d.ticket_fines_paid == FAILURE_TO_STOP_FINE
-        assert p.money == money_before - FAILURE_TO_STOP_FINE
+        assert not isinstance(app.state, FelonyStopState)
+        assert isinstance(app.state, EnforcementStopState)
+        assert d.failure_to_stop_count == 0  # no pursuit was ever started
+        assert d.truck.velocity_mps == 0.0  # and the truck is actually stopped
+        assert p.money < money_before
         assert p.career.reputation < rep_before
+        assert app.state.fine >= FAILURE_TO_STOP_CITATION_FINE
+        # It is still a serious violation on the record.
+        assert p.driving_record.serious_in_window(p.game_hours) >= 1
+    finally:
+        app.shutdown()
+
+
+def test_a_compliant_driver_is_never_charged_with_running(monkeypatch):
+    """Steady speed, no signal, cruise engaged, realistic pacing: no felony.
+
+    This is the exact shape of a player who is listening to the instruction.
+    The old tracker convicted them at about 5.07 seconds.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.driving import FelonyStopState
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        limit = _speed_for(d, over=25.0)
+        assert d._pull_over is not None
+        # Lighting a driver up hands the wheel back rather than leaving an
+        # assist holding a steady speed into the drain.
+        assert d._cruise_mph is None
+        assert d.trip.pull_over_active  # and the clock stops compressing
+        speed = (limit + 25.0) / 2.23694
+        for _ in range(10):
+            d.truck.velocity_mps = speed  # dead steady, never signalled
+            d._update_pull_over(1.0)
+        assert not isinstance(app.state, FelonyStopState)
+        assert d.failure_to_stop_count == 0
     finally:
         app.shutdown()
 
@@ -322,14 +374,16 @@ def test_failure_to_stop_gives_staged_warnings(monkeypatch):
         monkeypatch.setattr(app.ctx, "say_event", lambda text, *a, **k: spoken.append(text))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         limit = _speed_for(d, over=25.0)
+        _past_grace(d)
         d.truck.velocity_mps = (limit + 25.0) / 2.23694
 
-        d.trip.position_mi = d._pull_over_start_mi + 0.9
-        d._update_pull_over(1.0)
-        d.trip.position_mi = d._pull_over_start_mi + 1.6
-        d._update_pull_over(1.0)
-
+        # The warnings run on real seconds now, not trip miles: compression
+        # could burn through two miles before the first could ever speak.
+        for _ in range(9):
+            d._update_pull_over(1.0)
         assert any("Failure-to-stop warning" in s for s in spoken)
+        for _ in range(8):
+            d._update_pull_over(1.0)
         assert any("Final failure-to-stop warning" in s for s in spoken)
         assert d.failure_to_stop_count == 0
     finally:
@@ -348,10 +402,11 @@ def test_failure_to_stop_warning_acknowledges_signal(monkeypatch):
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         limit = _speed_for(d, over=25.0)
         d._signal_pull_over()
+        _past_grace(d)
         d.truck.velocity_mps = (limit + 25.0) / 2.23694
 
-        d.trip.position_mi = d._pull_over_start_mi + 0.9
-        d._update_pull_over(1.0)
+        for _ in range(9):
+            d._update_pull_over(1.0)
 
         assert any("You signaled for the stop" in s for s in spoken)
         assert d.failure_to_stop_count == 0
@@ -373,9 +428,8 @@ def test_felony_stop_cancels_loaded_run_and_returns_to_terminal(monkeypatch):
         damage_before = d.truck.damage_pct
         game_hours_before = app.ctx.profile.game_hours
 
-        d.trip.position_mi = d._pull_over_start_mi + 3.0
-        d.truck.velocity_mps = 65.0 / 2.23694
-        d._update_pull_over(1.0)
+        # Only a deliberate held opt-in starts a pursuit.
+        d._evade_pull_over()
 
         assert isinstance(app.state, FelonyStopState)
         assert app.state.load_lost is True
@@ -399,10 +453,7 @@ def test_felony_stop_does_not_claim_load_loss_for_empty_run(monkeypatch):
         _quiet(app, monkeypatch)
         d.job.bobtail = True
         _speed_for(d, over=25.0)
-
-        d.trip.position_mi = d._pull_over_start_mi + 3.0
-        d.truck.velocity_mps = 65.0 / 2.23694
-        d._update_pull_over(1.0)
+        d._evade_pull_over()
 
         assert isinstance(app.state, FelonyStopState)
         assert app.state.load_lost is False
@@ -608,6 +659,7 @@ def test_braking_to_a_stop_reaches_the_roadside_stop(monkeypatch):
         _quiet(app, monkeypatch)
         _speed_for(d, over=25.0)
         d._signal_pull_over()  # signal, then brake steadily
+        _past_grace(d)
         for _ in range(4):
             d._update_pull_over(1.0, service_braking=True)
         assert d._pull_over_compliance >= PULL_OVER_FULL_COMPLIANCE
@@ -631,9 +683,14 @@ def test_clean_stop_can_waive_a_ticket_to_a_warning(monkeypatch):
         _quiet(app, monkeypatch)
         _speed_for(d, over=25.0)
         d._signal_pull_over()
+        _past_grace(d)
         for _ in range(4):
             d._update_pull_over(1.0, service_braking=True)
-        d._patrol_rng = _Roll(0.0)  # force the leniency roll to succeed
+        # The leniency roll is now a named, position-quantised seed so a
+        # reload cannot re-roll it; force it by making it always succeed.
+        monkeypatch.setattr(
+            "freight_fate.states.driving_rest_states.PULL_OVER_CLEAN_STOP_WARN_CHANCE", 1.0
+        )
         p = app.ctx.profile
         money_before = p.money
         d.truck.velocity_mps = 0.0
@@ -654,6 +711,7 @@ def test_failing_to_signal_takes_a_one_time_deduction(monkeypatch):
         d = _driving(app, patrol_intensity=1.0)
         _quiet(app, monkeypatch)
         _speed_for(d, over=25.0)
+        _past_grace(d)
         # Brake steadily but never signal: compliance climbs until the 5 s
         # signal grace lapses, when a one-time deduction drops it.
         comp = []
@@ -676,6 +734,7 @@ def test_continuous_coasting_slowly_drains_compliance(monkeypatch):
         _quiet(app, monkeypatch)
         _speed_for(d, over=25.0)
         d._signal_pull_over()  # signal so only coasting is in play
+        _past_grace(d)
         before = d._pull_over_compliance
         # Hold a steady speed (neither braking nor accelerating) for 5 s.
         for _ in range(5):

@@ -585,16 +585,36 @@ OVERSPEED_RESET_MPH = 1.0  # back within this of the limit disarms it
 OVERSPEED_CHIME_REPEAT_S = 5.0  # cadence just past the warn threshold
 OVERSPEED_CHIME_FAST_S = 0.5  # cadence at OVERSPEED_URGENT_MPH over and beyond
 OVERSPEED_URGENT_MPH = 20.0
-# On-the-spot speeding tickets, escalating per ticket within a trip. Paid
-# immediately when a trooper pulls you over (unlike the silent at-delivery
-# strikes, which stand in for the cost of speeding nobody caught).
-SPEEDING_TICKET_FINES = (150.0, 300.0, 600.0, 1200.0)
+# On-the-spot speeding tickets are priced by how far over the limit you were
+# and how many citations the career already carries -- see
+# models/enforcement.speeding_citation_fine, which is anchored to the real
+# state fine schedules. Paid immediately when a trooper pulls you over (unlike
+# the silent at-delivery strikes, which stand in for the cost of speeding
+# nobody caught).
 # Travel this far still moving after the lights come on and it counts as
 # ignoring the stop -- a heavier fine and a bigger reputation hit.
 PULL_OVER_IGNORE_MI = 2.0
 FAILURE_TO_STOP_WARNING_MI = 0.8
 FAILURE_TO_STOP_FINAL_WARNING_MI = 1.5
-FAILURE_TO_STOP_FINE = 2500.0
+# The staged warnings run on real seconds, not trip miles: compression could
+# burn two miles before the first warning had a chance to speak.
+PULL_OVER_FIRST_WARNING_S = 8.0
+PULL_OVER_FINAL_WARNING_S = 16.0
+# After the final warning, this long before troopers force the stop.
+PULL_OVER_FORCED_STOP_S = 10.0
+# Failing to pull over promptly -- and then stopping -- is not fleeing. It is
+# charged as failing to obey a lawful order, which rides in with reckless
+# driving as a serious traffic violation under 49 CFR 383.51 Table 2, at the
+# top of the ordinary commercial citation range.
+FAILURE_TO_STOP_CITATION_FINE = 1000.0
+# Running is a felony, so it takes a deliberate held input and never happens
+# by hesitating. Doubled when the next one would be a lifetime disqualification.
+PURSUIT_HOLD_S = 3.0
+# Fleeing and eluding a police officer in a commercial vehicle is a felony in
+# most states -- a third-degree felony in Florida, for one, carrying a fine of
+# up to 5,000 dollars. This takes that top of range, and the conviction is a
+# major offense under 49 CFR 383.51 Table 1 on top of the money.
+FAILURE_TO_STOP_FINE = 5000.0
 FAILURE_TO_STOP_DAMAGE_PCT = 12.0
 FAILURE_TO_STOP_PROCESSING_MIN = 180.0
 WEIGH_STATION_NOTICE_MI = 2.0
