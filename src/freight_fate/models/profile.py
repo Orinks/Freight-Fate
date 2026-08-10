@@ -676,6 +676,10 @@ class Profile:
     integrity_modified: bool = False
     # The player has not yet heard the one-time spoken notice about the flag.
     integrity_notice_pending: bool = False
+    # Clock presses left that still append "hours of service moved to Alt A,
+    # Alt S, and Alt D". The detail moved off C onto its own keys, and muscle
+    # memory says C, so the pointer rides C -- three times, then never again.
+    hos_key_notice_left: int = 3
     game_hours: float = 6.0  # in-game clock, hours since career start
     # Whole-day offset used only by the spoken calendar and seasonal weather.
     # Existing careers can anchor their independent calendar to today's date

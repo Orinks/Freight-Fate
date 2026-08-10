@@ -57,7 +57,9 @@ which is its own checklist below.
 Space speed and gear. V weather and safe speed. S posted limit. J engine
 brake. K adaptive cruise, plus and minus to trim it. Down arrow service
 brakes, B emergency stop. Tab status menu (brake heat, wear past 50
-percent, weather). C clock and hours. Escape pause menu -- where chain-up
+percent, weather). C clock, deadline, and the nearest hours limit; Alt+A
+time at the wheel, Alt+S when the break is due, Alt+D what ends the shift.
+Escape pause menu -- where chain-up
 lives. F1 repeats the full key help.
 
 ---
@@ -127,7 +129,7 @@ Do:
 1. Stop completely (under 3 miles per hour) and press Escape.
 2. Day: the item reads "Install snow chains: about 25 minutes." Night:
    "Install snow chains in the dark: about 40 minutes."
-3. Install, then press C and compare the clock and your hours of service.
+3. Install, then press C for the clock and Alt+A for time at the wheel, and compare both.
 4. Later, stop again and take "Remove snow chains: about 10 minutes."
 
 Listen for: the completion line -- chains hung, keep it near 30 miles per

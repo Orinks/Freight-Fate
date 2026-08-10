@@ -535,6 +535,10 @@ class DriverAppScreenState(MenuState):
             lines.append(f"ELD route note: {context}")
         else:
             lines.append("ELD route note: no legal stop warning right now.")
+        lines.append(
+            "ELD keys: Alt A time at the wheel, Alt S when the break is due, "
+            "Alt D what ends this shift."
+        )
         return lines
 
     def _next_traffic_line(self) -> str | None:

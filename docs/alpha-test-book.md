@@ -187,8 +187,8 @@ money, and takes spoken shop time.
 
 ### 3.1 One food buff at a time, and it never adds hours
 
-Setup: any loaded run past branded truck stops; note your fatigue on the
-clock readout (C).
+Setup: any loaded run past branded truck stops; note your fatigue in the
+Tab status menu, and your time at the wheel with Alt+A.
 
 Do: pull into a stop (T at an announced stop) and buy a hot meal. Drive
 an hour, then buy an energy drink somewhere else.
@@ -469,7 +469,7 @@ the consequences land on your career, not just your ears.
 Setup: any pickup and delivery.
 
 Do: listen through the loading and unloading at both ends; check the
-clock (C) before and after.
+clock (C) and your time on duty this shift (Alt+A) before and after.
 
 Listen for: spoken on-duty time passing at the dock, pull-ins taking
 real minutes, and loaded launches ramping in heavy instead of leaping
@@ -700,7 +700,9 @@ and the physics key list live in the companion volume,
 `docs/physics-playtest-checklists.md`. The keys this book leans on
 beyond those: X commit to the exit (or signal a pull-over), L lane
 readout, Left/Right lane change with assist off, R progress, Shift+R
-next exit, U upcoming, A repeat last announcement, comma repeat the
+next exit, U upcoming, C clock, deadline, and the nearest hours limit,
+Alt+A time at the wheel this shift, Alt+S when the break is due, Alt+D
+what ends the shift and where you can stop before it, A repeat last announcement, comma repeat the
 last spoken line (press again quickly to walk back through the last
 twenty), M radio with
 Page Down and Page Up to tune (semicolon and apostrophe still work) and

@@ -445,7 +445,10 @@ Driving controls are active while the road view is focused:
 | G | Report the grade under the wheels and whether the truck is holding, pulling, or losing it. |
 | Tab | Open the driving status menu. |
 | F | Report fuel level and estimated range. |
-| C | Report clock, deadline, estimated arrival, and hours of service. |
+| C | Report clock, deadline, estimated arrival, and the one hours-of-service limit that comes first. For the first few presses it also names the three keys below, then stops. |
+| Alt+A | Report time at the wheel so far this shift, and time on duty. |
+| Alt+S | Report when your 30 minute break is due, or that a break will not help. |
+| Alt+D | Report what ends this shift -- driving time left and duty window both -- and where you can legally stop before it. |
 | R | Report trip progress (the same percent the online drivers board shows) and the distance left, then the road you are on with its direction, the state you are in, and the city you are heading toward. With a planned stop set, the distance counts down to that stop instead of the destination. |
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
@@ -755,6 +758,21 @@ The game gives warnings at 2 hours, 1 hour, and 30 minutes before a limit.
 Driving past a limit risks inspections, fines, reputation loss, and
 out-of-service orders.
 
+Three keys ask the clock one question each while you drive, so you do not have
+to sit through a whole report to hear the number you want. They read left to
+right in the shape of a shift:
+
+- **Alt+A** -- at the wheel so far: driving time this shift, and time on duty.
+- **Alt+S** -- the break: when your 30 minute break comes due.
+- **Alt+D** -- what ends this shift: driving time left and the duty window, the
+  one that runs out first named first, plus where you can legally stop before
+  it.
+
+Each answer starts with its own words, so a mis-key is obvious before the
+number arrives. With hours of service enforcement off, each key says so rather
+than going quiet. **C** still gives the clock, the deadline, and whichever
+limit comes first, and the **Tab** status menu keeps the full report.
+
 The Logbook is the spoken Record of Duty Status behind that clock. It records a
 rolling timeline of driving, on-duty work, off-duty breaks, and sleeper-berth
 rest, with the time, location, and a short note such as fuel stop, loading, or
@@ -789,7 +807,10 @@ Use these keys when you need status without leaving the road:
 | --- | --- |
 | Space | Speed, gear, RPM, air pressure, and brake state. |
 | F | Fuel level and estimated range. |
-| C | Clock, deadline, estimated arrival, and hours of service. |
+| C | Clock, deadline, estimated arrival, and the nearest hours-of-service limit. |
+| Alt+A | Time at the wheel so far this shift, and time on duty. |
+| Alt+S | When your 30 minute break is due. |
+| Alt+D | What ends this shift, both clocks, plus the next legal stop. |
 | R | Route progress and GPS context. |
 | Shift+R | Next listed highway exit. |
 | V | Weather and forecast. |
