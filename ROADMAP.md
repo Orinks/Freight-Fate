@@ -200,6 +200,12 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       At the dev cutover, replay freshly played 1.9 careers (company new
       hire, slip-seat level 4+, post-buy-in owner-operator) against the
       validator, not just the stored-blob corpus.
+- [ ] **Extend the missed-gate overshoot to the pickup and city-service
+      gates.** The delivery gate now loops you back when you carry past
+      it too fast (2026-08-09, third instance of the scripted loop-back
+      pattern); the pickup gate and city-service arrivals still pin the
+      odometer at the end regardless of speed — same treadmill, same fix
+      pattern, deliberately left out of the first pass.
 - [ ] **Speak refused backups where the player can hear it.** A
       non-transient upload rejection only lands in the Cloud backup
       menu's status line; nothing is spoken at save time, so a refused

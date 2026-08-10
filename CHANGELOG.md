@@ -36,6 +36,15 @@
 
 ### Added
 
+- **Blow past the facility gate and you now miss it.** Arriving used to
+  be automatic no matter how fast you came in. Now the approach warns
+  you ahead of the gate with the speed to slow to, and if you carry past
+  too fast anyway, you miss the entrance: the game takes you to the next
+  safe turnaround and loops you back for another approach while the
+  clock keeps running, so a hot approach can cost you a deadline. Miss
+  it twice and the game offers braking help. The destination approach
+  assist always makes the gate for you.
+
 - **Towns now enforce their engine brake ordinances.** Like real
   municipal noise rules, cities and towns along your route are no engine
   brake zones. Coming up on one with the engine brake switched on, you
