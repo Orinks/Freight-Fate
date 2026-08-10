@@ -7960,6 +7960,21 @@
           "lat": 40.62684,
           "lon": -89.46532,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-74 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 10.1,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true
@@ -12774,6 +12789,21 @@
           ],
           "lat": 41.0725939,
           "lon": -87.8666247,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-57 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 40.4,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
           "vehicle_access": "tractor_trailer"
         }
       ],

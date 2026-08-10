@@ -4120,6 +4120,21 @@
           "lon": -92.81886,
           "parking_spaces": 52,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-94 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 17.8,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true
@@ -7457,6 +7472,21 @@
           ],
           "lat": 42.74123,
           "lon": -86.07075,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-94 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 47.9,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
           "vehicle_access": "tractor_trailer"
         }
       ],
@@ -20443,6 +20473,21 @@
           "lat": 41.83106,
           "lon": -87.69442,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-90 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 46.7,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true
@@ -28672,6 +28717,36 @@
           "lat": 44.96618,
           "lon": -92.67882,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-94 Weigh Station (mile 262)",
+          "type": "weigh_station",
+          "at_mi": 262.4,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-94 Weigh Station (mile 304)",
+          "type": "weigh_station",
+          "at_mi": 303.7,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "divided": true
@@ -34878,6 +34953,21 @@
           ],
           "lat": 44.34049,
           "lon": -87.84585,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-43 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 17.6,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
           "vehicle_access": "tractor_trailer"
         }
       ],
