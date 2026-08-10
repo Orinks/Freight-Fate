@@ -257,21 +257,23 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       working capital, and every operating cost. Freight access was
       never the reason for the high level -- all three endorsements
       unlock by level 4.
-- [ ] **PRE-BUILD MUST-DO: re-regen the invariants export for the tank
-      endorsement.** `ENDORSEMENT_LEVELS` gained `tank` at level 16, and
-      that set is exported for server-side cloud screening. The export
-      was regenerated and deployed to staging on 2026-08-09 for three
-      other fields; this is a fourth change on top. Ship the regen and
-      the Convex deploy BEFORE any build carrying tank freight, or
-      honest drivers have their backups refused (issue #97's exact
-      failure).
-- [ ] **PRE-BUILD MUST-DO: re-bake the sound pack for liquid surge.**
-      `assets/sounds/**` is gitignored, so the three `vehicle/liquid_*`
-      assets exist only as the committed bake script. Run
-      `sound-test/liquid_surge.py`, then `pack_sounds.py`, then update
-      the byte length and SHA-256 pinned in `tests/test_sound_pack.py`.
-      Until then surge falls back to the spoken layer in silence (guarded
-      by a one-time has_asset check, so no per-frame log spam).
+- [x] **Invariants regen for the tank endorsement and safety record --
+      DEPLOYED TO STAGING 2026-08-10** (orinks-net dev `74370b9`). The
+      diff was BIGGER than the implementing agents believed: five new
+      top-level profile fields, not three. `selection_score` and
+      `out_of_service_events` were reported as nested on `DrivingRecord`
+      and are not -- they reach `profileFields`, so without this every
+      1.9 backup would have failed `invalid_schema` again. Verified both
+      directions before deploying (current payloads rejected by the live
+      export, accepted by the regen) and confirmed live afterwards by
+      uploading a real backup. LESSON: never take "no regeneration
+      needed" on trust; diff the export.
+      STILL OWED AT THE DEV CUTOVER: the same regen against production.
+- [x] **Sound pack repacked for liquid surge -- 2026-08-10.** 274 to 277
+      entries; `tests/test_sound_pack.py` pins the length and SHA-256 and
+      both were updated. Pushing it needs `git lfs push origin <branch>`
+      by absolute path first (git-lfs is not on PATH here), then the
+      normal `git push`.
 - [ ] **Jail for a pursuit, not a three-hour "processing" fee.** Owner
       question 2026-08-10, roadmapped rather than built. Speeding is a
       citation even at the extreme end, so no change there -- but fleeing
