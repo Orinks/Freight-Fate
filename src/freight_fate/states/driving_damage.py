@@ -44,10 +44,20 @@ part company, and they part sharply -- see ``_recover_out_of_service``.
 from __future__ import annotations
 
 from ..models.business import player_pays_operating_costs
+from ..models.cargo_condition import (
+    CARGO_CLAIM_PCT,
+    CARGO_EXCEPTION_PCT,
+    CARGO_REJECT_PCT,
+    cargo_condition_text,
+    cargo_outcome,
+)
 from ..models.carrier_fleet import slip_seat_pool, slip_seats
 from ..models.trucks import TRUCK_CATALOG
 from ..sim.trip_models import FACILITY_GATE_ZONE_MI
 from .driving_core import *
+
+# The condition rungs, in the order a load passes them, for the in-drive cue.
+CARGO_CUE_STEPS = (CARGO_EXCEPTION_PCT, CARGO_CLAIM_PCT, CARGO_REJECT_PCT)
 
 
 def damage_band_clause(settings, truck) -> str:
@@ -116,7 +126,76 @@ def preventable_damage_charge(driving) -> tuple[float, float, str]:
     return deductible, reputation, reason
 
 
+def cargo_status_clause(truck) -> str:
+    """The load's condition for a status readout: the words and the number."""
+    condition = float(getattr(truck, "cargo_damage_pct", 0.0))
+    if condition < 1.0:
+        return "secure"
+    return f"{cargo_condition_text(condition)}, {condition:.0f} percent"
+
+
 class DamageBandMixin:
+    # -- cargo condition ---------------------------------------------------------
+
+    def _update_cargo_condition(self, dt: float) -> None:
+        """Feed the bend to the freight, then say when it has cost something.
+
+        The vehicle model has no map, so the road hands it the one thing it
+        cannot know: how far past the posted advisory this bend is being
+        taken. And a load that quietly degrades until the dock refuses it
+        would be the worst kind of surprise for a player who cannot see the
+        trailer -- so each rung speaks once, when it is crossed.
+        """
+        t = self.truck
+        curve = self.trip.curve_at(self.trip.position_mi)
+        t.corner_overspeed_mph = (
+            max(0.0, t.speed_mph - curve.advisory_mph)
+            if curve is not None and not curve.connector
+            else 0.0
+        )
+        condition = t.cargo_damage_pct
+        # The HIGHEST rung crossed, not the next one up. A collision can put a
+        # load through all three at once, and walking them a frame apart would
+        # fire three interrupting warnings inside a tenth of a second; the
+        # driver needs the state they are actually in, said once.
+        crossed = [step for step in CARGO_CUE_STEPS if condition >= step > self._cargo_cue_at]
+        if crossed:
+            self._cargo_cue_at = crossed[-1]
+            self._announce_cargo_condition()
+
+    def _announce_cargo_condition(self) -> None:
+        t = self.truck
+        outcome = cargo_outcome(t.cargo_damage_pct)
+        words = cargo_condition_text(t.cargo_damage_pct)
+        self.ctx.audio.play("ui/warning")
+        if self._terse_speech():
+            consequence = {
+                "exception": "Exception on the bill.",
+                "claim": "Claim likely.",
+                "rejected": "The dock will refuse it.",
+            }[outcome]
+            message = f"Load {words}, {t.cargo_damage_pct:.0f} percent. {consequence}"
+        else:
+            consequence = {
+                "exception": (
+                    "The receiver will note an exception on the bill of lading and "
+                    "hold back part of the pay."
+                ),
+                "claim": (
+                    "This is claim territory now: the receiver will take it, and the "
+                    "carrier will pay for what you broke."
+                ),
+                "rejected": (
+                    "The dock will refuse a load in this state. You would arrive with "
+                    "nothing to deliver and a claim for the whole of it."
+                ),
+            }[outcome]
+            message = (
+                f"The load has shifted hard and is {words}, {t.cargo_damage_pct:.0f} "
+                f"percent. {consequence} Brake and corner gently from here."
+            )
+        self.ctx.say_event(message, interrupt=True)
+
     # -- the bands ---------------------------------------------------------------
 
     def _damage_band_clause(self) -> str:

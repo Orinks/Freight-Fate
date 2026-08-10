@@ -370,6 +370,7 @@ class DrivingUpdateMixin:
         # Damage bands run before the over-rev warning, so a redline call in
         # the same frame already names the band the truck just entered.
         self._update_damage_bands(dt)
+        self._update_cargo_condition(dt)
         self._update_overrev(dt)
         self._update_speeding(dt, accelerator_held=accel_held)
         self._update_engine_brake_zone(dt)

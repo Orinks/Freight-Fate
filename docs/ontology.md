@@ -207,6 +207,11 @@ from the words, and synonyms cost them a re-read.
 | The emergency call-out that gets an out-of-service truck moving | roadside repair | roadside rescue (that is the fuel one), tow | `_roadside_repair_out_of_pocket` |
 | The emergency call-out for an empty tank | roadside rescue | roadside repair (that is the damage one) | `_handle_out_of_fuel` |
 | Losing the truck to speed, usually out of gear on a grade | runaway | overspeed (that is the posted-limit one) | `RUNAWAY_SPEED_MPH` |
+| What state the freight is in | the load; "freight" where "load" would be ambiguous | cargo condition, product, goods | `TruckState.cargo_damage_pct` |
+| The receiver's note about damaged freight | exception on the bill of lading | OS and D, discrepancy, ding | `CARGO_OUTCOME_EXCEPTION` |
+| What the carrier owes for freight it damaged | freight claim | damages, cargo insurance, write-off | `CargoSettlement.claim_value` |
+| The receiver refusing a load outright | the receiver refused the load | bounced, returned, kicked back | `CARGO_OUTCOME_REJECTED` |
+| Damage a safety committee rules the driver's fault | preventable damage | at-fault, chargeable, negligence | `TruckState.preventable_damage_pct` |
 | The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
 
 Notes on the entries that are not simple:
@@ -249,6 +254,18 @@ noun for either.
 **Grounding is what the carrier does; out of service is what the truck is.** A
 company driver hears both, in that order, because they are different facts: the
 truck is unfit, and the carrier has taken it off the road as a result.
+
+**Truck damage and load damage are never the same sentence.** The truck's
+number is the driver's problem and prices at a garage; the load's is the
+customer's and prices at the freight's value, which is far larger. A readout
+that gives one must not let the player assume it covers the other, so the Tab
+screen names the freight separately from the truck.
+
+**The load's condition is spoken in words first, the number second.**
+"Eighteen percent" tells a player nothing about whether the receiver will sign
+for it; "damaged, eighteen percent" tells them both. The words are fixed --
+secure, shifted but sound, damaged, badly damaged, ruined -- and each one maps
+to exactly one thing the dock will do.
 
 **"Roadside rescue" and "roadside repair" are two different call-outs.** The
 rescue brings fuel; the repair gets an out-of-service truck moving. They cost

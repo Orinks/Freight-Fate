@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import time
 
+from ..models.cargo_condition import cargo_condition_text, settle_cargo
 from ..sim.timezones import to_local
 from .base import TimedMessageState
 from .driving_core import *
 from .driving_damage import (
+    cargo_status_clause,
     damage_band_clause,
     damage_summary_line,
     preventable_damage_charge,
@@ -174,7 +176,10 @@ class DrivingStatusScreenState(MenuState):
             "Load: no cargo, local city service drive"
             if d.phase == DRIVE_PHASE_CITY_SERVICE
             else f"Load: {d.job.weight_tons:.0f} tons of {d.job.cargo.label}, "
-            f"gross {d.truck.gross_mass_kg / KG_PER_TON:.0f} tons"
+            f"gross {d.truck.gross_mass_kg / KG_PER_TON:.0f} tons, "
+            # The player cannot see the trailer; the dock's verdict must not
+            # be the first they hear of what the freight is in.
+            f"freight {cargo_status_clause(d.truck)}"
         )
         time_line = (
             f"Time: {clock_text(d.trip.local_hour)} {d.trip.current_timezone.name}, "
@@ -863,6 +868,59 @@ class ArrivalState(MenuState):
         # The arrival screen and announcement read summary_lines, not parts.
         self.summary_lines = list(self.summary_parts)
 
+    def _cargo_settlement_line(self, cargo) -> str:
+        """What the receiver found, what it cost, and who carries the claim.
+
+        Always in that order, and always with the money named, because this
+        is the largest single thing that can happen to a run and the player
+        has no way to see the trailer.
+        """
+        p = self.ctx.profile
+        owner_op = is_owner_operator(p.business_status)
+        claim_holder = (
+            "The claim is against your own authority"
+            if owner_op
+            else "The carrier carries the claim, and it is on your record"
+        )
+        if self.driving._terse_speech():
+            head = {
+                "exception": "Exception on the bill.",
+                "claim": "Freight claim.",
+                "rejected": "Load refused.",
+            }[cargo.outcome]
+            claim = f" Claim {cargo.claim_value:,.0f} dollars." if cargo.claim_value >= 1.0 else ""
+            return (
+                f"{head} Load {cargo_condition_text(cargo.condition_pct)}, "
+                f"{cargo.condition_pct:.0f} percent. Pay down "
+                f"{cargo.pay_loss:,.0f} dollars.{claim}"
+            )
+        if cargo.rejected:
+            return (
+                "The receiver refused the load. It came off the trailer "
+                f"{cargo_condition_text(cargo.condition_pct)} at "
+                f"{cargo.condition_pct:.0f} percent, and a dock will not sign for "
+                f"freight in that state. You are paid nothing for the haul: "
+                f"{cargo.pay_loss:,.0f} dollars gone, and a claim of about "
+                f"{cargo.claim_value:,.0f} dollars for the freight itself. "
+                f"{claim_holder}."
+            )
+        if cargo.outcome == "claim":
+            return (
+                "The receiver took the load but wrote it up. It arrived "
+                f"{cargo_condition_text(cargo.condition_pct)} at "
+                f"{cargo.condition_pct:.0f} percent, which is a freight claim of "
+                f"about {cargo.claim_value:,.0f} dollars. "
+                f"{cargo.pay_loss:,.0f} dollars comes off this settlement. "
+                f"{claim_holder}."
+            )
+        return (
+            "The receiver noted an exception on the bill of lading: the load "
+            f"arrived {cargo_condition_text(cargo.condition_pct)} at "
+            f"{cargo.condition_pct:.0f} percent. That holds back "
+            f"{cargo.pay_loss:,.0f} dollars of the haul. Brake and corner gently "
+            "and the bill stays clean."
+        )
+
     def _settle(self) -> None:
         d = self.driving
         p = self.ctx.profile
@@ -885,6 +943,12 @@ class ArrivalState(MenuState):
             (0.0, 0.0, "") if is_owner_operator(p.business_status) else preventable_damage_charge(d)
         )
         driver_charges += damage_deductible
+        # The dock inspects before it signs. Under the Carmack Amendment the
+        # carrier owes the value of freight it damages, and a receiver may
+        # refuse a bad load outright -- which is why this is the largest
+        # consequence in the game and comes off the top of the haul.
+        cargo = settle_cargo(d.truck.cargo_damage_pct, gross_base)
+        driver_charges += cargo.pay_loss
         business = build_business_settlement(
             p.business_status,
             job,
@@ -923,7 +987,11 @@ class ArrivalState(MenuState):
         gross_pay = business.gross_pay
         on_time_bonus_paid = max(0.0, gross_pay - no_on_time_bonus_business.gross_pay)
         early_bonus = max(0.0, gross_pay - deadline_business.gross_pay)
-        speeding_charges = driver_charges - damage_deductible
+        if not cargo.clean:
+            self.summary_parts.append(self._cargo_settlement_line(cargo))
+            p.career.reputation = max(0.0, p.career.reputation - cargo.reputation_hit)
+            increment_stat(p, "cargo_claims")
+        speeding_charges = driver_charges - damage_deductible - cargo.pay_loss
         if speeding_charges:
             self.summary_parts.append(
                 f"Driver-responsibility charges: speeding fines cost you "

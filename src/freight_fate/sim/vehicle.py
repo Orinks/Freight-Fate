@@ -110,6 +110,19 @@ DAMAGE_BAND_LIMP = 2
 DAMAGE_BAND_LAST_CALL = 3
 DAMAGE_BAND_OUT_OF_SERVICE = 4
 
+# -- cargo condition ------------------------------------------------------------------
+# What moves freight is what the truck does abruptly, so the rates live with
+# the physics that produce them; what the receiver DOES about the resulting
+# condition lives in models/cargo_condition, away from the sim. A hard stop
+# throws the load forward against its straps; a bend taken past its posted
+# advisory throws it sideways, where nothing is restraining it at all, which
+# is why cornering costs more than the same energy spent braking.
+CARGO_HARD_BRAKE_G = 0.25  # decel past which freight starts moving
+CARGO_BRAKE_PCT_PER_G_S = 22.0  # per g of excess, per real second
+CARGO_CORNER_MARGIN_MPH = 8.0  # slack over the posted advisory before it bites
+CARGO_CORNER_PCT_PER_MPH_S = 0.10  # per mph past that, per real second
+CARGO_COLLISION_PCT = 40.0  # at full severity
+
 # -- runaway ------------------------------------------------------------------------
 # Losing a loaded truck down a grade is the classic way to destroy one, and
 # coasting out of gear is how it happens: no driveline to hold the load back,
@@ -313,6 +326,19 @@ class TruckState:
     # damage taken reacting correctly to a hazard is not. Per-trip, not
     # persisted onto the profile -- the career layer reads it at settlement.
     preventable_damage_pct: float = 0.0
+
+    # What the freight is in. 0 = tendered condition, 100 = a trailer of
+    # scrap. Moved by hard stops, bends taken past their advisory, and
+    # collisions, scaled by how well this class of freight survives being
+    # thrown about (``cargo_fragility``, set by the driving layer from the
+    # job). Lives with cargo_kg because the same forces move both.
+    cargo_damage_pct: float = 0.0
+    cargo_fragility: float = 1.0
+    # Set each frame by the driving layer: how far past the posted advisory
+    # the truck is taking the bend it is in, in mph. Zero on a straight or
+    # inside the advisory. The vehicle model has no map, so the road has to
+    # tell it; the force it produces is real and belongs here.
+    corner_overspeed_mph: float = 0.0
 
     # ECM road-speed governor: above this the engine simply stops fuelling,
     # exactly like the rpm governor below. None = ungoverned. Not persisted --
@@ -936,6 +962,8 @@ class TruckState:
         self.velocity_mps = new_v
         self.odometer_mi += abs(self.velocity_mps) * dt / 1609.344
 
+        # The freight rides on the same acceleration the tractor just felt.
+        self._update_cargo(dt, max(0.0, -accel / G) if old_v > 0.0 else 0.0)
         self._update_rpm(dt)
         self._update_fuel(dt)
         self._update_temps(dt)
@@ -1354,6 +1382,36 @@ class TruckState:
         self.parking_brake = True
         self.transmission.reset_to_neutral()
 
+    def add_cargo_damage(self, pct: float) -> float:
+        """Move the freight's condition meter; returns what was added."""
+        if not self.trailer_attached or self.cargo_kg <= 0.0:
+            return 0.0  # nothing on the fifth wheel to hurt
+        added = min(100.0, self.cargo_damage_pct + max(0.0, pct)) - self.cargo_damage_pct
+        self.cargo_damage_pct += added
+        return added
+
+    def _update_cargo(self, dt: float, decel_g: float) -> None:
+        """Freight moves when the truck does something abrupt.
+
+        Two forces, both already in the sim. Braking hard throws the load
+        forward against its straps, and past a quarter g that starts costing
+        something. Taking a bend faster than it is signed for throws it
+        sideways, where nothing is holding it at all -- which is why a
+        hairpin taken well over its advisory is worse for the freight than
+        the same energy spent stopping, and why it used to be free.
+        """
+        if not self.trailer_attached or self.cargo_kg <= 0.0:
+            return
+        rate = 0.0
+        over_brake = decel_g - CARGO_HARD_BRAKE_G
+        if over_brake > 0.0 and self.speed_mph > 5.0:
+            rate += over_brake * CARGO_BRAKE_PCT_PER_G_S
+        over_corner = self.corner_overspeed_mph - CARGO_CORNER_MARGIN_MPH
+        if over_corner > 0.0:
+            rate += over_corner * CARGO_CORNER_PCT_PER_MPH_S
+        if rate > 0.0:
+            self.add_cargo_damage(rate * self.cargo_fragility * dt)
+
     def add_damage(self, pct: float, *, preventable: bool = True) -> float:
         """Put incident damage on the truck; returns what was actually added.
 
@@ -1400,3 +1458,5 @@ class TruckState:
         """severity 0..1; slows the truck and adds damage."""
         self.velocity_mps *= max(0.2, 1.0 - severity)
         self.add_damage(severity * 18.0, preventable=preventable)
+        # Whatever hit the tractor went through the freight as well.
+        self.add_cargo_damage(severity * CARGO_COLLISION_PCT * self.cargo_fragility)

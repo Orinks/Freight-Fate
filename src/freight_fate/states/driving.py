@@ -6,6 +6,7 @@ from __future__ import annotations
 from ..sim.pedal_latch import PedalLatch
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
+from ..models.cargo_condition import cargo_fragility
 from .driving_damage import DamageBandMixin
 from .driving_engine_brake import EngineBrakeZoneMixin
 from .driving_events import DrivingEventMixin
@@ -62,6 +63,12 @@ class DrivingState(
         # nothing on the fifth wheel. Pickup deadheads haul their empty box.
         self.truck.trailer_attached = not (job.bobtail or phase == DRIVE_PHASE_CITY_SERVICE)
         self.truck.transmission.automatic = ctx.settings.automatic_transmission
+        # How well this freight survives being thrown about. Fed to the truck
+        # because the forces that move a load are the truck's, but what the
+        # receiver does about the result belongs to models/cargo_condition.
+        self.truck.cargo_fragility = cargo_fragility(
+            job.cargo if phase == DRIVE_PHASE_DELIVERY else None
+        )
         profile.load_truck_condition(self.truck)
         self.truck.set_cold_air_start()
         self.start_damage = profile.truck_damage_pct
@@ -256,6 +263,9 @@ class DrivingState(
         self._limp_cruise_said = False
         self._out_of_service_creep_s = 0.0
         self._recovering = False
+        # The highest cargo-condition rung already spoken, so each one warns
+        # once. Trip-scoped and snapshotted like the damage band.
+        self._cargo_cue_at = 0.0
         self._signal_timer = 0.0
         self._exit_stop = None  # active route exit
         # Stable proof that the player explicitly selected an optional sleep
@@ -520,6 +530,8 @@ class DrivingState(
             "damage_band": self._damage_band,
             "worst_damage_band": self._worst_damage_band,
             "preventable_damage_pct": self.truck.preventable_damage_pct,
+            "cargo_damage_pct": self.truck.cargo_damage_pct,
+            "cargo_cue_at": self._cargo_cue_at,
             "limp_cap_mph": self._limp_cap_mph,
             "out_of_service_creep_s": self._out_of_service_creep_s,
             "start_wear": {
@@ -625,6 +637,8 @@ class DrivingState(
             state._out_of_service_creep_s = float(data.get("out_of_service_creep_s", 0.0))
             state._worst_damage_band = int(data.get("worst_damage_band", state._damage_band))
             state.truck.preventable_damage_pct = float(data.get("preventable_damage_pct", 0.0))
+            state.truck.cargo_damage_pct = float(data.get("cargo_damage_pct", 0.0))
+            state._cargo_cue_at = float(data.get("cargo_cue_at", 0.0))
             # Saves from before the wear meters count deltas from the resume
             # point: the truck just loaded the profile's wear, so the run
             # simply reports a little less instead of failing to load.
