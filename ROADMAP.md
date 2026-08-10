@@ -189,6 +189,32 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       `tests/` claims the bare module name `conftest`, which broke
       `test_online_presence.py`'s `from conftest import FakeKeyring`.
       The loader lives in the test module for that reason.
+- [ ] Passing traffic you can actually hear (player-requested, measured
+      2026-08-10). Four pass-by cues are shipped, credited and wired by
+      vehicle class in `driving_core._traffic_vehicle_sound`, and they
+      are effectively never heard. Two separate reasons, both measured
+      over 6.2 mi of interstate at 60 mph:
+      (1) **Nothing plays when a vehicle passes.** The cues hang off
+      `TrafficManager.next_situation`, which returns a situation only for
+      `merging`, `braking` or `following` -- a hazard needing driver
+      action -- and only once per vehicle ever
+      (`announced_vehicle_keys`). A vehicle simply overtaking is silent.
+      This is the same wiring the trooper-cue note in `traffic_manager`
+      already describes, and it is wider than the trooper.
+      (2) **There is almost nothing out there to pass.** Peak bubble was
+      0-3 vehicles at hours 7, 8, 9, 17 and 22, and actual pass-bys --
+      an NPC changing which side of the truck it is on -- were ZERO at
+      every hour except one trooper at 09:00. Vehicles are culled only
+      at 2.0 mi behind, so they are not being lost before crossing;
+      `spawn_initial_traffic` seeds them ahead along the leg and nothing
+      ever comes up from behind, so the bubble is a set of lead vehicles
+      you slowly close on rather than a living road.
+      Fixing this needs an overtake event keyed on relative position
+      (pan by side, level by closing speed), separate from the hazard
+      announcement path, plus enough density for it to fire. The audio
+      is not the blocker: `traffic/semi_pass` was replaced 2026-08-10
+      with a real Blastwave FX roadside take (peak/median 43x, 1948 rpm
+      under load) and it changes nothing until the above lands.
 - [ ] Shared App() fixtures, if ever worth it. Measured 2026-08-10 and
       NOT the bottleneck: a boot is 149 ms warm across 83 files, while
       the full suite is 3,114 tests in 3:54. What is left is a handful of
