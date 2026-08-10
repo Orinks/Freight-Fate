@@ -19,6 +19,7 @@ from .driving_pacenotes import DrivingPacenoteMixin
 from .driving_pickup import DrivingPickupMixin
 from .driving_speed_control import SpeedControlStateMixin
 from .driving_turns import TurnCommitmentMixin
+from .driving_traffic_pass import TrafficPassMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 from .driving_wrong_way import WrongWayMixin
 
@@ -33,6 +34,7 @@ class DrivingState(
     DrivingUpdateMixin,
     DamageBandMixin,
     WrongWayMixin,
+    TrafficPassMixin,
     EnforcementWatchMixin,
     EngineBrakeZoneMixin,
     FacilityGateMixin,
@@ -443,6 +445,10 @@ class DrivingState(
         # a reloaded trip is not still reversing.
         self._wrong_way_mi = 0.0
         self._wrong_way_said_at = 0.0
+        # Traffic pass earcons (driving_traffic_pass.py): which end of the
+        # truck each bubble vehicle was on last frame, and which have already
+        # been given their whoosh. Per-stint, not saved.
+        self._reset_traffic_passes()
         # Street corners (driving_turns.py): how many corners this run has
         # cost, which escalates the spoken help. The per-corner latches are
         # rebuilt whenever the trip's route changes.

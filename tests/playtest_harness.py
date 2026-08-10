@@ -359,6 +359,12 @@ class PlaytestHarness:
         driving.handle_event(key_event(pygame.K_k))
 
         last_mode = ""
+        # Budgeted for a road with traffic on it. Once the rolling bubble kept
+        # the highway populated, adaptive cruise started doing its job -- the
+        # truck follows slower vehicles instead of holding the set speed the
+        # whole way -- and the same segment covered about 9 percent less ground
+        # per frame. That is the feature working; the segment still completes,
+        # it just takes the time a real one would.
         for _frame in range(120_000):
             driving.update(1 / 60)
             mode = (
@@ -476,6 +482,12 @@ class PlaytestHarness:
         self.monkeypatch.setattr(pygame.key, "get_pressed", lambda: ExitKeys())
         signaled = False
         last_mode = ""
+        # Budgeted for a road with traffic on it. Once the rolling bubble kept
+        # the highway populated, adaptive cruise started doing its job -- the
+        # truck follows slower vehicles instead of holding the set speed the
+        # whole way -- and the same segment covered about 9 percent less ground
+        # per frame. That is the feature working; the segment still completes,
+        # it just takes the time a real one would.
         for _frame in range(120_000):
             driving.truck.air_pressure_psi = driving.truck.specs.air_governor_cut_out_psi
             driving.truck.parking_brake = False
@@ -852,6 +864,12 @@ class PlaytestHarness:
         assert self.driving is not None
         self.driving.trip._hazard_check_mi = 1e9
         self.driving.trip._inspection_check_mi = 1e9
+        # Traffic IS random friction for these measurements, and emptying the
+        # list is not enough on its own -- the rolling bubble tops the road up
+        # again on the next update. Left on, a speed-control segment settled in
+        # behind a slower vehicle and stopped at the same mile no matter how
+        # many frames it was given.
+        self.driving.trip.traffic_manager.rolling_bubble = False
         self.driving.trip.traffic_manager.vehicles = []
         self.driving.trip.traffic_pressures = []
         self.driving.weather.current = WeatherKind.CLEAR

@@ -2071,7 +2071,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         self.traffic_manager.update(
             dt=dt,
             position_mi=self.position_mi,
-            time_scale=self.time_scale,
+            # effective_time_scale, not time_scale: the manager turns real
+            # seconds into game hours to move its vehicles, and that is
+            # exactly the conversion effective_time_scale exists to own. On
+            # the raw figure the traffic ran at full compression while the
+            # truck was maneuvering at reduced pacing, so the NPCs slid
+            # relative to the player instead of holding station with them --
+            # a truck you were slowly gaining on would jump away.
+            time_scale=self.effective_time_scale,
+            # Local, not the departure hour: the density model is about the
+            # road the truck is on right now, and a long run crosses rush
+            # hours and empties out overnight while it drives.
+            hour=self.local_hour,
         )
         self._check_zones()
         self._check_chain_law()

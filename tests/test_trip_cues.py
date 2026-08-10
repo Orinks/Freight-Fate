@@ -123,6 +123,7 @@ def test_progress_summary_mentions_highway(world):
 
 def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     trip, _truck = make_trip(world)
+    trip.traffic_manager.rolling_bubble = False
     trip.traffic_manager.vehicles = []
 
     # State crossings speak once, at the line -- the old 10-mile advance
@@ -242,6 +243,7 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
     trip, truck = make_trip(world)
     truck.velocity_mps = 29.0
     trip.position_mi = 9.98
+    trip.traffic_manager.rolling_bubble = False
     trip.traffic_manager.vehicles = [
         NPCVehicle("npc:queue", 10.0, 45.0, 45.0, 0, "braking_traffic")
     ]

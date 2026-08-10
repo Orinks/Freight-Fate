@@ -142,8 +142,11 @@ def test_update_moves_and_prunes_vehicles_outside_bubble():
 
     manager.update(dt=1.0, position_mi=0.0, time_scale=20.0)
 
-    assert [vehicle.key for vehicle in manager.vehicles] == ["ahead"]
-    assert manager.vehicles[0].position_mi > 2.2
+    # Only the two seeded here are the subject; the rolling bubble also tops
+    # the window up around the truck, and that is a different test's business.
+    seeded = {v.key: v for v in manager.vehicles if v.key in ("behind", "ahead")}
+    assert list(seeded) == ["ahead"]
+    assert seeded["ahead"].position_mi > 2.2
 
 
 def test_update_keeps_future_route_traffic_until_reached():
@@ -152,12 +155,16 @@ def test_update_keeps_future_route_traffic_until_reached():
     assert route is not None
     manager = _manager_for_route(route, seed=7)
     manager.spawn_initial_traffic()
-    initial_count = len(manager.vehicles)
+    initial_keys = {vehicle.key for vehicle in manager.vehicles}
 
     manager.update(dt=0.0, position_mi=0.0, time_scale=20.0)
 
-    assert initial_count > 1
-    assert len(manager.vehicles) == initial_count
+    # Nothing seeded up the route may be dropped for being far away. The
+    # bubble adds vehicles near the truck, so count the survivors by key
+    # rather than the total, which now legitimately grows.
+    survivors = {vehicle.key for vehicle in manager.vehicles}
+    assert len(initial_keys) > 1
+    assert initial_keys <= survivors
     assert any(vehicle.position_mi > 10.0 for vehicle in manager.vehicles)
 
 
@@ -191,7 +198,8 @@ def test_merging_vehicle_moves_into_player_lane_and_creates_situation():
     manager.update(dt=0.0, position_mi=0.0, time_scale=20.0)
     situation = manager.next_situation(position_mi=0.0, truck_speed_mph=55.0)
 
-    assert manager.vehicles[0].relative_lane == 0
+    merging = next(v for v in manager.vehicles if v.key == "merge")
+    assert merging.relative_lane == 0
     assert situation is not None
     assert situation.kind == "merging"
     assert "Merging" in situation.message
@@ -204,7 +212,8 @@ def test_braking_vehicle_slows_and_creates_lead_situation():
     manager.update(dt=1.0, position_mi=0.0, time_scale=20.0)
     situation = manager.next_situation(position_mi=0.0, truck_speed_mph=60.0)
 
-    assert manager.vehicles[0].target_speed_mph < 45.0
+    braking = next(v for v in manager.vehicles if v.key == "brake")
+    assert braking.target_speed_mph < 45.0
     assert situation is not None
     assert situation.kind == "braking"
     assert "Brake lights" in situation.message
@@ -316,3 +325,122 @@ def test_long_route_bad_weather_preserves_spawned_traffic_positions():
     assert len(rain.vehicles) == len(clear.vehicles)
     assert _placement_signature(rain) == _placement_signature(clear)
     assert [v.speed_mph for v in rain.vehicles] != [v.speed_mph for v in clear.vehicles]
+
+
+# -- the rolling bubble ------------------------------------------------------
+# Traffic used to be seeded once for the whole route at one candidate per 85
+# miles and never replaced, which left the bubble at 0-3 vehicles, draining as
+# the trip went on, with nothing ever coming up from behind.
+
+
+def test_the_bubble_fills_as_the_truck_drives():
+    manager = _manager()
+    manager.update(dt=0.0, position_mi=20.0, time_scale=1.0)
+
+    assert len(manager.vehicles) >= 4
+
+
+def test_the_bubble_does_not_drain_over_a_long_run():
+    """Vehicles are retired behind the truck, so something must replace them.
+
+    Advanced in driving-sized steps rather than jumps. A truck that teleports
+    five miles at a time outruns its own window -- it culls a bubble's worth
+    of traffic per step while only a few cells of new road come into range --
+    which says nothing about a truck that drives there.
+    """
+    manager = _manager()
+    manager.update(dt=0.0, position_mi=10.0, time_scale=1.0)
+    early = len(manager.vehicles)
+
+    position = 10.0
+    while position < 70.0:
+        position += 0.25
+        manager.update(dt=1.0, position_mi=position, time_scale=1.0)
+
+    assert early >= 1
+    assert len(manager.vehicles) >= early
+
+
+def test_traffic_appears_behind_the_truck_so_it_can_be_overtaken():
+    """The old model placed everything ahead, so nobody could ever pass.
+
+    Watched over a stretch of driving rather than at one mile: whether a
+    given cell of road is carrying somebody is a coin the seed flips, and the
+    claim here is about the road, not about mile 30.
+    """
+    manager = _manager()
+    behind_seen: list[float] = []
+    position = 30.0
+    while position < 45.0:
+        position += 0.25
+        manager.update(dt=1.0, position_mi=position, time_scale=1.0)
+        behind_seen.extend(v.speed_mph for v in manager.vehicles if v.position_mi < position)
+
+    assert behind_seen, "nothing was ever spawned behind the truck"
+    assert any(mph > 62.0 for mph in behind_seen), "nothing behind is fast enough to pass"
+
+
+def test_nothing_is_created_alongside_the_truck():
+    """A vehicle that materialises next to the cab appeared out of nowhere."""
+    from freight_fate.sim.traffic_manager import NO_SPAWN_AHEAD_MI, NO_SPAWN_BEHIND_MI
+
+    manager = _manager()
+    manager.update(dt=0.0, position_mi=40.0, time_scale=1.0)
+
+    for vehicle in manager.vehicles:
+        gap = vehicle.position_mi - 40.0
+        assert not (-NO_SPAWN_BEHIND_MI < gap < NO_SPAWN_AHEAD_MI), vehicle.key
+
+
+def test_a_passed_cell_never_spawns_again():
+    """Backing up or slowing must not repopulate road already driven."""
+    manager = _manager()
+    manager.update(dt=0.0, position_mi=50.0, time_scale=1.0)
+    keys = {v.key for v in manager.vehicles}
+
+    manager.vehicles = []
+    manager.update(dt=0.0, position_mi=50.0, time_scale=1.0)
+
+    assert not ({v.key for v in manager.vehicles} & keys)
+
+
+def test_the_bubble_is_deterministic_for_the_same_seed_and_position():
+    first, second = _manager(seed=4), _manager(seed=4)
+    first.update(dt=0.0, position_mi=25.0, time_scale=1.0)
+    second.update(dt=0.0, position_mi=25.0, time_scale=1.0)
+
+    assert first.vehicles
+    assert [(v.key, round(v.position_mi, 6), round(v.speed_mph, 6)) for v in first.vehicles] == [
+        (v.key, round(v.position_mi, 6), round(v.speed_mph, 6)) for v in second.vehicles
+    ]
+
+
+def test_density_ignores_the_difficulty_and_compression_knobs():
+    """Presence is not difficulty -- the same rule the police already follow.
+
+    hazard_scale is the relaxed-mode hazard multiplier times the time-scale
+    tuning's hazard frequency. Neither is a statement about how many vehicles
+    exist, and together they were emptying the interstate.
+    """
+    busy = _manager(seed=3)
+    quiet = _manager(seed=3)
+    quiet.hazard_scale = 0.11
+
+    busy.update(dt=0.0, position_mi=30.0, time_scale=1.0)
+    quiet.update(dt=0.0, position_mi=30.0, time_scale=1.0)
+
+    assert busy.vehicles
+    assert len(busy.vehicles) == len(quiet.vehicles)
+
+
+def test_density_follows_the_clock_not_the_departure_hour():
+    """A run that leaves at 04:00 drives into the morning rush."""
+    manager = _manager()
+    leg = manager.route.legs[0]
+
+    manager.hour = 3.0
+    quiet = manager._leg_density(leg, night=True)
+    manager.hour = 8.0
+    rush = manager._leg_density(leg, night=False)
+
+    assert rush > quiet

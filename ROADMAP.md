@@ -189,11 +189,37 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       `tests/` claims the bare module name `conftest`, which broke
       `test_online_presence.py`'s `from conftest import FakeKeyring`.
       The loader lives in the test module for that reason.
-- [ ] Passing traffic you can actually hear (player-requested, measured
-      2026-08-10). Four pass-by cues are shipped, credited and wired by
-      vehicle class in `driving_core._traffic_vehicle_sound`, and they
-      are effectively never heard. Two separate reasons, both measured
-      over 6.2 mi of interstate at 60 mph:
+- [x] **Passing traffic you can actually hear -- SHIPPED 2026-08-10**
+      (player-requested). Five bugs in the existing bubble, no redesign:
+      traffic was stepped on the raw `time_scale` while everything else
+      ran on `effective_time_scale`, against that property's own
+      docstring, so NPCs slid relative to the truck whenever pacing eased;
+      `spawn_initial_traffic` drew one candidate per 85 miles, once, and
+      never replaced what the cull retired, so the bubble drained as a run
+      went on; everything was seeded ahead, so the `passing` intent could
+      never pass; `_leg_density` was multiplied by `hazard_scale` (the
+      relaxed-mode hazard knob times the time-scale tuning's hazard
+      frequency, landing at 0.11), which is the rule enforcement already
+      settled -- presence is not difficulty; and no pass earcon existed
+      for bubble vehicles at all. Now: a rolling window that spawns ahead
+      and behind with deterministic per-cell draws, clear air around the
+      cab so nothing materialises alongside, a drawn exit mile so a slow
+      vehicle cannot pin the truck for the rest of the route, density
+      tracking the live local hour rather than the departure hour, and
+      `states/driving_traffic_pass.py` firing a class-matched whoosh
+      panned to the side, rate-limited in REAL seconds because ten times
+      pacing turned a populated road into a cue every 2.2 seconds.
+      Measured: bubble 0-3 -> 10-19 vehicles, pass-bys 0 -> 4-7 per 6 mi,
+      cues across every class. `TrafficManager.rolling_bubble` turns the
+      top-up off for tests that hand-place their own road.
+- [ ] Traffic follow-ups the above surfaced: the player cannot overtake a
+      slow vehicle under automatic lane keeping, so being held up is
+      currently resolved only by that vehicle's exit mile -- an actual
+      pass manoeuvre is the real answer. Also worth a look: the
+      `traffic_slowing` achievement ("Bumper-to-Bumper Blues") was
+      unreachable on the old empty road and now fires, so its wording and
+      rarity have never been reviewed against real play.
+- [x] Superseded detail from the original report, kept for the record:
       (1) **Nothing plays when a vehicle passes.** The cues hang off
       `TrafficManager.next_situation`, which returns a situation only for
       `merging`, `braking` or `following` -- a hazard needing driver

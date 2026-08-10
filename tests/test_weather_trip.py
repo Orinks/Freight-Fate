@@ -393,7 +393,14 @@ def make_trip(world, start="Chicago", end="Indianapolis", seed=2, **kwargs):
     truck.transmission.automatic = True
     truck.start_engine()
     weather = WeatherSystem("great_lakes", seed=1)
-    return Trip(route, truck, weather, seed=seed, **kwargs), truck
+    trip = Trip(route, truck, weather, seed=seed, **kwargs)
+    # A quiet road by default. These are cue-plumbing tests -- deduplication,
+    # toll markers, zone warnings -- and the rolling traffic bubble puts real
+    # vehicles on the road that raise their own cues, which is the feature
+    # working rather than a dedup failure. Tests that are about traffic turn
+    # it back on, and tests/test_traffic_manager.py owns the bubble itself.
+    trip.traffic_manager.rolling_bubble = False
+    return trip, truck
 
 
 def _brake_until_speed(
@@ -634,6 +641,7 @@ def test_too_fast_for_conditions_risks_traction_loss(world):
     trip, truck = make_trip(world)
     trip._hazard_check_mi = 1e9  # silence the random environmental hazards
     trip._inspection_check_mi = 1e9
+    trip.traffic_manager.rolling_bubble = False
     trip.traffic_manager.vehicles = []
 
     def run_for_hazard(frames=12000):
@@ -655,6 +663,7 @@ def test_too_fast_for_conditions_risks_traction_loss(world):
     trip2, truck2 = make_trip(world, seed=7)
     trip2._hazard_check_mi = 1e9
     trip2._inspection_check_mi = 1e9
+    trip2.traffic_manager.rolling_bubble = False
     trip2.traffic_manager.vehicles = []
     safe_hits = []
     for _ in range(6000):
@@ -1144,13 +1153,21 @@ def test_npc_traffic_seeding_is_deterministic(world):
 
 def test_npc_traffic_moves_each_trip_tick(world):
     trip, _truck = make_trip(world)
+    trip.traffic_manager.rolling_bubble = False
     trip.traffic_manager.vehicles = [NPCVehicle("npc:test", 5.0, 60.0, 60.0, 0, "steady_truck")]
     trip._hazard_check_mi = 1e9
     trip._inspection_check_mi = 1e9
 
+    # Against the clock the sim actually converts with. Traffic used to be
+    # stepped on the raw time_scale while everything else ran on
+    # effective_time_scale, so the NPCs slid relative to the truck whenever
+    # pacing eased off; this now moves the distance the trip's own clock says.
+    expected = 5.0 + 60.0 * 1.0 * trip.effective_time_scale / 3600.0
     trip.update(1.0)
 
-    assert trip.npc_vehicles[0].position_mi > 5.2
+    moved = next(v for v in trip.npc_vehicles if v.key == "npc:test")
+    assert moved.position_mi == pytest.approx(expected, abs=1e-6)
+    assert moved.position_mi > 5.0
 
 
 def test_npc_vehicles_property_tracks_traffic_manager(world):
@@ -1248,6 +1265,7 @@ def test_npc_traffic_cue_and_status_are_reviewable(world):
     trip, truck = make_trip(world)
     truck.velocity_mps = 29.0
     trip.position_mi = 10.0
+    trip.traffic_manager.rolling_bubble = False
     trip.traffic_manager.vehicles = [
         NPCVehicle("npc:merge", 10.8, 42.0, 42.0, 0, "merging_vehicle")
     ]
@@ -1273,6 +1291,7 @@ def test_metric_toggle_updates_npc_traffic_cue_units(world):
     truck.velocity_mps = 29.0
     trip.position_mi = 10.0
     trip.imperial = False
+    trip.traffic_manager.rolling_bubble = False
     trip.traffic_manager.vehicles = [
         NPCVehicle("npc:metric-merge", 10.8, 42.0, 42.0, 0, "merging_vehicle")
     ]
@@ -1293,6 +1312,7 @@ def test_metric_toggle_updates_npc_traffic_cue_units(world):
 def test_npc_traffic_status_includes_speed_units(world):
     trip, _truck = make_trip(world)
     trip.position_mi = 10.0
+    trip.traffic_manager.rolling_bubble = False
     trip.traffic_manager.vehicles = [NPCVehicle("npc:status", 10.8, 68.0, 68.0, 0, "steady_truck")]
 
     assert "moving 68 miles per hour" in trip.npc_traffic_status()
@@ -1485,6 +1505,7 @@ def test_progress_summary_mentions_highway(world):
 
 def test_gps_state_crossing_and_rest_stop_cues_deduplicate(world):
     trip, _truck = make_trip(world)
+    trip.traffic_manager.rolling_bubble = False
     trip.traffic_manager.vehicles = []
 
     trip.position_mi = 28.0
@@ -1630,6 +1651,7 @@ def test_traffic_context_and_warning_are_grounded_in_lead_vehicle(world):
     trip, truck = make_trip(world)
     truck.velocity_mps = 29.0
     trip.position_mi = 9.98
+    trip.traffic_manager.rolling_bubble = False
     trip.traffic_manager.vehicles = [
         NPCVehicle("npc:queue", 10.0, 45.0, 45.0, 0, "braking_traffic")
     ]

@@ -361,6 +361,9 @@ class DrivingUpdateMixin:
         # Reads the same last_moved_mi the exit watch just used, so the
         # distance it counts back is the distance the trip actually lost.
         self._update_wrong_way(dt)
+        # After the trip has moved the truck and stepped the bubble, so the
+        # crossing this reads is the one that just happened.
+        self._update_traffic_passes(dt)
 
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)

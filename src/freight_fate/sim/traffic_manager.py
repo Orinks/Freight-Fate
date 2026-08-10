@@ -14,6 +14,43 @@ from .trip_models import (
     TrafficContext,
 )
 
+# -- the rolling bubble --------------------------------------------------------------
+# Traffic used to be seeded once, for the whole route, at one candidate vehicle
+# per 85 miles, and never replaced: everything was placed ahead of the truck and
+# retired for good two miles behind it. Three consequences, all measured over
+# 6.2 miles of interstate before this changed -- the bubble peaked at 0-3
+# vehicles, it drained as the trip went on because nothing replaced what was
+# retired, and the "passing" intent could never actually pass, because a
+# vehicle doing 62-75 mph placed AHEAD of a 60 mph truck only ever recedes.
+#
+# So the bubble is now a window that travels with the truck. Vehicles are
+# created as the road reaches them and retired behind, which bounds the
+# population by the road around the player instead of by route length, and
+# leaves room for the thing the old model could not express: somebody coming up
+# from behind and going past.
+SPAWN_CELL_MI = 0.4
+# Far enough back that a faster vehicle has room to close and pass rather than
+# appearing alongside; the cull at -2.0 mi is what it eventually leaves by.
+BUBBLE_BEHIND_MI = 2.4
+# A little past TRAFFIC_LOOKAHEAD_MI so a lead vehicle is already in place
+# before it comes into announcing range.
+BUBBLE_AHEAD_MI = 3.2
+# Ceiling on the live population. Every vehicle is stepped each frame, and the
+# road only has so many lanes; past this it is noise the player cannot resolve.
+MAX_BUBBLE_VEHICLES = 28
+# Clear air around the truck where nothing is created. Traffic has to enter
+# the bubble at its edges and close from there; a vehicle drawn into being a
+# few hundred feet ahead is one that appeared out of nowhere, and on a road
+# the player reads by ear that is worse than an empty lane -- the lead-vehicle
+# warning would announce a truck that did not exist a second earlier.
+NO_SPAWN_AHEAD_MI = 1.1
+NO_SPAWN_BEHIND_MI = 0.6
+# How far a bubble vehicle runs before it leaves the highway, drawn per
+# vehicle. Nobody shares a whole corridor with you, and the upper end is what
+# bounds how long a slow one can hold the lane in front of the truck.
+EXIT_AFTER_MIN_MI = 2.5
+EXIT_AFTER_MAX_MI = 11.0
+
 
 @dataclass
 class TrafficVehicle:
@@ -33,6 +70,14 @@ class TrafficVehicle:
     vehicle_class: str
     length_mi: float = 0.25
     lane: int = 0
+    # The route mile this vehicle leaves the highway at, for bubble traffic.
+    # Nobody drives the whole corridor beside you: they take an exit, and
+    # without that a slower vehicle ahead was permanent. The truck would
+    # settle in behind a 45 mph car and never see the front of it again,
+    # which turned an adaptive-cruise feature into a pin -- a speed-control
+    # segment that used to finish stopped dead at the same mile however long
+    # it was given.
+    exit_at_mi: float | None = None
 
     @property
     def at_mi(self) -> float:
@@ -106,6 +151,20 @@ class TrafficManager:
         self.imperial = imperial
         self.vehicles: list[TrafficVehicle] = []
         self.announced_vehicle_keys: set[str] = set()
+        # Spawn cells the rolling bubble has already drawn for. A cell is used
+        # once and never again, so a vehicle the truck has passed cannot pop
+        # back into existence when the truck slows and the window catches up.
+        self._spawned_cells: set[int] = set()
+        # Whether ``update`` tops the window up. On for real driving; a test
+        # or a tool that assigns ``vehicles`` directly wants the road it put
+        # there and nothing else, and topping up behind its back would make
+        # the list it just set unreproducible.
+        self.rolling_bubble = True
+        # Time of day the density model should read. Set from the trip each
+        # frame; without it a ten-hour run kept its departure hour's traffic
+        # all night, which is the case a player driving with live weather and
+        # a real clock notices first.
+        self.hour = start_hour
         # The driving state mirrors the player's discrete lane here each
         # frame so same-lane checks and spoken relative lanes stay honest.
         self.player_lane = 0
@@ -122,22 +181,43 @@ class TrafficManager:
         return random.Random(int(digest[:16], 16))
 
     def _rush_hour_traffic_bias(self, leg: Leg) -> float:
-        if not any(start <= self.start_hour < end for start, end in RUSH_HOUR_WINDOWS):
+        # self.hour, not start_hour: a run that departs at 04:00 drives into
+        # the morning rush, and one that departs at 16:00 drives out of the
+        # evening one. Reading the departure hour for the whole trip made the
+        # road outside the cab disagree with the clock inside it.
+        hour = self.hour % 24.0
+        if not any(start <= hour < end for start, end in RUSH_HOUR_WINDOWS):
             return 0.0
         return 0.14 if leg.checkpoints else 0.06
 
     def _leg_density(self, leg: Leg, night: bool) -> float:
+        """How much of this road is carrying somebody, 0 to 1.
+
+        Deliberately reads nothing from ``hazard_scale``, on the rule the
+        enforcement layer already settled for police: presence is not
+        difficulty, and the road has the traffic it has. That knob is
+        ``hos.hazard_scale(mode)`` times the time-scale tuning's
+        ``hazard_frequency`` -- a difficulty setting multiplied by a
+        compression setting, neither of which is a statement about how many
+        vehicles exist. Together they were landing at 0.11 on an ordinary
+        run, cutting a busy interstate to a 5 percent chance of company per
+        cell, and the compression half had it exactly backwards: at ten times
+        pacing the truck covers ten times the ground in a real minute and
+        should meet MORE traffic, not less.
+
+        Difficulty still reaches the player where it belongs -- on random
+        hazards, and on which vehicles are worth interrupting them about.
+        """
         metro_bias = 0.18 if leg.checkpoints else 0.0
         night_bias = -0.08 if night else 0.0
         rush_bias = self._rush_hour_traffic_bias(leg)
-        density = min(
+        return min(
             0.86,
             max(
                 0.05,
                 0.22 + leg.miles / 900.0 + metro_bias + night_bias + rush_bias,
             ),
         )
-        return density * self.hazard_scale
 
     def _weather_slowdown(self) -> float:
         effects = self.weather.effects
@@ -366,7 +446,105 @@ class TrafficManager:
                 count += 1
         return count
 
-    def update(self, *, dt: float, position_mi: float, time_scale: float) -> None:
+    def _leg_at(self, mile: float) -> Leg | None:
+        """The leg the given route mile falls in."""
+        found: Leg | None = None
+        for start, leg in zip(self.leg_starts, self.route.legs, strict=False):
+            if mile + 1e-9 >= start:
+                found = leg
+            else:
+                break
+        return found
+
+    def _cell_rng(self, cell: int) -> random.Random:
+        """A generator belonging to one cell of road.
+
+        Keyed on the route and seed like every other draw here, plus the cell
+        index, so the same trip replayed puts the same vehicle in the same
+        place -- the world has to load offline and behave identically twice.
+        """
+        digest = hashlib.sha256(f"{self._seed_key()}:cell:{cell}".encode()).hexdigest()
+        return random.Random(int(digest[:16], 16))
+
+    def _replenish(self, position_mi: float) -> None:
+        """Fill the window around the truck, ahead and behind.
+
+        Behind matters as much as ahead. The old model only ever placed
+        vehicles in front, so the road could overtake nobody -- and being
+        overtaken is most of what traffic sounds like from a truck holding 60
+        in the right lane.
+        """
+        if not self.rolling_bubble or len(self.vehicles) >= MAX_BUBBLE_VEHICLES:
+            return
+        low = max(0.0, position_mi - BUBBLE_BEHIND_MI)
+        high = min(self.route.miles, position_mi + BUBBLE_AHEAD_MI)
+        occupied = {int(vehicle.position_mi / SPAWN_CELL_MI) for vehicle in self.vehicles}
+        night = is_night(self.hour)
+        weather_slowdown = self._weather_slowdown()
+        for cell in range(int(low / SPAWN_CELL_MI), int(high / SPAWN_CELL_MI) + 1):
+            if cell in self._spawned_cells:
+                continue
+            self._spawned_cells.add(cell)
+            if cell in occupied or len(self.vehicles) >= MAX_BUBBLE_VEHICLES:
+                continue
+            rng = self._cell_rng(cell)
+            # Draw the place inside the cell BEFORE the clear-air test. Testing
+            # the cell's own mile and then offsetting by up to a cell width put
+            # vehicles back inside the zone the test was meant to keep empty.
+            mile = cell * SPAWN_CELL_MI + rng.uniform(0.0, SPAWN_CELL_MI)
+            if -NO_SPAWN_BEHIND_MI < mile - position_mi < NO_SPAWN_AHEAD_MI:
+                continue
+            leg = self._leg_at(mile)
+            if leg is None:
+                continue
+            # Density is a share of road, so it reads directly as the chance
+            # this cell of it is carrying somebody.
+            if rng.random() > self._leg_density(leg, night):
+                continue
+            behind = mile < position_mi
+            # Somebody behind you is somebody who is going to pass you, so the
+            # draw back there favours the faster intents. Ahead keeps the old
+            # spread, where slower vehicles are what you come up on.
+            if behind:
+                intent = rng.choices(("passing", "cruising"), weights=(3.0, 1.0))[0]
+            else:
+                intent = rng.choices(
+                    ("cruising", "following", "merging", "braking", "passing"),
+                    weights=(3.0, 1.5, 1.2, 1.0, 0.6),
+                )[0]
+            vehicle_class = rng.choices(
+                ("car", "box truck", "semi", "service vehicle"),
+                weights=(5.0, 1.4, 2.0, 0.3),
+            )[0]
+            base_speed = {
+                "cruising": rng.uniform(52.0, 64.0),
+                "following": rng.uniform(42.0, 55.0),
+                "merging": rng.uniform(38.0, 52.0),
+                "braking": rng.uniform(35.0, 48.0),
+                "passing": rng.uniform(66.0, 78.0),
+            }[intent]
+            rush_slowdown = rng.uniform(4.0, 10.0) if self._rush_hour_traffic_bias(leg) else 0.0
+            speed = max(25.0, base_speed - weather_slowdown - rush_slowdown)
+            lane = 1 if intent == "passing" else 0
+            self.vehicles.append(
+                TrafficVehicle(
+                    key=f"bubble:{cell}",
+                    position_mi=mile,
+                    speed_mph=speed,
+                    target_speed_mph=speed,
+                    relative_lane=-lane,
+                    intent=intent,
+                    vehicle_class=vehicle_class,
+                    lane=lane,
+                    exit_at_mi=mile + rng.uniform(EXIT_AFTER_MIN_MI, EXIT_AFTER_MAX_MI),
+                )
+            )
+
+    def update(
+        self, *, dt: float, position_mi: float, time_scale: float, hour: float | None = None
+    ) -> None:
+        if hour is not None:
+            self.hour = hour
         game_hours = dt * time_scale / 3600.0
         kept: list[TrafficVehicle] = []
         for vehicle in self.vehicles:
@@ -378,9 +556,17 @@ class TrafficManager:
             delta = vehicle.target_speed_mph - vehicle.speed_mph
             vehicle.speed_mph += max(-6.0 * dt, min(4.0 * dt, delta))
             vehicle.position_mi += max(0.0, vehicle.speed_mph) * game_hours
+            # getattr, for the reason lead_vehicle already gives: the harness
+            # and the trip's own NPCVehicle share this runtime surface without
+            # carrying the dataclass, so they have no exit mile to read.
+            exit_at = getattr(vehicle, "exit_at_mi", None)
+            if exit_at is not None and vehicle.position_mi >= exit_at:
+                continue  # took its exit
             if vehicle.position_mi - position_mi >= -2.0:
                 kept.append(vehicle)
-        self.vehicles = sorted(kept, key=lambda vehicle: vehicle.position_mi)
+        self.vehicles = kept
+        self._replenish(position_mi)
+        self.vehicles.sort(key=lambda vehicle: vehicle.position_mi)
 
     def next_situation(
         self, *, position_mi: float, truck_speed_mph: float

@@ -17,6 +17,27 @@
 
 ### Fixed
 
+- **The highway has traffic on it now, and you can hear it go by.** The
+  road was very nearly empty -- a few vehicles at the start of a run and
+  fewer as it went on, because nothing ever replaced what you drove past
+  and nothing ever came up from behind you. On top of that, the pass-by
+  sounds for cars, box trucks and semis could not play at all: they were
+  only ever attached to a warning about a vehicle ahead, so traffic going
+  past your cab was silent. Now the road stays busy around you, vehicles
+  come up behind and overtake, and you hear each one go by on the side it
+  passed on. How busy it is follows the clock and the weather as you
+  drive, so a night run is quiet and a morning one is not, and a long
+  trip changes as the hours pass instead of keeping its departure hour's
+  traffic all night long.
+
+- **Traffic no longer thins out because of your difficulty or pacing
+  settings.** How many vehicles were on the road was being multiplied by
+  the random-hazard setting and by your time compression, which between
+  them could empty an interstate. Neither of those is a statement about
+  how much traffic exists, so neither touches it any more: the road has
+  the traffic it has, the same way it has the police it has. Your hazard
+  and pacing settings still do everything else they did.
+
 - **A full truck stop no longer means you cannot fuel there.** When the
   overnight parking at a stop was full, the whole stop closed to you --
   your only choices were to drive on, take a motel room, or sleep on the

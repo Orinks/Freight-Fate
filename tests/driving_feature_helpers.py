@@ -79,6 +79,11 @@ def quiet_trip(driving):
 
     driving.trip._hazard_check_mi = 1e9
     driving.trip._inspection_check_mi = 1e9
+    # Emptying the list is not enough on its own: the bubble tops itself up
+    # around the truck every update, so a test that cleared the road once
+    # would find traffic back on it a frame later -- along with the pass
+    # earcons and the slow-traffic badge that come with it.
+    driving.trip.traffic_manager.rolling_bubble = False
     driving.trip.traffic_manager.vehicles = []
     # Congestion zones re-inject slow NPC traffic when entered, which would
     # steal the ACC's attention from whatever the test is isolating.
