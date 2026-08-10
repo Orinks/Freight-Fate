@@ -39,14 +39,23 @@ class DispatchPolicy:
 
 
 def dispatch_policy(profile) -> DispatchPolicy:
-    """The dispatch autonomy band for this profile, derived from saves as-is."""
+    """The dispatch autonomy band for this profile, derived from saves as-is.
+
+    Autonomy is earned by level and kept by reputation. A driver dispatch has
+    stopped trusting loses the privilege of picking loads again, and loses
+    refusals with it -- the same ladder, walked backwards.
+    """
+    from .enforcement import trust_decline_penalty, trust_revokes_load_choice
+
     status = getattr(profile, "business_status", COMPANY_DRIVER)
     if is_owner_operator(status):
         return DispatchPolicy(assigns_load=False, assigns_route=False, decline_budget=0)
     level = int(getattr(profile.career, "level", 1))
+    reputation = float(getattr(profile.career, "reputation", 50.0))
     budget = NEW_HIRE_DECLINE_BUDGET + (1 if level >= REGIONAL_REGULAR_LEVEL else 0)
+    budget = max(0, budget - trust_decline_penalty(reputation))
     return DispatchPolicy(
-        assigns_load=level < SENIOR_LOAD_CHOICE_LEVEL,
+        assigns_load=level < SENIOR_LOAD_CHOICE_LEVEL or trust_revokes_load_choice(reputation),
         assigns_route=True,
         decline_budget=budget,
     )

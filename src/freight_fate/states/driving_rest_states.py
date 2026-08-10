@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from ..models import enforcement
 from .driving_core import *
 
 
@@ -75,6 +76,108 @@ class ShoulderSleepConfirmationState(MenuState):
         self.ctx.say(text, interrupt=True)
 
 
+def _record_hours(driving: DrivingState) -> float:
+    """Where the career clock stands right now, mid-trip included."""
+    p = driving.ctx.profile
+    return float(p.game_hours) + driving.trip.game_minutes / 60.0
+
+
+def _suspension_text(profile, hours: float, verb: str = "suspended") -> str:
+    """What a fresh timed suspension or disqualification means, and what still
+    works while it runs."""
+    left = enforcement.days_text(profile.driving_record.days_left(hours))
+    return (
+        f"Your CDL is {verb} for {left}. Driving jobs are off the dispatch "
+        f"board until it clears, {enforcement.clears_text(profile)}. Your money "
+        "and your truck are safe; rest, repairs, and city services are still open."
+    )
+
+
+def _serious_violation_text(profile, count: int, hours: float) -> str:
+    """Spoken movement on the serious-violation ladder, consequence attached."""
+    if count <= 1:
+        return (
+            "That is a serious violation on your record. One more inside three "
+            "years and your CDL is suspended for 60 days, and driving jobs stop "
+            "until it clears."
+        )
+    which = enforcement.ordinal_word(count)
+    return (
+        f"That is your {which} serious violation in three years. {_suspension_text(profile, hours)}"
+    )
+
+
+def _major_offense_text(profile, kind: str, hours: float) -> str:
+    """The major-offense outcome, said as fact with the way forward."""
+    name = str(getattr(profile, "name", "") or "This driver")
+    if kind == enforcement.SUSPENSION_LIFETIME:
+        return (
+            "That is your second major offense. Under federal rules a second "
+            "major offense disqualifies a commercial licence for life, so this "
+            "driver will not drive commercially again. Nothing is taken away: "
+            f"{name} keeps every dollar, the truck, and the whole record, and "
+            "you can open this career any time to look back over it. Rest, "
+            "repairs, and city services still work here, and the dispatch board "
+            "can still be read, but there is no driving work and no date this "
+            "clears. When you want the road again, start a new career from the "
+            "title menu. Everything you learned still applies."
+        )
+    return (
+        "Running from a police stop in a commercial vehicle is a felony, and a "
+        "major offense on your CDL, which is a one-year disqualification. "
+        f"{_suspension_text(profile, hours, verb='disqualified')} One more "
+        "major offense is a lifetime disqualification."
+    )
+
+
+def _log_enforcement(
+    ctx, driving: DrivingState, *, fine: float, serious: bool = False, major: bool = False
+) -> str:
+    """Book a spoken roadside enforcement event onto the career record.
+
+    Only enforcement the player actually heard reaches the record. The silent
+    at-delivery settlement strike stays money-only, so a suspension can never
+    materialise at a delivery summary with no warning behind it.
+    """
+    p = ctx.profile
+    if p is None or driving._enforcement_bypassed():
+        return ""  # the debug hours modes freeze the ladder as well as the stop
+    record = p.driving_record
+    record.record_citation(fine)
+    hours = _record_hours(driving)
+    if major:
+        text = _major_offense_text(p, record.record_major_offense(hours), hours)
+    elif serious:
+        text = _serious_violation_text(p, record.record_serious_violation(hours), hours)
+    else:
+        return ""
+    driving.record_events.append(text)
+    return text
+
+
+def _log_fatigue_event(ctx, driving: DrivingState) -> str:
+    """Book running off the road asleep, and say what it just cost."""
+    p = ctx.profile
+    hours = _record_hours(driving)
+    hit = enforcement.FATIGUE_EVENT_REPUTATION_HIT
+    count, serious = p.driving_record.record_fatigue_event(hours)
+    if count < enforcement.FATIGUE_EVENTS_BEFORE_SERIOUS:
+        text = (
+            "Running off the road asleep is a preventable safety incident and "
+            f"it goes on your record: {hit:.0f} points off your reputation. Do "
+            "it again and it becomes a fatigued-driving violation on your CDL."
+        )
+    else:
+        text = (
+            "That is twice now that you have run off the road asleep. Driving "
+            "impaired by fatigue is a federal violation, so this one counts "
+            f"against your licence as well as {hit:.0f} points off your "
+            f"reputation. {_serious_violation_text(p, serious, hours)}"
+        )
+    driving.record_events.append(text)
+    return text
+
+
 class TrafficStopState(MenuState):
     """A roadside traffic stop after a speeding pull-over: a spoken license and
     logbook check, an on-the-spot ticket or a warning, then back to the road."""
@@ -93,6 +196,7 @@ class TrafficStopState(MenuState):
         over: float,
         limit: float,
         clean_stop: bool = False,
+        warned: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.driving = driving
@@ -100,6 +204,9 @@ class TrafficStopState(MenuState):
         self.over = over
         self.limit = limit
         self.clean_stop = clean_stop
+        # The driver kept rolling through a failure-to-stop warning before
+        # finally pulling in: reckless-class behavior, not just speed.
+        self.warned = warned
         self._outcome_text = ""
         self._resolve()
 
@@ -138,25 +245,35 @@ class TrafficStopState(MenuState):
             return
         # A prompt, fully-compliant stop earns a small chance the trooper lets a
         # ticket slide with a warning instead.
-        if self.clean_stop and d._patrol_rng.random() < PULL_OVER_CLEAN_STOP_WARN_CHANCE:
+        # Named seed, quantised on where the stop happened: reloading the
+        # save must not re-roll whether the trooper let it slide.
+        waiver_key = f"{d.trip_seed}:police:waiver:{round(d.trip.position_mi, 1)}"
+        waiver_roll = random.Random(waiver_key).random()
+        if self.clean_stop and waiver_roll < PULL_OVER_CLEAN_STOP_WARN_CHANCE:
             self._outcome_text = (
                 f"You were {over_text} over the {limit_text} limit. I was gonna "
                 "give you a ticket, but since you pulled over promptly, I'll let "
                 "it go this time. Keep it down."
             )
             return
-        fine = SPEEDING_TICKET_FINES[min(d.speeding_tickets, len(SPEEDING_TICKET_FINES) - 1)]
+        # Priced by how far over the limit and how many citations the career
+        # already carries, against the real state fine schedules.
+        fine = enforcement.speeding_citation_fine(self.over, p.driving_record.citations)
         d.speeding_tickets += 1
         d.ticket_fines_paid += fine
         p.money -= fine
         hit = hos.HOS_REPUTATION_HIT * (0.7 if self.signaled else 1.0)
         p.career.reputation = max(0.0, rep - hit)
         self.ctx.audio.play("ui/error")
+        serious = enforcement.is_serious_speed(self.over) or self.warned
+        ladder = _log_enforcement(self.ctx, d, fine=fine, serious=serious)
         self._outcome_text = (
             f"You were {over_text} over the {limit_text} limit. Speeding "
             f"ticket: {fine:,.0f} dollars, paid on the spot, and a reputation "
             "hit."
         )
+        if ladder:
+            self._outcome_text += f" {ladder}"
 
     def announce_entry(self) -> None:
         polite = " You signaled and pulled over promptly." if self.signaled else ""
@@ -197,16 +314,22 @@ class EnforcementStopState(MenuState):
         signaled: bool,
         return_message: str,
         out_of_service: bool = False,
+        warned: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.driving = driving
         self._title = title
         self.summary = summary
-        self.fine = fine
+        # Repeat offenders pay more for the same stop, capped at three times
+        # the posted amount, same rule as the speeding schedule.
+        record = getattr(ctx.profile, "driving_record", None)
+        priors = record.citations if record is not None else 0
+        self.fine = enforcement.repeat_fine(fine, priors, fine * 3.0)
         self.reputation_hit = reputation_hit
         self.signaled = signaled
         self.return_message = return_message
         self.out_of_service = out_of_service
+        self.warned = warned
         self._outcome_text = ""
         self._resolve()
 
@@ -229,9 +352,12 @@ class EnforcementStopState(MenuState):
         hit = self.reputation_hit * (0.8 if self.signaled else 1.0)
         p.career.reputation = max(0.0, p.career.reputation - hit)
         self.ctx.audio.play("ui/error")
+        ladder = _log_enforcement(self.ctx, d, fine=self.fine, serious=self.warned)
         self._outcome_text = (
             f"Fine: {self.fine:,.0f} dollars, paid on the spot, and a reputation hit."
         )
+        if ladder:
+            self._outcome_text += f" {ladder}"
         if self.out_of_service:
             # The ten hours pass HERE, parked on the shoulder with the
             # officer's order in hand -- never as a silent mid-drive jump.
@@ -281,6 +407,7 @@ class FelonyStopState(MenuState):
         self.driving = driving
         self.load_lost = driving.phase == DRIVE_PHASE_DELIVERY and not driving.job.bobtail
         self._summary = ""
+        self._standing_text = ""
         self._resolve()
 
     def _resolve(self) -> None:
@@ -290,6 +417,9 @@ class FelonyStopState(MenuState):
         d.ticket_fines_paid += FAILURE_TO_STOP_FINE
         p.money -= FAILURE_TO_STOP_FINE
         p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT * 3.0)
+        # The part that used to go nowhere: fleeing a stop in a commercial
+        # vehicle is a major offense, and the licence answers for it.
+        self._standing_text = _log_enforcement(self.ctx, d, fine=FAILURE_TO_STOP_FINE, major=True)
         d.truck.damage_pct = min(100.0, d.truck.damage_pct + FAILURE_TO_STOP_DAMAGE_PCT)
         d.truck.velocity_mps = 0.0
         d.truck.throttle = 0.0
@@ -324,6 +454,8 @@ class FelonyStopState(MenuState):
             f"hours. {load_text} You are released back to "
             f"{self.ctx.world.home_terminal(p.current_city).spoken_name}."
         )
+        if self._standing_text:
+            self._summary += f" {self._standing_text}"
 
     def announce_entry(self) -> None:
         self.ctx.say(f"{self.title}. {self._summary} {self.current_text()}", interrupt=True)

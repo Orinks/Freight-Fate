@@ -213,6 +213,9 @@ class DrivingState(
         self.jake_fines_paid = 0.0
         self._jake_violation_deadline_s: float | None = None  # grace after the warning
         self._jake_citation_latched = False  # one citation per continuous engagement
+        # Zones whose one warning has already been spent this trip; a second
+        # engagement in the same town is cited without a fresh grace window.
+        self._jake_zone_grace_used: set[str] = set()
         self._jake_zone_warned_key: str | None = None  # approach callout latch
         self._assist_zone_cue_key: str | None = None  # once-per-zone assist-release cue
         self._pull_over: str | None = None  # None | "lights" | "stopping"
@@ -228,6 +231,19 @@ class DrivingState(
         self._pull_over_return = "Back on the highway. Watch your speed."
         self._pull_over_warning_level = 0
         self.failure_to_stop_count = 0
+        # Real seconds owed to the player before the stop is judged at all:
+        # the spoken instruction plus reaction time. Nothing drains until it
+        # has run out.
+        self._pull_over_grace_s = 0.0
+        # How long the stop has stayed unresolved past the final warning.
+        self._pull_over_forced_s = 0.0
+        # How long the deliberate run key has been held down.
+        self._pursuit_hold_s = 0.0
+        # Ladder movement spoken during this trip, restated once at the
+        # delivery summary so nothing about your standing is heard only
+        # on a road the player has already left.
+        self.record_events: list[str] = []
+        self.fatigue_events = 0  # run-off-road microsleeps this trip
         self._weigh_station_notice_key = ""
         self._unsafe_damage_stop_key = ""
         # Compliance tracker for the active stop: 0..1, judged from behavior
@@ -241,6 +257,12 @@ class DrivingState(
         # Deterministic, save-safe stream for "did a patrol catch you" rolls, kept
         # apart from the trip's hazard/zone/inspection streams.
         self._patrol_rng = random.Random(None if trip_seed is None else trip_seed ^ 0xB0A1)
+        # The road-joint spacer used to draw from _patrol_rng about a hundred
+        # times a mile, so whether a trooper caught you came down to how many
+        # joints had played -- frame timing, effectively, and a reload
+        # re-rolled it. Ambience gets its own stream, and every enforcement
+        # roll is drawn from a named, position-quantised seed instead.
+        self._road_texture_rng = random.Random(None if trip_seed is None else trip_seed ^ 0x5EA7)
         self._rescue_offered = False
         self._signal_timer = 0.0
         self._exit_stop = None  # active route exit
@@ -391,7 +413,7 @@ class DrivingState(
         self._ambient_event_cooldown_s = 0.0
         self._pending_ambient_event: tuple[str, str | None] | None = None
         self._road_joint_accumulator_m = 0.0
-        self._next_joint_distance_m = self._patrol_rng.uniform(14.0, 18.0)
+        self._next_joint_distance_m = self._road_texture_rng.uniform(14.0, 18.0)
         self.lane_guidance = LaneGuidance()
         self._edge_loop_key: str | None = None  # active edge-ladder rung loop
         self._road_pan_applied = 0.0  # last pursuit-guide pan set on the road bed
@@ -438,6 +460,45 @@ class DrivingState(
         # Curve calls already made this trip (keys are curve entry miles).
         self._pacenote_spoken: set[int] = set()
         self._status_text = f"Press {self.ctx.control_hint('engine')} to start the engine."
+
+    # Every field the live stop is judged by. Kept in one list so the
+    # snapshot and the restore cannot drift apart and quietly reintroduce
+    # the reload-cancels-the-stop exploit.
+    _PULL_OVER_FIELDS = (
+        "_pull_over",
+        "_pull_over_start_mi",
+        "_pull_over_signaled",
+        "_pull_over_over",
+        "_pull_over_limit",
+        "_pull_over_kind",
+        "_pull_over_title",
+        "_pull_over_summary",
+        "_pull_over_fine",
+        "_pull_over_reputation_hit",
+        "_pull_over_return",
+        "_pull_over_warning_level",
+        "_pull_over_compliance",
+        "_pull_over_elapsed",
+        "_pull_over_prev_mph",
+        "_pull_over_coast_s",
+        "_pull_over_signal_boost",
+        "_pull_over_nosignal_hit",
+        "_pull_over_grace_s",
+        "_pull_over_forced_s",
+    )
+
+    def _pull_over_snapshot(self) -> dict | None:
+        if self._pull_over is None:
+            return None
+        return {name: getattr(self, name) for name in self._PULL_OVER_FIELDS}
+
+    def _restore_pull_over(self, data) -> None:
+        """Bring a stop back exactly as it was, mid-stop compliance and all."""
+        if not isinstance(data, dict) or not data.get("_pull_over"):
+            return
+        for name in self._PULL_OVER_FIELDS:
+            if name in data:
+                setattr(self, name, data[name])
 
     def _terse_speech(self) -> bool:
         return self.ctx.settings.speech_verbosity == 0
@@ -521,6 +582,14 @@ class DrivingState(
             "speeding_tickets": self.speeding_tickets,
             "ticket_fines_paid": self.ticket_fines_paid,
             "failure_to_stop_count": self.failure_to_stop_count,
+            "record_events": list(self.record_events),
+            "fatigue_events": self.fatigue_events,
+            "jake_zone_grace_used": sorted(self._jake_zone_grace_used),
+            # A stop with lights behind you is the single most expensive thing
+            # on this road, so it rides in the snapshot like everything else.
+            # Saving and reloading used to cancel it outright, which would
+            # have made every suspension in the game optional.
+            "pull_over": self._pull_over_snapshot(),
             "jake_zone_fines": self.jake_zone_fines,
             "jake_fines_paid": self.jake_fines_paid,
             "gate_miss_count": self._gate_miss_count,
@@ -672,6 +741,10 @@ class DrivingState(
             state.speeding_tickets = int(data.get("speeding_tickets", 0))
             state.ticket_fines_paid = float(data.get("ticket_fines_paid", 0.0))
             state.failure_to_stop_count = int(data.get("failure_to_stop_count", 0))
+            state.record_events = [str(line) for line in data.get("record_events", [])]
+            state.fatigue_events = int(data.get("fatigue_events", 0))
+            state._jake_zone_grace_used = {str(key) for key in data.get("jake_zone_grace_used", [])}
+            state._restore_pull_over(data.get("pull_over"))
             state.jake_zone_fines = int(data.get("jake_zone_fines", 0))
             state.jake_fines_paid = float(data.get("jake_fines_paid", 0.0))
             state._gate_miss_count = int(data.get("gate_miss_count", 0))

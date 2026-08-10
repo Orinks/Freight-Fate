@@ -32,6 +32,7 @@ class CareerStatsState(MenuState):
         return items
 
     def _lines(self) -> list[str]:
+        from ..models import enforcement
         from ..models.jobs import ENDORSEMENT_LABELS
 
         p = self.ctx.profile
@@ -50,6 +51,9 @@ class CareerStatsState(MenuState):
         return [
             f"Level {career.level} driver, {career.xp:.0f} experience",
             f"Reputation: {career.reputation:.0f} out of 100",
+            enforcement.trust_text(career.reputation),
+            enforcement.career_menu_status(p),
+            enforcement.standing_text(p),
             endorsements,
             f"Deliveries: {career.deliveries}, {pct:.0f} percent on time",
             f"Lifetime {s.distance_unit_text()}: "

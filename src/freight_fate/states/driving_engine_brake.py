@@ -72,6 +72,16 @@ class EngineBrakeZoneMixin:
         if self._jake_citation_latched:
             return  # one citation per continuous engagement
         if self._jake_violation_deadline_s is None:
+            if city in self._jake_zone_grace_used:
+                # The grace window is one chance to comply, not a renewable
+                # exemption. Flicking the switch off just before the timer
+                # expires and straight back on used to draw warnings forever
+                # and never a fine; coming back on the jake in the same town
+                # is now an immediate citation.
+                self._jake_citation_latched = True
+                self._fine_engine_braking(city)
+                return
+            self._jake_zone_grace_used.add(city)
             self._jake_violation_deadline_s = JAKE_ZONE_GRACE_S
             self._speak_jake_zone_warning(city)
             return
@@ -186,6 +196,10 @@ class EngineBrakeZoneMixin:
         self.jake_zone_fines += 1
         self.jake_fines_paid += fine
         self.ctx.profile.money -= fine  # can go negative; never a game over
+        # A municipal noise ordinance is not an FMCSA serious violation, so it
+        # never moves the suspension ladder -- but it is still a citation on
+        # the record, and the next citation of any kind costs more for it.
+        self.ctx.profile.driving_record.record_citation(fine)
         self.ctx.audio.play("ui/error")
         self.ctx.controller.rumble.alert()
         if self._terse_speech():

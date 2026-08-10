@@ -54,6 +54,7 @@ from ..updater import is_frozen
 from .business import COMPANY_DRIVER, INDEPENDENT_AUTHORITY, is_owner_operator
 from .career import Career
 from .career_ladder import STARTER_CARRIER_NAME
+from .enforcement import DrivingRecord, seed_record_from_save
 from .loyalty import LoyaltyAccount
 from .market import Market
 from .start_options import DEFAULT_START_KEY, START_MODE_COMPANY
@@ -693,6 +694,10 @@ class Profile:
     fatigue: float = 0.0  # 0 fresh .. 100 exhausted
     active_buffs: list = field(default_factory=list)  # timed consumables, see data/buffs.py
     pay_advance: float = 0.0  # outstanding dispatcher advance owed, repaid at delivery
+    # Fines a settlement could not fully collect. Carried forward and taken
+    # out of the next one, because the alternative -- saying a fine was paid
+    # and then writing it off -- tells the player something untrue.
+    fines_owed: float = 0.0
     pay_advance_used_for_load: bool = False
     business_status: str = COMPANY_DRIVER  # company driver, then leased-on owner-operator
     carrier_name: str = STARTER_CARRIER_NAME
@@ -702,6 +707,11 @@ class Profile:
     trailer_programs: list[str] = field(default_factory=list)
     owned_trailers: list[str] = field(default_factory=list)
     career: Career = field(default_factory=Career)
+    # Citations, serious violations, and CDL standing. Enforcement outlives a
+    # trip: the old build kept the felony count on the trip snapshot and then
+    # threw the snapshot away, so nothing a driver did downstream ever
+    # remembered it.
+    driving_record: DrivingRecord = field(default_factory=DrivingRecord)
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock
     duty_log: DutyLog = field(default_factory=DutyLog)  # rolling Record of Duty Status
@@ -758,6 +768,13 @@ class Profile:
         if _migrate_profile_wide_grime(d):
             migrated = True
         career = Career(**_known_fields(Career, d.pop("career", {})))
+        # A career from before the enforcement record existed is seeded from
+        # whatever offenses the save still holds -- no amnesty -- and hears a
+        # one-time explanation of where it stands.
+        if "driving_record" in d:
+            record = DrivingRecord(**_known_fields(DrivingRecord, d.pop("driving_record") or {}))
+        else:
+            record = seed_record_from_save(d)
         market = Market(**_known_fields(Market, d.pop("market", {})))
         hos = HosClock.from_dict(d.pop("hos", None))  # absent in v2 saves: fresh clock
         duty_log = DutyLog.from_dict(d.pop("duty_log", None))
@@ -765,14 +782,20 @@ class Profile:
         known = {
             f
             for f in cls.__dataclass_fields__
-            if f not in ("career", "market", "hos", "duty_log", "loyalty")
+            if f not in ("career", "driving_record", "market", "hos", "duty_log", "loyalty")
         }
         # truck_conditions rides through kwargs: on this line the records are
         # plain dicts, already fanned out per truck above, so they need no
         # per-record construction on the way in.
         kwargs = {k: v for k, v in d.items() if k in known}
         profile = cls(
-            career=career, market=market, hos=hos, duty_log=duty_log, loyalty=loyalty, **kwargs
+            career=career,
+            driving_record=record,
+            market=market,
+            hos=hos,
+            duty_log=duty_log,
+            loyalty=loyalty,
+            **kwargs,
         )
         # A save that had to be migrated on load is rewritten on the next save,
         # so the conversion is not redone on every launch.

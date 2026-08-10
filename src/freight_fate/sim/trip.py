@@ -201,6 +201,9 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         # stop sign; the driving state maintains it every frame. It pins the
         # clock to real time (see effective_time_scale).
         self.controlled_ramp = False
+        # A police stop is in progress: the clock stops compressing until it
+        # resolves, so the distance the stop is judged by is honest miles.
+        self.pull_over_active = False
         self._announced_chain_law: set[str] = set()
         self._announced_curves: set[str] = set()
         self._announced_lane_changes: set[str] = set()
@@ -266,6 +269,13 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         full = self.time_scale
         if self.waiting and self.truck.parking_brake and self.truck.speed_mph < 1.0:
             return full * PARKED_TIME_SCALE_MULT
+        if self.pull_over_active:
+            # Lights behind you: the whole encounter runs on the real clock.
+            # PULL_OVER_IGNORE_MI is 2 raw trip miles, but braking takes real
+            # seconds and compression spent them at 40x -- a textbook stop
+            # from 74 mph consumed 2.18 miles and tripped the felony line
+            # before the truck had slowed to 50.
+            return min(full, 1.0)
         if self.controlled_ramp:
             # A ramp ending in a light or a sign plays out in real time
             # from the gore: the stop-sign warning must buy human reaction

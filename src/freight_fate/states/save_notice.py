@@ -84,6 +84,51 @@ class LegacyCareerNoticeState(MenuState):
         self.ctx.replace_state(NameEntryState(self.ctx))
 
 
+class DrivingRecordNoticeState(MenuState):
+    """A career that predates the enforcement record, told where it stands.
+
+    There is no amnesty here: every offense the save still holds counts, and
+    a reputation dispatch has already lost faith in counts too. The one thing
+    owed is a plain explanation, once, before the player finds out by way of
+    a short board they cannot account for.
+    """
+
+    title = "Your driving record"
+    intro_help = "Press Enter on OK to continue to your career."
+
+    def announce_entry(self) -> None:
+        from ..models import enforcement
+
+        p = self.ctx.profile
+        self.ctx.say(
+            "Something new. Freight Fate now keeps a driving record for your "
+            "career: citations, serious violations, and whether your CDL is "
+            "clear. Two serious violations in three years suspend it, and "
+            "running from a police stop is a major offense that disqualifies "
+            "it for a year. Your reputation now also decides how much freight "
+            "dispatch will show you and how much choice you get. Nothing was "
+            "reset and nothing was taken: this is where your career already "
+            f"stands. {enforcement.standing_text(p)} "
+            f"{enforcement.trust_text(p.career.reputation)} "
+            f"{self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        return [MenuItem("OK", self._acknowledge, help="Continue to your career.")]
+
+    def _acknowledge(self) -> None:
+        from .main_menu import _world_entry_state, pending_notice_state
+
+        p = self.ctx.profile
+        p.driving_record.notice_pending = False
+        p.save()
+        self.ctx.replace_state(pending_notice_state(self.ctx) or _world_entry_state(self.ctx))
+
+    def go_back(self) -> None:
+        # Escape acknowledges too; the player must never be stuck here.
+        self._acknowledge()
+
+
 class SaveMigrationNoticeState(MenuState):
     title = "Save file updated"
     intro_help = "Press Enter on OK to continue to your career."

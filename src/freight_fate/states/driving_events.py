@@ -419,7 +419,8 @@ class DrivingEventMixin:
                 return_message=("Back on the highway with a reset clock. Keep the logbook clean."),
                 lights_message=(
                     "Lights and siren behind you for a log check. Signal "
-                    "with X and brake to a stop on the shoulder."
+                    f"with {self.ctx.control_hint('take_exit')} and brake to "
+                    "a stop on the shoulder."
                 ),
             )
             _record_inspection(self.ctx, event=True)

@@ -67,6 +67,10 @@ class BusinessSettlement:
     driver_charges: float
     business_charges: tuple[BusinessCharge, ...]
     net_before_advance: float
+    # Fines this load could not cover. Net pay floors at zero, but the money
+    # is not forgiven -- saying "this cost you 400 dollars" while quietly
+    # writing off 250 of it told the player something that did not happen.
+    uncollected_charges: float = 0.0
 
     @property
     def business_charge_total(self) -> float:
@@ -387,6 +391,18 @@ def independent_authority_charges_for_trailers(
     )
 
 
+def _uncollected(driver_charges: float, raw_net: float) -> float:
+    """How much of the driver's fines this load could not pay.
+
+    Fines are the last thing the settlement covers, so a shortfall eats into
+    them first. Whatever is left stands as an outstanding balance instead of
+    quietly disappearing when net pay floors at zero.
+    """
+    if raw_net >= 0.0:
+        return 0.0
+    return round(min(driver_charges, -raw_net), 2)
+
+
 def build_business_settlement(
     status: str,
     job: Job,
@@ -401,37 +417,37 @@ def build_business_settlement(
     if status == INDEPENDENT_AUTHORITY:
         gross_pay = direct_freight_gross(gross_pay)
         charges = independent_authority_charges_for_trailers(job, gross_pay, owned_trailers)
-        net = max(0.0, gross_pay - driver_charges - sum(charge.amount for charge in charges))
+        raw = gross_pay - driver_charges - sum(charge.amount for charge in charges)
         return BusinessSettlement(
             status,
             status_label(status),
             round(gross_pay, 2),
             driver_charges,
             charges,
-            round(net, 2),
+            round(max(0.0, raw), 2),
+            _uncollected(driver_charges, raw),
         )
     if is_owner_operator(status):
         gross_pay = owner_operator_gross(gross_pay)
         charges = owner_operator_charges(job, gross_pay)
-        net = max(0.0, gross_pay - driver_charges - sum(charge.amount for charge in charges))
+        raw = gross_pay - driver_charges - sum(charge.amount for charge in charges)
         return BusinessSettlement(
             status,
             status_label(status),
             round(gross_pay, 2),
             driver_charges,
             charges,
-            round(net, 2),
+            round(max(0.0, raw), 2),
+            _uncollected(driver_charges, raw),
         )
 
-    net = max(
-        0.0,
-        company_driver_pay(job, gross_pay, on_time, carrier_key, reputation) - driver_charges,
-    )
+    raw = company_driver_pay(job, gross_pay, on_time, carrier_key, reputation) - driver_charges
     return BusinessSettlement(
         COMPANY_DRIVER,
         status_label(COMPANY_DRIVER),
         round(gross_pay, 2),
         driver_charges,
         (),
-        round(net, 2),
+        round(max(0.0, raw), 2),
+        _uncollected(driver_charges, raw),
     )

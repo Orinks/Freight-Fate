@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import zlib
 
+from ..models import enforcement
 from ..models.business import (
     INDEPENDENT_AUTHORITY,
     build_business_settlement,
@@ -233,15 +234,22 @@ class CityMenuState(MenuState):
             )
         else:
             first_day = f" Career objective: {career_objective(p).terminal_text}"
+        # A licence that is not clear is said here, every time, because it
+        # decides what the rest of this screen can do.
+        cdl = ""
+        if p.driving_record.suspended(p.game_hours):
+            cdl = f" {enforcement.career_menu_status(p)}."
         self.ctx.say(
             f"Parked at {terminal.spoken_name} in the {city.name} "
             f"service area, {city.state}. {business.capitalize()} with "
-            f"level {rank.level}, {rank.title}. "
+            f"level {rank.level}, {rank.title}.{cdl} "
             f"You have {p.money:,.0f} dollars. "
             f"{first_day}",
             interrupt=interrupt,
         )
         self.ctx.say(self.current_text(), interrupt=False, review=False)
+        self._check_carrier_termination()
+        self._check_standing()
 
     def build_items(self) -> list[MenuItem]:
         items = [
@@ -358,6 +366,18 @@ class CityMenuState(MenuState):
                     self._career_plan,
                     help="Review the next practical career objective and how it "
                     "should shape dispatch choices.",
+                ),
+            )
+        record = self.ctx.profile.driving_record
+        if record.suspended(self.ctx.profile.game_hours) and not record.lifetime_disqualified:
+            items.insert(
+                1,
+                MenuItem(
+                    "Wait out the CDL suspension",
+                    self._wait_out_suspension,
+                    help="Sit out the rest of the suspension in one go. The "
+                    "career clock jumps to the day it clears; your money, "
+                    "truck, and record are untouched.",
                 ),
             )
         if self._pay_advance_available():
@@ -646,6 +666,73 @@ class CityMenuState(MenuState):
         if before_fatigue < 70.0:
             self.ctx.award_achievement("sleep_before_exhaustion")
 
+    def _wait_out_suspension(self) -> None:
+        """Sit out the rest of a CDL suspension in one go.
+
+        Serving a 60-day suspension ten hours at a time would be an
+        accessibility problem dressed up as realism, so the terminal lets the
+        driver wait it out and says exactly what that costs in game time.
+        """
+        p = self.ctx.profile
+        record = p.driving_record
+        hours = record.hours_left(p.game_hours)
+        if hours <= 0:
+            self.ctx.say("Your CDL is clear. There is nothing to wait out.")
+            return
+        days = enforcement.days_text(record.days_left(p.game_hours))
+        start = p.game_hours
+        p.game_hours += hours
+        _record_city_duty(self.ctx, "off_duty", start, p.game_hours, "CDL suspension")
+        record.serve_until(p.game_hours)
+        p.hos.sleep()
+        p.fatigue = 0.0
+        p.market.advance_to(p.market_day())
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        zone = city_zone(self.ctx.world.city(p.current_city))
+        hour = to_local(p.game_hours, zone) % 24.0
+        self.ctx.say(
+            f"You sat out the {days} of your suspension. Your CDL is clear "
+            f"again and driving jobs are back on the dispatch board. It is "
+            f"{clock_text(hour)}, {time_of_day(hour)}, and you are rested.",
+            interrupt=True,
+        )
+
+    def _check_standing(self) -> None:
+        """Speak a trust-band change, once, when it changes -- never on a timer."""
+        p = self.ctx.profile
+        record = p.driving_record
+        band = enforcement.trust_band(p.career.reputation)
+        if band == record.trust_band_heard:
+            return
+        first_time = record.trust_band_heard == ""
+        record.trust_band_heard = band
+        if first_time and band == enforcement.TRUST_FULL:
+            return  # a clean driver is never told they are fine
+        self.ctx.say(enforcement.trust_text(p.career.reputation), interrupt=False)
+
+    def _check_carrier_termination(self) -> None:
+        """A company driver the carrier will no longer keep on the insurance."""
+        p = self.ctx.profile
+        if not enforcement.carrier_termination_due(p):
+            return
+        former = p.carrier_name
+        p.driving_record.carrier_terminations += 1
+        p.carrier_key = enforcement.LAST_CHANCE_CARRIER_KEY
+        p.carrier_name = enforcement.LAST_CHANCE_CARRIER_NAME
+        p.dispatch_board_cache = None
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/error")
+        self.ctx.say(
+            f"{former} has let you go. Your safety record put you past what "
+            "their insurance will carry, so your seat and your assigned truck "
+            f"go back to the yard. {enforcement.LAST_CHANCE_CARRIER_NAME} will "
+            "take you on: lower pay, shorter freight, and a fresh start with a "
+            "dispatcher who does not know you yet. Your money, your levels, and "
+            "everything you own stay exactly as they are.",
+            interrupt=True,
+        )
+
     def _logbook(self) -> None:
         from .logbook import LogbookState
 
@@ -689,6 +776,9 @@ def dispatch_cache_key(p) -> dict:
         "level": p.career.level,
         "endorsements": sorted(p.career.endorsements),
         "count": board_offer_count(p.career.level),
+        # A board cached before dispatch lost faith in you must not outlive
+        # the trust that built it.
+        "trust": enforcement.trust_band(p.career.reputation),
         "force_dest": forced_dispatch_destination(),
     }
 
@@ -718,7 +808,11 @@ def open_freight_market(ctx) -> list[Job]:
         jobs = board.offers(
             p.current_city,
             p.career.endorsements,
-            count=board_offer_count(p.career.level),
+            # How much freight dispatch will show you is a matter of trust, and
+            # trust slides with reputation the whole way down.
+            count=enforcement.board_offers_for_reputation(
+                board_offer_count(p.career.level), p.career.reputation
+            ),
             level=p.career.level,
             market=p.market,
             carrier_key=getattr(p, "carrier_key", ""),
@@ -951,6 +1045,17 @@ class JobBoardState(MenuState):
 
     def announce_entry(self) -> None:
         n = len(self.jobs)
+        p = self.ctx.profile
+        # A board the player cannot take work from explains itself before it
+        # lists anything. An unexplained empty or refusing board is exactly the
+        # kind of silence this game does not do.
+        if p.driving_record.suspended(p.game_hours):
+            self.ctx.say(
+                f"{enforcement.suspension_board_line(p)} You can still read the "
+                f"{n} listed dispatch{'es' if n != 1 else ''}. Escape returns to "
+                "the terminal."
+            )
+            return
         if n == 0:
             self.ctx.say("Dispatch board. No jobs available right now. Press Escape to go back.")
         elif self.assigned_mode:
@@ -1397,6 +1502,10 @@ class JobBoardState(MenuState):
 
     def _accept(self, job: Job) -> None:
         p = self.ctx.profile
+        if p.driving_record.suspended(p.game_hours):
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(enforcement.suspension_refusal_line(p), interrupt=True)
+            return
         locked = self._locked_reason(job)
         if locked:
             self.ctx.audio.play("ui/error")

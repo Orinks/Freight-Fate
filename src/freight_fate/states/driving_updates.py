@@ -1332,7 +1332,7 @@ class DrivingUpdateMixin:
             self._road_joint_accumulator_m += t.velocity_mps * dt
             if self._road_joint_accumulator_m >= self._next_joint_distance_m:
                 self._road_joint_accumulator_m %= self._next_joint_distance_m
-                self._next_joint_distance_m = self._patrol_rng.uniform(14.0, 18.0)
+                self._next_joint_distance_m = self._road_texture_rng.uniform(14.0, 18.0)
 
                 vol = 0.015 * min(1.0, t.velocity_mps / 30.0)
                 audio.play("vehicle/road_joint", volume=vol)
@@ -2116,6 +2116,7 @@ class DrivingUpdateMixin:
         self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
         t.damage_pct = min(100.0, t.damage_pct + MICROSLEEP_SHOULDER_DAMAGE_PCT)
         t.velocity_mps *= 0.8  # wandering onto the shoulder scrubs speed
+        standing = self._record_fatigue_event()
         if self._microsleep_misses >= MICROSLEEP_FORCE_STOP_MISSES:
             self._microsleep_misses = 0
             t.throttle = 0.0
@@ -2123,16 +2124,52 @@ class DrivingUpdateMixin:
             self.ctx.audio.play("vehicle/tire_screech", volume=0.9)
             self.ctx.say_event(
                 "You cannot stay awake. You drift onto the shoulder and jolt "
-                "awake on the brakes. Stop and sleep before you wreck.",
+                f"awake on the brakes. {standing} {self._fatigue_out_of_service()}",
                 interrupt=True,
             )
         else:
             self.ctx.say_event(
                 f"You nodded off and drifted onto the rumble strip. The truck "
-                f"took damage, now {t.damage_pct:.0f} percent. Pull over and "
-                "sleep.",
+                f"took damage, now {t.damage_pct:.0f} percent. {standing} "
+                "Pull over and sleep.",
                 interrupt=True,
             )
+
+    def _record_fatigue_event(self) -> str:
+        """Book a run-off-road fatigue event and say what it cost.
+
+        Falling asleep at the wheel is not a scrape: 49 CFR 392.3 forbids
+        driving impaired by fatigue, and to a carrier this is a preventable
+        safety incident. The first one costs standing; from the second on it
+        is a violation the licence answers for.
+        """
+        from ..models import enforcement
+        from .driving_rest_states import _log_fatigue_event
+
+        p = self.ctx.profile
+        if p is None or self._enforcement_bypassed():
+            return ""
+        self.fatigue_events += 1
+        hit = enforcement.FATIGUE_EVENT_REPUTATION_HIT
+        p.career.reputation = max(0.0, p.career.reputation - hit)
+        return _log_fatigue_event(self.ctx, self)
+
+    def _fatigue_out_of_service(self) -> str:
+        """The third miss in a row is the fatigue out-of-service order."""
+        from ..models import enforcement
+
+        if self._enforcement_bypassed():
+            return "Stop and sleep before you wreck."
+        self.truck.velocity_mps = 0.0
+        self.truck.set_parking_brake()
+        self._place_out_of_service()
+        return (
+            "You are out of service for fatigue: "
+            f"{enforcement.FATIGUE_OUT_OF_SERVICE_HOURS:.0f} hours off duty "
+            f"before you may roll. It is now {clock_text(self.trip.local_hour)}, "
+            "your hours of service are reset, and the delivery deadline kept "
+            "counting the whole time."
+        )
 
     def _update_overrev(self, dt: float) -> None:
         t = self.truck
@@ -2283,7 +2320,10 @@ class DrivingUpdateMixin:
         patrol = self.trip.active_patrol_at(self.trip.position_mi)
         if patrol is None:
             return False
-        return self._patrol_rng.random() < patrol.intensity
+        # Named and position-quantised, never time-quantised: a reload must
+        # not re-roll whether a trooper was sitting there.
+        key = f"{self.trip_seed}:police:catch:{round(self.trip.position_mi, 1)}"
+        return random.Random(key).random() < patrol.intensity
 
     def _begin_pull_over(self, limit: float) -> None:
         """A trooper has lit you up: announce it and wait for the stop."""
@@ -2304,15 +2344,47 @@ class DrivingUpdateMixin:
         self._pull_over_prev_mph = self.truck.speed_mph
         patrol = self.trip.active_patrol_at(self.trip.position_mi)
         where = patrol.reason if patrol is not None else "patrol"
-        self.ctx.audio.play("events/police_siren")
-        self.ctx.controller.rumble.alert()
-        self.ctx.say_event(
+        signal_hint = self.ctx.control_hint("take_exit")
+        message = (
             f"Lights and siren behind you. A trooper on this {where} clocked you "
             f"at {self.ctx.settings.speed_text(self.truck.speed_mph)} in a "
-            f"{self.ctx.settings.speed_text(limit)} zone. Signal with X and "
-            "brake to a stop on the shoulder.",
-            interrupt=True,
+            f"{self.ctx.settings.speed_text(limit)} zone. Signal with "
+            f"{signal_hint} and brake to a stop on the shoulder."
         )
+        self._arm_pull_over(message)
+        self.ctx.controller.rumble.alert()
+
+    def _arm_pull_over(self, message: str) -> None:
+        """Shared start for every stop: hands back on the wheel, real clock,
+        and no judgement until the player has heard the whole instruction.
+
+        The old code started draining compliance the instant the siren played.
+        Holding a steady speed -- which is what cruise, the speed keeper, or
+        simply listening looks like -- drained it to zero about five seconds
+        in, while a thirty-four word instruction was still being spoken. That
+        charged attentive drivers with a felony for doing nothing wrong.
+        """
+        self.trip.pull_over_active = True
+        self._disarm_speed_control()  # hands back on the wheel to brake
+        self._pull_over_grace_s = self._pull_over_grace_seconds(message)
+        # Commit the encounter to the save before a word of it is spoken, so
+        # neither a crash nor a quit-to-menu can make it never have happened.
+        self.enforcement_events.add(f"stop:{round(self.trip.position_mi, 1)}")
+        if self.ctx.profile is not None:
+            self.ctx.profile.active_trip = self.snapshot()
+            self.ctx.save_profile()
+        self.ctx.audio.play("events/police_siren")
+        self.ctx.say_event(message, interrupt=True)
+
+    def _pull_over_grace_seconds(self, message: str) -> float:
+        """Real seconds to hear the instruction and get a hand to the wheel."""
+        speech_rate = (
+            self.ctx.settings.speech_rate
+            if self.ctx.settings.sapi_events
+            and getattr(self.ctx.speech, "event_supports_rate", False)
+            else 0.0
+        )
+        return ramp_arrival_grace_seconds(message, speech_rate)
 
     def _enforcement_bypassed(self) -> bool:
         return self.ctx.settings.hos_mode in hos.HOS_NON_ENFORCED_MODES
@@ -2354,7 +2426,8 @@ class DrivingUpdateMixin:
                     return_message="Back on the highway. Watch for the next open scale.",
                     lights_message=(
                         "Scale bypass enforcement. Lights and siren behind you: "
-                        "signal with X and brake to a stop on the shoulder."
+                        f"signal with {self.ctx.control_hint('take_exit')} and "
+                        "brake to a stop on the shoulder."
                     ),
                 )
 
@@ -2387,7 +2460,8 @@ class DrivingUpdateMixin:
             return_message="Back on the highway. Repair the truck at the next safe stop.",
             lights_message=(
                 "Unsafe equipment stop. Lights and siren behind you: signal "
-                "with X and brake to a stop on the shoulder."
+                f"with {self.ctx.control_hint('take_exit')} and brake to a "
+                "stop on the shoulder."
             ),
         )
 
@@ -2417,8 +2491,7 @@ class DrivingUpdateMixin:
         self._reset_pull_over_tracker()
         self._pull_over_compliance = PULL_OVER_START_COMPLIANCE
         self._pull_over_prev_mph = self.truck.speed_mph
-        self.ctx.audio.play("events/police_siren")
-        self.ctx.say_event(lights_message, interrupt=True)
+        self._arm_pull_over(lights_message)
 
     def _signal_pull_over(self) -> None:
         """X during a pull-over: signal and ease over (better demeanor)."""
@@ -2546,9 +2619,17 @@ class DrivingUpdateMixin:
             return
         if self._enforcement_bypassed():
             self._pull_over = None
+            self.trip.pull_over_active = False
             return
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
             self._open_traffic_stop()
+            return
+        # Nothing is judged until the instruction has finished being spoken
+        # and the player has had real reaction seconds on top of it.
+        if self._pull_over_grace_s > 0.0:
+            self._pull_over_grace_s = max(0.0, self._pull_over_grace_s - dt)
+            self._pull_over_prev_mph = self.truck.speed_mph
+            self._pull_over_start_mi = self.trip.position_mi
             return
         self._pull_over_elapsed += dt
         speed = self.truck.speed_mph
@@ -2578,16 +2659,32 @@ class DrivingUpdateMixin:
                 delta -= PULL_OVER_NOSIGNAL_HIT
             delta -= PULL_OVER_NOSIGNAL_RATE * dt
         self._pull_over_compliance = max(0.0, min(1.0, self._pull_over_compliance + delta))
-        # Behavior ends the stop -- a zeroed tracker -- but rolling on for miles
-        # with the lights behind you is a felony on its own, and the staged
-        # warnings still speak by how far you have travelled.
+        # Running is a choice, never a consequence of hesitating: only the
+        # held opt-in below starts a pursuit.
+        self._update_pursuit_optin(dt)
+        if self._pull_over is None:
+            return  # the opt-in fired
+        # The warnings are on a real-time cadence now. They used to be keyed
+        # to trip miles, which compression could burn through before the
+        # first one could ever speak.
         distance = self.trip.position_mi - self._pull_over_start_mi
-        if self._pull_over_compliance <= 0.0 or distance >= PULL_OVER_IGNORE_MI:
-            self._evade_pull_over()
-        elif distance >= FAILURE_TO_STOP_FINAL_WARNING_MI:
+        if self._pull_over_elapsed >= PULL_OVER_FINAL_WARNING_S:
             self._warn_failure_to_stop(final=True)
-        elif distance >= FAILURE_TO_STOP_WARNING_MI:
+        elif self._pull_over_elapsed >= PULL_OVER_FIRST_WARNING_S:
             self._warn_failure_to_stop(final=False)
+        # Not stopping is not running. A zeroed tracker or two miles of
+        # rolling ends in troopers boxing you in: a failure-to-stop citation
+        # and a forced stop, which is expensive and goes on the record -- but
+        # it is not a felony, and it cannot end a career by inattention.
+        if self._pull_over_compliance <= 0.0 or distance >= PULL_OVER_IGNORE_MI:
+            # Escalate through the warnings rather than jumping to the last
+            # one: the player hears it getting worse before it is over.
+            self._warn_failure_to_stop(final=self._pull_over_warning_level >= 1)
+            self._pull_over_forced_s += dt
+            if self._pull_over_forced_s >= PULL_OVER_FORCED_STOP_S:
+                self._fail_to_stop()
+        else:
+            self._pull_over_forced_s = 0.0
 
     def _warn_failure_to_stop(self, *, final: bool) -> None:
         level = 2 if final else 1
@@ -2606,7 +2703,9 @@ class DrivingUpdateMixin:
             )
         else:
             message = (
-                "Failure-to-stop warning. Signal with X and brake to a full stop on the shoulder."
+                "Failure-to-stop warning. Signal with "
+                f"{self.ctx.control_hint('take_exit')} and brake to a full "
+                "stop on the shoulder."
             )
         self.ctx.audio.play("ui/warning")
         self.ctx.say_event(message, interrupt=True)
@@ -2622,6 +2721,11 @@ class DrivingUpdateMixin:
         return_message = self._pull_over_return
         # Read the tracker before the reset zeroes it.
         clean_stop = self._pull_over_compliance >= PULL_OVER_FULL_COMPLIANCE
+        self.trip.pull_over_active = False
+        self._pursuit_hold_s = 0.0
+        # Rolling on through a spoken failure-to-stop warning before finally
+        # pulling in is reckless-class behavior, and the record says so.
+        warned = self._pull_over_warning_level > 0
         self._pull_over = None
         self._reset_pull_over_tracker()
         if kind != "speeding":
@@ -2636,20 +2740,112 @@ class DrivingUpdateMixin:
                     signaled=signaled,
                     return_message=return_message,
                     out_of_service=(kind == "hos_out_of_service"),
+                    warned=warned,
                 )
             )
             return
         self.ctx.push_state(
             TrafficStopState(
-                self.ctx, self, signaled=signaled, over=over, limit=limit, clean_stop=clean_stop
+                self.ctx,
+                self,
+                signaled=signaled,
+                over=over,
+                limit=limit,
+                clean_stop=clean_stop,
+                warned=warned,
+            )
+        )
+
+    def _pursuit_hold_required_s(self) -> float:
+        """How long the run key must be held. A lifetime disqualification is
+        the harshest outcome in the game, so it takes twice as long to choose."""
+        record = getattr(self.ctx.profile, "driving_record", None)
+        second = record is not None and record.major_count >= 1
+        return PURSUIT_HOLD_S * (2.0 if second else 1.0)
+
+    def _update_pursuit_optin(self, dt: float) -> None:
+        """Running from a stop: an affirmative held choice, never an accident.
+
+        A driver who is complying but disoriented -- holding a steady speed
+        while the instruction is still being read out -- must never be able to
+        reach a felony. So the tracker running out is a citation and a forced
+        stop, and the only road to a pursuit is holding this key after being
+        told exactly what it costs.
+        """
+        if self._enforcement_bypassed():
+            return
+        keys = pygame.key.get_pressed()
+        mods = pygame.key.get_mods()
+        holding = keys[pygame.K_x] and bool(mods & pygame.KMOD_SHIFT)
+        if not holding:
+            if self._pursuit_hold_s > 0.0:
+                self._pursuit_hold_s = 0.0
+                self.ctx.say_event("Not running. Brake to a stop on the shoulder.")
+            return
+        required = self._pursuit_hold_required_s()
+        if self._pursuit_hold_s <= 0.0:
+            hint = self.ctx.control_hint("take_exit")
+            record = self.ctx.profile.driving_record
+            cost = (
+                "This is your second major offense: it disqualifies your CDL "
+                "for life, and this career will not drive again."
+                if record.major_count >= 1
+                else "It is a felony, it cancels this load, and it disqualifies "
+                "your CDL for a year."
+            )
+            self.ctx.say_event(
+                f"Hold shift {hint} for {required:.0f} seconds to run. {cost} "
+                "Let go now to stop instead.",
+                interrupt=True,
+            )
+        self._pursuit_hold_s += dt
+        if self._pursuit_hold_s >= required:
+            self._pursuit_hold_s = 0.0
+            self._evade_pull_over()
+
+    def _fail_to_stop(self) -> None:
+        """Never pulled over, but never ran either: troopers force the stop.
+
+        This is where a zeroed compliance tracker and two miles of rolling
+        both end. It is expensive and it is a serious violation on the record,
+        but it is not a felony -- that has its own deliberate opt-in.
+        """
+        signaled = self._pull_over_signaled
+        self._pull_over = None
+        self.trip.pull_over_active = False
+        self._reset_pull_over_tracker()
+        self._pursuit_hold_s = 0.0
+        t = self.truck
+        t.throttle = 0.0
+        t.brake = 1.0
+        t.velocity_mps = 0.0
+        t.set_parking_brake()
+        self.ctx.audio.play("ui/error")
+        self.ctx.push_state(
+            EnforcementStopState(
+                self.ctx,
+                self,
+                title="Failure-to-stop stop",
+                summary=(
+                    "Troopers boxed you in and brought the truck to a stop. "
+                    "Failing to pull over promptly for an officer is a serious "
+                    "violation, and the citation says so."
+                ),
+                fine=FAILURE_TO_STOP_CITATION_FINE,
+                reputation_hit=hos.HOS_REPUTATION_HIT * 2.0,
+                signaled=signaled,
+                return_message="Back on the highway. Pull over promptly next time.",
+                warned=True,
             )
         )
 
     def _evade_pull_over(self) -> None:
-        """Drove on with the lights behind, or let the compliance tracker zero
-        out by accelerating or never slowing: spike strips end it, logged as a
-        felony stop with a heavy fine, reputation hit, and load consequences."""
+        """The player chose to run and held the key through the warning: spike
+        strips end it, logged as a major offense with a heavy fine, reputation
+        hit, and load consequences."""
         self._pull_over = None
+        self.trip.pull_over_active = False
         self._reset_pull_over_tracker()
+        self._pursuit_hold_s = 0.0
         self.ctx.audio.play("events/spike_strip")
         self.ctx.push_state(FelonyStopState(self.ctx, self))
