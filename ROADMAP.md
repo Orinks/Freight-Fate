@@ -126,10 +126,15 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       3,113 records, taking interstate mainline hairpins from 1,604 to
       zero. The raw bake keeps every row; ramps/connectors and all
       US/state-route records are untouched (US-550's 36 switchbacks and
-      Glenwood Canyon survive verbatim, verified). Known residue: the
-      same Denver departure artifact rides the US-40 leg, and no measured
-      signal separates artifact from real switchback on that class -- a
-      future US/state pass needs a different discriminator.
+      Glenwood Canyon survive verbatim, verified). RESIDUE CLOSED
+      2026-08-09: the US/state pass found its discriminator -- local
+      terrain at the hairpin's apex (a real hairpin cannot sit on flat
+      ground). tools/screen_curve_artifacts.py classifies every
+      non-interstate hairpin-severity curve against the archived
+      elevation profile and writes curve_artifacts.jsonl (963 flat-
+      terrain artifacts across 372 legs, skipped by the loader like the
+      interstate screen); all 385 hill/mountain hairpins kept, US-550
+      and Salt River Canyon verified untouched, tests pin both sides.
 - [x] **No career transfer from 1.8 and earlier -- SHIPPED 2026-08-09
       (owner ruling 2026-08-08).** `created_line` marker on every new
       save; pre-marker 1.9 tester careers pass via the save-version

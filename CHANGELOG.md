@@ -4,6 +4,13 @@
 
 ### Fixed
 
+- **Phantom hairpin turns are gone from ordinary highways.** Some US and
+  state routes carried impossibly sharp curves on flat ground, left over
+  from how routes were originally traced, so you could hear a hairpin
+  warning and slow way down where the real road runs straight. Those are
+  now screened out. Real switchbacks in the hills and mountains, like
+  the Million Dollar Highway, are exactly as sharp as ever.
+
 - **Cloud backups of 1.9 careers are accepted again.** The server was
   quietly refusing every backup of a company-driver career because it
   still expected drivers to own their truck, which 1.9's assigned
@@ -14,6 +21,12 @@
 
 ### Changed
 
+- **The radio dial moved to Page Down and Page Up.** Page Down tunes to
+  the next station and Page Up to the previous, with Control still
+  jumping a whole category. The old semicolon and apostrophe keys keep
+  working as a second option, so nothing you know breaks. The radio help
+  pages and the manual now name the right keys everywhere.
+
 - **Test builds use a staging server for online services.** While 1.9 is
   in testing, the drivers board, profile sharing, and cloud backup talk
   to a separate staging copy of orinks.net with its own accounts and
@@ -22,6 +35,15 @@
   backups will not carry over when 1.9 releases.
 
 ### Added
+
+- **Towns now enforce their engine brake ordinances.** Like real
+  municipal noise rules, cities and towns along your route are no engine
+  brake zones. Coming up on one with the engine brake switched on, you
+  hear a spoken heads-up; keep it barking inside the zone and a local
+  officer writes an on-the-spot fine that grows if you keep doing it.
+  Descending a real grade, reacting to a hazard, and retarding raised by
+  cruise or the curve assist are never fined, and open-road engine
+  braking is untouched. Your delivery summary lists any citations paid.
 
 - **Live traffic and truck parking cover far more of the map.** Real
   incident and road-work reports are back in Indiana and now on in
