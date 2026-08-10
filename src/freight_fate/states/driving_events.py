@@ -2516,6 +2516,9 @@ class DrivingEventMixin:
         if self._cruise_mph is None:
             return
         t = self.truck
+        # A limp-mode cap under the set speed is invisible from the seat: the
+        # truck simply never reaches its number. Name it, once per engagement.
+        self._announce_limp_cruise_cap()
         self._acc_follow_cue_s = max(0.0, self._acc_follow_cue_s - dt)
         self._descent_cue_s = max(0.0, self._descent_cue_s - dt)
         descent_level = self.ctx.settings.descent_speed_control

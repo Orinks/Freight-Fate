@@ -367,6 +367,9 @@ class DrivingUpdateMixin:
         self._update_hazard(dt)
         self._update_grade_advisory()
         self._update_microsleep(keys, dt)
+        # Damage bands run before the over-rev warning, so a redline call in
+        # the same frame already names the band the truck just entered.
+        self._update_damage_bands(dt)
         self._update_overrev(dt)
         self._update_speeding(dt, accelerator_held=accel_held)
         self._update_engine_brake_zone(dt)
@@ -805,7 +808,7 @@ class DrivingUpdateMixin:
             if not self.ctx.settings.lane_departure_warning:
                 return
             self.ctx.audio.play("vehicle/rumble_strip", volume=1.0, pan=self._lane_pan())
-            self.truck.damage_pct = min(100.0, self.truck.damage_pct + 1.0)
+            self.truck.add_damage(1.0)
             boundary = self._edge_boundary()
             if boundary == "oncoming":
                 # Past an undivided centerline is not a shoulder: say the
@@ -2114,7 +2117,7 @@ class DrivingUpdateMixin:
         self._microsleep_cooldown_gm = MICROSLEEP_COOLDOWN_GM
         t = self.truck
         self.ctx.audio.play("vehicle/rumble_strip", volume=1.0)
-        t.damage_pct = min(100.0, t.damage_pct + MICROSLEEP_SHOULDER_DAMAGE_PCT)
+        t.add_damage(MICROSLEEP_SHOULDER_DAMAGE_PCT)
         t.velocity_mps *= 0.8  # wandering onto the shoulder scrubs speed
         if self._microsleep_misses >= MICROSLEEP_FORCE_STOP_MISSES:
             self._microsleep_misses = 0
@@ -2146,12 +2149,24 @@ class DrivingUpdateMixin:
         self._overrev_warn_due = self._overrev_s + OVERREV_REPEAT_S
         self.ctx.audio.play("ui/warning")
         self.ctx.controller.rumble.alert()
+        # Speak the meter that is actually moving. Over-revving has charged
+        # ENGINE WEAR since the wear meters landed (see
+        # ENGINE_WEAR_OVER_REV_PCT_PER_S, "was the damage_pct redline
+        # penalty"), but this warning went on reading damage_pct -- which for
+        # most drivers sits at zero. The line told the player nothing was
+        # being harmed while real harm accumulated, and for a player who only
+        # has the spoken word that is the whole readout, not a detail.
+        # Where damage has separately put the truck in a band, name the band
+        # too, so the number and its meaning never travel apart.
+        band = self._damage_band_clause()
+        band_clause = f" Truck is in {band}." if band else ""
         message = (
-            f"Redline. Damage {t.damage_pct:.0f} percent."
+            f"Redline. Engine wear {t.engine_wear_pct:.0f} percent.{band_clause}"
             if self._terse_speech()
             else (
-                "The engine is screaming at redline and taking damage, now "
-                f"{t.damage_pct:.0f} percent. Ease off and slow down."
+                "The engine is screaming at redline and wearing itself out, now "
+                f"{t.engine_wear_pct:.0f} percent engine wear.{band_clause} "
+                "Ease off and slow down."
             )
         )
         self.ctx.say_event(message, interrupt=True)

@@ -6,6 +6,11 @@ import time
 from ..sim.timezones import to_local
 from .base import TimedMessageState
 from .driving_core import *
+from .driving_damage import (
+    damage_band_clause,
+    damage_summary_line,
+    preventable_damage_charge,
+)
 
 DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH = 55.0
 ROAD_GRIME_PER_MILE = 0.004
@@ -178,12 +183,17 @@ class DrivingStatusScreenState(MenuState):
             else f"Time: {clock_text(d.trip.local_hour)} {d.trip.current_timezone.name}, "
             f"{deadline_text}"
         )
+        band = damage_band_clause(self.ctx.settings, t)
+        damage_band_suffix = f", {band}" if band else ""
         return [
             f"Driver: {profile.name}",
             f"Money: {profile.money:,.0f} dollars",
             load_line,
             f"Objective: {d._objective_text()}",
-            f"Truck: fuel {t.fuel_fraction * 100:.0f} percent, damage {t.damage_pct:.0f} percent",
+            # The band rides with the number: hearing "78 percent" without
+            # "limp mode" leaves the player to work out why the truck is slow.
+            f"Truck: fuel {t.fuel_fraction * 100:.0f} percent, "
+            f"damage {t.damage_pct:.0f} percent{damage_band_suffix}",
             f"Transmission: {'automatic' if t.transmission.automatic else 'manual'}, {d._gear_text()}",
             f"Fatigue: {profile.fatigue:.0f} percent",
             f"Hours: {d.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}",
@@ -867,6 +877,14 @@ class ArrivalState(MenuState):
         accessorials = carrier_accessorial_charges(job, p)
         carrier_charges = toll_expense + charge_total(accessorials)
         driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        # A company driver who brings a truck back damaged does not get a
+        # clean settlement: the carrier eats the repair, and the driver eats
+        # the deductible and the safety bonus. An owner-operator has already
+        # paid the whole repair themselves, so nobody charges them twice.
+        damage_deductible, damage_reputation_hit, damage_reason = (
+            (0.0, 0.0, "") if is_owner_operator(p.business_status) else preventable_damage_charge(d)
+        )
+        driver_charges += damage_deductible
         business = build_business_settlement(
             p.business_status,
             job,
@@ -905,10 +923,20 @@ class ArrivalState(MenuState):
         gross_pay = business.gross_pay
         on_time_bonus_paid = max(0.0, gross_pay - no_on_time_bonus_business.gross_pay)
         early_bonus = max(0.0, gross_pay - deadline_business.gross_pay)
-        if driver_charges:
+        speeding_charges = driver_charges - damage_deductible
+        if speeding_charges:
             self.summary_parts.append(
                 f"Driver-responsibility charges: speeding fines cost you "
-                f"{driver_charges:,.0f} dollars."
+                f"{speeding_charges:,.0f} dollars."
+            )
+        if damage_deductible >= 1.0:
+            p.career.reputation = max(0.0, p.career.reputation - damage_reputation_hit)
+            increment_stat(p, "preventable_equipment_damage")
+            self.summary_parts.append(
+                f"Driver-responsibility charges: safety ruled the damage preventable, "
+                f"{damage_reason}. The carrier covers the repair; your deductible is "
+                f"{damage_deductible:,.0f} dollars and the safety bonus is void. "
+                f"Reputation down {damage_reputation_hit:.0f}, and it is on your record."
             )
         # Tickets from being pulled over were already paid on the spot; report
         # them for transparency but don't deduct again at settlement.
@@ -1041,11 +1069,9 @@ class ArrivalState(MenuState):
             )
         if early_bonus >= 1.0:
             self.summary_parts.append(f"Early delivery bonus: {early_bonus:,.0f} dollars.")
-        if trip_damage > 1:
-            self.summary_parts.append(
-                f"The cargo run added {trip_damage:.0f} percent truck damage. "
-                "Visit the garage when you can."
-            )
+        damage_line = damage_summary_line(self.ctx.settings, d.truck, trip_damage)
+        if damage_line is not None:
+            self.summary_parts.append(damage_line)
         wear_parts = []
         for added, meter in (
             (max(0.0, d.truck.tire_wear_pct - d.start_tire_wear), "tire wear"),

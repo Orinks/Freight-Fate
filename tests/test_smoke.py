@@ -47,8 +47,10 @@ def test_garage_offers_partial_fuel_and_repairs_when_cash_is_short():
         p.truck_damage_pct = 10.0
         app.state.refresh()
         select(app.state, "Repair")
-        assert p.truck_damage_pct == pytest.approx(8.0)
-        assert p.money == pytest.approx(0.0)
+        # Repairs price on the damage-severity curve, so a short wallet buys
+        # a little under the two percent the old flat rate would have sold.
+        assert 8.0 <= p.truck_damage_pct < 8.5
+        assert p.money == pytest.approx(0.0, abs=0.01)
     finally:
         app.shutdown()
 

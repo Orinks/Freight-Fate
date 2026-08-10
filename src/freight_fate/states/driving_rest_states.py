@@ -290,7 +290,7 @@ class FelonyStopState(MenuState):
         d.ticket_fines_paid += FAILURE_TO_STOP_FINE
         p.money -= FAILURE_TO_STOP_FINE
         p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT * 3.0)
-        d.truck.damage_pct = min(100.0, d.truck.damage_pct + FAILURE_TO_STOP_DAMAGE_PCT)
+        d.truck.add_damage(FAILURE_TO_STOP_DAMAGE_PCT)
         d.truck.velocity_mps = 0.0
         d.truck.throttle = 0.0
         d.truck.brake = 1.0
@@ -984,8 +984,7 @@ class RestStopState(MenuState):
         if damage < 1.0:
             self.ctx.say("The truck does not need roadside assistance.")
             return
-        repaired = max(0.0, damage - FIELD_REPAIR_DAMAGE_PCT)
-        cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
+        cost = road_repair_cost(damage, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE)
         carrier_paid = not player_pays_operating_costs(p.business_status)
         if not carrier_paid:
             p.money -= cost

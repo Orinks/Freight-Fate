@@ -199,6 +199,14 @@ from the words, and synonyms cost them a re-read.
 | The highway exit for the delivery | destination exit | final exit, last exit, your exit | `_destination_exit_stop` |
 | The loop-back after missing the destination exit or the facility gate | safe turnaround | U-turn, turnaround point, loop | `_handle_missed_destination_exit`, `_handle_missed_facility_gate` |
 | The fine for engine braking in one | engine brake citation | jake ticket, noise fine | `EngineBrakeZoneMixin._fine_engine_braking` |
+| The first damage band: the engine holds power back | reduced power | derate, band two, power loss | `DAMAGE_BAND_REDUCED` |
+| The deep damage band: reduced power plus a road-speed cap | limp mode | limp-home, speed governor, safe mode | `DAMAGE_BAND_LIMP` |
+| Damage past the point where the truck may be driven | out of service | broken down, totaled, disabled, dead truck | `TruckState.out_of_service` |
+| The carrier taking a company tractor off the road | dispatch grounds it, grounded | benched, red-tagged, impounded | `_carrier_grounds_the_tractor` |
+| The tractor a grounded company driver is moved into | yard spare | loaner, replacement truck, backup rig | `_draw_yard_spare` |
+| The emergency call-out that gets an out-of-service truck moving | roadside repair | roadside rescue (that is the fuel one), tow | `_roadside_repair_out_of_pocket` |
+| The emergency call-out for an empty tank | roadside rescue | roadside repair (that is the damage one) | `_handle_out_of_fuel` |
+| Losing the truck to speed, usually out of gear on a grade | runaway | overspeed (that is the posted-limit one) | `RUNAWAY_SPEED_MPH` |
 | The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
 
 Notes on the entries that are not simple:
@@ -221,6 +229,30 @@ corridors"). Per-drive navigation says leg.
 device, not something a player ever reads back or types anywhere -- only the
 activation code crosses to the player. Keep it out of every spoken and
 transcript-bound string; if a screen reads it out loud, that is a bug.
+
+**The damage bands are three nouns, not three ways of saying "damaged".**
+Reduced power is the engine holding back; limp mode is that plus a road-speed
+cap the driver cannot drive out of; out of service is the truck no longer being
+legal or able to drive at all. Each one means something different is true about
+what the truck will do next, so they are never used loosely or
+interchangeably. Every readout that gives a damage number gives the band beside
+it -- the number alone tells a player nothing about what they have lost.
+
+**"Out of service" is the real-world term and carries its real meaning.** It is
+not a colourful way of saying "very damaged": it is the state in which a truck
+may not be driven, borrowed from the out-of-service criteria an inspector
+applies at the roadside. The same words already name the hours-of-service
+version (`_place_out_of_service`), which is correct -- both mean "this truck
+does not move until something is put right" -- so never introduce a second
+noun for either.
+
+**Grounding is what the carrier does; out of service is what the truck is.** A
+company driver hears both, in that order, because they are different facts: the
+truck is unfit, and the carrier has taken it off the road as a result.
+
+**"Roadside rescue" and "roadside repair" are two different call-outs.** The
+rescue brings fuel; the repair gets an out-of-service truck moving. They cost
+different money and different hours, so they keep different names.
 
 **"Stop" is the most overloaded word in the game** -- the POI, the act of
 stopping the truck, and the command to do so. Where the sentence could be read

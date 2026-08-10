@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from ..models.business import player_pays_operating_costs
-from ..models.economy import REPAIR_COST_PER_PCT
+from ..models.economy import REPAIR_COST_PER_PCT, damage_severity_mult
 from .base import MenuItem, MenuState
 
 TERMINAL_FUEL_MIN = 20.0
@@ -249,12 +249,20 @@ class GarageState(MenuState):
 
     def _partial_repair(self) -> None:
         p = self.ctx.profile
-        repairable = p.money / REPAIR_COST_PER_PCT
+        # The shop works down from the worst of it, so what a short wallet
+        # buys is priced at the depth it starts from, not at the flat rate.
+        # Dividing the money by the flat rate quoted more percent than the
+        # curve actually sells and overdrew the account by pennies.
+        repairable = p.money / (REPAIR_COST_PER_PCT * damage_severity_mult(p.truck_damage_pct))
+        repairable = min(repairable, p.truck_damage_pct)
         if repairable < 1:
             self.ctx.audio.play("ui/error")
             self.ctx.say("Not enough money for one percent of repairs.")
             return
-        cost = self.ctx.economy.repair_cost(repairable)
+        cost = min(
+            p.money,
+            round(repairable * REPAIR_COST_PER_PCT * damage_severity_mult(p.truck_damage_pct), 2),
+        )
         p.money -= cost
         p.truck_damage_pct = max(0.0, p.truck_damage_pct - repairable)
         start = p.game_hours

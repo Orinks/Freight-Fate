@@ -6,6 +6,7 @@ from __future__ import annotations
 from ..sim.pedal_latch import PedalLatch
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
+from .driving_damage import DamageBandMixin
 from .driving_engine_brake import EngineBrakeZoneMixin
 from .driving_events import DrivingEventMixin
 from .driving_facility_gate import FacilityGateMixin
@@ -24,6 +25,7 @@ ACTIVE_TRIP_DEADLINE_MODEL = 1
 class DrivingState(
     DrivingControlsMixin,
     DrivingUpdateMixin,
+    DamageBandMixin,
     EngineBrakeZoneMixin,
     FacilityGateMixin,
     SpeedControlStateMixin,
@@ -242,6 +244,18 @@ class DrivingState(
         # apart from the trip's hazard/zone/inspection streams.
         self._patrol_rng = random.Random(None if trip_seed is None else trip_seed ^ 0xB0A1)
         self._rescue_offered = False
+        # Damage bands. The band itself is derived from damage_pct every
+        # frame; what is trip-scoped is the last band ANNOUNCED (so an edge
+        # speaks once) and the limp cap mid-wind-down. Both round-trip through
+        # the snapshot -- a resume that re-announced limp mode, or snapped the
+        # cap back to full speed, would be lying about the truck.
+        self._damage_band = self.truck.damage_band
+        # The deepest band this run reached, for settlement to grade against.
+        self._worst_damage_band = self.truck.damage_band
+        self._limp_cap_mph: float | None = None
+        self._limp_cruise_said = False
+        self._out_of_service_creep_s = 0.0
+        self._recovering = False
         self._signal_timer = 0.0
         self._exit_stop = None  # active route exit
         # Stable proof that the player explicitly selected an optional sleep
@@ -501,6 +515,13 @@ class DrivingState(
                 for charge in self.trip.toll_charges
             ],
             "start_damage": self.start_damage,
+            # The band already announced, the cap mid-wind-down, and how much
+            # of the out-of-service creep window has been used.
+            "damage_band": self._damage_band,
+            "worst_damage_band": self._worst_damage_band,
+            "preventable_damage_pct": self.truck.preventable_damage_pct,
+            "limp_cap_mph": self._limp_cap_mph,
+            "out_of_service_creep_s": self._out_of_service_creep_s,
             "start_wear": {
                 "tire": self.start_tire_wear,
                 "brake": self.start_brake_wear,
@@ -594,6 +615,16 @@ class DrivingState(
             )
             state.resumed = True
             state.start_damage = float(data["start_damage"])
+            # A save from before the damage bands carries neither key: derive
+            # the announced band from the damage it does carry, so a resumed
+            # limping truck does not re-announce a band the player already
+            # heard, and leave the cap to open itself at the resume speed.
+            state._damage_band = int(data.get("damage_band", state.truck.damage_band))
+            saved_cap = data.get("limp_cap_mph")
+            state._limp_cap_mph = None if saved_cap is None else float(saved_cap)
+            state._out_of_service_creep_s = float(data.get("out_of_service_creep_s", 0.0))
+            state._worst_damage_band = int(data.get("worst_damage_band", state._damage_band))
+            state.truck.preventable_damage_pct = float(data.get("preventable_damage_pct", 0.0))
             # Saves from before the wear meters count deltas from the resume
             # point: the truck just loaded the profile's wear, so the run
             # simply reports a little less instead of failing to load.
