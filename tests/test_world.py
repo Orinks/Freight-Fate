@@ -745,3 +745,26 @@ def test_synthetic_facility_approaches_stay_within_the_local_band(world):
     ):
         route = world.facility_approach_route(city_key, name)
         assert 1.0 <= route.miles <= 9.0, f"{city_key}/{name}: {route.miles}"
+
+
+def test_world_data_contains_real_weigh_station_stops(world):
+    """A 2026-08 design audit found the enforcement/HOS scale checks, the
+    weigh-station-lane ambience, and their tests were all dormant: every one
+    keys off ``Stop.type == "weigh_station"``, but no leg had ever shipped a
+    stop of that type -- only OSM interchange signage reading "Weigh
+    Station" was baked, never promoted to a stop. This pins the promotion so
+    the whole system cannot silently go dark again."""
+    weigh_stations = [
+        stop for leg in world.legs for stop in leg.stops if stop.type == "weigh_station"
+    ]
+    # 87 sole-destination "Weigh Station" interchange signs were promoted
+    # across 78 legs; a floor well under that catches a regression without
+    # pinning the exact count to future map-enrichment batches.
+    assert len(weigh_stations) >= 50
+
+    for stop in weigh_stations:
+        # Real facility, not a placeholder: sourced, actioned, spoken cleanly.
+        assert stop.curated
+        assert stop.source
+        assert stop.actions == ("inspect",)
+        assert stop.spoken_name.startswith("weigh station:")

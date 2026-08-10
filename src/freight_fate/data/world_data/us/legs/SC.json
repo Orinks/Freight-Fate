@@ -4306,6 +4306,21 @@
             "parking"
           ],
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-26 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 68.4,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "corridor": {
@@ -15812,6 +15827,36 @@
           ],
           "lat": 34.3474336,
           "lon": -83.3222952,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-85 Weigh Station (mile 38)",
+          "type": "weigh_station",
+          "at_mi": 38.2,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-85 Weigh Station (mile 57)",
+          "type": "weigh_station",
+          "at_mi": 56.6,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
           "vehicle_access": "tractor_trailer"
         }
       ],

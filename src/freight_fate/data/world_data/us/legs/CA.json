@@ -33909,6 +33909,21 @@
           "lon": -117.4360822,
           "vehicle_access": "tractor_trailer",
           "parking_spaces": 29
+        },
+        {
+          "name": "I-5 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 72.0,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "corridor": {
@@ -42562,6 +42577,21 @@
           "services": [
             "parking",
             "restrooms"
+          ],
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-5 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 14.1,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
           ],
           "vehicle_access": "tractor_trailer"
         }
@@ -72864,6 +72894,21 @@
           "lat": 45.2333924,
           "lon": -122.8096461,
           "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-5 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 551.5,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
+          "vehicle_access": "tractor_trailer"
         }
       ],
       "route_via": [
@@ -100684,6 +100729,21 @@
           ],
           "lat": 45.2333924,
           "lon": -122.8096461,
+          "vehicle_access": "tractor_trailer"
+        },
+        {
+          "name": "I-5 Weigh Station",
+          "type": "weigh_station",
+          "at_mi": 606.5,
+          "source": "OpenStreetMap highway=motorway_junction exit ref and destination sign tags on the leg's Interstate shield, snapped to checked-in OSRM route geometry, accessed 2026-06-23: https://www.openstreetmap.org/ -- promoted to a weigh_station stop because 'Weigh Station' was the sole destination signed at this junction (a dedicated on-mainline scale ramp, not a shared exit with another place or road), at the sign's own milepost.",
+          "actions": [
+            "inspect"
+          ],
+          "services": [],
+          "parking": "none",
+          "directions": [
+            "both"
+          ],
           "vehicle_access": "tractor_trailer"
         }
       ],
