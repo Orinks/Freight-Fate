@@ -44,6 +44,10 @@
   Descending a real grade, reacting to a hazard, and retarding raised by
   cruise or the curve assist are never fined, and open-road engine
   braking is untouched. Your delivery summary lists any citations paid.
+  Cruise and the curve assist mind the signs like a courteous driver:
+  inside a zone they switch the engine brake off and hold speed with the
+  service brakes instead, saying once why the engine note changed --
+  unless a real downgrade makes the engine brake the safe tool.
 
 - **Live traffic and truck parking cover far more of the map.** Real
   incident and road-work reports are back in Indiana and now on in

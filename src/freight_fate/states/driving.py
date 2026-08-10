@@ -212,6 +212,7 @@ class DrivingState(
         self._jake_violation_deadline_s: float | None = None  # grace after the warning
         self._jake_citation_latched = False  # one citation per continuous engagement
         self._jake_zone_warned_key: str | None = None  # approach callout latch
+        self._assist_zone_cue_key: str | None = None  # once-per-zone assist-release cue
         self._pull_over: str | None = None  # None | "lights" | "stopping"
         self._pull_over_start_mi = 0.0
         self._pull_over_signaled = False

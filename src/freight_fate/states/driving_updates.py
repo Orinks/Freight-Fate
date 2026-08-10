@@ -760,7 +760,9 @@ class DrivingUpdateMixin:
                 and t.grip >= 0.55
                 and t.rpm >= JAKE_MIN_RPM
             )
-            if jake_capable and not t.engine_brake:
+            # Town no-engine-brake zones close the jake to the assist as well
+            # (real downgrades stay exempt); the service trim below answers.
+            if jake_capable and not t.engine_brake and self._assist_jake_allowed():
                 excess = excess_now if excess_now is not None else 10.0
                 t.engine_brake_stage = 3 if excess > 15 else (2 if excess > 8 else 1)
                 self._curve_assist_jake = True

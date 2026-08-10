@@ -138,6 +138,8 @@ HELP_PAGES = [
             "J re-engages at the stage you last selected, like a real dash switch.",
             "Towns ban engine braking as noise: inside a no engine brake zone you are",
             "warned first, then fined if it stays on. Downgrades and emergencies are exempt.",
+            "Cruise and the curve assist switch the engine brake off for you inside a",
+            "zone and hold speed with the brakes, except on real downgrades.",
             "Hold H to sound the horn; release H to stop it.",
         ],
     ),

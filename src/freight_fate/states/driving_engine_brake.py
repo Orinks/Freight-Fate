@@ -42,16 +42,22 @@ class EngineBrakeZoneMixin:
         t = self.truck
         if self._ramp_mi is not None or self.trip.finished or self._pull_over is not None:
             return
+        city = self.trip.engine_brake_ban_at(self.trip.position_mi)
+        if city is not None:
+            # A real driver flips engine-brake mode off at the town line; the
+            # assists do the same before any driver-fault question is asked.
+            self._release_assist_jake_in_zone(city)
+        else:
+            self._assist_zone_cue_key = None
         # The switch alone is not the offense; the bark is. The vehicle already
         # knows whether the retarder is genuinely retarding (stage selected,
         # engine on, off the fuel, in gear), so ask it rather than re-deriving.
         barking = t.jake_retard_torque_nm() > 0.0 and t.speed_mph >= JAKE_ZONE_MIN_MPH
         # Cruise and the curve assist raise the retarder themselves and release
-        # it themselves; their bark is not the driver's doing, and cruise only
-        # reaches for it on descents anyway. Auto mode on an AMT is different:
-        # the driver armed the stalk with J, so its bark is theirs.
+        # it themselves -- and inside a zone they have just released it above,
+        # so an assist bark never reaches the fine path. Auto mode on an AMT is
+        # different: the driver armed the stalk with J, so its bark is theirs.
         driver_owns_jake = barking and self._cruise_jake_stage == 0 and not self._curve_assist_jake
-        city = self.trip.engine_brake_ban_at(self.trip.position_mi)
         if city is None:
             self._jake_violation_deadline_s = None
             self._jake_citation_latched = False
@@ -74,6 +80,53 @@ class EngineBrakeZoneMixin:
             self._jake_violation_deadline_s = None
             self._jake_citation_latched = True
             self._fine_engine_braking(city)
+
+    def _assist_jake_allowed(self) -> bool:
+        """May cruise or the curve assist raise the retarder here?
+
+        Not inside a town's ban zone -- the assists respect the posted sign
+        the way a driver flips engine-brake mode off in town -- except where
+        the ordinance's own carve-outs apply: a real downgrade or an
+        emergency, where the retarder is the safe tool everywhere.
+        """
+        if self.trip.engine_brake_ban_at(self.trip.position_mi) is None:
+            return True
+        return self._jake_zone_exempt()
+
+    def _release_assist_jake_in_zone(self, city: str) -> None:
+        """Drop an assist-raised retarder at the town line.
+
+        Runs every frame inside a zone; releasing is idempotent and the
+        raise gates keep the assists from reaching for it again. Spoken once
+        per zone, only when a retarder audibly stops -- the note cutting out
+        with no explanation is the confusing part -- and never in terse
+        speech, which skips advisory-class cues (no money is at risk here).
+        """
+        cruise_owns = self._cruise_jake_stage > 0
+        if not (cruise_owns or self._curve_assist_jake) or not self.truck.engine_brake:
+            return
+        if self._jake_zone_exempt():
+            return  # a real downgrade or emergency: safety wins in town too
+        self.truck.engine_brake_stage = 0
+        if cruise_owns:
+            self._cruise_jake_stage = 0
+        self._curve_assist_jake = False
+        if self._assist_zone_cue_key == city or self._terse_speech():
+            return
+        self._assist_zone_cue_key = city
+        spoken = self.ctx.world.spoken_city(city, qualified=False)
+        if cruise_owns:
+            message = (
+                f"No engine brake zone in {spoken}. Cruise is holding the "
+                "engine brake off and using the brakes."
+            )
+        else:
+            message = (
+                f"No engine brake zone in {spoken}. The curve assist is "
+                "using the brakes instead of the engine brake."
+            )
+        self.ctx.audio.play("ui/notify", volume=0.6)
+        self.ctx.say_event(message, interrupt=False)
 
     def _jake_zone_exempt(self) -> bool:
         """The ordinance's own carve-outs: emergencies and real downgrades."""

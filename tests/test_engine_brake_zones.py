@@ -158,7 +158,9 @@ def test_hazard_emergency_is_exempt(monkeypatch):
         app.shutdown()
 
 
-def test_cruise_raised_retarder_is_never_the_drivers_fault(monkeypatch):
+def test_cruise_jake_releases_entering_a_zone_with_a_spoken_reason(monkeypatch):
+    # A real driver flips engine-brake mode off coming into town; cruise now
+    # does the same, telling the player once why the retarder note stopped.
     from freight_fate.app import App
     from freight_fate.states.driving_engine_brake import JAKE_ZONE_GRACE_S
 
@@ -169,14 +171,17 @@ def test_cruise_raised_retarder_is_never_the_drivers_fault(monkeypatch):
         _roll_with_jake(d, monkeypatch, mile=2.0)
         d._cruise_jake_stage = 3  # automation raised it, not the driver's stalk
         d._update_engine_brake_zone(0.1)
+        assert d.truck.engine_brake_stage == 0
+        assert d._cruise_jake_stage == 0
+        assert "Cruise is holding the engine brake off" in spoken[-1]
+        assert "Buffalo" in spoken[-1]
         d._update_engine_brake_zone(JAKE_ZONE_GRACE_S + 5.0)
         assert d.jake_zone_fines == 0
-        assert spoken == []
     finally:
         app.shutdown()
 
 
-def test_curve_assist_retarder_is_never_the_drivers_fault(monkeypatch):
+def test_curve_assist_jake_releases_in_zone_with_its_own_reason(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving_engine_brake import JAKE_ZONE_GRACE_S
 
@@ -187,9 +192,98 @@ def test_curve_assist_retarder_is_never_the_drivers_fault(monkeypatch):
         _roll_with_jake(d, monkeypatch, mile=2.0)
         d._curve_assist_jake = True  # the assist engaged it for a bend
         d._update_engine_brake_zone(0.1)
+        assert d.truck.engine_brake_stage == 0
+        assert d._curve_assist_jake is False
+        assert "curve assist is using the brakes" in spoken[-1]
         d._update_engine_brake_zone(JAKE_ZONE_GRACE_S + 5.0)
         assert d.jake_zone_fines == 0
+    finally:
+        app.shutdown()
+
+
+def test_assist_zone_cue_speaks_once_per_zone_and_never_in_terse(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = _capture_events(app, monkeypatch)
+        _roll_with_jake(d, monkeypatch, mile=2.0)
+        d._cruise_jake_stage = 3
+        d._update_engine_brake_zone(0.1)
+        assert len(spoken) == 1
+        # Cruise tries the retarder again further into the same zone.
+        d.truck.engine_brake = True
+        d._cruise_jake_stage = 2
+        d._update_engine_brake_zone(0.1)
+        assert d.truck.engine_brake_stage == 0
+        assert len(spoken) == 1  # released again, said nothing new
+
+        terse = _driving(app)
+        terse_spoken = _capture_events(app, monkeypatch)
+        monkeypatch.setattr(terse, "_terse_speech", lambda: True)
+        _roll_with_jake(terse, monkeypatch, mile=2.0)
+        terse._cruise_jake_stage = 3
+        terse._update_engine_brake_zone(0.1)
+        assert terse.truck.engine_brake_stage == 0  # still released
+        assert terse_spoken == []  # advisory-class: terse stays quiet
+    finally:
+        app.shutdown()
+
+
+def test_cruise_keeps_its_jake_in_zone_on_a_real_downgrade(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = _capture_events(app, monkeypatch)
+        _roll_with_jake(d, monkeypatch, mile=2.0, grade=-0.04)
+        d._cruise_jake_stage = 3
+        d._update_engine_brake_zone(0.1)
+        assert d.truck.engine_brake_stage > 0  # safety wins over the ordinance
+        assert d._cruise_jake_stage == 3
         assert spoken == []
+    finally:
+        app.shutdown()
+
+
+def test_assists_may_not_raise_the_jake_inside_a_zone(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _capture_events(app, monkeypatch)
+        _roll_with_jake(d, monkeypatch, mile=2.0)
+        d.truck.engine_brake = False
+        assert d._assist_jake_allowed() is False  # flat ground in town
+        monkeypatch.setattr(d.trip, "grade_at", lambda mile: -0.04)
+        assert d._assist_jake_allowed() is True  # a real downgrade is exempt
+        monkeypatch.setattr(d.trip, "grade_at", lambda mile: 0.0)
+        d.trip.position_mi = d.trip.total_miles / 2.0
+        assert d._assist_jake_allowed() is True  # open road
+    finally:
+        app.shutdown()
+
+
+def test_cruise_snubs_with_service_brakes_instead_of_the_jake_in_zone(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _capture_events(app, monkeypatch)
+        _roll_with_jake(d, monkeypatch, mile=2.0)
+        d.truck.engine_brake = False
+        d.truck.brake = 0.0
+        d._auto_jake = False
+        # Four over the target on flat ground inside the zone: the retarder
+        # stays quiet and the drums take the snub instead.
+        d._hold_cruise_from_above(0.1, -4.0, closing=False)
+        assert d.truck.engine_brake_stage == 0
+        assert d._cruise_jake_stage == 0
+        assert d.truck.brake > 0.0
     finally:
         app.shutdown()
 

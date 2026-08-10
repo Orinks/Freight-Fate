@@ -2856,10 +2856,13 @@ class DrivingEventMixin:
         # Cruise reaches for the retarder only where a real one would: the
         # engine-brake stalk has to permit it. Descent control set to off is
         # the driver saying they manage grades themselves, and a real truck's
-        # cruise does not flip the stalk on for you. The drums below still
-        # answer either way, so turning it off costs the quiet retarder, never
-        # the ability to hold the speed.
-        may_retard = self.ctx.settings.descent_speed_control != "off"
+        # cruise does not flip the stalk on for you. Town no-engine-brake
+        # zones close the stalk too (unless a real downgrade exempts them --
+        # see driving_engine_brake). The drums below still answer either way,
+        # so losing the retarder never costs the ability to hold the speed.
+        may_retard = (
+            self.ctx.settings.descent_speed_control != "off" and self._assist_jake_allowed()
+        )
         wanted = 0
         if may_retard and over > CRUISE_JAKE_OVER_MPH and t.throttle <= 0.05:
             steps = int((over - CRUISE_JAKE_OVER_MPH) / CRUISE_JAKE_STEP_MPH)
