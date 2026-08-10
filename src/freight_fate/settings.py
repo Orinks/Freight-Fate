@@ -170,7 +170,15 @@ class Settings:
     # manual task: you hold the lane, and every exit needs its signal and
     # its exit lane. It is one of the preset fields, so the preset row can
     # never again read "Realistic" over fully automated lane keeping.
-    lane_keeping: str = "full"
+    #
+    # The default is the realistic preset's value, so a fresh install really
+    # is the ruleset the preset row has been claiming all along: for months
+    # the row read "Realistic" while lane keeping was fully automated,
+    # because the preset could not see this field. Owner ruling 2026-08-09 --
+    # make the truck match the label players have been reading rather than
+    # renaming the label to match a setting nobody chose. Existing players
+    # are untouched: their saved value migrates to whatever they already had.
+    lane_keeping: str = "off"
     # How many more times the Lane keeping row explains that it used to be
     # called Lane drift. Zero by default: a fresh install has nothing to
     # explain, and only a load that actually found the old key on disk raises
@@ -186,12 +194,10 @@ class Settings:
     # How loud the lane and edge cues speak: the edge-boundary textures,
     # the lane locator, and the dead-man's-curve strips all scale by it.
     lane_cue_loudness: str = "standard"  # subtle/standard/prominent
-    # "custom", not "realistic": the shipped defaults are the realistic
-    # assists plus fully automated lane keeping, which is no single preset.
-    # That combination used to read "Realistic" because lane keeping sat
-    # outside the presets and the row could not see it. Nothing about the
-    # defaults changed -- only what the row is willing to call them.
-    driving_assistance_preset: str = "custom"
+    # The shipped defaults now match the realistic preset field for field --
+    # lane keeping was the only one that did not, and it is the default the
+    # row has been claiming since before it could see that field.
+    driving_assistance_preset: str = "realistic"
     automatic_emergency_braking: bool = True
     lane_departure_warning: bool = True
     stop_and_go_assist: bool = True

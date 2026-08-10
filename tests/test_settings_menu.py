@@ -59,16 +59,16 @@ def test_settings_menu_cycles_lane_keeping():
 
     app = App()
     try:
-        assert app.ctx.settings.lane_keeping == "full"
+        assert app.ctx.settings.lane_keeping == "off"  # the realistic default
         cat = open_settings_category(app, "Driving assistance")
         while not cat.items[cat.index].text.startswith("Lane keeping"):
             cat.handle_event(key_event(pygame.K_DOWN))
         cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.lane_keeping == "partial"
+        assert app.ctx.settings.lane_keeping == "full"
         cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.lane_keeping == "off"
-        cat.handle_event(key_event(pygame.K_LEFT))
         assert app.ctx.settings.lane_keeping == "partial"
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.lane_keeping == "full"
     finally:
         app.shutdown()
 
@@ -85,14 +85,14 @@ def test_lane_keeping_row_speaks_its_consequence_not_a_bare_value():
         while not cat.items[cat.index].text.startswith("Lane keeping"):
             cat.handle_event(key_event(pygame.K_DOWN))
         assert cat.items[cat.index].text == (
+            "Lane keeping: off, you hold the lane and take your own exits"
+        )
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert cat.items[cat.index].text == (
             "Lane keeping: full, the truck holds the lane and takes your exits"
         )
         cat.handle_event(key_event(pygame.K_RETURN))
         assert "you steer with help" in cat.items[cat.index].text
-        cat.handle_event(key_event(pygame.K_RETURN))
-        assert cat.items[cat.index].text == (
-            "Lane keeping: off, you hold the lane and take your own exits"
-        )
     finally:
         app.shutdown()
 
@@ -171,7 +171,7 @@ def test_gameplay_lane_keeping_row_is_a_pointer_not_a_second_control():
         while cat.items[cat.index].text != "Lane keeping":
             cat.handle_event(key_event(pygame.K_DOWN))
         cat.handle_event(key_event(pygame.K_RIGHT))
-        assert app.ctx.settings.lane_keeping == "full"
+        assert app.ctx.settings.lane_keeping == "off"  # unchanged: it is a pointer
         assert "has moved" in cat.items[cat.index].help
     finally:
         app.shutdown()
@@ -442,13 +442,10 @@ def test_driving_assistance_preset_keyboard_path_and_custom_transition():
     app.ctx.say = fake_say
     try:
         cat = open_settings_category(app, "Driving assistance")
-        # The shipped defaults are the realistic assists plus fully automated
-        # lane keeping, which is no single preset. The row used to call that
-        # combination "Realistic"; now that lane keeping is a preset field it
-        # cannot, and Custom is the only true answer.
-        assert cat.items[0].text == "Driving assistance preset: Custom"
-        cat.handle_event(key_event(pygame.K_RIGHT))
-        assert app.ctx.settings.driving_assistance_preset == "realistic"
+        # The shipped defaults now ARE the realistic preset, field for field,
+        # so the row can finally say so honestly rather than reading Custom
+        # over a combination no preset described.
+        assert cat.items[0].text == "Driving assistance preset: Realistic"
         assert app.ctx.settings.lane_keeping == "off"
         cat.handle_event(key_event(pygame.K_RIGHT))
         assert app.ctx.settings.driving_assistance_preset == "balanced"
@@ -529,6 +526,36 @@ def test_selected_stop_assist_keyboard_toggle_persists_outside_presets():
         assert app.ctx.settings.selected_stop_assist is True
     finally:
         app.shutdown()
+
+
+def test_a_fresh_install_is_the_realistic_preset():
+    """The shipped defaults ARE the realistic preset, and the row says so.
+
+    For months the row read "Realistic" while lane keeping was fully
+    automated, because the preset could not see that field -- so a player
+    reading the row believed they were driving the realistic ruleset. This
+    makes the truck match the label those players have been reading, rather
+    than renaming the label to match a setting nobody chose.
+    """
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    assert settings.lane_keeping == "off"
+    assert settings.lane_is_manual()
+    assert not settings.lane_is_automated()
+    assert settings.driving_assistance_preset == "realistic"
+    assert settings.refresh_driving_assistance_preset() == "realistic"
+
+
+def test_an_unreadable_lane_value_still_falls_back_to_full_not_the_default():
+    """A corrupt value is not a fresh install. We do not know what the player
+    chose, so the fallback stays the most assisted mode and announces itself
+    -- handing a blind player a manual steering task they never opted into is
+    the worse failure. A new career, by contrast, gets the documented default.
+    """
+    from freight_fate.settings import LANE_KEEPING_FALLBACK
+
+    assert LANE_KEEPING_FALLBACK == "full"
 
 
 def test_every_preset_owns_lane_keeping():
@@ -655,7 +682,7 @@ def test_a_fresh_install_hears_no_rename_notice():
     if settings.path.exists():
         settings.path.unlink()
     loaded = Settings.load()
-    assert loaded.lane_keeping == "full"
+    assert loaded.lane_keeping == "off"  # the realistic default, not the fallback
     assert loaded.lane_keeping_rename_notice_left == 0
     assert loaded.lane_keeping_unreadable is False
 

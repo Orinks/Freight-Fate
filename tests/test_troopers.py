@@ -1,10 +1,33 @@
 """State-trooper pull-overs: patrol windows, getting caught speeding, the
 interactive traffic stop, immediate tickets, warnings, and evasion."""
 
+import random
+
 from speech_capture import speech_stub
 
 from freight_fate.sim import Trip, TruckState, WeatherSystem
 from freight_fate.sim.trip import PatrolWindow
+
+
+def _park_where_the_trooper_writes_it_up(d) -> None:
+    """Move the truck to a milepost whose seeded waiver roll is a ticket.
+
+    A prompt clean stop has a real one-in-four chance the trooper lets the
+    ticket slide, and since the enforcement overhaul that roll is a named
+    seed quantised on where the stop happened -- so a reload cannot re-roll
+    it, and no RNG attribute on the driving state can steer it either. A
+    test that needs the ticket written has to choose the milepost.
+    """
+    from freight_fate.states.driving import PULL_OVER_CLEAN_STOP_WARN_CHANCE
+
+    start = d.trip.position_mi
+    for step in range(500):
+        candidate = round(start + step * 0.1, 1)
+        key = f"{d.trip_seed}:police:waiver:{candidate}"
+        if random.Random(key).random() >= PULL_OVER_CLEAN_STOP_WARN_CHANCE:
+            d.trip.position_mi = candidate
+            return
+    raise AssertionError("no milepost in range writes the ticket up")
 
 
 def _trip(seed=7, hazard_scale=1.0, start_hour=12.0):
@@ -663,7 +686,7 @@ def test_braking_to_a_stop_reaches_the_roadside_stop(monkeypatch):
         for _ in range(4):
             d._update_pull_over(1.0, service_braking=True)
         assert d._pull_over_compliance >= PULL_OVER_FULL_COMPLIANCE
-        d._patrol_rng = _Roll(1.0)  # do not roll the clean-stop leniency
+        _park_where_the_trooper_writes_it_up(d)
         d.truck.velocity_mps = 0.0
         d._update_pull_over(1.0)
         assert isinstance(app.state, TrafficStopState)

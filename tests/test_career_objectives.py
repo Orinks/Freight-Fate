@@ -409,6 +409,11 @@ def test_out_of_sync_owner_operator_uses_career_guidance(monkeypatch):
         monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="Owner Week", current_city="Chicago")
         apply_start_option(app.ctx.profile, start_option(OWNER_OPERATOR_START_KEY))
+        # An owner-operator now starts at level one like everyone else, so
+        # they get the first-day guidance on their first day. This test is
+        # about the run AFTER that: past day one, the guidance has to switch
+        # to the career line and stop reading like a company trainer.
+        app.ctx.profile.achievements.append("first_dispatch")
 
         app.push_state(CityMenuState(app.ctx))
 

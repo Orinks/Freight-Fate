@@ -30,6 +30,16 @@
 
 ### Changed
 
+- **New careers now really do start on the Realistic preset.** The
+  settings row has said Realistic for a long time, but lane keeping sat
+  outside the presets, so the truck was quietly holding your lane and
+  taking your exits the whole time. A fresh install now matches the
+  label: you hold the lane yourself, and your destination exit needs
+  your signal and your exit lane like every other exit. If you would
+  rather the truck did that part, Driving assistance settings has the
+  other two presets and the Lane keeping row. Nothing changes for an
+  existing career -- your saved setting carries over exactly as it was.
+
 - **The steering setting now says what the truck actually does.** Lane
   drift is now called Lane keeping, and its values changed from off,
   light, and realistic to full, partial, and off. The old names were the
