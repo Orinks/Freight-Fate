@@ -358,6 +358,93 @@ def test_a_second_pursuit_ends_this_career_driving_for_good(monkeypatch):
         app.shutdown()
 
 
+def test_a_stop_that_suspends_the_cdl_does_not_send_you_back_out_driving(monkeypatch):
+    # The stop menu used to offer "Pull back onto the highway" no matter what
+    # had just happened -- so a driver whose licence had been pulled seconds
+    # earlier was invited to drive on, with no way to end the run from the
+    # shoulder. A suspended driver is done for now; the run ends here.
+    from freight_fate.app import App
+    from freight_fate.states.driving import TrafficStopState
+
+    app = App()
+    try:
+        d = _driving(app)
+        p = app.ctx.profile
+        _quiet(app, monkeypatch)
+        p.driving_record.record_serious_violation(p.game_hours)  # one already on file
+        d.speeding_tickets = 1
+        stop = TrafficStopState(app.ctx, d, signaled=False, over=22.0, limit=65.0)
+        assert p.driving_record.suspended(p.game_hours)
+        labels = [item.text for item in stop.build_items()]
+        assert not any("highway" in label for label in labels)
+        assert any("terminal" in label.lower() for label in labels)
+    finally:
+        app.shutdown()
+
+
+def test_an_ordinary_ticket_still_pulls_back_onto_the_highway(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import TrafficStopState
+
+    app = App()
+    try:
+        d = _driving(app)
+        _quiet(app, monkeypatch)
+        d.speeding_tickets = 1
+        stop = TrafficStopState(app.ctx, d, signaled=True, over=11.0, limit=65.0)
+        assert not app.ctx.profile.driving_record.suspended(app.ctx.profile.game_hours)
+        assert any("highway" in item.text for item in stop.build_items())
+    finally:
+        app.shutdown()
+
+
+def test_the_suspended_stop_says_the_run_is_over_and_why(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import TrafficStopState
+
+    app = App()
+    try:
+        d = _driving(app)
+        p = app.ctx.profile
+        spoken = _quiet(app, monkeypatch)
+        p.driving_record.record_serious_violation(p.game_hours)
+        d.speeding_tickets = 1
+        stop = TrafficStopState(app.ctx, d, signaled=False, over=22.0, limit=65.0)
+        stop.announce_entry()
+        said = " ".join(spoken)
+        assert "cannot drive" in said or "may not drive" in said
+        assert "load" in said  # what happens to the freight is stated
+    finally:
+        app.shutdown()
+
+
+def test_an_enforcement_stop_that_suspends_also_ends_the_run(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import EnforcementStopState
+
+    app = App()
+    try:
+        d = _driving(app)
+        p = app.ctx.profile
+        _quiet(app, monkeypatch)
+        p.driving_record.record_serious_violation(p.game_hours)
+        stop = EnforcementStopState(
+            app.ctx,
+            d,
+            title="Enforcement stop",
+            summary="Unsafe equipment.",
+            fine=900.0,
+            reputation_hit=5.0,
+            signaled=True,
+            return_message="Back on the highway.",
+            warned=True,  # a serious violation: this is the second
+        )
+        assert p.driving_record.suspended(p.game_hours)
+        assert not any("highway" in item.text for item in stop.build_items())
+    finally:
+        app.shutdown()
+
+
 def test_a_serious_speeding_ticket_moves_the_ladder_and_says_so(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import TrafficStopState

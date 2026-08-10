@@ -4,6 +4,15 @@
 
 ### Fixed
 
+- **A roadside stop that pulls your licence now ends the run properly.**
+  Losing your CDL at the roadside still left "Pull back onto the
+  highway" as your only choice, so the game took your licence and then
+  invited you to drive off with it, with no way to end the trip from the
+  shoulder. Now the stop says plainly that you cannot drive the truck
+  away, hands the load back to dispatch, and releases you to the
+  terminal -- where waiting out the suspension is waiting for you. An
+  ordinary ticket still just puts you back on the road.
+
 - **Phantom hairpin turns are gone from ordinary highways.** Some US and
   state routes carried impossibly sharp curves on flat ground, left over
   from how routes were originally traced, so you could hear a hairpin

@@ -178,7 +178,73 @@ def _log_fatigue_event(ctx, driving: DrivingState) -> str:
     return text
 
 
-class TrafficStopState(MenuState):
+class _RoadsideExitMixin:
+    """How a roadside stop lets the player go -- which depends on whether they
+    may still legally drive.
+
+    An ordinary ticket ends with merging back up to speed. A stop that just
+    pulled the licence cannot: the driver is not allowed to move the truck, so
+    offering the highway would be the game inviting them to break the rule it
+    just enforced, and there would be no way off the shoulder at all. In that
+    case the run ends here the way the felony stop already ends -- the load
+    goes back to dispatch and the driver is released to the terminal, where
+    "Wait out the CDL suspension" is waiting for them.
+    """
+
+    def _licence_pulled(self) -> bool:
+        record = getattr(self.ctx.profile, "driving_record", None)
+        if record is None:
+            return False
+        return bool(record.lifetime_disqualified) or record.suspended(self.ctx.profile.game_hours)
+
+    def _roadside_exit_item(self, *, highway_help: str) -> MenuItem:
+        if self._licence_pulled():
+            return MenuItem(
+                "Return to terminal",
+                self._end_run_suspended,
+                help="Your licence is pulled, so the truck stays put. Dispatch "
+                "takes the load back and you continue from the terminal.",
+            )
+        return MenuItem("Pull back onto the highway", self.go_back, help=highway_help)
+
+    def _suspended_exit_text(self) -> str:
+        """Said as part of the outcome: why the run stops and what happens next."""
+        p = self.ctx.profile
+        record = p.driving_record
+        load = (
+            f"Dispatch takes the {self.driving.job.cargo.label} load back and reassigns it"
+            if self.driving.phase == DRIVE_PHASE_DELIVERY and not self.driving.job.bobtail
+            else "There is no loaded trailer to hand back, and the assignment is canceled"
+        )
+        if record.lifetime_disqualified:
+            return (
+                " You cannot drive this truck away: the licence is gone for good. "
+                f"{load}, and a relief driver takes the truck in. You are released "
+                f"to {self.ctx.world.home_terminal(p.current_city).spoken_name}."
+            )
+        return (
+            " You cannot drive this truck away from here -- the licence is pulled "
+            f"as of now. {load}, and a relief driver takes the truck in. You are "
+            f"released to {self.ctx.world.home_terminal(p.current_city).spoken_name}, "
+            "where you can wait the suspension out."
+        )
+
+    def _end_run_suspended(self) -> None:
+        """Close out the run from the shoulder and release to the terminal."""
+        from .city import CityMenuState
+
+        d = self.driving
+        p = self.ctx.profile
+        p.store_truck_condition(d.truck)
+        p.game_hours += d.trip.game_minutes / 60.0
+        p.market.advance_to(p.market_day())
+        p.active_trip = None
+        p.pay_advance_used_for_load = False
+        self.ctx.save_profile()
+        self.ctx.reset_to(CityMenuState(self.ctx))
+
+
+class TrafficStopState(_RoadsideExitMixin, MenuState):
     """A roadside traffic stop after a speeding pull-over: a spoken license and
     logbook check, an on-the-spot ticket or a warning, then back to the road."""
 
@@ -274,6 +340,8 @@ class TrafficStopState(MenuState):
         )
         if ladder:
             self._outcome_text += f" {ladder}"
+        if self._licence_pulled():
+            self._outcome_text += self._suspended_exit_text()
 
     def announce_entry(self) -> None:
         polite = " You signaled and pulled over promptly." if self.signaled else ""
@@ -285,10 +353,8 @@ class TrafficStopState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem(
-                "Pull back onto the highway",
-                self.go_back,
-                help="Signal, check your mirror, and merge back up to speed.",
+            self._roadside_exit_item(
+                highway_help="Signal, check your mirror, and merge back up to speed."
             )
         ]
 
@@ -297,7 +363,7 @@ class TrafficStopState(MenuState):
         self.ctx.say("Back on the highway. Watch your speed.", interrupt=True)
 
 
-class EnforcementStopState(MenuState):
+class EnforcementStopState(_RoadsideExitMixin, MenuState):
     """Roadside enforcement stop for non-speeding violations."""
 
     intro_help = "Press Enter or Escape to pull back onto the highway when you are ready."
@@ -373,6 +439,8 @@ class EnforcementStopState(MenuState):
                 "your hours of service are reset, and you wake rested -- but "
                 "the delivery deadline kept counting the whole time."
             )
+        if self._licence_pulled():
+            self._outcome_text += self._suspended_exit_text()
 
     def announce_entry(self) -> None:
         polite = " You signaled and pulled over promptly." if self.signaled else ""
@@ -384,10 +452,8 @@ class EnforcementStopState(MenuState):
 
     def build_items(self) -> list[MenuItem]:
         return [
-            MenuItem(
-                "Pull back onto the highway",
-                self.go_back,
-                help="Signal, check your mirror, and merge back up to speed.",
+            self._roadside_exit_item(
+                highway_help="Signal, check your mirror, and merge back up to speed."
             )
         ]
 
