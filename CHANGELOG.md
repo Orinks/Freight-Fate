@@ -4,6 +4,16 @@
 
 ### Fixed
 
+- **A full truck stop no longer means you cannot fuel there.** When the
+  overnight parking at a stop was full, the whole stop closed to you --
+  your only choices were to drive on, take a motel room, or sleep on the
+  shoulder, even at a big truck stop with its pumps right there. On a
+  night run that could mean passing stop after stop and running the tank
+  dry. The parking lot and the fuel island are separate things now: a
+  full lot still costs you the parking, but you can pull to the pumps,
+  fill up, and then decide where to spend the night. Stops with no fuel
+  of their own, like a plain rest area, are unchanged.
+
 - **Stopping hard no longer wrecks a load that was tied down properly.**
   A firm stop at a light used to be enough to put general freight over
   the line into an exception on the bill, and a load of food or

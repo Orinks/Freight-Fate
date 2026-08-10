@@ -401,3 +401,51 @@ def test_parking_full_night_offers_a_motel(monkeypatch):
         assert p.fatigue == 0.0
     finally:
         app.shutdown()
+
+
+def test_a_full_lot_still_lets_you_fuel(monkeypatch):
+    """The pumps and the parking lot are separate facilities.
+
+    A full lot used to swallow the whole stop, so an overnight run could
+    pass a row of open pumps and still go dry between stops.
+    """
+    from freight_fate.app import App
+    from freight_fate.states.driving import ParkingFullState
+
+    app = App()
+    try:
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        driving = _driving(app, business_status=LEASED_OWNER_OPERATOR)
+        p = app.ctx.profile
+        p.money = 5_000.0
+        driving.truck.fuel_gal = 20.0
+        state = ParkingFullState(app.ctx, driving, _stop(driving, actions=("sleep", "fuel")))
+        app.push_state(state)
+
+        labels = [item.text for item in state.items]
+        assert any(label.startswith("Refuel ") for label in labels)
+        state._refuel()
+
+        assert driving.truck.fuel_gal == pytest.approx(driving.truck.specs.fuel_tank_gal)
+        assert p.money < 5_000.0
+    finally:
+        app.shutdown()
+
+
+def test_a_full_lot_without_pumps_offers_no_fuel(monkeypatch):
+    """A rest area is not a truck stop: no island, no fuel row."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import ParkingFullState
+
+    app = App()
+    try:
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        driving = _driving(app)
+        state = ParkingFullState(app.ctx, driving, _stop(driving, actions=("sleep",)))
+        app.push_state(state)
+
+        assert not any(item.text.startswith("Refuel ") for item in state.items)
+    finally:
+        app.shutdown()

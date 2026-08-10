@@ -93,6 +93,20 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **A full lot no longer closes the fuel island -- SHIPPED
+      2026-08-10.** Owner-reported from a live run. `_open_poi_stop`
+      diverted to `ParkingFullState` whenever a stop carried `sleep` and
+      the overnight crunch rolled full (20:00-04:00), and that `return`
+      swallowed the whole stop -- so the biggest truck stops, the ones
+      most likely to carry `sleep`, were exactly the ones that turned a
+      driver away from their pumps overnight, with running dry the
+      likely outcome. The fuel purchase moved to a `_FuelPumpMixin`
+      shared by `RestStopState` and `ParkingFullState`, and the full-lot
+      menu now leads with the pumps when the stop has them. Note for
+      later: the game models no opening hours at all (the scraped
+      `opening_hours` OSM tags in `data/spider/vehicle-access-cache.json`
+      are dead data), so nothing else is time-gated -- if stop hours are
+      ever wanted, fuel islands should stay 24-hour.
 - [x] **Load-shift realism retune -- SHIPPED 2026-08-10.** Benched
       through `tools/playtest_road.py` (which now reports cargo
       condition, peak deceleration and worst bend overspeed in its

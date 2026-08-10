@@ -543,7 +543,107 @@ class FelonyStopState(MenuState):
         self.ctx.reset_to(CityMenuState(self.ctx))
 
 
-class RestStopState(MenuState):
+class _FuelPumpMixin:
+    """The fuel island, for every state that can be standing on one.
+
+    A truck stop's pumps and its parking lot are separate facilities, and the
+    lot filling up does not lock the island: a driver turned away from an
+    overnight space can still pull to the pumps, fuel, and leave. Keeping the
+    purchase here rather than on ``RestStopState`` alone is what lets
+    ``ParkingFullState`` offer it -- before this, a full lot swallowed the
+    whole stop, and an overnight run could pass a row of open pumps and
+    still go dry.
+    """
+
+    _fueled_here = False  # a fuel purchase this visit (free showers)
+
+    def _fuel_label(self) -> str:
+        d = self.driving
+        need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
+        if need < 1:
+            return "Fuel: tank is full"
+        if not player_pays_operating_costs(self.ctx.profile.business_status):
+            return f"Refuel {need:.0f} gallons on the carrier fuel card"
+        cost = self.ctx.economy.fuel_cost(d.trip.current_region, need) + 35.0
+        return f"Refuel {need:.0f} gallons for {cost:,.0f} dollars"
+
+    def _refuel(self) -> None:
+        from ..models.loyalty import loyalty_earnings_text
+
+        d = self.driving
+        p = self.ctx.profile
+        region = d.trip.current_region
+        need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
+        if need < 1:
+            self.ctx.say("The tank is already full.")
+            return
+        if not player_pays_operating_costs(p.business_status):
+            # the carrier fuel card covers road fuel for company drivers
+            d.truck.refuel(need)
+            self._fueled_here = True
+            _advance_rest_clock(d, FUEL_STOP_MIN)
+            d.hos.on_duty(FUEL_STOP_MIN)
+            self._save_here(silent=True)
+            self.ctx.audio.play("vehicle/fuel_pump")
+
+            # Award loyalty points for fueling
+            loyalty_result = p.loyalty.add_fueling(need, stop_name=self.stop.name, location=region)
+            loyalty_text = loyalty_earnings_text(
+                need, loyalty_result["points_earned"], loyalty_result["rewards"]
+            )
+
+            self.ctx.say(
+                f"Refueled {need:.0f} gallons on the carrier fuel card. "
+                f"Fueling took {FUEL_STOP_MIN:.0f} minutes. {loyalty_text}"
+            )
+            self.ctx.award_achievement("route_refuel")
+            self.refresh()
+            return
+        cost = self.ctx.economy.fuel_cost(region, need) + 35.0
+        if p.money < cost:
+            partial_gal = max(0.0, (p.money - 35.0) / self.ctx.economy.fuel_price(region))
+            if partial_gal < 5:
+                self.ctx.audio.play("ui/error")
+                self.ctx.say("You cannot afford fuel here.")
+                return
+            need = partial_gal
+            cost = self.ctx.economy.fuel_cost(region, need) + 35.0
+        p.money -= cost
+        d.truck.refuel(need)
+        self._fueled_here = True
+        _advance_rest_clock(d, FUEL_STOP_MIN)
+        d.hos.on_duty(FUEL_STOP_MIN)
+        self._save_here(silent=True)
+        self.ctx.audio.play("vehicle/fuel_pump")
+
+        # Award loyalty points for fueling
+        loyalty_result = p.loyalty.add_fueling(need, stop_name=self.stop.name, location=region)
+        loyalty_text = loyalty_earnings_text(
+            need, loyalty_result["points_earned"], loyalty_result["rewards"]
+        )
+
+        self.ctx.say(
+            f"Refueled {need:.0f} gallons for {cost:,.0f} dollars. "
+            f"You have {p.money:,.0f} dollars. Fueling took "
+            f"{FUEL_STOP_MIN:.0f} minutes. {loyalty_text}"
+        )
+        self.ctx.award_achievement("route_refuel")
+        self.refresh()
+
+    def _save_here(self, *, silent: bool = False) -> None:
+        d = self.driving
+        p = self.ctx.profile
+        p.store_truck_condition(d.truck)
+        p.active_trip = d.snapshot()
+        self.ctx.save_profile()
+        if not silent:
+            self.ctx.audio.play("ui/notify")
+            self.ctx.say(
+                f"Saved at {self.stop.spoken_name}. Your drive will resume from this rest stop."
+            )
+
+
+class RestStopState(_FuelPumpMixin, MenuState):
     """Spoken route POI menu: actions come from the corridor metadata."""
 
     intro_help = (
@@ -892,79 +992,6 @@ class RestStopState(MenuState):
             f"delivery. You have {p.money:,.0f} dollars, with "
             f"{p.pay_advance:,.0f} dollars of advance still to repay."
         )
-        self.refresh()
-
-    def _fuel_label(self) -> str:
-        d = self.driving
-        need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
-        if need < 1:
-            return "Fuel: tank is full"
-        if not player_pays_operating_costs(self.ctx.profile.business_status):
-            return f"Refuel {need:.0f} gallons on the carrier fuel card"
-        cost = self.ctx.economy.fuel_cost(d.trip.current_region, need) + 35.0
-        return f"Refuel {need:.0f} gallons for {cost:,.0f} dollars"
-
-    def _refuel(self) -> None:
-        from ..models.loyalty import loyalty_earnings_text
-
-        d = self.driving
-        p = self.ctx.profile
-        region = d.trip.current_region
-        need = d.truck.specs.fuel_tank_gal - d.truck.fuel_gal
-        if need < 1:
-            self.ctx.say("The tank is already full.")
-            return
-        if not player_pays_operating_costs(p.business_status):
-            # the carrier fuel card covers road fuel for company drivers
-            d.truck.refuel(need)
-            self._fueled_here = True
-            _advance_rest_clock(d, FUEL_STOP_MIN)
-            d.hos.on_duty(FUEL_STOP_MIN)
-            self._save_here(silent=True)
-            self.ctx.audio.play("vehicle/fuel_pump")
-
-            # Award loyalty points for fueling
-            loyalty_result = p.loyalty.add_fueling(need, stop_name=self.stop.name, location=region)
-            loyalty_text = loyalty_earnings_text(
-                need, loyalty_result["points_earned"], loyalty_result["rewards"]
-            )
-
-            self.ctx.say(
-                f"Refueled {need:.0f} gallons on the carrier fuel card. "
-                f"Fueling took {FUEL_STOP_MIN:.0f} minutes. {loyalty_text}"
-            )
-            self.ctx.award_achievement("route_refuel")
-            self.refresh()
-            return
-        cost = self.ctx.economy.fuel_cost(region, need) + 35.0
-        if p.money < cost:
-            partial_gal = max(0.0, (p.money - 35.0) / self.ctx.economy.fuel_price(region))
-            if partial_gal < 5:
-                self.ctx.audio.play("ui/error")
-                self.ctx.say("You cannot afford fuel here.")
-                return
-            need = partial_gal
-            cost = self.ctx.economy.fuel_cost(region, need) + 35.0
-        p.money -= cost
-        d.truck.refuel(need)
-        self._fueled_here = True
-        _advance_rest_clock(d, FUEL_STOP_MIN)
-        d.hos.on_duty(FUEL_STOP_MIN)
-        self._save_here(silent=True)
-        self.ctx.audio.play("vehicle/fuel_pump")
-
-        # Award loyalty points for fueling
-        loyalty_result = p.loyalty.add_fueling(need, stop_name=self.stop.name, location=region)
-        loyalty_text = loyalty_earnings_text(
-            need, loyalty_result["points_earned"], loyalty_result["rewards"]
-        )
-
-        self.ctx.say(
-            f"Refueled {need:.0f} gallons for {cost:,.0f} dollars. "
-            f"You have {p.money:,.0f} dollars. Fueling took "
-            f"{FUEL_STOP_MIN:.0f} minutes. {loyalty_text}"
-        )
-        self.ctx.award_achievement("route_refuel")
         self.refresh()
 
     def _loyalty_menu(self) -> None:
@@ -1393,18 +1420,6 @@ class RestStopState(MenuState):
         )
         _record_inspection(self.ctx)
 
-    def _save_here(self, *, silent: bool = False) -> None:
-        d = self.driving
-        p = self.ctx.profile
-        p.store_truck_condition(d.truck)
-        p.active_trip = d.snapshot()
-        self.ctx.save_profile()
-        if not silent:
-            self.ctx.audio.play("ui/notify")
-            self.ctx.say(
-                f"Saved at {self.stop.spoken_name}. Your drive will resume from this rest stop."
-            )
-
     def go_back(self) -> None:
         self.ctx.audio.play("ui/menu_back")
         self.ctx.pop_state()
@@ -1586,36 +1601,57 @@ class LoyaltyRewardsState(MenuState):
             self.ctx.say("Unable to redeem laundry discount. Insufficient points.")
 
 
-class ParkingFullState(MenuState):
-    """The overnight lot is full: push on, or risk the shoulder."""
+class ParkingFullState(_FuelPumpMixin, MenuState):
+    """The overnight lot is full: fuel anyway, push on, or risk the shoulder."""
 
     title = "Parking full"
     intro_help = (
-        "The truck parking here is full. Use up and down arrows and "
-        "Enter to choose. Escape returns to the road to find "
-        "another stop."
+        "The truck parking here is full, but the pumps are open. Use up "
+        "and down arrows and Enter to choose. Escape returns to the road "
+        "to find another stop."
     )
 
     def __init__(self, ctx, driving: DrivingState, stop) -> None:
         super().__init__(ctx)
         self.driving = driving
         self.stop = stop
+        self._fueled_here = False
 
     def announce_entry(self) -> None:
         self.ctx.audio.set_ambient(_poi_ambient_key(self.stop, self.driving.trip.current_hour))
+        # The lot and the island are separate facilities, and a driver who
+        # cannot park here can still fuel here. Saying so up front is what
+        # stops a full lot from reading as a closed truck stop.
+        pumps = " The fuel island is open." if "fuel" in set(self.stop.actions) else ""
         self.ctx.say(
-            f"The truck parking at {self.stop.spoken_name} is full tonight. "
+            f"The truck parking at {self.stop.spoken_name} is full tonight.{pumps} "
             f"It is {clock_text(self.driving.trip.local_hour)}. "
             f"{self.current_text()}"
         )
 
     def build_items(self) -> list[MenuItem]:
-        return [
+        items: list[MenuItem] = []
+        if "fuel" in set(self.stop.actions):
+            # First: a driver turned away at 2 AM needs the tank before they
+            # need the choice of where to sleep, and running dry between
+            # overnight stops is the failure this ordering exists to prevent.
+            items.append(
+                MenuItem(
+                    self._fuel_label,
+                    self._refuel,
+                    help="The lot is full, but the pumps are open. Fill the tank "
+                    "at this region's diesel price, plus a 35 dollar service "
+                    "fee, then choose where to spend the night.",
+                )
+            )
+        items.append(
             MenuItem(
                 "Drive on to the next stop",
                 self._drive_on,
                 help="Return to the road and try the next rest stop.",
-            ),
+            )
+        )
+        return items + [
             MenuItem(
                 f"Motel room: sleep 10 hours for {MOTEL_COST:.0f} dollars",
                 self._motel,
