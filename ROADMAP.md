@@ -154,17 +154,33 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       data carries no radius), threshold 0.40 g -- above every shipped
       advisory, below the 0.5 g lateral securement rating. Every bend in
       the game is now free at its posted advisory.
-- [ ] Test-suite streamlining pass (raised 2026-08-10). The suite is
-      past 9,000 tests and `-n auto` spawns a worker per core, each
-      booting a full pygame `App()`, which pins the owner's CPU; a run
-      of six driving suites also lost a worker to the thread timeout
-      ("node down" on `test_shift_key_does_not_press_clutch_in_
-      automatic`) while the same set passed serially in 146 s. Two
-      separable jobs: cap or tune the xdist worker count in
-      `pyproject`'s `addopts` so the machine stays usable, and prune or
-      consolidate the per-change tests that duplicate coverage. Measure
-      before deleting -- the App-booting fixtures are the likely cost,
-      not the test count.
+- [x] **Test-suite streamlining, first pass -- SHIPPED 2026-08-10.**
+      The count was never the problem. 6,614 of the 9,720 tests lived in
+      `tests/test_radio.py`, and 6,599 of those were one parametrised
+      function doing field-presence checks on static catalog rows: 89 s
+      of near-pure pytest overhead at ~13 ms an assertion. Collapsed to
+      a single sweep that reports every bad entry at once (89.21s ->
+      2.00s), plus the tuning test that walked all 5,092 receivable
+      stations to prove a set membership (33.5s -> 0.32s). Suite is
+      9,720 -> 3,122 with no coverage lost. Separately, `-n auto` on the
+      28-core developer machine was not merely pinning the CPU, it was
+      dying with an INTERNALERROR in the reporter -- almost certainly the
+      same "node down" the CI xdist notes describe. Worker curve on 140
+      driving tests is flat past eight (n=4 48s, n=8 31s, n=16 31s), so
+      `tests/conftest.py` now implements xdist's
+      `pytest_xdist_auto_num_workers` hook and caps auto at 8; CI runners
+      are below the ceiling and unaffected.
+- [ ] Test-suite streamlining, second pass: the break harness lives in
+      `tools/` and looks like a script while being the thing that finds
+      real bugs, carries its own `Rig` duplicating `tests/` fixture work,
+      and its ODD-vs-FAIL verdict is ambiguous enough that four bogus
+      findings sat untriaged for a day. Proposal is `tests/adversarial/`
+      behind a marker deselected by default, keeping ODD as a marker
+      rather than a separate runner. Deferred deliberately: it currently
+      runs single-process in under a minute *because* it is outside
+      pytest, so weigh that against the move. Also unexamined: whether
+      the App()-booting fixtures that dominate the remaining runtime can
+      be shared rather than rebuilt per test.
 - [x] **Adversarial "break the game" harness -- SHIPPED 2026-08-09.**
       `tools/playtest_break.py` (plus `tools/playtest_break_scenarios/`,
       split by system family to stay under the practical-file-size
