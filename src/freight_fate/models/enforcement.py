@@ -68,13 +68,15 @@ SPEEDING_FINE_STEPS: tuple[tuple[float, float], ...] = (
     (20.0, 1_600.0),
     (30.0, 2_500.0),
 )
-# No single speeding citation may exceed the highest real first-offense CDL
-# speeding fine in the country.
-SPEEDING_FINE_CEILING = 2_500.0
-# Prior citations anywhere in the career make the next one cost more: repeat
-# and aggravated speeding is charged as a misdemeanor in several states.
+# Prior citations anywhere in the career make the next one cost more, and
+# nothing caps it. The step schedule above is the severe end of real
+# first-offense CDL law, but a first offense is the cheapest a violation ever
+# is: repeat and aggravated speeding is charged as a misdemeanor in several
+# states, habitual-offender statutes stack penalties further, and court costs
+# and surcharges ride on top of every count. A driver who keeps collecting
+# citations keeps paying more, without limit -- which is the honest shape of
+# the real thing and the point of the schedule.
 CITATION_REPEAT_STEP = 0.5
-CITATION_REPEAT_MAX_MULT = 3.0
 
 # -- fatigue (49 CFR 392.3 / 392.5) -----------------------------------------
 
@@ -123,10 +125,8 @@ def speeding_citation_fine(mph_over: float, prior_citations: int = 0) -> float:
     for threshold, amount in SPEEDING_FINE_STEPS:
         if mph_over >= threshold:
             fine = amount
-    multiplier = min(
-        CITATION_REPEAT_MAX_MULT, 1.0 + CITATION_REPEAT_STEP * max(0, int(prior_citations))
-    )
-    return round(min(SPEEDING_FINE_CEILING, fine * multiplier), 2)
+    multiplier = 1.0 + CITATION_REPEAT_STEP * max(0, int(prior_citations))
+    return round(fine * multiplier, 2)
 
 
 def is_serious_speed(mph_over: float) -> bool:
@@ -134,12 +134,16 @@ def is_serious_speed(mph_over: float) -> bool:
     return float(mph_over) >= SERIOUS_SPEED_MPH_OVER
 
 
-def repeat_fine(base_fine: float, prior_citations: int, ceiling: float) -> float:
-    """The same repeat-offender scaling for non-speeding citations."""
-    multiplier = min(
-        CITATION_REPEAT_MAX_MULT, 1.0 + CITATION_REPEAT_STEP * max(0, int(prior_citations))
-    )
-    return round(min(ceiling, base_fine * multiplier), 2)
+def repeat_fine(base_fine: float, prior_citations: int, ceiling: float | None = None) -> float:
+    """The same repeat-offender scaling for non-speeding citations.
+
+    ``ceiling`` is optional and exists only for a citation whose statute
+    genuinely names a maximum; left None, the fine compounds with priors
+    without limit, like the speeding schedule.
+    """
+    multiplier = 1.0 + CITATION_REPEAT_STEP * max(0, int(prior_citations))
+    fine = base_fine * multiplier
+    return round(fine if ceiling is None else min(ceiling, fine), 2)
 
 
 @dataclass

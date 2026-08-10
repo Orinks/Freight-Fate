@@ -320,11 +320,11 @@ class EnforcementStopState(MenuState):
         self.driving = driving
         self._title = title
         self.summary = summary
-        # Repeat offenders pay more for the same stop, capped at three times
-        # the posted amount, same rule as the speeding schedule.
+        # Repeat offenders pay more for the same stop, and nothing caps it --
+        # same rule as the speeding schedule.
         record = getattr(ctx.profile, "driving_record", None)
         priors = record.citations if record is not None else 0
-        self.fine = enforcement.repeat_fine(fine, priors, fine * 3.0)
+        self.fine = enforcement.repeat_fine(fine, priors)
         self.reputation_hit = reputation_hit
         self.signaled = signaled
         self.return_message = return_message

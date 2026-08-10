@@ -31,14 +31,29 @@ def test_speeding_fine_climbs_with_how_far_over_the_limit():
     assert serious >= 1_000.0
 
 
-def test_repeat_offenders_pay_more_up_to_the_real_ceiling():
-    from freight_fate.models.enforcement import SPEEDING_FINE_CEILING, speeding_citation_fine
+def test_repeat_offenders_pay_more_without_any_ceiling():
+    # A habitual offender's bill is not capped. The base schedule is anchored
+    # to the severe end of real state law, but court costs, surcharges, and
+    # the misdemeanor treatment repeat speeding earns all stack on top -- so
+    # priors keep compounding for as long as the driver keeps collecting them.
+    from freight_fate.models.enforcement import speeding_citation_fine
 
     first = speeding_citation_fine(16.0, prior_citations=0)
     third = speeding_citation_fine(16.0, prior_citations=2)
     assert third > first
-    # No citation may exceed the highest real first-offense CDL speeding fine.
-    assert speeding_citation_fine(35.0, prior_citations=20) == SPEEDING_FINE_CEILING
+    many = speeding_citation_fine(35.0, prior_citations=20)
+    plenty = speeding_citation_fine(35.0, prior_citations=40)
+    assert plenty > many > 10_000.0
+
+
+def test_no_number_of_priors_stops_the_fine_growing():
+    from freight_fate.models.enforcement import repeat_fine, speeding_citation_fine
+
+    escalating = [speeding_citation_fine(16.0, prior_citations=n) for n in range(12)]
+    assert escalating == sorted(escalating)
+    assert len(set(escalating)) == len(escalating)  # every prior costs more
+    # The same rule governs non-speeding citations.
+    assert repeat_fine(900.0, 30, ceiling=None) > repeat_fine(900.0, 5, ceiling=None)
 
 
 # --- the serious-violation ladder ------------------------------------------
