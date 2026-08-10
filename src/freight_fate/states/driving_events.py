@@ -878,25 +878,12 @@ class DrivingEventMixin:
             return
         if self._exit_signal_on:
             self._update_exit_countdown(stop)
+            self._update_exit_speed_assist(stop)
         if self.ctx.settings.steering_assist == "off":
             return
         if not self._exit_signal_on:
             return
         ahead = stop.at_mi - self.trip.position_mi
-        if self.ctx.settings.exit_speed_assist and 0 < ahead <= 1.5:
-            if self._cruise_mph is not None:
-                self._cancel_cruise()
-            if self.truck.speed_mph > RAMP_MAX_MPH:
-                self.truck.brake = max(self.truck.brake, 0.35)
-                if not self._assist_exit_slowing_said:
-                    self._assist_exit_slowing_said = True
-                    # Never "confirm": there is no confirm action, and an X
-                    # pressed to obey it cancels the signal instead.
-                    self.ctx.say_event(
-                        "Exit speed assistance slowing. Hold Right for the "
-                        "exit lane and keep slowing.",
-                        interrupt=False,
-                    )
         if ahead < -EXIT_COMMIT_WINDOW_MI:
             return
 
@@ -968,6 +955,38 @@ class DrivingEventMixin:
                 f"At the exit gore. Hold the exit lane and stay under {RAMP_MAX_MPH:.0f}.",
                 interrupt=False,
             )
+
+    def _update_exit_speed_assist(self, stop) -> None:
+        """Slow an armed exit toward ramp speed, in EVERY steering mode.
+
+        This used to sit below the lane-drift early return, so it never ran
+        with ``steering_assist`` off -- and the All assists preset forces lane
+        drift off, which meant the easiest preset silently disabled one of the
+        assists it had just turned on.
+        """
+        if not self.ctx.settings.exit_speed_assist:
+            return
+        ahead = stop.at_mi - self.trip.position_mi
+        if not 0 < ahead <= 1.5:
+            return
+        if self._cruise_mph is not None:
+            self._cancel_cruise()
+        if self.truck.speed_mph <= RAMP_MAX_MPH:
+            return
+        self.truck.brake = max(self.truck.brake, 0.35)
+        if self._assist_exit_slowing_said:
+            return
+        self._assist_exit_slowing_said = True
+        # Never name a key this driver's settings do not give them: with lane
+        # drift off a tap changes lanes, and holding Right does nothing.
+        lane_text = (
+            "Tap Right to the right lane and keep slowing."
+            if self.ctx.settings.steering_assist == "off"
+            else "Hold Right for the exit lane and keep slowing."
+        )
+        # Never "confirm": there is no confirm action, and an X pressed to
+        # obey it cancels the signal instead.
+        self.ctx.say_event(f"Exit speed assistance slowing. {lane_text}", interrupt=False)
 
     def _active_exit_pressure(self, stop) -> object | None:
         sample_mi = min(self.trip.position_mi, stop.at_mi)

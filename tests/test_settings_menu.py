@@ -435,6 +435,53 @@ def test_all_assists_preset_switches_lane_drift_off():
     assert settings.steering_assist == "realistic"
 
 
+def test_leaving_all_assists_hands_the_manual_lane_task_back():
+    """Regression: All assists forced lane drift off, and cycling back to
+    Realistic restored every other assist but left the automation running --
+    under a preset label that said the opposite."""
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.steering_assist = "realistic"
+    settings.apply_driving_assistance_preset("all")
+    assert settings.steering_assist == "off"
+    settings.apply_driving_assistance_preset("realistic")
+    assert settings.steering_assist == "realistic"
+    assert settings.driving_assistance_preset == "realistic"
+    # The debt is settled: a second pass does not resurrect it.
+    settings.apply_driving_assistance_preset("balanced")
+    assert settings.steering_assist == "realistic"
+
+
+def test_the_preset_row_reads_custom_when_lane_drift_contradicts_it():
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.apply_driving_assistance_preset("all")
+    assert settings.refresh_driving_assistance_preset() == "all"
+    # All assists means automated lane keeping; a manual lane task under that
+    # label would be a lie, so the row says Custom instead.
+    settings.steering_assist = "realistic"
+    assert settings.refresh_driving_assistance_preset() == "custom"
+
+
+def test_lane_drift_row_updates_the_preset_row(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        app.ctx.settings.apply_driving_assistance_preset("all")
+        cat = open_settings_category(app, "Driving assistance")
+        while not cat.items[cat.index].text.startswith("Lane drift"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.steering_assist != "off"
+        assert app.ctx.settings.driving_assistance_preset == "custom"
+        assert app.ctx.settings.steering_assist_restore == ""
+    finally:
+        app.shutdown()
+
+
 def test_driving_assistance_presets_survive_reload():
     from freight_fate.settings import DRIVING_ASSIST_FIELDS, DRIVING_ASSIST_PRESETS, Settings
 

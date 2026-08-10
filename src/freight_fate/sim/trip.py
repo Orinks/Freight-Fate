@@ -204,6 +204,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         # A police stop is in progress: the clock stops compressing until it
         # resolves, so the distance the stop is judged by is honest miles.
         self.pull_over_active = False
+        # True from a street corner's approach call until the corner resolves;
+        # the driving state maintains it. Same clock rule as the ramp: the
+        # advisory has to be brakeable in real seconds, and at 40x it is not.
+        self.controlled_turn = False
         self._announced_chain_law: set[str] = set()
         self._announced_curves: set[str] = set()
         self._announced_lane_changes: set[str] = set()
@@ -276,11 +280,13 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             # from 74 mph consumed 2.18 miles and tripped the felony line
             # before the truck had slowed to 50.
             return min(full, 1.0)
-        if self.controlled_ramp:
+        if self.controlled_ramp or self.controlled_turn:
             # A ramp ending in a light or a sign plays out in real time
             # from the gore: the stop-sign warning must buy human reaction
             # seconds, not compressed ones. A hot entry used to burn the
-            # whole half mile in a few real seconds.
+            # whole half mile in a few real seconds. A street corner is the
+            # same bargain -- "Advise 20" is only plannable if the miles to
+            # the corner take real seconds to pass.
             return min(full, 1.0)
         if self._severe_curve_decompression():
             # Same law for a hard bend: the pacenote lead is sized in real
