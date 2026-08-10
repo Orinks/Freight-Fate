@@ -54,21 +54,125 @@ def test_settings_menu_cycles_hours_of_service():
 
 
 @pytest.mark.smoke
-def test_settings_menu_cycles_lane_drift():
+def test_settings_menu_cycles_lane_keeping():
     from freight_fate.app import App
 
     app = App()
     try:
-        assert app.ctx.settings.steering_assist == "off"
-        cat = open_settings_category(app, "Gameplay")
-        while not cat.items[cat.index].text.startswith("Lane drift"):
+        assert app.ctx.settings.lane_keeping == "full"
+        cat = open_settings_category(app, "Driving assistance")
+        while not cat.items[cat.index].text.startswith("Lane keeping"):
             cat.handle_event(key_event(pygame.K_DOWN))
         cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.steering_assist == "light"
+        assert app.ctx.settings.lane_keeping == "partial"
         cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.steering_assist == "realistic"
+        assert app.ctx.settings.lane_keeping == "off"
         cat.handle_event(key_event(pygame.K_LEFT))
-        assert app.ctx.settings.steering_assist == "light"
+        assert app.ctx.settings.lane_keeping == "partial"
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_lane_keeping_row_speaks_its_consequence_not_a_bare_value():
+    """A bare "off" would be read across from the rows around it, where off
+    means less help. Here it means the hardest mode."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        cat = open_settings_category(app, "Driving assistance")
+        while not cat.items[cat.index].text.startswith("Lane keeping"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        assert cat.items[cat.index].text == (
+            "Lane keeping: full, the truck holds the lane and takes your exits"
+        )
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert "you steer with help" in cat.items[cat.index].text
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert cat.items[cat.index].text == (
+            "Lane keeping: off, you hold the lane and take your own exits"
+        )
+    finally:
+        app.shutdown()
+
+
+def test_lane_keeping_row_explains_its_rename_to_returning_players():
+    """A blind player cannot see a row change name. The row says it, built
+    from the value they actually ended up with, and only for a settings file
+    that really carried the old key."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    try:
+        app.ctx.settings.lane_keeping = "full"
+        app.ctx.settings.lane_keeping_rename_notice_left = 3
+        cat = open_settings_category(app, "Driving assistance")
+        while not cat.items[cat.index].text.startswith("Lane keeping"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        notice = [line for line in spoken if "used to be Lane drift" in line]
+        assert notice
+        assert "yours read off" in notice[-1]
+        assert "the truck still holds the lane and takes your exits" in notice[-1]
+        assert app.ctx.settings.lane_keeping_rename_notice_left == 2
+    finally:
+        app.shutdown()
+
+
+def test_an_unreadable_lane_value_is_announced_not_taken_in_silence():
+    """Falling back to full is right; falling back silently is not. It
+    deletes the destination-exit decision, and nothing later in the drive
+    would tell the player why their exits are being taken."""
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import MainMenuState
+
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    try:
+        app.ctx.settings.lane_keeping_unreadable = True
+        MainMenuState(app.ctx).announce_entry()
+        assert any("lane keeping setting could not be read" in line for line in spoken)
+        assert any("Settings, Driving assistance" in line for line in spoken)
+        # Said once, not on every trip back to the main menu.
+        spoken.clear()
+        MainMenuState(app.ctx).announce_entry()
+        assert not [line for line in spoken if "lane keeping setting could not be read" in line]
+    finally:
+        app.shutdown()
+
+
+def test_the_rename_notice_stops_after_its_budget():
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    app.ctx.say = lambda text, interrupt=True, review=True: spoken.append(text)
+    try:
+        app.ctx.settings.lane_keeping_rename_notice_left = 0
+        cat = open_settings_category(app, "Driving assistance")
+        while not cat.items[cat.index].text.startswith("Lane keeping"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+        assert not [line for line in spoken if "used to be Lane drift" in line]
+    finally:
+        app.shutdown()
+
+
+def test_gameplay_lane_keeping_row_is_a_pointer_not_a_second_control():
+    """Two live controls for one setting is a navigation hazard in a spoken
+    list: the row that stayed behind must not change anything."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        cat = open_settings_category(app, "Gameplay")
+        while cat.items[cat.index].text != "Lane keeping":
+            cat.handle_event(key_event(pygame.K_DOWN))
+        cat.handle_event(key_event(pygame.K_RIGHT))
+        assert app.ctx.settings.lane_keeping == "full"
+        assert "has moved" in cat.items[cat.index].help
     finally:
         app.shutdown()
 
@@ -338,7 +442,14 @@ def test_driving_assistance_preset_keyboard_path_and_custom_transition():
     app.ctx.say = fake_say
     try:
         cat = open_settings_category(app, "Driving assistance")
-        assert cat.items[0].text == "Driving assistance preset: Realistic"
+        # The shipped defaults are the realistic assists plus fully automated
+        # lane keeping, which is no single preset. The row used to call that
+        # combination "Realistic"; now that lane keeping is a preset field it
+        # cannot, and Custom is the only true answer.
+        assert cat.items[0].text == "Driving assistance preset: Custom"
+        cat.handle_event(key_event(pygame.K_RIGHT))
+        assert app.ctx.settings.driving_assistance_preset == "realistic"
+        assert app.ctx.settings.lane_keeping == "off"
         cat.handle_event(key_event(pygame.K_RIGHT))
         assert app.ctx.settings.driving_assistance_preset == "balanced"
         assert app.ctx.settings.lane_centering_assist is True
@@ -420,64 +531,47 @@ def test_selected_stop_assist_keyboard_toggle_persists_outside_presets():
         app.shutdown()
 
 
-def test_all_assists_preset_switches_lane_drift_off():
+def test_every_preset_owns_lane_keeping():
+    """Lane keeping used to sit outside the presets, so All assists forced it
+    and no other preset could hand it back. Each preset now names a value."""
     from freight_fate.settings import Settings
 
     settings = Settings()
-    settings.steering_assist = "realistic"
-    settings.apply_driving_assistance_preset("all")
-    assert settings.steering_assist == "off"
-    # Only All assists touches lane drift; the other presets leave it alone.
-    settings.steering_assist = "realistic"
-    settings.apply_driving_assistance_preset("balanced")
-    assert settings.steering_assist == "realistic"
+    for preset, expected in (("all", "full"), ("balanced", "partial"), ("realistic", "off")):
+        settings.apply_driving_assistance_preset(preset)
+        assert settings.lane_keeping == expected
+        assert settings.driving_assistance_preset == preset
+
+
+def test_the_preset_row_can_no_longer_lie_about_lane_keeping():
+    """Regression: the row read "Realistic" over fully automated lane keeping
+    -- the one row a player checks to learn how much the truck is doing could
+    not see the biggest thing it was doing."""
+    from freight_fate.settings import Settings
+
+    settings = Settings()
     settings.apply_driving_assistance_preset("realistic")
-    assert settings.steering_assist == "realistic"
-
-
-def test_leaving_all_assists_hands_the_manual_lane_task_back():
-    """Regression: All assists forced lane drift off, and cycling back to
-    Realistic restored every other assist but left the automation running --
-    under a preset label that said the opposite."""
-    from freight_fate.settings import Settings
-
-    settings = Settings()
-    settings.steering_assist = "realistic"
-    settings.apply_driving_assistance_preset("all")
-    assert settings.steering_assist == "off"
-    settings.apply_driving_assistance_preset("realistic")
-    assert settings.steering_assist == "realistic"
-    assert settings.driving_assistance_preset == "realistic"
-    # The debt is settled: a second pass does not resurrect it.
-    settings.apply_driving_assistance_preset("balanced")
-    assert settings.steering_assist == "realistic"
-
-
-def test_the_preset_row_reads_custom_when_lane_drift_contradicts_it():
-    from freight_fate.settings import Settings
-
-    settings = Settings()
+    assert settings.refresh_driving_assistance_preset() == "realistic"
+    settings.lane_keeping = "full"
+    assert settings.refresh_driving_assistance_preset() == "custom"
     settings.apply_driving_assistance_preset("all")
     assert settings.refresh_driving_assistance_preset() == "all"
-    # All assists means automated lane keeping; a manual lane task under that
-    # label would be a lie, so the row says Custom instead.
-    settings.steering_assist = "realistic"
+    settings.lane_keeping = "off"
     assert settings.refresh_driving_assistance_preset() == "custom"
 
 
-def test_lane_drift_row_updates_the_preset_row(monkeypatch):
+def test_lane_keeping_row_updates_the_preset_row(monkeypatch):
     from freight_fate.app import App
 
     app = App()
     try:
         app.ctx.settings.apply_driving_assistance_preset("all")
         cat = open_settings_category(app, "Driving assistance")
-        while not cat.items[cat.index].text.startswith("Lane drift"):
+        while not cat.items[cat.index].text.startswith("Lane keeping"):
             cat.handle_event(key_event(pygame.K_DOWN))
         cat.handle_event(key_event(pygame.K_RETURN))
-        assert app.ctx.settings.steering_assist != "off"
+        assert app.ctx.settings.lane_keeping != "full"
         assert app.ctx.settings.driving_assistance_preset == "custom"
-        assert app.ctx.settings.steering_assist_restore == ""
     finally:
         app.shutdown()
 
@@ -494,7 +588,7 @@ def test_driving_assistance_presets_survive_reload():
         assert tuple(getattr(loaded, field) for field in DRIVING_ASSIST_FIELDS) == expected
 
 
-def test_legacy_settings_preserve_lane_drift_choice():
+def test_legacy_settings_preserve_lane_keeping_choice():
     import json
 
     from freight_fate.settings import Settings
@@ -503,12 +597,84 @@ def test_legacy_settings_preserve_lane_drift_choice():
     settings.path.parent.mkdir(parents=True, exist_ok=True)
     settings.path.write_text(json.dumps({"steering_assist": "off"}), encoding="utf-8")
     loaded = Settings.load()
-    assert loaded.steering_assist == "off"
+    # Legacy "off" was the truck holding the lane for you: "full" now.
+    assert loaded.lane_keeping == "full"
     assert loaded.lane_departure_warning is False
     assert loaded.automatic_emergency_braking is False
     assert loaded.stop_and_go_assist is False
     assert loaded.descent_speed_control == "off"
     assert loaded.driving_assistance_preset == "custom"
+
+
+@pytest.mark.parametrize(
+    ("legacy", "expected"),
+    (("off", "full"), ("light", "partial"), ("realistic", "off")),
+)
+def test_every_legacy_lane_value_migrates_without_changing_difficulty(legacy, expected):
+    """The whole point of the rename: the words move, the truck does not."""
+    import json
+
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.path.parent.mkdir(parents=True, exist_ok=True)
+    settings.path.write_text(
+        json.dumps({"steering_assist": legacy, "driving_assistance_preset": "custom"}),
+        encoding="utf-8",
+    )
+    loaded = Settings.load()
+    assert loaded.lane_keeping == expected
+    # A player who saw the old name is owed the explanation, and only them.
+    assert loaded.lane_keeping_rename_notice_left == 3
+
+
+def test_unknown_lane_value_falls_back_to_full_and_says_so():
+    """Landing on "off" instead would start drift, rumble strips, off-road
+    damage AND stop granting the destination exit -- with no audible cause."""
+    import json
+
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.path.parent.mkdir(parents=True, exist_ok=True)
+    settings.path.write_text(
+        json.dumps({"steering_assist": "sideways", "driving_assistance_preset": "custom"}),
+        encoding="utf-8",
+    )
+    loaded = Settings.load()
+    assert loaded.lane_keeping == "full"
+    assert loaded.lane_keeping_unreadable is True
+    # Nothing to explain about a rename that never applied to this value.
+    assert loaded.lane_keeping_rename_notice_left == 0
+
+
+def test_a_fresh_install_hears_no_rename_notice():
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    if settings.path.exists():
+        settings.path.unlink()
+    loaded = Settings.load()
+    assert loaded.lane_keeping == "full"
+    assert loaded.lane_keeping_rename_notice_left == 0
+    assert loaded.lane_keeping_unreadable is False
+
+
+def test_settings_still_write_the_legacy_lane_key_for_1_8_builds():
+    """A 1.8.x build shares this settings.json and still reads
+    ``steering_assist``; dropping the key would reset it to its own default
+    and change what the truck does over there."""
+    import json
+
+    from freight_fate.settings import LANE_KEEPING_TO_LEGACY, Settings
+
+    for mode, legacy in LANE_KEEPING_TO_LEGACY.items():
+        settings = Settings()
+        settings.lane_keeping = mode
+        settings.save()
+        written = json.loads(settings.path.read_text(encoding="utf-8"))
+        assert written["lane_keeping"] == mode
+        assert written["steering_assist"] == legacy
 
 
 def test_exactly_one_driving_assistance_preset_selector():

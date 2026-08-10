@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import asdict, dataclass
+from typing import ClassVar
 
 from .models.profile import data_dir
 from .units import (
@@ -57,6 +58,49 @@ CHATTER_FIELDS = (
 # village layer on another -- the player never needs to know which).
 PLACE_CALLOUT_MODES = ("off", "sparse", "all")
 
+# How much of the lane-holding work the truck does for the driver. The
+# setting used to be called ``steering_assist`` and its values read exactly
+# backwards: "off" meant the truck held the lane FOR you and took your exits,
+# while "realistic" was the manual task -- and "off" was the default. A player
+# who believed they had turned assistance off was in the most assisted mode
+# there is, and their exits took themselves. The values now name what the
+# truck does.
+LANE_KEEPING_MODES = ("full", "partial", "off")
+
+# The one value every fallback lands on: the loader's, the menu label's, and
+# the spoken notice's. They agreed only by coincidence before, which is how a
+# label and a behaviour can quietly come apart. "full" is right because
+# landing on "off" instead would start drift, rumble strips, and off-road
+# damage AND stop granting the destination exit -- a difficulty spike with no
+# audible cause. It is safe as a default and unsafe as a *silent* one, so an
+# unreadable value is spoken about once (see ``lane_keeping_unreadable``).
+LANE_KEEPING_FALLBACK = "full"
+
+# Spoken value labels. The bare value word must never appear alone: "off"
+# here means the hardest mode, while "off" in overspeed warning, the speed
+# keeper, and descent control all mean less help. The clause is what keeps a
+# listener from carrying the wrong sense across rows, and "full" has to
+# disambiguate itself from "full manual" in the same breath.
+LANE_KEEPING_LABELS = {
+    "full": "full, the truck holds the lane and takes your exits",
+    "partial": "partial, gentle drift and you steer with help",
+    "off": "off, you hold the lane and take your own exits",
+}
+
+# Every legacy value maps to the mode that behaves identically, so the rename
+# moves nobody's difficulty. Anything else -- a corrupt file, a value from a
+# build that is not this one -- lands on the fallback above: silently handing
+# a blind player a manual steering task they never opted into is by far the
+# worse failure.
+LANE_KEEPING_FROM_LEGACY = {"off": "full", "light": "partial", "realistic": "off"}
+LANE_KEEPING_TO_LEGACY = {"full": "off", "partial": "light", "off": "realistic"}
+
+# How many times the row explains its own rename before it stops. A note
+# queued behind a row announcement is cut off when the player keeps arrowing,
+# so one shot is not enough for something this consequential; three makes a
+# lost announcement self-correcting.
+LANE_KEEPING_RENAME_NOTICES = 3
+
 DRIVING_ASSIST_FIELDS = (
     "automatic_emergency_braking",
     "lane_departure_warning",
@@ -67,26 +111,18 @@ DRIVING_ASSIST_FIELDS = (
     "destination_approach_assist",
     "curve_speed_assist",
     "route_transition_assist",
+    # Lane keeping is a preset field like the rest. It used to sit outside
+    # them, which is how the preset row came to read "Realistic" over fully
+    # automated lane keeping -- the one row a player checks to learn how much
+    # the truck is doing could not see the biggest thing it was doing.
+    "lane_keeping",
 )
 
 DRIVING_ASSIST_PRESETS = {
-    "realistic": (True, True, True, False, "realistic", True, False, True, True),
-    "balanced": (True, True, True, True, "balanced", True, True, True, True),
-    "all": (True, True, True, True, "interactive", True, True, True, True),
+    "realistic": (True, True, True, False, "realistic", True, False, True, True, "off"),
+    "balanced": (True, True, True, True, "balanced", True, True, True, True, "partial"),
+    "all": (True, True, True, True, "interactive", True, True, True, True, "full"),
 }
-
-# Lane drift is a simulation choice, not an assist, so it is deliberately not
-# one of the equality fields above -- Realistic and Balanced leave the
-# player's choice alone. All assists is the exception: the easiest preset must
-# not leave a manual steering task running, so it implies "off".
-#
-# That exception is what made the preset row lie. Picking All assists forced
-# lane drift off; cycling back to Realistic restored every other assist but
-# left the automated lane keeping in place, under a label that says otherwise.
-# The implied value is now part of what a preset MEANS, so applying a preset
-# hands the manual task back and the row reads Custom whenever the two
-# disagree.
-DRIVING_ASSIST_PRESET_STEERING = {"realistic": None, "balanced": None, "all": "off"}
 
 
 @dataclass
@@ -127,20 +163,35 @@ class Settings:
     hos_mode: str = (
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
-    # Whether the lane-position task runs at all. A simulation choice like
-    # the speed keeper, not a safety assist: the 1.9 exit mechanics only
-    # demand signals and lane discipline when it is on. Presets leave it
-    # alone with one exception: All assists drops it to "off" (automated
-    # lane keeping, tap lane changes), because the easiest preset must not
-    # leave a manual steering task running.
-    steering_assist: str = "off"  # off/light/realistic lane drift
-    # What lane drift was before All assists forced it off, so leaving that
-    # preset hands the manual lane task back. Empty means nothing is owed.
-    steering_assist_restore: str = ""
+    # How much of the lane-holding work the truck does. "full" keeps the
+    # truck centred, takes your exits for you, and turns Left and Right into
+    # tap lane changes. "partial" drifts gently and gives you generous
+    # steering authority, but the lane work is yours. "off" is the whole
+    # manual task: you hold the lane, and every exit needs its signal and
+    # its exit lane. It is one of the preset fields, so the preset row can
+    # never again read "Realistic" over fully automated lane keeping.
+    lane_keeping: str = "full"
+    # How many more times the Lane keeping row explains that it used to be
+    # called Lane drift. Zero by default: a fresh install has nothing to
+    # explain, and only a load that actually found the old key on disk raises
+    # it. A setting rather than a profile field on purpose -- the rename is
+    # global, so a per-career counter would re-fire on every career and fire
+    # for careers created after the update, who never saw the old name.
+    lane_keeping_rename_notice_left: int = 0
+    # Set by ``load`` when the lane-keeping value on disk could not be read at
+    # all and the fallback was taken blind. Deliberately not a saved field: it
+    # describes one load, and the truck must say so once rather than leave a
+    # player wondering why their exits are suddenly being taken.
+    lane_keeping_unreadable: ClassVar[bool] = False
     # How loud the lane and edge cues speak: the edge-boundary textures,
     # the lane locator, and the dead-man's-curve strips all scale by it.
     lane_cue_loudness: str = "standard"  # subtle/standard/prominent
-    driving_assistance_preset: str = "realistic"
+    # "custom", not "realistic": the shipped defaults are the realistic
+    # assists plus fully automated lane keeping, which is no single preset.
+    # That combination used to read "Realistic" because lane keeping sat
+    # outside the presets and the row could not see it. Nothing about the
+    # defaults changed -- only what the row is willing to call them.
+    driving_assistance_preset: str = "custom"
     automatic_emergency_braking: bool = True
     lane_departure_warning: bool = True
     stop_and_go_assist: bool = True
@@ -256,35 +307,52 @@ class Settings:
 
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        data = asdict(self)
+        # Compatibility write, for one release only. A 1.8.x build installed
+        # alongside this one shares the same settings.json and still reads
+        # ``steering_assist``; if the key vanished it would fall back to its
+        # own default and quietly change what the truck does over there. A
+        # reader may tolerate keys it does not know, but a writer must not
+        # drop a key another reader still needs. Remove this line once 1.9 is
+        # the oldest build players run -- no earlier than the release after
+        # 1.9.0.
+        data["steering_assist"] = LANE_KEEPING_TO_LEGACY.get(self.lane_keeping, "off")
         tmp = self.path.with_suffix(".json.tmp")
         with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(asdict(self), f, indent=2)
+            json.dump(data, f, indent=2)
         tmp.replace(self.path)
+
+    def lane_is_automated(self) -> bool:
+        """Whether the truck holds the lane -- and takes the exits -- itself.
+
+        Every spoken instruction about steering hangs off this one answer:
+        automated means a tap changes lanes and the destination exit is
+        granted, manual means holding a direction steers and every exit needs
+        its signal and its lane. Nine call sites used to compare the raw
+        string, which is exactly how spoken advice comes to name a key the
+        driver's settings do not give them.
+        """
+        return self.lane_keeping == "full"
+
+    def lane_is_manual(self) -> bool:
+        """Whether the lane work -- and the exit -- belongs to the driver."""
+        return not self.lane_is_automated()
+
+    def lane_keeping_label(self) -> str:
+        """The spoken value with the clause that says what it costs you."""
+        return LANE_KEEPING_LABELS.get(
+            self.lane_keeping, LANE_KEEPING_LABELS[LANE_KEEPING_FALLBACK]
+        )
 
     def apply_driving_assistance_preset(self, preset: str) -> None:
         values = DRIVING_ASSIST_PRESETS[preset]
         for field, value in zip(DRIVING_ASSIST_FIELDS, values, strict=True):
             setattr(self, field, value)
-        implied = DRIVING_ASSIST_PRESET_STEERING[preset]
-        if implied is not None:
-            if self.steering_assist != implied:
-                self.steering_assist_restore = self.steering_assist
-            self.steering_assist = implied
-        elif self.steering_assist_restore:
-            # Leaving All assists gives the manual lane task back rather than
-            # keeping its automation under another preset's name.
-            self.steering_assist = self.steering_assist_restore
-            self.steering_assist_restore = ""
         self.driving_assistance_preset = preset
 
     def refresh_driving_assistance_preset(self) -> str:
         values = tuple(getattr(self, field) for field in DRIVING_ASSIST_FIELDS)
-        matches = [
-            name
-            for name, mapping in DRIVING_ASSIST_PRESETS.items()
-            if mapping == values
-            and DRIVING_ASSIST_PRESET_STEERING[name] in (None, self.steering_assist)
-        ]
+        matches = [name for name, mapping in DRIVING_ASSIST_PRESETS.items() if mapping == values]
         self.driving_assistance_preset = matches[0] if len(matches) == 1 else "custom"
         return self.driving_assistance_preset
 
@@ -310,6 +378,27 @@ class Settings:
             pass
         except (json.JSONDecodeError, OSError):
             log.warning("Could not read settings; using defaults", exc_info=True)
+        # ``steering_assist`` became ``lane_keeping`` in 1.9. A save that
+        # already carries the new key is read as-is; anything older has its
+        # legacy value carried across to the mode that behaves identically,
+        # so the truck does exactly what it did yesterday. A player who
+        # cannot see the row change must never find the steering task in
+        # their hands because a setting was renamed.
+        if isinstance(data, dict) and "lane_keeping" not in data:
+            legacy = data.get("steering_assist")
+            if isinstance(legacy, str) and legacy in LANE_KEEPING_FROM_LEGACY:
+                s.lane_keeping = LANE_KEEPING_FROM_LEGACY[legacy]
+                # This player had the old row under the old name. The row
+                # owes them an explanation, and only them.
+                s.lane_keeping_rename_notice_left = LANE_KEEPING_RENAME_NOTICES
+            elif "steering_assist" in data:
+                # The old key is there but says nothing we recognise. Taking
+                # the fallback silently would delete the destination-exit
+                # decision without a sound.
+                s.lane_keeping = LANE_KEEPING_FALLBACK
+                s.lane_keeping_unreadable = True
+            else:
+                s.lane_keeping = LANE_KEEPING_FALLBACK
         from .sim.hos import HOS_MODES
 
         # Legacy 1.5.0 saves carried a player-selectable "off" mode. It is no
@@ -319,21 +408,37 @@ class Settings:
             s.hos_mode = "realistic"
         if s.lane_cue_loudness not in ("subtle", "standard", "prominent"):
             s.lane_cue_loudness = "standard"
-        if s.steering_assist not in ("off", "light", "realistic"):
-            s.steering_assist = "off"
+        if s.lane_keeping not in LANE_KEEPING_MODES:
+            s.lane_keeping = LANE_KEEPING_FALLBACK
+            s.lane_keeping_unreadable = True
             s.lane_departure_warning = False
             s.lane_centering_assist = False
+        if not isinstance(s.lane_keeping_rename_notice_left, int) or isinstance(
+            s.lane_keeping_rename_notice_left, bool
+        ):
+            s.lane_keeping_rename_notice_left = 0
+        s.lane_keeping_rename_notice_left = max(
+            0, min(LANE_KEEPING_RENAME_NOTICES, s.lane_keeping_rename_notice_left)
+        )
         if data is not None and "driving_assistance_preset" not in data:
-            s.lane_departure_warning = s.steering_assist != "off"
-            s.lane_centering_assist = s.steering_assist == "light"
+            s.lane_departure_warning = s.lane_keeping != "full"
+            s.lane_centering_assist = s.lane_keeping == "partial"
             for field in DRIVING_ASSIST_FIELDS:
                 if field == "descent_speed_control":
                     setattr(s, field, "off")
-                elif field not in ("lane_departure_warning", "lane_centering_assist"):
+                elif field not in (
+                    "lane_departure_warning",
+                    "lane_centering_assist",
+                    # The migrated lane-keeping mode IS this save's current
+                    # difficulty. The blanket "everything off" below must not
+                    # reach it, or a pre-preset save would change what the
+                    # truck does the moment it is opened.
+                    "lane_keeping",
+                ):
                     setattr(s, field, False)
             s.driving_assistance_preset = "custom"
         for field in DRIVING_ASSIST_FIELDS:
-            if field == "descent_speed_control":
+            if field in ("descent_speed_control", "lane_keeping"):
                 continue
             if not isinstance(getattr(s, field), bool):
                 setattr(s, field, getattr(cls(), field))

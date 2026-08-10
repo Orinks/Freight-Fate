@@ -453,7 +453,7 @@ Driving controls are active while the road view is focused:
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
 | L | Report which lane you are in and whether you are centered, drifting, or at an edge. |
-| Left / Right arrow | With lane drift on, steer; steer across the line to change lanes. With lane drift off, tap to change one lane in that direction -- the signal clicks and the change is announced. |
+| Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
 | A | Repeat the last driving announcement, in case you missed it. |
 | Comma | Review earlier speech. |
 | U | Report what is coming up: imposed speed limits, patrols, stops, exits, and the next few bends ahead with their advisory speeds. |
@@ -674,8 +674,8 @@ item again after a moment rather than treating a modeled temperature as live.
 
 Stops are reported as you approach them. A one-mile cue tells you when to take
 an exit. As an announced exit approaches, use X to signal or cancel your intent,
-slow to 45 miles per hour or less, and set up the exit lane when lane drift is
-enabled. The signal-on announcement also names how the ramp ends -- a traffic
+slow to 45 miles per hour or less, and set up the exit lane unless lane keeping
+is on full. The signal-on announcement also names how the ramp ends -- a traffic
 light or a stop sign -- so the braking plan can start on the mainline, and the
 U upcoming readout carries the same warning. Once you are on a ramp that ends
 in a light or a sign, the game clock runs in real time until you are through
@@ -692,9 +692,9 @@ Arrow to brake does not skip the first menu option.
 
 Destination exits work the same way. When your delivery exit is ahead, the game
 announces the signed exit and toward cities, marks it as the destination exit,
-and tells you to slow down and set up for the ramp. If lane drift is on, use X
-to signal and move right for the exit lane. With lane drift off, the GPS infers
-your destination-exit intent from the route. If automatic speed control is
+and tells you to slow down and set up for the ramp. With lane keeping on partial
+or off, use X to signal and move right for the exit lane. On full, lane keeping
+takes the destination exit for you, and the first one of each run says so. If automatic speed control is
 active, it eases the truck to 40 miles per hour or your lower cruise target,
 below the 45 mile-per-hour ramp limit, so you can reach ramp speed without an
 abrupt handoff. Press X to take the exit; automatic speed control releases as
@@ -907,7 +907,7 @@ Three driving assistance presets are available: Realistic, Balanced, and All ass
 
 The individual controls are Automatic emergency braking, Lane-departure warning, Stop-and-go assistance, Lane centering assistance, Descent speed control, Exit speed assistance, Destination approach assistance, Planned rest-stop stopping assistance, Curve speed assistance, and Route-transition assistance. Descent speed control has four levels: Off, Realistic, Balanced, and Interactive. Interactive is a descent-control level, not a preset. Exit speed assistance slows for an already-selected exit, destination approach assistance slows and stops at the selected facility arrival point, and the separate default-off planned-stop control stops at a sleep stop only after T plans it and X signals for it. Curve speed assistance reduces speed workload for mapped curves, and route-transition assistance helps manage speed and lane workload at confirmed route transitions. Assists never silently choose a route or optional exit, enter a yard, dock, or complete a delivery: you still steer, confirm route choices and exits, initiate lane changes, leave long stops, and handle every precision task.
 
-Lane drift also lives in this category and, like the speed keeper, sits outside the presets. It chooses whether the lane-position task runs at all: Off keeps the truck centered with no lane work, Light drifts gently with centering help, and Realistic drifts like a real wheel. When lane drift is on, a short beep comes from the side you drift toward, so steer away from the beep; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. With lane drift on, taking an exit needs your turn signal set and the exit lane held. Choosing Light or Realistic turns the matching lane support on. The All assists preset switches lane drift off, so lanes are kept for you and a tap changes lanes; other presets never change it.
+Lane keeping also lives in this category. It was called Lane drift before 1.9, and its values were the wrong way round: the old "off" meant the truck held the lane for you. Nothing about your driving changed in the rename -- your old setting carried over to the value that behaves identically -- but the row now says what the truck actually does. Full keeps the truck centered with no lane work, turns Left and Right into tap lane changes, and takes your exits for you, including the destination exit, with no signal and no exit lane. Partial drifts gently with generous steering help. Off drifts like a real wheel, and every exit needs your turn signal set and the exit lane held. On partial or off, a short beep comes from the side you drift toward, so steer away from the beep; a centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. Lane keeping is a preset field: Realistic sets it to off, Balanced to partial, and All assists to full, so the preset row can never describe less automation than you actually have.
 
 One more control, Speed keeper, sits outside the presets and is never changed by choosing a preset. In low-speed zones where adaptive cruise is unavailable, such as facility access roads, gate queues, and work zones, pressing K starts automatic speed control in speed-keeper mode. It holds your current speed at or below the zone limit and creeps behind queued traffic, so the accelerator does not need to stay held down. On the open road it automatically changes to adaptive cruise and accelerates toward the posted limit, or restores the cruise target you selected earlier. Entering another restricted zone changes back to the speed keeper. If you start it during the deadhead, the planned pickup pauses the session while you check in and load, keeps it through a save, and resumes it after departure once the truck is rolling. Plus and Minus adjust the remembered open-road cruise target in either mode. Any brake input outside that planned pickup, a hazard, or pressing K again cancels the whole session so it cannot restart unexpectedly. Speed keeper is on by default and can be turned off in Settings, Gameplay.
 
@@ -933,10 +933,10 @@ Gameplay settings include:
 | Overspeed warning | The dash alert for running over the posted limit: On speaks once and then chimes faster the further over you are, Urgent only keeps just the runaway alarm for deliberate fast cruising, and Off silences it. |
 | Driving mode | Choose Relaxed, Standard, or Realistic pacing and pressure. Relaxed keeps every driving system but gives wider hazard response windows, fewer random hazards, gentler collision damage and fatigue, calmer routine speech, and the most real time to respond. Standard keeps balanced timing and consequences. Realistic moves distance and time fastest, so decisions arrive sooner without extra forgiveness. At low speed the clock still eases toward real time, and deliberate parked waiting runs at double the selected pace. |
 | Hours of service | Choose realistic or relaxed legal limits. Relaxed hours rules lengthen the limits and further reduce random hazard frequency; real violations keep their normal consequences. |
-| Driving assistance | Open Settings, Driving assistance for lane drift, lane warning, lane centering, emergency braking, stop-and-go, descent, and speed keeper controls. |
+| Driving assistance | Open Settings, Driving assistance for lane keeping, lane warning, lane centering, emergency braking, stop-and-go, descent, and speed keeper controls. |
 | Trip pacing | Choose relaxed, standard, or fast pacing. Pacing applies at highway speed; the clock eases toward real time while you accelerate, brake, or maneuver, so working up through the gears does not cost most of a game hour. Setting the parking brake while stopped means deliberate waiting: time then passes at double your pacing, letting weather and daylight move along. |
 | Hours of service | Choose realistic or relaxed hours rules. |
-| Lane drift | Choose whether lane drift is off, light, or realistic. When on, a short beep comes from the side you drift toward, so steer away from the beep. A dedicated centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. |
+| Lane keeping | Formerly Lane drift. Choose how much of the lane-holding work the truck does: full holds the lane and takes your exits, partial gives gentle drift with steering help, off leaves the lane and every exit to you. On partial or off, a short beep comes from the side you drift toward, so steer away from the beep. A dedicated centered-lane chime confirms you are centered again, and the rumble strip is panned to the side you have drifted toward near the lane edge. |
 | Speed keeper | Allow automatic speed control to use the speed keeper in low-speed zones and switch back to adaptive cruise on open roads. |
 | Controller | Accept controller input alongside the keyboard. The keyboard always stays active. |
 | Haptics | Use controller vibration for hazards, hard braking, rumble strips, and road seams. |

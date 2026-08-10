@@ -305,10 +305,13 @@ playlist and it becomes a personal station.
 
 ## Settings section: additions
 
-- Lane drift is the steering setting, and its values explain themselves:
-  off means the truck holds the lane for you, light is gentle drift with
-  centering help, realistic means you hold the lane. [PENDING CURVE-NAV
-  FOLD for the exact spoken wording.]
+- Lane keeping is the steering setting -- it was called Lane drift, and
+  its old values read backwards. Now they explain themselves: full means
+  the truck holds the lane and takes your exits, partial is gentle drift
+  with steering help, off means you hold the lane and take your own
+  exits. Your old setting carried over to the value that behaves
+  identically, and the row says so the first few times you visit it.
+  [PENDING CURVE-NAV FOLD for the exact spoken wording.]
 - Overspeed warning, real radio streams, and automatic direction changes
   are as the first draft described.
 
@@ -358,7 +361,7 @@ verdicts on a mountain road and you have earned the title.
 
 ## Driving section: NEW -- steering through curves (the sound design) [PENDING CURVE-NAV FOLD]
 
-With lane drift on, the road sound becomes your steering guide. It
+With lane keeping on partial or off, the road sound becomes your steering guide. It
 leans toward where the wheel should go: into a bend as the bend
 arrives, through it, and back toward lane center when you drift --
 follow the sound home. Centered on a straight, nothing new plays.

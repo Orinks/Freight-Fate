@@ -400,6 +400,13 @@ class DrivingState(
         self._descent_limit_state = ""
         self._descent_capture_active = False
         self._assist_exit_slowing_said = False
+        # Lane keeping on full grants the exit lane and takes the destination
+        # exit without the driver touching anything. That is coherent, but
+        # unattributed it reads as the exit taking itself -- which is exactly
+        # what got reported. Name the automation at the point of confusion,
+        # once each per run, then go back to the plain wording.
+        self._lane_keeping_grant_said = False
+        self._lane_keeping_takes_exit_said = False
         self._curve_assist_active = False
         self._curve_assist_cue_s = 0.0
         self._transition_assist_active = False

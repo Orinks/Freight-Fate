@@ -49,7 +49,7 @@ def test_edge_ladder_loop_is_panned_to_the_drift_side(monkeypatch):
     app = App()
     try:
         d = _driving(app)
-        d.ctx.settings.steering_assist = "realistic"
+        d.ctx.settings.lane_keeping = "off"
         d.truck.velocity_mps = 25.0  # rolling: grooves make noise
         d.lane.offset = 1.0  # whole tire on the right-edge strip
         loops = []
@@ -75,7 +75,7 @@ def test_road_bed_leans_toward_the_correction_on_a_drift(monkeypatch):
     app = App()
     try:
         d = _driving(app)
-        d.ctx.settings.steering_assist = "realistic"
+        d.ctx.settings.lane_keeping = "off"
         d.truck.velocity_mps = 25.0  # guidance only listens at speed
         pans = []
         monkeypatch.setattr(
@@ -99,7 +99,7 @@ def test_road_bed_slews_home_and_centered_cue_ends_a_drift(monkeypatch):
     app = App()
     try:
         d = _driving(app)
-        d.ctx.settings.steering_assist = "realistic"
+        d.ctx.settings.lane_keeping = "off"
         d.truck.velocity_mps = 25.0  # guidance only listens at speed
         calls = []
         pans = []
@@ -133,7 +133,7 @@ def test_guidance_stays_asleep_inside_normal_wander(monkeypatch):
     app = App()
     try:
         d = _driving(app)
-        d.ctx.settings.steering_assist = "realistic"
+        d.ctx.settings.lane_keeping = "off"
         d.truck.velocity_mps = 25.0  # guidance only listens at speed
         pans = []
         monkeypatch.setattr(
@@ -161,7 +161,7 @@ def test_transverse_strips_fire_once_at_the_marked_mile(monkeypatch):
     app = App()
     try:
         d = _driving(app)
-        d.ctx.settings.steering_assist = "off"  # even with drift off
+        d.ctx.settings.lane_keeping = "full"  # even with drift off
         d.truck.velocity_mps = 25.0
         d._transverse_strip_miles = (5.0,)
         d._transverse_fired = set()
@@ -190,12 +190,12 @@ def test_lane_locator_toggle_and_panned_tick(monkeypatch):
         d.ctx.say = lambda text, **kw: spoken.append(text)
         d.truck.velocity_mps = 25.0
 
-        d.ctx.settings.steering_assist = "off"
+        d.ctx.settings.lane_keeping = "full"
         d._toggle_lane_locator()
         assert not d._lane_locator_on  # refused: nothing to locate
         assert "holds the lane" in spoken[-1]
 
-        d.ctx.settings.steering_assist = "realistic"
+        d.ctx.settings.lane_keeping = "off"
         d._toggle_lane_locator()
         assert d._lane_locator_on
         calls = []
@@ -233,7 +233,7 @@ def test_a_hot_bend_actually_pushes_the_truck(monkeypatch):
     app = App()
     try:
         d = _driving(app)
-        d.ctx.settings.steering_assist = "realistic"
+        d.ctx.settings.lane_keeping = "off"
         d.ctx.settings.curve_speed_assist = False
         d.truck.velocity_mps = 45.0 / 2.23694
         bend = SimpleNamespace(
@@ -267,7 +267,7 @@ def test_pinballing_across_a_line_keeps_only_the_thump(monkeypatch):
     events = []
     try:
         d = _driving(app)
-        d.ctx.settings.steering_assist = "realistic"
+        d.ctx.settings.lane_keeping = "off"
         d.ctx.say_event = lambda text, interrupt=False: events.append(text)
         d.truck.velocity_mps = 25.0
         played = []
@@ -304,7 +304,7 @@ def test_curve_run_speaks_a_verdict_on_exit(monkeypatch):
     events = []
     try:
         d = _driving(app)
-        d.ctx.settings.steering_assist = "realistic"
+        d.ctx.settings.lane_keeping = "off"
         d.ctx.settings.curve_callouts = True
         d.ctx.settings.speech_verbosity = 1
         d.ctx.say_event = lambda text, interrupt=False: events.append(text)

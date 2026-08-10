@@ -2130,7 +2130,7 @@ def test_destination_exit_announcement_names_lane_move_when_drift_is_on(monkeypa
     from freight_fate.app import App
 
     app = App()
-    app.ctx.settings.steering_assist = "light"
+    app.ctx.settings.lane_keeping = "partial"
     events = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:

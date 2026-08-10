@@ -36,7 +36,7 @@ rolling, flat, all) unless ``--from``/``--to`` name a pair.
 
 The driving assists that change what the truck does on a grade are arguments
 too -- ``--descent off|realistic|interactive``, ``--assists``,
-``--predictive-cruise on|off``, ``--steering``, ``--transmission``, and
+``--predictive-cruise on|off``, ``--lane-keeping``, ``--transmission``, and
 ``--verbosity`` -- so a behaviour can be compared across settings without
 editing your own. Anything not given falls back to your real settings, so the
 playtest otherwise reproduces what a player would actually get.
@@ -400,8 +400,8 @@ def build_driving(ctx, hit: Hit, args):
         s.descent_speed_control = args.descent
     if args.predictive_cruise:
         s.predictive_cruise = args.predictive_cruise == "on"
-    if args.steering:
-        s.steering_assist = args.steering
+    if args.lane_keeping:
+        s.lane_keeping = args.lane_keeping
     if args.curve_assist:
         s.curve_speed_assist = args.curve_assist == "on"
     if args.transmission:
@@ -517,6 +517,8 @@ def run_headless(app, driving, args) -> None:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    from freight_fate.settings import LANE_KEEPING_MODES
+
     p = argparse.ArgumentParser(
         description="Drop into a chosen piece of road with the truck already set up."
     )
@@ -544,7 +546,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     p.add_argument("--assists", help="driving assistance preset, e.g. realistic, all")
     p.add_argument("--predictive-cruise", choices=("on", "off"), help="grade preview for cruise")
-    p.add_argument("--steering", choices=("off", "light", "realistic"), help="steering assist")
+    p.add_argument(
+        "--lane-keeping",
+        choices=LANE_KEEPING_MODES,
+        help="lane keeping: full holds the lane and takes exits, off leaves both to you",
+    )
     p.add_argument(
         "--curve-assist",
         choices=("on", "off"),
@@ -619,10 +625,10 @@ def main(argv: list[str] | None = None) -> int:
     from freight_fate.settings import data_dir
 
     _configure_logging()
-    # The session must not leak its --steering/--assists overrides into the
+    # The session must not leak its --lane-keeping/--assists overrides into the
     # player's real settings: App.shutdown() saves settings on the way out,
     # which persisted a playtest's flags as the player's own choices
-    # (owner-hit 2026-07-27: --steering realistic became the saved setting).
+    # (owner-hit 2026-07-27: the steering override became the saved setting).
     settings_path = data_dir() / "settings.json"
     settings_before = settings_path.read_bytes() if settings_path.exists() else None
     app = App()

@@ -10,7 +10,7 @@ Written 2026-07-27, the day the feature folded into `feat/career-1.9`.
 Your ask, built: "real speeds in for curves as well as panning sounds so
 we can steer through them." The advisory speeds were already real (baked
 from actual road geometry on all 63,724 curves); this adds the steering.
-With lane drift on, curves push the truck toward the outside with honest
+With lane keeping on partial or off, curves push the truck toward the outside with honest
 physics — tighter bend, heavier load, or more speed over the advisory
 all push harder; ice resists less — and you hold the lane with Left and
 Right against it. The audio design follows the community ruling from the
@@ -19,10 +19,10 @@ where the wheel should go, never a new tone, and silence-is-centered.
 
 ## Turning it on
 
-Curve steering only exists when **lane drift** is on. It's off by
-default (Settings, Driving assistance, Lane drift): off means the truck
-holds the lane itself, light is gentle drift with centering help,
-realistic is the real wheel. For honest testing use realistic, and turn
+Curve steering only exists when **lane keeping** is not on full. Full is
+the default (Settings, Driving assistance, Lane keeping): full means the
+truck holds the lane itself and takes your exits, partial is gentle drift
+with steering help, off is the real wheel. For honest testing use off, and turn
 **Curve speed assistance off** — with it on, the truck brakes for the
 bends itself and you'll wonder why nothing is happening. That is not a
 bug; it's the assist doing its job. Related settings: "Lane and edge

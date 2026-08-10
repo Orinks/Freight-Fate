@@ -15,7 +15,9 @@ import random
 
 MPH_PER_MPS = 2.23694
 
-ASSIST_LEVELS = ("off", "light", "realistic")
+# Mirrors ``settings.LANE_KEEPING_MODES``: how much lane-holding the truck
+# does. "full" holds the lane outright, so no drift model runs at all.
+ASSIST_LEVELS = ("full", "partial", "off")
 LANE_EDGE = 1.0
 LANE_WIDTH = 2.0  # offset units from one lane center to the next
 CROSS_AT = 1.12  # straddling the line this far commits the lane change
@@ -29,7 +31,9 @@ WANDER_RATE = 0.05
 CURVE_RATE = 0.12
 WIND_RATE = 0.10
 STEER_RATE = 0.55
-ASSIST_TUNING = {"light": (0.45, 1.35), "realistic": (1.0, 1.0)}
+# Only the modes where the driver does the lane work have a drift model.
+# "full" is absent on purpose: it pins the offset to lane centre.
+ASSIST_TUNING = {"partial": (0.45, 1.35), "off": (1.0, 1.0)}
 
 DEFAULT_LANE_COUNT = 2
 
@@ -87,16 +91,16 @@ class LaneKeeping:
         *,
         curve: float = 0.0,
         wind: float = 0.0,
-        assist: str = "off",
+        assist: str = "full",
     ) -> bool:
         """Advance the lane model.
 
         Returns True when the truck has been off the road edge long enough to
         fire a warning/damage event. A completed drift across an interior lane
         line is reported through ``crossed`` (+1 moved left, -1 moved right)
-        for the frame it happens. ``assist='off'`` preserves the pre-existing
-        driving behavior by keeping the truck centered; the discrete ``lane``
-        is still honored there, driven by tap-to-change controls.
+        for the frame it happens. ``assist='full'`` is lane keeping doing the
+        whole job: the truck stays centered and no drift accrues. The discrete
+        ``lane`` is still honored there, driven by tap-to-change controls.
         """
         self.crossed = 0
         tuning = ASSIST_TUNING.get(assist)

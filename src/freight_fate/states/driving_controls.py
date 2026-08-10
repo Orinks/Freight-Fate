@@ -85,9 +85,9 @@ class DrivingControlsMixin:
             self._adjust_cruise(CRUISE_STEP_MPH)
         elif key in (pygame.K_MINUS, pygame.K_KP_MINUS) or getattr(event, "unicode", "") == "-":
             self._adjust_cruise(-CRUISE_STEP_MPH)
-        elif key == pygame.K_LEFT and self.ctx.settings.steering_assist == "off":
+        elif key == pygame.K_LEFT and self.ctx.settings.lane_is_automated():
             self._tap_lane_change(1)
-        elif key == pygame.K_RIGHT and self.ctx.settings.steering_assist == "off":
+        elif key == pygame.K_RIGHT and self.ctx.settings.lane_is_automated():
             self._tap_lane_change(-1)
         elif key == pygame.K_SPACE:
             self._speak_speed()
@@ -265,7 +265,8 @@ class DrivingControlsMixin:
             "X signals for the next announced route exit, called out by its "
             "number when known, or cancels that signal. Prepare early: slow "
             "to 45 for the ramp, hold the exit "
-            "lane when lane drift is enabled, and the truck takes the ramp "
+            "lane unless lane keeping assistance is on full, and the truck takes "
+            "the ramp "
             "when your setup is valid. Ramps usually end at a traffic light "
             "or stop sign, called out on the way down; stop for red or the "
             "sign, then pull ahead. X also signals a pull-over if a "
@@ -309,8 +310,8 @@ class DrivingControlsMixin:
             "The Tab status menu includes a Driver apps tablet menu for "
             "navigation, weather, traffic, truck stops, road chatter, and ELD. "
             "Left or Right Control stops the driving event voice. "
-            "Left and Right arrows steer when lane drift is enabled; steer "
-            "across the lane line to change lanes. With lane drift off, tap "
+            "Left and Right arrows steer unless lane keeping assistance is on "
+            "full; steer across the lane line to change lanes. On full, tap "
             "Left or Right to change lanes instead. Exits leave from the "
             "right lane. Hazards called out as brake or change lanes are "
             "fixed objects in your lane: dodge with a clear lane beside "
@@ -361,8 +362,8 @@ class DrivingControlsMixin:
             )
         self.ctx.say(
             "Right trigger is the gas, left trigger the brake; press the left "
-            "trigger fully for the hardest stop. The left stick steers when lane "
-            "drift is on. "
+            "trigger fully for the hardest stop. The left stick steers unless lane "
+            "keeping assistance is on full. "
             f"{gears}"
             "The Y button starts automatic speed control, switching between "
             "adaptive cruise and the low-speed keeper as needed. Hold the right "
@@ -806,8 +807,8 @@ class DrivingControlsMixin:
         Opt-in and player-summoned, which is what keeps it inside the
         community ruling against continuous steering tones: nothing plays
         unless the driver asked, and I again turns it off."""
-        if self.ctx.settings.steering_assist == "off":
-            self.ctx.say("Lane drift is off; the truck holds the lane for you.")
+        if self.ctx.settings.lane_is_automated():
+            self.ctx.say("Lane keeping assistance is on full; the truck holds the lane for you.")
             return
         self._lane_locator_on = not self._lane_locator_on
         self._lane_locator_timer = 0.0

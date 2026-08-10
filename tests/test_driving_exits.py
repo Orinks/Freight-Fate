@@ -58,7 +58,7 @@ def test_x_signals_for_upcoming_route_exit_without_taking_it(monkeypatch):
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "light"
+    app.ctx.settings.lane_keeping = "partial"
     monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
@@ -89,7 +89,7 @@ def test_x_near_the_exit_keeps_the_signal_until_a_second_press(monkeypatch):
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "realistic"
+    app.ctx.settings.lane_keeping = "off"
     monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
@@ -122,7 +122,7 @@ def test_right_taps_with_drift_on_earn_the_hold_hint_once(monkeypatch):
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "realistic"
+    app.ctx.settings.lane_keeping = "off"
     monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     try:
         driving = start_drive(app)
@@ -160,7 +160,7 @@ def test_missed_destination_exit_reroutes_every_time(monkeypatch):
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "realistic"
+    app.ctx.settings.lane_keeping = "off"
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
@@ -223,7 +223,7 @@ def test_canceled_exit_signal_does_not_prompt_lane_prep(monkeypatch):
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "light"
+    app.ctx.settings.lane_keeping = "partial"
     monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(
         app.ctx,
@@ -256,7 +256,7 @@ def test_canceled_destination_exit_signal_stays_on_highway(monkeypatch):
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "off"
+    app.ctx.settings.lane_keeping = "full"
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
@@ -293,7 +293,7 @@ def test_destination_exit_auto_arms_and_takes_ramp_with_valid_setup(monkeypatch)
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "off"
+    app.ctx.settings.lane_keeping = "full"
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
@@ -318,12 +318,55 @@ def test_destination_exit_auto_arms_and_takes_ramp_with_valid_setup(monkeypatch)
 
 
 @pytest.mark.smoke
+def test_full_lane_keeping_says_it_is_taking_the_destination_exit(monkeypatch):
+    """The reported bug: exits took themselves with nothing said. Full lane
+    keeping is allowed to take them; it is not allowed to be silent about it."""
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.lane_keeping = "full"
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving._destination_exit_stop()
+        assert stop is not None
+        driving.trip.position_mi = stop.at_mi - 1.0
+        driving.truck.velocity_mps = 15.0
+        driving.update(1 / 60)
+        assert any("Lane keeping will take this exit" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_destination_exit_auto_grant_follows_full_lane_keeping(monkeypatch):
+    """The auto-grant is keyed on the mode, not on the old string. Under
+    partial or off the destination exit needs the signal like any other."""
+    from freight_fate.app import App
+
+    for mode, expected in (("full", True), ("partial", False), ("off", False)):
+        app = App()
+        app.ctx.settings.lane_keeping = mode
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub([]))
+        try:
+            driving = start_drive(app)
+            quiet_trip(driving)
+            stop = driving._destination_exit_stop()
+            assert stop is not None
+            assert driving._exit_intent_ready(stop) is expected
+        finally:
+            app.shutdown()
+
+
+@pytest.mark.smoke
 def test_destination_exit_no_longer_requires_x_to_take_ramp(monkeypatch):
     from freight_fate.app import App
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "off"
+    app.ctx.settings.lane_keeping = "full"
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
@@ -344,13 +387,13 @@ def test_destination_exit_no_longer_requires_x_to_take_ramp(monkeypatch):
 
 
 @pytest.mark.smoke
-@pytest.mark.parametrize("steering_assist", ("light", "realistic"))
-def test_realistic_lane_drift_requires_signal_for_destination_exit(monkeypatch, steering_assist):
+@pytest.mark.parametrize("lane_keeping", ("partial", "off"))
+def test_manual_lane_keeping_requires_signal_for_destination_exit(monkeypatch, lane_keeping):
     from freight_fate.app import App
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = steering_assist
+    app.ctx.settings.lane_keeping = lane_keeping
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
@@ -377,7 +420,7 @@ def test_relaxed_lane_drift_infers_destination_exit_intent(monkeypatch):
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "off"
+    app.ctx.settings.lane_keeping = "full"
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
@@ -403,12 +446,12 @@ def test_exit_requires_right_lane_alignment(monkeypatch):
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "light"
+    app.ctx.settings.lane_keeping = "partial"
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        app.ctx.settings.steering_assist = "light"
+        app.ctx.settings.lane_keeping = "partial"
         driving.trip.traffic_pressures = []
         stop = driving.trip.stops[0]
         driving.trip.position_mi = stop.at_mi - 1.0
@@ -431,12 +474,12 @@ def test_exit_traffic_pressure_changes_missed_lane_recovery(monkeypatch):
 
     spoken = []
     app = App()
-    app.ctx.settings.steering_assist = "light"
+    app.ctx.settings.lane_keeping = "partial"
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        app.ctx.settings.steering_assist = "light"
+        app.ctx.settings.lane_keeping = "partial"
         stop = driving.trip.stops[0]
         driving.trip.traffic_pressures = [
             TrafficPressure(
@@ -468,7 +511,7 @@ def test_exit_lane_can_be_set_with_keyboard_steering(monkeypatch):
     spoken = []
     sounds = []
     app = App()
-    app.ctx.settings.steering_assist = "light"
+    app.ctx.settings.lane_keeping = "partial"
     monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(
         app.ctx.audio, "play", lambda key, volume=1.0, **_kw: sounds.append((key, volume))
@@ -494,7 +537,7 @@ def test_lane_drift_off_sets_exit_lane_when_signaling(monkeypatch):
     spoken = []
     sounds = []
     app = App()
-    app.ctx.settings.steering_assist = "off"
+    app.ctx.settings.lane_keeping = "full"
     monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
     monkeypatch.setattr(
         app.ctx.audio, "play", lambda key, volume=1.0, **_kw: sounds.append((key, volume))
@@ -515,16 +558,16 @@ def test_lane_drift_off_sets_exit_lane_when_signaling(monkeypatch):
         app.shutdown()
 
 
-def test_exit_speed_assist_slows_with_lane_drift_off(monkeypatch):
-    """Regression: the assist sat below the lane-drift early return, so it
-    never ran with steering assistance off -- and the All assists preset
-    forces lane drift off, silently disabling an assist it just turned on."""
+def test_exit_speed_assist_slows_with_full_lane_keeping(monkeypatch):
+    """Regression: the assist sat below the lane-work early return, so it
+    never ran with lane keeping on full -- and the All assists preset selects
+    full, silently disabling an assist it had just turned on."""
     from freight_fate.app import App
 
     spoken = []
     app = App()
     app.ctx.settings.apply_driving_assistance_preset("all")
-    assert app.ctx.settings.steering_assist == "off"
+    assert app.ctx.settings.lane_keeping == "full"
     assert app.ctx.settings.exit_speed_assist is True
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
     try:
@@ -538,8 +581,8 @@ def test_exit_speed_assist_slows_with_lane_drift_off(monkeypatch):
         assert driving.truck.brake >= 0.35
         slowing = [line for line in spoken if "Exit speed assistance slowing" in line]
         assert slowing
-        # Never name a key this driver does not have: with lane drift off a
-        # tap changes lanes, and holding Right does nothing.
+        # Never name a key this driver does not have: with lane keeping on
+        # full a tap changes lanes, and holding Right does nothing.
         assert "Tap Right" in slowing[-1]
         assert "Hold Right" not in slowing[-1]
     finally:
@@ -551,7 +594,7 @@ def test_exit_lane_stays_set_after_keyboard_release():
     from freight_fate.app import App
 
     app = App()
-    app.ctx.settings.steering_assist = "light"
+    app.ctx.settings.lane_keeping = "partial"
     try:
         driving = start_drive(app)
         quiet_trip(driving)

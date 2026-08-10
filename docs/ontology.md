@@ -86,6 +86,7 @@ belongs to the truck you own in this game, not to the driver.
 | Road events | `TripRoadEventMixin` | `sim/trip_road_events.py` |
 | Traffic on the trip | `TripTrafficMixin` | `sim/trip_traffic.py` |
 | Lane keeping | `LaneKeeping` | `sim/lane.py` |
+| Lane keeping (the setting) | `lane_keeping` | `settings.py`, `states/main_menu.py` |
 | Driving mode tuning | `DrivingModeTuning` | `sim/driving_modes.py` |
 | Pedal latch | `PedalLatch` | `sim/pedal_latch.py` |
 | Planned rest-stop stopping assistance | `selected_stop_assist` | `settings.py`, `states/driving_events.py` |
@@ -189,6 +190,7 @@ from the words, and synonyms cost them a re-read.
 | A license add-on | endorsement | certification, licence | `ENDORSEMENT_LEVELS` |
 | A purchasable consumable | its own name: "shower", "energy drink" | buff, item, power-up | `Buff` |
 | The tractor a carrier gave you | your assigned truck | your truck (when leased) | `FleetTier` |
+| How much of the lane-holding work the truck does | lane keeping, always with its value clause ("full, the truck holds the lane and takes your exits") | lane drift (retired 1.9), steering assist, lane keeping assist (that is `lane_centering_assist`), the bare value word alone -- "off" here is the hardest mode, the opposite of "off" on the rows around it | `settings.lane_keeping` |
 | Vehicles around you now | traffic | NPCs, cars | `TrafficManager` |
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
 | A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |

@@ -671,7 +671,7 @@ class DrivingUpdateMixin:
         self._accrue_microsleep(gm, moving, fatigue)
 
     def _update_lane(self, keys, dt: float) -> None:
-        mode = self.ctx.settings.steering_assist
+        mode = self.ctx.settings.lane_keeping
         steer = 0.0
         if keys[pygame.K_LEFT]:
             steer -= 1.0
@@ -1071,7 +1071,7 @@ class DrivingUpdateMixin:
             text = "Through the bend. You caught the edge."
         elif run["hot"]:
             text = "Through the bend, hot."
-        elif self.ctx.settings.steering_assist != "off":
+        elif self.ctx.settings.lane_is_manual():
             text = "Through the bend, held your line."
         else:
             text = "Through the bend."
@@ -1122,10 +1122,10 @@ class DrivingUpdateMixin:
     def _update_lane_locator_audio(self, dt: float) -> None:
         """The I-key locator: a soft tock every beat, panned to where the
         truck sits in its lane. Player-summoned, so it keeps ticking until
-        they shut it off or lane drift goes away."""
+        they shut it off or lane keeping takes the lane over."""
         if not self._lane_locator_on:
             return
-        if self.ctx.settings.steering_assist == "off" or self.truck.speed_mph < 2.0:
+        if self.ctx.settings.lane_is_automated() or self.truck.speed_mph < 2.0:
             return
         self._lane_locator_timer -= dt
         if self._lane_locator_timer > 0.0:
@@ -1146,7 +1146,7 @@ class DrivingUpdateMixin:
         the spoken warning carries the oncoming danger)."""
         from ..sim.lane_guidance import edge_rung
 
-        if self.ctx.settings.steering_assist == "off" or self.truck.speed_mph < 2.0:
+        if self.ctx.settings.lane_is_automated() or self.truck.speed_mph < 2.0:
             rung = None  # tires that are not rolling make no groove noise
         else:
             rung = edge_rung(
@@ -1199,8 +1199,7 @@ class DrivingUpdateMixin:
                 self.lane,
                 dt,
                 assist_on=(
-                    self.ctx.settings.steering_assist != "off"
-                    and self.truck.speed_mph >= LANE_MIN_MPH
+                    self.ctx.settings.lane_is_manual() and self.truck.speed_mph >= LANE_MIN_MPH
                 ),
                 curve_steer=self._curve_steer_demand(),
                 curve_ahead_mi=self.trip.curve_ahead_mi(CURVE_LEAD_MI),
@@ -1417,7 +1416,7 @@ class DrivingUpdateMixin:
         self._update_edge_ladder_audio(audio)
         self._update_transverse_strips()
         self._update_lane_locator_audio(dt)
-        if rumble > 0.0 and self.ctx.settings.steering_assist != "off":
+        if rumble > 0.0 and self.ctx.settings.lane_is_manual():
             # Harsh, continuous pad buzz while over the rumble strip; refreshed
             # each frame, it stops on its own once steered back off.
             self.ctx.controller.rumble.rumble_strip(rumble)

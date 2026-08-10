@@ -119,7 +119,7 @@ def test_selected_stop_assist_reaches_full_stop_and_sleep_menu(monkeypatch, driv
     app, driving, spoken = driving_app
     stop = sleep_stop(driving, ahead=1.0)
     app.ctx.settings.selected_stop_assist = True
-    app.ctx.settings.steering_assist = "off"
+    app.ctx.settings.lane_keeping = "full"
     monkeypatch.setattr("freight_fate.sim.hos.parking_is_full", lambda *_args: False)
     driving.truck.start_engine()
     driving.truck.set_air_ready(parking_brake=False)

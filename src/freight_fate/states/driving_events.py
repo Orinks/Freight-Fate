@@ -736,12 +736,20 @@ class DrivingEventMixin:
         }.get(self._ramp_control_for(stop), "")
         ahead_text = self.ctx.settings.distance_text(ahead, precise=True)
         ramp_text = self.ctx.settings.speed_text(RAMP_MAX_MPH)
-        if self.ctx.settings.steering_assist == "off":
+        if self.ctx.settings.lane_is_automated():
             self._exit_lane_alignment = EXIT_LANE_READY
             self._exit_lane_ready_said = True
             self.ctx.audio.play("ui/notify", volume=0.6)
+            # The first granted lane of the run says who granted it. A driver
+            # who never asked for this needs one chance to notice the truck
+            # is doing it, and where to change that.
+            if self._lane_keeping_grant_said:
+                granted = "Exit lane set."
+            else:
+                self._lane_keeping_grant_said = True
+                granted = "Exit lane set for you by lane keeping."
             message = (
-                f"{head} {ahead_text} ahead. Exit lane set.{lane_hint} "
+                f"{head} {ahead_text} ahead. {granted}{lane_hint} "
                 f"Slow to {ramp_text} or less for the ramp.{ending}" + self._cap_cruise_for_ramp()
             )
         else:
@@ -753,9 +761,7 @@ class DrivingEventMixin:
         if self._is_selected_stop(stop):
             self._selected_stop_assist_armed = self.ctx.settings.selected_stop_assist
             if self._selected_stop_assist_armed:
-                lane_action = (
-                    "Set the exit lane; " if self.ctx.settings.steering_assist != "off" else ""
-                )
+                lane_action = "Set the exit lane; " if self.ctx.settings.lane_is_manual() else ""
                 message += (
                     " Planned rest-stop stopping assistance armed. "
                     f"{lane_action}After the ramp control is clear, it will stop at the entrance."
@@ -841,8 +847,8 @@ class DrivingEventMixin:
         if ahead <= 0:
             return
         milestones = EXIT_COUNTDOWN_MILESTONES_MI
-        if self.ctx.settings.steering_assist != "off":
-            # Drift-on players already get the two-mile exit-lane prep
+        if self.ctx.settings.lane_is_manual():
+            # Players doing their own lane work get the two-mile exit-lane prep
             # prompt; the countdown adds only the closer anchors.
             milestones = milestones[1:]
         crossed = [m for m in milestones if ahead <= m and m not in self._exit_countdown_said]
@@ -865,7 +871,7 @@ class DrivingEventMixin:
         if not self._exit_lane_ready():
             lane_text = (
                 " Tap Right to the right lane."
-                if self.ctx.settings.steering_assist == "off"
+                if self.ctx.settings.lane_is_automated()
                 else " Steer right for the exit lane."
             )
         self.ctx.audio.play("ui/notify", volume=0.6)
@@ -879,7 +885,7 @@ class DrivingEventMixin:
         if self._exit_signal_on:
             self._update_exit_countdown(stop)
             self._update_exit_speed_assist(stop)
-        if self.ctx.settings.steering_assist == "off":
+        if self.ctx.settings.lane_is_automated():
             return
         if not self._exit_signal_on:
             return
@@ -889,8 +895,9 @@ class DrivingEventMixin:
 
         right = keys[pygame.K_RIGHT]
         left = keys[pygame.K_LEFT]
-        # A quick tap is how assist-off players change lanes; with drift on
-        # it only nudges the wheel and the exit lane never builds. Two taps
+        # A quick tap is how full-lane-keeping players change lanes; when the
+        # lane work is yours it only nudges the wheel and the exit lane never
+        # builds. Two taps
         # on one approach earn the how-to, once, so the silence never reads
         # as broken keys.
         if right:
@@ -906,7 +913,7 @@ class DrivingEventMixin:
         ):
             self._exit_tap_hint_said = True
             self.ctx.say(
-                "Lane drift is on, so taps only nudge the wheel. "
+                "You are holding the lane yourself, so taps only nudge the wheel. "
                 "Hold Right to steer into the exit lane."
             )
         if right:
@@ -959,10 +966,10 @@ class DrivingEventMixin:
     def _update_exit_speed_assist(self, stop) -> None:
         """Slow an armed exit toward ramp speed, in EVERY steering mode.
 
-        This used to sit below the lane-drift early return, so it never ran
-        with ``steering_assist`` off -- and the All assists preset forces lane
-        drift off, which meant the easiest preset silently disabled one of the
-        assists it had just turned on.
+        This used to sit below the lane-work early return, so it never ran
+        with ``lane_keeping`` on full -- and the All assists preset
+        selects full lane keeping, which meant the easiest preset silently
+        disabled one of the assists it had just turned on.
         """
         if not self.ctx.settings.exit_speed_assist:
             return
@@ -981,7 +988,7 @@ class DrivingEventMixin:
         # drift off a tap changes lanes, and holding Right does nothing.
         lane_text = (
             "Tap Right to the right lane and keep slowing."
-            if self.ctx.settings.steering_assist == "off"
+            if self.ctx.settings.lane_is_automated()
             else "Hold Right for the exit lane and keep slowing."
         )
         # Never "confirm": there is no confirm action, and an X pressed to
@@ -1090,14 +1097,20 @@ class DrivingEventMixin:
             if labeled
             else f"In {distance}, the destination exit for {stop.name}."
         )
+        if not self.ctx.settings.lane_is_automated():
+            if self._terse_speech():
+                return core
+            return f"{core} Move right for the exit lane and slow down."
+        # Lane keeping takes this exit with no signal and no lane work, so
+        # the one thing the driver must not have to infer is that it is
+        # happening at all. Said once per run, and terse keeps it: a
+        # consequence is exactly what terse verbosity holds on to.
+        if self._lane_keeping_takes_exit_said:
+            return core if self._terse_speech() else f"{core} Slow down for the ramp."
+        self._lane_keeping_takes_exit_said = True
         if self._terse_speech():
-            return core
-        lane_text = (
-            "Slow down for the ramp."
-            if self.ctx.settings.steering_assist == "off"
-            else "Move right for the exit lane and slow down."
-        )
-        return f"{core} {lane_text}"
+            return f"{core} Lane keeping will take this exit."
+        return f"{core} Lane keeping will take this exit. Slow down for the ramp."
 
     def _check_destination_exit(self) -> None:
         stop = self._destination_exit_stop()
@@ -1121,7 +1134,7 @@ class DrivingEventMixin:
             self._exit_stop = stop
             self._exit_signal_canceled = False
             self._reset_exit_lane_state()
-            if self.ctx.settings.steering_assist == "off":
+            if self.ctx.settings.lane_is_automated():
                 self._exit_lane_alignment = EXIT_LANE_READY
                 self._exit_lane_ready_said = True
 
@@ -1195,7 +1208,7 @@ class DrivingEventMixin:
             return False
         if self._exit_signal_on:
             return True
-        return stop.type == "delivery_destination" and self.ctx.settings.steering_assist == "off"
+        return stop.type == "delivery_destination" and self.ctx.settings.lane_is_automated()
 
     def _surface_chain_route(self):
         """The destination facility's tier-1 street chain, or None.
@@ -2983,10 +2996,10 @@ class DrivingEventMixin:
         self._destination_exit_response_s = 0.0
         self._destination_exit_cache = None
         if self._terse_speech():
-            # The signal reset with the miss; with lane drift on, terse
+            # The signal reset with the miss; when the lane work is theirs, terse
             # players still need to hear that arming it is on them again.
             reroute_text = "Safe turnaround. Destination exit ahead again."
-            if self.ctx.settings.steering_assist != "off":
+            if self.ctx.settings.lane_is_manual():
                 reroute_text = (
                     "Safe turnaround. Destination exit ahead again; press "
                     f"{self.ctx.control_hint('take_exit')} to signal."

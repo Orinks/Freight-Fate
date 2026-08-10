@@ -65,7 +65,7 @@ def test_steering_across_the_line_changes_lanes():
     lane.steering = -1.0  # hold left
     crossed = 0
     for _ in range(200):
-        lane.update(0.1, 29.0, assist="realistic")
+        lane.update(0.1, 29.0, assist="off")
         if lane.crossed:
             crossed = lane.crossed
             break
@@ -81,7 +81,7 @@ def test_no_lane_to_the_left_means_the_median():
     lane.steering = -1.0
     fired = False
     for _ in range(400):
-        if lane.update(0.1, 29.0, assist="realistic"):
+        if lane.update(0.1, 29.0, assist="off"):
             fired = True
             break
     assert fired  # off-road event, not a lane change

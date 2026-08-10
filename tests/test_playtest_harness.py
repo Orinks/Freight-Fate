@@ -1029,7 +1029,7 @@ def test_lane_setup_keys_change_lane_and_speak_result(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
         harness.start_delivery(profile_name="Lane Keyboard Driver")
         harness.prepare_for_driving(speed_mph=45.0)
-        harness.app.ctx.settings.steering_assist = "off"
+        harness.app.ctx.settings.lane_keeping = "full"
         harness.driving.lane.lane = 0
         harness.press_key(pygame.K_LEFT)
         assert harness.driving._lane_change_target == 1

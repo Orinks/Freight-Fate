@@ -22,6 +22,8 @@ from ..playtest_levers import apply_continue_levers
 from ..settings import (
     DRIVING_ASSIST_FIELDS,
     DRIVING_ASSIST_PRESETS,
+    LANE_KEEPING_MODES,
+    LANE_KEEPING_TO_LEGACY,
     PLACE_CALLOUT_MODES,
     TIME_SCALES,
 )
@@ -241,6 +243,16 @@ class MainMenuState(MenuState):
                 f"{count} saved career could not be read and was moved aside. "
                 if count == 1
                 else f"{count} saved careers could not be read and were moved aside. "
+            )
+        if self.ctx.settings.lane_keeping_unreadable:
+            # Falling back to full lane keeping is the right answer and a
+            # silent one is not: it deletes the destination-exit decision
+            # outright, and nothing later in the drive would explain why.
+            self.ctx.settings.lane_keeping_unreadable = False
+            warning += (
+                "Your lane keeping setting could not be read, so it is set to "
+                "full: the truck holds the lane and takes your exits. Change it "
+                "in Settings, Driving assistance. "
             )
         if not _loadable_saves() and _legacy_saves:
             # Every saved career predates 1.9, so there is no Continue item
@@ -901,7 +913,7 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Driving assistance preset: {self._assist_preset_label()}",
                     lambda: self._cycle_assist_preset(1),
-                    help="Realistic provides modern truck safety support. Balanced adds light lane centering and downhill speed help. All assists enables every available driving assist and switches lane drift off, so lanes are kept for you and a tap changes lanes. Changing an individual assist makes this Custom. You still steer, choose routes, confirm exits, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
+                    help="Realistic provides modern truck safety support. Balanced adds light lane centering and downhill speed help. All assists enables every available driving assist and sets lane keeping to full, so the truck holds the lane, a tap changes lanes, and your destination exit is taken for you. Changing an individual assist makes this Custom. You still choose routes, and handle yards and docks. Presets do not change trip pacing, hours rules, transmission, weather, or hazards.",
                 )
             ]
             items.extend(
@@ -921,20 +933,21 @@ class SettingsCategoryState(MenuState):
             )
             items.append(
                 MenuItem(
-                    lambda: f"Lane drift: {self._steering_label()}",
-                    lambda: self._cycle_steering(1),
-                    help="Adds an optional lane-position task while you drive. "
-                    "Off keeps the truck centered with no lane work. Light "
-                    "drifts gently with centering help, and realistic drifts "
-                    "like a real wheel, so exits need a signal and the exit "
-                    "lane. With drift on, the road sound leans toward where "
-                    "the wheel should go -- follow it into a bend and back "
-                    "to lane center -- and the road edge answers with real "
-                    "textures: a stutter clipping the rumble strip, a buzz "
-                    "fully on it, gravel off the pavement. Choosing light or "
-                    "realistic turns the matching lane support on. The All "
-                    "assists preset switches this off; other presets never "
-                    "change it.",
+                    lambda: f"Lane keeping: {self._lane_keeping_label()}",
+                    lambda: self._cycle_lane_keeping(1),
+                    help="Formerly Lane drift. How much of the lane-holding "
+                    "work the truck does. Full holds the lane for you, turns "
+                    "Left and Right into tap lane changes, and takes your "
+                    "exits, including the destination exit, without a signal. "
+                    "Partial drifts gently with generous steering help; off "
+                    "drifts like a real wheel and every exit needs its signal "
+                    "and its exit lane. On partial or off the road sound "
+                    "leans toward where the wheel should go -- follow it into "
+                    "a bend and back to lane center -- and the road edge "
+                    "answers with real textures: a stutter clipping the "
+                    "rumble strip, a buzz fully on it, gravel off the "
+                    "pavement. Realistic sets this to off, Balanced to "
+                    "partial, All assists to full.",
                 )
             )
             items.append(
@@ -1003,10 +1016,17 @@ class SettingsCategoryState(MenuState):
                     "makes road hazards rare, so you can focus on "
                     "driver responsibility: hours, fueling, and repairs.",
                 ),
+                # One setting, one live control. This row used to adjust lane
+                # keeping too, under a second and much thinner help text; two
+                # live controls for one setting is a real hazard in a spoken
+                # list. It stays here as a pointer for a release or two so
+                # muscle memory still lands somewhere useful, the same way
+                # the moved Online row does.
                 MenuItem(
-                    lambda: f"Lane drift: {self._steering_label()}",
-                    lambda: self._cycle_steering(1),
-                    help="Choose whether lane drift is off, light, or realistic.",
+                    "Lane keeping",
+                    self._open_assistance_settings,
+                    help="Lane keeping, formerly Lane drift, has moved to "
+                    "driving assistance settings. This opens that menu.",
                 ),
                 MenuItem(
                     lambda: f"Speed keeper: {'on' if s.speed_keeper else 'off'}",
@@ -1150,7 +1170,10 @@ class SettingsCategoryState(MenuState):
                     self._toggle_overspeed_warning,
                     self._cycle_pace,
                     self._cycle_hos,
-                    self._cycle_steering,
+                    # The lane keeping row here is a pointer, not a control:
+                    # left and right must not silently change a setting the
+                    # row cannot read back.
+                    lambda _d: None,
                     self._toggle_speed_keeper,
                     self._toggle_controller,
                     self._toggle_haptics,
@@ -1161,6 +1184,11 @@ class SettingsCategoryState(MenuState):
                         (lambda d, field=field: self._toggle_driving_assist(field, d))
                         for field, _, _ in self._driving_assist_specs()
                     ],
+                    # The last two rows of this category were left out of the
+                    # arrow-key path, so Left and Right did nothing on them
+                    # while every other row answered.
+                    self._cycle_lane_keeping,
+                    self._cycle_cue_loudness,
                 ],
                 "audio": [
                     lambda d: self._volume("master_volume", 0.1 * d),
@@ -1401,6 +1429,41 @@ class SettingsCategoryState(MenuState):
             ),
         )
 
+    def _open_assistance_settings(self) -> None:
+        self.ctx.push_state(SettingsCategoryState(self.ctx, "assistance"))
+
+    def speak_current(self) -> None:
+        super().speak_current()
+        self._maybe_say_lane_keeping_rename()
+
+    def _maybe_say_lane_keeping_rename(self) -> None:
+        """Tell a returning player their Lane drift row is now Lane keeping.
+
+        Only the real control says it, and only for a player whose settings
+        file actually carried the old name. It queues behind the row
+        announcement rather than interrupting it, which means a player who
+        keeps arrowing loses it -- so the budget is three, and a lost
+        announcement corrects itself on the next visit.
+        """
+        s = self.ctx.settings
+        if self.category != "assistance" or s.lane_keeping_rename_notice_left <= 0:
+            return
+        if not self.items or not self.items[self.index].text.startswith("Lane keeping"):
+            return
+        s.lane_keeping_rename_notice_left -= 1
+        s.save()
+        was = LANE_KEEPING_TO_LEGACY.get(s.lane_keeping, "off")
+        unchanged = {
+            "full": "the truck still holds the lane and takes your exits",
+            "partial": "the drift and the steering help are just as they were",
+            "off": "you still hold the lane and take your own exits",
+        }.get(s.lane_keeping, "the truck still holds the lane and takes your exits")
+        self.ctx.say(
+            f"This row used to be Lane drift, and yours read {was}. "
+            f"Nothing about your driving changed: {unchanged}.",
+            interrupt=False,
+        )
+
     def _assist_preset_label(self) -> str:
         return {
             "realistic": "Realistic",
@@ -1416,16 +1479,16 @@ class SettingsCategoryState(MenuState):
         presets = tuple(DRIVING_ASSIST_PRESETS)
         current = self.ctx.settings.driving_assistance_preset
         index = presets.index(current) if current in presets else (-1 if direction > 0 else 0)
-        drift_before = self.ctx.settings.steering_assist
+        lane_before = self.ctx.settings.lane_keeping
         self.ctx.settings.apply_driving_assistance_preset(
             presets[(index + direction) % len(presets)]
         )
         self._announce()
-        if self.ctx.settings.steering_assist != drift_before:
+        if self.ctx.settings.lane_keeping != lane_before:
             note = (
-                "Lane drift off: automated lane keeping, tap Left or Right to change lanes."
-                if self.ctx.settings.steering_assist == "off"
-                else f"Lane drift back on: {self._steering_label()}."
+                "Lane keeping full: the truck holds the lane, tap Left or Right to change lanes."
+                if self.ctx.settings.lane_is_automated()
+                else f"Lane keeping back to {self._lane_keeping_label()}."
             )
             self.ctx.say(note, interrupt=False)
 
@@ -1472,14 +1535,13 @@ class SettingsCategoryState(MenuState):
             "debug_off": "off (developer)",
         }.get(self.ctx.settings.hos_mode, "realistic")
 
-    def _steering_label(self) -> str:
+    def _lane_keeping_label(self) -> str:
         # The value carries its own meaning: a player cycling the row hears
-        # what changes hands, not a bare difficulty word (owner ask 2026-07-27).
-        return {
-            "off": "off, the truck holds the lane for you",
-            "light": "light, gentle drift and you steer with help",
-            "realistic": "realistic, you hold the lane yourself",
-        }.get(self.ctx.settings.steering_assist, "off, the truck holds the lane for you")
+        # what changes hands, not a bare difficulty word (owner ask
+        # 2026-07-27). It has to, because "off" here means the hardest mode
+        # while "off" on the rows around it means less help. The labels and
+        # the loader's fallback share one source in settings.py.
+        return self.ctx.settings.lane_keeping_label()
 
     def _announce(self) -> None:
         self.refresh()
@@ -1567,17 +1629,15 @@ class SettingsCategoryState(MenuState):
         self.ctx.settings.lane_cue_loudness = levels[(i + d) % len(levels)]
         self._announce()
 
-    def _cycle_steering(self, d: int) -> None:
-        modes = ["off", "light", "realistic"]
+    def _cycle_lane_keeping(self, d: int) -> None:
+        modes = list(LANE_KEEPING_MODES)
         try:
-            i = modes.index(self.ctx.settings.steering_assist)
+            i = modes.index(self.ctx.settings.lane_keeping)
         except ValueError:
             i = 0
-        self.ctx.settings.steering_assist = modes[(i + d) % len(modes)]
-        # A hand-picked lane-drift value is the player's own choice now: it
-        # cancels any restore All assists was holding, and the preset row has
-        # to answer for it (All assists with drift on reads as Custom).
-        self.ctx.settings.steering_assist_restore = ""
+        self.ctx.settings.lane_keeping = modes[(i + d) % len(modes)]
+        # Lane keeping is a preset field, so a hand-picked value is answered
+        # by the preset row the same way any other assist is.
         self.ctx.settings.refresh_driving_assistance_preset()
         self._announce()
 

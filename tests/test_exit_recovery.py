@@ -93,7 +93,7 @@ def test_countdown_anchors_the_exit_with_lane_advice(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        app.ctx.settings.steering_assist = "off"
+        app.ctx.settings.lane_keeping = "full"
         spoken = _capture_events(app, monkeypatch)
         stop = _armed_exit(driving, 1.9)
         # Not in the right lane: the countdown must say how to fix it.
@@ -117,7 +117,7 @@ def test_countdown_crossing_all_milestones_speaks_only_nearest(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        app.ctx.settings.steering_assist = "off"
+        app.ctx.settings.lane_keeping = "full"
         spoken = _capture_events(app, monkeypatch)
         stop = _armed_exit(driving, 5.0)
         # Time compression: one frame jumps from far out to almost there.
