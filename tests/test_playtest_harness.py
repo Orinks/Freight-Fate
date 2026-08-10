@@ -622,6 +622,11 @@ def test_signaled_downhill_exit_keeps_cruise_below_ramp_limit(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
         harness.app.ctx.settings.automatic_transmission = True
         harness.app.ctx.settings.time_scale = 10.0
+        # This is about what cruise does for a ramp, not about lane work. With
+        # lane keeping manual (the default since the realistic preset became
+        # real) the truck never reaches the exit lane on its own, so it never
+        # enters the ramp and there is no cruise behaviour left to test.
+        harness.app.ctx.settings.lane_keeping = "full"
         harness.start_route("Chicago", "Indianapolis", trip_seed=0)
         driving = harness.driving
         assert driving is not None
@@ -671,6 +676,9 @@ def test_rest_stop_arrival_cue_allows_immediate_parking_brake_stop(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
         harness.app.ctx.settings.automatic_transmission = True
         harness.app.ctx.settings.time_scale = 40.0
+        # The question here is whether the spoken arrival point leaves real
+        # seconds to stop in, not whether the driver made the exit lane.
+        harness.app.ctx.settings.lane_keeping = "full"
         harness.start_route("Chicago", "Indianapolis", trip_seed=0)
         driving = harness.driving
         assert driving is not None

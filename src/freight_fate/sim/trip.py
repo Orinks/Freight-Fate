@@ -401,8 +401,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         if len(leg.route_points) >= 2:
             return self._leg_latlon_at(leg, native_offset)
         world = get_world()
-        start = world.cities[self.route.cities[leg_i]]
-        end = world.cities[self.route.cities[leg_i + 1]]
+        # A leg with no baked geometry falls back to interpolating between its
+        # two city coordinates -- but a synthetic route (a test fixture, a
+        # hand-built leg) names cities the world has never heard of. Answering
+        # "no coordinate" is right there: every caller already guards on a
+        # falsy pair, and a coordinate lookup must not be able to take the
+        # whole trip down. Enforcement-post placement made this reachable by
+        # asking for the region of every mile it considers.
+        try:
+            start = world.cities[self.route.cities[leg_i]]
+            end = world.cities[self.route.cities[leg_i + 1]]
+        except (KeyError, IndexError):
+            return (0.0, 0.0)
         fraction = route_offset / leg.miles if leg.miles > 0 else 0.0
         return (
             start.lat + (end.lat - start.lat) * fraction,
@@ -1610,7 +1620,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         leg_i, leg_start = self._leg_at_mile(mile)
         leg = self.route.legs[leg_i]
         nearer = leg_i if mile - leg_start < leg.miles / 2 else leg_i + 1
-        return get_world().cities[self.route.cities[nearer]].region
+        # Same reason as latlon_at: a synthetic route names cities the world
+        # does not carry, and no caller of this is worth crashing a trip for.
+        # Region only tunes how thick enforcement and weather are; an unknown
+        # road simply gets the neutral default.
+        try:
+            return get_world().cities[self.route.cities[nearer]].region
+        except (KeyError, IndexError):
+            return ""
 
     def _near_city(self, mile: float) -> bool:
         return any(abs(mile - mp) <= URBAN_RADIUS_MI for mp in self._city_mileposts)
