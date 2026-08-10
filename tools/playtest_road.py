@@ -479,6 +479,8 @@ def run_headless(app, driving, args) -> None:
     """Drive it on the clock and print what happens -- no window, no speech."""
     import pygame
 
+    from freight_fate.states.driving_damage import cargo_status_clause
+
     spoken: list[tuple[str, str]] = []
     app.ctx.say_event = lambda text, interrupt=False: spoken.append(("event", text))
     app.ctx.say = lambda text, interrupt=True: spoken.append(("say", text))
@@ -491,10 +493,20 @@ def run_headless(app, driving, args) -> None:
     app.push_state(driving)
 
     trip, truck = driving.trip, driving.truck
-    print("\n  mile   mph  grade  gear  jake  brake   air   cruise")
+    print("\n  mile   mph  grade  gear  jake  brake   air   cruise  cargo  peak g")
     seen, last_report = 0, trip.position_mi - 1.0
+    # What the freight actually felt, which no other column shows: the hardest
+    # deceleration of the run and the worst overspeed through a bend are the
+    # two inputs the cargo model reads, so a condition number that moved can
+    # be traced to the manoeuvre that moved it.
+    peak_decel_g = peak_corner_over = 0.0
+    last_mph = truck.speed_mph
     for _ in range(int(60 * 60 * args.headless)):
         driving.update(1 / 60)
+        decel_g = max(0.0, (last_mph - truck.speed_mph) / 2.23694 / 9.80665 * 60.0)
+        last_mph = truck.speed_mph
+        peak_decel_g = max(peak_decel_g, decel_g)
+        peak_corner_over = max(peak_corner_over, float(truck.corner_overspeed_mph))
         while seen < len(spoken):
             kind, text = spoken[seen]
             seen += 1
@@ -506,6 +518,7 @@ def run_headless(app, driving, args) -> None:
                 f"{truck.grade * 100:+5.1f}  {truck.transmission.gear:4d}  "
                 f"{'ON ' if truck.engine_brake else 'off'}  {truck.brake:5.2f} "
                 f"{truck.air_pressure_psi:5.1f}   {driving._cruise_mph}"
+                f"   {truck.cargo_damage_pct:5.1f}  {peak_decel_g:5.2f}"
             )
         if trip.finished:
             break
@@ -513,6 +526,11 @@ def run_headless(app, driving, args) -> None:
         f"\nfinal: mile {trip.position_mi:.1f}, {truck.speed_mph:.1f} mph, "
         f"air {truck.air_pressure_psi:.0f} psi, brakes {truck.brake_temp_c:.0f}C, "
         f"cruise {driving._cruise_mph}"
+    )
+    print(
+        f"cargo: {truck.cargo_damage_pct:.1f} percent "
+        f"({cargo_status_clause(truck)}), peak decel {peak_decel_g:.2f} g, "
+        f"worst bend {peak_corner_over:.0f} mph over advisory"
     )
 
 

@@ -93,6 +93,37 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Load-shift realism retune -- SHIPPED 2026-08-10.** Benched
+      through `tools/playtest_road.py` (which now reports cargo
+      condition, peak deceleration and worst bend overspeed in its
+      headless trace) and found two faults. Braking: the threshold sat
+      at 0.25 g against a truck whose service brakes top out at 0.35 g,
+      so one full application from 65 mph cost general freight 13.3 pct
+      -- past the exception line -- and food 31.9 pct. Securement is
+      rated to 0.8 g forward under 49 CFR 393.102, which no Class 8 rig
+      can reach, so the threshold moved to 0.45 g: full service stops
+      are free, the emergency application (0.58 g measured) costs about
+      3 pct, and a grade adding its own g still bites. Cornering: the
+      model read raw mph over the advisory, which ranked bends backwards
+      -- a 472 ft sweeper at +15 cost 7.1 pct while a 198 ft hairpin at
+      the same +15, pulling 0.68 g against the sweeper's 0.51, cost only
+      2.8 pct. Rebuilt on geometric lateral g from the curve's own
+      `min_radius_ft` (new `TruckState.corner_lateral_g`, fed by
+      `driving_damage`, with an advisory-derived fallback for legs whose
+      data carries no radius), threshold 0.40 g -- above every shipped
+      advisory, below the 0.5 g lateral securement rating. Every bend in
+      the game is now free at its posted advisory.
+- [ ] Test-suite streamlining pass (raised 2026-08-10). The suite is
+      past 9,000 tests and `-n auto` spawns a worker per core, each
+      booting a full pygame `App()`, which pins the owner's CPU; a run
+      of six driving suites also lost a worker to the thread timeout
+      ("node down" on `test_shift_key_does_not_press_clutch_in_
+      automatic`) while the same set passed serially in 146 s. Two
+      separable jobs: cap or tune the xdist worker count in
+      `pyproject`'s `addopts` so the machine stays usable, and prune or
+      consolidate the per-change tests that duplicate coverage. Measure
+      before deleting -- the App-booting fixtures are the likely cost,
+      not the test count.
 - [x] **Adversarial "break the game" harness -- SHIPPED 2026-08-09.**
       `tools/playtest_break.py` (plus `tools/playtest_break_scenarios/`,
       split by system family to stay under the practical-file-size

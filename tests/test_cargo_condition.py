@@ -27,12 +27,22 @@ from freight_fate.models.cargo_condition import (
 from freight_fate.models.jobs import CARGO_CATALOG, Job
 from freight_fate.models.profile import Profile
 from freight_fate.sim.vehicle import (
-    CARGO_CORNER_MARGIN_MPH,
+    CARGO_ADVISORY_LAT_G,
+    CARGO_CORNER_LAT_G,
     CARGO_HARD_BRAKE_G,
+    EMERGENCY_BRAKE_MULT,
     TruckState,
 )
 
 MPS_PER_MPH = 1 / 2.23694
+
+
+# A bend's radius, in feet, for a given lateral pull at a given speed -- the
+# inverse of what the model computes, so a test can ask for "0.1 g over the
+# threshold" without hand-solving the geometry each time.
+def _radius_for(mph: float, lateral_g: float) -> float:
+    mps = mph * MPS_PER_MPH
+    return mps * mps / (lateral_g * 9.81) / 0.3048
 
 
 def _job(cargo="general") -> Job:
@@ -89,29 +99,89 @@ def test_hard_braking_shifts_the_load():
     assert t.cargo_damage_pct > 0.0
 
 
+def test_a_full_service_stop_does_not_hurt_a_secured_load():
+    """Securement is rated past what the brakes can produce (49 CFR 393.102).
+
+    A stop at everything the service brakes have -- which is what a startled
+    driver makes several times a run -- used to put general freight over the
+    exception line on its own, and fragile freight into claim territory.
+    """
+    t = _loaded(mph=65.0)
+    peak = t.specs.max_brake_decel_g
+    assert peak < CARGO_HARD_BRAKE_G  # the premise: brakes cannot reach it
+    for _ in range(600):
+        t._update_cargo(1 / 60, decel_g=peak)
+    assert t.cargo_damage_pct == 0.0
+
+
+def test_an_emergency_application_does_reach_the_freight():
+    """Full service plus the spring brakes is past what securement holds."""
+    t = _loaded(mph=65.0)
+    emergency_g = t.specs.max_brake_decel_g * EMERGENCY_BRAKE_MULT
+    assert emergency_g > CARGO_HARD_BRAKE_G
+    for _ in range(300):
+        t._update_cargo(1 / 60, decel_g=emergency_g)
+    assert t.cargo_damage_pct > 0.0
+
+
 def test_a_bend_taken_well_over_its_advisory_costs_the_freight():
     """The break harness found a hairpin at 45 over doing nothing at all."""
-    t = _loaded()
-    t.corner_overspeed_mph = 45.0
+    t = _loaded(mph=75.0)
+    t.corner_radius_ft = _radius_for(30.0, CARGO_CORNER_LAT_G)  # a 30 mph bend
     for _ in range(120):
         t._update_cargo(1 / 60, decel_g=0.0)
     assert t.cargo_damage_pct > 0.0
 
 
-def test_a_bend_taken_within_its_margin_is_free():
-    t = _loaded()
-    t.corner_overspeed_mph = CARGO_CORNER_MARGIN_MPH - 1.0
+def test_a_bend_taken_at_its_advisory_is_free():
+    t = _loaded(mph=45.0)
+    # A bend signed for 45: the shipped advisories sit below the threshold.
+    t.corner_radius_ft = _radius_for(45.0, CARGO_ADVISORY_LAT_G)
     for _ in range(600):
         t._update_cargo(1 / 60, decel_g=0.0)
     assert t.cargo_damage_pct == 0.0
 
 
+def test_the_tighter_bend_costs_more_at_the_same_margin_over_its_sign():
+    """The realism bug the playtest bench caught: the ranking was inverted.
+
+    A hairpin and a sweeper taken the same mph over their advisories are not
+    the same manoeuvre -- the hairpin throws the load half again as hard --
+    but the old model read raw mph over the sign and charged the hairpin less.
+    """
+    costs = []
+    for advisory in (30.0, 55.0):
+        t = _loaded(mph=advisory + 15.0)
+        t.corner_radius_ft = _radius_for(advisory, CARGO_ADVISORY_LAT_G)
+        for _ in range(120):
+            t._update_cargo(1 / 60, decel_g=0.0)
+        costs.append(t.cargo_damage_pct)
+    hairpin, sweeper = costs
+    assert hairpin > sweeper > 0.0
+
+
+def test_a_bend_without_a_baked_radius_falls_back_on_its_advisory():
+    """A gap in the map must not read as a straight road."""
+    t = _loaded(mph=60.0)
+    t.corner_radius_ft = 0.0
+    t.corner_advisory_mph = 30.0
+    assert t.corner_lateral_g > CARGO_CORNER_LAT_G
+    for _ in range(120):
+        t._update_cargo(1 / 60, decel_g=0.0)
+    assert t.cargo_damage_pct > 0.0
+
+
+def test_a_straight_road_pulls_nothing_sideways():
+    t = _loaded(mph=70.0)
+    assert t.corner_lateral_g == 0.0
+
+
 def test_fragile_freight_degrades_faster_than_general():
     rates = []
     for cargo_key in ("general", "electronics"):
-        t = _loaded()
+        t = _loaded(mph=50.0)
         t.cargo_fragility = cargo_fragility(CARGO_CATALOG[cargo_key])
-        t.corner_overspeed_mph = 30.0
+        t.corner_radius_ft = _radius_for(30.0, CARGO_ADVISORY_LAT_G)
         for _ in range(120):
             t._update_cargo(1 / 60, decel_g=0.0)
         rates.append(t.cargo_damage_pct)
@@ -121,7 +191,8 @@ def test_fragile_freight_degrades_faster_than_general():
 def test_an_empty_trailer_has_nothing_to_damage():
     t = TruckState()
     t.cargo_kg = 0.0
-    t.corner_overspeed_mph = 50.0
+    t.velocity_mps = 60.0 * MPS_PER_MPH
+    t.corner_radius_ft = _radius_for(25.0, CARGO_ADVISORY_LAT_G)
     for _ in range(120):
         t._update_cargo(1 / 60, decel_g=1.0)
     assert t.cargo_damage_pct == 0.0

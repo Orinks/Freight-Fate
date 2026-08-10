@@ -156,6 +156,9 @@ class DamageBandMixin:
         # ratio, because what a bend pulls sideways goes with the square of
         # how far over the posting it is being taken.
         t.corner_advisory_mph = float(bend.advisory_mph) if bend else 0.0
+        # And the geometry, for dry freight: a pallet is moved by the sideways
+        # pull, which comes from the radius rather than from the sign.
+        t.corner_radius_ft = float(getattr(bend, "min_radius_ft", 0.0) or 0.0) if bend else 0.0
         condition = t.cargo_damage_pct
         # The HIGHEST rung crossed, not the next one up. A collision can put a
         # load through all three at once, and walking them a frame apart would

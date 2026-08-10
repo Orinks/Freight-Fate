@@ -24,6 +24,8 @@ from .transmission import (
 
 G = 9.81
 AIR_DENSITY = 1.225
+MPS_TO_MPH = 2.23694
+M_PER_FT = 0.3048
 
 # Floor under the deceleration a stopping-distance estimate is allowed to
 # assume. A rig that cannot out-brake its own grade is a runaway and belongs
@@ -125,14 +127,34 @@ DAMAGE_BAND_OUT_OF_SERVICE = 4
 # -- cargo condition ------------------------------------------------------------------
 # What moves freight is what the truck does abruptly, so the rates live with
 # the physics that produce them; what the receiver DOES about the resulting
-# condition lives in models/cargo_condition, away from the sim. A hard stop
-# throws the load forward against its straps; a bend taken past its posted
-# advisory throws it sideways, where nothing is restraining it at all, which
-# is why cornering costs more than the same energy spent braking.
-CARGO_HARD_BRAKE_G = 0.25  # decel past which freight starts moving
-CARGO_BRAKE_PCT_PER_G_S = 22.0  # per g of excess, per real second
-CARGO_CORNER_MARGIN_MPH = 8.0  # slack over the posted advisory before it bites
-CARGO_CORNER_PCT_PER_MPH_S = 0.10  # per mph past that, per real second
+# condition lives in models/cargo_condition, away from the sim.
+#
+# Both thresholds are the securement standard rather than round numbers. Under
+# 49 CFR 393.102 a load must be restrained against 0.8 g forward and 0.5 g
+# lateral, and a Class 8 rig cannot brake at half of the forward figure -- so
+# freight tied down to spec is not hurt by stopping hard, however alarming the
+# stop. It is hurt by the sideways case, because the same regulation asks less
+# there and a loaded van starts lifting a wheel around 0.35 g anyway.
+#
+# So: braking bites only past what a full service application can produce,
+# which leaves the emergency application, a grade adding its own g to the
+# stop, and collisions. Cornering bites from a shade under the rollover
+# threshold, where the load is working against its straps well before the
+# truck is in trouble.
+CARGO_HARD_BRAKE_G = 0.45  # decel past which freight starts moving
+CARGO_BRAKE_PCT_PER_G_S = 6.0  # per g of excess, per real second
+# Lateral, and geometric: what the bend actually pulls, from its radius and
+# the speed it is being taken at. The old model read raw mph over the posted
+# advisory, which ranked bends backwards -- a hairpin and a sweeper taken the
+# same margin over their signs are not the same manoeuvre, and the hairpin,
+# which throws the load half again as hard, was costing it a third as much
+# because a short bend is over sooner.
+CARGO_CORNER_LAT_G = 0.40  # lateral pull past which freight starts moving
+CARGO_CORNER_PCT_PER_G_S = 12.0  # per g of excess, per real second
+# What a posted advisory is worth in lateral g, for bends whose data carries
+# no radius: the shipped advisories bake out at very nearly this figure, so a
+# curve missing its geometry still behaves like its neighbours.
+CARGO_ADVISORY_LAT_G = 0.30
 CARGO_COLLISION_PCT = 40.0  # at full severity
 
 # -- runaway ------------------------------------------------------------------------
@@ -355,6 +377,10 @@ class TruckState:
     # load needs the ratio, not the excess: the pull in a bend goes with the
     # square of how far over the posting you are taking it.
     corner_advisory_mph: float = 0.0
+    # The bend's own geometry, in feet. Dry freight needs the radius rather
+    # than the advisory, because what moves a pallet is the sideways pull, and
+    # that is a fact about the corner rather than about the sign beside it.
+    corner_radius_ft: float = 0.0
 
     # The liquid aboard, if this is a tank load. None for every other kind of
     # freight, and every surge term short-circuits on that -- a driver hauling
@@ -1512,15 +1538,37 @@ class TruckState:
         self.cargo_damage_pct += added
         return added
 
+    @property
+    def corner_lateral_g(self) -> float:
+        """What the bend the truck is in is pulling sideways, in g.
+
+        Geometric, from the corner's own radius: a pallet does not know what
+        the advisory sign said, only how hard it is being pushed against the
+        trailer wall. Zero on a straight. Bends whose data carries no radius
+        fall back to one implied by the advisory, so a gap in the map reads
+        like its neighbours rather than like a straight road.
+        """
+        radius_m = self.corner_radius_ft * M_PER_FT
+        if radius_m <= 0.0:
+            advisory_mps = self.corner_advisory_mph / MPS_TO_MPH
+            if advisory_mps <= 0.0:
+                return 0.0
+            radius_m = advisory_mps * advisory_mps / (CARGO_ADVISORY_LAT_G * G)
+        speed_mps = self.speed_mph / MPS_TO_MPH
+        return speed_mps * speed_mps / (radius_m * G)
+
     def _update_cargo(self, dt: float, decel_g: float) -> None:
         """Freight moves when the truck does something abrupt.
 
-        Two forces, both already in the sim. Braking hard throws the load
-        forward against its straps, and past a quarter g that starts costing
-        something. Taking a bend faster than it is signed for throws it
-        sideways, where nothing is holding it at all -- which is why a
-        hairpin taken well over its advisory is worse for the freight than
-        the same energy spent stopping, and why it used to be free.
+        Two forces, both already in the sim, and the securement standard sets
+        both thresholds. Braking throws the load forward against restraint
+        rated to hold it through 0.8 g, which is more than the brakes can
+        produce -- so an ordinary hard stop, however loud, costs the freight
+        nothing, and what does cost is the emergency application, a grade
+        adding its own g to the stop, or hitting something. Cornering throws
+        it sideways against restraint rated for only 0.5 g, in a truck that
+        starts lifting a wheel before that, which is why a bend is the
+        manoeuvre that actually moves freight.
         """
         if not self.trailer_attached or self.cargo_kg <= 0.0:
             return
@@ -1528,9 +1576,9 @@ class TruckState:
         over_brake = decel_g - CARGO_HARD_BRAKE_G
         if over_brake > 0.0 and self.speed_mph > 5.0:
             rate += over_brake * CARGO_BRAKE_PCT_PER_G_S
-        over_corner = self.corner_overspeed_mph - CARGO_CORNER_MARGIN_MPH
+        over_corner = self.corner_lateral_g - CARGO_CORNER_LAT_G
         if over_corner > 0.0:
-            rate += over_corner * CARGO_CORNER_PCT_PER_MPH_S
+            rate += over_corner * CARGO_CORNER_PCT_PER_G_S
         if rate > 0.0:
             self.add_cargo_damage(rate * self.cargo_fragility * dt)
 

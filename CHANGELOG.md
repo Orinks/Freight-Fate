@@ -4,6 +4,25 @@
 
 ### Fixed
 
+- **Stopping hard no longer wrecks a load that was tied down properly.**
+  A firm stop at a light used to be enough to put general freight over
+  the line into an exception on the bill, and a load of food or
+  electronics close to a claim, from one stop. That was never right:
+  freight is secured to survive far harder braking than a truck can
+  actually produce. Now a full brake application costs the load nothing,
+  however alarming it sounds. Slamming on the emergency brake still
+  reaches the freight, and so does a hard stop with a grade pushing you
+  down it.
+
+- **Sharp bends are now the ones that hurt the load.** The game used to
+  count only how many miles an hour over the advisory you were, so a
+  gentle sweeper taken fifteen over cost the freight more than a tight
+  mountain hairpin taken the same fifteen over -- even though the
+  hairpin throws the load half again as hard. Now it is the sideways
+  pull of the bend itself that moves the freight, so the tighter the
+  corner, the less room you have over the sign. Taking a bend at its
+  posted advisory is free on every curve in the game.
+
 - **A roadside stop that pulls your licence now ends the run properly.**
   Losing your CDL at the roadside still left "Pull back onto the
   highway" as your only choice, so the game took your licence and then
