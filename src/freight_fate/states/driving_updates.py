@@ -372,6 +372,9 @@ class DrivingUpdateMixin:
         # the same frame already names the band the truck just entered.
         self._update_damage_bands(dt)
         self._update_cargo_condition(dt)
+        # After the cargo pass, so the bend's advisory is already on the truck
+        # for the lateral wave. Returns immediately on any non-tank load.
+        self._update_liquid_cues(dt)
         self._update_overrev(dt)
         self._update_speeding(dt, accelerator_held=accel_held)
         self._update_engine_brake_zone(dt)

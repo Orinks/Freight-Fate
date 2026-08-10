@@ -182,6 +182,10 @@ class DrivingStatusScreenState(MenuState):
             # be the first they hear of what the freight is in.
             f"freight {cargo_status_clause(d.truck)}"
         )
+        # A tank load behaves unlike anything else on the roster, and the
+        # driver cannot see the trailer -- so how it will behave is answerable
+        # here, on demand, rather than only at pickup. Empty for other freight.
+        tank_line = d.liquid_status_clause()
         time_line = (
             f"Time: {clock_text(d.trip.local_hour)} {d.trip.current_timezone.name}, "
             f"{hours_used:.1f} hours used"
@@ -191,10 +195,14 @@ class DrivingStatusScreenState(MenuState):
         )
         band = damage_band_clause(self.ctx.settings, t)
         damage_band_suffix = f", {band}" if band else ""
-        return [
+        lines = [
             f"Driver: {profile.name}",
             f"Money: {profile.money:,.0f} dollars",
             load_line,
+        ]
+        if tank_line:
+            lines.append(f"Tank: {tank_line}")
+        lines += [
             f"Objective: {d._objective_text()}",
             # The band rides with the number: hearing "78 percent" without
             # "limp mode" leaves the player to work out why the truck is slow.
@@ -208,6 +216,7 @@ class DrivingStatusScreenState(MenuState):
             f"Hours: {d.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}",
             time_line,
         ]
+        return lines
 
     def _map_items(self) -> list[MenuItem]:
         d = self.driving

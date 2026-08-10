@@ -231,6 +231,10 @@ RAMP_BAR_TICK_RANGE_MI = 300.0 / 5280.0
 RAMP_BAR_SOLID_MI = 0.012
 RAMP_BAR_TICK_SLOW_S = 1.1  # period at the edge of the range
 RAMP_BAR_TICK_FAST_S = 0.15  # period at the bar
+# Ground covered while the driver hears the cue and gets to the pedal. The bar
+# is the one place in the game where the cue IS the instrument, so its range
+# has to pay for the listening as well as the stopping.
+RAMP_BAR_REACTION_S = 1.5
 # Safety-call re-arm: Ctrl always silences (a screen-reader reflex must
 # never be fought), but a curve call cut inside this window re-speaks
 # once, refreshed, after the delay -- IF the bend is still ahead and the

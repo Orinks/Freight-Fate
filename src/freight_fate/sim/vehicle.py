@@ -12,6 +12,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
+from .surge import LiquidLoad, lateral_accel_mps2
 from .transmission import (
     AUTO_DOWNSHIFT_RPM,
     DOWNSHIFT_TIME,
@@ -23,6 +24,17 @@ from .transmission import (
 
 G = 9.81
 AIR_DENSITY = 1.225
+
+# Floor under the deceleration a stopping-distance estimate is allowed to
+# assume. A rig that cannot out-brake its own grade is a runaway and belongs
+# to the descent systems; this only keeps the arithmetic finite.
+MIN_STOPPING_DECEL_MPS2 = 0.35
+
+# What counts as "the driver was already doing the right thing" when a liquid
+# load carries them past a bar anyway: a real brake application, and a real
+# forward shove from the tank at that moment.
+SURGE_EXCUSE_BRAKE = 0.6
+SURGE_EXCUSE_FORCE_N = 1500.0
 
 # Full service application plus the spring brakes: the hardest stop the rig
 # can make, still scaled by weather grip and brake fade.
@@ -339,6 +351,15 @@ class TruckState:
     # inside the advisory. The vehicle model has no map, so the road has to
     # tell it; the force it produces is real and belongs here.
     corner_overspeed_mph: float = 0.0
+    # The advisory itself, alongside how far past it the truck is. A liquid
+    # load needs the ratio, not the excess: the pull in a bend goes with the
+    # square of how far over the posting you are taking it.
+    corner_advisory_mph: float = 0.0
+
+    # The liquid aboard, if this is a tank load. None for every other kind of
+    # freight, and every surge term short-circuits on that -- a driver hauling
+    # boxes must not be able to tell this code exists.
+    liquid: LiquidLoad | None = None
 
     # ECM road-speed governor: above this the engine simply stops fuelling,
     # exactly like the rpm governor below. None = ungoverned. Not persisted --
@@ -873,6 +894,100 @@ class TruckState:
         capacity = s.mass_kg * effort
         return min(friction, capacity) / max(self.gross_mass_kg, 1.0)
 
+    # -- liquid surge -------------------------------------------------------------
+
+    def surge_force_n(self) -> float:
+        """Forward push from a sloshing liquid load, newtons. Zero otherwise."""
+        if self.liquid is None or not self.trailer_attached or self.cargo_kg <= 0.0:
+            return 0.0
+        return self.liquid.force_n(self.cargo_kg)
+
+    def pushed_through_by_surge(self) -> bool:
+        """Whether the liquid, not the driver, is what carried the truck on.
+
+        True only when the load is genuinely shoving forward while the driver
+        is already hard on the brakes. A driver who braked correctly and in
+        time, and got pushed through anyway by a load doing exactly what a
+        tank load does, has not made a preventable mistake -- and a safety
+        committee that ruled otherwise would be teaching them nothing except
+        that the game is arbitrary.
+        """
+        if self.liquid is None:
+            return False
+        if self.brake < SURGE_EXCUSE_BRAKE and not self.emergency_brake:
+            return False
+        return self.surge_force_n() >= SURGE_EXCUSE_FORCE_N
+
+    def surge_decel_penalty_mps2(self) -> float:
+        """How much deceleration this load can take away at the worst moment.
+
+        A property of the tank and how full it is rather than of where the
+        wave happens to be, so a stopping distance built on it is a number the
+        driver can learn rather than one that breathes with the water.
+        """
+        if self.liquid is None or not self.trailer_attached or self.cargo_kg <= 0.0:
+            return 0.0
+        return self.liquid.peak_force_n(self.cargo_kg) / max(self.gross_mass_kg, 1.0)
+
+    def _update_liquid(self, dt: float, accel_mps2: float) -> None:
+        if self.liquid is None or not self.trailer_attached or self.cargo_kg <= 0.0:
+            return
+        lat = lateral_accel_mps2(self.speed_mph, self.corner_advisory_mph)
+        self.liquid.update(dt, accel_mps2, lat)
+
+    # -- stopping distance --------------------------------------------------------
+
+    def stopping_distance_m(
+        self,
+        speed_mps: float | None = None,
+        *,
+        reaction_s: float = 0.0,
+        include_surge: bool = True,
+    ) -> float:
+        """Road needed to bring this truck, as it is right now, to a stop.
+
+        The one number every stop cue in the game was missing. It answers with
+        what the truck can actually do -- fade, worn shoes, the load aboard,
+        the weather under the tyres, the grade it is on, and a liquid load
+        pushing back -- rather than with a constant chosen for a good day.
+
+        ``reaction_s`` adds the ground covered before the pedal moves, for
+        callers budgeting a driver's response as well as the truck's.
+        """
+        v = abs(self.velocity_mps if speed_mps is None else speed_mps)
+        if v <= 0.0:
+            return 0.0
+        # Uphill helps and downhill hurts, at g times the grade.
+        decel = self.full_service_decel_mps2() + G * self.grade
+        if include_surge:
+            decel -= self.surge_decel_penalty_mps2()
+        # A truck that cannot out-brake the hill it is on is a runaway, not a
+        # stopping-distance problem; the floor keeps the number finite so the
+        # cue layer degrades into "as early as possible" instead of dividing
+        # by zero. The descent and runaway systems own that case.
+        decel = max(MIN_STOPPING_DECEL_MPS2, decel)
+        return v * max(0.0, reaction_s) + (v * v) / (2.0 * decel)
+
+    def stopping_distance_mi(
+        self,
+        speed_mps: float | None = None,
+        *,
+        reaction_s: float = 0.0,
+        include_surge: bool = True,
+    ) -> float:
+        return (
+            self.stopping_distance_m(speed_mps, reaction_s=reaction_s, include_surge=include_surge)
+            / 1609.344
+        )
+
+    def surge_stopping_penalty_mi(self, speed_mps: float | None = None) -> float:
+        """Extra road the liquid alone asks for, miles. Zero without a tank."""
+        if self.liquid is None:
+            return 0.0
+        with_liquid = self.stopping_distance_mi(speed_mps)
+        without = self.stopping_distance_mi(speed_mps, include_surge=False)
+        return max(0.0, with_liquid - without)
+
     def jake_retard_torque_nm(self) -> float:
         """Compression-brake torque at the crank for the current stage and RPM."""
         if (
@@ -944,7 +1059,12 @@ class TruckState:
         tr.update(dt)
         self._update_air_system(dt)
 
-        net = self.drive_force() - self.resistance_force() - self.brake_force()
+        # Four terms, not three. A liquid load pushes forward exactly when the
+        # brakes are trying to stop -- it belongs here as its own force and not
+        # inside resistance_force(), whose sign convention always opposes travel
+        # and which also feeds the cruise controller's feed-forward.
+        surge = self.surge_force_n()
+        net = self.drive_force() - self.resistance_force() - self.brake_force() + surge
         accel = net / self.gross_mass_kg
         old_v = self.velocity_mps
         new_v = self.velocity_mps + accel * dt
@@ -962,7 +1082,9 @@ class TruckState:
         self.velocity_mps = new_v
         self.odometer_mi += abs(self.velocity_mps) * dt / 1609.344
 
-        # The freight rides on the same acceleration the tractor just felt.
+        # The freight rides on the same acceleration the tractor just felt --
+        # and a liquid load rides it by running to one end of the tank.
+        self._update_liquid(dt, accel)
         self._update_cargo(dt, max(0.0, -accel / G) if old_v > 0.0 else 0.0)
         self._update_rpm(dt)
         self._update_fuel(dt)

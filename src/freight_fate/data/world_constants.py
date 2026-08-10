@@ -44,6 +44,7 @@ def vehicle_access_allows(access: str, *, bobtail: bool) -> bool:
         return bobtail
     return access != "none"
 
+
 # Alternate routes should feel like real dispatch choices, not graph leftovers.
 # A little extra mileage is fine for traffic, weather, grades, or avoiding a
 # metro corridor; hundreds of out-of-direction miles on a short lane are not.
@@ -257,8 +258,8 @@ FACILITY_CARGO_ROLES: dict[str, dict[str, tuple[str, ...]]] = {
         "receives": ("steel", "machinery", "electronics", "general"),
     },
     "chemical_petroleum_terminal": {
-        "ships": ("chemicals", "bulk"),
-        "receives": ("chemicals", "bulk", "general"),
+        "ships": ("chemicals", "bulk", "fuel_bulk"),
+        "receives": ("chemicals", "bulk", "general", "fuel_bulk"),
     },
     "cold_storage": {
         "ships": ("food", "refrigerated"),
@@ -289,12 +290,12 @@ FACILITY_CARGO_ROLES: dict[str, dict[str, tuple[str, ...]]] = {
         "receives": ("farm_inputs", "general"),
     },
     "food_terminal": {
-        "ships": ("food", "refrigerated", "grain"),
-        "receives": ("food", "refrigerated", "grain"),
+        "ships": ("food", "refrigerated", "grain", "liquid_food"),
+        "receives": ("food", "refrigerated", "grain", "liquid_food"),
     },
     "food_processor": {
-        "ships": ("food", "refrigerated"),
-        "receives": ("grain", "food", "refrigerated", "farm_inputs"),
+        "ships": ("food", "refrigerated", "liquid_food"),
+        "receives": ("grain", "food", "refrigerated", "farm_inputs", "liquid_food"),
     },
     "grocery_retail_dc": {
         "ships": ("retail", "food", "refrigerated", "general"),

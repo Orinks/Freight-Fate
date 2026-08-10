@@ -9,6 +9,7 @@ from ..models.jobs import Job, job_from_payload, job_payload, plan_hos
 from ..models.trailer_yard import TRAILER_SWAP_MIN
 from ..music import select_menu_music_sequence
 from ..settings import Settings
+from ..sim.surge import liquid_load_for
 from ..sim.vehicle import TruckState
 from .base import MenuItem, MenuState, TimedMessageState
 
@@ -374,6 +375,7 @@ class PickupFacilityState(MenuState):
             self.ctx.say(
                 f"Walking {trailer.spoken_name}: lamps all lit, brakes in "
                 "adjustment, tires with tread on them. It checks out. Good to go."
+                f"{self._tank_walk_around_clause()}"
             )
             return
         self.ctx.audio.play("ui/warning")
@@ -382,11 +384,34 @@ class PickupFacilityState(MenuState):
             f"The trailer is {trailer.condition_text}. Pull out of the gate with "
             "it and the write-up is yours at the first scale. "
             f"Choose Refuse this trailer to have the yard swap it, which costs "
-            f"about {TRAILER_SWAP_MIN:.0f} minutes.",
+            f"about {TRAILER_SWAP_MIN:.0f} minutes."
+            f"{self._tank_walk_around_clause()}",
             interrupt=True,
         )
         self._offer_refusal = True
         self.refresh(keep_index=False)
+
+    def _tank_walk_around_clause(self) -> str:
+        """What the walk-around tells you about a tank you cannot see into.
+
+        The one place fill level and tank type belong in speech: they are
+        fixed for the whole run and they decide everything about how it will
+        drive. Once the wheels are turning the audio carries it instead.
+        """
+        liquid = liquid_load_for(self.job.cargo, self.job.weight_tons)
+        if liquid is None:
+            return ""
+        if liquid.baffled:
+            behaviour = (
+                "The baffles will settle it in a couple of cycles, but it still "
+                "arrives after you do."
+            )
+        else:
+            behaviour = (
+                "Smooth bore, so there is nothing in there to slow it down. Brake "
+                "early, brake once, and let it come back before you move off."
+            )
+        return f" The tank is {liquid.describe_fill()}, {liquid.describe_tank()}. {behaviour}"
 
     def _refuse_trailer(self) -> None:
         p = self.ctx.profile

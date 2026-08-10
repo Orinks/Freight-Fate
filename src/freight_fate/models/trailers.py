@@ -66,7 +66,26 @@ TRAILER_CATALOG: dict[str, TrailerType] = {
         58_000.0,
         0.09,
     ),
+    # A tank is the most expensive box a driver can pull and the one the
+    # carrier is fussiest about: pressure tests, internal wash-outs between
+    # products, and a shell that is scrap the first time it is rolled. The
+    # reserves reflect equipment that is inspected far more than a dry van.
+    "tank": TrailerType(
+        "tank",
+        "Tank",
+        "tank trailer",
+        "Tank trailer program for liquid bulk: fuel, chemicals, and liquid food products.",
+        14_000.0,
+        0.26,
+        96_000.0,
+        0.13,
+    ),
 }
+
+# How much liquid a road tank holds, in the same tonnes the job weights use.
+# A load's weight against this is how full the tank is -- which is the single
+# number that decides how hard it will surge.
+TANK_CAPACITY_TONS = 26.0
 
 
 CARGO_TRAILER_COMPATIBILITY: dict[str, tuple[str, ...]] = {
@@ -86,6 +105,8 @@ CARGO_TRAILER_COMPATIBILITY: dict[str, tuple[str, ...]] = {
     "refrigerated": ("reefer",),
     "chemicals": ("dry_van",),
     "electronics": ("dry_van",),
+    "fuel_bulk": ("tank",),
+    "liquid_food": ("tank",),
 }
 
 

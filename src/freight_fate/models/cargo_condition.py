@@ -68,6 +68,14 @@ CARGO_FRAGILITY: dict[str, float] = {
     "construction": 0.6,
     "grain": 0.5,
     "bulk": 0.4,
+    # Liquid cannot be broken. What a tank load loses is quality: product
+    # whipped into foam and out through the vents, temperature spec gone,
+    # a food-grade load no longer fit to sell. That takes a great deal of
+    # abuse, so the meter climbs slowly -- the danger of a tanker was never
+    # to the cargo, it is to the truck and the driver, and that is priced in
+    # the physics rather than here.
+    "fuel_bulk": 0.30,
+    "liquid_food": 0.40,
 }
 CARGO_FRAGILITY_DEFAULT = 1.0
 CARGO_FRAGILE_FLAG_MULT = 1.5  # applied when the class is flagged fragile
@@ -156,13 +164,30 @@ def settle_cargo(condition_pct: float, gross_pay: float) -> CargoSettlement:
     return CargoSettlement(outcome, condition_pct, 0.0, 0.0, 0.0)
 
 
-def cargo_condition_text(condition_pct: float) -> str:
+# The same four rungs said in the words that fit a tank. Diesel does not
+# "shift but sound" and milk does not "break": a liquid load is worked, then
+# off spec, then contaminated, then lost. Same thresholds, same money -- only
+# the nouns change, because a driver who hears "the load is damaged" about a
+# tank of fuel has been told nothing they can act on.
+LIQUID_CONDITION_TEXT = {
+    CARGO_OUTCOME_REJECTED: "lost",
+    CARGO_OUTCOME_CLAIM: "contaminated",
+    CARGO_OUTCOME_EXCEPTION: "off spec",
+}
+
+
+def cargo_condition_text(condition_pct: float, *, liquid: bool = False) -> str:
     """The spoken state of the load, for status readouts and cues.
 
     Plain words, not a number alone: "eighteen percent" tells a player
-    nothing about whether the receiver will sign for it.
+    nothing about whether the receiver will sign for it. ``liquid`` swaps in
+    the tank vocabulary; the thresholds and the consequences are identical.
     """
     outcome = cargo_outcome(condition_pct)
+    if liquid:
+        if outcome in LIQUID_CONDITION_TEXT:
+            return LIQUID_CONDITION_TEXT[outcome]
+        return "worked" if condition_pct >= 1.0 else "settled"
     if outcome == CARGO_OUTCOME_REJECTED:
         return "ruined"
     if outcome == CARGO_OUTCOME_CLAIM:

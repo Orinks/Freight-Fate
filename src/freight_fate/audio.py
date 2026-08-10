@@ -78,7 +78,14 @@ CH_JAKE = 13  # engine-brake growl: synthesized loop, stage- and rpm-keyed
 CH_RADIO_FX = 14  # FM fringe hiss bed under a thinning station
 CH_EDGE = 15  # edge-boundary ladder loops: clip / strip / shoulder textures
 CH_ALERT = 16  # continuous alert tones: the stop bar's solid zone
-RESERVED = 14
+CH_SURGE = 17  # liquid running in a tank trailer: gated, silent on other freight
+# Everything above must be inside the reservation. set_reserved(n) protects
+# channels 0..n-1 from find_channel, and this sat at 14 while CH_RADIO_FX,
+# CH_EDGE and CH_ALERT were added above it -- so on the pygame fallback a
+# burst of one-shots could evict the edge ladder or the stop bar's held tone
+# mid-warning. Guidance a blind driver is steering by must never be
+# stealable: keep this one past the last named slot.
+RESERVED = CH_SURGE + 1
 NUM_CHANNELS = 32
 
 # A held alert tone is a dead man's switch. Its owner re-asserts it every
