@@ -107,7 +107,7 @@ def _complete_first_delivery(app):
     route = app.ctx.world.supported_route_options(job.origin, job.destination)[0]
     driving = DrivingState(app.ctx, job, route)
     driving.trip.game_minutes = job.deadline_game_h * 30.0
-    driving.speeding_strikes = 0
+    driving.speeding_tickets = 0
     return ArrivalState(app.ctx, driving)
 
 

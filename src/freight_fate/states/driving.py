@@ -8,6 +8,7 @@ from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from ..models.cargo_condition import cargo_fragility
 from .driving_damage import DamageBandMixin
+from .driving_enforcement import EnforcementWatchMixin
 from .driving_engine_brake import EngineBrakeZoneMixin
 from .driving_events import DrivingEventMixin
 from .driving_facility_gate import FacilityGateMixin
@@ -28,6 +29,7 @@ class DrivingState(
     DrivingControlsMixin,
     DrivingUpdateMixin,
     DamageBandMixin,
+    EnforcementWatchMixin,
     EngineBrakeZoneMixin,
     FacilityGateMixin,
     TurnCommitmentMixin,
@@ -189,8 +191,6 @@ class DrivingState(
         self._last_event_message = ""  # last spoken route announcement, for replay
         self._speed_announce_timer = 0.0
         self._last_announced_mph = 0.0
-        self._speeding_timer = 0.0
-        self.speeding_strikes = 0
         # Compliance grace after a posted-limit drop: braking time before
         # strikes accrue, earned only while actually slowing.
         self._enforced_limit_prev: float | None = None
@@ -265,15 +265,15 @@ class DrivingState(
         self._pull_over_coast_s = 0.0  # consecutive s with no braking and no accel
         self._pull_over_signal_boost = False  # the one-time signal bump has fired
         self._pull_over_nosignal_hit = False  # the one-time no-signal 1/4 hit has fired
-        # Deterministic, save-safe stream for "did a patrol catch you" rolls, kept
-        # apart from the trip's hazard/zone/inspection streams.
-        self._patrol_rng = random.Random(None if trip_seed is None else trip_seed ^ 0xB0A1)
-        # The road-joint spacer used to draw from _patrol_rng about a hundred
-        # times a mile, so whether a trooper caught you came down to how many
-        # joints had played -- frame timing, effectively, and a reload
-        # re-rolled it. Ambience gets its own stream, and every enforcement
-        # roll is drawn from a named, position-quantised seed instead.
+        # The road-joint spacer used to draw from the shared patrol stream
+        # about a hundred times a mile, so whether a trooper caught you came
+        # down to how many joints had played -- frame timing, effectively, and
+        # a reload re-rolled it. Ambience keeps its own stream, and there is
+        # no longer a shared enforcement stream at all: every police decision
+        # is a named, position-quantised seed (see sim/enforcement_posts.
+        # post_seed), so nothing the audio layer does can consume it.
         self._road_texture_rng = random.Random(None if trip_seed is None else trip_seed ^ 0x5EA7)
+        self._enforcement_init()
         self._rescue_offered = False
         # Damage bands. The band itself is derived from damage_pct every
         # frame; what is trip-scoped is the last band ANNOUNCED (so an edge
@@ -615,7 +615,6 @@ class DrivingState(
                 "engine": self.start_engine_wear,
             },
             "rig_buffs": self.rig_buffs,
-            "speeding_strikes": self.speeding_strikes,
             "speed_control_armed": self._speed_control_armed,
             "speed_control_target_mph": self._speed_control_target_mph,
             "air_brake": self.truck.air_brake_snapshot(),
@@ -736,7 +735,13 @@ class DrivingState(
             state.rig_buffs = {
                 str(group): dict(info) for group, info in dict(data.get("rig_buffs", {})).items()
             }
-            state.speeding_strikes = int(data["speeding_strikes"])
+            # "speeding_strikes" was a required snapshot field until the
+            # silent at-delivery speeding charge was removed. Snapshots
+            # written before that still carry it; reading it with [] would
+            # KeyError every in-flight save from the other direction, so the
+            # key is simply no longer consulted. Ignored, not migrated: the
+            # charge it stood for no longer exists to migrate into.
+            data.pop("speeding_strikes", None)
             target = data.get("speed_control_target_mph")
             state._restore_speed_control_session(
                 armed=bool(data.get("speed_control_armed", False)),

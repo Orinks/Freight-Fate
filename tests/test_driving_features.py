@@ -808,7 +808,10 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "list the actions available there" in help_text
     assert "call for help" in help_text
     assert "tolls and approved company charges" in help_text
-    assert "costs you caused, like speeding fines" in help_text
+    assert "fines an earlier load could not cover" in help_text
+    # The removed silent charge must not creep back into the help either.
+    assert "speeding nobody saw costs nothing at all" in help_text
+    assert "already paid on" in help_text
     assert "gross pay, carrier-paid or reimbursed charges" in help_text
     assert "net driver pay" in help_text
     assert "touch the brakes to cancel" in help_text
@@ -838,9 +841,16 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "risks losing traction" in help_text
     assert "low visibility shortens" in help_text
     assert "career runs on a calendar that starts in spring" in help_text
-    assert "state troopers patrol" in help_text
-    assert "cb chatter may mention" in help_text
+    assert "enforcement posts sit along the road" in help_text
+    # The graded observation, and the tactic it gives back, are documented.
+    assert "five over is seen and" in help_text
+    assert "running in a pack" in help_text
+    assert "cb chatter passes on what other drivers have seen" in help_text
+    assert "never claims the road is clear" in help_text
     assert "review that chatter" in help_text
+    # The presence control has to promise, in the help, what it does not do.
+    assert "enforcement presence control" in help_text
+    assert "getting caught is" in help_text
     # The 1.9 line's older sentence said cruise "will not engage on low-speed
     # local roads". That is no longer true of the shipped behaviour: the speed
     # keeper takes those and hands back to cruise, so the help says so instead.
@@ -1137,8 +1147,18 @@ def test_lane_departure_warning_flushes_event_voice(monkeypatch):
         app.shutdown()
 
 
-def test_speeding_strike_flushes_event_voice(monkeypatch):
+def test_a_pull_over_flushes_event_voice(monkeypatch):
+    """Lights behind you interrupts whatever the event voice was saying.
+
+    This used to test the silent "Speeding strike" line, which was the loudest
+    thing speeding could produce. That line is gone -- speeding nobody saw
+    says nothing at all now -- so the interrupt guarantee moves to the call
+    that replaced it, which is the one that genuinely cannot wait.
+    """
+    from enforcement_helpers import always_observing_post
+
     from freight_fate.app import App
+    from freight_fate.sim.enforcement_observe import OBSERVE_HOLD_MI
 
     app = App()
     events = []
@@ -1156,11 +1176,13 @@ def test_speeding_strike_flushes_event_voice(monkeypatch):
             "speed_limit_at",
             lambda _position: (25.0, None),
         )
-        monkeypatch.setattr(driving, "_trooper_catches_speeder", lambda _limit: False)
+        driving._enforcement_prev_mi = driving.trip.position_mi
+        driving.trip.posts = [always_observing_post(at_mi=driving.trip.position_mi + 0.2)]
+        driving._over_limit_mi = OBSERVE_HOLD_MI * 2
 
-        driving._update_speeding(11.0)
+        driving._update_enforcement_watch(0.1)
 
-        assert events[-1][0].startswith("Speeding strike.")
+        assert events[-1][0].startswith("Lights and siren behind you.")
         assert events[-1][1] is True
     finally:
         app.shutdown()
@@ -1305,8 +1327,9 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
 
 
 def test_driver_apps_screen_uses_keyboard_and_vague_road_chatter(monkeypatch):
+    from enforcement_helpers import always_observing_post
+
     from freight_fate.app import App
-    from freight_fate.sim.trip import PatrolWindow
     from freight_fate.states.driving import DrivingStatusState
 
     app = App()
@@ -1315,13 +1338,8 @@ def test_driver_apps_screen_uses_keyboard_and_vague_road_chatter(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        driving.trip.patrols = [
-            PatrolWindow(
-                driving.trip.position_mi + 3.0,
-                driving.trip.position_mi + 6.0,
-                0.8,
-                "speed trap",
-            )
+        driving.trip.posts = [
+            always_observing_post(at_mi=driving.trip.position_mi + 4.0, reach_mi=1.0)
         ]
 
         driving.handle_event(key_event(pygame.K_TAB))
@@ -2272,7 +2290,7 @@ def test_missed_destination_exit_suppresses_facility_zone_cues(monkeypatch):
 
 def test_missed_destination_recovery_does_not_keep_issuing_gate_speed_strikes(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.states.driving import SPEEDING_HOLD_S, DrivingState
+    from freight_fate.states.driving import DrivingState
 
     app = App()
     events = []
@@ -2290,9 +2308,9 @@ def test_missed_destination_recovery_does_not_keep_issuing_gate_speed_strikes(mo
         assert "missed the destination exit" in events[-1].lower()
         assert "back up" not in events[-1].lower()
 
-        driving.update(SPEEDING_HOLD_S + 1.0)
+        driving.update(7.0)
 
-        assert driving.speeding_strikes == 0
+        assert driving.speeding_tickets == 0
         assert not any("End of facility gate zone" in event for event in events)
     finally:
         app.shutdown()
@@ -2838,7 +2856,7 @@ def test_toll_route_delivery_settlement_records_expense(monkeypatch):
         assert "tolls 30" in text
         assert "accessorials carrier-authorized unloading service 185 dollars" in text
         assert "not deducted from driver pay" in text
-        assert "Driver-responsibility charges 0 dollars" in text
+        assert "Fines carried over 0 dollars" in text
         assert f"Net driver pay {expected.net_before_advance:,.0f} dollars" in text
 
         assert not hasattr(app.state, "screen_index")

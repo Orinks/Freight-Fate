@@ -63,6 +63,7 @@ from ..radio import (
 )
 from ..sim import hos
 from ..sim.driving_modes import tuning_for_time_scale
+from ..sim.enforcement_observe import OBSERVE_LEEWAY_MPH
 from ..sim.hos import HosClock, clock_text, is_night, time_of_day
 from ..sim.lane import CURVE_RATE, LaneKeeping, lane_label
 from ..sim.lane_guidance import LaneGuidance
@@ -583,10 +584,6 @@ def road_repair_cost(damage_pct: float, down_to: float, callout_fee: float) -> f
     return callout_fee + repaired * MECHANIC_RATE_PER_PCT * damage_severity_mult(damage_pct)
 
 
-def _speeding_settlement_fine(strikes: int) -> float:
-    return min(400.0, 80.0 * strikes) if strikes else 0.0
-
-
 def _record_inspection(ctx, *, event: bool = False) -> None:
     """Every inspection feeds both the one-off badge and the career tally."""
     ctx.award_achievement("inspection", event=event)
@@ -627,11 +624,12 @@ class _DrivingRadioBackend:
         self.driving.ctx.audio.stop_music(600)
 
 
-# A strike is recorded only above the posted limit plus this leeway, held for the
-# sustained window below -- roughly real-world ticketing tolerance, now judged
-# against the leg's real OSM maxspeed rather than a flat number.
-SPEEDING_LEEWAY_MPH = 9.0
-SPEEDING_HOLD_S = 6.0
+# Tolerance over the posted limit before a speed is a speed at all -- roughly
+# real-world ticketing tolerance, judged against the leg's real OSM maxspeed
+# rather than a flat number. Canonical in the sim layer, because the officer
+# who reads the speed lives there; this name is kept because half the driving
+# layer already asks for it.
+SPEEDING_LEEWAY_MPH = OBSERVE_LEEWAY_MPH
 # The dash overspeed alert speaks up before enforcement does: it arms a few
 # mph over the limit (under the strike leeway), then chimes on an interval
 # until the truck settles back under. Real carrier trucks nag exactly like
@@ -645,12 +643,19 @@ OVERSPEED_RESET_MPH = 1.0  # back within this of the limit disarms it
 OVERSPEED_CHIME_REPEAT_S = 5.0  # cadence just past the warn threshold
 OVERSPEED_CHIME_FAST_S = 0.5  # cadence at OVERSPEED_URGENT_MPH over and beyond
 OVERSPEED_URGENT_MPH = 20.0
-# On-the-spot speeding tickets are priced by how far over the limit you were
-# and how many citations the career already carries -- see
+# Speeding tickets are priced by how far over the limit you were and how many
+# citations the career already carries -- see
 # models/enforcement.speeding_citation_fine, which is anchored to the real
-# state fine schedules. Paid immediately when a trooper pulls you over (unlike
-# the silent at-delivery strikes, which stand in for the cost of speeding
-# nobody caught).
+# state fine schedules. Paid on the spot when a trooper pulls you over, and
+# that is the ONLY way speeding costs anything.
+#
+# There used to be a second, invisible charge: hold nine over for six seconds
+# with no patrol anywhere and the drive banked a "speeding strike", billed at
+# the dock hours later as a driver-responsibility charge. It was a placeholder
+# for enforcement that did not exist -- a fine from an officer who was never
+# there -- and it is gone (owner ruling, 2026-08-09). Speeding nobody saw now
+# costs nothing, which is both honest and what happens on a real road. The
+# presence model is what stands between a speeder and impunity.
 # Travel this far still moving after the lights come on and it counts as
 # ignoring the stop -- a heavier fine and a bigger reputation hit.
 PULL_OVER_IGNORE_MI = 2.0

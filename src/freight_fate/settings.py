@@ -101,6 +101,14 @@ LANE_KEEPING_TO_LEGACY = {"full": "off", "partial": "light", "off": "realistic"}
 # lost announcement self-correcting.
 LANE_KEEPING_RENAME_NOTICES = 3
 
+# How loud the policed country is. Presence is not difficulty: see the
+# ``enforcement_presence`` field for why these two must never move together.
+ENFORCEMENT_PRESENCE_LEVELS = ("full", "standard", "quiet")
+# Multiplier on the ambient enforcement layer -- the marked-unit passes for
+# posts nobody is sitting in, the scale approach beds, and the CB colour. It
+# never reaches placement, staffing, observation or consequence.
+ENFORCEMENT_AMBIENCE_SCALE = {"full": 1.35, "standard": 1.0, "quiet": 0.45}
+
 DRIVING_ASSIST_FIELDS = (
     "automatic_emergency_braking",
     "lane_departure_warning",
@@ -191,6 +199,16 @@ class Settings:
     # describes one load, and the truck must say so once rather than leave a
     # player wondering why their exits are suddenly being taken.
     lane_keeping_unreadable: ClassVar[bool] = False
+    # How much police activity the road makes audible. AMBIENCE ONLY. It never
+    # changes where the enforcement posts are, whether one is staffed, or how
+    # likely you are to be observed and pulled over -- if one slider moved
+    # both, turning the noise down would quietly make the game easier while
+    # the player believed they had only turned down noise. The on-demand
+    # road-ahead readout reports enforcement at full detail at every level, so
+    # what a quiet road costs you is atmosphere, never information you can ask
+    # for. A quiet setting still hears every staffed post it passes: a post
+    # the player was given no cue for is not allowed to cost them anything.
+    enforcement_presence: str = "standard"  # full / standard / quiet
     # How loud the lane and edge cues speak: the edge-boundary textures,
     # the lane locator, and the dead-man's-curve strips all scale by it.
     lane_cue_loudness: str = "standard"  # subtle/standard/prominent
@@ -414,6 +432,8 @@ class Settings:
             s.hos_mode = "realistic"
         if s.lane_cue_loudness not in ("subtle", "standard", "prominent"):
             s.lane_cue_loudness = "standard"
+        if s.enforcement_presence not in ENFORCEMENT_PRESENCE_LEVELS:
+            s.enforcement_presence = "standard"
         if s.lane_keeping not in LANE_KEEPING_MODES:
             s.lane_keeping = LANE_KEEPING_FALLBACK
             s.lane_keeping_unreadable = True

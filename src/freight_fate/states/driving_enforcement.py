@@ -1,0 +1,653 @@
+# ruff: noqa: F403,F405
+"""The enforcement watch: hearing the police, and being seen by them.
+
+This is the game-layer half of the presence model. ``sim/enforcement_posts``
+decides where the posts are and who is sitting in them;
+``sim/enforcement_observe`` decides what one of them notices and how sure it
+is. This module assembles what the truck is doing into a sample, plays the
+cues, makes the named seeded draw, and hands a confirmed observation to the
+pull-over machinery that already exists.
+
+Three rules shape everything here.
+
+**Audible before it can bite.** A staffed post cannot observe a driver who was
+never told it was there. That is not balance, it is the whole accessibility
+contract: a blind player cannot see a cruiser on a crossover, so if the game
+never made a sound about it, the ticket it writes is arbitrary. Every staffed
+post emits its marker earcon before it enters observing range, at every
+enforcement-presence level, and ``observe`` refuses to look at a driver who
+has not heard it.
+
+**Speech is rationed; earcons are not.** Two spoken enforcement lines for a
+whole run, spent on the things that cost money -- an open scale, and anything
+that has already taken something from you. The marked-unit pass is never
+spoken: it is a fact about the world with no action attached, and narrating it
+twelve times a run is pure noise. A closed scale is never spoken either; the
+ambience swells, nothing is said, and the absence of speech is what says
+"closed".
+
+**One demand at a time.** Nothing here fires while a hazard deadline is
+running, during a microsleep, on a ramp, inside an arrival gate sequence, or
+during a stop already in progress. Deferred, never dropped: the post keeps
+watching, and the moment the cab is quiet again it gets its look.
+"""
+
+from __future__ import annotations
+
+import random
+
+from ..audio import CH_SCALE
+from ..models.safety_record import (
+    inspection_selection_chance,
+    refresh_selection_score,
+    safety_record_text,
+)
+from ..settings import ENFORCEMENT_AMBIENCE_SCALE
+from ..sim.enforcement_observe import (
+    CERTAIN_OVER_MPH,
+    COVER_RADIUS_MI,
+    COVER_SPEED_TOLERANCE_MPH,
+    OBSERVE_HOLD_MI,
+    OBSERVE_LEEWAY_MPH,
+    WHAT_CHAINS,
+    WHAT_DAMAGE,
+    WHAT_FOLLOWING,
+    WHAT_LIGHTS,
+    WHAT_SPEEDING,
+    RoadSample,
+    observe,
+)
+from ..sim.enforcement_posts import (
+    KIND_FIXED_SCALE,
+    KIND_SCALE_APRON,
+    post_seed,
+)
+from ..sim.trip_models import ENFORCEMENT_WARNING_MAX_MI, SCALE_WARNING_REAL_S
+from .driving_core import *
+from .driving_siren import (
+    PASS_MARKER_LEAD_S,
+    SIGNATURE_KEY,
+    SIREN_RISE_S,
+    SirenLoop,
+    register_enforcement_sounds,
+)
+
+# -- cue tuning --------------------------------------------------------------
+
+# The marker earcon fires this far before a post starts watching, so the cue
+# and the observation can never land in the same instant.
+POST_MARKER_LEAD_MI = 0.25
+
+# A marked unit going the other way is the most common police sound on a real
+# road, and it now is here too. Pan is confirmation only -- the gesture in the
+# asset is what says "oncoming pass" -- and the level falls off with distance
+# from the post so a distant unit reads as distant.
+PASS_PAN = 0.55
+PASS_BASE_VOLUME = 0.7
+
+# The weigh-station bed. It starts early and quiet and swells as the scale
+# closes, which is a distance cue that works at any pacing: a loop rising over
+# real seconds conveys closing speed correctly however compressed the clock is.
+SCALE_BED_START_MI = 2.2
+SCALE_BED_MIN_VOLUME = 0.10
+SCALE_BED_OPEN_MAX_VOLUME = 0.62
+SCALE_BED_CLOSED_MAX_VOLUME = 0.26
+SCALE_BED_FADE_MS = 700
+
+# The radio duck for a cue. A sibling of the picket duck, never the picket
+# duck itself -- that one self-heals on _stop_radio_fringe and would drag the
+# enforcement duck away with it.
+RADIO_CUE_DUCK = 0.22
+RADIO_CUE_DUCK_S = 1.1
+
+# How far past a post the truck has to be before its pass earcon has fired.
+PASS_TRIGGER_MI = 0.05
+
+# Fines for the things an officer sees rather than clocks. Anchored to the
+# common state ranges for each: chain-law violations run into the high
+# hundreds in the mountain states, following too close and lane misuse are
+# ordinary moving violations, and running without lights after dark is a
+# fix-it-plus-fine in most places.
+CHAIN_LAW_FINE = 500.0
+FOLLOWING_TOO_CLOSE_FINE = 250.0
+LIGHTS_FINE = 150.0
+LANE_MISUSE_FINE = 175.0
+
+
+class EnforcementWatchMixin:
+    """Cues, sampling, and the seeded observation draw, on the driving state."""
+
+    # -- lifecycle -----------------------------------------------------------
+
+    def _enforcement_init(self) -> None:
+        """Set up the watch. Called once from the driving state's constructor."""
+        register_enforcement_sounds()
+        self.siren = SirenLoop()
+        # Continuous distance over the limit. This -- not a real-time hold --
+        # is what a post reads as a speed. See _update_enforcement_watch.
+        self._over_limit_mi = 0.0
+        self._enforcement_prev_mi = 0.0
+        self._passed_post_ids: set[str] = set()
+        self._marked_post_ids: set[str] = set()
+        self._scale_bed_key = ""
+        self._scale_bed_volume = 0.0
+        self._radio_cue_duck = 1.0
+        self._radio_cue_duck_s = 0.0
+        self._radio_cut_for_stop = False
+        self._pending_sounds: list[tuple[float, str, float, float]] = []
+        # Posts whose look was deferred because the cab was busy. They keep
+        # their turn; nothing is silently dropped.
+        self._deferred_post_ids: set[str] = set()
+        self._pacing_since_s: dict[str, float] = {}
+
+    # -- presence ------------------------------------------------------------
+
+    def _ambience_scale(self) -> float:
+        """The enforcement-presence multiplier. Ambience only, never odds."""
+        level = getattr(self.ctx.settings, "enforcement_presence", "standard")
+        return ENFORCEMENT_AMBIENCE_SCALE.get(level, 1.0)
+
+    def _enforcement_busy(self) -> bool:
+        """Whether the cab already has a demand on the driver.
+
+        The weigh-station and unsafe-damage checks used to guard on the stop
+        and the ramp but not on the hazard deadline, so a trooper could light
+        you up in the middle of a braking window you had two seconds to make.
+        """
+        return (
+            self._pull_over is not None
+            or self._ramp_mi is not None
+            or self._hazard_deadline is not None
+            or self._microsleep_deadline is not None
+            or getattr(self, "_arrival_menu_open", False)
+        )
+
+    # -- scheduled audio -----------------------------------------------------
+
+    def _schedule_sound(self, delay_s: float, key: str, volume: float, pan: float) -> None:
+        self._pending_sounds.append((delay_s, key, volume, pan))
+
+    def _service_pending_sounds(self, dt: float) -> None:
+        if not self._pending_sounds:
+            return
+        still: list[tuple[float, str, float, float]] = []
+        for delay, key, volume, pan in self._pending_sounds:
+            remaining = delay - dt
+            if remaining <= 0.0:
+                self.ctx.audio.play(key, volume=volume, pan=pan)
+            else:
+                still.append((remaining, key, volume, pan))
+        self._pending_sounds = still
+
+    # -- radio ---------------------------------------------------------------
+
+    def _duck_radio_for_cue(self) -> None:
+        """Make a hole in the programme for an enforcement earcon.
+
+        The catalog ships dozens of always-available police and fire scanner
+        streams, so an enforcement earcon played on top of the radio is
+        competing with material that sounds exactly like it. Ducking is what
+        makes the synthesized signature legible.
+        """
+        self._radio_cue_duck = RADIO_CUE_DUCK
+        self._radio_cue_duck_s = RADIO_CUE_DUCK_S
+        self._apply_radio_volume()
+
+    def _service_radio_cue_duck(self, dt: float) -> None:
+        if self._radio_cue_duck_s <= 0.0:
+            return
+        self._radio_cue_duck_s -= dt
+        if self._radio_cue_duck_s <= 0.0 and self._radio_cue_duck != 1.0:
+            self._radio_cue_duck = 1.0
+            self._apply_radio_volume()
+
+    def _cut_radio_for_stop(self) -> None:
+        """Kill the radio outright for the duration of a stop.
+
+        Cut, not ducked. The sudden silence is itself an unambiguous cue that
+        something has taken the cab over, and it removes any chance of a
+        scanner stream being mistaken for the cruiser behind you.
+        """
+        if self._radio_cut_for_stop:
+            return
+        self._radio_cut_for_stop = True
+        self.ctx.audio.stop_music(200)
+
+    def _restore_radio_after_stop(self) -> None:
+        if not self._radio_cut_for_stop:
+            return
+        self._radio_cut_for_stop = False
+        self._radio_cue_duck = 1.0
+        self._radio_cue_duck_s = 0.0
+        self._play_radio_current()
+
+    # -- cues ----------------------------------------------------------------
+
+    def _play_enforcement_marker(self, *, volume: float = 0.8, pan: float = 0.0) -> None:
+        self._duck_radio_for_cue()
+        self.ctx.audio.play(SIGNATURE_KEY, volume=volume, pan=pan)
+
+    def _mark_post_audible(self, post) -> None:
+        """The guarantee: a staffed post makes a sound before it can see you.
+
+        Fires at every presence level, because this cue is not ambience -- it
+        is the only reason the post is allowed to cost the player anything.
+        """
+        if post.id in self._marked_post_ids:
+            return
+        self._marked_post_ids.add(post.id)
+        # The flag and the sound are set together, on purpose. ``announced``
+        # is what ``observe`` checks before it will look at the driver at all,
+        # so it must mean "this post has made a noise", not "the trip meant to
+        # make one". A post that could set the flag without playing anything
+        # would be a post that tickets a player it never spoke to.
+        post.announced = True
+        self._play_enforcement_marker(volume=0.75)
+
+    def _play_marked_unit_pass(self, post) -> None:
+        """The oncoming pass: marker first, vehicle 200 ms behind it.
+
+        Both backends apply pan once at trigger, so a real Doppler sweep is
+        not buildable from code -- the sweep has to be baked into the asset,
+        and the pan here is a static confirmation of side, never the carrier
+        of the meaning. The two-element shape is what makes it survive: the
+        civilian and trooper pass clips differ only by a chirp buried inside
+        the whoosh, which is gone under engine, road, weather and radio, but a
+        marker arriving first at its own level is not.
+        """
+        side = PASS_PAN if post.kind in (KIND_FIXED_SCALE, KIND_SCALE_APRON) else -PASS_PAN
+        volume = PASS_BASE_VOLUME * min(1.4, self._ambience_scale())
+        self._play_enforcement_marker(volume=min(1.0, volume), pan=side)
+        self._schedule_sound(PASS_MARKER_LEAD_S, "traffic/trooper_pass", min(1.0, volume), side)
+
+    def _update_marked_unit_passes(self, previous_mi: float) -> None:
+        """Fire a pass earcon for every post the truck has just gone by."""
+        position = self.trip.position_mi
+        for post in self.trip.posts:
+            if post.id in self._passed_post_ids:
+                continue
+            trigger = post.at_mi + PASS_TRIGGER_MI
+            if not (previous_mi < trigger <= position):
+                continue
+            self._passed_post_ids.add(post.id)
+            if not post.staffed:
+                # An empty crossover is silent unless the presence setting is
+                # buying atmosphere: this is the one cue the slider governs,
+                # and it can never cost the player anything, because there is
+                # nobody there to observe them.
+                if self._ambience_scale() >= 1.2:
+                    self._play_marked_unit_pass(post)
+                continue
+            if post.is_scale:
+                continue  # the scale bed already covers the approach
+            self._play_marked_unit_pass(post)
+
+    def _update_scale_bed(self) -> None:
+        """The weigh-station approach bed, swelling on the real clock.
+
+        Open and closed are NOT two different ambiences. Two lot beds
+        differing by activity level is exactly the discrimination that fails
+        against a road bed, and it would be competing with the truck-stop and
+        facility-gate ambiences besides. The swell says "scale". Open adds a
+        spoken line, because an open scale costs money and time and has earned
+        speech. Closed says nothing at all, and the silence is the answer.
+
+        Whether a trooper is sitting on a closed apron stays unknowable. A
+        sighted driver cannot reliably see that either, so it is fair tension
+        rather than hidden information.
+        """
+        position = self.trip.position_mi
+        nearest = None
+        for post in self.trip.posts:
+            if not post.is_scale:
+                continue
+            ahead = post.at_mi - position
+            if -0.3 <= ahead <= SCALE_BED_START_MI and (nearest is None or ahead < nearest[0]):
+                nearest = (ahead, post)
+        if nearest is None:
+            if self._scale_bed_key:
+                self._scale_bed_key = ""
+                self._scale_bed_volume = 0.0
+                self.ctx.audio.stop_loop(CH_SCALE, fade_ms=SCALE_BED_FADE_MS)
+            return
+        ahead, post = nearest
+        closeness = 1.0 - max(0.0, min(1.0, max(0.0, ahead) / SCALE_BED_START_MI))
+        ceiling = (
+            SCALE_BED_OPEN_MAX_VOLUME
+            if post.kind == KIND_FIXED_SCALE
+            else SCALE_BED_CLOSED_MAX_VOLUME
+        )
+        ceiling *= self._ambience_scale()
+        volume = SCALE_BED_MIN_VOLUME + (max(0.0, ceiling - SCALE_BED_MIN_VOLUME)) * closeness
+        self._scale_bed_key = post.id
+        self._scale_bed_volume = volume
+        # start_loop dedupes on a running key, so this doubles as the level
+        # update and self-heals if anything stopped the channel.
+        self.ctx.audio.start_loop(
+            CH_SCALE, "poi/weigh_station_lane", volume=volume, fade_ms=SCALE_BED_FADE_MS
+        )
+
+    # -- scales --------------------------------------------------------------
+
+    def _scale_is_open(self, stop) -> bool:
+        """Whether this weigh station is open today.
+
+        Settled once when the trip was built, from a named seeded draw over
+        the stop's own key, so a reload cannot reopen a dark scale.
+        """
+        for post in self.trip.posts:
+            if post.anchor == stop.key:
+                return post.kind == KIND_FIXED_SCALE
+        return False
+
+    def _scale_notice_lookahead_mi(self) -> float:
+        """Lead distance for the open-scale call, sized in real seconds.
+
+        An open scale costs money and time, so it gets a longer lead than a
+        heads-up does -- and the lead is derived from the actual sentence,
+        not a constant, because enforcement lines differ a lot in length.
+        """
+        speed = max(self.truck.speed_mph, 1.0)
+        seconds = max(
+            SCALE_WARNING_REAL_S,
+            self._pull_over_grace_seconds(
+                "Open weigh station ahead in two miles. Slow below fifteen and "
+                "press T for inspection check-in."
+            ),
+        )
+        miles = seconds * speed * self.trip.effective_time_scale / 3600.0
+        return max(WEIGH_STATION_NOTICE_MI, min(miles, ENFORCEMENT_WARNING_MAX_MI))
+
+    # -- the siren -----------------------------------------------------------
+
+    def _hold_stop_siren(self) -> None:
+        """Keep the cruiser audible for as long as it is behind you.
+
+        The old build played one mono, centred, fixed-level wail and never
+        repeated it, and the whole pull-over update contained no audio at all.
+        Miss that one shot and there was no ongoing evidence of a police car
+        anywhere in the encounter.
+        """
+        # Pan is confirmation of side and nothing more -- "behind you" is in
+        # the spoken instruction, because stereo cannot carry front from back
+        # and plenty of players run a single earbud. It closes toward centre
+        # as the cruiser comes up, so the pan agrees with the level rise
+        # rather than fighting it.
+        closing = min(1.0, self.siren.elapsed_s / max(1e-6, SIREN_RISE_S))
+        self.siren.hold(self.ctx.audio, pan=-0.5 * (1.0 - closing))
+
+    def _end_stop_audio(self) -> None:
+        """Every path out of a stop comes through here."""
+        self.siren.stop(self.ctx.audio)
+        self._restore_radio_after_stop()
+
+    # -- the sample ----------------------------------------------------------
+
+    def _road_sample(self, post) -> RoadSample:
+        """Everything a post could notice about the truck, read defensively."""
+        trip, truck = self.trip, self.truck
+        position = trip.position_mi
+        limit, _ = trip.speed_limit_at(position)
+        effects = getattr(trip.weather, "effects", None)
+        visibility = float(getattr(effects, "visibility_mi", 10.0) or 10.0)
+        context = trip.traffic_context()
+        gap_s = getattr(context, "gap_seconds", None) if context is not None else None
+        chain_level = trip.chain_law_level() if hasattr(trip, "chain_law_level") else 0
+        return RoadSample(
+            position_mi=position,
+            speed_mph=truck.speed_mph,
+            limit_mph=limit,
+            # A parallel change is reworking damage into bands; read it
+            # defensively so neither side can break the other.
+            damage_pct=float(getattr(truck, "damage_pct", 0.0) or 0.0),
+            visibility_mi=visibility,
+            night=is_night(trip.local_hour),
+            lights_on=bool(getattr(truck, "lights_on", True)),
+            chains_required=chain_level > 0,
+            chains_on=bool(getattr(truck, "chains_on", False)) or chain_level == 0,
+            following_gap_s=gap_s,
+            left_lane_restricted=bool(getattr(self, "_left_lane_restricted", False)),
+            in_left_lane=int(getattr(self.lane, "lane", 0) or 0) > 0,
+            pack_neighbours=trip.traffic_manager.pack_neighbours(
+                position,
+                truck.speed_mph,
+                radius_mi=COVER_RADIUS_MI,
+                tolerance_mph=COVER_SPEED_TOLERANCE_MPH,
+            ),
+            crest_between=self._crest_between(position, post.at_mi),
+            paced_real_s=self._pacing_since_s.get(post.id, 0.0),
+            over_limit_mi=self._over_limit_mi,
+        )
+
+    def _crest_between(self, position_mi: float, post_mi: float) -> bool:
+        """Whether the road hides the post from an optical method.
+
+        A crest is a grade sign change across the intervening stretch -- the
+        road goes up and then comes down between you and the officer, so
+        neither of you can see the other. A hard bend does the same thing, and
+        the curve bake already knows where those are.
+        """
+        low, high = sorted((position_mi, post_mi))
+        if high - low < 0.05:
+            return False
+        grades = [self.trip.grade_at(low + (high - low) * f) for f in (0.0, 0.25, 0.5, 0.75, 1.0)]
+        if max(grades) > 0.015 and min(grades) < -0.015:
+            return True
+        for curve in getattr(self.trip, "curves", ()):
+            if low <= curve.start_mi <= high and abs(getattr(curve, "radius_m", 1e9)) < 400.0:
+                return True
+        return False
+
+    # -- the watch -----------------------------------------------------------
+
+    def _update_enforcement_watch(self, dt: float) -> None:
+        """One frame of the enforcement layer: cues, sampling, and the draw.
+
+        **The pacing mismatch, and how it is solved.** Speeding used to be
+        judged on a six REAL second hold, but the old patrol window could last
+        7.6 real seconds at standard pacing and 3.8 at the fastest -- so at
+        the fastest pacing a speeder could be structurally unable to be caught
+        inside a patrol at all. Decompressing the clock inside every post's
+        reach was the other option and was rejected: with a post every
+        thirty-odd miles it would have put a dozen miles of a five-hundred
+        mile run onto the real clock, which is a different game.
+
+        Instead, observation is DISTANCE-quantised. A post reads a speed the
+        way a radar does -- over a stretch of road (``OBSERVE_HOLD_MI``, about
+        four hundred feet) -- and a stretch of road is the same stretch at
+        every pacing, at every frame rate, and after a reload. The real-time
+        hold is gone entirely along with the silent at-delivery charge it
+        served; there is nothing left for it to disagree with.
+        """
+        self._service_pending_sounds(dt)
+        self._service_radio_cue_duck(dt)
+        self.siren.service(self.ctx.audio, dt)
+        previous_mi = self._enforcement_prev_mi
+        position = self.trip.position_mi
+        self._enforcement_prev_mi = position
+        moved = max(0.0, position - previous_mi)
+        limit, _ = self.trip.speed_limit_at(position)
+        if self.truck.speed_mph <= limit + OBSERVE_LEEWAY_MPH:
+            self._over_limit_mi = 0.0
+        elif self._limit_drop_grace_s > 0.0:
+            # A limit that just dropped under a loaded truck: the driver is
+            # braking and has not disregarded anything yet. Nothing accrues,
+            # so no post can read a speed out of the transition itself.
+            self._over_limit_mi = 0.0
+        elif (
+            self._speed_control_engaged() and self.truck.brake > 0.0 and self.truck.throttle <= 0.05
+        ):
+            # An automatic speed control is already braking the truck down.
+            # Nothing about that is disregard either -- and the rule has to
+            # cover every assist that brakes, not just the adaptive-cruise
+            # limit cap: the destination-exit ease used to accrue over-limit
+            # distance while the assist was doing exactly what it was asked
+            # to, which would have ticketed the most cautious drivers in the
+            # game for using the feature.
+            self._over_limit_mi = 0.0
+        else:
+            self._over_limit_mi += moved
+        self._track_pacing(dt)
+        self._update_scale_bed()
+        if self._ramp_mi is None:
+            self._update_marked_unit_passes(previous_mi)
+        for post in self.trip.posts:
+            if post.staffed and position >= post.watch_start_mi - POST_MARKER_LEAD_MI:
+                self._mark_post_audible(post)
+        if self._enforcement_bypassed():
+            return
+        if self._enforcement_busy():
+            # Defer, never drop: remember which posts had a look owing and
+            # let them take it as soon as the cab is quiet.
+            for post in self.trip.posts_watching(position):
+                self._deferred_post_ids.add(post.id)
+            return
+        self._run_observations()
+
+    def _speed_control_engaged(self) -> bool:
+        """Whether cruise or the speed keeper currently owns the throttle."""
+        return self._cruise_mph is not None or bool(getattr(self, "_speed_control_armed", False))
+
+    def _track_pacing(self, dt: float) -> None:
+        """How long each roving unit has been sitting behind the truck."""
+        position = self.trip.position_mi
+        for post in self.trip.posts:
+            if post.method != "pacing" or not post.staffed:
+                continue
+            behind = position - post.at_mi
+            if 0.0 < behind <= 1.0:
+                self._pacing_since_s[post.id] = self._pacing_since_s.get(post.id, 0.0) + dt
+            elif behind > 1.0:
+                self._pacing_since_s.pop(post.id, None)
+
+    def _run_observations(self) -> None:
+        """Ask every post watching this mile what it sees, best first."""
+        position = self.trip.position_mi
+        watching = self.trip.posts_watching(position)
+        if not watching:
+            return
+        best = None
+        for post in watching:
+            found = observe(post, self._road_sample(post))
+            if found is not None and (best is None or found.confidence > best.confidence):
+                best = found
+        if best is None:
+            return
+        post = best.post
+        # The named, seeded, POSITION-quantised draw. Never time-quantised:
+        # identical driving through identical road has to produce an identical
+        # outcome whatever the frame rate, and a reload must not re-roll
+        # whether a trooper was looking at you.
+        violation_key = f"{best.what}:{round(position, 1)}"
+        roll = random.Random(
+            post_seed(self.trip_seed, post.id, f"observe:{violation_key}")
+        ).random()
+        if roll >= best.confidence:
+            # Noticed and let go. A post does not re-decide: this is what
+            # makes "five over near a post is ignored" a state rather than a
+            # rare piece of bad luck the player can never learn from.
+            post.declined = True
+            return
+        self._begin_observed_stop(best)
+
+    def _begin_observed_stop(self, observation) -> None:
+        """Turn a confirmed observation into the pull-over that already exists."""
+        post = observation.post
+        self._cut_radio_for_stop()
+        self._over_limit_mi = 0.0
+        post.declined = True
+        if observation.what == WHAT_SPEEDING:
+            limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
+            self._begin_pull_over(limit)
+            return
+        summary, fine, return_message = self._observed_stop_terms(observation)
+        self._begin_enforcement_pull_over(
+            kind="observed",
+            title="Roadside pull-over",
+            summary=summary,
+            fine=fine,
+            reputation_hit=hos.HOS_REPUTATION_HIT,
+            return_message=return_message,
+            lights_message=(
+                f"Lights and siren behind you. A trooper on this {post.reason} "
+                f"saw {observation.what}. Signal with "
+                f"{self.ctx.control_hint('take_exit')} and brake to a stop on "
+                "the shoulder."
+            ),
+        )
+
+    def _observed_stop_terms(self, observation) -> tuple[str, float, str]:
+        post = observation.post
+        what = observation.what
+        if what == WHAT_DAMAGE:
+            return (
+                f"A trooper on this {post.reason} saw visible truck damage at "
+                f"{self.truck.damage_pct:.0f} percent and ordered a roadside "
+                "safety inspection.",
+                UNSAFE_DAMAGE_FINE,
+                "Back on the highway. Repair the truck at the next safe stop.",
+            )
+        if what == WHAT_CHAINS:
+            return (
+                f"A trooper on this {post.reason} saw you running the chain "
+                "control without chains on the drives.",
+                CHAIN_LAW_FINE,
+                "Back on the highway. Chain up before the next control.",
+            )
+        if what == WHAT_FOLLOWING:
+            return (
+                f"A trooper on this {post.reason} watched you close right up on the vehicle ahead.",
+                FOLLOWING_TOO_CLOSE_FINE,
+                "Back on the highway. Leave yourself a gap.",
+            )
+        if what == WHAT_LIGHTS:
+            return (
+                f"A trooper on this {post.reason} saw you running dark.",
+                LIGHTS_FINE,
+                "Back on the highway. Keep your lights on after dark.",
+            )
+        return (
+            f"A trooper on this {post.reason} pulled you over for {what}.",
+            LANE_MISUSE_FINE,
+            "Back on the highway. Keep right except to pass.",
+        )
+
+    # -- scale screening -----------------------------------------------------
+
+    def _scale_selects_driver(self, stop) -> bool:
+        """Whether an open scale sends this truck to the inspection lane.
+
+        The safety record is the dial. A clean career is waved through nearly
+        every time; a career carrying citations, out-of-service history and a
+        damaged truck is pulled in at every open scale, which is what makes a
+        dirty record feel relentless without the game inventing bad luck.
+        """
+        profile = self.ctx.profile
+        if profile is None:
+            return False
+        score = refresh_selection_score(
+            profile, damage_pct=float(getattr(self.truck, "damage_pct", 0.0) or 0.0)
+        )
+        key = post_seed(self.trip_seed, f"scale:{stop.key}", "select")
+        return random.Random(key).random() < inspection_selection_chance(score)
+
+    def safety_record_line(self) -> str:
+        """The spoken safety-record line, for the driver's own status readout."""
+        profile = self.ctx.profile
+        if profile is None:
+            return "Safety record: clean. Inspectors have no reason to pull you in."
+        score = refresh_selection_score(
+            profile, damage_pct=float(getattr(self.truck, "damage_pct", 0.0) or 0.0)
+        )
+        return safety_record_text(score)
+
+
+__all__ = [
+    "CERTAIN_OVER_MPH",
+    "OBSERVE_HOLD_MI",
+    "PASS_PAN",
+    "POST_MARKER_LEAD_MI",
+    "RADIO_CUE_DUCK",
+    "SCALE_BED_START_MI",
+    "EnforcementWatchMixin",
+]

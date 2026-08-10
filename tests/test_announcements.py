@@ -194,8 +194,9 @@ def test_curve_callout_setting_controls_the_single_automatic_announcement(monkey
 
 
 def test_cb_radio_chatter_queues_and_uses_cb_audio(monkeypatch):
+    from enforcement_helpers import always_observing_post
+
     from freight_fate.app import App
-    from freight_fate.sim.trip import PatrolWindow
 
     app = App()
     try:
@@ -210,7 +211,7 @@ def test_cb_radio_chatter_queues_and_uses_cb_audio(monkeypatch):
                 TripEventKind.GPS_CUE,
                 "CB chatter in 5 miles: drivers report a bear ahead. "
                 "Ease back and check your speed.",
-                {"cb_patrol": PatrolWindow(10.0, 14.0, 0.8, "highway enforcement")},
+                {"cb_patrol": always_observing_post(at_mi=14.0, reach_mi=4.0)},
             )
         )
 
@@ -221,8 +222,9 @@ def test_cb_radio_chatter_queues_and_uses_cb_audio(monkeypatch):
 
 
 def test_truly_ambient_chatter_is_spaced_without_blocking_safety(monkeypatch):
+    from enforcement_helpers import always_observing_post
+
     from freight_fate.app import App
-    from freight_fate.sim.trip import PatrolWindow
     from freight_fate.states.driving import AMBIENT_EVENT_SPACING_S
 
     app = App()
@@ -237,7 +239,7 @@ def test_truly_ambient_chatter_is_spaced_without_blocking_safety(monkeypatch):
             TripEvent(
                 TripEventKind.GPS_CUE,
                 "CB chatter in 5 miles: drivers report a bear ahead.",
-                {"cb_patrol": PatrolWindow(10.0, 14.0, 0.8, "highway enforcement")},
+                {"cb_patrol": always_observing_post(at_mi=14.0, reach_mi=4.0)},
             )
         )
         d._handle_trip_event(TripEvent(TripEventKind.GPS_CUE, "Exit 12 ahead."))
@@ -255,7 +257,7 @@ def test_truly_ambient_chatter_is_spaced_without_blocking_safety(monkeypatch):
             TripEvent(
                 TripEventKind.GPS_CUE,
                 "CB chatter in 4 miles: drivers report a bear ahead.",
-                {"cb_patrol": PatrolWindow(11.0, 14.0, 0.8, "highway enforcement")},
+                {"cb_patrol": always_observing_post(at_mi=14.0, reach_mi=3.0)},
             )
         )
         d._update_ambient_events(AMBIENT_EVENT_SPACING_S)

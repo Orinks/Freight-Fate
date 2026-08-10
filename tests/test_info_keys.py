@@ -180,9 +180,10 @@ def test_upcoming_key_reports_an_imposed_limit_ahead(monkeypatch):
         app.shutdown()
 
 
-def test_upcoming_key_reports_cb_patrol_ahead(monkeypatch):
+def test_upcoming_key_reports_an_enforcement_post_ahead(monkeypatch):
+    from enforcement_helpers import always_observing_post
+
     from freight_fate.app import App
-    from freight_fate.sim.trip import PatrolWindow
 
     app = App()
     try:
@@ -191,12 +192,16 @@ def test_upcoming_key_reports_cb_patrol_ahead(monkeypatch):
         d.trip.zones = []
         d.trip.stops = []
         d.trip.navigation_cues = []
-        d.trip.patrols = [PatrolWindow(10.0, 14.0, 0.8, "highway enforcement")]
+        d.trip.patrols = [always_observing_post(at_mi=14.0, reach_mi=4.0)]
         spoken = _capture(app, monkeypatch)
 
         d.handle_event(key_event(pygame.K_u))
 
-        assert "CB chatter reports a bear ahead" in spoken[-1]
+        # A status readout the player asked for speaks the canonical noun.
+        # "Bear" is CB voice and belongs only inside a clause the line
+        # attributes to the CB.
+        assert "enforcement post" in spoken[-1]
+        assert "bear" not in spoken[-1]
     finally:
         app.shutdown()
 

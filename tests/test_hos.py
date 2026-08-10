@@ -1951,6 +1951,9 @@ def test_pre_1_5_snapshot_resumes_with_fresh_clock():
             "position_mi": 412.0,
             "game_minutes": 540.0,
             "start_damage": 3.0,
+            # A pre-removal snapshot field; kept here so the resume path
+            # keeps proving it loads an in-flight save from before the silent
+            # at-delivery speeding charge was deleted.
             "speeding_strikes": 1,
         }
         app.ctx.profile = p

@@ -42,11 +42,14 @@ class PlaytestResult:
     destination: str = ""
     current_city: str = ""
     remaining_miles: float = 0.0
-    speeding_strikes: int = 0
     speeding_tickets: int = 0
     inspection_fines: int = 0
     speed_control_transitions: list[str] = field(default_factory=list)
-    max_speeding_timer_s: float = 0.0
+    # The furthest the truck ever ran continuously over the limit. Distance,
+    # not seconds: an officer reads a speed over a stretch of road, and that
+    # stretch is the same stretch at every pacing. Replaces a real-time timer
+    # that measured the silent at-delivery charge, which no longer exists.
+    max_over_limit_mi: float = 0.0
     construction_entry_speed_mph: float | None = None
     heavy_traffic_entry_speed_mph: float | None = None
     destination_exit_speed_mph: float | None = None
@@ -368,9 +371,9 @@ class PlaytestHarness:
             if mode != last_mode:
                 self.result.speed_control_transitions.append(mode)
                 last_mode = mode
-            self.result.max_speeding_timer_s = max(
-                self.result.max_speeding_timer_s,
-                driving._speeding_timer,
+            self.result.max_over_limit_mi = max(
+                self.result.max_over_limit_mi,
+                driving._over_limit_mi,
             )
             _, zone_reason = driving.trip.speed_limit_at(driving.trip.position_mi)
             if zone_reason == "construction" and self.result.construction_entry_speed_mph is None:
@@ -385,7 +388,6 @@ class PlaytestHarness:
                 f"stopped at {driving.trip.position_mi:.1f}"
             )
 
-        self.result.speeding_strikes = driving.speeding_strikes
         self.result.speeding_tickets = driving.speeding_tickets
         self.result.inspection_fines = driving.hos_fine_count
         return self.result
@@ -488,9 +490,9 @@ class PlaytestHarness:
             if mode != last_mode:
                 self.result.speed_control_transitions.append(mode)
                 last_mode = mode
-            self.result.max_speeding_timer_s = max(
-                self.result.max_speeding_timer_s,
-                driving._speeding_timer,
+            self.result.max_over_limit_mi = max(
+                self.result.max_over_limit_mi,
+                driving._over_limit_mi,
             )
             if driving._destination_exit_announced_key and not signaled:
                 driving.handle_event(key_event(pygame.K_x))
@@ -512,7 +514,6 @@ class PlaytestHarness:
                 f"signaled={signaled}\n{self.result.transcript_text}"
             )
 
-        self.result.speeding_strikes = driving.speeding_strikes
         self.result.speeding_tickets = driving.speeding_tickets
         self.app.state.handle_event(key_event(pygame.K_RETURN))
         _finish_timed_state(self.app)

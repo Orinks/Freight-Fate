@@ -93,6 +93,11 @@ belongs to the truck you own in this game, not to the driver.
 | Traffic vehicle | `TrafficVehicle`, `TrafficSituation`, `TrafficManager` | `sim/traffic_manager.py` |
 | Live traffic | `TrafficEvent`, `TrafficData`, `RealTrafficProvider` | `sim/real_traffic.py` |
 | Truck parking | `TruckParkingLocation`, `ParkingData`, `TruckParkingProvider` | `sim/truck_parking.py` |
+| Enforcement post | `EnforcementPost` | `sim/enforcement_posts.py` |
+| What a post noticed | `Observation`, `RoadSample` | `sim/enforcement_observe.py` |
+| The enforcement watch on the drive | `EnforcementWatchMixin` | `states/driving_enforcement.py` |
+| The held siren and its signature | `SirenLoop` | `states/driving_siren.py` |
+| The safety record | -- | `models/safety_record.py` |
 | Time zone | `TimeZone` | `sim/timezones.py` |
 | Live weather | `RealWeatherProvider` | `sim/real_weather.py` |
 
@@ -104,6 +109,12 @@ route ahead. A sentence about "traffic" should make clear which one it means.
 Three providers -- weather, traffic and parking -- reach the network. All of
 them must degrade to the baked data silently; nothing in the drive may block on
 one.
+
+An enforcement post is a PLACE (a milepost with a body in it, or not) and an
+observation is an EVENT (that body noticing one thing about your truck, with a
+confidence). Keeping them apart is what lets presence be constant while
+consequence stays rare: a run is full of posts and almost never produces an
+observation. "Observed" is an internal word and is never spoken.
 
 `Trip` is the binding entity: it joins a driver, a truck, a job and a route
 into one moving thing, and it owns the clock. Everything the player hears while
@@ -212,6 +223,15 @@ from the words, and synonyms cost them a re-read.
 | The fine for engine braking in one | engine brake citation | jake ticket, noise fine | `EngineBrakeZoneMixin._fine_engine_braking` |
 | An offense that counts toward losing the CDL | serious violation | strike, point, demerit, infraction | `DrivingRecord.record_serious_violation` |
 | The career-long enforcement history | your record | rap sheet, history, file | `DrivingRecord` |
+| A place on the road where an officer may be sitting | enforcement post | patrol, speed trap, trap, checkpoint, bear | `EnforcementPost` |
+| The officer | trooper on the highway; officer at a scale | cop, bear, smokey, unit, LEO | `EnforcementPost.agency` |
+| Being pulled to the shoulder by one | pull-over | stop (already the POI, the act of stopping, and the command) | `_pull_over` |
+| The inspection facility | weigh station; "the scale" in short cues | scale house, weigh point, chicken coop | `RoadStop(type="weigh_station")` |
+| Whether it is working today | open / closed | active, manned, staffed, live | `KIND_FIXED_SCALE` vs `KIND_SCALE_APRON` |
+| Drivers talking about enforcement on the radio | CB chatter | radio talk, scanner, traffic | `cb_patrol_message` |
+| A CB report nobody has verified | unconfirmed | rumor, maybe, possible, unreliable | `_cb_confidence` |
+| How much police activity you hear | enforcement presence | police density, patrol frequency, difficulty | `settings.enforcement_presence` |
+| How interesting you look to an inspector | safety record | ISS, CSA, SMS, score, rating | `Profile.selection_score` |
 | The CDL being off the road for a set time | CDL suspension; "suspended" in short status | ban, revocation, lockout | `DrivingRecord.suspended` |
 | The permanent version of it, after a second major offense | lifetime disqualification | permaban, career over, blacklist | `DrivingRecord.lifetime_disqualified` |
 | An offense heavy enough to disqualify a CDL outright | major offense | felony (as the game's own noun), big one | `DrivingRecord.record_major_offense` |
@@ -313,6 +333,20 @@ different number, and a shift can span several runs.
 reported incidents on the road ahead are different systems the player can act
 on differently. "Traffic is heavy" and "there is a wreck reported ahead" are
 not interchangeable.
+
+### "Bear" is CB voice only
+
+"Bear" may appear in exactly one place: inside a clause the line attributes to
+the CB, spoken by a driver on the radio. It is trade slang, and it is flavour.
+In a warning, a menu item, a status readout, or anything the game says in its
+own voice, the word is "trooper".
+
+This is enforced, not just documented:
+`tests/test_enforcement_presence.py::test_bear_is_cb_voice_only_in_every_player_facing_string`
+scans every player-facing string in `src/` and fails if the word appears
+outside a CB clause. The check exists because slang leaks: the word is
+evocative, it reads well in a sentence, and one careless line teaches a screen
+reader user a second noun for a thing that already had one.
 
 ## Open naming decisions
 

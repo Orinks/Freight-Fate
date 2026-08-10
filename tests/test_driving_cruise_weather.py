@@ -13,7 +13,6 @@ from speech_capture import speech_stub
 from freight_fate.states.driving import (
     ACC_LIMIT_OFFSET_MPH,
     PCC_CREST_SAG_MPH,
-    SPEEDING_HOLD_S,
 )
 
 # -- cruise control -------------------------------------------------------------
@@ -775,19 +774,25 @@ def test_adaptive_cruise_slows_before_large_limit_drop(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    ("speed_mph", "timer_before", "dt"),
+    ("speed_mph", "over_before_mi", "dt"),
     [
-        (45.0, SPEEDING_HOLD_S - 0.05, 0.1),
-        (46.0, SPEEDING_HOLD_S - 0.05, 0.1),
-        (55.0, SPEEDING_HOLD_S - 0.25, 0.5),
-        (65.0, SPEEDING_HOLD_S - 0.5, 1.0),
-        (70.0, SPEEDING_HOLD_S - 1.0, 1.5),
+        (45.0, 0.07, 0.1),
+        (46.0, 0.07, 0.1),
+        (55.0, 0.06, 0.5),
+        (65.0, 0.05, 1.0),
+        (70.0, 0.04, 1.5),
     ],
 )
 @pytest.mark.smoke
-def test_adaptive_cruise_limit_drop_does_not_trigger_speeding_strike(
-    monkeypatch, speed_mph, timer_before, dt
+def test_adaptive_cruise_limit_drop_is_never_read_as_speeding(
+    monkeypatch, speed_mph, over_before_mi, dt
 ):
+    """Cruise braking the truck down to a new limit is not disregard.
+
+    It used to be measured against a real-time strike clock; it is measured
+    against the over-limit distance an officer reads now, and the answer has
+    to be the same: the accrual resets, and nothing is charged.
+    """
     from freight_fate.app import App
 
     app = App()
@@ -802,14 +807,15 @@ def test_adaptive_cruise_limit_drop_does_not_trigger_speeding_strike(
         driving.truck.velocity_mps = speed_mph / 2.23694
         driving.truck.throttle = 0.0
         driving._cruise_mph = 65.0
-        driving._speeding_timer = timer_before
+        driving._over_limit_mi = over_before_mi
 
         driving.update(dt)
 
         assert driving._acc_limit_capped
         assert driving.truck.brake > 0.0
-        assert driving.speeding_strikes == 0
-        assert not any("Speeding strike" in e for e in events)
+        assert driving._over_limit_mi == 0.0
+        assert driving._pull_over is None
+        assert not any("Lights and siren" in e for e in events)
     finally:
         app.shutdown()
 
@@ -1672,23 +1678,25 @@ def test_limit_drop_earns_braking_grace(monkeypatch):
         driving._update_speeding(0.1)  # seed the previous limit
         monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (50.0, None))
 
-        before = driving.speeding_strikes
-        for _ in range(70):  # 7 s: inside the (65-50)/2 = 7.5 s grace
-            driving._update_speeding(0.1)
-        assert driving.speeding_strikes == before
+        def _roll(steps, *, accelerator_held=False):
+            for _ in range(steps):
+                driving.trip.position_mi += 0.01
+                driving._update_speeding(0.1, accelerator_held=accelerator_held)
+                driving._update_enforcement_watch(0.1)
 
-        # Grace spent, still 15 over with no brake: the normal hold applies.
-        for _ in range(100):  # 0.5 s of leftover grace + the 6 s hold, once
-            driving._update_speeding(0.1)
-        assert driving.speeding_strikes == before + 1
+        _roll(70)  # 7 s: inside the (65-50)/2 = 7.5 s grace
+        assert driving._over_limit_mi == 0.0  # the transition itself is not a speed
 
-        # Second drop, but the driver stays on the throttle: no grace.
+        # Grace spent, still 15 over with no brake: the distance accrues.
+        _roll(30)
+        assert driving._over_limit_mi > 0.0
+
+        # Second drop, but the driver stays on the throttle: no grace at all.
         monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (35.0, None))
         t.throttle = 1.0
-        strikes = driving.speeding_strikes
-        for _ in range(70):  # > SPEEDING_HOLD_S at 0.1 s steps
-            driving._update_speeding(0.1, accelerator_held=True)
-        assert driving.speeding_strikes == strikes + 1
+        driving._over_limit_mi = 0.0
+        _roll(5, accelerator_held=True)
+        assert driving._over_limit_mi > 0.0
     finally:
         app.shutdown()
 

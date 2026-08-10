@@ -3,9 +3,22 @@
 from __future__ import annotations
 
 import logging
+import random
 import re
 
 from ..data.world import Leg
+from .enforcement_posts import (
+    KIND_CHAIN,
+    KIND_CMV,
+    KIND_FIXED_SCALE,
+    KIND_MEDIAN,
+    KIND_ROVING,
+    KIND_SCALE_APRON,
+    KIND_URBAN,
+    KIND_WORK_ZONE,
+    EnforcementPost,
+    post_seed,
+)
 from .trip_models import (
     CONSTRUCTION_TAPER_LIMIT_MPH,
     CONSTRUCTION_TAPER_MI,
@@ -13,7 +26,6 @@ from .trip_models import (
     TRAFFIC_PRESSURE_LOOKAHEAD_MI,
     ZONE_MIN_GAP_MI,
     NavigationCue,
-    PatrolWindow,
     TrafficContext,
     TrafficPressure,
     TripEventKind,
@@ -67,39 +79,78 @@ class TripTrafficMixin:
         )
         self._emit(TripEventKind.GPS_CUE, situation.message, cue=cue, npc_vehicle=lead)
 
-    def cb_patrol_message(self, patrol: PatrolWindow, ahead_mi: float) -> str:
-        """Player-facing CB chatter for enforcement presence."""
-        distance = self._distance_text(max(0.0, ahead_mi))
-        if "construction" in patrol.reason or "work zone" in patrol.reason:
-            return (
-                f"CB chatter in {distance}: drivers are talking about enforcement "
-                "near the work zone. Ease back and check your speed."
-            )
-        return (
-            f"CB chatter in {distance}: drivers report a bear ahead. "
-            "Ease back and check your speed."
-        )
+    # -- CB chatter ----------------------------------------------------------
+    # "Bear" is CB voice. It may appear only inside a clause the line
+    # attributes to the CB, never in a warning, a menu, or a status readout,
+    # where the word is "trooper". tests/test_enforcement_presence.py asserts
+    # this over every player-facing string in src/.
 
-    def cb_patrol_status(self, patrol: PatrolWindow, ahead_mi: float) -> str:
+    def _cb_confidence(self, post: EnforcementPost) -> str:
+        """How firmly the channel is standing behind this report.
+
+        A blind player cannot look out of the window and falsify a CB call, so
+        an unreliable channel has to carry its unreliability in the words --
+        a silently wrong report is indistinguishable from a bug, and the
+        rational response to that is to stop trusting the channel at all.
+        Confidence rides the attribution verb and the corroboration count, and
+        nothing else: no percentages, no meta-commentary.
+
+        Wrong in one direction only. The CB may call a post that turns out to
+        be empty; that costs a needless lift off the throttle. It may never
+        say the road is clear, because silence is the only honest way to
+        report nothing heard.
+        """
+        rolled = random.Random(post_seed(self._seed, post.id, "cb_confidence")).random()
+        if post.staffed:
+            return "strong" if rolled < 0.55 else "ordinary"
+        return "thin" if rolled < 0.7 else "ordinary"
+
+    @staticmethod
+    def _cb_side(post: EnforcementPost) -> str:
+        """Where on the road the CB says it is. Words, never pan alone."""
+        return {
+            KIND_MEDIAN: "in the median",
+            KIND_ROVING: "working with traffic",
+            KIND_WORK_ZONE: "in the work zone",
+            KIND_SCALE_APRON: "on the scale apron",
+            KIND_FIXED_SCALE: "at the scale",
+            KIND_URBAN: "coming into town",
+            KIND_CMV: "on the right shoulder",
+            KIND_CHAIN: "at the chain-up area",
+        }.get(post.kind, "up ahead")
+
+    def cb_patrol_message(self, post: EnforcementPost, ahead_mi: float) -> str:
+        """Player-facing CB chatter for one enforcement post.
+
+        Terse speech keeps the fact, the distance and the side, and drops the
+        advice tail -- that tail is what made the old line eighteen words, and
+        therefore longer than the window it had to be heard in.
+        """
         distance = self._distance_text(max(0.0, ahead_mi))
+        confidence = self._cb_confidence(post)
+        side = self._cb_side(post)
+        if confidence == "strong":
+            return f"CB chatter, {distance}: two drivers call a bear {side}."
+        if confidence == "ordinary":
+            return f"CB chatter, {distance}: a driver reports a bear {side}."
+        return f"CB chatter: somebody called a bear {side} a while back."
+
+    def cb_patrol_status(self, post: EnforcementPost, ahead_mi: float) -> str:
+        """The on-demand road-ahead readout's enforcement clause.
+
+        Reported at full detail whatever the enforcement-presence setting is.
+        Presence governs ambience; it never withholds information the player
+        asked a key for.
+        """
+        distance = self._distance_text(max(0.0, ahead_mi))
+        where = self._cb_side(post)
         if ahead_mi <= 0:
-            if "construction" in patrol.reason or "work zone" in patrol.reason:
-                return "CB chatter says enforcement is active around this work zone"
-            return "CB chatter says a bear may be watching this stretch"
-        if "construction" in patrol.reason or "work zone" in patrol.reason:
-            return f"CB chatter about work-zone enforcement in {distance}"
-        return f"CB chatter reports a bear ahead in {distance}"
+            return f"an enforcement post {where} on this stretch"
+        return f"an enforcement post {where} in {distance}"
 
-    def next_patrol_within(self, within_mi: float) -> PatrolWindow | None:
-        """Nearest active or upcoming patrol window inside the lookahead."""
-        candidates = [
-            p
-            for p in self.patrols
-            if p.end_mi >= self.position_mi and p.start_mi - self.position_mi <= within_mi
-        ]
-        if not candidates:
-            return None
-        return min(candidates, key=lambda p: max(0.0, p.start_mi - self.position_mi))
+    def next_patrol_within(self, within_mi: float) -> EnforcementPost | None:
+        """Nearest enforcement post at or ahead of the truck in the lookahead."""
+        return self.next_post_within(within_mi)
 
     def _rush_hour_traffic_bias(self, leg: Leg) -> float:
         if not any(start <= self.start_hour < end for start, end in RUSH_HOUR_WINDOWS):

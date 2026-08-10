@@ -11,7 +11,13 @@ from ..data.curves import RouteCurve, route_curves
 from ..data.regions import classify_region
 from ..data.world import Leg, Route, get_world, lane_word
 from ..units import distance_unit, spoken_distance, spoken_gap, to_distance
-from .hos import clock_text, is_night
+from .enforcement_posts import (
+    KIND_FIXED_SCALE,
+    KIND_SCALE_APRON,
+    EnforcementPost,
+    EnforcementPostMixin,
+)
+from .hos import clock_text
 from .season import is_weekend
 from .timezones import appointment_text, city_zone, zone_for
 from .traffic_manager import TrafficManager
@@ -112,7 +118,7 @@ def _cue_direction(text: str) -> str:
     return ""
 
 
-class Trip(TripRoadEventMixin, TripTrafficMixin):
+class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
     """One delivery run along a chosen route."""
 
     def __init__(
@@ -191,9 +197,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self.navigation_cues = self._build_navigation_cues()
         self.landmarks = self._place_landmarks()
         self.billboards = self._place_billboards()
-        self.patrols = self._place_patrols()
-        self.traffic_manager.add_patrol_traffic(self.patrols)
         self.chain_law_areas = self._place_chain_law_areas()
+        # Enforcement posts read the zones, the scales, the chain controls and
+        # the city mileposts, so they are placed after all of them.
+        self.posts = self._place_enforcement_posts()
+        self.traffic_manager.add_enforcement_traffic(self.posts)
         # Curve data: baked real-world curve records per leg, resolved to trip
         # miles so the driving state can query active curves and approach them.
         self.curves = self._place_curves()
@@ -241,7 +249,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._announced_real_traffic: set[str] = set()
         self._next_real_traffic_check_mi = 0.0
         self._construction_zone_grace_start: dict[str, float] = {}
-        self._announced_patrols: set[str] = set()
+        # CB heads-ups are rationed (see _check_enforcement_heads_up): the
+        # spoken budget for a whole run is two lines, so this counts them.
+        self._cb_calls_made = 0
+        # Posts that have already entered the lead window. Separate from
+        # EnforcementPost.announced, which is the accessibility gate (this
+        # post made a sound, so it is allowed to observe you): a post can be
+        # audible without having spent one of the run's two spoken lines.
+        self._heads_up_seen: set[str] = set()
         self._hazard_check_mi = 5.0
         self._inspection_check_mi = 10.0
         self._conditions_check_mi = CONDITIONS_CHECK_MI
@@ -262,6 +277,20 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
             self.weather.set_city(weather_key, weather_lat, weather_lon)
             if self.weather.provider is not None:
                 self.weather.provider.request(weather_key, weather_lat, weather_lon)
+
+    @property
+    def patrols(self) -> list[EnforcementPost]:
+        """The enforcement posts on this route, under the older name.
+
+        A post is a point, not a window, so ``start_mi``/``end_mi`` on one
+        answer with the stretch it watches. Kept because the info key, the
+        road-ahead readout and the traffic bubble all still ask for patrols.
+        """
+        return self.posts
+
+    @patrols.setter
+    def patrols(self, value: list[EnforcementPost]) -> None:
+        self.posts = value
 
     @property
     def effective_time_scale(self) -> float:
@@ -1361,47 +1390,6 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         # loop job.
         return all(len(leg.route_points) < 2 for leg in self.route.legs)
 
-    def _patrol_intensity_at(self, mile: float) -> float:
-        leg_i, _ = self._leg_at_mile(mile)
-        cls = _highway_class(self.route.legs[leg_i].highway)
-        base = {"interstate": 0.5, "us_highway": 0.35}.get(cls, 0.25)
-        region = self._region_at(mile)
-        if region in _HOT_PATROL_REGIONS:
-            base *= 1.3
-        elif region in _COLD_PATROL_REGIONS:
-            base *= 0.7
-        if is_night(self.local_start_hour):
-            base *= 1.15
-        return base
-
-    def _place_patrols(self) -> list[PatrolWindow]:
-        patrols: list[PatrolWindow] = []
-        total = self.route.miles
-        n = max(0, int(total / 120.0 * min(1.0, self.hazard_scale)))
-        for _ in range(n):
-            at = self._insp_rng.uniform(10, max(11, total - 15))
-            length = self._insp_rng.uniform(3, 8)
-            intensity = self._patrol_intensity_at(at) * self.hazard_scale
-            patrols.append(
-                PatrolWindow(at, at + length, max(0.1, min(0.95, intensity)), "highway enforcement")
-            )
-        for zone in self.zones:
-            if zone.reason == "construction":
-                patrols.append(
-                    PatrolWindow(
-                        zone.start_mi,
-                        zone.end_mi,
-                        min(0.95, 0.9 * self.hazard_scale),
-                        "work zone enforcement",
-                    )
-                )
-        patrols.sort(key=lambda p: p.start_mi)
-        return patrols
-
-    def active_patrol_at(self, mile: float) -> PatrolWindow | None:
-        active = [p for p in self.patrols if p.start_mi <= mile <= p.end_mi]
-        return max(active, key=lambda p: p.intensity) if active else None
-
     def _place_chain_law_areas(self) -> list[tuple[float, float]]:
         """Stretches under a winter chain law: sustained steep grade, fixed in
         space at trip build. Whether the law is *active* follows the live
@@ -1918,9 +1906,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         for cr in self.curves:
             if cr.start_mi <= self.position_mi:
                 self._announced_curves.add(f"curve:{cr.start_mi:.3f}:{cr.direction}")
-        for patrol in self.patrols:
-            if patrol.start_mi <= self.position_mi:
-                self._announced_patrols.add(_patrol_key(patrol))
+        for post in self.posts:
+            # A post whose watch the truck has already entered was heard
+            # before the save; one still ahead has not been, and must get its
+            # cue again -- a resumed trip may not silently skip an
+            # announcement the post then observes the driver on.
+            if post.watch_start_mi <= self.position_mi:
+                post.announced = True
+                self._heads_up_seen.add(post.id)
         for pressure in self.traffic_pressures:
             if pressure.start_mi <= self.position_mi:
                 self._announced_traffic_pressures.add(_traffic_pressure_key(pressure))
@@ -2083,7 +2076,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         self._check_cities()
         self._check_timezone()
         if moved_mi > 0.0:
-            self._check_patrol_heads_up()
+            self._check_enforcement_heads_up()
             self._check_hazards(moved_mi)
             self._check_conditions_speed(moved_mi)
             self._check_inspections(moved_mi)
@@ -2508,18 +2501,70 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
                 )
                 return
 
-    def _check_patrol_heads_up(self) -> None:
-        for patrol in self.patrols:
-            key = _patrol_key(patrol)
-            ahead = patrol.start_mi - self.position_mi
-            if 0 < ahead <= CB_PATROL_LOOKAHEAD_MI and key not in self._announced_patrols:
-                self._announced_patrols.add(key)
-                self._emit(
-                    TripEventKind.GPS_CUE,
-                    self.cb_patrol_message(patrol, ahead),
-                    cb_patrol=patrol,
-                )
-                return
+    def _enforcement_warning_lookahead_mi(self) -> float:
+        """Lead distance for an enforcement cue, in miles, sized in real time.
+
+        A flat five miles was five miles of *game* road: at realistic pacing
+        the player passed the post before an eighteen-word CB call had
+        finished speaking. Scale it with speed and pacing the way zone
+        warnings already are, and clamp it so it is never shorter than the
+        old distance and never absurd.
+        """
+        speed = max(self.truck.speed_mph, 1.0)
+        miles = ENFORCEMENT_WARNING_REAL_S * speed * self.effective_time_scale / 3600.0
+        return max(CB_PATROL_LOOKAHEAD_MI, min(miles, ENFORCEMENT_WARNING_MAX_MI))
+
+    def _check_enforcement_heads_up(self) -> None:
+        """Mark posts heard, and spend the run's small CB speech budget well.
+
+        Two things happen here, and only the first one is unconditional.
+        Every post inside the lead window is marked announced, because a post
+        the player was never cued for is not allowed to observe them -- the
+        cue itself is the marked-unit pass earcon and the scale swell, which
+        the driving layer plays. The CB heads-up on top of that is speech, and
+        speech is rationed: at most CB_CALLS_PER_RUN for a whole delivery,
+        spent on the posts the driver's current speed actually exposes them
+        to. Candidates are sorted by urgency rather than by mile order, so a
+        cluster around a work zone cannot push a nearer post's call past its
+        own window.
+        """
+        lookahead = self._enforcement_warning_lookahead_mi()
+        candidates: list[tuple[float, EnforcementPost, float]] = []
+        for post in self.posts:
+            ahead = post.watch_start_mi - self.position_mi
+            if not (0 < ahead <= lookahead) or post.id in self._heads_up_seen:
+                continue
+            self._heads_up_seen.add(post.id)
+            post.announced = True
+            if post.kind in (KIND_FIXED_SCALE, KIND_SCALE_APRON):
+                continue  # the scale has its own approach cue; the CB stays out of it
+            candidates.append((ahead, post, self._cb_urgency(post)))
+        if not candidates or self._cb_calls_made >= CB_CALLS_PER_RUN:
+            return
+        # Urgency first, then whichever is nearest: a post the truck's speed
+        # would walk it into outranks a post it would coast past.
+        ahead, post, urgency = max(candidates, key=lambda c: (c[2], -c[0]))
+        if urgency <= 0.0:
+            return
+        self._cb_calls_made += 1
+        self._emit(
+            TripEventKind.GPS_CUE,
+            self.cb_patrol_message(post, ahead),
+            cb_patrol=post,
+        )
+
+    def _cb_urgency(self, post: EnforcementPost) -> float:
+        """How much this post matters to how the truck is being driven now.
+
+        Never zero for a staffed post: the ration decides whether the call is
+        spoken, and a report the player cannot check must not be withheld
+        because they happen to be legal in this instant. Speed only raises
+        the priority.
+        """
+        limit, _ = self.speed_limit_at(post.at_mi)
+        over = max(0.0, self.truck.speed_mph - limit)
+        base = 1.0 if post.staffed else 0.35
+        return base + min(2.0, over / 10.0)
 
     def _random_inspection_odds(self, leg: Leg) -> float:
         """Odds a random roadside log-check fires when the driver is in HOS

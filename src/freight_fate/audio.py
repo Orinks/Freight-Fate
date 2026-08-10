@@ -78,7 +78,13 @@ CH_JAKE = 13  # engine-brake growl: synthesized loop, stage- and rpm-keyed
 CH_RADIO_FX = 14  # FM fringe hiss bed under a thinning station
 CH_EDGE = 15  # edge-boundary ladder loops: clip / strip / shoulder textures
 CH_ALERT = 16  # continuous alert tones: the stop bar's solid zone
-RESERVED = 14
+CH_SIREN = 17  # the held enforcement siren, panned and levelled to the cruiser
+CH_SCALE = 18  # weigh-station approach bed, swelling on real seconds
+# Every named CH_ slot has to be inside the reserved block. It used to stop at
+# 14 while CH_RADIO_FX, CH_EDGE and CH_ALERT sat above it, so under one-shot
+# pressure pygame's allocator was free to steal the FM fringe bed, the edge
+# loop, or a held alert tone -- exactly when the most is going on.
+RESERVED = CH_SCALE + 1
 NUM_CHANNELS = 32
 
 # A held alert tone is a dead man's switch. Its owner re-asserts it every
@@ -204,6 +210,25 @@ def _pack_carries_whole_ring(pack) -> bool:
     return complete
 
 
+# Sounds the game synthesizes at runtime rather than shipping. Registered
+# under an ordinary sound key, so play/start_loop reach them through the same
+# path as a packed asset on every backend. Deterministic by construction: the
+# generator is pure arithmetic, so the same build always produces the same
+# bytes. Used for the enforcement signature, whose whole job is to be a shape
+# nothing else in the game -- and nothing a radio station can broadcast --
+# already occupies.
+_GENERATED: dict[str, tuple[bytes, str]] = {}
+
+
+def register_generated_sound(key: str, data: bytes, ext: str = "wav") -> None:
+    """Publish synthesized audio under ``key`` for every backend."""
+    _GENERATED[key] = (data, ext)
+
+
+def generated_sound_keys() -> tuple[str, ...]:
+    return tuple(sorted(_GENERATED))
+
+
 def _asset_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | None:
     """Bytes and extension for a sound key, from the shipped pack or loose files.
 
@@ -217,6 +242,9 @@ def _asset_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | N
     pack and the fifth off disk, blending two different engines. Unless the
     pack carries the whole ring, the ring reads from the loose tree.
     """
+    generated = _GENERATED.get(key)
+    if generated is not None:
+        return generated
     pack = assets_pack.open_default()
     if pack is not None and key in ENGINE_BAND_KEYS and not _pack_carries_whole_ring(pack):
         pack = None
@@ -316,6 +344,8 @@ def engine_load_gain(throttle: float) -> float:
 
 
 def _one_shot_category(key: str) -> str:
+    if key.startswith("enforcement/") or key == "events/police_siren":
+        return "siren"
     if key.startswith("ui/"):
         return "ui"
     if key.startswith("weather/"):
@@ -330,6 +360,11 @@ def _loop_category(channel: int) -> str:
         return "engine"
     if channel in (CH_WEATHER, CH_WEATHER_B):
         return "weather"
+    if channel == CH_SIREN:
+        # Off the shared sfx bus on purpose: a siren behind you is the one
+        # sound in the game that must be raisable without dragging every
+        # clunk, hiss and chime up with it.
+        return "siren"
     return "sfx"
 
 
@@ -346,6 +381,7 @@ class _PygameBackend:
         self.weather_volume = 0.65
         self.engine_volume = 0.55
         self.ui_volume = 0.9
+        self.siren_volume = 1.0
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
         self._loop_pans: dict[int, float] = {}  # channel -> stereo pan, -1 left .. 1 right
@@ -811,6 +847,7 @@ class _PygameBackend:
             "engine": self.engine_volume,
             "weather": self.weather_volume,
             "ui": self.ui_volume,
+            "siren": self.siren_volume,
         }.get(category, self.sfx_volume)
 
     def set_volumes(
@@ -821,6 +858,7 @@ class _PygameBackend:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        siren: float | None = None,
     ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
@@ -834,6 +872,8 @@ class _PygameBackend:
             self.engine_volume = max(0.0, min(1.0, engine))
         if ui is not None:
             self.ui_volume = max(0.0, min(1.0, ui))
+        if siren is not None:
+            self.siren_volume = max(0.0, min(1.0, siren))
         if not self.enabled:
             return
         for ch in list(self._loops):
@@ -898,6 +938,7 @@ class _BassBackend:
         self.weather_volume = 0.65
         self.engine_volume = 0.55
         self.ui_volume = 0.9
+        self.siren_volume = 1.0
         self._loops: dict[int, tuple[str, float, object]] = {}  # slot -> (key, gain, stream)
         self._sustains: dict[int, SustainLoop] = {}  # slot -> active sustain loop
         # slot -> (key, stream) still ringing out its release tail after a
@@ -1740,6 +1781,7 @@ class _BassBackend:
             "engine": self.engine_volume,
             "weather": self.weather_volume,
             "ui": self.ui_volume,
+            "siren": self.siren_volume,
         }.get(category, self.sfx_volume)
 
     def set_volumes(
@@ -1750,6 +1792,7 @@ class _BassBackend:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        siren: float | None = None,
     ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
@@ -1763,6 +1806,8 @@ class _BassBackend:
             self.engine_volume = max(0.0, min(1.0, engine))
         if ui is not None:
             self.ui_volume = max(0.0, min(1.0, ui))
+        if siren is not None:
+            self.siren_volume = max(0.0, min(1.0, siren))
         for ch in list(self._loops):
             self._apply_loop_volume(ch)
         # Reapply engine volume through the rpm path: it knows the current
@@ -1810,6 +1855,7 @@ class _NullBackend:
         self.weather_volume = 0.65
         self.engine_volume = 0.55
         self.ui_volume = 0.9
+        self.siren_volume = 1.0
 
     def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None: ...
     def start_loop(
@@ -1855,6 +1901,7 @@ class _NullBackend:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        siren: float | None = None,
     ) -> None:
         if master is not None:
             self.master_volume = max(0.0, min(1.0, master))
@@ -1868,6 +1915,8 @@ class _NullBackend:
             self.engine_volume = max(0.0, min(1.0, engine))
         if ui is not None:
             self.ui_volume = max(0.0, min(1.0, ui))
+        if siren is not None:
+            self.siren_volume = max(0.0, min(1.0, siren))
 
     def shutdown(self) -> None: ...
 
@@ -2224,16 +2273,17 @@ class AudioEngine:
         weather: float | None = None,
         engine: float | None = None,
         ui: float | None = None,
+        siren: float | None = None,
     ) -> None:
-        self._impl.set_volumes(master, sfx, music, weather, engine, ui)
+        self._impl.set_volumes(master, sfx, music, weather, engine, ui, siren)
         # The other half of a silence report: a healthy backend playing at
         # zero looks exactly like a broken one until the levels are written
         # down. Logged on change only, so it cannot flood the file.
-        levels = (master, sfx, music, weather, engine, ui)
+        levels = (master, sfx, music, weather, engine, ui, siren)
         if levels != self._logged_volumes:
             self._logged_volumes = levels
             log.info(
-                "Volumes: master=%s sfx=%s music=%s weather=%s engine=%s ui=%s",
+                "Volumes: master=%s sfx=%s music=%s weather=%s engine=%s ui=%s siren=%s",
                 *levels,
             )
 

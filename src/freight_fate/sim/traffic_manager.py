@@ -11,7 +11,6 @@ from .hos import is_night
 from .trip_models import (
     RUSH_HOUR_WINDOWS,
     TRAFFIC_LOOKAHEAD_MI,
-    PatrolWindow,
     TrafficContext,
 )
 
@@ -59,6 +58,7 @@ class TrafficVehicle:
             "merging": "merging_vehicle",
             "braking": "braking_traffic",
             "passing": "passing_vehicle",
+            "patrolling": "marked_unit",
         }.get(self.intent, self.intent)
 
     @property
@@ -71,6 +71,7 @@ class TrafficVehicle:
             "merging": "merging traffic",
             "braking": "brake lights ahead",
             "passing": "passing traffic",
+            "patrolling": "marked unit ahead",
         }.get(self.intent, "traffic ahead")
 
 
@@ -203,23 +204,36 @@ class TrafficManager:
                 )
         self.vehicles = sorted(vehicles, key=lambda vehicle: vehicle.position_mi)
 
-    def add_patrol_traffic(self, patrols: list[PatrolWindow]) -> None:
+    def add_enforcement_traffic(self, posts) -> None:
+        """Give the roving posts a body in the traffic bubble.
+
+        Only ``roving_patrol`` posts get one: those are the units that move
+        with traffic, and the traffic bubble is what moving traffic is for. A
+        median crossover, a scale apron and a work-zone detail are parked --
+        they belong to the enforcement layer's own cues, not to the bubble,
+        and spawning a "cruising" vehicle for each of them is what used to
+        put phantom troopers into the lead-vehicle lookups.
+
+        The intent is ``patrolling``, not ``cruising``: ``next_situation``
+        returned ``None`` for cruising, which is why the shipped, credited,
+        unit-tested trooper pass-by sound never once played in the game.
+        """
         existing_keys = {vehicle.key for vehicle in self.vehicles}
-        for patrol in patrols:
-            key = f"trooper:{patrol.start_mi:.3f}:{patrol.end_mi:.3f}:{patrol.reason}"
+        for post in posts:
+            if getattr(post, "kind", "") != "roving_patrol" or not getattr(post, "staffed", False):
+                continue
+            key = f"trooper:{post.id}"
             if key in existing_keys:
                 continue
-            span = max(0.1, patrol.end_mi - patrol.start_mi)
-            position = patrol.start_mi + min(0.8, span / 3.0)
-            speed = 50.0 if "work zone" in patrol.reason else 62.0
+            speed = 62.0
             self.vehicles.append(
                 TrafficVehicle(
                     key=key,
-                    position_mi=position,
+                    position_mi=post.at_mi,
                     speed_mph=speed,
                     target_speed_mph=speed,
                     relative_lane=0,
-                    intent="cruising",
+                    intent="patrolling",
                     vehicle_class="state trooper",
                 )
             )
@@ -327,6 +341,31 @@ class TrafficManager:
                     nearest, nearest_gap = vehicle, distance
         return nearest
 
+    def pack_neighbours(
+        self,
+        position_mi: float,
+        speed_mph: float,
+        *,
+        radius_mi: float,
+        tolerance_mph: float,
+    ) -> int:
+        """Civilian vehicles close by and holding roughly the truck's speed.
+
+        This is traffic cover. A truck alone on an empty road is the only
+        thing to look at; a truck in the middle of a pack all doing the same
+        speed is one of several, and real speed enforcement picks one. Marked
+        units do not count as cover, for reasons that should not need saying.
+        """
+        count = 0
+        for vehicle in self.vehicles:
+            if getattr(vehicle, "vehicle_class", "") == "state trooper":
+                continue
+            if abs(vehicle.position_mi - position_mi) > radius_mi:
+                continue
+            if abs(vehicle.speed_mph - speed_mph) <= tolerance_mph:
+                count += 1
+        return count
+
     def update(self, *, dt: float, position_mi: float, time_scale: float) -> None:
         game_hours = dt * time_scale / 3600.0
         kept: list[TrafficVehicle] = []
@@ -355,6 +394,15 @@ class TrafficManager:
         vehicle = context.lead
         if vehicle.key in self.announced_vehicle_keys:
             return None
+        # getattr, not attribute access: the playtest harness and the trip's
+        # own NPCVehicle share this runtime surface without carrying a class.
+        if getattr(vehicle, "vehicle_class", "") == "state trooper":
+            # A marked unit is a fact about the road, not an instruction: no
+            # action follows from hearing it, so it is carried by an earcon
+            # (see the driving layer's marked-unit pass) and never by a
+            # sentence. The whole run's spoken enforcement budget is two
+            # lines, and they are owed to things that cost money.
+            return None
         gap = self._gap_text(context.gap_mi)
         speed = self._speed_value(vehicle.speed_mph)
         intent = self._vehicle_intent(vehicle)
@@ -379,7 +427,6 @@ class TrafficManager:
 
 __all__ = [
     "Leg",
-    "PatrolWindow",
     "RUSH_HOUR_WINDOWS",
     "TrafficManager",
     "TrafficSituation",

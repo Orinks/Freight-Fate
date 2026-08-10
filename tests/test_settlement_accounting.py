@@ -42,7 +42,7 @@ def _settle(
     route_cities,
     *,
     money=1000.0,
-    speeding_strikes=0,
+    fines_owed=0.0,
     pay_advance=0.0,
     pay_advance_used_for_load=False,
     business_status=COMPANY_DRIVER,
@@ -59,7 +59,7 @@ def _settle(
     app.ctx.profile.pay_advance_used_for_load = pay_advance_used_for_load
     route = app.ctx.world.route_from_cities(route_cities)
     driving = DrivingState(app.ctx, job, route, phase="delivery")
-    driving.speeding_strikes = speeding_strikes
+    app.ctx.profile.fines_owed = fines_owed
     if wear:
         # Wear the physics would have accrued over the run (the teleport
         # below skips the update ticks that would earn it for real).
@@ -144,14 +144,14 @@ def test_driver_responsibility_charges_reduce_driver_pay_but_not_carrier_charges
             job,
             ["New York", "Philadelphia"],
             money=1000.0,
-            speeding_strikes=2,
+            fines_owed=160.0,
         )
         expected = build_business_settlement(
             COMPANY_DRIVER, job, gross, on_time=True, driver_charges=160.0
         )
 
         assert "Carrier-paid or reimbursed charges 215 dollars" in summary
-        assert "Driver-responsibility charges 160 dollars" in summary
+        assert "Fines carried over 160 dollars" in summary
         assert app.ctx.profile.money == pytest.approx(1000.0 + expected.net_before_advance)
         assert app.ctx.profile.career.total_earnings == pytest.approx(expected.net_before_advance)
     finally:
@@ -314,7 +314,6 @@ def test_restored_toll_charges_do_not_duplicate_or_pay_out():
                 {"name": "Delaware River Turnpike Toll Bridge settlement point", "amount": 12.0},
             ],
             "start_damage": 0.0,
-            "speeding_strikes": 0,
         }
 
         resumed = DrivingState.from_snapshot(app.ctx, snapshot)
