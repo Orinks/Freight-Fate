@@ -49,6 +49,32 @@
 
 ### Added
 
+- **A wrecked truck now drives like one, and eventually not at all.**
+  Damage used to cost you a little acceleration and nothing else, so a
+  truck at ninety-nine percent still ran down the highway. Now the
+  engine holds power back and burns more fuel past fifty percent, winds
+  down to a forty-five mile an hour cap past seventy-five, warns you at
+  eighty-five, and at ninety percent the truck is out of service: you
+  get ten miles an hour to clear the lane, and then road service has to
+  come to you. Every step is announced before you feel it, and the cap
+  eases in rather than snapping. Repairs cost far more the longer you
+  put them off.
+
+- **Bring a company truck back wrecked and the carrier notices.** An
+  owner-operator pays the whole repair and waits. A company driver pays
+  nothing for it, but dispatch grounds the tractor, puts you in a yard
+  spare for the rest of the run, charges a deductible, voids the safety
+  bonus, and logs preventable damage against your record -- and a
+  pattern of that costs the seat.
+
+- **Your freight can be damaged, and the receiver can refuse it.** Hard
+  stops, cornering far too fast, and collisions now hurt the load, and
+  the dock inspects before it signs. A little damage is noted as an
+  exception, more becomes a claim against the carrier, and a load in bad
+  enough shape is refused outright -- no pay for the haul at all, and a
+  claim on top. You hear the load take it at the time, and you can check
+  its condition while you drive.
+
 - **Traffic law now follows you through your whole career.** Fines scale
   with how far over you were and climb with every citation you have
   already collected, and the serious ones go on a record that outlives

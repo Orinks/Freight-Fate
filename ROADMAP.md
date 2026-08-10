@@ -225,6 +225,27 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       At the dev cutover, replay freshly played 1.9 careers (company new
       hire, slip-seat level 4+, post-buy-in owner-operator) against the
       validator, not just the stored-blob corpus.
+- [ ] **Wear ceilings need their own wall.** The damage bands shipped
+      2026-08-09 with a 90 percent out-of-service cutoff, but brake,
+      engine, and tire wear at 100 percent still only fade physics --
+      no band ladder, no spoken ceiling warning, no "your brakes are
+      gone" wall. Verified they are not duplicated by the damage bands;
+      this is the natural follow-up.
+- [ ] **Senior-driver reassignment on a grounded tractor.** A company
+      driver at level 9+ has a dedicated seat and cannot be moved into a
+      yard spare without a new persistent Profile field, so they get a
+      road-crew patch instead. Given the cloud-validator profile-shape
+      history, that field wants its own change.
+- [ ] **Cornering damage to the tractor, not just the freight.** A bend
+      taken far too fast now costs the load; body damage from cornering
+      needs a roll/lateral-load model that does not exist yet.
+- [ ] **Reefer spoilage.** Temperature-controlled loads cannot fail
+      because no temperature simulation exists to fail; deliberately not
+      faked when cargo damage shipped.
+- [ ] **A tow, distinct from roadside repair.** The out-of-service
+      recovery is a single roadside-repair contract mirroring the fuel
+      rescue. A real tow -- where the truck ends up somewhere else and
+      the load is affected -- was flagged rather than half-built.
 - [ ] **Rename `steering_assist` to `lane_keeping_assist`.** The name is
       inverted: `"off"` means the truck holds the lane FOR you, and
       `"realistic"` is the manual task. Two studies independently flagged
