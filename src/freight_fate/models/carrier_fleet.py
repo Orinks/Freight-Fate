@@ -136,11 +136,108 @@ FLEET_TIERS: tuple[FleetTier, ...] = (
 
 
 def fleet_tier_for_level(level: int) -> FleetTier:
+    """The tier a career level makes a driver *eligible* for.
+
+    Eligibility, not entitlement. What the yard actually hands over is
+    ``assigned_fleet_tier``, which is this capped by where the driver stands
+    with the carrier. Kept a pure function of level because the cloud-save
+    validator's exported fleet-tier table is keyed on exactly that.
+    """
     tier = FLEET_TIERS[0]
     for candidate in FLEET_TIERS:
         if int(level) >= candidate.min_level:
             tier = candidate
     return tier
+
+
+# A carrier gives its best iron to the drivers it wants to keep, and a driver
+# on a final warning does not get the new truck. So the level says what a
+# driver has earned the right to and dispatch trust says what the yard is
+# actually willing to put in their hands; the assignment is the lower of the
+# two. A driver in full trust is capped by nothing and never touches any of
+# this.
+STANDING_TIER_CAP = {
+    "full": len(FLEET_TIERS) - 1,
+    "guarded": 2,  # long-haul fleet: still real equipment, not the flagships
+    "poor": 1,  # regional fleet
+    "last chance": 0,  # the yard's spares
+}
+
+
+def _career_level(profile) -> int:
+    return int(getattr(getattr(profile, "career", None), "level", 1))
+
+
+def eligible_fleet_tier(profile) -> FleetTier:
+    """What this driver's level has earned the right to."""
+    return fleet_tier_for_level(_career_level(profile))
+
+
+def assigned_fleet_tier(profile) -> FleetTier:
+    """What the yard will actually hand this driver: level capped by standing."""
+    from .enforcement import standing_band
+
+    earned = eligible_fleet_tier(profile)
+    cap = STANDING_TIER_CAP.get(standing_band(profile), len(FLEET_TIERS) - 1)
+    return FLEET_TIERS[min(FLEET_TIERS.index(earned), cap)]
+
+
+def equipment_held_back(profile) -> bool:
+    """Whether standing is holding this driver below the iron their level earns."""
+    from .business import is_owner_operator
+
+    if is_owner_operator(getattr(profile, "business_status", "")):
+        return False  # their tractor is their own; no yard decides it
+    return FLEET_TIERS.index(assigned_fleet_tier(profile)) < FLEET_TIERS.index(
+        eligible_fleet_tier(profile)
+    )
+
+
+def _hold_cause_phrases(profile) -> tuple[str, str]:
+    """(why the iron is held, what clears it), both in plain words."""
+    from . import enforcement
+    from .solvency import debt_owed, money_text
+
+    cause = enforcement.standing_cause(profile)
+    if cause == enforcement.CAUSE_DEBT:
+        return f"you owe {money_text(debt_owed(profile))}", "Clear it"
+    if cause == enforcement.CAUSE_LICENCE:
+        clears = enforcement.clears_text(profile)
+        when = f" until it clears {clears}" if clears else ""
+        return f"your CDL is suspended{when}", "Get it back"
+    return "your dispatch trust is down", "Bring it back up with clean on-time runs"
+
+
+def equipment_hold_text(profile, terse: bool = False) -> str:
+    """Why the yard handed over a lesser truck than the level earns.
+
+    Names three things every time, because this is the most frequent moment in
+    the whole change and the easiest to read as a bug: the tractor the level
+    would have earned, the single reason in the driver's own numbers, and the
+    exact thing that gives it back.
+    """
+    if not equipment_held_back(profile):
+        return ""
+    earned = eligible_fleet_tier(profile)
+    reason, clears = _hold_cause_phrases(profile)
+    if terse:
+        return f"Held back from the {earned.label}: {reason}."
+    return (
+        f"Your level earns a tractor from the {earned.label}, but the yard "
+        f"keeps its best iron for drivers in good standing, and {reason}. "
+        f"{clears} and the {earned.label} comes back to you."
+    )
+
+
+def equipment_hold_clause(profile) -> str:
+    """The one-sentence version, for a status line that already gave the cause."""
+    if not equipment_held_back(profile):
+        return ""
+    return (
+        f"The yard is also holding your equipment back: your tractor comes "
+        f"from the {assigned_fleet_tier(profile).label}, not the "
+        f"{eligible_fleet_tier(profile).label} your level earns."
+    )
 
 
 def _driver_seed(profile, tier: FleetTier) -> int:
@@ -167,7 +264,7 @@ def slip_seat_pool(profile) -> tuple[str, ...]:
     with nowhere legal to sleep -- and a yard that dispatches heavy freight
     keeps something spec'd to pull it.
     """
-    tier = fleet_tier_for_level(int(getattr(getattr(profile, "career", None), "level", 1)))
+    tier = assigned_fleet_tier(profile)
     pool = tier.pool
     size = min(SLIP_SEAT_POOL_SIZE, len(pool))
     start = _driver_seed(profile, tier) % len(pool)
@@ -243,8 +340,7 @@ def assigned_truck_key(profile, job=None) -> str:
     -- this is the driver's standing assignment. With one, and while the
     driver is still slip-seating, it is the best fit the yard has free.
     """
-    level = int(getattr(getattr(profile, "career", None), "level", 1))
-    tier = fleet_tier_for_level(level)
+    tier = assigned_fleet_tier(profile)
     if job is None or not slip_seats(profile):
         return tier.pool[_stable_index(profile, tier)]
     pool = slip_seat_pool(profile)
@@ -254,9 +350,18 @@ def assigned_truck_key(profile, job=None) -> str:
     return max(pool, key=lambda key: _fit_score(key, needs))
 
 
-def assignment_reason_text(key: str, job) -> str:
-    """Why dispatch put the driver in this particular truck, in plain words."""
+def assignment_reason_text(key: str, job, profile=None, terse: bool = False) -> str:
+    """Why dispatch put the driver in this particular truck, in plain words.
+
+    With a profile, a truck the yard is holding back says so here rather than
+    leaving the driver to wonder why their level stopped buying them anything.
+    """
     model = TRUCK_CATALOG[key]
+    if profile is not None and equipment_held_back(profile):
+        hold = equipment_hold_text(profile, terse=terse)
+        if terse:
+            return f"{model.label.capitalize()}. {hold}"
+        return f"Dispatch has you in the {model.label} for this run. {hold}"
     needs_sleeper, needs_heavy, is_turn = job_equipment_needs(job)
     if needs_sleeper and model.cab == CAB_SLEEPER:
         reason = "this one is too far to finish in a shift, so you need the bunk"
@@ -278,8 +383,10 @@ def fleet_assignment_text(profile) -> str:
     # the readout has to name the truck whose condition it describes.
     key = profile.active_truck_key()
     model = TRUCK_CATALOG[key]
-    tier = fleet_tier_for_level(int(profile.career.level))
-    return f"Dispatch has you in a {model.label} from the {tier.label}: {model.description}"
+    tier = assigned_fleet_tier(profile)
+    line = f"Dispatch has you in a {model.label} from the {tier.label}: {model.description}"
+    hold = equipment_hold_text(profile)
+    return f"{line} {hold}" if hold else line
 
 
 def fleet_upgrade_announcement(profile) -> str:
@@ -291,3 +398,26 @@ def fleet_upgrade_announcement(profile) -> str:
         f"{model.label}: {model.description} The yard handed it over "
         "fueled, serviced, and washed."
     )
+
+
+def withheld_promotion_text(profile) -> str:
+    """What a level-up says when standing keeps the better tractor in the yard.
+
+    The tractor does not change hands, so nothing about the driver's current
+    truck changes either -- no fresh fuel, no reset wear, no wash. Handing a
+    lesser truck over spotless would tell the player something happened when
+    nothing did.
+    """
+    if not equipment_held_back(profile):
+        return ""
+    model = TRUCK_CATALOG[profile.active_truck_key()]
+    return (
+        f"You keep the {model.label} you are in, exactly as it stands. "
+        f"{equipment_hold_text(profile)}"
+    )
+
+
+# What a level-up says instead of promising a tractor the yard is not handing
+# over. The rest of the rank's unlock still happens, so only the equipment
+# half of the promise is corrected.
+WITHHELD_UNLOCK_TAIL = "The tractor that comes with it is staying in the yard for now."

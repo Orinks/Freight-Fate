@@ -87,6 +87,55 @@ XP_PER_MILE_ON_TIME = 1.6
 XP_PER_MILE_LATE = 0.9
 
 
+# Nobody grooms a driver on a final warning for promotion. A carrier that has
+# stopped trusting a driver puts them on routine freight and stops investing
+# in them, and the career moves slower for it.
+#
+# Three rules bind these numbers. A driver in full trust is at exactly 1.0, so
+# the tuned arc to level 30 does not move a minute for anyone running clean.
+# Nothing ever reaches zero, because a driver digging out has to be able to
+# make progress or the career is a trap with a menu. And every rate is at or
+# below 1.0, so the XP ceiling exported to cloud-save screening still bounds
+# every honest career.
+#
+# Keyed by the spoken band strings from ``enforcement`` rather than importing
+# them, which would close an import cycle. A test pins the two together.
+STANDING_XP_RATE = {
+    "full": 1.0,
+    "guarded": 0.9,
+    "poor": 0.75,
+    "last chance": 0.6,
+}
+
+
+def standing_xp_rate(band: str) -> float:
+    """How fast the career moves at this level of dispatch trust."""
+    return STANDING_XP_RATE.get(band, 1.0)
+
+
+def xp_rate_clause(band: str) -> str:
+    """One sentence saying the career has slowed, and why. Empty when it has not.
+
+    Never the number. A multiplier a player cannot check turns every
+    settlement into arithmetic and reads as an accusation; what they need is
+    the cause and the way out, which they can act on.
+    """
+    if standing_xp_rate(band) >= 1.0:
+        return ""
+    return (
+        f"While your dispatch trust is {band}, the carrier keeps you on "
+        "routine freight, so career experience comes in more slowly until it "
+        "is back up."
+    )
+
+
+def xp_rate_settlement_clause(band: str) -> str:
+    """The same fact as a clause, to ride an existing settlement line."""
+    if standing_xp_rate(band) >= 1.0:
+        return ""
+    return f"at the slower rate that comes with {band} dispatch trust"
+
+
 def xp_class_multiplier(cargo) -> float:
     """How much more a delivery teaches, by cargo demands."""
     if getattr(cargo, "endorsement", None):
@@ -154,8 +203,15 @@ class Career:
         on_time: bool,
         damage_pct: float,
         cargo_class_mult: float = 1.0,
+        standing_rate: float = 1.0,
     ) -> list[str]:
-        """Apply a finished delivery; returns announcements (level ups etc.)."""
+        """Apply a finished delivery; returns announcements (level ups etc.).
+
+        ``standing_rate`` slows the career for a driver the carrier has
+        stopped investing in. It defaults to 1.0 and is applied only when it
+        is not 1.0, so a clean driver's XP is the same arithmetic it has
+        always been, down to the float.
+        """
         before_level = self.level
         before_endorsements = self.endorsements
 
@@ -173,6 +229,8 @@ class Career:
             gained *= 1.0 + xp_streak_bonus(self.on_time_streak)
         if damage_pct <= 1.0:
             gained *= 1.0 + XP_CLEAN_BONUS
+        if standing_rate != 1.0:
+            gained *= max(0.0, min(1.0, float(standing_rate)))
         self.xp += gained
         if on_time:
             self.on_time_deliveries += 1

@@ -829,7 +829,9 @@ def test_a_floor_reputation_company_driver_loses_the_carrier(monkeypatch):
         CityMenuState(app.ctx)._check_carrier_termination()
         assert p.carrier_key == LAST_CHANCE_CARRIER_KEY
         assert p.driving_record.carrier_terminations == 1
-        assert any(former in line and "let you go" in line for line in spoken)
+        # "Ended your employment", never "let you go": the ontology settled on
+        # the plain factual verb over the softening one.
+        assert any(former in line and "ended your employment" in line for line in spoken)
         # Nothing is taken away but the seat.
         assert p.money > 0 or p.career.level >= 1
     finally:

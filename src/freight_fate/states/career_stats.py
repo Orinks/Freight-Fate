@@ -34,6 +34,7 @@ class CareerStatsState(MenuState):
     def _lines(self) -> list[str]:
         from ..models import enforcement
         from ..models.jobs import ENDORSEMENT_LABELS
+        from ..models.solvency import debt_line
 
         p = self.ctx.profile
         s = self.ctx.settings
@@ -48,12 +49,20 @@ class CareerStatsState(MenuState):
         # that granted them; this line is the reviewable record (owner got
         # stuck declining a reefer load he was already cleared to haul).
         endorsements = f"Endorsements: {', '.join(held)}" if held else "Endorsements: none yet"
+        # Money was reviewable nowhere on this screen, which left a player
+        # asking "how much do I owe" with no way to find out short of opening
+        # a fuel menu. Balance is always here now; what is owed joins it only
+        # when it is real. The slower career rate rides the trust line, which
+        # is on this screen already.
+        owed = debt_line(p)
         return [
             f"Level {career.level} driver, {career.xp:.0f} experience",
             f"Reputation: {career.reputation:.0f} out of 100",
-            enforcement.trust_text(career.reputation),
+            enforcement.dispatch_trust_line(p),
             enforcement.career_menu_status(p),
             enforcement.standing_text(p),
+            f"Balance: {p.money:,.0f} dollars",
+            *([owed] if owed else []),
             endorsements,
             f"Deliveries: {career.deliveries}, {pct:.0f} percent on time",
             f"Lifetime {s.distance_unit_text()}: "

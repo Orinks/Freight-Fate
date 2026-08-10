@@ -133,8 +133,14 @@ def test_delivery_stores_wear_and_road_grime():
         app.shutdown()
 
 
-def test_driver_responsibility_charges_reduce_driver_pay_but_not_carrier_charges():
+def test_a_carried_balance_is_collected_at_a_capped_share_not_all_at_once():
+    """A balance owed used to be piled onto the next settlement whole, so every
+    run after one shortfall paid zero and working could never dig you out.
+    It is now recovered at a capped share, and three quarters always reaches
+    the driver.
+    """
     from freight_fate.app import App
+    from freight_fate.models.solvency import COLLECTION_SHARE
 
     app = App()
     try:
@@ -146,14 +152,20 @@ def test_driver_responsibility_charges_reduce_driver_pay_but_not_carrier_charges
             money=1000.0,
             fines_owed=160.0,
         )
+        # Nothing about THIS load was a driver charge, so the settlement is
+        # computed clean and the old balance comes out of the net afterwards.
         expected = build_business_settlement(
-            COMPANY_DRIVER, job, gross, on_time=True, driver_charges=160.0
+            COMPANY_DRIVER, job, gross, on_time=True, driver_charges=0.0
         )
+        net = expected.net_before_advance
+        collected = round(1000.0 + net - app.ctx.profile.money, 2)
 
         assert "Carrier-paid or reimbursed charges 215 dollars" in summary
-        assert "Fines carried over 160 dollars" in summary
-        assert app.ctx.profile.money == pytest.approx(1000.0 + expected.net_before_advance)
-        assert app.ctx.profile.career.total_earnings == pytest.approx(expected.net_before_advance)
+        assert "Balance owed" in summary
+        assert collected > 0  # it really is being paid down
+        assert collected <= round(net * COLLECTION_SHARE, 2) + 0.01
+        assert app.ctx.profile.money > 1000.0  # the run still paid the driver
+        assert app.ctx.profile.fines_owed == pytest.approx(160.0 - collected, abs=0.01)
     finally:
         app.shutdown()
 
