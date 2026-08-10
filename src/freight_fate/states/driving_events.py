@@ -3002,6 +3002,13 @@ class DrivingEventMixin:
         if self.truck.speed_mph <= DELIVERY_PARK_MPH:
             self._handle_arrival_creep()
             return
+        # Above the gate zone's posted limit with the warning heard and the
+        # reaction window spent: the entrance is missed, not still ahead.
+        # (See driving_facility_gate.py; the assist branch above brakes the
+        # truck itself and must never reach this.)
+        if self._gate_miss_pending():
+            self._handle_missed_facility_gate()
+            return
         if self._arrival_stop_said:
             self._remind_arrival_gate(
                 "Destination gate: stop to dock.",
@@ -3026,6 +3033,7 @@ class DrivingEventMixin:
                 "Slow down and come to a complete stop at the gate."
             )
         )
+        self._seed_gate_grace_at_gate(message)
         self.ctx.say_event(message, interrupt=True)
 
     def _remind_arrival_gate(self, status: str, message: str, *, pickup: bool = False) -> None:

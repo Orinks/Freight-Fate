@@ -8,6 +8,7 @@ from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from .driving_engine_brake import EngineBrakeZoneMixin
 from .driving_events import DrivingEventMixin
+from .driving_facility_gate import FacilityGateMixin
 from .driving_location import DrivingLocationMixin
 from .driving_pacenotes import DrivingPacenoteMixin
 from .driving_pickup import DrivingPickupMixin
@@ -24,6 +25,7 @@ class DrivingState(
     DrivingControlsMixin,
     DrivingUpdateMixin,
     EngineBrakeZoneMixin,
+    FacilityGateMixin,
     SpeedControlStateMixin,
     DrivingLocationMixin,
     DrivingPickupMixin,
@@ -360,6 +362,12 @@ class DrivingState(
         self._arrival_full_stop_said = False
         self._arrival_menu_open = False
         self._gate_reminder_s = 0.0
+        # Facility gate misses (driving_facility_gate.py): the pre-gate speed
+        # warning latch, the real-time reaction window it opens, and how many
+        # loop-backs this trip has cost -- the count escalates the spoken help.
+        self._gate_speed_warned = False
+        self._gate_grace_s = 0.0
+        self._gate_miss_count = 0
         self._city_service_enter_ready = False
         self._air_ready_said = self.truck.air_ready
         self._low_air_said = self.truck.air_low_warning
@@ -515,6 +523,7 @@ class DrivingState(
             "failure_to_stop_count": self.failure_to_stop_count,
             "jake_zone_fines": self.jake_zone_fines,
             "jake_fines_paid": self.jake_fines_paid,
+            "gate_miss_count": self._gate_miss_count,
             "lane_offset": self.lane.offset,
             "lane_index": self.lane.lane,
             # Mid-surface-chain saves resume on the street chain; absent on
@@ -665,6 +674,7 @@ class DrivingState(
             state.failure_to_stop_count = int(data.get("failure_to_stop_count", 0))
             state.jake_zone_fines = int(data.get("jake_zone_fines", 0))
             state.jake_fines_paid = float(data.get("jake_fines_paid", 0.0))
+            state._gate_miss_count = int(data.get("gate_miss_count", 0))
             state.lane.offset = float(data.get("lane_offset", 0.0))
             state.lane.lane = max(0, int(data.get("lane_index", 0)))
             return state

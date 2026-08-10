@@ -355,6 +355,7 @@ class DrivingUpdateMixin:
         self._check_weigh_station_enforcement(pos_before)
         self._check_unsafe_damage_enforcement()
         self._check_destination_exit()
+        self._check_gate_approach_warning(dt)
         self._update_exit(self.trip.last_moved_mi, dt)
 
         self._update_hours_and_fatigue(dt)
