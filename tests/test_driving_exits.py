@@ -515,6 +515,37 @@ def test_lane_drift_off_sets_exit_lane_when_signaling(monkeypatch):
         app.shutdown()
 
 
+def test_exit_speed_assist_slows_with_lane_drift_off(monkeypatch):
+    """Regression: the assist sat below the lane-drift early return, so it
+    never ran with steering assistance off -- and the All assists preset
+    forces lane drift off, silently disabling an assist it just turned on."""
+    from freight_fate.app import App
+
+    spoken = []
+    app = App()
+    app.ctx.settings.apply_driving_assistance_preset("all")
+    assert app.ctx.settings.steering_assist == "off"
+    assert app.ctx.settings.exit_speed_assist is True
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = driving.trip.stops[0]
+        driving.trip.position_mi = stop.at_mi - 1.0
+        driving.truck.velocity_mps = 29.0  # ~65 mph, well over ramp speed
+        driving.handle_event(key_event(pygame.K_x))
+        driving._update_exit_preparation(HeldKeys(), 1 / 60)
+        assert driving.truck.brake >= 0.35
+        slowing = [line for line in spoken if "Exit speed assistance slowing" in line]
+        assert slowing
+        # Never name a key this driver does not have: with lane drift off a
+        # tap changes lanes, and holding Right does nothing.
+        assert "Tap Right" in slowing[-1]
+        assert "Hold Right" not in slowing[-1]
+    finally:
+        app.shutdown()
+
+
 @pytest.mark.smoke
 def test_exit_lane_stays_set_after_keyboard_release():
     from freight_fate.app import App

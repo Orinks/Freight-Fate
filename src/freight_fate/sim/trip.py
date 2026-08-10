@@ -201,6 +201,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         # stop sign; the driving state maintains it every frame. It pins the
         # clock to real time (see effective_time_scale).
         self.controlled_ramp = False
+        # True from a street corner's approach call until the corner resolves;
+        # the driving state maintains it. Same clock rule as the ramp: the
+        # advisory has to be brakeable in real seconds, and at 40x it is not.
+        self.controlled_turn = False
         self._announced_chain_law: set[str] = set()
         self._announced_curves: set[str] = set()
         self._announced_lane_changes: set[str] = set()
@@ -266,11 +270,13 @@ class Trip(TripRoadEventMixin, TripTrafficMixin):
         full = self.time_scale
         if self.waiting and self.truck.parking_brake and self.truck.speed_mph < 1.0:
             return full * PARKED_TIME_SCALE_MULT
-        if self.controlled_ramp:
+        if self.controlled_ramp or self.controlled_turn:
             # A ramp ending in a light or a sign plays out in real time
             # from the gore: the stop-sign warning must buy human reaction
             # seconds, not compressed ones. A hot entry used to burn the
-            # whole half mile in a few real seconds.
+            # whole half mile in a few real seconds. A street corner is the
+            # same bargain -- "Advise 20" is only plannable if the miles to
+            # the corner take real seconds to pass.
             return min(full, 1.0)
         if self._severe_curve_decompression():
             # Same law for a hard bend: the pacenote lead is sized in real

@@ -197,7 +197,9 @@ from the words, and synonyms cost them a re-read.
 | A stretch of road where a town bans the engine brake | no engine brake zone | jake brake zone, engine brake restriction, quiet zone | `Trip.engine_brake_ban_at` |
 | The facility entrance where a drive ends | facility gate; "gate" in short cues | entrance (as the noun for the thing), dock gate | `_handle_arrival_gate` |
 | The highway exit for the delivery | destination exit | final exit, last exit, your exit | `_destination_exit_stop` |
-| The loop-back after missing the destination exit or the facility gate | safe turnaround | U-turn, turnaround point, loop | `_handle_missed_destination_exit`, `_handle_missed_facility_gate` |
+| A street maneuver the route asks for | turn | corner, junction, intersection, manoeuvre | `_is_judged_turn`, `local_turn` cues |
+| The speed a turn has to be taken under | advise ("Advise 20", the pacenote word) | turn limit, corner advisory, max speed | `_turn_speed_mph` |
+| The loop-back after missing the destination exit, the facility gate, or a turn | safe turnaround | U-turn, turnaround point, loop | `_handle_missed_destination_exit`, `_handle_missed_facility_gate`, `_handle_missed_turn` |
 | The fine for engine braking in one | engine brake citation | jake ticket, noise fine | `EngineBrakeZoneMixin._fine_engine_braking` |
 | The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
 

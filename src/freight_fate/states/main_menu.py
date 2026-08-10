@@ -1418,10 +1418,12 @@ class SettingsCategoryState(MenuState):
         )
         self._announce()
         if self.ctx.settings.steering_assist != drift_before:
-            self.ctx.say(
-                "Lane drift off: automated lane keeping, tap Left or Right to change lanes.",
-                interrupt=False,
+            note = (
+                "Lane drift off: automated lane keeping, tap Left or Right to change lanes."
+                if self.ctx.settings.steering_assist == "off"
+                else f"Lane drift back on: {self._steering_label()}."
             )
+            self.ctx.say(note, interrupt=False)
 
     def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
         if field in (
@@ -1568,6 +1570,11 @@ class SettingsCategoryState(MenuState):
         except ValueError:
             i = 0
         self.ctx.settings.steering_assist = modes[(i + d) % len(modes)]
+        # A hand-picked lane-drift value is the player's own choice now: it
+        # cancels any restore All assists was holding, and the preset row has
+        # to answer for it (All assists with drift on reads as Custom).
+        self.ctx.settings.steering_assist_restore = ""
+        self.ctx.settings.refresh_driving_assistance_preset()
         self._announce()
 
     def _toggle_speed_keeper(self, _d: int = 1) -> None:

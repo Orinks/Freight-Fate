@@ -75,6 +75,19 @@ DRIVING_ASSIST_PRESETS = {
     "all": (True, True, True, True, "interactive", True, True, True, True),
 }
 
+# Lane drift is a simulation choice, not an assist, so it is deliberately not
+# one of the equality fields above -- Realistic and Balanced leave the
+# player's choice alone. All assists is the exception: the easiest preset must
+# not leave a manual steering task running, so it implies "off".
+#
+# That exception is what made the preset row lie. Picking All assists forced
+# lane drift off; cycling back to Realistic restored every other assist but
+# left the automated lane keeping in place, under a label that says otherwise.
+# The implied value is now part of what a preset MEANS, so applying a preset
+# hands the manual task back and the row reads Custom whenever the two
+# disagree.
+DRIVING_ASSIST_PRESET_STEERING = {"realistic": None, "balanced": None, "all": "off"}
+
 
 @dataclass
 class Settings:
@@ -121,6 +134,9 @@ class Settings:
     # lane keeping, tap lane changes), because the easiest preset must not
     # leave a manual steering task running.
     steering_assist: str = "off"  # off/light/realistic lane drift
+    # What lane drift was before All assists forced it off, so leaving that
+    # preset hands the manual lane task back. Empty means nothing is owed.
+    steering_assist_restore: str = ""
     # How loud the lane and edge cues speak: the edge-boundary textures,
     # the lane locator, and the dead-man's-curve strips all scale by it.
     lane_cue_loudness: str = "standard"  # subtle/standard/prominent
@@ -249,13 +265,26 @@ class Settings:
         values = DRIVING_ASSIST_PRESETS[preset]
         for field, value in zip(DRIVING_ASSIST_FIELDS, values, strict=True):
             setattr(self, field, value)
-        if preset == "all":
-            self.steering_assist = "off"
+        implied = DRIVING_ASSIST_PRESET_STEERING[preset]
+        if implied is not None:
+            if self.steering_assist != implied:
+                self.steering_assist_restore = self.steering_assist
+            self.steering_assist = implied
+        elif self.steering_assist_restore:
+            # Leaving All assists gives the manual lane task back rather than
+            # keeping its automation under another preset's name.
+            self.steering_assist = self.steering_assist_restore
+            self.steering_assist_restore = ""
         self.driving_assistance_preset = preset
 
     def refresh_driving_assistance_preset(self) -> str:
         values = tuple(getattr(self, field) for field in DRIVING_ASSIST_FIELDS)
-        matches = [name for name, mapping in DRIVING_ASSIST_PRESETS.items() if mapping == values]
+        matches = [
+            name
+            for name, mapping in DRIVING_ASSIST_PRESETS.items()
+            if mapping == values
+            and DRIVING_ASSIST_PRESET_STEERING[name] in (None, self.steering_assist)
+        ]
         self.driving_assistance_preset = matches[0] if len(matches) == 1 else "custom"
         return self.driving_assistance_preset
 

@@ -356,6 +356,7 @@ class DrivingUpdateMixin:
         self._check_unsafe_damage_enforcement()
         self._check_destination_exit()
         self._check_gate_approach_warning(dt)
+        self._update_turn_commitment(dt)
         self._update_exit(self.trip.last_moved_mi, dt)
 
         self._update_hours_and_fatigue(dt)
@@ -1168,7 +1169,11 @@ class DrivingUpdateMixin:
         the guide leans harder exactly when the bend pulls harder."""
         active = self.trip.curve_at(self.trip.position_mi)
         if active is None or active.connector:
-            return 0.0
+            # Ramp connectors and street maneuvers carry no mainline curve
+            # record, and returning 0.0 here left the panned road bed dead
+            # centre through every exit and every turn. The maneuver demand
+            # keeps the guide leaning (see driving_turns.py).
+            return self._maneuver_steer_demand(active)
         tightness = max(0.2, 1.0 - active.min_radius_ft / 5000.0)
         excess = max(0.0, self.truck.speed_mph - active.advisory_mph)
         magnitude = min(1.0, tightness * (1.0 + excess * 0.04))

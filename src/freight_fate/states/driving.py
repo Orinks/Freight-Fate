@@ -13,6 +13,7 @@ from .driving_location import DrivingLocationMixin
 from .driving_pacenotes import DrivingPacenoteMixin
 from .driving_pickup import DrivingPickupMixin
 from .driving_speed_control import SpeedControlStateMixin
+from .driving_turns import TurnCommitmentMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
 
 # Bumped when the meaning of a snapshot's deadline changes. A snapshot written
@@ -26,6 +27,7 @@ class DrivingState(
     DrivingUpdateMixin,
     EngineBrakeZoneMixin,
     FacilityGateMixin,
+    TurnCommitmentMixin,
     SpeedControlStateMixin,
     DrivingLocationMixin,
     DrivingPickupMixin,
@@ -368,6 +370,11 @@ class DrivingState(
         self._gate_speed_warned = False
         self._gate_grace_s = 0.0
         self._gate_miss_count = 0
+        # Street corners (driving_turns.py): how many corners this run has
+        # cost, which escalates the spoken help. The per-corner latches are
+        # rebuilt whenever the trip's route changes.
+        self._turn_miss_count = 0
+        self._reset_turn_state_for_trip()
         self._city_service_enter_ready = False
         self._air_ready_said = self.truck.air_ready
         self._low_air_said = self.truck.air_low_warning
@@ -524,6 +531,7 @@ class DrivingState(
             "jake_zone_fines": self.jake_zone_fines,
             "jake_fines_paid": self.jake_fines_paid,
             "gate_miss_count": self._gate_miss_count,
+            "turn_miss_count": self._turn_miss_count,
             "lane_offset": self.lane.offset,
             "lane_index": self.lane.lane,
             # Mid-surface-chain saves resume on the street chain; absent on
@@ -675,6 +683,7 @@ class DrivingState(
             state.jake_zone_fines = int(data.get("jake_zone_fines", 0))
             state.jake_fines_paid = float(data.get("jake_fines_paid", 0.0))
             state._gate_miss_count = int(data.get("gate_miss_count", 0))
+            state._turn_miss_count = int(data.get("turn_miss_count", 0))
             state.lane.offset = float(data.get("lane_offset", 0.0))
             state.lane.lane = max(0, int(data.get("lane_index", 0)))
             return state
