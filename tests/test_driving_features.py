@@ -323,7 +323,14 @@ def test_automatic_reverse_selection_is_spoken(monkeypatch):
         app.shutdown()
 
 
-def test_sustained_redline_speaks_a_damage_warning(monkeypatch):
+def test_sustained_redline_speaks_the_wear_it_is_actually_causing(monkeypatch):
+    """Over-revving charges ENGINE WEAR, not incident damage.
+
+    This warning used to read ``damage_pct``, which for most drivers sits at
+    zero, so it announced "taking damage, now 0 percent" while real harm
+    piled up on a meter it never mentioned. For a player who only has the
+    spoken word that was the whole readout, not a detail.
+    """
     import math
 
     from freight_fate.app import App
@@ -347,7 +354,7 @@ def test_sustained_redline_speaks_a_damage_warning(monkeypatch):
         wheel_rps = (t.specs.max_rpm * 1.1) / (60.0 * ratio)
         t.velocity_mps = wheel_rps * 2 * math.pi * t.specs.wheel_radius_m
         t.rpm = t.specs.max_rpm
-        t.damage_pct = 12.0
+        t.engine_wear_pct = 12.0
 
         driving._update_overrev(1.0)  # inside the grace period: a shift flare
         assert events == []
@@ -355,6 +362,7 @@ def test_sustained_redline_speaks_a_damage_warning(monkeypatch):
         driving._update_overrev(1.0)  # sustained past the grace: warn
         assert "redline" in events[-1][0].lower()
         assert "12 percent" in events[-1][0]
+        assert "engine wear" in events[-1][0].lower()
         assert events[-1][1] is True
         assert "ui/warning" in played
 

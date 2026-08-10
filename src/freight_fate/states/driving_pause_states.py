@@ -163,8 +163,7 @@ class PauseMenuState(MenuState):
         damage = self.driving.truck.damage_pct
         if damage <= FIELD_REPAIR_DAMAGE_PCT:
             return "Call a roadside mechanic: not needed yet"
-        repaired = damage - FIELD_REPAIR_DAMAGE_PCT
-        cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
+        cost = road_repair_cost(damage, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE)
         return f"Call a roadside mechanic: {cost:,.0f} dollars"
 
     def _mechanic(self) -> None:
@@ -181,8 +180,7 @@ class PauseMenuState(MenuState):
             self.ctx.say("Come to a complete stop first.")
             return
         p = self.ctx.profile
-        repaired = damage - FIELD_REPAIR_DAMAGE_PCT
-        cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
+        cost = road_repair_cost(damage, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE)
         carrier_paid = not player_pays_operating_costs(p.business_status)
         if not carrier_paid:
             p.money -= cost  # the rescue is never refused; money can go negative

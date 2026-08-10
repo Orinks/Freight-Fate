@@ -230,8 +230,16 @@ def test_fuel_prices_vary_by_region():
 
 
 def test_repair_cost_scales_with_damage():
+    """Superlinear: deep damage is frame and driveline, not panels.
+
+    The flat per-percent rate is still the base, but the bill curves with
+    depth, so a wrecked truck is not merely three times a scraped one.
+    """
     assert Economy.repair_cost(0) == 0.0
-    assert Economy.repair_cost(50) == 50 * 85.0
+    assert Economy.repair_cost(50) > 50 * 85.0
+    assert Economy.repair_cost(90) / Economy.repair_cost(30) > 5.0
+    # Light damage still prices essentially as it always did.
+    assert Economy.repair_cost(5) == pytest.approx(5 * 85.0, rel=0.02)
 
 
 # -- career ---------------------------------------------------------------------

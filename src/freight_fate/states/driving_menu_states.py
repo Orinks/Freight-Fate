@@ -4,9 +4,16 @@ from __future__ import annotations
 import time
 
 from ..models import enforcement
+from ..models.cargo_condition import cargo_condition_text, settle_cargo
 from ..sim.timezones import to_local
 from .base import TimedMessageState
 from .driving_core import *
+from .driving_damage import (
+    cargo_status_clause,
+    damage_band_clause,
+    damage_summary_line,
+    preventable_damage_charge,
+)
 
 DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH = 55.0
 ROAD_GRIME_PER_MILE = 0.004
@@ -170,7 +177,10 @@ class DrivingStatusScreenState(MenuState):
             "Load: no cargo, local city service drive"
             if d.phase == DRIVE_PHASE_CITY_SERVICE
             else f"Load: {d.job.weight_tons:.0f} tons of {d.job.cargo.label}, "
-            f"gross {d.truck.gross_mass_kg / KG_PER_TON:.0f} tons"
+            f"gross {d.truck.gross_mass_kg / KG_PER_TON:.0f} tons, "
+            # The player cannot see the trailer; the dock's verdict must not
+            # be the first they hear of what the freight is in.
+            f"freight {cargo_status_clause(d.truck)}"
         )
         time_line = (
             f"Time: {clock_text(d.trip.local_hour)} {d.trip.current_timezone.name}, "
@@ -179,12 +189,17 @@ class DrivingStatusScreenState(MenuState):
             else f"Time: {clock_text(d.trip.local_hour)} {d.trip.current_timezone.name}, "
             f"{deadline_text}"
         )
+        band = damage_band_clause(self.ctx.settings, t)
+        damage_band_suffix = f", {band}" if band else ""
         return [
             f"Driver: {profile.name}",
             f"Money: {profile.money:,.0f} dollars",
             load_line,
             f"Objective: {d._objective_text()}",
-            f"Truck: fuel {t.fuel_fraction * 100:.0f} percent, damage {t.damage_pct:.0f} percent",
+            # The band rides with the number: hearing "78 percent" without
+            # "limp mode" leaves the player to work out why the truck is slow.
+            f"Truck: fuel {t.fuel_fraction * 100:.0f} percent, "
+            f"damage {t.damage_pct:.0f} percent{damage_band_suffix}",
             f"Transmission: {'automatic' if t.transmission.automatic else 'manual'}, {d._gear_text()}",
             f"Fatigue: {profile.fatigue:.0f} percent",
             # Standing is spoken when it changes and whenever it is asked for,
@@ -857,6 +872,59 @@ class ArrivalState(MenuState):
         # The arrival screen and announcement read summary_lines, not parts.
         self.summary_lines = list(self.summary_parts)
 
+    def _cargo_settlement_line(self, cargo) -> str:
+        """What the receiver found, what it cost, and who carries the claim.
+
+        Always in that order, and always with the money named, because this
+        is the largest single thing that can happen to a run and the player
+        has no way to see the trailer.
+        """
+        p = self.ctx.profile
+        owner_op = is_owner_operator(p.business_status)
+        claim_holder = (
+            "The claim is against your own authority"
+            if owner_op
+            else "The carrier carries the claim, and it is on your record"
+        )
+        if self.driving._terse_speech():
+            head = {
+                "exception": "Exception on the bill.",
+                "claim": "Freight claim.",
+                "rejected": "Load refused.",
+            }[cargo.outcome]
+            claim = f" Claim {cargo.claim_value:,.0f} dollars." if cargo.claim_value >= 1.0 else ""
+            return (
+                f"{head} Load {cargo_condition_text(cargo.condition_pct)}, "
+                f"{cargo.condition_pct:.0f} percent. Pay down "
+                f"{cargo.pay_loss:,.0f} dollars.{claim}"
+            )
+        if cargo.rejected:
+            return (
+                "The receiver refused the load. It came off the trailer "
+                f"{cargo_condition_text(cargo.condition_pct)} at "
+                f"{cargo.condition_pct:.0f} percent, and a dock will not sign for "
+                f"freight in that state. You are paid nothing for the haul: "
+                f"{cargo.pay_loss:,.0f} dollars gone, and a claim of about "
+                f"{cargo.claim_value:,.0f} dollars for the freight itself. "
+                f"{claim_holder}."
+            )
+        if cargo.outcome == "claim":
+            return (
+                "The receiver took the load but wrote it up. It arrived "
+                f"{cargo_condition_text(cargo.condition_pct)} at "
+                f"{cargo.condition_pct:.0f} percent, which is a freight claim of "
+                f"about {cargo.claim_value:,.0f} dollars. "
+                f"{cargo.pay_loss:,.0f} dollars comes off this settlement. "
+                f"{claim_holder}."
+            )
+        return (
+            "The receiver noted an exception on the bill of lading: the load "
+            f"arrived {cargo_condition_text(cargo.condition_pct)} at "
+            f"{cargo.condition_pct:.0f} percent. That holds back "
+            f"{cargo.pay_loss:,.0f} dollars of the haul. Brake and corner gently "
+            "and the bill stays clean."
+        )
+
     def _settle(self) -> None:
         d = self.driving
         p = self.ctx.profile
@@ -872,6 +940,20 @@ class ArrivalState(MenuState):
         carrier_charges = toll_expense + charge_total(accessorials)
         # Anything a previous load could not cover comes out of this one first.
         driver_charges = _speeding_settlement_fine(d.speeding_strikes) + p.fines_owed
+        # A company driver who brings a truck back damaged does not get a
+        # clean settlement: the carrier eats the repair, and the driver eats
+        # the deductible and the safety bonus. An owner-operator has already
+        # paid the whole repair themselves, so nobody charges them twice.
+        damage_deductible, damage_reputation_hit, damage_reason = (
+            (0.0, 0.0, "") if is_owner_operator(p.business_status) else preventable_damage_charge(d)
+        )
+        driver_charges += damage_deductible
+        # The dock inspects before it signs. Under the Carmack Amendment the
+        # carrier owes the value of freight it damages, and a receiver may
+        # refuse a bad load outright -- which is why this is the largest
+        # consequence in the game and comes off the top of the haul.
+        cargo = settle_cargo(d.truck.cargo_damage_pct, gross_base)
+        driver_charges += cargo.pay_loss
         business = build_business_settlement(
             p.business_status,
             job,
@@ -910,23 +992,35 @@ class ArrivalState(MenuState):
         gross_pay = business.gross_pay
         on_time_bonus_paid = max(0.0, gross_pay - no_on_time_bonus_business.gross_pay)
         early_bonus = max(0.0, gross_pay - deadline_business.gross_pay)
-        # Say what actually moved. A load too cheap to cover the fines used to
-        # be told it paid them in full and then quietly forgiven the rest.
-        collected = driver_charges - business.uncollected_charges
+        # Anything this load could not cover is carried, not forgiven: a load
+        # too cheap to pay its charges used to be told it paid them in full.
         p.fines_owed = business.uncollected_charges
-        if driver_charges:
-            if business.uncollected_charges > 0:
-                self.summary_parts.append(
-                    f"Driver-responsibility charges: speeding fines of "
-                    f"{driver_charges:,.0f} dollars. This load only covered "
-                    f"{collected:,.0f} of it, so {business.uncollected_charges:,.0f} "
-                    "dollars stays owed and comes out of your next settlement."
-                )
-            else:
-                self.summary_parts.append(
-                    f"Driver-responsibility charges: speeding fines cost you "
-                    f"{driver_charges:,.0f} dollars."
-                )
+        if not cargo.clean:
+            self.summary_parts.append(self._cargo_settlement_line(cargo))
+            p.career.reputation = max(0.0, p.career.reputation - cargo.reputation_hit)
+            increment_stat(p, "cargo_claims")
+        speeding_charges = driver_charges - damage_deductible - cargo.pay_loss
+        if speeding_charges:
+            self.summary_parts.append(
+                f"Driver-responsibility charges: speeding fines cost you "
+                f"{speeding_charges:,.0f} dollars."
+            )
+        if damage_deductible >= 1.0:
+            p.career.reputation = max(0.0, p.career.reputation - damage_reputation_hit)
+            increment_stat(p, "preventable_equipment_damage")
+            self.summary_parts.append(
+                f"Driver-responsibility charges: safety ruled the damage preventable, "
+                f"{damage_reason}. The carrier covers the repair; your deductible is "
+                f"{damage_deductible:,.0f} dollars and the safety bonus is void. "
+                f"Reputation down {damage_reputation_hit:.0f}, and it is on your record."
+            )
+        if business.uncollected_charges > 0:
+            collected = driver_charges - business.uncollected_charges
+            self.summary_parts.append(
+                f"This load only covered {collected:,.0f} dollars of those "
+                f"charges, so {business.uncollected_charges:,.0f} dollars stays "
+                "owed and comes out of your next settlement."
+            )
         # Tickets from being pulled over were already paid on the spot; report
         # them for transparency but don't deduct again at settlement.
         if d.speeding_tickets:
@@ -1062,11 +1156,9 @@ class ArrivalState(MenuState):
             )
         if early_bonus >= 1.0:
             self.summary_parts.append(f"Early delivery bonus: {early_bonus:,.0f} dollars.")
-        if trip_damage > 1:
-            self.summary_parts.append(
-                f"The cargo run added {trip_damage:.0f} percent truck damage. "
-                "Visit the garage when you can."
-            )
+        damage_line = damage_summary_line(self.ctx.settings, d.truck, trip_damage)
+        if damage_line is not None:
+            self.summary_parts.append(damage_line)
         wear_parts = []
         for added, meter in (
             (max(0.0, d.truck.tire_wear_pct - d.start_tire_wear), "tire wear"),

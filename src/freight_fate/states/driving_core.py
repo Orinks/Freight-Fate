@@ -25,7 +25,12 @@ from ..models.business import (
     reputation_pay_bonus,
 )
 from ..models.career import xp_class_multiplier, xp_streak_bonus
-from ..models.economy import MOTEL_COST, pay_advance_grant, pay_advance_unavailable_reason
+from ..models.economy import (
+    MOTEL_COST,
+    damage_severity_mult,
+    pay_advance_grant,
+    pay_advance_unavailable_reason,
+)
 from ..models.jobs import (
     Job,
     fair_active_deadline,
@@ -67,6 +72,18 @@ from ..sim.trip import RoadStop, Trip, TripEventKind
 from ..sim.trip_models import leg_lane_count
 from ..sim.vehicle import (
     CHAIN_SAFE_MPH,
+    DAMAGE_BAND_LAST_CALL,
+    DAMAGE_BAND_LIMP,
+    DAMAGE_BAND_NONE,
+    DAMAGE_BAND_OUT_OF_SERVICE,
+    DAMAGE_BAND_REDUCED,
+    DAMAGE_CREEP_CAP_MPH,
+    DAMAGE_DERATE_PCT,
+    DAMAGE_LAST_CALL_PCT,
+    DAMAGE_LIMP_CAP_MPH,
+    DAMAGE_LIMP_PCT,
+    DAMAGE_MAX_PCT,
+    DAMAGE_OUT_OF_SERVICE_PCT,
     HIGH_IDLE_DEFAULT_RPM,
     HIGH_IDLE_MAX_RPM,
     HIGH_IDLE_MIN_RPM,
@@ -74,6 +91,7 @@ from ..sim.vehicle import (
     JAKE_STAGES,
     KG_PER_TON,
     REFERENCE_CARGO_KG,
+    REVERSE_ENGAGE_MAX_MPH,
     TIRE_WINTER,
     G,
     TruckState,
@@ -95,6 +113,37 @@ FIELD_REPAIR_DAMAGE_PCT = 25.0  # damage level the patch repairs down to
 MECHANIC_CALLOUT_FEE = 500.0
 MECHANIC_RATE_PER_PCT = 110.0  # premium over the garage's 85 per percent
 MECHANIC_WAIT_MIN = 90.0  # game minutes waiting for the truck to be fixed
+# A full breakdown is the emergency version of that call-out: the truck is
+# dead where it stopped, so the fee is the premium and the repair only gets
+# the truck moving again -- it does not put it right. The rate per percent is
+# the same road rate; the difference is the call-out and the hours.
+BREAKDOWN_CALLOUT_FEE = 1200.0
+BREAKDOWN_REPAIR_DAMAGE_PCT = 60.0  # still deep in reduced power afterwards
+BREAKDOWN_REPAIR_MIN = 180.0  # game minutes at the side of the road
+BREAKDOWN_REPUTATION_HIT = 5.0  # a company driver's record instead of their wallet
+# A carrier does not send a driver back out in equipment it just had to
+# recover: it grounds the tractor and covers the bill, and what the driver
+# loses is the day and their standing. Waiting on the yard to bring iron out
+# to a stranded truck is slower than a mechanic patching one, which is the
+# whole trade -- the company driver keeps their money and pays in hours.
+GROUNDED_SWAP_MIN = 300.0  # game minutes waiting on a replacement tractor
+GROUNDED_SPARE_DAMAGE_PCT = 15.0  # a yard spare is used equipment, not a new one
+# How long a driver may crawl an out-of-service truck before road service
+# reaches them anyway. Real seconds: it is a window to clear a live lane,
+# not a way to finish the run at ten miles an hour.
+OUT_OF_SERVICE_RECOVERY_GRACE_S = 60.0
+# What the carrier charges a company driver at settlement for damage its own
+# safety committee ruled preventable. The carrier still pays the repair --
+# this is the deductible and the voided safety bonus, which is how a real
+# company driver feels damage in the wallet without being handed the whole
+# invoice. Scaled by the deepest band the run reached, because a driver who
+# spent it in limp mode did something to get there.
+PREVENTABLE_DAMAGE_DEDUCTIBLE = 250.0  # per band reached, at full preventable share
+PREVENTABLE_REPUTATION_PER_BAND = 1.5  # standing lost per band reached
+# How fast limp mode winds the road-speed cap down: the same "about 2 mph per
+# second of comfortable braking" the dropped-speed-limit grace is built on, so
+# the cap never snaps a speed out from under the driver.
+LIMP_CAP_RAMP_MPH_PER_S = 2.0
 # Chaining up is done kneeling on the shoulder in the weather that made it
 # necessary. Real crews quote twenty to thirty minutes for a drive-axle set;
 # doing it in the dark by headlamp costs more time and much more out of the
@@ -523,6 +572,17 @@ def _poi_ambient_key(stop, hour: float) -> str:
     return "ambient/truck_stop"
 
 
+def road_repair_cost(damage_pct: float, down_to: float, callout_fee: float) -> float:
+    """What a road shop charges to bring ``damage_pct`` down to ``down_to``.
+
+    Same severity curve as the terminal garage (``damage_severity_mult``) so
+    the two never disagree about what deep damage is worth, plus whatever
+    call-out fee getting a mechanic to the truck carries.
+    """
+    repaired = max(0.0, float(damage_pct) - float(down_to))
+    return callout_fee + repaired * MECHANIC_RATE_PER_PCT * damage_severity_mult(damage_pct)
+
+
 def _speeding_settlement_fine(strikes: int) -> float:
     return min(400.0, 80.0 * strikes) if strikes else 0.0
 
@@ -864,7 +924,7 @@ def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
             f"You have {p.money:,.0f} dollars."
         )
     if hos.shoulder_damage_due(driving.trip_seed, anchor_mi):
-        driving.truck.damage_pct = min(100.0, driving.truck.damage_pct + hos.SHOULDER_DAMAGE_PCT)
+        driving.truck.add_damage(hos.SHOULDER_DAMAGE_PCT)
         parts.append(
             f"Roadside debris and wake turbulence added "
             f"{hos.SHOULDER_DAMAGE_PCT:.0f} percent truck damage."

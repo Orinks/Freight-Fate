@@ -638,12 +638,22 @@ class DrivingControlsMixin:
         self.ctx.say(f"Parking brake set. Air pressure {t.air_pressure_psi:.0f} psi.{slowing}")
 
     def _manual_shift(self, gear: int) -> None:
-        result = self.truck.transmission.request_gear(gear)
+        # Through the truck, not the gearbox: the speed-dependent guards (a
+        # reverse selection while rolling forward) need road speed, which the
+        # transmission has no way to know.
+        rolling_reverse = gear == REVERSE and self.truck.speed_mph > REVERSE_ENGAGE_MAX_MPH
+        result = self.truck.request_gear(gear)
         if result.ok:
             self.ctx.audio.play_bank("vehicle/shift_manual", "vehicle/gear_shift")
             self.ctx.say(result.message)
             if self.tutorial:
                 self.tutorial.on_gear_engaged()
+        elif rolling_reverse:
+            self.ctx.audio.play("vehicle/gear_grind")
+            self.ctx.say(
+                f"{result.message} That crash of gears cost the driveline: "
+                f"damage {self.truck.damage_pct:.0f} percent."
+            )
         elif result.grind:
             self.ctx.audio.play("vehicle/gear_grind")
             self.ctx.say(

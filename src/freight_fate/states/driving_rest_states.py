@@ -420,7 +420,9 @@ class FelonyStopState(MenuState):
         # The part that used to go nowhere: fleeing a stop in a commercial
         # vehicle is a major offense, and the licence answers for it.
         self._standing_text = _log_enforcement(self.ctx, d, fine=FAILURE_TO_STOP_FINE, major=True)
-        d.truck.damage_pct = min(100.0, d.truck.damage_pct + FAILURE_TO_STOP_DAMAGE_PCT)
+        # add_damage, not a raw assignment: spike damage has to cross the
+        # bands so a spiked truck can go out of service like any other wreck.
+        d.truck.add_damage(FAILURE_TO_STOP_DAMAGE_PCT)
         d.truck.velocity_mps = 0.0
         d.truck.throttle = 0.0
         d.truck.brake = 1.0
@@ -1116,8 +1118,7 @@ class RestStopState(MenuState):
         if damage < 1.0:
             self.ctx.say("The truck does not need roadside assistance.")
             return
-        repaired = max(0.0, damage - FIELD_REPAIR_DAMAGE_PCT)
-        cost = MECHANIC_CALLOUT_FEE + repaired * MECHANIC_RATE_PER_PCT
+        cost = road_repair_cost(damage, FIELD_REPAIR_DAMAGE_PCT, MECHANIC_CALLOUT_FEE)
         carrier_paid = not player_pays_operating_costs(p.business_status)
         if not carrier_paid:
             p.money -= cost

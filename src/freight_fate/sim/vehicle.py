@@ -16,6 +16,8 @@ from .transmission import (
     AUTO_DOWNSHIFT_RPM,
     DOWNSHIFT_TIME,
     PROGRESSIVE_UPSHIFT_RPM,
+    REVERSE,
+    ShiftResult,
     Transmission,
 )
 
@@ -61,6 +63,84 @@ ENGINE_WEAR_OVER_REV_PCT_PER_S = 0.8  # was the damage_pct redline penalty
 ENGINE_WEAR_LUG_PCT_PER_S = 0.05  # heavy throttle far below the torque band
 LUG_THROTTLE = 0.7
 LUG_RPM_FRACTION = 0.7  # of peak-torque RPM
+
+# -- incident damage bands ---------------------------------------------------------
+# A real truck does not fail all at once, and it does not shrug off a wreck
+# either. An electronic engine meets a serious fault with a staged inducement:
+# a warning first, then a torque derate (Cummins induces about 25 percent),
+# then a road-speed derate the truck cannot drive out of, and finally idle
+# only. Volvo publishes the same ladder as amber alert, torque limitation,
+# 5 mph derate, idle only.
+#
+# The last rung is not the engine's decision at all, it is the law's. Under
+# the CVSA North American Standard Out-of-Service Criteria a commercial
+# vehicle carrying a qualifying defect is an imminent hazard and is
+# prohibited from operating until it is repaired -- an inspector places it
+# out of service at the roadside and it does not drive away. Brakes are the
+# leading cause and carry an automatic trigger at 20 percent of the service
+# brakes defective, which is the useful calibration here: losing a fifth of
+# one safety system is already the wall, so a truck that has consumed nine
+# tenths of its whole condition is far past any single out-of-service line.
+# That is why the wall sits at DAMAGE_OUT_OF_SERVICE_PCT and not at 100:
+# a wrecked truck has to stop while it still has paint on it.
+#
+# Below the first band nothing at all changes, so a driver who keeps the
+# truck straight never meets any of this.
+DAMAGE_DERATE_PCT = 50.0  # reduced power begins
+DAMAGE_LIMP_PCT = 75.0  # limp mode: the road-speed cap comes in
+DAMAGE_LAST_CALL_PCT = 85.0  # advisory band: names the wall before it lands
+DAMAGE_OUT_OF_SERVICE_PCT = 90.0  # the wall: the truck may not be driven
+DAMAGE_MAX_PCT = 100.0  # the top of the meter, for the derate ramp's anchor
+# Torque lost to the derate, ramped across each band so no crossing is a
+# cliff: nothing at the bottom of reduced power, a quarter of the engine by
+# limp mode, and near half at the top of the meter.
+DAMAGE_DERATE_TORQUE_LOSS = 0.25
+DAMAGE_LIMP_TORQUE_LOSS = 0.45
+DAMAGE_DERATE_FUEL_PENALTY = 0.25  # extra burn at the top of the meter
+DAMAGE_LIMP_CAP_MPH = 45.0  # what limp mode governs the truck down to
+# Out of service is not "slow", it is "not driveable". The engine may still
+# run and the truck may still crawl clear of a live lane -- leaving a
+# stricken truck stopped in traffic would be the more dangerous rule -- but
+# there is no road speed left in it and the trip cannot continue.
+DAMAGE_CREEP_CAP_MPH = 10.0
+
+DAMAGE_BAND_NONE = 0
+DAMAGE_BAND_REDUCED = 1
+DAMAGE_BAND_LIMP = 2
+DAMAGE_BAND_LAST_CALL = 3
+DAMAGE_BAND_OUT_OF_SERVICE = 4
+
+# -- cargo condition ------------------------------------------------------------------
+# What moves freight is what the truck does abruptly, so the rates live with
+# the physics that produce them; what the receiver DOES about the resulting
+# condition lives in models/cargo_condition, away from the sim. A hard stop
+# throws the load forward against its straps; a bend taken past its posted
+# advisory throws it sideways, where nothing is restraining it at all, which
+# is why cornering costs more than the same energy spent braking.
+CARGO_HARD_BRAKE_G = 0.25  # decel past which freight starts moving
+CARGO_BRAKE_PCT_PER_G_S = 22.0  # per g of excess, per real second
+CARGO_CORNER_MARGIN_MPH = 8.0  # slack over the posted advisory before it bites
+CARGO_CORNER_PCT_PER_MPH_S = 0.10  # per mph past that, per real second
+CARGO_COLLISION_PCT = 40.0  # at full severity
+
+# -- runaway ------------------------------------------------------------------------
+# Losing a loaded truck down a grade is the classic way to destroy one, and
+# coasting out of gear is how it happens: no driveline to hold the load back,
+# no retarder, and drums that fade long before the bottom. Past this speed a
+# tractor-trailer is not "going fast", it is coming apart -- tires past their
+# rated speed, driveline whipping, the trailer steering the tractor -- so it
+# takes real damage for every second it stays there, hard enough that a full
+# runaway ends the run rather than merely sounding an alarm.
+RUNAWAY_SPEED_MPH = 85.0
+RUNAWAY_DAMAGE_PCT_PER_S = 1.0  # per 10 mph past the threshold, per real second
+
+# -- driveline abuse ------------------------------------------------------------------
+# Selecting reverse while rolling forward is not a shift, it is a collision
+# inside the gearbox. Real synchro-less truck boxes simply will not take it:
+# the teeth crash and the lever stops. Above a walking pace the request is
+# refused and the attempt costs the driveline.
+REVERSE_ENGAGE_MAX_MPH = 3.0
+REVERSE_CRASH_DAMAGE_PCT = 4.0  # per refused attempt at speed
 
 # -- jake brake -----------------------------------------------------------------
 # The engine brake is retarding TORQUE at the crank, not a flat force at the
@@ -238,6 +318,33 @@ class TruckState:
     tire_wear_buff_mult: float = 1.0  # driver-care buff on tread wear (data/buffs.py)
     engine_wear_buff_mult: float = 1.0  # driver-care buff on duty-cycle engine wear
 
+    # How much of the damage on this truck a safety committee would call
+    # preventable. Carriers rule every incident preventable or not and run
+    # progressive discipline on the preventable ones, so the model has to
+    # know the difference: hitting something, drifting off the road asleep,
+    # crashing the box into reverse and losing it down a grade all are;
+    # damage taken reacting correctly to a hazard is not. Per-trip, not
+    # persisted onto the profile -- the career layer reads it at settlement.
+    preventable_damage_pct: float = 0.0
+
+    # What the freight is in. 0 = tendered condition, 100 = a trailer of
+    # scrap. Moved by hard stops, bends taken past their advisory, and
+    # collisions, scaled by how well this class of freight survives being
+    # thrown about (``cargo_fragility``, set by the driving layer from the
+    # job). Lives with cargo_kg because the same forces move both.
+    cargo_damage_pct: float = 0.0
+    cargo_fragility: float = 1.0
+    # Set each frame by the driving layer: how far past the posted advisory
+    # the truck is taking the bend it is in, in mph. Zero on a straight or
+    # inside the advisory. The vehicle model has no map, so the road has to
+    # tell it; the force it produces is real and belongs here.
+    corner_overspeed_mph: float = 0.0
+
+    # ECM road-speed governor: above this the engine simply stops fuelling,
+    # exactly like the rpm governor below. None = ungoverned. Not persisted --
+    # the driving layer sets it from the damage bands every frame.
+    speed_cap_mph: float | None = None
+
     stalled: bool = False
     # Driver-latched parked high idle (fast-idle/PTO mode, on the cruise
     # buttons like a real electronic truck). None = off. Not persisted:
@@ -289,8 +396,76 @@ class TruckState:
 
     @property
     def health_factor(self) -> float:
-        """Power multiplier from accumulated incident damage."""
-        return max(0.3, 1.0 - self.damage_pct / 150.0)
+        """Power multiplier from accumulated incident damage.
+
+        The old linear slide is still the base curve; the band derate rides
+        on top of it, inside the floor so that a limping truck always keeps
+        enough engine to reach a repair. The harsh part of the deep bands is
+        the road-speed cap, not being unable to move at all.
+        """
+        return max(0.3, (1.0 - self.damage_pct / 150.0) * self.damage_derate_factor)
+
+    @property
+    def damage_band(self) -> int:
+        """Which named damage band the truck is in right now.
+
+        Derived, never stored: ``damage_pct`` is already the persisted truth,
+        so a save can never disagree with itself about the band.
+        """
+        damage = self.damage_pct
+        if damage >= DAMAGE_OUT_OF_SERVICE_PCT:
+            return DAMAGE_BAND_OUT_OF_SERVICE
+        if damage >= DAMAGE_LAST_CALL_PCT:
+            return DAMAGE_BAND_LAST_CALL
+        if damage >= DAMAGE_LIMP_PCT:
+            return DAMAGE_BAND_LIMP
+        if damage >= DAMAGE_DERATE_PCT:
+            return DAMAGE_BAND_REDUCED
+        return DAMAGE_BAND_NONE
+
+    @property
+    def damage_derate_factor(self) -> float:
+        """Torque left after the damage derate; 1.0 below reduced power.
+
+        Ramped inside each band so crossing one is a wind-down rather than a
+        step, and exactly 1.0 at the reduced-power threshold itself.
+        """
+        damage = self.damage_pct
+        if damage < DAMAGE_DERATE_PCT:
+            return 1.0
+        if damage < DAMAGE_LIMP_PCT:
+            frac = (damage - DAMAGE_DERATE_PCT) / (DAMAGE_LIMP_PCT - DAMAGE_DERATE_PCT)
+            return 1.0 - DAMAGE_DERATE_TORQUE_LOSS * frac
+        frac = min(1.0, (damage - DAMAGE_LIMP_PCT) / (DAMAGE_MAX_PCT - DAMAGE_LIMP_PCT))
+        return (
+            1.0
+            - DAMAGE_DERATE_TORQUE_LOSS
+            - (DAMAGE_LIMP_TORQUE_LOSS - DAMAGE_DERATE_TORQUE_LOSS) * frac
+        )
+
+    @property
+    def damage_fuel_penalty(self) -> float:
+        """Extra fuel burn fraction from a derated engine; zero below the band."""
+        if self.damage_pct < DAMAGE_DERATE_PCT:
+            return 0.0
+        over = (self.damage_pct - DAMAGE_DERATE_PCT) / (DAMAGE_MAX_PCT - DAMAGE_DERATE_PCT)
+        return DAMAGE_DERATE_FUEL_PENALTY * min(1.0, over)
+
+    @property
+    def out_of_service(self) -> bool:
+        """The wall: this truck may not be driven until it is repaired.
+
+        The engine is left alone deliberately -- a stricken truck still needs
+        to be able to crawl out of a live lane -- so what stops the trip is
+        the creep cap the driving layer holds, not a dead engine.
+        """
+        return self.damage_pct >= DAMAGE_OUT_OF_SERVICE_PCT
+
+    @property
+    def speed_governed(self) -> bool:
+        """The road-speed governor is holding fuel off right now."""
+        cap = self.speed_cap_mph
+        return cap is not None and self.speed_mph >= cap
 
     # -- wear effects ------------------------------------------------------------
 
@@ -574,6 +749,11 @@ class TruckState:
             # The diesel governor cuts fuel at governed RPM. Continuing to hold
             # the throttle must not accelerate through a fixed low gear.
             return 0.0
+        if self.speed_governed:
+            # The road-speed governor does the same thing at a road speed
+            # instead of an engine speed. It cuts fuel; it does not brake, so
+            # gravity can still carry the truck past the cap on a downgrade.
+            return 0.0
         torque = self.torque_at(self.rpm) * self.throttle * self.health_factor
         torque *= self.engine_wear_factor
         direction = -1.0 if ratio < 0 else 1.0
@@ -629,7 +809,7 @@ class TruckState:
         if not self.engine_on or self.stalled or self.air_brakes_holding:
             return 0.0
         ratio = self.transmission.drive_ratio
-        if ratio == 0.0 or self.coupled_rpm() >= self.specs.max_rpm:
+        if ratio == 0.0 or self.coupled_rpm() >= self.specs.max_rpm or self.speed_governed:
             return 0.0
         full_force = (
             self.torque_at(self.rpm)
@@ -782,6 +962,8 @@ class TruckState:
         self.velocity_mps = new_v
         self.odometer_mi += abs(self.velocity_mps) * dt / 1609.344
 
+        # The freight rides on the same acceleration the tractor just felt.
+        self._update_cargo(dt, max(0.0, -accel / G) if old_v > 0.0 else 0.0)
         self._update_rpm(dt)
         self._update_fuel(dt)
         self._update_temps(dt)
@@ -1058,8 +1240,10 @@ class TruckState:
             # calibration above is untouched.
             base *= max(1.0, self.rpm / self.specs.idle_rpm)
         burn = (base + power_kw * 1.5e-5) * self.specs.fuel_burn_factor
-        # A tired engine burns more fuel for the power it still makes.
+        # A tired engine burns more fuel for the power it still makes, and a
+        # damaged one working against its own derate burns more again.
         burn *= 1.0 + ENGINE_WEAR_FUEL_PENALTY * self.engine_wear_pct / 100.0
+        burn *= 1.0 + self.damage_fuel_penalty
         self.fuel_gal = max(0.0, self.fuel_gal - burn * dt * self.fuel_burn_mult)
         if self.fuel_gal <= 0.0:
             self.stop_engine()
@@ -1110,7 +1294,8 @@ class TruckState:
             if self.chain_wear_pct >= 100.0:
                 self.chains_on = False
                 self.chains_just_snapped = True
-                self.damage_pct = min(100.0, self.damage_pct + CHAIN_SNAP_DAMAGE_PCT)
+                # Grinding a set to destruction on bare pavement is a choice.
+                self.add_damage(CHAIN_SNAP_DAMAGE_PCT)
 
         # The service brakes wear with the energy they actually dissipate;
         # the jake dumps its share out the exhaust and costs the shoes nothing.
@@ -1120,6 +1305,15 @@ class TruckState:
             if self.brake_temp_c >= self.brake_fade_onset_c:
                 brake *= BRAKE_WEAR_HOT_MULT
             self.brake_wear_pct = min(100.0, self.brake_wear_pct + brake)
+
+        # A runaway is mechanical destruction, not a speeding offence, and it
+        # does not care whether the engine is running -- coasting out of gear
+        # down a grade is the classic way to arrive here. Charged per real
+        # second, like the other abuse terms, and scaled by how far past the
+        # threshold the truck has gone.
+        if self.speed_mph > RUNAWAY_SPEED_MPH:
+            over = (self.speed_mph - RUNAWAY_SPEED_MPH) / 10.0
+            self.add_damage(RUNAWAY_DAMAGE_PCT_PER_S * over * dt)
 
         if self.engine_on:
             duty = self.throttle * (self.rpm / s.max_rpm)
@@ -1188,7 +1382,81 @@ class TruckState:
         self.parking_brake = True
         self.transmission.reset_to_neutral()
 
-    def apply_collision(self, severity: float) -> None:
+    def add_cargo_damage(self, pct: float) -> float:
+        """Move the freight's condition meter; returns what was added."""
+        if not self.trailer_attached or self.cargo_kg <= 0.0:
+            return 0.0  # nothing on the fifth wheel to hurt
+        added = min(100.0, self.cargo_damage_pct + max(0.0, pct)) - self.cargo_damage_pct
+        self.cargo_damage_pct += added
+        return added
+
+    def _update_cargo(self, dt: float, decel_g: float) -> None:
+        """Freight moves when the truck does something abrupt.
+
+        Two forces, both already in the sim. Braking hard throws the load
+        forward against its straps, and past a quarter g that starts costing
+        something. Taking a bend faster than it is signed for throws it
+        sideways, where nothing is holding it at all -- which is why a
+        hairpin taken well over its advisory is worse for the freight than
+        the same energy spent stopping, and why it used to be free.
+        """
+        if not self.trailer_attached or self.cargo_kg <= 0.0:
+            return
+        rate = 0.0
+        over_brake = decel_g - CARGO_HARD_BRAKE_G
+        if over_brake > 0.0 and self.speed_mph > 5.0:
+            rate += over_brake * CARGO_BRAKE_PCT_PER_G_S
+        over_corner = self.corner_overspeed_mph - CARGO_CORNER_MARGIN_MPH
+        if over_corner > 0.0:
+            rate += over_corner * CARGO_CORNER_PCT_PER_MPH_S
+        if rate > 0.0:
+            self.add_cargo_damage(rate * self.cargo_fragility * dt)
+
+    def add_damage(self, pct: float, *, preventable: bool = True) -> float:
+        """Put incident damage on the truck; returns what was actually added.
+
+        Every damage site goes through here so the preventable share is
+        counted once, at the moment the cause is known. Preventable is the
+        default because nearly everything that damages a truck is somebody's
+        decision; the exceptions have to say so.
+        """
+        added = min(DAMAGE_MAX_PCT, self.damage_pct + max(0.0, pct)) - self.damage_pct
+        self.damage_pct += added
+        if preventable:
+            self.preventable_damage_pct += added
+        return added
+
+    def recover_from_breakdown(self, damage_pct: float) -> None:
+        """Roadside repair: patch the truck down to ``damage_pct`` and leave it
+        safely stopped, ungoverned, and ready for a normal restart."""
+        self.damage_pct = min(self.damage_pct, float(damage_pct))
+        self.speed_cap_mph = None
+        self.recover_from_fuel_depletion()
+
+    def request_gear(self, target: int):
+        """Manual gear selection, with the guards a real driveline enforces.
+
+        The gearbox itself knows nothing about road speed, so the one rule it
+        cannot enforce alone lives here: reverse while rolling forward is a
+        crash of gears, not a shift. It is refused, and the attempt costs the
+        driveline -- a real box would be short some teeth afterwards.
+        """
+        if (
+            target == REVERSE
+            and not self.transmission.automatic
+            and self.speed_mph > REVERSE_ENGAGE_MAX_MPH
+        ):
+            self.add_damage(REVERSE_CRASH_DAMAGE_PCT)
+            return ShiftResult(
+                False,
+                "Reverse will not go in at this speed. Stop the truck first.",
+                grind=True,
+            )
+        return self.transmission.request_gear(target)
+
+    def apply_collision(self, severity: float, *, preventable: bool = True) -> None:
         """severity 0..1; slows the truck and adds damage."""
         self.velocity_mps *= max(0.2, 1.0 - severity)
-        self.damage_pct = min(100.0, self.damage_pct + severity * 18.0)
+        self.add_damage(severity * 18.0, preventable=preventable)
+        # Whatever hit the tractor went through the freight as well.
+        self.add_cargo_damage(severity * CARGO_COLLISION_PCT * self.cargo_fragility)

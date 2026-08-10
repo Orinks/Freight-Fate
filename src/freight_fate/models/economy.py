@@ -25,6 +25,14 @@ REGION_FUEL_PRICE = {
 }
 
 REPAIR_COST_PER_PCT = 85.0  # $ per percent of damage repaired
+# Body damage does not price by the percent. Light damage is panels and
+# lamps; deep damage is frame, driveline, and cooling package, and the labour
+# to reach any of it goes up with everything else that has to come off first.
+# So the bill curves: a truck at ninety percent is not three times the bill of
+# one at thirty, it is closer to seven. The curve is negligible at the shallow
+# end on purpose -- a careful driver's occasional scrape prices as it always
+# did -- and only bites where the driver has been ignoring warnings.
+REPAIR_SEVERITY_CURVE = 2.0
 REST_COST = 35.0  # flat cost of a rest stop visit (food, parking)
 MOTEL_COST = 95.0  # a real bed near the lot: full-quality rest for money
 
@@ -37,6 +45,16 @@ MOTEL_COST = 95.0  # a real bed near the lot: full-quality rest for money
 PAY_ADVANCE_LIMIT = 1500.0  # most you can owe at once
 PAY_ADVANCE_GRANT = 500.0  # cash per request
 PAY_ADVANCE_ELIGIBLE_BELOW = 10.0  # only offered at single-digit cash or worse
+
+
+def damage_severity_mult(damage_pct: float) -> float:
+    """How much dearer a percent of damage is at this depth. 1.0 at zero.
+
+    One curve, shared by the terminal garage and the road shops, so a driver
+    is never quoted two different theories of what their truck is worth.
+    """
+    depth = max(0.0, min(1.0, float(damage_pct) / 100.0))
+    return 1.0 + REPAIR_SEVERITY_CURVE * depth * depth
 
 
 def pay_advance_grant(money: float, outstanding: float, used_for_load: bool = False) -> float:
@@ -86,4 +104,4 @@ class Economy:
 
     @staticmethod
     def repair_cost(damage_pct: float) -> float:
-        return round(damage_pct * REPAIR_COST_PER_PCT, 2)
+        return round(damage_pct * REPAIR_COST_PER_PCT * damage_severity_mult(damage_pct), 2)
