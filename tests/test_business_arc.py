@@ -56,6 +56,39 @@ def test_thirty_level_ladder_has_business_arc_titles():
     assert CAREER_RANKS[-1].title == "Freight Fate Independent"
 
 
+def test_owner_operator_start_begins_the_arc_rather_than_skipping_it():
+    # The owner-operator start used to hand out level 18, 35 deliveries,
+    # 42,000 miles and 70,000 dollars of lifetime earnings before the player
+    # had driven a foot -- most of a thirty-level arc, plus a career history
+    # that never happened and was published on the public profile. The start
+    # is about ECONOMICS, not progression: you own the truck and you carry
+    # the costs from day one, and you climb the same ladder as everyone else.
+    from freight_fate.models.profile import Profile
+    from freight_fate.models.start_options import (
+        OWNER_OPERATOR_START_KEY,
+        apply_start_option,
+        start_option,
+    )
+
+    p = Profile(name="Independent")
+    option = start_option(OWNER_OPERATOR_START_KEY)
+    apply_start_option(p, option)
+
+    assert p.career.level == 1
+    assert p.career.xp == 0
+    assert p.career.deliveries == 0
+    assert p.career.on_time_deliveries == 0
+    assert p.career.total_miles == 0.0
+    assert p.career.total_earnings == 0.0
+    # What the start IS: your truck, your capital, your costs.
+    assert p.business_status == LEASED_OWNER_OPERATOR
+    assert "rig" in p.owned_trucks
+    assert p.money > 0
+    # And the menu no longer promises a shortcut.
+    blurb = f"{option.menu_summary} {option.help_text}".lower()
+    assert "skip" not in blurb
+
+
 def test_owner_operator_unlock_requires_career_and_working_capital():
     from freight_fate.models.profile import Profile
 

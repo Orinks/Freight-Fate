@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .career import LEVEL_XP
 from .career_ladder import STARTER_CARRIER_NAME
 from .trailers import DEFAULT_TRAILER_PROGRAMS
 
@@ -194,26 +193,28 @@ START_OPTIONS: dict[str, CareerStartOption] = {
         carrier_name="Northstar Freight Lines",
         mode=START_MODE_OWNER_OPERATOR,
         menu_summary=(
-            "Experienced-driver start: leased-on owner-operator from day one "
-            "with a starter tractor and real operating costs."
+            "Leased-on owner-operator from day one: your own starter tractor, "
+            "and every operating cost is yours."
         ),
         help_text=(
-            "Skip the company-driver ladder. You start leased on with an owned "
-            "starter tractor, more gross revenue, limited working capital, and "
-            "operating costs such as fuel, repairs, reserves, and settlement "
-            "fees coming out of your cash."
+            "The hardest way to begin. You start leased on with an owned "
+            "starter tractor and limited working capital, and the operating "
+            "costs -- fuel, repairs, reserves, and settlement fees -- come "
+            "out of your own cash instead of the carrier's. You still start "
+            "at level one and climb the same career as everyone else: this "
+            "changes who pays, not how far along you are."
         ),
         default_city="Chicago",
+        # The career itself starts at zero. This option is about ECONOMICS --
+        # your truck, your costs -- and never about skipping the ladder. It
+        # used to grant level 18 with 35 deliveries, 42,000 miles and 70,000
+        # dollars of lifetime earnings, which handed the player most of a
+        # thirty-level arc and published a career history that never happened
+        # on their public profile.
         starting_money=18_000.0,
         owned_trucks=("rig",),
         truck_fuel_gal=110.0,
         truck_damage_pct=4.0,
-        starting_level_xp=LEVEL_XP[17],
-        starting_deliveries=35,
-        starting_on_time_deliveries=30,
-        starting_total_miles=42_000.0,
-        starting_total_earnings=70_000.0,
-        starting_reputation=80.0,
         dispatch=DispatchProfile(long_haul_bias=0.25),
     ),
 }

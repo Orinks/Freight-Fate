@@ -225,6 +225,38 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       At the dev cutover, replay freshly played 1.9 careers (company new
       hire, slip-seat level 4+, post-buy-in owner-operator) against the
       validator, not just the stored-blob corpus.
+- [ ] **THE BACK HALF OF THE ARC IS FLAVOUR TEXT (direction set
+      2026-08-09).** An audit of all thirty ranks found every real
+      mechanical unlock lives in levels 1-13 (endorsements, regional
+      fleet, extra decline, board growth to 6/7/8 offers, choosing your
+      own loads at 8, a dedicated tractor at 9, premium fleet at 13).
+      Levels 14-16 only make text visible ("Working-capital target
+      becomes visible"), and 19-30 are twelve levels of flavour
+      ("Specialty trailer programs matter more", "Top career rank").
+      That is why the owner-operator start was placed at 18 -- it sat
+      exactly where the ladder stopped paying out.
+      OWNER RULING: do NOT build a fleet-management layer -- it would
+      duplicate the separate dispatch game and drag a blind player out
+      of the cab into menus. The first half is EARNING TRUST; the second
+      half is CARRYING RISK. Same cab, same road, higher stakes. Every
+      addition must pass one test: you can hear and feel the difference
+      from the driver's seat. Planned spine: harder freight classes
+      (tanker surge first, then oversize/overweight with permits and
+      route restrictions, hazmat with route bans and inspection
+      scrutiny), dedicated contract lanes you can fail, owned trailers
+      with their own upkeep, and authority turning the board into a
+      market you price rather than a list you pick from. If the second
+      act cannot be filled with real mechanics, the honest fix is fewer
+      levels rather than more flavour -- validate the ~335h curve
+      against whatever actually ships.
+- [x] **Owner-operator start begins at level 1 (2026-08-09).** It used
+      to grant LEVEL_XP[17] (level 18) plus 35 deliveries, 42,000 miles
+      and 70,000 dollars of lifetime earnings -- all published to the
+      public profile as career history that never happened. The option
+      now grants only what it is about: the tractor, 18,000 dollars of
+      working capital, and every operating cost. Freight access was
+      never the reason for the high level -- all three endorsements
+      unlock by level 4.
 - [ ] **Wear ceilings need their own wall.** The damage bands shipped
       2026-08-09 with a 90 percent out-of-service cutoff, but brake,
       engine, and tire wear at 100 percent still only fade physics --

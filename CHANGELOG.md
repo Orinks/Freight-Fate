@@ -30,6 +30,29 @@
 
 ### Changed
 
+- **The steering setting now says what the truck actually does.** Lane
+  drift is now called Lane keeping, and its values changed from off,
+  light, and realistic to full, partial, and off. The old names were the
+  wrong way round: what used to be called off was the truck holding the
+  lane for you and taking your exits, including your destination exit.
+  Your setting carried over to the value that behaves exactly the same,
+  so nothing about your driving changed, and the row explains the rename
+  the first few times you visit it. Lane keeping now also follows the
+  driving assistance presets, so the preset row can no longer describe
+  less automation than you really have. With it on full, the truck says
+  so the first time it sets an exit lane for you and the first time it
+  takes your destination exit.
+
+- **The owner-operator start no longer skips the career.** It used to
+  open at level eighteen with thirty-five deliveries and forty-two
+  thousand miles already behind you -- most of the thirty-level career
+  handed over before you had driven a foot, and a history that never
+  happened showing on your public profile. Now it starts where every
+  career starts, at level one. What the choice actually gives you is the
+  hard part: your own tractor, your own working capital, and every
+  operating cost coming out of your pocket instead of the carrier's.
+  It changes who pays, not how far along you are.
+
 - **Three new keys answer one hours question each.** C used to read the
   clock, the deadline, and your whole hours-of-service position in one
   long breath. Now Alt A says how long you have been at the wheel this

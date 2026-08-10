@@ -230,9 +230,13 @@ def test_owner_operator_start_applies_owned_equipment_and_costs():
     assert p.active_trailer_programs() == ("dry_van",)
     assert p.money == pytest.approx(18_000.0)
     assert p.truck_damage_pct > 0
-    assert p.career.level >= OWNER_OPERATOR_LEVEL
-    assert p.career.deliveries >= 35
-    assert p.career.total_miles > 0
+    # The start buys you equipment and costs, never progress: the career
+    # begins at zero and climbs the same ladder as a company hire. It used
+    # to open at level 18 with 35 deliveries and 42,000 miles behind it.
+    assert p.career.level == 1
+    assert p.career.deliveries == 0
+    assert p.career.total_miles == 0.0
+    assert p.career.level < OWNER_OPERATOR_LEVEL  # the buy-in gate is still ahead
 
 
 def test_new_career_start_menu_lists_company_and_owner_operator():
@@ -337,13 +341,19 @@ def test_first_day_briefing_names_owner_operator_costs():
         assert "own the starter tractor" in message
         assert "working capital" in message
         assert "fuel, repairs, truck wear" in message
-        assert all(item.text != "First-day briefing" for item in state.items)
-        assert any(item.text == "Career plan" for item in state.items)
+        # An owner-operator now starts at level one with nothing behind them,
+        # so they are on their first day like any other new career: the
+        # briefing is offered, and the career plan replaces it once they have
+        # run their first dispatch. The old start faked 35 deliveries of
+        # experience, so it skipped straight past the briefing.
+        assert any(item.text == "First-day briefing" for item in state.items)
+        assert all(item.text != "Career plan" for item in state.items)
         assert not first_dispatch_done(app.ctx.profile)
 
         app.ctx.profile.achievements.append("first_dispatch")
         state.refresh()
         assert all(item.text != "First-day briefing" for item in state.items)
+        assert any(item.text == "Career plan" for item in state.items)
         assert first_dispatch_done(app.ctx.profile)
     finally:
         app.shutdown()
