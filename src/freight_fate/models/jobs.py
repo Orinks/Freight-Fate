@@ -32,7 +32,12 @@ from ..sim.trip_models import (
 from .business_constants import DIRECT_FREIGHT_PAY_MULT
 from .market import Market, market_condition
 from .start_options import DEFAULT_START_KEY, start_option
-from .trailers import equipment_text_for_cargo, required_program_text, trailer_keys_for_cargo
+from .trailers import (
+    TANK_CAPACITY_TONS,
+    equipment_text_for_cargo,
+    required_program_text,
+    trailer_keys_for_cargo,
+)
 
 
 @dataclass(frozen=True)
@@ -45,10 +50,23 @@ class CargoType:
     fragile: bool = False
     min_level: int = 1
     equipment: str = ""
+    # Liquid bulk. A tank load is the only freight that keeps moving after the
+    # truck has stopped, so the physics layer needs to know, and whether the
+    # shell has baffles in it decides how badly. Sanitation rules forbid
+    # baffles in food-grade tanks -- the crevices cannot be washed out -- so
+    # the freight that is hardest to haul is the milk, not the fuel.
+    tank: bool = False
+    baffled: bool = False
 
     @property
     def equipment_text(self) -> str:
         return self.equipment or equipment_text_for_cargo(self.key)
+
+    def fill_fraction(self, weight_tons: float) -> float:
+        """How full the tank is for a load of this weight, 0 to 1."""
+        if not self.tank or TANK_CAPACITY_TONS <= 0.0:
+            return 0.0
+        return max(0.0, min(1.0, float(weight_tons) / TANK_CAPACITY_TONS))
 
 
 CARGO_CATALOG: dict[str, CargoType] = {
@@ -80,6 +98,36 @@ CARGO_CATALOG: dict[str, CargoType] = {
     "electronics": CargoType(
         "electronics", "electronics", 3.30, (4, 12), "high_value", fragile=True
     ),
+    # Liquid bulk: the back half of the career, where the freight stops being
+    # heavier and starts being harder. Both pay well over dry freight because
+    # the load fights back -- it arrives at the stop bar a second after you do.
+    #
+    # Fuel rides in a baffled shell: the bulkheads spend the fore-and-aft wave
+    # and it settles in a few cycles. It is the one to learn on.
+    "fuel_bulk": CargoType(
+        "fuel_bulk",
+        "bulk fuel",
+        3.45,
+        (11, 25),
+        "tank",
+        min_level=16,
+        tank=True,
+        baffled=True,
+    ),
+    # Liquid food rides in a smooth bore, because sanitation rules forbid
+    # baffles in a food-grade tank -- nobody can wash out the crevices. So the
+    # gentlest cargo in the game travels in the most vicious equipment, and
+    # a half-loaded milk tank is the hardest thing on the roster to stop.
+    "liquid_food": CargoType(
+        "liquid_food",
+        "liquid food products",
+        3.85,
+        (9, 24),
+        "tank",
+        min_level=21,
+        tank=True,
+        baffled=False,
+    ),
 }
 
 ENDORSEMENT_LABELS = {
@@ -87,6 +135,7 @@ ENDORSEMENT_LABELS = {
     "refrigerated": "refrigerated endorsement",
     "heavy_haul": "heavy-haul endorsement",
     "high_value": "high-value endorsement",
+    "tank": "tank vehicle endorsement",
 }
 
 FACILITY_CARGO: dict[str, set[str]] = {
@@ -99,11 +148,11 @@ MARKET_TAG_CARGO_BONUS = {
     "air": {"electronics", "parcel", "general"},
     "automotive": {"automotive", "steel", "machinery", "electronics"},
     "border": {"retail", "container", "general", "parcel"},
-    "chemical": {"chemicals", "bulk"},
+    "chemical": {"chemicals", "bulk", "fuel_bulk"},
     "cold_chain": {"food", "refrigerated"},
     "construction": {"construction", "bulk", "steel", "lumber_paper"},
-    "energy": {"chemicals", "bulk"},
-    "food": {"food", "refrigerated", "grain"},
+    "energy": {"chemicals", "bulk", "fuel_bulk"},
+    "food": {"food", "refrigerated", "grain", "liquid_food"},
     "industrial": {"steel", "machinery", "bulk", "construction"},
     "intermodal": {"container", "general", "retail", "automotive"},
     "lumber": {"lumber_paper", "construction"},

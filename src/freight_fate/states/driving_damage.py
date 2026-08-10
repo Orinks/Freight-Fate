@@ -129,9 +129,11 @@ def preventable_damage_charge(driving) -> tuple[float, float, str]:
 def cargo_status_clause(truck) -> str:
     """The load's condition for a status readout: the words and the number."""
     condition = float(getattr(truck, "cargo_damage_pct", 0.0))
+    # A tank load gets the tank vocabulary. Diesel does not "shift but sound".
+    liquid = getattr(truck, "liquid", None) is not None
     if condition < 1.0:
-        return "secure"
-    return f"{cargo_condition_text(condition)}, {condition:.0f} percent"
+        return "settled" if liquid else "secure"
+    return f"{cargo_condition_text(condition, liquid=liquid)}, {condition:.0f} percent"
 
 
 class DamageBandMixin:
@@ -148,11 +150,12 @@ class DamageBandMixin:
         """
         t = self.truck
         curve = self.trip.curve_at(self.trip.position_mi)
-        t.corner_overspeed_mph = (
-            max(0.0, t.speed_mph - curve.advisory_mph)
-            if curve is not None and not curve.connector
-            else 0.0
-        )
+        bend = curve if curve is not None and not curve.connector else None
+        t.corner_overspeed_mph = max(0.0, t.speed_mph - bend.advisory_mph) if bend else 0.0
+        # The advisory itself as well as the excess: a liquid load needs the
+        # ratio, because what a bend pulls sideways goes with the square of
+        # how far over the posting it is being taken.
+        t.corner_advisory_mph = float(bend.advisory_mph) if bend else 0.0
         condition = t.cargo_damage_pct
         # The HIGHEST rung crossed, not the next one up. A collision can put a
         # load through all three at once, and walking them a frame apart would
@@ -166,7 +169,9 @@ class DamageBandMixin:
     def _announce_cargo_condition(self) -> None:
         t = self.truck
         outcome = cargo_outcome(t.cargo_damage_pct)
-        words = cargo_condition_text(t.cargo_damage_pct)
+        words = cargo_condition_text(
+            t.cargo_damage_pct, liquid=getattr(t, "liquid", None) is not None
+        )
         self.ctx.audio.play("ui/warning")
         if self._terse_speech():
             consequence = {

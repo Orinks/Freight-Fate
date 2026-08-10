@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from ..sim.pedal_latch import PedalLatch
+from ..sim.surge import liquid_load_for
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
 from ..models.cargo_condition import cargo_fragility
@@ -12,6 +13,7 @@ from .driving_enforcement import EnforcementWatchMixin
 from .driving_engine_brake import EngineBrakeZoneMixin
 from .driving_events import DrivingEventMixin
 from .driving_facility_gate import FacilityGateMixin
+from .driving_liquid import LiquidLoadMixin
 from .driving_location import DrivingLocationMixin
 from .driving_pacenotes import DrivingPacenoteMixin
 from .driving_pickup import DrivingPickupMixin
@@ -38,6 +40,7 @@ class DrivingState(
     DrivingPickupMixin,
     DrivingEventMixin,
     DrivingPacenoteMixin,
+    LiquidLoadMixin,
     State,
 ):
     def __init__(
@@ -72,6 +75,15 @@ class DrivingState(
         # receiver does about the result belongs to models/cargo_condition.
         self.truck.cargo_fragility = cargo_fragility(
             job.cargo if phase == DRIVE_PHASE_DELIVERY else None
+        )
+        # A tank load is the only freight that keeps moving after the truck
+        # stops. How full the shell is comes straight from the load's weight,
+        # so the wave is a deterministic property of the job -- the same run
+        # always drives the same way. Every other kind of freight leaves this
+        # None and never touches a line of the surge model.
+        self.truck.liquid = liquid_load_for(
+            job.cargo if phase == DRIVE_PHASE_DELIVERY else None,
+            job.weight_tons,
         )
         profile.load_truck_condition(self.truck)
         self.truck.set_cold_air_start()
@@ -976,6 +988,7 @@ class DrivingState(
 
     def exit(self) -> None:
         self.ctx.audio.horn_stop()
+        self._stop_liquid_cues()
         self.radio.write_settings(self.ctx.settings)
         self.ctx.settings.save()
         self.ctx.audio.stop_world()

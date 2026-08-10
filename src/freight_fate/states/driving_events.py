@@ -5,6 +5,7 @@ from .base import TimedMessageState
 from .driving_core import *
 from .driving_menu_states import ArrivalState, FacilityArrivalState
 from .driving_rest_states import ParkingFullState, RestStopState, ShoulderSleepConfirmationState
+from .driving_stops import assist_full_decel_mps2, bar_solid_zone_mi, bar_tick_range_mi
 
 
 class DrivingEventMixin:
@@ -1587,14 +1588,20 @@ class DrivingEventMixin:
             self._set_bar_solid(False)
             return
         gap_mi = self._ramp_mi - RAMP_ACCESS_MI
-        if gap_mi > RAMP_BAR_TICK_RANGE_MI or gap_mi < 0:
+        # Both distances come from what this truck can actually stop in, with
+        # the old constants as their floors: a load that stops longer -- hot
+        # brakes, ice, a downgrade, liquid running forward in a tank -- hears
+        # the bar earlier, because it needs the road earlier.
+        tick_range_mi = bar_tick_range_mi(self.truck)
+        solid_mi = bar_solid_zone_mi(self.truck)
+        if gap_mi > tick_range_mi or gap_mi < 0:
             self._set_bar_solid(False)
             return
-        if gap_mi <= RAMP_BAR_SOLID_MI:
+        if gap_mi <= solid_mi:
             self._set_bar_solid(True)
             return
         self._set_bar_solid(False)
-        closeness = 1.0 - gap_mi / RAMP_BAR_TICK_RANGE_MI
+        closeness = 1.0 - gap_mi / tick_range_mi
         period = RAMP_BAR_TICK_SLOW_S - closeness * (RAMP_BAR_TICK_SLOW_S - RAMP_BAR_TICK_FAST_S)
         self._ramp_bar_tick_timer += dt
         if self._ramp_bar_tick_timer >= period:
@@ -1739,7 +1746,7 @@ class DrivingEventMixin:
                 # A green (or a yellow already at the bar) is legal to roll,
                 # but not at speed: hold the crossing under the clean-roll
                 # threshold with room to spare.
-                if gap_mi <= RAMP_BAR_TICK_RANGE_MI and speed > GREEN_ROLL_MPH - 5:
+                if gap_mi <= bar_tick_range_mi(self.truck) and speed > GREEN_ROLL_MPH - 5:
                     self.truck.throttle = 0.0
                     self.truck.brake = max(self.truck.brake, 0.4)
                 return
@@ -1780,7 +1787,7 @@ class DrivingEventMixin:
             return
         self.truck.throttle = 0.0
         self.truck.brake = max(
-            self.truck.brake, min(1.0, max(0.3, needed / RAMP_ASSIST_FULL_DECEL_MPS2))
+            self.truck.brake, min(1.0, max(0.3, needed / assist_full_decel_mps2(self.truck)))
         )
         if not self._ramp_assist_said:
             self._ramp_assist_said = True
@@ -1817,7 +1824,13 @@ class DrivingEventMixin:
                     self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=-0.4)
                     self.ctx.audio.play("vehicle/collision")
                     self.ctx.controller.rumble.impact(RED_RUN_DAMAGE)
-                    self.truck.apply_collision(RED_RUN_DAMAGE)
+                    # A driver already hard on the brakes, carried through by
+                    # the load, did not make a preventable mistake. The
+                    # violation still stands; the discipline does not.
+                    self.truck.apply_collision(
+                        RED_RUN_DAMAGE,
+                        preventable=not self.truck.pushed_through_by_surge(),
+                    )
                     self.ctx.say_event(
                         "You ran the red light at the ramp end and cross traffic "
                         "clipped the trailer! Total damage "
@@ -1856,7 +1869,10 @@ class DrivingEventMixin:
                 self.ctx.audio.play("traffic/car_pass", volume=1.0, pan=0.4)
                 self.ctx.audio.play("vehicle/collision")
                 self.ctx.controller.rumble.impact(STOP_ROLL_DAMAGE)
-                self.truck.apply_collision(STOP_ROLL_DAMAGE)
+                self.truck.apply_collision(
+                    STOP_ROLL_DAMAGE,
+                    preventable=not self.truck.pushed_through_by_surge(),
+                )
                 self.ctx.say_event(
                     "You blew the stop sign at the ramp end and clipped cross "
                     f"traffic! Total damage {self.truck.damage_pct:.0f} percent.",
@@ -2157,7 +2173,7 @@ class DrivingEventMixin:
         if needed < RAMP_ASSIST_DECEL_START_MPS2 and gap_mi > 0.08:
             return False
         self.truck.throttle = 0.0
-        assist_brake = min(1.0, max(0.3, needed / RAMP_ASSIST_FULL_DECEL_MPS2))
+        assist_brake = min(1.0, max(0.3, needed / assist_full_decel_mps2(self.truck)))
         self.truck.brake = max(self.truck.brake, assist_brake)
         self._selected_stop_assist_brake = max(self._selected_stop_assist_brake, assist_brake)
         if not self._selected_stop_assist_said:
@@ -2790,8 +2806,8 @@ class DrivingEventMixin:
         # Anti-windup: a grade the engine cannot pull, or a downgrade gravity
         # owns, pins the pedal at one end for as long as it lasts. Integrating
         # through that buries the trim at its limit, and the truck then sags or
-        # surges for seconds after the road levels out while it unwinds. Only
-        # take the new trim when it can still move the pedal.
+        # overshoots for seconds after the road levels out while it unwinds.
+        # Only take the new trim when it can still move the pedal.
         saturated = (demand <= 0.0 and error < 0.0) or (demand >= 1.0 and error > 0.0)
         if not saturated:
             self._cruise_trim = trim

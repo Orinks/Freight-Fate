@@ -89,6 +89,8 @@ belongs to the truck you own in this game, not to the driver.
 | Lane keeping (the setting) | `lane_keeping` | `settings.py`, `states/main_menu.py` |
 | Driving mode tuning | `DrivingModeTuning` | `sim/driving_modes.py` |
 | Pedal latch | `PedalLatch` | `sim/pedal_latch.py` |
+| A tank load and its sloshing wave | `LiquidLoad`, `SloshAxis` | `sim/surge.py` |
+| Stop-cue geometry from stopping distance | -- | `states/driving_stops.py` |
 | Planned rest-stop stopping assistance | `selected_stop_assist` | `settings.py`, `states/driving_events.py` |
 | Traffic vehicle | `TrafficVehicle`, `TrafficSituation`, `TrafficManager` | `sim/traffic_manager.py` |
 | Live traffic | `TrafficEvent`, `TrafficData`, `RealTrafficProvider` | `sim/real_traffic.py` |
@@ -205,6 +207,13 @@ from the words, and synonyms cost them a re-read.
 | Vehicles around you now | traffic | NPCs, cars | `TrafficManager` |
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
 | A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |
+| The trailer liquid bulk rides in | tank trailer | tanker (as a noun for the trailer), tank truck | `TRAILER_CATALOG["tank"]` |
+| Freight that is a liquid in bulk | liquid bulk | tanker freight, wet freight | `CargoType.tank` |
+| Liquid moving inside the tank | surge | slosh, sloshing, wave action | `LiquidLoad`, `SloshAxis` |
+| A tank with bulkheads that damp fore-aft surge | baffled | compartmented, bulkheaded | `CargoType.baffled` |
+| A tank with nothing inside to damp surge | smooth bore | unbaffled, food-grade tank | `CargoType.baffled` False |
+| How much liquid is in the tank | how full the tank is: "half full", "nearly full" | outage, ullage, headspace, fill level | `LiquidLoad.fill_fraction` |
+| Road the truck needs to stop from here | stopping distance | braking distance, stop room | `TruckState.stopping_distance_m` |
 | The short code a player reads and types into a browser to connect a computer | activation code | user code, device code, pairing code | `Activation.user_code` |
 | The legal driving clock as a whole | hours of service | HOS, the ELD rules, your logbook hours | `HosClock`, `settings.hos_mode` |
 | The 11-hour clock that limits time at the wheel | driving time left | drive clock, hours left, hours remaining | `HosClock.drive_time_summary` |

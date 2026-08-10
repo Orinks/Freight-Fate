@@ -66,6 +66,7 @@ current idle, start, and shutdown cues.
 | Curve cue bink | `vehicle/curve_bink.wav` | Original synthesized bright cue tone (`sound-test/transverse_strips.py`); carries the pacenote call, the curve entry, and the stop-bar closing tick -- the beep the old ui/tick placeholder note asked for |
 | Lane-line marker roll | `vehicle/lane_line_cross.wav` | Original synthesized raised-marker crossing (`sound-test/transverse_strips.py`): the five-hit axle roll of a tractor-trailer crossing a lane line, panned to the crossed side |
 | Stop-bar solid tone | `vehicle/bar_solid.wav` | Original synthesized continuous alert (`sound-test/transverse_strips.py`): the parking-sensor beeps going solid in the bar's final leeway, a calm 400 Hz you can hold for seconds at a time (pitched down from 1250 by ear, 2026-08-03) |
+| Liquid surge, tank trailer | `vehicle/liquid_wash.wav`, `vehicle/liquid_hit.wav`, `vehicle/liquid_hit_lateral.wav` | Original synthesized tank-surge layer (deterministic seeded spectral-domain DSP, `sound-test/liquid_surge.py`): a wash bed held only while the liquid is running, plus the arrival slap through the shell's modal ring, fore-aft and lateral distinguished by ring. Banded 1.5-4 kHz on purpose -- the engine and road beds own everything below a kilohertz and the jake runs at full gain during exactly the deceleration that produces surge |
 
 ## Licensed Driving Sounds
 

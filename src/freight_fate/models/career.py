@@ -50,6 +50,9 @@ ENDORSEMENT_LEVELS = {
     "refrigerated": 2,
     "heavy_haul": 3,
     "high_value": 4,
+    # The back half of the arc stops being about heavier freight and starts
+    # being about freight that fights back. A tank is the first of those.
+    "tank": 16,
 }
 
 # Paying for the course yourself unlocks an endorsement before the carrier
@@ -58,12 +61,14 @@ ENDORSEMENT_COURSE_COSTS = {
     "refrigerated": 900.0,
     "heavy_haul": 1_600.0,
     "high_value": 1_300.0,
+    "tank": 2_400.0,
 }
 
 ENDORSEMENT_LABELS_SPOKEN = {
     "refrigerated": "refrigerated",
     "heavy_haul": "heavy-haul",
     "high_value": "high-value",
+    "tank": "tank vehicle",
 }
 
 # Experience scales with what the freight demands, not just its miles:
@@ -159,6 +164,11 @@ ENDORSEMENT_ANNOUNCEMENTS = {
         "You earned the heavy-haul endorsement. Heavy machinery jobs are now available."
     ),
     "high_value": ("You earned the high-value endorsement. Electronics jobs are now available."),
+    "tank": (
+        "You earned the tank vehicle endorsement. Liquid bulk jobs are now available. "
+        "A tank load keeps moving after you do: brake early, brake once, and "
+        "listen for the wave coming back."
+    ),
 }
 
 
