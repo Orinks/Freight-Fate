@@ -21,6 +21,19 @@
 
 ### Changed
 
+- **Street corners now ask you to slow down for them.** The approach
+  names the turn, the street, the distance, and the speed to be under,
+  and arriving too fast means you go by it: the game takes you to the
+  next safe turnaround and loops you back, with the clock running. Miss
+  the same corner twice, or three anywhere on a run, and the turn is
+  made for you so no route can strand you. Highway junctions are
+  unchanged.
+
+- **The road under the truck now leans into turns and ramps.** The
+  guiding road sound went quiet during every corner and every exit ramp
+  -- exactly when you most need to hear where the road is going. It now
+  follows you through them.
+
 - **The radio dial moved to Page Down and Page Up.** Page Down tunes to
   the next station and Page Up to the previous, with Control still
   jumping a whole category. The old semicolon and apostrophe keys keep
@@ -73,6 +86,11 @@
   clock keeps running, so a hot approach can cost you a deadline. Miss
   it twice and the game offers braking help. The destination approach
   assist always makes the gate for you.
+
+- **Weigh stations are on the map.** Eighty-seven real scales across
+  thirty-two states are now stops on the routes that sign them, so the
+  scale rules the game already had -- checking in, and what happens if
+  you roll past an open one -- finally have somewhere to happen.
 
 - **Towns now enforce their engine brake ordinances.** Like real
   municipal noise rules, cities and towns along your route are no engine

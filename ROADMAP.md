@@ -225,6 +225,30 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       At the dev cutover, replay freshly played 1.9 careers (company new
       hire, slip-seat level 4+, post-buy-in owner-operator) against the
       validator, not just the stored-blob corpus.
+- [ ] **Rename `steering_assist` to `lane_keeping_assist`.** The name is
+      inverted: `"off"` means the truck holds the lane FOR you, and
+      `"realistic"` is the manual task. Two studies independently flagged
+      it as the reason "turns are already manual" reads false. Deferred
+      from the turn-commitment pass only because it touches ~40 test call
+      sites and would have collided with concurrent work; values map
+      `off -> full`, `light -> partial`, `realistic -> off`, and existing
+      saves must migrate to today's behaviour, not to a harder game.
+- [ ] **Police phases 2-5** (`docs`-less design captured 2026-08-09):
+      typed enforcement posts replacing `PatrolWindow` with an observation
+      model (geometry, line of sight, weather, traffic cover, severity);
+      the full inspection ladder (Levels I/II/V, vehicle out-of-service,
+      roadside repair, scale weighing and overweight); staged pursuit with
+      a surrender branch and telegraphed spike deployment; urban units
+      giving the engine-brake citation a body; ports of entry. Phase 0
+      (data + RNG split + pull-over persistence + control hints) and the
+      scale data landed 2026-08-09.
+- [ ] **Enforcement catch rate is still the weak link.** Fines and the
+      violation ladder are tuned per citation, but patrols cover only
+      ~4.6% of a 600-mile route in realistic mode, 0% under 120 miles,
+      and a 5.5-mile window is 3.8-7.6 REAL seconds at high pacing --
+      shorter than `SPEEDING_HOLD_S` (6.0), so at the fastest pacing a
+      speeder can be structurally unable to accrue a strike inside a
+      patrol. The presence model above is the fix.
 - [ ] **Extend the missed-gate overshoot to the pickup and city-service
       gates.** The delivery gate now loops you back when you carry past
       it too fast (2026-08-09, third instance of the scripted loop-back
