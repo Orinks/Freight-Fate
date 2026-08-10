@@ -170,17 +170,35 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       `tests/conftest.py` now implements xdist's
       `pytest_xdist_auto_num_workers` hook and caps auto at 8; CI runners
       are below the ceiling and unaffected.
-- [ ] Test-suite streamlining, second pass: the break harness lives in
-      `tools/` and looks like a script while being the thing that finds
-      real bugs, carries its own `Rig` duplicating `tests/` fixture work,
-      and its ODD-vs-FAIL verdict is ambiguous enough that four bogus
-      findings sat untriaged for a day. Proposal is `tests/adversarial/`
-      behind a marker deselected by default, keeping ODD as a marker
-      rather than a separate runner. Deferred deliberately: it currently
-      runs single-process in under a minute *because* it is outside
-      pytest, so weigh that against the move. Also unexamined: whether
-      the App()-booting fixtures that dominate the remaining runtime can
-      be shared rather than rebuilt per test.
+- [x] **Adversarial battery reports through pytest -- SHIPPED
+      2026-08-10.** `tests/adversarial/test_break_scenarios.py` runs the
+      same registry `tools/playtest_break.py` does, so the scenarios stay
+      one source of truth and the CLI (`--scenario NAME --transcript`,
+      still the way to read spoken output) is untouched. The ODD-vs-FAIL
+      ambiguity that let four bogus findings sit untriaged is gone: a NEW
+      odd finding fails, the four known-open ones are strict xfails
+      carrying their explanation in `KNOWN_OPEN`, and fixing one turns it
+      into XPASS, which fails and says to delete the entry. Marked
+      `adversarial` and deselected in addopts; `tests/conftest.py` also
+      skips collecting the directory unless the marker is asked for,
+      since deselection happens after collection and collecting it pulls
+      in pygame and the whole scenario package for nothing. 28 passed,
+      4 xfailed in 7 s under the worker cap -- faster than the tool's
+      serial run, so the "it is fast because it is outside pytest"
+      worry did not survive contact. Watch for: a second conftest under
+      `tests/` claims the bare module name `conftest`, which broke
+      `test_online_presence.py`'s `from conftest import FakeKeyring`.
+      The loader lives in the test module for that reason.
+- [ ] Shared App() fixtures, if ever worth it. Measured 2026-08-10 and
+      NOT the bottleneck: a boot is 149 ms warm across 83 files, while
+      the full suite is 3,114 tests in 3:54. What is left is a handful of
+      legitimate broad sweeps -- the network-wide deadline check (58 s),
+      the whole-board route check (53 s), and 113 s of full deliveries in
+      `test_mapped_state_lines_are_authoritative_in_delivery_transcripts`,
+      three params of which are strict xfails re-confirming the ambient
+      message-queue bug documented in that file. Fixing that queue
+      deletes those xfails and about 90 s with them, which is the real
+      lever; trimming the sweeps would trade coverage for seconds.
 - [x] **Adversarial "break the game" harness -- SHIPPED 2026-08-09.**
       `tools/playtest_break.py` (plus `tools/playtest_break_scenarios/`,
       split by system family to stay under the practical-file-size

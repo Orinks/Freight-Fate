@@ -99,8 +99,18 @@ pythonpath = ["tools"]
 # default here also stops local runs and CI diverging. Slow sweep tests must
 # carry their own @pytest.mark.timeout -- under xdist the thread timeout kills
 # the whole worker, which surfaces as "node down" rather than a test failure.
-addopts = "-q -n auto --timeout=120 --timeout-method=thread"
+#
+# What -n auto resolves to is capped in tests/conftest.py: a worker loads
+# pygame and the audio stack, so past about eight the run stops getting
+# faster and, on a 28-core machine, started dying with an INTERNALERROR in
+# the reporter instead of merely running slowly.
+#
+# The adversarial battery (tests/adversarial) is deselected here because it
+# drives whole simulated deliveries. Run it deliberately:
+#     uv run pytest tests/adversarial -m adversarial
+addopts = "-q -n auto --timeout=120 --timeout-method=thread -m 'not adversarial'"
 markers = [
+    "adversarial: the break-the-game battery; slow, deselected by default",
     "career_1_9: curated transcript-backed career 1.9 smoke coverage",
     "property: property-based randomized tests",
     "smoke: headless end-to-end smoke tests",

@@ -44,6 +44,19 @@ settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "default"))
 MAX_XDIST_AUTO_WORKERS = 8
 
 
+# The adversarial battery is deselected by default (see pyproject addopts),
+# but deselection happens AFTER collection -- and collecting it imports
+# tools/playtest_break.py, which puts tools/ on sys.path and pulls in pygame
+# and the whole scenario package for a run that will not use any of it. Skip
+# the directory outright unless the marker was actually asked for.
+collect_ignore_glob: list[str] = []
+
+
+def pytest_configure(config):
+    if "adversarial" not in (getattr(config.option, "markexpr", "") or ""):
+        collect_ignore_glob.append("adversarial/*")
+
+
 @pytest.hookimpl(tryfirst=True)
 def pytest_xdist_auto_num_workers(config):
     """Resolve ``-n auto`` to something that leaves the machine usable."""

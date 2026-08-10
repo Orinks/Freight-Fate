@@ -49,7 +49,19 @@ code, in the same change:
 - Tests: `uv run pytest` (config already applies `-q -n auto` and a per-test
   timeout). Run focused tests for your area first, the full suite for shared
   behavior. A slow sweep test needs its own `@pytest.mark.timeout` -- under
-  xdist the thread timeout kills the worker and reads as "node down".
+  xdist the thread timeout kills the worker and reads as "node down". What
+  `-n auto` resolves to is capped in `tests/conftest.py`: workers load pygame
+  and the audio stack, so past about eight the run stops getting faster, and
+  uncapped on a 28-core machine it died in the reporter rather than merely
+  running slowly.
+- Adversarial battery: `uv run pytest tests/adversarial -m adversarial`. Slow,
+  so it is deselected by default and not even collected without the marker.
+  Deliberately unreasonable play (floor it through town, coast a mountain in
+  neutral, save-scum a traffic stop) against the real driving state. Known
+  open findings are strict xfails in `KNOWN_OPEN`; fix one and delete its
+  entry in the same change, which is what the XPASS failure will tell you to
+  do. Same scenarios still run as a tool for reading spoken output:
+  `uv run python tools/playtest_break.py --scenario NAME --transcript`.
 - Lint: `uv run ruff check src tests tools`
 - Byte-compile check: `uv run python -m compileall src tests tools`
 - Headless runs: set `FREIGHT_FATE_NO_SPEECH=1` (CI also uses
