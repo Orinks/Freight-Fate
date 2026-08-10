@@ -2208,19 +2208,33 @@ class DrivingUpdateMixin:
         self.ctx.say_event(message, interrupt=True)
 
     def _update_speeding(self, dt: float, *, accelerator_held: bool = False) -> None:
+        """The dash alert, and the braking grace a dropped limit earns.
+
+        This used to be where speeding was charged: hold nine over for six
+        real seconds with no patrol anywhere on the route and the drive banked
+        a silent "speeding strike", billed at the dock as a
+        driver-responsibility charge. That was a fine from an officer who was
+        never there, and it is gone. Speeding costs exactly what a trooper who
+        saw it decides it costs, and nothing otherwise.
+
+        What survives is the part that was always about fairness rather than
+        money: a limit that drops under a loaded truck earns real braking
+        seconds before anything counts, because enforcement tickets sustained
+        disregard, not the transition. That grace now gates the enforcement
+        watch's over-limit distance, which is the measure an officer actually
+        reads.
+        """
         if self._ramp_mi is not None:
             return  # the ramp is off the highway and unpatrolled
         if self._missed_destination_exit_said and not self._destination_exit_taken:
             return  # recovery state: guide the player back to the missed exit
         if self._pull_over is not None:
-            return  # already being pulled over; don't pile on strikes
+            return  # already stopped; the dash has nothing to add
         limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
         self._update_overspeed_warning(dt, limit)
-        # A dropped limit earns braking time before strikes accrue: real
-        # enforcement tickets sustained disregard, not the transition, and a
-        # loaded truck cannot shed 15 mph the instant a sign changes. About
-        # 2 mph per second of comfortable braking sets the window, capped so
-        # the grace cannot be used to coast through a whole restricted zone.
+        # About 2 mph per second of comfortable braking sets the window,
+        # capped so the grace cannot be used to coast through a whole
+        # restricted zone.
         if self._enforced_limit_prev is not None and limit < self._enforced_limit_prev:
             grace = (self.truck.speed_mph - limit) / 2.0
             self._limit_drop_grace_s = max(self._limit_drop_grace_s, min(15.0, grace))
@@ -2228,57 +2242,11 @@ class DrivingUpdateMixin:
         if self._limit_drop_grace_s > 0.0:
             self._limit_drop_grace_s = max(0.0, self._limit_drop_grace_s - dt)
             # Staying on the throttle through the drop is disregard, not
-            # compliance: the grace collapses and the clock runs. Read the
-            # current key/trigger position, not the smoothed truck throttle,
-            # which is still ramping down just after the driver lifts off.
+            # compliance: the grace collapses. Read the current key/trigger
+            # position, not the smoothed truck throttle, which is still
+            # ramping down just after the driver lifts off.
             if accelerator_held:
                 self._limit_drop_grace_s = 0.0
-            else:
-                self._speeding_timer = 0.0
-                return
-        if self.truck.speed_mph > limit + SPEEDING_LEEWAY_MPH:
-            if (
-                self._cruise_mph is not None
-                and self._acc_limit_capped
-                and self.truck.brake > 0.0
-                and self.truck.throttle <= 0.05
-            ):
-                self._speeding_timer = 0.0
-                return
-            self._speeding_timer += dt
-            if self._speeding_timer > SPEEDING_HOLD_S:
-                self._speeding_timer = 0.0
-                # The silent at-delivery strike: the safety and insurance cost
-                # of speeding nobody saw. Whether anybody DID see it is not
-                # decided here any more -- an officer reads a speed over a
-                # stretch of road, not over six real seconds of wall clock, so
-                # observation lives in the enforcement watch, on a distance
-                # measure that behaves the same at every pacing. A stop already
-                # in progress returns above, so the two can never charge the
-                # same instance twice.
-                before = _speeding_settlement_fine(self.speeding_strikes)
-                self.speeding_strikes += 1
-                after = _speeding_settlement_fine(self.speeding_strikes)
-                self.ctx.audio.play("ui/warning")
-                self.ctx.controller.rumble.alert()
-                # Surface the cost the moment the strike lands instead of only as a
-                # silent deduction at delivery, so the price of speeding is felt now.
-                if after > before:
-                    self.ctx.say_event(
-                        "Speeding strike. The limit is "
-                        f"{self.ctx.settings.speed_text(limit)}. Speeding "
-                        f"fines now total {after:,.0f} dollars, due at delivery.",
-                        interrupt=True,
-                    )
-                else:
-                    self.ctx.say_event(
-                        "Speeding strike. The limit is "
-                        f"{self.ctx.settings.speed_text(limit)}. Your speeding "
-                        f"fines are already at the {after:,.0f}-dollar maximum.",
-                        interrupt=True,
-                    )
-        else:
-            self._speeding_timer = 0.0
 
     def _update_overspeed_warning(self, dt: float, limit: float) -> None:
         """The dash overspeed alert: speak once, then chime until compliant.

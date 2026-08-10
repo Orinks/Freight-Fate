@@ -14,49 +14,61 @@ from playtest_break import DT, Rig, _fabricated_curve, _outcome, scenario
 
 @scenario(
     "floor_it_through_town",
-    "Hold the floor through urban speed zones; strikes and spoken fine totals must agree.",
+    "Hold the floor through urban speed zones; every dollar it costs must come "
+    "from an officer who was audibly there.",
 )
 def _floor_it():
+    """Flooring it must produce a real pull-over or nothing at all.
+
+    This scenario used to check a "speeding strike" ledger: hold nine over for
+    six seconds anywhere on the route and the drive banked a charge, billed at
+    the dock. That was a fine from an officer who was never there, and it is
+    gone. What replaces it is the harder question -- when the road DOES charge
+    you, was there a trooper, and did the player hear them?
+    """
     rig = Rig()
     findings: list[str] = []
     try:
         d = rig.d
+        money_before = rig.ctx.profile.money
         rig.prepare(speed_mph=30.0)
         rig.held.add(rig.pygame.K_UP)
         rig.step(9000, until=lambda: d.trip.position_mi >= min(25.0, d.trip.total_miles - 8.0))
-        strike_lines = rig.lines_with("Speeding strike")
-        if d.speeding_strikes != len(strike_lines):
-            findings.append(
-                f"strike ledger mismatch: {d.speeding_strikes} strikes recorded, "
-                f"{len(strike_lines)} spoken"
-            )
-        from freight_fate.states.driving_core import _speeding_settlement_fine
 
-        totals = []
-        for line in strike_lines:
-            m = re.search(r"total ([\d,]+) dollars|the ([\d,]+)-dollar maximum", line)
-            if m:
-                totals.append(float((m.group(1) or m.group(2)).replace(",", "")))
-        for n, spoken_total in enumerate(totals, start=1):
-            expected = _speeding_settlement_fine(n)
-            if abs(spoken_total - expected) > 0.01:
-                findings.append(
-                    f"spoken fine total {spoken_total:,.0f} != ledger {expected:,.0f} "
-                    f"after strike {n}"
-                )
-        if d.speeding_strikes == 0:
-            findings.append("held the floor through town and never earned a single speeding strike")
-        money_delta = rig.ctx.profile.money - 5000.0
-        if money_delta != 0.0:
+        # Nothing may bank a charge behind the player's back any more.
+        for ghost in ("Speeding strike", "due at delivery", "dollar maximum"):
+            if rig.lines_with(ghost):
+                findings.append(f"the removed silent speeding charge still speaks: {ghost!r}")
+        money_delta = rig.ctx.profile.money - money_before
+        if money_delta < 0.0 and d.speeding_tickets == 0:
             findings.append(
-                f"money moved {money_delta:+,.0f} mid-trip; strikes are supposed to be "
-                "settled at delivery"
+                f"money fell {-money_delta:,.0f} with no traffic stop on the record: "
+                "speeding nobody saw is supposed to cost nothing"
             )
+        # A ticket is real money, so it has to have had a real officer behind
+        # it -- and the player has to have heard them coming.
+        if d.speeding_tickets:
+            if not rig.lines_with("Lights and siren behind you"):
+                findings.append(
+                    f"{d.speeding_tickets} ticket(s) written with no lights-and-siren "
+                    "call: the player was charged by an officer they never heard"
+                )
+            if abs(money_delta + d.ticket_fines_paid) > 0.01:
+                findings.append(
+                    f"ticket ledger mismatch: money moved {money_delta:+,.0f} but "
+                    f"tickets total {d.ticket_fines_paid:,.0f}"
+                )
+        every_post_heard = all(
+            post.announced for post in d.trip.posts if post.declined or not post.staffed
+        )
+        if not every_post_heard:
+            findings.append("a post acted on the driver before it had made a sound")
         return _outcome(
             "floor_it_through_town",
             rig,
             findings,
-            f"{d.speeding_strikes} strikes, spoken totals match the ledger",
+            f"{d.speeding_tickets} traffic stop(s), {d.ticket_fines_paid:,.0f} dollars, "
+            "every one of them audible first",
         )
     finally:
         rig.close()

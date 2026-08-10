@@ -106,8 +106,8 @@ glare ice, the truck actually holds.
 The overspeed warning is your dash, not the police. A few over the limit
 chimes softly and says the limit; the chime repeats, faster the further
 over. It quiets while you are braking down and resets when you settle under.
-Speeding strikes are separate and silent -- the warning exists so a strike
-never surprises you.
+It is a courtesy and it costs nothing: speeding is charged by the trooper who
+saw it, on the shoulder, or it is not charged at all.
 
 ## The In-Cab Radio: new section
 

@@ -771,6 +771,38 @@ def test_a_reckless_driver_meets_the_same_road_and_a_very_different_bill():
 
 
 @pytest.mark.timeout(300)
+def test_speeding_scales_from_free_to_expensive_with_no_flat_spot():
+    """Being seen is now the ONLY thing speeding costs.
+
+    With the silent at-delivery charge deleted, this model is the whole of
+    what stands between a speeder and impunity, so the curve between the two
+    has to be a curve. A driver inside the leeway pays nothing at all; one
+    drifting over occasionally carries real risk without certainty; one
+    holding twenty over habitually is stopped several times a run.
+    """
+    route_pairs = (("Chicago", "Denver"), ("Los Angeles", "Phoenix"))
+    for a, b in route_pairs:
+
+        def rate(**kw):
+            totals = []
+            for seed in range(6):
+                trip = _trip(a, b, seed=seed)  # noqa: B023
+                totals.append(_walk(trip, seed=seed, **kw) / trip.route.miles * 500.0)
+            return sum(totals) / len(totals)
+
+        legal = rate(over=5.0, damage=0.0)
+        occasional = rate(over=13.0, damage=0.0, duty=0.2, recover_mi=25.0)
+        habitual = rate(over=22.0, damage=0.0, duty=0.5, recover_mi=25.0)
+        assert legal == 0.0, f"{a}->{b}: driving legally cost {legal:.2f} stops"
+        assert 0.15 <= occasional <= 1.5, (
+            f"{a}->{b}: an occasional speeder saw {occasional:.2f} stops per 500 miles "
+            "-- that is either immunity or certainty, and it should be neither"
+        )
+        assert habitual >= 2.0, f"{a}->{b}: a habitual speeder saw only {habitual:.2f}"
+        assert habitual > occasional * 3.0
+
+
+@pytest.mark.timeout(300)
 def test_riding_in_a_pack_is_a_real_tactic_over_a_whole_run():
     """The unit test proves the factor; this proves it survives a run."""
     alone = []

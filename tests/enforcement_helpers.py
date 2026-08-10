@@ -38,23 +38,16 @@ def always_observing_post(
 def watch_speed(driving, *, over: float = 20.0, dt: float = 0.1) -> float:
     """Put the truck ``over`` the limit under a watching post, and let it look.
 
-    Runs the two halves in the same order the drive loop does: the watch
-    first, so an officer who acts suppresses the silent at-delivery strike,
-    then the strike bookkeeping for the speeding nobody saw.
-
     Returns the posted limit. Seeds the over-limit distance past the
     observation hold directly: the hold is a stretch of road, and driving that
     stretch out frame by frame is not what any of these tests is about.
     """
-    from freight_fate.states.driving import SPEEDING_HOLD_S
-
     driving.trip.position_mi = driving.trip.total_miles / 2.0
     driving._enforcement_prev_mi = driving.trip.position_mi
     limit, _ = driving.trip.speed_limit_at(driving.trip.position_mi)
     driving.truck.velocity_mps = (limit + over) / 2.23694
     driving._over_limit_mi = OBSERVE_HOLD_MI * 2.0
     driving._update_enforcement_watch(dt)
-    driving._update_speeding(SPEEDING_HOLD_S + 1.0)
     return limit
 
 

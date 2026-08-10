@@ -310,7 +310,7 @@ def test_delivery_settlement_awards_core_achievements(monkeypatch):
         route = app.ctx.world.supported_route_options(job.origin, job.destination)[0]
         driving = DrivingState(app.ctx, job, route)
         driving.trip.game_minutes = job.deadline_game_h * 30.0
-        driving.speeding_strikes = 0
+        driving.speeding_tickets = 0
         monkeypatch.setattr(app.ctx, "say", lambda *_args, **_kwargs: None)
 
         arrival = ArrivalState(app.ctx, driving)
@@ -363,7 +363,7 @@ def test_eastbound_badge_fires_only_on_an_eastbound_delivery(monkeypatch):
         route = world.supported_route_options(job.origin, job.destination)[0]
         driving = DrivingState(app.ctx, job, route)
         driving.trip.game_minutes = job.deadline_game_h * 30.0
-        driving.speeding_strikes = 0
+        driving.speeding_tickets = 0
         monkeypatch.setattr(app.ctx, "say", lambda *_a, **_k: None)
 
         ArrivalState(app.ctx, driving)

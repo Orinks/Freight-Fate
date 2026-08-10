@@ -529,6 +529,9 @@ def test_old_map_snapshot_still_resumes():
             "position_mi": 412.0,
             "game_minutes": 540.0,
             "start_damage": 3.0,
+            # Written before the silent at-delivery speeding charge was
+            # removed. An in-flight save must still resume; the key is
+            # ignored, not migrated, because the charge it stood for is gone.
             "speeding_strikes": 1,
         }
         app.ctx.profile = p

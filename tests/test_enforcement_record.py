@@ -393,22 +393,33 @@ def test_a_mild_speeding_ticket_is_money_only(monkeypatch):
         app.shutdown()
 
 
-def test_the_silent_settlement_strike_never_moves_the_ladder(monkeypatch):
-    """A suspension must never materialise at a delivery summary."""
+def test_speeding_nobody_saw_never_touches_the_licence(monkeypatch):
+    """The old silent settlement strike deliberately never moved the ladder.
+
+    The strike is gone, and the guarantee it needed is now structural rather
+    than deliberate: with nobody watching, speeding produces no citation to
+    put on the record in the first place. Nothing may reach the licence file
+    without a trooper having been there.
+    """
     from freight_fate.app import App
-    from freight_fate.states.driving import SPEEDING_HOLD_S, SPEEDING_LEEWAY_MPH
+    from freight_fate.states.driving import SPEEDING_LEEWAY_MPH
 
     app = App()
     try:
         d = _driving(app)
         p = app.ctx.profile
         _quiet(app, monkeypatch)
+        d.trip.posts = []  # empty road
         d.trip.position_mi = d.trip.total_miles / 2.0
+        d._enforcement_prev_mi = d.trip.position_mi
         limit, _ = d.trip.speed_limit_at(d.trip.position_mi)
-        for _ in range(4):
-            d.truck.velocity_mps = (limit + SPEEDING_LEEWAY_MPH + 30) / 2.23694
-            d._update_speeding(SPEEDING_HOLD_S + 1.0)
-        assert d.speeding_strikes >= 1
+        d.truck.velocity_mps = (limit + SPEEDING_LEEWAY_MPH + 30) / 2.23694
+        for _ in range(40):
+            d.trip.position_mi += 0.05
+            d._update_enforcement_watch(0.2)
+            d._update_speeding(0.2)
+        assert d.speeding_tickets == 0
+        assert p.driving_record.citations == 0
         assert p.driving_record.serious_in_window(p.game_hours) == 0
         assert not p.driving_record.suspended(p.game_hours)
     finally:

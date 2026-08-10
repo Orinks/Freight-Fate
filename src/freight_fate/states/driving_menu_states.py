@@ -738,7 +738,9 @@ class FacilityArrivalState(MenuState):
         tolls = d.trip.toll_expense
         accessorials = carrier_accessorial_charges(job, self.ctx.profile)
         carrier_charges = tolls + charge_total(accessorials)
-        driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        # Only what a previous settlement could not collect. Speeding itself
+        # is charged on the shoulder by the trooper who saw it, or not at all.
+        driver_charges = self.ctx.profile.fines_owed
         net_estimated_pay = max(0.0, estimated_pay - driver_charges)
         advance_due = round(min(self.ctx.profile.pay_advance, net_estimated_pay), 2)
         net_estimated_pay = round(net_estimated_pay - advance_due, 2)
@@ -767,7 +769,7 @@ class FacilityArrivalState(MenuState):
             f"{carrier_charges:,.0f} dollars, including tolls "
             f"{tolls:,.0f} and accessorials {charge_summary(accessorials)}. "
             "Those charges do not reduce driver pay. "
-            f"Driver-responsibility charges are estimated at "
+            f"Fines carried over from earlier loads are "
             f"{driver_charges:,.0f} dollars, for estimated net driver pay "
             f"{net_estimated_pay:,.0f}.{advance_note} "
             f"{timing}. {cargo_condition} {self._finish_instruction()} to settle."
@@ -825,12 +827,13 @@ class ArrivalState(MenuState):
         job = d.job
         self.title = "Repositioned"
         p.current_city = job.destination
-        driver_charges = _speeding_settlement_fine(d.speeding_strikes)
+        driver_charges = p.fines_owed
         if driver_charges:
             p.money -= driver_charges
+            p.fines_owed = 0.0
             self.summary_parts.append(
-                f"Driver-responsibility charges: speeding fines cost you "
-                f"{driver_charges:,.0f} dollars."
+                f"Fines carried over from earlier loads: "
+                f"{driver_charges:,.0f} dollars, now settled."
             )
         p.store_truck_condition(d.truck)
         p.game_hours += hours
@@ -873,7 +876,9 @@ class ArrivalState(MenuState):
         accessorials = carrier_accessorial_charges(job, p)
         carrier_charges = toll_expense + charge_total(accessorials)
         # Anything a previous load could not cover comes out of this one first.
-        driver_charges = _speeding_settlement_fine(d.speeding_strikes) + p.fines_owed
+        # That is the whole of it now: nothing is billed here for speeding a
+        # trooper did not see, because nothing about that is anybody's to bill.
+        driver_charges = p.fines_owed
         business = build_business_settlement(
             p.business_status,
             job,
@@ -919,15 +924,15 @@ class ArrivalState(MenuState):
         if driver_charges:
             if business.uncollected_charges > 0:
                 self.summary_parts.append(
-                    f"Driver-responsibility charges: speeding fines of "
+                    f"Fines carried over from earlier loads: "
                     f"{driver_charges:,.0f} dollars. This load only covered "
                     f"{collected:,.0f} of it, so {business.uncollected_charges:,.0f} "
                     "dollars stays owed and comes out of your next settlement."
                 )
             else:
                 self.summary_parts.append(
-                    f"Driver-responsibility charges: speeding fines cost you "
-                    f"{driver_charges:,.0f} dollars."
+                    f"Fines carried over from earlier loads: "
+                    f"{driver_charges:,.0f} dollars, now settled."
                 )
         # Tickets from being pulled over were already paid on the spot; report
         # them for transparency but don't deduct again at settlement.
@@ -1050,7 +1055,7 @@ class ArrivalState(MenuState):
                 "These are billed to carrier settlement and not deducted from driver pay. "
                 f"Business status: {business.status_label}. "
                 f"Business costs {business.business_charge_total:,.0f} dollars. "
-                f"Driver-responsibility charges {driver_charges:,.0f} dollars. "
+                f"Fines carried over {driver_charges:,.0f} dollars. "
                 f"Net driver pay {net_pay:,.0f} "
                 f"dollars, and you now have {p.money:,.0f}. "
                 f"After unloading, dispatch has you parked at "
@@ -1091,7 +1096,7 @@ class ArrivalState(MenuState):
             trip_damage=trip_damage,
             toll_expense=toll_expense,
             route_miles=d.route.miles,
-            speeding_strikes=d.speeding_strikes,
+            speeding_tickets=d.speeding_tickets,
             gross_pay=gross_pay,
         )
         self.summary_parts.extend(self._achievement_messages)
@@ -1138,7 +1143,7 @@ class ArrivalState(MenuState):
             "Carrier charges are not deducted from driver pay.",
             f"Business status: {business.status_label}.",
             *business_cost_lines,
-            f"Driver-responsibility charges: {driver_charges:,.0f} dollars.",
+            f"Fines carried over from earlier loads: {driver_charges:,.0f} dollars.",
             *advance_lines,
             f"Net driver pay: {net_pay:,.0f} dollars.",
             f"Money after settlement: {p.money:,.0f} dollars.",
@@ -1223,7 +1228,7 @@ class ArrivalState(MenuState):
         trip_damage: float,
         toll_expense: float,
         route_miles: float,
-        speeding_strikes: int,
+        speeding_tickets: int,
         gross_pay: float = 0.0,
     ) -> None:
         p = self.ctx.profile
@@ -1240,7 +1245,7 @@ class ArrivalState(MenuState):
             ids.append("first_on_time")
         if trip_damage <= 1.0:
             ids.append("clean_delivery")
-        if speeding_strikes == 0:
+        if speeding_tickets == 0:
             ids.append("speed_limit_saint")
         if toll_expense > 0:
             ids.append("toll_paid")
@@ -1345,7 +1350,7 @@ class ArrivalState(MenuState):
         # Five consecutive on-time, undamaged, ticket-free deliveries.
         stats = p.achievement_stats if isinstance(p.achievement_stats, dict) else {}
         p.achievement_stats = stats
-        perfect = on_time and trip_damage <= 1.0 and speeding_strikes == 0
+        perfect = on_time and trip_damage <= 1.0 and speeding_tickets == 0
         streak = int(stats.get("perfect_streak", 0)) + 1 if perfect else 0
         stats["perfect_streak"] = streak
         if streak >= 5:
@@ -1483,13 +1488,7 @@ class ArrivalState(MenuState):
             ids.append("dawn_run")
         if d.truck.fuel_fraction < 0.08:
             ids.append("fuel_fumes")
-        if (
-            route_miles >= 300.0
-            and on_time
-            and trip_damage <= 1.0
-            and speeding_strikes == 0
-            and d.speeding_tickets == 0
-        ):
+        if route_miles >= 300.0 and on_time and trip_damage <= 1.0 and speeding_tickets == 0:
             ids.append("spotless_long")
         if d.speeding_tickets >= 1:
             ids.append("first_ticket")

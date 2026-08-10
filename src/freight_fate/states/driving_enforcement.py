@@ -443,10 +443,10 @@ class EnforcementWatchMixin:
     def _update_enforcement_watch(self, dt: float) -> None:
         """One frame of the enforcement layer: cues, sampling, and the draw.
 
-        **The pacing mismatch, and how it is solved.** ``SPEEDING_HOLD_S`` is
-        six REAL seconds, but the old patrol window could last 7.6 real
-        seconds at standard pacing and 3.8 at the fastest -- so at the fastest
-        pacing a speeder could be structurally unable to accrue a strike
+        **The pacing mismatch, and how it is solved.** Speeding used to be
+        judged on a six REAL second hold, but the old patrol window could last
+        7.6 real seconds at standard pacing and 3.8 at the fastest -- so at
+        the fastest pacing a speeder could be structurally unable to be caught
         inside a patrol at all. Decompressing the clock inside every post's
         reach was the other option and was rejected: with a post every
         thirty-odd miles it would have put a dozen miles of a five-hundred
@@ -456,10 +456,8 @@ class EnforcementWatchMixin:
         way a radar does -- over a stretch of road (``OBSERVE_HOLD_MI``, about
         four hundred feet) -- and a stretch of road is the same stretch at
         every pacing, at every frame rate, and after a reload. The real-time
-        hold stays where it belongs, on the silent at-delivery strike, which
-        is a bookkeeping fact about the driver rather than a thing an officer
-        saw. The two no longer have to agree, because they are measuring
-        different things.
+        hold is gone entirely along with the silent at-delivery charge it
+        served; there is nothing left for it to disagree with.
         """
         self._service_pending_sounds(dt)
         self._service_radio_cue_duck(dt)
@@ -469,10 +467,26 @@ class EnforcementWatchMixin:
         self._enforcement_prev_mi = position
         moved = max(0.0, position - previous_mi)
         limit, _ = self.trip.speed_limit_at(position)
-        if self.truck.speed_mph > limit + OBSERVE_LEEWAY_MPH:
-            self._over_limit_mi += moved
-        else:
+        if self.truck.speed_mph <= limit + OBSERVE_LEEWAY_MPH:
             self._over_limit_mi = 0.0
+        elif self._limit_drop_grace_s > 0.0:
+            # A limit that just dropped under a loaded truck: the driver is
+            # braking and has not disregarded anything yet. Nothing accrues,
+            # so no post can read a speed out of the transition itself.
+            self._over_limit_mi = 0.0
+        elif (
+            self._speed_control_engaged() and self.truck.brake > 0.0 and self.truck.throttle <= 0.05
+        ):
+            # An automatic speed control is already braking the truck down.
+            # Nothing about that is disregard either -- and the rule has to
+            # cover every assist that brakes, not just the adaptive-cruise
+            # limit cap: the destination-exit ease used to accrue over-limit
+            # distance while the assist was doing exactly what it was asked
+            # to, which would have ticketed the most cautious drivers in the
+            # game for using the feature.
+            self._over_limit_mi = 0.0
+        else:
+            self._over_limit_mi += moved
         self._track_pacing(dt)
         self._update_scale_bed()
         if self._ramp_mi is None:
@@ -489,6 +503,10 @@ class EnforcementWatchMixin:
                 self._deferred_post_ids.add(post.id)
             return
         self._run_observations()
+
+    def _speed_control_engaged(self) -> bool:
+        """Whether cruise or the speed keeper currently owns the throttle."""
+        return self._cruise_mph is not None or bool(getattr(self, "_speed_control_armed", False))
 
     def _track_pacing(self, dt: float) -> None:
         """How long each roving unit has been sitting behind the truck."""

@@ -175,7 +175,7 @@ def test_speeding_past_a_staffed_post_starts_a_pull_over(monkeypatch):
         _quiet(app, monkeypatch)
         _speed_for(d)
         assert d._pull_over == "lights"
-        assert d.speeding_strikes == 0  # caught -> no silent strike
+        assert d.speeding_tickets == 0  # the ticket is written at the stop, not here
     finally:
         app.shutdown()
 
@@ -197,16 +197,25 @@ def test_metric_pull_over_announcement_uses_metric_units(monkeypatch):
         app.shutdown()
 
 
-def test_speeding_with_no_patrol_records_a_silent_strike(monkeypatch):
+def test_speeding_with_no_post_watching_costs_nothing(monkeypatch):
+    """Getting away with it is the intended outcome, not a gap.
+
+    This used to assert a silent strike was banked for the dock. There is no
+    such thing any more: an empty road charges nothing, which is both honest
+    and what happens on a real one.
+    """
     from freight_fate.app import App
 
     app = App()
     try:
         d = _driving(app, patrol_intensity=None)
         _quiet(app, monkeypatch)
+        money_before = app.ctx.profile.money
         _speed_for(d)
         assert d._pull_over is None
-        assert d.speeding_strikes == 1
+        assert d.speeding_tickets == 0
+        assert app.ctx.profile.money == money_before
+        assert app.ctx.profile.fines_owed == 0.0
     finally:
         app.shutdown()
 
@@ -219,9 +228,11 @@ def test_debug_off_mode_never_pulls_you_over(monkeypatch):
         d = _driving(app, patrol_intensity=1.0)
         app.ctx.settings.hos_mode = "debug_off"
         _quiet(app, monkeypatch)
+        money_before = app.ctx.profile.money
         _speed_for(d)
         assert d._pull_over is None
-        assert d.speeding_strikes == 1
+        assert d.speeding_tickets == 0
+        assert app.ctx.profile.money == money_before
     finally:
         app.shutdown()
 

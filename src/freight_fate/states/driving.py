@@ -182,8 +182,6 @@ class DrivingState(
         self._last_event_message = ""  # last spoken route announcement, for replay
         self._speed_announce_timer = 0.0
         self._last_announced_mph = 0.0
-        self._speeding_timer = 0.0
-        self.speeding_strikes = 0
         # Compliance grace after a posted-limit drop: braking time before
         # strikes accrue, earned only while actually slowing.
         self._enforced_limit_prev: float | None = None
@@ -577,7 +575,6 @@ class DrivingState(
                 "engine": self.start_engine_wear,
             },
             "rig_buffs": self.rig_buffs,
-            "speeding_strikes": self.speeding_strikes,
             "speed_control_armed": self._speed_control_armed,
             "speed_control_target_mph": self._speed_control_target_mph,
             "air_brake": self.truck.air_brake_snapshot(),
@@ -686,7 +683,13 @@ class DrivingState(
             state.rig_buffs = {
                 str(group): dict(info) for group, info in dict(data.get("rig_buffs", {})).items()
             }
-            state.speeding_strikes = int(data["speeding_strikes"])
+            # "speeding_strikes" was a required snapshot field until the
+            # silent at-delivery speeding charge was removed. Snapshots
+            # written before that still carry it; reading it with [] would
+            # KeyError every in-flight save from the other direction, so the
+            # key is simply no longer consulted. Ignored, not migrated: the
+            # charge it stood for no longer exists to migrate into.
+            data.pop("speeding_strikes", None)
             target = data.get("speed_control_target_mph")
             state._restore_speed_control_session(
                 armed=bool(data.get("speed_control_armed", False)),

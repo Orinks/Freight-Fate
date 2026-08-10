@@ -428,7 +428,7 @@ def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
     time_scale,
     modes,
 ):
-    from freight_fate.states.driving import SPEEDING_HOLD_S
+    from freight_fate.sim.enforcement_observe import OBSERVE_HOLD_MI
 
     with PlaytestHarness(monkeypatch) as harness:
         harness.app.ctx.settings.hos_mode = "realistic"
@@ -449,10 +449,13 @@ def test_realistic_speed_control_transitions_do_not_issue_speeding_fines(
         harness.settle_delivery_after_segment()
 
     assert result.speed_control_transitions == modes
-    assert result.speeding_strikes == 0, result.transcript_text
     assert result.speeding_tickets == 0, result.transcript_text
     assert result.inspection_fines == 0, result.transcript_text
-    assert result.max_speeding_timer_s < SPEEDING_HOLD_S
+    # Cruise never held the truck over the limit far enough for a post to
+    # read a speed out of it, and nothing was written.
+    assert result.max_over_limit_mi < OBSERVE_HOLD_MI
+    assert result.speeding_tickets == 0
+    assert "Lights and siren" not in result.transcript_text
     assert "Speeding strike" not in result.transcript_text
     assert "speeding fines" not in result.transcript_text.lower()
     assert "Trooper in the construction zone" not in result.transcript_text
@@ -517,7 +520,8 @@ def test_realistic_cruise_eases_for_destination_exit_without_speeding_fine(
     monkeypatch,
     restricted_zone_reason,
 ):
-    from freight_fate.states.driving import RAMP_MAX_MPH, SPEEDING_HOLD_S
+    from freight_fate.sim.enforcement_observe import OBSERVE_HOLD_MI
+    from freight_fate.states.driving import RAMP_MAX_MPH
 
     with PlaytestHarness(monkeypatch) as harness:
         harness.app.ctx.settings.hos_mode = "realistic"
@@ -532,9 +536,12 @@ def test_realistic_cruise_eases_for_destination_exit_without_speeding_fine(
 
     assert result.destination_exit_speed_mph is not None
     assert result.destination_exit_speed_mph <= RAMP_MAX_MPH
-    assert result.speeding_strikes == 0, result.transcript_text
     assert result.speeding_tickets == 0, result.transcript_text
-    assert result.max_speeding_timer_s < SPEEDING_HOLD_S
+    # Cruise never held the truck over the limit far enough for a post to
+    # read a speed out of it, and nothing was written.
+    assert result.max_over_limit_mi < OBSERVE_HOLD_MI
+    assert result.speeding_tickets == 0
+    assert "Lights and siren" not in result.transcript_text
     assert "destination exit" in result.transcript_text
     assert "Adaptive cruise easing to 40 miles per hour for the ramp" in result.transcript_text
     # The exit key is a turn signal now: "Signal on for ..." replaced the older
