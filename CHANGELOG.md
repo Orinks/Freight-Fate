@@ -102,6 +102,25 @@
 
 ### Added
 
+- **Tank freight, and a load that keeps moving after you stop.** Bulk
+  fuel and liquid food open late in your career, and they drive like
+  nothing else: a part-full tank runs forward when you brake and comes
+  back into you a beat later, so a half-full smooth-bore tanker needs a
+  third more room to stop than a dry van. You hear the wave running
+  before you feel it push, which is the whole skill -- brake early,
+  brake once, and let it settle. Baffles calm it front to back but do
+  nothing side to side, and a bend is where a tanker gets you. The
+  walk-around tells you how full the tank is and what kind it is.
+
+- **Police are on the road now, whoever you are.** Enforcement sits at
+  real places -- medians, work zones, the apron of a closed scale, town
+  limits -- and whether you are seen depends on distance, sight lines
+  over crests and round bends, weather, and whether you are running in a
+  pack. A clean driver hears police often and pays nothing; a habitual
+  speeder gets stopped three or four times in five hundred miles. And
+  speeding you were never seen doing no longer bills you at the dock: an
+  invisible charge from an officer who was never there is gone.
+
 - **A wrecked truck now drives like one, and eventually not at all.**
   Damage used to cost you a little acceleration and nothing else, so a
   truck at ninety-nine percent still ran down the highway. Now the
