@@ -358,6 +358,9 @@ class DrivingUpdateMixin:
         self._check_gate_approach_warning(dt)
         self._update_turn_commitment(dt)
         self._update_exit(self.trip.last_moved_mi, dt)
+        # Reads the same last_moved_mi the exit watch just used, so the
+        # distance it counts back is the distance the trip actually lost.
+        self._update_wrong_way(dt)
 
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)

@@ -20,6 +20,7 @@ from .driving_pickup import DrivingPickupMixin
 from .driving_speed_control import SpeedControlStateMixin
 from .driving_turns import TurnCommitmentMixin
 from .driving_updates import OVERREV_GRACE_S, DrivingUpdateMixin
+from .driving_wrong_way import WrongWayMixin
 
 # Bumped when the meaning of a snapshot's deadline changes. A snapshot written
 # under an older model gets the one-time fair-deadline floor on resume; one at
@@ -31,6 +32,7 @@ class DrivingState(
     DrivingControlsMixin,
     DrivingUpdateMixin,
     DamageBandMixin,
+    WrongWayMixin,
     EnforcementWatchMixin,
     EngineBrakeZoneMixin,
     FacilityGateMixin,
@@ -435,6 +437,12 @@ class DrivingState(
         self._gate_speed_warned = False
         self._gate_grace_s = 0.0
         self._gate_miss_count = 0
+        # Backing down a live road (driving_wrong_way.py): route miles given
+        # up since reverse was engaged somewhere it has no business being, and
+        # the distance the last warning was spoken at. Per-stint, not saved --
+        # a reloaded trip is not still reversing.
+        self._wrong_way_mi = 0.0
+        self._wrong_way_said_at = 0.0
         # Street corners (driving_turns.py): how many corners this run has
         # cost, which escalates the spoken help. The per-corner latches are
         # rebuilt whenever the trip's route changes.

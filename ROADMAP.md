@@ -93,6 +93,33 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Break-harness findings now assert what they claim, and the one
+      real one is fixed -- SHIPPED 2026-08-10.** Triaging the harness's
+      2026-08-09 findings against transcripts, four of nine were
+      artifacts rather than game bugs, and acting on them would have
+      meant "fixing" working code: `slam_reverse_at_speed` called
+      `Transmission.request_gear` beneath the road-speed guard the gear
+      keys actually reach; `hazard_ignored_to_100_damage` compared a
+      mid-run spoken line against post-rescue damage;
+      `neutral_coast_mountain` hardcoded "no mechanical failure" while
+      its own transcript walked the truck to out of service; and
+      `hos_marathon_and_rest_cheese` appended a finding in the `else` of
+      a check whose `if` asserts the opposite, so it could never come
+      back clean. All four now check the consequence instead of
+      asserting its absence. 26 clean, 5 odd, down from 9.
+      `reverse_down_the_route` was the real one: a mile backed down an
+      interstate with no wrong-way feedback of any kind, an
+      accessibility gap before a realism one, since the only spoken line
+      was a merge instruction for the exit being reversed away from. New
+      `states/driving_wrong_way.py` ladders remind -> illegal -> traffic
+      on distance backed, exempting the yard, stops and the receiver's
+      gate zone.
+- [ ] Break-harness findings still open, all verified: the facility-gate
+      loop-back charges 20 game minutes but no HOS driving time and no
+      fuel; a live hazard warning does not survive save/reload (the
+      traffic-stop branch DOES survive, so only the hazard is at risk);
+      a multi-level settlement announces one level-up line; short-hop
+      streak XP runs 4.9x a long haul's efficiency.
 - [x] **A full lot no longer closes the fuel island -- SHIPPED
       2026-08-10.** Owner-reported from a live run. `_open_poi_stop`
       diverted to `ParkingFullState` whenever a stop carried `sleep` and

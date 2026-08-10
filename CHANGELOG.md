@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Added
+
+- **The game now tells you when you are backing the wrong way.** You
+  could put the truck in reverse on the open highway and back up for as
+  long as you liked, giving the route back mile after mile, and the only
+  thing you would hear was the navigation still calling out the exit you
+  were reversing away from. Now the truck speaks up: first that you are
+  still in reverse and moving away from your destination, then that
+  backing on a travelled lane is illegal and how much of the route you
+  have given up, and if you keep going, traffic finds you. Backing where
+  it is your job -- in the yard, at a stop, lining up on the receiver's
+  dock -- stays silent, as it should.
+
 ### Fixed
 
 - **A full truck stop no longer means you cannot fuel there.** When the
