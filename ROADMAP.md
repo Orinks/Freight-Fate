@@ -257,6 +257,38 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       working capital, and every operating cost. Freight access was
       never the reason for the high level -- all three endorsements
       unlock by level 4.
+- [ ] **Jail for a pursuit, not a three-hour "processing" fee.** Owner
+      question 2026-08-10, roadmapped rather than built. Speeding is a
+      citation even at the extreme end, so no change there -- but fleeing
+      police is a genuine arrestable felony, and the game currently
+      charges 5,000 dollars, 12 percent damage and 180 minutes of
+      "processing" before releasing the driver to the terminal. Three
+      hours is booking, not custody. The realistic version holds the
+      driver for days of game time, which the "wait out the CDL
+      suspension" flow at states/city.py already knows how to advance --
+      except automatic rather than chosen. It would also make the
+      one-year major-offense disqualification land properly, since the
+      driver would come out of custody into a licence they cannot use.
+      Must not become a dead end: the notice has to state the release
+      date and what still works, per the save_notice cadence.
+- [ ] **Give the horn gameplay.** Owner idea 2026-08-10, roadmapped.
+      Today it is a sound with no consequence. Real horn use is
+      functional and situational: warning a vehicle drifting into your
+      lane, alerting someone reversing across your path, the blast at a
+      blind corner or an uncontrolled crossing, and the pull-the-cord
+      wave to a kid. Mechanically it should be able to PREVENT an
+      incident -- a drifting car warned off in time is a collision that
+      does not happen, which turns a hazard from a reaction test into a
+      decision. It should also cost something when misused: leaning on
+      it inside a town is the same municipal noise ordinance the engine
+      brake already answers to. The hazard and traffic systems it needs
+      both already exist, so this is cheap for how much it adds, and it
+      fits the "carrying risk" spine for the back half of the arc.
+- [ ] **A live hazard does not survive save and reload.** Found by
+      `tools/playtest_break.py --scenario save_scum_enforcement`: the
+      traffic stop now round-trips (fixed with the enforcement work), but
+      `_hazard_deadline` is still absent from the snapshot, so quitting
+      mid-hazard makes the debris vanish without ever braking for it.
 - [ ] **Wear ceilings need their own wall.** The damage bands shipped
       2026-08-09 with a 90 percent out-of-service cutoff, but brake,
       engine, and tire wear at 100 percent still only fade physics --

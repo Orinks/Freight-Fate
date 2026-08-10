@@ -99,7 +99,6 @@ def _save_scum():
 
         d.trip.position_mi = 12.0
         rig.prepare(speed_mph=70.0)
-        d.speeding_strikes = 3
         d.jake_zone_fines = 2
         d.jake_fines_paid = 450.0
         d.ticket_fines_paid = 150.0
@@ -123,8 +122,8 @@ def _save_scum():
                 "a live hazard warning does not survive save/reload: reload mid-hazard and "
                 "the debris is gone without braking"
             )
-        if resumed.speeding_strikes != 3:
-            findings.append("speeding strikes lost in the snapshot round-trip")
+        if resumed.speeding_tickets != d.speeding_tickets:
+            findings.append("the on-the-spot ticket count was lost in the snapshot round-trip")
         if resumed.jake_zone_fines != 2 or resumed.jake_fines_paid != 450.0:
             findings.append("jake citations lost in the snapshot round-trip")
         if resumed.ticket_fines_paid != 150.0:

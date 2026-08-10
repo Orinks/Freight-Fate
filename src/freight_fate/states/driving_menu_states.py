@@ -1267,6 +1267,25 @@ class ArrivalState(MenuState):
             advance_lines.append(f"Pay advance repaid: {advance_repaid:,.0f} dollars.")
         if p.pay_advance >= 1.0:
             advance_lines.append(f"Pay advance still outstanding: {p.pay_advance:,.0f} dollars.")
+        # This load's own driver-responsibility charges (a damage deductible,
+        # a freight claim) are a different thing from a balance carried in
+        # from an earlier load, and each has to be able to read zero without
+        # the other's number standing in for it. The reviewable list used to
+        # print the first under the second's label, so a settlement that
+        # quietly took money off a balance announced "Fines carried over from
+        # earlier loads: 0 dollars".
+        charge_lines = []
+        if driver_charges >= 1.0:
+            charge_lines.append(
+                f"Driver-responsibility charges this load: {driver_charges:,.0f} dollars."
+            )
+        if collected >= 1.0:
+            charge_lines.append(
+                f"Balance owed: {collected:,.0f} dollars of this settlement paid it down, "
+                f"leaving {p.fines_owed:,.0f} dollars owed."
+            )
+        if not charge_lines:
+            charge_lines.append("No driver-responsibility charges and no balance owed.")
         business_cost_lines = []
         if business.business_charges:
             business_cost_lines = [
@@ -1286,7 +1305,7 @@ class ArrivalState(MenuState):
             "Carrier charges are not deducted from driver pay.",
             f"Business status: {business.status_label}.",
             *business_cost_lines,
-            f"Fines carried over from earlier loads: {driver_charges:,.0f} dollars.",
+            *charge_lines,
             *advance_lines,
             f"Net driver pay: {net_pay:,.0f} dollars.",
             f"Money after settlement: {p.money:,.0f} dollars.",

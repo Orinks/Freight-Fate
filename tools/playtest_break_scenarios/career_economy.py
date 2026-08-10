@@ -17,7 +17,8 @@ from playtest_break import MPH_PER_MPS, Outcome, Rig, _fresh_data_dir, _outcome,
 
 @scenario(
     "settlement_spoken_balance",
-    "Full menu-flow delivery with 3 speeding strikes; every spoken dollar must match the ledger.",
+    "Delivery carrying a balance owed larger than the load pays; the spoken "
+    "ledger must match the money, and the run must still pay the driver.",
 )
 def _settlement_truth():
     _fresh_data_dir()
@@ -26,11 +27,13 @@ def _settlement_truth():
     findings: list[str] = []
     with PlaytestHarness(_Shim()) as h:
         h.start_delivery()
-        d = h.driving
-        # Five strikes: a 400-dollar ledger against a ~200-dollar starter wage,
-        # to see which of the two numbers the settlement actually bills.
-        d.speeding_strikes = 5
         p = h.app.ctx.profile
+        # A balance far bigger than a starter load's wage. This used to be
+        # billed whole against the next settlement, which floored net pay at
+        # zero forever and silently forgave the rest while the spoken ledger
+        # claimed it had been paid. It is now recovered at a capped share.
+        p.fines_owed = 2_000.0
+        owed_before = p.fines_owed
         money_before = p.money
         h.settle_current_delivery()
         h.read_settlement_lines()
@@ -46,22 +49,32 @@ def _settlement_truth():
                 f"settlement line said {m.group(1)} dollars after settlement, balance is "
                 f"{p.money:,.0f}"
             )
-        from freight_fate.states.driving_core import _speeding_settlement_fine
+        from freight_fate.models.solvency import COLLECTION_SHARE
 
-        fine = _speeding_settlement_fine(5)
-        if f"{fine:,.0f}" not in text:
-            findings.append(
-                f"5 speeding strikes should cost {fine:,.0f} at settlement but no spoken "
-                "line carries that amount"
-            )
+        collected = round(owed_before - p.fines_owed, 2)
         delta = p.money - money_before
-        if fine > 0 and delta >= 0.0 and "Net driver pay: 0 dollars" in text:
+        if collected <= 0.0:
             findings.append(
-                f"each strike warned '{fine:,.0f} dollars, due at delivery', and the "
-                f"settlement reads 'Driver-responsibility charges: {fine:,.0f} dollars' -- "
-                "but net pay is floored at zero, the balance never moved, and everything "
-                "beyond the load's small wage was silently forgiven. Fines above the wage "
-                "of a cheap load cost nothing, and the spoken ledger claims they were paid"
+                f"a balance of {owed_before:,.0f} dollars was carried into this "
+                "settlement and none of it was collected: working never pays it down"
+            )
+        if delta <= 0.0:
+            findings.append(
+                f"the run paid the driver {delta:,.0f}: a balance owed took the whole "
+                "settlement, which is the zero-pay trap -- a driver with a truck, a "
+                "board, and no reachable state where working helps"
+            )
+        if collected > 0.0 and "Balance owed" not in text:
+            findings.append(
+                f"{collected:,.0f} dollars came off the balance but no spoken line "
+                "says so: money moved silently"
+            )
+        # The floor is the promise: never more than the capped share.
+        gross = delta + collected
+        if gross > 0 and collected > round(gross * COLLECTION_SHARE, 2) + 1.0:
+            findings.append(
+                f"collection took {collected:,.0f} of {gross:,.0f}, past the "
+                f"{COLLECTION_SHARE:.0%} cap the game promises out loud"
             )
         if p.career.deliveries != 1:
             findings.append(f"career shows {p.career.deliveries} deliveries after one run")

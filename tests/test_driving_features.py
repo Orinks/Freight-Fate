@@ -1652,6 +1652,45 @@ def test_armed_exit_counts_down(monkeypatch):
 
         # Each anchor speaks once, in order. The lane advice that follows is
         # covered by tests/test_exit_recovery.py; here only the sequence matters.
+        # A driver doing their own lane work already gets the two-mile
+        # exit-lane prep prompt, so the countdown starts at one mile for them
+        # and keeps all three anchors for a driver whose truck holds the lane.
+        calls = [t.split(".")[0] for t in events if t.startswith("Destination exit in")]
+        assert calls == [
+            "Destination exit in 1 mile",
+            "Destination exit in half a mile",
+        ]
+    finally:
+        app.shutdown()
+
+
+def test_armed_exit_counts_down_from_two_miles_when_the_truck_holds_the_lane(monkeypatch):
+    from types import SimpleNamespace
+
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+    try:
+        app.ctx.settings.lane_keeping = "full"
+        driving = start_drive(app)
+        quiet_trip(driving)
+        stop = SimpleNamespace(
+            at_mi=driving.trip.position_mi + 3.0,
+            type="delivery_destination",
+            spoken_name="Test Plaza",
+            name="Test Receiver",
+            exit_label="",
+            exit_phrase="",
+        )
+        driving._exit_stop = stop
+        driving._exit_countdown_said = set()
+
+        for ahead in (2.5, 1.9, 1.9, 0.9, 0.4, 0.3):
+            driving.trip.position_mi = stop.at_mi - ahead
+            driving._update_exit(0.0)
+
         calls = [t.split(".")[0] for t in events if t.startswith("Destination exit in")]
         assert calls == [
             "Destination exit in 2 miles",
