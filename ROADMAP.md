@@ -93,6 +93,31 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Adversarial "break the game" harness -- SHIPPED 2026-08-09.**
+      `tools/playtest_break.py` (plus `tools/playtest_break_scenarios/`,
+      split by system family to stay under the practical-file-size
+      guideline) drives DrivingState and the menu-flow harness through 31
+      deliberately unreasonable scenarios across every system -- physics
+      (floor it through town, reverse down the interstate, coast a
+      mountain in neutral, dynamite the parking brake at 60), assists
+      fighting each other (cruise/curve/descent stacked, the jake-zone
+      toggle dodge, the new facility-gate overshoot with the approach
+      assist on and off), resources (fuel-rescue farming, a 22-hour HOS
+      marathon, micro-rest cheese, a motel room one minute from a
+      deadline), career/economy (settlement honesty, the advance-abandon
+      cycle, endorsement wallet edges, the level-up boundary, the
+      owner-operator buy-in gate at exactly level 18, short-hop streak
+      XP farming), dispatch board-reroll farming, save-scum during a
+      traffic stop or a live hazard, chain-law and glare-ice physics, and
+      radio-dial abuse. Each scenario checks its own invariants (money
+      finite, position monotonic, spoken numbers matching real state) so
+      a rerun after any change flags regressions without a transcript
+      read. `--list` / `--scenario NAME` / `--transcript`; the whole
+      battery runs in well under a minute, single process, no window.
+      First run: 17 clean, 14 odd findings (see PR/session notes for the
+      ranked list) -- none fixed here by design, this lands the harness
+      and the findings for the enforcement-overhaul and damage-band work
+      already in flight to triage against.
 - [x] **Bake the remaining curated billboard sheets -- SHIPPED
       2026-08-09.** All 23 sheets baked with zero copy changes; blockers
       finished the same day at the owner's direction: the sixteen
