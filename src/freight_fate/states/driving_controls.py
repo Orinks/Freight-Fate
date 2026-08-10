@@ -112,11 +112,20 @@ class DrivingControlsMixin:
         elif key == pygame.K_l:
             self.ctx.say(self.lane.describe())
         elif key == pygame.K_s:
-            self._speak_speed_limit()
+            if getattr(event, "mod", 0) & pygame.KMOD_ALT:
+                self._speak_hos_break()
+            else:
+                self._speak_speed_limit()
         elif key == pygame.K_d:
-            self._speak_safe_speed()
+            if getattr(event, "mod", 0) & pygame.KMOD_ALT:
+                self._speak_hos_drive_left()
+            else:
+                self._speak_safe_speed()
         elif key == pygame.K_a:
-            self._speak_last_announcement()
+            if getattr(event, "mod", 0) & pygame.KMOD_ALT:
+                self._speak_hos_wheel_time()
+            else:
+                self._speak_last_announcement()
         elif key == pygame.K_g:
             self._speak_grade()
         elif key == pygame.K_i:
@@ -281,7 +290,11 @@ class DrivingControlsMixin:
             "Space speed, active speed-control mode, and target. "
             "S posted speed limit. G the grade under the wheels, whether the "
             "truck is holding it, and the next grade ahead. Tab status menu. F fuel. "
-            "C clock, deadline, and hours of service. "
+            "C clock, deadline, and the hours limit that comes first. "
+            "Three keys answer one hours question each, without the rest of "
+            "that report: Alt A time at the wheel so far, Alt S when your "
+            "30 minute break is due, and Alt D what ends this shift, with "
+            "where you can legally stop before it. "
             "R progress, distance left, and where you are. "
             "Shift R next listed highway exit. "
             "V weather. L lane position. A repeats the last driving announcement. "
@@ -360,7 +373,9 @@ class DrivingControlsMixin:
             "D-pad down signals for the next announced exit, or signals a "
             "pull-over when a trooper lights you up. "
             "D-pad up reads your route and current location, D-pad left the "
-            "weather, D-pad right the clock. The B button speaks your speed. "
+            "weather, D-pad right the clock with your full hours of service; "
+            "the keyboard's Alt A, Alt S, and Alt D split those hours into one "
+            "answer each. The B button speaks your speed. "
             "Click the left stick to honk, "
             "the right stick to toggle the engine brake. "
             "Hold the right bumper for the second layer: plus A starts or stops "
@@ -489,7 +504,9 @@ class DrivingControlsMixin:
         elif button == pygame.CONTROLLER_BUTTON_DPAD_LEFT:
             self._speak_weather()
         elif button == pygame.CONTROLLER_BUTTON_DPAD_RIGHT:
-            self._speak_clock()
+            # A pad has no room for the three keyboard hours keys, so this one
+            # keeps the whole hours-of-service report it always spoke.
+            self._speak_clock(full_hours=True)
         elif button == pygame.CONTROLLER_BUTTON_BACK:
             self._speak_controller_help()
 
@@ -1124,14 +1141,22 @@ class DrivingControlsMixin:
         base = f"{clock_text(self.trip.local_hour)} {self.trip.current_timezone.name}"
         return f"{base}, {cal}." if cal else f"{base}."
 
-    def _speak_clock(self) -> None:
-        """C: local time, then the deadline verdict, then hours of service.
+    def _speak_clock(self, full_hours: bool = False) -> None:
+        """C: local time, then the deadline verdict, then the nearest hours limit.
 
         Ordered for braille as much as speech: a display shows one short line
         at a time, so the clock and the on-schedule verdict must land in the
         first 40 cells, with detail behind them. Terse speech drops the
-        calendar, the appointment restatement, and the stop-planning context
-        (Tab still carries all three)."""
+        calendar and the appointment restatement (Tab still carries both).
+
+        The hours detail moved onto Alt A, Alt S, and Alt D, but C keeps one
+        clause for whichever limit comes first: a driver can be on schedule
+        and out of hours at the same time, and hearing only the schedule
+        would be the wrong half of the answer.
+
+        ``full_hours`` keeps the whole hours-of-service report in one press
+        for the controller's D-pad right, which has nowhere to put three more
+        info buttons. A pad player must not lose hours of service."""
         hours_used = self.trip.game_minutes / 60.0
         terse = self._terse_speech()
         now = (
@@ -1139,16 +1164,20 @@ class DrivingControlsMixin:
             if terse
             else self._clock_phrase()
         )
-        hos_part = self.hos.summary(self.ctx.settings.hos_mode)
-        if not terse:
-            hos_route = self._hos_route_context()
-            if hos_route:
-                hos_part = f"{hos_part} {hos_route}"
+        if full_hours:
+            clause = self.hos.summary(self.ctx.settings.hos_mode)
+            route = "" if terse else self._hos_route_context()
+            clause = f"{clause} {route}" if route else clause
+            tail = f" {clause}"
+        else:
+            clause = self._hos_nearest_clause()
+            tail = f" {clause}" if clause else ""
+            tail += self._hos_key_notice()
         if self.phase == DRIVE_PHASE_PICKUP:
             self.ctx.say(
                 f"{now} Pickup at {self._pickup_facility_text()}: "
                 f"{self.ctx.settings.distance_text(self.trip.remaining_miles)} to go, "
-                f"{hours_used:.1f} hours used. {hos_part}"
+                f"{hours_used:.1f} hours used.{tail}"
             )
             return
         remaining = self.job.deadline_game_h - hours_used
@@ -1156,14 +1185,13 @@ class DrivingControlsMixin:
         if remaining <= 0:
             self.ctx.say(
                 f"{now} {-remaining:.1f} hours past the deadline. "
-                f"The pay is shrinking, but finish the delivery. {hos_part}"
+                f"The pay is shrinking, but finish the delivery.{tail}"
             )
             return
         verdict = "On schedule" if eta < remaining else "Running behind"
         if terse:
             self.ctx.say(
-                f"{now} {verdict}: arrival in {eta:.1f} hours, "
-                f"deadline in {remaining:.1f}. {hos_part}"
+                f"{now} {verdict}: arrival in {eta:.1f} hours, deadline in {remaining:.1f}.{tail}"
             )
             return
         basis = (
@@ -1175,8 +1203,64 @@ class DrivingControlsMixin:
         self.ctx.say(
             f"{now} {verdict}: arrival in {eta:.1f} hours {basis}, "
             f"deadline in {remaining:.1f}, due {_deadline_appointment(self)}.{push} "
-            f"{hours_used:.1f} hours on the road. {hos_part}"
+            f"{hours_used:.1f} hours on the road.{tail}"
         )
+
+    # Alt A, Alt S, and Alt D split the three hours numbers a driver plans
+    # around out of the C readout, one key each, left to right in the shape of
+    # a shift: what is behind you, what stops you next, what ends the day. The
+    # Alt chord keeps the right hand on the arrows, where the accelerator is,
+    # and a slipped modifier lands on A, S, or D -- all spoken info, nothing
+    # that moves the truck. Controllers keep the combined readout on D-pad
+    # right; a pad has nowhere to put three more info buttons.
+
+    def _hos_nearest_clause(self) -> str:
+        """One sentence for the HOS limit that comes first, or '' when off."""
+        next_limit = self.hos.next_limit(self.ctx.settings.hos_mode)
+        if next_limit is None:
+            return ""
+        kind, remaining_min, _due = next_limit
+        if remaining_min <= 0:
+            return {
+                "break": "Break overdue.",
+                "drive": "Out of driving time for this shift.",
+                "duty": "Your duty window has closed.",
+            }[kind]
+        left = hos.duration_text(remaining_min / 60.0)
+        return {
+            "break": f"Break due in {left}.",
+            "drive": f"Driving time left: {left}.",
+            "duty": f"Duty window closes in {left}.",
+        }[kind]
+
+    def _hos_key_notice(self) -> str:
+        """Where the hours detail went, for the first few clock presses only.
+
+        Muscle memory says C, so the pointer has to ride C itself. Three
+        presses is enough to learn it and few enough not to become noise."""
+        left = getattr(self.ctx.profile, "hos_key_notice_left", 0)
+        if left <= 0:
+            return ""
+        self.ctx.profile.hos_key_notice_left = left - 1
+        return " Hours of service moved to Alt A, Alt S, and Alt D."
+
+    def _speak_hos_wheel_time(self) -> None:
+        """Alt A: how much of this shift is already behind you."""
+        self.ctx.say(self.hos.wheel_time_summary(self.ctx.settings.hos_mode, self._terse_speech()))
+
+    def _speak_hos_break(self) -> None:
+        """Alt S: when the 30-minute break comes due."""
+        self.ctx.say(self.hos.break_summary(self.ctx.settings.hos_mode, self._terse_speech()))
+
+    def _speak_hos_drive_left(self) -> None:
+        """Alt D: what ends this shift, and where you can legally stop before it."""
+        terse = self._terse_speech()
+        text = self.hos.drive_time_summary(self.ctx.settings.hos_mode, terse)
+        if not terse:
+            route = self._hos_route_context()
+            if route:
+                text = f"{text} {route}"
+        self.ctx.say(text)
 
     def _hos_route_context(self) -> str:
         mode = self.ctx.settings.hos_mode

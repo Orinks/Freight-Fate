@@ -58,6 +58,13 @@ Add these rows:
 | Page Down and Page Up | Tune the radio to the next and previous station. Ctrl with either leaps a whole category. The semicolon and apostrophe keys still work. |
 | Y | Report the radio station, volume, and streamer-safe status. |
 | R | Report how far along the route you are. |
+| Alt+A | Report time at the wheel so far this shift, and time on duty. |
+| Alt+S | Report when your 30 minute break is due, or that a break will not help. |
+| Alt+D | Report what ends this shift -- driving time left and duty window both -- and where you can legally stop before it. |
+
+Update the C row: it now reports the clock, the deadline, the estimated
+arrival, and the one hours-of-service limit that comes first, rather than the
+whole hours report. The first few presses also name the three Alt keys above.
 
 Update the A row so the repeat keys read as a family:
 
@@ -264,6 +271,16 @@ up as you close on it, so you stop AT the bar instead of a quarter mile
 short and creeping blind.
 
 ## Hours Of Service section: additions (enforcement grew teeth and honesty)
+
+The clock answers one question at a time now. Alt A gives time at the wheel so
+far this shift, Alt S when the 30 minute break comes due, and Alt D what ends
+the shift -- driving time and duty window both, the one that runs out first
+named first, then the nearest place you can legally stop. Each answer opens
+with its own words, so a slipped key is obvious by ear, and with enforcement
+off each key says so instead of going quiet. C keeps the clock, the deadline,
+and whichever limit comes first, and for the first few presses it points at
+the new keys. On a controller, D-pad right still reads the whole hours report
+in one press.
 
 A log check that finds you over your hours is no longer a silent time
 jump: the officer orders you off the road, the stop explains exactly

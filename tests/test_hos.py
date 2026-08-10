@@ -416,6 +416,240 @@ def test_hos_summary_omits_break_when_duty_window_closes_first():
     assert "break due" not in summary
 
 
+# -- the one-answer readouts (Alt A, Alt S, Alt D) ---------------------------------
+
+
+def _duty_closes_first() -> HosClock:
+    """A shift where the 14-hour window runs out before the break is due."""
+    c = HosClock()
+    c.driving_min = 414
+    c.since_break_min = 270
+    c.duty_min = 732
+    c.status = "driving"
+    return c
+
+
+def test_wheel_time_leads_with_its_own_noun_and_names_both_spent_clocks():
+    c = HosClock()
+    c.drive(324)
+
+    said = c.wheel_time_summary("realistic")
+
+    assert said.startswith("At the wheel so far:")
+    assert "5.4 hours driving" in said
+    assert "5.4 hours on duty this shift" in said
+
+
+def test_terse_wheel_time_keeps_the_driving_number_alone():
+    c = HosClock()
+    c.drive(324)
+
+    said = c.wheel_time_summary("realistic", terse=True)
+
+    assert said == "At the wheel 5.4 hours."
+
+
+def test_wheel_time_speaks_short_stretches_as_minutes():
+    c = HosClock()
+    c.drive(24)
+
+    assert "24 minutes driving" in c.wheel_time_summary("realistic")
+
+
+def test_wheel_time_says_no_driving_yet_on_a_fresh_shift():
+    assert "no driving yet" in HosClock().wheel_time_summary("realistic")
+
+
+def test_wheel_time_flags_being_out_of_hours():
+    c = HosClock()
+    c.drive(11 * 60 + 30)
+
+    assert "You are out of hours." in c.wheel_time_summary("realistic")
+    assert "You are out of hours." in c.wheel_time_summary("realistic", terse=True)
+
+
+def test_wheel_time_flags_an_overdue_break_without_calling_it_out_of_hours():
+    c = HosClock()
+    c.drive(481)
+
+    said = c.wheel_time_summary("realistic")
+
+    assert "30-minute break is overdue" in said
+    assert "out of hours" not in said
+
+
+def test_wheel_time_answers_instead_of_going_quiet_with_enforcement_off():
+    c = HosClock()
+    c.drive(324)
+
+    for mode in ("off", "debug_off"):
+        said = c.wheel_time_summary(mode)
+        assert "5.4 hours driving" in said
+        assert "enforcement is off" in said
+
+
+def test_break_key_leads_with_the_break_and_counts_driving_time():
+    c = HosClock()
+    c.drive(120)
+
+    assert c.break_summary("realistic") == "Break due in 6.0 hours of driving."
+    assert c.break_summary("realistic", terse=True) == "Break due in 6.0 hours."
+
+
+def test_break_key_speaks_minutes_when_under_an_hour():
+    c = HosClock()
+    c.drive(456)
+
+    assert "Break due in 24 minutes" in c.break_summary("realistic")
+
+
+def test_break_key_answers_the_break_first_then_the_window_that_closes_first():
+    # summary() omits the break here; a key the player pressed for the break
+    # has to answer the break, then add the fact that overrides it.
+    said = _duty_closes_first().break_summary("realistic")
+
+    assert said.startswith("Break due in 3.5 hours")
+    assert "duty window closes first, in 1.8 hours" in said
+
+
+def test_terse_break_key_still_names_the_window_that_closes_first():
+    said = _duty_closes_first().break_summary("realistic", terse=True)
+
+    assert "Break due in 3.5 hours" in said
+    assert "duty window 1.8 hours" in said
+
+
+def test_break_key_reports_an_overdue_break_with_what_to_do():
+    c = HosClock()
+    c.drive(481)
+
+    assert c.break_summary("realistic") == ("Break overdue. Take a 30 minute break at a rest stop.")
+    assert c.break_summary("realistic", terse=True) == "Break overdue."
+
+
+def test_break_key_says_a_break_will_not_help_once_the_shift_is_over():
+    c = HosClock()
+    c.drive(11 * 60 + 30)
+
+    said = c.break_summary("realistic")
+
+    assert "out of driving time for this shift" in said
+    assert "Sleep 10 hours" in said
+
+
+def test_break_key_names_the_duty_window_when_that_is_the_blown_clock():
+    c = HosClock()
+    c.driving_min = 100
+    c.duty_min = 14 * 60 + 30
+    c.since_break_min = 60
+
+    said = c.break_summary("realistic")
+
+    assert "past your duty window" in said
+    assert said.count("but") == 1  # one overriding fact, not two stacked clauses
+
+
+def test_break_key_says_none_required_with_enforcement_off():
+    for mode in ("off", "debug_off"):
+        assert "Break: none required." in HosClock().break_summary(mode)
+        assert "enforcement is off" in HosClock().break_summary(mode)
+
+
+def test_drive_time_key_names_both_clocks_and_leads_with_driving_time():
+    c = HosClock()
+    c.drive(300)
+
+    assert c.drive_time_summary("realistic") == (
+        "Driving time left: 6.0 hours. Duty window closes in 9.0 hours."
+    )
+    assert c.drive_time_summary("realistic", terse=True) == (
+        "Driving time left: 6.0 hours, duty window 9.0 hours."
+    )
+
+
+def test_drive_time_key_leads_with_the_duty_window_when_that_binds():
+    said = _duty_closes_first().drive_time_summary("realistic")
+
+    assert said.startswith("Duty window closes in 1.8 hours")
+    assert "Driving time left: 4.1 hours" in said
+
+
+def test_drive_time_key_names_which_clock_ran_out():
+    over_drive = HosClock()
+    over_drive.drive(11 * 60 + 30)
+    over_duty = HosClock()
+    over_duty.driving_min = 100
+    over_duty.duty_min = 14 * 60 + 30
+
+    assert over_drive.drive_time_summary("realistic") == (
+        "Out of driving time for this shift. Sleep 10 hours at a rest stop to reset."
+    )
+    assert over_duty.drive_time_summary("realistic") == (
+        "Your duty window has closed. Sleep 10 hours at a rest stop to reset."
+    )
+
+
+def test_drive_time_key_adds_the_overdue_break_that_comes_first():
+    c = HosClock()
+    c.drive(481)
+
+    assert "break is overdue and comes first" in c.drive_time_summary("realistic")
+    assert "break overdue" in c.drive_time_summary("realistic", terse=True)
+
+
+def test_drive_time_key_carries_the_pending_sleeper_split():
+    c = HosClock()
+    c.drive(300)
+    c.sleeper_split_rest(480)
+
+    for terse in (False, True):
+        assert "Sleeper split pending" in c.drive_time_summary("realistic", terse)
+    # The split belongs to the shift-ending key, not the other two.
+    assert "Sleeper split" not in c.break_summary("realistic")
+    assert "Sleeper split" not in c.wheel_time_summary("realistic")
+
+
+def test_drive_time_key_says_no_limit_with_enforcement_off():
+    c = HosClock()
+    c.drive(20 * 60)
+
+    for mode in ("off", "debug_off"):
+        said = c.drive_time_summary(mode)
+        assert "no limit" in said
+        assert "enforcement is off" in said
+
+
+def test_the_three_hours_keys_never_share_a_first_word():
+    c = HosClock()
+    c.drive(120)
+
+    for terse in (False, True):
+        firsts = {
+            said.split()[0]
+            for said in (
+                c.wheel_time_summary("realistic", terse),
+                c.break_summary("realistic", terse),
+                c.drive_time_summary("realistic", terse),
+            )
+        }
+        assert len(firsts) == 3
+
+
+def test_the_hours_keys_never_hard_code_a_realistic_limit_in_relaxed_mode():
+    # violation_causes still names "the 11-hour driving limit"; relaxed runs
+    # 13.75, so the new readouts name the clock and never the hour count.
+    c = HosClock()
+    c.drive(13 * 60)
+
+    for said in (
+        c.wheel_time_summary("relaxed"),
+        c.break_summary("relaxed"),
+        c.drive_time_summary("relaxed"),
+    ):
+        assert "11-hour" not in said
+        assert "14-hour" not in said
+
+
 # -- modes -------------------------------------------------------------------
 
 

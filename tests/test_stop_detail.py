@@ -293,7 +293,7 @@ def test_planned_prefix_reaches_every_stop_announcement(monkeypatch):
         screen.items = screen.build_items()
         assert any(f"Planned stop, {stop.spoken_name}" in i.text for i in screen.items)
 
-        # C-key rest-stop suggestion ("Next legal stop").
+        # Alt D rest-stop suggestion ("Next legal stop").
         context = d._hos_route_context()
         assert f"Next legal stop: Planned stop, {stop.spoken_name}" in context
     finally:

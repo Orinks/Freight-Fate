@@ -395,7 +395,9 @@ class HosClock:
             "duty": "your 14-hour duty window had expired",
             "break": "you were past the 30-minute break requirement",
         }
-        return [phrases[kind] for kind, rem, _ in self._statuses(mode) if rem <= 0 and kind in phrases]
+        return [
+            phrases[kind] for kind, rem, _ in self._statuses(mode) if rem <= 0 and kind in phrases
+        ]
 
     def re_arm_warnings(self) -> None:
         """Speak the countdown again after a rest that did NOT reset the shift.
@@ -481,6 +483,106 @@ class HosClock:
             f"break due in {break_left:.1f} hours, "
             f"duty window closes in {duty_left:.1f} hours.{suffix}"
         )
+
+    # -- the one-answer readouts ------------------------------------------------
+    #
+    # ``summary`` speaks the whole picture; these three answer one question each,
+    # for the Alt A, Alt S, and Alt D keys (see DrivingControlsMixin). None may
+    # go silent -- a blind driver cannot tell a quiet key from a dead one -- and
+    # none names a limit in hours: relaxed runs 1.25 times realistic, so a
+    # hard-coded "11-hour limit" would be a lie in it.
+
+    _ENFORCEMENT_OFF = "Hours of service enforcement is off; the ELD clock still records time."
+    _RESET_ADVICE = "Sleep 10 hours at a rest stop to reset."
+    # kind -> (clause after "you are", sentence that can lead a readout)
+    _SHIFT_OVER = {
+        "drive": ("out of driving time for this shift", "Out of driving time for this shift."),
+        "duty": ("past your duty window", "Your duty window has closed."),
+    }
+
+    def _hours_left(self, mode: str) -> tuple[float, float, float]:
+        """(driving, duty window, break) hours left, floored at zero."""
+        spent = (self.driving_min, self.duty_min, self.since_break_min)
+        return tuple(max(0.0, x - y) / 60.0 for x, y in zip(LIMITS[mode], spent, strict=True))
+
+    def _shift_over_kind(self, mode: str) -> str | None:
+        """Which blown limit ended the shift, or None; the driving clock leads."""
+        blown = {kind for kind, rem, _ in self._statuses(mode) if rem <= 0}
+        return "drive" if "drive" in blown else ("duty" if "duty" in blown else None)
+
+    def wheel_time_summary(self, mode: str, terse: bool = False) -> str:
+        """Alt A: how much of this shift is spent -- not the hours on this run."""
+        fresh = self.driving_min <= 0.0
+        driven = duration_text(self.driving_min / 60.0)
+        if terse:
+            lead = "At the wheel: no driving yet" if fresh else f"At the wheel {driven}"
+        else:
+            spent = "no driving yet" if fresh else f"{driven} driving"
+            lead = f"At the wheel so far: {spent}, {duration_text(self.duty_min / 60.0)} on duty this shift"
+        if mode not in LIMITS:
+            note = self._ENFORCEMENT_OFF
+        elif self._shift_over_kind(mode) is not None:
+            note = "You are out of hours."
+        elif self._hours_left(mode)[2] <= 0.0:
+            note = "Your 30-minute break is overdue."
+        else:
+            note = ""
+        return f"{lead}. {note}".rstrip()
+
+    def break_summary(self, mode: str, terse: bool = False) -> str:
+        """Alt S: when the 30-minute break comes due."""
+        if mode not in LIMITS:
+            return f"Break: none required. {self._ENFORCEMENT_OFF}"
+        _drive_left, duty_left, break_left = self._hours_left(mode)
+        over = self._shift_over_kind(mode)
+        if break_left <= 0.0:
+            answer = "Break overdue"
+            detail = "" if terse else " Take a 30 minute break at a rest stop."
+        else:
+            answer = f"Break due in {duration_text(break_left)}" + ("" if terse else " of driving")
+            detail = ""
+            if over is None and duty_left <= break_left:
+                # summary drops the break when the window closes first; a key
+                # pressed for the break answers it, then the overriding fact.
+                answer += (
+                    f", duty window {duration_text(duty_left)}"
+                    if terse
+                    else f", but your duty window closes first, in {duration_text(duty_left)}"
+                )
+        if over is not None:
+            return f"{answer}, but you are {self._SHIFT_OVER[over][0]}. {self._RESET_ADVICE}"
+        return f"{answer}.{detail}"
+
+    def drive_time_summary(self, mode: str, terse: bool = False) -> str:
+        """Alt D: what ends this shift. Both clocks are named; the binding one leads."""
+        if mode not in LIMITS:
+            no_limit = "Driving time left: no limit" + ("" if terse else ", and no duty window")
+            return f"{no_limit}. {self._ENFORCEMENT_OFF}"
+        drive_left, duty_left, break_left = self._hours_left(mode)
+        over = self._shift_over_kind(mode)
+        if over is not None:
+            return f"{self._SHIFT_OVER[over][1]} {self._RESET_ADVICE}"
+        drive_text = f"Driving time left: {duration_text(drive_left)}"
+        duty_text = f"Duty window closes in {duration_text(duty_left)}"
+        duty_binds = duty_left <= drive_left  # the window, not the wheel, ends this shift
+        if terse:
+            text = (
+                f"Duty window {duration_text(duty_left)}, {drive_text.lower()}"
+                if duty_binds
+                else f"{drive_text}, duty window {duration_text(duty_left)}"
+            )
+        else:
+            text = (
+                f"{duty_text}, before your driving time runs out. {drive_text}"
+                if duty_binds
+                else f"{drive_text}. {duty_text}"
+            )
+        if break_left <= 0.0:
+            text += (
+                ", break overdue" if terse else ". Your 30-minute break is overdue and comes first"
+            )
+        pending = self.split_pending_summary()
+        return f"{text}. {pending}" if pending else f"{text}."
 
     def arrival_note(self, mode: str, eta_min: float) -> str:
         """One clause relating an ETA to the nearest HOS limit, or ''.

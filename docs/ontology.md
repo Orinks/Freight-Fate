@@ -193,6 +193,13 @@ from the words, and synonyms cost them a re-read.
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
 | A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |
 | The short code a player reads and types into a browser to connect a computer | activation code | user code, device code, pairing code | `Activation.user_code` |
+| The legal driving clock as a whole | hours of service | HOS, the ELD rules, your logbook hours | `HosClock`, `settings.hos_mode` |
+| The 11-hour clock that limits time at the wheel | driving time left | drive clock, hours left, hours remaining | `HosClock.drive_time_summary` |
+| Driving time already spent this shift | at the wheel | hours driven, drive time used, hours on the road (that is the run) | `HosClock.wheel_time_summary` |
+| The 14-hour clock that starts when you go on duty | duty window | 14-hour clock, on-duty clock, shift window | `HosClock.duty_min` |
+| The 30 minutes off the wheel the law requires | break | rest break, 30, half-hour rest | `HosClock.break_summary` |
+| The in-game time of day where the truck is | clock | local time, game time | `Trip.local_hour`, `clock_text` |
+| When the load is due | deadline | due time, drop time (the appointment is the named hour) | `Job.deadline_game_h` |
 | The retarder | engine brake; "jake" in short control feedback ("Jake on, stage two") | retarder | `TruckState.engine_brake_stage` |
 | A stretch of road where a town bans the engine brake | no engine brake zone | jake brake zone, engine brake restriction, quiet zone | `Trip.engine_brake_ban_at` |
 | The facility entrance where a drive ends | facility gate; "gate" in short cues | entrance (as the noun for the thing), dock gate | `_handle_arrival_gate` |
@@ -290,6 +297,15 @@ them buffs; the player buys a shower, an energy drink, an Iron Skillet dinner.
 Every spoken string goes through `Buff.label`, which is what makes that work.
 Game-shop jargon in a trucking sim breaks the fiction and, more practically,
 tells a screen reader user nothing about what they just bought.
+
+**The hours clocks are three separate nouns, and they never share a first
+word.** "At the wheel" is time already driven this shift, "driving time left"
+is what remains of the 11-hour clock, and the "duty window" is the 14-hour one
+that can close first. The dedicated keys lead with those nouns so a driver
+knows which key landed before any number arrives; "hours left", "hours driven",
+and "hours until a break" all open on "hours" and are exactly what not to say.
+Hours at the wheel are not "hours on the road" either: the run's clock is a
+different number, and a shift can span several runs.
 
 **"Traffic" needs a qualifier.** Simulated vehicles around the truck and
 reported incidents on the road ahead are different systems the player can act

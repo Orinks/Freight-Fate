@@ -459,6 +459,131 @@ def test_terse_clock_key_drops_calendar_and_stop_planning(monkeypatch):
         app.shutdown()
 
 
+def _alt(key):
+    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode="", mod=pygame.KMOD_LALT)
+
+
+def test_clock_key_keeps_one_hours_clause_instead_of_the_whole_report(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.hos.drive(300.0)
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(key_event(pygame.K_c))
+        report = spoken[-1]
+        # The limit that comes first still rides the clock key: a driver can
+        # be on schedule and out of hours at once.
+        assert "Break due in 3.0 hours." in report
+        # ...but the full ELD report belongs to Tab and the three hours keys.
+        assert "hours of driving left" not in report
+        assert "ELD status" not in report
+    finally:
+        app.shutdown()
+
+
+def test_clock_key_points_at_the_hours_keys_for_the_first_three_presses(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = _capture(app, monkeypatch)
+        notice = "Hours of service moved to Alt A, Alt S, and Alt D."
+        for _ in range(3):
+            d.handle_event(key_event(pygame.K_c))
+            assert notice in spoken[-1]
+        d.handle_event(key_event(pygame.K_c))
+        assert notice not in spoken[-1]
+        assert app.ctx.profile.hos_key_notice_left == 0
+    finally:
+        app.shutdown()
+
+
+def test_alt_a_s_and_d_each_answer_one_hours_question(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.hos.drive(300.0)
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(_alt(pygame.K_a))
+        assert spoken[-1].startswith("At the wheel so far:")
+        assert "5.0 hours driving" in spoken[-1]
+
+        d.handle_event(_alt(pygame.K_s))
+        assert spoken[-1].startswith("Break due in 3.0 hours")
+
+        d.handle_event(_alt(pygame.K_d))
+        assert spoken[-1].startswith("Driving time left: 6.0 hours")
+        assert "Duty window closes in 9.0 hours" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_the_hours_keys_leave_plain_a_s_and_d_alone(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = _capture(app, monkeypatch)
+
+        d.handle_event(key_event(pygame.K_s))
+        assert "Speed limit" in spoken[-1]
+        d.handle_event(key_event(pygame.K_d))
+        assert "Safe speed" in spoken[-1] or "safe speed" in spoken[-1]
+        d.handle_event(key_event(pygame.K_a))
+        assert "At the wheel" not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_alt_d_carries_the_next_legal_stop_context(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.hos.drive(300.0)
+        spoken = _capture(app, monkeypatch)
+        d.handle_event(_alt(pygame.K_d))
+        verbose = spoken[-1]
+        # The stop-planning clause moved off the clock key onto the key that
+        # answers "when does this shift end".
+        assert "legal stop" in verbose or "No route stop" in verbose
+
+        app.ctx.settings.speech_verbosity = 0
+        d.handle_event(_alt(pygame.K_d))
+        assert "Next legal stop" not in spoken[-1]
+        assert len(spoken[-1]) < len(verbose)
+    finally:
+        app.shutdown()
+
+
+def test_controller_clock_button_keeps_the_whole_hours_report(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        d.hos.drive(300.0)
+        spoken = _capture(app, monkeypatch)
+        event = pygame.event.Event(
+            pygame.CONTROLLERBUTTONDOWN, button=pygame.CONTROLLER_BUTTON_DPAD_RIGHT
+        )
+        d.handle_controller(event, app.ctx.controller)
+        # A pad has nowhere to put three more info buttons, so this one press
+        # must still carry the hours a keyboard player gets from Alt A/S/D.
+        assert "hours of driving left" in spoken[-1]
+        assert "Hours of service moved to" not in spoken[-1]
+    finally:
+        app.shutdown()
+
+
 def test_status_menu_carries_the_drivers_board_progress_percent(monkeypatch):
     from freight_fate.app import App
 

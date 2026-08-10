@@ -221,7 +221,10 @@ it" on the keyboard becomes "press D-pad down to take it" on a controller.
 | Space | Speak speed, gear, RPM |
 | Tab | Driving status menu |
 | F | Fuel and range |
-| C | Clock, deadline, ETA |
+| C | Clock, deadline, ETA, and the hours limit that comes first |
+| Alt+A | Time at the wheel so far this shift |
+| Alt+S | When your 30 minute break is due |
+| Alt+D | What ends this shift, and where you can stop before it |
 | R | Route progress |
 | Shift+R | Next listed highway exit |
 | L | Lane position |
@@ -266,7 +269,7 @@ Gameplay → Controller if you prefer keyboard only.
 | D-pad Up | Route progress |
 | D-pad Down | Take exit / signal a pull-over |
 | D-pad Left | Weather and forecast |
-| D-pad Right | Clock, deadline, hours of service |
+| D-pad Right | Clock, deadline, and the full hours of service report |
 | Left stick click (L3) | Horn |
 | Right stick click (R3) | Engine brake toggle |
 | Start | Pause / resume |
