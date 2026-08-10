@@ -134,10 +134,12 @@ def test_asset_bytes_reads_loose_files_without_pack():
 def test_committed_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_PACK_PATH.read_bytes()
-    assert len(pack_bytes) == 224_884_245
+    # Repacked 2026-08-10 for the three liquid-surge assets that ship with
+    # tank freight (vehicle/liquid_wash, liquid_hit, liquid_hit_lateral).
+    assert len(pack_bytes) == 225_204_989
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "cad82d380f73c98a6cfb84527ee09f59c6579dfac8a9fddb5200100a7f85a3b3"
+        "19b9207ad47e93da09b8c40f510b04b58de56679cf4c3a7310b6bcadceacbd6f"
     )
 
 
