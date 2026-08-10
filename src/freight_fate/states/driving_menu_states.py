@@ -4,7 +4,9 @@ from __future__ import annotations
 import time
 
 from ..models import enforcement
+from ..models.career import standing_xp_rate, xp_rate_settlement_clause
 from ..models.cargo_condition import cargo_condition_text, settle_cargo
+from ..models.solvency import deductions_from_settlement
 from ..sim.timezones import to_local
 from .base import TimedMessageState
 from .driving_core import *
@@ -191,9 +193,23 @@ class DrivingStatusScreenState(MenuState):
         )
         band = damage_band_clause(self.ctx.settings, t)
         damage_band_suffix = f", {band}" if band else ""
+        # What is owed sits next to what is held, so a driver can ask the same
+        # question mid-run that the terminal answers between them.
+        from ..models.solvency import debt_line
+
+        owed = debt_line(profile)
+        # The trust line only joins the driving screen when it is doing
+        # something. A driver in full trust already hears it on the career
+        # stats screen and does not need it twice.
+        trust = (
+            enforcement.dispatch_trust_line(profile)
+            if enforcement.standing_band(profile) != enforcement.TRUST_FULL
+            else ""
+        )
         return [
             f"Driver: {profile.name}",
             f"Money: {profile.money:,.0f} dollars",
+            *([owed] if owed else []),
             load_line,
             f"Objective: {d._objective_text()}",
             # The band rides with the number: hearing "78 percent" without
@@ -202,9 +218,10 @@ class DrivingStatusScreenState(MenuState):
             f"damage {t.damage_pct:.0f} percent{damage_band_suffix}",
             f"Transmission: {'automatic' if t.transmission.automatic else 'manual'}, {d._gear_text()}",
             f"Fatigue: {profile.fatigue:.0f} percent",
-            # Standing is spoken when it changes and whenever it is asked for,
-            # never on a timer.
+            # Where the driver stands is spoken when it changes and whenever it
+            # is asked for, never on a timer.
             enforcement.standing_text(profile),
+            *([trust] if trust else []),
             f"Hours: {d.hos.summary(self.ctx.settings.hos_mode).rstrip('.')}",
             time_line,
         ]
@@ -942,8 +959,12 @@ class ArrivalState(MenuState):
         toll_expense = d.trip.toll_expense
         accessorials = carrier_accessorial_charges(job, p)
         carrier_charges = toll_expense + charge_total(accessorials)
-        # Anything a previous load could not cover comes out of this one first.
-        driver_charges = _speeding_settlement_fine(d.speeding_strikes) + p.fines_owed
+        # What a previous load could not cover is no longer piled onto this
+        # settlement whole. It is a balance owed, and a balance owed is
+        # recovered at a capped share further down -- taking all of it here is
+        # what made every settlement after the first shortfall pay zero.
+        carried_balance = max(0.0, float(p.fines_owed))
+        driver_charges = _speeding_settlement_fine(d.speeding_strikes)
         # A company driver who brings a truck back damaged does not get a
         # clean settlement: the carrier eats the repair, and the driver eats
         # the deductible and the safety bonus. An owner-operator has already
@@ -998,6 +1019,8 @@ class ArrivalState(MenuState):
         early_bonus = max(0.0, gross_pay - deadline_business.gross_pay)
         # Anything this load could not cover is carried, not forgiven: a load
         # too cheap to pay its charges used to be told it paid them in full.
+        # The carried balance from earlier loads is added back after collection
+        # below, so it is never taken twice.
         p.fines_owed = business.uncollected_charges
         if not cargo.clean:
             self.summary_parts.append(self._cargo_settlement_line(cargo))
@@ -1019,11 +1042,11 @@ class ArrivalState(MenuState):
                 f"Reputation down {damage_reputation_hit:.0f}, and it is on your record."
             )
         if business.uncollected_charges > 0:
-            collected = driver_charges - business.uncollected_charges
+            paid_now = driver_charges - business.uncollected_charges
             self.summary_parts.append(
-                f"This load only covered {collected:,.0f} dollars of those "
+                f"This load only covered {paid_now:,.0f} dollars of those "
                 f"charges, so {business.uncollected_charges:,.0f} dollars stays "
-                "owed and comes out of your next settlement."
+                "owed. A quarter of each settlement from here goes to it, never more."
             )
         # Tickets from being pulled over were already paid on the spot; report
         # them for transparency but don't deduct again at settlement.
@@ -1055,7 +1078,19 @@ class ArrivalState(MenuState):
         # and the advanced money becomes cash the career cannot account for,
         # which reads as an edited save to cloud upload screening.
         settled_pay = net_pay
-        advance_repaid = round(min(p.pay_advance, net_pay), 2)
+        # A balance owed and an advance come out of the same capped share, so a
+        # driver who is carrying both still finishes the run with money. With
+        # nothing owed this is the arithmetic it has always been.
+        collected, advance_repaid = deductions_from_settlement(
+            carried_balance, p.pay_advance, net_pay
+        )
+        if collected > 0:
+            net_pay = round(net_pay - collected, 2)
+            self.summary_parts.append(
+                f"Balance owed: {collected:,.0f} dollars of this settlement went "
+                "to paying it down. A quarter of a settlement is the most that "
+                "ever goes to it, so three quarters always reaches you."
+            )
         if advance_repaid > 0:
             net_pay = round(net_pay - advance_repaid, 2)
             p.pay_advance = round(p.pay_advance - advance_repaid, 2)
@@ -1068,6 +1103,9 @@ class ArrivalState(MenuState):
                 f"Pay advance repaid from this settlement: "
                 f"{advance_repaid:,.0f} dollars.{outstanding}"
             )
+        # What is left of the old balance rides on with whatever this load could
+        # not cover.
+        p.fines_owed = round(p.fines_owed + max(0.0, carried_balance - collected), 2)
         on_time = hours <= job.deadline_game_h
         p.money += net_pay
         p.current_city = job.destination
@@ -1081,6 +1119,9 @@ class ArrivalState(MenuState):
         road_grime_added = min(100.0, job.distance_mi * ROAD_GRIME_PER_MILE)
         p.road_grime_pct = min(100.0, p.road_grime_pct + road_grime_added)
         previous_level = p.career.level
+        # Where the driver stands with the carrier, read after the money has
+        # moved so a settlement that pays the balance down counts immediately.
+        standing = enforcement.standing_band(p)
         announcements = p.career.record_delivery(
             job.distance_mi,
             # The whole settlement, not what survived the advance repayment.
@@ -1088,18 +1129,27 @@ class ArrivalState(MenuState):
             on_time,
             trip_damage,
             cargo_class_mult=xp_class_multiplier(job.cargo),
+            standing_rate=standing_xp_rate(standing),
         )
-        announcements.extend(self._handle_fleet_promotion(previous_level))
+        announcements.extend(self._handle_fleet_promotion(previous_level, announcements))
         xp_bonus_notes = []
         if xp_class_multiplier(job.cargo) > 1.0:
             xp_bonus_notes.append("demanding freight")
         streak_bonus = xp_streak_bonus(p.career.on_time_streak) if on_time else 0.0
         if streak_bonus > 0.0:
             xp_bonus_notes.append(f"a {p.career.on_time_streak}-delivery on-time streak")
+        # The slower rate rides the line that is already there rather than
+        # arriving as its own announcement, and it never names a multiplier: a
+        # number the player cannot check turns every settlement into arithmetic.
+        rate_clause = xp_rate_settlement_clause(standing)
         if xp_bonus_notes:
+            tail = f", {rate_clause}" if rate_clause else ""
             self.summary_parts.append(
-                f"Career experience bonus for {' and '.join(xp_bonus_notes)}."
+                f"Career experience bonus for {' and '.join(xp_bonus_notes)}{tail}."
             )
+        elif rate_clause:
+            self.summary_parts.append(f"Career experience is coming in {rate_clause}.")
+        self._debt_settlement_lines()
         if trust_bonus >= 1.0:
             self.summary_parts.append(
                 f"Dispatch trust bonus: {trust_bonus:,.0f} dollars for your "
@@ -1246,17 +1296,73 @@ class ArrivalState(MenuState):
         ]
         self._announcements = announcements
 
-    def _handle_fleet_promotion(self, previous_level: int) -> list[str]:
+    def _debt_settlement_lines(self) -> None:
+        """Say what a balance owed did to this settlement, and warn once a rung.
+
+        Rungs move on the same discipline as the trust band: spoken when they
+        change, never on a timer, and never repeated.
+        """
+        from ..models import solvency
+
+        p = self.ctx.profile
+        record = p.driving_record
+        written_off = solvency.apply_hard_cap(p)
+        if written_off >= 1.0:
+            self.summary_parts.append(
+                f"{p.carrier_name} wrote off {written_off:,.0f} dollars of what "
+                "you owe. They hold the balance where it is rather than let it "
+                "climb, because they would rather keep you working."
+            )
+        rung = solvency.debt_rung(p)
+        if rung == int(record.debt_rung_heard):
+            return
+        was = int(record.debt_rung_heard)
+        record.debt_rung_heard = rung
+        if rung == 0:
+            if was > 0:
+                self.summary_parts.append(
+                    "You are square with your carrier again. Nothing is owed, "
+                    "and every settlement reaches you whole from here."
+                )
+            return
+        line = solvency.debt_warning_line(p, terse=self.driving._terse_speech())
+        if line:
+            self.summary_parts.append(line)
+
+    def _rewrite_unlock_promise(self, announcements: list[str] | None) -> None:
+        """Stop a level-up promising a tractor the yard is not handing over."""
+        from ..models.carrier_fleet import WITHHELD_UNLOCK_TAIL
+
+        if not announcements:
+            return
+        unlock = self.ctx.profile.career.rank.unlock
+        target = f"Unlock: {unlock}"
+        for index, message in enumerate(announcements):
+            if message.startswith("Level up!") and target in message:
+                announcements[index] = message.replace(target, f"{target} {WITHHELD_UNLOCK_TAIL}")
+                return
+
+    def _handle_fleet_promotion(
+        self, previous_level: int, announcements: list[str] | None = None
+    ) -> list[str]:
         """Swap the carrier tractor when a level-up crosses a fleet tier.
 
         The carrier hands the new unit over road-ready, so the profile's
         equipment condition resets with it -- company repairs are carrier
         billed anyway, this just skips the paperwork.
+
+        Unless the yard is not handing it over. A driver whose standing holds
+        them below their level keeps the truck they are in, untouched: the
+        road-ready reset belongs to the tractor changing hands, and handing
+        someone a spotless lesser truck would tell them something happened
+        when nothing did.
         """
         from ..models.carrier_fleet import (
             assigned_truck_key,
+            equipment_held_back,
             fleet_tier_for_level,
             fleet_upgrade_announcement,
+            withheld_promotion_text,
         )
         from ..models.trucks import TRUCK_CATALOG
 
@@ -1265,6 +1371,9 @@ class ArrivalState(MenuState):
             return []
         if fleet_tier_for_level(previous_level).key == fleet_tier_for_level(p.career.level).key:
             return []
+        if equipment_held_back(p):
+            self._rewrite_unlock_promise(announcements)
+            return [withheld_promotion_text(p)]
         model = TRUCK_CATALOG[assigned_truck_key(p)]
         p.truck_fuel_gal = model.specs.fuel_tank_gal
         p.truck_damage_pct = 0.0

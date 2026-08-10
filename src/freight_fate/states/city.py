@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import zlib
 
-from ..models import enforcement
+from ..models import enforcement, solvency
 from ..models.business import (
     INDEPENDENT_AUTHORITY,
     build_business_settlement,
@@ -248,6 +248,10 @@ class CityMenuState(MenuState):
             interrupt=interrupt,
         )
         self.ctx.say(self.current_text(), interrupt=False, review=False)
+        # A career-changing setback goes first and takes the screen: nothing
+        # else the terminal has to say survives being read over the top of it.
+        if self._check_career_setback():
+            return
         self._check_carrier_termination()
         self._check_standing()
 
@@ -458,10 +462,21 @@ class CityMenuState(MenuState):
 
     def _pay_advance_available(self) -> bool:
         p = self.ctx.profile
+        # An advance is only ever offered below ten dollars of cash, so a
+        # driver already having a balance collected would be offered one after
+        # every single run, forever, borrowing against money that is already
+        # spoken for. Dispatch stops offering instead.
+        if solvency.advance_refused_reason(p):
+            return False
         return pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load) > 0
 
     def _request_pay_advance(self) -> None:
         p = self.ctx.profile
+        refused = solvency.advance_refused_reason(p)
+        if refused:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say(refused)
+            return
         grant = pay_advance_grant(p.money, p.pay_advance, p.pay_advance_used_for_load)
         if grant <= 0:
             self.ctx.audio.play("ui/error")
@@ -699,17 +714,56 @@ class CityMenuState(MenuState):
         )
 
     def _check_standing(self) -> None:
-        """Speak a trust-band change, once, when it changes -- never on a timer."""
+        """Speak a trust-band change, once, when it changes -- never on a timer.
+
+        The band now answers to the licence and to what the driver owes as
+        well as to their service, so the line names whichever of the three is
+        actually holding it, what the yard is doing about the equipment, and
+        whether the career has slowed. All of it is available on demand from
+        Career stats; none of it is ever repeated on a timer.
+        """
         p = self.ctx.profile
         record = p.driving_record
-        band = enforcement.trust_band(p.career.reputation)
+        band = enforcement.standing_band(p)
         if band == record.trust_band_heard:
             return
         first_time = record.trust_band_heard == ""
+        improved = (
+            not first_time
+            and enforcement.worst_band(band, record.trust_band_heard) == record.trust_band_heard
+        )
         record.trust_band_heard = band
         if first_time and band == enforcement.TRUST_FULL:
             return  # a clean driver is never told they are fine
-        self.ctx.say(enforcement.trust_text(p.career.reputation), interrupt=False)
+        line = enforcement.dispatch_trust_line(p)
+        if improved and band == enforcement.TRUST_FULL and not p.owns_equipment():
+            from ..models.carrier_fleet import fleet_assignment_text
+
+            line = f"{line} {fleet_assignment_text(p)}"
+        self.ctx.say(line, interrupt=False)
+
+    def _check_career_setback(self) -> bool:
+        """Take the seat or the truck when a balance has passed the ceiling.
+
+        Only ever here, at the terminal, and never out on the road: both of
+        these remove the tractor the driver is sitting in, and doing that
+        mid-run would take the truck out from under them. Returns True when a
+        notice is now owed, so the caller can stop talking about the terminal
+        and put the notice on screen instead.
+        """
+        p = self.ctx.profile
+        if not solvency.setback_pending(p):
+            if solvency.company_termination_due(p):
+                solvency.apply_company_termination(p)
+            elif solvency.repossession_due(p):
+                solvency.apply_repossession(p)
+            else:
+                return False
+            self.ctx.save_profile()
+        from .career_setback import CareerSetbackNoticeState
+
+        self.ctx.push_state(CareerSetbackNoticeState(self.ctx))
+        return True
 
     def _check_carrier_termination(self) -> None:
         """A company driver the carrier will no longer keep on the insurance."""
@@ -724,7 +778,7 @@ class CityMenuState(MenuState):
         self.ctx.save_profile()
         self.ctx.audio.play("ui/error")
         self.ctx.say(
-            f"{former} has let you go. Your safety record put you past what "
+            f"{former} has ended your employment. Your safety record put you past what "
             "their insurance will carry, so your seat and your assigned truck "
             f"go back to the yard. {enforcement.LAST_CHANCE_CARRIER_NAME} will "
             "take you on: lower pay, shorter freight, and a fresh start with a "
@@ -1592,7 +1646,8 @@ class JobBoardState(MenuState):
         key = p.take_slip_seat(job)
         if key == before:
             return ""
-        return f" {assignment_reason_text(key, job)}"
+        terse = self.ctx.settings.speech_verbosity == 0
+        return f" {assignment_reason_text(key, job, profile=p, terse=terse)}"
 
     def _trailer_note(self, job: Job) -> str:
         p = self.ctx.profile

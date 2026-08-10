@@ -255,6 +255,18 @@ def next_business_unlock(profile) -> str:
 
 
 def business_status_summary(profile) -> str:
+    # What is owed and the ceiling on it belong on the screen that explains
+    # the business, and have to be askable at any time rather than only when
+    # a settlement brings them up.
+    from .solvency import debt_line
+
+    owed = debt_line(profile)
+    return (
+        f"{_business_status_summary(profile)} {owed}" if owed else _business_status_summary(profile)
+    )
+
+
+def _business_status_summary(profile) -> str:
     status = getattr(profile, "business_status", COMPANY_DRIVER)
     rank = rank_for_level(profile.career.level)
     if is_owner_operator(status):

@@ -214,7 +214,15 @@ from the words, and synonyms cost them a re-read.
 | The permanent version of it, after a second major offense | lifetime disqualification | permaban, career over, blacklist | `DrivingRecord.lifetime_disqualified` |
 | An offense heavy enough to disqualify a CDL outright | major offense | felony (as the game's own noun), big one | `DrivingRecord.record_major_offense` |
 | Running off the road asleep | fatigue event | microsleep (that is the warning, not the event), nod-off | `DrivingRecord.record_fatigue_event` |
-| How far dispatch will work with you right now | dispatch trust | standing, rep level, tier | `enforcement.trust_band` |
+| How far dispatch will work with you right now | dispatch trust | standing, rep level, tier | `enforcement.standing_band` |
+| Everything the driver is behind by, cash and balance together | debt; "what you owe" in a sentence | negative balance, in the red, in the hole, arrears | `solvency.debt_owed` |
+| Charges a settlement could not cover, carried to the next one | balance owed | tab, IOU, outstanding fines, arrears | `Profile.fines_owed` |
+| The figure debt is not allowed to pass | ceiling | limit, cap, threshold, max | `solvency.debt_ceiling` |
+| The share of every settlement that always reaches the driver | take-home | net after collection, what is left, remainder | `solvency.TAKE_HOME_SHARE` |
+| The carrier ending a company driver's employment | ended your employment | terminated, fired, let go, sacked, dropped | `solvency.apply_company_termination` |
+| The lender taking an owner-operator's tractor back | took the truck back; repossessed | seized, foreclosed, repo, impounded | `solvency.apply_repossession` |
+| Equipment the level earns that dispatch trust is withholding | held back | locked, gated, downgraded, nerfed, demoted | `carrier_fleet.equipment_held_back` |
+| Career experience arriving slower in low dispatch trust | reduced rate | XP penalty, multiplier, malus, nerf | `career.standing_xp_rate` |
 | The first damage band: the engine holds power back | reduced power | derate, band two, power loss | `DAMAGE_BAND_REDUCED` |
 | The deep damage band: reduced power plus a road-speed cap | limp mode | limp-home, speed governor, safe mode | `DAMAGE_BAND_LIMP` |
 | Damage past the point where the truck may be driven | out of service | broken down, totaled, disabled, dead truck | `TruckState.out_of_service` |
@@ -231,6 +239,26 @@ from the words, and synonyms cost them a re-read.
 | The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
 
 Notes on the entries that are not simple:
+
+**"Standing" is a code word, never a spoken one.** Dispatch trust answers to
+three things now -- the service record, the licence, and what the driver owes
+-- and the code calls that combination standing (`enforcement.standing_band`).
+The game still says *dispatch trust*, because it is one ladder with more
+inputs, not a second status. A screen reader user should not have to hold two
+words for one question, and "standing" was already ruled out as a synonym
+above. `enforcement.standing_text` is a separate thing again: it speaks as
+"Record: ...", and it is the enforcement record, not the trust band.
+
+**Say the cause, not the ladder.** Because dispatch trust now has three
+inputs, "clean on-time runs rebuild it" is false for a driver whose service is
+fine and whose debt is the problem. Every place that says trust is down names
+which of the three is holding it and what specifically clears that one.
+
+**Neither ending is an ending.** Ending an employment and taking a truck back
+are setbacks with a stated way forward, and the spoken text says so in the
+same breath. Never write "game over", "career over", "you failed", "start
+over", "bankrupt", or anything implying the save is gone -- none of that is
+true, and all of it lands hardest on the player it is describing.
 
 **Job and load are two concepts, not two names.** The job is the contract; the
 load is the freight on the trailer. "Use Abandon job to drop the load" is

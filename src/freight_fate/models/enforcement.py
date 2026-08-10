@@ -164,6 +164,17 @@ class DrivingRecord:
     # The trust band the driver has already been told about, so a change is
     # spoken once when it happens and never repeated on a timer.
     trust_band_heard: str = ""
+    # The debt warning the driver has already been given, on the same
+    # discipline: rungs are spoken when they move, never on a timer.
+    debt_rung_heard: int = 0
+    # Times a lender has taken an owner-operator's tractor back.
+    repossessions: int = 0
+    # A career-changing setback that has happened but not yet been read: the
+    # lines are composed when it lands and kept until the driver acknowledges
+    # them, so the longest and most consequential text in the game survives a
+    # keypress, a save, and a reload.
+    setback_notice_kind: str = ""  # "" | "termination" | "repossession"
+    setback_notice_lines: list[str] = field(default_factory=list)
     suspended_until_h: float = 0.0  # career game hours the CDL comes back
     suspension_reason: str = ""  # SUSPENSION_SERIOUS / SUSPENSION_MAJOR
     lifetime_disqualified: bool = False
@@ -315,27 +326,155 @@ def trust_decline_penalty(reputation: float) -> int:
     return 0
 
 
-def trust_text(reputation: float) -> str:
-    """Where the driver stands with dispatch, in one spoken line."""
-    band = trust_band(reputation)
+def trust_band_text(band: str) -> str:
+    """What a trust band means, without saying what brings it back.
+
+    Split out because "clean on-time runs rebuild it" stopped being true once
+    money and the licence fed the same band: a driver whose service is fine
+    and whose debt is the problem can run clean forever and watch nothing
+    move. The way back has to name the thing that is actually holding it.
+    """
     if band == TRUST_FULL:
         return "Dispatch trust: full. You get the whole board."
     if band == TRUST_GUARDED:
         return (
             "Dispatch trust: guarded. Dispatch is holding back some of the "
-            "freight and fewer refusals. Clean on-time runs rebuild it."
+            "freight and fewer refusals."
         )
     if band == TRUST_POOR:
         return (
             "Dispatch trust: poor. You are back to assigned loads whatever your "
             "level, the board is down to two, and the good freight is going to "
-            "other drivers. Clean on-time runs rebuild it."
+            "other drivers."
         )
     return (
         "Dispatch trust: last chance. One assigned load at a time, no refusals, "
-        "and the carrier is deciding whether to keep you. Clean on-time runs "
-        "rebuild it."
+        "and the carrier is deciding whether to keep you."
     )
+
+
+def trust_text(reputation: float) -> str:
+    """Where the driver stands with dispatch on service alone, in one line."""
+    band = trust_band(reputation)
+    if band == TRUST_FULL:
+        return trust_band_text(band)
+    return f"{trust_band_text(band)} Clean on-time runs rebuild it."
+
+
+# -- the whole picture: service, licence, and money -------------------------
+
+# Dispatch trust is one ladder with three inputs, not three ladders. Service
+# has always fed it. The licence and what the driver owes now feed the same
+# rungs, because a yard that will not give a driver its good freight is the
+# same yard that will not give them its good iron, for the same reasons.
+#
+# It stays one ladder on purpose: a second parallel status would cost a screen
+# reader user a whole extra concept to hold, and there is only one question
+# behind all of it -- how much is this carrier willing to put in your hands.
+
+# Worst first, so the binding input is simply the minimum.
+_BAND_ORDER = (TRUST_LAST_CHANCE, TRUST_POOR, TRUST_GUARDED, TRUST_FULL)
+
+CAUSE_SERVICE = "service"
+CAUSE_LICENCE = "licence"
+CAUSE_DEBT = "debt"
+
+
+def worst_band(*bands: str) -> str:
+    return min(bands, key=lambda band: _BAND_ORDER.index(band))
+
+
+def licence_band(profile) -> str:
+    """A licence that is not valid takes the seat, whatever the service record.
+
+    Only a suspension counts, never a serious violation on its own. A
+    suspension is a fact with a date on it that the driver can already hear
+    and wait out; violations age off over three game years, and gating the
+    equipment on those would be a hold no amount of good driving could clear.
+    Those already reach dispatch trust the honest way, through reputation.
+    """
+    record = getattr(profile, "driving_record", None)
+    if record is None:
+        return TRUST_FULL
+    hours = float(getattr(profile, "game_hours", 0.0) or 0.0)
+    return TRUST_LAST_CHANCE if record.suspended(hours) else TRUST_FULL
+
+
+def solvency_band(profile) -> str:
+    """How far what the driver owes has eaten into the carrier's patience."""
+    from .solvency import debt_rung
+
+    return (TRUST_FULL, TRUST_GUARDED, TRUST_POOR, TRUST_LAST_CHANCE)[debt_rung(profile)]
+
+
+def standing_band(profile) -> str:
+    """The band the carrier actually acts on: the worst of the three inputs.
+
+    Internal name only. Spoken text calls this dispatch trust, because that is
+    the noun the game already uses and ``docs/ontology.md`` already rules
+    "standing" out as a synonym for it.
+    """
+    return worst_band(
+        trust_band(float(getattr(getattr(profile, "career", None), "reputation", 50.0))),
+        licence_band(profile),
+        solvency_band(profile),
+    )
+
+
+def standing_cause(profile) -> str:
+    """Which input is holding the band down. Empty when nothing is."""
+    band = standing_band(profile)
+    if band == TRUST_FULL:
+        return ""
+    if licence_band(profile) == band:
+        return CAUSE_LICENCE
+    if solvency_band(profile) == band:
+        return CAUSE_DEBT
+    return CAUSE_SERVICE
+
+
+def standing_way_back(profile) -> str:
+    """What actually brings the band up, naming the thing that is holding it."""
+    from .solvency import debt_owed, money_text
+
+    cause = standing_cause(profile)
+    if cause == CAUSE_LICENCE:
+        clears = clears_text(profile)
+        if not clears:
+            return "Your CDL is disqualified for life, so the seat is not coming back."
+        return f"Your CDL is suspended, so the yard holds your seat until it clears {clears}."
+    if cause == CAUSE_DEBT:
+        line = f"You owe {money_text(debt_owed(profile))}, and that is what is holding it."
+        if trust_band(float(profile.career.reputation)) != TRUST_FULL:
+            return f"{line} Paying it down brings it back, and clean on-time runs help too."
+        return f"{line} Paying it down brings it back."
+    if cause == CAUSE_SERVICE:
+        return "Clean on-time runs rebuild it."
+    return ""
+
+
+def dispatch_trust_line(profile) -> str:
+    """Everything dispatch trust is doing to this driver, on demand, in one go.
+
+    Spoken when the band changes and whenever the player asks for it. Never on
+    a timer, and never for a driver in full trust beyond the one plain line
+    they already heard.
+    """
+    from .career import xp_rate_clause
+    from .carrier_fleet import equipment_hold_clause
+
+    band = standing_band(profile)
+    parts = [trust_band_text(band)]
+    way_back = standing_way_back(profile)
+    if way_back:
+        parts.append(way_back)
+    hold = equipment_hold_clause(profile)
+    if hold:
+        parts.append(hold)
+    rate = xp_rate_clause(band)
+    if rate:
+        parts.append(rate)
+    return " ".join(parts)
 
 
 def board_reputation_note(reputation: float) -> str:
