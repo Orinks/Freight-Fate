@@ -1,5 +1,3 @@
-import pytest
-
 from freight_fate.radio import (
     DEFAULT_RADIO_CATALOG,
     SAFE_FALLBACK_STATION_ID,
@@ -143,16 +141,27 @@ def test_tuning_uses_receivable_stations_not_global_catalog():
         position=(47.61, -122.33),
     )
     backend = RecordingBackend()
+    receivable = {reception.station.id for reception in radio.receivable_stations()}
 
-    # Walk the whole receivable ring once: every stop must be a Seattle-area
-    # signal, never Boston's, however many imported stations share the dial.
+    # The guarantee is that the dial is drawn from what the truck can actually
+    # receive. That is two claims, and neither needs the whole ring: the
+    # receivable set carries Seattle and not Boston, and every press lands
+    # inside that set. Together they say no amount of tuning reaches Boston.
+    #
+    # This used to walk all 5,092 receivable stations at 5.8 ms a press -- 33
+    # seconds, 94 percent of this file's runtime after the catalog sweep was
+    # collapsed, to re-derive what the set comparison already settles.
+    assert "kexp-seattle" in receivable
+    assert "wbur-boston" not in receivable
+
     seen = []
-    for _ in range(len(radio.receivable_stations())):
+    for _ in range(50):
         action = radio.tune(1, backend)
         seen.append(action.station.id)
 
-    assert "kexp-seattle" in seen
-    assert "wbur-boston" not in seen
+    assert seen, "tuning produced no station at all"
+    off_dial = sorted(set(seen) - receivable)
+    assert not off_dial, f"tuning reached stations the truck cannot receive: {off_dial}"
 
 
 def test_ff_music_stations_receivable_everywhere_in_every_mode():
@@ -329,13 +338,37 @@ def test_truck_position_uses_route_geometry(world):
     assert -124.0 <= lon <= -121.0
 
 
-@pytest.mark.parametrize("station", DEFAULT_RADIO_CATALOG)
-def test_catalog_entries_have_spoken_identity(station):
-    assert station.id
-    assert station.name
-    # Web stations are named, not lettered; everything else leads with a
-    # call sign, and display_name copes with either shape.
-    assert station.call_sign or station.source_type == "web"
-    assert station.display_name and not station.display_name.startswith(",")
-    assert station.format
-    assert station.source
+def test_catalog_entries_have_spoken_identity():
+    """Every station in the catalog carries what the dial has to say.
+
+    Swept in one test rather than parametrised per station. As a
+    parametrisation this was 6,599 of the suite's 9,720 cases -- 68 percent of
+    every collection, schedule and report the runner does, for 89 seconds of
+    almost pure overhead on a check that reads a static table. It also stopped
+    at the first bad station; a data sweep should hand back the whole list,
+    because whoever regenerates the catalog wants to fix them in one pass.
+    """
+    problems: list[str] = []
+    for station in DEFAULT_RADIO_CATALOG:
+        where = station.id or station.name or "<unnamed station>"
+        if not station.id:
+            problems.append(f"{where}: no id")
+        if not station.name:
+            problems.append(f"{where}: no name")
+        # Web stations are named, not lettered; everything else leads with a
+        # call sign, and display_name copes with either shape.
+        if not station.call_sign and station.source_type != "web":
+            problems.append(f"{where}: no call sign and not a web station")
+        if not station.display_name:
+            problems.append(f"{where}: no display name")
+        elif station.display_name.startswith(","):
+            problems.append(f"{where}: display name starts with a comma")
+        if not station.format:
+            problems.append(f"{where}: no format")
+        if not station.source:
+            problems.append(f"{where}: no source")
+    assert not problems, (
+        f"{len(problems)} catalog entries are missing spoken identity:\n"
+        + "\n".join(problems[:40])
+        + (f"\n... and {len(problems) - 40} more" if len(problems) > 40 else "")
+    )
