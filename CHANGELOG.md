@@ -36,6 +36,33 @@
 
 ### Added
 
+- **Traffic law now follows you through your whole career.** Fines scale
+  with how far over you were and climb with every citation you have
+  already collected, and the serious ones go on a record that outlives
+  the trip. Two serious violations in three years suspends your CDL for
+  sixty days and takes driving jobs off the dispatch board until it
+  clears; three costs a hundred and twenty days. Running from a traffic
+  stop is a felony that disqualifies you for a year, and a second one
+  ends that driver's commercial career for good -- so running is now
+  something you have to deliberately choose, with the cost read to you
+  before you commit. Your standing is always available to ask for, and
+  the game warns you before the next violation is the one that lands.
+  A driver who keeps it clean sees none of this.
+
+- **Dispatch trusts you less as your reputation falls.** A good record
+  gets you the whole board and your pick of loads. As reputation slides
+  you see fewer and worse-paying dispatches, lose the right to choose
+  your own load, and get a smaller allowance for turning work down; at
+  the bottom your carrier lets you go. Clean, on-time runs rebuild it,
+  and the game tells you which way you are moving.
+
+- **Falling asleep at the wheel is now on your record.** Running off the
+  road asleep costs reputation as a preventable safety incident, and
+  doing it again becomes a fatigued-driving violation on your CDL. When
+  you cannot stay awake at all, the truck is genuinely stopped and you
+  are out of service for ten hours -- the same rule a real inspector
+  would apply.
+
 - **Blow past the facility gate and you now miss it.** Arriving used to
   be automatic no matter how fast you came in. Now the approach warns
   you ahead of the gate with the speed to slow to, and if you carry past
