@@ -6,6 +6,7 @@ from __future__ import annotations
 from ..sim.pedal_latch import PedalLatch
 from .driving_core import *
 from .driving_controls import DrivingControlsMixin
+from .driving_enforcement import EnforcementWatchMixin
 from .driving_engine_brake import EngineBrakeZoneMixin
 from .driving_events import DrivingEventMixin
 from .driving_facility_gate import FacilityGateMixin
@@ -25,6 +26,7 @@ ACTIVE_TRIP_DEADLINE_MODEL = 1
 class DrivingState(
     DrivingControlsMixin,
     DrivingUpdateMixin,
+    EnforcementWatchMixin,
     EngineBrakeZoneMixin,
     FacilityGateMixin,
     TurnCommitmentMixin,
@@ -256,15 +258,15 @@ class DrivingState(
         self._pull_over_coast_s = 0.0  # consecutive s with no braking and no accel
         self._pull_over_signal_boost = False  # the one-time signal bump has fired
         self._pull_over_nosignal_hit = False  # the one-time no-signal 1/4 hit has fired
-        # Deterministic, save-safe stream for "did a patrol catch you" rolls, kept
-        # apart from the trip's hazard/zone/inspection streams.
-        self._patrol_rng = random.Random(None if trip_seed is None else trip_seed ^ 0xB0A1)
-        # The road-joint spacer used to draw from _patrol_rng about a hundred
-        # times a mile, so whether a trooper caught you came down to how many
-        # joints had played -- frame timing, effectively, and a reload
-        # re-rolled it. Ambience gets its own stream, and every enforcement
-        # roll is drawn from a named, position-quantised seed instead.
+        # The road-joint spacer used to draw from the shared patrol stream
+        # about a hundred times a mile, so whether a trooper caught you came
+        # down to how many joints had played -- frame timing, effectively, and
+        # a reload re-rolled it. Ambience keeps its own stream, and there is
+        # no longer a shared enforcement stream at all: every police decision
+        # is a named, position-quantised seed (see sim/enforcement_posts.
+        # post_seed), so nothing the audio layer does can consume it.
         self._road_texture_rng = random.Random(None if trip_seed is None else trip_seed ^ 0x5EA7)
+        self._enforcement_init()
         self._rescue_offered = False
         self._signal_timer = 0.0
         self._exit_stop = None  # active route exit

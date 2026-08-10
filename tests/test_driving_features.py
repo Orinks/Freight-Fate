@@ -830,9 +830,16 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "risks losing traction" in help_text
     assert "low visibility shortens" in help_text
     assert "career runs on a calendar that starts in spring" in help_text
-    assert "state troopers patrol" in help_text
-    assert "cb chatter may mention" in help_text
+    assert "enforcement posts sit along the road" in help_text
+    # The graded observation, and the tactic it gives back, are documented.
+    assert "five over is seen and" in help_text
+    assert "running in a pack" in help_text
+    assert "cb chatter passes on what other drivers have seen" in help_text
+    assert "never claims the road is clear" in help_text
     assert "review that chatter" in help_text
+    # The presence control has to promise, in the help, what it does not do.
+    assert "enforcement presence control" in help_text
+    assert "getting caught is" in help_text
     # The 1.9 line's older sentence said cruise "will not engage on low-speed
     # local roads". That is no longer true of the shipped behaviour: the speed
     # keeper takes those and hands back to cruise, so the help says so instead.
@@ -1148,7 +1155,7 @@ def test_speeding_strike_flushes_event_voice(monkeypatch):
             "speed_limit_at",
             lambda _position: (25.0, None),
         )
-        monkeypatch.setattr(driving, "_trooper_catches_speeder", lambda _limit: False)
+        driving.trip.posts = []  # nobody is watching; only the silent strike lands
 
         driving._update_speeding(11.0)
 
@@ -1297,8 +1304,9 @@ def test_air_brake_help_and_status_are_spoken(monkeypatch):
 
 
 def test_driver_apps_screen_uses_keyboard_and_vague_road_chatter(monkeypatch):
+    from enforcement_helpers import always_observing_post
+
     from freight_fate.app import App
-    from freight_fate.sim.trip import PatrolWindow
     from freight_fate.states.driving import DrivingStatusState
 
     app = App()
@@ -1307,13 +1315,8 @@ def test_driver_apps_screen_uses_keyboard_and_vague_road_chatter(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
-        driving.trip.patrols = [
-            PatrolWindow(
-                driving.trip.position_mi + 3.0,
-                driving.trip.position_mi + 6.0,
-                0.8,
-                "speed trap",
-            )
+        driving.trip.posts = [
+            always_observing_post(at_mi=driving.trip.position_mi + 4.0, reach_mi=1.0)
         ]
 
         driving.handle_event(key_event(pygame.K_TAB))

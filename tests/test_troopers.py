@@ -1,10 +1,10 @@
-"""State-trooper pull-overs: patrol windows, getting caught speeding, the
-interactive traffic stop, immediate tickets, warnings, and evasion."""
+"""Trooper pull-overs: enforcement posts, being observed speeding, the
+interactive roadside pull-over, immediate tickets, warnings, and evasion."""
 
+from enforcement_helpers import always_observing_post, open_scale_post, watch_speed
 from speech_capture import speech_stub
 
 from freight_fate.sim import Trip, TruckState, WeatherSystem
-from freight_fate.sim.trip import PatrolWindow
 
 
 def _trip(seed=7, hazard_scale=1.0, start_hour=12.0):
@@ -20,18 +20,18 @@ def _trip(seed=7, hazard_scale=1.0, start_hour=12.0):
     )
 
 
-# --- patrol model -----------------------------------------------------------
+# --- post model -------------------------------------------------------------
 
 
-def _patrol_key(t):
-    return [(round(p.start_mi, 1), round(p.intensity, 3)) for p in t.patrols]
+def _post_key(t):
+    return [(round(p.at_mi, 1), p.kind, p.staffed) for p in t.posts]
 
 
-def test_patrol_seeding_is_deterministic():
-    assert _patrol_key(_trip()) == _patrol_key(_trip())
+def test_post_seeding_is_deterministic():
+    assert _post_key(_trip()) == _post_key(_trip())
 
 
-def test_patrol_windows_create_state_trooper_npcs():
+def test_roving_posts_create_state_trooper_npcs():
     t = _trip()
 
     troopers = [
@@ -39,62 +39,71 @@ def test_patrol_windows_create_state_trooper_npcs():
         for vehicle in t.traffic_manager.vehicles
         if getattr(vehicle, "vehicle_class", "") == "state trooper"
     ]
+    roving = [p for p in t.posts if p.kind == "roving_patrol" and p.staffed]
 
-    assert t.patrols
-    assert len(troopers) == len(t.patrols)
+    assert t.posts
+    assert len(troopers) == len(roving)
     assert all(vehicle.reason == "state trooper ahead" for vehicle in troopers)
 
 
-def test_relaxed_mode_has_fewer_patrols():
-    assert len(_trip(hazard_scale=0.3).patrols) <= len(_trip().patrols)
+def test_relaxed_hazards_do_not_thin_the_police():
+    """A calmer hazard setting must not empty the roads of enforcement.
+
+    Presence is a fact about the country, not a difficulty knob: hazard_scale
+    used to divide the patrol count, so relaxed mode drove through a state
+    with one patrol window in six hundred miles.
+    """
+    assert len(_trip(hazard_scale=0.3).posts) == len(_trip().posts)
 
 
-def test_construction_zones_are_always_hot_patrols():
+def test_construction_zones_always_carry_a_work_zone_post():
     t = _trip()
     construction = [z for z in t.zones if z.reason == "construction"]
     if construction:
-        covering = t.active_patrol_at((construction[0].start_mi + construction[0].end_mi) / 2)
-        assert covering is not None and covering.intensity >= 0.5
+        zone = construction[0]
+        covering = [
+            p for p in t.posts if p.kind == "work_zone_post" and abs(p.at_mi - zone.start_mi) < 1.0
+        ]
+        assert covering
 
 
-def test_active_patrol_returns_hottest_window():
+def test_active_post_returns_the_most_attentive_watcher():
     t = _trip()
-    t.patrols = [
-        PatrolWindow(0.0, 100.0, 0.3, "highway enforcement"),
-        PatrolWindow(0.0, 100.0, 0.8, "work zone enforcement"),
-    ]
-    assert t.active_patrol_at(50.0).intensity == 0.8
-    assert t.active_patrol_at(200.0) is None
+    quiet = always_observing_post(at_mi=50.0, kind="urban_unit", notice=0.3)
+    loud = always_observing_post(at_mi=50.0, kind="work_zone_post", notice=0.9)
+    t.posts = [quiet, loud]
+    assert t.active_post_at(50.0) is loud
+    assert t.active_post_at(2000.0) is None
 
 
-def test_cb_radio_warns_before_upcoming_patrol():
-    from freight_fate.sim.trip import CB_PATROL_LOOKAHEAD_MI, TripEventKind
+def test_cb_radio_warns_before_an_upcoming_post():
+    from freight_fate.sim.trip import TripEventKind
 
     t = _trip()
-    t.patrols = [PatrolWindow(10.0, 14.0, 0.8, "highway enforcement")]
-    t.position_mi = 10.0 - CB_PATROL_LOOKAHEAD_MI + 0.1
+    t.posts = [always_observing_post(at_mi=14.0, reach_mi=4.0)]
+    t.position_mi = 10.0 - 0.1
     t.truck.velocity_mps = 1.0
 
     events = t.update(0.1)
 
-    cb_events = [e for e in events if e.data.get("cb_patrol") is t.patrols[0]]
+    cb_events = [e for e in events if e.data.get("cb_patrol") is t.posts[0]]
     assert cb_events
     assert cb_events[0].kind == TripEventKind.GPS_CUE
-    assert "drivers report a bear ahead" in cb_events[0].message
-    assert "check your speed" in cb_events[0].message
+    assert "CB chatter" in cb_events[0].message
+    assert "bear" in cb_events[0].message
 
 
-def test_cb_radio_patrol_warning_only_fires_once():
+def test_cb_radio_post_warning_only_fires_once():
     t = _trip()
-    t.patrols = [PatrolWindow(10.0, 14.0, 0.8, "highway enforcement")]
+    t.posts = [always_observing_post(at_mi=14.0, reach_mi=4.0)]
     t.position_mi = 6.0
     t.truck.velocity_mps = 1.0
 
     first = t.update(0.1)
     second = t.update(0.1)
 
-    assert sum(1 for e in first if e.data.get("cb_patrol") is t.patrols[0]) == 1
-    assert not any(e.data.get("cb_patrol") is t.patrols[0] for e in second)
+    assert sum(1 for e in first if e.data.get("cb_patrol") is t.posts[0]) == 1
+    assert not any(e.data.get("cb_patrol") is t.posts[0] for e in second)
 
 
 # --- driving-side: catching the speeder -------------------------------------
@@ -121,9 +130,13 @@ def _driving(app, *, patrol_intensity=1.0):
     d = DrivingState(app.ctx, job, route, phase="delivery")
     total = d.trip.total_miles
     if patrol_intensity is None:
-        d.trip.patrols = []
+        d.trip.posts = []
     else:
-        d.trip.patrols = [PatrolWindow(0.0, total, patrol_intensity, "highway enforcement")]
+        # One post that watches the whole route and has already been heard,
+        # so a test can put the truck anywhere and ask what it sees.
+        d.trip.posts = [
+            always_observing_post(at_mi=total, reach_mi=total + 1.0, notice=patrol_intensity)
+        ]
     return d
 
 
@@ -134,13 +147,13 @@ def _quiet(app, monkeypatch):
 
 
 def _speed_for(d, over=20.0):
-    from freight_fate.states.driving import SPEEDING_HOLD_S
+    """Speed past a watching post far enough for it to read the speed.
 
-    d.trip.position_mi = d.trip.total_miles / 2.0
-    limit, _ = d.trip.speed_limit_at(d.trip.position_mi)
-    d.truck.velocity_mps = (limit + over) / 2.23694
-    d._update_speeding(SPEEDING_HOLD_S + 1.0)
-    return limit
+    Observation is distance-quantised now, not held on the wall clock, so
+    the setup is "the truck has run this far over the limit", not "this many
+    real seconds have passed".
+    """
+    return watch_speed(d, over=over)
 
 
 def _past_grace(d):
@@ -153,7 +166,7 @@ def _past_grace(d):
     d._pull_over_grace_s = 0.0
 
 
-def test_speeding_in_a_patrol_window_starts_a_pull_over(monkeypatch):
+def test_speeding_past_a_staffed_post_starts_a_pull_over(monkeypatch):
     from freight_fate.app import App
 
     app = App()
@@ -494,6 +507,7 @@ def test_weigh_station_blow_past_starts_enforcement_stop(monkeypatch):
         d = _driving(app, patrol_intensity=None)
         _quiet(app, monkeypatch)
         d.trip.stops = [RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))]
+        d.trip.posts = [*d.trip.posts, open_scale_post(d.trip.stops[0])]
         d.trip.position_mi = 10.1
         d.truck.velocity_mps = 55.0 / 2.23694
 
@@ -526,6 +540,7 @@ def test_weigh_station_warning_is_spoken_before_bypass(monkeypatch):
         monkeypatch.setattr(app.ctx, "say_event", lambda text, *a, **k: spoken.append(text))
         monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         d.trip.stops = [RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))]
+        d.trip.posts = [*d.trip.posts, open_scale_post(d.trip.stops[0])]
         d.trip.position_mi = 8.2
         d.truck.velocity_mps = 45.0 / 2.23694
 
@@ -548,6 +563,7 @@ def test_debug_off_mode_bypasses_scale_blow_past(monkeypatch):
         app.ctx.settings.hos_mode = "debug_off"
         _quiet(app, monkeypatch)
         d.trip.stops = [RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))]
+        d.trip.posts = [*d.trip.posts, open_scale_post(d.trip.stops[0])]
         d.trip.position_mi = 10.1
         d.truck.velocity_mps = 55.0 / 2.23694
 
@@ -570,6 +586,7 @@ def test_scale_bypass_does_not_overwrite_active_pull_over(monkeypatch):
         limit = _speed_for(d, over=25.0)
         assert d._pull_over == "lights"
         d.trip.stops = [RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))]
+        d.trip.posts = [*d.trip.posts, open_scale_post(d.trip.stops[0])]
         d.trip.position_mi = 10.1
         d.truck.velocity_mps = (limit + 25.0) / 2.23694
 
@@ -648,6 +665,7 @@ def test_f1_help_names_non_speed_enforcement_pullovers(monkeypatch):
 
 def test_braking_to_a_stop_reaches_the_roadside_stop(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.states import driving_rest_states
     from freight_fate.states.driving import (
         PULL_OVER_FULL_COMPLIANCE,
         TrafficStopState,
@@ -657,13 +675,17 @@ def test_braking_to_a_stop_reaches_the_roadside_stop(monkeypatch):
     try:
         d = _driving(app, patrol_intensity=1.0)
         _quiet(app, monkeypatch)
+        # The clean-stop leniency is a real one-in-four chance seeded on the
+        # trip; this test is about reaching the roadside stop and being
+        # ticketed, so take the leniency off the table rather than leaving a
+        # one-in-four flake in it.
+        monkeypatch.setattr(driving_rest_states, "PULL_OVER_CLEAN_STOP_WARN_CHANCE", 0.0)
         _speed_for(d, over=25.0)
         d._signal_pull_over()  # signal, then brake steadily
         _past_grace(d)
         for _ in range(4):
             d._update_pull_over(1.0, service_braking=True)
         assert d._pull_over_compliance >= PULL_OVER_FULL_COMPLIANCE
-        d._patrol_rng = _Roll(1.0)  # do not roll the clean-stop leniency
         d.truck.velocity_mps = 0.0
         d._update_pull_over(1.0)
         assert isinstance(app.state, TrafficStopState)

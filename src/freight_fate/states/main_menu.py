@@ -22,6 +22,7 @@ from ..playtest_levers import apply_continue_levers
 from ..settings import (
     DRIVING_ASSIST_FIELDS,
     DRIVING_ASSIST_PRESETS,
+    ENFORCEMENT_PRESENCE_LEVELS,
     PLACE_CALLOUT_MODES,
     TIME_SCALES,
 )
@@ -1004,6 +1005,13 @@ class SettingsCategoryState(MenuState):
                     "driver responsibility: hours, fueling, and repairs.",
                 ),
                 MenuItem(
+                    lambda: f"Enforcement presence: {s.enforcement_presence}",
+                    lambda: self._cycle_enforcement_presence(1),
+                    help="How much police activity you hear on the road. It does "
+                    "not change how likely you are to be pulled over. Asking for "
+                    "the road ahead always reports enforcement in full.",
+                ),
+                MenuItem(
                     lambda: f"Lane drift: {self._steering_label()}",
                     lambda: self._cycle_steering(1),
                     help="Choose whether lane drift is off, light, or realistic.",
@@ -1150,6 +1158,7 @@ class SettingsCategoryState(MenuState):
                     self._toggle_overspeed_warning,
                     self._cycle_pace,
                     self._cycle_hos,
+                    self._cycle_enforcement_presence,
                     self._cycle_steering,
                     self._toggle_speed_keeper,
                     self._toggle_controller,
@@ -1557,6 +1566,31 @@ class SettingsCategoryState(MenuState):
             i = 0
         self.ctx.settings.hos_mode = modes[(i + d) % len(modes)]
         self._announce()
+
+    def _cycle_enforcement_presence(self, d: int) -> None:
+        """Cycle how loud the policed country is -- and say what it does not do.
+
+        The reassurance is not padding. A slider that lowers what you hear is
+        indistinguishable, from inside the cab, from a slider that lowers what
+        can happen to you; saying so plainly at the moment of the change is
+        the only place the player can learn the difference.
+        """
+        levels = list(ENFORCEMENT_PRESENCE_LEVELS)
+        try:
+            i = levels.index(self.ctx.settings.enforcement_presence)
+        except ValueError:
+            i = levels.index("standard")
+        chosen = levels[(i + d) % len(levels)]
+        self.ctx.settings.enforcement_presence = chosen
+        heard = {
+            "full": "You will hear more police activity.",
+            "standard": "You will hear the usual amount of police activity.",
+            "quiet": "You will hear less police activity.",
+        }[chosen]
+        self.ctx.say(
+            f"Enforcement presence, {chosen}. {heard} "
+            "Getting caught speeding is exactly as likely as before."
+        )
 
     def _cycle_cue_loudness(self, d: int) -> None:
         levels = ["subtle", "standard", "prominent"]

@@ -57,6 +57,14 @@ CHATTER_FIELDS = (
 # village layer on another -- the player never needs to know which).
 PLACE_CALLOUT_MODES = ("off", "sparse", "all")
 
+# How loud the policed country is. Presence is not difficulty: see the
+# ``enforcement_presence`` field for why these two must never move together.
+ENFORCEMENT_PRESENCE_LEVELS = ("full", "standard", "quiet")
+# Multiplier on the ambient enforcement layer -- the marked-unit passes for
+# posts nobody is sitting in, the scale approach beds, and the CB colour. It
+# never reaches placement, staffing, observation or consequence.
+ENFORCEMENT_AMBIENCE_SCALE = {"full": 1.35, "standard": 1.0, "quiet": 0.45}
+
 DRIVING_ASSIST_FIELDS = (
     "automatic_emergency_braking",
     "lane_departure_warning",
@@ -127,6 +135,16 @@ class Settings:
     hos_mode: str = (
         "realistic"  # hours of service: realistic/relaxed (debug_off is an internal dev bypass)
     )
+    # How much police activity the road makes audible. AMBIENCE ONLY. It never
+    # changes where the enforcement posts are, whether one is staffed, or how
+    # likely you are to be observed and pulled over -- if one slider moved
+    # both, turning the noise down would quietly make the game easier while
+    # the player believed they had only turned down noise. The on-demand
+    # road-ahead readout reports enforcement at full detail at every level, so
+    # what a quiet road costs you is atmosphere, never information you can ask
+    # for. A quiet setting still hears every staffed post it passes: a post
+    # the player was given no cue for is not allowed to cost them anything.
+    enforcement_presence: str = "standard"  # full / standard / quiet
     # Whether the lane-position task runs at all. A simulation choice like
     # the speed keeper, not a safety assist: the 1.9 exit mechanics only
     # demand signals and lane discipline when it is on. Presets leave it
@@ -319,6 +337,8 @@ class Settings:
             s.hos_mode = "realistic"
         if s.lane_cue_loudness not in ("subtle", "standard", "prominent"):
             s.lane_cue_loudness = "standard"
+        if s.enforcement_presence not in ENFORCEMENT_PRESENCE_LEVELS:
+            s.enforcement_presence = "standard"
         if s.steering_assist not in ("off", "light", "realistic"):
             s.steering_assist = "off"
             s.lane_departure_warning = False

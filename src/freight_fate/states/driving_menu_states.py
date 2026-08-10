@@ -571,10 +571,12 @@ class DriverAppScreenState(MenuState):
         pos = d.trip.position_mi
         if self.ctx.settings.hos_mode in hos.HOS_NON_ENFORCED_MODES:
             return "Road chatter: enforcement reports are quiet in this mode."
-        for patrol in getattr(d.trip, "patrols", []):
+        # Full detail whatever the enforcement-presence setting is: presence
+        # governs ambience, and never information the player asked a key for.
+        for patrol in getattr(d.trip, "posts", []):
             if patrol.end_mi < pos:
                 continue
-            ahead = max(0.0, patrol.start_mi - pos)
+            ahead = max(0.0, patrol.watch_start_mi - pos)
             if ahead <= 25.0:
                 return (
                     "Road chatter: drivers are talking about enforcement somewhere "

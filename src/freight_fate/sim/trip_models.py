@@ -397,7 +397,20 @@ CONSTRUCTION_TAPER_MI = 1.0
 CONSTRUCTION_TAPER_LIMIT_MPH = 55.0
 CORRIDOR_HAZARD_MIN_FACTOR = 0.75
 CORRIDOR_HAZARD_MAX_FACTOR = 1.45
-CB_PATROL_LOOKAHEAD_MI = 5.0
+CB_PATROL_LOOKAHEAD_MI = 5.0  # floor for the enforcement lead, never the whole answer
+# Enforcement cues get the same real-time treatment zone warnings already get
+# (ZONE_WARNING_REAL_S below). A fixed five miles is 13.8 real seconds at
+# relaxed pacing and 3.5 at realistic, and the CB call itself takes about
+# seven seconds to speak -- so at realistic pacing the player used to pass the
+# post mid-sentence.
+ENFORCEMENT_WARNING_REAL_S = 18.0
+ENFORCEMENT_WARNING_MAX_MI = 12.0
+# An open scale costs money and time, so its call gets a longer lead than a
+# heads-up does.
+SCALE_WARNING_REAL_S = 20.0
+# Spoken enforcement lines are capped for a whole run. Presence is carried by
+# earcons; speech is spent only where an action follows.
+CB_CALLS_PER_RUN = 2
 ZONE_WARNING_LOOKAHEAD_MI = 2.0  # minimum distance heads-up for a zone
 # Distance compression (time_scale) and speed eat into how much *real* time a
 # fixed-distance warning gives -- 2 miles at 70 mph and 20x is only ~5 seconds.
@@ -746,22 +759,6 @@ class Zone:
 
 
 @dataclass
-class PatrolWindow:
-    """A stretch of road where a state trooper may be watching.
-
-    ``intensity`` (0-1) is the chance a sustained speeding strike inside the
-    window actually gets you pulled over -- higher on busy interstates, in
-    construction, and at rush hour or night, lower out on empty plains. The
-    ``reason`` is a short internal context label, such as highway enforcement
-    or work zone enforcement."""
-
-    start_mi: float
-    end_mi: float
-    intensity: float
-    reason: str
-
-
-@dataclass
 class RoadStop:
     name: str
     at_mi: float
@@ -883,10 +880,6 @@ class TrafficPressure:
     intensity: float
     target_speed_mph: float
     reason: str
-
-
-def _patrol_key(patrol: PatrolWindow) -> str:
-    return f"{patrol.reason}:{patrol.start_mi:.3f}:{patrol.end_mi:.3f}"
 
 
 def _traffic_pressure_key(pressure: TrafficPressure) -> str:

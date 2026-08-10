@@ -1,8 +1,9 @@
 """Traffic bubble manager tests."""
 
+from enforcement_helpers import always_observing_post
+
 from freight_fate.data.world import get_world
 from freight_fate.sim.traffic_manager import TrafficManager, TrafficVehicle
-from freight_fate.sim.trip_models import PatrolWindow
 from freight_fate.sim.vehicle import TruckState
 from freight_fate.sim.weather import WeatherKind, WeatherSystem
 
@@ -160,16 +161,20 @@ def test_update_keeps_future_route_traffic_until_reached():
     assert any(vehicle.position_mi > 10.0 for vehicle in manager.vehicles)
 
 
-def test_patrol_windows_add_state_trooper_traffic():
+def test_roving_posts_add_state_trooper_traffic():
     manager = _manager()
     manager.vehicles = [TrafficVehicle("traffic:existing", 2.0, 55.0, 55.0, 0, "cruising", "semi")]
-    patrols = [
-        PatrolWindow(10.0, 14.0, 0.8, "highway enforcement"),
-        PatrolWindow(22.0, 26.0, 0.9, "work zone enforcement"),
+    posts = [
+        always_observing_post(at_mi=10.0, kind="roving_patrol"),
+        always_observing_post(at_mi=22.0, kind="roving_patrol"),
+        # Parked kinds belong to the enforcement cues, not the traffic bubble:
+        # spawning a "cruising" vehicle for a median crossover is what used to
+        # put phantom troopers into the lead-vehicle lookups.
+        always_observing_post(at_mi=30.0, kind="median_post"),
     ]
 
-    manager.add_patrol_traffic(patrols)
-    manager.add_patrol_traffic(patrols)
+    manager.add_enforcement_traffic(posts)
+    manager.add_enforcement_traffic(posts)
 
     troopers = [vehicle for vehicle in manager.vehicles if vehicle.vehicle_class == "state trooper"]
     assert len(troopers) == 2

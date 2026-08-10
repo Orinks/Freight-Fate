@@ -369,6 +369,11 @@ class DrivingUpdateMixin:
         self._update_grade_advisory()
         self._update_microsleep(keys, dt)
         self._update_overrev(dt)
+        # The watch runs first on purpose. If an officer opens a pull-over
+        # this frame, _update_speeding returns early on the live stop, so one
+        # instance of speeding can never be charged twice -- once as a ticket
+        # and again as a silent at-delivery strike.
+        self._update_enforcement_watch(dt)
         self._update_speeding(dt, accelerator_held=accel_held)
         self._update_engine_brake_zone(dt)
         self._update_pull_over(dt, service_braking=braking or emergency)
@@ -1771,6 +1776,10 @@ class DrivingUpdateMixin:
     def _apply_radio_volume(self) -> None:
         factor = getattr(self, "_radio_signal_factor", 1.0)
         duck = getattr(self, "_radio_picket_duck", 1.0)
+        # A sibling of the picket duck, deliberately not the same field: the
+        # picket duck self-heals on _stop_radio_fringe, which would drag an
+        # enforcement duck away with it in the middle of a cue.
+        duck *= getattr(self, "_radio_cue_duck", 1.0)
         self.ctx.audio.set_volumes(music=self.ctx.settings.radio_volume * factor * duck)
 
     def _play_radio_current(self) -> None:
@@ -2239,12 +2248,14 @@ class DrivingUpdateMixin:
             self._speeding_timer += dt
             if self._speeding_timer > SPEEDING_HOLD_S:
                 self._speeding_timer = 0.0
-                # Caught by a patrol -> an immediate pull-over and ticket. Not
-                # caught -> the silent at-delivery strike (the safety/insurance
-                # cost of speeding nobody saw). Never both for one instance.
-                if self._trooper_catches_speeder(limit):
-                    self._begin_pull_over(limit)
-                    return
+                # The silent at-delivery strike: the safety and insurance cost
+                # of speeding nobody saw. Whether anybody DID see it is not
+                # decided here any more -- an officer reads a speed over a
+                # stretch of road, not over six real seconds of wall clock, so
+                # observation lives in the enforcement watch, on a distance
+                # measure that behaves the same at every pacing. A stop already
+                # in progress returns above, so the two can never charge the
+                # same instance twice.
                 before = _speeding_settlement_fine(self.speeding_strikes)
                 self.speeding_strikes += 1
                 after = _speeding_settlement_fine(self.speeding_strikes)
@@ -2318,18 +2329,6 @@ class DrivingUpdateMixin:
                 interrupt=False,
             )
 
-    def _trooper_catches_speeder(self, limit: float) -> bool:
-        """Whether a patrol clocks this speeding strike, by patrol intensity."""
-        if self.ctx.settings.hos_mode in hos.HOS_NON_ENFORCED_MODES:
-            return False  # enforcement is bypassed in the debug mode
-        patrol = self.trip.active_patrol_at(self.trip.position_mi)
-        if patrol is None:
-            return False
-        # Named and position-quantised, never time-quantised: a reload must
-        # not re-roll whether a trooper was sitting there.
-        key = f"{self.trip_seed}:police:catch:{round(self.trip.position_mi, 1)}"
-        return random.Random(key).random() < patrol.intensity
-
     def _begin_pull_over(self, limit: float) -> None:
         """A trooper has lit you up: announce it and wait for the stop."""
         self._pull_over = "lights"
@@ -2347,8 +2346,8 @@ class DrivingUpdateMixin:
         self._reset_pull_over_tracker()
         self._pull_over_compliance = PULL_OVER_START_COMPLIANCE
         self._pull_over_prev_mph = self.truck.speed_mph
-        patrol = self.trip.active_patrol_at(self.trip.position_mi)
-        where = patrol.reason if patrol is not None else "patrol"
+        post = self.trip.active_post_at(self.trip.position_mi)
+        where = post.reason if post is not None else "highway enforcement"
         signal_hint = self.ctx.control_hint("take_exit")
         message = (
             f"Lights and siren behind you. A trooper on this {where} clocked you "
@@ -2378,7 +2377,17 @@ class DrivingUpdateMixin:
         if self.ctx.profile is not None:
             self.ctx.profile.active_trip = self.snapshot()
             self.ctx.save_profile()
-        self.ctx.audio.play("events/police_siren")
+        # Cut the radio outright rather than ducking it. The catalog ships
+        # dozens of always-available police and fire scanner streams, so a
+        # siren over programme material is genuinely ambiguous -- and the
+        # sudden silence is itself an unmistakable cue that something has
+        # taken the cab over.
+        self._cut_radio_for_stop()
+        # Lead with the synthesized enforcement signature, then hold the real
+        # siren underneath it. The signature says "this is the game telling
+        # you about enforcement"; the siren says what it is.
+        self._play_enforcement_marker(volume=0.9)
+        self._hold_stop_siren()
         self.ctx.say_event(message, interrupt=True)
 
     def _pull_over_grace_seconds(self, message: str) -> float:
@@ -2398,14 +2407,24 @@ class DrivingUpdateMixin:
         return f"weigh:{stop.name}:{stop.at_mi:.1f}"
 
     def _check_weigh_station_enforcement(self, previous_mi: float) -> None:
-        if self._enforcement_bypassed() or self._pull_over is not None or self._ramp_mi is not None:
+        # One demand on the driver at a time. This guarded on the stop and the
+        # ramp but not on a running hazard deadline, so a scale could speak
+        # over a braking window the player had two seconds to make.
+        if self._enforcement_bypassed() or self._enforcement_busy():
             return
         for stop in self.trip.stops:
             if stop.type != "weigh_station":
                 continue
             ahead = stop.at_mi - self.trip.position_mi
             key = self._weigh_station_key(stop)
-            if 0 < ahead <= WEIGH_STATION_NOTICE_MI and key != self._weigh_station_notice_key:
+            if (
+                0 < ahead <= self._scale_notice_lookahead_mi()
+                and key != self._weigh_station_notice_key
+                and self._scale_is_open(stop)
+            ):
+                # Only an OPEN scale is spoken. A closed one gets the thinner,
+                # drier approach bed and nothing said -- the swell says
+                # "scale", and the absence of speech is what says "closed".
                 self._weigh_station_notice_key = key
                 self.ctx.audio.play("events/inspection_warning", volume=0.7)
                 self.ctx.say_event(
@@ -2417,7 +2436,11 @@ class DrivingUpdateMixin:
             if key in self.enforcement_events:
                 continue
             crossed = previous_mi < stop.at_mi <= self.trip.position_mi
-            if crossed and self.truck.speed_mph > WEIGH_STATION_BYPASS_MPH:
+            if (
+                crossed
+                and self._scale_is_open(stop)
+                and self.truck.speed_mph > WEIGH_STATION_BYPASS_MPH
+            ):
                 self.enforcement_events.add(key)
                 self._begin_enforcement_pull_over(
                     kind="weigh_station_bypass",
@@ -2437,14 +2460,14 @@ class DrivingUpdateMixin:
                 )
 
     def _check_unsafe_damage_enforcement(self) -> None:
-        if self._enforcement_bypassed() or self._pull_over is not None or self._ramp_mi is not None:
+        if self._enforcement_bypassed() or self._enforcement_busy():
             return
         if (
             self.truck.damage_pct < UNSAFE_DAMAGE_STOP_PCT
             or self.truck.speed_mph <= DOCKING_MAX_MPH
         ):
             return
-        patrol = self.trip.active_patrol_at(self.trip.position_mi)
+        patrol = self.trip.active_post_at(self.trip.position_mi)
         if patrol is None:
             return
         key = f"unsafe_damage:{round(self.trip.position_mi, 1)}"
@@ -2625,7 +2648,11 @@ class DrivingUpdateMixin:
         if self._enforcement_bypassed():
             self._pull_over = None
             self.trip.pull_over_active = False
+            self._end_stop_audio()
             return
+        # Re-asserted every frame the cruiser is there, and released by its own
+        # dead man's switch the moment this stops being called.
+        self._hold_stop_siren()
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
             self._open_traffic_stop()
             return
@@ -2727,6 +2754,7 @@ class DrivingUpdateMixin:
         # Read the tracker before the reset zeroes it.
         clean_stop = self._pull_over_compliance >= PULL_OVER_FULL_COMPLIANCE
         self.trip.pull_over_active = False
+        self._end_stop_audio()
         self._pursuit_hold_s = 0.0
         # Rolling on through a spoken failure-to-stop warning before finally
         # pulling in is reckless-class behavior, and the record says so.
@@ -2818,6 +2846,7 @@ class DrivingUpdateMixin:
         signaled = self._pull_over_signaled
         self._pull_over = None
         self.trip.pull_over_active = False
+        self._end_stop_audio()
         self._reset_pull_over_tracker()
         self._pursuit_hold_s = 0.0
         t = self.truck
@@ -2850,6 +2879,7 @@ class DrivingUpdateMixin:
         hit, and load consequences."""
         self._pull_over = None
         self.trip.pull_over_active = False
+        self._end_stop_audio()
         self._reset_pull_over_tracker()
         self._pursuit_hold_s = 0.0
         self.ctx.audio.play("events/spike_strip")

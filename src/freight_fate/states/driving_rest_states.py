@@ -1308,8 +1308,19 @@ class RestStopState(MenuState):
         _advance_rest_clock(d, INSPECTION_MIN)
         d.hos.on_duty(INSPECTION_MIN)
         self.ctx.audio.play("ui/notify")
+        # Whether the screening lane waves you through or pulls you in is the
+        # safety record's job. A clean career is waved through nearly every
+        # time; a career carrying citations, out-of-service history and a
+        # beaten-up truck is pulled in at every open scale.
+        selected = d._scale_selects_driver(self.stop)
+        outcome = (
+            "Officers pull you into the inspection lane."
+            if selected
+            else "Officers wave you straight back onto the highway."
+        )
         self.ctx.say(
-            f"Inspection check-in complete at {self.stop.spoken_name}. "
+            f"Inspection check-in complete at {self.stop.spoken_name}. {outcome} "
+            f"{d.safety_record_line()} "
             f"It is {clock_text(d.trip.local_hour)}. "
             f"{_deadline_text(d)}"
         )

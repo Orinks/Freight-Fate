@@ -57,6 +57,7 @@ from .career_ladder import STARTER_CARRIER_NAME
 from .enforcement import DrivingRecord, seed_record_from_save
 from .loyalty import LoyaltyAccount
 from .market import Market
+from .safety_record import SAFETY_RECORD_BASELINE
 from .start_options import DEFAULT_START_KEY, START_MODE_COMPANY
 
 log = logging.getLogger(__name__)
@@ -712,6 +713,17 @@ class Profile:
     # threw the snapshot away, so nothing a driver did downstream ever
     # remembered it.
     driving_record: DrivingRecord = field(default_factory=DrivingRecord)
+    # How interesting this driver looks to a screening lane, 0 to 100, higher
+    # being worse. Derived from reputation, citations, out-of-service history,
+    # damage carried and clean inspections (see models/safety_record.py) and
+    # refreshed whenever any of those move; stored so the scale can read it
+    # without rebuilding the whole history mid-approach. Spoken as "safety
+    # record", never as a number and never as a trade acronym.
+    selection_score: float = SAFETY_RECORD_BASELINE
+    # Times this driver has been placed out of service, roadside or at a
+    # scale. Feeds the safety record; kept on the profile rather than the
+    # licence file because it is a carrier fact, not a licensing one.
+    out_of_service_events: int = 0
     market: Market = field(default_factory=Market)
     hos: HosClock = field(default_factory=HosClock)  # hours-of-service shift clock
     duty_log: DutyLog = field(default_factory=DutyLog)  # rolling Record of Duty Status
