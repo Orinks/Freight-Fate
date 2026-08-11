@@ -76,6 +76,21 @@ JAKE_LOOP_RPMS = (1200, 1400, 1600, 1800, 2000, 2200)
 JAKE_STAGE_GAIN = (0.25, 0.65, 1.0)
 JAKE_MIN_RPM = 950.0
 
+# How far over a curve's advisory speed the truck has to be before the curve
+# assist reaches for the retarder. The engine brake is for shedding real
+# speed; a bend the truck is a few mph over is a lift and a touch of the
+# drums, which do it quietly and are legal in every town. Without this line
+# the assist barked through every mapped bend it handled -- 22 engagements in
+# 58 miles of Arizona mountain road, ten of them for seven mph -- which is
+# not how anyone drives and is noise a town can fine you for (tester report,
+# 2026-08-11). It is the same "well over the advisory" line the service trim
+# below already draws.
+CURVE_ASSIST_JAKE_MIN_MPH = 10.0
+# Over the advisory by this much and the corner gets everything the retarder
+# has; between the two lines it gets the working setting, stage two. A bend
+# on a real downgrade skips the line above entirely -- see _update_lane.
+CURVE_ASSIST_JAKE_FULL_MPH = 15.0
+
 # Auto jake (automatic box, owner design 2026-07-22): J arms retarder
 # management the way a real AMT integrates it. The controller holds the
 # engagement speed (or the descent-control target) by stepping the stage,
@@ -767,14 +782,17 @@ class DrivingUpdateMixin:
                 if self._curve_assist_active:
                     heuristic -= 3
                 curve_assisting = self.truck.speed_mph > heuristic
-        # Jake first (owner ruling 2026-07-22): a real driver -- and a real
-        # predictive retarder -- slows with the engine brake before the
-        # service brakes. At the start of an assist episode, if the player's
-        # jake is off and the truck can retard honestly (off throttle,
-        # coupled, revs up) on a surface that allows it (a full jake on low
-        # grip breaks the drives loose), the assist switches the jake on at
-        # a stage sized to the overspeed. The service brakes only trim when
-        # the truck is still well over the advisory or the jake cannot work.
+        # Jake first (owner ruling 2026-07-22), but only for speed worth
+        # shedding: a real driver -- and a real predictive retarder -- slows
+        # with the engine brake before the service brakes when there is real
+        # speed to take off, and lifts and touches the drums for a bend they
+        # are barely over. At the start of an assist episode, if the corner
+        # needs CURVE_ASSIST_JAKE_MIN_MPH or more off (or the road is genuinely
+        # downhill), the player's jake is off, and the truck can retard
+        # honestly (off throttle, coupled, revs up) on a surface that allows it
+        # (a full jake on low grip breaks the drives loose), the assist
+        # switches the jake on at a stage sized to the overspeed. Everything
+        # under that line is the drums' work: quiet, and legal in every town.
         t = self.truck
         tr = t.transmission
         if curve_assisting and not self._curve_assist_active:
@@ -787,11 +805,33 @@ class DrivingUpdateMixin:
                 and t.grip >= 0.55
                 and t.rpm >= JAKE_MIN_RPM
             )
+            # A real downgrade is the retarder's own job -- holding a loaded
+            # truck back on a grade is the one use every noise ordinance
+            # leaves legal -- so the overspeed line does not apply there.
+            # GRADE_WARN_CLEAR_PCT is the same line the G readout and the
+            # ordinance exemption already draw between level road and a
+            # grade. Without this carve-out the assist held a six percent
+            # descent on the drums alone: past fade in four and a half
+            # minutes, 585 degrees at ten (bench trace, 2026-08-11).
+            downhill = self.trip.grade_at(self.trip.position_mi) * 100.0 <= -GRADE_WARN_CLEAR_PCT
+            # Only where the assist can measure the overspeed. Without a baked
+            # advisory -- the ramp fallback above -- there is no measurement,
+            # and a loud restricted device is not something to reach for on a
+            # guess; the ramp has its own assist and the service trim below.
+            worth_the_bark = excess_now is not None and (
+                downhill or excess_now > CURVE_ASSIST_JAKE_MIN_MPH
+            )
             # Town no-engine-brake zones close the jake to the assist as well
             # (real downgrades stay exempt); the service trim below answers.
-            if jake_capable and not t.engine_brake and self._assist_jake_allowed():
-                excess = excess_now if excess_now is not None else 10.0
-                t.engine_brake_stage = 3 if excess > 15 else (2 if excess > 8 else 1)
+            if (
+                jake_capable
+                and worth_the_bark
+                and not t.engine_brake
+                and self._assist_jake_allowed()
+            ):
+                # Stage one is a token two cylinders: past this line it would
+                # bark without taking off the speed that called for it.
+                t.engine_brake_stage = 3 if excess_now > CURVE_ASSIST_JAKE_FULL_MPH else 2
                 self._curve_assist_jake = True
         elif not curve_assisting and self._curve_assist_jake:
             # Release only the jake WE engaged; the player's own selection

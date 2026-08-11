@@ -5,6 +5,7 @@ from .base import TimedMessageState
 from .driving_core import *
 from .driving_menu_states import ArrivalState, FacilityArrivalState
 from .driving_rest_states import ParkingFullState, RestStopState, ShoulderSleepConfirmationState
+from .driving_speed_control import KEEPER_EASE_UNDERSHOOT_MPH
 from .driving_stops import assist_full_decel_mps2, bar_solid_zone_mi, bar_tick_range_mi
 
 
@@ -2355,6 +2356,28 @@ class DrivingEventMixin:
             return
         self._keeper_zone = zone_reason
         target_mph = min(self._keeper_mph, limit)
+        # The road ahead, not just the road under the wheels: a corner or a
+        # lower posted limit close enough that the shedding has to start now.
+        # A posted drop gets the same one-shot cue adaptive cruise gives it;
+        # a corner does not, because its own approach call already names the
+        # number and says the keeper is taking it.
+        ahead = self._keeper_speed_ahead()
+        if ahead is not None and ahead[0] < target_mph:
+            target_mph = max(KEEPER_MIN_MPH, ahead[0] - KEEPER_EASE_UNDERSHOOT_MPH)
+            if ahead[1] != "turn" and (
+                self._keeper_ease_said is None or ahead[0] < self._keeper_ease_said - 0.5
+            ):
+                self._keeper_ease_said = ahead[0]
+                reason = {
+                    "construction": "Construction zone ahead",
+                    "heavy traffic": "Heavy traffic ahead",
+                }.get(ahead[1], "Posted limit lower")
+                self.ctx.say_event(
+                    f"{reason}; speed keeper easing to {self.ctx.settings.speed_text(ahead[0])}.",
+                    interrupt=False,
+                )
+        elif ahead is None:
+            self._keeper_ease_said = None
         context = self.trip.traffic_context()
         if context is not None and (
             context.gap_seconds <= KEEPER_GAP_SECONDS or context.lead.speed_mph < target_mph

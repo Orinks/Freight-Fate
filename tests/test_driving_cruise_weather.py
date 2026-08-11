@@ -3,9 +3,12 @@
 import pygame
 import pytest
 from driving_feature_helpers import (
+    facility_street_chain,
     key_event,
     open_limits,
     quiet_trip,
+    release_air_brakes,
+    roll_to,
     start_drive,
 )
 from speech_capture import speech_stub
@@ -412,6 +415,129 @@ def test_speed_keeper_switches_to_cruise_on_the_open_road(monkeypatch):
         assert driving._cruise_mph == pytest.approx(55.0)
         assert driving._speed_control_armed
         assert any("Open road. Adaptive cruise resuming" in s for s in events)
+    finally:
+        app.shutdown()
+
+
+def _keeper_on_a_street_chain(app, monkeypatch, *, start_before_mi: float):
+    """A keeper session holding the street limit, rolling up to the corner."""
+    driving = start_drive(app)
+    quiet_trip(driving)
+    trip = facility_street_chain(driving)
+    cue = next(c for c in trip.navigation_cues if c.key.startswith("local:turn:"))
+    t = driving.truck
+    driving.handle_event(key_event(pygame.K_e))
+    t.cargo_kg = 0.0
+    t.grade = 0.0
+    t.transmission.gear = 5
+    t.velocity_mps = 25.0 / 2.23694
+    trip.position_mi = cue.at_mi - start_before_mi
+    release_air_brakes(driving)
+    driving.handle_event(key_event(pygame.K_k))
+    assert driving._keeper_mph == pytest.approx(25.0, abs=0.5)
+    return driving, cue
+
+
+def test_speed_keeper_is_under_the_turn_speed_before_the_corner(monkeypatch):
+    # The tester report: the keeper held the street's 25 into a corner that
+    # advises 20, so the corner was taken over its speed and the safe
+    # turnaround was charged. It now sheds the speed on the approach.
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    try:
+        driving, cue = _keeper_on_a_street_chain(app, monkeypatch, start_before_mi=0.25)
+        advise = driving._turn_speed_mph(cue)
+        assert advise == 20.0  # a 25 mph street, capped at what a trailer turns
+
+        trace = roll_to(driving, cue.at_mi)
+        # Under the number BEFORE the corner, not arriving at it on the spot:
+        # the settling tail is what the tester was missing.
+        under = [mile for mile, mph in trace if mph <= advise]
+        assert under, "the keeper never reached the corner speed"
+        assert cue.at_mi - min(under) >= 0.01
+        assert driving.truck.speed_mph <= advise
+        # And the corner is made without the loop-back, with the session intact.
+        driving.update(1 / 60)
+        assert driving._turn_miss_count == 0
+        assert driving._keeper_mph is not None
+    finally:
+        app.shutdown()
+
+
+def test_speed_keeper_holds_the_street_limit_until_the_corner_is_close(monkeypatch):
+    # The other half of the fix: easing early enough must not mean crawling a
+    # whole block. Well outside the ease window there is nothing to slow for.
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    try:
+        driving, cue = _keeper_on_a_street_chain(app, monkeypatch, start_before_mi=0.4)
+        assert driving._keeper_speed_ahead() is None
+        for _ in range(60 * 5):
+            driving.update(1 / 60)
+            assert driving.truck.brake < 0.02  # below where the brake even sounds
+        assert driving.truck.speed_mph == pytest.approx(25.0, abs=1.0)
+    finally:
+        app.shutdown()
+
+
+def test_speed_keeper_eases_for_a_lower_posted_limit_and_says_so(monkeypatch):
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        driving.trip.traffic_context = lambda: None
+        t = driving.truck
+        driving.handle_event(key_event(pygame.K_e))
+        t.cargo_kg = 0.0
+        t.grade = 0.0
+        t.transmission.gear = 5
+        t.velocity_mps = 25.0 / 2.23694
+        # Just inside the window the keeper says it needs for this drop, which
+        # is what the window is a promise about.
+        drop_mi = driving.trip.position_mi + 0.9 * driving._keeper_ease_mi(
+            15.0, driving.trip.effective_time_scale
+        )
+        driving.trip.speed_limit_at = lambda mile: (
+            (15.0, "facility access road") if mile >= drop_mi else (25.0, "facility access road")
+        )
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._keeper_mph == pytest.approx(25.0, abs=0.5)
+
+        for _ in range(60 * 30):
+            driving.update(1 / 60)
+            if driving.trip.position_mi >= drop_mi:
+                break
+        # Down to the new number by the time the sign is under the wheels, said
+        # once for that number rather than once a frame.
+        assert any(
+            e == "Posted limit lower; speed keeper easing to 15 miles per hour." for e in events
+        )
+        assert t.speed_mph <= 15.0
+        assert sum("speed keeper easing to 15" in e for e in events) == 1
     finally:
         app.shutdown()
 

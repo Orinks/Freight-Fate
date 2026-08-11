@@ -3252,14 +3252,28 @@ def test_curve_assist_prefers_the_jake_before_service_brakes(monkeypatch):
         t.throttle = 0.0
         t.grip = 1.0
         monkeypatch.setattr(driving.trip, "curve_at", lambda _pos: FakeCurve())
+        # Level ground, open road: the assist's own rule is what is on trial
+        # here, not the grade exemption or a town's posted sign.
+        monkeypatch.setattr(driving.trip, "grade_at", lambda _pos: 0.0)
+        monkeypatch.setattr(driving.trip, "engine_brake_ban_at", lambda _pos: None)
 
-        # Modest overspeed (7 over the advisory): the jake alone handles it.
+        # Level road, seven over the advisory: not speed worth barking for.
+        # The drums take that one, quietly.
         t.velocity_mps = 21.0  # ~47 mph vs 40 advisory
         t.brake = 0.0
         driving._update_lane(NoKeys(), 1 / 60)
-        assert t.engine_brake_stage == 1  # assist engaged the jake, sized small
+        assert not t.engine_brake
+        assert not driving._curve_assist_jake
+        assert t.brake > 0.0
+
+        # A corner that needs real speed off: the retarder leads, as a real
+        # driver would, and the drums finish the job.
+        driving._curve_assist_active = False
+        t.velocity_mps = 54.0 / 2.23694  # 14 over the advisory
+        t.brake = 0.0
+        driving._update_lane(NoKeys(), 1 / 60)
+        assert t.engine_brake_stage == 2
         assert driving._curve_assist_jake
-        assert t.brake == 0.0  # ...and left the service brakes alone
 
         # Low grip inverts the rule: a jake on ice breaks the drives loose.
         driving._curve_assist_active = False
@@ -3282,6 +3296,180 @@ def test_curve_assist_prefers_the_jake_before_service_brakes(monkeypatch):
         driving._update_lane(NoKeys(), 1 / 60)
         assert not driving._curve_assist_jake
         assert not t.engine_brake
+    finally:
+        app.shutdown()
+
+
+class _NoKeysType:
+    def __getitem__(self, _key):
+        return False
+
+
+_NO_KEYS = _NoKeysType()
+
+
+class _AssistRig:
+    """A truck set up to let the curve assist decide, and nothing else."""
+
+    def __init__(self, driving, monkeypatch, *, advisory: int, grade: float = 0.0):
+        from freight_fate.data.curves import RouteCurve
+
+        self.driving = driving
+        self.truck = driving.truck
+        driving.ctx.settings.curve_speed_assist = True
+        monkeypatch.setattr(driving.ctx, "say_event", lambda *a, **k: None)
+        monkeypatch.setattr(driving.ctx.audio, "play", lambda *a, **k: None)
+        curve = RouteCurve(
+            start_mi=driving.trip.position_mi,
+            apex_mi=driving.trip.position_mi + 0.1,
+            end_mi=driving.trip.position_mi + 0.2,
+            direction="L",
+            advisory_mph=advisory,
+            min_radius_ft=1500,
+            deflection_deg=30.0,
+        )
+        monkeypatch.setattr(driving.trip, "curve_at", lambda _mile: curve)
+        monkeypatch.setattr(driving.trip, "grade_at", lambda _mile: grade)
+        monkeypatch.setattr(driving.trip, "engine_brake_ban_at", lambda _mile: None)
+        t = self.truck
+        t.set_air_ready(parking_brake=False)
+        t.start_engine()
+        t.transmission.automatic = True
+        t.transmission.gear = 9
+        t.rpm = 1500.0
+        t.throttle = 0.0
+        t.grip = 1.0
+        t.grade = grade
+
+    def drive(self, mph: float):
+        """One frame at ``mph``, from a fresh assist episode."""
+        self.driving._curve_assist_active = False
+        self.truck.velocity_mps = mph / 2.23694
+        self.truck.brake = 0.0
+        self.driving._update_lane(_NO_KEYS, 1 / 60)
+        return self.truck
+
+
+def test_curve_assist_leaves_the_jake_alone_for_a_gentle_bend(monkeypatch):
+    """A sweeper the truck is a few mph over is the drums' work, not the jake's.
+
+    Tester report, 2026-08-11: the assist barked through every mapped bend it
+    handled -- 22 engagements in 58 miles of Arizona mountain road, ten of
+    them for seven mph over. Nobody drives that way, and the engine brake is
+    the one device a town can fine you for using.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        rig = _AssistRig(driving, monkeypatch, advisory=55)
+
+        t = rig.drive(62.0)  # seven over a highway sweeper
+        assert not t.engine_brake
+        assert not driving._curve_assist_jake
+        assert t.brake > 0.0  # the assist still slows the truck, quietly
+    finally:
+        app.shutdown()
+
+
+def test_curve_assist_still_jakes_a_corner_needing_real_speed_off(monkeypatch):
+    """Past the line the retarder comes out, sized to the corner."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        rig = _AssistRig(driving, monkeypatch, advisory=45)
+
+        # Ten over is still the drums' job; twelve is the working setting.
+        assert not rig.drive(55.0).engine_brake
+        t = rig.drive(57.0)
+        assert t.engine_brake_stage == 2
+        assert driving._curve_assist_jake
+
+        # Well over the advisory, the corner gets everything the jake has.
+        driving._curve_assist_jake = False
+        t.engine_brake_stage = 0
+        assert rig.drive(63.0).engine_brake_stage == 3
+    finally:
+        app.shutdown()
+
+
+def test_curve_assist_jakes_a_bend_on_a_real_downgrade(monkeypatch):
+    """Downhill, the overspeed line does not apply: holding a loaded truck
+    back on a grade is the retarder's own job, and the one use every town
+    noise ordinance leaves legal."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        rig = _AssistRig(driving, monkeypatch, advisory=45, grade=-0.06)
+
+        t = rig.drive(52.0)  # only seven over, but six percent down
+        assert t.engine_brake_stage == 2
+        assert driving._curve_assist_jake
+    finally:
+        app.shutdown()
+
+
+def test_curve_assist_holds_a_long_downgrade_on_the_jake_not_the_drums(monkeypatch):
+    """The safety half of the same fix, in real physics.
+
+    A threshold with no downhill carve-out left the assist holding a six
+    percent descent on the service brakes alone: past fade in four and a half
+    minutes, 585 degrees at ten (bench trace, 2026-08-11). Cooking the drums
+    on a mountain is a worse bug than a noisy sweeper.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        rig = _AssistRig(driving, monkeypatch, advisory=45, grade=-0.06)
+        t = rig.truck
+        t.velocity_mps = 48.0 / 2.23694  # under the engage line to start with
+        retarded = False
+
+        for _ in range(60 * 60):  # a minute of frames down the grade
+            t.grade = -0.06  # the trip normally stamps this each frame
+            t.brake = 0.0  # no pedal: the assist is the only thing braking
+            driving._update_lane(_NO_KEYS, 1 / 60)
+            t.update(1 / 60)
+            retarded = retarded or t.engine_brake
+
+        assert retarded  # the retarder did the holding
+        assert t.brake_temp_c < t.brake_fade_onset_c  # and the drums stayed cool
+    finally:
+        app.shutdown()
+
+
+def test_curve_assist_does_not_guess_the_retarder_without_an_advisory(monkeypatch):
+    """No baked advisory, no measurement, no bark.
+
+    The ramp fallback has no advisory speed to measure an overspeed against.
+    It used to assume ten mph over and engage stage two on that assumption --
+    reaching for a loud, town-restricted device on no evidence at all.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        rig = _AssistRig(driving, monkeypatch, advisory=45)
+        monkeypatch.setattr(driving.trip, "curve_at", lambda _mile: None)
+        driving._ramp_mi = 0.3  # on a ramp: the old terrain heuristic answers
+
+        t = rig.drive(55.0)
+        assert not t.engine_brake
+        assert not driving._curve_assist_jake
+        assert t.brake > 0.0  # the ramp still gets slowed, on the drums
     finally:
         app.shutdown()
 
