@@ -232,9 +232,10 @@ from the words, and synonyms cost them a re-read.
 | The fine for engine braking in one | engine brake citation | jake ticket, noise fine | `EngineBrakeZoneMixin._fine_engine_braking` |
 | An offense that counts toward losing the CDL | serious violation | strike, point, demerit, infraction | `DrivingRecord.record_serious_violation` |
 | The career-long enforcement history | your record | rap sheet, history, file | `DrivingRecord` |
-| A place on the road where an officer may be sitting | enforcement post | patrol, speed trap, trap, checkpoint, bear | `EnforcementPost` |
+| A place on the road where an officer may be sitting, and the sounding entry that teaches it | enforcement post | patrol, speed trap, trap, checkpoint, bear | `EnforcementPost` |
 | The officer | trooper on the highway; officer at a scale | cop, bear, smokey, unit, LEO | `EnforcementPost.agency` |
-| The sounding entry for a patrol car sitting off the road on that side, heard before it can see you (the concept itself is "enforcement post", above) | Enforcement post | patrol, speed trap, trap, checkpoint | `traffic/trooper_pass`, `EnforcementPost` |
+| The two rising tones an enforcement post makes before it can see you | Enforcement marker | signature, earcon, warning tone, post ping | `enforcement/signature`, `_mark_post_audible` |
+| A marked police vehicle passing as the truck goes by an enforcement post -- the marker with a whoosh behind it | Police car going by | marked unit pass, patrol car pass, trooper pass | `traffic/trooper_pass`, `_play_marked_unit_pass` |
 | The held siren a driver hears when a trooper is pulling them over | Siren | siren loop, cop siren, alarm tone | `events/police_siren`, `states/driving_siren.py` |
 | Being pulled to the shoulder by one | pull-over | stop (already the POI, the act of stopping, and the command) | `_pull_over` |
 | The inspection facility | weigh station; "the scale" in short cues | scale house, weigh point, chicken coop | `RoadStop(type="weigh_station")` |
@@ -281,7 +282,7 @@ from the words, and synonyms cost them a re-read.
 | One rumble hit with nothing held after it, unattached to a steering correction -- fatigue or a momentary catch | Rumble strip, single hit | single tap, fatigue rumble | `vehicle/rumble_strip` |
 | Grouped bars cut across a whole lane, placed only ahead of a curve that has killed people | Transverse strips | rumble bars, wake-up strips, dead-man's-curve strips | `vehicle/transverse_strips`, `sim/lane_guidance.TRANSVERSE_KEY` |
 | A chime from the side a demanding bend turns toward, ahead of curve callouts | Curve chime | curve bink, bend warning | `vehicle/curve_bink` |
-| The player's own turn signal sounding, from the side signalled | Exit signal tone | signal tone (bare), blinker sound | `vehicle/signal_tone` |
+| The player's own turn signal sounding, from the side signalled -- a lane change, a shoulder pull-over, a ramp merge, or the route's exit | Signal tone | exit signal tone (four of its six soundings are not exits), blinker sound, indicator click | `vehicle/signal_tone` |
 | The compressor filling the air tanks before the truck can move | Air building | air pressurize, tank fill | `vehicle/air_pressurize` |
 | The short sharp pop when the tanks reach full and the compressor cuts out | Air dryer purge | dryer pop, compressor cutout | `vehicle/air_dryer_purge` |
 | Air pressure fallen too low to brake safely | Low air buzzer | low-pressure alarm, air warning | `vehicle/low_air_buzzer` |

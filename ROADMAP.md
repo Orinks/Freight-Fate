@@ -2730,7 +2730,9 @@ section below and the Unreleased changelog; the release-line view:
       menu: seven categories of road cue, each entry played on demand with
       the canonical name, what it means, and the setting that gates it.
       Ambience, music and self-explanatory sounds are excluded on the record,
-      and a completeness test fails any new cue that ships uncatalogued.
+      and a completeness test fails any new cue that ships uncatalogued --
+      including the ones the game synthesizes at runtime rather than shipping
+      as a file.
 
 ## Shipped in 1.6.0
 

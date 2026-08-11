@@ -78,8 +78,9 @@ _LANE = SoundCategory(
             "toward a bend before you reach it. It is the quietest thing in "
             "the cab that tells you where you are; steer back toward the "
             "middle and it settles.",
-            when="Lane keeping partial or off. On full, the truck holds the "
-            "lane and the road stays centered.",
+            when="Lane keeping partial or off, and lane-departure warning on. "
+            "With that warning off the road stays centered and the lean never "
+            "happens; on full lane keeping the truck holds the lane for you.",
         ),
         SoundEntry(
             "Rumble strip, clipped",
@@ -103,7 +104,10 @@ _LANE = SoundCategory(
         ),
         SoundEntry(
             "Off the pavement",
-            (Cue("vehicle/edge_shoulder", volume=0.88, pan=-0.7, hold_s=2.0),),
+            (
+                Cue("vehicle/edge_shoulder", volume=0.88, pan=-0.7, hold_s=2.0),
+                Cue("vehicle/edge_shoulder", volume=0.88, pan=0.7, delay_s=2.4, hold_s=2.0),
+            ),
             "Gravel. The truck has left the road surface on that side. Ease "
             "back on: do not yank the wheel, and do not brake hard while a "
             "trailer wheel is still in the dirt.",
@@ -117,6 +121,9 @@ _LANE = SoundCategory(
             "The soft chime that says you are centered again. It is the "
             "all-clear after a drift, and it also marks a bend taken cleanly "
             "when speech is set to terse.",
+            when="The all-clear after a drift needs lane keeping partial or "
+            "off and lane-departure warning on. The short answer to a bend "
+            "needs curve callouts on and speech set to terse.",
         ),
         SoundEntry(
             "Lane line crossed",
@@ -153,7 +160,9 @@ _LANE = SoundCategory(
         ),
         SoundEntry(
             "Transverse strips",
-            (Cue("vehicle/transverse_strips", volume=0.8),),
+            # Level rises with road speed at the call site; this is what a
+            # hairpin approach sounds like, which is the only place they exist.
+            (Cue("vehicle/transverse_strips", volume=0.95),),
             "Grouped bars cut across the whole lane, not along its edge. Real "
             "road agencies only cut these ahead of a curve that has killed "
             "people. Brake as soon as you hear them; they are placed far "
@@ -171,13 +180,14 @@ _LANE = SoundCategory(
             when="Curve callouts on.",
         ),
         SoundEntry(
-            "Exit signal tone",
+            "Signal tone",
             (
                 Cue("vehicle/signal_tone", volume=0.8, pan=-0.6),
                 Cue("vehicle/signal_tone", volume=0.8, pan=0.6, delay_s=1.2),
             ),
-            "Your signal, from the side you signalled. It marks a deliberate "
-            "move: an exit you asked for, or a lane change you meant.",
+            "Your own turn signal, from the side you signalled. It marks a "
+            "move you meant to make: a lane change, easing onto the shoulder, "
+            "coming up a ramp, or taking the exit the route asked for.",
         ),
     ),
 )
@@ -202,7 +212,10 @@ _AIR = SoundCategory(
         ),
         SoundEntry(
             "Low air buzzer",
-            (Cue("vehicle/low_air_buzzer", volume=0.7, hold_s=3.0),),
+            # One sounding, not a loop: the cab plays it once each time the
+            # pressure crosses the line, and holding it here would invent a
+            # buzzer that never stops.
+            (Cue("vehicle/low_air_buzzer", volume=0.7),),
             "Air pressure has fallen too low to brake safely. Stop using the "
             "brakes, let the compressor catch up, and keep the parking brake "
             "set until it does. Hard repeated braking is what empties the "
@@ -269,7 +282,11 @@ _ENGINE_BRAKE = SoundCategory(
             (Cue("vehicle/overspeed_chime", volume=0.65),),
             "You are over the posted limit here. It is not a ticket and "
             "nobody has necessarily seen you, but an officer who has will "
-            "act on it.",
+            "act on it. The faster the chime repeats, the further over you "
+            "are.",
+            when="Overspeed warning on. Set to urgent only it stays quiet "
+            "until you are far enough over to be running away with the "
+            "truck, and set to off it never sounds.",
         ),
         SoundEntry(
             "Gear grind",
@@ -379,29 +396,66 @@ _HAZARDS = SoundCategory(
 )
 
 
-# The enforcement post, the siren and the weigh-station bed are all scaled
-# at runtime by how close the vehicle is to the cruiser or the scale; each
-# entry below picks a representative level rather than the whole range.
+# The siren and the weigh-station bed are both scaled at runtime by how close
+# the vehicle is to the cruiser or the scale; each entry below picks a
+# representative level rather than the whole range.
+#
+# The marker and the pass are two entries, not one, because they are two
+# different pieces of information. The marker is the warning the whole
+# enforcement contract rests on -- it arrives before a post can observe you.
+# The pass is the marker with a vehicle behind it, and it arrives AFTER the
+# post is behind you (states/driving_enforcement.PASS_TRIGGER_MI), so it
+# cannot be a warning about anything.
 _ENFORCEMENT = SoundCategory(
     "Enforcement",
     (
         SoundEntry(
-            "Enforcement post",
+            "Enforcement marker",
+            # _play_enforcement_marker's own level for the pre-post warning,
+            # centered: the marker says "a post is here", never which side.
+            (Cue("enforcement/signature", volume=0.75),),
+            "A short pair of rising tones, twice over, straight ahead. An "
+            "enforcement post is about to be close enough to watch you, and "
+            "this arrives before it can see anything. Be at the limit the "
+            "moment you hear it: what you do after this tone is all an "
+            "officer sitting there has to go on.",
+            when="Always -- nothing turns it off. Every post that is allowed "
+            "to cost you anything sounds this first, at every enforcement "
+            "presence setting, and the radio is pulled down out of the way "
+            "so you can hear it.",
+        ),
+        SoundEntry(
+            "Police car going by",
+            # Marker first at PASS_BASE_VOLUME, vehicle PASS_MARKER_LEAD_S
+            # behind it at the same pan; PASS_PAN is positive at a scale and
+            # negative at every other post.
             (
-                Cue("traffic/trooper_pass", volume=0.8, pan=-0.6),
-                Cue("traffic/trooper_pass", volume=0.8, pan=0.6, delay_s=1.6),
+                Cue("enforcement/signature", volume=0.7, pan=-0.55),
+                Cue("traffic/trooper_pass", volume=0.7, pan=-0.55, delay_s=0.2),
+                Cue("enforcement/signature", volume=0.7, pan=0.55, delay_s=2.6),
+                Cue("traffic/trooper_pass", volume=0.7, pan=0.55, delay_s=2.8),
             ),
-            "A patrol car sitting off the road on that side, heard before it "
-            "can see you. Most posts are empty and cost you nothing; this "
-            "sound means this one is not, so be at the limit before you "
-            "reach it.",
+            "The marker again, with a vehicle going past a fifth of a second "
+            "behind it. You have just passed an enforcement post and a marked "
+            "car is around it. This one is news, not a warning: it sounds "
+            "once you are already by, and it does not tell you whether "
+            "anybody was sitting there. The demo plays it on the left, the "
+            "side an ordinary post is on, and then on the right, the side a "
+            "weigh station is on.",
+            when="Past a post with somebody in it, at any enforcement "
+            "presence setting. Past an empty one, only with presence set to "
+            "full. Never past a scale that is being worked: there the "
+            "approach bed carries the warning instead.",
         ),
         SoundEntry(
             "Siren",
             (Cue("events/police_siren", volume=0.8, pan=-0.5, hold_s=3.0),),
             "A trooper is pulling you over. Signal, brake, and stop on the "
             "shoulder. Ignoring it is logged as evasion and costs far more "
-            "than the ticket would have.",
+            "than the ticket would have. On the road it starts quiet and "
+            "grows over the first few seconds as the cruiser comes up behind "
+            "you; the demo holds one steady level, so the rise is the part "
+            "you will only hear out there.",
         ),
         SoundEntry(
             "Inspection warning",
