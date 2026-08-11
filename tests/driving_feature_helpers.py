@@ -133,6 +133,65 @@ def mark_destination_exit_taken(driving):
     driving.trip.position_mi = driving.trip.total_miles
 
 
+def facility_street_chain(driving, *, time_scale: float = 1.0):
+    """Swap the drive onto a deterministic two-block facility street chain.
+
+    The deadhead shape a tester reported: 25 mph streets with a judged left
+    turn between them, which advises the trailer corner cap of 20. Both blocks
+    are long enough that the facility gate zone stays clear of the corner, so
+    a test can watch the corner on its own.
+    """
+    from freight_fate.data.world_models import Leg, Route
+    from freight_fate.sim import Trip
+
+    city = driving.trip.route.cities[0]
+    legs = [
+        Leg(
+            city,
+            city,
+            1.2,
+            "East Navarre Street",
+            "flat",
+            (),
+            local_cue="Start on East Navarre Street.",
+            local_speed_mph=25.0,
+        ),
+        Leg(
+            city,
+            city,
+            1.2,
+            "North Michigan Street",
+            "flat",
+            (),
+            local_cue="Turn left onto North Michigan Street.",
+            local_speed_mph=25.0,
+        ),
+    ]
+    trip = Trip(
+        Route([city] * 3, legs), driving.truck, driving.trip.weather, seed=3, time_scale=time_scale
+    )
+    trip.traffic_manager.vehicles = []
+    trip.traffic_manager.rolling_bubble = False
+    trip._hazard_check_mi = 1e9
+    trip._inspection_check_mi = 1e9
+    trip.traffic_context = lambda: None
+    driving.trip = trip
+    driving._reset_turn_state_for_trip()
+    driving._destination_exit_taken = True
+    return trip
+
+
+def roll_to(driving, mile: float, *, limit_frames: int = 60 * 300):
+    """Run frames until the truck reaches ``mile``; return the speed trace."""
+    trace = []
+    for _ in range(limit_frames):
+        if driving.trip.position_mi >= mile:
+            break
+        driving.update(1 / 60)
+        trace.append((driving.trip.position_mi, driving.truck.speed_mph))
+    return trace
+
+
 def open_status_screen(app, label):
     """From the open driving status picker, open a named screen submenu."""
     from freight_fate.states.driving import DrivingStatusScreenState

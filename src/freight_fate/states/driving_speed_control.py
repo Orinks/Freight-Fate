@@ -3,7 +3,35 @@
 
 from __future__ import annotations
 
-from .driving_core import KEEPER_MIN_MPH, RESTRICTED_ZONE_REASONS
+from .driving_core import KEEPER_MIN_MPH, MPH_PER_MPS, RESTRICTED_ZONE_REASONS
+from .driving_turns import TURN_COMMIT_TAIL_MI
+
+# How early the keeper starts shedding speed for something ahead, sized in
+# REAL seconds rather than miles -- the same law the turn call and the zone
+# warning already follow, because under time compression a fixed stretch of
+# road passes before a truck can slow through it.
+KEEPER_EASE_REAL_S = 6.0
+# And down to the number this long BEFORE the point, never exactly on it: a
+# corner reached at the advise speed with no margin is a corner taken at it,
+# which is the tester report this exists to answer.
+KEEPER_SETTLE_REAL_S = 2.0
+# What the keeper actually delivers at street speed, measured on the bench
+# rather than assumed: it is capped at light brake and comes off the pedal
+# inside its own deadband, so it sheds about 0.4 m/s2 down there (0.9 at
+# highway speed, where drag does most of the work). Sized on a comfortable
+# 0.8 instead, the window was honest for a corner but half what a 25-to-15
+# drop needs, and the truck reached the sign still doing 17.
+KEEPER_EASE_DECEL_MPS2 = 0.4
+# Aim a hair under the number rather than exactly at it. The keeper closes
+# the last mile an hour on engine drag alone -- below its braking deadband --
+# so a target set right on the number is a number the truck only reaches AT
+# the corner, which is the report all over again.
+KEEPER_EASE_UNDERSHOOT_MPH = 1.0
+# A ceiling, so a long access road is never crawled from one end.
+KEEPER_EASE_MAX_MI = 0.75
+# Scan step for the posted-limit look ahead. A city block is shorter than the
+# tenth of a mile adaptive cruise steps by on the corridor.
+KEEPER_LIMIT_PROBE_MI = 0.05
 
 
 class SpeedControlStateMixin:
@@ -36,6 +64,8 @@ class SpeedControlStateMixin:
         self._keeper_mph = None
         self._keeper_throttle = 0.0
         self._keeper_zone = ""
+        self._keeper_ease_said = None
+        self._keeper_ease_target = None
 
     def _disarm_speed_control(self) -> None:
         # Remember the open-road target across the cancel, like a car's
@@ -191,3 +221,75 @@ class SpeedControlStateMixin:
             self._construction_slowdown = (zone.end_mi, limit_mph, reason)
         current_limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
         return (limit_mph, reason) if limit_mph < current_limit else None
+
+    def _keeper_ease_mi(self, target_mph: float, scale: float) -> float:
+        """How much road the keeper needs to be down to ``target_mph`` in time.
+
+        Sized in real seconds and converted to miles at ``scale``, so time
+        compression cannot spend the window before the truck can use it. The
+        physical shed time is the floor: a big drop buys more road however
+        relaxed the clock is. A settling tail on top puts the truck at the
+        number ahead of the point rather than exactly on it.
+        """
+        speed = max(self.truck.speed_mph, 1.0)
+        shed_s = max(0.0, speed - target_mph) / MPH_PER_MPS / KEEPER_EASE_DECEL_MPS2
+        seconds = max(KEEPER_EASE_REAL_S, shed_s) + KEEPER_SETTLE_REAL_S
+        miles = seconds * speed * scale / 3600.0
+        return min(KEEPER_EASE_MAX_MI, miles)
+
+    def _keeper_turn_ease_scale(self) -> float:
+        """The clock the keeper will actually ease a corner on.
+
+        A corner in play decompresses the trip to real time so "Advise 20" is
+        plannable, and that happens a full spoken window out -- always wider
+        than this ease. Sizing the ease on the compressed clock instead read
+        the corner as close from half a mile back and held the whole block at
+        the corner speed, which is the sluggishness this fix must not trade
+        the tester's problem for.
+        """
+        return min(self.trip.effective_time_scale, 1.0)
+
+    def _keeper_speed_ahead(self) -> tuple[float, str] | None:
+        """The lower number the keeper must already be shedding speed for.
+
+        Returns ``(mph, reason)`` for the nearest thing ahead the truck cannot
+        arrive at over -- a judged street turn's advise speed, or a posted
+        limit lower than the one under the wheels -- once it is close enough
+        that easing has to start. ``None`` when the road ahead asks for
+        nothing the truck is not already doing.
+
+        Adaptive cruise refuses to engage inside a zone, so on facility
+        streets the keeper is the only automation there is, and it read only
+        the limit under the wheels. It held the street's 25 into corners that
+        advise 20 and straight through the safe turnaround (tester, 2026-08).
+        """
+        held = self._keeper_ease_target
+        position = self.trip.position_mi
+        if held is not None and position < held[0]:
+            # Keep aiming at the point already being slowed for. The window is
+            # sized in real seconds, so it retracts as the truck slows: without
+            # this the corner dropped back out of sight and the keeper wound
+            # the truck up again on its approach -- the same trap the
+            # construction hold above exists to close.
+            return held[1], held[2]
+        self._keeper_ease_target = None
+        cue = self._turn_cue_in_play()
+        if cue is not None:
+            advise = self._turn_speed_mph(cue)
+            ahead = cue.at_mi - position
+            if 0.0 < ahead <= self._keeper_ease_mi(advise, self._keeper_turn_ease_scale()):
+                # Held through the corner itself, not up to it: releasing on
+                # the milepost puts the throttle back on mid-turn.
+                self._keeper_ease_target = (cue.at_mi + TURN_COMMIT_TAIL_MI, advise, "turn")
+                return advise, "turn"
+        limit, _ = self.trip.speed_limit_at(position)
+        horizon = min(self.trip.total_miles, position + KEEPER_EASE_MAX_MI)
+        probe = position + KEEPER_LIMIT_PROBE_MI
+        scale = self.trip.effective_time_scale
+        while probe <= horizon + 1e-6:
+            posted, reason = self.trip.speed_limit_at(probe)
+            if posted < limit and probe - position <= self._keeper_ease_mi(posted, scale):
+                self._keeper_ease_target = (probe, posted, reason or "posted limit")
+                return posted, reason or "posted limit"
+            probe += KEEPER_LIMIT_PROBE_MI
+        return None

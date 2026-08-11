@@ -192,7 +192,13 @@ class TurnCommitmentMixin:
             call = f"{direction.capitalize()} turn onto {street}, {distance}."
         if self._terse_speech():
             return call
-        return f"{call} Advise {target}."
+        call = f"{call} Advise {target}."
+        if self._keeper_mph is not None and self.truck.speed_mph > self._turn_speed_mph(cue):
+            # The keeper sheds this corner's speed itself, so say so here
+            # rather than as a second utterance on top of the corner call --
+            # and so nobody reaches for the brake, which cancels the session.
+            call = f"{call} Speed keeper easing."
+        return call
 
     # -- the frame ------------------------------------------------------------
 

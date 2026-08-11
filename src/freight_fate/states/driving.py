@@ -432,6 +432,10 @@ class DrivingState(
         self._keeper_mph: float | None = None
         self._keeper_throttle = 0.0
         self._keeper_zone = ""
+        # The lower number ahead the keeper is easing for, and the say-once
+        # latch for the posted-limit version of that cue.
+        self._keeper_ease_said: float | None = None
+        self._keeper_ease_target: tuple[float, float, str] | None = None
         self._arrival_stop_said = False
         self._arrival_full_stop_said = False
         self._arrival_menu_open = False

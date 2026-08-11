@@ -153,6 +153,53 @@ def test_terse_keeps_direction_street_and_distance_but_drops_the_advisory(monkey
         app.shutdown()
 
 
+def test_the_approach_call_says_the_speed_keeper_is_taking_the_corner(monkeypatch):
+    # The keeper sheds the corner's speed itself. That is said inside the
+    # corner's own call rather than as a second utterance on top of it, so
+    # nobody reaches for the brake -- braking cancels the whole session.
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _street_chain(d)
+        spoken = _capture(app, monkeypatch)
+        d.trip.position_mi = 0.4
+        _mph(d, 30.0)
+        d._keeper_mph = 25.0
+        d._update_turn_commitment(0.016)
+        assert spoken[0] == (
+            "Left turn onto North Michigan Street, a quarter mile. "
+            "Advise 20 miles per hour. Speed keeper easing."
+        )
+    finally:
+        app.shutdown()
+
+
+def test_the_approach_call_stays_quiet_about_a_keeper_with_nothing_to_shed(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _street_chain(d)
+        spoken = _capture(app, monkeypatch)
+        d.trip.position_mi = 0.4
+        # Manual speed control leaves the call exactly as it was.
+        _mph(d, 30.0)
+        d._update_turn_commitment(0.016)
+        assert spoken[0].endswith("Advise 20 miles per hour.")
+        # So does a keeper already under the corner speed: there is nothing
+        # for it to shed, so there is nothing to say about it.
+        _mph(d, 18.0)
+        d._keeper_mph = 20.0
+        assert d._turn_approach_text(d._turn_cue_in_play(), 0.2).endswith(
+            "Advise 20 miles per hour."
+        )
+    finally:
+        app.shutdown()
+
+
 def test_a_cold_arrival_at_the_turn_still_gets_its_window(monkeypatch):
     # A resumed save can reach the turn without ever hearing the approach.
     from freight_fate.app import App
