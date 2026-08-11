@@ -88,7 +88,7 @@ annotation is what keeps it honest.
 
 ### Categories and entries
 
-Seven categories, roughly 45 entries. That is a little past the 35-40 the
+Seven categories, 46 entries as shipped. That is a little past the 35-40 the
 scope was pitched at; the rule held, the count did not. Nothing here is
 ambience, flavour or music, and no entry survives that a player could name on
 first hearing. The list below is the intended shape; the implementation
@@ -127,11 +127,21 @@ ahead, left and right (`events/turn_*`); state line
 (`events/state_crossing`); toll charged (`events/toll_charged`); the driver's
 yawn (`driver/yawn`).
 
-**Enforcement** (6) -- trooper pass, the enforcement post marker
-(`traffic/trooper_pass`); the siren (`events/police_siren`); inspection
-warning (`events/inspection_warning`); the weigh station approach bed
-(`poi/weigh_station_lane`, held); spike strip (`events/spike_strip`); CB
-chatter (`events/cb_radio_chatter`).
+**Enforcement** (7) -- the enforcement marker (`enforcement/signature`), the
+cue that arrives before a post can observe you; the police car going by (that
+same marker plus `traffic/trooper_pass` 0.2s behind it), which fires *after*
+the post and does not mean it was staffed; the siren
+(`events/police_siren`); inspection warning (`events/inspection_warning`);
+the weigh station approach bed (`poi/weigh_station_lane`, held); spike strip
+(`events/spike_strip`); CB chatter (`events/cb_radio_chatter`).
+
+The marker and the pass are two entries, not one, because conflating them is
+the mistake this catalog made first: the pass whoosh is deliberately hard to
+tell from a civilian one and arrives too late to act on, while the marker is
+the game's own guarantee that nothing tickets a driver it never spoke to.
+`enforcement/signature` is synthesized at runtime rather than shipped as a
+file, so the completeness scan has to union the generated keys or it cannot
+see the most important cue on this list.
 
 **The load** (3) -- liquid surge in a tank trailer: the wash
 (`vehicle/liquid_wash`, held), the fore-aft strike (`vehicle/liquid_hit`) and
