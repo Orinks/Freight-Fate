@@ -150,6 +150,31 @@ onto exit signalling.
       and both multipliers now live in `models/enforcement.py` behind one
       `citation_fine` helper; `CHAIN_LAW_FINE` had two live definitions
       on different paths, one shadowing the other, now collapsed.
+- [ ] **Detention, lumper fees, washouts and tolls are spoken but never
+      paid.** `carrier_charges` (`driving_menu_states.py:975`) computes
+      them and feeds two spoken strings; nothing moves money. The game
+      tells an owner-operator "you are owed 90 dollars in detention" and
+      then does not pay it, and bills them for nothing. Wrong in both
+      directions, and the owner-operator start is the mode that feels it.
+      Found by the 2026-08-11 realism audit; full report in the session
+      scratchpad as `realism-audit.md`.
+- [ ] **Nothing ever weighs the truck.** Loads routinely gross to about
+      87,000 lb against the 80,000 lb federal limit, and "overweight"
+      appears nowhere in `src/`. Meanwhile every open scale costs a
+      mandatory 15 minutes of duty-window time with no bypass concept,
+      where a clean real carrier is waved through 85-90 percent of the
+      time. So the game charges for scales but never enforces the thing
+      scales exist for -- punishing and unrealistic in the same feature.
+- [ ] **Relaxed hours-of-service mode misreports the law.** It multiplies
+      the legal limits by 1.25 and then speaks 13.75 hours as "the
+      11-hour driving limit". Whatever the mode does to the numbers, the
+      spoken text must not name a real regulation it is not enforcing.
+- [ ] **Two roadmap claims are already false.** Split sleeper berth (8/2
+      and 7/3) is fully implemented despite lines further down this file
+      saying twice that it is not. Also worth knowing: the 30-minute
+      break rule is implemented to the current 2020 regulation, and at
+      least one practitioner source still describes the pre-2020 version
+      -- following that source would break working code.
 - [ ] **Decide whether the barrel strike should double.** It is the one
       citation that can only happen inside a construction zone, so the
       zone multiplier always applies and it is always charged 2,000. Its
