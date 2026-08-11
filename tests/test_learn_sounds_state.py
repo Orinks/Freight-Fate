@@ -145,6 +145,52 @@ def test_a_cue_with_no_playable_key_plays_and_holds_nothing():
     assert not demo.running
 
 
+def test_a_one_shot_is_not_layered_over_a_copy_of_itself():
+    """Enter twice on the yawn used to play two yawns a moment apart.
+
+    A one-shot handed to the mixer comes back with no handle, so the demo
+    cannot cut the first copy short; the only way not to double it is not to
+    start it. ``driver/yawn`` is the longest one-shot in the catalog at 3.8
+    seconds, which is long enough that a player mashing Enter really did hear
+    a sound the road never makes.
+    """
+    from freight_fate.sound_demo import SoundDemo
+
+    audio = FakeAudio()
+    demo = SoundDemo(audio)
+    yawn = SoundEntry("Yawn", (Cue("driver/yawn", volume=0.9),), "why")
+
+    demo.start(yawn)
+    demo.update(0.2)
+    demo.start(yawn)  # Enter again, well inside the clip
+    assert [k for k, _v, _p in audio.played] == ["driver/yawn"], "the yawn must not double"
+
+    demo.update(4.0)  # past the end of the clip
+    demo.start(yawn)
+    assert len(audio.played) == 2, "once it has finished, Enter plays it again"
+
+
+def test_a_different_entry_still_interrupts_a_sounding_one():
+    """The guard is per entry: arrowing on and playing the next cue must work."""
+    from freight_fate.sound_demo import SoundDemo
+
+    audio = FakeAudio()
+    demo = SoundDemo(audio)
+    demo.start(SoundEntry("Yawn", (Cue("driver/yawn"),), "why"))
+    demo.update(0.2)
+    demo.start(SoundEntry("Other", (Cue("events/spike_strip"),), "why"))
+    assert [k for k, _v, _p in audio.played] == ["driver/yawn", "events/spike_strip"]
+
+
+def test_a_cue_with_nothing_to_play_reports_itself_unplayable():
+    from freight_fate.sound_demo import SoundDemo
+
+    demo = SoundDemo(FakeAudio())
+    assert demo.can_play(SoundEntry("X", (Cue("a/real"),), "why"))
+    assert demo.can_play(SoundEntry("X", (Cue("missing/thing", fallback="a/real"),), "why"))
+    assert not demo.can_play(SoundEntry("X", (Cue("missing/thing"),), "why"))
+
+
 def _app():
     from freight_fate.app import App
 
@@ -378,6 +424,119 @@ def test_arrow_move_stops_a_running_held_demo(monkeypatch):
         assert not state.demo.running
     finally:
         app.shutdown()
+
+
+def test_reentering_the_screen_stops_a_running_held_demo(monkeypatch):
+    """Coming back from a screen pushed over this one is its own route.
+
+    ``pop_state`` calls ``enter`` again on whatever it uncovered, which
+    re-announces the title -- while a demo whose clock froze under the
+    covering state would pick its hold straight back up underneath it.
+    """
+    from speech_capture import speech_stub
+
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *_a, **_k: None)
+        monkeypatch.setattr(app.ctx.audio, "hold_alert", lambda *_a, **_k: None)
+        monkeypatch.setattr(app.ctx.audio, "set_loop_pan", lambda *_a, **_k: None)
+        releases: list[int] = []
+        monkeypatch.setattr(app.ctx.audio, "release_alert", lambda **_kw: releases.append(1))
+
+        state = LearnSoundCategoryState(app.ctx, _held_and_other_category())
+        state.enter()
+        state.activate()
+        assert state.demo.running
+
+        state.enter()  # what pop_state(reentry=True) does to the state beneath
+
+        assert releases, "re-entry must stop a running held demo"
+        assert not state.demo.running
+    finally:
+        app.shutdown()
+
+
+def test_the_enforcement_marker_plays_on_a_cold_open(monkeypatch):
+    """Opening the screen with no drive in progress must still play the marker.
+
+    The enforcement signature is synthesized, and the only other thing that
+    publishes it is a drive starting. Opened from the main menu it resolved to
+    nothing, so the entry that teaches the one cue the enforcement contract
+    rests on would have demonstrated silence.
+    """
+    from speech_capture import speech_stub
+
+    from freight_fate import audio as audio_module
+    from freight_fate.sound_catalog import CATALOG
+    from freight_fate.states import driving_siren
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        # Put the process back where a fresh launch is: nothing has driven yet,
+        # so the synthesized cue has not been published. monkeypatch restores
+        # both on the way out.
+        monkeypatch.delitem(audio_module._GENERATED, driving_siren.SIGNATURE_KEY, raising=False)
+        monkeypatch.setattr(driving_siren, "_registered", False)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        played: list[str] = []
+        monkeypatch.setattr(app.ctx.audio, "play", lambda key, **_kw: played.append(key))
+
+        enforcement = next(c for c in CATALOG if c.name == "Enforcement")
+        state = LearnSoundCategoryState(app.ctx, enforcement)
+        state.enter()
+        state.index = next(
+            i for i, e in enumerate(enforcement.entries) if e.name == "Enforcement marker"
+        )
+        played.clear()
+        state.activate()
+
+        assert played == [driving_siren.SIGNATURE_KEY]
+    finally:
+        app.shutdown()
+
+
+def test_an_unplayable_cue_is_spoken_about_rather_than_silent(monkeypatch):
+    """Silence would teach the player that a real cue makes no sound."""
+    from speech_capture import speech_stub
+
+    from freight_fate.sound_catalog import Cue, SoundCategory, SoundEntry
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        spoken: list[str] = []
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+        played: list[str] = []
+        monkeypatch.setattr(app.ctx.audio, "play", lambda key, **_kw: played.append(key))
+
+        gone = SoundCategory(
+            "Gone",
+            (SoundEntry("Missing cue", (Cue("nothing/at_all"),), "why"),),
+        )
+        state = LearnSoundCategoryState(app.ctx, gone)
+        state.enter()
+        played.clear()
+        spoken.clear()
+        state.activate()
+
+        assert played == [], "nothing resolved, so nothing should have been played"
+        assert any("Missing cue" in line and "not available" in line for line in spoken)
+        assert not state.demo.running
+    finally:
+        app.shutdown()
+
+
+def test_the_category_help_does_not_promise_a_stop_it_cannot_make():
+    """Escape releases a held cue; a one-shot already playing finishes."""
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    help_text = LearnSoundCategoryState.intro_help
+    assert "finishes on its own" in help_text
+    assert "stops the sound and goes back" not in help_text
 
 
 def test_the_main_menu_offers_learn_game_sounds():

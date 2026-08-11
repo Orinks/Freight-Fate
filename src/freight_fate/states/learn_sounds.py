@@ -12,9 +12,10 @@ so nothing here plays on movement.
 
 from __future__ import annotations
 
-from ..sound_catalog import CATALOG, SoundCategory
+from ..sound_catalog import CATALOG, SoundCategory, SoundEntry
 from ..sound_demo import SoundDemo
 from .base import MenuItem, MenuState
+from .driving_siren import register_enforcement_sounds
 
 
 class LearnSoundsState(MenuState):
@@ -46,9 +47,11 @@ class LearnSoundCategoryState(MenuState):
     """The cues inside one category, and the demo that plays them."""
 
     intro_help = (
-        "Enter plays the sound, and Enter again plays it a second time. "
-        "F1 says what it means and when you hear it. Up and down arrows "
-        "move, Escape stops the sound and goes back."
+        "Enter plays the sound, and Enter again plays it once it has "
+        "finished. F1 says what it means and when you hear it. Up and down "
+        "arrows move. Escape goes back, and both moving away and going back "
+        "stop a sound that would otherwise keep running; a short sound "
+        "already playing finishes on its own."
     )
 
     def __init__(self, ctx, category: SoundCategory) -> None:
@@ -57,11 +60,29 @@ class LearnSoundCategoryState(MenuState):
         self.title = category.name
         self.demo = SoundDemo(ctx.audio)
 
+    def enter(self) -> None:
+        """Open the screen, ready to play everything the catalog names.
+
+        The enforcement signature is synthesized rather than shipped, and the
+        only other thing that publishes it is a drive starting. Opening this
+        screen from the main menu would otherwise land on an entry that
+        resolved to nothing -- a cue demonstrated as silence, which is the one
+        thing this screen must never do. Registering is idempotent and cheap,
+        so both entry points simply do it on the way in.
+
+        Stopping the demo here covers re-entry: a screen pushed over this one
+        freezes the demo's clock, and coming back re-announces the title while
+        a held cue would otherwise pick its hold straight back up.
+        """
+        register_enforcement_sounds()
+        self.demo.stop()
+        super().enter()
+
     def build_items(self) -> list[MenuItem]:
         return [
             MenuItem(
                 entry.name,
-                lambda e=entry: self.demo.start(e),
+                lambda e=entry: self.play_entry(e),
                 help=f"{entry.meaning} {entry.when}".strip(),
                 # The demo IS the confirmation; a menu click over the top of a
                 # cue the player is trying to learn defeats the screen.
@@ -69,6 +90,21 @@ class LearnSoundCategoryState(MenuState):
             )
             for entry in self.category.entries
         ]
+
+    def play_entry(self, entry: SoundEntry) -> None:
+        """Demo one entry, or say why it cannot be demonstrated.
+
+        A cue that ships only in the licensed sound overlay resolves to
+        nothing on a clean build. Playing nothing at all would teach the
+        player that the real cue is silent, so the screen says so instead.
+        """
+        if not self.demo.can_play(entry):
+            self.ctx.say(
+                f"{entry.name} is not available in this copy of the game, "
+                "so there is nothing to play. F1 still says what it means."
+            )
+            return
+        self.demo.start(entry)
 
     def update(self, dt: float) -> None:
         super().update(dt)
