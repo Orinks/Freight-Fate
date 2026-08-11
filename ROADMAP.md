@@ -386,23 +386,35 @@ onto exit signalling.
       online_presence.py back to PRODUCTION_BASE_URL and drop the
       2026-08-staging entry from PUBLIC_KEYS in cloud_save_integrity.py.
       Staged accounts and backups are test data and do not migrate.
-- [x] **Staging moved off preview deployments (2026-08-11).** Convex
-      deletes preview deployments five days after they are created on the
-      free and starter plans, and on 2026-08-11 it collected the one
-      behind dev.orinks.net. Every online surface on staging failed at
-      once -- the drivers board, the updates feed, and every driver
-      profile -- and the tester accounts, careers, cloud backups, and the
-      staging signing key went with it. Staging now runs on a permanent
-      production deployment in its own Convex project
-      (orinks-net-staging / industrious-parrot-713), so it no longer
-      expires. The signing key was regenerated, since the private half
-      was only ever held by the deleted deployment; testers need a build
-      carrying the new public key before cloud restores verify again.
-- [ ] **Re-point the dev branch's Vercel build at the staging project.**
-      CONVEX_DEPLOY_KEY scoped to Preview (dev) must hold a production
-      deploy key for industrious-parrot-713, and that deployment needs
-      CLERK_JWT_ISSUER_DOMAIN plus the two signing vars set on it.
-      Until that lands, dev.orinks.net has no backend at all.
+- [x] **Staging restored after Convex collected its backend (2026-08-11).**
+      Convex deletes preview deployments five days after they are created
+      on the free and starter plans, and it collected the one behind
+      dev.orinks.net. Every online surface failed at once -- the drivers
+      board, the updates feed, and every driver profile -- and the tester
+      accounts, careers, cloud backups, and the staging signing key went
+      with it. Staging is running again on a fresh preview deployment
+      (charming-terrier-46) with a regenerated signing key, since the old
+      private half existed only inside the deleted deployment. Testers
+      need a build carrying the new public key before cloud restores
+      verify. Staging data does not survive this kind of loss, so treat
+      it as throwaway.
+- [ ] **Staging is back on a five-day clock; move it somewhere permanent.**
+      The fix is a production deployment in its own Convex project, which
+      never expires. First attempt (orinks-net-staging /
+      industrious-parrot-713) could not be pushed to: three attempts, each
+      hanging 300s before a 408 on evaluate_push. A second project
+      (orinks-net-staging2 / scrupulous-ferret-428) is provisioned and
+      untested. Budget a throwaway build when trying it -- see the
+      first-push note below. Current deployment expires around
+      2026-08-16.
+- [ ] **Known trap: the first push to a brand-new Convex deployment
+      fails.** Observed 2026-08-11 on charming-terrier-46: push one died
+      with `InvalidModules: Cannot read properties of undefined (reading
+      'error')`, pushes two and three succeeded in about a second with
+      identical code. Do not read a first-push failure as a broken
+      commit. Whether the same holds for production deployments is
+      unknown -- industrious-parrot-713 failed three times, which does
+      not fit the pattern.
 - [x] **Staging cloud backups fixed for 1.9 careers (2026-08-09).** Day
       one of staged testing surfaced it: every company-driver backup was
       silently refused as `invalid_possession`, because the validator's
