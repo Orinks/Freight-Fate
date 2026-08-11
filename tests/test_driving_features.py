@@ -825,7 +825,8 @@ def test_how_to_play_documents_new_gameplay_systems():
     assert "not every market supports every cargo equally" in help_text
     assert "major freight areas instead of every town" in help_text
     assert "routes with enough stops" in help_text
-    assert "refrigerated, heavy-haul, and high-value freight" in help_text
+    # The tank vehicle endorsement is level 16 and buyable, so it is listed too.
+    assert "refrigerated, heavy-haul, high-value, and liquid bulk freight" in help_text
     assert "full tank or full repair" in help_text
     assert "engine tune gives more pulling power" in help_text
     assert "aerodynamic kit burns less fuel" in help_text
@@ -3226,7 +3227,7 @@ def test_auto_jake_manages_stages_on_an_automatic_box(monkeypatch):
         app.shutdown()
 
 
-def test_curve_assist_prefers_the_jake_before_service_brakes(monkeypatch):
+def test_curve_assist_takes_corners_on_the_drums_and_grades_on_the_jake(monkeypatch):
     from freight_fate.app import App
 
     class NoKeys:
@@ -3266,18 +3267,22 @@ def test_curve_assist_prefers_the_jake_before_service_brakes(monkeypatch):
         assert not driving._curve_assist_jake
         assert t.brake > 0.0
 
-        # A corner that needs real speed off: the retarder leads, as a real
-        # driver would, and the drums finish the job.
+        # Fourteen over on the level is still the drums. The corner does not
+        # buy the retarder at any overspeed: a target speed wants the precise
+        # control only the service brakes give, and a retarder drives the rear
+        # tractor wheels alone -- the last axle to retard through a bend.
         driving._curve_assist_active = False
         t.velocity_mps = 54.0 / 2.23694  # 14 over the advisory
         t.brake = 0.0
         driving._update_lane(NoKeys(), 1 / 60)
-        assert t.engine_brake_stage == 2
-        assert driving._curve_assist_jake
+        assert not t.engine_brake
+        assert not driving._curve_assist_jake
+        assert t.brake > 0.0
 
-        # Low grip inverts the rule: a jake on ice breaks the drives loose.
+        # Low grip changes nothing on the level, and must not: a jake on ice
+        # breaks the drives loose, which is why the grade case below still
+        # checks grip.
         driving._curve_assist_active = False
-        driving._curve_assist_jake = False
         t.engine_brake_stage = 0
         t.grip = 0.4
         t.brake = 0.0
@@ -3285,9 +3290,21 @@ def test_curve_assist_prefers_the_jake_before_service_brakes(monkeypatch):
         assert not t.engine_brake  # no jake on ice
         assert t.brake > 0.0  # gentle service braking instead
 
+        # Tip the same bend downhill and the retarder does come out -- that is
+        # the grade's doing, not the corner's, and it is the one job the
+        # engine brake exists for.
+        monkeypatch.setattr(driving.trip, "grade_at", lambda _pos: -0.06)
+        t.grip = 1.0
+        driving._curve_assist_active = False
+        driving._curve_assist_jake = False
+        t.engine_brake_stage = 0
+        t.brake = 0.0
+        driving._update_lane(NoKeys(), 1 / 60)
+        assert driving._curve_assist_jake
+        assert t.engine_brake
+
         # When the assist's own jake episode ends, it releases the jake --
         # but only the one IT engaged.
-        t.grip = 1.0
         driving._curve_assist_active = False
         t.brake = 0.0
         driving._update_lane(NoKeys(), 1 / 60)
@@ -3374,8 +3391,17 @@ def test_curve_assist_leaves_the_jake_alone_for_a_gentle_bend(monkeypatch):
         app.shutdown()
 
 
-def test_curve_assist_still_jakes_a_corner_needing_real_speed_off(monkeypatch):
-    """Past the line the retarder comes out, sized to the corner."""
+def test_a_corner_never_raises_the_retarder_however_fast_you_take_it(monkeypatch):
+    """On the level the corner is the drums' work, at any overspeed.
+
+    The CDL rule for a curve is to be at a safe speed BEFORE it and pull
+    through on gentle throttle, because braking mid-corner is what locks a
+    wheel and jackknifes a trailer -- and a retarder drives the tractor's rear
+    wheels only. Jacobs draw the same line: the engine brake gives sustained
+    speed control, not the precise control a target speed needs. So no amount
+    of overspeed buys the jake here (owner ruling 2026-08-11, after a tester
+    kept hearing it through bends).
+    """
     from freight_fate.app import App
 
     app = App()
@@ -3384,16 +3410,13 @@ def test_curve_assist_still_jakes_a_corner_needing_real_speed_off(monkeypatch):
         quiet_trip(driving)
         rig = _AssistRig(driving, monkeypatch, advisory=45)
 
-        # Ten over is still the drums' job; twelve is the working setting.
-        assert not rig.drive(55.0).engine_brake
-        t = rig.drive(57.0)
-        assert t.engine_brake_stage == 2
-        assert driving._curve_assist_jake
-
-        # Well over the advisory, the corner gets everything the jake has.
-        driving._curve_assist_jake = False
-        t.engine_brake_stage = 0
-        assert rig.drive(63.0).engine_brake_stage == 3
+        for speed in (55.0, 57.0, 63.0, 80.0):
+            driving._curve_assist_jake = False
+            t = rig.drive(speed)
+            assert not t.engine_brake, f"retarder came out at {speed} on the level"
+            assert not driving._curve_assist_jake
+            # ...and the assist is still slowing the truck, on the drums.
+            assert t.brake > 0.0
     finally:
         app.shutdown()
 

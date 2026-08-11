@@ -85,16 +85,16 @@ JAKE_MIN_RPM = 950.0
 # How far over a curve's advisory speed the truck has to be before the curve
 # assist reaches for the retarder. The engine brake is for shedding real
 # speed; a bend the truck is a few mph over is a lift and a touch of the
-# drums, which do it quietly and are legal in every town. Without this line
-# the assist barked through every mapped bend it handled -- 22 engagements in
-# 58 miles of Arizona mountain road, ten of them for seven mph -- which is
-# not how anyone drives and is noise a town can fine you for (tester report,
-# 2026-08-11). It is the same "well over the advisory" line the service trim
-# below already draws.
+# drums, which do it quietly and are legal in every town.
+#
+# This threshold no longer gates the curve assist at all: a corner never
+# raises the retarder, whatever the overspeed (owner ruling 2026-08-11). It
+# survives as the line the service trim below draws for "well over the
+# advisory", which is what it always measured.
 CURVE_ASSIST_JAKE_MIN_MPH = 10.0
-# Over the advisory by this much and the corner gets everything the retarder
-# has; between the two lines it gets the working setting, stage two. A bend
-# on a real downgrade skips the line above entirely -- see _update_lane.
+# How hard the retarder works once a GRADE has called for it: past this much
+# over the advisory it gets everything, otherwise the working setting, stage
+# two. Reached only on a downgrade -- see _update_lane.
 CURVE_ASSIST_JAKE_FULL_MPH = 15.0
 
 # Auto jake (automatic box, owner design 2026-07-22): J arms retarder
@@ -788,17 +788,13 @@ class DrivingUpdateMixin:
                 if self._curve_assist_active:
                     heuristic -= 3
                 curve_assisting = self.truck.speed_mph > heuristic
-        # Jake first (owner ruling 2026-07-22), but only for speed worth
-        # shedding: a real driver -- and a real predictive retarder -- slows
-        # with the engine brake before the service brakes when there is real
-        # speed to take off, and lifts and touches the drums for a bend they
-        # are barely over. At the start of an assist episode, if the corner
-        # needs CURVE_ASSIST_JAKE_MIN_MPH or more off (or the road is genuinely
-        # downhill), the player's jake is off, and the truck can retard
-        # honestly (off throttle, coupled, revs up) on a surface that allows it
-        # (a full jake on low grip breaks the drives loose), the assist
-        # switches the jake on at a stage sized to the overspeed. Everything
-        # under that line is the drums' work: quiet, and legal in every town.
+        # The corner is the DRUMS' work, always. The retarder appears here
+        # only when the road is going downhill, and then it is the grade it is
+        # answering, not the bend. See the block below for the reasoning and
+        # the sources; the short version is that a corner needs a precise
+        # target speed, which is what service brakes are for, and a retarder
+        # drives only the tractor's rear wheels, which is the last axle you
+        # want retarding mid-bend.
         t = self.truck
         tr = t.transmission
         if curve_assisting and not self._curve_assist_active:
@@ -820,13 +816,29 @@ class DrivingUpdateMixin:
             # descent on the drums alone: past fade in four and a half
             # minutes, 585 degrees at ten (bench trace, 2026-08-11).
             downhill = self.trip.grade_at(self.trip.position_mi) * 100.0 <= -GRADE_WARN_CLEAR_PCT
-            # Only where the assist can measure the overspeed. Without a baked
-            # advisory -- the ramp fallback above -- there is no measurement,
-            # and a loud restricted device is not something to reach for on a
-            # guess; the ramp has its own assist and the service trim below.
-            worth_the_bark = excess_now is not None and (
-                downhill or excess_now > CURVE_ASSIST_JAKE_MIN_MPH
-            )
+            # A GRADE is the only thing that raises the retarder here. Slowing
+            # FOR a corner is the service brakes' job, however much speed the
+            # corner wants off -- owner ruling 2026-08-11, narrowing the
+            # jake-first ruling of 2026-07-22 to grades only.
+            #
+            # The training material is unambiguous and it is not about noise.
+            # The CDL manual's rule for a curve is to reach a safe speed
+            # BEFORE entering it and then pull through on gentle throttle,
+            # because braking mid-corner is what locks a wheel and jackknifes
+            # a trailer -- and a retarder drives only the tractor's rear
+            # wheels, which is precisely the axle you do not want retarding
+            # through a bend. Jacobs, who build the thing, draw the same line:
+            # the engine brake is for SUSTAINED speed control and is "not a
+            # substitute for a service braking system", because it cannot give
+            # the precise control the drums give. A corner is a precise target
+            # speed. A descent is sustained control. Only the descent qualifies.
+            #
+            # A bend ON a grade still retards, because that is the grade's
+            # doing, not the corner's -- and it has to: without this the assist
+            # held a six percent descent on the drums alone and went past fade
+            # in four and a half minutes, 585 degrees at ten (bench trace,
+            # 2026-08-11).
+            worth_the_bark = excess_now is not None and downhill
             # Town no-engine-brake zones close the jake to the assist as well
             # (real downgrades stay exempt); the service trim below answers.
             if (
