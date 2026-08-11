@@ -2,6 +2,7 @@
 policing, hazard dodges, keep-right pressure, and exit-lane gating."""
 
 import pytest
+from speech_capture import speech_stub
 
 from freight_fate.sim.lane import CROSS_AT, LaneKeeping, lane_label
 from freight_fate.sim.traffic_manager import TrafficVehicle
@@ -240,6 +241,185 @@ def test_moving_over_in_time_avoids_the_barrels():
         app.shutdown()
 
 
+def _synthetic_trip(segments, miles: float, seed: int):
+    """A trip over one made-up leg with the given baked lane segments."""
+    from freight_fate.data.world_models import Leg, Route
+    from freight_fate.sim.trip import Trip
+    from freight_fate.sim.vehicle import TruckState
+    from freight_fate.sim.weather import WeatherSystem
+
+    leg = Leg("a", "b", miles, "US-30", "flat", (), lane_segments=tuple(segments))
+    return Trip(
+        Route(cities=["a", "b"], legs=[leg]),
+        TruckState(),
+        WeatherSystem(seed=seed),
+        time_scale=1.0,
+        seed=seed,
+    )
+
+
+def _closure_footprints(trip):
+    """(taper start, work zone end) for every construction zone that cones
+    off a lane."""
+    out = []
+    for zone in trip.zones:
+        if zone.reason != "construction" or zone.closed_lane is None:
+            continue
+        tapers = [
+            z
+            for z in trip.zones
+            if z.reason == "construction merge" and abs(z.end_mi - zone.start_mi) < 0.01
+        ]
+        start = tapers[0].start_mi if tapers else zone.start_mi
+        out.append((start, zone.end_mi))
+    return out
+
+
+def test_a_one_lane_road_never_gets_a_coned_off_lane():
+    """Shane's Detroit-Mansfield trap: the work zone closed the only lane the
+    road had, so there was nowhere legal to be."""
+    from freight_fate.data.world_models import LaneSegment
+
+    for seed in range(40):
+        # Undivided two-way, so one lane our side for the whole leg.
+        trip = _synthetic_trip([LaneSegment(0.0, 900.0, lanes=2, oneway=False)], 900.0, seed)
+        assert _closure_footprints(trip) == [], f"seed {seed} coned off the only lane"
+
+
+def test_a_closure_never_straddles_a_stretch_that_narrows():
+    """A zone that starts on two lanes and ends on one is the same trap."""
+    from freight_fate.data.world_models import LaneSegment
+
+    segments = [
+        LaneSegment(0.0, 450.0, lanes=2, oneway=True),  # two lanes our side
+        LaneSegment(450.0, 900.0, lanes=2, oneway=False),  # one lane our side
+    ]
+    for seed in range(40):
+        trip = _synthetic_trip(segments, 900.0, seed)
+        for start, end in _closure_footprints(trip):
+            mile = start
+            while mile <= end:
+                assert trip.lane_count_at(mile) >= 2, f"seed {seed} closes a lane at mile {mile}"
+                mile += 0.25
+
+
+def test_riding_a_closed_lane_with_nowhere_to_go_is_never_punished(monkeypatch):
+    """The trap in Shane's log: pinned in lane zero on a one-lane stretch, the
+    merge warning fired forever and the barrels took a bite every few seconds."""
+    from freight_fate.app import App
+
+    app = App()
+    events: list[tuple[str, bool]] = []
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events, with_interrupt=True))
+        _rolling(d, 55.0)
+        d.trip.position_mi = 6.0
+        d.trip.zones.append(Zone(5.0, 9.0, 45.0, "construction", closed_lane=0))
+        d.lane.set_lane_count(1)  # the road narrowed under the zone
+        before = d.truck.damage_pct
+
+        for _ in range(400):
+            d._update_merge(0.1)
+
+        assert d._merge_deadline is None
+        assert d.truck.damage_pct == pytest.approx(before)
+        assert not [text for text, _ in events if "closed" in text]
+    finally:
+        app.shutdown()
+
+
+def _run_into_the_barrels(d, zone) -> None:
+    """Ride the coned-off lane until the barrels take the truck."""
+    d.trip.position_mi = (zone.start_mi + zone.end_mi) / 2.0
+    d.trip.zones.append(zone)
+    d.lane.lane = zone.closed_lane
+    for _ in range(200):
+        d._update_merge(0.1)
+        if d._merge_deadline is None and d.lane.lane != zone.closed_lane:
+            return
+    raise AssertionError("the barrels never fired")
+
+
+def test_plowing_the_barrels_costs_a_fine_and_a_serious_violation(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving_enforcement import WORK_ZONE_BARRELS_FINE
+
+    app = App()
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        _rolling(d, 55.0)
+        p = app.ctx.profile
+        record = p.driving_record
+        before_money = p.money
+        before_serious = len(record.serious_violations)
+
+        _run_into_the_barrels(d, Zone(5.0, 9.0, 45.0, "construction", closed_lane=1))
+
+        assert p.money == pytest.approx(before_money - WORK_ZONE_BARRELS_FINE)
+        assert d.ticket_fines_paid == pytest.approx(WORK_ZONE_BARRELS_FINE)
+        assert len(record.serious_violations) == before_serious + 1
+    finally:
+        app.shutdown()
+
+
+def test_the_barrel_fine_is_charged_once_per_work_zone(monkeypatch):
+    """Two strikes in one closure is one refusal to merge, so one citation --
+    the tester's log caught the barrels twice in eight seconds."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_enforcement import WORK_ZONE_BARRELS_FINE
+
+    app = App()
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        _rolling(d, 55.0)
+        p = app.ctx.profile
+        before_money = p.money
+        zone = Zone(5.0, 9.0, 45.0, "construction", closed_lane=1)
+
+        _run_into_the_barrels(d, zone)
+        damage_after_one = d.truck.damage_pct
+        d.trip.zones.remove(zone)
+        _run_into_the_barrels(d, zone)
+
+        assert p.money == pytest.approx(before_money - WORK_ZONE_BARRELS_FINE)
+        assert d.truck.damage_pct > damage_after_one  # the truck still pays
+    finally:
+        app.shutdown()
+
+
+def test_no_open_lane_means_no_fine(monkeypatch):
+    """The bug charging for itself would be worse than the bug: a driver with
+    nowhere to merge must not lose a dollar."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        _rolling(d, 55.0)
+        p = app.ctx.profile
+        record = p.driving_record
+        before_money = p.money
+        before_serious = len(record.serious_violations)
+        d.trip.position_mi = 6.0
+        d.trip.zones.append(Zone(5.0, 9.0, 45.0, "construction", closed_lane=0))
+        d.lane.set_lane_count(1)
+
+        for _ in range(400):
+            d._update_merge(0.1)
+        # Even reached directly, the citation refuses to write itself.
+        d._cite_barrel_strike(d.trip.zones[-1])
+
+        assert p.money == pytest.approx(before_money)
+        assert d.ticket_fines_paid == pytest.approx(0.0)
+        assert len(record.serious_violations) == before_serious
+    finally:
+        app.shutdown()
+
+
 def test_tap_change_refuses_the_closed_lane():
     from freight_fate.app import App
 
@@ -289,6 +469,30 @@ def test_tap_lane_change_needs_speed_and_a_real_lane():
         _rolling(d)
         d._tap_lane_change(-1)  # already in the right lane
         assert d._lane_change_target is None
+    finally:
+        app.shutdown()
+
+
+def test_asking_for_a_lane_the_road_does_not_have_names_that_side(monkeypatch):
+    """Answering "you are already in the right lane" to someone asking to go
+    left tells them nothing about why they cannot."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken: list[str] = []
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+        _rolling(d)
+        d.lane.set_lane_count(1)
+
+        d._tap_lane_change(1)
+        assert d._lane_change_target is None
+        assert spoken == ["There is no lane to your left here."]
+
+        spoken.clear()
+        d._tap_lane_change(-1)
+        assert spoken == ["There is no lane to your right here."]
     finally:
         app.shutdown()
 

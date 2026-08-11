@@ -112,6 +112,13 @@ CHAIN_LAW_FINE = 500.0
 FOLLOWING_TOO_CLOSE_FINE = 250.0
 LIGHTS_FINE = 150.0
 LANE_MISUSE_FINE = 175.0
+# Driving through the barrels instead of merging out of a coned-off lane.
+# Missouri RSMo 304.585 (endangerment of a highway worker) lists striking or
+# moving barrels, barriers and signs as an offense in its own right -- the one
+# category in that statute that does not need workers to be present -- at up
+# to 1,000 dollars. This takes the top of that range: it sits above the
+# equipment fines because what it risks is the crew, not the truck.
+WORK_ZONE_BARRELS_FINE = 1000.0
 
 
 class EnforcementWatchMixin:

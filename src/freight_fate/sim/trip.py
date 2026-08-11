@@ -1187,6 +1187,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                     else None
                 )
                 taper_start = max(0.0, at - CONSTRUCTION_TAPER_MI)
+                # Only cone off a lane where the driver has another one to
+                # move into for the whole signed stretch. Elsewhere the work
+                # still happens, with every lane open through it.
+                if closed is not None and not self._span_is_multilane(taper_start, end):
+                    closed = None
                 zones.append(
                     Zone(
                         taper_start,
@@ -1556,6 +1561,43 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             if seg.start_mi <= sample_offset <= seg.end_mi:
                 return seg.your_side(forward), seg.divided
         return None
+
+    def lane_count_at(self, mile: float | None = None) -> int:
+        """Lanes on our side at a route mile, from the best data available.
+
+        The baked lane segments (real OSM counts) rule where they exist; else
+        an undivided leg (carriageway-geometry flag) is one lane our side, and
+        the HPMS leg count is the last word. This is the same answer the
+        driving state steers by, so anything that reasons about how many lanes
+        the driver has -- lane closures above all -- asks here.
+        """
+        baked = self.lanes_at(mile)
+        if baked is not None:
+            return max(1, baked[0])
+        leg_i, _ = self._leg_at_mile(self.position_mi if mile is None else mile)
+        leg = self.route.legs[leg_i]
+        if getattr(leg, "divided", None) is False:
+            return 1
+        return leg_lane_count(leg)
+
+    def _span_is_multilane(self, start_mi: float, end_mi: float) -> bool:
+        """True when every mile of a work zone footprint -- taper included --
+        has a second lane our side.
+
+        A closure needs somewhere to send the driver. Where the road narrows
+        to one lane there is no such place, and coning that lane off pinned
+        the truck in a lane it was ordered out of and could not leave (tester
+        report, Detroit-Mansfield, 2026-08-11). Checking only the start mile
+        is not enough: a zone that begins on two lanes and ends on one is the
+        same trap a few miles later.
+        """
+        stop = min(self.total_miles, max(start_mi, end_mi))
+        mile = max(0.0, min(start_mi, stop))
+        while mile < stop:
+            if self.lane_count_at(mile) < 2:
+                return False
+            mile += LANE_CLOSURE_SAMPLE_MI
+        return self.lane_count_at(stop) >= 2
 
     def state_at(self, mile: float | None = None) -> str:
         """The state the truck is in, or empty where the bake is silent.

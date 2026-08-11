@@ -337,6 +337,12 @@ class TripTrafficMixin:
 
                 # Create the zone pair (taper + work zone)
                 taper_start = max(0.0, start_mi - CONSTRUCTION_TAPER_MI)
+                # A reported closure still needs a lane to merge into. Where
+                # the road runs one lane our side anywhere under the zone, the
+                # work is announced with every lane open rather than pinning
+                # the truck in a lane it cannot leave.
+                if closed_lane is not None and not self._span_is_multilane(taper_start, end_mi):
+                    closed_lane = None
                 real_zones.append(
                     Zone(
                         taper_start,

@@ -70,7 +70,6 @@ from ..sim.lane_guidance import LaneGuidance
 from ..sim.timezones import city_zone
 from ..sim.transmission import REVERSE
 from ..sim.trip import RoadStop, Trip, TripEventKind
-from ..sim.trip_models import leg_lane_count
 from ..sim.vehicle import (
     CHAIN_SAFE_MPH,
     DAMAGE_BAND_LAST_CALL,
