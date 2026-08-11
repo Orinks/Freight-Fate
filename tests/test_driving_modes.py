@@ -72,6 +72,45 @@ def test_pause_settings_mode_change_updates_active_trip_pressure(monkeypatch):
         app.shutdown()
 
 
+def test_speed_keeper_ease_window_follows_the_driving_mode(monkeypatch):
+    # The keeper's ease is budgeted in real seconds, so a compressed clock has
+    # to buy more road for the same warning. A corner is the exception: it
+    # decompresses the trip to real time, and the ease is sized on that clock
+    # rather than on the pacing the player picked.
+    from freight_fate.app import App
+    from freight_fate.states.driving_speed_control import KEEPER_EASE_MAX_MI
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = 25.0 / 2.23694
+
+        assert (
+            driving._keeper_ease_mi(20.0, 10.0)
+            > driving._keeper_ease_mi(20.0, 4.0)
+            > driving._keeper_ease_mi(20.0, 1.0)
+        )
+        # But never past the ceiling, so a long access road is not crawled.
+        assert driving._keeper_ease_mi(20.0, 40.0) == pytest.approx(KEEPER_EASE_MAX_MI)
+
+        # A bigger drop buys more road than the base window at the same pacing.
+        assert driving._keeper_ease_mi(5.0, 1.0) > driving._keeper_ease_mi(24.0, 1.0)
+
+        # A corner runs on the real clock whichever pacing the player chose, so
+        # its ease is sized there and never on the compressed road. Sizing it
+        # on the pacing read the corner as close from half a mile back and held
+        # the whole block at the corner speed.
+        driving.trip.time_scale = 40.0
+        driving.trip.controlled_turn = False
+        assert driving.trip.effective_time_scale > 1.0
+        assert driving._keeper_turn_ease_scale() == pytest.approx(1.0)
+        driving.trip.controlled_turn = True
+        assert driving._keeper_turn_ease_scale() == pytest.approx(1.0)
+    finally:
+        app.shutdown()
+
+
 def test_hos_warning_waits_until_active_hazard_is_resolved(monkeypatch):
     from freight_fate.app import App
 
