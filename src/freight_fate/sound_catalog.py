@@ -490,3 +490,60 @@ def catalog_keys() -> set[str]:
             if cue.fallback:
                 keys.add(cue.fallback)
     return keys
+
+
+# What is deliberately not taught, and why. An exclusion is a decision on the
+# record, not a gap: the completeness test fails on any played cue that is
+# neither catalogued above nor listed here. A trailing "/*" excludes a whole
+# folder.
+#
+# vehicle/road is in NEITHER list as a plain bed -- it is catalogued once, as
+# the road lean, because what teaches a player something is its pan.
+SELF_EXPLANATORY: dict[str, str] = {
+    # Listed one by one rather than as "engine/*": the jake ring lives in the
+    # same folder and IS taught, and a folder glob here would mark it excluded
+    # and taught at once.
+    "engine/idle": "It is an engine and it sounds like one.",
+    "engine/low": "As the idle loop: an engine at an engine speed.",
+    "engine/mid": "As the idle loop.",
+    "engine/midhigh": "As the idle loop.",
+    "engine/high": "As the idle loop.",
+    "engine/start": "An engine starting, immediately after you started it.",
+    "engine/shutdown": "An engine stopping, immediately after you stopped it.",
+    "weather/*": "Rain, wind, snow and thunder name themselves.",
+    "ambient/*": "Scene, not a cue: no decision attached.",
+    "music/*": "Songs.",
+    "ui/*": "Menu feedback, learned in the first ten seconds of the main menu.",
+    "radio/fm_hiss_loop": (
+        "Static means weak signal to anyone who has owned a radio, and the "
+        "station dropping is spoken aloud when it happens."
+    ),
+    "radio/picket": "The fringe flutter, same reason as the hiss bed.",
+    "radio/static_burst": "Plays under a spoken line that already explains it.",
+    "vehicle/road_joint": "Pavement seams: texture, not a decision.",
+    "vehicle/truck_door": "A door.",
+    "vehicle/fuel_pump": "A fuel pump, at a fuel pump.",
+    "vehicle/reverse": "A backup beeper while backing up.",
+    "vehicle/horn": "The player is holding the horn key.",
+    "vehicle/brake_squeal": "It means you braked hard, which you know.",
+    "vehicle/brake_hiss_bed": "The air letting off after you released the brake pedal.",
+    "vehicle/collision": "A collision announces itself by having happened.",
+    "vehicle/gear_shift": "A gear change in a truck that is changing gear.",
+    "vehicle/shift_manual": "Banked gear changes, same reason.",
+    "vehicle/shift_auto": "Banked gear changes, same reason.",
+    "traffic/car_pass": "A vehicle going past sounds like a vehicle going past.",
+    "traffic/box_truck_pass": "As the car pass.",
+    "traffic/semi_pass": "As the car pass.",
+    "poi/facility_gate": "Ambient bed for a place the game has already named.",
+    "poi/rest_stop_night": "Ambient bed for a place the game has already named.",
+    "facility/dock_gate": "Menu feedback at a facility, not a road cue.",
+    "poi/dock_and_deliver": "Menu feedback at a facility, not a road cue.",
+}
+
+
+def is_excluded(key: str) -> bool:
+    """Whether ``key`` is deliberately left out of the catalog."""
+    if key in SELF_EXPLANATORY:
+        return True
+    folder = key.split("/", 1)[0]
+    return f"{folder}/*" in SELF_EXPLANATORY

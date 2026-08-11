@@ -269,6 +269,48 @@ from the words, and synonyms cost them a re-read.
 | The receiver refusing a load outright | the receiver refused the load | bounced, returned, kicked back | `CARGO_OUTCOME_REJECTED` |
 | Damage a safety committee rules the driver's fault | preventable damage | at-fault, chargeable, negligence | `TruckState.preventable_damage_pct` |
 | The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
+| Road noise leaning toward the side of the lane you are on, and toward a bend before you reach it | The road lean | road bed, ambient road, tire hiss | `vehicle/road`, `sim/lane_guidance.LaneGuidance` |
+| A tire just catching the edge line, still fully inside the lane | Rumble strip, clipped | edge clip, low rung of the edge ladder | `vehicle/edge_clip`, `sim/lane_guidance.EDGE_CLIP_KEY` |
+| The whole tire riding the rumble strip on one side | Rumble strip | edge strip, full rumble, middle rung of the edge ladder | `vehicle/edge_strip`, `sim/lane_guidance.EDGE_STRIP_KEY` |
+| Gravel under a tire that has left the road surface | Off the pavement | shoulder gravel, run-off, top rung of the edge ladder | `vehicle/edge_shoulder`, `sim/lane_guidance.EDGE_SHOULDER_KEY` |
+| The soft chime confirming the truck is centered again after a drift | Back in the lane | lane-centered chime, drift recovered, all-clear | `vehicle/lane_centered` |
+| Tires rolling over a painted line's raised markers, meaning a lane change happened whether meant or not | Lane line crossed | line cross, lane-change bump | `vehicle/lane_line_cross` |
+| The player-toggled tock that pans to where the truck sits inside its lane | Lane locator | position tick, lane ping | `vehicle/lane_locator`, `states/driving_controls.py._toggle_lane_locator` |
+| One rumble hit with nothing held after it, unattached to a steering correction -- fatigue or a momentary catch | Rumble strip, single hit | single tap, fatigue rumble | `vehicle/rumble_strip` |
+| Grouped bars cut across a whole lane, placed only ahead of a curve that has killed people | Transverse strips | rumble bars, wake-up strips, dead-man's-curve strips | `vehicle/transverse_strips`, `sim/lane_guidance.TRANSVERSE_KEY` |
+| A chime from the side a demanding bend turns toward, ahead of curve callouts | Curve chime | curve bink, bend warning | `vehicle/curve_bink` |
+| The player's own turn signal sounding, from the side signalled | Exit signal tone | signal tone (bare), blinker sound | `vehicle/signal_tone` |
+| The compressor filling the air tanks before the truck can move | Air building | air pressurize, tank fill | `vehicle/air_pressurize` |
+| The short sharp pop when the tanks reach full and the compressor cuts out | Air dryer purge | dryer pop, compressor cutout | `vehicle/air_dryer_purge` |
+| Air pressure fallen too low to brake safely | Low air buzzer | low-pressure alarm, air warning | `vehicle/low_air_buzzer` |
+| The parking brake engaging: a hard mechanical clunk of air dumping | Parking brake set | brake set, park brake on | `vehicle/brake_set` |
+| The parking brake releasing, freeing the truck to roll | Parking brake released | brake release, park brake off | `vehicle/brake_release` |
+| The hardest stop the truck has, for a hazard that cannot otherwise be missed | Emergency brake | e-brake (bare abbreviation), panic stop | `vehicle/ebrake` (fallback `vehicle/brake_air`) |
+| Tires losing grip on the road | Tire screech | skid, traction loss | `vehicle/tire_screech` |
+| The retarder's lightest setting: two cylinders of retard | Engine brake, stage one | jake stage one, retarder low | `engine/jake_1600`, `JAKE_STAGE_GAIN` in `states/driving_updates.py` |
+| The retarder's usual working setting on a long descent: four cylinders of retard | Engine brake, stage two | jake stage two, retarder mid | `engine/jake_1600`, `JAKE_STAGE_GAIN` |
+| The retarder at everything it has: six cylinders of retard | Engine brake, stage three | jake stage three, retarder max | `engine/jake_1600`, `JAKE_STAGE_GAIN` |
+| A chime for being over the posted limit right now | Overspeed chime | speed warning, ticket chime | `vehicle/overspeed_chime` |
+| A manual shift that did not take | Gear grind | missed shift, grinding gears | `vehicle/gear_grind` |
+| The continuous tone meaning a stop bar is close enough that the truck must already be stopping | Stop bar tone | stop tone, bar tone | `vehicle/bar_solid` |
+| The ramp signal at the bottom of the ramp going green | Green light | ramp green, signal green | `events/ramp_light_green` |
+| The ramp signal going red | Red light | ramp red, stop signal | `events/ramp_light_red` |
+| Something in the truck's path that needs a real reaction now | Hazard warning | obstacle warning, danger cue | `events/hazard_warning` |
+| The hazard now behind the truck | Hazard clear | hazard passed, all clear | `events/hazard_clear` |
+| Roadwork ahead: the posted limit drops and a lane may close | Construction zone | work zone, roadwork cue | `events/construction_zone` |
+| The traffic ahead coming down in speed | Traffic slowing | slowdown cue, brake lights ahead | `events/traffic_slowing` |
+| A street maneuver coming up on a local drive | Turn ahead | maneuver cue, upcoming turn | `events/turn_ahead` |
+| The next maneuver is a left | Turn left | left-turn cue, left maneuver | `events/turn_left` |
+| The next maneuver is a right | Turn right | right-turn cue, right maneuver | `events/turn_right` |
+| Crossing into another state | State line | border cue, state-crossing chime | `events/state_crossing` |
+| A toll gantry or plaza billing the truck | Toll charged | toll cue, gantry chime | `events/toll_charged` |
+| The driver's own yawn as fatigue builds | Yawn | fatigue sound, drowsy cue | `driver/yawn` |
+| Being looked at for something other than speed: damage, missing chains, following too close | Inspection warning | inspection cue, roadside-check tone | `events/inspection_warning` |
+| The ambient bed that swells as the truck comes up on an open scale | Weigh station | scale bed, weigh-lane loop | `poi/weigh_station_lane` |
+| The end of a pursuit | Spike strip | tire-deflation device, pursuit ender | `events/spike_strip` |
+| The sounding entry for liquid running back and forth inside a tank trailer (the concept itself is "surge", above) | Surge | slosh, sloshing, wave action | `vehicle/liquid_wash`, `sim/surge.LiquidLoad` |
+| The load hitting the front or back of the tank | Surge strike | liquid hit, fore-aft strike | `vehicle/liquid_hit`, `sim/surge.SloshAxis` |
+| The load hitting the side of the tank -- the one that rolls trucks | Surge strike, sideways | lateral hit, side slosh | `vehicle/liquid_hit_lateral`, `sim/surge.SloshAxis` |
 
 Notes on the entries that are not simple:
 
