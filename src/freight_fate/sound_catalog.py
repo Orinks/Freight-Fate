@@ -145,7 +145,7 @@ _LANE = SoundCategory(
         ),
         SoundEntry(
             "Rumble strip, single hit",
-            (Cue("vehicle/rumble_strip", volume=0.9),),
+            (Cue("vehicle/rumble_strip", volume=0.8),),
             "A single hit of rumble strip with nothing held after it. A tired "
             "driver wandering, or the truck catching the edge for a moment. "
             "If you did not steer, it is fatigue, and it is telling you to "
@@ -162,8 +162,8 @@ _LANE = SoundCategory(
         SoundEntry(
             "Curve chime",
             (
-                Cue("vehicle/curve_bink", volume=0.6, pan=-0.85),
-                Cue("vehicle/curve_bink", volume=0.6, pan=0.85, delay_s=1.2),
+                Cue("vehicle/curve_bink", volume=0.9, pan=-0.85),
+                Cue("vehicle/curve_bink", volume=0.9, pan=0.85, delay_s=1.2),
             ),
             "A demanding bend is coming, and the chime comes from the side it "
             "turns toward. Be under the advised speed before you reach it, "
