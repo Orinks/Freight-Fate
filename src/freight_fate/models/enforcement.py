@@ -72,19 +72,47 @@ SPEEDING_FINE_STEPS: tuple[tuple[float, float], ...] = (
     (20.0, 1_600.0),
     (30.0, 2_500.0),
 )
-# Prior citations anywhere in the career make the next one cost more, and
-# nothing caps it. The step schedule above is the severe end of real
-# first-offense CDL law, but a first offense is the cheapest a violation ever
-# is: repeat and aggravated speeding is charged as a misdemeanor in several
-# states, habitual-offender statutes stack penalties further, and court costs
-# and surcharges ride on top of every count. A driver who keeps collecting
-# citations keeps paying more, without limit -- which is the honest shape of
-# the real thing and the point of the schedule.
+# Prior citations anywhere in the career make the next one cost more. The step
+# schedule above is the severe end of real first-offense CDL law, but a first
+# offense is the cheapest a violation ever is: repeat and aggravated speeding
+# is charged as a misdemeanor in several states, habitual-offender statutes
+# stack penalties further, and court costs and surcharges ride on top of every
+# count.
 #
 # The same step now scales every flat fine below, not just speeding. There is
 # deliberately one knob: a second repeat ladder would be a second thing to
 # tune, a second thing to explain, and a second thing to drift.
 CITATION_REPEAT_STEP = 0.5
+
+# ...but the step is capped, which it was not when it applied to speeding
+# alone. Two reasons, and the second is the binding one.
+#
+# Real repeat offenders are charged "double, even triple" a standard fine, so
+# the shape is right but the runaway is not. Uncapped, a career driver's scale
+# bypass reached 19,800 dollars by twenty priors, and 39,600 inside roadwork,
+# against a federal ceiling of 10,000 for the real offense.
+#
+# The binding constraint is solvency, not statute. An owner-operator who owes
+# more than ``solvency.REPOSSESSION_FLOOR`` (12,000) loses the tractor. A
+# single citation must never be able to reach that on its own, or one traffic
+# stop repossesses a truck -- which no player would read as a rule, only as
+# the game breaking. Capping the step at 2.0 leaves the construction-zone
+# doubling to ride on top for a worst case of 4x base: unsafe equipment tops
+# out at 9,200 and the very worst case in the game, 30-plus over in a work
+# zone as a repeat offender, at 10,000. Punishing, survivable, and clear of
+# the floor.
+#
+# Deliberately capping the STEP and not the total: the zone doubling stays
+# whole so the spoken "it is doubled because you were in a construction zone"
+# is always true. A total cap would silently swallow it for repeat offenders
+# and make that line a lie.
+#
+# The money therefore stops climbing after the third citation -- 1,800 then
+# 2,700 then 3,600 for a bypass -- and that is the intended shape rather than
+# a gap. Past that the deterrent is the record, not the wallet: the serious
+# violation ladder and the suspension tiers above keep escalating for the
+# whole career, and losing the licence costs far more than any fine.
+CITATION_REPEAT_MAX_MULTIPLIER = 2.0
 # A fine earned inside an active construction zone is doubled. That is the
 # real rule, not a game rule -- Nevada, Texas and Pennsylvania all double the
 # penalty for a violation committed inside a marked work zone, and the sign at
@@ -197,11 +225,24 @@ def citation_fine(
     whole figure, which is what a state that does both actually does to a
     repeat offender. A second bypass inside roadwork is 1,800 x 1.5 x 2.
 
-    ``ceiling`` is optional and exists only for a citation whose statute
-    genuinely names a maximum; left None, the fine compounds without limit,
-    like the speeding schedule.
+    The repeat step is capped at ``CITATION_REPEAT_MAX_MULTIPLIER``. Repeat
+    offenders really are charged "double, even triple" a standard fine, and
+    that is the shape this models -- but the step alone is unbounded, and
+    left to run it priced a career driver's scale bypass at 19,800 dollars
+    by twenty priors and 39,600 inside roadwork, against a federal ceiling
+    of 10,000 for the real offense. An owner-operator starts with 18,000, so
+    a single stop could exceed a whole career's capital. Past a point the
+    arithmetic stops reading as severity and starts reading as a bug.
+
+    The construction-zone doubling is applied AFTER the cap, not folded into
+    it: the cap governs how much being a repeat offender can cost you, and
+    where the violation happened is a separate fact about this one citation.
+
+    ``ceiling`` is optional and names a statutory maximum for a specific
+    citation; it is the last word, applied after everything else.
     """
-    multiplier = 1.0 + CITATION_REPEAT_STEP * max(0, int(prior_citations))
+    step = 1.0 + CITATION_REPEAT_STEP * max(0, int(prior_citations))
+    multiplier = min(step, CITATION_REPEAT_MAX_MULTIPLIER)
     if construction_zone:
         multiplier *= CONSTRUCTION_ZONE_FINE_MULTIPLIER
     fine = float(base_fine) * multiplier

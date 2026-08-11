@@ -31,29 +31,78 @@ def test_speeding_fine_climbs_with_how_far_over_the_limit():
     assert serious >= 1_000.0
 
 
-def test_repeat_offenders_pay_more_without_any_ceiling():
-    # A habitual offender's bill is not capped. The base schedule is anchored
-    # to the severe end of real state law, but court costs, surcharges, and
-    # the misdemeanor treatment repeat speeding earns all stack on top -- so
-    # priors keep compounding for as long as the driver keeps collecting them.
-    from freight_fate.models.enforcement import speeding_citation_fine
+def test_repeat_offenders_pay_more_up_to_the_cap():
+    # Priors compound the way real repeat offenders are charged "double, even
+    # triple" a standard fine -- but the step stops at
+    # CITATION_REPEAT_MAX_MULTIPLIER. Uncapped it reached 39,600 for a scale
+    # bypass in roadwork, which reads as a broken game rather than a severe
+    # one. See the constant for why solvency, not statute, sets the ceiling.
+    from freight_fate.models.enforcement import (
+        CITATION_REPEAT_MAX_MULTIPLIER,
+        citation_fine,
+        speeding_citation_fine,
+    )
 
     first = speeding_citation_fine(16.0, prior_citations=0)
     third = speeding_citation_fine(16.0, prior_citations=2)
     assert third > first
+    # Beyond the cap the money stops climbing; the record keeps escalating.
     many = speeding_citation_fine(35.0, prior_citations=20)
     plenty = speeding_citation_fine(35.0, prior_citations=40)
-    assert plenty > many > 10_000.0
+    assert plenty == many
+    assert citation_fine(900.0, 99) == 900.0 * CITATION_REPEAT_MAX_MULTIPLIER
 
 
-def test_no_number_of_priors_stops_the_fine_growing():
+def test_priors_climb_monotonically_and_then_hold():
     from freight_fate.models.enforcement import citation_fine, speeding_citation_fine
 
     escalating = [speeding_citation_fine(16.0, prior_citations=n) for n in range(12)]
-    assert escalating == sorted(escalating)
-    assert len(set(escalating)) == len(escalating)  # every prior costs more
+    assert escalating == sorted(escalating)  # never cheaper for more priors
+    assert len(set(escalating)) > 1  # and it really does climb before holding
     # The same rule governs non-speeding citations.
-    assert citation_fine(900.0, 30) > citation_fine(900.0, 5)
+    assert citation_fine(900.0, 30) == citation_fine(900.0, 5)
+    assert citation_fine(900.0, 2) > citation_fine(900.0, 0)
+
+
+def test_no_single_citation_can_repossess_a_truck_on_its_own():
+    """The binding balance constraint, not a statutory one.
+
+    An owner-operator who owes past REPOSSESSION_FLOOR loses the tractor. If
+    one stop could reach that, a traffic stop would end a career outright --
+    which no player reads as a rule, only as the game breaking. This pins the
+    worst case the game can actually produce: the top speeding step, a
+    habitual offender, inside a construction zone.
+    """
+    from freight_fate.models import enforcement
+    from freight_fate.models.solvency import REPOSSESSION_FLOOR
+
+    worst = enforcement.speeding_citation_fine(99.0, prior_citations=999, construction_zone=True)
+    assert worst < REPOSSESSION_FLOOR
+    flat = max(
+        enforcement.citation_fine(base, 999, construction_zone=True)
+        for base in (
+            enforcement.UNSAFE_DAMAGE_FINE,
+            enforcement.WEIGH_STATION_BYPASS_FINE,
+            enforcement.FAILURE_TO_STOP_CITATION_FINE,
+            enforcement.WORK_ZONE_BARRELS_FINE,
+        )
+    )
+    assert flat < REPOSSESSION_FLOOR
+
+
+def test_the_construction_zone_doubling_survives_the_repeat_cap():
+    """Capping the step, not the total -- so the spoken line stays true.
+
+    The player is told a fine was doubled because they were in a construction
+    zone. If the cap applied to the combined figure it would silently swallow
+    that for any repeat offender and make the sentence a lie.
+    """
+    from freight_fate.models.enforcement import citation_fine
+
+    for priors in (0, 1, 2, 5, 40):
+        plain = citation_fine(1_800.0, priors)
+        zoned = citation_fine(1_800.0, priors, construction_zone=True)
+        assert zoned == round(plain * 2.0, 2)
 
 
 def test_every_fine_is_anchored_to_the_real_penalty_it_names():
