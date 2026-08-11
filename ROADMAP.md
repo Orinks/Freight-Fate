@@ -1667,6 +1667,17 @@ city service drives below.)
       cross-traffic consequences) onto the tier-1 street chains. Deferred
       until local-drive pacing was proven in playtests; the per-system
       harness sweep now passes clean across all 38 corridors.
+- [ ] **Signalling a street turn.** X signals an announced highway exit and
+      plays one panned `vehicle/signal_tone`; there is no blinker for a
+      surface-street maneuver, and `vehicle/turn_signal` (a repeating tick)
+      sits unused in the sound tree along with `vehicle/lane_drift`, whose
+      job the edge ladder took over. The baked tier-1 maneuvers already
+      carry direction and distance, so the missing piece is the turn as a
+      continuous act -- a held tick that self-cancels at the corner, and a
+      rule about signalling before one -- not the map data. Owner call
+      2026-08-10: wait for the turn-geometry work rather than bolt a
+      blinker onto exit signalling. Decide the two orphan assets in the
+      same change.
 
 ### Maneuvers, enforcement, and the working day
 
