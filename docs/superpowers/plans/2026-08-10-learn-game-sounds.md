@@ -440,7 +440,7 @@ _AIR = SoundCategory(
         ),
         SoundEntry(
             "Low air buzzer",
-            (Cue("vehicle/low_air_buzzer", volume=0.9, hold_s=3.0),),
+            (Cue("vehicle/low_air_buzzer", volume=0.7, hold_s=3.0),),
             "Air pressure has fallen too low to brake safely. Stop using the "
             "brakes, let the compressor catch up, and keep the parking brake "
             "set until it does. Hard repeated braking is what empties the "
@@ -448,7 +448,7 @@ _AIR = SoundCategory(
         ),
         SoundEntry(
             "Parking brake set",
-            (Cue("vehicle/brake_set", volume=0.9),),
+            (Cue("vehicle/brake_set", volume=0.65),),
             "The parking brake going on: a hard mechanical clunk of air "
             "dumping. The truck will not move until you release it.",
         ),
@@ -457,13 +457,6 @@ _AIR = SoundCategory(
             (Cue("vehicle/brake_release", volume=0.65),),
             "The parking brake coming off. You are free to roll, which also "
             "means the truck can roll on a grade before you are ready.",
-        ),
-        SoundEntry(
-            "Brake air",
-            (Cue("vehicle/brake_air", volume=1.0),),
-            "The hiss of the service brakes releasing after a stop. Routine "
-            "on every pull-away, and worth knowing so it is not mistaken for "
-            "the low air buzzer or the dryer purge.",
         ),
         SoundEntry(
             "Emergency brake",
@@ -697,13 +690,14 @@ _LOAD = SoundCategory(
         ),
         SoundEntry(
             "Surge strike, sideways",
-            (
-                Cue("vehicle/liquid_hit_lateral", volume=0.85, pan=-0.6),
-                Cue("vehicle/liquid_hit_lateral", volume=0.85, pan=0.6, delay_s=1.4),
-            ),
-            "The load hitting the side of the tank, from the side it hit. "
-            "This is the one that rolls trucks: it arrives after you have "
-            "already turned or changed lanes.",
+            # Not panned, deliberately: states/driving_liquid.py encodes the
+            # surge in tempo and never in a side, because the road bed's pan
+            # is the lane instrument and the edge ladder's is the drift side.
+            (Cue("vehicle/liquid_hit_lateral", volume=0.85),),
+            "The load hitting the side of the tank. It has its own voice, "
+            "separate from the fore-and-aft strike, because it means "
+            "something different: this is the one that rolls trucks. It "
+            "arrives after you have already turned or changed lanes.",
             when="Liquid bulk freight in a tank trailer only.",
         ),
     ),

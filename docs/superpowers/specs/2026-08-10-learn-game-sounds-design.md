@@ -104,12 +104,12 @@ rumble strip (`vehicle/rumble_strip`); dead-man's-curve transverse strips
 (`vehicle/transverse_strips`); the curve chime (`vehicle/curve_bink`); the
 exit signal tone (`vehicle/signal_tone`).
 
-**Air and brakes** (8) -- air building (`vehicle/air_pressurize`, held); air
+**Air and brakes** (7) -- air building (`vehicle/air_pressurize`, held); air
 dryer purge (`vehicle/air_dryer_purge`); low air buzzer
 (`vehicle/low_air_buzzer`); parking brake set and released
-(`vehicle/brake_set`, `vehicle/brake_release`); brake air
-(`vehicle/brake_air`); emergency brake (`vehicle/ebrake`, falling back to
-`vehicle/brake_air`); tire screech (`vehicle/tire_screech`).
+(`vehicle/brake_set`, `vehicle/brake_release`); emergency brake
+(`vehicle/ebrake`, falling back to `vehicle/brake_air`); tire screech
+(`vehicle/tire_screech`).
 
 **Engine brake, speed and shifting** (5) -- the jake growl at two, four and
 six cylinders of retard (`engine/jake_*`), demoed at a representative rpm;
