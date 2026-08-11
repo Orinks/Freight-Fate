@@ -115,6 +115,48 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **First round of Dropbox tester findings triaged and fixed --
+      SHIPPED 2026-08-11.** Three P0s off the tester living document
+      (Shane P). A construction zone could close the only lane on a
+      one-lane stretch, pinning the driver in the closed lane and
+      re-running the barrel collision until they quit -- placement now
+      requires two lanes across the whole footprint including the taper,
+      and the merge check stands down when there is no open lane.
+      Taking a weigh station's own exit ramp counted as bypassing it,
+      because the bypass test ran a frame before the ramp existed and
+      judged on speed alone. A paid roadside fine was re-charged on every
+      reload, escalating each time, because the armed stop was saved but
+      never re-saved on resolution -- this also fixed the same
+      double-charge for speeding tickets. Owner-operator careers now
+      start with a brand-new truck (owner design call, same date) instead
+      of one already damaged and short of fuel, and driving through work
+      zone barrels is now a 1,000 dollar serious violation.
+- [ ] **Remaining tester findings from the same document.** Speed keeper
+      cannot shed 25 to 20 before city turns come up (it pre-brakes for
+      zones, not posted-limit drops). The jake brake engages through
+      every curve. Merging traffic does not yield to a loaded truck.
+      There is no cue telling you when you are clear to move back over
+      after passing, and at least one unexplained sound (a whoosh on the
+      left). Driver name entry has no caret -- arrow keys do nothing, so
+      a typo can only be found by deleting back to it.
+- [ ] **Fines rebalanced against real trucking penalties.** Researched
+      schedule agreed 2026-08-11: unsafe equipment to 2,300, weigh
+      station bypass to 1,800, chain law to 580 (1,150 when it blocks the
+      road), following too close to 600, lane misuse to 500, shoulder to
+      400, lights to 350, failure to stop to 1,500. Plus a 2x multiplier
+      inside an active work zone and repeat-offender escalation extended
+      from speeding to every fine, compounding rather than adding.
+- [ ] **Spoken "work zone" contradicts the ontology.** `sim/trip.py`
+      lines 2229 and 2234 speak "Work zone active" where
+      `docs/ontology.md` makes "construction zone" canonical. Pre-existing
+      drift, found while fixing the lane trap.
+- [ ] **A resolved enforcement stop re-speaks its fine amount.**
+      Re-entering a settled stop replays the whole line including the
+      dollar figure without charging anything, because `_resolve()` runs
+      in `__init__` and `announce_entry` has no once-guard. Harmless to
+      the wallet, but a screen reader user cannot tell a re-announcement
+      from a second charge.
+
 - [x] **Break-harness findings now assert what they claim, and the one
       real one is fixed -- SHIPPED 2026-08-10.** Triaging the harness's
       2026-08-09 findings against transcripts, four of nine were

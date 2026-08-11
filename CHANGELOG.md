@@ -26,6 +26,32 @@
 
 ### Fixed
 
+- **A construction zone can no longer close the only lane you have.** On a
+  stretch of road with one lane your way, a work zone could still cone off
+  that lane. The game then told you to move over to a lane that was not
+  there, and when you could not, drove you through the barrels for it --
+  again and again, damaging the truck and the load each time. Backing out
+  earned you a wrong-way warning, and the only way out was to quit to the
+  menu and lose the run. Work zones now only close a lane where the road
+  really has another one to give you, the whole way through, and if you
+  ever do end up somewhere with nowhere to go, the game stops asking.
+
+- **Pulling into a weigh station no longer counts as driving past it.**
+  You could signal, take the ramp and be on your way into the scale, and
+  still be pulled over and fined 750 dollars for blowing past it. The
+  check was looking at your speed at the moment you passed the sign,
+  which on the ramp is always too fast. Now taking the scale's own exit
+  is exactly what it looks like. Arming the exit and then carrying on
+  down the highway is still a bypass, so nothing is gained by faking it.
+
+- **A fine you have already paid is not charged again when you come
+  back.** Paying a roadside fine and then returning to the title screen
+  meant the stop was waiting for you on your next drive, and it charged
+  you again -- for more each time, because it counted the ticket you had
+  just paid as a previous offence. One tester lost most of a career's
+  money this way. A stop that has been settled now stays settled. This
+  covers speeding tickets too.
+
 - **The highway has traffic on it now, and you can hear it go by.** The
   road was very nearly empty -- a few vehicles at the start of a run and
   fewer as it went on, because nothing ever replaced what you drove past
@@ -101,6 +127,22 @@
   offers to turn it on right there.
 
 ### Changed
+
+- **Owner-operators now start with a brand-new truck.** Starting as an
+  owner-operator used to hand you a tractor that was already four percent
+  damaged and two thirds full of fuel, which read like something handed
+  down to you rather than something you had just bought. You are buying
+  in, so you are buying new: a full tank, no damage, and nothing worn.
+  This start is still the hardest way to begin -- fuel, repairs, reserves
+  and settlement fees all come out of your own cash, and your working
+  capital is thin -- but the truck under you is yours and it is new.
+
+- **Driving through the barrels in a work zone now costs you.** Riding a
+  closed lane until you plough through the cones used to cost only truck
+  damage. It is now a 1,000 dollar fine and a serious mark on your safety
+  record, the way running a work zone really is. You are charged once for
+  a given work zone no matter how many barrels you take out, and you are
+  never charged when the road left you no open lane to move into.
 
 - **New careers now really do start on the Realistic preset.** The
   settings row has said Realistic for a long time, but lane keeping sat
