@@ -1008,9 +1008,15 @@ class DrivingUpdateMixin:
         p = self.ctx.profile
         if p is None:
             return
-        # Knocking the barrels down happens inside the cones by definition, so
-        # this one is always the doubled figure.
-        fine = citation_fine(WORK_ZONE_BARRELS_FINE, career_citations(p), construction_zone=True)
+        # NOT doubled for the construction zone, unlike every other citation.
+        # The zone multiplier exists because states double an ordinary moving
+        # violation committed in roadwork. This offense only exists inside
+        # roadwork, and its base is Missouri RSMo 304.585, which is already the
+        # work-zone-specific penalty and caps a first offense at 1,000. Passing
+        # construction_zone=True here would charge twice for the same
+        # aggravating fact and put every first offense at double the statutory
+        # maximum. Priors still escalate it.
+        fine = citation_fine(WORK_ZONE_BARRELS_FINE, career_citations(p))
         p.money -= fine
         self.ticket_fines_paid += fine
         post = self.trip.active_post_at(self.trip.position_mi)
@@ -1022,9 +1028,10 @@ class DrivingUpdateMixin:
         ladder = _log_enforcement(self.ctx, self, fine=fine, serious=True)
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(
+            # No doubled-for-the-zone clause: this citation is not doubled,
+            # because its amount is already the roadwork penalty.
             f"{saw_it}. Driving through the barrels is a citation: "
-            f"{fine:,.0f} dollars, and it goes on your safety record."
-            f"{construction_zone_fine_clause(True)} "
+            f"{fine:,.0f} dollars, and it goes on your safety record. "
             f"You have {p.money:,.0f} dollars." + (f" {ladder}" if ladder else ""),
             interrupt=False,
         )

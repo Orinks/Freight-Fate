@@ -357,10 +357,10 @@ def test_plowing_the_barrels_costs_a_fine_and_a_serious_violation(monkeypatch):
 
         _run_into_the_barrels(d, Zone(5.0, 9.0, 45.0, "construction", closed_lane=1))
 
-        # Knocking the barrels down happens inside the cones by definition, so
-        # this citation is always the doubled figure.
-        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 0, construction_zone=True)
-        assert expected == pytest.approx(WORK_ZONE_BARRELS_FINE * 2.0)
+        # NOT doubled for the zone: the base is already the roadwork penalty
+        # (RSMo 304.585), so doubling would charge twice for the same fact.
+        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 0)
+        assert expected == pytest.approx(WORK_ZONE_BARRELS_FINE)
         assert p.money == pytest.approx(before_money - expected)
         assert d.ticket_fines_paid == pytest.approx(expected)
         assert len(record.serious_violations) == before_serious + 1
@@ -380,12 +380,12 @@ def test_the_barrel_citation_says_the_charged_figure_and_why(monkeypatch):
         _rolling(d, 55.0)
         _run_into_the_barrels(d, Zone(5.0, 9.0, 45.0, "construction", closed_lane=1))
 
-        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 0, construction_zone=True)
+        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 0)
         cited = [s for s in spoken if "through the barrels is a citation" in s]
         assert cited
         assert f"{expected:,.0f} dollars" in cited[0]
-        assert f"{WORK_ZONE_BARRELS_FINE:,.0f} dollars" not in cited[0]
-        assert "doubled" in cited[0] and "construction zone" in cited[0]
+        # It must NOT claim a doubling it did not apply.
+        assert "doubled" not in cited[0]
     finally:
         app.shutdown()
 
@@ -405,9 +405,9 @@ def test_the_barrel_citation_escalates_for_a_repeat_offender(monkeypatch):
 
         _run_into_the_barrels(d, Zone(5.0, 9.0, 45.0, "construction", closed_lane=1))
 
-        # Base x (1 + 0.5 x 2 priors) x 2 for the zone: compounded, not added.
-        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 2, construction_zone=True)
-        assert expected == pytest.approx(WORK_ZONE_BARRELS_FINE * 2.0 * 2.0)
+        # Priors still escalate it, up to the repeat cap; the zone does not.
+        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 2)
+        assert expected == pytest.approx(WORK_ZONE_BARRELS_FINE * 2.0)
         assert p.money == pytest.approx(before_money - expected)
     finally:
         app.shutdown()
@@ -433,7 +433,7 @@ def test_the_barrel_fine_is_charged_once_per_work_zone(monkeypatch):
         d.trip.zones.remove(zone)
         _run_into_the_barrels(d, zone)
 
-        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 0, construction_zone=True)
+        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 0)
         assert p.money == pytest.approx(before_money - expected)
         assert d.truck.damage_pct > damage_after_one  # the truck still pays
     finally:
