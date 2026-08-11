@@ -684,6 +684,93 @@ def test_a_closed_scale_says_nothing_and_an_open_one_speaks(monkeypatch):
         app.shutdown()
 
 
+def _scale_crossing(app, monkeypatch, *, mph, armed):
+    """Set a truck onto the gore of an open scale's own exit and run one frame.
+
+    The frame is the real one: the bypass check, then the exit watch, then the
+    verdict, in exactly the order ``DrivingState.update`` calls them.
+    """
+    from enforcement_helpers import open_scale_post
+
+    from freight_fate.sim.trip import RoadStop
+
+    d = _driving(app)
+    spoken = []
+    monkeypatch.setattr(app.ctx, "say", lambda text, *a, **k: spoken.append(text))
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, *a, **k: spoken.append(text))
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "save_profile", lambda *a, **k: None)
+    stop = RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))
+    d.trip.stops = [stop]
+    d.trip.posts = [open_scale_post(stop)]
+    d.trip.position_mi = 9.95
+    d.truck.velocity_mps = mph / 2.23694
+    if armed:
+        d._exit_stop = stop
+        d._exit_signal_on = True
+        d._exit_lane_alignment = 1.0
+        d.lane.lane = 0
+    previous_mi = d.trip.position_mi
+    d.trip.position_mi = 10.02
+    d._check_weigh_station_enforcement(previous_mi)
+    d._update_exit(0.07, 0.1)
+    d._resolve_weigh_station_bypass()
+    return d, stop, spoken
+
+
+def test_taking_the_scales_own_ramp_is_never_a_bypass(monkeypatch):
+    """Signalling, slowing, and turning in is the compliant thing to do.
+
+    A tester signalled for the scale, dropped to eighteen, and was fined for
+    blowing past it while he was on its ramp (log, 2026-08-10). The gore is
+    crossed at ramp speed by definition, so speed alone can never tell a
+    check-in from a bypass.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d, stop, spoken = _scale_crossing(app, monkeypatch, mph=18.0, armed=True)
+        assert d._pull_over is None
+        assert d._ramp_stop is not None and d._ramp_stop.key == stop.key
+        assert not [s for s in spoken if "Scale bypass enforcement" in s]
+        assert [s for s in spoken if "You take the exit for" in s]
+    finally:
+        app.shutdown()
+
+
+def test_arming_the_scales_exit_and_not_taking_it_is_still_a_bypass(monkeypatch):
+    """The signal is not the compliance; pulling in is.
+
+    Too fast for the ramp is a miss, and a miss past an open scale is the
+    same bypass it would be with no signal at all -- otherwise flicking the
+    signal on would buy a free pass at any speed.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d, _stop, spoken = _scale_crossing(app, monkeypatch, mph=62.0, armed=True)
+        assert d._ramp_stop is None
+        assert d._pull_over == "lights"
+        assert [s for s in spoken if "Scale bypass enforcement" in s]
+    finally:
+        app.shutdown()
+
+
+def test_rolling_past_an_open_scale_is_still_a_bypass(monkeypatch):
+    """The plain case, unchanged: no signal, highway speed, a fine."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d, _stop, spoken = _scale_crossing(app, monkeypatch, mph=62.0, armed=False)
+        assert d._pull_over == "lights"
+        assert [s for s in spoken if "Scale bypass enforcement" in s]
+    finally:
+        app.shutdown()
+
+
 # --- calibration: what presence costs a clean driver, and a reckless one ----
 
 
