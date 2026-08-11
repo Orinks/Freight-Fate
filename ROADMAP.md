@@ -139,13 +139,31 @@ onto exit signalling.
       after passing, and at least one unexplained sound (a whoosh on the
       left). Driver name entry has no caret -- arrow keys do nothing, so
       a typo can only be found by deleting back to it.
-- [ ] **Fines rebalanced against real trucking penalties.** Researched
-      schedule agreed 2026-08-11: unsafe equipment to 2,300, weigh
-      station bypass to 1,800, chain law to 580 (1,150 when it blocks the
-      road), following too close to 600, lane misuse to 500, shoulder to
-      400, lights to 350, failure to stop to 1,500. Plus a 2x multiplier
-      inside an active work zone and repeat-offender escalation extended
-      from speeding to every fine, compounding rather than adding.
+- [x] **Fines rebalanced against real trucking penalties -- SHIPPED
+      2026-08-11** on `feat/fines-rebalance`, held back from the first
+      tester build on purpose (see below). Unsafe equipment to 2,300,
+      weigh station bypass to 1,800, chain law to 580, following too
+      close to 600, lane misuse to 500, shoulder to 400, lights to 350,
+      failure to stop to 1,500. A 2x multiplier inside a construction
+      zone (taper included) and repeat-offender escalation extended from
+      speeding to every fine, compounding rather than adding. All amounts
+      and both multipliers now live in `models/enforcement.py` behind one
+      `citation_fine` helper; `CHAIN_LAW_FINE` had two live definitions
+      on different paths, one shadowing the other, now collapsed.
+- [ ] **Decide whether the barrel strike should double.** It is the one
+      citation that can only happen inside a construction zone, so the
+      zone multiplier always applies and it is always charged 2,000. Its
+      1,000 base came from Missouri RSMo 304.585, which is already the
+      work-zone-specific penalty and caps a first offense at 1,000 -- so
+      doubling charges twice for the same aggravating factor. Either
+      exempt offenses whose base is already zone-specific, or drop the
+      base to 500 so it lands at the statutory 1,000.
+- [ ] **Fix the driving behaviour that manufactures fines before the
+      fines reach testers.** Speed keeper cannot shed 25 to 20 before
+      city turns, and the jake brake fires through every curve -- both
+      produce exactly the violations that just got much more expensive.
+      Shipping the new amounts first would charge players for the game's
+      own errors.
 - [ ] **Spoken "work zone" contradicts the ontology.** `sim/trip.py`
       lines 2229 and 2234 speak "Work zone active" where
       `docs/ontology.md` makes "construction zone" canonical. Pre-existing
