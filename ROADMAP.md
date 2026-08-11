@@ -153,9 +153,11 @@ onto exit signalling.
 - [ ] **A resolved enforcement stop re-speaks its fine amount.**
       Re-entering a settled stop replays the whole line including the
       dollar figure without charging anything, because `_resolve()` runs
-      in `__init__` and `announce_entry` has no once-guard. Harmless to
-      the wallet, but a screen reader user cannot tell a re-announcement
-      from a second charge.
+      in `__init__` and `announce_entry` has no once-guard. The money is
+      safe, but the repeat is word-for-word identical to a fresh charge,
+      so there is no way to tell one from the other. Lead a re-entry with
+      past tense instead; do not silence it, since re-reading the stop is
+      the only way back to the detail.
 
 - [x] **Break-harness findings now assert what they claim, and the one
       real one is fixed -- SHIPPED 2026-08-10.** Triaging the harness's
