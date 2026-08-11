@@ -234,6 +234,8 @@ from the words, and synonyms cost them a re-read.
 | The career-long enforcement history | your record | rap sheet, history, file | `DrivingRecord` |
 | A place on the road where an officer may be sitting | enforcement post | patrol, speed trap, trap, checkpoint, bear | `EnforcementPost` |
 | The officer | trooper on the highway; officer at a scale | cop, bear, smokey, unit, LEO | `EnforcementPost.agency` |
+| The sounding entry for a patrol car sitting off the road on that side, heard before it can see you (the concept itself is "enforcement post", above) | Enforcement post | patrol, speed trap, trap, checkpoint | `traffic/trooper_pass`, `EnforcementPost` |
+| The held siren a driver hears when a trooper is pulling them over | Siren | siren loop, cop siren, alarm tone | `events/police_siren`, `states/driving_siren.py` |
 | Being pulled to the shoulder by one | pull-over | stop (already the POI, the act of stopping, and the command) | `_pull_over` |
 | The inspection facility | weigh station; "the scale" in short cues | scale house, weigh point, chicken coop | `RoadStop(type="weigh_station")` |
 | Whether it is working today | open / closed | active, manned, staffed, live | `KIND_FIXED_SCALE` vs `KIND_SCALE_APRON` |

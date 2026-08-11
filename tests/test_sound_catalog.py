@@ -151,11 +151,16 @@ def test_the_jake_ring_is_catalogued_by_hand():
 
 def test_every_entry_name_is_an_ontology_noun():
     ontology = (Path(__file__).parents[1] / "docs" / "ontology.md").read_text(encoding="utf-8")
-    missing = [e.name for e in sound_catalog.catalog_entries() if e.name not in ontology]
+    # Only the Spoken vocabulary table counts as a real row: a name that only
+    # turns up as a substring of a class name, a file path, or a sentence
+    # elsewhere in the file is a coincidence, not a documented noun.
+    start = ontology.index("## Spoken vocabulary")
+    end = ontology.find("\n## ", start)
+    vocabulary = ontology[start:] if end == -1 else ontology[start:end]
+    missing = [e.name for e in sound_catalog.catalog_entries() if e.name not in vocabulary]
     assert not missing, (
-        "these entry names are not in docs/ontology.md: "
-        + ", ".join(missing)
-        + ". Add a row for each, in this change."
+        "these entry names have no row in the Spoken vocabulary table of "
+        "docs/ontology.md: " + ", ".join(missing) + ". Add a row for each, in this change."
     )
 
 
