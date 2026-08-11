@@ -6,8 +6,14 @@ from ..audio import CH_AIR, CH_BRAKE, CH_EDGE, CH_JAKE, CH_RADIO_FX, CH_ROAD
 from ..audio_fades import curve as _resolve_curve
 from ..radio import truck_elevation_ft
 from .driving_core import *
+from .driving_enforcement import WORK_ZONE_BARRELS_FINE
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
-from .driving_rest_states import EnforcementStopState, FelonyStopState, TrafficStopState
+from .driving_rest_states import (
+    EnforcementStopState,
+    FelonyStopState,
+    TrafficStopState,
+    _log_enforcement,
+)
 
 # Re-crossings inside this window are pinballing, not lane changes.
 LANE_CROSS_REPEAT_S = 4.0
@@ -697,11 +703,8 @@ class DrivingUpdateMixin:
             if pad.active and pad.steering:
                 steer = pad.steering
         self.lane.steering = steer
-        # The trip's own route: after a surface chain swap the active trip
-        # drives the street legs, not the highway legs.
-        leg = self.trip.route.legs[self.trip.current_leg_index]
         # The exit ramp is a single lane; the mainline keeps its leg count.
-        self.lane.set_lane_count(1 if self._ramp_mi is not None else self._lane_count_here(leg))
+        self.lane.set_lane_count(1 if self._ramp_mi is not None else self._lane_count_here())
         # Use the real baked curve data when the truck is inside a curve.
         # The curve force pushes the lane offset outward proportionally to
         # how much the truck's speed exceeds the advisory speed, scaled by
@@ -929,6 +932,14 @@ class DrivingUpdateMixin:
         if closed is None or self.lane.lane != closed or self.truck.speed_mph < LANE_MIN_MPH:
             self._merge_deadline = None
             return
+        if self.lane.lane_count < 2:
+            # Nowhere to merge to: the road under this closure runs one lane
+            # our side. Zone placement will not do this any more, but a saved
+            # trip or a stretch that narrows mid-zone still can, and ordering
+            # a driver into a lane that does not exist -- then charging them
+            # for staying put -- is the worst thing this code could do.
+            self._merge_deadline = None
+            return
         open_lane = closed - 1 if closed > 0 else closed + 1
         open_name = lane_label(open_lane, self.lane.lane_count)
         if self._merge_deadline is None:
@@ -958,6 +969,52 @@ class DrivingUpdateMixin:
                 f"{self.truck.damage_pct:.0f} percent.",
                 interrupt=True,
             )
+            self._cite_barrel_strike(zone)
+
+    def _cite_barrel_strike(self, zone) -> None:
+        """Charge the citation for knocking down work zone barrels.
+
+        Charged where the chain-law citation is, and for the same reason:
+        this is written on the spot, mid-drive, and asking a driver who has
+        just taken a collision to also run a shoulder stop stacks two demands
+        on one moment. The record entry is a serious violation, not just
+        money -- the offense endangers the crew, not the truck.
+
+        Charged once per work zone. The barrels can catch a truck several
+        times over one closure (the tester's log has two strikes in eight
+        seconds); that is one refusal to merge, so it is one citation. The
+        damage still lands every time.
+        """
+        # An open lane is what makes this the driver's fault. A truck with
+        # nowhere to merge cannot be charged for staying where it is -- the
+        # merge update returns long before here in that case, and this second
+        # reading is deliberate: no future edit above may make this reachable.
+        if self.lane.lane_count < 2 or self._enforcement_bypassed():
+            return
+        key = f"barrels:{round(zone.start_mi, 1)}"
+        if key in self.enforcement_events:
+            return
+        self.enforcement_events.add(key)
+        p = self.ctx.profile
+        if p is None:
+            return
+        fine = WORK_ZONE_BARRELS_FINE
+        p.money -= fine
+        self.ticket_fines_paid += fine
+        post = self.trip.active_post_at(self.trip.position_mi)
+        saw_it = (
+            f"A trooper working this {post.reason} saw it"
+            if post is not None
+            else "The work crew called it in"
+        )
+        ladder = _log_enforcement(self.ctx, self, fine=fine, serious=True)
+        self.ctx.audio.play("ui/error")
+        self.ctx.say_event(
+            f"{saw_it}. Driving through the barrels is a citation: "
+            f"{fine:,.0f} dollars, and it goes on your safety record. "
+            f"You have {p.money:,.0f} dollars." + (f" {ladder}" if ladder else ""),
+            interrupt=False,
+        )
 
     def _keep_right_justified(self) -> bool:
         """Left-lane time is legitimate while passing slower right-lane
@@ -1091,22 +1148,14 @@ class DrivingUpdateMixin:
             text = "Through the bend."
         self.ctx.say_event(text, interrupt=False)
 
-    def _lane_count_here(self, leg) -> int:
-        """Lanes on our side, from the best data available at this mile.
+    def _lane_count_here(self) -> int:
+        """Lanes on our side at this mile.
 
-        The baked lane segments (real OSM counts) rule where they exist;
-        else an undivided leg (carriageway-geometry flag) is one lane our
-        side -- the old default of two invented a phantom passing lane on
-        every rural two-lane, which swallowed the curve push as fake lane
-        changes and silenced the whole edge ladder (owner-caught on Camp
-        Verde-Payson). The HPMS leg count remains the last word elsewhere.
+        One answer, kept on the trip, so the lane the truck steers in and the
+        lane a work zone may cone off can never disagree -- two readings of
+        the road is how a closure landed on a one-lane stretch.
         """
-        baked = self.trip.lanes_at()
-        if baked is not None:
-            return max(1, baked[0])
-        if getattr(leg, "divided", None) is False:
-            return 1
-        return leg_lane_count(leg)
+        return self.trip.lane_count_at()
 
     def _cue_loudness(self) -> float:
         from ..sim.lane_guidance import CUE_LOUDNESS

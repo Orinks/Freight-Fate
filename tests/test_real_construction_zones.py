@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from unittest.mock import MagicMock
 
 from freight_fate.data.world import Leg, Route
@@ -326,6 +327,73 @@ class TestPlaceRealConstructionZones:
         # route point on the I-71 Columbus-Cincinnati leg, so it should
         # be filtered and return empty.
         assert zones == []
+
+    def test_single_lane_road_keeps_every_lane_open(self):
+        """A reported closure on a one-lane-each-way road is placed with no
+        coned-off lane: closing the only lane leaves nowhere legal to drive."""
+        from freight_fate.data.world_models import LaneSegment
+
+        provider = MagicMock(spec=RealTrafficProvider)
+        provider.get_construction_near_route.return_value = [
+            TrafficEvent(
+                id="cz-narrow",
+                event_type="construction",
+                severity="medium",
+                description="Paving US 20",
+                county="Franklin",
+                latitude=39.83,
+                longitude=-83.01,
+                road_name="I-71",
+                closure="single lane",
+            )
+        ]
+        # Undivided two-way: one lane in the direction of travel.
+        leg = _make_leg()
+        leg = replace(leg, lane_segments=(LaneSegment(0.0, leg.miles, lanes=2, oneway=False),))
+        route = Route(cities=["columbus_oh_us", "cincinnati_oh_us"], legs=[leg])
+        trip = Trip(
+            route=route,
+            truck=TruckState(TruckSpecs()),
+            weather=WeatherSystem(),
+            time_scale=1.0,
+            seed=42,
+            traffic_provider=provider,
+        )
+        zones = trip._place_real_construction_zones()
+        assert zones  # the work zone is still announced
+        assert all(z.closed_lane is None for z in zones)
+
+    def test_two_lane_road_still_closes_a_lane(self):
+        """Where there is a lane to merge into, the reported closure stands."""
+        from freight_fate.data.world_models import LaneSegment
+
+        provider = MagicMock(spec=RealTrafficProvider)
+        provider.get_construction_near_route.return_value = [
+            TrafficEvent(
+                id="cz-wide",
+                event_type="construction",
+                severity="medium",
+                description="Paving I-71",
+                county="Franklin",
+                latitude=39.83,
+                longitude=-83.01,
+                road_name="I-71",
+                closure="single lane",
+            )
+        ]
+        leg = _make_leg()
+        leg = replace(leg, lane_segments=(LaneSegment(0.0, leg.miles, lanes=2, oneway=True),))
+        route = Route(cities=["columbus_oh_us", "cincinnati_oh_us"], legs=[leg])
+        trip = Trip(
+            route=route,
+            truck=TruckState(TruckSpecs()),
+            weather=WeatherSystem(),
+            time_scale=1.0,
+            seed=42,
+            traffic_provider=provider,
+        )
+        zones = trip._place_real_construction_zones()
+        assert [z.closed_lane for z in zones] == [0, 0]
 
     def test_facility_approach_route_returns_empty(self):
         """Facility approach routes skip real construction zones."""

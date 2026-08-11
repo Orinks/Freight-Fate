@@ -395,6 +395,11 @@ TRAFFIC_PRESSURE_LOOKAHEAD_MI = 2.5
 TRAFFIC_PRESSURE_MIN_INTENSITY = 0.12
 CONSTRUCTION_TAPER_MI = 1.0
 CONSTRUCTION_TAPER_LIMIT_MPH = 55.0
+# How finely a work zone footprint is sampled before a lane may be coned off.
+# Baked lane runs shorter than this are already collapsed for the spoken lane
+# callouts (LANE_RUN_MIN_MI), so a quarter mile resolves every stretch a
+# driver is told about.
+LANE_CLOSURE_SAMPLE_MI = 0.25
 CORRIDOR_HAZARD_MIN_FACTOR = 0.75
 CORRIDOR_HAZARD_MAX_FACTOR = 1.45
 CB_PATROL_LOOKAHEAD_MI = 5.0  # floor for the enforcement lead, never the whole answer

@@ -181,7 +181,11 @@ class DrivingControlsMixin:
             return
         target = lane.lane + direction
         if not 0 <= target < lane.lane_count:
-            self.ctx.say(f"You are already in the {lane.lane_name} lane.")
+            # Answer the side that was asked for. Naming the lane the driver
+            # is already in ("you are already in the right lane") is no answer
+            # at all to someone asking to go left.
+            side = "left" if direction > 0 else "right"
+            self.ctx.say(f"There is no lane to your {side} here.")
             return
         zone = self.trip.active_zone
         if zone is not None and zone.reason == "construction" and zone.closed_lane == target:
