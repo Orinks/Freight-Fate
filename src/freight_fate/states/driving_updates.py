@@ -818,12 +818,13 @@ class DrivingUpdateMixin:
             # A real downgrade is the retarder's own job -- holding a loaded
             # truck back on a grade is the one use every noise ordinance
             # leaves legal -- so the overspeed line does not apply there.
-            # GRADE_WARN_CLEAR_PCT is the same line the G readout and the
+            # _on_downgrade draws the same line the G readout and the
             # ordinance exemption already draw between level road and a
-            # grade. Without this carve-out the assist held a six percent
-            # descent on the drums alone: past fade in four and a half
-            # minutes, 585 degrees at ten (bench trace, 2026-08-11).
-            downhill = self.trip.grade_at(self.trip.position_mi) * 100.0 <= -GRADE_WARN_CLEAR_PCT
+            # grade, and adaptive cruise now asks it too. Without this
+            # carve-out the assist held a six percent descent on the drums
+            # alone: past fade in four and a half minutes, 585 degrees at ten
+            # (bench trace, 2026-08-11).
+            downhill = self._on_downgrade()
             # A GRADE is the only thing that raises the retarder here. Slowing
             # FOR a corner is the service brakes' job, however much speed the
             # corner wants off -- owner ruling 2026-08-11, narrowing the

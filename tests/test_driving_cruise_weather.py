@@ -1944,18 +1944,32 @@ def test_overspeed_warning_speaks_then_chimes_until_compliant(monkeypatch):
 # -- holding the set speed on a grade --------------------------------------------
 
 
-def _grade_hold(app, grade, *, set_mph=62.0, seconds=90.0, descent="realistic"):
+def _grade_hold(
+    app,
+    grade,
+    *,
+    set_mph=62.0,
+    seconds=90.0,
+    descent="realistic",
+    advisory=None,
+    stages=None,
+):
     """Run cruise at a set speed on a fixed grade; return the speed trace.
 
     Mirrors the driving loop's own order for the pieces a grade exercises:
     pedals decay when nothing is held, cruise runs, the retarder manager and
     the automatic get their turn, then the physics steps.
+
+    ``advisory`` caps the working target for a mapped bend the way a pacenote
+    does, and ``stages`` (a list) collects the retarder stage each frame --
+    what the corner-versus-grade tests below are actually reading.
     """
     driving = start_drive(app)
     quiet_trip(driving)
     open_limits(driving)
     driving.trip.traffic_context = lambda: None
     driving.trip.grade_at = lambda mile: grade
+    driving.trip.engine_brake_ban_at = lambda mile: None
     app.ctx.settings.descent_speed_control = descent
     app.ctx.settings.automatic_transmission = True
     t = driving.truck
@@ -1972,6 +1986,10 @@ def _grade_hold(app, grade, *, set_mph=62.0, seconds=90.0, descent="realistic"):
     for step in range(int(seconds * 60)):
         # Settle on the flat first so the grade arrives at a steady truck.
         t.grade = 0.0 if step < 20 * 60 else grade
+        if advisory is not None and step == 20 * 60:
+            # The bend's footprint outlasts the run, so the cap stays on.
+            driving._cruise_curve_mph = float(advisory)
+            driving._cruise_curve_end_mi = driving.trip.position_mi + 5.0
         ramp = dt * 2.2
         t.throttle = max(0.0, t.throttle - ramp * 2)
         t.brake = max(0.0, t.brake - ramp * 3)
@@ -1982,6 +2000,8 @@ def _grade_hold(app, grade, *, set_mph=62.0, seconds=90.0, descent="realistic"):
         t.update(dt)
         if step >= 20 * 60:
             speeds.append(t.speed_mph)
+            if stages is not None:
+                stages.append(t.engine_brake_stage)
     return driving, speeds
 
 
@@ -2368,6 +2388,167 @@ def test_cruise_leaves_the_retarder_alone_when_descent_control_is_off():
         assert driving.truck.engine_brake_stage == 0
         assert max(speeds) <= 68.0, max(speeds)
         assert not driving.truck.air_brakes_holding
+    finally:
+        app.shutdown()
+
+
+# -- the retarder answers grades, not corners -----------------------------------
+
+
+def test_cruise_slows_for_a_level_bend_on_the_drums_not_the_retarder():
+    """A corner is a target speed, and target speeds belong to the drums.
+
+    Adaptive cruise capped its working target to the bend's advisory and then
+    reached for the retarder against the resulting overspeed, at three
+    quarters of a mile per hour over, on flat road -- a tester heard the
+    engine brake in corners three times running. The CDL rule is to reach a
+    safe speed BEFORE a bend and pull through, because braking mid-corner is
+    what locks a wheel and jackknifes a trailer, and a retarder drives the
+    tractor's rear wheels alone. Jacobs say the same: sustained speed
+    control, "not a substitute for a service braking system".
+
+    Bench, level road, 62 set against a 45 advisory: the retarder was up for
+    350 of 1200 frames at stage three, once per bend over a route of five
+    (2026-08-11). It must be silent, and cruise must still arrive.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        stages = []
+        _, speeds = _grade_hold(app, 0.0, seconds=60.0, advisory=45.0, stages=stages)
+        assert max(stages) == 0, max(stages)
+        # And it genuinely slows for the bend -- silence must not mean cruise
+        # simply carried the set speed through the corner.
+        assert speeds[-1] <= 48.0, speeds[-1]
+        assert speeds[-1] >= 38.0, speeds[-1]
+    finally:
+        app.shutdown()
+
+
+def test_cruise_still_retards_for_a_bend_on_a_downgrade():
+    """A bend on a grade retards -- that is the grade's doing, not the bend's.
+
+    Removing the retarder here would put a six percent descent on the drums
+    alone: past fade onset in four and a half minutes (bench, 2026-08-11).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        stages = []
+        _, speeds = _grade_hold(app, -0.06, seconds=60.0, advisory=45.0, stages=stages)
+        assert max(stages) >= 1, max(stages)
+        # Holding the advisory, not running away down the hill.
+        assert max(speeds[-600:]) <= 55.0, max(speeds[-600:])
+    finally:
+        app.shutdown()
+
+
+def test_cruise_holds_a_sustained_grade_on_the_retarder():
+    """The descent case, pinned: a plain downgrade is the retarder's own job."""
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        stages = []
+        driving, speeds = _grade_hold(app, -0.06, seconds=60.0, stages=stages)
+        assert max(stages) >= 1, max(stages)
+        assert driving.truck.brake_temp_c < driving.truck.brake_fade_onset_c
+        assert max(speeds) <= 66.0, max(speeds)
+    finally:
+        app.shutdown()
+
+
+def test_cruise_gives_the_retarder_back_when_the_grade_runs_out_in_a_bend():
+    """The grade ends under the corner: the retarder goes with it.
+
+    Handing the number to the drums used to leave whatever stage cruise had
+    raised on the hill still barking, all the way through the level bend --
+    182 of 600 frames at stage three (bench, 2026-08-11). Only the stage
+    cruise raised itself is released; the driver's own switch is untouched.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        app.ctx.settings.descent_speed_control = "realistic"
+        driving = _cruising(app)
+        driving.trip.engine_brake_ban_at = lambda mile: None
+        driving.trip.grade_at = lambda mile: -0.06
+        t = driving.truck
+        dt = 1 / 60
+        for _ in range(int(12 * 60)):
+            t.grade = -0.06
+            ramp = dt * 2.2
+            t.throttle = max(0.0, t.throttle - ramp * 2)
+            t.brake = max(0.0, t.brake - ramp * 3)
+            driving._update_cruise(dt, False, False, False)
+            t.auto_shift()
+            t.update(dt)
+        assert driving._cruise_jake_stage >= 1, driving._cruise_jake_stage
+
+        # The bend arrives and the road levels out underneath it.
+        driving._cruise_curve_mph = 45.0
+        driving._cruise_curve_end_mi = driving.trip.position_mi + 5.0
+        driving.trip.grade_at = lambda mile: 0.0
+        stages = []
+        for _ in range(int(10 * 60)):
+            t.grade = 0.0
+            ramp = dt * 2.2
+            t.throttle = max(0.0, t.throttle - ramp * 2)
+            t.brake = max(0.0, t.brake - ramp * 3)
+            driving._update_cruise(dt, False, False, False)
+            t.auto_shift()
+            t.update(dt)
+            stages.append(t.engine_brake_stage)
+        assert max(stages) == 0, max(stages)
+        assert driving._cruise_jake_stage == 0
+    finally:
+        app.shutdown()
+
+
+def test_auto_jake_does_not_chase_a_bend_advisory():
+    """The AMT retarder manager holds the driver's number, not the corner's.
+
+    The third retarder path: the driver armed the stalk with J, so auto mode
+    owns the stage. It targets the speed it was armed at (or descent
+    control's ceiling on a grade) and never reads a curve advisory, so a bend
+    cannot step it up. Pinned because it is the one path that would otherwise
+    reintroduce the corner bark by another route.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    app.ctx.say_event = speech_stub()
+    try:
+        app.ctx.settings.descent_speed_control = "realistic"
+        driving = _cruising(app)
+        driving.trip.engine_brake_ban_at = lambda mile: None
+        driving.trip.grade_at = lambda mile: 0.0
+        driving._cancel_cruise()
+        t = driving.truck
+        t.grade = 0.0
+        t.throttle = 0.0
+        driving._auto_jake = True
+        driving._auto_jake_hold_mph = max(5.0, t.speed_mph)
+        t.engine_brake_stage = 1  # the controller climbs from here
+        driving._cruise_curve_mph = 45.0
+        driving._cruise_curve_end_mi = driving.trip.position_mi + 5.0
+
+        stages = []
+        for _ in range(int(20 * 60)):
+            t.grade = 0.0
+            t.throttle = 0.0
+            driving._update_auto_jake(1 / 60)
+            t.auto_shift()
+            t.update(1 / 60)
+            stages.append(t.engine_brake_stage)
+        assert max(stages) == 1, max(stages)
     finally:
         app.shutdown()
 

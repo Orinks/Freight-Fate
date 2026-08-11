@@ -103,6 +103,23 @@ class EngineBrakeZoneMixin:
             return True
         return self._jake_zone_exempt()
 
+    def _on_downgrade(self) -> bool:
+        """Is the road under the truck a real downgrade?
+
+        The one question that decides whether an assist may reach for the
+        retarder at all. Holding a loaded truck back on a grade is sustained
+        speed control, which is what the engine brake is built for and the one
+        use every noise ordinance leaves legal. Slowing to a target speed --
+        for a bend, a ramp, a lower posted limit, a lead vehicle -- is the
+        service brakes' job, because only the drums give the precise control
+        that needs, and a retarder drives the tractor's rear wheels alone.
+
+        JAKE_ZONE_EXEMPT_GRADE_PCT is the same line the ordinance carve-out
+        and the spoken G readout already draw between level road and a grade,
+        so a driver hearing "level" never hears a retarder answering a grade.
+        """
+        return self.trip.grade_at(self.trip.position_mi) * 100.0 <= -JAKE_ZONE_EXEMPT_GRADE_PCT
+
     def _release_assist_jake_in_zone(self, city: str) -> None:
         """Drop an assist-raised retarder at the town line.
 
@@ -144,8 +161,7 @@ class EngineBrakeZoneMixin:
         # imminent danger" -- every well-drafted ordinance excuses that.
         if self.truck.emergency_brake or self._hazard_deadline is not None:
             return True
-        grade_pct = self.trip.grade_at(self.trip.position_mi) * 100.0
-        return grade_pct <= -JAKE_ZONE_EXEMPT_GRADE_PCT
+        return self._on_downgrade()
 
     def _maybe_warn_jake_zone_ahead(self, driver_owns_jake: bool) -> None:
         """Read the NO ENGINE BRAKE sign out loud while it still helps.

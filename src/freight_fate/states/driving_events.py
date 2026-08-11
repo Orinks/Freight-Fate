@@ -2792,7 +2792,8 @@ class DrivingEventMixin:
         ):
             self._cruise_curve_mph = None
             self._cruise_curve_end_mi = None
-        if self._cruise_curve_mph is not None and self._cruise_curve_mph < target_mph:
+        curve_capped = self._cruise_curve_mph is not None and self._cruise_curve_mph < target_mph
+        if curve_capped:
             target_mph = self._cruise_curve_mph
         # Interactive descent control's safe ceiling, which lasts exactly as
         # long as the grade under the wheels.
@@ -2935,7 +2936,22 @@ class DrivingEventMixin:
             self._cruise_applied = self._cruise_throttle
         t.throttle = self._cruise_applied
         self._say_cruise_out_of_truck(dt, error)
-        self._hold_cruise_from_above(dt, error, closing=following or limit_capped or exit_capped)
+        # Every reason the working target sits below the set speed except one
+        # is a target speed to arrive at, and the drums are what arrive: a
+        # lead vehicle, an armed exit's ramp cap, a lower posted limit or a
+        # construction zone, and now a bend's advisory. The exception is a
+        # grade, which is sustained speed control and the retarder's own job
+        # -- so a bend on a downgrade still retards, because that is the
+        # grade's doing and not the corner's. See _on_downgrade for the rule
+        # and _update_lane for the same rule in the curve assist.
+        self._hold_cruise_from_above(
+            dt,
+            error,
+            closing=following
+            or limit_capped
+            or exit_capped
+            or (curve_capped and not self._on_downgrade()),
+        )
 
     def _say_cruise_out_of_truck(self, dt: float, error: float) -> None:
         """Say plainly when the hill has beaten cruise.
@@ -2993,11 +3009,13 @@ class DrivingEventMixin:
         already pulling the target down. Cruise now stages the retarder against
         the overspeed rather than leaving it off or pinning it open.
 
-        Closing on a lead or easing down to a lower posted limit keeps the old
-        proportional service-brake trim and no retarder at all. That is a
-        deliberate limit: the jake is a loud device, and reaching for it on
-        every piece of traffic would put a stage change in the player's ears
-        several times a mile for a job the drums do quietly.
+        Closing on a lead, easing down to a lower posted limit, or shedding
+        speed for a bend or a ramp keeps the old proportional service-brake
+        trim and no retarder at all. That is deliberate: each of those is a
+        target speed to arrive at, which wants the precise control only the
+        drums give, and the jake is a loud device besides -- reaching for it
+        on every piece of traffic would put a stage change in the player's
+        ears several times a mile for a job the drums do quietly.
         """
         t = self.truck
         over = -error
@@ -3006,6 +3024,15 @@ class DrivingEventMixin:
             if over > 2.0:
                 weather_brake = 0.45 if self.weather.effects.grip < 0.7 else 0.65
                 t.brake = max(t.brake, min(weather_brake, over / 30.0))
+            # Hand the speed over cleanly: give back a retarder cruise itself
+            # raised on the grade that has just run out, rather than letting
+            # it ride on into the bend or the queue. On a real downgrade it
+            # stays up -- there the retarder is holding the truck, and
+            # dropping it puts the whole grade onto the drums. The driver's
+            # own jake switch is never touched.
+            if self._cruise_jake_stage > 0 and not self._on_downgrade():
+                self._cruise_jake_stage = 0
+                t.engine_brake_stage = 0
             self._cruise_snubbing = False
             return
         if self._auto_jake:

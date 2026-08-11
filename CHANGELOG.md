@@ -67,13 +67,24 @@
   enough to arrive at the right speed. The corner call tells you when
   the keeper is taking it.
 
-- **The engine brake no longer barks through every bend.** The curve
-  assist used the engine brake on any curve at all, including gentle
-  ones that needed barely any speed off -- loud, constant, and not how
-  anyone drives. It now saves the engine brake for a corner that really
-  needs speed off, or for a downgrade, and lets the ordinary brakes
-  handle the rest. Coming down a long grade is unchanged: the engine
-  brake still does that work, because that is exactly what it is for.
+- **The engine brake is for hills now, not for corners.** The truck used
+  to engine brake its way through bends -- loud, constant, and not how
+  anyone drives. Slowing for a corner is the ordinary brakes' job, and
+  that is now true whoever is driving: the curve assist, adaptive
+  cruise, and the automatic gearbox all leave the engine brake alone for
+  a bend on level road. Three separate parts of the truck were doing it
+  and each has been dealt with, including one that kept the engine brake
+  running into a corner when the hill it was holding back ran out.
+
+  Hills are untouched, because that is what the engine brake is for. A
+  long descent is still held on it, and a bend part-way down a grade
+  still gets it. What changed is that a corner on the flat never does.
+
+  Why it matters beyond the noise: the engine brake pulls on the drive
+  wheels only, and a bend is the worst place to be pulling on just those
+  -- it is how a trailer comes around on you. Slowing before the corner
+  and rolling through it on gentle throttle is what the training says,
+  and it is now what the truck does.
 
 - **A construction zone can no longer close the only lane you have.** On a
   stretch of road with one lane your way, a work zone could still cone off
