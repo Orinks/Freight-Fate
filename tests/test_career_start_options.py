@@ -229,7 +229,9 @@ def test_owner_operator_start_applies_owned_equipment_and_costs():
     assert p.visible_owned_trucks() == ("rig",)
     assert p.active_trailer_programs() == ("dry_van",)
     assert p.money == pytest.approx(18_000.0)
-    assert p.truck_damage_pct > 0
+    # The truck is brand new, not a hand-me-down: full tank, no damage.
+    assert p.truck_damage_pct == pytest.approx(0.0)
+    assert p.truck_fuel_gal == pytest.approx(p.truck_specs().fuel_tank_gal)
     # The start buys you equipment and costs, never progress: the career
     # begins at zero and climbs the same ladder as a company hire. It used
     # to open at level 18 with 35 deliveries and 42,000 miles behind it.
@@ -237,6 +239,49 @@ def test_owner_operator_start_applies_owned_equipment_and_costs():
     assert p.career.deliveries == 0
     assert p.career.total_miles == 0.0
     assert p.career.level < OWNER_OPERATOR_LEVEL  # the buy-in gate is still ahead
+
+
+def test_owner_operator_start_truck_is_pristine_on_every_condition_dimension():
+    """The owner-operator buys a brand-new truck, so nothing starts worn.
+
+    Compared against a freshly built record rather than a hand-written list of
+    fields: adding a new condition dimension that defaults to a worn value
+    fails here instead of quietly shipping a hand-me-down.
+    """
+    from freight_fate.models.profile import Profile, _fresh_condition
+
+    p = Profile(name="Pristine Start", current_city="Chicago")
+    apply_start_option(p, start_option(OWNER_OPERATOR_START_KEY))
+
+    tank = p.truck_specs().fuel_tank_gal
+    record = p.truck_conditions["rig"]
+
+    assert set(record) == set(_fresh_condition(tank))
+    assert record == _fresh_condition(tank)
+    # Spelled out through the spoken-side properties too, so a rename that
+    # leaves the record intact but detaches a reader still fails.
+    assert p.truck_fuel_gal == pytest.approx(tank)
+    assert p.truck_damage_pct == pytest.approx(0.0)
+    assert p.tire_wear_pct == pytest.approx(0.0)
+    assert p.brake_wear_pct == pytest.approx(0.0)
+    assert p.engine_wear_pct == pytest.approx(0.0)
+    assert p.road_grime_pct == pytest.approx(0.0)
+    assert p.chain_wear_pct == pytest.approx(0.0)
+    assert p.tire_type == "all_season"
+    assert p.chains_owned is False
+
+
+def test_owner_operator_start_text_describes_a_new_truck():
+    option = start_option(OWNER_OPERATOR_START_KEY)
+    blurb = f"{option.menu_summary} {option.help_text}".lower()
+
+    assert "brand-new" in blurb
+    assert "starter tractor" not in blurb
+    # The difficulty still has to come across: the costs and the thin cushion
+    # are what make this the hardest start, not a worn-out truck.
+    assert "operating costs" in option.help_text
+    assert "working capital" in blurb
+    assert "hardest" in blurb
 
 
 def test_new_career_start_menu_lists_company_and_owner_operator():
@@ -338,7 +383,7 @@ def test_first_day_briefing_names_owner_operator_costs():
         message = first_day_orientation_message(app.ctx)
 
         assert "leased to Northstar Freight Lines" in message
-        assert "own the starter tractor" in message
+        assert "own a brand-new truck" in message
         assert "working capital" in message
         assert "fuel, repairs, truck wear" in message
         # An owner-operator now starts at level one with nothing behind them,
