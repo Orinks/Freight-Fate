@@ -1304,7 +1304,7 @@ def test_f1_speaks_the_meaning_and_the_when_note():
 
 
 def test_leaving_the_screen_releases_a_held_cue(monkeypatch):
-    from freight_fate.sound_catalog import CATALOG, Cue, SoundCategory, SoundEntry
+    from freight_fate.sound_catalog import Cue, SoundCategory, SoundEntry
     from freight_fate.states.learn_sounds import LearnSoundCategoryState
     from tests.speech_capture import speech_stub
 
@@ -1328,7 +1328,6 @@ def test_leaving_the_screen_releases_a_held_cue(monkeypatch):
         state.exit()
 
         assert releases, "a held cue must not survive the screen closing"
-        assert CATALOG  # the real catalog is untouched by this fixture
     finally:
         app.shutdown()
 ```
