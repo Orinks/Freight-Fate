@@ -395,6 +395,11 @@ TRAFFIC_PRESSURE_LOOKAHEAD_MI = 2.5
 TRAFFIC_PRESSURE_MIN_INTENSITY = 0.12
 CONSTRUCTION_TAPER_MI = 1.0
 CONSTRUCTION_TAPER_LIMIT_MPH = 55.0
+# One signed roadwork footprint is both zones: the work itself and the merge
+# taper that leads into it. Enforcement treats the pair as one place (see
+# Trip.in_construction_zone) because the cones, the crew and the doubled-fine
+# sign all start at the taper, not at the first barrel.
+CONSTRUCTION_ZONE_REASONS = frozenset({"construction", "construction merge"})
 # How finely a work zone footprint is sampled before a lane may be coned off.
 # Baked lane runs shorter than this are already collapsed for the spoken lane
 # callouts (LANE_RUN_MIN_MI), so a quarter mile resolves every stretch a

@@ -37,6 +37,13 @@ from __future__ import annotations
 import random
 
 from ..audio import CH_SCALE
+from ..models.enforcement import (
+    CHAIN_LAW_FINE,
+    FOLLOWING_TOO_CLOSE_FINE,
+    LANE_MISUSE_FINE,
+    LIGHTS_FINE,
+    UNSAFE_DAMAGE_FINE,
+)
 from ..models.safety_record import (
     inspection_selection_chance,
     refresh_selection_score,
@@ -103,22 +110,12 @@ RADIO_CUE_DUCK_S = 1.1
 # How far past a post the truck has to be before its pass earcon has fired.
 PASS_TRIGGER_MI = 0.05
 
-# Fines for the things an officer sees rather than clocks. Anchored to the
-# common state ranges for each: chain-law violations run into the high
-# hundreds in the mountain states, following too close and lane misuse are
-# ordinary moving violations, and running without lights after dark is a
-# fix-it-plus-fine in most places.
-CHAIN_LAW_FINE = 500.0
-FOLLOWING_TOO_CLOSE_FINE = 250.0
-LIGHTS_FINE = 150.0
-LANE_MISUSE_FINE = 175.0
-# Driving through the barrels instead of merging out of a coned-off lane.
-# Missouri RSMo 304.585 (endangerment of a highway worker) lists striking or
-# moving barrels, barriers and signs as an offense in its own right -- the one
-# category in that statute that does not need workers to be present -- at up
-# to 1,000 dollars. This takes the top of that range: it sits above the
-# equipment fines because what it risks is the crew, not the truck.
-WORK_ZONE_BARRELS_FINE = 1000.0
+# The fines for the things an officer sees rather than clocks -- chain law,
+# following too close, lights, lane misuse -- are priced in
+# models/enforcement, with every other citation amount and the multipliers
+# that scale them, and reach this module through the driving_core star
+# import. They used to be declared here as well as there, two constants
+# claiming to be the same Colorado citation with nothing keeping them equal.
 
 
 class EnforcementWatchMixin:

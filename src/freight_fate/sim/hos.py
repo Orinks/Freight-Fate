@@ -862,7 +862,8 @@ FATIGUE_SHOULDER_FLOOR = 30.0
 # last half hour -- 30 min left you stranded with no action available.
 SHOULDER_SLEEP_LIMIT_BUFFER_MIN = 120.0
 SHOULDER_FINE_CHANCE = 0.15
-SHOULDER_FINE = 150.0
+# Base only: models/enforcement.citation_fine scales it for priors and zone.
+SHOULDER_FINE = 400.0
 SHOULDER_DAMAGE_CHANCE = 0.10
 SHOULDER_DAMAGE_PCT = 3.0
 

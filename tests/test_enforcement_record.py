@@ -47,13 +47,87 @@ def test_repeat_offenders_pay_more_without_any_ceiling():
 
 
 def test_no_number_of_priors_stops_the_fine_growing():
-    from freight_fate.models.enforcement import repeat_fine, speeding_citation_fine
+    from freight_fate.models.enforcement import citation_fine, speeding_citation_fine
 
     escalating = [speeding_citation_fine(16.0, prior_citations=n) for n in range(12)]
     assert escalating == sorted(escalating)
     assert len(set(escalating)) == len(escalating)  # every prior costs more
     # The same rule governs non-speeding citations.
-    assert repeat_fine(900.0, 30, ceiling=None) > repeat_fine(900.0, 5, ceiling=None)
+    assert citation_fine(900.0, 30) > citation_fine(900.0, 5)
+
+
+def test_every_fine_is_anchored_to_the_real_penalty_it_names():
+    """The amounts themselves, so a rebalance is a deliberate edit here too."""
+    from freight_fate.models import enforcement as e
+
+    assert e.UNSAFE_DAMAGE_FINE == 2300.0  # FMCSA unsafe conditions: 2,304
+    assert e.WEIGH_STATION_BYPASS_FINE == 1800.0  # CA/NY pass 1,000 on a first offense
+    assert e.CHAIN_LAW_FINE == 580.0  # Colorado: 500 plus a 79-dollar surcharge
+    assert e.FOLLOWING_TOO_CLOSE_FINE == 600.0  # a 383.51 Table 2 serious violation
+    assert e.LANE_MISUSE_FINE == 500.0  # Virginia's highway safety corridor figure
+    assert e.LIGHTS_FINE == 350.0
+    assert e.FAILURE_TO_STOP_CITATION_FINE == 1500.0
+    assert e.FAILURE_TO_STOP_FINE == 5000.0  # already a felony-sized number
+    assert e.WORK_ZONE_BARRELS_FINE == 1000.0  # Missouri RSMo 304.585, top of range
+    assert e.SPEEDING_FINE_STEPS[0][1] == 250.0
+    assert e.SPEEDING_FINE_STEPS[-1][1] == 2500.0
+
+
+def test_the_shoulder_parking_ticket_moved_with_the_rest():
+    from freight_fate.sim import hos
+
+    assert hos.SHOULDER_FINE == 400.0
+
+
+def test_a_fine_earned_in_a_construction_zone_is_doubled():
+    from freight_fate.models.enforcement import (
+        CONSTRUCTION_ZONE_FINE_MULTIPLIER,
+        WEIGH_STATION_BYPASS_FINE,
+        citation_fine,
+        speeding_citation_fine,
+    )
+
+    assert CONSTRUCTION_ZONE_FINE_MULTIPLIER == 2.0
+    plain = citation_fine(WEIGH_STATION_BYPASS_FINE)
+    in_zone = citation_fine(WEIGH_STATION_BYPASS_FINE, construction_zone=True)
+    assert plain == 1_800.0
+    assert in_zone == 3_600.0
+    # Speeding doubles the same way; it is not exempt for going through its
+    # own schedule first.
+    assert speeding_citation_fine(16.0, construction_zone=True) == (
+        speeding_citation_fine(16.0) * 2.0
+    )
+
+
+def test_priors_and_the_construction_zone_compound_rather_than_add():
+    """The owner's explicit call: 1,800 x 1.5 x 2 on a second offense."""
+    from freight_fate.models.enforcement import WEIGH_STATION_BYPASS_FINE, citation_fine
+
+    second_offense_in_zone = citation_fine(WEIGH_STATION_BYPASS_FINE, 1, construction_zone=True)
+    assert second_offense_in_zone == 5_400.0
+    # Adding the two multipliers instead of compounding them would give 2.5x.
+    assert second_offense_in_zone != WEIGH_STATION_BYPASS_FINE * 2.5
+
+
+def test_a_missing_driving_record_reads_as_a_first_offender():
+    from types import SimpleNamespace
+
+    from freight_fate.models.enforcement import career_citations
+
+    assert career_citations(SimpleNamespace()) == 0
+    assert career_citations(SimpleNamespace(driving_record=None)) == 0
+    assert career_citations(SimpleNamespace(driving_record=_record(citations=3))) == 3
+
+
+def test_the_doubled_fine_says_why_in_plain_player_language():
+    from freight_fate.models.enforcement import construction_zone_fine_clause
+
+    assert construction_zone_fine_clause(False) == ""
+    clause = construction_zone_fine_clause(True)
+    assert "doubled" in clause
+    # The canonical spoken noun from docs/ontology.md, never "work zone".
+    assert "construction zone" in clause
+    assert "work zone" not in clause
 
 
 # --- the serious-violation ladder ------------------------------------------

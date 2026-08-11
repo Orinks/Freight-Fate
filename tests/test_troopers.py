@@ -257,7 +257,9 @@ def test_stopping_issues_an_immediate_ticket(monkeypatch):
         d._update_pull_over(1.0)
         assert isinstance(app.state, TrafficStopState)
         assert d.speeding_tickets == 1
-        expected = speeding_citation_fine(app.state.over, 0)
+        expected = speeding_citation_fine(
+            app.state.over, 0, construction_zone=app.state.construction_zone
+        )
         assert d.ticket_fines_paid == expected
         assert p.money == money_before - expected
         assert p.career.reputation < rep_before
@@ -323,11 +325,8 @@ def test_accelerating_away_ends_in_a_forced_stop_not_a_felony(monkeypatch):
     now only reachable by holding the run key on purpose.
     """
     from freight_fate.app import App
-    from freight_fate.states.driving import (
-        FAILURE_TO_STOP_CITATION_FINE,
-        EnforcementStopState,
-        FelonyStopState,
-    )
+    from freight_fate.models.enforcement import FAILURE_TO_STOP_CITATION_FINE
+    from freight_fate.states.driving import EnforcementStopState, FelonyStopState
 
     app = App()
     try:
@@ -507,11 +506,9 @@ def test_debug_off_mode_clears_active_pull_over_without_felony(monkeypatch):
 
 def test_weigh_station_blow_past_starts_enforcement_stop(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.models.enforcement import WEIGH_STATION_BYPASS_FINE, citation_fine
     from freight_fate.sim.trip import RoadStop
-    from freight_fate.states.driving import (
-        WEIGH_STATION_BYPASS_FINE,
-        EnforcementStopState,
-    )
+    from freight_fate.states.driving import EnforcementStopState
 
     app = App()
     try:
@@ -532,8 +529,13 @@ def test_weigh_station_blow_past_starts_enforcement_stop(monkeypatch):
         d.truck.velocity_mps = 0.0
         d._update_pull_over(1.0)
         assert isinstance(app.state, EnforcementStopState)
-        assert d.ticket_fines_paid == WEIGH_STATION_BYPASS_FINE
-        assert app.ctx.profile.money == money_before - WEIGH_STATION_BYPASS_FINE
+        # A clean career on open road: the base amount, unscaled. Asked of the
+        # helper rather than hardcoded, so a rebalance moves one number.
+        expected = citation_fine(
+            WEIGH_STATION_BYPASS_FINE, 0, construction_zone=app.state.construction_zone
+        )
+        assert d.ticket_fines_paid == expected
+        assert app.ctx.profile.money == money_before - expected
         assert app.ctx.profile.career.reputation < rep_before
     finally:
         app.shutdown()
@@ -611,7 +613,7 @@ def test_scale_bypass_does_not_overwrite_active_pull_over(monkeypatch):
 
 def test_unsafe_damage_in_patrol_starts_safety_stop(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.states.driving import UNSAFE_DAMAGE_FINE
+    from freight_fate.models.enforcement import UNSAFE_DAMAGE_FINE, citation_fine
 
     app = App()
     try:
@@ -628,8 +630,11 @@ def test_unsafe_damage_in_patrol_starts_safety_stop(monkeypatch):
         money_before = app.ctx.profile.money
         d.truck.velocity_mps = 0.0
         d._update_pull_over(1.0)
-        assert d.ticket_fines_paid == UNSAFE_DAMAGE_FINE
-        assert app.ctx.profile.money == money_before - UNSAFE_DAMAGE_FINE
+        expected = citation_fine(
+            UNSAFE_DAMAGE_FINE, 0, construction_zone=app.state.construction_zone
+        )
+        assert d.ticket_fines_paid == expected
+        assert app.ctx.profile.money == money_before - expected
     finally:
         app.shutdown()
 
@@ -648,6 +653,203 @@ def test_unsafe_damage_needs_active_enforcement(monkeypatch):
 
         assert d._pull_over is None
         assert not d.enforcement_events
+    finally:
+        app.shutdown()
+
+
+# --- construction zones and repeat offenders --------------------------------
+
+
+def _pave_construction(d):
+    """Lay real roadwork over the whole route, so any stop happens inside it."""
+    from freight_fate.sim.trip_models import Zone
+
+    d.trip.zones = [Zone(0.0, d.trip.total_miles, 45.0, "construction")]
+
+
+def test_the_merge_taper_counts_as_being_in_the_construction_zone(monkeypatch):
+    """One signed footprint: the cones and the doubled-fine sign start there."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import Zone
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=None)
+        _quiet(app, monkeypatch)
+        d.trip.position_mi = 5.0
+        d.trip.zones = [Zone(4.0, 6.0, 55.0, "construction merge")]
+        assert d.trip.in_construction_zone
+        d.trip.zones = [Zone(4.0, 6.0, 45.0, "heavy traffic")]
+        assert not d.trip.in_construction_zone
+    finally:
+        app.shutdown()
+
+
+def test_roadwork_hides_behind_a_jam_and_still_doubles_the_fine(monkeypatch):
+    """active_zone returns the slowest zone; the predicate must not use it."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import Zone
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=None)
+        _quiet(app, monkeypatch)
+        d.trip.position_mi = 5.0
+        d.trip.zones = [
+            Zone(4.0, 6.0, 45.0, "construction"),
+            Zone(4.0, 6.0, 20.0, "heavy traffic"),
+        ]
+        assert d.trip.active_zone.reason == "heavy traffic"
+        assert d.trip.in_construction_zone
+    finally:
+        app.shutdown()
+
+
+def test_a_scale_bypass_in_roadwork_costs_double_and_says_so(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.enforcement import WEIGH_STATION_BYPASS_FINE, citation_fine
+    from freight_fate.sim.trip import RoadStop
+    from freight_fate.states.driving import EnforcementStopState
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=None)
+        _quiet(app, monkeypatch)
+        _pave_construction(d)
+        d.trip.stops = [RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))]
+        d.trip.posts = [*d.trip.posts, open_scale_post(d.trip.stops[0])]
+        d.trip.position_mi = 10.1
+        d.truck.velocity_mps = 55.0 / 2.23694
+
+        d._check_weigh_station_enforcement(9.9)
+        assert d._pull_over_construction_zone
+
+        money_before = app.ctx.profile.money
+        d.truck.velocity_mps = 0.0
+        d._update_pull_over(1.0)
+
+        assert isinstance(app.state, EnforcementStopState)
+        expected = citation_fine(WEIGH_STATION_BYPASS_FINE, 0, construction_zone=True)
+        assert expected == WEIGH_STATION_BYPASS_FINE * 2.0
+        assert app.ctx.profile.money == money_before - expected
+        # The driver hears the figure that was actually charged, and why.
+        text = app.state._outcome_text
+        assert f"{expected:,.0f} dollars" in text
+        assert "doubled" in text and "construction zone" in text
+    finally:
+        app.shutdown()
+
+
+def test_a_repeat_scale_bypass_in_roadwork_compounds_rather_than_adds(monkeypatch):
+    """The owner's call: 1,800 x 1.5 x 2 = 5,400 on a second offense."""
+    from freight_fate.app import App
+    from freight_fate.models.enforcement import WEIGH_STATION_BYPASS_FINE, citation_fine
+    from freight_fate.sim.trip import RoadStop
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=None)
+        _quiet(app, monkeypatch)
+        _pave_construction(d)
+        app.ctx.profile.driving_record.citations = 1
+        d.trip.stops = [RoadStop("Ontario Scale", 10.0, "weigh_station", ("inspect",))]
+        d.trip.posts = [*d.trip.posts, open_scale_post(d.trip.stops[0])]
+        d.trip.position_mi = 10.1
+        d.truck.velocity_mps = 55.0 / 2.23694
+
+        d._check_weigh_station_enforcement(9.9)
+        money_before = app.ctx.profile.money
+        d.truck.velocity_mps = 0.0
+        d._update_pull_over(1.0)
+
+        expected = citation_fine(WEIGH_STATION_BYPASS_FINE, 1, construction_zone=True)
+        assert expected == 5_400.0
+        assert expected != WEIGH_STATION_BYPASS_FINE * 2.5  # not added
+        assert app.ctx.profile.money == money_before - expected
+    finally:
+        app.shutdown()
+
+
+def test_a_speeding_ticket_in_roadwork_doubles_and_the_line_says_the_charge(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.enforcement import speeding_citation_fine
+    from freight_fate.states.driving import TrafficStopState
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        _pave_construction(d)
+        _speed_for(d, over=25.0)  # well over -> a ticket, not a warning
+        assert d._pull_over_construction_zone
+        p = app.ctx.profile
+        money_before = p.money
+        d.truck.velocity_mps = 0.0
+        d._update_pull_over(1.0)
+
+        assert isinstance(app.state, TrafficStopState)
+        assert app.state.construction_zone
+        base = speeding_citation_fine(app.state.over, 0)
+        expected = speeding_citation_fine(app.state.over, 0, construction_zone=True)
+        assert expected == base * 2.0
+        assert d.ticket_fines_paid == expected
+        assert p.money == money_before - expected
+        text = app.state._outcome_text
+        assert f"{expected:,.0f} dollars" in text
+        assert "doubled" in text and "construction zone" in text
+    finally:
+        app.shutdown()
+
+
+def test_leaving_the_zone_before_stopping_does_not_undo_the_doubling(monkeypatch):
+    """The zone that counts is where the violation happened, not the shoulder."""
+    from freight_fate.app import App
+    from freight_fate.models.enforcement import speeding_citation_fine
+    from freight_fate.states.driving import TrafficStopState
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        _pave_construction(d)
+        _speed_for(d, over=25.0)
+        d.trip.zones = []  # rolled out the far end before braking
+        assert not d.trip.in_construction_zone
+        d.truck.velocity_mps = 0.0
+        d._update_pull_over(1.0)
+
+        assert isinstance(app.state, TrafficStopState)
+        assert app.state.construction_zone
+        assert d.ticket_fines_paid == speeding_citation_fine(
+            app.state.over, 0, construction_zone=True
+        )
+    finally:
+        app.shutdown()
+
+
+def test_a_non_speeding_stop_escalates_with_priors(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.enforcement import UNSAFE_DAMAGE_FINE, citation_fine
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        app.ctx.profile.driving_record.citations = 2
+        d.trip.position_mi = d.trip.total_miles / 2.0
+        d.truck.damage_pct = 70.0
+        d.truck.velocity_mps = 35.0 / 2.23694
+
+        d._check_unsafe_damage_enforcement()
+        money_before = app.ctx.profile.money
+        d.truck.velocity_mps = 0.0
+        d._update_pull_over(1.0)
+
+        expected = citation_fine(
+            UNSAFE_DAMAGE_FINE, 2, construction_zone=app.state.construction_zone
+        )
+        assert expected > UNSAFE_DAMAGE_FINE
+        assert app.ctx.profile.money == money_before - expected
     finally:
         app.shutdown()
 

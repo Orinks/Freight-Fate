@@ -263,6 +263,7 @@ class TrafficStopState(_RoadsideExitMixin, MenuState):
         limit: float,
         clean_stop: bool = False,
         warned: bool = False,
+        construction_zone: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.driving = driving
@@ -273,6 +274,9 @@ class TrafficStopState(_RoadsideExitMixin, MenuState):
         # The driver kept rolling through a failure-to-stop warning before
         # finally pulling in: reckless-class behavior, not just speed.
         self.warned = warned
+        # Whether the trooper clocked this speed inside roadwork, carried from
+        # where the violation happened rather than read at the shoulder.
+        self.construction_zone = construction_zone
         self._outcome_text = ""
         self._resolve()
 
@@ -322,9 +326,14 @@ class TrafficStopState(_RoadsideExitMixin, MenuState):
                 "it go this time. Keep it down."
             )
             return
-        # Priced by how far over the limit and how many citations the career
-        # already carries, against the real state fine schedules.
-        fine = enforcement.speeding_citation_fine(self.over, p.driving_record.citations)
+        # Priced by how far over the limit, how many citations the career
+        # already carries, and whether it happened in a construction zone,
+        # against the real state fine schedules.
+        fine = enforcement.speeding_citation_fine(
+            self.over,
+            enforcement.career_citations(p),
+            construction_zone=self.construction_zone,
+        )
         d.speeding_tickets += 1
         d.ticket_fines_paid += fine
         p.money -= fine
@@ -336,7 +345,7 @@ class TrafficStopState(_RoadsideExitMixin, MenuState):
         self._outcome_text = (
             f"You were {over_text} over the {limit_text} limit. Speeding "
             f"ticket: {fine:,.0f} dollars, paid on the spot, and a reputation "
-            "hit."
+            "hit." + enforcement.construction_zone_fine_clause(self.construction_zone)
         )
         if ladder:
             self._outcome_text += f" {ladder}"
@@ -381,16 +390,21 @@ class EnforcementStopState(_RoadsideExitMixin, MenuState):
         return_message: str,
         out_of_service: bool = False,
         warned: bool = False,
+        construction_zone: bool = False,
     ) -> None:
         super().__init__(ctx)
         self.driving = driving
         self._title = title
         self.summary = summary
-        # Repeat offenders pay more for the same stop, and nothing caps it --
-        # same rule as the speeding schedule.
-        record = getattr(ctx.profile, "driving_record", None)
-        priors = record.citations if record is not None else 0
-        self.fine = enforcement.repeat_fine(fine, priors)
+        # Repeat offenders pay more for the same stop and nothing caps it, and
+        # a construction zone doubles whatever that came to -- one schedule
+        # for every citation in the game, priced in models/enforcement.
+        self.construction_zone = construction_zone
+        self.fine = enforcement.citation_fine(
+            fine,
+            enforcement.career_citations(ctx.profile),
+            construction_zone=construction_zone,
+        )
         self.reputation_hit = reputation_hit
         self.signaled = signaled
         self.return_message = return_message
@@ -421,6 +435,7 @@ class EnforcementStopState(_RoadsideExitMixin, MenuState):
         ladder = _log_enforcement(self.ctx, d, fine=self.fine, serious=self.warned)
         self._outcome_text = (
             f"Fine: {self.fine:,.0f} dollars, paid on the spot, and a reputation hit."
+            + enforcement.construction_zone_fine_clause(self.construction_zone)
         )
         if ladder:
             self._outcome_text += f" {ladder}"
@@ -480,12 +495,21 @@ class FelonyStopState(MenuState):
         d = self.driving
         p = self.ctx.profile
         d.failure_to_stop_count += 1
-        d.ticket_fines_paid += FAILURE_TO_STOP_FINE
-        p.money -= FAILURE_TO_STOP_FINE
+        # The felony is priced like every other citation: the 5,000-dollar
+        # statutory top of range, scaled by what this driver already has on
+        # the record and by where the chase was.
+        zone = d.trip.in_construction_zone
+        fine = enforcement.citation_fine(
+            enforcement.FAILURE_TO_STOP_FINE,
+            enforcement.career_citations(p),
+            construction_zone=zone,
+        )
+        d.ticket_fines_paid += fine
+        p.money -= fine
         p.career.reputation = max(0.0, p.career.reputation - hos.HOS_REPUTATION_HIT * 3.0)
         # The part that used to go nowhere: fleeing a stop in a commercial
         # vehicle is a major offense, and the licence answers for it.
-        self._standing_text = _log_enforcement(self.ctx, d, fine=FAILURE_TO_STOP_FINE, major=True)
+        self._standing_text = _log_enforcement(self.ctx, d, fine=fine, major=True)
         # add_damage, not a raw assignment: spike damage has to cross the
         # bands so a spiked truck can go out of service like any other wreck.
         d.truck.add_damage(FAILURE_TO_STOP_DAMAGE_PCT)
@@ -515,8 +539,9 @@ class FelonyStopState(MenuState):
         self._summary = (
             "Troopers laid spike strips across the lane after you kept driving "
             "with lights and siren behind you. "
-            f"Felony failure-to-stop fine: {FAILURE_TO_STOP_FINE:,.0f} dollars, "
-            "paid on the spot, with a major reputation hit. "
+            f"Felony failure-to-stop fine: {fine:,.0f} dollars, "
+            "paid on the spot, with a major reputation hit."
+            f"{enforcement.construction_zone_fine_clause(zone)} "
             f"Spike strips added {FAILURE_TO_STOP_DAMAGE_PCT:.0f} percent truck "
             f"damage, and processing took {FAILURE_TO_STOP_PROCESSING_MIN / 60.0:.0f} "
             f"hours. {load_text} You are released back to "

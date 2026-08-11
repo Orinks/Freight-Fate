@@ -104,8 +104,13 @@ def _ice_jake():
 def _chain_law():
     import random as random_mod
 
+    from freight_fate.models.enforcement import (
+        CHAIN_LAW_FINE,
+        career_citations,
+        citation_fine,
+    )
     from freight_fate.sim.vehicle import TIRE_WINTER
-    from freight_fate.states.driving_core import CHAIN_LAW_CHECKPOINT_CHANCE, CHAIN_LAW_FINE
+    from freight_fate.states.driving_core import CHAIN_LAW_CHECKPOINT_CHANCE
 
     # Pick a trip seed whose deterministic checkpoint roll is a hit.
     seed = next(
@@ -125,6 +130,13 @@ def _chain_law():
         rig.step(3)  # let the trip push weather surface onto the truck
         d.trip.position_mi = 12.5  # past the area midpoint: checkpoint territory
         money_before = p.money
+        # What this driver owes for it: the base, scaled by priors and by
+        # whether the checkpoint caught them inside roadwork.
+        expected = citation_fine(
+            CHAIN_LAW_FINE,
+            career_citations(p),
+            construction_zone=d.trip.in_construction_zone,
+        )
         d._update_chain_law()
         if rig.said("without chains") == 0:
             findings.append("no spoken warning for entering a Level 2 chain law bare")
@@ -134,8 +146,8 @@ def _chain_law():
             findings.append("seeded checkpoint roll was a hit but no citation was written")
         else:
             delta = money_before - p.money
-            if abs(delta - CHAIN_LAW_FINE) > 0.01:
-                findings.append(f"citation took {delta:,.0f}, the fine is {CHAIN_LAW_FINE:,.0f}")
+            if abs(delta - expected) > 0.01:
+                findings.append(f"citation took {delta:,.0f}, the fine is {expected:,.0f}")
             m = re.search(r"You have (-?[\d,]+) dollars", cited[0])
             if m and abs(float(m.group(1).replace(",", "")) - round(p.money)) > 0.5:
                 findings.append(
@@ -161,7 +173,7 @@ def _chain_law():
             "chain_law_citation_balance",
             rig,
             findings,
-            f"citation billed {CHAIN_LAW_FINE:,.0f}, spoken balance matched, tier claims held",
+            f"citation billed {expected:,.0f}, spoken balance matched, tier claims held",
         )
     finally:
         rig.close()
