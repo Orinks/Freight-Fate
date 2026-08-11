@@ -104,3 +104,42 @@ def test_a_cue_falls_back_when_its_key_is_missing():
     demo = SoundDemo(audio)
     demo.start(SoundEntry("X", (Cue("missing/thing", fallback="a/real"),), "why"))
     assert [k for k, _v, _p in audio.played] == ["a/real"]
+
+
+def test_a_delayed_held_cue_holds_for_its_full_duration_even_across_a_big_step():
+    """The road lean is exactly this shape: Cue(..., delay_s=2.4, hold_s=2.0).
+
+    A hold that starts mid-frame must not lose that frame from its duration --
+    a coarse ``dt`` (a hitching frame, a screen resuming, a stepped test) must
+    never truncate or skip the hold.
+    """
+    from freight_fate.sound_demo import SoundDemo
+
+    audio = FakeAudio()
+    demo = SoundDemo(audio)
+    demo.start(SoundEntry("X", (Cue("a/loop", hold_s=2.0, delay_s=1.0),), "why"))
+    assert audio.holds == []
+    demo.update(3.0)  # spans the 1.0s delay and lands inside the 2.0s hold
+    assert audio.holds, "the delayed hold must have fired"
+    assert audio.released == 0, "must not be released in the same update that started it"
+    assert demo.running
+    demo.update(3.0)  # now past elapsed 5.0 (1.0 delay + 2.0 hold)
+    assert audio.released == 1
+    assert not demo.running
+
+
+def test_a_cue_with_no_playable_key_plays_and_holds_nothing():
+    """Missing key, missing fallback: play nothing, hold nothing, do not raise."""
+    from freight_fate.sound_demo import SoundDemo
+
+    audio = FakeAudio()
+    demo = SoundDemo(audio)
+    demo.start(SoundEntry("X", (Cue("missing/thing", fallback="missing/other"),), "why"))
+    assert audio.played == []
+    assert audio.holds == []
+    assert audio.released == 0
+    demo.update(0.1)
+    assert audio.played == []
+    assert audio.holds == []
+    assert audio.released == 0
+    assert not demo.running

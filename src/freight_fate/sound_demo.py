@@ -28,7 +28,7 @@ class SoundDemo:
         self._elapsed = 0.0
         self._hold_key = ""
         self._hold_volume = 1.0
-        self._hold_left = 0.0
+        self._hold_until = 0.0
 
     @property
     def running(self) -> bool:
@@ -48,8 +48,11 @@ class SoundDemo:
         self._elapsed += dt
         self._fire_due()
         if self._hold_key:
-            self._hold_left -= dt
-            if self._hold_left <= 0.0:
+            # Expiry is absolute on the demo's own clock, not a countdown
+            # decremented by whole frames: a coarse dt (a hitching frame, a
+            # screen resuming, a stepped test) must never truncate or skip a
+            # hold that a delayed cue just started this same update.
+            if self._elapsed >= self._hold_until:
                 self._release()
             else:
                 # Re-assert every frame: the engine's own watchdog drops the
@@ -81,7 +84,7 @@ class SoundDemo:
             self._audio.set_loop_pan(CH_ALERT, cue.pan)
             self._hold_key = key
             self._hold_volume = cue.volume
-            self._hold_left = cue.hold_s
+            self._hold_until = self._elapsed + cue.hold_s
             return
         self._audio.play(key, volume=cue.volume, pan=cue.pan)
 
@@ -103,5 +106,5 @@ class SoundDemo:
         if not self._hold_key:
             return
         self._hold_key = ""
-        self._hold_left = 0.0
+        self._hold_until = 0.0
         self._audio.release_alert()
