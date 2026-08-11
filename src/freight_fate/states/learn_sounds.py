@@ -74,11 +74,19 @@ class LearnSoundCategoryState(MenuState):
         super().update(dt)
         self.demo.update(dt)
 
-    def move(self, delta: int) -> None:
-        # Arrowing away from a running demo stops it: the next name should
-        # arrive over silence, not over the last cue.
+    def speak_current(self) -> None:
+        """Stop any running demo before speaking the newly selected entry.
+
+        ``move`` (arrows), ``jump`` (Home/End) and ``_first_letter_jump``
+        (typing a letter) are three separate routes into a changed
+        selection, but ``MenuState`` funnels all three through this one
+        hook before it speaks. Stopping the demo here, rather than in each
+        route, means a held cue can never keep ringing under a name it
+        does not belong to -- and a future navigation route inherits the
+        rule for free instead of needing to remember it.
+        """
         self.demo.stop()
-        super().move(delta)
+        super().speak_current()
 
     def go_back(self) -> None:
         self.demo.stop()

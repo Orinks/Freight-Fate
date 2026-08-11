@@ -269,3 +269,112 @@ def test_leaving_the_screen_releases_a_held_cue(monkeypatch):
         assert releases, "a held cue must not survive the screen closing"
     finally:
         app.shutdown()
+
+
+def _held_and_other_category():
+    from freight_fate.sound_catalog import Cue, SoundCategory, SoundEntry
+
+    return SoundCategory(
+        "Two",
+        (
+            SoundEntry("Held cue", (Cue("vehicle/bar_solid", hold_s=5.0),), "why"),
+            SoundEntry("Other cue", (Cue("vehicle/lane_centered"),), "why"),
+        ),
+    )
+
+
+def test_jump_stops_a_running_held_demo(monkeypatch):
+    """Home and End go through ``jump``, a route separate from ``move``.
+
+    Both funnel through ``speak_current``, which is where the demo actually
+    gets stopped; this pins that Home/End does not bypass it.
+    """
+    from speech_capture import speech_stub
+
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *_a, **_k: None)
+        monkeypatch.setattr(app.ctx.audio, "hold_alert", lambda *_a, **_k: None)
+        monkeypatch.setattr(app.ctx.audio, "set_loop_pan", lambda *_a, **_k: None)
+        releases: list[int] = []
+        monkeypatch.setattr(app.ctx.audio, "release_alert", lambda **_kw: releases.append(1))
+
+        state = LearnSoundCategoryState(app.ctx, _held_and_other_category())
+        state.enter()
+        state.activate()  # starts the held demo on "Held cue"
+        assert state.demo.running
+
+        state.jump(1)  # the Home/End route (bound to K_HOME / K_END in base.py)
+
+        assert releases, "Home/End must stop a running held demo"
+        assert not state.demo.running
+    finally:
+        app.shutdown()
+
+
+def test_first_letter_jump_stops_a_running_held_demo(monkeypatch):
+    """Typing a letter jumps by name, a third route independent of ``move``.
+
+    Same rule, same reason: it must not leave a held cue ringing under the
+    entry it just landed on.
+    """
+    from speech_capture import speech_stub
+
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *_a, **_k: None)
+        monkeypatch.setattr(app.ctx.audio, "hold_alert", lambda *_a, **_k: None)
+        monkeypatch.setattr(app.ctx.audio, "set_loop_pan", lambda *_a, **_k: None)
+        releases: list[int] = []
+        monkeypatch.setattr(app.ctx.audio, "release_alert", lambda **_kw: releases.append(1))
+
+        state = LearnSoundCategoryState(app.ctx, _held_and_other_category())
+        state.enter()
+        state.activate()  # starts the held demo on "Held cue"
+        assert state.demo.running
+
+        state._first_letter_jump("o")  # jumps to "Other cue"
+
+        assert releases, "a first-letter jump must stop a running held demo"
+        assert not state.demo.running
+    finally:
+        app.shutdown()
+
+
+def test_arrow_move_stops_a_running_held_demo(monkeypatch):
+    """The ordinary arrow route, checked the same way as the other two.
+
+    Asserting on ``release_alert`` rather than only ``demo.running`` means
+    this fails if the tone is left sounding, not just if the bookkeeping
+    thinks it stopped.
+    """
+    from speech_capture import speech_stub
+
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *_a, **_k: None)
+        monkeypatch.setattr(app.ctx.audio, "hold_alert", lambda *_a, **_k: None)
+        monkeypatch.setattr(app.ctx.audio, "set_loop_pan", lambda *_a, **_k: None)
+        releases: list[int] = []
+        monkeypatch.setattr(app.ctx.audio, "release_alert", lambda **_kw: releases.append(1))
+
+        state = LearnSoundCategoryState(app.ctx, _held_and_other_category())
+        state.enter()
+        state.activate()  # starts the held demo on "Held cue"
+        assert state.demo.running
+
+        state.move(1)
+
+        assert releases, "an ordinary arrow move must stop a running held demo"
+        assert not state.demo.running
+    finally:
+        app.shutdown()
