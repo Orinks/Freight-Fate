@@ -359,6 +359,13 @@ right. "You caught the edge" means the strip has notes. "Through the
 bend, hot" means you gambled and won -- this time. String together clean
 verdicts on a mountain road and you have earned the title.
 
+## Main Menu And Career Flow section: additions
+
+- **Learn game sounds** plays any cue the road uses, with what it means and
+  what to do about it. It is on the main menu and on the pause menu while you
+  drive. Arrow to a sound, press Enter to hear it, and press F1 for what it
+  is telling you.
+
 ## Driving section: NEW -- steering through curves (the sound design) [PENDING CURVE-NAV FOLD]
 
 With lane keeping on partial or off, the road sound becomes your steering guide. It

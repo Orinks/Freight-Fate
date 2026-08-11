@@ -4,6 +4,15 @@
 
 ### Added
 
+- **Learn what every sound means before you meet it at speed.** A new
+  Learn game sounds screen on the main menu, and on the pause menu while
+  you drive, plays any cue the road uses on demand. Arrow to a sound,
+  press Enter to hear it exactly as the drive plays it -- panned to the
+  side it comes from, held for as long as it would really run -- and
+  press F1 for what it is telling you and what to do about it. Sounds
+  that explain themselves, like the engine and the weather, are left out
+  so the list stays worth reading.
+
 - **The game now tells you when you are backing the wrong way.** You
   could put the truck in reverse on the open highway and back up for as
   long as you liked, giving the route back mile after mile, and the only

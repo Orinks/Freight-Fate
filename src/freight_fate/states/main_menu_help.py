@@ -43,6 +43,8 @@ HELP_PAGES = [
             "with a confirmation screen before anything destructive happens.",
             "Corrupted career saves may be moved aside at the main menu. A save",
             "changed outside the game still loads, but is marked as modified.",
+            "Learn game sounds on the main menu plays any sound the road uses "
+            "and says what it means. It is also on the pause menu while you drive.",
         ],
     ),
     (
@@ -145,6 +147,8 @@ HELP_PAGES = [
             "Cruise and the curve assist switch the engine brake off for you inside a",
             "zone and hold speed with the brakes, except on real downgrades.",
             "Hold H to sound the horn; release H to stop it.",
+            "If a sound on the road is unfamiliar, pause and open Learn game "
+            "sounds: it plays every cue on demand with what it is asking for.",
         ],
     ),
     (

@@ -2726,6 +2726,11 @@ section below and the Unreleased changelog; the release-line view:
       measurement, not by ear; regenerate any that sound off via
       `tools/generate_sounds.py` (+ `tools/mirror_turn_chime.py` for the
       right-turn mirror).
+- [x] **Learn game sounds.** A catalog screen on the main menu and the pause
+      menu: seven categories of road cue, each entry played on demand with
+      the canonical name, what it means, and the setting that gates it.
+      Ambience, music and self-explanatory sounds are excluded on the record,
+      and a completeness test fails any new cue that ships uncatalogued.
 
 ## Shipped in 1.6.0
 

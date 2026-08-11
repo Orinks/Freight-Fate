@@ -170,3 +170,16 @@ def test_descriptions_stay_player_facing():
         text = f"{entry.meaning} {entry.when}"
         for word in banned:
             assert word not in text, f"{entry.name} says {word!r} to the player"
+
+
+def test_the_help_reader_points_at_the_screen():
+    from freight_fate.states.main_menu_help import HELP_PAGES
+
+    joined = " ".join(line for _title, lines in HELP_PAGES for line in lines)
+    assert "Learn game sounds" in joined
+
+
+def test_the_changelog_records_the_feature():
+    text = (Path(__file__).parents[1] / "CHANGELOG.md").read_text(encoding="utf-8")
+    unreleased = text.split("## Unreleased", 1)[1].split("\n## ", 1)[0]
+    assert "Learn game sounds" in unreleased

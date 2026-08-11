@@ -79,3 +79,24 @@ def test_pause_menu_offers_controls_and_help():
         assert "Controls and help" in labels
     finally:
         app.shutdown()
+
+
+def test_pause_menu_emergency_shoulder_sleep_sits_between_mechanic_and_settings():
+    # build_items() inserts this item at a hardcoded index; pin its position
+    # so the next inserted item shifts this test instead of silently
+    # misplacing the item (it happened once already, index 4 -> 5).
+    from freight_fate.app import App
+    from freight_fate.states.driving import PauseMenuState
+
+    app = App()
+    try:
+        d = _driving(app)
+        pause = PauseMenuState(app.ctx, d)
+        d.emergency_shoulder_sleep_reason = lambda: "stopped away from any route point"
+        labels = [item.text for item in pause.build_items()]
+        assert "Emergency shoulder sleep" in labels
+        idx = labels.index("Emergency shoulder sleep")
+        assert labels[idx - 1] == pause._mechanic_label()
+        assert labels[idx + 1] == "Settings"
+    finally:
+        app.shutdown()
