@@ -79,7 +79,7 @@ SOUNDS_ROOT = Path(__file__).parents[1] / "src" / "freight_fate" / "assets" / "s
 def _resolves(key: str) -> bool:
     """Whether ``key`` resolves the way the game resolves it: the builder's
     loose tree first, then the committed pack."""
-    from tests.asset_helpers import asset_exists
+    from asset_helpers import asset_exists
 
     return asset_exists(SOUNDS_ROOT, key)
 
@@ -106,7 +106,10 @@ def test_directional_entries_demo_both_sides():
 ```
 
 `tests/asset_helpers.py::asset_exists(root, key)` already does the loose-tree-
-then-pack lookup, which is why the test above wraps it rather than reaching
+then-pack lookup. Test helpers are imported bare (`from asset_helpers import
+...`), not as `tests.asset_helpers` -- there is no `tests/__init__.py` and
+pytest puts `tests/` itself on `sys.path`. Same for `speech_capture` later.
+That lookup, which is why the test above wraps it rather than reaching
 for the filesystem. No change to that file is needed.
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -1229,7 +1232,7 @@ def test_the_category_screen_lists_every_catalog_category():
 def test_arrowing_speaks_the_name_and_plays_no_cue(monkeypatch):
     from freight_fate.sound_catalog import CATALOG
     from freight_fate.states.learn_sounds import LearnSoundCategoryState
-    from tests.speech_capture import speech_stub
+    from speech_capture import speech_stub
 
     app = _app()
     try:
@@ -1254,7 +1257,7 @@ def test_arrowing_speaks_the_name_and_plays_no_cue(monkeypatch):
 def test_enter_plays_the_entrys_cue_with_its_volume_and_pan(monkeypatch):
     from freight_fate.sound_catalog import CATALOG
     from freight_fate.states.learn_sounds import LearnSoundCategoryState
-    from tests.speech_capture import speech_stub
+    from speech_capture import speech_stub
 
     app = _app()
     try:
@@ -1306,7 +1309,7 @@ def test_f1_speaks_the_meaning_and_the_when_note():
 def test_leaving_the_screen_releases_a_held_cue(monkeypatch):
     from freight_fate.sound_catalog import Cue, SoundCategory, SoundEntry
     from freight_fate.states.learn_sounds import LearnSoundCategoryState
-    from tests.speech_capture import speech_stub
+    from speech_capture import speech_stub
 
     app = _app()
     try:
