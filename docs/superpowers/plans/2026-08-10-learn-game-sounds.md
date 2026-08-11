@@ -408,6 +408,16 @@ Expected: `test_all_seven_categories_are_present_in_order` FAILS (only `Lane and
 
 - [ ] **Step 3: Add the six categories**
 
+Every volume and pan below was checked against the call site that plays the
+cue. The ones that look like omissions are not: the `events/*` cues are played
+with no `volume` argument at all (`states/driving_events.py:102, 143, 229`),
+so their real level is the default 1.0, and only local turns pan
+(`TURN_CUE_PAN = 0.6` in `states/driving_core.py:554`). Do not "tidy" these by
+adding a volume. Two levels are deliberate approximations of a variable value
+and are commented as such in the code below: the weigh-station bed swells from
+`SCALE_BED_MIN_VOLUME` to a distance-scaled ceiling, and the trooper pass and
+siren are scaled by how close the cruiser is.
+
 Insert these before the `CATALOG` assignment in `src/freight_fate/sound_catalog.py`, then extend `CATALOG` to `(_LANE, _AIR, _ENGINE_BRAKE, _RAMPS, _HAZARDS, _ENFORCEMENT, _LOAD)`.
 
 ```python
@@ -416,7 +426,7 @@ _AIR = SoundCategory(
     (
         SoundEntry(
             "Air building",
-            (Cue("vehicle/air_pressurize", volume=0.55, hold_s=3.0),),
+            (Cue("vehicle/air_pressurize", volume=0.6, hold_s=3.0),),
             "The compressor filling the tanks. The truck cannot move until "
             "there is enough air in them, so start the engine, leave the "
             "parking brake set, and wait for it to reach a hundred psi.",
@@ -563,44 +573,44 @@ _HAZARDS = SoundCategory(
         ),
         SoundEntry(
             "Construction zone",
-            (Cue("events/construction_zone", volume=0.9),),
+            (Cue("events/construction_zone"),),
             "Roadwork ahead. The posted limit drops, a lane may close, and "
             "the taper callout names which side. Move over when told or you "
             "will go through the barrels.",
         ),
         SoundEntry(
             "Traffic slowing",
-            (Cue("events/traffic_slowing", volume=0.9),),
+            (Cue("events/traffic_slowing"),),
             "The traffic in front of you is coming down in speed. Back off "
             "the throttle before you need the brakes.",
         ),
         SoundEntry(
             "Turn ahead",
-            (Cue("events/turn_ahead", volume=0.9),),
+            (Cue("events/turn_ahead"),),
             "A street maneuver is coming on a local drive. The spoken "
             "guidance that follows names the street and the direction.",
         ),
         SoundEntry(
             "Turn left",
-            (Cue("events/turn_left", volume=0.9),),
+            (Cue("events/turn_left", pan=-0.6),),
             "The next maneuver is a left. Be under the advised speed before "
             "the corner: a loaded trailer off-tracks through a city turn.",
         ),
         SoundEntry(
             "Turn right",
-            (Cue("events/turn_right", volume=0.9),),
+            (Cue("events/turn_right", pan=0.6),),
             "The next maneuver is a right. Same rule as a left, and a right "
             "in a truck needs more room than it looks like it should.",
         ),
         SoundEntry(
             "State line",
-            (Cue("events/state_crossing", volume=0.9),),
+            (Cue("events/state_crossing"),),
             "You have crossed into another state. Speed limits and rules can "
             "change with it, and the spoken callout names the new state.",
         ),
         SoundEntry(
             "Toll charged",
-            (Cue("events/toll_charged", volume=0.9),),
+            (Cue("events/toll_charged"),),
             "A toll gantry or plaza has billed the truck. Tolls are settled "
             "at delivery, listed separately from anything you were fined.",
         ),
@@ -657,7 +667,7 @@ _ENFORCEMENT = SoundCategory(
         ),
         SoundEntry(
             "CB chatter",
-            (Cue("events/cb_radio_chatter", volume=0.8),),
+            (Cue("events/cb_radio_chatter"),),
             "Other drivers passing on what they have seen: enforcement, "
             "wrecks, work zones. It says how sure it is, it is sometimes out "
             "of date, and it never claims the road is clear.",
@@ -671,7 +681,7 @@ _LOAD = SoundCategory(
     (
         SoundEntry(
             "Surge",
-            (Cue("vehicle/liquid_wash", volume=0.7, hold_s=3.0),),
+            (Cue("vehicle/liquid_wash", volume=0.55, hold_s=3.0),),
             "Liquid running back and forth inside a tank trailer. It builds "
             "while you brake or accelerate and it pushes the truck after you "
             "have stopped doing whatever started it.",
@@ -679,7 +689,7 @@ _LOAD = SoundCategory(
         ),
         SoundEntry(
             "Surge strike",
-            (Cue("vehicle/liquid_hit", volume=0.8),),
+            (Cue("vehicle/liquid_hit", volume=0.85),),
             "The load hitting the front or back of the tank. It shoves the "
             "truck along its length, which is why a smooth bore tank is "
             "braked early and gently rather than late and hard.",
@@ -688,8 +698,8 @@ _LOAD = SoundCategory(
         SoundEntry(
             "Surge strike, sideways",
             (
-                Cue("vehicle/liquid_hit_lateral", volume=0.8, pan=-0.6),
-                Cue("vehicle/liquid_hit_lateral", volume=0.8, pan=0.6, delay_s=1.4),
+                Cue("vehicle/liquid_hit_lateral", volume=0.85, pan=-0.6),
+                Cue("vehicle/liquid_hit_lateral", volume=0.85, pan=0.6, delay_s=1.4),
             ),
             "The load hitting the side of the tank, from the side it hit. "
             "This is the one that rolls trucks: it arrives after you have "
