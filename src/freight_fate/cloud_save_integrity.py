@@ -20,7 +20,10 @@ PUBLIC_KEYS = {
     # Staging-only key: the 1.9 test line signs against the staged
     # orinks-net deployment (see DEFAULT_BASE_URL in online_presence.py).
     # Remove alongside the base-URL flip in the pre-release checklist.
-    "2026-08-staging": base64.b64decode("dReX+JwU/e3iAWFQI/8F/CUXX5ICaV3PT5k3tyBZO88="),
+    # Rotated 2026-08-11: the original half lived only in a Convex preview
+    # deployment, which Convex deleted at its five-day mark, taking the
+    # private key with it. Staging now runs on a permanent deployment.
+    "2026-08-staging": base64.b64decode("wFlZNTcOB8fNsc9a6oDcjJu8OER5/vZZCdL8wahdPNw="),
 }
 SUPPORTED_VALIDATOR_VERSION = 1
 

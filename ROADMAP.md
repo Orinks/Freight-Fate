@@ -386,6 +386,23 @@ onto exit signalling.
       online_presence.py back to PRODUCTION_BASE_URL and drop the
       2026-08-staging entry from PUBLIC_KEYS in cloud_save_integrity.py.
       Staged accounts and backups are test data and do not migrate.
+- [x] **Staging moved off preview deployments (2026-08-11).** Convex
+      deletes preview deployments five days after they are created on the
+      free and starter plans, and on 2026-08-11 it collected the one
+      behind dev.orinks.net. Every online surface on staging failed at
+      once -- the drivers board, the updates feed, and every driver
+      profile -- and the tester accounts, careers, cloud backups, and the
+      staging signing key went with it. Staging now runs on a permanent
+      production deployment in its own Convex project
+      (orinks-net-staging / industrious-parrot-713), so it no longer
+      expires. The signing key was regenerated, since the private half
+      was only ever held by the deleted deployment; testers need a build
+      carrying the new public key before cloud restores verify again.
+- [ ] **Re-point the dev branch's Vercel build at the staging project.**
+      CONVEX_DEPLOY_KEY scoped to Preview (dev) must hold a production
+      deploy key for industrious-parrot-713, and that deployment needs
+      CLERK_JWT_ISSUER_DOMAIN plus the two signing vars set on it.
+      Until that lands, dev.orinks.net has no backend at all.
 - [x] **Staging cloud backups fixed for 1.9 careers (2026-08-09).** Day
       one of staged testing surfaced it: every company-driver backup was
       silently refused as `invalid_possession`, because the validator's
