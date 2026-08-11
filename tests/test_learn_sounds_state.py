@@ -143,3 +143,129 @@ def test_a_cue_with_no_playable_key_plays_and_holds_nothing():
     assert audio.holds == []
     assert audio.released == 0
     assert not demo.running
+
+
+def _app():
+    from freight_fate.app import App
+
+    return App()
+
+
+def test_the_category_screen_lists_every_catalog_category():
+    from freight_fate.sound_catalog import CATALOG
+    from freight_fate.states.learn_sounds import LearnSoundsState
+
+    app = _app()
+    try:
+        state = LearnSoundsState(app.ctx)
+        labels = [item.text for item in state.build_items()]
+        assert labels == [c.name for c in CATALOG]
+    finally:
+        app.shutdown()
+
+
+def test_arrowing_speaks_the_name_and_plays_no_cue(monkeypatch):
+    from speech_capture import speech_stub
+
+    from freight_fate.sound_catalog import CATALOG
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        spoken: list[str] = []
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+        played: list[str] = []
+        monkeypatch.setattr(app.ctx.audio, "play", lambda key, **_kw: played.append(key))
+
+        state = LearnSoundCategoryState(app.ctx, CATALOG[0])
+        state.enter()
+        played.clear()
+        spoken.clear()
+        state.move(1)
+
+        assert any(state.items[state.index].text in line for line in spoken)
+        # Only the menu's own movement click, never a catalogued cue.
+        assert played == ["ui/menu_move"]
+    finally:
+        app.shutdown()
+
+
+def test_enter_plays_the_entrys_cue_with_its_volume_and_pan(monkeypatch):
+    from speech_capture import speech_stub
+
+    from freight_fate.sound_catalog import CATALOG
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        calls: list[tuple[str, float, float]] = []
+        monkeypatch.setattr(
+            app.ctx.audio,
+            "play",
+            lambda key, volume=1.0, pan=0.0: calls.append((key, volume, pan)),
+        )
+        monkeypatch.setattr(app.ctx.audio, "hold_alert", lambda key, **_kw: None)
+        monkeypatch.setattr(app.ctx.audio, "set_loop_pan", lambda *_a, **_k: None)
+
+        category = CATALOG[0]
+        state = LearnSoundCategoryState(app.ctx, category)
+        state.enter()
+        # Land on an entry whose first cue is a one-shot so the assert is direct.
+        index = next(i for i, e in enumerate(category.entries) if e.plays[0].hold_s == 0.0)
+        state.index = index
+        calls.clear()
+        state.activate()
+
+        cue = category.entries[index].plays[0]
+        assert (cue.key, cue.volume, cue.pan) in calls
+    finally:
+        app.shutdown()
+
+
+def test_f1_speaks_the_meaning_and_the_when_note():
+    from freight_fate.sound_catalog import CATALOG
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        category = next(c for c in CATALOG if any(e.when for e in c.entries))
+        entry_index = next(i for i, e in enumerate(category.entries) if e.when)
+        state = LearnSoundCategoryState(app.ctx, category)
+        state.items = state.build_items()
+        state.index = entry_index
+
+        help_text = state.current_help()
+        entry = category.entries[entry_index]
+        assert entry.meaning in help_text
+        assert entry.when in help_text
+    finally:
+        app.shutdown()
+
+
+def test_leaving_the_screen_releases_a_held_cue(monkeypatch):
+    from speech_capture import speech_stub
+
+    from freight_fate.sound_catalog import Cue, SoundCategory, SoundEntry
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *_a, **_k: None)
+        monkeypatch.setattr(app.ctx.audio, "hold_alert", lambda *_a, **_k: None)
+        monkeypatch.setattr(app.ctx.audio, "set_loop_pan", lambda *_a, **_k: None)
+        releases: list[int] = []
+        monkeypatch.setattr(app.ctx.audio, "release_alert", lambda **_kw: releases.append(1))
+
+        held = SoundCategory(
+            "Held", (SoundEntry("Held cue", (Cue("vehicle/bar_solid", hold_s=5.0),), "why"),)
+        )
+        state = LearnSoundCategoryState(app.ctx, held)
+        state.enter()
+        state.activate()
+        state.exit()
+
+        assert releases, "a held cue must not survive the screen closing"
+    finally:
+        app.shutdown()
