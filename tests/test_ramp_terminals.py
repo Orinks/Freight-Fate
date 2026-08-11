@@ -1,6 +1,7 @@
 """Ramp-terminal controls: lights and stop signs where the ramp meets the
 surface road, honored or run, baked from OSM or seeded by the heuristic."""
 
+import pygame
 import pytest
 from speech_capture import speech_stub
 
@@ -914,5 +915,102 @@ def test_hairpin_approach_pins_the_clock_to_real_time():
         d.truck.velocity_mps = 55.0 / 2.2369362920544
         d.trip.position_mi = mile + 0.5
         assert d.trip.effective_time_scale > 8.0
+    finally:
+        app.shutdown()
+
+
+def _approaching_a_terminal(app, monkeypatch, control: str, *, mph: float = 45.0):
+    """A real drive rolling down a ramp toward a red terminal control."""
+    from driving_feature_helpers import key_event, quiet_trip, start_drive
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+    driving = start_drive(app)
+    quiet_trip(driving)
+    driving.trip.traffic_context = lambda: None
+    driving.trip.grade_at = lambda mile: 0.0
+    driving.handle_event(key_event(pygame.K_e))
+    t = driving.truck
+    t.cargo_kg = 15000.0
+    t.velocity_mps = mph / 2.2369362920544
+    driving._ramp_stop = driving.trip.stops[0]
+    driving._ramp_mi = 0.5
+    driving._ramp_control = control
+    driving._ramp_light_offset_s = 0.0  # red
+    driving._ramp_light_timer = 0.0
+    driving._ramp_light_announced = True
+    driving._ramp_light_last_phase = "red"
+    driving._ramp_terminal_done = False
+    driving._ramp_waiting_at_light = False
+    driving._ramp_assist_brake = 0.0
+    return driving
+
+
+def test_route_transition_assistance_stops_at_the_sign_on_the_air_it_has(monkeypatch):
+    """The owner's report: the assist ran the tanks out stopping at a sign.
+
+    Its floor of a third of the pedal took off far more than its own 0.6 m/s2
+    trigger asked for, so the demand collapsed under the application, the
+    assist let go, the demand climbed back, and round it went -- 276 brake
+    applications on one flat approach, 125 psi down to 40, spring brakes on,
+    and the truck stopped in the road short of the bar.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.vehicle import TruckState
+
+    app = App()
+    said = []
+    try:
+        driving = _approaching_a_terminal(app, monkeypatch, "stop")
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(said))
+        t = driving.truck
+        # The air system charges for how far the pedal RISES, so that -- not
+        # the number of frames it moved on -- is the cost of the approach.
+        charged = {"rise": 0.0}
+        original = TruckState._consume_brake_air
+
+        def counting(self, dt):
+            rising = min(1.0, self.brake) - self._last_service_air_application
+            if rising > 1e-9:
+                charged["rise"] += rising
+            original(self, dt)
+
+        monkeypatch.setattr(TruckState, "_consume_brake_air", counting)
+        lowest_psi = t.air_pressure_psi
+        for _ in range(60 * 120):
+            driving.update(1 / 60)
+            lowest_psi = min(lowest_psi, t.air_pressure_psi)
+            if driving._ramp_terminal_done:
+                break
+        assert driving._ramp_terminal_done
+        assert t.speed_mph <= RED_STOP_MPH, t.speed_mph
+        assert "Stopped at the sign. Clear; pull ahead to the entrance." in said
+        assert lowest_psi > 60.0, lowest_psi  # never even reached the low-air warning
+        assert not t.spring_brakes_active
+        # A pedal that only ever rises toward the bar can cost one full
+        # application at most; the old release-and-remake cost thirty.
+        assert charged["rise"] <= 4.0, charged
+    finally:
+        app.shutdown()
+
+
+def test_route_transition_assistance_does_not_chatter_at_the_ramp_cap(monkeypatch):
+    """One threshold decided both ways announced itself over and over."""
+    from freight_fate.app import App
+
+    app = App()
+    said = []
+    try:
+        driving = _approaching_a_terminal(app, monkeypatch, "stop", mph=46.0)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(said))
+        for _ in range(60 * 120):
+            driving.update(1 / 60)
+            if driving._ramp_terminal_done:
+                break
+        released = sum(e == "Route-transition assistance released." for e in said)
+        assert released <= 1, said
     finally:
         app.shutdown()

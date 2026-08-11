@@ -32,6 +32,27 @@ KEEPER_EASE_MAX_MI = 0.75
 # Scan step for the posted-limit look ahead. A city block is shorter than the
 # tenth of a mile adaptive cruise steps by on the corridor.
 KEEPER_LIMIT_PROBE_MI = 0.05
+# The keeper works the drums in snubs, for the reason adaptive cruise already
+# does (see CRUISE_SNUB_BRAKE): the air model charges a fresh application
+# every time the pedal RISES, so a command that tracks the error up and down
+# pays for a brake application several times a second. The keeper's old
+# proportional trim sat right on its own deadband holding a zone speed down a
+# mild grade and did exactly that -- 275 applications in eighteen seconds,
+# 125 psi down to 41, spring brakes on, the truck stopped dead in a 15 mph
+# zone with nothing said about why (bench trace, 2026-08-11). Apply once,
+# hold it to the target, release, let it drift back up.
+KEEPER_SNUB_OVER_MPH = 1.5  # this far over the target starts a snub
+KEEPER_SNUB_UNDER_MPH = 1.0  # and it runs until this far back under it
+# What the snub aims to take off, NET of whatever the grade is putting back
+# in -- so the same application arrives on the flat and on a downgrade
+# instead of settling wherever gravity happens to balance it.
+KEEPER_SNUB_DECEL_MPS2 = 0.6
+KEEPER_SNUB_MIN_BRAKE = 0.12  # a real application, not a drag
+KEEPER_SNUB_MAX_BRAKE = 0.6  # zone speeds never need more than this
+# Pressed this hard, this far over, for this long: the keeper is out of
+# authority and has to say so rather than quietly ride the number down.
+KEEPER_OVERRUN_MPH = 3.0
+KEEPER_OVERRUN_S = 4.0
 
 
 class SpeedControlStateMixin:
@@ -66,6 +87,9 @@ class SpeedControlStateMixin:
         self._keeper_zone = ""
         self._keeper_ease_said = None
         self._keeper_ease_target = None
+        self._keeper_snub = 0.0
+        self._keeper_overrun_s = 0.0
+        self._keeper_overrun_said = False
 
     def _disarm_speed_control(self) -> None:
         # Remember the open-road target across the cancel, like a car's

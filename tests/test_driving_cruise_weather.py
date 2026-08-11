@@ -2398,3 +2398,104 @@ def test_descent_control_cue_does_not_chant_through_rolling_country():
         assert holding <= 3, holding
     finally:
         app.shutdown()
+
+
+# -- the speed keeper's air budget ----------------------------------------------
+
+
+def _count_brake_applications(monkeypatch):
+    """Count the rising-edge brake applications the air system charges for."""
+    from freight_fate.sim.vehicle import TruckState
+
+    tally = {"applications": 0, "rise": 0.0}
+    original = TruckState._consume_brake_air
+
+    def counting(self, dt):
+        rising = max(0.0, min(1.0, self.brake) - self._last_service_air_application)
+        if rising > 1e-9:
+            tally["applications"] += 1
+            tally["rise"] += rising
+        original(self, dt)
+
+    monkeypatch.setattr(TruckState, "_consume_brake_air", counting)
+    return tally
+
+
+def _keeper_on_a_grade(app, monkeypatch, *, grade_pct: float, limit_mph: float = 15.0):
+    """Speed keeper holding a zone limit down a steady grade."""
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+    driving = start_drive(app)
+    quiet_trip(driving)
+    driving.trip.traffic_context = lambda: None
+    driving.trip.grade_at = lambda mile: grade_pct / 100.0
+    driving.trip.speed_limit_at = lambda mile: (limit_mph, "facility access road")
+    driving.handle_event(key_event(pygame.K_e))
+    driving.truck.cargo_kg = 15000.0
+    driving.truck.velocity_mps = 25.0 / 2.23694
+    driving.handle_event(key_event(pygame.K_k))
+    assert driving._keeper_mph is not None
+    return driving
+
+
+def test_speed_keeper_holds_a_zone_speed_without_emptying_the_tanks(monkeypatch):
+    """The report this exists for: the assist ran the truck out of air.
+
+    A mild downgrade put the old proportional trim right on its own braking
+    deadband, so it made and released a brake application several times a
+    second. The air system charges a whole application on every rise, so the
+    tanks went 125 psi to 41 in eighteen seconds, the spring brakes set, and
+    the truck stopped dead in a 15 mph zone.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = _keeper_on_a_grade(app, monkeypatch, grade_pct=-2.0)
+        t = driving.truck
+        tally = _count_brake_applications(monkeypatch)
+        for _ in range(60 * 60):
+            driving.update(1 / 60)
+        assert not t.spring_brakes_active
+        assert not t.air_low_warning, t.air_pressure_psi
+        assert t.air_pressure_psi > 100.0, t.air_pressure_psi
+        # Still driving the zone a minute later, not parked in it.
+        assert driving._keeper_mph is not None
+        assert t.speed_mph > 5.0
+        # A snub is one application held to the number, so a minute of holding
+        # costs a handful of them rather than one per frame.
+        assert tally["applications"] <= 20, tally
+    finally:
+        app.shutdown()
+
+
+def test_speed_keeper_says_when_it_cannot_hold_the_speed(monkeypatch):
+    """Hot brakes on a real grade: the keeper is out of pedal and says so.
+
+    An assist that quietly holds the wrong speed is the one failure a driver
+    who cannot see the speedometer has no way to catch.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    try:
+        driving = _keeper_on_a_grade(app, monkeypatch, grade_pct=-6.0)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        t = driving.truck
+        for _ in range(60 * 30):
+            t.brake_temp_c = max(t.brake_temp_c, 750.0)  # faded past any authority
+            driving.update(1 / 60)
+        said = [
+            e
+            for e in events
+            if e == "Speed keeper cannot hold 15 miles per hour on this grade. "
+            "Apply service brakes."
+        ]
+        assert len(said) == 1, events
+    finally:
+        app.shutdown()

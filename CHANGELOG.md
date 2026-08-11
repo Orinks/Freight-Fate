@@ -26,6 +26,37 @@
 
 ### Fixed
 
+- **The assists no longer empty the air tanks stopping for a light or a
+  stop sign.** Coming down a ramp to a signal or a sign, route transition
+  assistance was pumping the brake pedal several times a second instead
+  of holding one steady application. Air went out of the tanks faster
+  than the compressor could put it back, and on a bad approach the
+  pressure fell far enough that the spring brakes slammed on and stopped
+  the truck in the road, short of the line. It now sets the brake once
+  and holds it, which is both how a driver does it and what the tanks
+  are sized for.
+
+- **The speed keeper no longer stalls the truck on a downhill.** Holding
+  a lower speed on a grade, the keeper was doing the same thing: dabbing
+  the brake over and over rather than holding it. On anything from a
+  gentle two percent down, it could run the air out in under twenty
+  seconds, set the spring brakes and leave you parked in a live lane
+  with the parking brake latched. It now takes one firm application and
+  holds it until the speed is where it should be.
+
+- **When an assist cannot hold your speed, it says so.** On a grade
+  steep enough, or with hot brakes or ice underneath, there is a point
+  where the assist has everything applied and the truck is still
+  running away. It used to just quietly keep losing. Now you are told,
+  once: the assist cannot hold the speed here, and you need the service
+  brakes yourself.
+
+- **Low air warnings no longer give parked-truck advice to a moving
+  driver.** Running low on air at speed, the game told you to keep the
+  parking brake set until pressure builds, which is advice for a truck
+  that is already stopped. Rolling, you are now told to get stopped and
+  let the compressor build, and that the spring brakes set at forty psi.
+
 - **The speed keeper now slows down before a corner instead of at it.**
   Driving to a shipper or a truck stop on city streets, the keeper would
   arrive at a turn still doing the street's speed, and it could not get

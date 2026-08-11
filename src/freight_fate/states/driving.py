@@ -349,6 +349,10 @@ class DrivingState(
         self._ramp_bar_tick_timer = 0.0
         self._bar_solid_on = False  # the bar's continuous final-zone tone
         self._ramp_assist_said = False
+        # The pedal route-transition assistance is currently holding for the
+        # terminal, so it can follow the demand up without letting go and
+        # re-making the application every few frames.
+        self._ramp_assist_brake = 0.0
         # Safety-call re-arm window (curve calls vs the Ctrl reflex).
         self._critical_curve = None
         self._critical_call_age_s = 0.0
@@ -438,6 +442,12 @@ class DrivingState(
         # latch for the posted-limit version of that cue.
         self._keeper_ease_said: float | None = None
         self._keeper_ease_target: tuple[float, float, str] | None = None
+        # The service-brake snub the keeper is holding (0.0 = off the pedal),
+        # and how long it has been out of authority with the truck still over
+        # the number -- past which it owns up rather than riding it out.
+        self._keeper_snub = 0.0
+        self._keeper_overrun_s = 0.0
+        self._keeper_overrun_said = False
         self._arrival_stop_said = False
         self._arrival_full_stop_said = False
         self._arrival_menu_open = False

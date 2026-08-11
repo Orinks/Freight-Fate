@@ -25,7 +25,9 @@ always did, and nothing changes for the freight that was already fine.
 from __future__ import annotations
 
 from .driving_core import (
+    RAMP_ASSIST_DECEL_START_MPS2,
     RAMP_ASSIST_FULL_DECEL_MPS2,
+    RAMP_ASSIST_RELEASE_BAND,
     RAMP_BAR_REACTION_S,
     RAMP_BAR_SOLID_MI,
     RAMP_BAR_TICK_RANGE_MI,
@@ -70,3 +72,31 @@ def assist_full_decel_mps2(truck) -> float:
     was already being handled correctly sees any change.
     """
     return max(0.5, min(RAMP_ASSIST_FULL_DECEL_MPS2, truck.full_service_decel_mps2()))
+
+
+def assist_servo_brake(applied: float, needed_mps2: float, truck) -> float:
+    """The application a stopping assist should be holding right now.
+
+    Two things keep it steady rather than fanning, which matters because the
+    air system charges a whole brake application every time the pedal RISES:
+
+    The floor is the assist's own trigger deceleration mapped through the same
+    denominator the demand is, so at the moment the assist first presses, floor
+    and demand agree. A flat floor of a third of the pedal against a trigger of
+    0.6 m/s2 could not agree with anything: the floor took off two thirds more
+    speed than the trigger asked for, the demand collapsed under it, the assist
+    let go, the demand climbed back, and the pedal went round again -- 276
+    applications on one flat approach to a stop sign, 125 psi down to 40, the
+    spring brakes on and the truck stopped in the road short of the bar (bench
+    trace, 2026-08-11).
+
+    And the pedal follows a falling demand only once the fall is worth a
+    release. Easing off is free; it is coming back on that costs air.
+    """
+    full = assist_full_decel_mps2(truck)
+    wanted = min(1.0, max(RAMP_ASSIST_DECEL_START_MPS2 / full, needed_mps2 / full))
+    if wanted > applied:
+        return wanted
+    if wanted < applied - RAMP_ASSIST_RELEASE_BAND:
+        return wanted
+    return applied

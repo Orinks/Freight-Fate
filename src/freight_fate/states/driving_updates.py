@@ -516,13 +516,21 @@ class DrivingUpdateMixin:
             self._low_air_said = True
             self.ctx.audio.play("vehicle/low_air_buzzer", volume=0.7)
             self.ctx.controller.rumble.alert()
+            # What to do about it depends on where the truck is. Parked, the
+            # answer is to leave the parking brake alone. Rolling, that advice
+            # is nonsense and the driver needs the real one: get stopped while
+            # there is still air to stop with, because the spring brakes will
+            # do it for them at 40 psi wherever they happen to be.
+            rolling = abs(t.velocity_mps) > 0.3
+            advice = (
+                "Get stopped and let the compressor build; the spring brakes set at 40 psi."
+                if rolling
+                else "Keep the parking brake set until pressure builds."
+            )
             message = (
                 f"Low air: {t.air_pressure_psi:.0f} psi."
                 if self._terse_speech()
-                else (
-                    f"Low air warning: {t.air_pressure_psi:.0f} psi. "
-                    "Keep the parking brake set until pressure builds."
-                )
+                else f"Low air warning: {t.air_pressure_psi:.0f} psi. {advice}"
             )
             self.ctx.say_event(message, interrupt=True)
         elif not t.air_low_warning:
@@ -872,10 +880,16 @@ class DrivingUpdateMixin:
             self._curve_assist_cue_s = CURVE_ASSIST_CUE_COOLDOWN_S
             self.ctx.say_event("Curve speed assistance released.", interrupt=False)
         self._curve_assist_active = curve_assisting
+        # Hysteresis on the ramp cap, for the same reason the curve assist has
+        # it: decided both ways on the one threshold, a truck riding the ramp
+        # limit announced itself slowing and released over and over down a
+        # single ramp -- and re-made the brake application, and paid the air
+        # for it, every time round (bench, 2026-08-11).
+        ramp_hold_mph = RAMP_CRUISE_TARGET_MPH if self._transition_assist_active else RAMP_MAX_MPH
         transition_assisting = (
             self.ctx.settings.route_transition_assist
             and self._ramp_mi is not None
-            and self.truck.speed_mph > RAMP_MAX_MPH
+            and self.truck.speed_mph > ramp_hold_mph
         )
         if transition_assisting:
             self.truck.brake = max(self.truck.brake, 0.4)

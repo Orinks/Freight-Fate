@@ -261,6 +261,11 @@ RAMP_TERMINAL_GRACE_MI = 0.02  # rolling this far past the bar commits the viola
 RAMP_ASSIST_DECEL_START_MPS2 = 0.6
 RAMP_ASSIST_FULL_DECEL_MPS2 = 3.0
 RAMP_ASSIST_HOLD_MI = 60.0 / 5280.0
+# How far the demand has to fall below the pedal the assist is already holding
+# before it eases off. Easing costs nothing; coming back on is charged a whole
+# brake application by the air system, so a servo that chases every dip in the
+# demand empties the tanks on one approach.
+RAMP_ASSIST_RELEASE_BAND = 0.05
 GREEN_ROLL_MPH = 25.0  # green lets you roll the terminal up to this
 STOP_ROLL_CLIP_MPH = 15.0  # blowing a stop sign this fast clips cross traffic
 RED_RUN_DAMAGE = 0.3  # collision severity for running the red

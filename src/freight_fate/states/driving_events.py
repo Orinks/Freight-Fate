@@ -5,8 +5,22 @@ from .base import TimedMessageState
 from .driving_core import *
 from .driving_menu_states import ArrivalState, FacilityArrivalState
 from .driving_rest_states import ParkingFullState, RestStopState, ShoulderSleepConfirmationState
-from .driving_speed_control import KEEPER_EASE_UNDERSHOOT_MPH
-from .driving_stops import assist_full_decel_mps2, bar_solid_zone_mi, bar_tick_range_mi
+from .driving_speed_control import (
+    KEEPER_EASE_UNDERSHOOT_MPH,
+    KEEPER_OVERRUN_MPH,
+    KEEPER_OVERRUN_S,
+    KEEPER_SNUB_DECEL_MPS2,
+    KEEPER_SNUB_MAX_BRAKE,
+    KEEPER_SNUB_MIN_BRAKE,
+    KEEPER_SNUB_OVER_MPH,
+    KEEPER_SNUB_UNDER_MPH,
+)
+from .driving_stops import (
+    assist_full_decel_mps2,
+    assist_servo_brake,
+    bar_solid_zone_mi,
+    bar_tick_range_mi,
+)
 
 
 class DrivingEventMixin:
@@ -1387,6 +1401,7 @@ class DrivingEventMixin:
         self._ramp_gap_milestones_said: set[int] = set()
         self._ramp_bar_tick_timer = 0.0
         self._ramp_assist_said = False
+        self._ramp_assist_brake = 0.0
 
     def _ramp_light_phase(self) -> str:
         cycle = RAMP_LIGHT_RED_S + RAMP_LIGHT_GREEN_S + RAMP_LIGHT_YELLOW_S
@@ -1755,6 +1770,7 @@ class DrivingEventMixin:
             # At the bar with the truck stopped: the assist owns the hold.
             self.truck.throttle = 0.0
             self.truck.brake = 1.0
+            self._ramp_assist_brake = 0.0
             if self._ramp_control == "stop":
                 self._ramp_terminal_done = True
                 self.ctx.say_event(
@@ -1776,7 +1792,10 @@ class DrivingEventMixin:
             # floor against a truck that is already stopped is a hold with no
             # release, and the driver cannot move again (playtest softlock,
             # 2026-07-24). The queue guidance is what tells them to close the
-            # gap to the bar from here.
+            # gap to the bar from here. Dropping the held application matters
+            # for the same reason: a creep to the bar must start from an open
+            # pedal, not from whatever the approach was holding.
+            self._ramp_assist_brake = 0.0
             return
         # Brake down the approach: needed deceleration to stop at the bar,
         # recomputed each tick, mapped onto brake application. As the gap
@@ -1784,12 +1803,12 @@ class DrivingEventMixin:
         gap_m = max(0.5, gap_mi * 1609.344)
         v_mps = max(0.0, self.truck.velocity_mps)
         needed = (v_mps * v_mps) / (2.0 * gap_m)
-        if needed < RAMP_ASSIST_DECEL_START_MPS2 and gap_m > 30.0:
+        idle = self._ramp_assist_brake <= 0.0
+        if idle and needed < RAMP_ASSIST_DECEL_START_MPS2 and gap_m > 30.0:
             return
+        self._ramp_assist_brake = assist_servo_brake(self._ramp_assist_brake, needed, self.truck)
         self.truck.throttle = 0.0
-        self.truck.brake = max(
-            self.truck.brake, min(1.0, max(0.3, needed / assist_full_decel_mps2(self.truck)))
-        )
+        self.truck.brake = max(self.truck.brake, self._ramp_assist_brake)
         if not self._ramp_assist_said:
             self._ramp_assist_said = True
             self._pause_speed_control()
@@ -2171,12 +2190,17 @@ class DrivingEventMixin:
         gap_m = max(0.5, gap_mi * 1609.344)
         v_mps = max(0.0, self.truck.velocity_mps)
         needed = (v_mps * v_mps) / (2.0 * gap_m)
-        if needed < RAMP_ASSIST_DECEL_START_MPS2 and gap_mi > 0.08:
+        if (
+            self._selected_stop_assist_brake <= 0.0
+            and needed < RAMP_ASSIST_DECEL_START_MPS2
+            and gap_mi > 0.08
+        ):
             return False
         self.truck.throttle = 0.0
-        assist_brake = min(1.0, max(0.3, needed / assist_full_decel_mps2(self.truck)))
-        self.truck.brake = max(self.truck.brake, assist_brake)
-        self._selected_stop_assist_brake = max(self._selected_stop_assist_brake, assist_brake)
+        self._selected_stop_assist_brake = assist_servo_brake(
+            self._selected_stop_assist_brake, needed, self.truck
+        )
+        self.truck.brake = max(self.truck.brake, self._selected_stop_assist_brake)
         if not self._selected_stop_assist_said:
             self._selected_stop_assist_said = True
             self._pause_speed_control()
@@ -2390,8 +2414,68 @@ class DrivingEventMixin:
             0.0, min(KEEPER_MAX_THROTTLE, self._keeper_throttle + error * 0.1 * dt)
         )
         t.throttle = self._keeper_throttle
-        if error < -1.5:
-            t.brake = max(t.brake, min(0.4, abs(error) / 15.0))
+        self._keeper_snub_brakes(dt, over=-error, target_mph=target_mph)
+
+    def _keeper_snub_brakes(self, dt: float, *, over: float, target_mph: float) -> None:
+        """Work the drums in snubs to hold the keeper's target.
+
+        One application, held until the truck is back under the number, then
+        released -- never a trim that tracks the error up and down. The air
+        model charges a whole application every time the pedal rises, so a
+        hunting command is charged for hundreds of them; and a proportional
+        term fades exactly as it approaches the target, so on a downgrade it
+        settles wherever the fading command happens to balance gravity rather
+        than ever arriving. Sizing the snub against the grade is what makes it
+        arrive; holding it is what makes it affordable.
+        """
+        t = self.truck
+        # Net of the grade: on the level this is a light application, and on a
+        # downgrade it is however much more it takes to still take
+        # KEEPER_SNUB_DECEL_MPS2 off the truck. Read every frame and allowed to
+        # firm up mid-snub -- a snub sized once, on the grade under the wheels
+        # when it started, holds that pedal onto a steepening hill and simply
+        # accelerates against it.
+        gravity_mps2 = max(0.0, -t.grade) * G
+        wanted = min(
+            KEEPER_SNUB_MAX_BRAKE,
+            max(
+                KEEPER_SNUB_MIN_BRAKE,
+                (KEEPER_SNUB_DECEL_MPS2 + gravity_mps2) / assist_full_decel_mps2(t),
+            ),
+        )
+        if self._keeper_snub > 0.0:
+            if over <= -KEEPER_SNUB_UNDER_MPH:
+                self._keeper_snub = 0.0  # under the number: let it go
+            else:
+                # Only ever firmer while the snub lasts. Easing and re-pressing
+                # is what the air system charges for.
+                self._keeper_snub = max(self._keeper_snub, wanted)
+        elif over > KEEPER_SNUB_OVER_MPH:
+            self._keeper_snub = wanted
+        if self._keeper_snub > 0.0:
+            t.throttle = 0.0  # never brake against our own throttle
+            t.brake = max(t.brake, self._keeper_snub)
+        # Pressing everything it has and still riding well over the number:
+        # say so. An assist that quietly holds the wrong speed is the one
+        # thing a driver who cannot see the speedometer cannot catch.
+        maxed = self._keeper_snub >= KEEPER_SNUB_MAX_BRAKE - 1e-6
+        if maxed and over > KEEPER_OVERRUN_MPH:
+            self._keeper_overrun_s += dt
+        else:
+            self._keeper_overrun_s = 0.0
+            if over <= 0.0:
+                self._keeper_overrun_said = False
+        if self._keeper_overrun_s >= KEEPER_OVERRUN_S and not self._keeper_overrun_said:
+            self._keeper_overrun_said = True
+            # Name the grade only where there is one: hot drums or ice take the
+            # same authority away on level road, and blaming a hill the driver
+            # is not on would send them looking for the wrong thing.
+            because = " on this grade" if t.grade <= -0.01 else ""
+            self.ctx.say_event(
+                f"Speed keeper cannot hold {self.ctx.settings.speed_text(target_mph)}"
+                f"{because}. Apply service brakes.",
+                interrupt=True,
+            )
 
     def _acc_gap_seconds(self) -> float:
         effects = self.weather.effects
