@@ -297,15 +297,17 @@ class CityMenuState(MenuState):
             MenuItem(
                 "Career stats",
                 self._stats,
-                help="Review your level, reputation, lifetime numbers, and "
-                "rest status, one line at a time.",
+                help="Review your level, reputation, dispatch trust, driving "
+                "record and CDL, your balance and anything you owe, "
+                "endorsements, lifetime numbers, and rest status, one line "
+                "at a time.",
             ),
             MenuItem(
                 "Endorsement courses",
                 self._endorsement_courses,
                 help="Pay for endorsement training yourself to unlock "
-                "refrigerated, heavy-haul, or high-value freight before "
-                "the carrier sponsors it at the listed level.",
+                "refrigerated, heavy-haul, high-value, or liquid bulk freight "
+                "before the carrier sponsors it at the listed level.",
             ),
             *(
                 [
@@ -1179,7 +1181,7 @@ class JobBoardState(MenuState):
             decline_note = (
                 f"You can decline {remaining} more assigned "
                 f"load{'s' if remaining != 1 else ''} before your next "
-                "promotion, but refusals cost standing with dispatch."
+                "promotion, but refusals cost dispatch trust."
             )
         else:
             decline_note = (

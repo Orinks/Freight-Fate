@@ -10,11 +10,132 @@ covers everything else and points there for the winter suite.
 Written for a screen-reader playtest: everything to verify is spoken,
 never visual. Each checklist says how to set it up, what to do, what to
 listen for, and when to call it a pass. Work them in order or
-cherry-pick — every one stands alone.
+cherry-pick — every one stands alone, except Chapter 0, which is setup
+you need before the game will behave the way the rest of this book
+describes.
 
 When something fails, note three things: what you did, what you heard,
 and what you expected to hear. That sentence pair is worth more than any
 log file.
+
+## Chapter 0. Before your first drive
+
+Four things you cannot work out by playing, and one thing that is missing
+on purpose. Read this chapter before you open the game; the rest of the
+book assumes you have.
+
+### 0.1 The alpha talks to a test server, not the real orinks.net
+
+Every online feature in this alpha — the drivers board, profile sharing,
+cloud backup, Mastodon posting — talks to a staging copy of the website
+instead of the real one. It is a separate site, with separate accounts
+and separate data.
+
+Three things follow from that, and all three are intended:
+
+- **Your real orinks.net sign-in will not work here.** Make a fresh
+  account on the staging site and use that one for the whole alpha.
+- **Nothing you do touches your real driver.** Your real profile, your
+  real board listing, and your real backups are untouched no matter what
+  you do in the alpha.
+- **Everything you make on staging is disposable.** Staging careers and
+  backups will not carry over when 1.9 releases. Never let a career you
+  care about exist only as a staging backup.
+
+Do not file "my orinks.net account is rejected" as a bug. What is worth
+reporting is a spoken line that says orinks.net without making clear
+which one you are being sent to, a refusal that leaves you no way to try
+again, or anything you do in the alpha showing up on the real site.
+
+### 0.2 Connecting an account is a code and a browser
+
+Setup: the staging account from 0.1, and a browser you can reach.
+
+Do: from the main menu, open Online, then "Set up orinks.net account".
+Choose the first item. If the browser does not open by itself, use "Say
+my activation code again" to hear it spelled out phonetically, or "Copy
+my activation code" to put it on the clipboard, and go to the site
+yourself. Sign in there and enter the code. Come back to the game and
+wait.
+
+Listen for: the game saying it is contacting the site, then reading you
+a short activation code; the menu item itself changing to say it is
+waiting for that code; a spoken re-orientation when you switch back to
+the game from the browser; and a confirmation naming your driver once
+the code is claimed.
+
+Pass when: you got connected using speech alone, you could replay the
+code as many times as you needed, and the confirmation said in so many
+words that profile sharing and cloud backup are both still off.
+
+The driver name in that confirmation is there to be checked, not
+admired: it is how you would find out somebody else claimed the code you
+just read aloud. If it is not your driver, say so.
+
+One deliberate design worth knowing: connecting an account turns nothing
+on. Cloud backup, profile sharing and Mastodon posting each need their
+own separate yes afterwards. A confirmation that claims otherwise is a
+bug.
+
+Also expected: right after you create your very first career, the game
+offers this setup once, unprompted, with "Not now" already selected. It
+is asked once ever and never again. That is not a stray prompt.
+
+### 0.3 What is already on before you touch anything
+
+Two things are on when you install: **Online services**, the master
+switch, and **Discord presence**. Discord presence shares only broad
+activity — main menu, driving a route, resting — and does nothing at all
+unless Discord is running. The master switch is only a master switch:
+everything underneath it is off or needs an account, so nothing is
+published because of it.
+
+Off until you turn each one on: profile sharing, cloud backup, Mastodon
+posting, real radio streams, and live weather, traffic and parking.
+
+The radio's streamer-safe setting is on, which is what keeps real public
+streams off the dial until you opt in.
+
+The sharing switches all live on one screen: Online, on the main menu.
+The two radio stream switches are under Settings, Audio. Live weather,
+traffic and parking are under Settings, Speech and weather, and they
+follow their own toggles — the master switch does not reach them.
+
+### 0.4 Hear what gets shared before any of it is shared
+
+Do: on the Online menu, before turning anything on, open account setup
+and choose "Hear what gets shared". Then start turning profile sharing
+on and choose the same item from the confirmation screen. Press F1 on
+each row of the Online menu.
+
+Listen for: one disclosure that names your driver name, broad on-duty
+board activity, eligible profile details, achievements, road-journal
+posts, the updates feed, and the game version you are running; and that
+says plainly what is never published — your real name, your full save,
+coordinates, cargo details, precise location, and the money you
+currently have. Lifetime career earnings are public; current cash is
+not.
+
+Pass when: you could hear the whole disclosure twice, from two places,
+without anything being transmitted, and every F1 row agreed with it.
+
+### 0.5 There is no driving school in this alpha
+
+The practice road where nothing counts is held back for a later
+release. It is not in the terminal menu and it is not hiding behind a
+level. **Do not file its absence as a bug.**
+
+What you get instead: a first-drive tutorial that walks you through
+starting the engine, waiting for air, releasing the parking brake and
+pulling away, and then stops; and "Learn game sounds" on the main menu
+and in the pause menu, which plays any road cue on demand in seven
+groups with F1 explaining what each one means. Everything past pulling
+away — lane changes, engine brake stages, long descents, exits — you
+learn on a real load.
+
+Worth reporting: a spoken prompt that tells you to go to the driving
+school, or a cue you met at speed that has no entry in Learn game
+sounds.
 
 ## Chapter 1. What the alpha changes, system by system
 
@@ -35,7 +156,8 @@ parking for. Winter tires are a garage choice with honest trade-offs.
 Chains ride in the side box, take real minutes and fatigue to hang (more
 in the dark), transform ice stops and icy descents, and grind apart on
 bare pavement. Chain laws activate over the steep passes with flashing
-signs, warnings, and a possible five-hundred-dollar citation. Worn tires
+signs, warnings, and a citation that starts at 580 dollars and climbs if
+you have a record or are inside a construction zone. Worn tires
 hydroplane at lower speeds; the jake can break the drive wheels loose on
 ice. Companion volume, checklists 1 through 8.
 
@@ -92,14 +214,24 @@ owner-operators. Trailers, carrier accounts, reputation trust bonuses,
 endorsement courses, and a first-day briefing that repeats until your
 first load. Chapter 9.
 
-**114 achievements.** State, region, and city arrivals, cargo firsts,
-close calls, mishaps, and career milestones. Chapter 9 covers the spot
-checks.
+**172 achievements, in seven categories.** State, region, and city
+arrivals, cargo firsts, close calls, mishaps, and career milestones. The
+badge wall opens on the categories and each one counts what you have
+earned in it. Chapter 9 covers the spot checks.
+
+**The law costs money now, and money has a floor under it.** Every fine
+in the game lives on one schedule and most of them roughly tripled; a
+fine earned inside a construction zone is doubled, and every citation
+already on your record makes the next one dearer, up to twice the base.
+An unpaid fine becomes a balance you carry, only a quarter of each
+settlement goes to it, and the balance is not allowed to grow without
+end. Chapter 9.6.
 
 **The radio follows the map.** M toggles it, Page Down and Page Up tune
-to the next and previous of the stations
-you can actually receive, twelve fictional regional stations fade to
-static at the edge of their range and hand back to the Roadhouse.
+to the next and previous of the stations you can actually receive, and
+Control with a tuning key jumps a whole category of the dial. The
+thirteen Freight Fate regional stations are always receivable wherever
+you are; real stations have real coverage and fade at the edge of it.
 Streamer-safe by default; real public streams behind an explicit opt-in.
 Chapter 10.
 
@@ -109,6 +241,11 @@ Great Basin, Appalachia — on their real roads with real grades,
 checkpoints, and truck stops. Roadside landmarks speak as ambient chatter
 with per-kind switches in Settings. The career clock crosses real US time
 zones, spoken, with deadlines in destination local time. Chapter 11.
+
+**Online services point at a test server.** The drivers board, profile
+sharing, cloud backup and Mastodon posting all talk to a staging copy of
+orinks.net, with its own accounts and its own throwaway data. You need a
+fresh account there and your real one will not work. Chapter 0.
 
 **Cloud restores get a second integrity check.** Beyond the server's
 signature, a restored profile must pass the game's own sanity rules, and
@@ -252,7 +389,9 @@ prices said so out loud.
 
 ### 4.1 The lane is discrete and the taps are real
 
-Setup: Settings with steering assist off; any multi-lane interstate leg.
+Setup: Settings, Driving assistance, Lane keeping set to off — that is
+the hardest setting on this row, not the mildest, so read the value
+clause before you commit. Any multi-lane interstate leg.
 
 Do: press L to hear your lane. Tap Left and Right arrows to change
 lanes; try one while on an exit ramp.
@@ -281,16 +420,47 @@ real traffic carries real consequences.
 
 ### 4.3 Construction closes a real lane
 
-Setup: any leg that announces a work zone.
+Setup: any leg that announces a construction zone.
 
 Do: obey the merge — flagger and taper first, then the barrels. On a
-second pass, stay in the closing lane too long on purpose.
+second pass, stay in the closing lane too long on purpose. Press L
+before and after, so you know how many lanes you had.
 
 Listen for: the staged approach in order (merge warning, flagger,
-taper), then barrel strikes and damage if you ignored it, and work-zone
-enforcement pressure hinted on the CB a few miles out.
+taper), then, if you ignored it, plowing through the barrels: truck
+damage, a citation of 1,000 dollars or more, and a plain statement that
+it goes on your safety record. Enforcement pressure hinted on the CB a
+few miles out.
 
-Pass when: complying is calm and ignoring it is expensive.
+Pass when: complying is calm, ignoring it costs both damage and money,
+and you were told the money was a citation and not a repair bill.
+
+Two rules here are deliberate, so do not report them as bugs:
+
+- **The barrels are charged once per construction zone**, however many
+  times they catch you inside it. That is one refusal to merge. The
+  damage still lands every time.
+- **The barrel citation is not doubled for being in a construction
+  zone**, unlike every other fine. Its amount is already the roadwork
+  penalty. Other citations you collect inside the zone are doubled, and
+  the game says so out loud when it doubles one.
+
+### 4.3a A construction zone never closes your only lane
+
+Setup: a leg that narrows to one lane your side — the road speaks the
+change ("Down to one lane your side", "Road widens to three lanes your
+side"), and L always answers with the lane count you actually have.
+
+Do: drive construction zones on stretches where the lane count changes.
+
+Listen for: no merge demand and no barrel citation anywhere a second
+lane your side does not exist for the whole zone, taper included. You
+should never be ordered out of a lane you cannot leave.
+
+Pass when: every merge you were asked to make had somewhere to go.
+Being pinned in a coned-off lane with no open lane beside you is worth
+reporting immediately — note the two cities and roughly how far into the
+leg it happened.
 
 ### 4.4 Exits take a setup
 
@@ -532,6 +702,24 @@ owner-operator or run your own authority.
 Pass when: the freedom ladder matches your level and the game says why
 each rung is locked.
 
+Numbers to expect, so you can tell a wrong count from a design you did
+not like: a new hire gets three refusals per level band, four from level
+five. Each refusal costs two reputation, and one on-time delivery wins
+that back.
+
+**Declining hard has a second, slower consequence, and it is intended.**
+Dispatch trust slides down a four-rung ladder — full, guarded, poor, last
+chance — and each rung down takes a refusal off your budget, holds back
+freight, and slows how fast career experience arrives. Below guarded,
+picking your own loads is revoked even past level 8. Dispatch trust also
+answers to your CDL and to money you owe, not just to refusals, so a
+clean driver in debt can see it fall too. Ask for it any time: it is on
+the Career stats screen in town and on Tab, Driver while driving, and it
+names which of the three is holding it down and what brings it back.
+
+Report the slowdown only if the game never told you it was happening.
+The rate is deliberately never spoken as a number.
+
 ### 9.3 The money is a carrier's money
 
 Setup: a company-driver career and an owner-operator career,
@@ -572,6 +760,75 @@ close call — and check the badge wall.
 
 Pass when: each lands once, speaks its line, and nothing awards twice.
 
+### 9.6 Owing money, and the floor underneath it
+
+Fines got much bigger in 1.9 and testers have already done the
+arithmetic and got frightened. Here is the shape the game is actually
+built to, so you can tell us when it does not hold.
+
+**What is intended.** A fine you cannot pay does not simply take your
+cash negative and leave you there. It becomes a **balance owed** that
+you carry, and four rules govern it:
+
+- **Only a quarter of any settlement goes to the balance.** Three
+  quarters always reaches you. You can never finish a run with nothing
+  because of what you owe, so working always helps.
+- **There is a ceiling, and you are told what it is.** For a company
+  driver it is what the carrier will carry — roughly eight of your own
+  settlements, never less than 6,000 dollars. For an owner-operator it
+  is what the tractor would fetch at sale, never less than 12,000.
+- **You get three spoken warnings on the way there**: when a balance
+  first exists, when you pass halfway, and a last warning that leaves
+  real room — at least a couple of your own settlements — before
+  anything happens.
+- **No single citation can reach the ceiling on its own.** The worst
+  fine in the game, a repeat offender doing thirty over inside a
+  construction zone, tops out at 10,000 dollars against a 12,000 floor.
+  One traffic stop is never meant to end a career.
+
+**What happens at the ceiling.** A company driver's employment ends and
+they move to another fleet on shorter freight and lesser equipment. An
+owner-operator's lender takes the tractor back and they go on a payroll
+again. Both settle the balance to zero, both keep level, experience,
+endorsements, driving record and everything else owned, and both land as
+a screen you can arrow through line by line and re-read before you leave
+it. Neither is a game over and neither deletes a save.
+
+If you are already at the fleet that hires anyone, there is nowhere
+further to fall, so the carrier holds the balance at the ceiling and
+writes off anything past it. It cannot grow.
+
+Setup: a career you do not mind wrecking. An owner-operator start is the
+fastest route — 18,000 dollars of working capital against a 12,000
+repossession floor.
+
+Do: collect citations on purpose. Blow an open scale, run fifteen or
+more over, ignore a merge into the barrels. Spend past zero at the
+garage. Between each one, check what you owe: Career stats in town, Tab
+then Driver while driving, or Business status. Ask dispatch for an
+advance once a balance exists. Keep going to the ceiling.
+
+Listen for: every citation naming its amount and your remaining cash;
+the doubling spoken as a reason whenever a fine is doubled for being in
+a construction zone; the balance turning up in the delivery summary with
+what the settlement paid toward it; the three warning rungs arriving in
+order, each naming the ceiling and what happens there; a refused pay
+advance explaining that a share of every settlement is already spoken
+for; and the ending screen reading in order — the money, what it cost,
+what you keep, where you go next.
+
+Pass when: you were never surprised. Every rung was spoken before the
+next one, the ceiling was a number you had heard, three quarters of each
+settlement really did reach you, and the ending screen let you re-read
+every line before you left it.
+
+Worth reporting: a settlement that leaves you with less than three
+quarters of the net; a balance still growing after the ceiling on a
+last-chance carrier; an ending that arrives with no final warning before
+it, or that arrives while you still had a couple of runs of room; any
+line that calls you failed, bankrupt, fired, or says a save was lost;
+and any fine amount you cannot get repeated after the fact.
+
 ## Chapter 10. Radio
 
 ### 10.1 The dial follows the map
@@ -581,25 +838,56 @@ Setup: a long leg crossing regions; radio on (M).
 Do: tune with Page Down and Page Up (semicolon and apostrophe still
 work), ask for status with Y, open the
 Radio screen
-from Tab. Drive a regional station to the edge of its market.
+from Tab. Drive a long way and keep checking what the dial offers.
 
-Listen for: only receivable stations in the dial rotation; the
-regional station fading to static at the fringe and the Roadhouse taking
-back over when the signal drops; hosts on the Roadhouse and Night Line
+Listen for: only receivable stations in the dial rotation, and the list
+changing as you cross the country; hosts on the Roadhouse and Night Line
 at their hours.
 
-Pass when: what you can tune matches where you are, and the handoff at
-signal loss is automatic and spoken.
+Pass when: what you can tune matches where you are, and the Radio screen
+agrees with what Page Down actually gives you.
+
+The thirteen Freight Fate regional stations — The Rawhide, Big Wheel
+Country, Prairie Line and the rest — are receivable everywhere by
+design, so they do not fade at a market edge. That is not a broken range
+check. Real coverage, fringe static and the handover to the Roadhouse
+belong to real stations, which need the opt-in in 10.2 before you can
+hear one at all.
 
 ### 10.2 Streamer-safe by default
 
 Setup: a fresh install or reset settings.
 
 Do: check what the radio plays before touching any opt-in; then find
-the explicit opt-in for real public streams.
+the explicit opt-in for real public streams. It is two settings, not
+one: turning real streams on and turning streamer-safe off.
 
 Pass when: nothing externally licensed plays until you opted in, in so
 many words.
+
+### 10.3 A dial this big needs jumping, not walking
+
+Setup: real streams on and streamer-safe off, from 10.2, so the whole
+dial is live — terrestrial, AFN, satellite, international, web radio,
+and your own playlists if you have any.
+
+Do: hold Control and press a tuning key repeatedly to walk the
+categories instead of the stations. Find a station you like and press O.
+Press O again on the same station. Jump to the Favorites category and
+check it is there. Keep tuning until something refuses to play.
+
+Listen for: each Control jump naming the category it landed in before
+naming the station; O confirming a station saved and then unsaved; a
+station that will not play handing over to another one in the same
+category rather than leaving you in silence, and then staying off the
+dial for the rest of the session.
+
+Pass when: you could cross a dial of thousands of stations in a handful
+of presses, favorites survive a restart, and a dead stream never traps
+you twice in one session.
+
+A retired dead stream comes back next time you play. That is deliberate:
+a stream that was down for an hour is not gone forever.
 
 ## Chapter 11. The world speaks
 
@@ -693,7 +981,11 @@ where the message left you.
 
 ### 12.2 Cloud restores still restore
 
-Setup: a cloud backup made normally.
+Setup: a cloud backup made normally. If you have not set one up yet,
+Chapter 0 has the account and the backup switch — cloud backup is off
+until you turn it on, and it needs the staging account, not your real
+one. Remember that a staging backup is disposable: it is not a safe
+place for the only copy of a career.
 
 Do: restore it.
 
@@ -709,17 +1001,33 @@ provoke says exactly why.
 
 Weather forcing (`FREIGHT_FATE_FORCE_WEATHER`), the winter route picks,
 and the physics key list live in the companion volume,
-`docs/physics-playtest-checklists.md`. The keys this book leans on
-beyond those: X commit to the exit (or signal a pull-over), L lane
-readout, Left/Right lane change with assist off, R progress, Shift+R
-next exit, U upcoming, C clock, deadline, and the nearest hours limit,
-Alt+A time at the wheel this shift, Alt+S when the break is due, Alt+D
-what ends the shift and where you can stop before it, A repeat last announcement, comma repeat the
-last spoken line (press again quickly to walk back through the last
-twenty), M radio with
-Page Down and Page Up to tune (semicolon and apostrophe still work) and
-Y for status, T stop at an announced service, F
-fuel, Enter accept a city-service arrival, F1 the full key help.
+`docs/physics-playtest-checklists.md`. The README has the full key
+table. The keys this book leans on beyond the physics ones:
+
+Driving: X commit to the exit (or signal a pull-over), L lane readout,
+I lane locator on and off, Left/Right steer or, with lane keeping on
+full, tap to change lanes, B the emergency brake, K automatic speed
+control, Shift+K resume it after braking cancelled it, Alt+T swap
+automatic and manual shifting, Alt+J whether J runs the automatic engine
+brake, T stop at an announced service, Enter accept a city-service
+arrival.
+
+Asking: R progress, Shift+R next exit, U upcoming, S posted limit, D the
+one safe speed for here, G the grade and the next one, C clock,
+deadline, and the nearest hours limit, Alt+A time at the wheel this
+shift, Alt+S when the break is due, Alt+D what ends the shift and where
+you can stop before it, F fuel, A repeat last announcement, F1 the full
+key help.
+
+Radio: M on and off, Page Down and Page Up to tune (semicolon and
+apostrophe still work), Control with a tuning key to jump a category, O
+to save or unsave a favorite, Y for status.
+
+Messages, on every screen: comma repeats the last spoken line and
+presses again walk back through the last 200, period moves forward,
+Control with comma or period jumps to the oldest or newest, the bracket
+keys switch between all messages, general messages and driving events,
+and Control C copies the one you are on.
 
 ### Scenario levers
 

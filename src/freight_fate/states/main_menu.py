@@ -970,7 +970,8 @@ class SettingsCategoryState(MenuState):
                     lambda: self._cycle_cue_loudness(1),
                     help="How loud the road speaks when you leave your line: "
                     "the rumble-strip and shoulder textures, the lane "
-                    "locator, and the warning bars before a hairpin all "
+                    "locator you turn on with I while driving, and the "
+                    "warning bars before a hairpin all "
                     "follow this. Subtle keeps them under the engine, "
                     "standard matches it, prominent cuts through for "
                     "players who want no doubt. Presets never change it.",
@@ -1053,9 +1054,10 @@ class SettingsCategoryState(MenuState):
                     lambda: f"Speed keeper: {'on' if s.speed_keeper else 'off'}",
                     lambda: self._toggle_speed_keeper(1),
                     help="In low-speed zones where adaptive cruise is unavailable, "
-                    "such as facility roads, gates, and work zones, automatic "
+                    "such as facility roads, gates, and construction zones, automatic "
                     "speed control uses the keeper, then switches back to adaptive "
-                    "cruise on open roads. Braking cancels the whole session.",
+                    "cruise on open roads. The keeper eases off early for the next "
+                    "turn or the next lower limit. Braking cancels the whole session.",
                 ),
                 MenuItem(
                     lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",
@@ -1244,7 +1246,10 @@ class SettingsCategoryState(MenuState):
             (
                 lambda: f"Speech verbosity: {['terse', 'normal'][s.speech_verbosity]}",
                 self._cycle_verbosity,
-                "Controls how often driving status reminders speak.",
+                "Controls how often driving status reminders speak. Rate, pitch, "
+                "volume, and voice rows appear in this category only when the "
+                "voice speaking to you supports them; with a screen reader "
+                "running, those four are set in the screen reader itself.",
             ),
             (
                 lambda: f"Roadside chatter: {s.chatter_summary()}",
@@ -1422,7 +1427,7 @@ class SettingsCategoryState(MenuState):
             (
                 "curve_speed_assist",
                 "Curve speed assistance",
-                "Reduces speed workload for mapped curves; you still steer.",
+                "Reduces speed workload for mapped curves; you still steer. It slows for the bend itself on the service brakes and never the engine brake; on a real downgrade it does raise the jake, because that is the grade's work and not the bend's.",
             ),
             (
                 "route_transition_assist",
@@ -1432,7 +1437,7 @@ class SettingsCategoryState(MenuState):
             (
                 "speed_keeper",
                 "Speed keeper",
-                "In low-speed zones where adaptive cruise is unavailable, such as facility roads, gates, and work zones, pressing K holds your current speed so the accelerator does not need to stay held. Braking cancels. Presets never change this.",
+                "In low-speed zones where adaptive cruise is unavailable, such as facility roads, gates, and construction zones, pressing K holds your current speed so the accelerator does not need to stay held. It eases off early for the next turn or the next lower limit ahead, and the corner call adds Speed keeper easing when it is taking the turn. Braking cancels. Presets never change this.",
             ),
             (
                 "pedal_latch",

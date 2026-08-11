@@ -175,7 +175,8 @@ def test_upcoming_key_reports_an_imposed_limit_ahead(monkeypatch):
         assert "construction taper" in spoken[-1]
         assert "merge left" in spoken[-1]
         assert "speed limit 55" in spoken[-1]
-        assert "then work zone 45" in spoken[-1]
+        # "construction zone" is the canonical spoken noun (docs/ontology.md).
+        assert "then construction zone 45" in spoken[-1]
     finally:
         app.shutdown()
 

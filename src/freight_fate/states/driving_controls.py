@@ -255,8 +255,11 @@ class DrivingControlsMixin:
             "K starts automatic speed control. Adaptive cruise handles open "
             "roads and the speed keeper handles low-speed zones, switching "
             "automatically between them. Bad weather increases the following "
-            "gap, sharp posted-limit drops make it slow early, and braking "
-            "cancels the whole session. At the planned pickup, it pauses while "
+            "gap, and both read the road ahead: cruise eases early for a sharp "
+            "posted-limit drop, the keeper for the next turn or the next lower "
+            "limit, and the corner call adds Speed keeper easing when it is "
+            "taking the turn. "
+            "Braking cancels the whole session. At the planned pickup, it pauses while "
             "you check in and load, then resumes once you depart and get rolling. "
             "Plus and minus, including the keypad keys, raise and lower the "
             "remembered open-road target by five, so you can dial it up to the "
@@ -302,7 +305,10 @@ class DrivingControlsMixin:
             "where you can legally stop before it. "
             "R progress, distance left, and where you are. "
             "Shift R next listed highway exit. "
-            "V weather. L lane position. A repeats the last driving announcement. "
+            "V weather. L lane position. I turns the lane locator on and off: a "
+            "soft tock once a beat, panned to where you sit inside your lane, "
+            "running until you turn it off, on lane keeping partial or off. "
+            "A repeats the last driving announcement. "
             "Comma repeats what was just said and keeps stepping back, and Period moves forward again. "
             "Control with Comma or Period jumps to the oldest or newest message. "
             "The bracket keys switch between all messages, general messages, and driving events. "
@@ -943,7 +949,7 @@ class DrivingControlsMixin:
                 parts.append(
                     f"construction taper in {s.distance_text(zone.start_mi - pos)}, "
                     f"merge left, speed limit {s.speed_text(zone.limit_mph)}, "
-                    f"then work zone {s.speed_text(paired.limit_mph)}"
+                    f"then construction zone {s.speed_text(paired.limit_mph)}"
                 )
             else:
                 parts.append(

@@ -340,7 +340,9 @@ def test_how_to_play_documents_earned_dispatch_freedom():
 
     help_text = " ".join(line for _title, lines in HELP_PAGES for line in lines).lower()
     assert "dispatch assigns" in help_text
-    assert "refusals cost standing with dispatch" in help_text
+    # "standing" is a code word, never a spoken one (docs/ontology.md).
+    assert "refusals cost dispatch trust" in help_text
+    assert "cost standing with dispatch" not in help_text
     assert "at level 8, dispatch trusts you to pick your own loads" in help_text
     assert "choosing your own routes is the owner-operator" in help_text
     assert "press f1 on a dispatch to review its details" in help_text

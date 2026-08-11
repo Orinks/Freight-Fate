@@ -1,7 +1,7 @@
 # Freight Fate
 
 An accessible, audio-first cross-country trucking simulation. Haul freight
-between more than 45 American cities, manage fuel, tolls, weather, and
+between more than 600 American cities, manage fuel, tolls, weather, and
 deadlines, and build a driving career entirely by ear.
 
 Freight Fate is designed for blind and low-vision players first: every screen
@@ -17,7 +17,7 @@ visual display mirrors all speech for sighted players and helpers.
   experience, level through a 30-rank trucking career, unlock cargo
   endorsements, then buy into a leased-on owner-operator path when your career
   and working capital are ready.
-- **Realistic freight markets** — the 59-city route graph acts as metro
+- **Realistic freight markets** — the 623-city route graph acts as metro
   service areas, while each market expands into representative ports, rail and
   intermodal ramps, air cargo areas, parcel hubs, distribution centers, cold
   storage, food processors, farms/elevators, manufacturing plants, steel and
@@ -45,7 +45,8 @@ visual display mirrors all speech for sighted players and helpers.
   speeds, construction and traffic zones, road hazards that demand quick
   braking, curated rest stops and service plazas with parking certainty,
   carrier-paid toll-road settlement charges, and roadside rescue when you run dry.
-- **Real-world weather (optional)** — flip Settings → Weather source to
+- **Real-world weather (optional)** — flip Settings → Speech and weather →
+  Weather source to
   "real world" and each city uses its live current conditions from the free
   [National Weather Service](https://www.weather.gov/documentation/services-web-api)
   API. If it is raining in Chicago right now, it is raining in your game. Works
@@ -64,14 +65,16 @@ visual display mirrors all speech for sighted players and helpers.
   with the engine note pitch-tracking RPM in real time; pygame.mixer takes
   over automatically if BASS cannot initialize.
 - **Screen reader native** — menus with first-letter navigation, contextual
-  F1 help everywhere, on-demand information keys while driving, and three
-  speech verbosity levels.
+  F1 help everywhere, on-demand information keys while driving, a message log
+  you can walk back through from any screen, and a choice of terse or normal
+  speech verbosity.
 - **Discord Rich Presence (optional)** — when Discord is running, your profile
   can show what you are up to: in the main menu, at the terminal, driving a
   route, resting, or delivering, with the broad route and cargo. Only general
   game activity is shared — never your save files or personal details — and it
-  is on by default but easily switched off in Settings → Gameplay → Discord
-  presence. The game starts and runs perfectly whether or not Discord is open.
+  is on by default but easily switched off under Discord presence on the
+  Online menu, on the main menu. The game starts and runs perfectly whether or
+  not Discord is open.
 
 ## Download and play
 
@@ -200,42 +203,100 @@ it" on the keyboard becomes "press D-pad down to take it" on a controller.
 | Home / End | First / last item |
 | Any letter | Jump to the next item starting with it |
 | F1 | Contextual help |
-| Comma | Review earlier speech |
-| Period | Move toward newer speech |
+
+#### Messages, on every screen
+
+The message log works the same way everywhere in the game, driving included.
+It keeps the last 200 things the game said, in one history shared by menu
+speech and driving events.
+
+| Key | Action |
+| --- | --- |
+| Comma | Repeat the last spoken line; press again quickly to step one line older each time |
+| Period | Move toward newer messages |
+| Ctrl+Comma | Jump to the oldest message |
+| Ctrl+Period | Jump to the newest message |
+| Left / Right bracket | Switch between all messages, general messages, and driving events |
+| Ctrl+C | Copy the message you are on |
 
 #### Driving
+
+Moving the truck:
 
 | Key | Action |
 | --- | --- |
 | Up arrow (hold) | Throttle |
 | Down arrow (hold) | Brake |
+| B (hold) | Emergency brake — the hardest possible stop |
+| Left / Right arrow | Steer. With lane keeping on full, a tap changes lanes instead |
 | E | Start / stop engine |
-| P | Release / set parking brake |
+| P | Release / set parking brake. Setting it at speed grinds flat spots into the tread and costs real tire wear — it is the emergency backup, not a brake |
+| H | Horn |
+
+Gears and the engine brake:
+
+| Key | Action |
+| --- | --- |
 | Left Shift (hold) | Clutch (manual mode) |
 | W | Shift up a gear (manual mode) |
 | Q | Shift down a gear (manual mode) |
 | N | Neutral (manual mode) |
-| J | Engine brake toggle |
-| 1, 2, 3 | Engine brake stage (low, medium, high) |
-| H | Horn |
-| X | Arm / cancel the next actionable exit |
-| T | Open a route stop, or emergency shoulder sleep away from stops, when fully stopped. |
-| Space | Speak speed, gear, RPM |
+| Backspace | Reverse (manual mode) |
+| Alt+T | Switch between automatic and manual shifting, mid-drive |
+| J | Engine brake on / off |
+| 1, 2, 3 | Engine brake stage (one, two, three) |
+| Alt+J | Whether J arms the automatic engine brake or leaves it to you |
+
+Speed control:
+
+| Key | Action |
+| --- | --- |
+| K | Automatic speed control on / off. Parked with the brake set, it latches a high idle instead |
+| Shift+K | Resume the last speed after braking cancelled it |
+| Plus / minus (keypad too) | Raise / lower the remembered open-road target by 5 |
+
+Route actions:
+
+| Key | Action |
+| --- | --- |
+| X | Signal for the next announced exit, or cancel that signal. Also signals a pull-over when a trooper lights you up |
+| T | Plan the next sleep-capable stop while rolling; at a stop, open its menu; fully stopped away from stops, open emergency shoulder sleep |
+| Enter | Go inside on a city-service arrival, or open a facility arrival once fully stopped |
 | Tab | Driving status menu |
-| F | Fuel and range |
-| C | Clock, deadline, ETA, and the hours limit that comes first |
+| Escape | Pause menu |
+
+Asking the truck and the road questions:
+
+| Key | Action |
+| --- | --- |
+| Space | Speed, gear, RPM, the speed-control mode in use, and air pressure |
+| S | Posted speed limit. On a ramp with a signal, the light and the distance to the stop bar |
+| D | The one safe speed for right here — weather, an armed exit, and the bend ahead already folded in |
+| G | The grade under the wheels, whether the truck is holding it, and the next grade ahead |
+| R | Route progress, distance left, and where you are |
+| Shift+R | Next listed highway exit |
+| U | What is coming up: imposed limits, stops, exits, and bends |
+| C | Clock, deadline, date and season, and the hours limit that comes first |
 | Alt+A | Time at the wheel so far this shift |
 | Alt+S | When your 30 minute break is due |
 | Alt+D | What ends this shift, and where you can stop before it |
-| R | Route progress |
-| Shift+R | Next listed highway exit |
-| L | Lane position |
+| F | Fuel and range |
 | V | Weather and forecast |
+| L | Lane position |
+| I | Lane locator on / off — a soft tock once a beat, panned to where you sit inside your lane. Available on lane keeping partial or off |
 | A | Repeat the last driving announcement |
 | F1 | List all controls |
-| Comma | Review earlier speech |
-| Period | Move toward newer speech |
-| Escape | Pause menu |
+| Left or Right Ctrl | Stop the driving event voice mid-sentence |
+
+The radio:
+
+| Key | Action |
+| --- | --- |
+| M | Radio on / off |
+| Page Down / Page Up | Tune to the next / previous receivable station (semicolon and apostrophe also work) |
+| Ctrl + a tuning key | Jump a whole dial category |
+| O | Save or unsave the current station as a favorite |
+| Y | Station, volume, and streamer-safe status |
 
 ### Controller
 
@@ -267,7 +328,7 @@ Gameplay → Controller if you prefer keyboard only.
 | A | Shift up a gear (manual mode) |
 | X | Shift down a gear (manual mode) |
 | Y | Automatic speed control on / off |
-| B | Speak speed, gear, RPM |
+| B | Speak speed, gear, RPM, speed-control mode, and air pressure |
 | D-pad Up | Route progress |
 | D-pad Down | Take exit / signal a pull-over |
 | D-pad Left | Weather and forecast |

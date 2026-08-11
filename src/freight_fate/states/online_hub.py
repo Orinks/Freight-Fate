@@ -116,8 +116,10 @@ class OnlineHubState(MenuState):
                 lambda: self._toggle_mastodon_sharing(1),
                 help="When on, finishing a delivery that earns an achievement, a "
                 "level, or a perfect streak posts a short public summary "
-                "to your own Mastodon account with the FreightFate "
-                "hashtag. Routine deliveries are never posted. Link a "
+                "to your own Mastodon account with the Freight Fate Runs "
+                "hashtag, which is separate from the Freight Fate tag "
+                "players use to talk about the game. Routine deliveries "
+                "are never posted. Link a "
                 "Mastodon account first with the Mastodon account item.",
             ),
             MenuItem(
