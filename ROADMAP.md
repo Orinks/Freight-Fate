@@ -163,13 +163,50 @@ onto exit signalling.
       money bug, but it is why the retarder barks through bends an
       experienced driver reads as a ticket waiting to happen. Widening
       the radius is an owner call.
-- [ ] **Fines rebalanced against real trucking penalties.** Researched
-      schedule agreed 2026-08-11: unsafe equipment to 2,300, weigh
-      station bypass to 1,800, chain law to 580 (1,150 when it blocks the
-      road), following too close to 600, lane misuse to 500, shoulder to
-      400, lights to 350, failure to stop to 1,500. Plus a 2x multiplier
-      inside an active work zone and repeat-offender escalation extended
-      from speeding to every fine, compounding rather than adding.
+- [x] **Fines rebalanced against real trucking penalties -- SHIPPED
+      2026-08-11** on `feat/fines-rebalance`, merged after the driver-assist
+      fixes so the penalties land on player error. Unsafe equipment to 2,300,
+      weigh station bypass to 1,800, chain law to 580, following too
+      close to 600, lane misuse to 500, shoulder to 400, lights to 350,
+      failure to stop to 1,500. A 2x multiplier inside a construction
+      zone (taper included) and repeat-offender escalation extended from
+      speeding to every fine, compounding rather than adding. All amounts
+      and both multipliers now live in `models/enforcement.py` behind one
+      `citation_fine` helper; `CHAIN_LAW_FINE` had two live definitions
+      on different paths, one shadowing the other, now collapsed.
+- [ ] **Detention, lumper fees, washouts and tolls are spoken but never
+      paid.** `carrier_charges` (`driving_menu_states.py:975`) computes
+      them and feeds two spoken strings; nothing moves money. The game
+      tells an owner-operator "you are owed 90 dollars in detention" and
+      then does not pay it, and bills them for nothing. Wrong in both
+      directions, and the owner-operator start is the mode that feels it.
+      Found by the 2026-08-11 realism audit; full report in
+      `docs/realism-audit-2026-08.md`.
+- [ ] **Nothing ever weighs the truck.** Loads routinely gross to about
+      87,000 lb against the 80,000 lb federal limit, and "overweight"
+      appears nowhere in `src/`. Meanwhile every open scale costs a
+      mandatory 15 minutes of duty-window time with no bypass concept,
+      where a clean real carrier is waved through 85-90 percent of the
+      time. So the game charges for scales but never enforces the thing
+      scales exist for -- punishing and unrealistic in the same feature.
+- [ ] **Relaxed hours-of-service mode misreports the law.** It multiplies
+      the legal limits by 1.25 and then speaks 13.75 hours as "the
+      11-hour driving limit". Whatever the mode does to the numbers, the
+      spoken text must not name a real regulation it is not enforcing.
+- [ ] **Two roadmap claims are already false.** Split sleeper berth (8/2
+      and 7/3) is fully implemented despite lines further down this file
+      saying twice that it is not. Also worth knowing: the 30-minute
+      break rule is implemented to the current 2020 regulation, and at
+      least one practitioner source still describes the pre-2020 version
+      -- following that source would break working code.
+- [x] **The barrel citation is no longer doubled for the zone -- SHIPPED
+      2026-08-11.** It was the one citation that can only happen inside a
+      construction zone, so the multiplier always applied and it was
+      always charged 2,000. Its base is Missouri RSMo 304.585, already
+      the work-zone-specific penalty, which caps a first offense at
+      1,000 -- doubling charged twice for the same aggravating fact. The
+      zone multiplier now applies only to offenses whose base is not
+      already zone-specific. Priors still escalate it.
 - [ ] **Spoken "work zone" contradicts the ontology.** `sim/trip.py`
       lines 2229 and 2234 speak "Work zone active" where
       `docs/ontology.md` makes "construction zone" canonical. Pre-existing

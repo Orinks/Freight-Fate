@@ -4,9 +4,15 @@ from __future__ import annotations
 from .. import engine_audio
 from ..audio import CH_AIR, CH_BRAKE, CH_EDGE, CH_JAKE, CH_RADIO_FX, CH_ROAD
 from ..audio_fades import curve as _resolve_curve
+from ..models.enforcement import (
+    CHAIN_LAW_FINE,
+    FAILURE_TO_STOP_CITATION_FINE,
+    UNSAFE_DAMAGE_FINE,
+    WEIGH_STATION_BYPASS_FINE,
+    WORK_ZONE_BARRELS_FINE,
+)
 from ..radio import truck_elevation_ft
 from .driving_core import *
-from .driving_enforcement import WORK_ZONE_BARRELS_FINE
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
 from .driving_rest_states import (
     EnforcementStopState,
@@ -1042,7 +1048,15 @@ class DrivingUpdateMixin:
         p = self.ctx.profile
         if p is None:
             return
-        fine = WORK_ZONE_BARRELS_FINE
+        # NOT doubled for the construction zone, unlike every other citation.
+        # The zone multiplier exists because states double an ordinary moving
+        # violation committed in roadwork. This offense only exists inside
+        # roadwork, and its base is Missouri RSMo 304.585, which is already the
+        # work-zone-specific penalty and caps a first offense at 1,000. Passing
+        # construction_zone=True here would charge twice for the same
+        # aggravating fact and put every first offense at double the statutory
+        # maximum. Priors still escalate it.
+        fine = citation_fine(WORK_ZONE_BARRELS_FINE, career_citations(p))
         p.money -= fine
         self.ticket_fines_paid += fine
         post = self.trip.active_post_at(self.trip.position_mi)
@@ -1054,6 +1068,8 @@ class DrivingUpdateMixin:
         ladder = _log_enforcement(self.ctx, self, fine=fine, serious=True)
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(
+            # No doubled-for-the-zone clause: this citation is not doubled,
+            # because its amount is already the roadwork penalty.
             f"{saw_it}. Driving through the barrels is a citation: "
             f"{fine:,.0f} dollars, and it goes on your safety record. "
             f"You have {p.money:,.0f} dollars." + (f" {ladder}" if ladder else ""),
@@ -2427,6 +2443,10 @@ class DrivingUpdateMixin:
         self._pull_over_fine = 0.0
         self._pull_over_reputation_hit = 0.0
         self._pull_over_return = "Back on the highway. Watch your speed."
+        # Where the violation happened, not where the truck finally stops: a
+        # driver clocked in the cones does not get out of the doubled fine by
+        # coasting past the last barrel before pulling over.
+        self._pull_over_construction_zone = self.trip.in_construction_zone
         self._pull_over_warning_level = 0
         self._reset_pull_over_tracker()
         self._pull_over_compliance = PULL_OVER_START_COMPLIANCE
@@ -2641,6 +2661,9 @@ class DrivingUpdateMixin:
         self._pull_over_fine = fine
         self._pull_over_reputation_hit = reputation_hit
         self._pull_over_return = return_message
+        # Captured with the observation, for the same reason as the speeding
+        # stop: the zone that matters is the one the violation happened in.
+        self._pull_over_construction_zone = self.trip.in_construction_zone
         self._pull_over_warning_level = 0
         self._reset_pull_over_tracker()
         self._pull_over_compliance = PULL_OVER_START_COMPLIANCE
@@ -2742,12 +2765,15 @@ class DrivingUpdateMixin:
         if roll >= CHAIN_LAW_CHECKPOINT_CHANCE:
             return
         p = self.ctx.profile
-        p.money -= CHAIN_LAW_FINE
-        self.ticket_fines_paid += CHAIN_LAW_FINE
+        zone = self.trip.in_construction_zone
+        fine = citation_fine(CHAIN_LAW_FINE, career_citations(p), construction_zone=zone)
+        p.money -= fine
+        self.ticket_fines_paid += fine
         self.ctx.audio.play("ui/error")
         self.ctx.say_event(
             "Chain checkpoint. An officer waves you onto the scale apron and "
-            f"writes a chain-law citation: {CHAIN_LAW_FINE:,.0f} dollars. "
+            f"writes a chain-law citation: {fine:,.0f} dollars."
+            f"{construction_zone_fine_clause(zone)} "
             f"You have {p.money:,.0f} dollars."
         )
 
@@ -2877,6 +2903,7 @@ class DrivingUpdateMixin:
         fine = self._pull_over_fine
         reputation_hit = self._pull_over_reputation_hit
         return_message = self._pull_over_return
+        construction_zone = self._pull_over_construction_zone
         # Read the tracker before the reset zeroes it.
         clean_stop = self._pull_over_compliance >= PULL_OVER_FULL_COMPLIANCE
         self.trip.pull_over_active = False
@@ -2900,6 +2927,7 @@ class DrivingUpdateMixin:
                     return_message=return_message,
                     out_of_service=(kind == "hos_out_of_service"),
                     warned=warned,
+                    construction_zone=construction_zone,
                 )
             )
             self._commit_resolved_stop()
@@ -2913,6 +2941,7 @@ class DrivingUpdateMixin:
                 limit=limit,
                 clean_stop=clean_stop,
                 warned=warned,
+                construction_zone=construction_zone,
             )
         )
         self._commit_resolved_stop()
@@ -3015,6 +3044,7 @@ class DrivingUpdateMixin:
                 signaled=signaled,
                 return_message="Back on the highway. Pull over promptly next time.",
                 warned=True,
+                construction_zone=self._pull_over_construction_zone,
             )
         )
         self._commit_resolved_stop()

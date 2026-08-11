@@ -155,12 +155,29 @@
   and settlement fees all come out of your own cash, and your working
   capital is thin -- but the truck under you is yours and it is new.
 
-- **Driving through the barrels in a work zone now costs you.** Riding a
-  closed lane until you plough through the cones used to cost only truck
-  damage. It is now a 1,000 dollar fine and a serious mark on your safety
-  record, the way running a work zone really is. You are charged once for
-  a given work zone no matter how many barrels you take out, and you are
-  never charged when the road left you no open lane to move into.
+- **Driving through the barrels in a construction zone now costs you.**
+  Riding a closed lane until you plough through the cones used to cost
+  only truck damage. It is now a fine and a serious mark on your safety
+  record, the way running a construction zone really is. You are charged
+  once for a given zone no matter how many barrels you take out, and you
+  are never charged when the road left you no open lane to move into.
+
+- **Fines across the board now match what they cost a real trucker.**
+  Nearly every penalty in the game was a fraction of the real thing.
+  Driving with unsafe equipment goes from 900 dollars to 2,300, running
+  an open scale from 750 to 1,800, following too close from 250 to 600,
+  and improper lane use from 175 to 500. Chain law, lights, shoulder
+  parking and failure to stop all rise too. Speeding was already set
+  against real schedules and has not changed.
+
+- **Two things now make a fine bigger.** Any fine you earn inside a
+  construction zone is doubled, the way most states really do double
+  them, and the taper counts as inside because that is where the signs
+  stand. Every prior citation in your career also raises the next one,
+  which used to apply only to speeding. The two stack on top of each
+  other, so a second run past an open scale in roadwork is 5,400 dollars.
+  When a fine has been doubled, you are told why, and every spoken fine
+  now says the amount actually taken from you rather than the base.
 
 - **New careers now really do start on the Realistic preset.** The
   settings row has said Realistic for a long time, but lane keeping sat

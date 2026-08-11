@@ -21,6 +21,10 @@ Sources for every number here:
 * 49 CFR 386 Appendix B. Violating an out-of-service order carries a civil
   penalty of not less than 3,961 dollars for a first conviction and not less
   than 7,924 dollars for a second.
+* Work zone penalty doubling. Nevada, Texas and Pennsylvania are among the
+  states that double the fine for a violation committed inside a marked work
+  zone, whatever the violation was. Every citation here doubles the same way
+  inside a construction zone, and the driver is told that is why.
 * FMCSA CSA Unsafe Driving BASIC. Every roadside citation is weighted and
   follows the *carrier*, which is why a company driver's citations cost the
   carrier's standing and eventually the job, while an owner-operator simply
@@ -68,15 +72,99 @@ SPEEDING_FINE_STEPS: tuple[tuple[float, float], ...] = (
     (20.0, 1_600.0),
     (30.0, 2_500.0),
 )
-# Prior citations anywhere in the career make the next one cost more, and
-# nothing caps it. The step schedule above is the severe end of real
-# first-offense CDL law, but a first offense is the cheapest a violation ever
-# is: repeat and aggravated speeding is charged as a misdemeanor in several
-# states, habitual-offender statutes stack penalties further, and court costs
-# and surcharges ride on top of every count. A driver who keeps collecting
-# citations keeps paying more, without limit -- which is the honest shape of
-# the real thing and the point of the schedule.
+# Prior citations anywhere in the career make the next one cost more. The step
+# schedule above is the severe end of real first-offense CDL law, but a first
+# offense is the cheapest a violation ever is: repeat and aggravated speeding
+# is charged as a misdemeanor in several states, habitual-offender statutes
+# stack penalties further, and court costs and surcharges ride on top of every
+# count.
+#
+# The same step now scales every flat fine below, not just speeding. There is
+# deliberately one knob: a second repeat ladder would be a second thing to
+# tune, a second thing to explain, and a second thing to drift.
 CITATION_REPEAT_STEP = 0.5
+
+# ...but the step is capped, which it was not when it applied to speeding
+# alone. Two reasons, and the second is the binding one.
+#
+# Real repeat offenders are charged "double, even triple" a standard fine, so
+# the shape is right but the runaway is not. Uncapped, a career driver's scale
+# bypass reached 19,800 dollars by twenty priors, and 39,600 inside roadwork,
+# against a federal ceiling of 10,000 for the real offense.
+#
+# The binding constraint is solvency, not statute. An owner-operator who owes
+# more than ``solvency.REPOSSESSION_FLOOR`` (12,000) loses the tractor. A
+# single citation must never be able to reach that on its own, or one traffic
+# stop repossesses a truck -- which no player would read as a rule, only as
+# the game breaking. Capping the step at 2.0 leaves the construction-zone
+# doubling to ride on top for a worst case of 4x base: unsafe equipment tops
+# out at 9,200 and the very worst case in the game, 30-plus over in a work
+# zone as a repeat offender, at 10,000. Punishing, survivable, and clear of
+# the floor.
+#
+# Deliberately capping the STEP and not the total: the zone doubling stays
+# whole so the spoken "it is doubled because you were in a construction zone"
+# is always true. A total cap would silently swallow it for repeat offenders
+# and make that line a lie.
+#
+# The money therefore stops climbing after the third citation -- 1,800 then
+# 2,700 then 3,600 for a bypass -- and that is the intended shape rather than
+# a gap. Past that the deterrent is the record, not the wallet: the serious
+# violation ladder and the suspension tiers above keep escalating for the
+# whole career, and losing the licence costs far more than any fine.
+CITATION_REPEAT_MAX_MULTIPLIER = 2.0
+# A fine earned inside an active construction zone is doubled. That is the
+# real rule, not a game rule -- Nevada, Texas and Pennsylvania all double the
+# penalty for a violation committed inside a marked work zone, and the sign at
+# the taper that says so is a sign real drivers read. It multiplies the
+# repeat-offender figure rather than adding to it, because a state that does
+# both doubles whatever the driver already owed.
+CONSTRUCTION_ZONE_FINE_MULTIPLIER = 2.0
+
+# -- what each citation costs before those multipliers ----------------------
+#
+# Every fine amount in the game lives here, beside the schedule and the
+# multipliers that scale it. They used to be scattered through the driving
+# layer, where the chain-law citation had drifted into two separate constants
+# that each claimed to be the Colorado number.
+
+# FMCSA driver-level penalty for operating a commercial vehicle with unsafe
+# conditions: 2,304 dollars.
+UNSAFE_DAMAGE_FINE = 2300.0
+# Running an open scale. State fines run from 250 dollars into four figures,
+# and California and New York both pass 1,000 on a first offense; the federal
+# exposure standing behind them reaches 10,000.
+WEIGH_STATION_BYPASS_FINE = 1800.0
+# Colorado's chain-law citation: 500 dollars plus a 79-dollar surcharge.
+CHAIN_LAW_FINE = 580.0
+# Following too closely is a serious traffic violation under 49 CFR 383.51
+# Table 2 -- two inside three years disqualify the CDL for 60 days -- so it is
+# priced as one, not as the fender-bender it looks like from the cab.
+FOLLOWING_TOO_CLOSE_FINE = 600.0
+# Improper lane use is a serious traffic violation on the same table. Virginia
+# charges 250 dollars for it, or 500 in a designated highway safety corridor;
+# this takes the corridor figure.
+LANE_MISUSE_FINE = 500.0
+# Running dark after sunset: an equipment violation everywhere, written as a
+# fix-it-plus-fine in most states.
+LIGHTS_FINE = 350.0
+# Driving through the barrels instead of merging out of a coned-off lane.
+# Missouri RSMo 304.585 (endangerment of a highway worker) lists striking or
+# moving barrels, barriers and signs as an offense in its own right -- the one
+# category in that statute that does not need workers to be present -- at up
+# to 1,000 dollars. This takes the top of that range: it sits above the
+# equipment fines because what it risks is the crew, not the truck.
+WORK_ZONE_BARRELS_FINE = 1000.0
+# Failing to pull over promptly -- and then stopping -- is not fleeing. It is
+# charged as failing to obey a lawful order, which rides in with reckless
+# driving as a serious traffic violation under 49 CFR 383.51 Table 2, above
+# the ordinary commercial citation range.
+FAILURE_TO_STOP_CITATION_FINE = 1500.0
+# Fleeing and eluding a police officer in a commercial vehicle is a felony in
+# most states -- a third-degree felony in Florida, for one, carrying a fine of
+# up to 5,000 dollars. This takes that top of range, and the conviction is a
+# major offense under 49 CFR 383.51 Table 1 on top of the money.
+FAILURE_TO_STOP_FINE = 5000.0
 
 # -- fatigue (49 CFR 392.3 / 392.5) -----------------------------------------
 
@@ -119,31 +207,82 @@ LAST_CHANCE_CARRIER_KEY = "great_lakes_training"
 LAST_CHANCE_CARRIER_NAME = "Great Lakes Training Transport"
 
 
-def speeding_citation_fine(mph_over: float, prior_citations: int = 0) -> float:
-    """What a speeding citation costs, by how far over and how many priors."""
+def citation_fine(
+    base_fine: float,
+    prior_citations: int = 0,
+    *,
+    construction_zone: bool = False,
+    ceiling: float | None = None,
+) -> float:
+    """What a citation actually costs: the base, the priors, and where it happened.
+
+    The one place a fine is priced. Every charge in the game comes through
+    here so that neither multiplier can be applied twice, skipped, or applied
+    in a different order somewhere else.
+
+    They compound rather than add. The repeat-offender step decides what this
+    driver owes for this violation; the construction zone then doubles that
+    whole figure, which is what a state that does both actually does to a
+    repeat offender. A second bypass inside roadwork is 1,800 x 1.5 x 2.
+
+    The repeat step is capped at ``CITATION_REPEAT_MAX_MULTIPLIER``. Repeat
+    offenders really are charged "double, even triple" a standard fine, and
+    that is the shape this models -- but the step alone is unbounded, and
+    left to run it priced a career driver's scale bypass at 19,800 dollars
+    by twenty priors and 39,600 inside roadwork, against a federal ceiling
+    of 10,000 for the real offense. An owner-operator starts with 18,000, so
+    a single stop could exceed a whole career's capital. Past a point the
+    arithmetic stops reading as severity and starts reading as a bug.
+
+    The construction-zone doubling is applied AFTER the cap, not folded into
+    it: the cap governs how much being a repeat offender can cost you, and
+    where the violation happened is a separate fact about this one citation.
+
+    ``ceiling`` is optional and names a statutory maximum for a specific
+    citation; it is the last word, applied after everything else.
+    """
+    step = 1.0 + CITATION_REPEAT_STEP * max(0, int(prior_citations))
+    multiplier = min(step, CITATION_REPEAT_MAX_MULTIPLIER)
+    if construction_zone:
+        multiplier *= CONSTRUCTION_ZONE_FINE_MULTIPLIER
+    fine = float(base_fine) * multiplier
+    return round(fine if ceiling is None else min(ceiling, fine), 2)
+
+
+def speeding_citation_fine(
+    mph_over: float, prior_citations: int = 0, *, construction_zone: bool = False
+) -> float:
+    """What a speeding citation costs, by how far over, how many priors, and where."""
     fine = SPEEDING_FINE_STEPS[0][1]
     for threshold, amount in SPEEDING_FINE_STEPS:
         if mph_over >= threshold:
             fine = amount
-    multiplier = 1.0 + CITATION_REPEAT_STEP * max(0, int(prior_citations))
-    return round(fine * multiplier, 2)
+    return citation_fine(fine, prior_citations, construction_zone=construction_zone)
+
+
+def career_citations(profile) -> int:
+    """How many citations this career already carries, for the repeat scaling.
+
+    Tolerates a profile with no record at all: a career that predates the
+    licence file is a first offender, not a crash.
+    """
+    record = getattr(profile, "driving_record", None)
+    return int(getattr(record, "citations", 0) or 0)
+
+
+def construction_zone_fine_clause(construction_zone: bool) -> str:
+    """Why the figure is twice what it would be anywhere else.
+
+    Spoken after the amount, never instead of it. A driver who hears a doubled
+    number with no explanation hears a bug. Empty when nothing was doubled, so
+    every caller can append it unconditionally.
+    """
+    return " It is doubled because you were in a construction zone." if construction_zone else ""
 
 
 def is_serious_speed(mph_over: float) -> bool:
     """Whether this overage is an FMCSA serious traffic violation."""
     return float(mph_over) >= SERIOUS_SPEED_MPH_OVER
-
-
-def repeat_fine(base_fine: float, prior_citations: int, ceiling: float | None = None) -> float:
-    """The same repeat-offender scaling for non-speeding citations.
-
-    ``ceiling`` is optional and exists only for a citation whose statute
-    genuinely names a maximum; left None, the fine compounds with priors
-    without limit, like the speeding schedule.
-    """
-    multiplier = 1.0 + CITATION_REPEAT_STEP * max(0, int(prior_citations))
-    fine = base_fine * multiplier
-    return round(fine if ceiling is None else min(ceiling, fine), 2)
 
 
 @dataclass

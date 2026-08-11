@@ -1744,6 +1744,23 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         """The reduced-limit zone the truck is currently inside, if any."""
         return self._active_zone_at(self.position_mi)
 
+    @property
+    def in_construction_zone(self) -> bool:
+        """Inside the signed footprint of roadwork -- taper included.
+
+        Not ``active_zone.reason``: that returns the slowest zone at this
+        mile, so a jam laid over the roadwork would hide it. Enforcement asks
+        whether any construction zone covers the truck, and the merge taper
+        counts as one -- it is the same closure, the same crew, and it is
+        where the barrels are.
+        """
+        return any(
+            z.reason in CONSTRUCTION_ZONE_REASONS
+            and z.start_mi <= self.position_mi <= z.end_mi
+            and self._zone_is_active(z)
+            for z in self.zones
+        )
+
     def ramp_control_at(self, route_mile: float, tol_mi: float = 2.0) -> str:
         """Baked OSM ramp-terminal control at the interchange nearest a route
         mile: ``signal``/``stop``/``none``, or ``""`` when no interchange

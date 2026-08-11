@@ -256,6 +256,8 @@ class DrivingState(
         self._pull_over_fine = 0.0
         self._pull_over_reputation_hit = 0.0
         self._pull_over_return = "Back on the highway. Watch your speed."
+        # Whether the violation happened inside roadwork, which doubles the fine.
+        self._pull_over_construction_zone = False
         self._pull_over_warning_level = 0
         self.failure_to_stop_count = 0
         # Real seconds owed to the player before the stop is judged at all:
@@ -547,6 +549,7 @@ class DrivingState(
         "_pull_over_fine",
         "_pull_over_reputation_hit",
         "_pull_over_return",
+        "_pull_over_construction_zone",
         "_pull_over_warning_level",
         "_pull_over_compliance",
         "_pull_over_elapsed",

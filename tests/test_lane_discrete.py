@@ -343,7 +343,7 @@ def _run_into_the_barrels(d, zone) -> None:
 
 def test_plowing_the_barrels_costs_a_fine_and_a_serious_violation(monkeypatch):
     from freight_fate.app import App
-    from freight_fate.states.driving_enforcement import WORK_ZONE_BARRELS_FINE
+    from freight_fate.models.enforcement import WORK_ZONE_BARRELS_FINE, citation_fine
 
     app = App()
     try:
@@ -357,9 +357,58 @@ def test_plowing_the_barrels_costs_a_fine_and_a_serious_violation(monkeypatch):
 
         _run_into_the_barrels(d, Zone(5.0, 9.0, 45.0, "construction", closed_lane=1))
 
-        assert p.money == pytest.approx(before_money - WORK_ZONE_BARRELS_FINE)
-        assert d.ticket_fines_paid == pytest.approx(WORK_ZONE_BARRELS_FINE)
+        # NOT doubled for the zone: the base is already the roadwork penalty
+        # (RSMo 304.585), so doubling would charge twice for the same fact.
+        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 0)
+        assert expected == pytest.approx(WORK_ZONE_BARRELS_FINE)
+        assert p.money == pytest.approx(before_money - expected)
+        assert d.ticket_fines_paid == pytest.approx(expected)
         assert len(record.serious_violations) == before_serious + 1
+    finally:
+        app.shutdown()
+
+
+def test_the_barrel_citation_says_the_charged_figure_and_why(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.enforcement import WORK_ZONE_BARRELS_FINE, citation_fine
+
+    app = App()
+    spoken: list[str] = []
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+        _rolling(d, 55.0)
+        _run_into_the_barrels(d, Zone(5.0, 9.0, 45.0, "construction", closed_lane=1))
+
+        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 0)
+        cited = [s for s in spoken if "through the barrels is a citation" in s]
+        assert cited
+        assert f"{expected:,.0f} dollars" in cited[0]
+        # It must NOT claim a doubling it did not apply.
+        assert "doubled" not in cited[0]
+    finally:
+        app.shutdown()
+
+
+def test_the_barrel_citation_escalates_for_a_repeat_offender(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models.enforcement import WORK_ZONE_BARRELS_FINE, citation_fine
+
+    app = App()
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        _rolling(d, 55.0)
+        p = app.ctx.profile
+        p.driving_record.citations = 2
+        before_money = p.money
+
+        _run_into_the_barrels(d, Zone(5.0, 9.0, 45.0, "construction", closed_lane=1))
+
+        # Priors still escalate it, up to the repeat cap; the zone does not.
+        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 2)
+        assert expected == pytest.approx(WORK_ZONE_BARRELS_FINE * 2.0)
+        assert p.money == pytest.approx(before_money - expected)
     finally:
         app.shutdown()
 
@@ -368,7 +417,7 @@ def test_the_barrel_fine_is_charged_once_per_work_zone(monkeypatch):
     """Two strikes in one closure is one refusal to merge, so one citation --
     the tester's log caught the barrels twice in eight seconds."""
     from freight_fate.app import App
-    from freight_fate.states.driving_enforcement import WORK_ZONE_BARRELS_FINE
+    from freight_fate.models.enforcement import WORK_ZONE_BARRELS_FINE, citation_fine
 
     app = App()
     try:
@@ -384,7 +433,8 @@ def test_the_barrel_fine_is_charged_once_per_work_zone(monkeypatch):
         d.trip.zones.remove(zone)
         _run_into_the_barrels(d, zone)
 
-        assert p.money == pytest.approx(before_money - WORK_ZONE_BARRELS_FINE)
+        expected = citation_fine(WORK_ZONE_BARRELS_FINE, 0)
+        assert p.money == pytest.approx(before_money - expected)
         assert d.truck.damage_pct > damage_after_one  # the truck still pays
     finally:
         app.shutdown()

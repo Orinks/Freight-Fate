@@ -7,6 +7,7 @@ import pygame
 import pytest
 from speech_capture import speech_stub
 
+from freight_fate.models import enforcement
 from freight_fate.sim import hos
 from freight_fate.sim.hos import (
     LIMITS,
@@ -1397,7 +1398,12 @@ def test_full_parking_offers_drive_on_and_shoulder(monkeypatch):
         assert driving.trip.game_minutes == minutes_before + 600.0
         assert driving.hos.driving_min == 0.0
         assert app.ctx.profile.fatigue == 30.0
-        assert app.ctx.profile.money == money_before - hos.SHOULDER_FINE
+        # A clean career parked clear of roadwork pays the base amount; the
+        # helper is asked so a rebalance moves one number, not this test.
+        expected_fine = enforcement.citation_fine(
+            hos.SHOULDER_FINE, 0, construction_zone=driving.trip.in_construction_zone
+        )
+        assert app.ctx.profile.money == money_before - expected_fine
         assert driving.truck.damage_pct == pytest.approx(damage_before + hos.SHOULDER_DAMAGE_PCT)
         assert app.ctx.profile.active_trip is not None
         wake_text = next(text for text in spoken if "sleep poorly on the shoulder" in text)

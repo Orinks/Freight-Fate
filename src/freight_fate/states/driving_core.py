@@ -31,6 +31,11 @@ from ..models.economy import (
     pay_advance_grant,
     pay_advance_unavailable_reason,
 )
+from ..models.enforcement import (
+    career_citations,
+    citation_fine,
+    construction_zone_fine_clause,
+)
 from ..models.jobs import (
     Job,
     fair_active_deadline,
@@ -156,8 +161,7 @@ CHAIN_INSTALL_NIGHT_FATIGUE = 10.0
 CHAIN_REMOVE_FATIGUE = 2.0
 # Rolling into an active chain law out of compliance: the checkpoint at the
 # bottom of the grade is staffed often enough that gambling is a bad trade.
-# The fine tracks Colorado's minimum chain-law citation.
-CHAIN_LAW_FINE = 500.0
+# What the citation costs is priced in models/enforcement with every other fine.
 CHAIN_LAW_CHECKPOINT_CHANCE = 0.6
 # Road wear service at branded travel centers -- the brand IS the capability
 # (amenities.classify_brand): Love's and Speedco run dedicated tire bays at
@@ -646,11 +650,11 @@ OVERSPEED_RESET_MPH = 1.0  # back within this of the limit disarms it
 OVERSPEED_CHIME_REPEAT_S = 5.0  # cadence just past the warn threshold
 OVERSPEED_CHIME_FAST_S = 0.5  # cadence at OVERSPEED_URGENT_MPH over and beyond
 OVERSPEED_URGENT_MPH = 20.0
-# Speeding tickets are priced by how far over the limit you were and how many
-# citations the career already carries -- see
-# models/enforcement.speeding_citation_fine, which is anchored to the real
-# state fine schedules. Paid on the spot when a trooper pulls you over, and
-# that is the ONLY way speeding costs anything.
+# Speeding tickets are priced by how far over the limit you were, how many
+# citations the career already carries, and whether it happened in a
+# construction zone -- see models/enforcement.speeding_citation_fine, which is
+# anchored to the real state fine schedules. Paid on the spot when a trooper
+# pulls you over, and that is the ONLY way speeding costs anything.
 #
 # There used to be a second, invisible charge: hold nine over for six seconds
 # with no patrol anywhere and the drive banked a "speeding strike", billed at
@@ -670,26 +674,14 @@ PULL_OVER_FIRST_WARNING_S = 8.0
 PULL_OVER_FINAL_WARNING_S = 16.0
 # After the final warning, this long before troopers force the stop.
 PULL_OVER_FORCED_STOP_S = 10.0
-# Failing to pull over promptly -- and then stopping -- is not fleeing. It is
-# charged as failing to obey a lawful order, which rides in with reckless
-# driving as a serious traffic violation under 49 CFR 383.51 Table 2, at the
-# top of the ordinary commercial citation range.
-FAILURE_TO_STOP_CITATION_FINE = 1000.0
 # Running is a felony, so it takes a deliberate held input and never happens
 # by hesitating. Doubled when the next one would be a lifetime disqualification.
 PURSUIT_HOLD_S = 3.0
-# Fleeing and eluding a police officer in a commercial vehicle is a felony in
-# most states -- a third-degree felony in Florida, for one, carrying a fine of
-# up to 5,000 dollars. This takes that top of range, and the conviction is a
-# major offense under 49 CFR 383.51 Table 1 on top of the money.
-FAILURE_TO_STOP_FINE = 5000.0
 FAILURE_TO_STOP_DAMAGE_PCT = 12.0
 FAILURE_TO_STOP_PROCESSING_MIN = 180.0
 WEIGH_STATION_NOTICE_MI = 2.0
 WEIGH_STATION_BYPASS_MPH = 15.0
-WEIGH_STATION_BYPASS_FINE = 750.0
 UNSAFE_DAMAGE_STOP_PCT = 65.0
-UNSAFE_DAMAGE_FINE = 900.0
 AMBIENT_EVENT_SPACING_S = 2.5  # keep low-priority chatter from stacking
 # Once the lights come on, a compliance tracker (0..1) judges whether you are
 # actually pulling over -- signaling and slowing -- rather than how far you
@@ -924,11 +916,14 @@ def _perform_shoulder_sleep(driving: DrivingState, anchor_mi: float) -> str:
         f"{_wake_air_instruction(driving, from_rest_menu=False)}"
     ]
     if hos.shoulder_fine_due(driving.trip_seed, anchor_mi):
-        p.money -= hos.SHOULDER_FINE
+        zone = driving.trip.in_construction_zone
+        fine = citation_fine(hos.SHOULDER_FINE, career_citations(p), construction_zone=zone)
+        p.money -= fine
         driving.ctx.audio.play("ui/error")
         parts.append(
             f"A trooper ticketed you for illegal parking: "
-            f"{hos.SHOULDER_FINE:,.0f} dollars. "
+            f"{fine:,.0f} dollars."
+            f"{construction_zone_fine_clause(zone)} "
             f"You have {p.money:,.0f} dollars."
         )
     if hos.shoulder_damage_due(driving.trip_seed, anchor_mi):
