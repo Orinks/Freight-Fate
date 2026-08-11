@@ -212,9 +212,11 @@ it" on the keyboard becomes "press D-pad down to take it" on a controller.
 | E | Start / stop engine |
 | P | Release / set parking brake |
 | Left Shift (hold) | Clutch (manual mode) |
-| 1–0 | Gears 1–10 (manual mode) |
+| W | Shift up a gear (manual mode) |
+| Q | Shift down a gear (manual mode) |
 | N | Neutral (manual mode) |
 | J | Engine brake toggle |
+| 1, 2, 3 | Engine brake stage (low, medium, high) |
 | H | Horn |
 | X | Arm / cancel the next actionable exit |
 | T | Open a route stop, or emergency shoulder sleep away from stops, when fully stopped. |

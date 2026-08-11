@@ -115,9 +115,11 @@ signature, a restored profile must pass the game's own sanity rules, and
 a file that fails is refused with a plainly spoken reason. Also shipping
 on the nightly line. Chapter 12.
 
-**Old saves keep working.** Careers back through the version-4 schema
-load with sensible defaults; your current wear settles onto every truck
-you own the first time a pre-alpha save loads. Chapter 12.
+**Careers from before 1.9 do not carry over.** 1.9 rebalances pay,
+trucks and levels, so every driver starts fresh. Your old save is left
+untouched on this computer and still works in 1.8, and the game explains
+this when you try to continue one. This is intended, not a bug —
+Chapter 12 covers what is worth reporting about it.
 
 ## Chapter 2. Wear meters and the truck they belong to
 
@@ -666,18 +668,28 @@ just say?".
 
 ## Chapter 12. Saves, restores, and the integrity gate
 
-### 12.1 Old careers migrate honestly
+### 12.1 Old careers are turned away kindly
 
-Setup: a save from the nightly line (version-4 schema or later).
+1.9 does not continue careers made before it. This is deliberate: 1.9
+rebalances pay, trucks and levels, so an old high-level driver would
+arrive on a scale that no longer exists. Your old save is not touched
+and still works in 1.8. **Do not file the refusal as a bug** — what is
+worth reporting is a refusal that is confusing, silent, or that loses
+anything.
 
-Do: load it in the alpha; check the truck status readout and the garage.
+Setup: a career made in 1.8 or on the nightly line, in place before you
+start the alpha.
 
-Listen for: the career loading with sensible defaults for everything
-new, and your old wear settled onto every truck you own — no pristine
-spare appearing from nowhere.
+Do: open the career list and try to continue it.
 
-Pass when: nothing was lost, nothing was invented, and the profile
-plays.
+Listen for: the driver being named, a plain explanation that 1.9
+rebalances the whole career so everyone starts fresh, a clear statement
+that the old save is still on this computer and still works in 1.8, and
+an offer to start a new career.
+
+Pass when: you understood why without needing to ask, nothing suggested
+the save was deleted or damaged, and you could get to a new career from
+where the message left you.
 
 ### 12.2 Cloud restores still restore
 

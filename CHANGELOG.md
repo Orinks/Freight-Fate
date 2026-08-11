@@ -316,9 +316,10 @@
   stop is a felony that disqualifies you for a year, and a second one
   ends that driver's commercial career for good -- so running is now
   something you have to deliberately choose, with the cost read to you
-  before you commit. There is no ceiling on what a habitual offender
-  pays: every citation already on your record makes the next one dearer,
-  for as long as you keep collecting them. Your standing is always available to ask for, and
+  before you commit. Every citation already on your record makes the
+  next one dearer, up to a limit: the money stops climbing after the
+  third, and from there it is your record that keeps getting worse, not
+  your wallet. Your standing is always available to ask for, and
   the game warns you before the next violation is the one that lands.
   A driver who keeps it clean sees none of this.
 
