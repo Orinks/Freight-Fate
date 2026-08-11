@@ -398,23 +398,30 @@ onto exit signalling.
       need a build carrying the new public key before cloud restores
       verify. Staging data does not survive this kind of loss, so treat
       it as throwaway.
-- [ ] **Staging is back on a five-day clock; move it somewhere permanent.**
-      The fix is a production deployment in its own Convex project, which
-      never expires. First attempt (orinks-net-staging /
-      industrious-parrot-713) could not be pushed to: three attempts, each
-      hanging 300s before a 408 on evaluate_push. A second project
-      (orinks-net-staging2 / scrupulous-ferret-428) is provisioned and
-      untested. Budget a throwaway build when trying it -- see the
-      first-push note below. Current deployment expires around
-      2026-08-16.
-- [ ] **Known trap: the first push to a brand-new Convex deployment
-      fails.** Observed 2026-08-11 on charming-terrier-46: push one died
-      with `InvalidModules: Cannot read properties of undefined (reading
-      'error')`, pushes two and three succeeded in about a second with
-      identical code. Do not read a first-push failure as a broken
-      commit. Whether the same holds for production deployments is
-      unknown -- industrious-parrot-713 failed three times, which does
-      not fit the pattern.
+- [x] **Staging now runs on a deployment that cannot expire
+      (2026-08-11).** dev.orinks.net is served by
+      scrupulous-ferret-428, the production deployment of its own Convex
+      project (orinks-net-staging2). Production deployments have no
+      lifetime, so the five-day preview clock no longer applies to
+      staging. The dev branch reaches it through a Vercel
+      CONVEX_DEPLOY_KEY scoped to Preview (dev), plus CONVEX_DEPLOY_FLAGS
+      carrying `--check-build-environment disable` -- Convex otherwise
+      refuses a production key from a preview build. Both are
+      branch-scoped, so every other branch still gets throwaway previews.
+- [ ] **Dead Convex deployment left behind: industrious-parrot-713**
+      (project orinks-net-staging), the first attempt. It never accepted
+      a push -- three tries, each hanging 300s before a 408 on
+      evaluate_push -- while an identically configured deployment
+      created minutes later took its first push in 21 seconds. Reported
+      to Convex on Discord 2026-08-11. Delete it once they answer, but
+      copy the signing key out first: `convex env get` still works on
+      it, and it is one of the few places that private half exists.
+- [ ] **A first push can fail spuriously.** charming-terrier-46 rejected
+      its first push with `InvalidModules: Cannot read properties of
+      undefined (reading 'error')`, naming no module, then accepted the
+      identical code seconds later. Not universal -- scrupulous-ferret-428
+      was fine first time. If a push fails that way, retry before
+      believing the commit is broken.
 - [x] **Staging cloud backups fixed for 1.9 careers (2026-08-09).** Day
       one of staged testing surfaced it: every company-driver backup was
       silently refused as `invalid_possession`, because the validator's
