@@ -272,7 +272,7 @@ from the words, and synonyms cost them a re-read.
 | The receiver refusing a load outright | the receiver refused the load | bounced, returned, kicked back | `CARGO_OUTCOME_REJECTED` |
 | Damage a safety committee rules the driver's fault | preventable damage | at-fault, chargeable, negligence | `TruckState.preventable_damage_pct` |
 | The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
-| Road noise leaning toward the side of the lane you are on, and toward a bend before you reach it | The road lean | road bed, ambient road, tire hiss | `vehicle/road`, `sim/lane_guidance.LaneGuidance` |
+| Road noise leaning the way the wheel should go -- into a bend, and away from the edge being drifted toward. The one panned cue a driver steers TOWARD; the rumble strip is the opposite and is steered away from | The road lean | road bed, ambient road, tire hiss, drift beep (that is the rumble strip, and it means the other direction) | `vehicle/road`, `sim/lane_guidance.LaneGuidance` |
 | A tire just catching the edge line, still fully inside the lane | Rumble strip, clipped | edge clip, low rung of the edge ladder | `vehicle/edge_clip`, `sim/lane_guidance.EDGE_CLIP_KEY` |
 | The whole tire riding the rumble strip on one side | Rumble strip | edge strip, full rumble, middle rung of the edge ladder | `vehicle/edge_strip`, `sim/lane_guidance.EDGE_STRIP_KEY` |
 | Gravel under a tire that has left the road surface | Off the pavement | shoulder gravel, run-off, top rung of the edge ladder | `vehicle/edge_shoulder`, `sim/lane_guidance.EDGE_SHOULDER_KEY` |

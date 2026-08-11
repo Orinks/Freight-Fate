@@ -298,3 +298,26 @@ def test_the_changelog_records_the_feature():
     text = (Path(__file__).parents[1] / "CHANGELOG.md").read_text(encoding="utf-8")
     unreleased = text.split("## Unreleased", 1)[1].split("\n## ", 1)[0]
     assert "Learn game sounds" in unreleased
+
+
+def _entry(name: str):
+    return next(e for e in sound_catalog.catalog_entries() if e.name == name)
+
+
+def test_the_road_lean_is_taught_as_a_cue_you_steer_toward():
+    """The lane guide is a pursuit instrument and the rumble strip is not.
+
+    Its target is ``curve_steer - offset`` (sim/lane_guidance), so drifting
+    right leans the bed left and following the lean is what recovers the
+    lane -- the opposite of the rumble strip, which sounds from the side
+    being drifted toward and is steered away from. Prose is the only place
+    that difference can live, and getting it backwards would teach a blind
+    driver to steer off the road, so it is pinned here rather than trusted.
+    """
+    lean = _entry("The road lean")
+    assert "Steer toward the lean" in lean.meaning
+    for rung in ("Rumble strip, clipped", "Rumble strip"):
+        assert "away" in _entry(rung).meaning.lower(), (
+            f"{rung} must keep telling the player to steer away from it, "
+            "or the two opposite conventions blur together"
+        )

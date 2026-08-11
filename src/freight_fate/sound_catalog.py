@@ -68,16 +68,27 @@ class SoundCategory:
 _LANE = SoundCategory(
     "Lane and steering",
     (
+        # The one cue on this screen you steer TOWARD. The guide is a pursuit
+        # instrument: its target is `curve_steer - offset`, so drifting right
+        # leans the bed left, and following the lean is what recovers the lane
+        # (sim/lane_guidance.py, and the "follow the sound" note on
+        # states/driving_updates.py::_update_lane_guidance_audio). Every other
+        # panned cue here is the opposite -- the rumble strip comes from the
+        # side you are drifting toward and you steer away from it. If that
+        # inversion ever reads as a mistake and someone "corrects" this text,
+        # they will be teaching blind drivers to steer off the road.
         SoundEntry(
             "The road lean",
             (
                 Cue("vehicle/road", volume=0.6, pan=-0.8, hold_s=2.0),
                 Cue("vehicle/road", volume=0.6, pan=0.8, delay_s=2.4, hold_s=2.0),
             ),
-            "Road noise leans toward the side of the lane you are on, and "
-            "toward a bend before you reach it. It is the quietest thing in "
-            "the cab that tells you where you are; steer back toward the "
-            "middle and it settles.",
+            "Not a sound of its own: it is the road noise you are always "
+            "hearing, leaning to one side. Steer toward the lean. It leans "
+            "the way the wheel should go, so it points into a bend before "
+            "you reach it, and away from the edge you are drifting toward. "
+            "This is the one cue here you follow rather than avoid, and it "
+            "eases back to the middle once you are straight.",
             when="Lane keeping partial or off, and lane-departure warning on. "
             "With that warning off the road stays centered and the lean never "
             "happens; on full lane keeping the truck holds the lane for you.",
