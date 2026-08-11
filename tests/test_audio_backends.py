@@ -212,6 +212,23 @@ def test_vehicle_horn_and_shift_recordings_are_short_one_shots():
     assert _shipped_duration_s("vehicle/gear_shift") <= 0.8
 
 
+def test_asset_length_matches_a_real_decode_of_the_same_clip():
+    """A one-shot is handed to the mixer without a handle, so the only way to
+    know when it stops sounding is to measure the clip. Read from the
+    container's own headers -- no decoder, no audio device -- and cross-checked
+    here against an actual decode."""
+    for key in ("driver/yawn", "events/spike_strip", "vehicle/signal_tone", "vehicle/bar_solid"):
+        assert audio.asset_length_s(key) == pytest.approx(_shipped_duration_s(key), abs=0.01)
+
+
+def test_asset_length_covers_synthesized_cues_and_shrugs_at_unknown_keys():
+    from freight_fate.states.driving_siren import SIGNATURE_KEY, register_enforcement_sounds
+
+    register_enforcement_sounds()
+    assert audio.asset_length_s(SIGNATURE_KEY) > 0.0, "a generated cue has a length too"
+    assert audio.asset_length_s("nothing/at_all") == 0.0
+
+
 def test_pygame_music_never_loops_catalog_tracks(monkeypatch):
     calls = []
     backend = audio._PygameBackend.__new__(audio._PygameBackend)

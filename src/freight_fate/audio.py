@@ -29,9 +29,11 @@ import logging
 import math
 import os
 import random
+import struct
 import sys
 import threading
 import time
+import wave
 from pathlib import Path
 
 import pygame
@@ -222,10 +224,14 @@ def _pack_carries_whole_ring(pack) -> bool:
 # already occupies.
 _GENERATED: dict[str, tuple[bytes, str]] = {}
 
+# Measured playing times, by sound key. See asset_length_s below.
+_LENGTHS: dict[str, float] = {}
+
 
 def register_generated_sound(key: str, data: bytes, ext: str = "wav") -> None:
     """Publish synthesized audio under ``key`` for every backend."""
     _GENERATED[key] = (data, ext)
+    _LENGTHS.pop(key, None)  # anything measured before this was measuring nothing
 
 
 def generated_sound_keys() -> tuple[str, ...]:
@@ -263,6 +269,62 @@ def _asset_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | N
         except OSError:
             log.warning("Unreadable sound file: %s", path, exc_info=True)
     return None
+
+
+def _wav_seconds(data: bytes) -> float:
+    with contextlib.closing(wave.open(io.BytesIO(data), "rb")) as clip:
+        rate = clip.getframerate()
+        return clip.getnframes() / rate if rate > 0 else 0.0
+
+
+def _ogg_seconds(data: bytes) -> float:
+    """Playing time of an Ogg Vorbis stream, from its own page headers.
+
+    The last page's granule position IS the final sample number, and the
+    sample rate sits in the identification header on the first page, so the
+    whole answer is two reads and a division -- no decoding, no backend, and
+    the same number on a machine with no audio device at all.
+    """
+    first = data.find(b"OggS")
+    if first < 0 or len(data) < first + 28:
+        return 0.0
+    packet = first + 27 + data[first + 26]  # page header, then its segment table
+    if data[packet : packet + 7] != b"\x01vorbis":
+        return 0.0
+    (rate,) = struct.unpack_from("<I", data, packet + 12)
+    last = data.rfind(b"OggS")
+    if last < 0 or rate <= 0:
+        return 0.0
+    (granule,) = struct.unpack_from("<q", data, last + 6)
+    return granule / rate if granule > 0 else 0.0
+
+
+def asset_length_s(key: str) -> float:
+    """How long the clip behind ``key`` sounds for, in seconds.
+
+    Zero when the key resolves to nothing, or to a container this cannot
+    measure. Cached, because callers ask about the same handful of keys
+    repeatedly and the answer cannot change while the game is running.
+
+    A one-shot handed to :meth:`AudioEngine.play` comes back with no handle,
+    so a caller that needs to know when it has finished -- the Learn game
+    sounds demo, which must not lay a second copy over the first -- has this
+    and nothing else to go on.
+    """
+    cached = _LENGTHS.get(key)
+    if cached is not None:
+        return cached
+    found = _asset_bytes(key, ("ogg", "wav"))
+    seconds = 0.0
+    if found is not None:
+        data, ext = found
+        try:
+            seconds = _ogg_seconds(data) if ext == "ogg" else _wav_seconds(data)
+        except Exception:  # noqa: BLE001 - an unreadable header is "unknown", never a crash
+            log.warning("Could not measure the length of %s", key, exc_info=True)
+            seconds = 0.0
+    _LENGTHS[key] = seconds
+    return seconds
 
 
 def verify_sound_assets() -> None:
@@ -2030,6 +2092,10 @@ class AudioEngine:
         the committed one -- or to stay silent where silence was the old
         behavior -- on a clean clone.
         """
+        if key in _GENERATED:
+            # Synthesized cues are published after this engine was built, so a
+            # miss cached before registration must never be the final answer.
+            return True
         cached = self._asset_known.get(key)
         if cached is None:
             cached = _asset_bytes(key, ("ogg", "wav")) is not None
