@@ -176,8 +176,19 @@
   stand. Every prior citation in your career also raises the next one,
   which used to apply only to speeding. The two stack on top of each
   other, so a second run past an open scale in roadwork is 5,400 dollars.
-  When a fine has been doubled, you are told why, and every spoken fine
-  now says the amount actually taken from you rather than the base.
+  Both stop climbing after the third citation, and no single fine can
+  ever cost you the truck on its own. When a fine has been doubled, you
+  are told why, and every spoken fine now says the amount actually taken
+  from you rather than the base.
+
+- **You never pay a fine into a hole.** Worth saying plainly alongside
+  the bigger numbers above, because it has always been true and is easy
+  to miss: if you cannot cover a fine, it becomes a balance you owe
+  rather than money you do not have. Only a quarter of each settlement
+  goes to paying that balance down, so three quarters still reaches you
+  and you can keep working. The balance cannot grow past a ceiling, and
+  you are warned out loud well before you get near one. A run of bad
+  luck costs you time and earnings; it does not strand you.
 
 - **New careers now really do start on the Realistic preset.** The
   settings row has said Realistic for a long time, but lane keeping sat
