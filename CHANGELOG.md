@@ -26,6 +26,24 @@
 
 ### Fixed
 
+- **The speed keeper now slows down before a corner instead of at it.**
+  Driving to a shipper or a truck stop on city streets, the keeper would
+  arrive at a turn still doing the street's speed, and it could not get
+  down to the corner's twenty in time. Often you missed the turn
+  outright, which cost you eight minutes going around the block -- and
+  the keeper switched itself off when that happened. It now looks ahead
+  to the next turn or the next lower limit and starts easing early
+  enough to arrive at the right speed. The corner call tells you when
+  the keeper is taking it.
+
+- **The engine brake no longer barks through every bend.** The curve
+  assist used the engine brake on any curve at all, including gentle
+  ones that needed barely any speed off -- loud, constant, and not how
+  anyone drives. It now saves the engine brake for a corner that really
+  needs speed off, or for a downgrade, and lets the ordinary brakes
+  handle the rest. Coming down a long grade is unchanged: the engine
+  brake still does that work, because that is exactly what it is for.
+
 - **A construction zone can no longer close the only lane you have.** On a
   stretch of road with one lane your way, a work zone could still cone off
   that lane. The game then told you to move over to a lane that was not

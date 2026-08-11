@@ -131,14 +131,38 @@ onto exit signalling.
       start with a brand-new truck (owner design call, same date) instead
       of one already damaged and short of fuel, and driving through work
       zone barrels is now a 1,000 dollar serious violation.
-- [ ] **Remaining tester findings from the same document.** Speed keeper
-      cannot shed 25 to 20 before city turns come up (it pre-brakes for
-      zones, not posted-limit drops). The jake brake engages through
-      every curve. Merging traffic does not yield to a loaded truck.
-      There is no cue telling you when you are clear to move back over
-      after passing, and at least one unexplained sound (a whoosh on the
-      left). Driver name entry has no caret -- arrow keys do nothing, so
-      a typo can only be found by deleting back to it.
+- [x] **The two driver assists that manufactured violations -- SHIPPED
+      2026-08-11** on `fix/assist-behaviour`. The speed keeper had no
+      lookahead at all: it read the limit under the wheels while every
+      forward-looking input the game owns is wired only into cruise,
+      which refuses to engage on facility streets. The 20 it could not
+      reach is not a posted limit either, it is the trailer corner cap on
+      any 25 mph street -- so this was a turn advisory, and a
+      posted-limit lookahead alone would not have fixed it. Worse than
+      speeding: the keeper drove into the missed turn, charged 8 game
+      minutes for the loop-back, and then cancelled its own session. The
+      curve assist raised the retarder on any curve it handled with no
+      test of how much speed the corner needed -- 53 engagements across
+      811 miles of real curve data, ten on one route for a 7 mph
+      sweeper. Both now measured, not assumed: keeper deceleration
+      benched at ~0.4 m/s2 at street speed, and a plain jake threshold
+      was caught cooking the drums past fade onset in 4.5 minutes on a 6
+      percent grade, so real downgrades are carved out.
+- [ ] **Remaining tester findings from the same document.** Merging
+      traffic does not yield to a loaded truck. There is no cue telling
+      you when you are clear to move back over after passing, and at
+      least one unexplained sound (a whoosh on the left). Driver name
+      entry has no caret -- arrow keys do nothing, so a typo can only be
+      found by deleting back to it.
+- [ ] **The no-engine-brake ban only knows route cities.** It rides
+      `URBAN_RADIUS_MI` (6.0) around route nodes, so small towns a leg
+      merely passes through are not modelled at all -- in a survey only
+      17 of 70 assisted curves fell inside any ban zone, and 4 of 26 on
+      one mountain route. An assist-raised retarder can never be fined
+      (`driver_owns_jake` excludes it), so this is realism rather than a
+      money bug, but it is why the retarder barks through bends an
+      experienced driver reads as a ticket waiting to happen. Widening
+      the radius is an owner call.
 - [ ] **Fines rebalanced against real trucking penalties.** Researched
       schedule agreed 2026-08-11: unsafe equipment to 2,300, weigh
       station bypass to 1,800, chain law to 580 (1,150 when it blocks the
