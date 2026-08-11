@@ -91,6 +91,28 @@ and [FMCSA ELD recording guidance](https://www.fmcsa.dot.gov/hours-service/elds/
       edit approve/reject prompts, a rare ELD-malfunction paper-log day,
       and the adverse-conditions +2-hour exception wired to live weather.
 
+### Signalling a street turn
+
+Deferred out of 1.9 (owner call 2026-08-10) rather than bolting a blinker
+onto exit signalling.
+
+- [ ] **A blinker for surface-street maneuvers.** X signals an announced
+      highway exit and plays one panned `vehicle/signal_tone`; nothing
+      signals a street corner. The map is not the blocker -- baked tier-1
+      maneuvers already carry direction and distance, which is what feeds
+      the `events/turn_left` and `turn_right` earcons. What is missing is
+      the turn as a continuous act: `LaneKeeping` has a lateral offset and
+      a lane index and no heading, the same gap that killed the quick-time
+      turn in July. Needs a held tick that self-cancels at the corner and a
+      rule about signalling before one, alongside whatever turn geometry
+      the surface-intersection work (1.9, `docs/surface-roads-plan.md`
+      phase 4) leaves behind.
+- [ ] **Decide the two orphan sound assets in the same change.**
+      `vehicle/turn_signal` is the repeating tick this feature wants and
+      has never been wired to anything. `vehicle/lane_drift` is dead for a
+      different reason -- the edge ladder took its job -- so it is a
+      deletion, not a wiring job.
+
 ## 1.9 in flight (`feat/career-1.9`)
 
 - [x] **Break-harness findings now assert what they claim, and the one
@@ -1667,17 +1689,6 @@ city service drives below.)
       cross-traffic consequences) onto the tier-1 street chains. Deferred
       until local-drive pacing was proven in playtests; the per-system
       harness sweep now passes clean across all 38 corridors.
-- [ ] **Signalling a street turn.** X signals an announced highway exit and
-      plays one panned `vehicle/signal_tone`; there is no blinker for a
-      surface-street maneuver, and `vehicle/turn_signal` (a repeating tick)
-      sits unused in the sound tree along with `vehicle/lane_drift`, whose
-      job the edge ladder took over. The baked tier-1 maneuvers already
-      carry direction and distance, so the missing piece is the turn as a
-      continuous act -- a held tick that self-cancels at the corner, and a
-      rule about signalling before one -- not the map data. Owner call
-      2026-08-10: wait for the turn-geometry work rather than bolt a
-      blinker onto exit signalling. Decide the two orphan assets in the
-      same change.
 
 ### Maneuvers, enforcement, and the working day
 
