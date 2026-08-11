@@ -272,6 +272,9 @@ class DrivingState(
         self.record_events: list[str] = []
         self.fatigue_events = 0  # run-off-road microsleeps this trip
         self._weigh_station_notice_key = ""
+        # A scale crossed with its own exit armed: judged after the exit watch
+        # runs, later in the same frame, never on ramp speed alone.
+        self._weigh_station_pending = None
         self._unsafe_damage_stop_key = ""
         # Compliance tracker for the active stop: 0..1, judged from behavior
         # (signaling and slowing), not distance. Reset on every stop-ending path.

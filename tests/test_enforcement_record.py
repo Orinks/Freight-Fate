@@ -695,6 +695,59 @@ def test_reloading_mid_stop_does_not_cancel_the_stop(monkeypatch):
         app.shutdown()
 
 
+def test_a_paid_stop_is_not_charged_again_on_the_next_resume(monkeypatch):
+    """The other half of "a stop survives a reload": it has to end, too.
+
+    The lights are written into the save before a word of the stop is spoken,
+    so a crash cannot erase it. Nothing wrote the save back once the fine was
+    paid, so every resume found a cruiser still sitting behind a parked truck
+    and charged for the same stop again -- at the repeat rate, so it cost more
+    each time. A tester lost his career's money to four of them in a minute
+    (log, 2026-08-10).
+    """
+    from freight_fate.app import App
+    from freight_fate.states.driving import DrivingState
+    from freight_fate.states.driving_rest_states import EnforcementStopState
+
+    app = App()
+    try:
+        d = _driving(app)
+        p = app.ctx.profile
+        _quiet(app, monkeypatch)
+        monkeypatch.setattr(app.ctx, "save_profile", lambda *a, **k: None)
+        d.trip.position_mi = d.trip.total_miles / 2.0
+        d._begin_enforcement_pull_over(
+            kind="weigh_station_bypass",
+            title="Weigh station bypass stop",
+            summary="Scale officers saw you blow past the scale.",
+            fine=750.0,
+            reputation_hit=3.0,
+            return_message="Back on the highway.",
+            lights_message="Lights and siren behind you.",
+        )
+        assert p.active_trip is not None
+        money_before = p.money
+        # Brake to a stop: the roadside stop opens and the fine is paid.
+        d.truck.velocity_mps = 0.0
+        d._pull_over_grace_s = 0.0
+        d._update_pull_over(0.1)
+        assert isinstance(app.state, EnforcementStopState)
+        paid = money_before - p.money
+        assert paid > 0.0
+        app.pop_state()
+
+        # Quit to the title and resume. The truck is parked and the stop is
+        # settled, so nothing about it may happen a second time.
+        resumed = DrivingState.from_snapshot(app.ctx, dict(p.active_trip))
+        assert resumed is not None
+        assert resumed._pull_over is None
+        resumed._update_pull_over(0.1)
+        assert not isinstance(app.state, EnforcementStopState)
+        assert p.money == money_before - paid
+    finally:
+        app.shutdown()
+
+
 def test_toggling_the_jake_cannot_farm_warnings_forever(monkeypatch):
     """One grace window per town, not a renewable exemption."""
     from freight_fate.app import App

@@ -358,6 +358,10 @@ class DrivingUpdateMixin:
         self._check_gate_approach_warning(dt)
         self._update_turn_commitment(dt)
         self._update_exit(self.trip.last_moved_mi, dt)
+        # Immediately after the exit watch, which is what turns a signaled
+        # scale exit into a ramp. Only now can a scale crossing be told apart
+        # from a check-in.
+        self._resolve_weigh_station_bypass()
         # Reads the same last_moved_mi the exit watch just used, so the
         # distance it counts back is the distance the trip actually lost.
         self._update_wrong_way(dt)
@@ -2433,23 +2437,64 @@ class DrivingUpdateMixin:
                 and self._scale_is_open(stop)
                 and self.truck.speed_mph > WEIGH_STATION_BYPASS_MPH
             ):
+                if self._exit_is_armed_for(stop):
+                    # Signaled for this scale's own ramp. Whether that is a
+                    # check-in or a miss is not decided here: the exit watch
+                    # settles it later in this same frame, and until it has,
+                    # ramp speed over the bypass threshold proves nothing --
+                    # the gore is crossed at ramp speed by definition. A
+                    # tester was fined for blowing past a scale while he was
+                    # on its ramp at eighteen (log, 2026-08-10).
+                    self._weigh_station_pending = stop
+                    continue
                 self.enforcement_events.add(key)
-                self._begin_enforcement_pull_over(
-                    kind="weigh_station_bypass",
-                    title="Weigh station bypass stop",
-                    summary=(
-                        f"Scale officers saw you blow past {stop.spoken_name} "
-                        "instead of pulling into the inspection lane."
-                    ),
-                    fine=WEIGH_STATION_BYPASS_FINE,
-                    reputation_hit=hos.HOS_REPUTATION_HIT,
-                    return_message="Back on the highway. Watch for the next open scale.",
-                    lights_message=(
-                        "Scale bypass enforcement. Lights and siren behind you: "
-                        f"signal with {self.ctx.control_hint('take_exit')} and "
-                        "brake to a stop on the shoulder."
-                    ),
-                )
+                self._charge_weigh_station_bypass(stop)
+
+    def _exit_is_armed_for(self, stop) -> bool:
+        """Whether this stop's own exit is the one the driver is committed to."""
+        active = self._ramp_stop or self._exit_stop
+        return active is not None and active.key == stop.key
+
+    def _resolve_weigh_station_bypass(self) -> None:
+        """Judge a deferred scale crossing now that the exit watch has run.
+
+        On the scale's own ramp, the driver pulled into the inspection lane
+        and owes nothing. Anything else -- too fast for the ramp, out of the
+        exit lane, the signal canceled at the gore -- is the same bypass it
+        would have been with no signal at all, so arming the exit and then
+        driving on buys nothing.
+        """
+        stop = self._weigh_station_pending
+        if stop is None:
+            return
+        self._weigh_station_pending = None
+        key = self._weigh_station_key(stop)
+        if key in self.enforcement_events:
+            return
+        self.enforcement_events.add(key)
+        if self._ramp_stop is not None and self._ramp_stop.key == stop.key:
+            return  # pulled in; the scale gets its look at the check-in
+        if self._pull_over is not None:
+            return  # already stopped this frame; one demand on the driver
+        self._charge_weigh_station_bypass(stop)
+
+    def _charge_weigh_station_bypass(self, stop) -> None:
+        self._begin_enforcement_pull_over(
+            kind="weigh_station_bypass",
+            title="Weigh station bypass stop",
+            summary=(
+                f"Scale officers saw you blow past {stop.spoken_name} "
+                "instead of pulling into the inspection lane."
+            ),
+            fine=WEIGH_STATION_BYPASS_FINE,
+            reputation_hit=hos.HOS_REPUTATION_HIT,
+            return_message="Back on the highway. Watch for the next open scale.",
+            lights_message=(
+                "Scale bypass enforcement. Lights and siren behind you: "
+                f"signal with {self.ctx.control_hint('take_exit')} and "
+                "brake to a stop on the shoulder."
+            ),
+        )
 
     def _check_unsafe_damage_enforcement(self) -> None:
         if self._enforcement_bypassed() or self._enforcement_busy():
@@ -2768,6 +2813,7 @@ class DrivingUpdateMixin:
                     warned=warned,
                 )
             )
+            self._commit_resolved_stop()
             return
         self.ctx.push_state(
             TrafficStopState(
@@ -2780,6 +2826,24 @@ class DrivingUpdateMixin:
                 warned=warned,
             )
         )
+        self._commit_resolved_stop()
+
+    def _commit_resolved_stop(self) -> None:
+        """Write a settled stop out of the save, the way arming wrote it in.
+
+        _arm_pull_over commits the encounter before a word of it is spoken so
+        that nothing can make it never have happened. This is the other half:
+        once the ticket is written, the save must stop saying a cruiser is
+        sitting behind you. Without it every resume found the stop still armed
+        against a parked truck, resolved it on the first frame, and charged
+        for it again -- at the repeat-offender rate, so it cost more each
+        time (tester log, 2026-08-10).
+        """
+        profile = self.ctx.profile
+        if profile is None or profile.active_trip is None:
+            return
+        profile.active_trip = self.snapshot()
+        self.ctx.save_profile()
 
     def _pursuit_hold_required_s(self) -> float:
         """How long the run key must be held. A lifetime disqualification is
@@ -2864,6 +2928,7 @@ class DrivingUpdateMixin:
                 warned=True,
             )
         )
+        self._commit_resolved_stop()
 
     def _evade_pull_over(self) -> None:
         """The player chose to run and held the key through the warning: spike
