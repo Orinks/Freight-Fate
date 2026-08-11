@@ -24,8 +24,8 @@ class CareerStartState(MenuState):
     intro_help = (
         "Pick how this career begins. Company starts use assigned carrier "
         "equipment. The carrier pays normal fuel, repairs, insurance, and "
-        "trailer support. The owner-operator start is higher risk: you "
-        "control a starter tractor and pay business costs from day one. Enter "
+        "trailer support. The owner-operator start is higher risk: you own a "
+        "brand-new truck and pay business costs from day one. Enter "
         "selects; Escape goes back to name entry."
     )
 

@@ -28,9 +28,11 @@ buy-in and working-capital gate instead of a confusing weekly deduction trap.
 
 Freight Fate also offers an alternate owner-operator start for players who want
 that fantasy immediately. It is framed as an experienced-driver start: the
-player begins leased on with an owned starter tractor, higher gross revenue,
-limited working capital, partial fuel, light equipment wear, and operating
-costs active from day one.
+player begins leased on with a brand-new truck they have just bought, higher
+gross revenue, limited working capital, and operating costs active from day
+one. The truck is pristine on every condition dimension -- the difficulty of
+this start is the costs and the thin cushion, never equipment that arrives
+already worn.
 
 ## Gameplay Model
 

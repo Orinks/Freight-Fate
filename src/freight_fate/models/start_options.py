@@ -66,7 +66,10 @@ class CareerStartOption:
     starting_money: float = 5_000.0
     starting_truck: str = "rig"
     owned_trucks: tuple[str, ...] = ()
-    truck_fuel_gal: float = 150.0
+    # ``None`` means a full tank for whatever truck this start hands over, read
+    # from that model's own specs. A literal number here would drift the day a
+    # tank capacity changes and quietly start the career short of fuel.
+    truck_fuel_gal: float | None = None
     truck_damage_pct: float = 0.0
     starting_level_xp: float = 0.0
     starting_deliveries: int = 0
@@ -193,16 +196,17 @@ START_OPTIONS: dict[str, CareerStartOption] = {
         carrier_name="Northstar Freight Lines",
         mode=START_MODE_OWNER_OPERATOR,
         menu_summary=(
-            "Leased-on owner-operator from day one: your own starter tractor, "
-            "and every operating cost is yours."
+            "Leased-on owner-operator from day one: a brand-new truck of your "
+            "own, and every operating cost is yours."
         ),
         help_text=(
-            "The hardest way to begin. You start leased on with an owned "
-            "starter tractor and limited working capital, and the operating "
-            "costs -- fuel, repairs, reserves, and settlement fees -- come "
-            "out of your own cash instead of the carrier's. You still start "
-            "at level one and climb the same career as everyone else: this "
-            "changes who pays, not how far along you are."
+            "The hardest way to begin. You start leased on with a brand-new "
+            "truck you have just bought -- full tank, no damage, nothing worn "
+            "-- and limited working capital, and the operating costs -- fuel, "
+            "repairs, reserves, and settlement fees -- come out of your own "
+            "cash instead of the carrier's. You still start at level one and "
+            "climb the same career as everyone else: this changes who pays, "
+            "not how far along you are."
         ),
         default_city="Chicago",
         # The career itself starts at zero. This option is about ECONOMICS --
@@ -211,10 +215,15 @@ START_OPTIONS: dict[str, CareerStartOption] = {
         # dollars of lifetime earnings, which handed the player most of a
         # thirty-level arc and published a career history that never happened
         # on their public profile.
+        #
+        # The truck itself is a design change of its own (owner, 2026-08-11):
+        # it used to open with 110 gallons and 4 percent damage, which read as
+        # a hand-me-down. Buying in means buying NEW, so the condition record
+        # is left pristine and the tank is filled from the model's own specs.
+        # The difficulty stays where it belongs -- in the costs and the thin
+        # cushion -- rather than in a truck that starts already worn.
         starting_money=18_000.0,
         owned_trucks=("rig",),
-        truck_fuel_gal=110.0,
-        truck_damage_pct=4.0,
         dispatch=DispatchProfile(long_haul_bias=0.25),
     ),
 }
@@ -237,6 +246,27 @@ def pay_plan_for_key(key: str | None) -> CompanyPayPlan:
     return option.company_pay or NORTHSTAR_PAY
 
 
+def _provision_start_trucks(profile, option: CareerStartOption) -> None:
+    """Give every truck this start hands over a brand-new condition record.
+
+    A condition record carries nine dimensions -- fuel, damage, tire, brake and
+    engine wear, grime, tire compound, whether chains are aboard, and chain
+    wear -- and a start option only ever named two of them. Rebuilding the
+    record instead of poking fields means a new dimension arrives pristine by
+    default rather than silently starting a fresh career already worn. Any
+    condition a start option deliberately wants worn is applied afterwards.
+    """
+    profile.truck_conditions = {}
+    for key in {profile.active_truck_key(), *profile.owned_trucks}:
+        profile.provision_truck_condition(key)
+    if option.truck_fuel_gal is not None:
+        # Never above the real tank: the option's number is a starting level,
+        # not a license to overfill a truck whose capacity has since changed.
+        profile.truck_fuel_gal = min(option.truck_fuel_gal, profile.truck_specs().fuel_tank_gal)
+    if option.truck_damage_pct:
+        profile.truck_damage_pct = option.truck_damage_pct
+
+
 def apply_start_option(profile, option: CareerStartOption) -> None:
     """Apply a start option to a freshly created or reset profile."""
 
@@ -252,8 +282,7 @@ def apply_start_option(profile, option: CareerStartOption) -> None:
     profile.owned_trailers = []
     profile.trailer_programs = list(DEFAULT_TRAILER_PROGRAMS) if option.is_owner_operator else []
     profile.upgrades = {}
-    profile.truck_fuel_gal = option.truck_fuel_gal
-    profile.truck_damage_pct = option.truck_damage_pct
+    _provision_start_trucks(profile, option)
     profile.active_trip = None
     profile.dispatch_board_cache = None
     profile.pay_advance = 0.0

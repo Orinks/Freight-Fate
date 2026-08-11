@@ -120,9 +120,10 @@ def first_day_orientation_message(ctx, prefix: str = "") -> str:
     if option.is_owner_operator:
         return (
             f"{prefix}First-day briefing: you are leased to {option.carrier_name} "
-            f"and parked at {location}. You own the starter tractor, have "
-            f"{p.money:,.0f} dollars of working capital, and fuel, repairs, "
-            "truck wear, trailer programs, and business reserves come out of "
+            f"and parked at {location}. You own a brand-new truck with a full "
+            f"tank, have {p.money:,.0f} dollars of working capital, and "
+            "fuel, repairs, truck wear, trailer programs, and business "
+            "reserves come out of "
             "your cash. Your first objective is to open the dispatch board, "
             "choose an unlocked load with a deadline you can protect, and get "
             "to the shipper without burning your cushion."

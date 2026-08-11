@@ -113,8 +113,8 @@ Company-driver carrier choices are:
 Company starts begin with 5,000 dollars, an assigned company tractor, a full
 tank, a fresh career record, and a company terminal or yard in the chosen metro
 service area. The owner-operator start begins as a leased-on owner-operator
-with 18,000 dollars working capital, an owned starter tractor, partial fuel,
-light wear, and owner-operator costs already active.
+with 18,000 dollars working capital, a brand-new truck of your own with a full
+tank and nothing worn, and owner-operator costs already active.
 The home-terminal picker starts with a region list, then opens the cities in
 that region. Each start has a suggested default city, but any listed terminal
 can be your starting city.
