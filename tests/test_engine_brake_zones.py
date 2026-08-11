@@ -31,6 +31,11 @@ def _driving(app):
     return DrivingState(app.ctx, job, route, phase="delivery")
 
 
+class _NoKeys:
+    def __getitem__(self, _key):
+        return False
+
+
 def _capture_events(app, monkeypatch):
     spoken = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
@@ -263,6 +268,44 @@ def test_assists_may_not_raise_the_jake_inside_a_zone(monkeypatch):
         monkeypatch.setattr(d.trip, "grade_at", lambda mile: 0.0)
         d.trip.position_mi = d.trip.total_miles / 2.0
         assert d._assist_jake_allowed() is True  # open road
+    finally:
+        app.shutdown()
+
+
+def test_curve_assist_takes_the_drums_for_a_corner_inside_a_zone(monkeypatch):
+    """The sign outranks the corner.
+
+    How much speed a corner needs off decides whether the retarder is worth
+    reaching for; the posted no engine brake zone decides whether it is
+    available at all. A bend in town with twenty mph to shed is still
+    slowed, on the service brakes.
+    """
+    from freight_fate.app import App
+    from freight_fate.data.curves import RouteCurve
+
+    app = App()
+    try:
+        d = _driving(app)
+        _capture_events(app, monkeypatch)
+        _roll_with_jake(d, monkeypatch, mile=2.0)  # inside the Buffalo zone
+        d.truck.engine_brake = False
+        d.truck.rpm = 1500.0
+        d.truck.grip = 1.0
+        d.truck.brake = 0.0
+        curve = RouteCurve(
+            start_mi=2.0,
+            apex_mi=2.1,
+            end_mi=2.2,
+            direction="L",
+            advisory_mph=35,  # twenty under the truck's 55
+            min_radius_ft=1200,
+            deflection_deg=40.0,
+        )
+        monkeypatch.setattr(d.trip, "curve_at", lambda _mile: curve)
+        d._update_lane(_NoKeys(), 1 / 60)
+        assert d.truck.engine_brake_stage == 0
+        assert d._curve_assist_jake is False
+        assert d.truck.brake > 0.0
     finally:
         app.shutdown()
 
