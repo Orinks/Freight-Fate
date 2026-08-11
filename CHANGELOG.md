@@ -26,6 +26,16 @@
 
 ### Fixed
 
+- **The reconnect advice now covers the case where the account is gone,
+  not just this computer.** When orinks.net stops accepting your sign-in,
+  the game told you to open your driver setup page and choose Add
+  computer. That is right when this computer was signed out, but there is
+  another way to get the same refusal: the driver itself no longer exists
+  on the site, which can happen after the site is rebuilt. Following the
+  old advice then led nowhere, because there was no account left to add a
+  computer to. You are now told how to tell the two apart, and what to do
+  in each case.
+
 - **The assists no longer empty the air tanks stopping for a light or a
   stop sign.** Coming down a ramp to a signal or a sign, route transition
   assistance was pumping the brake pedal several times a second instead

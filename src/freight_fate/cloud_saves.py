@@ -138,15 +138,28 @@ class CloudAuthError(Exception):
 # per computer, so a refusal means this computer's token was signed out
 # from the account's computer list (or replaced by a sign-out-everywhere).
 AUTH_HELP = (
-    "orinks.net no longer accepts this computer's sign-in. This usually "
-    "means this computer was signed out from the computer list on your "
-    "orinks.net driver setup page. On that page, choose Add computer to get "
-    "a fresh token, then paste it under Set up orinks.net account on the "
-    "Online menu."
+    "orinks.net no longer accepts this computer's sign-in. Usually this "
+    "computer was signed out from the computer list on your orinks.net "
+    "driver setup page: open that page, choose Add computer to get a fresh "
+    "token, then paste it under Set up orinks.net account on the Online "
+    "menu. If your driver is not on that page at all, the account itself is "
+    "gone rather than this computer's sign-in, which can happen after the "
+    "site is rebuilt; make a new account and connect it the same way."
 )
 
 
 def _auth_refused(e: urllib.error.HTTPError, body: dict) -> bool:
+    """Whether orinks.net refused this machine's credentials.
+
+    Two different situations arrive here and the site does not distinguish
+    them: a retired token (this computer signed out from the account's
+    computer list) and a driver record that no longer exists at all. Both
+    answer ``404 {"error": "driver_not_found"}`` -- observed on the staging
+    site on 2026-08-11, after the deployment behind it was rebuilt and every
+    driver issued before the move stopped resolving. AUTH_HELP therefore
+    covers both, since the recovery differs: Add computer for the first,
+    a whole new account for the second.
+    """
     return e.code == 401 or body.get("error") in ("unauthorized", "driver_not_found")
 
 
