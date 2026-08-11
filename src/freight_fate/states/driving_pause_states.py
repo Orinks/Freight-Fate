@@ -84,6 +84,12 @@ class PauseMenuState(MenuState):
                 "line by line, Escape returns here.",
             ),
             MenuItem(
+                "Learn game sounds",
+                self._learn_sounds,
+                help="Play any sound the road uses and hear what it means. "
+                "The drive is paused while you listen.",
+            ),
+            MenuItem(
                 self._mechanic_label,
                 self._mechanic,
                 help="A mobile mechanic patches the truck up enough to "
@@ -144,7 +150,7 @@ class PauseMenuState(MenuState):
         ]
         if self.driving.emergency_shoulder_sleep_reason() is not None:
             items.insert(
-                4,
+                5,
                 MenuItem(
                     "Emergency shoulder sleep",
                     self._emergency_shoulder_sleep,
@@ -328,6 +334,11 @@ class PauseMenuState(MenuState):
         from .main_menu import HelpState, controls_help_page
 
         self.ctx.push_state(HelpState(self.ctx, start_page=controls_help_page()))
+
+    def _learn_sounds(self) -> None:
+        from .learn_sounds import LearnSoundsState
+
+        self.ctx.push_state(LearnSoundsState(self.ctx))
 
     def _settings(self) -> None:
         from .main_menu import SettingsState

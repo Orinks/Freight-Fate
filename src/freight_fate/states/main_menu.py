@@ -322,6 +322,14 @@ class MainMenuState(MenuState):
         )
         items.append(
             MenuItem(
+                "Learn game sounds",
+                self._learn_sounds,
+                help="Play any sound the road uses and hear what it means, "
+                "before you meet it at speed.",
+            )
+        )
+        items.append(
+            MenuItem(
                 "Settings",
                 self._settings,
                 help="Units, transmission mode, volumes, weather, voices, "
@@ -384,6 +392,11 @@ class MainMenuState(MenuState):
 
     def _help(self) -> None:
         self.ctx.push_state(HelpState(self.ctx))
+
+    def _learn_sounds(self) -> None:
+        from .learn_sounds import LearnSoundsState
+
+        self.ctx.push_state(LearnSoundsState(self.ctx))
 
     def _achievements(self) -> None:
         self.ctx.push_state(AchievementCareerState(self.ctx))

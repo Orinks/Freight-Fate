@@ -378,3 +378,60 @@ def test_arrow_move_stops_a_running_held_demo(monkeypatch):
         assert not state.demo.running
     finally:
         app.shutdown()
+
+
+def test_the_main_menu_offers_learn_game_sounds():
+    from freight_fate.states.main_menu import MainMenuState
+
+    app = _app()
+    try:
+        labels = [item.text for item in MainMenuState(app.ctx).build_items()]
+        assert "Learn game sounds" in labels
+        # It sits with the other learning material, after How to play.
+        assert labels.index("Learn game sounds") == labels.index("How to play") + 1
+    finally:
+        app.shutdown()
+
+
+def test_the_pause_menu_offers_learn_game_sounds():
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState, PauseMenuState
+
+    app = _app()
+    try:
+        app.ctx.profile = Profile(name="Sounds", current_city="Buffalo")
+        route = app.ctx.world.supported_route("Buffalo", "Rochester")
+        job = Job(
+            CARGO_CATALOG["general"],
+            12.0,
+            "Buffalo",
+            "company yard",
+            "Rochester",
+            route.miles,
+            1000.0,
+            12.0,
+            destination_location="Rochester freight market",
+        )
+        driving = DrivingState(app.ctx, job, route, phase="delivery")
+        labels = [item.text for item in PauseMenuState(app.ctx, driving).build_items()]
+        assert "Learn game sounds" in labels
+        assert labels.index("Learn game sounds") == labels.index("Controls and help") + 1
+    finally:
+        app.shutdown()
+
+
+def test_both_entry_points_push_the_same_screen(monkeypatch):
+    from freight_fate.states.learn_sounds import LearnSoundsState
+    from freight_fate.states.main_menu import MainMenuState
+
+    app = _app()
+    try:
+        pushed: list[object] = []
+        monkeypatch.setattr(app.ctx, "push_state", lambda state, **_kw: pushed.append(state))
+        menu = MainMenuState(app.ctx)
+        item = next(i for i in menu.build_items() if i.text == "Learn game sounds")
+        item.action()
+        assert isinstance(pushed[0], LearnSoundsState)
+    finally:
+        app.shutdown()
