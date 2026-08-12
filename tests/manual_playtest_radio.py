@@ -303,3 +303,90 @@ def test_manual_streamer_safe_flip_mid_drive(monkeypatch):
             f"  debug  | WBEZ back on the dial? "
             f"{any(s.id == 'wbez-chicago' for s in d.radio.available_stations())}"
         )
+
+
+def test_manual_stall_rest_and_dead_streams(monkeypatch):
+    """Three edge legs: an engine stall mid-song, a rest-menu shutdown under
+    a covering menu, and a terrestrial band where every stream is dead."""
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Manual Edge Cases")
+        d = harness.driving
+        audio_log = []
+        monkeypatch.setattr(
+            d.ctx.audio,
+            "play_music",
+            lambda track, fade_ms=1500: audio_log.append(f"play_music {track}"),
+        )
+        monkeypatch.setattr(
+            d.ctx.audio,
+            "stop_music",
+            lambda fade_ms=0: audio_log.append(f"stop_music fade {fade_ms}"),
+        )
+        streams_dead = {"on": False}
+
+        def play_stream(url, fade_ms=1500):
+            if streams_dead["on"]:
+                raise RuntimeError("connection refused")
+            audio_log.append("play_radio_stream (stubbed)")
+
+        monkeypatch.setattr(d.ctx.audio, "play_radio_stream", play_stream)
+
+        cursor = len(result.transcript)
+
+        def step(label, action=None):
+            nonlocal cursor
+            print(f"\n=== {label}")
+            if action is not None:
+                action()
+            for line in result.transcript[cursor:]:
+                print(f"  spoken | {line}")
+            cursor = len(result.transcript)
+            for note in audio_log:
+                print(f"  audio  | {note}")
+            audio_log.clear()
+
+        def tick(seconds=1 / 60):
+            d.ctx.audio.update(seconds)
+            d._update_audio(1 / 60)
+
+        def start_engine():
+            harness.press_key(pygame.K_e)
+            tick(5.0)
+
+        step("Start the engine; the Roadhouse comes up", start_engine)
+
+        print("\n### Leg 1: the engine stalls mid-song")
+        step("The engine stalls (lugged in too high a gear)", lambda: (d.truck.stall(), tick()))
+        step("Press M while stalled", lambda: harness.press_key(pygame.K_m))
+        step("Restart the engine", start_engine)
+
+        print("\n### Leg 2: a rest-menu shutdown while a menu covers the drive")
+        step(
+            "The rest flow shuts the engine down under the menu",
+            lambda: (d.truck.stop_engine(), d.tick_covered_music(0.5)),
+        )
+        step(
+            "Waking up: engine restarted from the rest flow, menu still up",
+            lambda: (d.truck.start_engine(), d.tick_covered_music(0.5)),
+        )
+
+        print("\n### Leg 3: every real stream refuses to connect")
+        streams_dead["on"] = True
+
+        def jump_to_terrestrial():
+            event = pygame.event.Event(
+                pygame.KEYDOWN, key=pygame.K_PAGEDOWN, unicode="", mod=pygame.KMOD_CTRL
+            )
+            for _ in range(2):
+                d.handle_event(event)
+
+        step("Ctrl+Page Down twice: jump into a dead terrestrial band", jump_to_terrestrial)
+        step("Press Y: where did the radio land?", lambda: harness.press_key(pygame.K_y))
+
+        def reception_ticks():
+            for _ in range(8):  # twelve seconds of drive: the reconnect cadence
+                d._radio_signal_timer = 0.0
+                d._update_radio_reception(1.5)
+
+        step("Keep driving twelve seconds: the radio sorts itself out", reception_ticks)
+        step("Press Y again", lambda: harness.press_key(pygame.K_y))
