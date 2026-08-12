@@ -26,6 +26,8 @@ class DrivingControlsMixin:
 
         key = event.key
         tr = self.truck.transmission
+        if not tr.automatic and getattr(event, "mod", 0) & pygame.KMOD_SHIFT:
+            tr.clutch = 1.0
         if key in (pygame.K_LCTRL, pygame.K_RCTRL):
             self.ctx.stop_event_speech()
             self._note_critical_speech_stopped()
