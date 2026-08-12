@@ -209,9 +209,14 @@ class TripRoadEventMixin:
             where = (
                 "right ahead" if context.gap_mi < 0.1 else f"{self._gap_text(context.gap_mi)} ahead"
             )
+            # "Or change lanes" is only true advice where there is somewhere
+            # to send it: a road with no open lane beside this one leaves
+            # brake alone as the only real answer (playtest report, US-285,
+            # 2026-08-12 -- one lane your side, warned to change lanes anyway).
+            call = "Brake or change lanes!" if self.has_open_adjacent_lane_at() else "Brake!"
             self._emit(
                 TripEventKind.HAZARD,
-                f"Brake or change lanes! {reason.capitalize()} {where}.",
+                f"{call} {reason.capitalize()} {where}.",
                 deadline_s=2.5,
                 traffic=context,
                 dodgeable=True,
@@ -233,7 +238,10 @@ class TripRoadEventMixin:
             texts, weights = zip(*choices, strict=True)
             hazard = self._rng.choices(texts, weights)[0]
             dodgeable = hazard_is_dodgeable(hazard)
-            call = "Brake or change lanes!" if dodgeable else "Brake now!"
+            if dodgeable:
+                call = "Brake or change lanes!" if self.has_open_adjacent_lane_at() else "Brake!"
+            else:
+                call = "Brake now!"
             self._emit(
                 TripEventKind.HAZARD,
                 f"{call} {hazard[0].upper()}{hazard[1:]}.",

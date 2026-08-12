@@ -470,14 +470,21 @@ def ramp_arrival_grace_seconds(message: str, speech_rate: float = 0.5) -> float:
 def terse_hazard_message(message: str) -> str:
     """Trim the hazard call for terse speech.
 
-    "Brake now!" is implied by the hazard tone and can go; "Brake or change
-    lanes!" carries real information -- the hazard is dodgeable -- so terse
-    mode keeps it as a two-word cue instead of dropping it."""
+    "Brake now!" is implied by the hazard tone and can go; so can the bare
+    "Brake!" a dodgeable hazard falls back to where there is no lane to
+    offer. "Brake or change lanes!" carries real information -- the hazard
+    is dodgeable AND there is somewhere to send the dodge -- so terse mode
+    keeps it as a two-word cue instead of dropping it."""
     text = message.strip()
     for prefix in ("Brake now! ", "Brake now!"):
         if text.startswith(prefix):
             text = text[len(prefix) :].strip()
             break
+    else:
+        for prefix in ("Brake! ", "Brake!"):
+            if text.startswith(prefix):
+                text = text[len(prefix) :].strip()
+                break
     for prefix in ("Brake or change lanes! ", "Brake or change lanes!"):
         if text.startswith(prefix):
             text = "Brake or swerve! " + text[len(prefix) :].strip()

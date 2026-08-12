@@ -284,6 +284,28 @@ def test_a_closure_always_leaves_somewhere_to_go():
     assert checked  # the sweep actually saw closures
 
 
+def test_has_open_adjacent_lane_at_reads_lane_count_and_closures():
+    """The one authority a hazard warning's wording answers to: the same
+    lane count a lane change is refused against, and the same work-zone
+    closure ``closed_lane_at`` already reads."""
+    from freight_fate.data.world_models import LaneSegment
+
+    one_lane = _synthetic_trip([LaneSegment(0.0, 900.0, lanes=2, oneway=False)], 900.0, 1)
+    assert not one_lane.has_open_adjacent_lane_at(100.0)  # nowhere on this side at all
+
+    two_lane = _synthetic_trip([LaneSegment(0.0, 900.0, lanes=2, oneway=True)], 900.0, 2)
+    assert two_lane.has_open_adjacent_lane_at(100.0)
+
+    # The only other lane on a two-lane road, coned off: no escape either.
+    two_lane.zones = [Zone(90.0, 120.0, 45.0, "construction", closed_side="right")]
+    assert not two_lane.has_open_adjacent_lane_at(100.0)
+
+    # A third lane still leaves somewhere to go once one is closed.
+    three_lane = _synthetic_trip([LaneSegment(0.0, 900.0, lanes=3, oneway=True)], 900.0, 3)
+    three_lane.zones = [Zone(90.0, 120.0, 45.0, "construction", closed_side="right")]
+    assert three_lane.has_open_adjacent_lane_at(100.0)
+
+
 def test_riding_a_closed_lane_warns_then_hits_the_barrels():
     from freight_fate.app import App
 
@@ -893,6 +915,117 @@ def test_hazard_event_records_dodge_context():
         assert d._hazard_deadline is not None
         assert d._hazard_dodgeable is True
         assert d._hazard_lane == d.lane.lane
+    finally:
+        app.shutdown()
+
+
+# -- Hazard wording must not offer a lane change nobody can make -------------------
+
+
+def test_traffic_pressure_hazard_says_brake_only_with_no_lane_to_swerve_into():
+    """Manual playtest, US-285 toward Denver, 2026-08-12: one lane your
+    side, and the lead-vehicle warning still said "Brake or change lanes!"
+    -- an escape the road never offered. The lead-vehicle branch must ask
+    the same lane authority a real lane change answers to."""
+    from freight_fate.data.world_models import LaneSegment
+    from freight_fate.sim.trip import TripEventKind
+    from freight_fate.sim.trip_models import TrafficContext
+
+    trip = _synthetic_trip([LaneSegment(0.0, 900.0, lanes=2, oneway=False)], 900.0, 3)
+    trip.position_mi = 50.0
+    trip._traffic_warning_mi = 0.0
+    lead = _npc(50.05, lane=0, speed_mph=30.0)
+    lead.intent = "braking"
+    trip.traffic_context = lambda: TrafficContext(lead=lead, gap_mi=0.01, closing_mph=20.0)
+
+    trip._check_hazards(1.0)
+
+    events = [e for e in trip._events if e.kind == TripEventKind.HAZARD]
+    assert events
+    assert events[0].message == "Brake! Brake lights right ahead."
+    assert "change lanes" not in events[0].message
+    assert events[0].data["dodgeable"] is True  # brake alone still takes it nearly to a stop
+
+
+def test_traffic_pressure_hazard_keeps_the_lane_offer_when_one_exists():
+    """Same lead-vehicle warning, but on a road with somewhere to go: the
+    wording is unchanged from before this fix."""
+    from freight_fate.data.world_models import LaneSegment
+    from freight_fate.sim.trip import TripEventKind
+    from freight_fate.sim.trip_models import TrafficContext
+
+    trip = _synthetic_trip([LaneSegment(0.0, 900.0, lanes=2, oneway=True)], 900.0, 4)
+    trip.position_mi = 50.0
+    trip._traffic_warning_mi = 0.0
+    lead = _npc(50.05, lane=0, speed_mph=30.0)
+    lead.intent = "braking"
+    trip.traffic_context = lambda: TrafficContext(lead=lead, gap_mi=0.01, closing_mph=20.0)
+
+    trip._check_hazards(1.0)
+
+    events = [e for e in trip._events if e.kind == TripEventKind.HAZARD]
+    assert events
+    assert events[0].message == "Brake or change lanes! Brake lights right ahead."
+
+
+def test_random_dodgeable_hazard_says_brake_only_with_no_lane_to_swerve_into(monkeypatch):
+    """The fixed-object hazard family (debris, a stopped vehicle) gets the
+    same treatment as the lead-vehicle warning: no lane, no offer."""
+    import freight_fate.sim.trip_road_events as road_events
+    from freight_fate.data.world_models import LaneSegment
+    from freight_fate.sim.trip import TripEventKind
+
+    trip = _synthetic_trip([LaneSegment(0.0, 900.0, lanes=2, oneway=False)], 900.0, 9)
+    trip.position_mi = 50.0
+    trip._hazard_check_mi = 0.0
+    monkeypatch.setattr(trip, "_hazard_risk", lambda: 2.0)  # certain to fire
+    monkeypatch.setattr(
+        road_events, "eligible_hazards", lambda *a, **k: [("debris on the road", 1.0)]
+    )
+
+    trip._check_hazards(0.0)
+
+    events = [e for e in trip._events if e.kind == TripEventKind.HAZARD]
+    assert events
+    assert events[0].message == "Brake! Debris on the road."
+    assert events[0].data["dodgeable"] is True
+
+
+def test_hazard_hint_and_clearing_need_no_lane_when_there_is_none():
+    """One lane your side: the lingering hint must not offer a lane change,
+    and a lane-change refusal must never be required to clear the hazard --
+    slowing alone, with no lane change ever attempted, still resolves it and
+    earns the achievement."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import HAZARD_CREEP_MPH, HAZARD_SAFE_MPH, MPH_PER_MPS
+
+    app = App()
+    spoken: list[str] = []
+    awarded: list[str] = []
+    try:
+        d = _driving(app)
+        d.ctx.say_event = lambda text, *a, **k: spoken.append(text)
+        d.ctx.award_achievement = lambda key, **k: awarded.append(key)
+        _rolling(d, 65.0)
+        d.trip.has_open_adjacent_lane_at = lambda mile=None: False
+        d._hazard_deadline = 5.0
+        d._hazard_dodgeable = True
+        d._hazard_lane = d.lane.lane
+        d._hazard_slow_hint_said = False
+        d._automatic_braking_announced = False
+
+        # Slow past the old moving-hazard speed: the hint fires once, and
+        # never names a lane change.
+        d.truck.velocity_mps = (HAZARD_SAFE_MPH - 1.0) / MPH_PER_MPS
+        d._update_hazard(1 / 60)
+        assert spoken.count("It is still in your lane. Nearly stop.") == 1
+        assert not any("change lanes" in text for text in spoken)
+
+        # Never changed lanes: nearly stopping alone still clears it.
+        d.truck.velocity_mps = (HAZARD_CREEP_MPH - 1.0) / MPH_PER_MPS
+        d._update_hazard(1 / 60)
+        assert d._hazard_deadline is None
+        assert "hazard_avoided" in awarded
     finally:
         app.shutdown()
 
