@@ -206,6 +206,19 @@ class DrivingState(
         self._hazard_deadline: float | None = None
         self._hazard_slow_hint_said = False
         self._automatic_braking_announced = False
+        self._automatic_braking_escalated = False
+        # The service application the hazard assist is holding (0.0 = off the
+        # pedal), whether it has earned the emergency application on top, and
+        # the measurements that decide it. Held rather than re-decided every
+        # frame: the air system charges a whole brake application every time
+        # the pedal rises, and the assist's own braking retreats the very
+        # threshold that engaged it.
+        self._aeb_brake = 0.0
+        self._aeb_emergency = False
+        self._aeb_hold_s = 0.0
+        self._aeb_losing_s = 0.0
+        self._aeb_decel_mps2 = 0.0
+        self._aeb_last_speed_mps: float | None = None
         self._last_event_message = ""  # last spoken route announcement, for replay
         self._speed_announce_timer = 0.0
         self._last_announced_mph = 0.0

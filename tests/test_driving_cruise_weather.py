@@ -1307,6 +1307,12 @@ def test_hazard_deadline_covers_braking_time_from_current_speed():
 
 
 def test_automatic_emergency_braking_engages_once_and_cancels_cruise(monkeypatch):
+    """The assist takes the truck on the SERVICE brakes and says so once.
+
+    "Emergency braking engaged" is reserved for the escalation, which this
+    truck has not earned: the announcement must not claim the hardest stop
+    the rig has while the assist is on the normal brakes.
+    """
     from freight_fate.app import App
 
     app = App()
@@ -1320,8 +1326,11 @@ def test_automatic_emergency_braking_engages_once_and_cancels_cruise(monkeypatch
         driving._update_hazard(0.01)
         driving._update_hazard(0.01)
         assert driving.truck.brake == 1.0
+        assert not driving.truck.emergency_brake
         assert driving._cruise_mph is None
-        assert [text for text, _ in spoken].count("Emergency braking engaged.") == 1
+        said = [text for text, _ in spoken]
+        assert said.count("Automatic braking.") == 1
+        assert "Emergency braking engaged." not in said
     finally:
         app.shutdown()
 
@@ -1624,6 +1633,145 @@ def test_a_stop_service_braking_can_make_stays_on_the_service_brakes():
             elapsed += 1 / 60
     finally:
         app.shutdown()
+
+
+def test_a_routine_assisted_stop_costs_one_brake_application(monkeypatch):
+    """Owner ruling from a live drive, 2026-08-12: "This emergency braking has
+    to stop for brake assist. Air pressure keeps running out. Just use the
+    dang service brakes."
+
+    Two things spent that air. The assist decided its application afresh every
+    frame against a threshold its own braking pushed away, so it let go, the
+    threshold came back and it pressed again -- and the air system charges a
+    whole brake application every time the pedal RISES. And the input pass
+    ramps the brake down and writes the emergency flag from the B key, both
+    before the physics runs and both after the assist's last word on the
+    frame, so what the drums actually got was a frame's ramp short of full
+    service and the difference was re-charged every frame.
+
+    One held stop, one application: the pedal the drums see is the full one
+    the budget assumed, the gauge barely moves, and nothing escalates.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving import MPH_PER_MPS
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    try:
+        app.ctx.settings.automatic_emergency_braking = True
+        driving = start_drive(app)
+        quiet_trip(driving)
+        clear_weather(driving)
+        open_limits(driving)
+        driving.trip.traffic_pressures = []
+        driving.trip.curves = []
+        driving.trip.grade_at = lambda mile: 0.0  # level ground for the whole stop
+        driving._destination_exit_taken = True
+        t = driving.truck
+        driving.handle_event(key_event(pygame.K_e))  # engine on
+        t.transmission.gear = 10
+        t.velocity_mps = 65.0 / MPH_PER_MPS
+        t.grade, t.grip = 0.0, 1.0
+        t.brake_temp_c, t.brake_wear_pct = 20.0, 0.0
+        t.air_pressure_psi = 125.0  # governor cut-out, so nothing rebuilds mid-test
+        damage_before = t.damage_pct
+        psi_before = t.primary_air_psi
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake now! Stopped traffic ahead.",
+                {"deadline_s": 3.0},
+            )
+        )
+        # Units of pedal RISE the air system charged for, the measure the
+        # fanning assists were caught with (bench trace, 2026-08-11).
+        charged = 0.0
+        previous = t._last_service_air_application
+        held_decel = 0.0
+        pedal_seen = 0.0
+        for _ in range(60 * 30):
+            driving.update(1 / 60)
+            assert not t.emergency_brake, "a sound truck on the flat needed no panic stop"
+            application = t._last_service_air_application
+            charged += max(0.0, application - previous)
+            previous = application
+            if driving._aeb_brake > 0.0:
+                held_decel = max(held_decel, driving._aeb_decel_mps2)
+                pedal_seen = max(pedal_seen, application)
+            if driving._hazard_deadline is None:
+                break
+        assert driving._hazard_deadline is None, "the assist never resolved the hazard"
+        assert t.damage_pct == damage_before, "the assist engaged and still hit the hazard"
+        # The pedal the physics and the air system saw is the full service
+        # application the budget assumed, not what survived the input ramp.
+        assert pedal_seen == pytest.approx(1.0)
+        assert held_decel >= t.full_service_decel_mps2() * 0.95
+        assert charged <= 1.2, f"one held stop was charged {charged:.1f} brake applications"
+        spent = psi_before - t.primary_air_psi
+        assert 3.0 <= spent <= 9.0, f"a single held stop spent {spent:.1f} psi"
+    finally:
+        app.shutdown()
+
+
+def test_the_escalation_reads_what_the_truck_is_doing_not_what_it_should():
+    """Same speed, same time left, same brakes -- and only one of them panics.
+
+    The old predicate asked whether the time left still covered what a full
+    application OUGHT to deliver. That is a prediction, and the assist was not
+    delivering it, so an ordinary assisted stop could trip it. The escalation
+    now reads the deceleration the truck is actually making: a stop that is
+    getting there keeps the service brakes however tight the arithmetic looks,
+    and only a stop that has stopped getting there stands on everything.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving import MPH_PER_MPS
+
+    def run(*, slowing: bool) -> bool:
+        app = App()
+        try:
+            app.ctx.settings.time_scale = 20.0
+            app.ctx.settings.automatic_emergency_braking = True
+            driving = start_drive(app)
+            quiet_trip(driving)
+            t = driving.truck
+            held = 65.0 / MPH_PER_MPS
+            t.velocity_mps = held
+            t.grade, t.grip = 0.0, 1.0
+            t.brake_temp_c, t.brake_wear_pct = 20.0, 0.0
+            driving._handle_trip_event(
+                TripEvent(
+                    TripEventKind.HAZARD,
+                    "Brake now! Stopped traffic ahead.",
+                    {"deadline_s": 3.0},
+                )
+            )
+            stood_on_it = False
+            for _ in range(60 * 60):
+                t.throttle = 0.0
+                driving._update_hazard(1 / 60)
+                stood_on_it = stood_on_it or t.emergency_brake
+                if driving._hazard_deadline is None:
+                    break
+                if slowing:
+                    t.update(1 / 60)
+                    t.grade = 0.0
+                else:
+                    # Grip that is not there: everything is applied and the
+                    # truck is not losing a single mile an hour.
+                    t.velocity_mps = held
+            return stood_on_it
+        finally:
+            app.shutdown()
+
+    assert not run(slowing=True), "a stop that was getting there did not need the hard version"
+    assert run(slowing=False), "a truck that was not slowing at all rode it into the hazard"
 
 
 def test_automatic_emergency_braking_leads_the_budget(monkeypatch):

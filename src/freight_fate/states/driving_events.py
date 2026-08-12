@@ -139,7 +139,9 @@ class DrivingEventMixin:
             self._hazard_deadline = self._hazard_deadline_for(
                 slack * reaction * hos.reaction_window_mult(self.ctx.profile.fatigue)
             )
-            self._automatic_braking_announced = False
+            # A fresh hazard starts the assist from an open pedal, with nothing
+            # measured yet from the last one.
+            self._release_hazard_brake()
             message = terse_hazard_message(event.message) if self._terse_speech() else event.message
             if speed_control_was_active:
                 message = f"{message} Automatic speed control canceled."

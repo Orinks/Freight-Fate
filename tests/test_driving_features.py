@@ -223,24 +223,32 @@ def test_assist_releases_its_own_emergency_application(monkeypatch):
         # Clear path: AEB engaged and escalated, then the truck gets slow enough.
         driving._hazard_deadline = 3.0
         driving._automatic_braking_announced = True
+        driving._aeb_brake = 1.0
+        driving._aeb_emergency = True
         driving.truck.emergency_brake = True
         driving.truck.velocity_mps = 0.0
         driving._update_hazard(1 / 60)
         assert driving._hazard_deadline is None
         assert driving.truck.emergency_brake is False
+        assert driving._aeb_brake == 0.0
 
         # Collision path: the deadline runs out with the application still on.
         driving._hazard_deadline = 1 / 120
         driving._automatic_braking_announced = True
+        driving._aeb_brake = 1.0
+        driving._aeb_emergency = True
         driving.truck.emergency_brake = True
         driving.truck.velocity_mps = 30.0
         driving._update_hazard(1 / 60)
         assert driving._hazard_deadline is None
         assert driving.truck.emergency_brake is False
+        assert driving._aeb_brake == 0.0
 
         # A driver-held application is not the assist's to release.
         driving._hazard_deadline = 3.0
         driving._automatic_braking_announced = False
+        driving._aeb_brake = 0.0
+        driving._aeb_emergency = False
         driving.truck.emergency_brake = True
         driving.truck.velocity_mps = 0.0
         driving._update_hazard(1 / 60)

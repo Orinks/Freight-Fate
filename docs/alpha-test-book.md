@@ -445,17 +445,19 @@ seconds in; and do nothing at all.
 
 Listen for: enough silence after the warning to hear it out and act. If
 you start a lane change, the change should finish and clear the hazard on
-its own; "Emergency braking engaged" should not land on top of you
-part-way through the move. Doing nothing should end in the assist braking
-for you and actually stopping the truck — that changed the same day, and
-it is the second half of this checklist.
+its own; "Automatic braking" should not land on top of you part-way
+through the move. Doing nothing should end in the assist braking for you
+and actually stopping the truck — that changed the same day, and it is
+the second half of this checklist.
 
-Worth its own run: the assist starts on the normal brakes, and only
-stands on everything when those alone will no longer do it in the time
-left. So take a hazard at the bottom of a long descent, with brakes you
-have already cooked and rain or ice underneath. That combination used to
-end in a collision after the truck had told you it was braking. On good
-brakes on level ground you should never feel the hard version.
+Worth its own run: the assist says "Automatic braking" and uses the
+normal brakes, one steady application it holds to the end, and it only
+adds "Emergency braking engaged" when the stop it is actually making has
+stopped getting there in the time left. So take a hazard at the bottom of
+a long descent, with brakes you have already cooked and rain or ice
+underneath. That combination used to end in a collision after the truck
+had told you it was braking. On good brakes on level ground you should
+never hear the second line, and the air gauge should barely move.
 
 Pass when: you can hear the whole warning and still beat it, on every
 road and whatever state the brakes are in; and when you do nothing, the
