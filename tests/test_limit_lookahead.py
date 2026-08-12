@@ -90,6 +90,9 @@ def test_advance_warning_lead_scales_with_time_compression(world):
     trip = _trip(world, VILLAGE)
     trip.time_scale = 40.0  # the game's top compression setting
     speed = 55.0
+    # The compression ramp reads the truck's real speed; a parked trip idles
+    # at the 4x floor, so put the truck at highway pace first.
+    trip.truck.velocity_mps = speed * 0.44704
     scale = trip.effective_time_scale
     assert scale == 40.0  # full pacing already resumed at this speed
 
