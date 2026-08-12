@@ -1086,6 +1086,133 @@ def test_low_air_warning_flushes_event_voice(monkeypatch):
         app.shutdown()
 
 
+def test_low_air_warning_does_not_repeat_while_bouncing_near_threshold(monkeypatch):
+    """Regression for the tester report: heavy/repeated service braking makes
+    pressure hover right around the 60 psi threshold while the compressor
+    catches up. Each dip below 60 must not re-fire the full warning line as
+    long as pressure never climbs back out to the hysteresis clear point.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        speech_stub(events, with_interrupt=True),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.engine_on = True
+        driving.truck.air_pressure_psi = 125.0
+        driving._low_air_said = False
+
+        def step(psi: float) -> None:
+            was_low = driving.truck.air_low_warning
+            driving.truck.air_pressure_psi = psi
+            driving._update_air_brake_announcements(
+                was_ready=False, was_low=was_low, was_spring=False
+            )
+
+        # First dip below the warning threshold: exactly one warning.
+        step(55.0)
+        assert len(events) == 1
+        assert events[0][0].startswith("Low air warning")
+
+        # Repeated braking bounces pressure just below and just above 60 psi,
+        # but never clears the 68 psi hysteresis band. None of this may
+        # re-fire the warning.
+        for psi in (58.0, 61.0, 59.0, 62.0, 57.0, 63.0, 60.0, 56.0):
+            step(psi)
+        assert len(events) == 1
+    finally:
+        app.shutdown()
+
+
+def test_low_air_warning_rearms_after_recovering_above_clear_threshold(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        speech_stub(events, with_interrupt=True),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.engine_on = True
+        driving.truck.air_pressure_psi = 125.0
+        driving._low_air_said = False
+
+        def step(psi: float) -> None:
+            was_low = driving.truck.air_low_warning
+            driving.truck.air_pressure_psi = psi
+            driving._update_air_brake_announcements(
+                was_ready=False, was_low=was_low, was_spring=False
+            )
+
+        step(55.0)  # first dip: warns once
+        assert len(events) == 1
+
+        step(63.0)  # ticks back up but stays inside the hysteresis band
+        step(55.0)  # dips again: still must not re-warn
+        assert len(events) == 1
+
+        step(70.0)  # genuinely recovers clear of the 68 psi clear threshold
+        step(55.0)  # dips again: this is a fresh low-air event
+        assert len(events) == 2
+        assert events[-1][0].startswith("Low air warning")
+    finally:
+        app.shutdown()
+
+
+def test_spring_brake_warning_bypasses_low_air_cooldown(monkeypatch):
+    """A genuinely worsening situation must still warn immediately even while
+    the low-air warning's cooldown/latch is active from an earlier, milder
+    dip -- escalation to spring brakes is its own event, not gated by the
+    low-air hysteresis.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        speech_stub(events, with_interrupt=True),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.engine_on = True
+        driving.truck.air_pressure_psi = 125.0
+        driving._low_air_said = False
+        driving._spring_brake_said = False
+
+        def step(psi: float) -> None:
+            was_low = driving.truck.air_low_warning
+            was_spring = driving.truck.spring_brakes_active
+            driving.truck.air_pressure_psi = psi
+            driving._update_air_brake_announcements(
+                was_ready=False, was_low=was_low, was_spring=was_spring
+            )
+
+        step(55.0)  # low-air warning fires and latches
+        assert len(events) == 1
+        assert events[-1][0].startswith("Low air warning")
+
+        # Pressure keeps falling, straight through into spring-brake range,
+        # without ever recovering above the low-air clear threshold.
+        step(35.0)
+        assert len(events) == 2
+        assert events[-1][0].startswith("Spring brakes applied")
+    finally:
+        app.shutdown()
+
+
 def test_terse_lane_departure_omits_recovery_instruction(monkeypatch):
     from freight_fate.app import App
 
