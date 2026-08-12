@@ -394,3 +394,36 @@ def test_terminal_reports_old_fresh_observation_as_live_without_updating(monkeyp
         assert "updating" not in spoken[-1].lower()
     finally:
         app.shutdown()
+
+
+def test_the_calendar_the_player_hears_is_the_one_achievements_read():
+    """A date badge must fire on the date the player was told it is.
+
+    Reported 2026-08-11: the April 1 achievement fired with the real-time
+    calendar on, months away from April. The seasonal achievements read the
+    raw career clock, while every surface the player can hear -- the spoken
+    date, the season, the weather -- runs on the calendar clock: the real
+    wall-clock date when live weather drives it, otherwise the career clock
+    plus the profile's own calendar offset. Two clocks, and the badges were
+    reading the one nobody sees.
+    """
+    from freight_fate.models.profile import Profile
+    from freight_fate.sim.season import date_text, player_calendar_hours
+
+    # A career sitting on its own day 11 -- April 1 by the raw career clock,
+    # which starts on March 21.
+    profile = Profile(name="Calendar Driver")
+    profile.game_hours = 11 * 24.0 + 9.0
+    assert date_text(profile.game_hours) == "April 1"
+
+    # With the real-time calendar driving things, the player is told the real
+    # date, so that is the date the badge has to answer to.
+    real = player_calendar_hours(profile, live_calendar=True)
+    assert date_text(real) == date_text(real_clock_game_hours())
+
+    # With the independent career calendar, the profile's own offset counts:
+    # anchoring the calendar forward must move the badge with it.
+    profile.calendar_offset_days = 40
+    career = player_calendar_hours(profile, live_calendar=False)
+    assert date_text(career) == date_text(profile.calendar_game_hours)
+    assert date_text(career) != "April 1"

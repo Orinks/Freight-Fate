@@ -583,7 +583,7 @@ class CityMenuState(MenuState):
         from ..sim.season import (
             adjust_for_calendar,
             date_text,
-            real_clock_game_hours,
+            player_calendar_hours,
             season,
             temperature_c,
         )
@@ -591,10 +591,11 @@ class CityMenuState(MenuState):
         # Live conditions and the calendar are separate player choices. The
         # legacy default follows today's real date; an independent calendar
         # advances with career time even while conditions remain live.
-        season_hours = (
-            real_clock_game_hours()
-            if provider is not None and self.ctx.settings.live_weather_controls_calendar
-            else p.calendar_game_hours
+        season_hours = player_calendar_hours(
+            p,
+            live_calendar=(
+                provider is not None and self.ctx.settings.live_weather_controls_calendar
+            ),
         )
         if live:
             observed = None

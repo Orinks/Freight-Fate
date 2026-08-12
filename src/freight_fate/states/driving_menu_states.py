@@ -1451,6 +1451,20 @@ class ArrivalState(MenuState):
         ):
             self.ctx._app.mastodon.flush_async()
 
+    def _live_calendar(self) -> bool:
+        """Whether live weather is driving the calendar right now.
+
+        The same two-part answer the terminal's Time and weather readout uses:
+        a provider has to be attached AND the player has to have left the
+        calendar following it. Read defensively -- a trip built without a
+        weather system must not crash a settlement.
+        """
+        weather = getattr(getattr(self, "driving", None), "trip", None)
+        provider = getattr(getattr(weather, "weather", None), "provider", None)
+        return provider is not None and bool(
+            getattr(self.ctx.settings, "live_weather_controls_calendar", False)
+        )
+
     def _award_arrival_achievements(
         self,
         *,
@@ -1693,17 +1707,23 @@ class ArrivalState(MenuState):
             ids.append("home_return")
 
         # -- Seasons: the calendar rides shotgun ------------------------------
-        from ..sim.season import date_text, is_friday_the_thirteenth
+        from ..sim.season import date_text, is_friday_the_thirteenth, player_calendar_hours
         from ..sim.season import season as season_of
 
-        career_season = season_of(p.game_hours)
+        # The calendar the player HEARS, not raw career time. These badges
+        # answer to a date and a season the player was told, so reading the
+        # un-offset career clock fired April's Fool in August with the
+        # real-time calendar on (reported 2026-08-11), and called a delivery
+        # a winter one while the live weather said otherwise.
+        calendar_hours = player_calendar_hours(p, live_calendar=self._live_calendar())
+        career_season = season_of(calendar_hours)
         if career_season == "winter":
             ids.append("winter_delivery")
         if add_unique_stat(p, "seasons_delivered", career_season) >= 4:
             ids.append("four_seasons")
         if dest_region == "desert_southwest" and career_season == "summer":
             ids.append("desert_summer")
-        if date_text(p.game_hours) == "April 1":
+        if date_text(calendar_hours) == "April 1":
             ids.append("april_first")
 
         # -- Deliveries, second verse: clocks, gauges, and close calls --------
@@ -1726,12 +1746,12 @@ class ArrivalState(MenuState):
             ids.append("second_ticket")
 
         # -- Dates worth noticing, and records worth keeping ------------------
-        arrival_date = date_text(p.game_hours)
+        arrival_date = date_text(calendar_hours)
         if arrival_date == "December 25":
             ids.append("christmas_delivery")
         if arrival_date == "January 1" and arrival_hour < 3.0:
             ids.append("new_year_run")
-        if is_friday_the_thirteenth(p.game_hours) and trip_damage <= 1.0:
+        if is_friday_the_thirteenth(calendar_hours) and trip_damage <= 1.0:
             ids.append("friday_thirteenth")
         if job.distance_mi >= 1_000.0:
             ids.append("five_hundred_mile_run")

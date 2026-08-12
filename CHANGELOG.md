@@ -32,6 +32,16 @@
 
 ### Fixed
 
+- **Date badges now fire on the date you were actually told it is.** With
+  the real-time calendar on, April's Fool could arrive in August. A career
+  keeps two clocks -- how long you have been driving, and what the
+  calendar says -- and every date you hear comes from the second one,
+  while these badges were quietly reading the first. Christmas, New Year,
+  Friday the thirteenth and the seasonal badges were all reading the
+  wrong one too, so a delivery could be counted as a winter run while the
+  weather outside said otherwise. They all follow the calendar you hear
+  now, whether that is the real date or your career's own.
+
 - **When the truck brakes for you, it now actually stops in time.**
   Automatic braking used the normal brake pedal, held flat out. That is
   enough on a sound truck, but a stop on hot, worn brakes in the wet

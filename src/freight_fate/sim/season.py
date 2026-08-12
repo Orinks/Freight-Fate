@@ -84,6 +84,28 @@ def real_clock_game_hours(now: datetime.datetime | None = None) -> float:
     return days_offset * 24.0 + hour
 
 
+def player_calendar_hours(profile, *, live_calendar: bool) -> float:
+    """The clock the player's own calendar runs on.
+
+    There are two clocks in a career and only one of them is ever spoken. The
+    raw ``game_hours`` is elapsed career time; what the player is TOLD the
+    date is comes from here -- the real wall-clock date when live weather is
+    driving the calendar, otherwise career time plus the profile's own
+    calendar offset. Every date the game reads back to a player, and every
+    badge that answers to a date, has to use this one.
+
+    ``live_calendar`` is the caller's answer to "is live weather driving the
+    calendar right now", which needs both a weather provider and the
+    ``live_weather_controls_calendar`` setting. The caller knows; this does
+    not, and guessing here is how the two clocks drifted apart in the first
+    place (the April 1 badge fired in August, 2026-08-11).
+    """
+    if live_calendar:
+        return real_clock_game_hours()
+    offset = getattr(profile, "calendar_game_hours", None)
+    return float(offset if offset is not None else profile.game_hours)
+
+
 # Careers start on the calendar anchor March 21, 2001 -- a Wednesday -- so
 # the day of the week falls out of the career clock directly.
 _CAREER_START_WEEKDAY = datetime.date(2001, 3, 21).weekday()

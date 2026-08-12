@@ -227,6 +227,23 @@ onto exit signalling.
       the repo could easily work an old one. New sections cover the three
       2026-08-11 fixes: the hazard reaction window (4.2a), deferred
       enforcement looks (7.3a), and the curve/limit map fixes (11.1a).
+- [x] **Date badges read the clock nobody sees -- SHIPPED 2026-08-11**
+      (owner report: April's Fool firing with the real-time calendar on,
+      in August). A career carries two clocks: raw `game_hours`, which is
+      elapsed career time, and the calendar the player is actually told --
+      the real wall-clock date when live weather drives it, otherwise
+      career time plus `calendar_offset_days`. Every spoken surface used
+      the second; `_award_arrival_achievements` used the first, so
+      `april_first` fired on career day 11 whatever the date really was,
+      and `christmas_delivery`, `new_year_run`, `friday_thirteenth`,
+      `winter_delivery`, `four_seasons` and `desert_summer` were all wrong
+      the same way -- a delivery could count as a winter run while the
+      live weather said summer. The two-clock choice now lives in one
+      accessor, `season.player_calendar_hours`, which the terminal's Time
+      and weather readout uses as well; it was the duplicated inline
+      expression that let them drift apart. Testers who already earned a
+      date badge out of season keep it -- revoking earned badges would be
+      the worse call.
 - [ ] **Remaining tester findings from the same document.** Merging
       traffic does not yield to a loaded truck. There is no cue telling
       you when you are clear to move back over after passing, and at
