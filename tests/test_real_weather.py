@@ -1,6 +1,7 @@
 """Real-weather (NWS) provider tests. No network access: the fetch function
 is injected everywhere."""
 
+import logging
 import threading
 
 from freight_fate.sim.real_weather import (
@@ -381,6 +382,104 @@ def test_expired_observation_retries_then_recovers_to_live_weather():
     assert calls == [2]
     assert weather.source_status == "live"
     assert weather.current is WeatherKind.CLEAR
+
+
+# -- stale-observation robustness ----------------------------------------------
+#
+# Regression coverage for a tester report (2026-08-11): a dead/parked station
+# made every fetch for a route segment raise "NWS observation is too old to
+# use", which escaped through the worker's generic failure handler as a
+# WARNING-with-traceback every RETRY_AFTER_S (about once a minute) for
+# stretches of a drive. The fix keeps the staleness gate well clear of a
+# normal hourly METAR cadence, handles a too-old reading as a routine miss
+# instead of an error, and logs it at most once per stretch.
+
+
+def test_59_minute_old_observation_is_accepted():
+    """A METAR up to just under an hour old is completely normal and must
+    read as live, not trip the staleness gate."""
+    now = [2_000_000.0]
+    p = SyncProvider(
+        fetch=lambda lat, lon: ("Clear", 0.0, 10.0, 10.0, now[0] - 59 * 60.0),
+        clock=lambda: 0.0,
+        wall_clock=lambda: now[0],
+    )
+    p.request("route-cell", 40.0, -80.0)
+    assert p.get("route-cell") is WeatherKind.CLEAR
+    assert not p.unavailable("route-cell")
+
+
+def test_stale_observation_does_not_raise_out_of_worker():
+    """A too-old observation used to raise a bare ValueError from inside the
+    fetch path; the worker must absorb it internally instead."""
+    now = [2_000_000.0]
+    p = RealWeatherProvider(
+        fetch=lambda lat, lon: (
+            "Clear",
+            0.0,
+            10.0,
+            10.0,
+            now[0] - OBSERVATION_MAX_AGE_S - 1,
+        ),
+        clock=lambda: 0.0,
+        wall_clock=lambda: now[0],
+    )
+    # Calling the worker body directly (synchronously, no thread boundary to
+    # hide behind) must not raise.
+    p._worker("route:charleston_wv_us:roanoke_va_us:6", 40.0, -80.0)
+    assert p.get("route:charleston_wv_us:roanoke_va_us:6") is None
+    assert p.unavailable("route:charleston_wv_us:roanoke_va_us:6")
+
+
+def test_stale_observation_keeps_previous_conditions_smooth():
+    """Once real conditions are known, one stale refresh must not yank the
+    player back to simulated fallback weather -- the previous observation
+    keeps serving (per ``_usable``/``STALE_AFTER_S``) until it genuinely
+    expires or a fresh reading arrives."""
+    monotonic = [0.0]
+    wall = [2_000_000.0]
+    calls = [0]
+
+    def fetch(lat, lon):
+        calls[0] += 1
+        if calls[0] == 1:
+            return "Heavy Rain", 5.0, 12.0, 1.0, wall[0]
+        return "Clear", 0.0, 10.0, 10.0, wall[0] - OBSERVATION_MAX_AGE_S - 1
+
+    p = SyncProvider(fetch=fetch, clock=lambda: monotonic[0], wall_clock=lambda: wall[0])
+    p.request("route-cell", 40.0, -80.0)
+    assert p.get("route-cell") is WeatherKind.HEAVY_RAIN
+
+    monotonic[0] = CACHE_TTL_S + 1
+    wall[0] += CACHE_TTL_S + 1
+    p.request("route-cell", 40.0, -80.0)
+    assert calls[0] == 2  # the stale refresh really was attempted
+    assert p.get("route-cell") is WeatherKind.HEAVY_RAIN  # but did not overwrite the cache
+    assert not p.unavailable("route-cell")
+
+
+def test_repeated_stale_fetches_do_not_multiply_warnings(caplog):
+    """A station stuck past the staleness cutoff keeps getting retried
+    (RETRY_AFTER_S is under a minute), but the log must not repeat a full
+    warning-with-traceback on every attempt -- at most one note per stretch,
+    and never at WARNING/with a traceback."""
+    now = [2_000_000.0]
+    segment = "route:charleston_wv_us:roanoke_va_us:6"
+
+    def stale_fetch(lat, lon):
+        return "Clear", 0.0, 10.0, 10.0, now[0] - OBSERVATION_MAX_AGE_S - 1
+
+    p = RealWeatherProvider(fetch=stale_fetch, clock=lambda: 0.0, wall_clock=lambda: now[0])
+    with caplog.at_level(logging.DEBUG, logger="freight_fate.sim.real_weather"):
+        for _ in range(5):
+            p._worker(segment, 40.0, -80.0)
+
+    assert p.unavailable(segment)
+    warnings = [r for r in caplog.records if r.levelno >= logging.WARNING]
+    assert warnings == []
+    notes = [r for r in caplog.records if segment in r.getMessage()]
+    assert len(notes) == 1
+    assert notes[0].exc_info is None
 
 
 # -- temperature ---------------------------------------------------------------
