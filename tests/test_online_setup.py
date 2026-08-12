@@ -431,6 +431,31 @@ def test_still_waiting_clock_starts_after_the_announcement(monkeypatch):
     assert state._poll_started > 0.0
 
 
+def _ready(**overrides) -> online_activation.PollResult:
+    defaults = dict(
+        status="ready",
+        driver_id="rig-hauler",
+        token="ffd_" + "b" * 64,
+        display_name="Rig Hauler",
+    )
+    defaults.update(overrides)
+    return online_activation.PollResult(**defaults)
+
+
+def _sharing_returns(monkeypatch, answer: str) -> list[bool]:
+    """Run the setup-time Profile sharing call inline and record what it asked
+    orinks.net for. Never lets a real request out."""
+    asked: list[bool] = []
+
+    def fake_set(_identity, enabled):
+        asked.append(enabled)
+        return answer
+
+    monkeypatch.setattr(online_states.online_presence, "set_profile_sharing", fake_set)
+    monkeypatch.setattr(online_states.threading, "Thread", ImmediateThread)
+    return asked
+
+
 def test_ready_poll_adopts_identity_and_speaks_the_display_name(monkeypatch):
     # The save stub records the identity it was called on rather than
     # discarding it: driver_id reaching adopt_online_identity is not enough
@@ -440,33 +465,137 @@ def test_ready_poll_adopts_identity_and_speaks_the_display_name(monkeypatch):
     # next presence heartbeat.
     saved: list[online_states.OnlineIdentity] = []
     monkeypatch.setattr(online_states.OnlineIdentity, "save", lambda self: saved.append(self))
+    _sharing_returns(monkeypatch, "ok")
     spoken: list[str] = []
     ctx = _make_ctx(spoken)
-    ctx.settings.online_presence = True
-    ctx.settings.cloud_saves = True
     state = online_states.OnlineSetupState(ctx)
     state.enter()
     state.activation = _an_activation()
     state._phase = "waiting"
 
-    result = online_activation.PollResult(
-        status="ready",
-        driver_id="rig-hauler",
-        token="ffd_" + "b" * 64,
-        display_name="Rig Hauler",
-    )
+    result = _ready()
     state._outcome = ("ready", result)
-    state.update(0.0)
+    state.update(0.0)  # drains "ready": saves the identity, asks for sharing
+    state.update(0.0)  # drains the "sharing" answer
 
     assert any("Connected to orinks.net as Rig Hauler." in line for line in spoken)
     assert state.activation is None
-    assert ctx.settings.online_presence is False
-    assert ctx.settings.cloud_saves is False
     assert ("identity", "rig-hauler") in spoken
     assert ("pop",) in spoken
     assert len(saved) == 1
     assert saved[0].driver_id == "rig-hauler"
     assert saved[0].driver_token == result.token
+
+
+def test_connecting_turns_on_sharing_and_cloud_backup(monkeypatch):
+    """The whole point of connecting: a new account must not land on a public
+    profile that reads "no career statistics yet". Those statistics are
+    derived from the cloud backup, so both have to come on together."""
+    monkeypatch.setattr(online_states.OnlineIdentity, "save", lambda self: None)
+    asked = _sharing_returns(monkeypatch, "ok")
+    spoken: list[str] = []
+    ctx = _make_ctx(spoken)
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+    state._phase = "waiting"
+
+    state._outcome = ("ready", _ready())
+    state.update(0.0)
+    # Cloud backup needs no handshake, so it is on the moment the account is;
+    # sharing waits for the server, which is why it is still off right here.
+    assert ctx.settings.cloud_saves is True
+    assert ctx.settings.online_presence is False
+    assert state._phase == "sharing"
+
+    state.update(0.0)
+
+    assert asked == [True]
+    assert ctx.settings.online_presence is True
+    assert (
+        ctx.settings.profile_sharing_consent_version
+        == online_states.PROFILE_SHARING_CONSENT_VERSION
+    )
+    assert ctx.settings.profile_sharing_pending_off is False
+    assert ("pop",) in spoken
+
+
+def test_a_refused_sharing_call_keeps_the_connection_and_names_the_retry(monkeypatch):
+    """orinks.net refusing the sharing switch is not a failed setup: the
+    account is connected and backing up either way. Sending the player back
+    for a fresh activation code would throw away work the code already did."""
+    monkeypatch.setattr(online_states.OnlineIdentity, "save", lambda self: None)
+    _sharing_returns(monkeypatch, "error")
+    spoken: list[str] = []
+    ctx = _make_ctx(spoken)
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+    state._phase = "waiting"
+
+    state._outcome = ("ready", _ready())
+    state.update(0.0)
+    state.update(0.0)
+
+    assert ctx.settings.online_presence is False
+    assert ctx.settings.profile_sharing_consent_version == 0
+    assert ctx.settings.cloud_saves is True
+    last = [line for line in spoken if isinstance(line, str)][-1]
+    assert "Profile sharing" in last
+    assert "Online" in last
+    assert "activation code" not in last
+    assert ("pop",) in spoken
+
+
+def test_backing_out_mid_sharing_is_refused_and_never_says_nothing_was_saved(monkeypatch):
+    """By this point the token is stored and the account is connected. Leaving
+    would strand the game believing sharing is off while orinks.net may have
+    already turned it on, and "Nothing was saved" would be a plain lie."""
+    monkeypatch.setattr(online_states.OnlineIdentity, "save", lambda self: None)
+
+    class NeverRunsThread:
+        def __init__(self, *, target, **_kwargs):
+            self.target = target
+
+        def start(self):
+            pass  # the server has not answered yet
+
+    monkeypatch.setattr(online_states.threading, "Thread", NeverRunsThread)
+    spoken: list = []
+    popped: list = []
+    ctx = _make_ctx(spoken, pop_state=lambda: popped.append("pop"))
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+    state._phase = "waiting"
+
+    state._outcome = ("ready", _ready())
+    state.update(0.0)
+    assert state._phase == "sharing"
+    spoken.clear()
+
+    state.go_back()
+
+    assert popped == []
+    said = [line for line in spoken if isinstance(line, str)]
+    assert not any("Nothing was saved" in line for line in said)
+    assert any("Stay here" in line for line in said)
+
+
+def test_choosing_setup_again_mid_sharing_does_not_start_a_new_activation(monkeypatch):
+    """A second press must not throw away a finished setup for a fresh code."""
+    started: list = []
+    monkeypatch.setattr(
+        online_states.online_activation, "start_activation", lambda: started.append(True)
+    )
+    spoken: list[str] = []
+    ctx = _make_ctx(spoken)
+    state = online_states.OnlineSetupState(ctx)
+    state.enter()
+    state._phase = "sharing"
+
+    state._start_setup()
+
+    assert started == []
+    assert state._phase == "sharing"
+    assert any("Profile sharing" in line for line in spoken if isinstance(line, str))
 
 
 def test_token_save_failure_reuses_the_keyring_failure_wording(monkeypatch):

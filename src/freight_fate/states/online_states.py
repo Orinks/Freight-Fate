@@ -36,7 +36,10 @@ _ACTIVATION_POLL_FIRST_PHASE_SECONDS = 30.0
 _ACTIVATION_STILL_WAITING_AFTER = 5.0
 
 DISCLOSURE = (
-    "Profile sharing is optional and off until you turn it on. When on, orinks.net can "
+    "Connecting an orinks.net account turns Profile sharing on and starts backing your "
+    "careers up to that account, so your driver profile has career statistics on it from "
+    "the first delivery. Either one is a single item away in the Online menu whenever you "
+    "want it off. When Profile sharing is on, orinks.net can "
     "publicly show your driver name and broad on-duty board activity; eligible profile "
     "details; official achievements you earn; and automatic road-journal posts "
     "generated from gameplay. Public updates can also appear in the Freight Fate updates "
@@ -45,8 +48,9 @@ DISCLOSURE = (
     "publish your real name, full save, coordinates, active cargo details, or precise "
     "real-world location. Detailed career statistics come only from your latest accepted "
     "private backup and include lifetime career earnings, the running total your career "
-    "has ever earned; the money you currently have is never published. Turning Profile "
-    "sharing off hides public details but does not turn Cloud backup off."
+    "has ever earned; the money you currently have is never published. The backups "
+    "themselves stay private to your account and never appear as public downloads. "
+    "Turning Profile sharing off hides public details but does not turn cloud backup off."
 )
 
 # pygame.SCRAP_TEXT is the plain string "text/plain". Windows resolves that to
@@ -220,8 +224,12 @@ class OnlineSetupState(MenuState):
     that still works even when the game and the player's browser do not
     share a clipboard). Both stay available for as long as an activation is
     outstanding, and both double as the fallback path for when
-    ``webbrowser.open`` does nothing. On success the identity is saved while
-    Profile sharing and Cloud backup remain off.
+    ``webbrowser.open`` does nothing. On success the identity is saved, cloud
+    backup starts, and Profile sharing is turned on -- a connected account
+    whose public profile reads "no career statistics yet" is a connection that
+    did nothing for the player, and those statistics are derived from the
+    backup, so the two only make sense together. Either one is a single item
+    away in the Online menu afterwards.
     """
 
     title = "orinks.net account setup"
@@ -229,7 +237,7 @@ class OnlineSetupState(MenuState):
     def __init__(self, ctx, *, autostart: bool = False) -> None:
         super().__init__(ctx)
         self.activation: online_activation.Activation | None = None
-        self._phase = "idle"  # idle | starting | waiting | expired | error
+        self._phase = "idle"  # idle | starting | waiting | sharing | expired | error
         self._poll_started = 0.0
         self._still_waiting_said = False
         self._outcome: tuple[str, object] | None = None  # worker -> update() mailbox
@@ -280,6 +288,8 @@ class OnlineSetupState(MenuState):
             return "Starting setup with orinks.net"
         if self._phase == "waiting" and self.activation is not None:
             return f"Waiting for code {self.activation.user_code} to be entered"
+        if self._phase == "sharing":
+            return "Finishing setup with orinks.net"
         if self._phase == "expired":
             return "Activation code expired — choose to get a new one"
         if self._phase == "error":
@@ -295,10 +305,11 @@ class OnlineSetupState(MenuState):
             # (called right after enter() finishes) speaks first instead.
             return
         self.ctx.say(
-            f"{self.title}. This connects the game to your orinks.net account. "
-            "Profile sharing and Cloud backup remain off until you turn each "
-            "one on separately. The first item asks orinks.net for an "
-            f"activation code. {self.current_text()}"
+            f"{self.title}. This connects the game to your orinks.net account, "
+            "which turns Profile sharing on and starts backing your careers up "
+            "to that account. Choose Hear what gets shared for the details, or "
+            "turn either one off afterwards from the Online menu. The first "
+            f"item asks orinks.net for an activation code. {self.current_text()}"
         )
 
     def _speak_disclosure(self) -> None:
@@ -315,6 +326,15 @@ class OnlineSetupState(MenuState):
     # -- starting -------------------------------------------------------------
 
     def _start_setup(self) -> None:
+        if self._phase == "sharing":
+            # The code was already accepted; the account is being switched on.
+            # A fresh activation request here would throw away a finished
+            # setup, so this reports where the flow actually is instead.
+            self.ctx.say(
+                "Your account is connected. Still turning Profile sharing on.",
+                interrupt=True,
+            )
+            return
         if self._phase in ("starting", "waiting"):
             # Already under way -- repeat the code rather than burning a
             # second activation request the player did not ask for.
@@ -503,6 +523,9 @@ class OnlineSetupState(MenuState):
         if kind == "ready":
             self._finish_success(payload)
             return
+        if kind == "sharing":
+            self._finish_sharing(payload)
+            return
         if kind == "expired":
             self.activation = None
             self._phase = "expired"
@@ -546,8 +569,13 @@ class OnlineSetupState(MenuState):
                 interrupt=True,
             )
             return
+        # Cloud backup needs no server handshake -- the next accepted save
+        # uploads itself -- so it is on the moment the account is connected.
+        # Profile sharing does need one: orinks.net stays the authority on
+        # what is public, so ``online_presence`` only flips once the server
+        # has confirmed it, exactly as ProfileSharingSyncState does.
+        self.ctx.settings.cloud_saves = True
         self.ctx.settings.online_presence = False
-        self.ctx.settings.cloud_saves = False
         self.ctx.settings.profile_sharing_consent_version = 0
         self.ctx.settings.profile_sharing_pending_off = False
         self.ctx.settings.save()
@@ -559,11 +587,48 @@ class OnlineSetupState(MenuState):
         # finds out someone else claimed the code they spoke or copied, and
         # that the token just saved belongs to a stranger's driver, not theirs.
         display = result.display_name or "your driver"
+        self._phase = "sharing"
+        self.refresh()
         self.ctx.say(
-            f"Connected to orinks.net as {display}. Profile sharing remains "
-            "off. Cloud backup remains off until you turn it on.",
+            f"Connected to orinks.net as {display}. Your careers now back up "
+            "to that account. Turning Profile sharing on.",
             interrupt=True,
         )
+
+        def worker() -> None:
+            self._outcome = ("sharing", online_presence.set_profile_sharing(identity, True))
+
+        threading.Thread(target=worker, name="profile-sharing", daemon=True).start()
+
+    def _finish_sharing(self, outcome: object) -> None:
+        """Apply the server's answer to the setup-time Profile sharing switch.
+
+        A refusal is not a failed setup: the account is connected and backing
+        up either way, so this says which half landed and names the one item
+        that retries the other, rather than sending the player back through a
+        fresh activation code for something the code already did.
+        """
+        self._phase = "idle"
+        self.refresh()
+        if outcome == "ok":
+            self.ctx.settings.online_presence = True
+            self.ctx.settings.profile_sharing_consent_version = PROFILE_SHARING_CONSENT_VERSION
+            self.ctx.settings.save()
+            self.ctx.apply_online_presence()
+            self.ctx.say(
+                "Profile sharing is on. Your driver profile on orinks.net fills "
+                "in as you drive. Both this and cloud backup are single items "
+                "on the Online menu if you want either off.",
+                interrupt=True,
+            )
+        else:
+            self.ctx.say(
+                "Your account is connected and your careers are backing up, but "
+                "orinks.net could not turn Profile sharing on, so your profile "
+                "stays private for now. Choose Profile sharing on the Online "
+                "menu to try again.",
+                interrupt=True,
+            )
         self.ctx.pop_state()
 
     def go_back(self) -> None:
@@ -571,6 +636,17 @@ class OnlineSetupState(MenuState):
         # while the game is still contacting orinks.net for a code gets the
         # same confirmation as one who backs out mid-poll, rather than just
         # the generic menu-back sound and no word on what happened.
+        if self._phase == "sharing":
+            # Nothing to cancel here -- the account is already connected, and
+            # leaving mid-request would strand the game believing Profile
+            # sharing is off while orinks.net may already have turned it on.
+            # The request carries its own timeout, so this waits at most that
+            # long. Same rule as ProfileSharingSyncState.
+            self.ctx.say(
+                "Your account is connected. Stay here for the Profile sharing result.",
+                interrupt=True,
+            )
+            return
         if self._phase in ("starting", "waiting"):
             self.ctx.say("Setup canceled. Nothing was saved.")
         super().go_back()

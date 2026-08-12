@@ -92,19 +92,18 @@ def test_the_offer_names_where_to_find_it_later():
     assert "Online" in said
 
 
-def test_the_offer_does_not_promise_backup_or_the_board():
-    """Connecting does not switch either feature on -- it only lets the
-    player turn each on separately later.
+def test_the_offer_says_backup_and_the_public_profile_both_come_on():
+    """Connecting switches both on, and the copy has to say so.
 
     A substring check can never close this gap, in either direction: a
-    rewrite that keeps "lets you turn on cloud backup" and "appear on the
-    drivers board" verbatim, then adds a clause -- "...so your career is
-    already protected" -- still passes both a word-ban and a positive
-    substring check while reintroducing exactly the false promise a player
-    could act on. So this pins the entire spoken line, word for word. Any
-    future edit to this copy -- even one that keeps the two required
-    phrases -- has to update this literal string, which forces the person
-    making the edit to read what the offer now claims before it can ship.
+    rewrite that keeps the two required phrases verbatim, then adds a clause
+    that walks one of them back -- or, as this copy read before 1.9, one that
+    says connecting only "lets you turn on" backup when it now turns it on --
+    still passes both a word-ban and a positive substring check while leaving
+    the player with a wrong idea of what is backed up or public. So this pins
+    the entire spoken line, word for word. Any future edit to this copy has to
+    update this literal string, which forces the person making the edit to
+    read what the offer now claims before it can ship.
     """
     spoken: list = []
     ctx = _make_ctx(spoken)
@@ -113,10 +112,11 @@ def test_the_offer_does_not_promise_backup_or_the_board():
 
     assert said == [
         "Before you set off. You can connect this computer to an "
-        "orinks.net account. That is what lets you turn on cloud backup "
-        "for your career and appear on the drivers board later, from "
-        "Online on the main menu. It takes a code and your browser, and "
-        "you can do it any time instead. Not now. 1 of 2."
+        "orinks.net account. That backs your career up so you can bring "
+        "it to another computer, and puts your driver profile and on-duty "
+        "activity on the public site. You can turn either of those off "
+        "afterwards from Online on the main menu. It takes a code and "
+        "your browser, and you can do it any time instead. Not now. 1 of 2."
     ]
 
 
@@ -233,8 +233,7 @@ def test_the_welcome_is_heard_in_full_and_then_the_offer(monkeypatch):
     Speaking the welcome after pushing the offer state cancelled the offer
     mid-sentence: the player heard "Welcome aboard", then silence, sitting on
     an unexplained two-item consent menu whose disclosure -- that connecting
-    only lets cloud backup and the drivers board be turned on later -- had been
-    cut away.
+    turns cloud backup and the public profile on -- had been cut away.
     """
     spoken: list[tuple[str, bool]] = []
     app = _first_run_app(monkeypatch, spoken)

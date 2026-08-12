@@ -23,6 +23,17 @@ def test_disclosure_is_single_profile_sharing_consent():
     assert "factual" not in lowered
 
 
+def test_disclosure_says_connecting_turns_both_on():
+    """Since 1.9 connecting an account turns Profile sharing and cloud backup
+    on, so the one screen a player reaches for to hear what they are agreeing
+    to has to say that -- and still say how to undo it."""
+    lowered = DISCLOSURE.lower()
+    assert "turns profile sharing on" in lowered
+    assert "backing your careers up" in lowered
+    assert "online menu" in lowered
+    assert "off until you turn it on" not in lowered
+
+
 def test_disable_success_confirms_off_and_clears_pending(monkeypatch):
     from freight_fate.app import App
 

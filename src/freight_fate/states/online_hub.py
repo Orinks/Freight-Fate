@@ -25,7 +25,8 @@ class OnlineHubState(MenuState):
         "Use up and down arrows to pick an item. Enter opens an item or "
         "changes a setting forward, Right arrow also changes a setting "
         "forward, and Left arrow changes it backward. Escape goes back. "
-        "Everything here is optional and off until you turn it on."
+        "Nothing here does anything until you connect an orinks.net account, "
+        "and everything here can be turned off again."
     )
 
     def build_items(self) -> list[MenuItem]:
@@ -57,8 +58,9 @@ class OnlineHubState(MenuState):
                     else "Set up orinks.net account"
                 ),
                 self._online_account_setup,
-                help="Connect the game to your orinks.net account without turning on Profile "
-                "sharing or Cloud backup.",
+                help="Connect the game to your orinks.net account. Connecting turns "
+                "Profile sharing on and starts backing your careers up to that "
+                "account; both are single items on this menu if you want either off.",
             ),
             MenuItem(
                 # The identity check lives INSIDE the label so it is
@@ -80,7 +82,8 @@ class OnlineHubState(MenuState):
                 "and on-duty board activity. Career statistics on the public profile "
                 "include lifetime career earnings; the money you currently have is "
                 "never published. Nothing is shared until you set it up: "
-                "Set up the orinks.net account first. Cloud saves remain private and separate.",
+                "Set up the orinks.net account first, which turns this on. "
+                "Cloud saves remain private and separate.",
             ),
             MenuItem(
                 lambda: (
@@ -92,7 +95,10 @@ class OnlineHubState(MenuState):
                 help="After each game save, upload that career to your "
                 "own orinks.net account so you can restore it on another "
                 "computer. Backups are private to your account and never "
-                "appear as public downloads. Uses the same orinks.net account sign-in.",
+                "appear as public downloads. Uses the same orinks.net account "
+                "sign-in, and comes on when you connect that account. The "
+                "career statistics on your public profile are read from these "
+                "backups, so turning this off empties them.",
             ),
             MenuItem(
                 "Restore a cloud backup",

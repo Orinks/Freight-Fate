@@ -289,11 +289,14 @@ class Settings:
     update_channel: str = ""  # "stable"/"dev"; "" follows this build's channel
     skipped_update: str = ""  # release tag the player chose to skip
     discord_presence: bool = True  # show broad activity in Discord (privacy-safe)
-    # Share on-duty status on the public orinks.net drivers board. On by
-    # default like Discord presence, but inert until the player completes the
-    # browser setup: nothing is ever sent without a confirmed driver identity
-    # (see online_presence.py), and board listing further requires choosing
-    # the public visibility on the site.
+    # Share the public driver profile and on-duty board status on orinks.net.
+    # Off here because a player with no account has nothing to share: without
+    # a confirmed driver identity nothing is ever sent (see
+    # online_presence.py). Connecting an account turns this on, since a
+    # connected account that publishes nothing leaves a profile reading "no
+    # career statistics yet". orinks.net stays the authority: this only flips
+    # true once the server confirms, and board listing further requires
+    # choosing the public visibility on the site.
     online_presence: bool = False
     profile_sharing_consent_version: int = 0
     # A failed server revocation keeps public state uncertain, but stops all
@@ -301,8 +304,10 @@ class Settings:
     # stable Profile sharing item again.
     profile_sharing_pending_off: bool = False
     # Back up saves to the player's own Orinks account after each local save.
-    # Off by default and separate from public Profile sharing. It needs its
-    # own explicit yes even though it reuses the same account credentials.
+    # Off here for the same reason as ``online_presence``: no account, nothing
+    # to upload. Connecting an account turns this on -- the public career
+    # statistics are derived from the latest accepted backup, so the two only
+    # make sense together -- and the Online menu turns it off again on its own.
     cloud_saves: bool = False
     # Post short public summaries of notable deliveries (new badges, level
     # ups, perfect streaks) to the player's own Mastodon account through
