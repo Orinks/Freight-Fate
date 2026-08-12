@@ -41,6 +41,17 @@
 
 ### Fixed
 
+- **A dropping speed limit is one announcement, heard in time.** The
+  advance call -- "Speed limit drops to 45 in half a mile" -- used to
+  fire so close to the drop that at the game's pace the sentence was
+  still being spoken when the limit changed, and then "Speed limit
+  reduced to 45" repeated the same number, and cruise repeated it a
+  third time. The advance call now comes early enough to hear and act
+  on, and once you have heard the number -- from the call or from
+  cruise easing to it -- the arrival confirmation stays quiet. A limit
+  that changes with no warning still announces itself, and raised
+  limits speak as before.
+
 - **Hazard warnings stop telling you to change lanes when there is no
   lane.** On a one-lane road -- or beside a lane closed for roadwork --
   the warning said "Brake or change lanes!" and the reminder said
