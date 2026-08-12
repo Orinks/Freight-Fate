@@ -293,6 +293,7 @@ from the words, and synonyms cost them a re-read.
 | The parking brake engaging: a hard mechanical clunk of air dumping | Parking brake set | brake set, park brake on | `vehicle/brake_set` |
 | The parking brake releasing, freeing the truck to roll | Parking brake released | brake release, park brake off | `vehicle/brake_release` |
 | The hardest stop the truck has, for a hazard that cannot otherwise be missed | Emergency brake | e-brake (bare abbreviation), panic stop | `vehicle/ebrake` (fallback `vehicle/brake_air`) |
+| The hazard assist taking the truck and stopping it on the service brakes | Automatic braking | AEB, auto brake, emergency braking (that names only the escalation, and the routine stop never reaches it) | `states/driving_updates.py._update_hazard` |
 | Tires losing grip on the road | Tire screech | skid, traction loss | `vehicle/tire_screech` |
 | The retarder's lightest setting: two cylinders of retard | Engine brake, stage one | jake stage one, retarder low | `engine/jake_1600`, `JAKE_STAGE_GAIN` in `states/driving_updates.py` |
 | The retarder's usual working setting on a long descent: four cylinders of retard | Engine brake, stage two | jake stage two, retarder mid | `engine/jake_1600`, `JAKE_STAGE_GAIN` |

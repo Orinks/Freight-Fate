@@ -330,6 +330,10 @@ class DrivingUpdateMixin:
         self._resume_speed_control_if_ready(braking=braking)
         self._update_cruise(dt, braking, accelerating, clutch_disengaged)
         self._update_keeper(dt, braking, accelerating, clutch_disengaged)
+        # The hazard assist's held application belongs here with the other
+        # assists' floors, ahead of the physics -- see _apply_hazard_brake.
+        # _update_hazard, which decides it, runs at the end of the frame.
+        self._apply_hazard_brake()
 
         self._update_auto_jake(dt)
         self._track_driving_badges(dt)
@@ -1028,6 +1032,9 @@ class DrivingUpdateMixin:
             and lane.lane != self._hazard_lane
         ):
             self._hazard_deadline = None
+            # The swerve answered it, so the assist's application comes off
+            # with the hazard rather than being left on a truck now clear of it.
+            self._release_hazard_brake()
             self.ctx.audio.play("events/hazard_clear", volume=0.75)
             self.ctx.controller.rumble.alert(intensity=0.4)
             self.ctx.say_event("You swerve around it. Well done.", interrupt=False)
@@ -2177,6 +2184,96 @@ class DrivingUpdateMixin:
             return False
         return self._lane_change_timer <= self._hazard_deadline
 
+    def _apply_hazard_brake(self) -> None:
+        """Put the assist's held application back on the pedal before physics.
+
+        The input pass ramps the service brake down every frame nobody is on
+        it, and writes the emergency flag straight from the B key -- both
+        before ``truck.update()`` runs, and both ahead of ``_update_hazard``,
+        which is the frame's last word on the hazard. An assist that only
+        wrote the pedal from there handed the drums an application a frame's
+        ramp short of the full one its budget assumed, framerate-dependently
+        so; its emergency flag never survived to be read at all; and the air
+        system, which charges a whole brake application every time the pedal
+        RISES, was billed for the difference again and again. Re-asserted here
+        beside the other assists' floors, one held stop costs one application.
+        """
+        if self._aeb_brake <= 0.0:
+            return
+        # Never brake against our own throttle: a hazard assist that has taken
+        # the truck has taken the throttle with it.
+        self.truck.throttle = 0.0
+        self.truck.brake = max(self.truck.brake, self._aeb_brake)
+        if self._aeb_emergency:
+            self.truck.emergency_brake = True
+
+    def _release_hazard_brake(self) -> None:
+        """Hand the pedal back, and forget what the last stop measured.
+
+        The assist releases what the assist applied. The input pass also
+        stomps the emergency flag from the B key every frame, but nothing says
+        a frame of input runs between engage and clear -- and an application
+        with no owner left the truck standing on everything for good. A
+        driver-held B is untouched: only the assist's own flag is dropped.
+        """
+        if self._aeb_emergency:
+            self.truck.emergency_brake = False
+        self._aeb_brake = 0.0
+        self._aeb_emergency = False
+        self._aeb_hold_s = 0.0
+        self._aeb_losing_s = 0.0
+        self._aeb_decel_mps2 = 0.0
+        self._aeb_last_speed_mps = None
+        self._automatic_braking_announced = False
+        self._automatic_braking_escalated = False
+
+    def _track_assisted_deceleration(self, dt: float) -> None:
+        """Smooth the deceleration the truck is actually making right now.
+
+        The budget answers what a full application ought to deliver. What the
+        escalation needs is a different question nobody can predict: whether
+        the stop already underway is going to get there. Measured off the
+        truck's own speed and smoothed just enough that a shift, a gust or a
+        single long frame is not read as a losing stop.
+        """
+        speed = max(0.0, self.truck.velocity_mps)
+        last = self._aeb_last_speed_mps
+        self._aeb_last_speed_mps = speed
+        if self._aeb_brake <= 0.0 or last is None or dt <= 0.0:
+            return
+        self._aeb_hold_s += dt
+        sample = (last - speed) / dt
+        blend = min(1.0, dt / AEB_DECEL_SMOOTHING_S)
+        self._aeb_decel_mps2 += (sample - self._aeb_decel_mps2) * blend
+
+    def _service_braking_is_losing(self, dt: float) -> bool:
+        """Whether the stop actually underway is going to miss the hazard.
+
+        Not a prediction. The time left, measured against the deceleration the
+        truck is making with everything already on, and asked to keep the same
+        fifth of the stop in hand that the engage point was given. A full
+        service application that is delivering can never trip this: the assist
+        engages with that margin and a delivering truck holds it, because road
+        and air drag add to the budget rather than taking from it. What trips
+        it is losing ground -- drums cooking under the very application meant
+        to save the stop, a grade steepening under the wheels, grip that is not
+        there. Then, and only then, the assist uses the hardest stop the rig
+        has: the same one the B key gives the driver, and what the driver
+        facing an unavoidable collision would do.
+        """
+        if self._aeb_emergency:
+            return True  # earned once, held to the end of the stop
+        if self._hazard_deadline is None or self._aeb_hold_s < AEB_DECEL_SMOOTHING_S:
+            self._aeb_losing_s = 0.0
+            return False
+        over_mps = max(0.0, (self.truck.speed_mph - self._hazard_target_mph()) / MPH_PER_MPS)
+        left_s = max(0.0, self._hazard_deadline)
+        if self._aeb_decel_mps2 * left_s >= over_mps * AEB_BUDGET_MARGIN:
+            self._aeb_losing_s = 0.0
+            return False
+        self._aeb_losing_s += dt
+        return self._aeb_losing_s >= AEB_ESCALATE_CONFIRM_S
+
     def _hazard_target_mph(self) -> float:
         """The speed that resolves the active hazard by brake alone.
 
@@ -2294,14 +2391,7 @@ class DrivingUpdateMixin:
         target = self._hazard_target_mph()
         if self.truck.speed_mph <= target:
             self._hazard_deadline = None
-            # The assist releases what the assist applied. The input pass also
-            # stomps this flag from the B key every frame, but nothing says a
-            # frame of input runs between engage and clear -- and an
-            # application with no owner left the truck standing on everything
-            # for good.
-            if self._automatic_braking_announced:
-                self.truck.emergency_brake = False
-            self._automatic_braking_announced = False
+            self._release_hazard_brake()
             self._hazard_slow_hint_said = False
             self.ctx.audio.play("events/hazard_clear", volume=0.75)
             self.ctx.controller.rumble.alert(intensity=0.4)
@@ -2334,35 +2424,53 @@ class DrivingUpdateMixin:
             )
             self.ctx.say_event(hint, interrupt=False)
         self._hazard_deadline -= dt
-        if (
+        self._track_assisted_deceleration(dt)
+        assist_may_act = (
             self.ctx.settings.automatic_emergency_braking
-            and self._hazard_deadline <= self._aeb_engage_s(target)
             and not self._dodge_still_beats_the_hazard()
-        ):
-            self.truck.brake = max(self.truck.brake, 1.0)
-            # Full service is the first answer, and on a sound truck it is the
-            # only one needed. But the stop the budget predicted gets slower
-            # while it happens -- the drums heat under the very application
-            # meant to save it -- so on hot, worn brakes in the wet on a
-            # downgrade, service braking alone loses ground and the assist
-            # rides it into the hazard. Once the time left no longer covers
-            # even a full service stop, stand on everything: the same hardest
-            # stop the B key gives the driver, which is what they would do.
-            if self._hazard_deadline <= self._brake_budget_s(target):
-                self.truck.emergency_brake = True
+        )
+        if not assist_may_act:
+            # A driver mid-drift has answered the warning, and an assist the
+            # driver has switched off has no truck to take.
+            self._release_hazard_brake()
+        elif self._aeb_brake > 0.0 or self._hazard_deadline <= self._aeb_engage_s(target):
+            if self._aeb_brake <= 0.0:
+                # Seed the measurement with the stop the budget has just
+                # promised, so the smoothing starts from an honest prior
+                # instead of climbing out of a standstill and reading the
+                # first fifth of a second of a good stop as a failure.
+                self._aeb_decel_mps2 = max(
+                    0.0, self.truck.full_service_decel_mps2() + G * self.truck.grade
+                )
+                self._aeb_hold_s = 0.0
+                self._aeb_losing_s = 0.0
+            # Full SERVICE braking, and once it is on it stays on until the
+            # hazard is answered. Deciding it afresh every frame is what fanned
+            # the pedal: the assist's own braking retreats the very threshold
+            # that engaged it, so it let go, the threshold came back, and the
+            # air system was charged a whole brake application every time round
+            # -- which is how ordinary assisted driving ran the tanks down.
+            self._aeb_brake = 1.0
+            # And the emergency application stays a genuine last resort, judged
+            # on the deceleration the truck is actually making rather than on
+            # the one a full application ought to deliver.
+            if self._service_braking_is_losing(dt):
+                self._aeb_emergency = True
+            self._apply_hazard_brake()
             if not self._automatic_braking_announced:
                 self._automatic_braking_announced = True
                 # Kept out of the reviewable log: this line interrupts the
                 # hazard warning, and the review keys exist to give that
                 # warning back, not the assist that talked over it.
+                self.ctx.say_event("Automatic braking.", interrupt=True, review=False)
+            elif self._aeb_emergency and not self._automatic_braking_escalated:
+                self._automatic_braking_escalated = True
                 self.ctx.say_event("Emergency braking engaged.", interrupt=True, review=False)
             if self._cruise_mph is not None:
                 self._cancel_cruise()
         if self._hazard_deadline <= 0:
             self._hazard_deadline = None
-            if self._automatic_braking_announced:
-                self.truck.emergency_brake = False
-            self._automatic_braking_announced = False
+            self._release_hazard_brake()
             self.ctx.audio.play("vehicle/collision")
             severity = min(1.0, self.truck.speed_mph / 70.0)
             severity *= tuning_for_time_scale(self.trip.time_scale).collision_damage

@@ -211,6 +211,14 @@ EXIT_CANCEL_GUARD_MI = 1.0  # inside this, X keeps the signal; a second press ca
 EXIT_TAP_HOLD_S = 0.35  # a Right press this short is a tap, not held steering
 AEB_BUDGET_MARGIN = 1.2  # emergency braking leads the physics budget by this factor
 AEB_LEAD_S = 0.5  # plus this flat lead, covering brake heat added during the stop
+# The assist brakes on the SERVICE brakes, and the escalation to the emergency
+# application is judged on what the truck is actually doing rather than on what
+# a full application ought to deliver. The measured deceleration is smoothed
+# over this long, is not judged at all until the pedal has been down for one
+# smoothing constant, and the shortfall has to hold for the confirm window --
+# one noisy frame is not a losing stop.
+AEB_DECEL_SMOOTHING_S = 0.4
+AEB_ESCALATE_CONFIRM_S = 0.5
 # Floor on the driver's own time between hearing a hazard warning and the
 # assist taking the truck. Long enough to hear the sentence out and get on
 # the pedal: the warning is spoken, so a window shorter than the words is no
