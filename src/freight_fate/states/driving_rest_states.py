@@ -1152,16 +1152,21 @@ class RestStopState(_FuelPumpMixin, MenuState):
             )
             return
         p.money -= MOTEL_COST
+        # A motel bed is still a real sleep: no truck idles all night just
+        # because the driver is not in it. Every other sleep option shuts the
+        # engine down first; the motel room was the one path that skipped it
+        # while still sending the driver off to bed.
+        engine_off = _shut_down_engine(d)
         _advance_rest_clock(d, hos.SLEEP_MIN)
         d.hos.sleep()
         p.fatigue = 0.0
         self._save_here(silent=True)
         self.ctx.audio.play("ui/notify")
         self.ctx.say(
-            f"You took a motel room for {MOTEL_COST:,.0f} dollars and slept "
-            f"a full ten hours. It is {clock_text(d.trip.current_hour)}. "
+            f"{engine_off}You took a motel room for {MOTEL_COST:,.0f} dollars "
+            f"and slept a full ten hours. It is {clock_text(d.trip.current_hour)}. "
             f"Hours of service reset and you wake fresh. You have "
-            f"{p.money:,.0f} dollars. {_deadline_text(d)}"
+            f"{p.money:,.0f} dollars. {_deadline_text(d)}{_wake_air_instruction(d)}"
         )
         self.ctx.award_achievement("slept_on_route")
 
@@ -1697,11 +1702,15 @@ class ParkingFullState(_FuelPumpMixin, MenuState):
         self._drive_on()
 
     def _drive_on(self) -> None:
+        # No sleep happened here, so the engine is whatever it already was --
+        # never claim it needs a restart it may not need.
         self.ctx.audio.play("ui/menu_back")
         self.ctx.pop_state()
         self.ctx.say(
-            "Back on the road. The next stop is announced as you "
-            f"approach it. Press {self.ctx.control_hint('engine')} to start the engine.",
+            "Back on the road. The next stop is announced as you approach it. "
+            "The parking brake is set. Press "
+            f"{self.ctx.control_hint('engine')} to start the engine if needed, then "
+            f"{self.ctx.control_hint('parking_brake')} to release the brake and drive on.",
             interrupt=True,
         )
 
@@ -1715,6 +1724,9 @@ class ParkingFullState(_FuelPumpMixin, MenuState):
             )
             return
         p.money -= MOTEL_COST
+        # Same as every other sleep option: no truck idles all night just
+        # because the driver bedded down in a motel instead of the sleeper.
+        engine_off = _shut_down_engine(d)
         _advance_rest_clock(d, hos.SLEEP_MIN)
         d.hos.sleep()
         p.fatigue = 0.0
@@ -1724,10 +1736,11 @@ class ParkingFullState(_FuelPumpMixin, MenuState):
         self.ctx.audio.play("ui/notify")
         self.ctx.pop_state()
         self.ctx.say(
-            f"You took a motel room for {MOTEL_COST:,.0f} dollars and slept "
-            f"a full ten hours. It is {clock_text(d.trip.current_hour)}. "
+            f"{engine_off}You took a motel room for {MOTEL_COST:,.0f} dollars "
+            f"and slept a full ten hours. It is {clock_text(d.trip.current_hour)}. "
             f"Hours of service reset and you wake fresh. You have "
-            f"{p.money:,.0f} dollars. Press E to start the engine.",
+            f"{p.money:,.0f} dollars. Press {self.ctx.control_hint('engine')} "
+            "to start the engine.",
             interrupt=True,
         )
         self.ctx.award_achievement("slept_on_route")

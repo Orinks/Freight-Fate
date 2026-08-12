@@ -2985,6 +2985,18 @@ class DrivingUpdateMixin:
         clean_stop = self._pull_over_compliance >= PULL_OVER_FULL_COMPLIANCE
         self.trip.pull_over_active = False
         self._end_stop_audio()
+        # You are stopped for the trooper, not parked for the night: the
+        # engine keeps running, but it must not keep sounding like highway
+        # load. The frame loop that eases the rev down between frames stops
+        # running the instant the roadside menu takes over, so whatever was
+        # left over from braking to the stop -- a lagging throttle, RPM still
+        # catching up to idle -- would otherwise hang in the engine loop for
+        # the whole encounter. Set the engine band directly rather than
+        # through the full audio update, which also drives the radio, lane
+        # cues, and weather bed -- none of which belong in this one-off sync.
+        self.truck.throttle = 0.0
+        self.truck.rpm = self.truck.specs.idle_rpm
+        self.ctx.audio.set_engine_rpm(self.truck.rpm, throttle=0.0)
         self._pursuit_hold_s = 0.0
         # Rolling on through a spoken failure-to-stop warning before finally
         # pulling in is reckless-class behavior, and the record says so.
@@ -3105,6 +3117,11 @@ class DrivingUpdateMixin:
         t.brake = 1.0
         t.velocity_mps = 0.0
         t.set_parking_brake()
+        # Same reasoning as the ordinary pull-over: boxed in and stopped, the
+        # engine keeps running but must read as idle for the whole stop, not
+        # whatever rev it was carrying when the troopers closed in.
+        t.rpm = t.specs.idle_rpm
+        self.ctx.audio.set_engine_rpm(t.rpm, throttle=0.0)
         self.ctx.audio.play("ui/error")
         self.ctx.push_state(
             EnforcementStopState(

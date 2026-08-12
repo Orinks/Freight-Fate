@@ -353,6 +353,41 @@ def test_motel_sleep_costs_money_and_gives_full_rest(monkeypatch):
         app.shutdown()
 
 
+def test_motel_sleep_shuts_the_engine_off(monkeypatch):
+    """A motel room is still a real sleep: the truck must not idle all night
+    just because the driver bedded down off the lot instead of in the
+    sleeper. Every other sleep option already shut the engine down; the
+    motel room was the one path that skipped it while still sending the
+    driver to bed (tester report: Darren Duff, build 1.9.0.dev0)."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    try:
+        spoken = []
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        driving = _driving(app)
+        p = app.ctx.profile
+        p.money = 500.0
+        driving.truck.start_engine()
+        app.ctx.audio.engine_start(play_start_sound=False)
+        assert driving.truck.engine_on is True
+        assert app.ctx.audio.engine_running is True
+        state = RestStopState(app.ctx, driving, _stop(driving, actions=("break", "fuel")))
+        app.push_state(state)
+
+        state._motel_sleep()
+
+        # The engine is off at the start of the sleep, in both the sim state
+        # and the audio loop -- not just claimed, actually stopped.
+        assert driving.truck.engine_on is False
+        assert app.ctx.audio.engine_running is False
+        assert any("shut down the engine" in text for text in spoken)
+    finally:
+        app.shutdown()
+
+
 def test_motel_is_refused_when_broke(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import RestStopState
@@ -399,6 +434,38 @@ def test_parking_full_night_offers_a_motel(monkeypatch):
 
         assert p.money == pytest.approx(500.0 - MOTEL_COST)
         assert p.fatigue == 0.0
+    finally:
+        app.shutdown()
+
+
+def test_parking_full_motel_shuts_the_engine_off_and_wake_prompt_matches(monkeypatch):
+    """The full-lot motel path used to end with "Press E to start the
+    engine" without ever having stopped it -- the wake prompt claimed a
+    state the sim never reached. Shutting the engine down here makes that
+    prompt true instead of just spoken."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import ParkingFullState
+
+    app = App()
+    try:
+        spoken = []
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        driving = _driving(app)
+        p = app.ctx.profile
+        p.money = 500.0
+        driving.truck.start_engine()
+        app.ctx.audio.engine_start(play_start_sound=False)
+        state = ParkingFullState(app.ctx, driving, _stop(driving, actions=("sleep",)))
+        app.push_state(state)
+
+        state._motel()
+
+        # The wake prompt tells the driver to start the engine; that must
+        # actually be true, in both the sim state and the audio loop.
+        assert driving.truck.engine_on is False
+        assert app.ctx.audio.engine_running is False
+        assert any("start the engine" in text for text in spoken)
     finally:
         app.shutdown()
 

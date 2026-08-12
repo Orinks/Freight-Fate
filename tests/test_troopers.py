@@ -1,6 +1,7 @@
 """Trooper pull-overs: enforcement posts, being observed speeding, the
 interactive roadside pull-over, immediate tickets, warnings, and evasion."""
 
+import pytest
 from enforcement_helpers import always_observing_post, open_scale_post, watch_speed
 from speech_capture import speech_stub
 
@@ -265,6 +266,45 @@ def test_stopping_issues_an_immediate_ticket(monkeypatch):
         assert p.career.reputation < rep_before
         # 25 over is a serious traffic violation, and the record says so.
         assert p.driving_record.serious_in_window(p.game_hours) == 1
+    finally:
+        app.shutdown()
+
+
+def test_stopping_drops_engine_audio_to_idle(monkeypatch):
+    """The engine keeps running through a traffic stop -- you are pulled over
+    on the shoulder, not parked for the night -- but the engine loop must not
+    keep sounding like it is still under highway load once the truck is
+    actually at rest (tester report, build 1.9.0.dev0)."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import TrafficStopState
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=1.0)
+        _quiet(app, monkeypatch)
+        samples = []
+        monkeypatch.setattr(
+            app.ctx.audio,
+            "set_engine_rpm",
+            lambda rpm, throttle=0.0: samples.append((rpm, throttle)),
+        )
+        d.truck.engine_on = True
+        # Whatever the engine was doing while braking to the stop -- still
+        # revving, still carrying some throttle.
+        d.truck.rpm = 1800.0
+        d.truck.throttle = 0.7
+        _speed_for(d, over=25.0)
+        d.truck.velocity_mps = 0.0  # brake to a full stop on the shoulder
+        d._update_pull_over(1.0)
+        assert isinstance(app.state, TrafficStopState)
+        # The engine stays on: this is a traffic stop, not an overnight park.
+        assert d.truck.engine_on is True
+        # But it reads as idle the instant the stop opens.
+        idle_rpm = d.truck.specs.idle_rpm
+        assert d.truck.rpm == pytest.approx(idle_rpm)
+        assert d.truck.throttle == 0.0
+        assert samples
+        assert samples[-1] == (pytest.approx(idle_rpm), 0.0)
     finally:
         app.shutdown()
 
