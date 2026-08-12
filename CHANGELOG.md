@@ -41,6 +41,14 @@
 
 ### Fixed
 
+- **Cloud backup no longer goes quiet after the cloud copy of a career
+  disappears.** If your account's cloud storage was reset, or you deleted a
+  career's cloud backup from another computer, this computer still remembered
+  the old cloud copy and treated the mismatch as a conflict -- and from then
+  on it silently stopped backing that career up. The game now notices there is
+  nothing in the cloud to protect, starts the career's backups over fresh, and
+  your next save is backed up as usual.
+
 - **One dip in air pressure is one warning.** Hard or repeated braking
   drags air pressure down around the warning line while the compressor
   catches up, and every little dip below it re-fired the full low-air

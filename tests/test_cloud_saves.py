@@ -316,6 +316,53 @@ def test_conflict_marks_the_slot_and_stops_backups():
     assert len(transport.posts) == 1
 
 
+def test_empty_cloud_conflict_restarts_the_slot_instead_of_sticking():
+    """A conflict whose latest revision is null means the cloud slot is empty
+    (the deployment was wiped, or the slot was deleted from another machine).
+    There is no newer save at stake, so the guard must not stick: the slot
+    starts over as a fresh upload instead of silently never backing up again.
+    """
+    transport = FakeTransport(error=conflict_error(latest_revision=None))
+    clock = Clock()
+    service = make_service(transport, clock)
+    # This machine remembers a revision the server no longer has.
+    service.sync_state.record_synced("Road Star", 7, "stale-hash")
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert len(transport.posts) == 1
+    assert transport.posts[0]["parentRevision"] == 7
+    # Not a real conflict: nothing is recorded for the player to resolve.
+    assert service.conflicts() == {}
+
+    # The stale revision is gone, and the retry goes out as a fresh slot.
+    transport.error = None
+    clock.advance(RETRY_INTERVAL_S + 0.1)
+    service.pump()
+    assert len(transport.posts) == 2
+    assert transport.posts[1]["parentRevision"] is None
+    assert service.sync_state.slot("Road Star")["revision"] == 1
+
+
+def test_recorded_empty_cloud_conflict_heals_on_the_next_backup():
+    """Older builds recorded the empty-cloud conflict as sticky. A save made
+    under this build must clear that mark and back up fresh."""
+    transport = FakeTransport()
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.sync_state.record_synced("Road Star", 7, "stale-hash")
+    service.sync_state.record_conflict("Road Star", {"latestRevision": None})
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert len(transport.posts) == 1
+    assert transport.posts[0]["parentRevision"] is None
+    assert service.conflicts() == {}
+    assert service.sync_state.slot("Road Star")["revision"] == 1
+
+
 def test_keep_mine_overwrites_the_cloud_and_clears_the_conflict():
     transport = FakeTransport(error=conflict_error(latest_revision=5))
     clock = Clock()
