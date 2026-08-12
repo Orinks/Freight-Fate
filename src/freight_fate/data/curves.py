@@ -19,9 +19,10 @@ interstate can ride the US-route out of the same city), but road class
 alone cannot tell those apart from a real switchback -- US-550 and the Salt
 River Canyon really are that sharp. ``curve_artifacts.jsonl``
 (``tools/screen_curve_artifacts.py``) names the specific ``(leg, seq)``
-records an offline terrain check flagged as sitting on flat local ground,
-where no real hairpin can exist; everything else, sharp or not, is left
-alone.
+records an offline check flagged: flat local ground where no real hairpin
+can exist, city-departure geometry at a leg's ends off the mountains, and a
+radius no through highway of any class can bend to. Everything else, sharp
+or not, is left alone -- nothing in mountain terrain is ever flagged.
 """
 
 from __future__ import annotations
@@ -114,11 +115,12 @@ def _is_interstate_artifact(row: dict) -> bool:
 
 
 def _flagged_artifact_keys() -> frozenset[tuple[str, int]]:
-    """``(leg, seq)`` pairs a US/state-route terrain check flagged as flat.
+    """``(leg, seq)`` pairs the US/state-route artifact screen flagged.
 
     Baked offline by ``tools/screen_curve_artifacts.py`` -- see that tool's
-    docstring for the discriminator (flat local ground under a hairpin-
-    severity curve, checked against the dense archived elevation profile).
+    docstring for the three discriminators (flat local ground under a
+    hairpin-severity curve, city-departure geometry at a leg's ends off the
+    mountains, and a radius no through highway of any class can bend to).
     Missing file reads as "nothing flagged" rather than an error, the same
     fail-open the interstate screen takes when curves.jsonl itself is absent.
     """

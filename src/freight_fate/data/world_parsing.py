@@ -366,8 +366,7 @@ def _parse_stop(raw, leg_miles: float, from_city: str, to_city: str) -> Stop:
     vehicle_access = str(raw.get("vehicle_access", "")).strip() or DEFAULT_VEHICLE_ACCESS
     if vehicle_access not in VEHICLE_ACCESS_LEVELS:
         raise ValueError(
-            f"{from_city} to {to_city} stop {name!r} has unknown "
-            f"vehicle_access {vehicle_access!r}"
+            f"{from_city} to {to_city} stop {name!r} has unknown vehicle_access {vehicle_access!r}"
         )
     curation = str(raw.get("curation", "")).strip() or _infer_stop_curation(name, source)
     if curation not in STOP_CURATION_LEVELS:
@@ -510,14 +509,64 @@ def _parse_speed_limit(raw, leg_miles: float, from_city: str, to_city: str) -> S
 
 
 def _parse_speed_limits(
-    raw_samples, leg_miles: float, from_city: str, to_city: str
+    raw_samples, leg_miles: float, from_city: str, to_city: str, places: tuple[float, ...] = ()
 ) -> tuple[SpeedLimitSample, ...]:
     """Parse the baked maxspeed profile, ordered along the leg.
 
     Sorting by ``at_mi`` lets the runtime treat it as a step function without
-    trusting the order the samples happen to be stored in."""
-    samples = tuple(_parse_speed_limit(s, leg_miles, from_city, to_city) for s in raw_samples)
-    return tuple(sorted(samples, key=lambda s: s.at_mi))
+    trusting the order the samples happen to be stored in. The dwell filter
+    then drops the postings that are way boundaries rather than signs."""
+    samples = sorted(
+        (_parse_speed_limit(s, leg_miles, from_city, to_city) for s in raw_samples),
+        key=lambda s: s.at_mi,
+    )
+    return _dwell_filter_speed_limits(samples, leg_miles, places)
+
+
+def _dwell_filter_speed_limits(
+    samples: list[SpeedLimitSample], leg_miles: float, places: tuple[float, ...] = ()
+) -> tuple[SpeedLimitSample, ...]:
+    """Drop postings too short to be signage, so the limit stops flickering.
+
+    OSM splits a way wherever any tag changes, so the baked profile carries
+    postings that hold for a few hundred feet -- an 80 that drops to 45 and
+    back over four tenths of a mile is a way boundary, not a sign, and no
+    agency posts one. Real driving hides them: a tenth of a mile is seconds of
+    a real hour. Time compression does not, and the player hears the limit
+    reduce and normalize with nothing on the road to explain it (reported
+    2026-08-11). Across three long routes, 23 percent of all posted changes
+    were segments the truck crossed in under three real seconds.
+
+    Length alone cannot be the test, because real signed zones are short too:
+    the median village posting in this world runs seven tenths of a mile, and
+    63 percent of them are under a mile. What separates them is whether
+    anything on the road explains the drop. So a short posting survives when a
+    place sits within ``LIMIT_PLACE_NEAR_MI`` of it -- Strawberry's 35 stays a
+    35 -- and goes when nothing does.
+
+    Sibling of the timezone dwell filter and the state-crossing sanitizer: the
+    same "a boundary that does not last is not a boundary" rule, applied to
+    the third profile baked out of way geometry. The run is measured against
+    the last posting KEPT, so a chain of slivers collapses whole rather than
+    each one surviving by measuring only its neighbour.
+    """
+    if not samples:
+        return ()
+    kept: list[SpeedLimitSample] = [samples[0]]
+    for i, sample in enumerate(samples[1:], start=1):
+        run_end = samples[i + 1].at_mi if i + 1 < len(samples) else leg_miles
+        brief = run_end - sample.at_mi < LIMIT_DWELL_MI
+        # A place explains a REDUCTION and nothing else. Passing through
+        # Strawberry is why the number drops; it is never why the road briefly
+        # allows more, so a short raise beside a village is noise like any other.
+        lowers = sample.mph is not None and kept[-1].mph is not None and sample.mph < kept[-1].mph
+        explained = lowers and any(abs(sample.at_mi - at) <= LIMIT_PLACE_NEAR_MI for at in places)
+        if brief and not explained:
+            continue  # nothing on the road posts this; the last one kept carries on
+        if sample.mph == kept[-1].mph:
+            continue  # a way boundary that changed nothing else
+        kept.append(sample)
+    return tuple(kept)
 
 
 def _parse_restriction(raw, leg_miles: float, from_city: str, to_city: str) -> RouteRestriction:

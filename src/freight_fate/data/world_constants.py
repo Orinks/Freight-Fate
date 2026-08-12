@@ -52,6 +52,18 @@ ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
 ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
 ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
 
+# How far a baked posting must hold to count as a sign rather than a way
+# boundary. OSM splits a way wherever any tag changes, so the maxspeed profile
+# carries postings a few hundred feet long; under time compression those go by
+# in a second and read as the limit flickering for no reason. A real signed
+# zone -- a village main street, a bridge, a canyon -- outlasts this easily.
+LIMIT_DWELL_MI = 1.0
+# ...unless a place on the road explains it. A village main street really is
+# posted for half a mile, so length alone would delete the signs along with
+# the noise; a drop this close to a named place is the place's doing.
+LIMIT_PLACE_NEAR_MI = 1.0
+LIMIT_EXPLAINING_CATEGORIES = frozenset({"village"})
+
 POI_DENSITY_SHORT_LEG_MILES = 160.0
 POI_DENSITY_MEDIUM_LEG_MILES = 320.0
 

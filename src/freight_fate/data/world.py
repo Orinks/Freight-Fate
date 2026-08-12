@@ -176,13 +176,21 @@ class World(WorldServiceMixin):
                 _parse_interchange(x, miles, leg_from, leg_to, leg["highway"])
                 for x in corridor.get("interchanges", ())
             )
-            speed_limits = _parse_speed_limits(
-                corridor.get("speed_limits", ()), miles, leg_from, leg_to
-            )
             traffic_volumes = _parse_traffic_volumes(
                 corridor.get("traffic_aadt", ()), miles, leg_from, leg_to
             )
             landmarks = _parse_landmarks(corridor.get("landmarks", ()), miles, leg_from, leg_to)
+            # Landmarks first: the dwell filter keeps a short posting that a
+            # place on the road explains, and drops the ones nothing does.
+            speed_limits = _parse_speed_limits(
+                corridor.get("speed_limits", ()),
+                miles,
+                leg_from,
+                leg_to,
+                places=tuple(
+                    lm.at_mi for lm in landmarks if lm.category in LIMIT_EXPLAINING_CATEGORIES
+                ),
+            )
             restrictions = _parse_restrictions(
                 corridor.get("restrictions", ()), miles, leg_from, leg_to
             )

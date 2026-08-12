@@ -15,26 +15,44 @@ notes flagged the gap: "the same Denver departure artifact rides the US-40
 leg, and no measured signal separates artifact from real switchback on that
 class -- a future US/state pass needs a different discriminator."
 
-The discriminator
+The discriminators
 ------------------
-Terrain, not road class. A hairpin-severity curve (the same test
-``RouteCurve.severity`` uses: advisory <= 25 mph or deflection >= 150 deg)
-sitting on demonstrably FLAT local ground is not a real switchback -- no
-real hairpin exists without a hill to switch back on. This reuses the exact
-terrain verdict ``reclassify_terrain.py`` already computes from the dense
-archived elevation profile (``world_data/us/geometry/``) and the shared
-``terrain_rules`` thresholds, so "flat" here means the same thing it means
-everywhere else in the data. Curves in "hills" or "mountain" local terrain
-are left alone even when very sharp -- that is real geography (rolling
-two-lanes in the Ozarks, real climbs), and the recipe's rule holds: never
-delete without a strong, specific signal.
+All three ask the same question -- could a road of this class physically hold
+this bend here? -- of a hairpin-severity curve (the same test
+``RouteCurve.severity`` uses: advisory <= 25 mph or deflection >= 150 deg).
+None of them looks at road class, because US and state routes really do
+switch back.
+
+``flat`` -- the curve sits on demonstrably FLAT local ground. No real hairpin
+exists without a hill to switch back on. This reuses the exact terrain verdict
+``reclassify_terrain.py`` computes from the dense archived elevation profile
+(``world_data/us/geometry/``) and the shared ``terrain_rules`` thresholds, so
+"flat" here means what it means everywhere else in the data.
+
+``leg_end`` -- the curve sits within ``LEG_END_MI`` of either end of the leg,
+on ground that is not "mountain". A leg ends at a city node, and the bake
+stitches city-departure street geometry onto the mainline there; that is the
+same artifact ``flat`` was built for, and terrain alone cannot see it once the
+city sits on rolling ground. Mountain terrain is spared because a town in the
+mountains really can have a switchback on its doorstep (US-119 out of
+Charleston, KY-80 out of Hazard, US-95 out of Lewiston -- all preserved).
+
+``radius`` -- the curve is tighter than ``MIN_ROAD_RADIUS_FT``, anywhere on
+any leg. This is the sibling of the interstate screen's 300 ft floor, set
+instead at the point no through highway of any class can bend: 50 ft is
+tighter than a loaded tractor-trailer's own turning circle. The floor is
+grounded in the data rather than assumed -- the tightest genuine switchback
+the world carries is 54 ft (US-550 over Red Mountain Pass, mile 60.5), and
+nothing in mountain terrain falls below the floor at all.
 
 Verified against known cases before fanning out (see the tool's own
 ``--report``): the Denver-departure kink on US-40 (mile 1.7, flat) is
 flagged; the mid-canyon US-40 hairpin over the Rockies foothills (mile
 104, hills) is not; every US-550 Million Dollar Highway switchback and
 every Salt River Canyon (Globe->Show Low, US-60) switchback reads
-"mountain" and survives untouched.
+"mountain" and survives untouched. Across the whole world the three screens
+together flag nothing in mountain terrain, which is the property to check
+first if these thresholds are ever moved.
 
 Output
 ------
@@ -93,12 +111,27 @@ OUTPUT_PATH = (
 HAIRPIN_MAX_MPH = 25
 HAIRPIN_DEFLECTION_DEG = 150.0
 
-REASON = "flat local terrain at the curve's apex -- sweep artifact, not a real switchback"
+# How close to a leg's city node counts as departure geometry rather than
+# mainline, and the radius no through highway of any class can hold.
+LEG_END_MI = 2.5
+MIN_ROAD_RADIUS_FT = 50
+
+REASONS = {
+    "flat": "flat local terrain at the curve's apex -- sweep artifact, not a real switchback",
+    "leg_end": (
+        "within 2.5 miles of the leg's city node on non-mountain ground -- "
+        "city-departure geometry baked as mainline"
+    ),
+    "radius": (
+        "tighter than 50 feet of radius -- no through highway of any class "
+        "bends that hard, digitizing artifact"
+    ),
+}
 SOURCE = (
     "data/curves.py hairpin-severity definition (advisory<=25mph or "
     "deflection>=150deg) intersected with reclassify_terrain.py's terrain "
-    "verdict from the dense archived elevation profile; flat local ground "
-    "cannot hold a real hairpin. Development-time screen, see "
+    "verdict from the dense archived elevation profile, the leg's own city "
+    "nodes, and a physical radius floor. Development-time screen, see "
     "tools/screen_curve_artifacts.py."
 )
 
@@ -132,8 +165,21 @@ def _is_hairpin_severity(row: dict[str, Any]) -> bool:
     return row["advisory_mph"] <= HAIRPIN_MAX_MPH or row["deflection_deg"] >= HAIRPIN_DEFLECTION_DEG
 
 
+def _artifact_reason(row: dict[str, Any], terrain: str, leg_miles: float) -> str | None:
+    """Which discriminator, if any, says this curve cannot be real here."""
+    if terrain == "flat":
+        return "flat"
+    apex = float(row["apex_mi"])
+    near_end = apex <= LEG_END_MI or (leg_miles > 0.0 and apex >= leg_miles - LEG_END_MI)
+    if near_end and terrain != "mountain":
+        return "leg_end"
+    if row["min_radius_ft"] < MIN_ROAD_RADIUS_FT:
+        return "radius"
+    return None
+
+
 def find_artifacts(data: dict[str, Any]) -> list[dict[str, Any]]:
-    """Every non-interstate mainline hairpin-severity curve on flat ground.
+    """Every non-interstate mainline hairpin-severity curve no road can hold.
 
     Returns rows sorted by (leg, seq) -- the file's deterministic order.
     """
@@ -168,17 +214,20 @@ def find_artifacts(data: dict[str, Any]) -> list[dict[str, Any]]:
         if profile is None:
             continue  # no geometry archive coverage; nothing to classify from
 
+        leg_miles = float(leg.get("miles") or 0.0)
         for row in candidates:
             terrain = classify_point(profile, row["apex_mi"])
-            if terrain != "flat":
+            why = _artifact_reason(row, terrain, leg_miles)
+            if why is None:
                 continue
-            # Every row shares one reason and one source (the discriminator
-            # is uniform); those live once in the meta header, not repeated
-            # 900+ times, so a row stays exactly as lean as a curves.jsonl row.
+            # The reason texts and the source live once in the meta header,
+            # not repeated a thousand times; a row carries only the short key
+            # that selects one, so it stays as lean as a curves.jsonl row.
             flagged.append(
                 {
                     "leg": leg_key,
                     "seq": row["seq"],
+                    "why": why,
                     "start_mi": row["start_mi"],
                     "apex_mi": row["apex_mi"],
                     "end_mi": row["end_mi"],
@@ -198,14 +247,16 @@ def _dumps_rows(flagged: list[dict[str, Any]]) -> str:
     data_version = "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()[:12]
     meta = {
         "meta": {
-            "schema": 1,
+            "schema": 2,
             "data_version": data_version,
             "layer": "curve_artifacts",
-            "reason": REASON,
+            "reasons": REASONS,
             "source": SOURCE,
             "params": {
                 "hairpin_max_mph": HAIRPIN_MAX_MPH,
                 "hairpin_deflection_deg": HAIRPIN_DEFLECTION_DEG,
+                "leg_end_mi": LEG_END_MI,
+                "min_road_radius_ft": MIN_ROAD_RADIUS_FT,
             },
         }
     }
@@ -216,13 +267,16 @@ def _dumps_rows(flagged: list[dict[str, Any]]) -> str:
 
 def _report(flagged: list[dict[str, Any]]) -> None:
     by_leg: dict[str, list[dict[str, Any]]] = {}
+    counts: dict[str, int] = {}
     for row in flagged:
         by_leg.setdefault(row["leg"], []).append(row)
-    print(f"{len(flagged)} flat-terrain hairpin artifact(s) across {len(by_leg)} leg(s):")
+        counts[row["why"]] = counts.get(row["why"], 0) + 1
+    breakdown = ", ".join(f"{counts.get(why, 0)} {why}" for why in REASONS)
+    print(f"{len(flagged)} hairpin artifact(s) across {len(by_leg)} leg(s): {breakdown}")
     for leg_key in sorted(by_leg):
         rows = by_leg[leg_key]
         highway = rows[0]["highway"]
-        miles = ", ".join(f"{r['apex_mi']:.2f}" for r in rows)
+        miles = ", ".join(f"{r['apex_mi']:.2f} ({r['why']})" for r in rows)
         print(f"  {leg_key} ({highway}): {len(rows)} at mile(s) {miles}")
 
 

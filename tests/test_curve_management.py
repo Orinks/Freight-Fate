@@ -196,6 +196,68 @@ class TestUSRouteArtifactScreen:
                 "that screen is a separate, unconditional rule"
             )
 
+    def test_city_departure_hairpins_are_gone_off_the_mountains(self) -> None:
+        """Terrain alone could not see a departure kink on rolling ground.
+
+        Reported 2026-08-11: hairpins "and not just on mountains either". The
+        flat screen caught the artifact only where the city sat on flat
+        ground, so the same 43 ft kink a mile out of Hazard on KY-80 -- and
+        112 like it -- rode through on "hills".
+        """
+        for leg_key in (
+            "hot_springs_ar_us:fort_smith_ar_us",
+            "hot_springs_ar_us:little_rock_ar_us",
+            "rochester_mn_us:winona_mn_us",
+            "oxford_ms_us:memphis_tn_us",
+        ):
+            recs = leg_curves(leg_key)
+            assert recs, leg_key
+            near_departure = [r for r in recs if r.apex_mi < 2.5 and _is_hairpin(r)]
+            assert not near_departure, f"{leg_key}: departure artifact survived: {near_departure}"
+
+    def test_the_leg_end_rule_cuts_by_terrain_within_a_single_leg(self) -> None:
+        """KY-80 out of Hazard carries both cases half a mile apart.
+
+        A 43 ft kink at mile 1.06 on hills is departure geometry and goes; a
+        real 80 ft switchback at mile 2.48, where the road is already into the
+        mountains, stays. Position alone would have taken both, which is why
+        the rule asks the terrain as well.
+        """
+        recs = leg_curves("hazard_ky_us:london_ky_us")
+        near = [r for r in recs if r.apex_mi < 2.5 and _is_hairpin(r)]
+        assert near, "the mountain switchback at mile 2.48 must survive"
+        assert all(r.min_radius_ft >= 50 for r in near), (
+            f"the hills kink at mile 1.06 should be gone: {near}"
+        )
+
+    def test_a_mountain_town_keeps_the_switchback_on_its_doorstep(self) -> None:
+        """The leg-end rule spares mountain terrain, and has to.
+
+        US-119 leaves Charleston straight into the mountains, and a real
+        switchback sits within the first mile. Deleting by position alone
+        would have taken it.
+        """
+        recs = leg_curves("charleston_wv_us:pikeville_ky_us")
+        assert [r for r in recs if r.apex_mi < 2.5 and _is_hairpin(r)]
+
+    def test_no_surviving_curve_is_tighter_than_a_road_can_bend(self) -> None:
+        """A radius floor for every class, the sibling of the interstate 300 ft.
+
+        50 ft is tighter than a loaded tractor-trailer's own turning circle,
+        so nothing that bends harder is a road. The floor sits just under the
+        tightest genuine switchback the world carries (US-550 at 54 ft), which
+        is why it can be applied everywhere without a terrain test.
+        """
+        from freight_fate.data.curves import _load
+
+        offenders = [
+            (leg_key, rec)
+            for leg_key, recs in _load().items()
+            for rec in recs
+            if not rec.connector and rec.min_radius_ft < 50
+        ]
+        assert not offenders, f"impossible mainline radii survived: {offenders[:5]}"
+
     def test_million_dollar_highway_untouched_by_the_new_screen(self) -> None:
         """A mountain corridor keeps every switchback under the new screen too."""
         recs = leg_curves("durango_co_us:montrose_co_us")

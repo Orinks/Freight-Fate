@@ -130,6 +130,70 @@ def test_parser_accepts_gap_markers_and_still_rejects_bad_numbers():
         _parse_speed_limit({"at_mi": 5.0, "mph": 150.0}, 100.0, "A", "B")
 
 
+# --- the dwell filter -------------------------------------------------------
+
+
+def _parsed(*pairs, places=()):
+    from freight_fate.data.world_parsing import _parse_speed_limits
+
+    raw = [{"at_mi": at, "mph": mph} for at, mph in pairs]
+    return _parse_speed_limits(raw, 100.0, "A", "B", places=places)
+
+
+def test_a_posting_too_short_to_be_a_sign_is_absorbed():
+    """OSM segmentation, not signage.
+
+    Reported 2026-08-11: "the speeds keep reducing and speeding up for random
+    reasons that aren't apparent". A tenth of the baked profile is postings
+    the truck is inside for a second or two -- an 80 that drops to 45 and back
+    over four tenths of a mile is a way tag boundary, and no agency signs one.
+    """
+    kept = _parsed((0.0, 80.0), (20.0, 45.0), (20.4, 80.0), (60.0, 65.0))
+    assert [(s.at_mi, s.mph) for s in kept] == [(0.0, 80.0), (60.0, 65.0)]
+
+
+def test_a_long_zone_survives_the_dwell_filter():
+    """Anything that holds for more than the dwell is a posting, full stop."""
+    kept = _parsed((0.0, 55.0), (20.0, 30.0), (22.0, 55.0))
+    assert [(s.at_mi, s.mph) for s in kept] == [(0.0, 55.0), (20.0, 30.0), (22.0, 55.0)]
+
+
+def test_a_short_posting_a_village_explains_is_kept():
+    """The rim-town case: Strawberry's 35 runs seven tenths of a mile, which
+    is what a village main street really is. Length alone would delete the
+    signs along with the noise, so a place on the road is what saves it."""
+    noise = _parsed((0.0, 55.0), (20.0, 30.0), (20.6, 55.0))
+    assert [(s.at_mi, s.mph) for s in noise] == [(0.0, 55.0)]
+    signed = _parsed((0.0, 55.0), (20.0, 30.0), (20.6, 55.0), places=(20.1,))
+    assert [(s.at_mi, s.mph) for s in signed] == [(0.0, 55.0), (20.0, 30.0), (20.6, 55.0)]
+
+
+def test_the_first_posting_is_never_absorbed():
+    """There is nothing behind it to inherit from."""
+    kept = _parsed((0.0, 30.0), (0.2, 55.0), (80.0, 65.0))
+    assert kept[0].at_mi == 0.0
+    assert kept[0].mph == 30.0
+
+
+def test_a_chain_of_short_postings_collapses_to_where_the_road_settles():
+    """Stepping 70-65-60-55 over six tenths is one way boundary read four
+    times. Only the value the road actually settles at survives, and it keeps
+    its own start mile -- the 55 holds for the next twenty-nine miles, so it
+    is a posting even though the steps that led to it were not."""
+    kept = _parsed((0.0, 70.0), (10.0, 65.0), (10.3, 60.0), (10.6, 55.0), (40.0, 70.0))
+    assert [(s.at_mi, s.mph) for s in kept] == [(0.0, 70.0), (10.6, 55.0), (40.0, 70.0)]
+
+
+def test_a_short_coverage_gap_holds_the_posting_rather_than_flickering():
+    """A gap marker exists to stop a stale town limit ruling untagged MILES.
+    Half a mile of missing tagging is not that; flipping to the heuristic and
+    back inside a second is the flicker itself."""
+    kept = _parsed((0.0, 55.0), (30.0, None), (30.5, 55.0), (70.0, 65.0))
+    assert [(s.at_mi, s.mph) for s in kept] == [(0.0, 55.0), (70.0, 65.0)]
+    long_gap = _parsed((0.0, 55.0), (30.0, None), (60.0, 55.0))
+    assert [(s.at_mi, s.mph) for s in long_gap] == [(0.0, 55.0), (30.0, None), (60.0, 55.0)]
+
+
 def _load_repair():
     spec = importlib.util.spec_from_file_location(
         "repair_interstate_anchor_limits", ROOT / "tools" / "repair_interstate_anchor_limits.py"
