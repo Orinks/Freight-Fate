@@ -213,7 +213,9 @@ class Rig:
     # -- speech ----------------------------------------------------------------
 
     def _recorder(self, prefix: str):
-        def _speak(text: str, interrupt: bool = True, review: bool = True, remember: bool = True):
+        # **kwargs swallows whatever routing hints say_event grows (priority,
+        # key, force, ...) -- the rig records what was said, not how.
+        def _speak(text: str, interrupt: bool = True, **kwargs: object):
             self.transcript.append(f"{prefix}{text}")
 
         return _speak
@@ -368,7 +370,10 @@ def main(argv: list[str] | None = None) -> int:
         outcome = run_scenario(name)
         outcomes.append(outcome)
         for finding in outcome.findings:
-            print(f"  [{outcome.verdict}] {finding.splitlines()[0][:200]}")
+            lines = finding.splitlines()
+            # A traceback's first line says nothing; its last line is the error.
+            shown = lines[0] if len(lines) == 1 else f"{lines[0]} ... {lines[-1]}"
+            print(f"  [{outcome.verdict}] {shown[:300]}")
         if args.transcript:
             for line in outcome.transcript:
                 print(f"    | {line}")
