@@ -52,17 +52,37 @@ ALTERNATE_ROUTE_EXTRA_RATIO = 0.22
 ALTERNATE_ROUTE_MIN_EXTRA_MILES = 75.0
 ALTERNATE_ROUTE_MAX_EXTRA_MILES = 550.0
 
-# How far a baked posting must hold to count as a sign rather than a way
+# How long a baked posting must hold to count as a sign rather than a way
 # boundary. OSM splits a way wherever any tag changes, so the maxspeed profile
 # carries postings a few hundred feet long; under time compression those go by
-# in a second and read as the limit flickering for no reason. A real signed
-# zone -- a village main street, a bridge, a canyon -- outlasts this easily.
-LIMIT_DWELL_MI = 1.0
-# ...unless a place on the road explains it. A village main street really is
-# posted for half a mile, so length alone would delete the signs along with
-# the noise; a drop this close to a named place is the place's doing.
+# in a second and read as the limit flickering for no reason.
+#
+# Measured in REAL seconds, never in miles -- the same law the keeper ease, the
+# turn call and the zone warning already follow. A mile is not one experience:
+# at 70 it is under three real seconds and reads as a blink, at 30 it is over
+# ten and reads as a town. A mile-based bar was the 2026-08-11 attempt at this
+# and left 803 postings the truck crossed in under three real seconds.
+LIMIT_DWELL_REAL_S = 6.0
+# ...unless a place on the road explains it, and the drop is to a speed a place
+# posts. A village main street really is short, so length alone would delete
+# the signs along with the noise. Shaving five off a highway limit beside a
+# village is not the village's doing, though -- that pass is what kept a
+# quarter-mile 80-to-75-to-80 on I-44 -- so the exception is a lower bar for a
+# town speed, never a free pass.
+LIMIT_PLACE_DWELL_REAL_S = 3.0
 LIMIT_PLACE_NEAR_MI = 1.0
+LIMIT_PLACE_TOWN_MPH = 45.0
 LIMIT_EXPLAINING_CATEGORIES = frozenset({"village"})
+# Real seconds become miles at the pacing the game actually runs, which the
+# data layer cannot ask the sim for (it never imports it) and must not ask the
+# player's settings for (the world is parsed once, and world data has to be the
+# same for everybody). These mirror the standard pace and the compression ramp
+# in sim/trip_models.py; test_maxspeed pins them together so they cannot drift.
+LIMIT_DWELL_REFERENCE_SCALE = 20.0
+LIMIT_DWELL_LOW_SPEED_SCALE = 4.0
+LIMIT_DWELL_FULL_COMPRESSION_MPH = 50.0
+# What an untagged stretch is assumed to be driven at, for sizing only.
+LIMIT_DWELL_FALLBACK_MPH = 55.0
 
 POI_DENSITY_SHORT_LEG_MILES = 160.0
 POI_DENSITY_MEDIUM_LEG_MILES = 320.0

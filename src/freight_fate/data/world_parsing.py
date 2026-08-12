@@ -523,6 +523,25 @@ def _parse_speed_limits(
     return _dwell_filter_speed_limits(samples, leg_miles, places)
 
 
+def _limit_dwell_floor_mi(seconds: float, mph: float | None) -> float:
+    """How much road ``seconds`` of real time is, at a posting's own speed.
+
+    Compression is not one number: the trip's clock ramps from crawling pace up
+    to the configured pacing at highway speed, so slow road already runs closer
+    to real time. That is what makes a seconds-sized bar the right one here --
+    it asks for two and a quarter miles of a 70 and two thirds of a mile of a
+    30, which is very close to the difference between a way boundary and a
+    village main street.
+    """
+    speed = max(mph if mph is not None else LIMIT_DWELL_FALLBACK_MPH, 5.0)
+    ramp = min(1.0, speed / LIMIT_DWELL_FULL_COMPRESSION_MPH)
+    scale = (
+        LIMIT_DWELL_LOW_SPEED_SCALE
+        + (LIMIT_DWELL_REFERENCE_SCALE - LIMIT_DWELL_LOW_SPEED_SCALE) * ramp
+    )
+    return seconds * speed * scale / 3600.0
+
+
 def _dwell_filter_speed_limits(
     samples: list[SpeedLimitSample], leg_miles: float, places: tuple[float, ...] = ()
 ) -> tuple[SpeedLimitSample, ...]:
@@ -534,15 +553,23 @@ def _dwell_filter_speed_limits(
     agency posts one. Real driving hides them: a tenth of a mile is seconds of
     a real hour. Time compression does not, and the player hears the limit
     reduce and normalize with nothing on the road to explain it (reported
-    2026-08-11). Across three long routes, 23 percent of all posted changes
-    were segments the truck crossed in under three real seconds.
+    2026-08-11, and again on 2026-08-12 after the first attempt at this).
 
-    Length alone cannot be the test, because real signed zones are short too:
-    the median village posting in this world runs seven tenths of a mile, and
-    63 percent of them are under a mile. What separates them is whether
-    anything on the road explains the drop. So a short posting survives when a
-    place sits within ``LIMIT_PLACE_NEAR_MI`` of it -- Strawberry's 35 stays a
-    35 -- and goes when nothing does.
+    That first attempt asked for a fixed MILE, and a mile is not one
+    experience: at 70 the truck is through it in under three real seconds and
+    at 30 it takes over ten. So the bar is real seconds now -- the same law
+    the keeper ease, the turn call and the zone warning already follow -- and
+    converting it back to miles at each posting's own speed does for free what
+    the mile bar needed an exception to do, because slow road is barely
+    compressed. A 70 has to hold for over two miles; a 30 needs two thirds of
+    one.
+
+    The exception survives for the case seconds alone still cannot judge: a
+    genuinely short main street. A place within ``LIMIT_PLACE_NEAR_MI`` halves
+    the bar, but only for a drop to a speed a place actually posts. Shaving
+    five off a highway limit beside a village is not the village's doing, and
+    the old unconditional pass is what kept 763 sub-three-second postings,
+    including quarter-mile interstate trims.
 
     Sibling of the timezone dwell filter and the state-crossing sanitizer: the
     same "a boundary that does not last is not a boundary" rule, applied to
@@ -555,14 +582,15 @@ def _dwell_filter_speed_limits(
     kept: list[SpeedLimitSample] = [samples[0]]
     for i, sample in enumerate(samples[1:], start=1):
         run_end = samples[i + 1].at_mi if i + 1 < len(samples) else leg_miles
-        brief = run_end - sample.at_mi < LIMIT_DWELL_MI
-        # A place explains a REDUCTION and nothing else. Passing through
-        # Strawberry is why the number drops; it is never why the road briefly
-        # allows more, so a short raise beside a village is noise like any other.
+        # A place explains a REDUCTION TO A TOWN SPEED and nothing else.
+        # Passing through Strawberry is why the number drops to 35; it is never
+        # why the road briefly allows more, and never why an 80 becomes a 75.
         lowers = sample.mph is not None and kept[-1].mph is not None and sample.mph < kept[-1].mph
-        explained = lowers and any(abs(sample.at_mi - at) <= LIMIT_PLACE_NEAR_MI for at in places)
-        if brief and not explained:
-            continue  # nothing on the road posts this; the last one kept carries on
+        town = lowers and sample.mph is not None and sample.mph <= LIMIT_PLACE_TOWN_MPH
+        explained = town and any(abs(sample.at_mi - at) <= LIMIT_PLACE_NEAR_MI for at in places)
+        dwell_s = LIMIT_PLACE_DWELL_REAL_S if explained else LIMIT_DWELL_REAL_S
+        if run_end - sample.at_mi < _limit_dwell_floor_mi(dwell_s, sample.mph):
+            continue  # gone before it can be a sign; the last one kept carries on
         if sample.mph == kept[-1].mph:
             continue  # a way boundary that changed nothing else
         kept.append(sample)

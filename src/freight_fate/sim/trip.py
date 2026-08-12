@@ -869,14 +869,23 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         Probes the baked corridor limit only -- random work zones must not
         promote a village to limit-explainer on one trip and not the next.
         Mirrors the bake rule that placed paired callouts shortly before
-        their zone starts."""
+        their zone starts.
+
+        A name also explains the number already under the wheels. Strawberry's
+        callout sits two miles inside the 40 that Strawberry is the reason for,
+        and the road opens back up to 50 just past the town -- so the drop is
+        behind the name rather than ahead of it, and looking only forward left
+        the town unexplained and, on the sparse tier, unspoken."""
         here = self._corridor_limit_at(at_mi)
         mi = at_mi + LIMIT_SCAN_STRIDE_MI
         end = min(at_mi + VILLAGE_PAIR_WINDOW_MI, self.total_miles)
+        inside_town_limit = here <= VILLAGE_PAIR_MAX_LIMIT_MPH
         while mi <= end:
             there = self._corridor_limit_at(mi)
             if there < here and there <= VILLAGE_PAIR_MAX_LIMIT_MPH:
-                return True
+                return True  # the town's zone starts just ahead of its name
+            if inside_town_limit and there > here:
+                return True  # the name is inside the town's zone, which ends here
             mi += LIMIT_SCAN_STRIDE_MI
         return False
 

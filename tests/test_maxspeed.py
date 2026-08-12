@@ -168,6 +168,40 @@ def test_a_short_posting_a_village_explains_is_kept():
     assert [(s.at_mi, s.mph) for s in signed] == [(0.0, 55.0), (20.0, 30.0), (20.6, 55.0)]
 
 
+def test_the_dwell_is_real_seconds_and_not_a_distance():
+    """The same six tenths of a mile is two different events.
+
+    Reported again 2026-08-12, after the mile-based bar shipped: "the speeds
+    just increase and decrease in seconds". A bar written in miles cannot
+    answer that, because a mile at 70 goes by in under three real seconds and
+    a mile at 30 takes over ten. Sized in seconds, the highway trim goes and
+    the town street stays, with no exception needed for either.
+    """
+    highway = _parsed((0.0, 70.0), (20.0, 65.0), (21.2, 70.0))
+    assert [(s.at_mi, s.mph) for s in highway] == [(0.0, 70.0)]
+    town = _parsed((0.0, 45.0), (20.0, 30.0), (21.2, 45.0))
+    assert [(s.at_mi, s.mph) for s in town] == [(0.0, 45.0), (20.0, 30.0), (21.2, 45.0)]
+
+
+def test_a_village_does_not_excuse_a_highway_trim():
+    """The pass a place buys is for a town speed, not for any drop at all.
+
+    An 80 shaving to 75 for a quarter mile is a way boundary wherever it sits,
+    and I-44 west of Oklahoma City had one beside a village: the old free pass
+    kept it, and the player heard the limit drop and come back inside half a
+    second. Nothing a village posts is 75.
+    """
+    trim = _parsed((0.0, 80.0), (20.0, 75.0), (20.25, 80.0), places=(20.1,))
+    assert [(s.at_mi, s.mph) for s in trim] == [(0.0, 80.0)]
+
+
+def test_even_a_town_zone_has_to_last_longer_than_a_blink():
+    """A place lowers the bar; it does not remove it. A tenth of a mile of 25
+    is still a tag boundary, village or no village."""
+    blink = _parsed((0.0, 55.0), (20.0, 25.0), (20.1, 55.0), places=(20.05,))
+    assert [(s.at_mi, s.mph) for s in blink] == [(0.0, 55.0)]
+
+
 def test_the_first_posting_is_never_absorbed():
     """There is nothing behind it to inherit from."""
     kept = _parsed((0.0, 30.0), (0.2, 55.0), (80.0, 65.0))
@@ -192,6 +226,80 @@ def test_a_short_coverage_gap_holds_the_posting_rather_than_flickering():
     assert [(s.at_mi, s.mph) for s in kept] == [(0.0, 55.0), (70.0, 65.0)]
     long_gap = _parsed((0.0, 55.0), (30.0, None), (60.0, 55.0))
     assert [(s.at_mi, s.mph) for s in long_gap] == [(0.0, 55.0), (30.0, None), (60.0, 55.0)]
+
+
+def test_the_dwell_pacing_constants_match_the_sim():
+    """The data layer never imports the sim, so it carries its own copy of the
+    pacing it sizes the dwell against. Pin them, or a pacing change quietly
+    stops meaning what the filter thinks it means."""
+    from freight_fate.data.world_constants import (
+        LIMIT_DWELL_FULL_COMPRESSION_MPH,
+        LIMIT_DWELL_LOW_SPEED_SCALE,
+        LIMIT_DWELL_REFERENCE_SCALE,
+    )
+    from freight_fate.settings import TIME_SCALES
+    from freight_fate.sim.trip_models import FULL_COMPRESSION_MPH, LOW_SPEED_TIME_SCALE
+
+    assert LIMIT_DWELL_LOW_SPEED_SCALE == LOW_SPEED_TIME_SCALE
+    assert LIMIT_DWELL_FULL_COMPRESSION_MPH == FULL_COMPRESSION_MPH
+    # Sized on the standard pace, the middle of the three the player can pick.
+    assert sorted(TIME_SCALES)[1] == LIMIT_DWELL_REFERENCE_SCALE
+
+
+def _posting_real_seconds(miles: float, mph: float | None) -> float:
+    """How long the truck is inside a posting, in real seconds at standard pace."""
+    from freight_fate.data.world_constants import (
+        LIMIT_DWELL_FALLBACK_MPH,
+        LIMIT_DWELL_FULL_COMPRESSION_MPH,
+        LIMIT_DWELL_LOW_SPEED_SCALE,
+        LIMIT_DWELL_REFERENCE_SCALE,
+    )
+
+    speed = max(mph or LIMIT_DWELL_FALLBACK_MPH, 5.0)
+    ramp = min(1.0, speed / LIMIT_DWELL_FULL_COMPRESSION_MPH)
+    scale = (
+        LIMIT_DWELL_LOW_SPEED_SCALE
+        + (LIMIT_DWELL_REFERENCE_SCALE - LIMIT_DWELL_LOW_SPEED_SCALE) * ramp
+    )
+    return (miles / speed * 3600.0) / scale
+
+
+@pytest.mark.timeout(300)
+def test_no_leg_in_the_world_flickers_its_posted_limit(world):
+    """The whole point, checked on the shipped map rather than on fixtures.
+
+    Every posting the player can meet lasts long enough to be a sign, and the
+    only ones that last less than the full dwell are drops to a town speed
+    beside a village the game names out loud -- so there is always something
+    on the road to explain what they heard.
+    """
+    from freight_fate.data.world_constants import (
+        LIMIT_DWELL_REAL_S,
+        LIMIT_EXPLAINING_CATEGORIES,
+        LIMIT_PLACE_DWELL_REAL_S,
+        LIMIT_PLACE_NEAR_MI,
+        LIMIT_PLACE_TOWN_MPH,
+    )
+
+    for leg in world.legs:
+        places = tuple(
+            lm.at_mi for lm in leg.landmarks if lm.category in LIMIT_EXPLAINING_CATEGORIES
+        )
+        samples = leg.speed_limits
+        for i in range(1, len(samples)):
+            sample = samples[i]
+            end = samples[i + 1].at_mi if i + 1 < len(samples) else leg.miles
+            seconds = _posting_real_seconds(end - sample.at_mi, sample.mph)
+            if seconds >= LIMIT_DWELL_REAL_S:
+                continue
+            where = f"{leg.a} to {leg.b} at mile {sample.at_mi}"
+            assert seconds >= LIMIT_PLACE_DWELL_REAL_S, f"{where} lasts {seconds:.2f}s"
+            assert sample.mph is not None and sample.mph <= LIMIT_PLACE_TOWN_MPH, (
+                f"{where} is a {sample.mph} posting held for only {seconds:.2f}s"
+            )
+            assert any(abs(sample.at_mi - at) <= LIMIT_PLACE_NEAR_MI for at in places), (
+                f"{where} lasts {seconds:.2f}s with no place to explain it"
+            )
 
 
 def _load_repair():
