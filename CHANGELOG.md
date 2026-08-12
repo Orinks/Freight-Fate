@@ -41,6 +41,17 @@
 
 ### Fixed
 
+- **Rolling past the stop at your destination's entrance now loops you
+  back instead of stranding you.** If you cleared the ramp at the end of
+  a delivery too fast to make the stop, nothing happened at all: no
+  consequence, no reminder, just an endless quiet ramp -- and worse, a
+  paused cruise session could quietly resume and drive you away from the
+  very stop you were told to make. Blowing the entrance now works like
+  missing the gate anywhere else: you hear what happened, you loop back
+  through a safe turnaround with the clock running, and the entrance is
+  ahead again. Cruise also stays out of it from the moment you take the
+  destination exit until you have actually stopped.
+
 - **One dip in air pressure is one warning.** Hard or repeated braking
   drags air pressure down around the warning line while the compressor
   catches up, and every little dip below it re-fired the full low-air
