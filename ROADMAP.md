@@ -148,6 +148,85 @@ onto exit signalling.
       benched at ~0.4 m/s2 at street speed, and a plain jake threshold
       was caught cooking the drums past fade onset in 4.5 minutes on a 6
       percent grade, so real downgrades are carved out.
+- [x] **Automatic emergency braking left no reaction window -- SHIPPED
+      2026-08-11** (Munchkinbear, 2026-08-11: "less than half a second
+      between being told to brake/change lanes and the truck slamming on
+      the emergency brakes"). The hazard deadline was braking budget plus
+      a fixed slack, while the assist engaged at 1.2x the budget plus half
+      a second -- so the driver's window was a remainder, and every reason
+      the truck stops badly (speed, downgrade, brake heat, wear, grip)
+      came out of the driver's time rather than the truck's. Measured on
+      the traffic warning at 65 mph: 0.52 s fresh, 0.02 s drowsy, negative
+      (engaging on the first frame) on hot brakes or in the wet. It got
+      worse this build because putting traffic back on the road made that
+      warning -- the tightest slack the game emits, and a dodgeable one,
+      which budgets the longer stop -- the common case. The deadline is
+      now built forward from the moment the assist must act, so the window
+      is a guarantee: 3 s minimum to hear the warning and get on the
+      pedal, plus 2.5 s more when the call offers a lane change, since
+      that is how long the move takes. A tap change already under way
+      holds the assist off while it can still beat the hazard.
+- [x] **The assist did not always stop in time -- SHIPPED 2026-08-11**
+      (owner question the same day: to help a player it should stop in
+      time). It applied full SERVICE braking and the budget sizing its
+      engage point assumed the same, but the predicted stop gets slower
+      while it happens as the drums heat under that application. Benched
+      from the moment of engagement across nine conditions, two collided
+      after "Emergency braking engaged.": 65 mph on 450 C drums, 40 pct
+      wear and grip 0.7 down a six percent grade, and the same downgrade
+      at 80. `AEB_BUDGET_MARGIN` was meant to cover this and is not enough
+      when every factor compounds. Service braking stays the first answer;
+      once the time left no longer covers even that, the assist uses the
+      hardest stop the rig has. All nine now clear. Deliberately a last
+      resort, with a test each way -- an ordinary hazard on good brakes
+      must not become a spring-brake panic stop.
+- [x] **Enforcement forgot every look it deferred -- SHIPPED 2026-08-11**
+      (Jerry, 2026-08-11: whole routes over the limit with nothing
+      happening). One demand on the driver at a time is the right rule, so a
+      post whose watch overlapped a hazard, a ramp or a pull-over had its
+      look deferred -- into `_deferred_post_ids`, a set written in one place
+      and read in none. "Defer, never drop" therefore held only while the
+      post still covered the truck's mile, and a hazard window outlasts a
+      one-mile radar reach several times over at any pacing. The look is now
+      TAKEN when it happens and held until the cab is quiet, with a five-mile
+      staleness bound so a trooper who never caught up loses you. The old
+      test asserted the id landed in the set, which pinned the bookkeeping
+      and not the behaviour; it is replaced by two that drive the truck past
+      the post first.
+- [x] **Hairpins on ordinary roads, off the mountains -- SHIPPED
+      2026-08-11.** The 2026-08-09 screen was gated on flat terrain alone,
+      so 385 hairpin-severity curves survived on US and state routes (296 in
+      hills, 89 in mountain). Two more discriminators, both measured before
+      they were applied: city-departure geometry within 2.5 miles of a leg's
+      city node on non-mountain ground (112 curves, including a 43 ft kink a
+      mile out of Hazard on KY-80), and a 50 ft radius floor for any road
+      class (4 more, the tightest a 41 ft bend on US-50). The floor sits just
+      under the tightest genuine switchback in the data, US-550's 54 ft at
+      mile 60.5. Across the whole world the three screens together flag
+      nothing in mountain terrain -- the property to check first if these
+      thresholds are ever moved. KY-80 is the precision case: the hills kink
+      at mile 1.06 goes, the mountain switchback at 2.48 stays.
+- [x] **The posted limit flickered under time compression -- SHIPPED
+      2026-08-11.** OSM splits a way wherever any tag changes, so the baked
+      maxspeed profile carried postings a few hundred feet long. Real driving
+      hides them; at 20x they go by in under a second, and the player hears
+      the limit reduce and normalize with nothing on the road to explain it.
+      Measured before the fix: 23 percent of all posted changes on three long
+      routes were segments crossed in under three real seconds, including an
+      80 to 45 to 80 inside 1.2 seconds on the Sheridan-Merced run. Length
+      alone could not be the test -- the median village posting in this world
+      runs seven tenths of a mile -- so a short posting survives when a
+      village within a mile explains the REDUCTION, and goes when nothing
+      does. World-wide: 829 of 1,287 legs changed, posted segments 15,206 to
+      11,207, sub-second postings 1,993 to 583, drop-and-restore blips 1,415
+      to 309. What remains is village-explained and real.
+- [x] **The alpha test book ships with the build -- SHIPPED 2026-08-11**,
+      as `ALPHA_TEST_BOOK.md` plus an HTML rendering, verified by
+      `verify_packaged_payload` like the manual. Its checklists are written
+      against particular builds, so a tester fetching the current copy from
+      the repo could easily work an old one. New sections cover the three
+      2026-08-11 fixes: the hazard reaction window (4.2a), deferred
+      enforcement looks (7.3a), and the curve/limit map fixes (11.1a).
 - [ ] **Remaining tester findings from the same document.** Merging
       traffic does not yield to a loaded truck. There is no cue telling
       you when you are clear to move back over after passing, and at
@@ -243,10 +322,10 @@ onto exit signalling.
       gate zone.
 - [ ] Break-harness findings still open, all verified: the facility-gate
       loop-back charges 20 game minutes but no HOS driving time and no
-      fuel; a live hazard warning does not survive save/reload (the
-      traffic-stop branch DOES survive, so only the hazard is at risk);
-      a multi-level settlement announces one level-up line; short-hop
-      streak XP runs 4.9x a long haul's efficiency.
+      fuel; a multi-level settlement announces one level-up line;
+      short-hop streak XP runs 4.9x a long haul's efficiency. (The
+      save/reload hazard finding was closed 2026-08-11 as not reachable --
+      see the bullet below on why serializing it would be worse.)
 - [x] **A full lot no longer closes the fuel island -- SHIPPED
       2026-08-10.** Owner-reported from a live run. `_open_poi_stop`
       diverted to `ParkingFullState` whenever a stop carried `sleep` and
@@ -622,11 +701,21 @@ onto exit signalling.
       brake already answers to. The hazard and traffic systems it needs
       both already exist, so this is cheap for how much it adds, and it
       fits the "carrying risk" spine for the back half of the arc.
-- [ ] **A live hazard does not survive save and reload.** Found by
-      `tools/playtest_break.py --scenario save_scum_enforcement`: the
-      traffic stop now round-trips (fixed with the enforcement work), but
-      `_hazard_deadline` is still absent from the snapshot, so quitting
-      mid-hazard makes the debris vanish without ever braking for it.
+- [x] **"A live hazard does not survive save and reload" -- CLOSED
+      2026-08-11 as not reachable, not fixed.** `_hazard_deadline` is
+      genuinely absent from the snapshot, but no save can be written while
+      one is running, so there is nothing to save-scum. Every
+      player-reachable save needs a parked truck or an open menu (the
+      rest-stop save, the motel, a city service with the parking brake
+      set), and the one save taken mid-roll is the traffic stop, which
+      cannot begin during a hazard: `_begin_pull_over` has a single
+      caller, `_begin_observed_stop`, reachable only when
+      `_enforcement_busy()` is false, and a live hazard is one of the
+      things that makes it true. The scenario reached it by calling
+      `snapshot()` directly. Serializing the deadline would be the worse
+      bug -- the player would resume on a braking clock they never heard
+      the warning for -- so `save_scum_enforcement` now asserts the gate
+      instead of the round-trip, and its `KNOWN_OPEN` entry is deleted.
 - [ ] **Wear ceilings need their own wall.** The damage bands shipped
       2026-08-09 with a 90 percent out-of-service cutoff, but brake,
       engine, and tire wear at 100 percent still only fade physics --
@@ -4060,9 +4149,21 @@ fit for an audio-first game.
       gated by the per-install `Settings.online_offer_seen`, never asked again
       once seen or once a computer is already connected). Declining (or
       Escape, which behaves the same) and accepting both continue straight
-      into the city menu either way. The offer deliberately does not claim
-      connecting turns on cloud backup or the drivers board -- both stay off
-      until chosen separately, from Online.
+      into the city menu either way. The offer says exactly what connecting
+      does, which since the change below is turn Profile sharing and cloud
+      backup on.
+- [x] Connecting an orinks.net account turns Profile sharing and cloud backup
+      on, instead of leaving both off behind their own separate yes: the
+      public career statistics are derived from the latest accepted backup,
+      so a connected account with neither switched on left every new driver
+      staring at a profile that read "no career statistics yet". Cloud backup
+      needs no handshake and starts immediately; Profile sharing waits on the
+      server confirming it, exactly as the standalone toggle does, and a
+      refusal keeps the connection and names the retry rather than sending
+      the player back for a fresh activation code. Setup disclosure, the
+      first-run offer, the Online menu help, and the manual all say so up
+      front. Players already connected are untouched -- nothing they left off
+      turns itself on at upgrade.
 - [x] Idle drivers age off the live board: a truck parked with the game left running (not paused) signs off after 30 minutes without a snapshot change and stops heartbeating (`online_presence.py` IDLE_SIGNOFF_S); the server hides still-beating idle rows on the same clock for older builds (orinks-net `PRESENCE_IDLE_MS` + per-row `changedAt`), and deadhead presence now carries progress so a long empty run never reads as idle
 - [x] Online hub: the drivers board, orinks.net account, cloud backup and restore, and all sharing toggles moved from Settings into one Online menu on the main menu (`states/online_hub.py`); Settings keeps an Online pointer that opens the same menu for a release or two
 - [ ] Remove the Settings Online pointer once players have had a release or two to relearn the location

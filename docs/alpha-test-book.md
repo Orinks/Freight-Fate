@@ -66,16 +66,20 @@ the code is claimed.
 
 Pass when: you got connected using speech alone, you could replay the
 code as many times as you needed, and the confirmation said in so many
-words that profile sharing and cloud backup are both still off.
+words that your careers are backing up and profile sharing is on.
 
 The driver name in that confirmation is there to be checked, not
 admired: it is how you would find out somebody else claimed the code you
 just read aloud. If it is not your driver, say so.
 
-One deliberate design worth knowing: connecting an account turns nothing
-on. Cloud backup, profile sharing and Mastodon posting each need their
-own separate yes afterwards. A confirmation that claims otherwise is a
-bug.
+One deliberate design worth knowing, and it changed in 1.9: connecting
+an account now turns profile sharing and cloud backup on, because the
+career statistics on your public profile are read out of the backup, and
+an account that publishes nothing left new drivers looking at an empty
+profile. Both are single items on the Online menu if you want either
+off. Mastodon posting is still a separate yes and still needs its own
+linked account. A confirmation that claims otherwise, in either
+direction, is a bug.
 
 Also expected: right after you create your very first career, the game
 offers this setup once, unprompted, with "Not now" already selected. It
@@ -90,8 +94,10 @@ unless Discord is running. The master switch is only a master switch:
 everything underneath it is off or needs an account, so nothing is
 published because of it.
 
-Off until you turn each one on: profile sharing, cloud backup, Mastodon
-posting, real radio streams, and live weather, traffic and parking.
+Off until you turn each one on: Mastodon posting, real radio streams,
+and live weather, traffic and parking. Profile sharing and cloud backup
+are off too until you connect an account, which is what turns them on —
+see 0.2.
 
 The radio's streamer-safe setting is on, which is what keeps real public
 streams off the dial until you opt in.
@@ -108,10 +114,12 @@ and choose "Hear what gets shared". Then start turning profile sharing
 on and choose the same item from the confirmation screen. Press F1 on
 each row of the Online menu.
 
-Listen for: one disclosure that names your driver name, broad on-duty
-board activity, eligible profile details, achievements, road-journal
-posts, the updates feed, and the game version you are running; and that
-says plainly what is never published — your real name, your full save,
+Listen for: one disclosure that says up front that connecting an account
+turns profile sharing on and starts backing your careers up, and where
+to turn either off; that names your driver name, broad on-duty board
+activity, eligible profile details, achievements, road-journal posts,
+the updates feed, and the game version you are running; and that says
+plainly what is never published — your real name, your full save,
 coordinates, cargo details, precise location, and the money you
 currently have. Lifetime career earnings are public; current cash is
 not.
@@ -418,6 +426,52 @@ the hammer lane afterward.
 Pass when: the lane change genuinely resolves the hazard and sideswiping
 real traffic carries real consequences.
 
+### 4.2a The warning leaves you time to answer it
+
+New on 2026-08-11, from Munchkinbear's report and Darren's logs. The
+truck used to take over almost the instant it warned you — often inside
+half a second, sometimes before the sentence had finished — and on hot
+brakes or a downgrade it fired on the same breath. Every recorded lane
+change had automatic braking cut in mid-move.
+
+Setup: automatic emergency braking on (it is on by default), Standard
+pressure, highway speed. Worth repeating on a long downgrade and again
+with brakes you have already cooked on a descent, because those are the
+cases that used to be worst.
+
+Do: when a hazard calls, count before you act. Then run it three ways —
+answer immediately with a lane change; answer late, a good two or three
+seconds in; and do nothing at all.
+
+Listen for: enough silence after the warning to hear it out and act. If
+you start a lane change, the change should finish and clear the hazard on
+its own; "Emergency braking engaged" should not land on top of you
+part-way through the move. Doing nothing should end in the assist braking
+for you and actually stopping the truck — that changed the same day, and
+it is the second half of this checklist.
+
+Worth its own run: the assist starts on the normal brakes, and only
+stands on everything when those alone will no longer do it in the time
+left. So take a hazard at the bottom of a long descent, with brakes you
+have already cooked and rain or ice underneath. That combination used to
+end in a collision after the truck had told you it was braking. On good
+brakes on level ground you should never feel the hard version.
+
+Pass when: you can hear the whole warning and still beat it, on every
+road and whatever state the brakes are in; and when you do nothing, the
+truck stops short of the hazard rather than announcing the stop and
+hitting it anyway.
+
+Report if: the assist engages while you are mid-lane-change; the gap
+between the warning and the truck acting is shorter on one kind of road
+than another; or the truck brakes hard, says so, and still collides. The
+first two were the original bug and the third is the one found alongside
+it.
+
+Turn automatic emergency braking off in Settings and the whole safety net
+goes with it — ignoring a hazard then is a collision, as it should be.
+That is the setting doing its job, not a regression.
+
 ### 4.3 Construction closes a real lane
 
 Setup: any leg that announces a construction zone.
@@ -635,6 +689,37 @@ the arrest, and a loaded run cancelled out from under you.
 
 Pass when: the escalation is staged and spoken all the way down, and
 the consequences land on your career, not just your ears.
+
+### 7.3a A trooper who saw you does not forget
+
+New on 2026-08-11, from JamminJerry's report of running whole routes over
+the limit with nothing ever happening. The game deliberately gives you
+one thing at a time, so an officer's look was held back whenever
+something else already had your attention — a hazard, an exit, a stop in
+progress — and then it was never given back. The look is now kept and
+acted on the moment the cab goes quiet.
+
+Setup: a long run, Standard pressure. Enforcement presence does not
+change the odds — it only changes how loud the road is — so leave it
+wherever you like.
+
+Do: hold nine or ten over for a long stretch, on purpose, and keep
+driving through hazards rather than around them. The point is to be busy
+exactly when a trooper is looking.
+
+Listen for: the enforcement earcon before any post can see you — that
+never changes, and it is the rule that an officer you were never told
+about may not cost you anything. Then, after a hazard resolves, lights
+and siren arriving a little late rather than not at all.
+
+Pass when: a long over-the-limit run produces traffic stops at a rate
+that feels like a road with police on it, and every one of them was
+audible first.
+
+Worth knowing before you report: under nine over accrues nothing at all,
+by design. If you sit at eight over for a thousand miles and nothing ever
+happens, that is the game working. Ten over is the first speed anything
+can be built on.
 
 ### 7.4 Docks take time
 
@@ -907,6 +992,37 @@ stretches.
 Pass when: the new corridor plays as fully as an old one — no silent
 miles, no missing fuel plan.
 
+### 11.1a The road holds its shape and its number
+
+Two map fixes landed on 2026-08-11, both reported from this alpha. Sharp
+switchback calls were turning up on ordinary US and state routes away
+from the mountains, most often a mile or two out of a town; and the
+posted limit would drop and come straight back with nothing on the road
+to explain it.
+
+Setup: a long run on US and state routes rather than interstate, and at
+least one leg that leaves a town onto a two-lane. Standard pressure.
+
+Do: drive the first few miles out of a town paying attention to the curve
+calls, then settle in and just listen to the speed limit for half an hour.
+Press the limit key whenever something sounds wrong, so you can tell a
+real sign from a phantom.
+
+Listen for: curve calls that match the road you are on — a hairpin only
+where the country is genuinely steep enough for one. And a posted limit
+that changes when the road changes and holds otherwise, rather than
+dipping and recovering for no reason you can hear.
+
+Pass when: no switchback is called on flat or gently rolling ground, and
+a limit change is always something you can attribute — a town, a canyon,
+a state line, a work zone.
+
+Worth knowing before you report: real mountain country was left entirely
+alone, so US-550 over Red Mountain Pass and the Salt River Canyon still
+bend as hard as they ever did — those calls are correct. And a village
+main street really is posted low for half a mile, so a short drop with a
+town named around it is a real sign, not the bug.
+
 ### 11.2 The chatter switches work
 
 Setup: Settings, the Roadside chatter group.
@@ -982,8 +1098,8 @@ where the message left you.
 ### 12.2 Cloud restores still restore
 
 Setup: a cloud backup made normally. If you have not set one up yet,
-Chapter 0 has the account and the backup switch — cloud backup is off
-until you turn it on, and it needs the staging account, not your real
+Chapter 0 has the account and the backup switch — connecting the account
+turns cloud backup on, and it needs the staging account, not your real
 one. Remember that a staging backup is disposable: it is not a safe
 place for the only copy of a career.
 

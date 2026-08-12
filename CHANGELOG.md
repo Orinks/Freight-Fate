@@ -24,7 +24,68 @@
   it is your job -- in the yard, at a stop, lining up on the receiver's
   dock -- stays silent, as it should.
 
+- **The alpha test book now comes with the build.** The checklists are
+  written against particular builds, so testers had to go and find the
+  current copy for themselves and could easily end up working an old one.
+  Every download now carries it alongside the manual and the changelog, as
+  both a plain text file and a page you can open in a browser.
+
 ### Fixed
+
+- **When the truck brakes for you, it now actually stops in time.**
+  Automatic braking used the normal brake pedal, held flat out. That is
+  enough on a sound truck, but a stop on hot, worn brakes in the wet
+  going downhill gets slower while it is happening -- the drums heat up
+  under the very application meant to save you -- and the truck could
+  ride it all the way into the thing it warned you about. It now starts
+  with the normal brakes as before, and if the time left is no longer
+  enough for those alone, it stands on everything, the same hardest stop
+  you get from the emergency brake yourself. On good brakes on level
+  ground nothing changes; you will not get a violent stop you did not
+  need.
+
+- **You now get time to answer a hazard warning before the truck brakes
+  for you.** "Brake or change lanes" was followed almost instantly by
+  automatic emergency braking -- often inside half a second, sometimes
+  before the warning had finished being spoken, and on hot brakes or a
+  downgrade it fired on the same breath. There was no version of that
+  you could beat: a lane change alone takes two and a half seconds to
+  make. The warning now comes far enough ahead that you always have time
+  to hear it out and act, whatever the truck's speed, the grade, or the
+  state of the brakes, and if you are already moving into the next lane
+  when the assist would have engaged, it waits for you to finish rather
+  than snatching the truck back. Automatic braking still catches you if
+  you do nothing.
+
+- **The posted speed limit stops flickering for no reason.** On long runs
+  the limit would drop and come straight back with nothing on the road to
+  explain it -- in places an 80 became a 45 and an 80 again inside a
+  second. Those were never signs: the map splits a road wherever any
+  detail about it changes, and a few hundred feet of that is invisible at
+  real driving speed but goes by in a blink at the pace the game runs.
+  A posting now has to hold for long enough to be a sign before the truck
+  obeys it, unless there is a town on the road to explain it -- so
+  Strawberry's 35 is still Strawberry's 35, and the phantom drops are
+  gone. Two thirds of the routes in the game got quieter.
+
+- **Hairpin bends that no road could hold are gone from ordinary roads.**
+  Sharp switchback calls were turning up on US and state routes well away
+  from the mountains, most often within a mile or two of leaving a town.
+  Those came from the shape of the city streets at the start of a leg
+  being read as part of the highway, and from a handful of bends tighter
+  than a loaded truck's own turning circle. Both are now filtered out, on
+  every road in the game. Real switchbacks are untouched: nothing in
+  mountain country was removed, so the Million Dollar Highway and the Salt
+  River Canyon still bend exactly as hard as they always did.
+
+- **A trooper who saw you no longer forgets because you were busy.** If a
+  police contact happened while something else already had your attention
+  -- a hazard warning, an exit, a pull-over -- the game held the officer's
+  look back so you were not handed two things at once, and then never gave
+  it back. On a long run that could mean speeding the whole way and never
+  being stopped. The look is now taken when it happens and acted on as
+  soon as the cab is quiet, and only dropped if the officer is too far
+  behind you to have realistically caught up.
 
 - **The reconnect advice now covers the case where the account is gone,
   not just this computer.** When orinks.net stops accepting your sign-in,
@@ -197,6 +258,19 @@
   offers to turn it on right there.
 
 ### Changed
+
+- **Connecting your orinks.net account now turns your public profile and
+  cloud backup on.** Connecting used to switch nothing on: profile
+  sharing and cloud backup each needed their own separate yes afterwards,
+  so drivers who connected and drove away found a public profile that
+  said "no career statistics yet" and stayed that way. It said that
+  because those statistics are read out of your cloud backup, and there
+  was no backup. Connecting now starts both, so your profile fills in
+  from your first delivery. The game says so before you connect, in the
+  first-run offer, on the setup screen, and in "Hear what gets shared" --
+  and each one is still a single item on the Online menu whenever you
+  want it off. If you are already connected, nothing changes: whatever
+  you chose stays exactly as you left it.
 
 - **Owner-operators now start with a brand-new truck.** Starting as an
   owner-operator used to hand you a tractor that was already four percent
