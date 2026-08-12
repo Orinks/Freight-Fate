@@ -604,6 +604,177 @@ def test_speed_keeper_eases_for_a_lower_posted_limit_and_says_so(monkeypatch):
         app.shutdown()
 
 
+def test_speed_keeper_takes_the_next_street_up_to_its_posted_number(monkeypatch):
+    # The tester report: the keeper "sometimes doesn't hold speeds on access
+    # roads". A facility approach zones every street at its own baked number,
+    # and the keeper's number was frozen at whatever it engaged with, capped by
+    # the limit under the wheels -- so a session started on a 15 mph service
+    # way carried that crawl over every 25 mph street after it, for the rest of
+    # the chain, while the zone entry announced 25 and nothing on the wheel
+    # could raise it.
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        street = {"limit": 15.0}
+        driving.trip.speed_limit_at = lambda mile: (street["limit"], "facility access road")
+        driving.trip.traffic_context = lambda: None
+        driving.trip.grade_at = lambda mile: 0.0
+        t = driving.truck
+        driving.handle_event(key_event(pygame.K_e))
+        t.cargo_kg = 0.0
+        t.grade = 0.0
+        t.transmission.gear = 4
+        t.velocity_mps = 15.0 / 2.23694
+        release_air_brakes(driving)
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._keeper_mph == pytest.approx(15.0, abs=0.5)
+
+        street["limit"] = 25.0  # the service way ends and a named street begins
+        driving.update(1 / 60)
+        assert driving._keeper_mph == pytest.approx(25.0)
+        # An assist that speeds the truck up on its own says the new number:
+        # the zone entry announced the law, not what the truck will do.
+        assert any(
+            e == "Speed keeper holding 25 miles per hour through the facility access road zone."
+            for e in events
+        )
+        for _ in range(60 * 40):
+            driving.update(1 / 60)
+        assert t.speed_mph > 21.0, t.speed_mph
+        # Said once for the street, not once a frame.
+        assert sum("Speed keeper holding 25" in e for e in events) == 1
+
+        # A lower street is still simply obeyed, without re-arming the number
+        # or announcing anything: coming down was never the broken direction.
+        before = len(events)
+        street["limit"] = 15.0
+        driving.update(1 / 60)
+        assert driving._keeper_mph == pytest.approx(25.0)  # the number it was handed
+        assert not [e for e in events[before:] if "Speed keeper holding" in e]
+    finally:
+        app.shutdown()
+
+
+def test_speed_keeper_ease_window_buys_only_the_road_the_shed_costs():
+    # The other half of the same report. The window is a budget of real
+    # seconds, but it was priced at the speed the truck STARTS from for every
+    # one of them -- and the truck is slowing through most of them. On a
+    # 25-to-15 drop that bought about 40 percent more road than the shed
+    # costs, and since 7ff22b6e the eased number is a held floor, so the
+    # surplus is crawled at the low number rather than re-planned.
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import MPH_PER_MPS
+    from freight_fate.states.driving_speed_control import (
+        KEEPER_EASE_DECEL_MPS2,
+        KEEPER_EASE_REAL_S,
+        KEEPER_SETTLE_REAL_S,
+    )
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = 25.0 / 2.23694
+        speed = driving.truck.speed_mph
+
+        reaction_mi = (KEEPER_EASE_REAL_S + KEEPER_SETTLE_REAL_S) * speed / 3600.0
+        window = driving._keeper_ease_mi(15.0, 1.0)
+        shed_s = (speed - 15.0) / MPH_PER_MPS / KEEPER_EASE_DECEL_MPS2
+        # Exactly what the shed costs: its seconds at the mean of the two
+        # speeds, plus the settling tail down at the new number.
+        shed_mi = (shed_s * (speed + 15.0) / 2.0 + KEEPER_SETTLE_REAL_S * 15.0) / 3600.0
+        assert shed_mi > reaction_mi  # a drop big enough to be shed-bound
+        assert window == pytest.approx(shed_mi)
+        # And strictly less than charging every budgeted second at the speed
+        # the truck came in at, which is what it used to claim.
+        entry_sized_mi = (shed_s + KEEPER_SETTLE_REAL_S) * speed / 3600.0
+        assert window < entry_sized_mi * 0.9
+
+        # The reaction budget underneath is untouched. Those seconds are spent
+        # before any slowing starts, so they still cost road at today's speed
+        # -- a corner-sized drop, and no drop at all, are both as they were.
+        assert driving._keeper_ease_mi(20.0, 1.0) == pytest.approx(reaction_mi)
+        assert driving._keeper_ease_mi(speed + 5.0, 1.0) == pytest.approx(reaction_mi)
+    finally:
+        app.shutdown()
+
+
+def test_speed_keeper_ignores_a_slower_vehicle_miles_up_the_road(monkeypatch):
+    # The keeper matched any slower vehicle the traffic bubble could see --
+    # two and a half miles of it -- with no test on the gap at all, so a car
+    # doing 35 in a 45 work zone put the truck at 35 from the far end of the
+    # zone, silently. It now waits until there is a reason to shed for it, and
+    # still creeps behind a queue that is genuinely there.
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import NPCVehicle, TrafficContext
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.speed_limit_at = lambda mile: (45.0, "construction")
+        driving.trip.grade_at = lambda mile: 0.0
+        lead = {"gap_mi": 2.2, "speed_mph": 35.0}
+        driving.trip.traffic_context = lambda: TrafficContext(
+            lead=NPCVehicle(
+                key="lead",
+                position_mi=driving.trip.position_mi + lead["gap_mi"],
+                speed_mph=lead["speed_mph"],
+                target_speed_mph=lead["speed_mph"],
+                relative_lane=0,
+                behavior="slow_car",
+            ),
+            gap_mi=lead["gap_mi"],
+            closing_mph=10.0,
+        )
+        t = driving.truck
+        driving.handle_event(key_event(pygame.K_e))
+        t.cargo_kg = 0.0
+        t.grade = 0.0
+        t.transmission.gear = 8
+        t.velocity_mps = 45.0 / 2.23694
+        release_air_brakes(driving)
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._keeper_mph == pytest.approx(45.0, abs=0.5)
+        # Well outside anything the keeper has a reason to shed for.
+        assert lead["gap_mi"] > driving._keeper_ease_mi(
+            lead["speed_mph"], driving.trip.effective_time_scale
+        )
+
+        for _ in range(60 * 20):
+            driving.update(1 / 60)
+            # Matching the lead outright would have parked the truck at 35
+            # within a few seconds and held it there for the whole zone.
+            assert t.speed_mph > 37.0, t.speed_mph
+
+        # Right behind it, the queue rule still applies all the way to a stop.
+        lead.update(gap_mi=0.02, speed_mph=0.0)
+        for _ in range(60 * 60):
+            driving.update(1 / 60)
+            if t.speed_mph < 1.0:
+                break
+        assert t.speed_mph < 1.0, t.speed_mph
+    finally:
+        app.shutdown()
+
+
 def test_speed_keeper_needs_the_truck_rolling(monkeypatch):
     from freight_fate.app import App
 

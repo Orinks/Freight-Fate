@@ -21,6 +21,16 @@ KEEPER_SETTLE_REAL_S = 2.0
 # highway speed, where drag does most of the work). Sized on a comfortable
 # 0.8 instead, the window was honest for a corner but half what a 25-to-15
 # drop needs, and the truck reached the sign still doing 17.
+#
+# Kept at 0.4 on purpose, even though the snub added a few hours after that
+# measurement (7f46880b) now guarantees KEEPER_SNUB_DECEL_MPS2 -- 0.6, net of
+# the grade, held until the truck is a mile an hour UNDER the number, so the
+# real figure on the flat is better than this. Planning against 0.4 keeps a
+# third of the window in hand, and that is the margin that still makes the
+# corner on a downgrade, on warm drums, or with the pedal saturated at
+# KEEPER_SNUB_MAX_BRAKE. The two failures do not cost the same: arriving early
+# costs a stretch at the lower number, arriving late costs the corner, the
+# loop-back, and the session with it.
 KEEPER_EASE_DECEL_MPS2 = 0.4
 # Aim a hair under the number rather than exactly at it. The keeper closes
 # the last mile an hour on engine drag alone -- below its braking deadband --
@@ -85,6 +95,7 @@ class SpeedControlStateMixin:
         self._keeper_mph = None
         self._keeper_throttle = 0.0
         self._keeper_zone = ""
+        self._keeper_zone_limit = None
         self._keeper_ease_said = None
         self._keeper_ease_target = None
         self._keeper_snub = 0.0
@@ -264,12 +275,30 @@ class SpeedControlStateMixin:
         physical shed time is the floor: a big drop buys more road however
         relaxed the clock is. A settling tail on top puts the truck at the
         number ahead of the point rather than exactly on it.
+
+        Where the shed is what the window is for, its seconds are priced at
+        the speed the truck is actually DOING through them -- the mean of the
+        two ends -- and the settling tail down at the new number. Charging
+        every one of them at the speed the truck came in at claimed 0.64 of a
+        mile for a 25-to-15 drop that costs 0.45, and since the eased number
+        became a held floor (7ff22b6e) each surplus yard is crawled at the low
+        number instead of simply re-planned. The truck reaching a service
+        way's 15 a third of a mile early and sitting there is the "does not
+        hold speeds on access roads" report (tester, 2026-08).
+
+        The reaction budget underneath is untouched, and stays priced at
+        today's speed: those seconds are spent hearing and deciding, before
+        any slowing starts, so that is the road they really cost.
         """
         speed = max(self.truck.speed_mph, 1.0)
-        shed_s = max(0.0, speed - target_mph) / MPH_PER_MPS / KEEPER_EASE_DECEL_MPS2
-        seconds = max(KEEPER_EASE_REAL_S, shed_s) + KEEPER_SETTLE_REAL_S
-        miles = seconds * speed * scale / 3600.0
-        return min(KEEPER_EASE_MAX_MI, miles)
+        target = max(1.0, min(target_mph, speed))
+        reaction_mi = (KEEPER_EASE_REAL_S + KEEPER_SETTLE_REAL_S) * speed * scale / 3600.0
+        shed_s = (speed - target) / MPH_PER_MPS / KEEPER_EASE_DECEL_MPS2
+        # The mean of the two ends through the shed, then the settling tail
+        # down at the new number, because that is where the truck spends it.
+        shed_mi = shed_s * (speed + target) / 2.0 * scale / 3600.0
+        shed_mi += KEEPER_SETTLE_REAL_S * target * scale / 3600.0
+        return min(KEEPER_EASE_MAX_MI, max(reaction_mi, shed_mi))
 
     def _keeper_turn_ease_scale(self) -> float:
         """The clock the keeper will actually ease a corner on.

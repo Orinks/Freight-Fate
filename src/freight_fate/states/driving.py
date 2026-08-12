@@ -456,6 +456,9 @@ class DrivingState(
         self._keeper_mph: float | None = None
         self._keeper_throttle = 0.0
         self._keeper_zone = ""
+        # The posted number the keeper last took its target from, so a street
+        # that posts a HIGHER one can hand the keeper back up to street speed.
+        self._keeper_zone_limit: float | None = None
         # The lower number ahead the keeper is easing for, and the say-once
         # latch for the posted-limit version of that cue.
         self._keeper_ease_said: float | None = None
