@@ -39,11 +39,13 @@ def _driving(app):
     return d
 
 
-def _street_chain(d, *, time_scale: float = 1.0):
+def _street_chain(d, *, time_scale: float = 1.0, short_block_mi: float = 0.5):
     """Swap the drive onto a deterministic three-block facility street chain.
 
     Leg 1 is a left onto a 25 mph street (advise 20, the trailer cap); leg 2
     is a right onto a 15 mph service way (advise 15, the street's own limit).
+    ``short_block_mi`` shortens the middle block so the two corners arrive in
+    quick succession, the way a real city grid delivers them.
     """
     from freight_fate.data.world_models import Leg, Route
     from freight_fate.sim import Trip
@@ -63,7 +65,7 @@ def _street_chain(d, *, time_scale: float = 1.0):
         Leg(
             city,
             city,
-            0.5,
+            short_block_mi,
             "North Michigan Street",
             "flat",
             (),
@@ -196,6 +198,39 @@ def test_the_approach_call_stays_quiet_about_a_keeper_with_nothing_to_shed(monke
         assert d._turn_approach_text(d._turn_cue_in_play(), 0.2).endswith(
             "Advise 20 miles per hour."
         )
+    finally:
+        app.shutdown()
+
+
+def test_the_planner_sees_past_the_corner_it_is_already_easing_for(monkeypatch):
+    # A corner holds the keeper's target through its own tail, and a city
+    # block is shorter than that tail. Holding the FIRST corner's number
+    # through it meant the 15 mph service way one short block on never
+    # reached the planner at all -- turns "coming up really quickly", as the
+    # tester put it. The corner already being eased for is a floor on what to
+    # shed for now, never a reason to stop looking for something slower.
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _street_chain(d, short_block_mi=0.08)
+        _capture(app, monkeypatch)
+        first, second = d._turn_cues_in_play()
+        assert d._turn_speed_mph(first) == 20.0
+        assert d._turn_speed_mph(second) == 15.0
+        assert second.at_mi - first.at_mi < 0.15  # inside the first corner's tail
+
+        # Easing for the first corner, well before the second one is close.
+        d.trip.position_mi = first.at_mi - 0.05
+        _mph(d, 25.0)
+        assert d._keeper_speed_ahead() == (20.0, "turn")
+
+        # One block on, with the second corner's own window open, the planner
+        # takes the slower number rather than riding the first corner's out.
+        d.trip.position_mi = second.at_mi - 0.03
+        _mph(d, 19.0)
+        assert d._keeper_speed_ahead() == (15.0, "turn")
     finally:
         app.shutdown()
 
