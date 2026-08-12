@@ -319,6 +319,7 @@ from the words, and synonyms cost them a re-read.
 | The sounding entry for liquid running back and forth inside a tank trailer (the concept itself is "surge", above) | Surge | slosh, sloshing, wave action | `vehicle/liquid_wash`, `sim/surge.LiquidLoad` |
 | The load hitting the front or back of the tank | Surge strike | liquid hit, fore-aft strike | `vehicle/liquid_hit`, `sim/surge.SloshAxis` |
 | The load hitting the side of the tank -- the one that rolls trucks | Surge strike, sideways | lateral hit, side slosh | `vehicle/liquid_hit_lateral`, `sim/surge.SloshAxis` |
+| The one career whose accepted backups front the player's public profile | public career | shared career, featured career, main save | `publicSaveName` |
 
 Notes on the entries that are not simple:
 

@@ -68,6 +68,15 @@
   can take. Press L any time for the same reading on demand: your lane,
   and whether each neighbouring lane is open, blocked, or closed.
 
+- **You now choose which career is your public one.** Your public profile on
+  orinks.net shows one career. Until now that was quietly whichever career
+  happened to back up first, so playing several careers could put the wrong
+  one's level, statistics, and badges on your profile. The Cloud backup menu
+  now says "your public career" on the career that fronts your profile, and
+  every backed-up career offers "Make this your public career," with a spoken
+  confirmation before anything changes. Your other careers keep backing up
+  privately; they just stay off your profile.
+
 ### Fixed
 
 - **Turning streamer-safe mode on now takes effect on the air, not just
@@ -144,6 +153,18 @@
   through a safe turnaround with the clock running, and the entrance is
   ahead again. Cruise also stays out of it from the moment you take the
   destination exit until you have actually stopped.
+
+- **Cloud backup no longer goes quiet after the cloud copy of a career
+  disappears.** If your account's cloud storage was reset, or you deleted a
+  career's cloud backup from another computer, this computer still remembered
+  the old cloud copy and treated the mismatch as a conflict -- and from then
+  on it silently stopped backing that career up. That also trapped careers
+  whose conflict was real when it was noticed but whose cloud copy later
+  vanished. The game now checks whether there is anything in the cloud left
+  to protect before staying quiet, starts the career's backups over fresh
+  when there is not, and your next save is backed up as usual. Careers with a
+  genuine conflict -- a newer copy really is in the cloud -- still wait for
+  you to choose a side in the Cloud backup menu.
 
 - **One dip in air pressure is one warning.** Hard or repeated braking
   drags air pressure down around the warning line while the compressor

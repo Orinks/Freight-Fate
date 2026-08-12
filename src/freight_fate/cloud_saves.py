@@ -305,8 +305,10 @@ def upload_save(
     return {"ok": False, "reason": "error"}
 
 
-def list_saves(identity: OnlineIdentity, *, transport: Transport = _http_json) -> list[dict] | None:
-    """All kept cloud revisions for this driver (newest first), or None when
+def list_saves(identity: OnlineIdentity, *, transport: Transport = _http_json) -> dict | None:
+    """All kept cloud revisions for this driver (``saves``, newest first) plus
+    which career fronts the public profile (``publicSaveName``, None when no
+    career is designated or the server predates the choice) -- or None when
     the site is unreachable. Raises :class:`CloudAuthError` when the server
     answers but refuses the credentials. Called from menu worker threads only."""
     url = f"{_saves_url()}?driverId={identity.driver_id}"
@@ -326,7 +328,41 @@ def list_saves(identity: OnlineIdentity, *, transport: Transport = _http_json) -
         log.debug("Cloud save list failed: %s", e)
         return None
     saves = reply.get("saves")
-    return saves if isinstance(saves, list) else None
+    if not isinstance(saves, list):
+        return None
+    public = reply.get("publicSaveName")
+    return {"saves": saves, "publicSaveName": public if isinstance(public, str) else None}
+
+
+def set_public_save(
+    identity: OnlineIdentity,
+    *,
+    save_name: str | None,
+    transport: Transport = _http_json,
+) -> bool:
+    """Choose which career fronts the driver's public profile (None returns
+    to the server's first-uploader rule). True on success, False when the site
+    could not be reached or refused. Raises :class:`CloudAuthError` when the
+    server answers but refuses the credentials. Called from menu worker
+    threads only."""
+    url = f"{_saves_url()}/public-career"
+    payload = {"driverId": identity.driver_id, "saveName": save_name}
+    try:
+        reply = transport(url, payload, _auth_headers(identity))
+    except urllib.error.HTTPError as e:
+        body = _error_body(e)
+        if _auth_refused(e, body):
+            log.warning(
+                "Public career choice refused (HTTP %s): this computer's sign-in is no longer accepted",
+                e.code,
+            )
+            raise CloudAuthError from e
+        log.warning("Public career choice failed: HTTP %s", e.code)
+        return False
+    except Exception as e:
+        log.debug("Public career choice failed: %s", e)
+        return False
+    return bool(reply.get("ok"))
 
 
 def delete_save(
@@ -715,12 +751,32 @@ class CloudSaves:
 
     def _upload_slot(self, name: str, snapshot: dict) -> None:
         slot = self.sync_state.slot(name)
-        if "conflict" in slot:
-            # Never retry into a known conflict; the player resolves it from
-            # the Cloud backup menu. Drop the snapshot -- the local file is
-            # still the source of truth for "keep mine".
-            self._done_with(name, snapshot)
-            return
+        conflict = slot.get("conflict")
+        if conflict is not None and conflict.get("latestRevision") is None:
+            # Recorded by an older build against an empty cloud slot (wiped
+            # deployment, or deleted from another machine). No newer save
+            # exists to protect, so start the slot over instead of staying
+            # silent forever.
+            self.sync_state.forget(name)
+            slot = {}
+        elif conflict is not None:
+            # A known conflict names a real cloud revision -- but that copy
+            # may have vanished since it was recorded (deployment reset, or
+            # the slot deleted from another machine), and then there is
+            # nothing left to protect. Re-check before staying silent.
+            if self._cloud_slot_exists(name):
+                # Still there: the player resolves it from the Cloud backup
+                # menu. Drop the snapshot -- the local file is still the
+                # source of truth for "keep mine".
+                self._done_with(name, snapshot)
+                return
+            log.info(
+                "Cloud backup of %s was blocked by a conflict whose cloud "
+                "copy no longer exists; restarting the slot fresh",
+                name,
+            )
+            self.sync_state.forget(name)
+            slot = {}
         _, content_hash = cloud_content(snapshot)
         if slot.get("hash") == content_hash:
             self._done_with(name, snapshot)
@@ -741,6 +797,19 @@ class CloudSaves:
             log.info("Cloud backup of %s uploaded as revision %s", name, result["revision"])
             return
         if result.get("reason") == "conflict":
+            if result.get("latestRevision") is None:
+                # The cloud slot is empty -- the staging deployment was wiped,
+                # or the slot was deleted from another machine -- so there is
+                # no newer save to protect. Drop the stale revision and let the
+                # retry pass re-create the slot from this machine's save.
+                self.sync_state.forget(name)
+                self._retry_at = self._clock() + self._retry
+                log.info(
+                    "Cloud backup of %s named a revision the cloud no longer "
+                    "has; restarting the slot fresh",
+                    name,
+                )
+                return
             self.sync_state.record_conflict(name, result)
             self._done_with(name, snapshot)
             log.warning(
@@ -782,6 +851,21 @@ class CloudSaves:
             return
         # Transient (network, 5xx): keep the snapshot, back off.
         self._retry_at = self._clock() + self._retry
+
+    def _cloud_slot_exists(self, name: str) -> bool:
+        """Whether the cloud still holds any revision of this slot. Errs on
+        the side of True: an unreachable or refusing server must keep the
+        conflict guard in place."""
+        try:
+            reply = list_saves(self._identity, transport=self._transport)
+        except CloudAuthError:
+            return True
+        if reply is None:
+            return True
+        # The reply grew a wrapper dict when the public-career choice landed;
+        # accept both shapes so this survives either side of that change.
+        entries = reply["saves"] if isinstance(reply, dict) else reply
+        return any(entry.get("saveName") == name for entry in entries)
 
     def resolve_keep_mine(self, name: str, profile_dict: dict) -> bool:
         """Conflict choice: overwrite the cloud with this machine's save.
