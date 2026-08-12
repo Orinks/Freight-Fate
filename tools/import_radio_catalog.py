@@ -35,6 +35,8 @@ import re
 import sys
 from pathlib import Path
 
+from freight_fate.radio import normalize_stream_url
+
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_INPUT = ROOT / "data" / "radio-cache" / "pr150_stations.json"
 CURATED_PATH = ROOT / "src" / "freight_fate" / "data" / "radio_catalog.json"
@@ -77,6 +79,11 @@ def call_sign_base(call_sign: str) -> str:
 def curated_call_signs(curated: dict) -> set[str]:
     return {call_sign_base(row.get("call_sign", "")) for row in curated["stations"]}
 
+
+# normalize_stream_url lives in freight_fate.radio: this build-time collision
+# check and the runtime dial (which collapses a multi-site station like KZYX
+# or WNPN to a single listing) must agree on what counts as "the same
+# stream", so there is exactly one implementation of that rule.
 
 # Leftovers the source file's name cleaning can strand at the front of a
 # local station's name once a sibling frequency or call sign is stripped:
@@ -169,7 +176,7 @@ def convert_web_station(row: dict) -> dict:
 def build(source: dict, curated: dict) -> dict:
     reserved = curated_call_signs(curated)
     curated_urls = {
-        (row.get("stream_url") or "").strip()
+        normalize_stream_url(row.get("stream_url") or "")
         for row in curated["stations"]
         if row.get("stream_url")
     }
@@ -177,18 +184,20 @@ def build(source: dict, curated: dict) -> dict:
     dropped = 0
     seen_urls = set(curated_urls)
     for row in source["local"]:
-        if call_sign_base(row["call_sign"]) in reserved or row["url"] in seen_urls:
+        key = normalize_stream_url(row["url"])
+        if call_sign_base(row["call_sign"]) in reserved or key in seen_urls:
             dropped += 1
             continue
-        seen_urls.add(row["url"])
+        seen_urls.add(key)
         stations.append(convert_station(row))
     stations.sort(key=lambda s: (s["call_sign"], s["id"]))
     web_dropped = 0
     for row in source["web"]:  # already in listener-vote order; keep it
-        if row["url"] in seen_urls:
+        key = normalize_stream_url(row["url"])
+        if key in seen_urls:
             web_dropped += 1
             continue
-        seen_urls.add(row["url"])
+        seen_urls.add(key)
         stations.append(convert_web_station(row))
     dropped += web_dropped
     return {

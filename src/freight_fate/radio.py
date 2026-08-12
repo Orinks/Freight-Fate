@@ -174,6 +174,61 @@ def _call_sign_base(call_sign: str) -> str:
     return call_sign.replace("-", " ").split()[0].upper() if call_sign.strip() else ""
 
 
+_URL_SCHEME_RE = re.compile(r"^[a-z][a-z0-9+.\-]*://", re.IGNORECASE)
+
+
+def normalize_stream_url(url: str) -> str:
+    """A stream URL with scheme and a trailing slash stripped, for dedup only.
+
+    The same live stream is sometimes registered under both ``http://`` and
+    ``https://`` (and sometimes with a bare trailing slash); an exact-string
+    comparison treats those as different streams and let one station land on
+    the dial twice under two names (WHYY 90.9, 2026-08-12 field report).
+    Scheme and host are case-insensitive by spec, so only that part is
+    folded -- a genuinely case-sensitive path is never merged with a
+    different one. Never stored or spoken -- comparison only. Shared with
+    tools/import_radio_catalog.py's build-time collision check, so both
+    layers agree on what counts as "the same stream".
+    """
+    url = url.strip()
+    match = _URL_SCHEME_RE.match(url)
+    if match:
+        url = url[match.end() :]
+    url = url.rstrip("/")
+    host, _, rest = url.partition("/")
+    return f"{host.lower()}/{rest}" if rest else host.lower()
+
+
+def station_identity(station: RadioStation) -> str:
+    """The station's identity for dial-listing purposes.
+
+    Curated data can carry the same live stream under several rows on
+    purpose -- real multi-site coverage, one row per transmitter/translator
+    (KZYX Willits/Ukiah, WNPN/ripr Newport/Providence, KENW's three New
+    Mexico sites, SDPB's statewide network). Those rows stay in the data
+    unchanged: each still feeds its own reception physics. But they are one
+    station, not several, so the dial lists them once, at whichever site is
+    strongest from the truck's current position. Two rows sharing a
+    normalized stream URL share an identity; a station with no stream URL
+    (built-in, no real_stream) is never grouped -- its id already is one.
+    """
+    if station.stream_url:
+        return normalize_stream_url(station.stream_url)
+    return f"id:{station.id}"
+
+
+def _identity_siblings(
+    catalog: tuple[RadioStation, ...],
+) -> dict[str, tuple[RadioStation, ...]]:
+    """Every station sharing a dial identity with at least one other, keyed
+    by that identity. Solo stations (the overwhelming majority) are left out
+    entirely so every lookup against this map is a cheap membership check."""
+    groups: dict[str, list[RadioStation]] = {}
+    for station in catalog:
+        groups.setdefault(station_identity(station), []).append(station)
+    return {key: tuple(stations) for key, stations in groups.items() if len(stations) > 1}
+
+
 def load_imported_stations(
     curated: tuple[RadioStation, ...],
 ) -> tuple[RadioStation, ...]:
@@ -553,6 +608,12 @@ class RadioState:
         # Stations that refused to play this session: off the dial until the
         # next session rather than a dead stop on every pass of the band.
         self.unplayable_ids: set[str] = set()
+        # Multi-site stations (KZYX, WNPN/ripr, KENW, SDPB...): every row
+        # sharing a normalized stream URL, keyed by that identity. Built
+        # once per catalog -- the catalog itself never changes after
+        # construction -- so tuning and reception lookups stay O(sites),
+        # not O(catalog), on every call.
+        self._identity_siblings = _identity_siblings(catalog)
 
     @classmethod
     def from_settings(cls, settings, profile=None) -> RadioState:
@@ -590,8 +651,35 @@ class RadioState:
             for reception in receptions
             if reception.signal > 0.0 or reception.station.always_available
         ]
+        receivable = self._collapse_identity_sites(receivable)
         receivable.sort(key=self._reception_sort_key)
         return tuple(receivable) or (self.fallback_reception(),)
+
+    def _collapse_identity_sites(self, receptions: list[RadioReception]) -> list[RadioReception]:
+        """One dial entry per multi-site identity: whichever site is loudest.
+
+        KZYX/WNPN/KENW/SDPB-style entries are several real transmitters
+        broadcasting the same stream; each keeps feeding its own reception
+        physics, but only the strongest one currently in range gets a line
+        on the dial -- the rest would just repeat it under a different name.
+        """
+        if not self._identity_siblings:
+            return receptions
+        solo: list[RadioReception] = []
+        best: dict[str, RadioReception] = {}
+        order: list[str] = []
+        for reception in receptions:
+            identity = station_identity(reception.station)
+            if identity not in self._identity_siblings:
+                solo.append(reception)
+                continue
+            current = best.get(identity)
+            if current is None:
+                order.append(identity)
+                best[identity] = reception
+            elif reception.signal > current.signal:
+                best[identity] = reception
+        return solo + [best[identity] for identity in order]
 
     def available_stations(self) -> tuple[RadioStation, ...]:
         return tuple(reception.station for reception in self.receivable_stations())
@@ -620,10 +708,39 @@ class RadioState:
         if station is not None and self._station_allowed(station):
             reception = estimate_signal(station, self.position, self.elevation_ft)
             if reception.signal > 0.0 or station.always_available:
+                handover = self._identity_handover(station, reception.signal)
+                if handover is not None:
+                    self.station_id = handover.id
+                    return handover
                 return station
         fallback = self.fallback_station()
         self.station_id = fallback.id
         return fallback
+
+    def _identity_handover(
+        self, station: RadioStation, current_signal: float
+    ) -> RadioStation | None:
+        """The stronger sibling site for a multi-site station, if one beats it now.
+
+        Tuning in on KZYX/WNPN/KENW/SDPB-style entries points station_id at
+        one literal site's id; as the truck moves, this keeps that id
+        pointed at whichever site is actually loudest, so the tuned station
+        just gets stronger the way any single station would -- it never
+        needs a second dial entry to hand over to, and it never sits stuck
+        on a fading site while a clearer one of the same identity is in
+        range.
+        """
+        siblings = self._identity_siblings.get(station_identity(station))
+        if not siblings:
+            return None
+        best_station, best_signal = station, current_signal
+        for candidate in siblings:
+            if candidate.id == station.id or not self._station_allowed(candidate):
+                continue
+            candidate_signal = estimate_signal(candidate, self.position, self.elevation_ft).signal
+            if candidate_signal > best_signal:
+                best_station, best_signal = candidate, candidate_signal
+        return best_station if best_station.id != station.id else None
 
     def current_reception(self) -> RadioReception:
         station = self.current_station()
@@ -811,8 +928,21 @@ class RadioState:
         )
 
     def mark_unplayable(self, station_id: str) -> None:
-        """Take a station that refused to play off the dial for this session."""
+        """Take a station that refused to play off the dial for this session.
+
+        A multi-site station's sites all serve the same stream URL, so a
+        dead stream is dead at every site: the whole identity goes off the
+        dial together, or the handover in current_station/receivable_stations
+        would just find a sibling site pointed at the same dead URL and try
+        it again.
+        """
         self.unplayable_ids.add(station_id)
+        station = self._station_by_id(station_id)
+        if station is None:
+            return
+        siblings = self._identity_siblings.get(station_identity(station))
+        if siblings:
+            self.unplayable_ids.update(sibling.id for sibling in siblings)
 
     def _same_band_replacement(self, failed: RadioStation) -> RadioReception | None:
         """The next receivable station in the failed station's dial category."""
@@ -885,19 +1015,31 @@ class RadioState:
         demoting them there would reorder the front of the dial for no gain.
         """
         group = _dial_group(station)
-        if group > FAVORITES_GROUP and station.id in self.favorite_ids:
+        if group > FAVORITES_GROUP and self._identity_ids(station) & self.favorite_ids:
             return FAVORITES_GROUP
         return group
+
+    def _identity_ids(self, station: RadioStation) -> set[str]:
+        """station.id plus every sibling site's id sharing its identity.
+
+        A multi-site station is favorited or unfavorited as one station, not
+        per site: whichever site happens to be loudest when the driver saves
+        it should not be the only one that counts as saved once the truck
+        moves on and a sibling site takes over the dial listing.
+        """
+        siblings = self._identity_siblings.get(station_identity(station))
+        return {sibling.id for sibling in siblings} if siblings else {station.id}
 
     def toggle_favorite(self) -> str:
         """Save or unsave the current station; the spoken confirmation."""
         station = self.current_station()
         if station.fallback:
             return "The safety fallback is always on the dial."
-        if station.id in self.favorite_ids:
-            self.favorite_ids.discard(station.id)
+        ids = self._identity_ids(station)
+        if ids & self.favorite_ids:
+            self.favorite_ids -= ids
             return f"Removed {station.display_name} from favorites."
-        self.favorite_ids.add(station.id)
+        self.favorite_ids |= ids
         return f"Saved {station.display_name} to favorites."
 
     def _reception_sort_key(self, reception: RadioReception) -> tuple[int, float, str]:

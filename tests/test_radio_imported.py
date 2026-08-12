@@ -37,11 +37,24 @@ def test_web_tier_is_always_available_and_gated():
     assert not any(station.display_name.startswith(",") for station in WEB)
 
 
+def _normalized_url(url: str) -> str:
+    # Radio Browser registers the same live stream under both http:// and
+    # https:// (and sometimes a bare trailing slash); a raw string compare
+    # missed that entirely and let WHYY 90.9 land on the Philadelphia dial
+    # twice (2026-08-12 field report). Mirrors
+    # tools/import_radio_catalog.py's normalize_stream_url.
+    stripped = re.sub(r"^[a-z][a-z0-9+.\-]*://", "", url.strip(), flags=re.IGNORECASE)
+    stripped = stripped.rstrip("/")
+    host, _, rest = stripped.partition("/")
+    return f"{host.lower()}/{rest}" if rest else host.lower()
+
+
 def test_imported_urls_never_duplicate_the_dial():
     # The curated catalog may reuse a network stream across its own entries;
-    # the imported tier must not collide with curated URLs or itself.
-    curated_urls = {s.stream_url for s in load_radio_catalog() if s.stream_url}
-    imported_urls = [s.stream_url for s in IMPORTED + WEB]
+    # the imported tier must not collide with curated URLs or itself, even
+    # when the only difference is scheme or a trailing slash.
+    curated_urls = {_normalized_url(s.stream_url) for s in load_radio_catalog() if s.stream_url}
+    imported_urls = [_normalized_url(s.stream_url) for s in IMPORTED + WEB]
     assert len(imported_urls) == len(set(imported_urls))
     assert not curated_urls.intersection(imported_urls)
 
