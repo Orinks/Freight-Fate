@@ -1024,6 +1024,45 @@ def test_continuous_coasting_slowly_drains_compliance(monkeypatch):
         app.shutdown()
 
 
+def test_out_of_service_stop_shuts_down_the_engine(monkeypatch):
+    """The ten-hour out-of-service order is a real overnight fast-forward: it
+    must shut the engine down like every other sleep path (motel, sleeper
+    split, shoulder, lot), not leave it idling through the night, and it must
+    tell the driver how to get moving again afterward."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import EnforcementStopState
+
+    app = App()
+    try:
+        d = _driving(app, patrol_intensity=None)
+        _quiet(app, monkeypatch)
+        d.truck.start_engine()
+        assert d.truck.engine_on
+
+        app.push_state(
+            EnforcementStopState(
+                app.ctx,
+                d,
+                title="Log check",
+                summary="Evidence: HOS/ELD violation.",
+                fine=500.0,
+                reputation_hit=10.0,
+                signaled=True,
+                return_message="Back on the highway with a reset clock.",
+                out_of_service=True,
+            )
+        )
+
+        assert d.truck.engine_on is False
+        text = app.state._outcome_text
+        assert "shut down the engine" in text.lower()
+        # Ten hours parked with the engine off bleeds the air down, so the
+        # driver needs the restart instruction to get moving again.
+        assert "start the engine" in text.lower()
+    finally:
+        app.shutdown()
+
+
 def test_ticket_counters_survive_snapshot(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import DrivingState

@@ -216,10 +216,10 @@
 
 - **Sleeping at a motel now shuts the engine off.** Every other rest --
   sleeper berth, lot, shoulder -- killed the engine before you slept, but
-  a motel room left it running all night, burning fuel while the wake-up
-  message told you to start an engine that had never stopped. The motel
-  now shuts it down like everywhere else, and the morning prompt is
-  finally telling the truth.
+  a motel room left it running all night, so the game still called it
+  running while the wake-up message told you to start an engine that had
+  never stopped. The motel now shuts it down like everywhere else, and the
+  morning prompt is finally telling the truth.
 
 - **Live weather rides out a quiet station instead of lurching to neutral.**
   When the nearest weather station stopped reporting fresh observations,

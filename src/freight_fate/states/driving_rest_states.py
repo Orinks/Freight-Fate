@@ -447,12 +447,19 @@ class EnforcementStopState(_RoadsideExitMixin, MenuState):
             # 2026-07-24).
             causes = d.hos.violation_causes(self.ctx.settings.hos_mode)
             why = " The order stands because " + " and ".join(causes) + "." if causes else ""
+            # Ten hours parked is a real overnight fast-forward, the same as
+            # every other sleep path -- the engine must not idle through the
+            # whole order (log, 2026-08-12: it did, and the audio froze at
+            # pre-stop revs for the entire ten hours).
+            engine_off = _shut_down_engine(d)
             d._place_out_of_service()
+            lead = f" {engine_off.strip()}" if engine_off else ""
             self._outcome_text += (
-                f"{why} Out of service: ten hours pass parked on the shoulder "
+                f"{lead}{why} Out of service: ten hours pass parked on the shoulder "
                 f"before you may roll. It is now {clock_text(d.trip.local_hour)}, "
                 "your hours of service are reset, and you wake rested -- but "
                 "the delivery deadline kept counting the whole time."
+                f"{_wake_air_instruction(d, from_rest_menu=False)}"
             )
         if self._licence_pulled():
             self._outcome_text += self._suspended_exit_text()
