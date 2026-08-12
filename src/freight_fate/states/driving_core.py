@@ -300,6 +300,8 @@ RAMP_OVERSHOOT_MI = 0.5
 # the missed destination exit and the missed facility gate -- the same maneuver
 # a road up or down. The lost time is the whole consequence; there is no fine.
 RAMP_TERMINAL_MISS_LOOP_MIN = 20.0
+# The missed destination exit's own loop-back, same maneuver and same clock.
+EXIT_MISS_LOOP_MIN = 20.0
 RAMP_SPEECH_WPM_MIN = 30.0
 RAMP_SPEECH_WPM_MAX = 60.0
 RAMP_ARRIVAL_REACTION_S = 3.0

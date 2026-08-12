@@ -114,41 +114,39 @@ class FacilityGateMixin:
             and not self._arrival_menu_open
         )
 
-    def _charge_gate_miss_loop(self) -> None:
-        """HOS, fatigue, and idle fuel for the loop -- the spoken "the clock
-        is still running" line must be literally true. The scripted
-        reposition never passes through the per-frame loop that would
-        otherwise apply these (``_update_hours_and_fatigue``,
+    def _charge_scripted_loop(self, minutes: float) -> None:
+        """HOS, fatigue, and idle fuel for a scripted loop-back -- the spoken
+        "the clock is still running" line must be literally true. The
+        scripted reposition never passes through the per-frame loop that
+        would otherwise apply these (``_update_hours_and_fatigue``,
         ``TruckState._update_fuel``), so it charges the same rate math
-        directly against the fixed ``GATE_MISS_LOOP_MIN`` instead of
-        duplicating the constants those apply.
+        directly against the loop's fixed minutes instead of duplicating
+        the constants those apply. Shared by the missed facility gate and
+        the missed destination exit, whose loops are the same maneuver.
         """
         p = self.ctx.profile
         if self.job.bobtail:
-            self.hos.off_duty(GATE_MISS_LOOP_MIN)
+            self.hos.off_duty(minutes)
         else:
             # The loop is a real, if slow, drive through the next safe
             # turnaround -- on-duty driving time, not a parked wait.
-            self.hos.drive(GATE_MISS_LOOP_MIN)
+            self.hos.drive(minutes)
         fatigue_mult = tuning_for_time_scale(self.trip.time_scale).fatigue_rate
         night = is_night(self.trip.local_hour)
         now_h = self._absolute_game_hour()
         p.fatigue = min(
             100.0,
             p.fatigue
-            + hos.fatigue_rate_per_min(night)
-            * GATE_MISS_LOOP_MIN
-            * fatigue_mult
-            * p.fatigue_buff_rate(now_h),
+            + hos.fatigue_rate_per_min(night) * minutes * fatigue_mult * p.fatigue_buff_rate(now_h),
         )
-        self.truck.burn_idle_fuel_over_game_time(GATE_MISS_LOOP_MIN * 60.0)
+        self.truck.burn_idle_fuel_over_game_time(minutes * 60.0)
 
     def _handle_missed_facility_gate(self) -> None:
         """The scripted loop-back through the next safe turnaround."""
         self.trip.finished = False
         self._gate_miss_count += 1
         self.trip.game_minutes += GATE_MISS_LOOP_MIN
-        self._charge_gate_miss_loop()
+        self._charge_scripted_loop(GATE_MISS_LOOP_MIN)
         # Drop back a full warning window, not a fixed distance: under time
         # compression a fixed stretch passes before it can be heard, making
         # the re-approach unwinnable (the missed-exit loop's lesson).

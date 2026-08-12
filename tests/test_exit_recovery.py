@@ -66,6 +66,40 @@ def test_second_miss_still_loops_back(monkeypatch):
         app.shutdown()
 
 
+def test_missed_exit_loop_charges_hos_fatigue_and_fuel(monkeypatch):
+    """The loop-back through the next safe turnaround is a real, if slow,
+    drive: it must cost hours of service, fatigue, and an idle sip of fuel
+    alongside the twenty game minutes, exactly as the facility-gate miss
+    already does -- otherwise the reposition is free time."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_core import EXIT_MISS_LOOP_MIN
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        _capture_events(app, monkeypatch)
+        driving.truck.engine_on = True
+        driving.truck.rpm = driving.truck.specs.idle_rpm
+        driving_before = driving.hos.driving_min
+        fatigue_before = app.ctx.profile.fatigue
+        fuel_before = driving.truck.fuel_gal
+        minutes = driving.trip.game_minutes
+
+        driving.trip.position_mi = driving.trip.total_miles - 0.05
+        driving._handle_missed_destination_exit()
+
+        assert driving.trip.game_minutes == pytest.approx(minutes + EXIT_MISS_LOOP_MIN)
+        assert driving.hos.driving_min == pytest.approx(driving_before + EXIT_MISS_LOOP_MIN)
+        assert app.ctx.profile.fatigue > fatigue_before
+        assert driving.truck.fuel_gal < fuel_before
+        # Idle-rate honesty: ~0.8 gal/h floor, so twenty minutes is a small,
+        # bounded sip, not a fraction of a highway-cruise burn.
+        assert fuel_before - driving.truck.fuel_gal < 1.0
+    finally:
+        app.shutdown()
+
+
 def _armed_exit(driving, ahead):
     stop = RoadStop(
         "Camp Verde Dry Warehouse",

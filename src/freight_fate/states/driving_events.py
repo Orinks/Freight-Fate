@@ -3333,7 +3333,10 @@ class DrivingEventMixin:
         # pinned at the end of the route with no exit left to signal for,
         # cruise dying every frame (playtest transcript, 2026-07-16).
         self._missed_destination_exit_said = True
-        self.trip.game_minutes += 20.0
+        self.trip.game_minutes += EXIT_MISS_LOOP_MIN
+        # The loop-back is a real drive: hours, fatigue, and idle fuel move
+        # with the clock, exactly as the facility-gate miss charges them.
+        self._charge_scripted_loop(EXIT_MISS_LOOP_MIN)
         # Drop back a full exit window, not a fixed mile: under time
         # compression one mile passes in a few real seconds, making the
         # re-approach unwinnable before it was heard.

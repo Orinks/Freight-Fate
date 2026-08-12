@@ -118,6 +118,14 @@
   engine now settles to a real idle the moment you stop, the same fix
   already shipped for a roadside police stop.
 
+- **A missed destination exit's loop-back now costs what it says it does.**
+  Blowing past the destination exit loops you back through the next safe
+  turnaround on twenty minutes of clock time, but your hours of service,
+  fatigue, and fuel never moved -- the same free-time gap the facility
+  gate's loop just had closed. The exit loop now charges real driving
+  hours, real fatigue, and a small idle sip of fuel, exactly like the
+  gate's.
+
 - **A missed facility gate's loop-back now costs what it says it does.**
   Carrying past the destination gate too fast loops you back for another
   try, and the game always said your hours, the clock, and your fuel kept
