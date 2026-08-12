@@ -155,6 +155,14 @@ def _log_enforcement(
     return text
 
 
+def _times_now_text(count: int) -> str:
+    """Speak a repeat count the way a person would: 'twice now', 'three
+    times now' -- never frozen at the second occurrence's wording."""
+    if count == 2:
+        return "twice now"
+    return f"{enforcement.count_word(count)} times now"
+
+
 def _log_fatigue_event(ctx, driving: DrivingState) -> str:
     """Book running off the road asleep, and say what it just cost."""
     p = ctx.profile
@@ -169,10 +177,10 @@ def _log_fatigue_event(ctx, driving: DrivingState) -> str:
         )
     else:
         text = (
-            "That is twice now that you have run off the road asleep. Driving "
-            "impaired by fatigue is a federal violation, so this one counts "
-            f"against your licence as well as {hit:.0f} points off your "
-            f"reputation. {_serious_violation_text(p, serious, hours)}"
+            f"That is {_times_now_text(count)} that you have run off the road "
+            "asleep. Driving impaired by fatigue is a federal violation, so "
+            f"this one counts against your licence as well as {hit:.0f} points "
+            f"off your reputation. {_serious_violation_text(p, serious, hours)}"
         )
     driving.record_events.append(text)
     return text

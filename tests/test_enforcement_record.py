@@ -692,6 +692,28 @@ def test_terse_speech_still_hears_every_consequence(monkeypatch):
         app.shutdown()
 
 
+def test_repeat_fatigue_events_speak_the_real_count(monkeypatch):
+    """Every occurrence past the first is a serious violation, and the line
+    must say how many times it has actually happened -- not freeze at
+    'twice now' once the driver runs off the road asleep a third or fourth
+    time."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        spoken = _quiet(app, monkeypatch)
+        for _ in range(4):
+            d._microsleep_misses = 0
+            d._microsleep_drift_off_road()
+        said = " ".join(spoken)
+        assert "That is twice now that you have run off the road asleep." in said
+        assert "That is three times now that you have run off the road asleep." in said
+        assert "That is four times now that you have run off the road asleep." in said
+    finally:
+        app.shutdown()
+
+
 def test_a_clean_driver_hears_and_pays_nothing_new(monkeypatch):
     """The economy guardrail: nothing here reaches a driver who runs clean."""
     from freight_fate.app import App
