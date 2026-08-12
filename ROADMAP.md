@@ -293,6 +293,26 @@ onto exit signalling.
       keep one authoritative side so the announced lane always matches
       the coned lane, and spoken-event dedup stops standing warnings
       re-reading themselves and stale speech replaying after a pause.
+- [x] **Owner manual playtest round -- landed 2026-08-12.** Five real
+      playtest_road sessions over the tester-fix build verified the
+      work-zone side authority, the lane-return cue, the speech dedup
+      across a 25-minute pause, the once-per-episode air warning, and
+      the name-entry caret by ear -- and surfaced five more bugs, all
+      fixed the same day: a blown stop at a no-chain destination ramp
+      terminal stranded the drive silently while cruise auto-resumed
+      into it (now the fourth loop-back, with cruise held off the whole
+      ramp); hazard warnings offered lane changes on roads with no lane
+      to change into; the posted-limit drop spoke three times and too
+      late to act on; the hazard assist pumped the service brakes (an
+      air cost per re-press, which is what kept draining the tanks) and
+      its emergency escalation never reached the wheels; and a dead NWS
+      station pinned its route cell to simulated fallback forever (the
+      fetch now walks to the next-nearest live station).
+- [ ] **Adaptive cruise's own limit lookahead ignores time compression.**
+      `_acc_limit_lookahead_mi` sizes cruise's slow-down trigger with the
+      same uncompressed braking physics the limit pacenote just moved off
+      of, so at high pacing cruise can start easing later than a spoken
+      warning would like. Same real-seconds conversion, cruise's turn.
 - [ ] **Adversarial battery findings, 2026-08-12 run (31 scenarios: 28
       clean, 3 odd).** A gate-overshoot loop-back repositions the truck
       on 20 minutes of free time -- the HOS driving clock never moves,

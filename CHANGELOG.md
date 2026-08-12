@@ -41,6 +41,18 @@
 
 ### Fixed
 
+- **Automatic braking stops the truck on the service brakes, and stops
+  draining your air.** The hazard assist pumped the pedal -- pressing,
+  easing off as the stop improved, pressing again -- and every re-press
+  cost another shot of air, which is why long assisted drives kept
+  running the tanks down. Worse, its emergency escalation never actually
+  reached the wheels, so "Emergency braking engaged" spent your air and
+  gave nothing back. The assist now takes one full service application
+  and holds it to the end of the stop -- one application, one air cost --
+  and says simply "Automatic braking." The emergency application is
+  reserved for the moment the truck is measurably failing to slow, and
+  now it really happens when you hear it.
+
 - **A dropping speed limit is one announcement, heard in time.** The
   advance call -- "Speed limit drops to 45 in half a mile" -- used to
   fire so close to the drop that at the game's pace the sentence was
