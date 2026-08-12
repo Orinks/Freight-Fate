@@ -1523,6 +1523,7 @@ class DrivingUpdateMixin:
     def _update_audio(self, dt: float = 0.0) -> None:
         t = self.truck
         audio = self.ctx.audio
+        self._sync_radio_power()
         if t.engine_on and not audio.engine_running:
             # Catch-up sync (resuming a running-engine trip, returning from a
             # menu): bring the loop up without replaying the ignition crank.
@@ -1688,7 +1689,7 @@ class DrivingUpdateMixin:
             audio.set_ambient("ambient/night")
         else:
             audio.set_ambient(None)
-        if self.radio.enabled:
+        if self.radio.enabled and self.truck.engine_on:
             self._update_radio_reception(dt)
             self._update_radio_playback(night, dt)
             self._update_radio_fringe(dt)
@@ -1706,7 +1707,8 @@ class DrivingUpdateMixin:
         rotating songs and host breaks under the pause menu instead of going
         silent when the current bed runs out. Day/night flavor stays as it
         was when the menu opened; it catches up when driving resumes."""
-        if self.radio.enabled:
+        self._sync_radio_power()  # a rest-menu shutdown kills the radio too
+        if self.radio.enabled and self.truck.engine_on:
             self._update_radio_playback(self._music_night, dt)
 
     def _update_radio_reception(self, dt: float) -> None:
@@ -2045,35 +2047,77 @@ class DrivingUpdateMixin:
 
     def _play_radio_current(self) -> None:
         self._sync_radio_settings()
-        if self.radio.enabled:
+        # An explicit (re)start IS the power sync for this frame; without
+        # this, resuming a running-engine trip would restart the song twice.
+        self._radio_powered = self.truck.engine_on
+        if self.radio.enabled and self.truck.engine_on:
             self._apply_radio_volume()
             self.radio.play(self._radio_backend)
         else:
             self.ctx.audio.stop_music(600)
+
+    def _sync_radio_power(self) -> None:
+        """The radio draws power from the engine.
+
+        Every engine path funnels through here on the next frame -- the
+        ignition key, a stall, a rest-menu shutdown -- so the radio falls
+        silent with the engine and comes back on its own when the engine
+        does (owner ruling, 2026-08-12: no radio in a dead cab, starting
+        with the engine-off top of every load)."""
+        powered = self.truck.engine_on
+        if powered == self._radio_powered:
+            return
+        self._radio_powered = powered
+        if not self.radio.enabled:
+            return
+        if powered:
+            self._play_radio_current()
+        else:
+            self.ctx.audio.stop_music(600)
+            self._stop_radio_fringe()
 
     def _finish_radio_action(self, action) -> None:
         self.radio.write_settings(self.ctx.settings)
         self.ctx.settings.save()
         self.ctx.say(action.message)
 
+    def _radio_no_power(self) -> bool:
+        """Speak the dead-cab line when a radio key lands with no engine."""
+        if self.truck.engine_on:
+            return False
+        self.ctx.audio.play("ui/error")
+        self.ctx.say("The engine is off. The radio has no power.")
+        return True
+
     def _toggle_radio(self) -> None:
+        if self._radio_no_power():
+            return
         self._sync_radio_settings()
         action = self.radio.toggle(self._radio_backend)
         self._finish_radio_action(action)
 
     def _tune_radio(self, direction: int) -> None:
+        if self._radio_no_power():
+            return
         self._sync_radio_settings()
         action = self.radio.tune(direction, self._radio_backend)
         self._finish_radio_action(action)
 
     def _jump_radio_category(self, direction: int) -> None:
+        if self._radio_no_power():
+            return
         self._sync_radio_settings()
         action = self.radio.tune_category(direction, self._radio_backend)
         self._finish_radio_action(action)
 
     def _speak_radio_status(self) -> None:
         self._sync_radio_settings()
-        self.ctx.say(self.radio.status_text())
+        status = self.radio.status_text()
+        if not self.truck.engine_on:
+            # "Radio on" over a silent cab contradicts the player's ears;
+            # the same explanation the Tab radio screen gives goes here too.
+            status = f"{status} The engine is off, so the radio has no power right now."
+        self.ctx.say(status)
 
     def _toggle_radio_favorite(self) -> None:
         self._sync_radio_settings()

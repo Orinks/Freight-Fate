@@ -77,14 +77,14 @@ def test_web_band_sits_last_on_the_dial_and_jumpable():
     assert DIAL_CATEGORY_NAMES[9] == "Web radio"
     # Everything with a place or a story sorts ahead of the web band.
     assert all(_dial_group(s) < 9 for s in DEFAULT_RADIO_CATALOG if s.source_type not in {"web"})
-    radio = RadioState(streamer_safe=False, real_streams_enabled=True, position=DALLAS)
+    radio = RadioState(streamer_safe=False, position=DALLAS)
     stations = radio.available_stations()
     first_web = next(i for i, s in enumerate(stations) if s.source_type == "web")
     assert all(s.source_type == "web" for s in stations[first_web:])
 
 
 def test_streamer_safe_mode_hides_the_web_tier_too():
-    radio = RadioState(streamer_safe=True, real_streams_enabled=True, position=DALLAS)
+    radio = RadioState(streamer_safe=True, position=DALLAS)
     assert not any(s.source_type == "web" for s in radio.available_stations())
 
 
@@ -94,20 +94,20 @@ def test_curated_call_signs_always_win():
 
 
 def test_streamer_safe_mode_hides_every_imported_station():
-    radio = RadioState(streamer_safe=True, real_streams_enabled=True, position=DALLAS)
+    radio = RadioState(streamer_safe=True, position=DALLAS)
     stations = radio.available_stations()
     assert not any(station.source_type == "imported" for station in stations)
     # The built-in stations still fill the dial for a streaming driver.
     assert any(not station.real_stream for station in stations)
 
 
-def test_real_streams_switch_gates_the_imported_tier():
-    radio = RadioState(streamer_safe=False, real_streams_enabled=False, position=DALLAS)
-    assert not any(s.source_type == "imported" for s in radio.available_stations())
+def test_imported_tier_plays_out_of_the_box():
+    radio = RadioState(position=DALLAS)
+    assert any(s.source_type == "imported" for s in radio.available_stations())
 
 
 def test_imported_stations_come_in_near_their_transmitter():
-    radio = RadioState(streamer_safe=False, real_streams_enabled=True, position=DALLAS)
+    radio = RadioState(streamer_safe=False, position=DALLAS)
     in_reach = [s for s in radio.available_stations() if s.source_type == "imported"]
     assert in_reach, "Dallas should receive imported broadcast stations"
     # And they stay local: none of them is receivable from the other coast.
@@ -119,9 +119,7 @@ def test_imported_stations_come_in_near_their_transmitter():
 def test_imported_station_spoken_text_is_clean():
     # Curated stations may speak their website as a source note; the imported
     # tier's spoken lines carry no URLs or stream jargon at all.
-    radio = RadioState(
-        catalog=IMPORTED, streamer_safe=False, real_streams_enabled=True, position=DALLAS
-    )
+    radio = RadioState(catalog=IMPORTED, streamer_safe=False, position=DALLAS)
     for line in radio.station_list_lines(limit=30):
         assert "http" not in line.lower()
         assert "\n" not in line and "\t" not in line

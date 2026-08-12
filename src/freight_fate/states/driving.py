@@ -179,6 +179,9 @@ class DrivingState(
         # Re-tune cadence for a real stream that went silent (a dock bed
         # borrowed the music channel, or the connection stalled mid-drive).
         self._radio_reconnect_timer = 0.0
+        # The radio draws power from the engine: last power state, so the
+        # per-frame sync starts or stops playback only on the transition.
+        self._radio_powered = self.truck.engine_on
         self._radio_signal_factor = 1.0
         # FM fringe renderer state: cached signal/dial from the reception
         # tick, the hiss-bed flag, and the picket scheduler (its own seeded

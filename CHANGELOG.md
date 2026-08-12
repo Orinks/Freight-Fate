@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+### Changed
+
+- **The radio plays its full dial out of the box.** Real public streams
+  and your own playlists no longer hide behind an opt-in: install the
+  game and the whole dial is there. The two radio stream settings are
+  now one switch, streamer-safe mode, off by default. Turn it on while
+  streaming or recording your drive and the radio keeps to built-in
+  safe stations only.
+
+- **The terrestrial category now lists the strongest signal first.**
+  Tuning through terrestrial at the start of a run used to open on
+  whichever fringe station sorted first by call sign, static and all.
+  The strongest signal now comes first, and the weakest last, so a
+  category jump lands on a station you can actually listen to.
+
+- **Turning the radio on lands on a station that plays clean.** If the
+  station you left the radio on has gone fringe or out of range since,
+  switching the radio on now retunes to the strongest signal around
+  instead of greeting you with static. A station that still comes in
+  clearly -- including your playlists and the Freight Fate stations --
+  stays right where you left it.
+
+- **The radio draws power from the engine.** A cab with the engine off
+  is silent now: the radio cuts off when the engine shuts down and
+  comes back on its own when the engine starts. Pressing a radio key in
+  a dead cab says so: "The engine is off. The radio has no power." The
+  radio status key and the Tab radio screen explain the silence the
+  same way.
+
 ### Added
 
 - **Learn what every sound means before you meet it at speed.** A new

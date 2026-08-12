@@ -94,16 +94,16 @@ unless Discord is running. The master switch is only a master switch:
 everything underneath it is off or needs an account, so nothing is
 published because of it.
 
-Off until you turn each one on: Mastodon posting, real radio streams,
-and live weather, traffic and parking. Profile sharing and cloud backup
-are off too until you connect an account, which is what turns them on —
-see 0.2.
+Off until you turn each one on: Mastodon posting, and live weather,
+traffic and parking. Profile sharing and cloud backup are off too until
+you connect an account, which is what turns them on — see 0.2.
 
-The radio's streamer-safe setting is on, which is what keeps real public
-streams off the dial until you opt in.
+The radio plays its full dial out of the box, real public streams
+included. The streamer-safe setting is the opt-out: turn it on while
+streaming or recording and the radio keeps to built-in safe stations.
 
 The sharing switches all live on one screen: Online, on the main menu.
-The two radio stream switches are under Settings, Audio. Live weather,
+The streamer-safe switch is under Settings, Audio. Live weather,
 traffic and parking are under Settings, Speech and weather, and they
 follow their own toggles — the master switch does not reach them.
 
@@ -240,8 +240,9 @@ to the next and previous of the stations you can actually receive, and
 Control with a tuning key jumps a whole category of the dial. The
 thirteen Freight Fate regional stations are always receivable wherever
 you are; real stations have real coverage and fade at the edge of it.
-Streamer-safe by default; real public streams behind an explicit opt-in.
-Chapter 10.
+The full dial plays out of the box; streamer-safe mode is the opt-out
+for anyone broadcasting their drive. The radio draws power from the
+engine and falls silent with it. Chapter 10.
 
 **The world got big and specific.** More than a hundred new dispatchable
 cities fill the dead zones — the mountain West, the northern plains, the
@@ -946,25 +947,25 @@ The thirteen Freight Fate regional stations — The Rawhide, Big Wheel
 Country, Prairie Line and the rest — are receivable everywhere by
 design, so they do not fade at a market edge. That is not a broken range
 check. Real coverage, fringe static and the handover to the Roadhouse
-belong to real stations, which need the opt-in in 10.2 before you can
-hear one at all.
+belong to real stations, which play out of the box on a fresh install.
 
-### 10.2 Streamer-safe by default
+### 10.2 Streamer-safe on demand
 
 Setup: a fresh install or reset settings.
 
-Do: check what the radio plays before touching any opt-in; then find
-the explicit opt-in for real public streams. It is two settings, not
-one: turning real streams on and turning streamer-safe off.
+Do: check that real public streams and personal playlists are on the
+dial without touching anything — the full dial is the default. Then
+turn on the one streamer-safe switch under Settings, Audio, and check
+the dial again.
 
-Pass when: nothing externally licensed plays until you opted in, in so
-many words.
+Pass when: streamer-safe on leaves only built-in safe stations, and
+turning it back off restores the full dial.
 
 ### 10.3 A dial this big needs jumping, not walking
 
-Setup: real streams on and streamer-safe off, from 10.2, so the whole
-dial is live — terrestrial, AFN, satellite, international, web radio,
-and your own playlists if you have any.
+Setup: a fresh install — the whole dial is live by default: terrestrial,
+AFN, satellite, international, web radio, and your own playlists if you
+have any. Terrestrial lists the strongest signal first.
 
 Do: hold Control and press a tuning key repeatedly to walk the
 categories instead of the stations. Find a station you like and press O.

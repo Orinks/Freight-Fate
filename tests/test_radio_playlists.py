@@ -137,9 +137,8 @@ def test_personal_playlists_ride_the_streamer_safe_gate():
     catalog = DEFAULT_RADIO_CATALOG + (_playlist_station(),)
     safe = RadioState(catalog=catalog, streamer_safe=True)
     assert "playlist-test" not in [s.id for s in safe.available_stations()]
-    # Streamer-safe off is enough on its own: personal files need no internet,
-    # so the real-streams switch does not gate them.
-    open_dial = RadioState(catalog=catalog, streamer_safe=False, real_streams_enabled=False)
+    # Streamer-safe off is enough on its own: it is the one licensing gate.
+    open_dial = RadioState(catalog=catalog, streamer_safe=False)
     assert "playlist-test" in [s.id for s in open_dial.available_stations()]
 
 
@@ -148,7 +147,6 @@ def test_playlists_sit_between_built_in_and_terrestrial_on_the_dial():
     state = RadioState(
         catalog=catalog,
         streamer_safe=False,
-        real_streams_enabled=True,
         position=(33.45, -112.07),  # Phoenix: terrestrial in range
     )
     groups = [_dial_group(r.station) for r in state.receivable_stations()]
@@ -166,7 +164,6 @@ def test_tune_category_leaps_and_speaks_the_category():
     state = RadioState(
         catalog=DEFAULT_RADIO_CATALOG,
         streamer_safe=False,
-        real_streams_enabled=True,
         position=(33.45, -112.07),
     )
     action = state.tune_category(1)
@@ -179,7 +176,7 @@ def test_tune_category_leaps_and_speaks_the_category():
 
 
 def test_tune_category_wraps_and_never_lands_mid_category():
-    state = RadioState(catalog=DEFAULT_RADIO_CATALOG)  # streamer-safe defaults
+    state = RadioState(catalog=DEFAULT_RADIO_CATALOG)  # the out-of-the-box dial
     receptions = state.receivable_stations()
     first_by_group = {}
     for reception in receptions:

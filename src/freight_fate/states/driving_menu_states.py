@@ -318,10 +318,15 @@ class DrivingStatusScreenState(MenuState):
         position = d.radio.position
         lines = [
             d.radio.status_text(),
+            *(
+                ()
+                if d.truck.engine_on
+                else ("The engine is off, so the radio has no power right now.",)
+            ),
             (
-                "Real public streams: on, streamer-safe mode off"
-                if settings.radio_real_streams and not settings.radio_streamer_safe
-                else "Real public streams are hidden unless real streams are on and streamer-safe mode is off."
+                "Streamer-safe mode is off: real public streams and personal playlists are on the dial."
+                if not settings.radio_streamer_safe
+                else "Streamer-safe mode is on: real public streams and personal playlists are hidden."
             ),
             "Page Down tunes to the next station and Page Up to the previous; "
             "the semicolon and apostrophe keys still work. Jump categories "

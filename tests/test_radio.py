@@ -74,21 +74,22 @@ def test_catalog_loads_structured_regional_and_afn_stations():
     assert all(station.range_miles > 0 for station in locals_)
 
 
-def test_radio_defaults_to_streamer_safe_builtin_station():
+def test_radio_defaults_to_full_dial_on_builtin_station():
     radio = RadioState()
 
     assert radio.enabled is True
     assert radio.current_station().id == SAFE_ROUTE_PLAYLIST
     assert radio.volume == 0.25
-    assert radio.streamer_safe is True
-    assert radio.real_streams_enabled is False
-    assert not any(station.source_type == "afn" for station in radio.available_stations())
-    assert "streamer-safe" in radio.status_text()
+    # Streamer-safe mode is the opt-out, not the default: the full dial,
+    # real public streams included, is the out-of-the-box experience.
+    assert radio.streamer_safe is False
+    assert any(station.source_type == "afn" for station in radio.available_stations())
+    assert "streamer-safe off" in radio.status_text()
     assert "always available" in radio.status_text()
 
 
-def test_real_stream_station_requires_opt_in_and_streamer_safe_off():
-    radio = RadioState(real_streams_enabled=True, streamer_safe=True)
+def test_streamer_safe_mode_hides_real_streams():
+    radio = RadioState(streamer_safe=True)
     assert not any(station.source_type == "afn" for station in radio.available_stations())
 
     radio.streamer_safe = False
@@ -106,8 +107,7 @@ def test_radio_persists_enabled_station_and_volume():
     settings.radio_enabled = False
     settings.radio_station_id = "ff-night-line"
     settings.radio_volume = 0.4
-    settings.radio_streamer_safe = False
-    settings.radio_real_streams = True
+    settings.radio_streamer_safe = True
     settings.save()
 
     loaded = Settings.load()
@@ -116,13 +116,11 @@ def test_radio_persists_enabled_station_and_volume():
     assert radio.enabled is False
     assert radio.station_id == "ff-night-line"
     assert radio.volume == 0.4
-    assert radio.streamer_safe is False
-    assert radio.real_streams_enabled is True
+    assert radio.streamer_safe is True
 
 
 def test_regional_station_filtering_uses_simulated_truck_position():
     radio = RadioState(
-        real_streams_enabled=True,
         streamer_safe=False,
         position=(47.61, -122.33),
     )
@@ -136,7 +134,6 @@ def test_regional_station_filtering_uses_simulated_truck_position():
 
 def test_tuning_uses_receivable_stations_not_global_catalog():
     radio = RadioState(
-        real_streams_enabled=True,
         streamer_safe=False,
         position=(47.61, -122.33),
     )
@@ -165,9 +162,9 @@ def test_tuning_uses_receivable_stations_not_global_catalog():
 
 
 def test_ff_music_stations_receivable_everywhere_in_every_mode():
-    # No truck position, streamer-safe on, real streams off: the strictest
-    # possible dial must still carry every Freight Fate original-music station.
-    state = RadioState(position=None, streamer_safe=True, real_streams_enabled=False)
+    # No truck position and streamer-safe on: the strictest possible dial
+    # must still carry every Freight Fate original-music station.
+    state = RadioState(position=None, streamer_safe=True)
     names = {reception.station.name for reception in state.receivable_stations()}
     for expected in (
         "The Rawhide 98.1",
@@ -196,7 +193,6 @@ def test_no_regional_signal_still_has_safe_and_afn_fallback_choices():
     # Interior Nevada on US-50: real radio darkness even after the
     # 623-city coverage fill (central South Dakota is SDPB country now).
     radio = RadioState(
-        real_streams_enabled=True,
         streamer_safe=False,
         position=(38.9, -116.6),
     )
@@ -214,7 +210,6 @@ def test_dead_stream_hands_over_inside_its_own_band():
     radio = RadioState(
         enabled=True,
         station_id="afn-tokyo",
-        real_streams_enabled=True,
         streamer_safe=False,
     )
     backend = RecordingBackend(fail_ids={"afn-tokyo"})
@@ -234,7 +229,6 @@ def test_dead_stream_leaves_the_dial_for_the_session():
     radio = RadioState(
         enabled=True,
         station_id="afn-tokyo",
-        real_streams_enabled=True,
         streamer_safe=False,
     )
     backend = RecordingBackend(fail_ids={"afn-tokyo"})
@@ -251,7 +245,6 @@ def test_dead_stream_with_empty_band_still_reaches_the_fallback():
     radio = RadioState(
         enabled=True,
         station_id="afn-tokyo",
-        real_streams_enabled=True,
         streamer_safe=False,
     )
     afn_ids = {s.id for s in DEFAULT_RADIO_CATALOG if s.source_type == "afn"}
@@ -312,7 +305,6 @@ def test_driving_radio_backend_plays_real_stream_url():
 
 def test_spoken_status_includes_signal_source_safety_and_volume():
     radio = RadioState(
-        real_streams_enabled=True,
         streamer_safe=False,
         station_id="kexp-seattle",
         position=(47.61, -122.33),

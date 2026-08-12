@@ -258,8 +258,12 @@ class Settings:
     radio_volume: float = 0.25
     radio_enabled: bool = True
     radio_station_id: str = "route_playlist"
-    radio_streamer_safe: bool = True
-    radio_real_streams: bool = False
+    # The one radio licensing gate: on hides real public streams and
+    # personal playlists so nothing licensed reaches a broadcast. Off by
+    # default -- the full dial is the out-of-the-box experience, and safe
+    # mode is the explicit choice a streamer makes. (The former separate
+    # real-streams opt-in folded into this switch, 2026-08-12.)
+    radio_streamer_safe: bool = False
     weather_volume: float = 0.65
     engine_volume: float = 0.55
     ui_volume: float = 0.9

@@ -305,6 +305,10 @@ def load_personal_playlists(directory: Path | None = None) -> tuple[RadioStation
 # thousands of stations on the dial, the driver's own picks sit right after
 # their playlists, one category jump from anywhere.
 FAVORITES_GROUP = 3
+# Real ranged stations. Unlike every other group, order here is signal, not
+# call sign: a category jump at the start of a run should land on the
+# station that plays clean, not on whichever fringe call sign sorts first.
+TERRESTRIAL_GROUP = 4
 
 
 def _dial_group(station: RadioStation) -> int:
@@ -322,7 +326,7 @@ def _dial_group(station: RadioStation) -> int:
     if station.playlist and not station.real_stream:
         return 1
     if station.source_type in {"local", "regional", "imported"}:
-        return 4
+        return TERRESTRIAL_GROUP
     if station.source_type == "afn":
         return 5
     if station.source_type == "satellite":
@@ -522,7 +526,10 @@ def _leg_position(route, leg, index: int, local_mi: float, world) -> tuple[float
 
 
 class RadioState:
-    """Mutable in-cab radio state with streamer-safe defaults."""
+    """Mutable in-cab radio state. Streamer-safe mode is the one licensing
+    gate: off by default (owner ruling, 2026-08-12), so the full dial plays
+    out of the box, and turning it on is the explicit choice a streamer
+    makes to keep licensed audio off their broadcast."""
 
     def __init__(
         self,
@@ -531,8 +538,7 @@ class RadioState:
         enabled: bool = True,
         station_id: str = SAFE_ROUTE_PLAYLIST,
         volume: float = 0.25,
-        real_streams_enabled: bool = False,
-        streamer_safe: bool = True,
+        streamer_safe: bool = False,
         position: tuple[float, float] | None = None,
         favorite_ids: set[str] | None = None,
     ) -> None:
@@ -540,7 +546,6 @@ class RadioState:
         self.enabled = enabled
         self.station_id = station_id
         self.volume = self._clamp_volume(volume)
-        self.real_streams_enabled = real_streams_enabled
         self.streamer_safe = streamer_safe
         self.position = position
         self.elevation_ft: float | None = None
@@ -556,16 +561,12 @@ class RadioState:
             enabled=bool(getattr(settings, "radio_enabled", True)),
             station_id=str(getattr(settings, "radio_station_id", SAFE_ROUTE_PLAYLIST)),
             volume=float(getattr(settings, "radio_volume", 0.25)),
-            real_streams_enabled=bool(getattr(settings, "radio_real_streams", False)),
-            streamer_safe=bool(getattr(settings, "radio_streamer_safe", True)),
+            streamer_safe=bool(getattr(settings, "radio_streamer_safe", False)),
             favorite_ids=set(getattr(profile, "radio_favorites", ()) or ()),
         )
 
     def apply_settings(self, settings) -> None:
         self.volume = self._clamp_volume(float(getattr(settings, "radio_volume", self.volume)))
-        self.real_streams_enabled = bool(
-            getattr(settings, "radio_real_streams", self.real_streams_enabled)
-        )
         self.streamer_safe = bool(getattr(settings, "radio_streamer_safe", self.streamer_safe))
 
     def write_settings(self, settings) -> None:
@@ -664,7 +665,30 @@ class RadioState:
                 enabled=False,
                 reception=self.current_reception(),
             )
+        self._power_on_retune()
         return self.play(backend, prefix="Radio on.")
+
+    def _power_on_retune(self) -> None:
+        """Power-on lands on a station that plays clean.
+
+        The remembered station keeps the dial only while it still comes in
+        at full volume -- playlists and other always-available choices
+        always do. A fringe or out-of-range memory retunes to the strongest
+        ranged signal on the dial instead (owner ruling, 2026-08-12).
+        """
+        reception = self.current_reception()
+        if not reception.fallback and reception.signal >= SIGNAL_FULL_VOLUME:
+            return
+        ranged = [
+            r
+            for r in self.receivable_stations()
+            if not r.fallback and not r.station.always_available and r.station.range_miles > 0
+        ]
+        if not ranged:
+            return
+        best = max(ranged, key=lambda r: r.signal)
+        if reception.fallback or best.signal > reception.signal:
+            self.station_id = best.station.id
 
     def tune(self, direction: int, backend: RadioPlaybackBackend | None = None) -> RadioAction:
         receptions = self.receivable_stations()
@@ -805,14 +829,12 @@ class RadioState:
             return False
         if station.id in self.unplayable_ids:
             return False
-        if station.source_type == PERSONAL_PLAYLIST_SOURCE_TYPE:
-            # Personal media rides the streamer-safe gate like real streams
-            # do (the game cannot vouch for its licensing), but not the
-            # real-streams switch -- your own files need no internet.
-            return not self.streamer_safe
-        if not station.real_stream:
+        if not station.real_stream and station.source_type != PERSONAL_PLAYLIST_SOURCE_TYPE:
             return True
-        return self.real_streams_enabled and not self.streamer_safe
+        # Real streams and personal media ride the same gate: the game
+        # cannot vouch for their licensing, and streamer-safe mode is the
+        # one switch that keeps such audio off a broadcast.
+        return not self.streamer_safe
 
     def _station_by_id(self, station_id: str) -> RadioStation | None:
         for station in self.catalog:
@@ -878,9 +900,14 @@ class RadioState:
         self.favorite_ids.add(station.id)
         return f"Saved {station.display_name} to favorites."
 
-    def _reception_sort_key(self, reception: RadioReception) -> tuple[int, str]:
+    def _reception_sort_key(self, reception: RadioReception) -> tuple[int, float, str]:
         station = reception.station
-        return (self._group(station), station.call_sign)
+        group = self._group(station)
+        # Terrestrial runs strongest-first; every other group keeps call-sign
+        # order (web radio relies on the sort staying stable -- its call
+        # signs are empty and its catalog order is listener-vote order).
+        signal = -reception.signal if group == TERRESTRIAL_GROUP else 0.0
+        return (group, signal, station.call_sign)
 
     @staticmethod
     def _stop(backend: RadioPlaybackBackend | None) -> None:

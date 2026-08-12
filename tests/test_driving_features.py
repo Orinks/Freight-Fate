@@ -799,6 +799,7 @@ def test_drive_music_advances_to_next_track_while_paused(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        driving.truck.start_engine()  # the radio has power only with the engine on
         driving.update(1 / 60)  # lets the tuned station start its rotation
         assert driving.radio.enabled
         assert driving._radio_playlist

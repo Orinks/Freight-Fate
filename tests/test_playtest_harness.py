@@ -1013,7 +1013,13 @@ def test_deterministic_hook_restores_inspection_event(monkeypatch):
 def test_radio_controls_are_keyboard_reachable(monkeypatch):
     with PlaytestHarness(monkeypatch) as harness:
         result = harness.start_delivery(profile_name="Harness Radio")
+        # At the top of the load the engine is off, and a dead cab has no
+        # radio: the key answers with the no-power line instead of toggling.
         before_enabled = harness.driving.radio.enabled
+        harness.press_key(pygame.K_m)
+        assert harness.driving.radio.enabled is before_enabled
+        assert "no power" in result.transcript[-1].lower()
+        harness.prepare_for_driving()
         harness.press_key(pygame.K_m)
         assert harness.driving.radio.enabled is not before_enabled
         assert result.transcript[-1].lower().startswith("radio ")

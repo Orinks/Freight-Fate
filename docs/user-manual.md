@@ -1441,8 +1441,7 @@ Audio settings include:
 | Engine voice | Real plays the engine recorded from a working truck cab, following the RPM through its range. Classic keeps the original engine sound. Changes apply immediately, even while driving. |
 | Music volume | Menu and facility background music volume. |
 | In-cab radio volume | Driving radio music volume. It defaults lower than speech and safety cues. |
-| Radio streamer-safe mode | Keeps radio on built-in safe stations and hides real public streams. |
-| Radio real public streams | Opt-in catalog access for real public stations, including AFN choices. Streamer-safe mode must also be off before they appear. |
+| Radio streamer-safe mode | Off by default: the full dial plays, including real public streams and personal playlists. Turn it on while streaming or recording to keep the radio on built-in safe stations only. |
 | Menu and UI sounds volume | Menu movement, selection, warning, and cash sounds. |
 
 Speech and weather settings include:
@@ -1520,13 +1519,16 @@ Audio is layered by category:
 | In-cab radio | Keyboard-controlled driving music and safe station status. |
 
 Speech, gameplay cues, and warnings are the primary access path. Radio, music,
-and ambience sit behind those cues and can be adjusted separately. The in-cab
-radio defaults to built-in Freight Fate music and streamer-safe mode. Dial
-tuning moves through stations the truck can currently receive from the checked-in
-catalog, using the route's approximate position and each station's range. The
-Radio status screen lists the currently receivable stations. Saving a station
-with O keeps it in the Favorites category, one category jump from anywhere on
-the dial.
+and ambience sit behind those cues and can be adjusted separately. The radio
+draws power from the engine: it falls silent when the engine shuts off and
+comes back when the engine starts. Turning it on lands on a station that plays
+clean -- if the remembered station has gone fringe or out of range, the radio
+retunes to the strongest signal instead. Dial tuning moves through stations
+the truck can currently receive from the checked-in catalog, using the route's
+approximate position and each station's range; the terrestrial category lists
+the strongest signal first. The Radio status screen lists the currently
+receivable stations. Saving a station with O keeps it in the Favorites
+category, one category jump from anywhere on the dial.
 
 The Freight Fate Roadhouse and the Night Line have their own hosts, who break
 in between songs. Fictional regional stations cover markets across the map --
@@ -1537,10 +1539,11 @@ past the edge. When a station drops out of range the radio announces it and
 falls back to the Roadhouse, which is receivable everywhere along with the
 Night Line and the satellite fallback.
 
-Real public stream stations, including AFN choices, are hidden unless you turn on
-real streams and turn off streamer-safe mode. When the BASS audio backend is
-available, those stations play from their public stream URLs. If a selected
-station cannot play, the radio falls back safely instead of blocking the drive.
+Real public stream stations, including AFN choices, play out of the box; turning
+streamer-safe mode on hides them, for anyone streaming or recording their
+drive. When the BASS audio backend is available, those stations play from
+their public stream URLs. If a selected station cannot play, the radio falls
+back safely instead of blocking the drive.
 
 You can put your own music on the dial. Drop M3U or M3U8 playlist files into
 the Playlists folder next to your saves (the game creates it on first run) and
@@ -1549,9 +1552,9 @@ entries can point at files anywhere your computer can read, including network
 drives, and the usual formats all play: mp3, ogg, opus, flac, aac, and wma.
 The station remembers its place while you tune away during a drive, and a file
 that will not open is skipped rather than stopping the music. Personal
-playlists play only when streamer-safe mode is off, because the game cannot
-vouch for what your files are licensed for. Ctrl with any tune key jumps
-straight to the Your playlists category.
+playlists ride the same streamer-safe gate as real streams -- turning the mode
+on hides them, because the game cannot vouch for what your files are licensed
+for. Ctrl with any tune key jumps straight to the Your playlists category.
 
 The dial is grouped into categories -- route playlist, Freight Fate stations,
 your playlists, favorites, terrestrial, AFN, satellite, international,

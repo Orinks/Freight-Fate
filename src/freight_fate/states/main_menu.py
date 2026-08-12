@@ -1181,12 +1181,9 @@ class SettingsCategoryState(MenuState):
                 MenuItem(
                     lambda: f"Radio streamer-safe mode: {'on' if s.radio_streamer_safe else 'off'}",
                     lambda: self._toggle_radio_streamer_safe(1),
-                    help="When on, the radio uses only built-in safe stations and skips real public streams.",
-                ),
-                MenuItem(
-                    lambda: f"Radio real public streams: {'on' if s.radio_real_streams else 'off'}",
-                    lambda: self._toggle_radio_real_streams(1),
-                    help="Opt in to real public stream stations. Streamer-safe mode must also be off before they can play.",
+                    help="Off plays the full dial, including real public streams and "
+                    "personal playlists. Turn it on while streaming or recording to "
+                    "keep the radio on built-in safe stations only.",
                 ),
                 MenuItem(
                     lambda: f"Menu and UI sounds volume: {round(s.ui_volume * 100)} percent",
@@ -1284,7 +1281,6 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("radio_volume", 0.1 * d),
                     self._toggle_radio_streamer_safe,
-                    self._toggle_radio_real_streams,
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
                 "updates": [self._toggle_update_channel],
@@ -1768,10 +1764,6 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_radio_streamer_safe(self, _d: int) -> None:
         self.ctx.settings.radio_streamer_safe = not self.ctx.settings.radio_streamer_safe
-        self._announce()
-
-    def _toggle_radio_real_streams(self, _d: int) -> None:
-        self.ctx.settings.radio_real_streams = not self.ctx.settings.radio_real_streams
         self._announce()
 
     def _toggle_controller(self, _d: int) -> None:

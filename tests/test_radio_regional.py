@@ -189,6 +189,60 @@ def test_ranged_station_receivable_only_near_its_market():
     assert "kfix-dallas" not in ids_near_chicago
 
 
+def _terrestrial_at(station_id, call_sign, degrees_east, range_miles=120.0):
+    return RadioStation(
+        station_id,
+        f"{call_sign} FM",
+        call_sign,
+        "country",
+        "reception fixture",
+        lat=DALLAS[0],
+        lon=DALLAS[1] + degrees_east,
+        range_miles=range_miles,
+    )
+
+
+def test_terrestrial_category_sorts_strongest_signal_first():
+    # Call signs deliberately disagree with signal order: the old call-sign
+    # sort opened the band on the fringe station at the start of every run.
+    near = _terrestrial_at("fix-near", "WZZZ", 0.0)
+    mid = _terrestrial_at("fix-mid", "KMMM", 0.9)
+    far = _terrestrial_at("fix-far", "KAAA", 1.8)
+    radio = RadioState(catalog=(far, mid, near), position=DALLAS)
+
+    ids = [r.station.id for r in radio.receivable_stations()]
+
+    assert ids == ["fix-near", "fix-mid", "fix-far"]
+
+
+def test_power_on_retunes_a_fringe_memory_to_the_strongest_signal():
+    strong = _terrestrial_at("fix-strong", "WZZZ", 0.0)
+    fringe = _terrestrial_at("fix-fringe", "KAAA", 1.8)
+    radio = RadioState(catalog=(strong, fringe), station_id="fix-fringe", position=DALLAS)
+
+    radio.toggle()  # off
+    action = radio.toggle()  # back on: the fringe memory does not play clean
+
+    assert action.enabled is True
+    assert action.station.id == "fix-strong"
+
+
+def test_power_on_keeps_a_station_that_still_plays_clean():
+    from freight_fate.radio import SAFE_ROUTE_PLAYLIST
+
+    # A full-volume terrestrial memory holds the dial even against a
+    # stronger neighbor; so does any always-available choice.
+    strongest = _terrestrial_at("fix-strongest", "KAAA", 0.0)
+    clean = _terrestrial_at("fix-clean", "WZZZ", 0.35)  # ~20 mi: full volume
+    radio = RadioState(catalog=(strongest, clean), station_id="fix-clean", position=DALLAS)
+    radio.toggle()
+    assert radio.toggle().station.id == "fix-clean"
+
+    playlist = RadioState(station_id=SAFE_ROUTE_PLAYLIST, position=DALLAS)
+    playlist.toggle()
+    assert playlist.toggle().station.id == SAFE_ROUTE_PLAYLIST
+
+
 def test_station_playlist_selection_is_deterministic_and_complete():
     first = select_station_playlist("classic_rock", "seed|wgrx-chicago")
     second = select_station_playlist("classic_rock", "seed|wgrx-chicago")

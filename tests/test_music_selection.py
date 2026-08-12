@@ -383,6 +383,7 @@ def test_driving_state_uses_selected_drive_music(monkeypatch):
         job = _denver_to_salt_lake_job()
         route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
         driving = DrivingState(app.ctx, job, route, trip_seed=12345, start_hour=14.0)
+        driving.truck.start_engine()  # the radio has power only with the engine on
         app.push_state(driving)
         assert played[-1] == driving._day_music_sequence[0]
         assert played[-1] in {track.key for track in DAY_DRIVE_TRACKS}
@@ -412,6 +413,7 @@ def test_night_driving_advances_through_music_pool(monkeypatch):
         job = _denver_to_salt_lake_job()
         route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
         driving = DrivingState(app.ctx, job, route, trip_seed=54321, start_hour=23.0)
+        driving.truck.start_engine()  # the radio has power only with the engine on
         app.push_state(driving)
         first = played[-1]
         duration = music_track_duration_s(first)
@@ -449,6 +451,7 @@ def test_open_road_rotates_in_day_driving_pool(monkeypatch):
         route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
         driving = DrivingState(app.ctx, job, route, trip_seed=12345, start_hour=14.0)
         driving._day_music_sequence = ("open_road", "drive_desert_two_lane")
+        driving.truck.start_engine()  # the radio has power only with the engine on
         app.push_state(driving)
 
         driving._update_audio(music_track_duration_s("open_road") - 0.1)
@@ -477,6 +480,7 @@ def test_night_haul_rotates_in_night_driving_pool(monkeypatch):
         route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
         driving = DrivingState(app.ctx, job, route, trip_seed=12345, start_hour=23.0)
         driving._night_music_sequence = ("night_haul", "night_midnight_interstate")
+        driving.truck.start_engine()  # the radio has power only with the engine on
         app.push_state(driving)
 
         driving._update_audio(music_track_duration_s("night_haul") - 0.1)

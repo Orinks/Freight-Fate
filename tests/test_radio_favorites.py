@@ -12,7 +12,6 @@ DALLAS = (32.7767, -96.797)
 
 def _radio(**kwargs) -> RadioState:
     kwargs.setdefault("streamer_safe", False)
-    kwargs.setdefault("real_streams_enabled", True)
     kwargs.setdefault("position", DALLAS)
     return RadioState(**kwargs)
 
@@ -100,7 +99,6 @@ def test_favorites_ride_the_profile():
         radio_enabled = True
         radio_station_id = "route_playlist"
         radio_volume = 0.25
-        radio_real_streams = True
         radio_streamer_safe = False
 
     radio = RadioState.from_settings(FakeSettings(), reloaded)

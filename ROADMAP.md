@@ -2133,9 +2133,20 @@ section below and the Unreleased changelog; the release-line view:
 
 - [x] **The in-cab radio follows the map.** M toggles, semicolon and
       apostrophe tune the currently receivable stations, Y speaks status,
-      Tab has a Radio screen; streamer-safe by default with real public
-      streams behind an explicit opt-in. (The dial moved off the brackets
-      when message review took them for its categories.)
+      Tab has a Radio screen. (The dial moved off the brackets when
+      message review took them for its categories.)
+- [x] **The full dial out of the box; one streamer-safe switch
+      (2026-08-12, owner ruling).** The former pair -- streamer-safe on
+      by default plus a separate real-streams opt-in (an earlier fold in
+      the discovery line was reverted with it in `5e3e66a4`) -- is one
+      setting again: streamer-safe mode, off by default, hiding real
+      streams and personal playlists when on. Terrestrial now sorts
+      strongest signal first; power-on retunes a fringe or out-of-range
+      memory to the strongest signal; and the radio draws power from the
+      engine -- silent in a dead cab, back on its own at ignition, with
+      a spoken no-power line on the radio keys. Pre-fold settings files
+      keep a deliberately-enabled streamer-safe; only the default
+      changed.
 - [x] **Hosts, regional stations, and real signal behavior.** The Roadhouse
       and Night Line have live hosts; twelve fictional regional stations
       with newly composed songs cover markets across the map, fading to
