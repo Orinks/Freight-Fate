@@ -289,11 +289,21 @@ onto exit signalling.
       to neutral, without traceback spam in the log.
 - [ ] **Remaining tester findings from the same document.** Merging
       traffic does not yield to a loaded truck. At least one unexplained
-      sound (a whoosh on the left). In review: work-zone closures keeping
-      one authoritative side so the announced lane always matches the
-      coned lane, and spoken-event dedup so standing warnings stop
-      re-reading themselves (the shifted-load line could repeat every few
-      seconds; stale queued speech replayed after a pause).
+      sound (a whoosh on the left). Landed 2026-08-12: work-zone closures
+      keep one authoritative side so the announced lane always matches
+      the coned lane, and spoken-event dedup stops standing warnings
+      re-reading themselves and stale speech replaying after a pause.
+- [ ] **Adversarial battery findings, 2026-08-12 run (31 scenarios: 28
+      clean, 3 odd).** A gate-overshoot loop-back repositions the truck
+      on 20 minutes of free time -- the HOS driving clock never moves,
+      so the penalty is softer than an honest U-turn. A settlement that
+      jumps several career levels announces only the last one:
+      record_delivery's level-up line reports the level landed on, so
+      each intermediate rank and its own unlock text go unspoken. And
+      streak-compounded short hops out-earn honest long hauls per mile
+      by five to one (10.7 vs about 2 XP per mile over a 250-mile
+      sample), which undercuts the 1.9 pacing model -- balance call
+      needed on the streak multiplier for trivial-distance legs.
 - [ ] **The no-engine-brake ban only knows route cities.** It rides
       `URBAN_RADIUS_MI` (6.0) around route nodes, so small towns a leg
       merely passes through are not modelled at all -- in a survey only
