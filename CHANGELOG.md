@@ -77,9 +77,12 @@
 - **Live weather rides out a quiet station instead of lurching to neutral.**
   When the nearest weather station stopped reporting fresh observations,
   the game dropped your route's weather to temporary neutral conditions and
-  kept retrying loudly. It now holds the last real weather it knew until a
-  fresh report arrives, so a station gone quiet no longer changes what you
-  hear on the road.
+  kept retrying loudly. It now asks the next-nearest station instead -- the
+  closest one is not always a live one, and one parked station used to pin a
+  whole stretch of road to fallback weather -- and only when every station
+  nearby is quiet does it hold the last real weather it knew until a fresh
+  report arrives. Either way, a station gone quiet no longer changes what
+  you hear on the road.
 
 - **Date badges now fire on the date you were actually told it is.** With
   the real-time calendar on, April's Fool could arrive in August. A career
