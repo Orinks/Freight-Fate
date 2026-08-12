@@ -1061,7 +1061,7 @@ def test_app_speech_dispatch_flushes_stale_main_speech_for_urgent_events(monkeyp
         def say(self, text, interrupt=True):
             calls.append(("say_main", text, interrupt))
 
-        def say_event(self, text, interrupt=True):
+        def say_event(self, text, interrupt=True, **_pacing):
             calls.append(("say_event", text, interrupt))
 
         def stop_main(self):
@@ -1095,7 +1095,7 @@ def test_app_dedicated_event_voice_does_not_interrupt_main_speech(monkeypatch):
     calls = []
 
     class SpeechProbe:
-        def say_event(self, text, interrupt=True):
+        def say_event(self, text, interrupt=True, **_pacing):
             calls.append(("say_event", text, interrupt))
 
         def stop_main(self):

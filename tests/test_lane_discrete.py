@@ -604,6 +604,55 @@ def test_swerving_into_occupied_space_is_a_sideswipe():
         app.shutdown()
 
 
+def test_one_contact_is_billed_and_announced_once():
+    """Pinballing across the same line is one sideswipe, not three.
+
+    Tester transcript, 2026-08-11: "You sideswiped a box truck in the right
+    lane! The truck took damage, now 13 percent." three times inside six
+    tenths of a second, for one brush against one vehicle -- and the damage
+    charged three times with it.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _rolling(d)
+        spoken: list[str] = []
+        d.ctx.say_event = lambda text, *a, **k: spoken.append(text)
+        d.trip.traffic_manager.vehicles = [_npc(d.trip.position_mi + 0.1, lane=1)]
+        d.lane.lane = 1
+        d._finish_lane_change()
+        after_first = d.truck.damage_pct
+        # The tires roll the markers again as the truck settles back over.
+        d._finish_lane_change()
+        d._finish_lane_change()
+        assert len(spoken) == 1
+        assert d.truck.damage_pct == after_first
+    finally:
+        app.shutdown()
+
+
+def test_a_later_sideswipe_is_its_own_contact():
+    """The guard is a cooldown, not a once-per-trip latch."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _rolling(d)
+        spoken: list[str] = []
+        d.ctx.say_event = lambda text, *a, **k: spoken.append(text)
+        d.trip.traffic_manager.vehicles = [_npc(d.trip.position_mi + 0.1, lane=1)]
+        d.lane.lane = 1
+        d._finish_lane_change()
+        d._sideswipe_cooldown_s = 0.0  # seconds later, moving over again
+        d._finish_lane_change()
+        assert len(spoken) == 2
+    finally:
+        app.shutdown()
+
+
 def test_hazard_event_records_dodge_context():
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind

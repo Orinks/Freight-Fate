@@ -202,7 +202,11 @@ class DamageBandMixin:
                 f"The load has shifted hard and is {words}, {t.cargo_damage_pct:.0f} "
                 f"percent. {consequence} Brake and corner gently from here."
             )
-        self.ctx.say_event(message, interrupt=True)
+        # The load's condition is a state of the trailer, not a moment on the
+        # road: it earns the voice when it starts and again when the number it
+        # carries has moved. Otherwise the driver hears the same sentence for
+        # the rest of the run and has to sit through it every time.
+        self.ctx.say_event(message, interrupt=True, key="cargo_condition")
 
     # -- the bands ---------------------------------------------------------------
 

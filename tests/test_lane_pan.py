@@ -268,7 +268,7 @@ def test_pinballing_across_a_line_keeps_only_the_thump(monkeypatch):
     try:
         d = _driving(app)
         d.ctx.settings.lane_keeping = "off"
-        d.ctx.say_event = lambda text, interrupt=False: events.append(text)
+        d.ctx.say_event = lambda text, interrupt=False, **_: events.append(text)
         d.truck.velocity_mps = 25.0
         played = []
         monkeypatch.setattr(
@@ -307,7 +307,7 @@ def test_curve_run_speaks_a_verdict_on_exit(monkeypatch):
         d.ctx.settings.lane_keeping = "off"
         d.ctx.settings.curve_callouts = True
         d.ctx.settings.speech_verbosity = 1
-        d.ctx.say_event = lambda text, interrupt=False: events.append(text)
+        d.ctx.say_event = lambda text, interrupt=False, **_: events.append(text)
         d.truck.velocity_mps = 30.0 / 2.23694
         ticks = []
         monkeypatch.setattr(

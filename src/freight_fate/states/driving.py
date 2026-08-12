@@ -513,6 +513,7 @@ class DrivingState(
         self._lane_locator_timer = 0.0
         self._curve_run: dict | None = None  # the bend underway, and how it is going
         self._cross_repeat_s = 0.0  # rapid re-crossings keep only the quiet thump
+        self._sideswipe_cooldown_s = 0.0  # one contact, however many crossings
         self._reverse_cue_active = False
         self._air_cue_active = False  # compressor fill loop below governor release
         self._jake_cue_key: str | None = None  # jake growl loop currently playing

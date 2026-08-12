@@ -53,7 +53,13 @@ class DrivingEventMixin:
             # Travel-plaza and rest-stop notices are informational: they queue
             # behind whatever route speech just played instead of stacking on
             # it -- at departure that keeps the merge instruction in front.
-            return True
+            #
+            # The stop the player PLANNED is not a notice, it is the drive.
+            # Held in the one-deep ambient slot it was overwritten by the next
+            # piece of chatter, or thrown away outright by the next hazard,
+            # and the player drove past a stop they had chosen (tester Darren,
+            # 2026-08-11). It never goes through the ambient channel.
+            return not event.data.get("planned")
         if event.kind == TripEventKind.GPS_CUE:
             cue = event.data.get("cue")
             return (
@@ -251,7 +257,11 @@ class DrivingEventMixin:
             else:
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:
                     self.ctx.audio.play(sound, pan=_route_event_sound_pan(event))
-                self.ctx.say_event(event.message, interrupt=False)
+                self.ctx.say_event(
+                    event.message,
+                    interrupt=False,
+                    priority=self._event_priority(event),
+                )
                 # Any spoken route line pushes spaced ambient chatter back, so
                 # an informational notice never lands on top of a navigation
                 # instruction the player needs to act on.
@@ -321,6 +331,19 @@ class DrivingEventMixin:
             if getattr(cue, "kind", "") == "traffic":
                 return True
         return False
+
+    def _event_priority(self, event):
+        """How long this announcement is willing to wait behind other speech.
+
+        Route information -- above all the stop the player planned and the
+        word that they have driven past it -- gives ambient chatter a moment
+        and then goes in front of it. Everything else waits its turn.
+        """
+        if self._is_critical_event(event):
+            return EventPriority.CRITICAL
+        if event.kind == TripEventKind.STOP_AHEAD or event.data.get("planned"):
+            return EventPriority.ROUTE
+        return EventPriority.AMBIENT
 
     def _should_ignore_untaken_destination_facility_event(self, event) -> bool:
         if self.phase != DRIVE_PHASE_DELIVERY or self._destination_exit_taken:

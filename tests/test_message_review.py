@@ -170,7 +170,7 @@ def test_pausing_mid_run_leaves_no_trace_in_the_history():
 
 def monkeypatch_free_speech(app):
     app.ctx.speech.say = lambda text, interrupt=True: None
-    app.ctx.speech.say_event = lambda text, interrupt=True: None
+    app.ctx.speech.say_event = lambda text, interrupt=True, **_: None
     app.ctx.award_achievement = lambda *args, **kwargs: None
 
 
