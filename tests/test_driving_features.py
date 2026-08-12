@@ -201,6 +201,54 @@ def test_passing_hazard_plays_clear_sound(monkeypatch):
         app.shutdown()
 
 
+def test_assist_releases_its_own_emergency_application(monkeypatch):
+    """The AEB escalation sets truck.emergency_brake; the assist must release
+    it when the hazard resolves. In real play the input pass stomps the flag
+    from the B key every frame, but nothing guarantees an input frame between
+    engage and clear -- a harness driving the sim directly (the smoke drive,
+    the playtest tool) was left standing on everything forever."""
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    monkeypatch.setattr(
+        app.ctx,
+        "say_event",
+        speech_stub(events, with_interrupt=True),
+    )
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+
+        # Clear path: AEB engaged and escalated, then the truck gets slow enough.
+        driving._hazard_deadline = 3.0
+        driving._automatic_braking_announced = True
+        driving.truck.emergency_brake = True
+        driving.truck.velocity_mps = 0.0
+        driving._update_hazard(1 / 60)
+        assert driving._hazard_deadline is None
+        assert driving.truck.emergency_brake is False
+
+        # Collision path: the deadline runs out with the application still on.
+        driving._hazard_deadline = 1 / 120
+        driving._automatic_braking_announced = True
+        driving.truck.emergency_brake = True
+        driving.truck.velocity_mps = 30.0
+        driving._update_hazard(1 / 60)
+        assert driving._hazard_deadline is None
+        assert driving.truck.emergency_brake is False
+
+        # A driver-held application is not the assist's to release.
+        driving._hazard_deadline = 3.0
+        driving._automatic_braking_announced = False
+        driving.truck.emergency_brake = True
+        driving.truck.velocity_mps = 0.0
+        driving._update_hazard(1 / 60)
+        assert driving.truck.emergency_brake is True
+    finally:
+        app.shutdown()
+
+
 def test_fuel_rescue_stops_the_truck_before_restart(monkeypatch):
     from freight_fate.app import App
 

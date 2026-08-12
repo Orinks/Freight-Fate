@@ -2294,6 +2294,13 @@ class DrivingUpdateMixin:
         target = self._hazard_target_mph()
         if self.truck.speed_mph <= target:
             self._hazard_deadline = None
+            # The assist releases what the assist applied. The input pass also
+            # stomps this flag from the B key every frame, but nothing says a
+            # frame of input runs between engage and clear -- and an
+            # application with no owner left the truck standing on everything
+            # for good.
+            if self._automatic_braking_announced:
+                self.truck.emergency_brake = False
             self._automatic_braking_announced = False
             self._hazard_slow_hint_said = False
             self.ctx.audio.play("events/hazard_clear", volume=0.75)
@@ -2348,6 +2355,8 @@ class DrivingUpdateMixin:
                 self._cancel_cruise()
         if self._hazard_deadline <= 0:
             self._hazard_deadline = None
+            if self._automatic_braking_announced:
+                self.truck.emergency_brake = False
             self._automatic_braking_announced = False
             self.ctx.audio.play("vehicle/collision")
             severity = min(1.0, self.truck.speed_mph / 70.0)
