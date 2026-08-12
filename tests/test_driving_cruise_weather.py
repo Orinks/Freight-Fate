@@ -1340,6 +1340,10 @@ def test_fixed_object_hazard_needs_nearly_a_stop_or_a_swerve(monkeypatch):
     try:
         driving = start_drive(app)
         quiet_trip(driving)
+        # This test is about the swerve option, so pin a lane beside the
+        # truck to actually swerve into -- which real route the new career
+        # was dispatched onto is not this test's business.
+        monkeypatch.setattr(driving.trip, "has_open_adjacent_lane_at", lambda mile=None: True)
         t = driving.truck
         t.velocity_mps = 29.0  # ~65 mph
         t.grip, t.grade = 1.0, 0.0

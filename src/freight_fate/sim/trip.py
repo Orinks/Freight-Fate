@@ -1636,6 +1636,24 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             return None
         return 0 if zone.closed_side == "right" else count - 1
 
+    def has_open_adjacent_lane_at(self, mile: float | None = None) -> bool:
+        """Whether there is anywhere on this side to swerve into right now.
+
+        The same two facts a lane change already answers to: how many lanes
+        our side has (``lane_count_at``, the same count ``_tap_lane_change``
+        refuses against with "There is no lane to your left/right here"), and
+        which one a work zone has coned off (``closed_lane_at``). One lane
+        our side, or a two-lane stretch with the other lane shut, leaves
+        nowhere to send a dodge -- a hazard warning must not offer a lane
+        change nobody can make.
+        """
+        count = self.lane_count_at(mile)
+        if count < 2:
+            return False
+        if self.closed_lane_at(mile, lane_count=count) is not None:
+            count -= 1
+        return count >= 2
+
     def _span_is_multilane(self, start_mi: float, end_mi: float) -> bool:
         """True when every mile of a work zone footprint -- taper included --
         has a second lane our side.

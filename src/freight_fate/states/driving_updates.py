@@ -2324,10 +2324,15 @@ class DrivingUpdateMixin:
             and self.truck.speed_mph <= HAZARD_SAFE_MPH
         ):
             self._hazard_slow_hint_said = True
-            self.ctx.say_event(
-                "It is still in your lane. Nearly stop, or change lanes.",
-                interrupt=False,
+            # "Or change lanes" only names a maneuver this road offers; a
+            # one-lane stretch, or a two-lane one with the other lane coned
+            # off, gets nearly-stop as the whole answer.
+            hint = (
+                "It is still in your lane. Nearly stop, or change lanes."
+                if self.trip.has_open_adjacent_lane_at()
+                else "It is still in your lane. Nearly stop."
             )
+            self.ctx.say_event(hint, interrupt=False)
         self._hazard_deadline -= dt
         if (
             self.ctx.settings.automatic_emergency_braking
