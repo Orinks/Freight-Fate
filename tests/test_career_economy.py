@@ -122,6 +122,41 @@ def test_specialty_multiplier_applies_through_record_delivery():
     assert career.xp == pytest.approx(150.0 + 100.0 * 1.6 * 1.5)
 
 
+def test_single_level_up_speaks_the_one_rank(monkeypatch):
+    """A one-rank promotion keeps the exact wording players already expect."""
+    from freight_fate.models.career_ladder import rank_for_level
+
+    career = Career()
+    # 150 completion + 600 * 1.6 mileage XP = 1110: past the 1000 threshold
+    # for level 2, short of the 2500 threshold for level 3.
+    messages = career.record_delivery(600.0, 900.0, on_time=True, damage_pct=50.0)
+    assert career.level == 2
+    rank = rank_for_level(2)
+    level_ups = [m for m in messages if m.startswith("Level up!")]
+    assert level_ups == [f"Level up! You are now level 2: {rank.title}. Unlock: {rank.unlock}"]
+
+
+def test_multi_level_up_speaks_every_rank_passed_through(monkeypatch):
+    """A delivery big enough to jump several ranks must not go silent on the
+    ranks in between -- every passed rank's unlock is spoken, in order."""
+    from freight_fate.models.career_ladder import rank_for_level
+
+    career = Career()
+    career.xp = 999.0  # one XP short of level 2
+    assert career.level == 1
+    # 150 completion + 3000 * 1.6 mileage XP = 4950; 999 + 4950 = 5949,
+    # which lands inside the level-4 band (4500..7000): levels 2 and 3 are
+    # passed through in the same delivery.
+    messages = career.record_delivery(3000.0, 5000.0, on_time=True, damage_pct=50.0)
+    assert career.level == 4
+    level_ups = [m for m in messages if m.startswith("Level up!")]
+    assert level_ups == [
+        f"Level up! You are now level {lvl}: {rank_for_level(lvl).title}. "
+        f"Unlock: {rank_for_level(lvl).unlock}"
+        for lvl in (2, 3, 4)
+    ]
+
+
 def test_first_twenty_thresholds_stay_save_compatible():
     from freight_fate.models.career import LEVEL_XP
 

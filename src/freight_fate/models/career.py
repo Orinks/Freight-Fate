@@ -269,10 +269,16 @@ class Career:
         if self.level > before_level:
             # A promotion clears the assigned-load refusals dispatch remembers.
             self.dispatch_declines_used = 0
-            rank = self.rank
-            messages.append(
-                f"Level up! You are now level {self.level}: {rank.title}. Unlock: {rank.unlock}"
-            )
+            # A big delivery can jump several ranks at once; every rank
+            # passed through gets its own line so its unlock is actually
+            # heard, not just the final rank's (single-level phrasing is
+            # unchanged: the loop runs once and reads identically).
+            for gained_level in range(before_level + 1, self.level + 1):
+                rank = rank_for_level(gained_level)
+                messages.append(
+                    f"Level up! You are now level {gained_level}: "
+                    f"{rank.title}. Unlock: {rank.unlock}"
+                )
         for endorsement in self.endorsements - before_endorsements:
             messages.append(ENDORSEMENT_ANNOUNCEMENTS[endorsement])
         return messages
