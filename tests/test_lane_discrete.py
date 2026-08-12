@@ -973,11 +973,15 @@ def test_random_dodgeable_hazard_says_brake_only_with_no_lane_to_swerve_into(mon
     same treatment as the lead-vehicle warning: no lane, no offer."""
     import freight_fate.sim.trip_road_events as road_events
     from freight_fate.data.world_models import LaneSegment
-    from freight_fate.sim.trip import TripEventKind
+    from freight_fate.sim.trip import Trip, TripEventKind
 
     trip = _synthetic_trip([LaneSegment(0.0, 900.0, lanes=2, oneway=False)], 900.0, 9)
     trip.position_mi = 50.0
     trip._hazard_check_mi = 0.0
+    # The synthetic route's cities are not in the world, so the region lookup
+    # _check_hazards makes on the way to eligible_hazards (stubbed below)
+    # cannot resolve; pin a real region name.
+    monkeypatch.setattr(Trip, "current_region", property(lambda self: "great_lakes"))
     monkeypatch.setattr(trip, "_hazard_risk", lambda: 2.0)  # certain to fire
     monkeypatch.setattr(
         road_events, "eligible_hazards", lambda *a, **k: [("debris on the road", 1.0)]
