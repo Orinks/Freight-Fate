@@ -415,7 +415,7 @@ class _Ctx:
         self.audio = _Audio()
         self.said: list[str] = []
 
-    def say_event(self, text, interrupt=True, review=True):
+    def say_event(self, text, interrupt=True, review=True, **_pacing):
         self.said.append(text)
 
 

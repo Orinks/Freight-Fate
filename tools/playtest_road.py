@@ -482,7 +482,7 @@ def run_headless(app, driving, args) -> None:
     from freight_fate.states.driving_damage import cargo_status_clause
 
     spoken: list[tuple[str, str]] = []
-    app.ctx.say_event = lambda text, interrupt=False: spoken.append(("event", text))
+    app.ctx.say_event = lambda text, interrupt=False, **_: spoken.append(("event", text))
     app.ctx.say = lambda text, interrupt=True: spoken.append(("say", text))
 
     class NoKeys:

@@ -2507,6 +2507,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 self._emit(
                     TripEventKind.GPS_CUE,
                     f"You drove past your planned stop, {name}. Plan cancelled.",
+                    planned=True,
                 )
         for stop in self.stops:
             ahead = stop.at_mi - self.position_mi
@@ -2520,7 +2521,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 if stop.parking_text:
                     parts.append(f"{stop.parking_text}.")
                 parts.append("Press X to signal for the exit.")
-                self._emit(TripEventKind.STOP_AHEAD, " ".join(parts), stop=stop)
+                # The plan flag rides the event so the driving layer can rank
+                # the stop the player chose above ambient roadside chatter.
+                self._emit(
+                    TripEventKind.STOP_AHEAD,
+                    " ".join(parts),
+                    stop=stop,
+                    planned=self.is_planned(stop),
+                )
 
     def _check_navigation_cues(self) -> None:
         # One maneuver at a time on street chains: several block-scale

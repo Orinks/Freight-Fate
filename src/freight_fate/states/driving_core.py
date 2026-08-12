@@ -102,6 +102,7 @@ from ..sim.vehicle import (
     TruckState,
 )
 from ..sim.weather import WeatherKind, WeatherSystem
+from ..speech_pacing import EventPriority
 from .base import MenuItem, MenuState, State
 
 log = logging.getLogger(__name__)

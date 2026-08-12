@@ -41,6 +41,12 @@ class PauseMenuState(MenuState):
     def enter(self) -> None:
         self.ctx.audio.play("ui/pause")
         self.ctx.audio.stop_world()
+        # Everything the road had handed the voice belongs to the mile the
+        # player just stopped on. Left alone it sits in the event channel's
+        # own queue and is performed over the pause menu, or replayed in full
+        # on resume (tester transcript, 2026-08-11).
+        self.ctx.pause_event_speech()
+        self.driving._pending_ambient_event = None
         self.driving._reverse_cue_active = False
         self.driving._air_cue_active = False
         self.driving._jake_cue_key = None
@@ -307,6 +313,10 @@ class PauseMenuState(MenuState):
 
     def _resume(self) -> None:
         self.ctx.audio.play("ui/unpause")
+        # Anything that reached the voice while the menu was up describes a
+        # road the player was not on. They come back to the road as it is now.
+        self.ctx.resume_event_speech()
+        self.driving._pending_ambient_event = None
         self.ctx.pop_state()
         self.ctx.say("Resumed.", interrupt=False, review=False)
 

@@ -26,7 +26,7 @@ from .music import music_track_duration_s
 from .online_journal import JournalOutbox, queue_achievement
 from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
-from .speech import EventSpeechPacer, Speech
+from .speech import EventPriority, EventSpeechPacer, Speech
 from .states.base import State
 
 log = logging.getLogger(__name__)
@@ -182,7 +182,16 @@ class GameContext:
         if review:
             self.message_log.add(text, MessageCategory.GENERAL)
 
-    def say_event(self, text: str, interrupt: bool = True, review: bool = True) -> None:
+    def say_event(
+        self,
+        text: str,
+        interrupt: bool = True,
+        review: bool = True,
+        *,
+        priority: EventPriority | None = None,
+        key: str | None = None,
+        force: bool = False,
+    ) -> None:
         """Driving event announcements (hazards, warnings, weather, ...).
 
         With the dedicated SAPI event voice enabled, events speak on their own
@@ -194,20 +203,39 @@ class GameContext:
         screen reader. Urgent events first flush stale game speech, then speak
         as a fresh queued utterance so old messages do not bury the warning.
 
-        Queued events ride an anti-backlog projection either way: a line that
-        would start speaking well after the moment it described flushes the
-        expired backlog and speaks now instead of joining the recital.
+        Every line first passes the pacer, which knows what the player has
+        already heard. A line identical to one spoken a moment ago is dropped
+        outright -- one moment noticed on several frames is still one moment.
+        ``key`` marks a standing condition (a damaged load, an engine at
+        redline) rather than an event: it speaks when it starts and again only
+        when what it says has changed. ``force`` is for a line the player
+        asked for and must hear whether or not it repeats.
+
+        Queued events then ride an anti-backlog projection either way: a line
+        that would start speaking well after the moment it described flushes
+        the expired backlog and speaks now instead of joining the recital.
+        ``priority`` sets how long it is willing to wait first -- route
+        announcements (the planned stop, the exit) give ambient chatter well
+        under a second before going in front of it.
 
         ``review`` keeps a line out of the reviewable message log. An assist
         that interrupts to say it is acting would otherwise land exactly where
         the warning it cut off should be, so the review keys that exist to
         rescue an interrupted line would hand back the interruption instead.
         """
+        if self._event_pacer.is_repeat(text, key=key, force=force):
+            # Already in the player's ear. Not spoken, not logged, not
+            # reviewable: as far as the drive is concerned it never happened
+            # a second time.
+            return
+        if priority is None:
+            priority = EventPriority.CRITICAL if interrupt else EventPriority.AMBIENT
         transcript.info("[event] %s", text)
+        self._event_pacer.note_spoken(text, key=key)
         if self.settings.sapi_events:
             if interrupt:
                 self._event_pacer.note_interrupt(text)
-            elif self._event_pacer.should_flush(text):
+            elif self._event_pacer.should_flush(text, priority):
                 # The channel is backed up past the point of truth: purging
                 # and speaking fresh IS the queued line's honest delivery.
                 transcript.info("[pacer] stale event backlog flushed")
@@ -219,6 +247,26 @@ class GameContext:
             self.speech.say(text, interrupt=False)
         if review:
             self.message_log.add(text, MessageCategory.EVENT)
+
+    def reset_event_condition(self, key: str) -> None:
+        """A standing condition has cleared; let it announce itself afresh."""
+        self._event_pacer.forget_condition(key)
+
+    def pause_event_speech(self) -> None:
+        """The player stepped off the road: silence the road and drop its backlog.
+
+        Stopping the channel is what actually purges the voice's own queue --
+        without it, everything the road had submitted before the pause is
+        still in there and gets performed the moment the player comes back
+        (tester transcript, 2026-08-11).
+        """
+        self._event_pacer.pause()
+        _stop_event_speech(self.speech)
+
+    def resume_event_speech(self) -> None:
+        """Back at the wheel; nothing from before the pause is news."""
+        self._event_pacer.resume()
+        _stop_event_speech(self.speech)
 
     def stop_event_speech(self) -> None:
         self._event_pacer.reset()

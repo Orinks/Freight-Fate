@@ -2572,7 +2572,7 @@ def test_cruise_says_when_a_climb_has_beaten_it():
     for verbosity, expected in ((1, True), (0, False)):
         app = App()
         events: list[str] = []
-        app.ctx.say_event = lambda text, interrupt=False, sink=events: sink.append(text)
+        app.ctx.say_event = lambda text, interrupt=False, sink=events, **_: sink.append(text)
         try:
             app.ctx.settings.speech_verbosity = verbosity
             driving = _cruising(app)
@@ -2601,7 +2601,7 @@ def test_climb_cue_stays_quiet_when_cruise_is_winning():
 
     app = App()
     events: list[str] = []
-    app.ctx.say_event = lambda text, interrupt=False, sink=events: sink.append(text)
+    app.ctx.say_event = lambda text, interrupt=False, sink=events, **_: sink.append(text)
     try:
         app.ctx.settings.speech_verbosity = 1
         driving = _cruising(app)

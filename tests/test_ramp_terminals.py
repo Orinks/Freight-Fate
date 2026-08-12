@@ -679,7 +679,7 @@ def test_rolling_countdown_speaks_each_milestone_once():
         d = _driving(app)
         _on_ramp(d, "signal", red=True, mph=15.0)
         spoken = []
-        app.ctx.say_event = lambda t, interrupt=True: spoken.append(t)
+        app.ctx.say_event = lambda t, interrupt=True, **_: spoken.append(t)
         for feet in (900, 450, 250, 100):
             d._ramp_mi = RAMP_ACCESS_MI + feet / 5280.0
             d._update_ramp_gap_countdown()
@@ -714,7 +714,7 @@ def test_stop_sign_bar_has_position():
         d = _driving(app)
         _on_ramp(d, "stop", red=False, mph=15.0)
         spoken = []
-        app.ctx.say_event = lambda t, interrupt=True: spoken.append(t)
+        app.ctx.say_event = lambda t, interrupt=True, **_: spoken.append(t)
 
         # Rolling countdown through the terminal update, same as a light.
         for feet in (900, 450, 250, 100):

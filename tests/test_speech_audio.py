@@ -637,7 +637,7 @@ class _RecordingSpeech:
     def say(self, text: str, interrupt: bool = True) -> None:
         self.say_calls.append((text, interrupt))
 
-    def say_event(self, text: str, interrupt: bool = True) -> None:
+    def say_event(self, text: str, interrupt: bool = True, **_pacing) -> None:
         self.event_calls.append((text, interrupt))
 
     def stop(self) -> None:

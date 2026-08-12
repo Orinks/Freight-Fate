@@ -50,8 +50,15 @@ def speech_stub(
     stub, so that ``ctx.say``'s signature has exactly one definition.
     """
 
+    # ``**_pacing`` swallows say_event's keyword-only pacing arguments
+    # (priority, key, force). They steer when and whether a line reaches the
+    # voice, not what it says, so no capture stub has ever needed to see them.
     def _speak(
-        text: str, interrupt: bool = True, review: bool = True, remember: bool = True
+        text: str,
+        interrupt: bool = True,
+        review: bool = True,
+        remember: bool = True,
+        **_pacing,
     ) -> None:
         if record is not None:
             record(text, interrupt)

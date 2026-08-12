@@ -23,6 +23,9 @@ from .driving_rest_states import (
 
 # Re-crossings inside this window are pinballing, not lane changes.
 LANE_CROSS_REPEAT_S = 4.0
+# One brush against a vehicle alongside is one contact, however many times
+# the tires cross the line while it is happening.
+SIDESWIPE_REPEAT_S = 3.0
 
 # FM fringe rendering. The bed creeps in below full quieting (signal 0.6,
 # radio.SIGNAL_FULL_VOLUME) and deepens quadratically; pickets begin below
@@ -926,6 +929,7 @@ class DrivingUpdateMixin:
                 message += " Steer back toward the lane center."
             self.ctx.say_event(message, interrupt=True)
         self._cross_repeat_s = max(0.0, self._cross_repeat_s - dt)
+        self._sideswipe_cooldown_s = max(0.0, self._sideswipe_cooldown_s - dt)
         if self.lane.crossed:
             self._on_lane_crossed()
         self._update_tap_lane_change(dt)
@@ -1000,6 +1004,14 @@ class DrivingUpdateMixin:
             behind_mi=DODGE_CLEARANCE_BEHIND_MI,
         )
         if other is not None and self.truck.speed_mph > LANE_MIN_MPH:
+            if self._sideswipe_cooldown_s > 0.0:
+                # One contact, not three. A truck pinballing across the same
+                # painted line ran this branch on every crossing, so a single
+                # sideswipe was billed and announced repeatedly inside half a
+                # second (tester transcript, 2026-08-11). The damage and the
+                # warning both belong to the contact, and it happened once.
+                return
+            self._sideswipe_cooldown_s = SIDESWIPE_REPEAT_S
             self.ctx.audio.play("vehicle/collision")
             self.ctx.controller.rumble.impact(SIDESWIPE_DAMAGE)
             self.truck.apply_collision(SIDESWIPE_DAMAGE)
@@ -2478,6 +2490,9 @@ class DrivingUpdateMixin:
         if not t.over_revving:
             self._overrev_s = 0.0
             self._overrev_warn_due = OVERREV_GRACE_S
+            # Off the limiter. The next time the engine goes there is a fresh
+            # event and gets its warning again, even at the same wear number.
+            self.ctx.reset_event_condition("engine_redline")
             return
         self._overrev_s += dt
         if self._overrev_s < self._overrev_warn_due:
@@ -2505,7 +2520,10 @@ class DrivingUpdateMixin:
                 "Ease off and slow down."
             )
         )
-        self.ctx.say_event(message, interrupt=True)
+        # A standing condition: the engine is still at redline and the driver
+        # already knows. Repeating it earns the voice only when the wear
+        # number it carries has actually moved.
+        self.ctx.say_event(message, interrupt=True, key="engine_redline")
 
     def _update_speeding(self, dt: float, *, accelerator_held: bool = False) -> None:
         """The dash alert, and the braking grace a dropped limit earns.
