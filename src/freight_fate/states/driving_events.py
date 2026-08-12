@@ -1983,6 +1983,20 @@ class DrivingEventMixin:
                 return
             stop = self._ramp_stop
             if not self._ramp_end_said:
+                if (
+                    stop.type == "delivery_destination"
+                    and not self._surface_chain
+                    and self._surface_chain_route() is not None
+                ):
+                    # The facility has a street chain, so "you are at X"
+                    # here is a lie by two miles: the driver was told they
+                    # had arrived and then handed turn-by-turn streets
+                    # (owner log, 2026-07-23, Sacramento Dry Warehouse).
+                    # The chain's own "off the ramp and onto city streets"
+                    # line follows and says it right. The said-latch stays
+                    # open so the blown-stop rule below can never fire on a
+                    # chain facility: the streets are still the way in.
+                    return
                 self._ramp_end_said = True
                 if stop.type != "delivery_destination":
                     place = stop.spoken_name
@@ -1991,74 +2005,66 @@ class DrivingEventMixin:
                         if self._terse_speech()
                         else f"You are at {place}. Come to a complete stop."
                     )
-                    speech_rate = (
-                        self.ctx.settings.speech_rate
-                        if self.ctx.settings.sapi_events
-                        and getattr(self.ctx.speech, "event_supports_rate", False)
-                        else 0.0
-                    )
-                    self._ramp_arrival_grace_s = ramp_arrival_grace_seconds(
-                        message,
-                        speech_rate,
-                    )
                 else:
-                    if not self._surface_chain and self._surface_chain_route() is not None:
-                        # The facility has a street chain, so "you are at X"
-                        # here is a lie by two miles: the driver was told they
-                        # had arrived and then handed turn-by-turn streets
-                        # (owner log, 2026-07-23, Sacramento Dry Warehouse).
-                        # The chain's own "off the ramp and onto city streets"
-                        # line follows and says it right.
-                        return
                     place = stop.name
                     message = (
                         f"At {place}."
                         if self._terse_speech()
                         else f"You are at {place}. Come to a complete stop."
                     )
+                # Both kinds of ramp stop open the same real-time reaction
+                # window. The destination opened none at all, so its grace sat
+                # at zero forever and nothing downstream could ever read it as
+                # spent (owner playtest, Buffalo to Albany, 2026-08-12).
+                self._ramp_arrival_grace_s = self._ramp_arrival_grace_for(message)
                 self.ctx.say_event(message, interrupt=True)
                 return
-            if stop.type != "delivery_destination":
-                self._ramp_arrival_grace_s = max(0.0, self._ramp_arrival_grace_s - dt)
-            # Rolled clear past the end of the ramp without ever stopping. A
-            # destination exit keeps waiting (missing it drives its own reroute);
-            # a route POI is blown, so give the highway back instead of leaving a
-            # stuck, unpatrolled ramp lingering for miles. Both the distance and
-            # real-time grace must expire, so trip pacing cannot consume the
-            # player's spoken-cue reaction window.
+            self._ramp_arrival_grace_s = max(0.0, self._ramp_arrival_grace_s - dt)
+            # Rolled clear past the end of the ramp without ever stopping. Both
+            # the distance and the real-time grace must expire, so trip pacing
+            # cannot consume the player's spoken-cue reaction window.
             if (
-                stop.type != "delivery_destination"
-                and self._ramp_mi <= -RAMP_OVERSHOOT_MI
-                and self._ramp_arrival_grace_s <= 0.0
-                and not self.truck.parking_brake
+                self._ramp_mi > -RAMP_OVERSHOOT_MI
+                or self._ramp_arrival_grace_s > 0.0
+                or self.truck.parking_brake
             ):
-                self._ramp_mi = None
-                self._ramp_stop = None
-                self._ramp_end_said = False
-                self._ramp_arrival_grace_s = 0.0
-                planned = self.trip.is_planned(stop)
-                if planned:
-                    self.trip.planned_stop_key = None
-                if self._is_selected_stop(stop):
-                    self._clear_selected_stop_intent()
-                exit_ref = (
-                    f"{stop.exit_label} for {stop.spoken_name}"
-                    if stop.exit_label
-                    else f"the exit for {stop.spoken_name}"
-                )
-                line = (
-                    f"Drove past {stop.spoken_name}; you never stopped."
-                    if self._terse_speech()
-                    else f"You never stopped and drove past {exit_ref}."
-                )
-                if planned:
-                    line += " Plan cancelled."
-                line += (
-                    " Planned rest-stop stopping assistance is off. Continue safely and "
-                    f"press {self.ctx.control_hint('rest')} to plan the next sleep-capable stop."
-                )
-                self.ctx.say_event(line, interrupt=True)
                 return
+            if stop.type == "delivery_destination":
+                # The destination terminal used to be the one blown stop with
+                # no consequence at all: the arrival line was spoken once, the
+                # ramp counted down past it forever, and the player circled
+                # with the route status frozen and nothing said until they quit
+                # to the menu (owner playtest, Buffalo to Albany, 2026-08-12).
+                self._loop_back_to_destination_terminal(stop)
+                return
+            # A route POI is blown, so give the highway back instead of leaving
+            # a stuck, unpatrolled ramp lingering for miles.
+            self._ramp_mi = None
+            self._ramp_stop = None
+            self._ramp_end_said = False
+            self._ramp_arrival_grace_s = 0.0
+            planned = self.trip.is_planned(stop)
+            if planned:
+                self.trip.planned_stop_key = None
+            if self._is_selected_stop(stop):
+                self._clear_selected_stop_intent()
+            exit_ref = (
+                f"{stop.exit_label} for {stop.spoken_name}"
+                if stop.exit_label
+                else f"the exit for {stop.spoken_name}"
+            )
+            line = (
+                f"Drove past {stop.spoken_name}; you never stopped."
+                if self._terse_speech()
+                else f"You never stopped and drove past {exit_ref}."
+            )
+            if planned:
+                line += " Plan cancelled."
+            line += (
+                " Planned rest-stop stopping assistance is off. Continue safely and "
+                f"press {self.ctx.control_hint('rest')} to plan the next sleep-capable stop."
+            )
+            self.ctx.say_event(line, interrupt=True)
             return
         stop = self._exit_stop
         if stop is None:
@@ -2177,6 +2183,82 @@ class DrivingEventMixin:
             self.ctx.say_event(line, interrupt=True)
             self._exit_signal_on = False
             self._reset_exit_lane_state()
+
+    def _ramp_arrival_grace_for(self, message: str) -> float:
+        """Real reaction seconds after ``message`` at the player's own rate.
+
+        A screen-reader-owned voice reads at a rate the game cannot see, so
+        the slowest assumption stands in for it.
+        """
+        speech_rate = (
+            self.ctx.settings.speech_rate
+            if self.ctx.settings.sapi_events
+            and getattr(self.ctx.speech, "event_supports_rate", False)
+            else 0.0
+        )
+        return ramp_arrival_grace_seconds(message, speech_rate)
+
+    def _destination_terminal_retry_mi(self) -> float:
+        """How much road a loop-back puts back in front of the entrance.
+
+        Sized in real seconds at the current pace, never a fixed stretch: once
+        the terminal is behind the truck the ramp runs on the compressed clock
+        again, and a fixed retry distance would be gone before the fresh cue
+        could be heard -- the lesson the missed-exit and missed-gate loops both
+        already carry. Bounded by the road it lives on: never shorter than the
+        terminal-to-driveway stretch, never longer than the ramp itself.
+        """
+        speed = max(self.truck.speed_mph, RAMP_MAX_MPH)
+        miles = EXIT_WARNING_REAL_S * speed * self.trip.effective_time_scale / 3600.0
+        return max(RAMP_ACCESS_MI, min(miles, RAMP_LENGTH_MI))
+
+    def _loop_back_to_destination_terminal(self, stop) -> None:
+        """Blown the destination terminal at speed: the scripted loop-back.
+
+        The fourth instance of a pattern the blown ramp POI, the missed
+        destination exit, and the missed facility gate already share, and the
+        one place it was missing. Only the no-chain terminal reaches here: a
+        facility with a street chain hands off at legal speed and never blows.
+
+        The turnaround comes back to the facility, not back up the ramp, so
+        the light or sign the driver already honored is not re-run -- only the
+        entrance is ahead again. The clock keeps running through every loop;
+        the lost time is the consequence, never a fine.
+        """
+        self._ramp_terminal_miss_count += 1
+        self.trip.game_minutes += RAMP_TERMINAL_MISS_LOOP_MIN
+        self._ramp_mi = self._destination_terminal_retry_mi()
+        # The say-once latch must never swallow the reposition: when the
+        # missed-exit loop let it, a second miss stranded the trip with
+        # nothing left to aim at. The arrival line speaks fresh instead.
+        self._ramp_end_said = False
+        self._ramp_arrival_grace_s = 0.0
+        # Automatic speed control is what drove this miss, so the whole
+        # session goes -- not just the active controller. Left armed, the
+        # resume helper would wind the truck straight back up to speed on the
+        # re-approach and blow the same entrance again.
+        self._cancel_cruise()
+        self._cancel_keeper()
+        place = stop.name
+        if self._terse_speech():
+            message = (
+                f"Drove past {place}; you never stopped. Safe turnaround. "
+                f"{place} ahead again; stop this time."
+            )
+        else:
+            message = (
+                f"You drove past {place} without stopping. You continue to the "
+                "next safe turnaround and loop back onto the approach. "
+                f"{place} is ahead again; slow to a stop this time. "
+                "The clock is still running."
+            )
+        if self._ramp_terminal_miss_count >= 2:
+            # The identical core line keeps the flow predictable by ear; a
+            # repeat miss earns help, not scolding.
+            message += f" Brake with {self.ctx.control_hint('brake')} well before it."
+        self.ctx.audio.play("ui/warning")
+        self._set_status(f"Drove past {place}. Use the next safe turnaround.")
+        self.ctx.say_event(message, interrupt=True)
 
     def _update_selected_stop_assist(self) -> bool:
         """Brake an explicitly selected optional stop at its entrance."""

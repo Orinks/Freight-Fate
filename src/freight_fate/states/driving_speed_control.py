@@ -162,6 +162,16 @@ class SpeedControlStateMixin:
             self._disarm_speed_control()
             self.ctx.say_event("Automatic speed control canceled.", interrupt=False)
             return
+        if self._ramp_mi is not None:
+            # A ramp stop is in progress. Taking the exit cancels cruise
+            # outright, and the stop at the end of the ramp is the driver's to
+            # make -- resuming here wound the truck back up and drove a player
+            # straight past the destination terminal, silently, at 66 mph
+            # (owner playtest, Buffalo to Albany, 2026-08-12). The whole ramp
+            # counts, not just the stretch ``trip.controlled_ramp`` covers:
+            # that flag drops the moment the light or sign is behind the
+            # truck, which is exactly where the entrance still is.
+            return
         if (
             braking
             or t.air_brakes_holding

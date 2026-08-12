@@ -287,6 +287,11 @@ RAMP_CONTROL_RURAL_WEIGHTS = (0.30, 0.80)
 # cue and set the brake. Require both this distance and a real-time reaction
 # window. A driver who keeps rolling still misses the stop promptly.
 RAMP_OVERSHOOT_MI = 0.5
+# Blowing the destination terminal at the end of the ramp costs a scripted
+# loop-back through the next safe turnaround, charged the same game minutes as
+# the missed destination exit and the missed facility gate -- the same maneuver
+# a road up or down. The lost time is the whole consequence; there is no fine.
+RAMP_TERMINAL_MISS_LOOP_MIN = 20.0
 RAMP_SPEECH_WPM_MIN = 30.0
 RAMP_SPEECH_WPM_MAX = 60.0
 RAMP_ARRIVAL_REACTION_S = 3.0

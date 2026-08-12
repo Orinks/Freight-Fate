@@ -337,6 +337,9 @@ class DrivingState(
         self._ramp_stop = None
         self._ramp_end_said = False
         self._ramp_arrival_grace_s = 0.0
+        # How many times this drive has been carried past the destination
+        # terminal at speed; a repeat miss earns the braking hint.
+        self._ramp_terminal_miss_count = 0
         # Ramp terminal control for the active ramp: what meets you where the
         # ramp joins the surface road, and the light's cycle state if a signal.
         self._ramp_control = ""  # "signal" | "stop" | "none" | "" (no ramp)

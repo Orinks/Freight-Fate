@@ -164,3 +164,37 @@ def test_ramp_completion_enters_the_chain():
         assert d._ramp_mi is None
     finally:
         app.shutdown()
+
+
+def test_ramp_completion_enters_the_chain_at_speed():
+    """A legal roll off the end of the ramp still hands off to the streets.
+
+    The chain is a driving continuation, so it takes the truck at whatever
+    speed the terminal let through. The blown-stop loop-back that answers a
+    no-chain terminal must never reach a chain facility: there is nothing to
+    stop for here, and charging a turnaround would be a lie.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import RoadStop
+
+    app = App()
+    try:
+        city, location = _turn_level_facility(app.ctx.world)
+        d = _driving_to(app, city, location)
+        d._destination_exit_taken = True
+        d._ramp_mi = 0.0
+        d._ramp_stop = RoadStop(location, 10.0, "delivery_destination", ("deliver",))
+        d._ramp_control = "none"
+        d._ramp_terminal_done = True
+        d.truck.velocity_mps = 16.0  # ~36 mph, far above docking speed
+        minutes = d.trip.game_minutes
+
+        d._update_exit(0.0)
+
+        assert d._surface_chain
+        assert d._ramp_mi is None
+        assert not d.trip.finished
+        assert d._ramp_terminal_miss_count == 0
+        assert d.trip.game_minutes == pytest.approx(minutes)  # no loop-back charged
+    finally:
+        app.shutdown()
