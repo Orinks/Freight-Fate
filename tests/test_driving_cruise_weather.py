@@ -1222,9 +1222,9 @@ def clear_weather(driving):
 @pytest.mark.smoke
 def test_hazard_deadline_covers_braking_time_from_current_speed():
     """A fixed 3-4.5 s window was unbeatable at highway speed: a full-service
-    stop from 65 to 25 mph alone takes ~5 s. The deadline must be the braking
-    time the truck actually needs -- fade, wear, and load included -- from
-    the current speed, plus the rolled reaction slack."""
+    stop from 65 to 25 mph alone takes ~5 s. The deadline must cover the
+    braking the truck actually needs -- fade, wear, and load included -- from
+    the current speed, and leave the rolled reaction slack on top of it."""
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind
     from freight_fate.states.driving import HAZARD_SAFE_MPH, MPH_PER_MPS
@@ -1240,8 +1240,11 @@ def test_hazard_deadline_covers_braking_time_from_current_speed():
         hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 3.0})
         driving._handle_trip_event(hazard)
         brake_s = (t.speed_mph - HAZARD_SAFE_MPH) / MPH_PER_MPS / t.full_service_decel_mps2()
-        assert driving._hazard_deadline == pytest.approx(brake_s + 3.0, abs=0.01)
-        assert driving._hazard_deadline > 7.5
+        assert driving._brake_budget_s() == pytest.approx(brake_s, abs=0.01)
+        assert driving._hazard_deadline == pytest.approx(
+            driving._aeb_engage_s(HAZARD_SAFE_MPH) + 3.0, abs=0.01
+        )
+        assert driving._hazard_deadline > brake_s + 3.0
     finally:
         app.shutdown()
 
@@ -1312,7 +1315,7 @@ def test_fixed_object_hazard_deadline_budgets_the_longer_stop():
     moving-hazard speed -- otherwise the honest demand becomes unwinnable."""
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind
-    from freight_fate.states.driving import HAZARD_CREEP_MPH
+    from freight_fate.states.driving import HAZARD_CREEP_MPH, LANE_TAP_CHANGE_S
 
     app = App()
     try:
@@ -1329,7 +1332,7 @@ def test_fixed_object_hazard_deadline_budgets_the_longer_stop():
         )
         driving._handle_trip_event(hazard)
         assert driving._hazard_deadline == pytest.approx(
-            driving._brake_budget_s(HAZARD_CREEP_MPH) + 3.0, abs=0.01
+            driving._aeb_engage_s(HAZARD_CREEP_MPH) + 3.0 + LANE_TAP_CHANGE_S, abs=0.01
         )
         assert driving._hazard_deadline > driving._brake_budget_s() + 3.0
     finally:
@@ -1358,6 +1361,119 @@ def test_brake_budget_honors_fade_wear_and_load():
         t.brake_wear_pct = 60.0
         worn = driving._brake_budget_s()
         assert worn > fresh
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.parametrize(
+    ("label", "mph", "grade", "brake_temp_c", "wear_pct", "grip", "fatigue"),
+    [
+        ("fresh at highway speed", 65.0, 0.0, 20.0, 0.0, 1.0, 0.0),
+        ("drowsy", 65.0, 0.0, 20.0, 0.0, 1.0, 80.0),
+        ("down a five percent grade", 65.0, -0.05, 20.0, 0.0, 1.0, 0.0),
+        ("on cooked brakes", 65.0, 0.0, 500.0, 0.0, 1.0, 0.0),
+        ("on worn brakes in the wet", 65.0, 0.0, 20.0, 60.0, 0.6, 0.0),
+    ],
+)
+def test_the_driver_always_gets_a_real_window_before_the_assist_takes_over(
+    label, mph, grade, brake_temp_c, wear_pct, grip, fatigue
+):
+    """The reaction window must be a promise, not a leftover.
+
+    Reported by Munchkinbear, 2026-08-11: "less than half a second between
+    being told to brake or change lanes and the truck slamming on the
+    emergency brakes". The window was whatever survived after the assist's
+    engage margin -- which scales with the stopping budget -- was subtracted
+    from the fixed slack, so every reason the truck stops badly (speed,
+    grade, heat, wear, grip) ate the driver's time instead of the truck's.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving import HAZARD_MIN_REACTION_S, MPH_PER_MPS
+
+    app = App()
+    try:
+        app.ctx.settings.time_scale = 20.0
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.velocity_mps = mph / MPH_PER_MPS
+        t.grade, t.grip = grade, grip
+        t.brake_temp_c, t.brake_wear_pct = brake_temp_c, wear_pct
+        app.ctx.profile.fatigue = fatigue
+        # The tightest slack the road emits: the traffic-pressure warning.
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake or change lanes! Slow truck right ahead.",
+                {"deadline_s": 2.5, "dodgeable": True},
+            )
+        )
+        window = driving._hazard_deadline - driving._aeb_engage_s(driving._hazard_target_mph())
+        assert window >= HAZARD_MIN_REACTION_S, f"{label}: only {window:.2f} s to react"
+    finally:
+        app.shutdown()
+
+
+def test_a_dodgeable_hazard_leaves_time_to_finish_the_lane_change_it_asks_for():
+    """ "Brake or change lanes" names a maneuver that takes 2.5 s of drift.
+    Demanding it inside a window shorter than the maneuver is not a demand,
+    it is a trap -- so a dodgeable hazard budgets the move on top of the
+    time to hear the warning and decide."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving import (
+        HAZARD_MIN_REACTION_S,
+        LANE_TAP_CHANGE_S,
+        MPH_PER_MPS,
+    )
+
+    app = App()
+    try:
+        app.ctx.settings.time_scale = 20.0
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.velocity_mps = 65.0 / MPH_PER_MPS
+        t.grade, t.grip = 0.0, 1.0
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake or change lanes! Debris on the road.",
+                {"deadline_s": 2.5, "dodgeable": True},
+            )
+        )
+        window = driving._hazard_deadline - driving._aeb_engage_s(driving._hazard_target_mph())
+        assert window >= HAZARD_MIN_REACTION_S + LANE_TAP_CHANGE_S
+    finally:
+        app.shutdown()
+
+
+def test_the_assist_does_not_slam_on_mid_lane_change(monkeypatch):
+    """A driver already sliding into the next lane has answered the warning.
+    Taking the truck away from them halfway through the move is what the
+    report described as "as you change lanes, slam go the emergency brakes"."""
+    from freight_fate.app import App
+    from freight_fate.states.driving import LANE_TAP_CHANGE_S
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = 25.0
+        driving._hazard_dodgeable = True
+        driving._hazard_lane = driving.lane.lane
+        # Past the engage point, but the dodge still lands before the hazard.
+        driving._hazard_deadline = driving._aeb_engage_s(driving._hazard_target_mph())
+        driving._lane_change_target = driving.lane.lane + 1
+        driving._lane_change_timer = LANE_TAP_CHANGE_S * 0.4
+        driving._update_hazard(0.01)
+        assert driving.truck.brake == 0.0
+
+        # A dodge that can no longer beat the hazard does not hold the assist off.
+        driving._lane_change_timer = driving._hazard_deadline + 1.0
+        driving._update_hazard(0.01)
+        assert driving.truck.brake == 1.0
     finally:
         app.shutdown()
 

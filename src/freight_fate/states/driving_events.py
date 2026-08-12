@@ -116,11 +116,11 @@ class DrivingEventMixin:
             self._pending_ambient_event = None
             self.ctx.audio.play(sound or "ui/warning")
             self.ctx.controller.rumble.hazard()  # 750 ms right->left sweep
-            # The deadline is braking physics plus reaction slack. The physics
-            # part is whatever full service brakes need from the current speed
-            # on this surface; the rolled window covers hearing the warning and
-            # getting on the pedal, and fatigue eats into that part only --
-            # a drowsy driver reacts late, but the truck stops no slower.
+            # The deadline is the moment the assist has to act plus the time
+            # that is the driver's own. The rolled window covers hearing the
+            # warning and getting on the pedal, and fatigue eats into that
+            # part only -- a drowsy driver reacts late, but the truck stops
+            # no slower, and no driver reacts below the human floor.
             # A dodgeable hazard sits in the lane you are in *now*; ending up
             # in any other lane before the deadline clears it, if that lane
             # is actually open (see _finish_lane_change). By brake alone it
@@ -130,7 +130,7 @@ class DrivingEventMixin:
             self._hazard_slow_hint_said = False
             slack = event.data.get("deadline_s", 4.0)
             reaction = tuning_for_time_scale(self.trip.time_scale).reaction_window
-            self._hazard_deadline = self._brake_budget_s(self._hazard_target_mph()) + (
+            self._hazard_deadline = self._hazard_deadline_for(
                 slack * reaction * hos.reaction_window_mult(self.ctx.profile.fatigue)
             )
             self._automatic_braking_announced = False

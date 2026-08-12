@@ -2032,6 +2032,45 @@ class DrivingUpdateMixin:
         decel = t.full_service_decel_mps2() + G * t.grade
         return over_mps / max(decel, 0.5)
 
+    def _aeb_engage_s(self, target_mph: float) -> float:
+        """Time-to-hazard at which automatic braking has to take the truck.
+
+        The physics budget plus its lead: braking heats the brakes, so the
+        stop the budget just predicted gets slower while it happens.
+        """
+        return self._brake_budget_s(target_mph) * AEB_BUDGET_MARGIN + AEB_LEAD_S
+
+    def _hazard_deadline_for(self, window_s: float) -> float:
+        """Time-to-hazard that leaves the driver ``window_s`` of their own.
+
+        Built forward from the moment the assist must act rather than back
+        from raw braking physics. The old form -- budget plus slack -- made
+        the driver's window a remainder: the assist's engage margin scales
+        with the budget, so speed, grade, brake heat, wear and grip all came
+        out of the driver's time instead of the truck's. At 65 mph on a
+        traffic warning that remainder was half a second, and on hot brakes
+        it was already spent when the words started (Munchkinbear, 2026-08-11).
+        """
+        window = max(window_s, HAZARD_MIN_REACTION_S)
+        if self._hazard_dodgeable:
+            # The warning offers a lane change; leave room to actually make one.
+            window += LANE_TAP_CHANGE_S
+        return self._aeb_engage_s(self._hazard_target_mph()) + window
+
+    def _dodge_still_beats_the_hazard(self) -> bool:
+        """Whether a lane change already in progress will land in time.
+
+        A driver mid-drift has answered the warning, and grabbing the truck
+        out from under them is the assist overriding the very move it asked
+        for. Only while the move can still land: a dodge that no longer
+        beats the hazard is not a plan, and braking is what is left.
+        """
+        if self._lane_change_target is None or not self._hazard_dodgeable:
+            return False
+        if self._hazard_deadline is None:
+            return False
+        return self._lane_change_timer <= self._hazard_deadline
+
     def _hazard_target_mph(self) -> float:
         """The speed that resolves the active hazard by brake alone.
 
@@ -2177,13 +2216,10 @@ class DrivingUpdateMixin:
                 interrupt=False,
             )
         self._hazard_deadline -= dt
-        # The assist leads the budget: braking heats the brakes, so the stop
-        # the budget just predicted gets slower while it happens. Engaging at
-        # zero margin collided two seconds after "Emergency braking engaged."
         if (
             self.ctx.settings.automatic_emergency_braking
-            and self._hazard_deadline
-            <= self._brake_budget_s(target) * AEB_BUDGET_MARGIN + AEB_LEAD_S
+            and self._hazard_deadline <= self._aeb_engage_s(target)
+            and not self._dodge_still_beats_the_hazard()
         ):
             self.truck.brake = max(self.truck.brake, 1.0)
             if not self._automatic_braking_announced:

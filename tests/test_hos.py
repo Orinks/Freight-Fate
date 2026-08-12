@@ -1124,13 +1124,22 @@ def test_fatigued_driver_gets_a_shorter_hazard_window():
     try:
         app.ctx.settings.time_scale = 20.0
         driving = start_drive(app)
-        hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 4.0})
+        from freight_fate.states.driving import HAZARD_MIN_REACTION_S
+
+        hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 6.0})
         app.ctx.profile.fatigue = 0.0
         driving._handle_trip_event(hazard)
-        assert driving._hazard_deadline == pytest.approx(4.0)
+        fresh = driving._hazard_deadline
         app.ctx.profile.fatigue = 100.0
         driving._handle_trip_event(hazard)
-        assert driving._hazard_deadline == pytest.approx(2.4)
+        tired = driving._hazard_deadline
+        assert tired == pytest.approx(fresh - 2.4)
+        # ...but never below the floor no human reacts under, whatever the
+        # rolled slack says: a drowsy driver reacts late, not instantly.
+        hazard = TripEvent(TripEventKind.HAZARD, "Brake now!", {"deadline_s": 1.5})
+        driving._handle_trip_event(hazard)
+        floor = driving._hazard_deadline - driving._aeb_engage_s(driving._hazard_target_mph())
+        assert floor == pytest.approx(HAZARD_MIN_REACTION_S)
     finally:
         app.shutdown()
 

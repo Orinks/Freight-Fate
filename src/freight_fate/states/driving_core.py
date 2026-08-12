@@ -210,6 +210,12 @@ EXIT_CANCEL_GUARD_MI = 1.0  # inside this, X keeps the signal; a second press ca
 EXIT_TAP_HOLD_S = 0.35  # a Right press this short is a tap, not held steering
 AEB_BUDGET_MARGIN = 1.2  # emergency braking leads the physics budget by this factor
 AEB_LEAD_S = 0.5  # plus this flat lead, covering brake heat added during the stop
+# Floor on the driver's own time between hearing a hazard warning and the
+# assist taking the truck. Long enough to hear the sentence out and get on
+# the pedal: the warning is spoken, so a window shorter than the words is no
+# window at all. A dodgeable hazard adds LANE_TAP_CHANGE_S on top, because
+# "or change lanes" names a maneuver that takes that long to finish.
+HAZARD_MIN_REACTION_S = 3.0
 RAMP_CREEP_MI = 0.04  # within ~200 ft of the bar, "creep"; farther is a drive
 RAMP_MAX_MPH = 45.0  # any faster and you blow past the exit
 RAMP_CRUISE_TARGET_MPH = 40.0  # leave control-loop headroom below the hard ramp limit
