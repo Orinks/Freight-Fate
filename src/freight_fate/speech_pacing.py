@@ -32,6 +32,15 @@ condition last said (so it speaks again only when it has something new to
 say), and how long a line of each priority is willing to wait -- a route
 announcement waits a moment behind chatter and then goes ahead of it.
 
+The purge that delivers an interrupting line cuts both ways: it flushes dead
+chatter, but it also lands on whatever the voice was mid-way through -- and
+when that was a ROUTE or CRITICAL line (the weigh station notice, the planned
+stop), the player lost an instruction, not colour (a tester blew a weigh
+station this way, 2026-08-12). The pacer therefore keeps the newest such line
+alongside its projected finish time, and an interrupt arriving before that
+moment hands the line back to the caller to queue right behind the
+interrupting one: safety line first, then the line it stepped on.
+
 Durations are estimated from text length at a conservative default-voice
 speaking rate. A faster voice just flushes a little less eagerly than it
 could; a slower one flushes a little late but stays bounded -- either way the
@@ -74,6 +83,11 @@ class EventSpeechPacer:
     * ``note_interrupt`` for an interrupting line (it purges the channel), or
       ``should_flush`` for a queued one -- True there means the backlog has
       gone stale and this line must be submitted interrupting instead.
+    * ``note_interrupt`` may hand back the ROUTE or CRITICAL line the purge
+      cut off mid-sentence; the caller resubmits it queued (``note_queued``)
+      so the player still hears it, right behind the line that cut it.
+    * ``note_channel_purged`` when speech outside the pacer's view (an info
+      reply on a shared voice) purges the channel -- same hand-back.
     * ``pause``/``resume`` around a screen that takes the player off the road.
     """
 
@@ -113,6 +127,11 @@ class EventSpeechPacer:
         # voice was still holding when the player stepped away cannot surface
         # behind it.
         self._purge_next = False
+        # The newest ROUTE or CRITICAL line submitted, with the projection's
+        # estimate of when it finishes speaking. An interrupt landing before
+        # that moment plausibly cut it off mid-sentence; it is handed back to
+        # the caller so the player still hears it.
+        self._protected: tuple[str, EventPriority, float] | None = None
 
     def _duration_s(self, text: str) -> float:
         return self.BASE_UTTERANCE_S + len(text) / self.CHARS_PER_S
@@ -168,10 +187,66 @@ class EventSpeechPacer:
 
     # -- the backlog projection ---------------------------------------------------
 
-    def note_interrupt(self, text: str) -> None:
-        """An interrupting line purges the channel: the projection restarts."""
+    def _track(self, text: str, priority: EventPriority) -> None:
+        """Remember the newest line worth rescuing if an interrupt lands on it."""
+        if priority >= EventPriority.ROUTE:
+            self._protected = (text, EventPriority(priority), self._clear_at)
+
+    def _take_protected(self, cutting_text: str | None = None):
+        """Hand over the protected line if it was plausibly cut mid-speech.
+
+        The slot empties either way: a line is given back at most once per
+        cut, and a line whose projected finish had already passed was heard
+        in full, not destroyed. A line cutting itself is one line, not two,
+        so it is never handed back behind its own delivery.
+        """
+        held = self._protected
+        self._protected = None
+        if held is None:
+            return None
+        text, priority, done_at = held
+        if self._clock() >= done_at or text == cutting_text:
+            return None
+        return text, priority
+
+    def note_interrupt(
+        self, text: str, priority: EventPriority = EventPriority.CRITICAL
+    ) -> tuple[str, EventPriority] | None:
+        """An interrupting line purges the channel: the projection restarts.
+
+        Returns the ROUTE or CRITICAL line the purge plausibly cut off
+        mid-sentence -- its projected finish had not yet passed -- so the
+        caller can queue it right back behind the interrupting line. Chatter,
+        lines already heard in full, and a line interrupting itself return
+        None: nothing worth giving back was destroyed."""
+        cut = self._take_protected(text)
         self._purge_next = False
         self._clear_at = self._clock() + self._duration_s(text)
+        self._track(text, priority)
+        return cut
+
+    def note_queued(self, text: str, priority: EventPriority = EventPriority.AMBIENT) -> None:
+        """Extend the projection for a line delivered queued, no verdict asked.
+
+        For the deliveries that must never flush: a rescued cut-off line
+        (it has to fall in BEHIND the line that cut it, never purge it) and
+        event lines riding the main channel, where the backlog belongs to
+        the main voice rather than the pacer."""
+        start = max(self._clock(), self._clear_at)
+        self._clear_at = start + self._duration_s(text)
+        self._track(text, EventPriority(priority))
+
+    def note_channel_purged(self) -> tuple[str, EventPriority] | None:
+        """Speech outside the pacer's view purged the channel events ride on.
+
+        Only meaningful when the event voice is collapsed onto the main
+        channel: an info reply's interrupt there lands on whatever event line
+        was mid-sentence. Returns the cut ROUTE or CRITICAL line exactly as
+        :meth:`note_interrupt` would; the projection falls with the purge
+        (the interrupting speech itself is not the pacer's to time)."""
+        cut = self._take_protected()
+        self._clear_at = 0.0
+        return cut
 
     def should_flush(self, text: str, priority: EventPriority = EventPriority.AMBIENT) -> bool:
         """Decide a queued line's fate and update the projection either way.
@@ -189,19 +264,27 @@ class EventSpeechPacer:
             # been told about, so the first line back purges it.
             self._purge_next = False
             self._clear_at = now + self._duration_s(text)
+            self._protected = None
+            self._track(text, EventPriority(priority))
             return True
         start = max(now, self._clear_at)
         budget = self.WAIT_BUDGET_S.get(EventPriority(priority), self.STALE_WAIT_S)
         if start - now > budget:
+            # A stale flush takes the whole backlog, protected slot included:
+            # everything in it described miles already driven.
             self._clear_at = now + self._duration_s(text)
+            self._protected = None
+            self._track(text, EventPriority(priority))
             return True
         self._clear_at = start + self._duration_s(text)
+        self._track(text, EventPriority(priority))
         return False
 
     def reset(self) -> None:
         """The channel was silenced outside the pacer's view (Ctrl, menus)."""
         self._clear_at = 0.0
         self._purge_next = False
+        self._protected = None
 
     # -- leaving and returning to the road ----------------------------------------
 
@@ -214,8 +297,10 @@ class EventSpeechPacer:
         """
         self._clear_at = 0.0
         self._purge_next = True
+        self._protected = None
 
     def resume(self) -> None:
         """Back at the wheel. Nothing from before the pause is news."""
         self._clear_at = 0.0
         self._purge_next = True
+        self._protected = None

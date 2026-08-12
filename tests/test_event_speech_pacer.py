@@ -429,6 +429,293 @@ def _driving(app):
     return DrivingState(app.ctx, job, route, phase="delivery")
 
 
+# -- the line the interrupt stepped on (tester report, 2026-08-12) --------------
+#
+# A hazard, a curve call, or an info key landing while the voice was mid-way
+# through "Open weigh station ahead" destroyed the announcement outright: the
+# purge that delivers an interrupting line took the queue with it, and nothing
+# gave the cut line back. A tester blew a weigh station that way. The pacer
+# now hands the cut ROUTE or CRITICAL line back so it queues right behind the
+# line that cut it -- safety line first, then the line it stepped on.
+
+
+STOP_LINE = "Planned stop, Iowa 80 Truckstop at Exit 284 in five miles."
+HAZARD = "Hazard! Stopped traffic ahead."
+
+
+def test_interrupt_hands_back_a_cut_route_line() -> None:
+    pacer, _ = make_pacer()
+    pacer.should_flush(STOP_LINE, EventPriority.ROUTE)
+    assert pacer.note_interrupt(HAZARD) == (STOP_LINE, EventPriority.ROUTE)
+
+
+def test_a_route_line_that_finished_is_not_handed_back() -> None:
+    pacer, clock = make_pacer()
+    pacer.should_flush(STOP_LINE, EventPriority.ROUTE)
+    clock.now += 30.0  # the voice long since read it out in full
+    assert pacer.note_interrupt(HAZARD) is None
+
+
+def test_ambient_chatter_is_never_handed_back() -> None:
+    pacer, _ = make_pacer()
+    pacer.should_flush(CHATTER)  # AMBIENT: missing it costs the player nothing
+    assert pacer.note_interrupt(HAZARD) is None
+
+
+def test_a_critical_line_cut_by_another_critical_is_handed_back() -> None:
+    pacer, _ = make_pacer()
+    first = "Emergency vehicle approaching from behind. Move right."
+    assert pacer.note_interrupt(first) is None  # quiet channel: nothing was cut
+    assert pacer.note_interrupt(HAZARD) == (first, EventPriority.CRITICAL)
+
+
+def test_a_line_interrupting_itself_is_not_handed_back() -> None:
+    """The one-line ping-pong: A cutting A must not requeue A behind A."""
+    pacer, _ = make_pacer()
+    pacer.should_flush(STOP_LINE, EventPriority.ROUTE)
+    assert pacer.note_interrupt(STOP_LINE) is None
+
+
+def test_the_hand_back_happens_at_most_once_per_cut() -> None:
+    pacer, _ = make_pacer()
+    pacer.should_flush(STOP_LINE, EventPriority.ROUTE)
+    assert pacer.note_interrupt(HAZARD) == (STOP_LINE, EventPriority.ROUTE)
+    # The slot emptied with the hand-back and now holds the hazard: a further
+    # interrupt rescues the line it lands on, never the stop line twice.
+    assert pacer.note_interrupt("Sharp curve ahead.") == (HAZARD, EventPriority.CRITICAL)
+
+
+def test_say_event_requeues_the_route_line_a_hazard_cut() -> None:
+    """ctx.say_event: safety line first, then the line it stepped on."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        calls: list[tuple[str, bool]] = []
+        app.ctx.settings.sapi_events = True
+        app.ctx.speech.say_event = speech_stub(calls, with_interrupt=True)
+        app.ctx._event_pacer = EventSpeechPacer(clock=FakeClock())
+
+        app.ctx.say_event(STOP_LINE, interrupt=False, priority=EventPriority.ROUTE)
+        app.ctx.say_event(HAZARD, interrupt=True)
+
+        assert calls == [(STOP_LINE, False), (HAZARD, True), (STOP_LINE, False)]
+        # Requeued, not re-reported: the review log still holds it once.
+        assert [m.text for m in app.ctx.message_log.messages].count(STOP_LINE) == 1
+    finally:
+        app.shutdown()
+
+
+def test_say_event_leaves_a_finished_route_line_alone() -> None:
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        calls: list[tuple[str, bool]] = []
+        app.ctx.settings.sapi_events = True
+        app.ctx.speech.say_event = speech_stub(calls, with_interrupt=True)
+        clock = FakeClock()
+        app.ctx._event_pacer = EventSpeechPacer(clock=clock)
+
+        app.ctx.say_event(STOP_LINE, interrupt=False, priority=EventPriority.ROUTE)
+        clock.now += 30.0  # heard in full long before the hazard
+        app.ctx.say_event(HAZARD, interrupt=True)
+
+        assert calls == [(STOP_LINE, False), (HAZARD, True)]
+    finally:
+        app.shutdown()
+
+
+def test_a_repeated_hazard_cannot_ping_pong_the_requeue() -> None:
+    """The same hazard firing in a burst is one cut, one requeue -- the
+    repeat suppression drops the copies before they reach the channel."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        calls: list[tuple[str, bool]] = []
+        app.ctx.settings.sapi_events = True
+        app.ctx.speech.say_event = speech_stub(calls, with_interrupt=True)
+        app.ctx._event_pacer = EventSpeechPacer(clock=FakeClock())
+
+        app.ctx.say_event(STOP_LINE, interrupt=False, priority=EventPriority.ROUTE)
+        for _ in range(3):
+            app.ctx.say_event(HAZARD, interrupt=True)
+
+        assert calls.count((HAZARD, True)) == 1
+        assert calls.count((STOP_LINE, False)) == 2  # the original and one requeue
+    finally:
+        app.shutdown()
+
+
+def test_a_requeued_line_cut_again_comes_back_again() -> None:
+    """Two genuine warnings in a row still may not destroy the stop notice."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        calls: list[tuple[str, bool]] = []
+        app.ctx.settings.sapi_events = True
+        app.ctx.speech.say_event = speech_stub(calls, with_interrupt=True)
+        app.ctx._event_pacer = EventSpeechPacer(clock=FakeClock())
+
+        app.ctx.say_event(STOP_LINE, interrupt=False, priority=EventPriority.ROUTE)
+        app.ctx.say_event(HAZARD, interrupt=True)
+        app.ctx.say_event("Emergency vehicle approaching from behind.", interrupt=True)
+
+        assert calls.count((STOP_LINE, False)) == 3  # original, requeue, requeue
+    finally:
+        app.shutdown()
+
+
+# -- info keys on a shared voice (tester report, 2026-08-12) --------------------
+#
+# When events ride the main channel -- the player chose the main voice for
+# them, or no separate voice could be bound -- an info key's reply interrupts
+# whatever event line was mid-sentence there. The reply still answers first;
+# the cut ROUTE or CRITICAL line queues right behind it.
+
+
+SCALE_LINE = "Open weigh station ahead in two miles. All trucks must pull in."
+INFO_REPLY = "Fifty five miles per hour."
+
+
+def test_info_reply_on_the_main_voice_requeues_the_cut_event_line() -> None:
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        main: list[tuple[str, bool]] = []
+        app.ctx.settings.sapi_events = False  # events through the main voice
+        app.ctx.speech.say = speech_stub(main, with_interrupt=True)
+        app.ctx._event_pacer = EventSpeechPacer(clock=FakeClock())
+
+        app.ctx.say_event(SCALE_LINE, interrupt=False, priority=EventPriority.ROUTE)
+        app.ctx.say(INFO_REPLY)  # an info key answering, interrupt=True default
+
+        assert main == [(SCALE_LINE, False), (INFO_REPLY, True), (SCALE_LINE, False)]
+    finally:
+        app.shutdown()
+
+
+def test_info_reply_requeues_when_no_separate_event_voice_bound() -> None:
+    """The player asked for a dedicated event voice but Prism bound none, so
+    events fall back to the main channel and need the same protection."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        main: list[tuple[str, bool]] = []
+        events: list[tuple[str, bool]] = []
+        app.ctx.settings.sapi_events = True  # asked for, but no backend bound
+        app.ctx.speech.say = speech_stub(main, with_interrupt=True)
+        app.ctx.speech.say_event = speech_stub(events, with_interrupt=True)
+        app.ctx._event_pacer = EventSpeechPacer(clock=FakeClock())
+
+        app.ctx.say_event(SCALE_LINE, interrupt=False, priority=EventPriority.ROUTE)
+        app.ctx.say(INFO_REPLY)
+
+        assert main == [(INFO_REPLY, True)]
+        assert events == [(SCALE_LINE, False), (SCALE_LINE, False)]  # cut, requeued
+    finally:
+        app.shutdown()
+
+
+def test_info_reply_with_a_dedicated_event_voice_leaves_the_road_alone() -> None:
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        main: list[tuple[str, bool]] = []
+        events: list[tuple[str, bool]] = []
+        app.ctx.settings.sapi_events = True
+        app.ctx.speech._event_backend = object()  # a separate voice is bound
+        app.ctx.speech.say = speech_stub(main, with_interrupt=True)
+        app.ctx.speech.say_event = speech_stub(events, with_interrupt=True)
+        app.ctx._event_pacer = EventSpeechPacer(clock=FakeClock())
+
+        app.ctx.say_event(SCALE_LINE, interrupt=False, priority=EventPriority.ROUTE)
+        app.ctx.say(INFO_REPLY)
+
+        # Two channels, two voices: the reply cannot cut the event line, so
+        # nothing is requeued.
+        assert main == [(INFO_REPLY, True)]
+        assert events == [(SCALE_LINE, False)]
+    finally:
+        app.shutdown()
+
+
+# -- instructions to act ride ROUTE, not chatter --------------------------------
+
+
+def test_drowsy_warning_carries_route_priority(monkeypatch) -> None:
+    """ "Take a break or sleep" is an instruction, not roadside colour: it
+    must survive being talked over."""
+    from freight_fate.app import App
+    from freight_fate.sim import hos
+
+    app = App()
+    try:
+        driving = _driving(app)
+        events: list[tuple[str, dict]] = []
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, *a, **k: events.append((text, k)))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        monkeypatch.setattr(driving.hos, "check_warnings", lambda mode: [])
+        app.ctx.profile.fatigue = hos.FATIGUE_DROWSY + 1.0
+
+        driving._update_hours_and_fatigue(0.1)
+
+        _, kwargs = next((t, k) for t, k in events if "drowsy" in t)
+        assert kwargs.get("priority") is EventPriority.ROUTE
+        assert kwargs.get("interrupt") is False
+    finally:
+        app.shutdown()
+
+
+def test_non_urgent_hos_warning_carries_route_priority(monkeypatch) -> None:
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = _driving(app)
+        events: list[tuple[str, dict]] = []
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, *a, **k: events.append((text, k)))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        monkeypatch.setattr(app.ctx.controller.rumble, "alert", lambda: None)
+        warning = "30 minutes of drive time left. Plan a break soon."
+        monkeypatch.setattr(driving.hos, "check_warnings", lambda mode: [warning])
+
+        driving._update_hours_and_fatigue(0.1)
+
+        _, kwargs = next((t, k) for t, k in events if t == warning)
+        assert kwargs.get("priority") is EventPriority.ROUTE
+        assert kwargs.get("interrupt") is False
+    finally:
+        app.shutdown()
+
+
+def test_urgent_hos_violation_still_interrupts(monkeypatch) -> None:
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = _driving(app)
+        events: list[tuple[str, dict]] = []
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, *a, **k: events.append((text, k)))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        monkeypatch.setattr(app.ctx.controller.rumble, "alert", lambda: None)
+        warning = "Hours of service violation: 11 hours of driving used up."
+        monkeypatch.setattr(driving.hos, "check_warnings", lambda mode: [warning])
+
+        driving._update_hours_and_fatigue(0.1)
+
+        _, kwargs = next((t, k) for t, k in events if t == warning)
+        assert kwargs.get("interrupt") is True
+        assert kwargs.get("priority") is EventPriority.CRITICAL
+    finally:
+        app.shutdown()
+
+
 def test_the_pause_menu_drops_what_the_road_was_about_to_say() -> None:
     """Player paused mid-run and heard the last minute over again on resume."""
     from freight_fate.app import App

@@ -679,7 +679,15 @@ class DrivingUpdateMixin:
             for message in self.hos.check_warnings(mode):
                 self.ctx.audio.play("ui/warning")
                 self.ctx.controller.rumble.alert()
-                self.ctx.say_event(message, interrupt=hos.warning_is_urgent(message))
+                # The clock running down is the drive, not colour: even the
+                # non-urgent countdown must not queue behind chatter, and if
+                # something cuts it off it comes back.
+                urgent = hos.warning_is_urgent(message)
+                self.ctx.say_event(
+                    message,
+                    interrupt=urgent,
+                    priority=EventPriority.CRITICAL if urgent else EventPriority.ROUTE,
+                )
         self.trip.hos_violation = mode not in hos.HOS_NON_ENFORCED_MODES and self.hos.in_violation(
             mode
         )
@@ -716,8 +724,12 @@ class DrivingUpdateMixin:
             self._drowsy_said = True
             self._fatigue_cue_gm = 0.0
             self.ctx.audio.play("driver/yawn", volume=0.9)
+            # An instruction to act, not roadside colour: ROUTE keeps it out
+            # from behind chatter and brings it back if it gets talked over.
             self.ctx.say_event(
-                "You are getting drowsy. Take a break or sleep at a rest stop.", interrupt=False
+                "You are getting drowsy. Take a break or sleep at a rest stop.",
+                interrupt=False,
+                priority=EventPriority.ROUTE,
             )
         if fatigue < hos.FATIGUE_DROWSY:
             self._drowsy_said = False

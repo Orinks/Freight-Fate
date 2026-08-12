@@ -178,9 +178,49 @@ class GameContext:
 
     def say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         transcript.info("%s", text)
+        cut = None
+        if interrupt and self._event_voice_shares_main():
+            # In this configuration the main channel is also carrying the
+            # road, so an info reply's interrupt can land on a ROUTE or
+            # CRITICAL event line mid-sentence (a tester blew a weigh station
+            # this way). The reply still answers first; the cut line queues
+            # right behind it.
+            cut = self._event_pacer.note_channel_purged()
         self.speech.say(text, interrupt)
+        if cut is not None:
+            self._requeue_cut_event(cut)
         if review:
             self.message_log.add(text, MessageCategory.GENERAL)
+
+    def _event_voice_shares_main(self) -> bool:
+        """True when driving events speak on the main channel.
+
+        Either the player chose the main voice for events (Settings >
+        Speech), or the dedicated-voice preference found no separate backend
+        to bind, so :meth:`Speech.say_event` falls back to the main channel.
+        """
+        if not self.settings.sapi_events:
+            return True
+        return not getattr(self.speech, "has_separate_event_voice", False)
+
+    def _requeue_cut_event(self, cut: tuple[str, EventPriority]) -> None:
+        """Finish delivering a ROUTE or CRITICAL line an interrupt cut short.
+
+        Straight to the voice, queued: the line already passed the pacer,
+        the transcript, and the message log when it was first submitted, so
+        this is the same delivery completing rather than a new event. The
+        pacer tracks it again, so a further genuine interrupt can hand it
+        back a second time; it cannot ping-pong forever, because a requeue
+        is never interrupting and an identical interrupting line is never
+        handed back behind itself.
+        """
+        text, priority = cut
+        transcript.info("[pacer] cut line requeued")
+        self._event_pacer.note_queued(text, priority)
+        if self.settings.sapi_events:
+            self.speech.say_event(text, interrupt=False)
+        else:
+            self.speech.say(text, interrupt=False)
 
     def say_event(
         self,
@@ -218,6 +258,12 @@ class GameContext:
         announcements (the planned stop, the exit) give ambient chatter well
         under a second before going in front of it.
 
+        An interrupting line's purge also lands on whatever the voice was
+        mid-way through. When that was a ROUTE or CRITICAL line still
+        plausibly speaking, the pacer hands it back and it is resubmitted
+        queued, right behind the interrupting line -- safety line first,
+        then the line it stepped on, never dropped.
+
         ``review`` keeps a line out of the reviewable message log. An assist
         that interrupts to say it is acting would otherwise land exactly where
         the warning it cut off should be, so the review keys that exist to
@@ -232,9 +278,10 @@ class GameContext:
             priority = EventPriority.CRITICAL if interrupt else EventPriority.AMBIENT
         transcript.info("[event] %s", text)
         self._event_pacer.note_spoken(text, key=key)
+        cut = None
         if self.settings.sapi_events:
             if interrupt:
-                self._event_pacer.note_interrupt(text)
+                cut = self._event_pacer.note_interrupt(text, priority)
             elif self._event_pacer.should_flush(text, priority):
                 # The channel is backed up past the point of truth: purging
                 # and speaking fresh IS the queued line's honest delivery.
@@ -243,8 +290,13 @@ class GameContext:
             self.speech.say_event(text, interrupt)
         else:
             if interrupt:
+                cut = self._event_pacer.note_interrupt(text, priority)
                 _stop_main_speech(self.speech)
+            else:
+                self._event_pacer.note_queued(text, priority)
             self.speech.say(text, interrupt=False)
+        if cut is not None:
+            self._requeue_cut_event(cut)
         if review:
             self.message_log.add(text, MessageCategory.EVENT)
 

@@ -269,6 +269,14 @@ class Speech:
             return "unknown"
 
     @property
+    def has_separate_event_voice(self) -> bool:
+        """Whether events currently have their own backend.
+
+        Without one, :meth:`say_event` falls back to the main channel, so
+        events and menu speech share a single voice and can cut each other."""
+        return self._event_backend is not None
+
+    @property
     def event_backend_name(self) -> str:
         if self._event_backend is None:
             return "none"

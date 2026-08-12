@@ -301,6 +301,15 @@ onto exit signalling.
       first listed, so T at the scale opens the scale's menu. Breaker
       scenarios scale_check_in_guidance and
       scale_pull_over_stands_down_exit pin the whole flow.
+- [x] **Announcements cut off mid-sentence come back -- landed
+      2026-08-12** (the mechanism behind Jerry's blown weigh station).
+      An interrupting event line or an info-key reply on a shared voice
+      purged whatever the event channel was still speaking; a ROUTE or
+      CRITICAL line (scale notice, planned stop, HOS countdown, drowsy
+      warning) died silently mid-word. The pacer now hands the cut line
+      back and it requeues once, right behind the line that cut it, in
+      all three voice configurations; the drowsy warning and non-urgent
+      HOS countdowns ride ROUTE so they qualify.
 - [ ] **Remaining tester findings from the same document.** Merging
       traffic does not yield to a loaded truck. At least one unexplained
       sound (a whoosh on the left). Landed 2026-08-12: work-zone closures

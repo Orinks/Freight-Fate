@@ -79,6 +79,14 @@
 
 ### Fixed
 
+- **Important road announcements that get talked over now repeat themselves
+  instead of vanishing.** A hazard warning, a curve call, or an answer to a
+  status key could cut off a weigh station notice or a planned stop
+  announcement mid-sentence, and the rest of the line was simply gone -- one
+  tester blew straight past a weigh station that way. Now the urgent line
+  still speaks first, and the announcement it talked over speaks again right
+  after it, whether events use their own voice or your main one.
+
 - **The weigh station announcement and the T key now tell the same
   story.** The open-scale call used to end with "press T for inspection
   check-in", but T at highway speed plans a sleep stop -- so following

@@ -1059,11 +1059,7 @@ def test_hos_violation_speech_interrupts_but_threshold_warning_does_not(monkeypa
 
     app = App()
     spoken = []
-    monkeypatch.setattr(
-        app.ctx,
-        "say_event",
-        lambda text, interrupt=False: spoken.append((text, interrupt)),
-    )
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken, with_interrupt=True))
     try:
         driving = start_drive(app)
         app.ctx.settings.hos_mode = "realistic"
@@ -1096,11 +1092,7 @@ def test_severe_fatigue_drift_warning_is_urgent(monkeypatch):
 
     app = App()
     spoken = []
-    monkeypatch.setattr(
-        app.ctx,
-        "say_event",
-        lambda text, interrupt=False: spoken.append((text, interrupt)),
-    )
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken, with_interrupt=True))
     try:
         driving = start_drive(app)
         app.ctx.profile.fatigue = hos.FATIGUE_SEVERE
