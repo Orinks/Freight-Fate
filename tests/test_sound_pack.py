@@ -134,12 +134,13 @@ def test_asset_bytes_reads_loose_files_without_pack():
 def test_committed_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_PACK_PATH.read_bytes()
-    # Repacked 2026-08-10 for the three liquid-surge assets that ship with
-    # tank freight (vehicle/liquid_wash, liquid_hit, liquid_hit_lateral).
-    assert len(pack_bytes) == 225_204_989
+    # Repacked 2026-08-11 (f737b416) for the real 1600 rpm engine-brake
+    # recording; that commit shipped the pack and left this pin behind, so the
+    # check had been failing on the committed tree ever since.
+    assert len(pack_bytes) == 225_244_828
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "19b9207ad47e93da09b8c40f510b04b58de56679cf4c3a7310b6bcadceacbd6f"
+        "7c080075f6c11c04c2901470f7b33f5d7b230a7d28884bba85e524a89c44f9d6"
     )
 
 

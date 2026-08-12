@@ -221,6 +221,9 @@ def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
     (source_root / "docs" / "user-manual.md").write_text(
         "# Freight Fate User Manual\n", encoding="utf-8"
     )
+    (source_root / "docs" / "alpha-test-book.md").write_text(
+        "# Freight Fate 1.9 alpha test book\n", encoding="utf-8"
+    )
     monkeypatch.setattr(build_release, "ROOT", source_root)
 
     build_dir = tmp_path / "FreightFate"
@@ -234,6 +237,15 @@ def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
         .read_text(encoding="utf-8")
         .startswith("# Freight Fate User Manual")
     )
+    # The test book travels with the build it describes: its checklists are
+    # written against specific builds, so a tester who has to go and find the
+    # current copy ends up working an old one.
+    assert (
+        (build_dir / "ALPHA_TEST_BOOK.md")
+        .read_text(encoding="utf-8")
+        .startswith("# Freight Fate 1.9 alpha test book")
+    )
+    assert "alpha test book" in (build_dir / "ALPHA_TEST_BOOK.html").read_text(encoding="utf-8")
 
 
 def test_encrypted_sound_pack_is_staged_verbatim(tmp_path, monkeypatch):
@@ -344,6 +356,8 @@ def test_packaged_payload_requires_platform_prism_native(tmp_path):
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
+    (build_dir / "ALPHA_TEST_BOOK.md").write_text("# Test book\n", encoding="utf-8")
+    (build_dir / "ALPHA_TEST_BOOK.html").write_text("<h1>Test book</h1>\n", encoding="utf-8")
     add_sound_pack(build_dir, tmp_path)
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     sound_suffix = next(iter(build_release.platform_native_exts()))
@@ -375,6 +389,8 @@ def test_packaged_payload_rejects_exposed_world_data(tmp_path):
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
+    (build_dir / "ALPHA_TEST_BOOK.md").write_text("# Test book\n", encoding="utf-8")
+    (build_dir / "ALPHA_TEST_BOOK.html").write_text("<h1>Test book</h1>\n", encoding="utf-8")
     add_sound_pack(build_dir, tmp_path)
     (build_dir / "freight_fate" / "data").mkdir(parents=True)
     (build_dir / "freight_fate" / "data" / "world.json").write_text("{}", encoding="utf-8")
@@ -408,6 +424,8 @@ def test_packaged_payload_rejects_exposed_sound_files(tmp_path):
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
+    (build_dir / "ALPHA_TEST_BOOK.md").write_text("# Test book\n", encoding="utf-8")
+    (build_dir / "ALPHA_TEST_BOOK.html").write_text("<h1>Test book</h1>\n", encoding="utf-8")
     add_sound_pack(build_dir, tmp_path)
     (build_dir / "freight_fate" / "assets" / "sounds").mkdir(parents=True)
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
@@ -441,6 +459,8 @@ def test_packaged_payload_requires_runnable_posix_executable(tmp_path, monkeypat
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
+    (build_dir / "ALPHA_TEST_BOOK.md").write_text("# Test book\n", encoding="utf-8")
+    (build_dir / "ALPHA_TEST_BOOK.html").write_text("<h1>Test book</h1>\n", encoding="utf-8")
     add_sound_pack(build_dir, tmp_path)
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     (build_dir / "sound_lib" / "lib" / "libbass.so").write_text("", encoding="utf-8")
@@ -508,6 +528,8 @@ def test_linux_packaged_payload_requires_prism_dependency_bundle(tmp_path, monke
     (build_dir / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.md").write_text("# Manual\n", encoding="utf-8")
     (build_dir / "USER_MANUAL.html").write_text("<h1>Manual</h1>\n", encoding="utf-8")
+    (build_dir / "ALPHA_TEST_BOOK.md").write_text("# Test book\n", encoding="utf-8")
+    (build_dir / "ALPHA_TEST_BOOK.html").write_text("<h1>Test book</h1>\n", encoding="utf-8")
     add_sound_pack(build_dir, tmp_path)
     (build_dir / "sound_lib" / "lib").mkdir(parents=True)
     (build_dir / "sound_lib" / "lib" / "libbass.so").write_text("", encoding="utf-8")
