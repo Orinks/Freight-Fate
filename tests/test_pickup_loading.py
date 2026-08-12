@@ -1,6 +1,7 @@
 """Drivable pickup, loading, and transition into loaded delivery."""
 
 import pygame
+import pytest
 from speech_capture import speech_stub
 
 
@@ -181,6 +182,31 @@ def test_pickup_facility_waits_for_full_stop(monkeypatch):
         assert isinstance(app.state, PickupFacilityState)
         assert played[-1][0] == "facility/dock_gate"
         assert app.state.items[app.state.index].text == "Check in at shipping office"
+    finally:
+        app.shutdown()
+
+
+def test_pickup_arrival_settles_the_engine_to_idle(monkeypatch):
+    """The pickup check-in gate must not freeze engine audio at whatever
+    rev the truck was carrying on the approach -- same defect class as the
+    already-fixed police-stop freeze."""
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+    monkeypatch.setattr(app.ctx, "say", speech_stub())
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    try:
+        driving = accept_pickup_drive(app)
+        arrive_at_pickup(app, speed_mps=26.8)
+
+        driving.truck.velocity_mps = 0.0
+        driving.truck.rpm = driving.truck.specs.max_rpm  # revs still up from the approach
+        driving.update(1 / 60)
+
+        assert "Pulling into pickup" in app.state.lines()[0]
+        assert driving.truck.rpm == pytest.approx(driving.truck.specs.idle_rpm)
+        assert driving.truck.throttle == 0.0
     finally:
         app.shutdown()
 

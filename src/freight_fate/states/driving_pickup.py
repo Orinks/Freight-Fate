@@ -65,9 +65,14 @@ class DrivingPickupMixin:
         p = self.ctx.profile
         self._arrival_menu_open = True
         speed_control_paused = self._pause_speed_control()
-        self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
+        # A pickup gate is a menu-driven stop like a roadside inspection: the
+        # frame loop that eases revs down between frames stops the instant
+        # the check-in menu takes over, so without this the engine audio
+        # froze at whatever rev the approach left it at, all the way through
+        # the stop.
+        self._settle_engine_to_idle()
         # Store the whole record, not just fuel and damage: this line also
         # accrues brake and engine wear, which the flat names do not carry.
         p.store_truck_condition(self.truck)

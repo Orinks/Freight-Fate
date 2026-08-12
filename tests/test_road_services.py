@@ -62,6 +62,33 @@ def _quiet(app, monkeypatch, spoken=None):
     monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
 
 
+# -- engine settles at the gate ----------------------------------------------
+
+
+def test_poi_stop_settles_the_engine_to_idle(monkeypatch):
+    """A road stop that pulls in through the settle step must not freeze
+    engine audio at whatever rev the truck was carrying on the approach --
+    same defect class as the already-fixed police-stop freeze."""
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", speech_stub())
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    try:
+        driving = _driving(app)
+        stop = _stop(driving, "Love's Travel Stop")
+        driving.truck.velocity_mps = 0.0
+        driving.truck.rpm = driving.truck.specs.max_rpm  # revs still up from the approach
+
+        driving._open_poi_stop(stop, settle=True)
+
+        assert driving.truck.rpm == pytest.approx(driving.truck.specs.idle_rpm)
+        assert driving.truck.throttle == 0.0
+    finally:
+        app.shutdown()
+
+
 # -- who offers what --------------------------------------------------------------
 
 

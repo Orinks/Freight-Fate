@@ -166,6 +166,29 @@ def test_stopping_before_the_overshoot_still_opens_the_arrival(monkeypatch):
         app.shutdown()
 
 
+def test_facility_arrival_settles_the_engine_to_idle(monkeypatch):
+    """The destination dock gate must not freeze engine audio at whatever
+    rev the truck was carrying on the approach -- same defect class as the
+    already-fixed police-stop freeze."""
+    from freight_fate.app import App
+
+    app = App()
+    monkeypatch.setattr(app.ctx, "say", speech_stub())
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+    try:
+        d = _driving(app)
+        _at_the_terminal(d)
+        app.push_state(d, should_enter=False)
+        d.truck.rpm = d.truck.specs.max_rpm  # simulate revs still up from the highway
+
+        d._open_facility_arrival()
+
+        assert d.truck.rpm == pytest.approx(d.truck.specs.idle_rpm)
+        assert d.truck.throttle == 0.0
+    finally:
+        app.shutdown()
+
+
 def test_speed_control_waits_out_a_pending_ramp_stop(monkeypatch):
     """Automatic speed control must not resume onto a ramp with a stop on it.
 

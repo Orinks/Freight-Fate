@@ -653,6 +653,12 @@ class DrivingEventMixin:
             self.trip.planned_stop_key = None
 
         if settle:
+            # A POI stop that pulls in through this wait is a menu-driven
+            # stop like a roadside inspection: the frame loop that eases
+            # revs down between frames stops the instant the wait state
+            # takes over, so without this the engine audio froze at
+            # whatever rev the approach left it at for the whole stop.
+            self._settle_engine_to_idle()
             _advance_rest_clock(self, STOP_PULL_IN_MIN)
             self.hos.on_duty(STOP_PULL_IN_MIN)
             self.ctx.profile.active_trip = self.snapshot()
@@ -3465,9 +3471,14 @@ class DrivingEventMixin:
             return
         self._arrival_menu_open = True
         self._cancel_cruise()
-        self.truck.throttle = 0.0
         self.truck.brake = 1.0
         self.truck.set_parking_brake()
+        # A dock gate is a menu-driven stop like a roadside inspection: the
+        # frame loop that eases revs down between frames stops the instant
+        # the dock menu takes over, so without this the engine audio froze
+        # at whatever rev the approach left it at, all the way through the
+        # stop.
+        self._settle_engine_to_idle()
         _advance_rest_clock(self, STOP_PULL_IN_MIN)
         self.hos.on_duty(STOP_PULL_IN_MIN)
         self._set_status("Pulling into destination. Dock menu opening.")
