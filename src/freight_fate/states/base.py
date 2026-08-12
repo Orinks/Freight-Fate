@@ -31,6 +31,22 @@ def end_sentence(text: str) -> str:
     return text if text.endswith((".", "!", "?", ":")) else text + "."
 
 
+def spoken_char(ch: str) -> str:
+    """A single typed character the way an accessible text field announces it.
+
+    Shared by every text-entry field in the game (currently just driver name
+    entry) so a character reviewed one at a time always sounds the same way.
+    A space reads as "space" rather than silence. A capital letter gets a
+    leading "cap" -- speech synthesis pronounces "J" and "j" identically, so
+    without the marker a player arrowing through a typed name has no way to
+    hear that the first letter capitalized the way they meant it to."""
+    if ch == " ":
+        return "space"
+    if ch.isalpha() and ch.isupper():
+        return f"cap {ch.lower()}"
+    return ch
+
+
 class State:
     """Base class for all game screens."""
 
