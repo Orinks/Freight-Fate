@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from datetime import datetime
 from pathlib import Path
 
@@ -46,6 +47,37 @@ _last_invalid_saves: list[Path] = []
 # missing career reads as data loss to a blind player -- so _loadable_saves
 # collects them here for the menus to show alongside the loadable ones.
 _legacy_saves: list[LegacyCareerError] = []
+
+# Reused within a single _reuse_loadable_saves_scan() block (see below) so a
+# state that asks several times in one pass -- MainMenuState.enter() calls
+# _loadable_saves() three times: build_items, announce_entry's legacy-save
+# check, and its own profile lookup -- pays for one save-directory scan
+# instead of three. Outside such a block every call still rescans, so a
+# state that lists saves after creating or deleting one never sees stale
+# results.
+_loadable_saves_cache: list[tuple[Path, Profile]] | None = None
+_loadable_saves_cache_active = False
+
+
+@contextlib.contextmanager
+def _reuse_loadable_saves_scan():
+    """Coalesce every _loadable_saves() call made inside this block.
+
+    Reentrant: a nested call is a no-op, so this can wrap a method that also
+    wraps itself (or calls another wrapped method) without the inner scope
+    prematurely dropping the cache the outer scope is still relying on.
+    """
+    global _loadable_saves_cache_active, _loadable_saves_cache
+    already_active = _loadable_saves_cache_active
+    _loadable_saves_cache_active = True
+    if not already_active:
+        _loadable_saves_cache = None
+    try:
+        yield
+    finally:
+        if not already_active:
+            _loadable_saves_cache_active = False
+            _loadable_saves_cache = None
 
 
 def pending_notice_state(ctx) -> State | None:
@@ -113,8 +145,16 @@ def _world_entry_state(ctx, *, queue_entry_announcement: bool = False) -> State:
 
 
 def _loadable_saves() -> list[tuple[Path, Profile]]:
-    """Return readable saves in newest-first order."""
-    global _last_invalid_saves, _legacy_saves
+    """Return readable saves in newest-first order.
+
+    Inside a :func:`_reuse_loadable_saves_scan` block, the first real scan's
+    result (and the ``_last_invalid_saves``/``_legacy_saves`` it populates)
+    is reused for the rest of the block instead of rescanning the save
+    directory again.
+    """
+    global _last_invalid_saves, _legacy_saves, _loadable_saves_cache
+    if _loadable_saves_cache_active and _loadable_saves_cache is not None:
+        return _loadable_saves_cache
     _last_invalid_saves = []
     _legacy_saves = []
     saves = []
@@ -131,6 +171,8 @@ def _loadable_saves() -> list[tuple[Path, Profile]]:
             # Loading may have converted a legacy file in place; report the
             # path the career actually lives at now.
             saves.append((profile.path, profile))
+    if _loadable_saves_cache_active:
+        _loadable_saves_cache = saves
     return saves
 
 
@@ -214,11 +256,12 @@ class MainMenuState(MenuState):
         cls._update_prompted = False
 
     def enter(self) -> None:
-        super().enter()
-        profile = self.ctx.profile
-        if profile is None:
-            saves = _loadable_saves()
-            profile = saves[0][1] if saves else None
+        with _reuse_loadable_saves_scan():
+            super().enter()
+            profile = self.ctx.profile
+            if profile is None:
+                saves = _loadable_saves()
+                profile = saves[0][1] if saves else None
         sequence = select_menu_music_sequence(profile)
         self.ctx.play_music_sequence("menu", sequence)
         cls = MainMenuState

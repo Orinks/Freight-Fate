@@ -115,6 +115,48 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Headless-measured startup: four fixes for ~0.46s off the
+      launch-to-main-menu path -- SHIPPED 2026-08-12.** A profiling pass
+      pinned headless startup at a 2.166s median and isolated four
+      independent costs: the sound engine now kicks the ~225MB sound pack's
+      read-and-unmask onto a background thread as early as `App()`
+      construction starts, so it overlaps the world load instead of
+      stalling the first sound played (measured ~0.32-0.34s off the first
+      menu sound at both 0 and 20 saved careers); the main menu's save-scan
+      (`_loadable_saves()`) ran three times on every menu entry and now
+      runs once and reuses the result (measured ~0.11s saved at 20 saved
+      careers, scales with save count); `keyring` and
+      `cryptography.hazmat` (pulled in by the online-account and
+      cloud-backup modules) are now imported lazily, on first real use,
+      instead of on every launch whether or not the player has ever linked
+      an account (~0.15s measured import-time saving); and a frozen build
+      now bakes its package version into `build_info.json` at build time
+      instead of scanning installed-package metadata on every launch (dev
+      checkouts are unaffected -- no measurable local win, this only pays
+      off in a packaged build). Measured on the same headless phase-timer
+      the profiling pass used, 5 runs each: 2.187s to 1.727s median with an
+      empty save collection, 1.887s to 1.682s with 20. One thing considered
+      and deliberately left alone: skipping `OnlineIdentity.load()`
+      entirely when every online setting is off would have shaved a
+      further ~0.065s for players with a linked account, but
+      `OnlinePresence.set_enabled()`/`CloudSaves` both refuse to turn back
+      on without an identity already loaded, and nothing re-loads it when a
+      setting is flipped on mid-session outside the account-link flow -- so
+      a player who linked an account and then turned every online setting
+      off would have lost the ability to turn one back on without
+      re-pasting credentials. Left unconditional; the load already costs
+      nothing for the common case of no linked account, via the existing
+      early return before it ever touches `keyring`. The remaining big
+      item, sharding/streaming the world load itself (~1.17s of the
+      median, by far the largest single phase), is a separate, larger
+      change and out of scope here -- tracked as its own follow-up, owner
+      approved, in the bullet immediately below.
+- [ ] **World load is still the largest single startup phase (~1.17s of
+      the 2.166s headless-measured median).** Out of scope for the
+      four-fix pass above; owner-approved as its own follow-up. Likely
+      needs sharded/streamed loading of `world_data/` rather than one
+      up-front read, mirroring how the sound pack now streams in on a
+      background thread.
 - [x] **First round of Dropbox tester findings triaged and fixed --
       SHIPPED 2026-08-11.** Three P0s off the tester living document
       (Shane P). A construction zone could close the only lane on a

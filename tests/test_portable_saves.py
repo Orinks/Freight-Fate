@@ -1,6 +1,7 @@
 """Portable save layout: game-directory storage and legacy migration."""
 
 import sys
+from pathlib import Path
 
 from freight_fate.models import profile as profile_mod
 
@@ -61,6 +62,28 @@ def test_game_root_for_macos_app_is_bundle_parent(monkeypatch, tmp_path):
 def test_game_root_from_source_is_project_root():
     root = profile_mod.game_root()
     assert (root / "src" / "freight_fate").is_dir()
+
+
+def test_is_writable_dir_probes_disk_once_per_path(monkeypatch, tmp_path):
+    """The mkdir+write+unlink probe must run once per path per process, not
+    once per caller: _save_root() and data_dir() re-derive this on every
+    save lookup, several times per menu enter."""
+    profile_mod._is_writable_dir.cache_clear()
+    probes = []
+    real_mkdir = Path.mkdir
+
+    def counting_mkdir(self, *args, **kwargs):
+        probes.append(self)
+        return real_mkdir(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "mkdir", counting_mkdir)
+    target = tmp_path / "writable"
+
+    assert profile_mod._is_writable_dir(target) is True
+    assert profile_mod._is_writable_dir(target) is True
+    assert profile_mod._is_writable_dir(target) is True
+
+    assert len(probes) == 1
 
 
 def test_legacy_saves_migrate_once(monkeypatch, tmp_path):

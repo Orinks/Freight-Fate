@@ -10,9 +10,6 @@ import math
 from collections.abc import Mapping
 from decimal import Decimal
 
-from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-
 from .models.profile import Profile
 
 PUBLIC_KEYS = {
@@ -139,6 +136,13 @@ def verify_cloud_revision(
         ) from exc
     if len(signature) != 64:
         raise CloudSaveIntegrityError("integrity_failed", "The backup signature is unreadable.")
+    # cryptography.hazmat is a real import cost (part of the ~0.1s keyring/
+    # crypto startup tax the 1.9 profiling pass found) and only a cloud
+    # restore actually verifies a signature, so it is deferred to here
+    # instead of paying on every launch that never touches cloud saves.
+    from cryptography.exceptions import InvalidSignature
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
     try:
         Ed25519PublicKey.from_public_bytes(keys[key_id]).verify(
             signature, canonical_profile(payload)

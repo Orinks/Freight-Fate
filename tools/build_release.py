@@ -590,12 +590,20 @@ def stamp_build_info(build_dir: Path, label: str) -> None:
 
     ``label`` is either a nightly tag (``nightly-20260611``) or a plain
     version (``1.6.0``); the release tag for the latter is ``v``-prefixed.
+
+    ``package_version`` is the exact ``pyproject.toml`` project version --
+    not ``label``, which for a nightly is a date-stamped tag, not a package
+    version. freight_fate.__init__ reads it back to skip the
+    importlib.metadata lookup that costs real time on every launch (the
+    metadata a frozen build would otherwise scan for is not even installed
+    the normal way in a Nuitka standalone build).
     """
     nightly = label.startswith("nightly-")
     info = {
         "tag": label if nightly else f"v{label}",
         "channel": "dev" if nightly else "stable",
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "package_version": project_version(),
     }
     if build_dir.suffix == ".app":
         info_path = build_dir / "Contents" / "MacOS" / "build_info.json"

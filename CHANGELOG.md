@@ -4,6 +4,12 @@
 
 ### Changed
 
+- **The game starts noticeably faster.** Reaching the main menu is quicker
+  on every launch: sound loading now overlaps the rest of startup instead
+  of stalling the first sound you hear, the main menu no longer re-reads
+  your saved careers three times over, and a few startup checks that only
+  matter once you connect an online account no longer run for everybody.
+
 - **Chaining very short hops no longer fast-tracks a career.** The on-time
   streak bonus is now capped at the experience the miles themselves teach,
   so a run of twenty-five-mile hops earns its streak bonus on the driving,

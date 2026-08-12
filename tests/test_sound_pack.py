@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import os
+import threading
+import time
 import zipfile
 from pathlib import Path
 
@@ -152,6 +154,7 @@ def _reset_default_pack(monkeypatch, path: Path) -> None:
     monkeypatch.setattr(assets_pack, "DEFAULT_PACK_PATH", path)
     monkeypatch.setattr(assets_pack, "_default_pack", None)
     monkeypatch.setattr(assets_pack, "_default_pack_missing", False)
+    monkeypatch.setattr(assets_pack, "_prefetch_started", False)
 
 
 @needs_loose_tree
@@ -175,6 +178,72 @@ def test_pack_from_another_program_falls_back_to_loose_files(tmp_path, monkeypat
     _reset_default_pack(monkeypatch, stranger)
     assert assets_pack.open_default() is None
     assert audio._asset_bytes("ui/menu_select", ("ogg", "wav")) is not None
+
+
+def test_prefetch_default_loads_once_for_concurrent_callers(tmp_path, monkeypatch):
+    """The background prefetch and every racing open_default() caller must
+    all see the one real load: the read-and-unmask work runs exactly once,
+    and everyone gets the same SoundPack instance back."""
+    sounds = _write_fixture_sounds(tmp_path)
+    out = assets_pack.write_pack(sounds, tmp_path / "sounds.pak")
+    _reset_default_pack(monkeypatch, out)
+
+    calls: list[Path] = []
+    real_init = assets_pack.SoundPack.__init__
+
+    def slow_counting_init(self, path):
+        calls.append(path)
+        time.sleep(0.05)  # stand-in for the real ~0.3s read-and-unmask
+        real_init(self, path)
+
+    monkeypatch.setattr(assets_pack.SoundPack, "__init__", slow_counting_init)
+
+    assets_pack.prefetch_default()
+
+    results: list[assets_pack.SoundPack | None] = []
+    errors: list[BaseException] = []
+
+    def worker() -> None:
+        try:
+            results.append(assets_pack.open_default())
+        except BaseException as exc:  # pragma: no cover - failure path
+            errors.append(exc)
+
+    threads = [threading.Thread(target=worker) for _ in range(5)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout=5)
+
+    assert not errors
+    assert len(calls) == 1  # read off disk exactly once, not once per caller
+    assert all(pack is results[0] for pack in results)
+    assert results[0] is not None
+    assert results[0].read("ui/menu_select.ogg") == b"fake ogg for menu select"
+
+
+def test_prefetch_default_is_a_harmless_noop_when_called_twice(tmp_path, monkeypatch):
+    sounds = _write_fixture_sounds(tmp_path)
+    out = assets_pack.write_pack(sounds, tmp_path / "sounds.pak")
+    _reset_default_pack(monkeypatch, out)
+    assets_pack.prefetch_default()
+    assets_pack.prefetch_default()  # must not start a second thread/load
+    pack = assets_pack.open_default()
+    assert pack is not None
+    assert pack.read("ui/menu_select.ogg") == b"fake ogg for menu select"
+
+
+@needs_loose_tree
+def test_prefetch_with_unreadable_pack_still_falls_back_via_open_default(tmp_path, monkeypatch):
+    # A corrupt pack found by the background prefetch must land exactly
+    # where it does today: no pack, loose files answer, nothing raised.
+    broken = tmp_path / "sounds.pak"
+    broken.write_bytes(assets_pack.PACK_MAGIC + b"not a zip, only noise")
+    _reset_default_pack(monkeypatch, broken)
+    assets_pack.prefetch_default()
+    assert assets_pack.open_default() is None
+    found = audio._asset_bytes("ui/menu_select", ("ogg", "wav"))
+    assert found is not None
 
 
 @needs_loose_tree

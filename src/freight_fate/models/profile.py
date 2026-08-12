@@ -47,6 +47,7 @@ import sys
 import zlib
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
+from functools import cache
 from pathlib import Path
 
 from ..sim.hos import DutyLog, HosClock
@@ -139,12 +140,20 @@ def _legacy_data_dir() -> Path:
     return base / "FreightFate"
 
 
+@cache
 def _is_writable_dir(path: Path) -> bool:
     """Whether ``path`` exists (or can be created) and accepts a write.
 
     Detects installs in protected locations, such as Windows ``Program
     Files``, where the portable ``saves`` folder beside the game would raise
     on the first save and crash the game mid-session.
+
+    Cached per path: ``_save_root()`` re-derives this on every save-directory
+    lookup (several times per menu enter), and the answer cannot change
+    within one run -- ``game_root()`` is fixed once the process starts, and
+    nothing else in the portable-save code path relocates it mid-session.
+    Without the cache this was a real mkdir+write+unlink against disk every
+    single call.
     """
     try:
         path.mkdir(parents=True, exist_ok=True)

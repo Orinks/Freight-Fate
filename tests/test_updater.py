@@ -211,6 +211,21 @@ def test_build_info_stamp_marks_stable_and_nightly_channels(tmp_path):
     assert nightly.built_at
 
 
+def test_build_info_stamp_bakes_the_real_package_version(tmp_path):
+    """package_version is the pyproject version, not the nightly tag -- a
+    nightly's build stamp label is a date, not a package version, and
+    freight_fate.__init__ reads this field back to skip importlib.metadata."""
+    build_release = load_build_release_module()
+    stamp_build_info = build_release.stamp_build_info
+    project_version = build_release.project_version()
+
+    build_dir = tmp_path / "nightly"
+    build_dir.mkdir()
+    stamp_build_info(build_dir, "nightly-20260615")
+    info = json.loads((build_dir / "build_info.json").read_text(encoding="utf-8"))
+    assert info["package_version"] == project_version
+
+
 def test_release_docs_are_staged_with_build_payload(tmp_path, monkeypatch):
     build_release = load_build_release_module()
     source_root = tmp_path / "repo"

@@ -40,14 +40,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar
 
-try:
-    import keyring
-except Exception:  # pragma: no cover - only a broken install gets here
-    # Defensive, like every other optional import in this module: a machine
-    # that cannot even load keyring still plays, it just keeps the driver
-    # token in a private file instead of the platform secret store.
-    keyring = None  # type: ignore[assignment]
-
 from .discord_presence import PresenceState
 from .net import ssl_context
 
@@ -176,6 +168,38 @@ _EXPECTED_BACKENDS = {
     "linux": "SecretService",
 }
 
+# ``keyring`` (and what it pulls in -- jaraco.context, the platform secret
+# store bindings) costs real time just to import, on top of whatever an
+# actual secret-store round trip takes. online_presence/cloud_saves/
+# mastodon_sharing all default off (an account has to be linked first), so
+# most launches never need this module at all; importing it unconditionally
+# at module load time paid that cost on every single one regardless.
+#
+# The sentinel (not None) is what lets a test keep patching this module's
+# ``keyring`` attribute directly, the way tests already do: one that sets it
+# to None (simulating "no secret store") or to a fake keyring object must
+# stick, not get silently clobbered by a real import the next time something
+# here asks for it.
+_KEYRING_UNSET = object()
+keyring = _KEYRING_UNSET
+
+
+def _keyring():
+    """The keyring module, imported on first use here; None if unavailable."""
+    global keyring
+    if keyring is _KEYRING_UNSET:
+        try:
+            import keyring as _kr
+        except Exception:  # pragma: no cover - only a broken install gets here
+            # Defensive, like every other optional import in this module: a
+            # machine that cannot even load keyring still plays, it just
+            # keeps the driver token in a private file instead of the
+            # platform secret store.
+            keyring = None
+        else:
+            keyring = _kr
+    return keyring
+
 
 def secret_store_report() -> tuple[bool, str]:
     """Whether this build can reach a platform secret store, and what it found.
@@ -187,7 +211,8 @@ def secret_store_report() -> tuple[bool, str]:
     fine, because it would take that fallback everywhere and never say so.
     Only the second returns False.
     """
-    if keyring is None:
+    kr = _keyring()
+    if kr is None:
         return False, "keyring is not installed in this build"
     expected = _EXPECTED_BACKENDS.get(sys.platform)
     if expected is None:
@@ -212,7 +237,7 @@ def secret_store_report() -> tuple[bool, str]:
         # Qualified: keyring names the macOS and Secret Service backend
         # classes both plain "Keyring", and this line is read out of a CI log
         # to tell the platforms apart.
-        store = type(keyring.get_keyring())
+        store = type(kr.get_keyring())
         active = f"{store.__module__}.{store.__qualname__}"
     except Exception as e:
         active = f"unavailable on this machine ({e!r})"
@@ -259,10 +284,11 @@ class OnlineIdentity:
     @staticmethod
     def _store_token(driver_id: str, token: str) -> bool:
         """Put the token in the platform store. False if there isn't one."""
-        if keyring is None:
+        kr = _keyring()
+        if kr is None:
             return False
         try:
-            keyring.set_password(_TOKEN_SERVICE, driver_id, token)
+            kr.set_password(_TOKEN_SERVICE, driver_id, token)
         except Exception:
             log.debug("no usable secret store for the driver token", exc_info=True)
             return False
@@ -270,10 +296,11 @@ class OnlineIdentity:
 
     @staticmethod
     def _read_stored_token(driver_id: str) -> str | None:
-        if keyring is None:
+        kr = _keyring()
+        if kr is None:
             return None
         try:
-            token = keyring.get_password(_TOKEN_SERVICE, driver_id)
+            token = kr.get_password(_TOKEN_SERVICE, driver_id)
         except Exception:
             log.debug("could not read the driver token from the secret store", exc_info=True)
             return None

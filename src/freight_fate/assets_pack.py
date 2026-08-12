@@ -16,6 +16,7 @@ from __future__ import annotations
 import io
 import logging
 import os
+import threading
 import zipfile
 import zlib
 from pathlib import Path
@@ -120,6 +121,67 @@ class SoundPack:
 
 _default_pack: SoundPack | None = None
 _default_pack_missing = False
+# Guards both the read-and-unmask work and the two globals above. A plain
+# lock (rather than a Future/Event) doubles as the join: whichever thread --
+# the background prefetch, or a caller of open_default() that got there
+# first -- is inside this lock actually reading the ~225MB pack off disk,
+# every other thread blocks on the lock itself instead of polling anything.
+_load_lock = threading.Lock()
+_prefetch_started = False
+
+
+def _load_default_pack_locked() -> None:
+    """Do the actual read-and-unmask. Caller must hold ``_load_lock``."""
+    global _default_pack, _default_pack_missing
+    if _default_pack is not None or _default_pack_missing:
+        return  # someone else finished this while we waited for the lock
+    if DEFAULT_PACK_PATH.exists():
+        try:
+            _default_pack = SoundPack(DEFAULT_PACK_PATH)
+        except Exception:
+            log.warning(
+                "Unreadable sound pack at %s; reading loose sound files instead",
+                DEFAULT_PACK_PATH,
+                exc_info=True,
+            )
+            _default_pack_missing = True
+        else:
+            log.info(
+                "Sound pack loaded: %s (%d entries)",
+                DEFAULT_PACK_PATH,
+                len(_default_pack.names()),
+            )
+    else:
+        _default_pack_missing = True
+
+
+def prefetch_default() -> None:
+    """Start loading the shipped pack on a background thread.
+
+    The pack is a ~225MB file that gets read fully into memory and XOR
+    unmasked; today that ~0.3s lands synchronously on whichever sound plays
+    first (typically a main-menu sound), stalling it. Called as early as
+    possible in ``App()`` construction, this overlaps that cost with the
+    rest of startup (world load especially) instead of adding to it.
+
+    Safe to call more than once (a no-op once a load has started or
+    finished) and safe even when there is no pack to load. Never blocks: the
+    actual wait happens in :func:`open_default`, via the same lock, so a
+    corrupt or half-written pack still raises/logs exactly as it does today
+    -- just on whichever thread ends up doing the work, main or background.
+    """
+    global _prefetch_started
+    if os.environ.get("FREIGHT_FATE_IGNORE_SOUND_PACK") == "1":
+        return
+    if _prefetch_started or _default_pack is not None or _default_pack_missing:
+        return
+    _prefetch_started = True
+
+    def _run() -> None:
+        with _load_lock:
+            _load_default_pack_locked()
+
+    threading.Thread(target=_run, name="ffpack-prefetch", daemon=True).start()
 
 
 def open_default() -> SoundPack | None:
@@ -130,27 +192,15 @@ def open_default() -> SoundPack | None:
     A source checkout still has its loose sound tree to fall back on, so the
     game keeps its sound; a frozen build has nothing to fall back to, but it
     says so in the log instead of failing on the first sound it plays.
+
+    If :func:`prefetch_default` already has this underway on a background
+    thread, this blocks on ``_load_lock`` until that finishes instead of
+    redoing the read itself -- the first sound request pays only whatever
+    time is left on the prefetch, not the whole ~0.3s again.
     """
-    global _default_pack, _default_pack_missing
     if os.environ.get("FREIGHT_FATE_IGNORE_SOUND_PACK") == "1":
         return None
     if _default_pack is None and not _default_pack_missing:
-        if DEFAULT_PACK_PATH.exists():
-            try:
-                _default_pack = SoundPack(DEFAULT_PACK_PATH)
-            except Exception:
-                log.warning(
-                    "Unreadable sound pack at %s; reading loose sound files instead",
-                    DEFAULT_PACK_PATH,
-                    exc_info=True,
-                )
-                _default_pack_missing = True
-            else:
-                log.info(
-                    "Sound pack loaded: %s (%d entries)",
-                    DEFAULT_PACK_PATH,
-                    len(_default_pack.names()),
-                )
-        else:
-            _default_pack_missing = True
+        with _load_lock:
+            _load_default_pack_locked()
     return _default_pack

@@ -9,13 +9,14 @@ import os
 import sys
 import time
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pygame
 
 from . import __version__
 from .achievements import AchievementAward, award
+from .assets_pack import prefetch_default as prefetch_sound_pack
 from .audio import AudioEngine
-from .cloud_saves import CloudSaves
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
@@ -23,11 +24,17 @@ from .message_log import MessageCategory, MessageLog
 from .models.economy import Economy
 from .models.profile import Profile
 from .music import music_track_duration_s
-from .online_journal import JournalOutbox, queue_achievement
-from .online_presence import OnlineIdentity, OnlinePresence
 from .settings import Settings
 from .speech import EventPriority, EventSpeechPacer, Speech
 from .states.base import State
+
+if TYPE_CHECKING:
+    # Not needed at runtime: cloud_saves.py (and what it pulls in --
+    # cryptography.hazmat, by way of cloud_save_integrity) is only imported
+    # where CloudSaves is actually constructed, below. See online_presence
+    # and cloud_save_integrity for the matching lazy-import treatment of
+    # keyring and cryptography.hazmat themselves.
+    from .cloud_saves import CloudSaves
 
 log = logging.getLogger(__name__)
 # Every spoken line lands here too, so a logged playtest reads as a transcript of
@@ -531,6 +538,8 @@ class GameContext:
         # Through the guard: a sandboxed session's achievements evaporate
         # with the rest of the run instead of leaking to disk.
         self.save_profile()
+        from .online_journal import queue_achievement
+
         if queue_achievement(
             self._app.journal, result.achievement, earned_at_ms=int(time.time() * 1000)
         ):
@@ -554,6 +563,11 @@ class App:
         if os.environ.get("FREIGHT_FATE_NO_SPEECH"):
             os.environ["SDL_VIDEODRIVER"] = "dummy"
             os.environ["SDL_AUDIODRIVER"] = "dummy"
+        # Kick the ~225MB sound pack's read-and-unmask onto a background
+        # thread before anything else: it has no dependency on pygame or the
+        # world data that follows, so it overlaps the rest of startup instead
+        # of stalling the first sound played (see assets_pack.open_default).
+        prefetch_sound_pack()
         pygame.init()
         pygame.display.set_caption(f"Freight Fate {__version__}")
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
@@ -568,15 +582,38 @@ class App:
         self.world = get_world()
         self.economy = Economy()
         self.presence = DiscordPresence(enabled=self.settings.discord_presence)
+        # OnlineIdentity/OnlinePresence/CloudSaves/JournalOutbox are imported
+        # here rather than at module level so a launch that never touches
+        # keyring or cryptography.hazmat (see online_presence._keyring and
+        # cloud_save_integrity.verify_cloud_revision) does not pay their
+        # import cost either.
+        #
+        # identity is loaded unconditionally, not gated on whether any
+        # online setting is currently on: OnlinePresence/CloudSaves.
+        # set_enabled() both refuse to turn on without an identity already in
+        # hand (see online_presence.OnlinePresence.set_enabled), and nothing
+        # re-loads it when a player flips a setting on mid-session -- only
+        # the account-link flow (adopt_online_identity) does that. A player
+        # who linked an account and then turned every online setting off
+        # must still be able to turn one back on later without re-pasting
+        # credentials. The load itself stays cheap for the common case
+        # anyway: no account ever linked means no online.json, and
+        # OnlineIdentity.load() returns before touching keyring at all.
+        from .online_presence import OnlineIdentity, OnlinePresence
+
         identity = OnlineIdentity.load()
         self.online = OnlinePresence(
             enabled=self.settings.online_presence,
             identity=identity,
         )
+        from .cloud_saves import CloudSaves
+
         self.cloud = CloudSaves(
             enabled=self.settings.cloud_saves,
             identity=identity,
         )
+        from .online_journal import JournalOutbox
+
         self.journal = JournalOutbox(
             identity=identity,
             enabled=self.settings.online_presence,
