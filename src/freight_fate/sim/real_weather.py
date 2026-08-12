@@ -215,6 +215,15 @@ def _default_fetch(
     return text, wind_kmh, temp_c, visibility_mi, observed_at
 
 
+class _StaleObservation(Exception):
+    """Internal control-flow signal: NWS answered fine, but the newest
+    observation the station has on offer is older than
+    :data:`OBSERVATION_MAX_AGE_S`. This is an expected, routine condition for
+    a dead or parked station -- not a fetch failure -- so ``_worker`` catches
+    it in its own clause, ahead of the generic error handler, and never lets
+    it surface as a warning-with-traceback."""
+
+
 @dataclass(frozen=True)
 class _CachedObservation:
     kind: WeatherKind
@@ -251,6 +260,10 @@ class RealWeatherProvider:
         self._station_for_key: dict[str, str] = {}
         self._failed_at: dict[str, float] = {}
         self._inflight: set[str] = set()
+        # Route segments currently in a stale-observation stretch, so the
+        # miss is logged once when the stretch starts rather than on every
+        # RETRY_AFTER_S retry until the station catches up.
+        self._stale_logged: set[str] = set()
 
     @staticmethod
     def _station_identity(lat: float, lon: float) -> str:
@@ -374,15 +387,18 @@ class RealWeatherProvider:
             observed_at = fetched[4] if len(fetched) > 4 else None
             if observed_at is None:
                 observed_at = self._wall_clock()
-            if self._wall_clock() - float(observed_at) > OBSERVATION_MAX_AGE_S:
-                raise ValueError("NWS observation is too old to use")
+            observed_at = float(observed_at)
+            age_s = self._wall_clock() - observed_at
+            if age_s > OBSERVATION_MAX_AGE_S:
+                raise _StaleObservation(age_s)
             kind = map_condition(text, wind, visibility_mi)
             with self._lock:
                 self._obs_by_station[station] = _CachedObservation(
-                    kind, temp_c, self._clock(), float(observed_at)
+                    kind, temp_c, self._clock(), observed_at
                 )
                 self._station_for_key[city] = station
                 self._failed_at.pop(city, None)
+                self._stale_logged.discard(city)
             log.info(
                 "Real weather for %s: %s (NWS %r, wind %.0f km/h, temp %s, vis %s)",
                 city,
@@ -392,6 +408,28 @@ class RealWeatherProvider:
                 f"{temp_c:.0f}C" if temp_c is not None else "n/a",
                 f"{visibility_mi:.1f}mi" if visibility_mi is not None else "n/a",
             )
+        except _StaleObservation as exc:
+            # NWS answered; the station just has nothing newer than the
+            # dead-station cutoff. Fall back like any other miss (any
+            # previously cached conditions keep serving for up to
+            # STALE_AFTER_S) but treat this as routine, not an error: no
+            # traceback, and only one log line per stretch of staleness --
+            # not one every RETRY_AFTER_S until the station catches up.
+            with self._lock:
+                self._failed_at[city] = self._clock()
+                already_logged = city in self._stale_logged
+                self._stale_logged.add(city)
+            if not already_logged:
+                age_min = exc.args[0] / 60.0
+                limit_min = OBSERVATION_MAX_AGE_S / 60.0
+                log.info(
+                    "Real weather for %s: newest station observation is %.0f min "
+                    "old (limit %.0f min) -- holding previous conditions until a "
+                    "newer reading arrives",
+                    city,
+                    age_min,
+                    limit_min,
+                )
         except Exception:
             with self._lock:
                 self._failed_at[city] = self._clock()
