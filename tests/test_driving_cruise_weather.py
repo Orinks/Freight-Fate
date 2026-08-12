@@ -732,16 +732,26 @@ def test_speed_keeper_ignores_a_slower_vehicle_miles_up_the_road(monkeypatch):
         driving.trip.speed_limit_at = lambda mile: (45.0, "construction")
         driving.trip.grade_at = lambda mile: 0.0
         lead = {"gap_mi": 2.2, "speed_mph": 35.0}
+
+        def _gap() -> float:
+            # A stopped lead is a fixed point in space: the gap must close as
+            # the truck rolls toward it, or the "creep to the queue and stop"
+            # contract is untestable (a frozen 105-foot gap earns a permanent
+            # 2 mph creep, correctly).
+            if "stop_at_mi" in lead:
+                return max(0.0, lead["stop_at_mi"] - driving.trip.position_mi)
+            return lead["gap_mi"]
+
         driving.trip.traffic_context = lambda: TrafficContext(
             lead=NPCVehicle(
                 key="lead",
-                position_mi=driving.trip.position_mi + lead["gap_mi"],
+                position_mi=driving.trip.position_mi + _gap(),
                 speed_mph=lead["speed_mph"],
                 target_speed_mph=lead["speed_mph"],
                 relative_lane=0,
                 behavior="slow_car",
             ),
-            gap_mi=lead["gap_mi"],
+            gap_mi=_gap(),
             closing_mph=10.0,
         )
         t = driving.truck
@@ -765,7 +775,8 @@ def test_speed_keeper_ignores_a_slower_vehicle_miles_up_the_road(monkeypatch):
             assert t.speed_mph > 37.0, t.speed_mph
 
         # Right behind it, the queue rule still applies all the way to a stop.
-        lead.update(gap_mi=0.02, speed_mph=0.0)
+        lead.update(speed_mph=0.0)
+        lead["stop_at_mi"] = driving.trip.position_mi + 0.02
         for _ in range(60 * 60):
             driving.update(1 / 60)
             if t.speed_mph < 1.0:
