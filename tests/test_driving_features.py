@@ -1074,6 +1074,9 @@ def test_low_air_warning_flushes_event_voice(monkeypatch):
         driving.truck.primary_air_psi = 50.0
         driving.truck.secondary_air_psi = 50.0
         driving.truck.trailer_air_psi = 50.0
+        # A fresh episode: the cold-start narration latch is for the start-of-
+        # drive announcement, and this test pins the flush of a NEW warning.
+        driving._low_air_said = False
         driving._update_air_brake_announcements(
             was_ready=False,
             was_low=False,
