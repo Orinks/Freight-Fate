@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Added
+
+- **You now choose which career is your public one.** Your public profile on
+  orinks.net shows one career. Until now that was quietly whichever career
+  happened to back up first, so playing several careers could put the wrong
+  one's level, statistics, and badges on your profile. The Cloud backup menu
+  now says "your public career" on the career that fronts your profile, and
+  every backed-up career offers "Make this your public career," with a spoken
+  confirmation before anything changes. Your other careers keep backing up
+  privately; they just stay off your profile.
+
 ### Fixed
 
 - **Quick manual downshifts now respect the clutch the moment you press it.**
