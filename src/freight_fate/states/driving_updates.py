@@ -2222,6 +2222,16 @@ class DrivingUpdateMixin:
             and not self._dodge_still_beats_the_hazard()
         ):
             self.truck.brake = max(self.truck.brake, 1.0)
+            # Full service is the first answer, and on a sound truck it is the
+            # only one needed. But the stop the budget predicted gets slower
+            # while it happens -- the drums heat under the very application
+            # meant to save it -- so on hot, worn brakes in the wet on a
+            # downgrade, service braking alone loses ground and the assist
+            # rides it into the hazard. Once the time left no longer covers
+            # even a full service stop, stand on everything: the same hardest
+            # stop the B key gives the driver, which is what they would do.
+            if self._hazard_deadline <= self._brake_budget_s(target):
+                self.truck.emergency_brake = True
             if not self._automatic_braking_announced:
                 self._automatic_braking_announced = True
                 # Kept out of the reviewable log: this line interrupts the

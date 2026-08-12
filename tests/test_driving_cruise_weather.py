@@ -1478,6 +1478,97 @@ def test_the_assist_does_not_slam_on_mid_lane_change(monkeypatch):
         app.shutdown()
 
 
+def test_the_assist_stands_on_everything_when_service_braking_is_losing():
+    """An assist that takes the truck has to actually stop it.
+
+    Owner question, 2026-08-11: to help a player it should stop in time. It
+    did not always. The assist applied full SERVICE braking and the budget
+    that sized its engage point assumed the same, but a stop on hot, worn
+    brakes in the wet on a downgrade gets slower while it happens -- the
+    drums heat further under the very application meant to save it. Two of
+    nine benched conditions collided after "Emergency braking engaged."
+
+    Full service stays the first answer. When the time left no longer covers
+    even that, the assist uses the hardest stop the rig has, which is what
+    the driver would do and exactly what the B key already gives them.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving import MPH_PER_MPS
+
+    app = App()
+    try:
+        app.ctx.settings.time_scale = 20.0
+        app.ctx.settings.automatic_emergency_braking = True
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.velocity_mps = 65.0 / MPH_PER_MPS
+        t.grade, t.grip = -0.06, 0.7
+        t.brake_temp_c, t.brake_wear_pct = 450.0, 40.0
+        t.cargo_kg = 19_000.0
+        damage_before = t.damage_pct
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake or change lanes! Slow truck right ahead.",
+                {"deadline_s": 2.5, "dodgeable": True},
+            )
+        )
+        stood_on_it = False
+        elapsed = 0.0
+        while driving._hazard_deadline is not None and elapsed < 120.0:
+            t.throttle = 0.0
+            driving._update_hazard(1 / 60)
+            stood_on_it = stood_on_it or t.emergency_brake
+            if driving._hazard_deadline is None:
+                break
+            t.grade = -0.06
+            t.update(1 / 60)
+            elapsed += 1 / 60
+        assert t.damage_pct == damage_before, "the assist engaged and still hit the hazard"
+        assert stood_on_it, "service braking alone was losing and nothing escalated"
+    finally:
+        app.shutdown()
+
+
+def test_a_stop_service_braking_can_make_stays_on_the_service_brakes():
+    """The escalation is a last resort, not the new normal: an ordinary
+    hazard on good brakes must not become a spring-brake panic stop."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving import MPH_PER_MPS
+
+    app = App()
+    try:
+        app.ctx.settings.time_scale = 20.0
+        app.ctx.settings.automatic_emergency_braking = True
+        driving = start_drive(app)
+        quiet_trip(driving)
+        t = driving.truck
+        t.velocity_mps = 65.0 / MPH_PER_MPS
+        t.grade, t.grip = 0.0, 1.0
+        t.brake_temp_c, t.brake_wear_pct = 20.0, 0.0
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake or change lanes! Slow truck right ahead.",
+                {"deadline_s": 2.5, "dodgeable": True},
+            )
+        )
+        elapsed = 0.0
+        while driving._hazard_deadline is not None and elapsed < 120.0:
+            t.throttle = 0.0
+            driving._update_hazard(1 / 60)
+            assert not t.emergency_brake, "good brakes on the flat needed no panic stop"
+            if driving._hazard_deadline is None:
+                break
+            t.update(1 / 60)
+            elapsed += 1 / 60
+    finally:
+        app.shutdown()
+
+
 def test_automatic_emergency_braking_leads_the_budget(monkeypatch):
     """The assist engages with margin over the physics budget: braking heats
     the brakes, so a zero-margin engage under-delivers exactly as it fires."""
