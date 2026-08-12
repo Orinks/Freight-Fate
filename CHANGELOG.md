@@ -13,6 +13,8 @@
   shift inputs now recognize Shift as clutch-down immediately, so damage only
   starts if you release the clutch while the selected gear is too low for your
   road speed. Sorry for missing this player-input path in the first fix.
+  Contributed by corykad ([@corykad](https://github.com/corykad)) in
+  [PR #157](https://github.com/Orinks/Freight-Fate/pull/157).
 
 ## 1.8.8.1 - 2026-08-08
 
