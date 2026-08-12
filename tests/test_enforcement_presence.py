@@ -651,6 +651,71 @@ def test_enforcement_defers_while_the_cab_already_has_a_demand(monkeypatch):
         app.shutdown()
 
 
+def test_a_deferred_look_survives_the_truck_leaving_the_post_behind(monkeypatch):
+    """The officer saw you; the hazard only postponed the lights.
+
+    ``_deferred_post_ids`` was written and never read anywhere, so "defer,
+    never drop" only held while the post still covered the truck's mile. A
+    hazard window outlasts a one-mile radar reach several times over at any
+    pacing, so in practice every look that landed during one was thrown away
+    (Jerry, 2026-08-11: whole routes over the limit with nothing happening).
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _capture_audio(app, monkeypatch)
+        post = always_observing_post(at_mi=6.0, reach_mi=1.0)
+        d.trip.posts = [post]
+        d.trip.position_mi = 5.5
+        d._enforcement_prev_mi = 5.4
+        d.truck.velocity_mps = 120.0 / 2.23694  # flagrant
+        d._over_limit_mi = OBSERVE_HOLD_MI * 3
+        d._hazard_deadline = 6.0
+        d._update_enforcement_watch(0.1)
+        assert d._pull_over is None  # one demand on the driver at a time
+
+        # The hazard runs long enough that the truck is well past the post by
+        # the time the cab is quiet. The stop still happens.
+        d.trip.position_mi = 9.0
+        d._enforcement_prev_mi = 9.0
+        d._hazard_deadline = None
+        assert not d.trip.posts_watching(d.trip.position_mi)
+        d._update_enforcement_watch(0.1)
+        assert d._pull_over == "lights"
+    finally:
+        app.shutdown()
+
+
+def test_a_trooper_who_never_caught_up_loses_you(monkeypatch):
+    """A held look is not a debt collected fifty miles later."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_enforcement import DEFERRED_STOP_MAX_MI
+
+    app = App()
+    try:
+        d = _driving(app)
+        _capture_audio(app, monkeypatch)
+        post = always_observing_post(at_mi=6.0, reach_mi=1.0)
+        d.trip.posts = [post]
+        d.trip.position_mi = 5.5
+        d._enforcement_prev_mi = 5.4
+        d.truck.velocity_mps = 120.0 / 2.23694
+        d._over_limit_mi = OBSERVE_HOLD_MI * 3
+        d._hazard_deadline = 6.0
+        d._update_enforcement_watch(0.1)
+        assert d._pull_over is None
+
+        d.trip.position_mi = 5.5 + DEFERRED_STOP_MAX_MI + 1.0
+        d._enforcement_prev_mi = d.trip.position_mi
+        d._hazard_deadline = None
+        d._update_enforcement_watch(0.1)
+        assert d._pull_over is None
+    finally:
+        app.shutdown()
+
+
 def test_a_closed_scale_says_nothing_and_an_open_one_speaks(monkeypatch):
     """The swell says "scale"; the absence of speech says "closed"."""
     from enforcement_helpers import open_scale_post

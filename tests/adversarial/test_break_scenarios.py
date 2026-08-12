@@ -88,11 +88,6 @@ KNOWN_OPEN = {
         "streak-compounded 25-mile hops earn 4.9x the XP efficiency of a "
         "500-mile haul, and short hauls are the faster ones to drive"
     ),
-    "save_scum_enforcement": (
-        "a live hazard warning is not in the snapshot, so reloading mid-hazard "
-        "makes the debris vanish without braking (the traffic-stop branch of "
-        "this scenario does survive, and is asserted alongside it)"
-    ),
 }
 
 

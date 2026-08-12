@@ -61,6 +61,7 @@ from ..sim.enforcement_observe import (
     WHAT_FOLLOWING,
     WHAT_LIGHTS,
     WHAT_SPEEDING,
+    Observation,
     RoadSample,
     observe,
 )
@@ -84,6 +85,14 @@ from .driving_siren import (
 # The marker earcon fires this far before a post starts watching, so the cue
 # and the observation can never land in the same instant.
 POST_MARKER_LEAD_MI = 0.25
+
+# How far a held look can travel before the officer has simply lost you. A
+# trooper who clocks a truck pulls out and catches it; one who never did is
+# not entitled to the stop half a state later. Generous on purpose: the thing
+# doing the deferring is usually a hazard, and a hazard window now runs long
+# enough to be answerable, which at full compression is several miles of road.
+# Five was not enough -- it stranded two looks out of three in a bench drive.
+DEFERRED_STOP_MAX_MI = 10.0
 
 # A marked unit going the other way is the most common police sound on a real
 # road, and it now is here too. Pan is confirmation only -- the gesture in the
@@ -142,6 +151,9 @@ class EnforcementWatchMixin:
         # Posts whose look was deferred because the cab was busy. They keep
         # their turn; nothing is silently dropped.
         self._deferred_post_ids: set[str] = set()
+        # The look itself, and the mile it was taken at: what makes the
+        # deferral a postponement rather than a discard.
+        self._held_observation: tuple[Observation, float] | None = None
         self._pacing_since_s: dict[str, float] = {}
 
     # -- presence ------------------------------------------------------------
@@ -501,10 +513,16 @@ class EnforcementWatchMixin:
         if self._enforcement_bypassed():
             return
         if self._enforcement_busy():
-            # Defer, never drop: remember which posts had a look owing and
-            # let them take it as soon as the cab is quiet.
-            for post in self.trip.posts_watching(position):
-                self._deferred_post_ids.add(post.id)
+            # Defer, never drop. The look is TAKEN here and held: the officer
+            # saw what they saw, and only the lights wait for the cab to be
+            # quiet. Recording post ids instead threw the look away, because
+            # by the time a hazard window closes the truck is miles past a
+            # one-mile radar reach and nothing is watching it any more.
+            self._hold_observation()
+            return
+        held = self._take_held_observation()
+        if held is not None:
+            self._begin_observed_stop(held)
             return
         self._run_observations()
 
@@ -525,18 +543,48 @@ class EnforcementWatchMixin:
                 self._pacing_since_s.pop(post.id, None)
 
     def _run_observations(self) -> None:
-        """Ask every post watching this mile what it sees, best first."""
+        """Take this mile's look and act on it."""
+        found = self._observed_now()
+        if found is not None:
+            self._begin_observed_stop(found)
+
+    def _hold_observation(self) -> None:
+        """Take the look the busy cab cannot act on yet, and keep it."""
+        if self._held_observation is not None:
+            return  # one held look at a time; the first officer has the claim
+        found = self._observed_now()
+        if found is None:
+            return
+        self._held_observation = (found, self.trip.position_mi)
+        self._deferred_post_ids.add(found.post.id)
+
+    def _take_held_observation(self):
+        """The held look, if the officer could still plausibly be behind you."""
+        if self._held_observation is None:
+            return None
+        found, seen_mi = self._held_observation
+        self._held_observation = None
+        self._deferred_post_ids.discard(found.post.id)
+        if self.trip.position_mi - seen_mi > DEFERRED_STOP_MAX_MI:
+            return None
+        return found
+
+    def _observed_now(self):
+        """Ask every post watching this mile what it sees, best first.
+
+        Returns the observation that survived its seeded roll, or ``None``.
+        """
         position = self.trip.position_mi
         watching = self.trip.posts_watching(position)
         if not watching:
-            return
+            return None
         best = None
         for post in watching:
             found = observe(post, self._road_sample(post))
             if found is not None and (best is None or found.confidence > best.confidence):
                 best = found
         if best is None:
-            return
+            return None
         post = best.post
         # The named, seeded, POSITION-quantised draw. Never time-quantised:
         # identical driving through identical road has to produce an identical
@@ -551,8 +599,8 @@ class EnforcementWatchMixin:
             # makes "five over near a post is ignored" a state rather than a
             # rare piece of bad luck the player can never learn from.
             post.declined = True
-            return
-        self._begin_observed_stop(best)
+            return None
+        return best
 
     def _begin_observed_stop(self, observation) -> None:
         """Turn a confirmed observation into the pull-over that already exists."""
@@ -648,6 +696,7 @@ class EnforcementWatchMixin:
 
 __all__ = [
     "CERTAIN_OVER_MPH",
+    "DEFERRED_STOP_MAX_MI",
     "OBSERVE_HOLD_MI",
     "PASS_PAN",
     "POST_MARKER_LEAD_MI",

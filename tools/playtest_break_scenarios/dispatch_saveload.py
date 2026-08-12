@@ -117,10 +117,23 @@ def _save_scum():
                 "ticket, and the felony ladder all vanish -- quit-to-menu is a get-out-of-"
                 "jail-free card (pull-over state is not in the snapshot)"
             )
-        if resumed._hazard_deadline is None and d._hazard_deadline is not None:
+        # A live hazard is deliberately NOT in the snapshot, and that is not a
+        # save-scum hole because no save can be written while one is running.
+        # Every player-reachable save needs a parked truck or an open menu --
+        # the rest-stop save, the motel, a city service (parking brake set) --
+        # and the one save taken mid-roll is the traffic stop, which cannot
+        # begin during a hazard: _begin_pull_over has a single caller,
+        # _begin_observed_stop, reachable only when _enforcement_busy() is
+        # false, and a live hazard is one of the things that makes it true.
+        # So what this scenario must hold is the gate, not the round-trip.
+        # Restoring the deadline instead would be the worse bug: the player
+        # would resume on a braking clock they never heard the warning for,
+        # which is the one thing the enforcement layer refuses to do.
+        if not d._enforcement_busy():
             findings.append(
-                "a live hazard warning does not survive save/reload: reload mid-hazard and "
-                "the debris is gone without braking"
+                "a live hazard no longer makes the cab busy, so a traffic stop can begin "
+                "mid-hazard -- that stop snapshots itself, which would put a live hazard "
+                "into a save the reload cannot speak"
             )
         if resumed.speeding_tickets != d.speeding_tickets:
             findings.append("the on-the-spot ticket count was lost in the snapshot round-trip")
