@@ -41,6 +41,14 @@
 
 ### Fixed
 
+- **Hazard warnings stop telling you to change lanes when there is no
+  lane.** On a one-lane road -- or beside a lane closed for roadwork --
+  the warning said "Brake or change lanes!" and the reminder said
+  "Nearly stop, or change lanes," while the lane keys could only answer
+  that no lane exists. When there is nowhere to swerve, the truck now
+  says plainly what works: "Brake!" -- and slowing alone has always been
+  enough to clear the hazard.
+
 - **Rolling past the stop at your destination's entrance now loops you
   back instead of stranding you.** If you cleared the ramp at the end of
   a delivery too fast to make the stop, nothing happened at all: no
