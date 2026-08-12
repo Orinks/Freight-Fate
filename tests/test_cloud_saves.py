@@ -351,6 +351,81 @@ def test_recorded_empty_cloud_conflict_heals_on_the_next_backup():
     assert service.sync_state.slot("Road Star")["revision"] == 1
 
 
+class RoutedTransport:
+    """Serves the slot-list GET and the upload POST from one fake."""
+
+    def __init__(self, *, list_reply, upload_reply=None, list_error=None) -> None:
+        self.list_reply = list_reply
+        self.list_error = list_error
+        self.upload_reply = upload_reply or {"ok": True, "revision": 1}
+        self.requests: list[tuple[str, dict | None, dict[str, str]]] = []
+
+    def __call__(self, url: str, payload: dict | None, headers: dict[str, str]) -> dict:
+        self.requests.append((url, payload, headers))
+        if payload is None:  # the list fetch
+            if self.list_error is not None:
+                raise self.list_error
+            return self.list_reply
+        return self.upload_reply
+
+    @property
+    def posts(self) -> list[dict]:
+        return [p for _, p, _ in self.requests if p is not None]
+
+
+def test_stale_recorded_conflict_heals_when_the_cloud_slot_is_gone():
+    """A conflict recorded against a cloud copy that has since vanished
+    (deployment reset, slot deleted from another machine) must not block
+    backups forever: the guard re-checks the cloud and starts over."""
+    transport = RoutedTransport(list_reply={"ok": True, "saves": []})
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.sync_state.record_synced("Road Star", 7, "stale-hash")
+    service.sync_state.record_conflict(
+        "Road Star",
+        {"latestRevision": 40, "latestCreatedAt": 1_700_000_000_000, "latestSummary": "level 18"},
+    )
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert len(transport.posts) == 1
+    assert transport.posts[0]["parentRevision"] is None
+    assert service.conflicts() == {}
+    assert service.sync_state.slot("Road Star")["revision"] == 1
+
+
+def test_recorded_conflict_with_a_live_cloud_copy_still_blocks():
+    transport = RoutedTransport(
+        list_reply={"ok": True, "saves": [{"saveName": "Road Star", "revision": 40}]}
+    )
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.sync_state.record_synced("Road Star", 7, "stale-hash")
+    service.sync_state.record_conflict("Road Star", {"latestRevision": 40})
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    # The other machine's newer save is still at stake: nothing uploads and
+    # the conflict stays for the player to resolve.
+    assert transport.posts == []
+    assert "Road Star" in service.conflicts()
+
+
+def test_conflict_recheck_that_cannot_reach_the_cloud_keeps_the_guard():
+    transport = RoutedTransport(list_reply={}, list_error=OSError("no route"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.sync_state.record_conflict("Road Star", {"latestRevision": 40})
+    profile = Profile(name="Road Star")
+
+    service.queue_backup(profile)
+    drain(service, clock)
+    assert transport.posts == []
+    assert "Road Star" in service.conflicts()
+
+
 def test_keep_mine_overwrites_the_cloud_and_clears_the_conflict():
     transport = FakeTransport(error=conflict_error(latest_revision=5))
     clock = Clock()
