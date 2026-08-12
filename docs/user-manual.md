@@ -580,7 +580,7 @@ Driving controls are active while the road view is focused:
 | R | Report trip progress (the same percent the online drivers board shows) and the distance left, then the road you are on with its direction, the state you are in, and the city you are heading toward. With a planned stop set, the distance counts down to that stop instead of the destination. |
 | Shift+R | Report the next listed highway exit. |
 | V | Report weather and forecast. |
-| L | Report which lane you are in and whether you are centered, drifting, or at an edge. |
+| L | Report which lane you are in, whether you are centered, drifting, or at an edge, and whether the lane beside you is open or blocked. |
 | Left / Right arrow | With lane keeping on partial or off, steer; steer across the line to change lanes. With lane keeping on full, tap to change one lane in that direction -- the signal clicks and the change is announced. |
 | A | Repeat the last route announcement -- the last thing with consequences -- even if other speech came after it. |
 | U | Report what is coming up: imposed speed limits, patrols, stops, exits, and the next few bends ahead with their advisory speeds. |
@@ -855,7 +855,14 @@ Fatigue shortens the reaction window.
 The road tells you how many lanes you have. Road status names the lanes on
 your side -- "divided, three lanes your side" -- and as the road widens or
 narrows mid-leg you hear it happen. Where the map has no lane data the game
-stays quiet rather than guess. Press L any time for which lane you are in.
+stays quiet rather than guess. Press L any time for which lane you are in,
+and whether the lane beside you is open, blocked, or coned off.
+
+Passing has a second half, and the truck speaks it. When you move over to get
+around slower traffic, you hear when the lane you came out of is open again:
+"Clear of the box truck. Right lane open." It is said once for each vehicle
+you get past, only while it is still true, and never about a lane roadwork has
+closed. If you missed it, or want to know before you commit, press L.
 
 Construction and traffic zones lower the speed limit. A construction zone may
 begin with a merge or flagger taper before the lower limit inside it, and may

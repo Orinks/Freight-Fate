@@ -282,7 +282,7 @@ Asking the truck and the road questions:
 | Alt+D | What ends this shift, and where you can stop before it |
 | F | Fuel and range |
 | V | Weather and forecast |
-| L | Lane position |
+| L | Lane position, and whether the lane beside you is open or blocked |
 | I | Lane locator on / off — a soft tock once a beat, panned to where you sit inside your lane. Available on lane keeping partial or off |
 | A | Repeat the last driving announcement |
 | F1 | List all controls |

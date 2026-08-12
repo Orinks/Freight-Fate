@@ -395,6 +395,9 @@ class DrivingUpdateMixin:
         # After the trip has moved the truck and stepped the bubble, so the
         # crossing this reads is the one that just happened.
         self._update_traffic_passes(dt)
+        # Right after the passes, and for the same reason: the lane the driver
+        # moved out of is only open once the bubble has been stepped.
+        self._update_lane_gap(dt)
 
         self._update_hours_and_fatigue(dt)
         self._update_audio(dt)
