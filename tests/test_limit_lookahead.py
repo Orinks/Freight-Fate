@@ -69,10 +69,42 @@ def test_no_warning_when_already_slow(world):
     assert not [c for c in _cues(trip, 49.8, 30.0) if "drops to" in c]
 
 
-def test_no_warning_outside_the_braking_window(world):
-    # 1.4 miles out at 55 is far beyond reaction plus comfortable braking.
+def test_no_warning_beyond_the_scaled_lookahead_window(world):
+    # Beyond LIMIT_WARNING_MAX_LEAD_MI the boundary isn't even scanned for
+    # yet, whatever the current pace -- the cap that keeps a heavily
+    # compressed drive from calling a drop absurdly far out.
     trip = _trip(world, VILLAGE)
-    assert not [c for c in _cues(trip, 48.6, 55.0) if "drops to" in c]
+    assert not [c for c in _cues(trip, 44.5, 55.0) if "drops to" in c]
+
+
+def test_advance_warning_lead_scales_with_time_compression(world):
+    """The lead is sized in ``LIMIT_WARNING_REAL_S`` real seconds of hearing-
+    and-braking time at the current pace, not a fixed game-mile distance --
+    the same law ``_zone_warning_lookahead_mi`` and ``EXIT_WARNING_REAL_S``
+    apply elsewhere. Under heavy time compression the old curve-pacenote-
+    derived lead (still used for curves) bought under a real second; a half
+    mile passed in a few real seconds and the drop landed before the call
+    finished speaking (owner's live playtest, 2026-08-12). The fix buys back
+    several times that.
+    """
+    trip = _trip(world, VILLAGE)
+    trip.time_scale = 40.0  # the game's top compression setting
+    speed = 55.0
+    scale = trip.effective_time_scale
+    assert scale == 40.0  # full pacing already resumed at this speed
+
+    old_lead_mi = trip._curve_pacenote_lead_mi(speed, 30.0)
+    old_real_s = old_lead_mi * 3600.0 / (speed * scale)
+    assert old_real_s < 1.0  # the bug: barely a real second to react
+
+    new_lead_mi = trip._limit_drop_warning_lead_mi(speed)
+    new_real_s = new_lead_mi * 3600.0 / (speed * scale)
+    assert new_real_s > old_real_s * 5
+
+    # And the cue actually fires that far out.
+    position = 50.0 - new_lead_mi + 0.05
+    cues = _cues(trip, position, speed)
+    assert any(c.startswith("Speed limit drops to 30 in") for c in cues)
 
 
 def test_no_warning_for_a_small_step(world):
@@ -85,7 +117,11 @@ def test_no_warning_for_a_small_step(world):
 
 def test_short_zone_length_spoken_on_entry(world):
     trip = _trip(world, VILLAGE)
-    _cues(trip, 49.0, 55.0)  # seed the announced limit at 65
+    # Seeded well outside LIMIT_WARNING_MAX_LEAD_MI so this update only seeds
+    # the announced limit at 65 and does not itself pre-announce the drop --
+    # this test is about the arrival line's own span wording, covered
+    # separately from the pre-announce suppression below.
+    _cues(trip, 40.0, 55.0)
     cues = _cues(trip, 50.05, 30.0)
     assert "Speed limit reduced to 30 for half a mile." in cues
 
@@ -95,10 +131,45 @@ def test_long_zone_entry_stays_unsized(world):
         world,
         (SpeedLimitSample(0.0, 65.0), SpeedLimitSample(50.0, 30.0)),
     )
-    _cues(trip, 49.0, 55.0)
+    _cues(trip, 40.0, 55.0)  # seed the announced limit at 65, out of lookahead range
     cues = _cues(trip, 50.05, 30.0)
     reduced = [c for c in cues if c.startswith("Speed limit reduced")]
     assert reduced == ["Speed limit reduced to 30."]
+
+
+def test_unannounced_drop_still_speaks_reduced_to(world):
+    """A posting the advance pacenote never got a chance to warn about --
+    too far out to be in the lookahead window when last checked -- still
+    gets its plain arrival confirmation. Suppression only applies to a
+    posting that was actually pre-announced."""
+    trip = _trip(world, VILLAGE)
+    seed_cues = _cues(trip, 40.0, 55.0)
+    assert not [c for c in seed_cues if "drops to" in c]
+    cues = _cues(trip, 50.05, 30.0)
+    assert "Speed limit reduced to 30 for half a mile." in cues
+
+
+def test_preannounced_drop_does_not_repeat_reduced_to(world):
+    """The complaint (owner, live playtest, 2026-08-12): a posted drop spoke
+    'Speed limit drops to 45 in half a mile.' and then, an instant later
+    under time compression, 'Speed limit reduced to 45.' -- the same number
+    twice. Once the advance pacenote has named a posting, the plain arrival
+    line for that same number stays quiet."""
+    trip = _trip(world, VILLAGE)
+    warn_cues = _cues(trip, 49.8, 55.0)
+    assert "Speed limit drops to 30 in a quarter mile." in warn_cues
+    arrival_cues = _cues(trip, 50.05, 55.0)
+    assert not [c for c in arrival_cues if c.startswith("Speed limit reduced")]
+
+
+def test_raise_is_never_suppressed_by_a_preannounced_drop(world):
+    """Only 'reduced to' is ever suppressed by a pre-announced drop -- a
+    raise leaving the zone always speaks, carrying its own number."""
+    trip = _trip(world, VILLAGE)
+    _cues(trip, 49.8, 55.0)  # advance-warns and pre-announces the 30 drop
+    _cues(trip, 50.05, 55.0)  # arrival, suppressed (see test above)
+    cues = _cues(trip, 50.65, 55.0)
+    assert "Speed limit raised to 65." in cues
 
 
 def test_gap_marker_ends_a_village_zone(world):

@@ -66,6 +66,15 @@ PACENOTE_LINK_GAP_MI = 0.3
 # same way she calls a curve): only drops of at least this size get a
 # warning -- a 65-to-60 step needs no braking plan, a village 30 does.
 LIMIT_DROP_WARN_MIN_DELTA_MPH = 10.0
+# The "drops to X in ..." pacenote lead, sized in REAL seconds of
+# hearing-and-braking time at the current pace rather than a fixed game-mile
+# distance -- the same law _zone_warning_lookahead_mi and EXIT_WARNING_REAL_S
+# apply. A fixed lead (the old curve-pacenote braking distance) shrank to a
+# couple of real seconds under time compression: the drop landed before the
+# call finished (owner's live playtest, 2026-08-12). Capped so a slow leg
+# under heavy compression does not call a drop from absurdly far out.
+LIMIT_WARNING_REAL_S = 18.0
+LIMIT_WARNING_MAX_LEAD_MI = 5.0
 # A newly entered lower limit that ends within this span has its length
 # spoken ("for the next half a mile"), so a short village zone reads as a
 # passing event, not a new cruising speed.
@@ -243,6 +252,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         self._active_zone: Zone | None = None
         self._announced_speed_limit: float | None = None
         self._warned_limit_drops: set[float] = set()
+        # Posted-limit values already spoken for the CURRENT posting -- by the
+        # advance "drops to X" pacenote, or by an assist's own "easing to X"
+        # line -- so the plain arrival confirmation doesn't repeat the same
+        # number a moment (or, under compression, an instant) later.
+        self._limit_drop_preannounced: set[float] = set()
         self._announced_zone_warnings: set[str] = set()
         self._announced_traffic_pressures: set[str] = set()
         self._announced_npc_traffic: set[str] = set()
@@ -2425,6 +2439,17 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         if limit != self._announced_speed_limit:
             lowered = limit < self._announced_speed_limit
             self._announced_speed_limit = limit
+            if lowered:
+                # The advance pacenote or an assist's "easing to X" line may
+                # already have named this exact number for this posting --
+                # the arrival line repeating it a moment (or, under
+                # compression, an instant) later was the owner's live-playtest
+                # complaint (2026-08-12). Consumed once: an unannounced drop
+                # right after still gets its own "reduced to".
+                key = round(limit, 1)
+                if key in self._limit_drop_preannounced:
+                    self._limit_drop_preannounced.discard(key)
+                    return
             verb = "reduced to" if lowered else "raised to"
             near = self._nearest_urban_city(self.position_mi) if lowered else None
             where = ""
@@ -2459,6 +2484,20 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 return mi - self.position_mi
         return None
 
+    def _limit_drop_warning_lead_mi(self, speed: float) -> float:
+        """Lead distance for the "drops to X" pacenote, scaled so the player
+        gets roughly ``LIMIT_WARNING_REAL_S`` of real hearing-and-braking time
+        despite speed and time compression -- see ``LIMIT_WARNING_REAL_S``."""
+        speed = max(speed, 1.0)
+        miles = LIMIT_WARNING_REAL_S * speed * self.effective_time_scale / 3600.0
+        return max(PACENOTE_MIN_LEAD_MI, min(miles, LIMIT_WARNING_MAX_LEAD_MI))
+
+    def note_limit_preannounced(self, limit_mph: float) -> None:
+        """Record that an assist just spoke the incoming posted limit itself
+        (speed keeper / adaptive cruise "easing to X"), so the plain arrival
+        confirmation does not repeat the same number a moment later."""
+        self._limit_drop_preannounced.add(round(limit_mph, 1))
+
     def _next_limit_drop(self) -> tuple[float, float] | None:
         """The next corridor limit change ahead, when it is a warn-worthy drop.
 
@@ -2469,7 +2508,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         where inside a tick the scan starts."""
         current = self._corridor_limit_at(self.position_mi)
         prev = self.position_mi
-        end = min(self.total_miles, self.position_mi + PACENOTE_MAX_LEAD_MI)
+        end = min(self.total_miles, self.position_mi + LIMIT_WARNING_MAX_LEAD_MI)
         while prev < end:
             mi = min(end, prev + LIMIT_SCAN_STRIDE_MI)
             limit = self._corridor_limit_at(mi)
@@ -2509,9 +2548,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         if speed <= limit + PACENOTE_MARGIN_MPH:
             return
         ahead = boundary_mi - self.position_mi
-        if ahead > self._curve_pacenote_lead_mi(speed, limit):
+        if ahead > self._limit_drop_warning_lead_mi(speed):
             return
         self._warned_limit_drops.add(key)
+        self._limit_drop_preannounced.add(round(limit, 1))
         self._emit(
             TripEventKind.GPS_CUE,
             f"Speed limit drops to {self._speed_value(limit)} in "

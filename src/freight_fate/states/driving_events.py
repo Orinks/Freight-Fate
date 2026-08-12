@@ -2505,6 +2505,11 @@ class DrivingEventMixin:
                     f"{reason}; speed keeper easing to {self.ctx.settings.speed_text(ahead[0])}.",
                     interrupt=False,
                 )
+                # This line already named the number for a plain posted-limit
+                # drop; the arrival "Speed limit reduced to X" would otherwise
+                # repeat it a moment later.
+                if ahead[1] not in ("construction", "heavy traffic"):
+                    self.trip.note_limit_preannounced(ahead[0])
         elif ahead is None:
             self._keeper_ease_said = None
         context = self.trip.traffic_context()
@@ -2939,6 +2944,12 @@ class DrivingEventMixin:
                     f"{reason}; adaptive cruise easing to {self.ctx.settings.speed_text(cap_mph)}.",
                     interrupt=False,
                 )
+                # This line already named the number for a plain posted-limit
+                # drop; the arrival "Speed limit reduced to X" would otherwise
+                # repeat it a moment (or, under compression, an instant)
+                # later -- the owner's live-playtest complaint (2026-08-12).
+                if limit_reason not in RESTRICTED_ZONE_REASONS:
+                    self.trip.note_limit_preannounced(cap_mph)
         elif cap_mph >= self._cruise_mph:
             # Back out on the open road at the set speed: the next drop is
             # news again.

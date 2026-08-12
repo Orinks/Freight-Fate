@@ -595,6 +595,11 @@ def test_speed_keeper_eases_for_a_lower_posted_limit_and_says_so(monkeypatch):
         )
         assert t.speed_mph <= 15.0
         assert sum("speed keeper easing to 15" in e for e in events) == 1
+        # The keeper's own line already named the number; it must feed the
+        # trip's pre-announce set so the plain arrival "Speed limit reduced
+        # to 15" does not repeat it a moment later (owner's live playtest,
+        # 2026-08-12, on the plain posted-drop case this hook covers).
+        assert 15.0 in driving.trip._limit_drop_preannounced
     finally:
         app.shutdown()
 
@@ -952,6 +957,40 @@ def test_adaptive_cruise_slows_before_large_limit_drop(monkeypatch):
         assert driving.truck.throttle < 0.8
         assert driving.truck.brake > 0.0
         assert any("adaptive cruise easing to" in e for e in events)
+    finally:
+        app.shutdown()
+
+
+def test_adaptive_cruise_easing_preannounces_the_capped_target(monkeypatch):
+    """Cruise's own 'easing to X' line for a plain posted-limit drop already
+    named a number; wiring it into the trip's pre-announce set is the other
+    half of the fix that lets a plain arrival confirmation for that same
+    number stay quiet (owner's live playtest, 2026-08-12). What cruise
+    actually said is the ACC-offset target (posted + ACC_LIMIT_OFFSET_MPH
+    here, since this is a plain drop, not a restricted zone), not the raw
+    posted number -- pre-announcing that raw number instead would silence an
+    arrival confirmation cruise never actually spoke."""
+    from freight_fate.app import App
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        drop_at = driving.trip.position_mi + 0.4
+        driving.trip.speed_limit_at = lambda mile: (40.0, None) if mile >= drop_at else (65.0, None)
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 30.4  # ~68 mph
+        driving.truck.throttle = 0.8
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving.trip.position_mi < drop_at
+
+        driving.update(1 / 60)
+
+        assert any("adaptive cruise easing to" in e for e in events)
+        assert 45.0 in driving.trip._limit_drop_preannounced  # 40 + ACC_LIMIT_OFFSET_MPH
     finally:
         app.shutdown()
 
