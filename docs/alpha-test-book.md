@@ -516,6 +516,14 @@ Being pinned in a coned-off lane with no open lane beside you is worth
 reporting immediately — note the two cities and roughly how far into the
 leg it happened.
 
+Also listen for: the side never changing its mind. The lane named in the
+advance warning, in U, at the taper, inside the work zone, and by any
+refusal when you ask to change lanes is one and the same lane. If you are
+told the right lane is closed and anything afterwards treats the left one
+as shut, report it. Where the road drops a lane under you, expect to hear
+which lane closed and which one you are now in — never silence followed by
+barrels.
+
 ### 4.4 Exits take a setup
 
 Setup: any leg with announced exits; know your destination exit (R for

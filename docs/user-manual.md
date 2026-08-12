@@ -879,6 +879,12 @@ catch you, and it is deliberately not doubled for being in a construction
 zone, because it is already a construction-zone offense. You are never
 charged for it when the road left you nowhere to go.
 
+Every callout names the closure by its side of the road, and that side is the
+side that is shut, whether the road runs two lanes your way or four. If the
+road drops a lane under you and the lane you are moved into is the closed one,
+the truck is put back in an open lane and told so -- that one is the road's
+doing, not yours, so it costs you nothing.
+
 Speed-limit changes name the town that causes them, and the limits on streets
 approaching a facility are the real posted ones, not a blanket guess -- a long
 industrial approach might honestly be 45, stepping down as you close on the

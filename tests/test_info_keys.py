@@ -167,16 +167,36 @@ def test_upcoming_key_reports_an_imposed_limit_ahead(monkeypatch):
         d = _driving(app)
         d.trip.position_mi = 0.0
         d.trip.zones = [
-            Zone(5.0, 6.0, 55.0, "construction merge"),
-            Zone(6.0, 8.0, 45.0, "construction"),
+            Zone(5.0, 6.0, 55.0, "construction merge", closed_side="right"),
+            Zone(6.0, 8.0, 45.0, "construction", closed_side="right"),
         ]
         spoken = _capture(app, monkeypatch)
         d.handle_event(key_event(pygame.K_u))
         assert "construction taper" in spoken[-1]
-        assert "merge left" in spoken[-1]
+        assert "right lane closed, merge left" in spoken[-1]
         assert "speed limit 55" in spoken[-1]
         # "construction zone" is the canonical spoken noun (docs/ontology.md).
         assert "then construction zone 45" in spoken[-1]
+
+        # The readout used to say "merge left" whatever was shut, so on a
+        # left-lane closure it sent the driver into the cones.
+        d.trip.zones = [
+            Zone(5.0, 6.0, 55.0, "construction merge", closed_side="left"),
+            Zone(6.0, 8.0, 45.0, "construction", closed_side="left"),
+        ]
+        spoken.clear()
+        d.handle_event(key_event(pygame.K_u))
+        assert "left lane closed, merge right" in spoken[-1]
+
+        # Roadwork with every lane open must not invent a merge either.
+        d.trip.zones = [
+            Zone(5.0, 6.0, 55.0, "construction merge"),
+            Zone(6.0, 8.0, 45.0, "construction"),
+        ]
+        spoken.clear()
+        d.handle_event(key_event(pygame.K_u))
+        assert "all lanes open" in spoken[-1]
+        assert "merge" not in spoken[-1]
     finally:
         app.shutdown()
 

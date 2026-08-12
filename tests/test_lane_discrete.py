@@ -189,9 +189,99 @@ def test_closure_messages_name_the_closed_side():
         assert "right lane is closed; merge left" in trip._zone_warning_message(closed_right, 2.0)
         assert "left lane is closed; merge right" in trip._zone_warning_message(closed_left, 2.0)
         assert "hold your lane" in trip._zone_warning_message(open_zone, 2.0)
-        assert "stay in the right lane" in trip._zone_entry_message(closed_left)
+        assert "left lane is closed; keep right" in trip._zone_entry_message(closed_left)
+        assert "right lane is closed; keep left" in trip._zone_entry_message(closed_right)
     finally:
         app.shutdown()
+
+
+def test_the_side_announced_is_the_side_that_is_shut():
+    """Shane's report: told the right lane was closed, then found the closure
+    on the other side. The zone stores a side, so the lane the callouts name
+    and the lane the game shuts are one fact -- on a three-wide road too,
+    where a bare index of 1 used to be the middle lane while every line
+    called it the left one."""
+    from freight_fate.data.world_models import LaneSegment
+
+    trip = _synthetic_trip([LaneSegment(0.0, 900.0, lanes=3, oneway=True)], 900.0, 7)
+    assert trip.lane_count_at(100.0) == 3
+    for side, expected in (("right", 0), ("left", 2)):
+        zone = Zone(90.0, 120.0, 45.0, "construction", closed_side=side)
+        trip.zones = [zone]
+        shut, keep = trip._closure_phrases(zone)
+        assert shut == side
+        assert keep != side
+        index = trip.closed_lane_at(100.0)
+        assert index == expected
+        # What the player is told, and which lane the game shuts, agree.
+        assert lane_label(index, 3) == shut
+        assert f"The {shut} lane is closed" in trip._zone_warning_message(zone, 2.0)
+        assert f"keep {keep}" in trip._zone_entry_message(zone)
+
+
+def test_a_closure_keeps_its_side_where_the_road_widens():
+    """A stored lane index means a different lane at either end of one work
+    zone; the side does not."""
+    from freight_fate.data.world_models import LaneSegment
+
+    trip = _synthetic_trip(
+        [
+            LaneSegment(0.0, 100.0, lanes=2, oneway=True),
+            LaneSegment(100.0, 900.0, lanes=3, oneway=True),
+        ],
+        900.0,
+        11,
+    )
+    zone = Zone(90.0, 120.0, 45.0, "construction", closed_side="left")
+    trip.zones = [zone]
+    assert trip.closed_lane_at(95.0) == 1  # left of two
+    assert trip.closed_lane_at(110.0) == 2  # still the left one, of three
+    assert lane_label(trip.closed_lane_at(95.0), 2) == "left"
+    assert lane_label(trip.closed_lane_at(110.0), 3) == "left"
+
+
+def test_a_jam_over_the_work_zone_cannot_hide_the_closure():
+    """``active_zone`` answers with the slowest zone at the mile, so a jam
+    laid over the roadwork used to leave the closure unenforced and unspoken
+    while the warning had already named it."""
+    from freight_fate.data.world_models import LaneSegment
+
+    trip = _synthetic_trip([LaneSegment(0.0, 900.0, lanes=2, oneway=True)], 900.0, 5)
+    work = Zone(90.0, 120.0, 45.0, "construction", closed_side="right")
+    jam = Zone(80.0, 130.0, 25.0, "heavy traffic")
+    trip.zones = [work, jam]
+    trip.position_mi = 100.0
+    assert trip.active_zone is jam  # the slower of the two
+    assert trip.active_closure() is work
+    assert trip.closed_lane_at() == 0
+
+
+def test_a_closure_always_leaves_somewhere_to_go():
+    """The never-stuck invariant: wherever a lane is shut, another lane on our
+    side is open at that same mile."""
+    from freight_fate.data.world_models import LaneSegment
+
+    segments = [
+        LaneSegment(0.0, 300.0, lanes=2, oneway=True),
+        LaneSegment(300.0, 600.0, lanes=3, oneway=True),
+        LaneSegment(600.0, 900.0, lanes=2, oneway=True),
+    ]
+    checked = 0
+    for seed in range(25):
+        trip = _synthetic_trip(segments, 900.0, seed)
+        for start, end in _closure_footprints(trip):
+            mile = start
+            while mile <= end:
+                count = trip.lane_count_at(mile)
+                closed = trip.closed_lane_at(mile)
+                if closed is not None:
+                    checked += 1
+                    assert count >= 2
+                    assert 0 <= closed < count
+                    assert closed in (0, count - 1)  # never the middle lane
+                    assert any(lane != closed for lane in range(count))
+                mile += 0.25
+    assert checked  # the sweep actually saw closures
 
 
 def test_riding_a_closed_lane_warns_then_hits_the_barrels():
@@ -466,6 +556,138 @@ def test_no_open_lane_means_no_fine(monkeypatch):
         assert p.money == pytest.approx(before_money)
         assert d.ticket_fines_paid == pytest.approx(0.0)
         assert len(record.serious_violations) == before_serious
+    finally:
+        app.shutdown()
+
+
+def test_a_narrowing_road_never_leaves_the_truck_in_the_closed_lane(monkeypatch):
+    """The other half of Shane's trap. He was told the right lane was closed
+    and moved left; where the road drops a lane the count clamp renumbers the
+    lanes under the truck, and the lane he had moved into became the closed
+    one. The road moved him, so the road moves him back out -- no barrels, no
+    citation, and he is told what happened."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken: list[str] = []
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+        _rolling(d, 55.0)
+        d.trip.position_mi = 6.0
+        d.trip.zones.append(Zone(5.0, 9.0, 45.0, "construction", closed_side="left"))
+        d.lane.set_lane_count(3)
+        d.lane.lane = 1  # the middle lane, open: the left one is coned off
+        d._leave_a_lane_the_road_closed()  # seed the lane count it has seen
+        before = d.truck.damage_pct
+
+        d.lane.set_lane_count(2)  # the road drops a lane under the truck
+        assert d.trip.closed_lane_at(lane_count=2) == 1  # which is where it now is
+        d._leave_a_lane_the_road_closed()
+
+        assert d.lane.lane == 0
+        assert d._merge_deadline is None
+        assert d.truck.damage_pct == pytest.approx(before)
+        assert spoken and "left lane is closed" in spoken[-1]
+        assert "right lane" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_a_lane_the_driver_steered_into_is_still_theirs_to_answer_for(monkeypatch):
+    """The rescue above must not become a free pass: with the road unchanged,
+    riding the cones still earns the warning and the barrels."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        _rolling(d, 55.0)
+        d.trip.position_mi = 6.0
+        d.trip.zones.append(Zone(5.0, 9.0, 45.0, "construction", closed_side="left"))
+        d._leave_a_lane_the_road_closed()
+        d.lane.lane = 1  # steered into the closed lane
+
+        d._leave_a_lane_the_road_closed()
+        assert d.lane.lane == 1  # nothing moved under the truck
+
+        d._update_merge(0.1)
+        assert d._merge_deadline is not None
+    finally:
+        app.shutdown()
+
+
+def test_a_tap_change_refuses_a_lane_that_closed_on_the_way_over(monkeypatch):
+    """A lane change takes seconds; the cones can arrive inside them. The
+    completion used to commit the move whatever had happened meanwhile."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken: list[str] = []
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+        _rolling(d, 55.0)
+        d.trip.position_mi = 6.0
+        d._tap_lane_change(1)
+        assert d._lane_change_target == 1
+
+        # The work zone starts under the truck while the change is running.
+        d.trip.zones.append(Zone(5.0, 9.0, 45.0, "construction", closed_side="left"))
+        for _ in range(40):
+            d._update_tap_lane_change(0.1)
+
+        assert d.lane.lane == 0
+        assert d._lane_change_target is None
+        assert spoken and "left lane is closed" in spoken[-1]
+    finally:
+        app.shutdown()
+
+
+def test_the_taper_warns_a_truck_in_the_lane_that_is_closing(monkeypatch):
+    """The merge taper is where the closure starts. Riding it used to be
+    silent all the way to the first barrel."""
+    from freight_fate.app import App
+
+    app = App()
+    spoken: list[str] = []
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+        _rolling(d, 55.0)
+        d.trip.position_mi = 4.5
+        d.trip.zones.append(Zone(4.0, 5.0, 55.0, "construction merge", closed_side="left"))
+        d.lane.lane = 1  # riding the lane that closes at the barrels
+        before = d.truck.damage_pct
+
+        for _ in range(200):
+            d._update_merge(0.1)
+
+        assert spoken and "closes at the work zone ahead" in spoken[0]
+        assert len([s for s in spoken if "closes at the work zone" in s]) == 1
+        assert d._merge_deadline is None  # the barrel clock belongs to the work zone
+        assert d.truck.damage_pct == pytest.approx(before)
+    finally:
+        app.shutdown()
+
+
+def test_the_taper_refuses_a_move_into_the_lane_that_is_closing(monkeypatch):
+    from freight_fate.app import App
+
+    app = App()
+    spoken: list[str] = []
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
+        _rolling(d, 55.0)
+        d.trip.position_mi = 4.5
+        d.trip.zones.append(Zone(4.0, 5.0, 55.0, "construction merge", closed_side="left"))
+
+        d._tap_lane_change(1)
+        assert d._lane_change_target is None
+        assert d.lane.lane == 0
+        assert spoken == ["The left lane closes at the work zone ahead."]
     finally:
         app.shutdown()
 

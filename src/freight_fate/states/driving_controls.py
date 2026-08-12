@@ -187,10 +187,20 @@ class DrivingControlsMixin:
             side = "left" if direction > 0 else "right"
             self.ctx.say(f"There is no lane to your {side} here.")
             return
-        zone = self.trip.active_zone
-        if zone is not None and zone.reason == "construction" and zone.closed_lane == target:
+        # The taper counts: that is where the lane is closing, and letting a
+        # driver move into it there is how they ended up inside the cones.
+        # Asked of the trip so a jam laid over the roadwork cannot hide the
+        # closure, and so the answer follows a road that widens or narrows.
+        if target == self.trip.closed_lane_at(lane_count=lane.lane_count):
+            closure = self.trip.active_closure()
+            name = lane_label(target, lane.lane_count)
+            closing = closure is not None and closure.reason != "construction"
             self.ctx.audio.play("ui/error")
-            self.ctx.say(f"The {lane_label(target, lane.lane_count)} lane is closed here.")
+            self.ctx.say(
+                f"The {name} lane closes at the work zone ahead."
+                if closing
+                else f"The {name} lane is closed here."
+            )
             return
         self._lane_change_target = target
         self._lane_change_timer = LANE_TAP_CHANGE_S
@@ -948,9 +958,19 @@ class DrivingControlsMixin:
                     None,
                 )
             if paired is not None:
+                # Which way to merge is the zone's to say. This line used to
+                # read "merge left" whatever was coned off, so half the time
+                # the readout sent the driver into the closed lane; where
+                # nothing is closed it now says so instead of inventing a
+                # merge.
+                if zone.closed_side is not None:
+                    shut, keep = self.trip._closure_phrases(zone)
+                    merge = f"{shut} lane closed, merge {keep}"
+                else:
+                    merge = "all lanes open"
                 parts.append(
                     f"construction taper in {s.distance_text(zone.start_mi - pos)}, "
-                    f"merge left, speed limit {s.speed_text(zone.limit_mph)}, "
+                    f"{merge}, speed limit {s.speed_text(zone.limit_mph)}, "
                     f"then construction zone {s.speed_text(paired.limit_mph)}"
                 )
             else:
