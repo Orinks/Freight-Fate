@@ -219,7 +219,36 @@ onto exit signalling.
       village within a mile explains the REDUCTION, and goes when nothing
       does. World-wide: 829 of 1,287 legs changed, posted segments 15,206 to
       11,207, sub-second postings 1,993 to 583, drop-and-restore blips 1,415
-      to 309. What remains is village-explained and real.
+      to 309.
+- [x] **...and still flickered, because the bar was written in miles --
+      SHIPPED 2026-08-12** (owner, on the 2026-08-11 build: "I still see
+      speed decreases and increases a few seconds after one another"). Two
+      holes. The mile bar is not one experience: a mile at 70 is 2.8 real
+      seconds at standard pace and a mile at 30 is over ten, so a 1.0 mi bar
+      admitted multi-second flickers by construction (40 of them). Worse, the
+      village exception was an unconditional pass -- any reduction within a
+      mile of a place survived at any length, which is how a quarter-mile
+      80-to-75-to-80 on I-44 lived through the screen. That accounted for 763
+      of the 803 postings still crossed in under three real seconds.
+      The dwell is real seconds now (`LIMIT_DWELL_REAL_S`), converted to
+      miles at each posting's own speed through the same compression ramp
+      `effective_time_scale` uses, and the exception is a halved bar for a
+      drop to a town speed rather than a free pass. World-wide: posted
+      segments 11,207 to 7,401, postings under three real seconds 803 to 0,
+      drop-and-restore blips under six seconds 703 to 120 -- and every one of
+      those 120 is a town speed beside a village the game speaks aloud, which
+      `test_no_leg_in_the_world_flickers_its_posted_limit` now pins as a
+      property of the shipped map. Sized on the standard 20x pace: relaxed
+      gets a quieter road than it strictly needs, and realistic is the player
+      asking for the world to fly by. The data layer carries its own copy of
+      the pacing constants (it never imports the sim); `test_maxspeed` pins
+      them to `trip_models` so they cannot drift.
+      Knock-on, fixed in the same change: Strawberry's 35 was one of the
+      slivers, and `_village_explains_drop` only looked FORWARD for the drop
+      a village explains, so the rim town stopped being sparse-worthy and
+      went unspoken on the default place-callouts tier. A name now also
+      explains the town speed already under the wheels when the road opens
+      back up just past it.
 - [x] **The alpha test book ships with the build -- SHIPPED 2026-08-11**,
       as `ALPHA_TEST_BOOK.md` plus an HTML rendering, verified by
       `verify_packaged_payload` like the manual. Its checklists are written
@@ -244,12 +273,27 @@ onto exit signalling.
       expression that let them drift apart. Testers who already earned a
       date badge out of season keep it -- revoking earned badges would be
       the worse call.
+- [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
+      Passing now has a way back: a one-shot "Clear of the box truck.
+      Right lane open." spoken from the same occupancy check that decides
+      a sideswipe, plus an L readout of every neighbouring lane on demand
+      (Darren). Driver name entry grew a real caret -- arrows review and
+      speak each character, editing happens at the caret (Cary). The
+      low-air warning got hysteresis so brake-heavy driving warns once
+      per episode, not per dip (Darren). Traffic stops settle the engine
+      sound to idle, and motel sleep shuts the engine off before the wake
+      prompt asks you to restart it (Jerry, Darren). The speed keeper's
+      corner hold no longer hides the next corner of a short city block
+      (Shane's "turns coming up really quickly"). Live weather holds
+      last-known conditions through a stale station instead of dropping
+      to neutral, without traceback spam in the log.
 - [ ] **Remaining tester findings from the same document.** Merging
-      traffic does not yield to a loaded truck. There is no cue telling
-      you when you are clear to move back over after passing, and at
-      least one unexplained sound (a whoosh on the left). Driver name
-      entry has no caret -- arrow keys do nothing, so a typo can only be
-      found by deleting back to it.
+      traffic does not yield to a loaded truck. At least one unexplained
+      sound (a whoosh on the left). In review: work-zone closures keeping
+      one authoritative side so the announced lane always matches the
+      coned lane, and spoken-event dedup so standing warnings stop
+      re-reading themselves (the shifted-load line could repeat every few
+      seconds; stale queued speech replayed after a pause).
 - [ ] **The no-engine-brake ban only knows route cities.** It rides
       `URBAN_RADIUS_MI` (6.0) around route nodes, so small towns a leg
       merely passes through are not modelled at all -- in a survey only

@@ -30,7 +30,56 @@
   Every download now carries it alongside the manual and the changelog, as
   both a plain text file and a page you can open in a browser.
 
+- **The truck now tells you when the lane you passed in is open again.**
+  Moving over to pass was a one-way trip: nothing said when you were clear
+  of the slower vehicle, so coming back was a guess and a mirror you cannot
+  check. Once you are past and there is room to spare, the truck says so --
+  "Clear of the box truck. Right lane open." -- once, using the same
+  judgment that decides a sideswipe, so a lane it calls open is a lane you
+  can take. Press L any time for the same reading on demand: your lane,
+  and whether each neighbouring lane is open, blocked, or closed.
+
 ### Fixed
+
+- **One dip in air pressure is one warning.** Hard or repeated braking
+  drags air pressure down around the warning line while the compressor
+  catches up, and every little dip below it re-fired the full low-air
+  warning. The warning now speaks once and stays quiet until pressure has
+  properly recovered -- though the spring-brake emergency at 40 psi still
+  speaks the moment it happens, no matter what.
+
+- **Driver name entry now has a caret you can steer.** The arrow keys did
+  nothing in the name field, so the only way to find a typo was deleting
+  back to it. Left and right now walk the name a character at a time and
+  speak each one -- capitals marked, space called out -- Home and End jump
+  to either end, and typing and backspace work at the caret, so fixing one
+  wrong letter no longer costs the rest of the name.
+
+- **The speed keeper no longer misses the second corner of a short block.**
+  On city streets the keeper eased for the corner in front of it and held
+  that number through the turn -- and a downtown block is shorter than that
+  hold, so the next, slower corner was invisible until too late and the
+  truck arrived over the speed the turn needed. Every corner close enough
+  to matter now bids, and the slowest one wins.
+
+- **Pulled over means idling, not revving.** When an officer waved you to
+  the shoulder, the engine sound kept whatever rev it had when the lights
+  came on, and held it there for the whole stop. The truck now settles to
+  idle at the roadside, like a truck actually stopped at the roadside.
+
+- **Sleeping at a motel now shuts the engine off.** Every other rest --
+  sleeper berth, lot, shoulder -- killed the engine before you slept, but
+  a motel room left it running all night, burning fuel while the wake-up
+  message told you to start an engine that had never stopped. The motel
+  now shuts it down like everywhere else, and the morning prompt is
+  finally telling the truth.
+
+- **Live weather rides out a quiet station instead of lurching to neutral.**
+  When the nearest weather station stopped reporting fresh observations,
+  the game dropped your route's weather to temporary neutral conditions and
+  kept retrying loudly. It now holds the last real weather it knew until a
+  fresh report arrives, so a station gone quiet no longer changes what you
+  hear on the road.
 
 - **Date badges now fire on the date you were actually told it is.** With
   the real-time calendar on, April's Fool could arrive in August. A career
@@ -73,10 +122,17 @@
   second. Those were never signs: the map splits a road wherever any
   detail about it changes, and a few hundred feet of that is invisible at
   real driving speed but goes by in a blink at the pace the game runs.
-  A posting now has to hold for long enough to be a sign before the truck
-  obeys it, unless there is a town on the road to explain it -- so
-  Strawberry's 35 is still Strawberry's 35, and the phantom drops are
-  gone. Two thirds of the routes in the game got quieter.
+
+  A posting now has to hold long enough to be a sign before the truck
+  obeys it, and long enough is measured in the seconds you actually spend
+  inside it rather than in miles -- because a mile of a 70 goes by in
+  under three seconds while a mile of a 30 takes over ten, and only one
+  of those is a flicker. Nothing on any road in the game now changes the
+  limit for less than three seconds, and the only changes shorter than
+  six are drops to a town speed beside a village the game names out loud,
+  so there is always something on the road to explain what you heard. A
+  quarter of the postings on the map went, and Strawberry's 35 is still
+  Strawberry's 35.
 
 - **Hairpin bends that no road could hold are gone from ordinary roads.**
   Sharp switchback calls were turning up on US and state routes well away
