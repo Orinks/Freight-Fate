@@ -748,10 +748,20 @@ class TimezoneCrossing:
 class Zone:
     """A stretch of road with a reduced speed limit.
 
-    ``closed_lane`` marks a lane coned off through the zone (an index into
-    the leg's lanes, 0 = right). Construction sets it; the taper zone ahead
-    of the work carries the same value so the merge callout can say which
-    way to move.
+    ``closed_side`` is which SIDE of the road is coned off through the zone,
+    "right" or "left", and it is the authoritative fact: the road can carry a
+    different number of lanes at either end of one work zone, so a stored lane
+    index means different lanes at different miles, while the side does not.
+    Everything spoken about a closure, and everything that decides which lane
+    the truck may be in, reads the side (through ``Trip.closed_lane_at``), so
+    the lane the player is told about and the lane that is actually shut can
+    never be two readings of the same number.
+
+    ``closed_lane`` is the nominal index on an ordinary two-lane-each-way
+    stretch (0 = right), kept because saves, tests and the placement code
+    speak in indexes. The two are derived from each other on construction.
+    Construction sets the closure; the taper zone ahead of the work carries
+    the same one so the merge callout can say which way to move.
 
     Congestion zones ("heavy traffic") carry ``aadt`` and per-direction
     ``lanes`` instead of a fixed schedule: whether the zone is active and how
@@ -766,6 +776,13 @@ class Zone:
     closed_lane: int | None = None
     aadt: float | None = None
     lanes: int = 2
+    closed_side: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.closed_side is None and self.closed_lane is not None:
+            self.closed_side = "right" if self.closed_lane == 0 else "left"
+        elif self.closed_side is not None and self.closed_lane is None:
+            self.closed_lane = 0 if self.closed_side == "right" else 1
 
 
 @dataclass

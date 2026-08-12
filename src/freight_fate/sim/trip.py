@@ -1181,8 +1181,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             else:
                 continue  # the route is crowded; place fewer zones instead
             if self._rng.random() < 0.6:
-                closed = (
-                    self._rng.choice((0, 1))
+                # A side, not a lane number: crews cone off the outside of the
+                # road, and a side still names a real lane where the stretch
+                # runs three wide -- an index of 1 would be the middle lane
+                # there while every callout called it the left one.
+                side = (
+                    self._rng.choice(("right", "left"))
                     if self._rng.random() < CONSTRUCTION_CLOSURE_CHANCE
                     else None
                 )
@@ -1190,18 +1194,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 # Only cone off a lane where the driver has another one to
                 # move into for the whole signed stretch. Elsewhere the work
                 # still happens, with every lane open through it.
-                if closed is not None and not self._span_is_multilane(taper_start, end):
-                    closed = None
+                if side is not None and not self._span_is_multilane(taper_start, end):
+                    side = None
                 zones.append(
                     Zone(
                         taper_start,
                         at,
                         CONSTRUCTION_TAPER_LIMIT_MPH,
                         "construction merge",
-                        closed_lane=closed,
+                        closed_side=side,
                     )
                 )
-                zones.append(Zone(at, end, 45, "construction", closed_lane=closed))
+                zones.append(Zone(at, end, 45, "construction", closed_side=side))
                 # Claim the whole signed footprint, taper included, so the
                 # next draw cannot land a second work zone inside this one.
                 spans.append((taper_start, end))
@@ -1579,6 +1583,49 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         if getattr(leg, "divided", None) is False:
             return 1
         return leg_lane_count(leg)
+
+    def active_closure(self, mile: float | None = None) -> Zone | None:
+        """The roadwork zone whose cones cover this mile, taper included.
+
+        Not ``active_zone``: that answers with the SLOWEST zone at the mile,
+        so a jam laid over the roadwork hid the closure from everything that
+        asks which lane is shut -- the driver was still told the right lane
+        was closed while the lane-change check believed nothing was. The work
+        zone answers ahead of its own taper where the two overlap, because
+        that is where the barrels are.
+        """
+        sample = self.position_mi if mile is None else mile
+        covering = [
+            z
+            for z in self.zones
+            if z.reason in CONSTRUCTION_ZONE_REASONS
+            and z.closed_side is not None
+            and z.start_mi <= sample <= z.end_mi
+        ]
+        if not covering:
+            return None
+        return min(covering, key=lambda z: (z.reason != "construction", z.start_mi))
+
+    def closed_lane_at(
+        self, mile: float | None = None, *, lane_count: int | None = None
+    ) -> int | None:
+        """Which lane index is coned off at a mile, or ``None`` for none.
+
+        Derived from the closure's SIDE and the lanes the road has here, so
+        it follows a stretch that widens or narrows instead of pointing at
+        whichever lane happened to carry that index where the zone was
+        placed. ``lane_count`` overrides the road's count for a caller that
+        steers by its own (the exit ramp is one lane whatever the mainline
+        does). One lane our side means there is nowhere to send anybody, so
+        nothing is closed.
+        """
+        zone = self.active_closure(mile)
+        if zone is None or zone.closed_side is None:
+            return None
+        count = self.lane_count_at(mile) if lane_count is None else lane_count
+        if count < 2:
+            return None
+        return 0 if zone.closed_side == "right" else count - 1
 
     def _span_is_multilane(self, start_mi: float, end_mi: float) -> bool:
         """True when every mile of a work zone footprint -- taper included --
@@ -2190,14 +2237,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
 
     @staticmethod
     def _closure_phrases(zone: Zone) -> tuple[str, str]:
-        """(closed lane name, direction to merge) for a zone's coned-off lane."""
-        if zone.closed_lane == 0:
-            return "right", "left"
-        return "left", "right"
+        """(closed lane name, direction to merge) for a zone's coned-off lane.
+
+        Read off the side the zone stores rather than worked out from a lane
+        index, so the side the player is told is the side that is shut on any
+        road, however many lanes it has.
+        """
+        shut = zone.closed_side or ("right" if zone.closed_lane == 0 else "left")
+        return shut, ("left" if shut == "right" else "right")
 
     def _zone_warning_message(self, zone: Zone, ahead: float) -> str:
         if zone.reason == "construction":
-            if zone.closed_lane is not None:
+            if zone.closed_side is not None:
                 shut, keep = self._closure_phrases(zone)
                 merge_part = f"The {shut} lane is closed; merge {keep} at the taper. "
             else:
@@ -2228,7 +2279,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
 
     def _zone_entry_message(self, zone: Zone) -> str:
         if zone.reason == "construction merge":
-            if zone.closed_lane is not None:
+            if zone.closed_side is not None:
                 shut, keep = self._closure_phrases(zone)
                 return (
                     f"Construction merge taper. The {shut} lane closes ahead; "
@@ -2240,11 +2291,16 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 f"Speed limit {self._speed_value(zone.limit_mph)}."
             )
         if zone.reason == "construction":
-            if zone.closed_lane is not None:
+            if zone.closed_side is not None:
                 shut, keep = self._closure_phrases(zone)
+                # "Stay in the left lane" was only ever the whole truth on a
+                # road two lanes wide; three lanes across it named a lane the
+                # driver had no reason to be in. "Keep left" is the same
+                # instruction on a two-lane stretch and still true on a wider
+                # one.
                 return (
-                    f"Work zone active. The {shut} lane is closed; stay in the "
-                    f"{keep} lane and watch the barrels. "
+                    f"Work zone active. The {shut} lane is closed; keep {keep} "
+                    "and watch the barrels. "
                     f"Speed limit {self._speed_value(zone.limit_mph)}."
                 )
             return (

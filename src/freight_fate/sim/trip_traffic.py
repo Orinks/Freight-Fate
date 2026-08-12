@@ -333,7 +333,7 @@ class TripTrafficMixin:
                 limit_mph = self._construction_zone_speed(event)
 
                 # Determine lane closure
-                closed_lane = self._construction_closed_lane(event)
+                closed_side = self._construction_closed_side(event)
 
                 # Create the zone pair (taper + work zone)
                 taper_start = max(0.0, start_mi - CONSTRUCTION_TAPER_MI)
@@ -341,15 +341,15 @@ class TripTrafficMixin:
                 # the road runs one lane our side anywhere under the zone, the
                 # work is announced with every lane open rather than pinning
                 # the truck in a lane it cannot leave.
-                if closed_lane is not None and not self._span_is_multilane(taper_start, end_mi):
-                    closed_lane = None
+                if closed_side is not None and not self._span_is_multilane(taper_start, end_mi):
+                    closed_side = None
                 real_zones.append(
                     Zone(
                         taper_start,
                         start_mi,
                         CONSTRUCTION_TAPER_LIMIT_MPH,
                         "construction merge",
-                        closed_lane=closed_lane,
+                        closed_side=closed_side,
                     )
                 )
                 real_zones.append(
@@ -358,7 +358,7 @@ class TripTrafficMixin:
                         end_mi,
                         limit_mph,
                         "construction",
-                        closed_lane=closed_lane,
+                        closed_side=closed_side,
                     )
                 )
                 seen_spans.append((taper_start, end_mi))
@@ -402,13 +402,18 @@ class TripTrafficMixin:
         # Single lane closure or default
         return 45.0
 
-    def _construction_closed_lane(self, event) -> int | None:
-        """Determine which lane is closed, or None if no closure."""
+    def _construction_closed_side(self, event) -> str | None:
+        """Which side of the road is coned off, or None if no closure.
+
+        A side rather than a lane index: the feeds report the work, and the
+        lane it lands on depends on how wide the road is where the truck
+        reaches it (see ``Trip.closed_lane_at``).
+        """
         closure = event.closure
         if closure == "full closure":
-            return 0  # right lane closed as part of full closure
+            return "right"  # right lane closed as part of full closure
         if closure in ("alternating", "single lane"):
-            return 0  # right lane (typically the closed one)
+            return "right"  # right lane (typically the closed one)
         if closure == "shoulder":
             return None  # shoulder work doesn't close a travel lane
         return None

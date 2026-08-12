@@ -489,6 +489,10 @@ class DrivingState(
         self._lane_change_timer = 0.0
         self._lane_signal_timer = 0.0
         self._merge_deadline: float | None = None
+        # Lanes on our side last tick, so a road that narrows under the truck
+        # can be told apart from a driver who steered into the cones.
+        self._lane_count_seen: int | None = None
+        self._merge_taper_warned: str | None = None
         self._hazard_dodgeable = False
         self._hazard_lane = 0
         self._left_lane_s = 0.0

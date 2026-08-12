@@ -738,6 +738,10 @@ class DrivingUpdateMixin:
         self.lane.steering = steer
         # The exit ramp is a single lane; the mainline keeps its leg count.
         self.lane.set_lane_count(1 if self._ramp_mi is not None else self._lane_count_here())
+        # A narrowing road renumbers the lanes under the truck, so this has to
+        # run the moment the count changes and before anything polices where
+        # the truck is.
+        self._leave_a_lane_the_road_closed()
         # Use the real baked curve data when the truck is inside a curve.
         # The curve force pushes the lane offset outward proportionally to
         # how much the truck's speed exceeds the advisory speed, scaled by
@@ -937,7 +941,21 @@ class DrivingUpdateMixin:
         self._lane_change_timer -= dt
         if self._lane_change_timer <= 0:
             self._lane_change_target = None
-            self.lane.lane = min(target, self.lane.lane_count - 1)
+            target = min(target, self.lane.lane_count - 1)
+            # Check the closure again on arrival, not just when the key was
+            # pressed. A change takes seconds, and in those seconds the truck
+            # can reach the cones or the road can narrow and renumber the
+            # lanes -- either way the clamp above would otherwise land the
+            # truck in the closed lane it was moving to avoid.
+            if target == self._closed_lane_here():
+                self.ctx.audio.play("ui/error")
+                self.ctx.say_event(
+                    f"The {lane_label(target, self.lane.lane_count)} lane is "
+                    f"closed. Staying in the {self.lane.lane_name} lane.",
+                    interrupt=True,
+                )
+                return
+            self.lane.lane = target
             # The tap change crosses the same painted line: same marker roll.
             self.ctx.audio.play(
                 "vehicle/lane_line_cross",
@@ -1002,10 +1020,67 @@ class DrivingUpdateMixin:
         if not quiet:
             self.ctx.say_event(f"In the {lane.lane_name} lane.", interrupt=False)
 
+    def _closed_lane_here(self) -> int | None:
+        """The coned-off lane index in the truck's own lane numbering.
+
+        Asked of the trip, which reads the closure's side against the lanes
+        the road has here, and told the count the truck is actually steering
+        in -- the exit ramp is one lane whatever the mainline carries. This
+        is the only place the driving state learns which lane is shut, so no
+        two checks can answer differently.
+        """
+        return self.trip.closed_lane_at(lane_count=self.lane.lane_count)
+
+    def _open_lane_beside(self, closed: int) -> int | None:
+        """The nearest lane the truck may legally be in, or None if there is
+        no such lane."""
+        count = self.lane.lane_count
+        if count < 2:
+            return None
+        candidate = closed - 1 if closed > 0 else closed + 1
+        if not 0 <= candidate < count or candidate == closed:
+            return None
+        return candidate
+
+    def _leave_a_lane_the_road_closed(self) -> None:
+        """Move the truck out of a closure it never drove into.
+
+        The road, not the driver, can put a truck in coned-off lanes: where a
+        stretch narrows, the lane count renumbers the lanes under the truck
+        and the count clamp drops it a lane over, which can be the closed one.
+        Shane's Detroit-Mansfield run is what that sounds like -- told the
+        right lane was closed, moved left, and then put back in the closed
+        lane with nothing to do about it. Whenever the road moves the truck
+        into a closure it is moved straight back out and told so; only a lane
+        the driver steered into is theirs to answer for.
+        """
+        count = self.lane.lane_count
+        was = self._lane_count_seen
+        self._lane_count_seen = count
+        if was is None or was == count:
+            return  # the road did not change under the truck
+        closed = self._closed_lane_here()
+        if closed is None or self.lane.lane != closed:
+            return
+        open_lane = self._open_lane_beside(closed)
+        if open_lane is None:
+            return
+        open_name = lane_label(open_lane, count)
+        self.lane.lane = open_lane
+        self.lane.offset = 0.0
+        self._lane_change_target = None
+        self._merge_deadline = None
+        self.ctx.audio.play("vehicle/lane_line_cross", volume=min(1.0, 0.7 * self._cue_loudness()))
+        self.ctx.say_event(
+            f"The {lane_label(closed, count)} lane is closed where the road "
+            f"narrows. You are in the {open_name} lane.",
+            interrupt=True,
+        )
+
     def _update_merge(self, dt: float) -> None:
         """Riding a coned-off lane: one urgent warning, then the barrels win."""
-        zone = self.trip.active_zone
-        closed = zone.closed_lane if zone is not None and zone.reason == "construction" else None
+        zone = self.trip.active_closure()
+        closed = self._closed_lane_here()
         if closed is None or self.lane.lane != closed or self.truck.speed_mph < LANE_MIN_MPH:
             self._merge_deadline = None
             return
@@ -1017,8 +1092,24 @@ class DrivingUpdateMixin:
             # for staying put -- is the worst thing this code could do.
             self._merge_deadline = None
             return
-        open_lane = closed - 1 if closed > 0 else closed + 1
+        open_lane = self._open_lane_beside(closed)
+        if open_lane is None:
+            self._merge_deadline = None
+            return
         open_name = lane_label(open_lane, self.lane.lane_count)
+        if zone is not None and zone.reason != "construction":
+            # Still in the taper: the lane is closing, not closed. Say so
+            # once, and leave the barrel clock for the work zone itself.
+            taper_key = f"{zone.reason}:{zone.start_mi:.2f}"
+            if self._merge_taper_warned != taper_key:
+                self._merge_taper_warned = taper_key
+                self.ctx.audio.play("ui/warning")
+                self.ctx.say_event(
+                    f"The {lane_label(closed, self.lane.lane_count)} lane closes "
+                    f"at the work zone ahead. Move to the {open_name} lane.",
+                    interrupt=True,
+                )
+            return
         if self._merge_deadline is None:
             self._merge_deadline = MERGE_WINDOW_S
             self.ctx.audio.play("ui/warning")
@@ -1106,8 +1197,7 @@ class DrivingUpdateMixin:
     def _keep_right_justified(self) -> bool:
         """Left-lane time is legitimate while passing slower right-lane
         traffic, or while construction has the right lane coned off."""
-        zone = self.trip.active_zone
-        if zone is not None and zone.closed_lane == 0:
+        if self._closed_lane_here() == 0:
             return True
         slower = self.trip.traffic_manager.vehicle_in_lane(
             self.trip.position_mi,
