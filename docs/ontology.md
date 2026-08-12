@@ -87,6 +87,7 @@ belongs to the truck you own in this game, not to the driver.
 | Traffic on the trip | `TripTrafficMixin` | `sim/trip_traffic.py` |
 | Lane keeping | `LaneKeeping` | `sim/lane.py` |
 | Lane keeping (the setting) | `lane_keeping` | `settings.py`, `states/main_menu.py` |
+| The lane you came out of being open again | `LaneGapMixin` | `states/driving_lane_gap.py` |
 | Driving mode tuning | `DrivingModeTuning` | `sim/driving_modes.py` |
 | Pedal latch | `PedalLatch` | `sim/pedal_latch.py` |
 | A tank load and its sloshing wave | `LiquidLoad`, `SloshAxis` | `sim/surge.py` |
@@ -205,6 +206,7 @@ from the words, and synonyms cost them a re-read.
 | The tractor a carrier gave you | your assigned truck | your truck (when leased) | `FleetTier` |
 | How much of the lane-holding work the truck does | lane keeping, always with its value clause ("full, the truck holds the lane and takes your exits") | lane drift (retired 1.9), steering assist, lane keeping assist (that is `lane_centering_assist`), the bare value word alone -- "off" here is the hardest mode, the opposite of "off" on the rows around it | `settings.lane_keeping` |
 | Vehicles around you now | traffic | NPCs, cars | `TrafficManager` |
+| Room to move into the next lane over | the lane is open ("right lane open"); held by somebody, it is blocked ("right lane blocked by a semi") | clear (that is what the truck is clear OF -- the vehicle passed), safe, free, gap | `LaneGapMixin`, `states/driving_lane_gap.py` |
 | Incidents reported ahead | delays, road reports | traffic (unqualified) | `RealTrafficProvider` |
 | A parking space at a stop | parking | slot, spot | `TruckParkingLocation` |
 | The trailer liquid bulk rides in | tank trailer | tanker (as a noun for the trailer), tank truck | `TRAILER_CATALOG["tank"]` |

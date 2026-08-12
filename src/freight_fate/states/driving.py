@@ -13,6 +13,7 @@ from .driving_enforcement import EnforcementWatchMixin
 from .driving_engine_brake import EngineBrakeZoneMixin
 from .driving_events import DrivingEventMixin
 from .driving_facility_gate import FacilityGateMixin
+from .driving_lane_gap import LaneGapMixin
 from .driving_liquid import LiquidLoadMixin
 from .driving_location import DrivingLocationMixin
 from .driving_pacenotes import DrivingPacenoteMixin
@@ -35,6 +36,7 @@ class DrivingState(
     DamageBandMixin,
     WrongWayMixin,
     TrafficPassMixin,
+    LaneGapMixin,
     EnforcementWatchMixin,
     EngineBrakeZoneMixin,
     FacilityGateMixin,
@@ -468,6 +470,9 @@ class DrivingState(
         # truck each bubble vehicle was on last frame, and which have already
         # been given their whoosh. Per-stint, not saved.
         self._reset_traffic_passes()
+        # The return-gap watch (driving_lane_gap.py): the lane the last change
+        # moved out of, and who is holding it. Per-stint, not saved.
+        self._reset_lane_gap()
         # Street corners (driving_turns.py): how many corners this run has
         # cost, which escalates the spoken help. The per-corner latches are
         # rebuilt whenever the trip's route changes.

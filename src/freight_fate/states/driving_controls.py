@@ -110,7 +110,7 @@ class DrivingControlsMixin:
         elif key == pygame.K_v:
             self._speak_weather()
         elif key == pygame.K_l:
-            self.ctx.say(self.lane.describe())
+            self.ctx.say(self._lane_status_text())
         elif key == pygame.K_s:
             if getattr(event, "mod", 0) & pygame.KMOD_ALT:
                 self._speak_hos_break()
@@ -305,7 +305,9 @@ class DrivingControlsMixin:
             "where you can legally stop before it. "
             "R progress, distance left, and where you are. "
             "Shift R next listed highway exit. "
-            "V weather. L lane position. I turns the lane locator on and off: a "
+            "V weather. L lane position, and whether the lane beside you is "
+            "open. After a pass, the truck also says when the lane you came "
+            "out of is clear again. I turns the lane locator on and off: a "
             "soft tock once a beat, panned to where you sit inside your lane, "
             "running until you turn it off, on lane keeping partial or off. "
             "A repeats the last driving announcement. "
