@@ -533,7 +533,12 @@ class DrivingUpdateMixin:
                 else f"Low air warning: {t.air_pressure_psi:.0f} psi. {advice}"
             )
             self.ctx.say_event(message, interrupt=True)
-        elif not t.air_low_warning:
+        elif t.air_pressure_psi >= t.specs.air_low_warning_clear_psi:
+            # Re-arm only once pressure has recovered clear of the warning
+            # threshold (hysteresis), not merely ticked a fraction above it.
+            # Heavy or repeated service braking otherwise leaves pressure
+            # bouncing right around air_low_warning_psi while the compressor
+            # catches up, and each bounce re-fired the full warning line.
             self._low_air_said = False
 
         if t.spring_brakes_active and not was_spring and not self._spring_brake_said:

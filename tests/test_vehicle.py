@@ -989,6 +989,17 @@ def test_brake_applications_consume_air_and_trigger_low_air_warning():
     assert t.air_low_warning
 
 
+def test_air_low_warning_clear_threshold_has_hysteresis_margin():
+    # air_low_warning itself is a raw instantaneous crossing (no memory) --
+    # the driving state layer is what latches the warning until pressure
+    # recovers clear of this threshold, so it must sit safely above the warn
+    # point (and below the compressor cut-in) or the hysteresis band does
+    # nothing.
+    specs = TruckState().specs
+    assert specs.air_low_warning_clear_psi > specs.air_low_warning_psi
+    assert specs.air_low_warning_clear_psi < specs.air_governor_cut_in_psi
+
+
 def test_service_brakes_drain_separate_air_reservoirs():
     t = TruckState()
     t.set_air_ready(parking_brake=False)

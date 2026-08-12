@@ -291,6 +291,11 @@ class TruckSpecs:
     air_governor_cut_out_psi: float = 125.0
     air_governor_cut_in_psi: float = 100.0
     air_low_warning_psi: float = 60.0
+    # Hysteresis for the low-air warning cue: repeated service braking makes
+    # pressure hover right around air_low_warning_psi while the compressor
+    # catches up, so the warning must not re-arm until pressure has climbed
+    # well above the threshold, not merely ticked a fraction over it.
+    air_low_warning_clear_psi: float = 68.0
     air_spring_brake_psi: float = 40.0
     air_parking_release_psi: float = 100.0
     air_cold_start_psi: float = 55.0
