@@ -41,6 +41,18 @@
 
 ### Fixed
 
+- **The speed keeper comes back up to street speed.** Its number could
+  only fall: a session that started on a 15 mile-per-hour service way
+  held that crawl over every 25 mile-per-hour street after it, for the
+  whole facility approach, even while the zone entry announced the
+  higher limit. A new posted number now hands the keeper back up, and
+  it says so: "Speed keeper holding 25 miles per hour through the
+  facility access road zone." It also stops matching a slower vehicle
+  it can see miles ahead -- easing starts when the distance calls for
+  it -- and its slow-down for a drop no longer starts a stretch too
+  early. Creeping up to a stopped queue and a speed you set by hand
+  both work as before.
+
 - **Automatic braking stops the truck on the service brakes, and stops
   draining your air.** The hazard assist pumped the pedal -- pressing,
   easing off as the stop improved, pressing again -- and every re-press

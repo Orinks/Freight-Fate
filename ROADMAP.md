@@ -308,6 +308,17 @@ onto exit signalling.
       its emergency escalation never reached the wheels; and a dead NWS
       station pinned its route cell to simulated fallback forever (the
       fetch now walks to the next-nearest live station).
+- [x] **Speed keeper holds street speed on access roads -- landed
+      2026-08-12** (Armstrong's report, secondhand). Three defects: the
+      keeper's number could only fall, so a session begun on a 15 mph
+      service way crawled the whole facility approach while the zones
+      announced 25; the ease window priced the whole shed at entry
+      speed (40 percent early on a 25-to-15 drop, crawled rather than
+      re-planned since the eased number became a held floor); and a
+      slower lead anywhere in the traffic bubble's 2.5-mile reach was
+      matched outright with no distance test. All three fixed with the
+      spoken hand-back-up line; queue creep and hand-set speeds
+      unchanged.
 - [ ] **Adaptive cruise's own limit lookahead ignores time compression.**
       `_acc_limit_lookahead_mi` sizes cruise's slow-down trigger with the
       same uncompressed braking physics the limit pacenote just moved off
