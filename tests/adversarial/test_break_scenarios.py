@@ -85,8 +85,9 @@ KNOWN_OPEN = {
         "settlement crossing three thresholds announces one"
     ),
     "short_hop_streak_xp_farming": (
-        "streak-compounded 25-mile hops earn 4.9x the XP efficiency of a "
-        "500-mile haul, and short hauls are the faster ones to drive"
+        "25-mile hops earn 4.6x the XP efficiency of a 500-mile haul, and short "
+        "hauls are the faster ones to drive; the streak bonus is now capped at "
+        "the mileage XP, so what remains is the flat completion XP by design"
     ),
 }
 

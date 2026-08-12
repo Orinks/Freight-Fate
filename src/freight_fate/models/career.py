@@ -155,6 +155,20 @@ def xp_streak_bonus(streak: int) -> float:
     return min(XP_STREAK_MAX_BONUS, XP_STREAK_STEP * max(0, streak - 1))
 
 
+def streak_bonus_xp(streak: int, base_xp: float, mileage_xp: float) -> float:
+    """XP the on-time streak adds, capped at what the miles themselves taught.
+
+    The share applies to the whole award, flat completion XP included -- but
+    a streak can at most double the road lesson, never mint XP off the flat
+    per-delivery award. Without the cap, chaining board-minimum 25-mile hops
+    farmed the streak against a base that is nearly all completion XP. The
+    cap only binds below about 77 miles at plain freight; the honest pacing
+    model's shortest deal is 105 miles, so the contracted arc to level 30 is
+    unchanged to the float.
+    """
+    return min(xp_streak_bonus(streak) * base_xp, mileage_xp)
+
+
 ENDORSEMENT_ANNOUNCEMENTS = {
     "refrigerated": (
         "You earned the refrigerated endorsement. "
@@ -234,9 +248,10 @@ class Career:
             self.on_time_streak = 0
         completion = DELIVERY_COMPLETION_XP * (1.0 if on_time else 0.5)
         per_mile = XP_PER_MILE_ON_TIME if on_time else XP_PER_MILE_LATE
-        gained = completion + miles * per_mile * max(1.0, cargo_class_mult)
+        mileage_xp = miles * per_mile * max(1.0, cargo_class_mult)
+        gained = completion + mileage_xp
         if on_time:
-            gained *= 1.0 + xp_streak_bonus(self.on_time_streak)
+            gained += streak_bonus_xp(self.on_time_streak, gained, mileage_xp)
         if damage_pct <= 1.0:
             gained *= 1.0 + XP_CLEAN_BONUS
         if standing_rate != 1.0:

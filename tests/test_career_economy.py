@@ -72,6 +72,50 @@ def test_streak_bonus_caps_near_half():
     assert xp_streak_bonus(40) == pytest.approx(0.45)
 
 
+def test_short_hop_streak_bonus_is_capped_at_the_mileage_xp():
+    # A board-minimum 25-mile hop at a deep on-time streak: the streak bonus
+    # is capped at what the miles themselves taught (25 * 1.6 = 40 XP), not
+    # 45 percent of the whole award including the flat completion XP. This is
+    # the short-hop farming cap: a streak can at most double the road lesson,
+    # it cannot mint XP off the flat per-delivery award.
+    career = Career()
+    career.on_time_streak = 9  # this delivery makes it 10, the share cap
+    career.record_delivery(25.0, 300.0, on_time=True, damage_pct=0.0)
+    base = 150.0 + 25.0 * 1.6
+    mileage_xp = 25.0 * 1.6
+    assert career.xp == pytest.approx((base + mileage_xp) * 1.15)
+
+
+def test_streak_beyond_the_cap_adds_nothing_more():
+    # Once both caps are saturated, a longer streak earns the same bonus.
+    at_cap = Career()
+    at_cap.on_time_streak = 19
+    at_cap.record_delivery(25.0, 300.0, on_time=True, damage_pct=0.0)
+
+    far_beyond = Career()
+    far_beyond.on_time_streak = 39
+    far_beyond.record_delivery(25.0, 300.0, on_time=True, damage_pct=0.0)
+
+    assert far_beyond.xp == pytest.approx(at_cap.xp)
+
+
+def test_honest_haul_streak_values_unchanged_below_the_cap():
+    # Real freight is untouched: on any haul long enough that the road XP
+    # exceeds the capped share of the award (about 77 miles and up at plain
+    # freight), the streak bonus is the same arithmetic it has always been.
+    long_haul = Career()
+    long_haul.on_time_streak = 11  # deep streak, share already at 0.45
+    long_haul.record_delivery(500.0, 1800.0, on_time=True, damage_pct=0.0)
+    assert long_haul.xp == pytest.approx((150.0 + 500.0 * 1.6) * 1.45 * 1.15)
+
+    # Even the shortest freight the honest pacing model deals (105 miles at
+    # level 1) sits above the threshold; 80 miles still clears it.
+    short_honest = Career()
+    short_honest.on_time_streak = 14
+    short_honest.record_delivery(80.0, 400.0, on_time=True, damage_pct=0.0)
+    assert short_honest.xp == pytest.approx((150.0 + 80.0 * 1.6) * 1.45 * 1.15)
+
+
 def test_specialty_multiplier_applies_through_record_delivery():
     career = Career()
     career.record_delivery(100.0, 500.0, on_time=True, damage_pct=50.0, cargo_class_mult=1.5)
