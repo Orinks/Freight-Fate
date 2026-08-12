@@ -70,6 +70,15 @@
 
 ### Fixed
 
+- **Turning streamer-safe mode on now takes effect on the air, not just
+  on paper.** Flipping it on from the settings while a real public
+  stream was playing left the stream running -- the one thing the mode
+  exists to stop -- while the dial silently moved to the silent
+  fallback, and turning the mode back off left the radio parked on that
+  silence. Now the station leaves the air the moment you flip the
+  switch, the cab says so, and the radio lands on the Roadhouse like
+  any other handover.
+
 - **The static dies with the station it belongs to.** When a station
   faded past the edge of its range and the radio fell back to the
   Roadhouse, the dead station's hiss and noise splashes kept crackling

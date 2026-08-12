@@ -300,6 +300,18 @@ class GameContext:
     def quit(self) -> None:
         self._app.running = False
 
+    def apply_active_radio_settings(self) -> None:
+        """Apply a radio settings change to a covered drive, right now.
+
+        Flipping streamer-safe from the pause settings is a promise about
+        what is on the air at this moment; the active drive must react
+        while the menu still covers it, not at some later reception tick."""
+        for state in reversed(self._app.states):
+            apply = getattr(state, "apply_radio_settings_now", None)
+            if apply is not None:
+                apply()
+                break
+
     def save_profile(self) -> None:
         # Driving-school sandbox: the profile is a throwaway copy and must
         # never reach disk; the real save is restored when school ends.

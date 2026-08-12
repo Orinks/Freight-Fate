@@ -230,3 +230,76 @@ def test_manual_fadeout_drive(monkeypatch):
         harness.press_key(pygame.K_y)
         for line in result.transcript[cursor:]:
             print(f"  spoken | {line}")
+
+
+def test_manual_streamer_safe_flip_mid_drive(monkeypatch):
+    """Turn streamer-safe ON from the pause settings while a real public
+    stream is playing. The whole point of the mode is that the licensed
+    audio stops; watch what actually happens to the channel and the dial."""
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Manual Streamer Flip")
+        d = harness.driving
+        audio_log = []
+        monkeypatch.setattr(
+            d.ctx.audio,
+            "play_music",
+            lambda track, fade_ms=1500: audio_log.append(f"play_music {track}"),
+        )
+        monkeypatch.setattr(
+            d.ctx.audio,
+            "stop_music",
+            lambda fade_ms=0: audio_log.append(f"stop_music fade {fade_ms}"),
+        )
+        monkeypatch.setattr(
+            d.ctx.audio,
+            "play_radio_stream",
+            lambda url, fade_ms=1500: audio_log.append("play_radio_stream (stubbed)"),
+        )
+        monkeypatch.setattr(d.ctx.audio, "music_playing", lambda: True)  # stream is alive
+
+        harness.press_key(pygame.K_e)
+        d.ctx.audio.update(5.0)
+        d._update_audio(1 / 60)
+
+        cursor = len(result.transcript)
+
+        def step(label, action=None):
+            nonlocal cursor
+            print(f"\n=== {label}")
+            if action is not None:
+                action()
+            for line in result.transcript[cursor:]:
+                print(f"  spoken | {line}")
+            cursor = len(result.transcript)
+            for note in audio_log:
+                print(f"  audio  | {note}")
+            audio_log.clear()
+
+        step(
+            "Tune the live WBEZ stream",
+            lambda: d.radio.select_station("wbez-chicago", d._radio_backend),
+        )
+
+        def flip_streamer_safe():
+            # Exactly what the settings row does now.
+            d.ctx.settings.radio_streamer_safe = True
+            d.ctx.apply_active_radio_settings()
+
+        step("Turn streamer-safe ON in settings, return to the drive", flip_streamer_safe)
+        step("What does the cab say the radio is now? (Y)", lambda: harness.press_key(pygame.K_y))
+        print(f"  debug  | current station: {d.radio.current_station().display_name}")
+        print(
+            f"  debug  | station still on the dial? "
+            f"{any(s.id == 'wbez-chicago' for s in d.radio.available_stations())}"
+        )
+
+        def flip_back():
+            d.ctx.settings.radio_streamer_safe = False
+            d.ctx.apply_active_radio_settings()
+
+        step("Turn streamer-safe back OFF, return to the drive", flip_back)
+        step("Y again", lambda: harness.press_key(pygame.K_y))
+        print(
+            f"  debug  | WBEZ back on the dial? "
+            f"{any(s.id == 'wbez-chicago' for s in d.radio.available_stations())}"
+        )

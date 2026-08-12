@@ -2049,6 +2049,33 @@ class DrivingUpdateMixin:
             self.radio.write_settings(self.ctx.settings)
             self.ctx.settings.save()
 
+    def apply_radio_settings_now(self) -> None:
+        """React to a radio settings flip while this drive owns the radio.
+
+        Turning streamer-safe on is a promise about what is on the air
+        right now. Before this, the playing stream was never stopped (the
+        one thing the mode exists to do), the dial swapped to the SILENT
+        fallback without a word, and flipping the mode back off left the
+        radio parked on that silence. Now the station leaves the air the
+        moment the row is toggled, the cab says so, and the radio lands on
+        the Roadhouse like any other handover."""
+        before = self.radio.current_station()
+        self.radio.apply_settings(self.ctx.settings)
+        if self.radio._station_allowed(before):
+            return
+        powered = self.radio.enabled and self.truck.engine_on
+        action = self.radio.select_station(
+            SAFE_ROUTE_PLAYLIST, self._radio_backend if powered else None
+        )
+        self.radio.write_settings(self.ctx.settings)
+        self.ctx.settings.save()
+        if powered:
+            self.ctx.say_event(
+                f"{before.display_name} left the dial: streamer-safe mode is on. "
+                f"Tuned to {action.station.display_name}.",
+                interrupt=False,
+            )
+
     def _apply_radio_volume(self) -> None:
         factor = getattr(self, "_radio_signal_factor", 1.0)
         duck = getattr(self, "_radio_picket_duck", 1.0)

@@ -352,6 +352,52 @@ def test_station_fades_out_of_range_and_falls_back_to_roadhouse(denver_driving):
     assert driving._radio_picket_duck == 1.0
 
 
+def test_streamer_safe_flip_mid_drive_hands_over_audibly(denver_driving, monkeypatch):
+    # Turning streamer-safe on from the pause settings while a licensed
+    # stream plays: the stream leaves the air immediately, the cab says so,
+    # and the radio lands on the Roadhouse -- never the silent fallback.
+    # Flipping back off restores the dial without moving the radio again.
+    app, driving, played_music, _effects, events = denver_driving
+    streams = []
+    monkeypatch.setattr(
+        driving.ctx.audio, "play_radio_stream", lambda url, fade_ms=1500: streams.append(url)
+    )
+    driving.truck.start_engine()
+    station = RadioStation(
+        "kfix-live",
+        "Denver Live",
+        "KLIV",
+        "news",
+        "fixture",
+        lat=39.7392,
+        lon=-104.9903,
+        range_miles=120.0,
+        real_stream=True,
+        stream_url="https://example.test/live.mp3",
+        safe_for_streaming=False,
+    )
+    driving.radio.catalog = driving.radio.catalog + (station,)
+    driving.radio.update_position((39.7392, -104.9903))
+    driving.radio.select_station("kfix-live", driving._radio_backend)
+    assert streams == [station.stream_url]
+    played_music.clear()
+
+    app.ctx.settings.radio_streamer_safe = True
+    app.ctx.apply_active_radio_settings()
+
+    assert driving.radio.current_station().id == "route_playlist"
+    assert any("left the dial" in text for text in events)
+    assert played_music, "the Roadhouse takes the channel from the stream"
+
+    events.clear()
+    app.ctx.settings.radio_streamer_safe = False
+    app.ctx.apply_active_radio_settings()
+
+    assert driving.radio.current_station().id == "route_playlist"
+    assert not events, "nothing to say: the dial just fills back in"
+    assert "kfix-live" in {s.id for s in driving.radio.available_stations()}
+
+
 def test_fringe_signal_thins_radio_volume(denver_driving):
     app, driving, _music, played_effects, _events = denver_driving
     applied = []

@@ -1764,6 +1764,7 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_radio_streamer_safe(self, _d: int) -> None:
         self.ctx.settings.radio_streamer_safe = not self.ctx.settings.radio_streamer_safe
+        self.ctx.apply_active_radio_settings()
         self._announce()
 
     def _toggle_controller(self, _d: int) -> None:

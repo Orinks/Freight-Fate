@@ -591,7 +591,12 @@ def test_a_new_station_restarts_the_three_state_tally():
         for index, state in enumerate(("Illinois", "Indiana", "Ohio")):
             driving.trip.state_at = lambda _mile=None, s=state: s
             # A different station every state: no single signal held three.
-            driving._track_radio_badges(SimpleNamespace(station=SimpleNamespace(id=f"ff:{index}")))
+            driving._track_radio_badges(
+                SimpleNamespace(
+                    station=SimpleNamespace(id=f"ff:{index}", range_miles=0.0),
+                    distance_miles=None,
+                )
+            )
         assert "radio_three_states" not in awarded
     finally:
         app.shutdown()
