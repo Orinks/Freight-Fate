@@ -1380,26 +1380,55 @@ class TruckState:
         self.rpm = 0.0
         self.air_compressor_active = False
 
+    def _fuel_wear_penalty_mult(self) -> float:
+        """A tired engine burns more fuel for the power it still makes, and
+        a damaged one working against its own derate burns more again."""
+        mult = 1.0 + ENGINE_WEAR_FUEL_PENALTY * self.engine_wear_pct / 100.0
+        return mult * (1.0 + self.damage_fuel_penalty)
+
+    def idle_fuel_burn_rate(self) -> float:
+        """Gallons per game-second if idling right now: no wheel-power term,
+        base rate scaled by rpm -- a parked truck revving high still burns
+        real fuel -- with the same wear and damage penalties every gallon
+        pays. ~0.8 gal/h at a normal idle rpm."""
+        base = 0.00022 * max(1.0, self.rpm / self.specs.idle_rpm)
+        return base * self.specs.fuel_burn_factor * self._fuel_wear_penalty_mult()
+
     def _update_fuel(self, dt: float) -> None:
         if not self.engine_on:
             return
         # ~0.8 gal/h at idle; load burn calibrated for ~6.5-7 mpg at 60 mph cruise
-        power_kw = abs(self.drive_force()) * abs(self.velocity_mps) / 1000.0
-        base = 0.00022
         if abs(self.velocity_mps) < 0.3:
             # Standing still the wheel-power term is zero, so an unloaded rev
             # would burn nothing extra: scale the base burn with rpm instead.
             # High idle and parked revving cost real fuel; the moving-truck
-            # calibration above is untouched.
-            base *= max(1.0, self.rpm / self.specs.idle_rpm)
-        burn = (base + power_kw * 1.5e-5) * self.specs.fuel_burn_factor
-        # A tired engine burns more fuel for the power it still makes, and a
-        # damaged one working against its own derate burns more again.
-        burn *= 1.0 + ENGINE_WEAR_FUEL_PENALTY * self.engine_wear_pct / 100.0
-        burn *= 1.0 + self.damage_fuel_penalty
+            # calibration below is untouched.
+            burn = self.idle_fuel_burn_rate()
+        else:
+            power_kw = abs(self.drive_force()) * abs(self.velocity_mps) / 1000.0
+            burn = (0.00022 + power_kw * 1.5e-5) * self.specs.fuel_burn_factor
+            burn *= self._fuel_wear_penalty_mult()
         self.fuel_gal = max(0.0, self.fuel_gal - burn * dt * self.fuel_burn_mult)
         if self.fuel_gal <= 0.0:
             self.stop_engine()
+
+    def burn_idle_fuel_over_game_time(self, game_seconds: float) -> float:
+        """Burn fuel at the idle-rate floor for a stretch of GAME time that
+        never passed through the per-frame loop -- a scripted maneuver (a
+        missed facility gate's loop-back), not a rest. ``fuel_burn_mult``
+        already tracks the same real-to-game scale ``_update_fuel`` applies
+        every frame (``truck.fuel_burn_mult == trip.effective_time_scale``,
+        set each ``Trip.update``), which is why that per-frame burn is
+        already denominated in game-seconds and this can burn directly
+        against ``game_seconds`` with no extra conversion. Returns gallons
+        burned; a no-op with the engine off."""
+        if not self.engine_on or game_seconds <= 0.0:
+            return 0.0
+        burned = min(self.fuel_gal, self.idle_fuel_burn_rate() * game_seconds)
+        self.fuel_gal -= burned
+        if self.fuel_gal <= 0.0:
+            self.stop_engine()
+        return burned
 
     def _update_temps(self, dt: float) -> None:
         s = self.specs

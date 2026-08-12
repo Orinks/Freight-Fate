@@ -347,17 +347,29 @@ onto exit signalling.
       same uncompressed braking physics the limit pacenote just moved off
       of, so at high pacing cruise can start easing later than a spoken
       warning would like. Same real-seconds conversion, cruise's turn.
-- [ ] **Adversarial battery findings, 2026-08-12 run (31 scenarios: 28
-      clean, 3 odd).** A gate-overshoot loop-back repositions the truck
-      on 20 minutes of free time -- the HOS driving clock never moves,
-      so the penalty is softer than an honest U-turn. A settlement that
-      jumps several career levels announces only the last one:
-      record_delivery's level-up line reports the level landed on, so
-      each intermediate rank and its own unlock text go unspoken. And
-      streak-compounded short hops out-earn honest long hauls per mile
-      by five to one (10.7 vs about 2 XP per mile over a 250-mile
-      sample), which undercuts the 1.9 pacing model -- balance call
-      needed on the streak multiplier for trivial-distance legs.
+- [x] **Adversarial battery findings, 2026-08-12 run (31 scenarios: 28
+      clean, 3 odd) -- all three SHIPPED.** A gate-overshoot loop-back
+      repositioned the truck on 20 minutes of free time with the HOS
+      driving clock never moving; it now charges real hours-of-service and
+      fatigue and burns idle-rate fuel for the loop, so the spoken "the
+      clock is still running" line is true. A settlement that jumps
+      several career levels announced only the last one; every rank
+      passed now gets its own "Level up" line with its own unlock. The
+      streak-compounded short-hop XP edge is addressed by the streak-cap
+      fix below.
+- [x] Short-hop XP farming reined in: the on-time streak bonus is capped
+      at the mileage XP (25-mile-hop efficiency 4.9x to 4.6x versus a
+      500-mile haul, honest pacing to level 30 unchanged at 335 hours).
+      The remaining gap is the flat completion XP, kept by design.
+- [x] **Five small bug fixes, 2026-08-12.** A trooper's out-of-service
+      order now shuts the engine down like every other overnight stop
+      instead of leaving it running while the wake-up line told the
+      driver to start it. Docking and pickup check-in gates, and a
+      settling POI stop, now snap engine audio to idle instead of
+      freezing at the approach's revs -- the same fix already shipped for
+      roadside stops, now shared through one `_settle_engine_to_idle`
+      helper. Running off the road asleep a third or later time now
+      speaks the real count instead of freezing at "twice now".
 - [ ] **The no-engine-brake ban only knows route cities.** It rides
       `URBAN_RADIUS_MI` (6.0) around route nodes, so small towns a leg
       merely passes through are not modelled at all -- in a survey only
@@ -445,12 +457,14 @@ onto exit signalling.
       `states/driving_wrong_way.py` ladders remind -> illegal -> traffic
       on distance backed, exempting the yard, stops and the receiver's
       gate zone.
-- [ ] Break-harness findings still open, all verified: the facility-gate
-      loop-back charges 20 game minutes but no HOS driving time and no
-      fuel; a multi-level settlement announces one level-up line;
-      short-hop streak XP runs 4.9x a long haul's efficiency. (The
-      save/reload hazard finding was closed 2026-08-11 as not reachable --
-      see the bullet below on why serializing it would be worse.)
+- [x] Break-harness findings, all now shipped: the facility-gate loop-back
+      now charges HOS driving time, fatigue, and idle fuel alongside the
+      20 game minutes; a multi-level settlement now speaks one line per
+      rank passed; short-hop streak XP is addressed by the streak-cap fix
+      earlier in this section. (The save/reload hazard finding was closed
+      2026-08-11 as not reachable -- see the bullet below on why serializing
+      it would be
+      worse.)
 - [x] **A full lot no longer closes the fuel island -- SHIPPED
       2026-08-10.** Owner-reported from a live run. `_open_poi_stop`
       diverted to `ParkingFullState` whenever a stop carried `sleep` and

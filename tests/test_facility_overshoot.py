@@ -9,6 +9,7 @@ cue is the only signage, a pre-gate speed warning always precedes the first
 possible miss, and a real-time reaction window is honored before one latches.
 """
 
+import pytest
 from speech_capture import speech_stub
 
 
@@ -296,6 +297,35 @@ def test_time_is_charged_each_loop(monkeypatch):
             _at_gate(d, mph=70.0)
             d._handle_arrival_gate()
         assert d.trip.game_minutes == minutes + 2 * GATE_MISS_LOOP_MIN
+    finally:
+        app.shutdown()
+
+
+def test_missed_gate_loop_charges_hos_fatigue_and_fuel(monkeypatch):
+    """The spoken "The clock is still running" line must be true: a gate
+    miss's scripted loop-back costs real HOS, fatigue, and fuel, not just
+    the game clock -- otherwise the loop is a free-time exploit."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_facility_gate import GATE_MISS_LOOP_MIN
+
+    app = App()
+    try:
+        d = _driving(app)
+        _capture_events(app, monkeypatch)
+        driving_before = d.hos.driving_min
+        fatigue_before = app.ctx.profile.fatigue
+        d.truck.rpm = d.truck.specs.idle_rpm
+        fuel_before = d.truck.fuel_gal
+
+        _at_gate(d, mph=70.0)
+        d._handle_arrival_gate()
+
+        assert d.hos.driving_min == pytest.approx(driving_before + GATE_MISS_LOOP_MIN)
+        assert app.ctx.profile.fatigue > fatigue_before
+        assert d.truck.fuel_gal < fuel_before
+        # Idle-rate honesty: ~0.8 gal/h floor, so twenty minutes is a small,
+        # bounded sip, not a fraction of a highway-cruise burn.
+        assert fuel_before - d.truck.fuel_gal < 1.0
     finally:
         app.shutdown()
 

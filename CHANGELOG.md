@@ -4,6 +4,13 @@
 
 ### Changed
 
+- **Chaining very short hops no longer fast-tracks a career.** The on-time
+  streak bonus is now capped at the experience the miles themselves teach,
+  so a run of twenty-five-mile hops earns its streak bonus on the driving,
+  not on the flat per-delivery award. Real freight is untouched: on hauls
+  of about eighty miles and up, streak experience is exactly what it was
+  before.
+
 - **The radio plays its full dial out of the box.** Real public streams
   and your own playlists no longer hide behind an opt-in: install the
   game and the whole dial is there. The two radio stream settings are
@@ -78,6 +85,43 @@
   privately; they just stay off your profile.
 
 ### Fixed
+
+- **A ten-hour out-of-service order now shuts the engine down.** Every
+  other overnight stop -- sleeper berth, lot, shoulder, motel -- killed the
+  engine first; a trooper's out-of-service order skipped it, so the engine
+  kept running while the wake-up line told you to start an engine that was
+  already on. The order now shuts the engine down like everywhere else,
+  and if ten hours parked with it off bled the air down, it tells you to
+  build pressure again before you release the brake.
+
+- **A big delivery now announces every rank it passes through.** Jump
+  three levels in one haul and only the last promotion used to get a
+  line -- the ranks in between, and the unlocks that came with them, went
+  unspoken. Every rank you pass now gets its own "Level up" line, in
+  order, so nothing you earned goes unheard.
+
+- **Running off the road asleep a third or fourth time now says so.** The
+  line telling you it happened again was stuck at "twice now" no matter
+  how many times it actually happened. It now counts honestly: twice,
+  three times, four times, and on from there.
+
+- **Docking and checking in no longer freeze the engine sound.** Pulling
+  into a delivery dock or a pickup gate could leave the engine note stuck
+  at whatever rev it was carrying on the approach, revving or lugging
+  through the whole stop no matter what the truck was actually doing. The
+  engine now settles to a real idle the moment you stop, the same fix
+  already shipped for a roadside police stop.
+
+- **A missed facility gate's loop-back now costs what it says it does.**
+  Carrying past the destination gate too fast loops you back for another
+  try, and the game always said your hours, the clock, and your fuel kept
+  running through it -- but only the clock actually did. The loop now
+  spends real hours-of-service time and real fatigue, and burns a small
+  idle sip of fuel too, so the line matches what happens.
+
+- **Nineteen radio stations got their apostrophes back.** Imported station
+  names like The Big Buffalo s Oldies now read naturally on the dial
+  instead of with a stray broken s.
 
 - **Important road announcements that get talked over now repeat themselves
   instead of vanishing.** A hazard warning, a curve call, or an answer to a
