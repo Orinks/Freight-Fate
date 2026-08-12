@@ -42,9 +42,11 @@ def _is_legacy_snapshot(entry: dict) -> bool:
 CLOUD_DISCLOSURE = (
     "Your full career is stored privately in your orinks.net account. orinks.net "
     "validates and signs accepted backups before they can be restored. If "
-    "Profile sharing is also on, approved facts from your latest accepted "
-    "backup may appear in your public profile. The backup itself is never "
-    "public. The last ten accepted backups of each career are kept."
+    "Profile sharing is also on, approved facts from your public career's "
+    "latest accepted backup may appear in your public profile; you choose "
+    "your public career here, and every other career stays a private cloud "
+    "backup. The backup itself is never public. The last ten accepted "
+    "backups of each career are kept."
 )
 
 
@@ -74,6 +76,7 @@ class CloudBackupState(MenuState):
     def __init__(self, ctx) -> None:
         super().__init__(ctx)
         self._saves: list[dict] | None = None
+        self._public_save: str | None = None
         self._auth_failed = False
         self._fetched = threading.Event()
         self._announced = False
@@ -101,9 +104,13 @@ class CloudBackupState(MenuState):
 
         def worker() -> None:
             try:
-                self._saves = cloud_saves.list_saves(identity)
+                reply = cloud_saves.list_saves(identity)
             except cloud_saves.CloudAuthError:
                 self._auth_failed = True
+            else:
+                if reply is not None:
+                    self._saves = reply["saves"]
+                    self._public_save = reply["publicSaveName"]
             self._fetched.set()
 
         threading.Thread(target=worker, name="cloud-saves-list", daemon=True).start()
@@ -183,6 +190,8 @@ class CloudBackupState(MenuState):
             for entry in self._slots():
                 name = entry["saveName"]
                 bits = [name]
+                if name == self._public_save:
+                    bits.append("your public career")
                 if entry.get("summary"):
                     bits.append(entry["summary"])
                 bits.append(_backed_up_text(entry.get("createdAt")))
@@ -216,7 +225,21 @@ class CloudBackupState(MenuState):
 
     def _open_slot(self, entry: dict) -> None:
         revisions = [e for e in self._saves or [] if e.get("saveName") == entry["saveName"]]
-        self.ctx.push_state(CloudSlotState(self.ctx, entry["saveName"], revisions))
+        self.ctx.push_state(
+            CloudSlotState(
+                self.ctx,
+                entry["saveName"],
+                revisions,
+                public_save_name=self._public_save,
+                on_public_chosen=self._public_career_chosen,
+            )
+        )
+
+    def _public_career_chosen(self, save_name: str) -> None:
+        """Keep the list truthful after the slot menu changes the choice,
+        without another fetch."""
+        self._public_save = save_name
+        self.refresh()
 
     def update(self, dt: float) -> None:
         super().update(dt)
@@ -254,11 +277,20 @@ class CloudSlotState(MenuState):
     mailbox hands the outcome back to ``update`` for speech.
     """
 
-    def __init__(self, ctx, save_name: str, revisions: list[dict]) -> None:
+    def __init__(
+        self,
+        ctx,
+        save_name: str,
+        revisions: list[dict],
+        public_save_name: str | None = None,
+        on_public_chosen=None,
+    ) -> None:
         super().__init__(ctx)
         self.save_name = save_name
         self.revisions = revisions  # newest first, from the list fetch
         self.title = f"Cloud backup: {save_name}"
+        self._is_public = public_save_name == save_name
+        self._on_public_chosen = on_public_chosen
         self._busy = False
         self._outcome: str | None = None  # worker -> update() mailbox
         self._restored_path = None
@@ -328,6 +360,28 @@ class CloudSlotState(MenuState):
                     )
                 )
         if self.revisions:
+            if self._is_public:
+                items.append(
+                    MenuItem(
+                        "This is your public career",
+                        self.speak_current,
+                        help="When Profile sharing is on, approved facts from "
+                        "this career's accepted backups appear on your public "
+                        "profile. Your other careers stay private cloud "
+                        "backups.",
+                    )
+                )
+            else:
+                items.append(
+                    MenuItem(
+                        "Make this your public career",
+                        self._confirm_public,
+                        help="Your public profile shows one career. Choosing "
+                        "this one makes its accepted backups the ones that "
+                        "front your profile; your other careers stay private "
+                        "cloud backups.",
+                    )
+                )
             items.append(
                 MenuItem(
                     "Delete this career's cloud backups",
@@ -426,6 +480,32 @@ class CloudSlotState(MenuState):
             self.ctx.say("Still working on the last choice.", interrupt=True)
             return
         self.ctx.push_state(ConfirmDeleteCloudState(self.ctx, self))
+
+    def _confirm_public(self) -> None:
+        if self._busy:
+            self.ctx.say("Still working on the last choice.", interrupt=True)
+            return
+        self.ctx.push_state(ConfirmPublicCareerState(self.ctx, self))
+
+    def start_set_public(self) -> None:
+        """Called by the confirmation state after the player says yes."""
+        identity = OnlineIdentity.load()
+        if identity is None:
+            self.ctx.say("Cloud backup is not set up on this computer.", interrupt=True)
+            return
+        self._busy = True
+        self.refresh()
+        self.ctx.say("Telling orinks.net.", interrupt=True)
+
+        def worker() -> None:
+            try:
+                ok = cloud_saves.set_public_save(identity, save_name=self.save_name)
+            except cloud_saves.CloudAuthError:
+                self._outcome = "public_auth_failed"
+                return
+            self._outcome = "public_set" if ok else "public_failed"
+
+        threading.Thread(target=worker, name="cloud-saves-public", daemon=True).start()
 
     def _has_local_save(self) -> bool:
         from ..models.profile import find_save_path
@@ -540,6 +620,32 @@ class CloudSlotState(MenuState):
             self.ctx.say(
                 f"{cloud_saves.AUTH_HELP} Nothing was deleted, and the cloud "
                 "backups were not changed.",
+                interrupt=True,
+            )
+        elif outcome == "public_set":
+            self._is_public = True
+            if self._on_public_chosen is not None:
+                self._on_public_chosen(self.save_name)
+            self._status = "This is now your public career."
+            self.ctx.audio.play("ui/menu_select")
+            self.ctx.say(
+                f"Done. {self.save_name} is now your public career. When "
+                "Profile sharing is on, your public profile shows this "
+                "career's accepted backups; your other careers stay private "
+                "cloud backups.",
+                interrupt=True,
+            )
+        elif outcome == "public_failed":
+            self._status = "The public career choice did not go through. Nothing changed."
+            self.ctx.say(
+                "The choice did not go through. Check your connection and "
+                "try again; your public career is unchanged.",
+                interrupt=True,
+            )
+        elif outcome == "public_auth_failed":
+            self._status = "Reconnect needed. Your public career is unchanged."
+            self.ctx.say(
+                f"{cloud_saves.AUTH_HELP} Your public career is unchanged.",
                 interrupt=True,
             )
         elif outcome == "keep_mine_failed":
@@ -702,6 +808,35 @@ class ConfirmDeleteCloudState(MenuState):
     def _yes(self) -> None:
         self.ctx.pop_state()
         self._slot_state.start_delete()
+
+
+class ConfirmPublicCareerState(MenuState):
+    """Safe-default gate before switching which career fronts the profile."""
+
+    title = "Make this your public career?"
+
+    def __init__(self, ctx, slot_state: CloudSlotState) -> None:
+        super().__init__(ctx)
+        self._slot_state = slot_state
+
+    def announce_entry(self) -> None:
+        self.ctx.say(
+            f"Make {self._slot_state.save_name} your public career? Your "
+            "public profile shows one career. When Profile sharing is on, "
+            "this career's accepted backups become the ones your profile "
+            "shows, and your other careers stay private cloud backups. "
+            f"{self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        return [
+            MenuItem("No, keep things as they are", self.go_back),
+            MenuItem("Yes, make this my public career", self._yes),
+        ]
+
+    def _yes(self) -> None:
+        self.ctx.pop_state()
+        self._slot_state.start_set_public()
 
 
 class ConfirmKeepMineState(MenuState):
