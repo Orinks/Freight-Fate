@@ -2452,6 +2452,7 @@ class DrivingEventMixin:
         self._speed_control_paused_at_stop = False
         self._keeper_mph = min(t.speed_mph if target_mph is None else target_mph, limit_mph)
         self._keeper_zone = zone_reason
+        self._keeper_zone_limit = limit_mph
         self._keeper_throttle = t.throttle
         if announce:
             self.ctx.audio.play("ui/notify", volume=0.5)
@@ -2486,6 +2487,7 @@ class DrivingEventMixin:
             self._engage_cruise(target_mph, transition=True)
             return
         self._keeper_zone = zone_reason
+        self._take_new_posted_limit(limit, zone_reason)
         target_mph = min(self._keeper_mph, limit)
         # The road ahead, not just the road under the wheels: a corner or a
         # lower posted limit close enough that the shedding has to start now.
@@ -2516,7 +2518,20 @@ class DrivingEventMixin:
             self._keeper_ease_said = None
         context = self.trip.traffic_context()
         if context is not None and (
-            context.gap_seconds <= KEEPER_GAP_SECONDS or context.lead.speed_mph < target_mph
+            context.gap_seconds <= KEEPER_GAP_SECONDS
+            or (
+                context.lead.speed_mph < target_mph
+                # Once there is a reason to shed for it, on the keeper's own
+                # ease law. Matching a slower vehicle the moment it is visible
+                # meant matching one two and a half miles off (the traffic
+                # bubble's whole reach), so a car doing 35 in a 45 work zone
+                # put the truck at 35 from the far end of the zone with
+                # nothing said. The stopped-queue case still lands here: a
+                # standstill lead prices out at zero, and the gap to it is
+                # inside anybody's window.
+                and context.gap_mi
+                <= self._keeper_ease_mi(context.lead.speed_mph, self.trip.effective_time_scale)
+            )
         ):
             # Creep along with the queue, all the way down to a stop, and roll
             # again when it moves -- gates and work zones are queue country.
@@ -2527,6 +2542,44 @@ class DrivingEventMixin:
         )
         t.throttle = self._keeper_throttle
         self._keeper_snub_brakes(dt, over=-error, target_mph=target_mph)
+
+    def _take_new_posted_limit(self, limit: float, zone_reason: str) -> None:
+        """Hand the keeper back up to street speed when the street changes.
+
+        The keeper's number is the one it was given when it engaged, capped by
+        the limit under the wheels -- so it comes DOWN with the road on its
+        own, and used to have no way back UP. A facility approach is a chain of
+        streets zoned one per leg (25 named, 15 unnamed service ways), so a
+        session started on a service way held that crawl over every named
+        street after it, for the whole chain, while the zone entry announced
+        the higher number (tester report, access roads, 2026-08). The spoken
+        promise is "holding X through the <reason> zone"; a new posted number
+        is a new zone, and it takes it.
+
+        Only ever upward, and only on a real change to the posted number: a
+        driver who set a lower speed by hand keeps it as long as the street
+        does, and coming down is already the cap's job.
+        """
+        if self._keeper_mph is None or limit == self._keeper_zone_limit:
+            return
+        self._keeper_zone_limit = limit
+        if limit <= self._keeper_mph:
+            return
+        self._keeper_mph = limit
+        easing = self._keeper_ease_target
+        if easing is not None and easing[1] < limit:
+            # Already shedding for something lower up the road, on a street
+            # short enough that both land together. The ease line names the
+            # number the truck will actually be doing; "holding 25" on top of
+            # it is a promise contradicted in the same breath.
+            return
+        # An assist that speeds the truck up on its own has to say so: the
+        # zone entry announced the law, not what the truck is about to do.
+        self.ctx.say_event(
+            f"Speed keeper holding {self.ctx.settings.speed_text(limit)} "
+            f"through the {zone_reason} zone.",
+            interrupt=False,
+        )
 
     def _keeper_snub_brakes(self, dt: float, *, over: float, target_mph: float) -> None:
         """Work the drums in snubs to hold the keeper's target.
