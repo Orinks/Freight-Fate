@@ -2885,6 +2885,14 @@ class DrivingUpdateMixin:
         self._play_enforcement_marker(volume=0.9)
         self._hold_stop_siren()
         self.ctx.say_event(message, interrupt=True)
+        # One demand at a time: an exit armed for a ramp must not keep
+        # announcing and steering for it under the trooper's lights -- that
+        # is how a scale bypass became a failure-to-stop cascade.
+        if self._stand_down_exit_for_stop():
+            self.ctx.say_event(
+                "Exit approach canceled; plan it again after the stop.",
+                interrupt=False,
+            )
 
     def _pull_over_grace_seconds(self, message: str) -> float:
         """Real seconds to hear the instruction and get a hand to the wheel."""
@@ -2923,12 +2931,21 @@ class DrivingUpdateMixin:
                 # "scale", and the absence of speech is what says "closed".
                 self._weigh_station_notice_key = key
                 self.ctx.audio.play("events/inspection_warning", volume=0.7)
+                # Action first, and both keys through control_hint. The old
+                # line hard-coded "press T", and T at speed planned a sleep
+                # stop past the scale -- the instruction itself marched a
+                # tester into the bypass charge (report, 2026-08-12).
                 self.ctx.say_event(
                     f"Open weigh station ahead in {self.ctx.settings.distance_text(ahead)}: "
-                    f"{stop.spoken_name}. Slow below {WEIGH_STATION_BYPASS_MPH:.0f} "
-                    "and press T for inspection check-in.",
+                    f"{stop.name}. All trucks must pull in. Slow below fifteen "
+                    "and signal for the scale exit with "
+                    f"{self.ctx.control_hint('take_exit')}. Once you are "
+                    "stopped at the scale, press "
+                    f"{self.ctx.control_hint('rest')} to check in.",
                     interrupt=False,
+                    priority=EventPriority.ROUTE,
                 )
+            self._check_scale_reminder(stop, ahead, key)
             if key in self.enforcement_events:
                 continue
             crossed = previous_mi < stop.at_mi <= self.trip.position_mi

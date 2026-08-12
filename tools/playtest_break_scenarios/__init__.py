@@ -14,6 +14,7 @@ from . import (
     career_economy,
     dispatch_saveload,
     driving_physics,
+    enforcement,
     radio_weather,
     resources,
     settings_misc,
@@ -22,6 +23,7 @@ from . import (
 __all__ = [
     "driving_physics",
     "assists",
+    "enforcement",
     "resources",
     "career_economy",
     "dispatch_saveload",

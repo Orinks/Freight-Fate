@@ -601,7 +601,11 @@ def test_weigh_station_warning_is_spoken_before_bypass(monkeypatch):
         d._check_weigh_station_enforcement(8.1)
 
         assert len([s for s in spoken if "Open weigh station ahead" in s]) == 1
-        assert "press T for inspection check-in" in spoken[0]
+        # The notice teaches the exit key first; the rest key only once
+        # stopped at the scale. "Press T" at speed plans a sleep stop, which
+        # is the instruction that used to march drivers into the bypass.
+        assert "signal for the scale exit with X" in spoken[0]
+        assert "Once you are stopped at the scale, press T to check in" in spoken[0]
     finally:
         app.shutdown()
 

@@ -119,6 +119,23 @@ RADIO_CUE_DUCK_S = 1.1
 # How far past a post the truck has to be before its pass earcon has fired.
 PASS_TRIGGER_MI = 0.05
 
+# One short reminder this close to an announced open scale, if the truck is
+# still over the bypass speed with no scale exit armed. The full notice can
+# land miles out; nothing else spoke between it and the bypass point, and a
+# tester who mis-followed it heard silence all the way to the lights.
+WEIGH_STATION_REMINDER_MI = 0.5
+
+# The sentence the open-scale lead distance is sized from. It must pace the
+# real announcement's longest realistic rendering -- a long stop name and the
+# controller phrases, which run longer than the keyboard letters -- or the
+# spoken lead undershoots and the notice lands with no road left to act on.
+SCALE_NOTICE_SAMPLE = (
+    "Open weigh station ahead in two miles: Northbound Platte River Port "
+    "of Entry. All trucks must pull in. Slow below fifteen and signal for "
+    "the scale exit with right bumper plus D-pad down. Once you are "
+    "stopped at the scale, press right bumper plus D-pad down to check in."
+)
+
 # The fines for the things an officer sees rather than clocks -- chain law,
 # following too close, lights, lane misuse -- are priced in
 # models/enforcement, with every other citation amount and the multipliers
@@ -366,13 +383,118 @@ class EnforcementWatchMixin:
         speed = max(self.truck.speed_mph, 1.0)
         seconds = max(
             SCALE_WARNING_REAL_S,
-            self._pull_over_grace_seconds(
-                "Open weigh station ahead in two miles. Slow below fifteen and "
-                "press T for inspection check-in."
-            ),
+            self._pull_over_grace_seconds(SCALE_NOTICE_SAMPLE),
         )
         miles = seconds * speed * self.trip.effective_time_scale / 3600.0
         return max(WEIGH_STATION_NOTICE_MI, min(miles, ENFORCEMENT_WARNING_MAX_MI))
+
+    def _open_scale_ahead(self, within_mi: float):
+        """The nearest open weigh station strictly ahead, or None.
+
+        Returns ``(stop, ahead_mi)``. A closed scale never matches -- its
+        guards must stay inert so the silence-means-closed rule holds.
+        """
+        best = None
+        for stop in self.trip.stops:
+            if stop.type != "weigh_station":
+                continue
+            ahead = stop.at_mi - self.trip.position_mi
+            if (
+                0 < ahead <= within_mi
+                and self._scale_is_open(stop)
+                and (best is None or ahead < best[1])
+            ):
+                best = (stop, ahead)
+        return best
+
+    def _check_scale_reminder(self, stop, ahead: float, key: str) -> None:
+        """One short line before the bypass point, if nothing has changed.
+
+        The full notice latches miles out; between it and the gore the old
+        build said nothing at all, so a driver who mis-read the instruction
+        crossed at speed in silence. Fires once per scale, only while the
+        truck is still over the bypass speed with no scale exit armed.
+        """
+        if not 0 < ahead <= WEIGH_STATION_REMINDER_MI:
+            return
+        if key != self._weigh_station_notice_key or key == self._weigh_station_reminder_key:
+            return
+        if self.truck.speed_mph <= WEIGH_STATION_BYPASS_MPH:
+            return
+        if self._exit_is_armed_for(stop):
+            return
+        self._weigh_station_reminder_key = key
+        self.ctx.say_event(
+            "Weigh station in half a mile. Slow below fifteen for the scale.",
+            interrupt=False,
+            priority=EventPriority.ROUTE,
+        )
+
+    def _scale_outranks_rest_planning(self) -> bool:
+        """An open scale ahead owns the next exit; rest planning waits.
+
+        The old announcement told the driver to press the rest key, and the
+        rest key at speed planned a sleep stop PAST the scale -- two
+        instructions marching the player into a bypass charge. Says what
+        comes first and changes nothing; repeats dedupe in the pacer.
+        """
+        if self._enforcement_bypassed() or self._ramp_mi is not None:
+            return False
+        window = max(self._scale_notice_lookahead_mi(), self._exit_window_mi())
+        found = self._open_scale_ahead(window)
+        if found is None:
+            return False
+        stop, ahead = found
+        distance = self.ctx.settings.distance_text(ahead, precise=True)
+        self.ctx.say_event(
+            f"Weigh station first: {stop.name}, {distance} ahead. All trucks "
+            "must stop. Slow below fifteen and signal for the scale exit "
+            f"with {self.ctx.control_hint('take_exit')}. Rest planning can "
+            "wait until you are past the scale.",
+            interrupt=False,
+        )
+        return True
+
+    def _scale_claiming_exit(self, stop):
+        """The open scale that outranks ``stop`` for the exit key, or None.
+
+        An exit press with an open scale nearer than the chosen stop belongs
+        to the scale: arming the farther ramp is exactly the move that
+        carried a tester past the inspection lane unarmed.
+        """
+        if self._enforcement_bypassed():
+            return None
+        found = self._open_scale_ahead(self._exit_window_mi())
+        if found is None:
+            return None
+        scale, _ = found
+        if stop is None or stop.key == scale.key:
+            return None  # nothing outranked; the normal arming handles it
+        if stop.at_mi <= scale.at_mi:
+            return None  # the chosen stop comes first anyway
+        return scale
+
+    def _stand_down_exit_for_stop(self) -> bool:
+        """One demand at a time: a beginning pull-over owns the road.
+
+        An exit armed for a ramp kept announcing and steering for it while
+        the trooper stop was running, which turned one mistake into a
+        failure-to-stop cascade. Returns True when something actually stood
+        down; the plan itself stays on the route map.
+        """
+        had_exit = self._exit_signal_on or self._exit_stop is not None
+        if not had_exit:
+            return False
+        stop = self._exit_stop
+        self._exit_stop = None
+        self._exit_signal_on = False
+        self._exit_signal_canceled = False
+        self._cruise_exit_mph = None
+        self._destination_exit_response_s = 0.0
+        self._reset_exit_lane_state()
+        if stop is not None and self._is_selected_stop(stop):
+            self._clear_selected_stop_intent()
+        return True
 
     # -- the siren -----------------------------------------------------------
 
@@ -702,5 +824,7 @@ __all__ = [
     "POST_MARKER_LEAD_MI",
     "RADIO_CUE_DUCK",
     "SCALE_BED_START_MI",
+    "SCALE_NOTICE_SAMPLE",
+    "WEIGH_STATION_REMINDER_MI",
     "EnforcementWatchMixin",
 ]

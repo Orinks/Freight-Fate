@@ -287,6 +287,20 @@ onto exit signalling.
       (Shane's "turns coming up really quickly"). Live weather holds
       last-known conditions through a stale station instead of dropping
       to neutral, without traceback spam in the log.
+- [x] **The scale announcement and the T key tell the same story --
+      landed 2026-08-12** (Jerry's bypass pull-over). The open-scale
+      call taught "press T", but T at speed plans a sleep stop, so the
+      game planned a travel center past the scale, X armed that exit,
+      and following both instructions crossed the scale unarmed into
+      the cop. The notice now teaches the exit key first and the rest
+      key only once stopped; T near an open scale defers to the scale;
+      X prefers the nearer open scale over a planned sleep stop; a
+      half-mile reminder fires if the truck is still over fifteen; a
+      beginning pull-over stands any armed exit down (one demand at a
+      time); and the stop-menu lookup picks the nearest stop, not the
+      first listed, so T at the scale opens the scale's menu. Breaker
+      scenarios scale_check_in_guidance and
+      scale_pull_over_stands_down_exit pin the whole flow.
 - [ ] **Remaining tester findings from the same document.** Merging
       traffic does not yield to a loaded truck. At least one unexplained
       sound (a whoosh on the left). Landed 2026-08-12: work-zone closures

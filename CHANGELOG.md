@@ -79,6 +79,20 @@
 
 ### Fixed
 
+- **The weigh station announcement and the T key now tell the same
+  story.** The open-scale call used to end with "press T for inspection
+  check-in", but T at highway speed plans a sleep stop -- so following
+  the instruction planned a truck stop past the scale, X armed that
+  exit instead of the scale's, and doing exactly what the game said
+  ended in a bypass pull-over. The announcement now tells you to slow
+  below fifteen and signal for the scale exit with the exit key, and to
+  press the rest key once you are stopped at the scale. Pressing the
+  rest key near an open scale now reminds you the scale comes first
+  instead of planning a stop, the exit key prefers a nearer open scale
+  over a planned sleep stop, a short reminder speaks half a mile out if
+  you are still fast, and if a trooper does light you up, any armed
+  exit stands down so the stop is the only thing asking for your hands.
+
 - **Turning streamer-safe mode on now takes effect on the air, not just
   on paper.** Flipping it on from the settings while a real public
   stream was playing left the stream running -- the one thing the mode

@@ -494,6 +494,10 @@ class DrivingEventMixin:
                 f"Press {exit_hint} to signal the trooper stop."
             )
             return
+        # An open scale ahead is not optional, so the rest key must not plan
+        # a sleep stop past it -- the scale comes first, then the plan.
+        if self.truck.speed_mph > DOCKING_MAX_MPH and self._scale_outranks_rest_planning():
+            return
         stop = self.trip.nearest_stop_within()
         if self.truck.speed_mph <= DOCKING_MAX_MPH:
             if stop is None:
@@ -696,6 +700,13 @@ class DrivingEventMixin:
         )
         # Explicit T selection outranks inferred destination bookkeeping.
         stop = selected if selected_ahead else self._exit_stop or self._upcoming_exit_stop()
+        # ...and a nearer open scale outranks both: the inspection lane is
+        # not optional, and arming the farther ramp is exactly what carried
+        # a tester past the scale unarmed. The plan itself survives.
+        scale_claimed = self._scale_claiming_exit(stop)
+        outranked = stop if scale_claimed is not None else None
+        if scale_claimed is not None:
+            stop = scale_claimed
         if stop is None:
             self.ctx.say(
                 "No route exit to signal for yet. Press "
@@ -754,7 +765,9 @@ class DrivingEventMixin:
         # approach runs silent.
         self._exit_countdown_said = set()
         self.ctx.audio.play("vehicle/signal_tone", volume=0.7, pan=0.6)
-        if stop.type == "delivery_destination":
+        if scale_claimed is not None:
+            head = f"Signal on for the scale exit: {stop.name},"
+        elif stop.type == "delivery_destination":
             labeled = getattr(stop, "exit_phrase", "") or stop.exit_label
             head = (
                 # A labeled exit already names itself; don't repeat the
@@ -809,6 +822,12 @@ class DrivingEventMixin:
                 )
             else:
                 message += " Brake to a complete stop at the entrance."
+        if (
+            scale_claimed is not None
+            and outranked is not None
+            and (self._is_selected_stop(outranked) or self.trip.is_planned(outranked))
+        ):
+            message += " Your planned sleep stop waits until you are past the scale."
         self._set_status(message)
         if responding_to_destination_callout:
             # Queue behind whichever event is currently speaking. Usually that

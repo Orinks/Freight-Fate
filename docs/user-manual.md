@@ -1046,7 +1046,9 @@ are really known for.
 
 Not every stop offers every action. A public rest area usually does not offer
 fuel or repair. A weigh station is for inspection, not food or sleep: slow
-down, pull into the scale lane, stop, then press T for inspection check-in.
+below fifteen, signal for the scale exit with X, stop at the scale, then
+press T for inspection check-in. T at highway speed plans sleep stops, so
+near an open scale it reminds you the scale comes first instead.
 Parking labels describe confidence, not a live guarantee that a space is open
 right now. Late at night, a sleep-capable stop may be full. A full lot still
 sells diesel: the fuel island is open whatever the parking is doing, so a

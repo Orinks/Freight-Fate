@@ -1876,10 +1876,20 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         return min(active, key=lambda z: z.limit_mph)
 
     def nearest_stop_within(self, radius_mi: float = 1.5) -> RoadStop | None:
+        """The stop closest to the truck, not the first one listed.
+
+        First-in-list-order stood in for nearest here, so stopping at a scale
+        with a travel plaza also inside the radius could open the plaza's
+        menu -- whichever the leg data happened to list first.
+        """
+        best: RoadStop | None = None
+        best_dist = radius_mi
         for stop in self.stops:
-            if abs(stop.at_mi - self.position_mi) <= radius_mi:
-                return stop
-        return None
+            dist = abs(stop.at_mi - self.position_mi)
+            if dist <= best_dist and (best is None or dist < best_dist):
+                best = stop
+                best_dist = dist
+        return best
 
     def upcoming_stop(self, within_mi: float = 5.0) -> RoadStop | None:
         """The next stop whose exit lies ahead within the given distance."""
