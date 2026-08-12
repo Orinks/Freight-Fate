@@ -105,20 +105,32 @@ class TurnCommitmentMixin:
         self._turn_grace_s = 0.0
         self.trip.controlled_turn = False
 
-    def _turn_cue_in_play(self):
-        """The corner currently being approached or judged, or None."""
+    def _turn_cues_in_play(self) -> list:
+        """Every unsettled corner from here on, nearest first.
+
+        The commitment loop only ever judges one corner at a time, so it asks
+        for the first of these. A planner that has to BRAKE for corners needs
+        the whole run: city blocks are shorter than one corner's own tail, so
+        the next corner is regularly already in front of the truck while this
+        one is still being taken.
+        """
         if getattr(self, "_turn_trip_id", None) != id(self.trip):
             self._reset_turn_state_for_trip()
         position = self.trip.position_mi
-        best = None
-        for cue in self.trip.navigation_cues:
-            if not _is_judged_turn(cue) or cue.key in self._turn_resolved:
-                continue
-            if cue.at_mi - position < -TURN_COMMIT_TAIL_MI:
-                continue
-            if best is None or cue.at_mi < best.at_mi:
-                best = cue
-        return best
+        cues = [
+            cue
+            for cue in self.trip.navigation_cues
+            if _is_judged_turn(cue)
+            and cue.key not in self._turn_resolved
+            and cue.at_mi - position >= -TURN_COMMIT_TAIL_MI
+        ]
+        cues.sort(key=lambda cue: cue.at_mi)
+        return cues
+
+    def _turn_cue_in_play(self):
+        """The corner currently being approached or judged, or None."""
+        cues = self._turn_cues_in_play()
+        return cues[0] if cues else None
 
     def _turn_leg_index(self, cue) -> int:
         try:

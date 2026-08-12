@@ -276,9 +276,9 @@ class SpeedControlStateMixin:
     def _keeper_speed_ahead(self) -> tuple[float, str] | None:
         """The lower number the keeper must already be shedding speed for.
 
-        Returns ``(mph, reason)`` for the nearest thing ahead the truck cannot
+        Returns ``(mph, reason)`` for the SLOWEST thing ahead the truck cannot
         arrive at over -- a judged street turn's advise speed, or a posted
-        limit lower than the one under the wheels -- once it is close enough
+        limit lower than the one under the wheels -- among those close enough
         that easing has to start. ``None`` when the road ahead asks for
         nothing the truck is not already doing.
 
@@ -287,25 +287,42 @@ class SpeedControlStateMixin:
         the limit under the wheels. It held the street's 25 into corners that
         advise 20 and straight through the safe turnaround (tester, 2026-08).
         """
-        held = self._keeper_ease_target
         position = self.trip.position_mi
-        if held is not None and position < held[0]:
-            # Keep aiming at the point already being slowed for. The window is
-            # sized in real seconds, so it retracts as the truck slows: without
-            # this the corner dropped back out of sight and the keeper wound
-            # the truck up again on its approach -- the same trap the
-            # construction hold above exists to close.
-            return held[1], held[2]
-        self._keeper_ease_target = None
-        cue = self._turn_cue_in_play()
-        if cue is not None:
-            advise = self._turn_speed_mph(cue)
+        # Keep aiming at the point already being slowed for. The window is
+        # sized in real seconds, so it retracts as the truck slows: without
+        # this the corner dropped back out of sight and the keeper wound the
+        # truck up again on its approach -- the same trap the construction
+        # hold above exists to close. It is a FLOOR on what to shed for, never
+        # the whole answer: a held target that could also HIDE a lower one is
+        # how the second corner of a short block went unbraked (below).
+        held = self._keeper_ease_target
+        if held is not None and position >= held[0]:
+            held = None
+        demand = held
+        turn_scale = self._keeper_turn_ease_scale()
+        for cue in self._turn_cues_in_play():
             ahead = cue.at_mi - position
-            if 0.0 < ahead <= self._keeper_ease_mi(advise, self._keeper_turn_ease_scale()):
-                # Held through the corner itself, not up to it: releasing on
-                # the milepost puts the throttle back on mid-turn.
-                self._keeper_ease_target = (cue.at_mi + TURN_COMMIT_TAIL_MI, advise, "turn")
-                return advise, "turn"
+            if ahead <= 0.0:
+                continue
+            advise = self._turn_speed_mph(cue)
+            if ahead > self._keeper_ease_mi(advise, turn_scale):
+                continue
+            # Every corner whose window is open, not just the nearest, and the
+            # slowest of them wins. A corner holds its target through its own
+            # tail, and a city block is shorter than that tail -- so aiming at
+            # the nearest corner alone left the keeper still holding 20 for the
+            # corner behind it while a 15 mph service way came up, and the
+            # truck arrived over the number with the loop-back charged
+            # (tester, turns "coming up really quickly").
+            #
+            # Held through each corner itself, not up to it: releasing on the
+            # milepost puts the throttle back on mid-turn, so a run of corners
+            # at one number holds to the far side of the last of them.
+            until = cue.at_mi + TURN_COMMIT_TAIL_MI
+            if demand is None or advise < demand[1]:
+                demand = (until, advise, "turn")
+            elif advise == demand[1]:
+                demand = (max(demand[0], until), advise, demand[2])
         limit, _ = self.trip.speed_limit_at(position)
         horizon = min(self.trip.total_miles, position + KEEPER_EASE_MAX_MI)
         probe = position + KEEPER_LIMIT_PROBE_MI
@@ -313,7 +330,9 @@ class SpeedControlStateMixin:
         while probe <= horizon + 1e-6:
             posted, reason = self.trip.speed_limit_at(probe)
             if posted < limit and probe - position <= self._keeper_ease_mi(posted, scale):
-                self._keeper_ease_target = (probe, posted, reason or "posted limit")
-                return posted, reason or "posted limit"
+                if demand is None or posted < demand[1]:
+                    demand = (probe, posted, reason or "posted limit")
+                break
             probe += KEEPER_LIMIT_PROBE_MI
-        return None
+        self._keeper_ease_target = demand
+        return None if demand is None else (demand[1], demand[2])

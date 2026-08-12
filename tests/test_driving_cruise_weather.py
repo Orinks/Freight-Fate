@@ -9,6 +9,7 @@ from driving_feature_helpers import (
     quiet_trip,
     release_air_brakes,
     roll_to,
+    short_block_street_chain,
     start_drive,
 )
 from speech_capture import speech_stub
@@ -490,6 +491,58 @@ def test_speed_keeper_holds_the_street_limit_until_the_corner_is_close(monkeypat
             driving.update(1 / 60)
             assert driving.truck.brake < 0.02  # below where the brake even sounds
         assert driving.truck.speed_mph == pytest.approx(25.0, abs=1.0)
+    finally:
+        app.shutdown()
+
+
+def test_speed_keeper_makes_the_second_corner_of_a_short_block(monkeypatch):
+    # The rest of the tester report: turns coming up really quickly. The
+    # keeper held the corner it was already easing for through that corner's
+    # whole tail, and a city block is shorter than the tail -- so the 15 mph
+    # service way one block on was invisible until the truck was on top of it,
+    # and the keeper drove into the second corner at the first corner's speed.
+    from freight_fate.app import App
+
+    class NoKeys:
+        def __getitem__(self, _key):
+            return False
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        trip, first, second = short_block_street_chain(driving)
+        t = driving.truck
+        driving.handle_event(key_event(pygame.K_e))
+        t.cargo_kg = 0.0
+        t.grade = 0.0
+        t.transmission.gear = 5
+        t.velocity_mps = 25.0 / 2.23694
+        trip.position_mi = first.at_mi - 0.25
+        release_air_brakes(driving)
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._keeper_mph == pytest.approx(25.0, abs=0.5)
+        assert driving._turn_speed_mph(first) == 20.0
+        assert driving._turn_speed_mph(second) == 15.0
+        assert second.at_mi - first.at_mi < 0.15  # inside the first corner's tail
+
+        roll_to(driving, first.at_mi)
+        assert t.speed_mph <= 20.0  # the first corner, as before
+        # The second corner is the one the old planner could not see: while
+        # there is still road to shed on, the keeper has to be aiming at ITS
+        # number rather than still holding the first corner's.
+        roll_to(driving, second.at_mi - 0.03)
+        assert driving._keeper_speed_ahead() == (15.0, "turn")
+        trace = roll_to(driving, second.at_mi)
+        under = [mile for mile, mph in trace if mph <= 15.0]
+        assert under, "the keeper never reached the service road's corner speed"
+        assert t.speed_mph <= 15.0
+
+        driving.update(1 / 60)
+        assert driving._turn_miss_count == 0
+        assert driving._keeper_mph is not None
     finally:
         app.shutdown()
 

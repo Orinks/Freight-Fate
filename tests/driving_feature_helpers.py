@@ -181,6 +181,70 @@ def facility_street_chain(driving, *, time_scale: float = 1.0):
     return trip
 
 
+def short_block_street_chain(driving, *, block_mi: float = 0.08, time_scale: float = 1.0):
+    """A street chain whose second corner arrives inside the first one's tail.
+
+    The other half of the tester's deadhead report: turns "coming up really
+    quickly". A 420-foot block is an ordinary city block and shorter than the
+    stretch one corner stays in play for, so the second corner is already in
+    front of the truck while the first is still being taken -- and it turns
+    onto an unnamed service way, which advises the 15 mph gate crawl rather
+    than the 20 a named street's corner gets.
+
+    Returns ``(trip, first_cue, second_cue)``.
+    """
+    from freight_fate.data.world_models import Leg, Route
+    from freight_fate.sim import Trip
+
+    city = driving.trip.route.cities[0]
+    legs = [
+        Leg(
+            city,
+            city,
+            1.2,
+            "East Navarre Street",
+            "flat",
+            (),
+            local_cue="Start on East Navarre Street.",
+            local_speed_mph=25.0,
+        ),
+        Leg(
+            city,
+            city,
+            block_mi,
+            "North Michigan Street",
+            "flat",
+            (),
+            local_cue="Turn left onto North Michigan Street.",
+            local_speed_mph=25.0,
+        ),
+        Leg(
+            city,
+            city,
+            1.2,
+            "the service road",
+            "flat",
+            (),
+            local_cue="Turn right onto the service road.",
+            local_speed_mph=15.0,
+        ),
+    ]
+    trip = Trip(
+        Route([city] * 4, legs), driving.truck, driving.trip.weather, seed=3, time_scale=time_scale
+    )
+    trip.traffic_manager.vehicles = []
+    trip.traffic_manager.rolling_bubble = False
+    trip._hazard_check_mi = 1e9
+    trip._inspection_check_mi = 1e9
+    trip.traffic_context = lambda: None
+    driving.trip = trip
+    driving._reset_turn_state_for_trip()
+    driving._destination_exit_taken = True
+    turns = [c for c in trip.navigation_cues if c.key.startswith("local:turn:")]
+    assert len(turns) == 2, "the short-block chain needs both corners"
+    return trip, turns[0], turns[1]
+
+
 def roll_to(driving, mile: float, *, limit_frames: int = 60 * 300):
     """Run frames until the truck reaches ``mile``; return the speed trace."""
     trace = []
