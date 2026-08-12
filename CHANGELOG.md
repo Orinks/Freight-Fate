@@ -70,6 +70,18 @@
 
 ### Fixed
 
+- **The static dies with the station it belongs to.** When a station
+  faded past the edge of its range and the radio fell back to the
+  Roadhouse, the dead station's hiss and noise splashes kept crackling
+  over the new station for a second or two, holding the music quiet.
+  The handover now cuts the static the moment it speaks.
+
+- **The Skip on the Far End badge means what it says again.** It is
+  meant for pulling in a station from beyond its coverage thanks to
+  high ground, but it was awarded for riding any station into its own
+  static, so every fading signal handed it out. It now takes a catch
+  genuinely past the station's normal reach.
+
 - **The speed keeper comes back up to street speed.** Its number could
   only fall: a session that started on a 15 mile-per-hour service way
   held that crawl over every 25 mile-per-hour street after it, for the

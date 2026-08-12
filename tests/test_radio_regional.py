@@ -328,6 +328,12 @@ def test_station_fades_out_of_range_and_falls_back_to_roadhouse(denver_driving):
 
     import freight_fate.states.driving_updates as driving_updates
 
+    # The drive to the contour edge left the fringe renderer live: hiss bed
+    # up, pickets ducking the program. All of it belongs to the dying station.
+    driving._radio_fringe_signal = 0.15
+    driving._fringe_bed_active = True
+    driving._radio_picket_duck = 0.5
+
     driving._radio_signal_timer = 0.0
     orig = driving_updates.truck_position
     driving_updates.truck_position = far_from_denver
@@ -339,6 +345,11 @@ def test_station_fades_out_of_range_and_falls_back_to_roadhouse(denver_driving):
     assert driving.radio.current_station().id == "route_playlist"
     assert any("faded out of range" in text for text in events)
     assert any(key == "radio/static_burst" for key, _v in played_effects)
+    # The dead station's fringe dies with it: no hiss or picket duck may
+    # survive the handover to sit over the always-available fallback.
+    assert driving._radio_fringe_signal is None
+    assert driving._fringe_bed_active is False
+    assert driving._radio_picket_duck == 1.0
 
 
 def test_fringe_signal_thins_radio_volume(denver_driving):

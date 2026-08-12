@@ -1729,6 +1729,12 @@ class DrivingUpdateMixin:
             self._radio_states_held.clear()
             self.ctx.audio.play("radio/static_burst", volume=0.5)
             action = self.radio.select_station(SAFE_ROUTE_PLAYLIST, self._radio_backend)
+            # The dead station's fringe must die with it: without this the
+            # cached signal keeps the hiss bed and pickets crackling over
+            # the fallback -- and its picket duck holding the volume down --
+            # until the next reception tick.
+            self._radio_fringe_signal = None
+            self._stop_radio_fringe()
             self.radio.write_settings(self.ctx.settings)
             self.ctx.settings.save()
             self.ctx.say_event(
@@ -1967,9 +1973,16 @@ class DrivingUpdateMixin:
         station = reception.station
         if add_unique_stat(p, "radio_stations_heard", station.id) >= 25:
             self.ctx.award_achievement("radio_dial_wanderer", event=True)
-        # Fringe reception: audible, but well past where this station has any
-        # business reaching. Height is range, so this is a hilltop catch.
-        if 0.0 < self._radio_signal_factor <= STATIC_SIGNAL_THRESHOLD:
+        # A genuine skip: audible past the station's flat contour, which only
+        # height can do. Any station merely ridden into its own static must
+        # not count -- that is Somewhere in the Static's territory, and this
+        # badge used to pop on every ordinary fade-out drive.
+        distance = reception.distance_miles
+        if (
+            distance is not None
+            and station.range_miles > 0
+            and distance >= station.range_miles * 1.1
+        ):
             self.ctx.award_achievement("radio_fringe_catch", event=True)
         state = self.trip.state_at()
         if not state:

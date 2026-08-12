@@ -2146,7 +2146,12 @@ section below and the Unreleased changelog; the release-line view:
       engine -- silent in a dead cab, back on its own at ignition, with
       a spoken no-power line on the radio keys. Pre-fold settings files
       keep a deliberately-enabled streamer-safe; only the default
-      changed.
+      changed. The manual playtest round
+      (`tests/manual_playtest_radio.py`) then caught and fixed two more:
+      the dead station's fringe static survived the fade-out handover
+      for a reception tick, and the Skip on the Far End badge fired on
+      any deep-fringe listening instead of a genuine past-the-contour
+      catch.
 - [x] **Hosts, regional stations, and real signal behavior.** The Roadhouse
       and Night Line have live hosts; twelve fictional regional stations
       with newly composed songs cover markets across the map, fading to

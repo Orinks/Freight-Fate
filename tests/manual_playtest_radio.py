@@ -140,3 +140,93 @@ def test_manual_radio_session(monkeypatch):
         screen.driving = d
         for line in screen._radio_lines():
             print(f"  screen | {line}")
+
+
+def test_manual_fadeout_drive(monkeypatch):
+    """Ride WCRX out of its 10-mile contour to the handover, then ride WBEZ's
+    110-mile signal into the deep fringe on the run to Rockford."""
+    with PlaytestHarness(monkeypatch) as harness:
+        result = harness.start_delivery(profile_name="Manual Fadeout Drive")
+        d = harness.driving
+        settings_volume = d.ctx.settings.radio_volume
+        volumes, hiss, pickets, bursts = [], [], [], []
+        monkeypatch.setattr(d.ctx.audio, "play_music", lambda track, fade_ms=1500: None)
+        monkeypatch.setattr(d.ctx.audio, "stop_music", lambda fade_ms=0: None)
+        monkeypatch.setattr(d.ctx.audio, "play_radio_stream", lambda url, fade_ms=1500: None)
+        monkeypatch.setattr(d.ctx.audio, "music_playing", lambda: True)  # the stream is alive
+        monkeypatch.setattr(
+            d.ctx.audio, "set_volumes", lambda **kw: volumes.append(kw.get("music"))
+        )
+        monkeypatch.setattr(
+            d.ctx.audio,
+            "start_loop",
+            lambda ch, key, volume=1.0, fade_ms=0: hiss.append(volume) if "hiss" in key else None,
+        )
+        monkeypatch.setattr(
+            d.ctx.audio,
+            "play_bank",
+            lambda *a, **kw: pickets.append(1),
+        )
+        monkeypatch.setattr(
+            d.ctx.audio,
+            "play",
+            lambda key, volume=1.0, pan=0.0: bursts.append(key) if "static" in key else None,
+        )
+
+        harness.press_key(pygame.K_e)
+        d.ctx.audio.update(5.0)
+        d._update_audio(1 / 60)
+        d.truck.velocity_mps = 29.0  # ~65 mph, so the picket flutter rate is honest
+
+        cursor = len(result.transcript)
+
+        def ride(station_id, label, miles):
+            nonlocal cursor
+            print(f"\n### {label}")
+            d.radio.select_station(station_id, d._radio_backend)
+            cursor = len(result.transcript)
+            for mile in miles:
+                d.trip.position_mi = float(mile)
+                volumes.clear()
+                hiss.clear()
+                pickets.clear()
+                d._radio_signal_timer = 0.0
+                d._update_radio_reception(1.5)
+                for _ in range(8):  # two seconds of fringe rendering
+                    d._update_radio_fringe(0.25)
+                reception = d.radio.current_reception()
+                factor = (volumes[-1] / settings_volume) if volumes else 1.0
+                parts = [
+                    f"mile {mile:>3}",
+                    f"{reception.station.call_sign or reception.station.display_name:<4}",
+                    f"signal {reception.signal:4.2f} ({reception.signal_label})",
+                    f"program volume {factor * 100:3.0f}%",
+                ]
+                if hiss:
+                    parts.append(f"hiss bed {hiss[-1] * 100:3.0f}%")
+                if pickets:
+                    parts.append(f"{len(pickets)} noise pickets in 2s")
+                print("  " + ", ".join(parts))
+                for line in result.transcript[cursor:]:
+                    print(f"    spoken | {line}")
+                cursor = len(result.transcript)
+                if bursts:
+                    print(f"    audio  | {bursts[-1]} (the handover crackle)")
+                    bursts.clear()
+
+        ride(
+            "wcrx-chicago",
+            "WCRX, a 10-mile college signal, eastbound out of its contour",
+            range(0, 15, 2),
+        )
+        ride(
+            "wbez-chicago",
+            "WBEZ, 110-mile contour, the whole 86-mile run to Rockford",
+            range(0, 87, 8),
+        )
+
+        print("\n=== Y readout parked at Rockford")
+        cursor = len(result.transcript)
+        harness.press_key(pygame.K_y)
+        for line in result.transcript[cursor:]:
+            print(f"  spoken | {line}")

@@ -557,8 +557,8 @@ def test_the_radio_badges_follow_the_signal():
 
     app, driving, awarded = _driving_for_badges()
     try:
-        station = SimpleNamespace(id="ff:test", display_name="Test Radio")
-        reception = SimpleNamespace(station=station)
+        station = SimpleNamespace(id="ff:test", display_name="Test Radio", range_miles=100.0)
+        reception = SimpleNamespace(station=station, distance_miles=None)
         driving._radio_signal_factor = 1.0
         for state in ("Illinois", "Indiana"):
             driving.trip.state_at = lambda _mile=None, s=state: s
@@ -568,11 +568,16 @@ def test_the_radio_badges_follow_the_signal():
         driving._track_radio_badges(reception)
         assert "radio_three_states" in awarded
 
-        # A signal down in the hiss is a fringe catch.
+        # A catch well past the flat contour -- only height does that -- is
+        # a skip. Riding a station into its own static near the edge is not.
         awarded.clear()
-        driving._radio_signal_factor = 0.01
-        driving._track_radio_badges(reception)
+        far = SimpleNamespace(station=station, distance_miles=115.0)
+        driving._track_radio_badges(far)
         assert "radio_fringe_catch" in awarded
+        awarded.clear()
+        near_edge = SimpleNamespace(station=station, distance_miles=105.0)
+        driving._track_radio_badges(near_edge)
+        assert "radio_fringe_catch" not in awarded
     finally:
         app.shutdown()
 
