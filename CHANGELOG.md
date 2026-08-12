@@ -4,6 +4,14 @@
 
 ### Fixed
 
+- **Cloud backup no longer goes quiet after the cloud copy of a career
+  disappears.** If your account's cloud storage was reset, or you deleted a
+  career's cloud backup from another computer, this computer still remembered
+  the old cloud copy and treated the mismatch as a conflict -- and from then
+  on it silently stopped backing that career up. The game now notices there is
+  nothing in the cloud to protect, starts the career's backups over fresh, and
+  your next save is backed up as usual.
+
 - **Quick manual downshifts now respect the clutch the moment you press it.**
   The previous clutch over-rev fix corrected the truck simulation, but the
   live driving controls still had a timing gap: if you pressed Shift and tapped
