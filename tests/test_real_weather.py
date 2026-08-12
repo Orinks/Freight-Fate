@@ -691,3 +691,75 @@ def test_world_cities_have_coordinates(world):
         assert city.lon != 0.0, f"{city.name} missing longitude"
         assert 24 < city.lat < 50
         assert -125 < city.lon < -66
+
+
+def _nws_obs(text: str, age_s: float, now: float) -> dict:
+    from datetime import datetime, timezone
+
+    stamp = datetime.fromtimestamp(now - age_s, tz=timezone.utc).isoformat()
+    return {
+        "properties": {
+            "textDescription": text,
+            "windSpeed": {"value": 10.0, "unitCode": "wmoUnit:km_h-1"},
+            "temperature": {"value": 20.0, "unitCode": "wmoUnit:degC"},
+            "visibility": {"value": 16093.44, "unitCode": "wmoUnit:m"},
+            "timestamp": stamp,
+        }
+    }
+
+
+def test_station_walk_skips_a_dead_nearest_station(monkeypatch):
+    """The nearest NWS station is not always a live one. A station sitting on
+    a days-old observation pinned a route cell to simulated fallback for a
+    whole session (2026-08-12 manual playtest): the resolver trusted index
+    zero forever, and first contact had no previous conditions to hold. The
+    fetch now walks to the next-nearest fresh station and remembers it."""
+    import time as time_mod
+
+    from freight_fate.sim import real_weather as rw
+
+    monkeypatch.setattr(rw, "_station_cache", {})
+    monkeypatch.setattr(rw, "_station_pick", {})
+    urls = ["https://x/st0/observations/latest", "https://x/st1/observations/latest"]
+    monkeypatch.setattr(rw, "_resolve_station_urls", lambda lat, lon: urls)
+    now = time_mod.time()
+    calls: list[str] = []
+
+    def fake_get_json(url: str) -> dict:
+        calls.append(url)
+        if "st0" in url:
+            return _nws_obs("Mostly Cloudy", 3 * 24 * 3600.0, now)  # parked station
+        return _nws_obs("Rain", 20 * 60.0, now)  # fresh, 20 minutes old
+
+    monkeypatch.setattr(rw, "_get_json", fake_get_json)
+
+    text, _wind, _temp, _vis, observed_at = rw._default_fetch(41.88, -87.63)
+    assert text == "Rain"
+    assert observed_at is not None and time_mod.time() - observed_at < rw.OBSERVATION_MAX_AGE_S
+
+    # The fresh station is remembered and asked first next time.
+    calls.clear()
+    rw._default_fetch(41.88, -87.63)
+    assert "st1" in calls[0]
+
+
+def test_station_walk_returns_freshest_when_all_are_stale(monkeypatch):
+    import time as time_mod
+
+    from freight_fate.sim import real_weather as rw
+
+    monkeypatch.setattr(rw, "_station_cache", {})
+    monkeypatch.setattr(rw, "_station_pick", {})
+    urls = ["https://x/st0/observations/latest", "https://x/st1/observations/latest"]
+    monkeypatch.setattr(rw, "_resolve_station_urls", lambda lat, lon: urls)
+    now = time_mod.time()
+
+    def fake_get_json(url: str) -> dict:
+        if "st0" in url:
+            return _nws_obs("Fog", 5 * 24 * 3600.0, now)
+        return _nws_obs("Snow", 4 * 3600.0, now)  # stale too, but fresher
+
+    monkeypatch.setattr(rw, "_get_json", fake_get_json)
+
+    text, *_rest = rw._default_fetch(41.88, -87.63)
+    assert text == "Snow"  # the freshest stale one, for the caller's hold logic

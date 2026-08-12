@@ -119,17 +119,25 @@ def _get_json(url: str) -> dict:
         return json.loads(resp.read().decode("utf-8"))
 
 
-# Resolving a city's nearest observation station is stable, so cache it across
-# refreshes (keyed by coarse coordinates) to avoid repeating the two lookups.
-_station_cache: dict[tuple[float, float], str] = {}
+# Resolving a city's nearby observation stations is stable, so cache the list
+# across refreshes (keyed by coarse coordinates) to avoid repeating the two
+# lookups. The pick records which of them last answered with a FRESH
+# observation: the nearest station is not always a live one -- a dead or
+# parked station pinned one I-90 cell to simulated fallback for a whole
+# session (2026-08-12 manual playtest) -- so fetches walk past stale stations
+# instead of trusting index zero forever.
+STATION_WALK_LIMIT = 3
+_station_cache: dict[tuple[float, float], list[str]] = {}
+_station_pick: dict[tuple[float, float], int] = {}
 _station_lock = threading.Lock()
 
 
-def _resolve_station_obs_url(lat: float, lon: float) -> str:
-    """Return the 'latest observation' URL for the station nearest a point.
+def _resolve_station_urls(lat: float, lon: float) -> list[str]:
+    """Return 'latest observation' URLs for the stations nearest a point,
+    nearest first, capped at :data:`STATION_WALK_LIMIT`.
 
     Walks the NWS discovery chain: ``/points`` yields the station list URL, and
-    that list yields the nearest station. The result is cached per location.
+    that list yields the stations. The result is cached per location.
     """
     key = (round(lat, 2), round(lon, 2))
     with _station_lock:
@@ -143,11 +151,11 @@ def _resolve_station_obs_url(lat: float, lon: float) -> str:
     station_urls = stations.get("observationStations") or []
     if not station_urls:
         raise ValueError(f"no observation stations near {lat:.4f},{lon:.4f}")
-    obs_url = f"{station_urls[0]}/observations/latest"
+    urls = [f"{u}/observations/latest" for u in station_urls[:STATION_WALK_LIMIT]]
 
     with _station_lock:
-        _station_cache[key] = obs_url
-    return obs_url
+        _station_cache[key] = urls
+    return urls
 
 
 def _wind_to_kmh(wind: dict | None) -> float:
@@ -190,16 +198,9 @@ def _visibility_to_mi(vis: dict | None) -> float | None:
     return value / 1609.344  # metres (wmoUnit:m, the NWS default)
 
 
-def _default_fetch(
-    lat: float, lon: float
+def _parse_observation(
+    data: dict,
 ) -> tuple[str, float, float | None, float | None, float | None]:
-    """Fetch (condition, wind, temperature, visibility, observation time)
-    from NWS.
-
-    The temperature and visibility are None when the station reports no
-    current value. Raises on network failure."""
-    obs_url = _resolve_station_obs_url(lat, lon)
-    data = _get_json(obs_url)
     props = data["properties"]
     text = props.get("textDescription") or ""
     wind_kmh = _wind_to_kmh(props.get("windSpeed"))
@@ -213,6 +214,41 @@ def _default_fetch(
         except (TypeError, ValueError):
             log.warning("NWS observation carried an invalid timestamp: %r", timestamp)
     return text, wind_kmh, temp_c, visibility_mi, observed_at
+
+
+def _default_fetch(
+    lat: float, lon: float
+) -> tuple[str, float, float | None, float | None, float | None]:
+    """Fetch (condition, wind, temperature, visibility, observation time)
+    from NWS, from the nearest station with a FRESH observation.
+
+    Stations die and park: the nearest one can sit on a reading days old
+    while the next one over reports on the hour. The walk tries the station
+    that last answered fresh first, then the others in distance order, and
+    returns the first fresh observation. If every station within the walk
+    limit is stale, the freshest of them is returned and the caller's stale
+    handling takes over. Temperature and visibility are None when the
+    station reports no current value. Raises on network failure."""
+    key = (round(lat, 2), round(lon, 2))
+    urls = _resolve_station_urls(lat, lon)
+    with _station_lock:
+        preferred = _station_pick.get(key, 0)
+    order = [preferred] + [i for i in range(len(urls)) if i != preferred]
+    now = time.time()
+    freshest: tuple[float, tuple, int] | None = None
+    for i in order:
+        parsed = _parse_observation(_get_json(urls[i]))
+        observed_at = parsed[4]
+        # No timestamp reads as current: the worker treats it as now.
+        age_s = None if observed_at is None else now - float(observed_at)
+        if age_s is None or age_s <= OBSERVATION_MAX_AGE_S:
+            with _station_lock:
+                _station_pick[key] = i
+            return parsed
+        if freshest is None or age_s < freshest[0]:
+            freshest = (age_s, parsed, i)
+    assert freshest is not None
+    return freshest[1]
 
 
 class _StaleObservation(Exception):
