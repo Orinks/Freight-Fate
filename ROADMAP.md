@@ -1198,6 +1198,17 @@ onto exit signalling.
       and the same silence family as the sticky-conflict case from
       Jessie's stale prod save). Consider a one-time spoken notice when
       a slot's backups stop being accepted.
+- [ ] **Report client sync status server-side so stalls are diagnosable
+      from the dashboard.** The client now logs its per-career sync state
+      at startup (2026-08-13), but that only helps for testers who share
+      logs; a player whose backups silently stop (Trssharp, Jessie) is
+      still a black box. Have the client include a small per-career
+      status report with its existing traffic — last upload result,
+      recorded conflict and its cloud revision, reason for the last skip
+      — stored per driver on orinks-net for the dashboard. Metadata
+      only, no save content, riding the existing cloud-backup consent.
+      Two-repo change that touches the server, so it waits for the
+      validator cutover to settle rather than shipping mid-window.
 - [x] **Country-originals music batch (2026-08-08).** Thirty-one tracks
       from the owner's originals zip: five day beds, eight night beds, ten
       country-station songs, the seven-track Nashville After Hours jazz

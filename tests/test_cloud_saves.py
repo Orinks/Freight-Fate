@@ -13,6 +13,7 @@ from __future__ import annotations
 import base64
 import io
 import json
+import logging
 import urllib.error
 
 import pytest
@@ -437,6 +438,46 @@ def test_conflict_recheck_that_cannot_reach_the_cloud_keeps_the_guard():
     drain(service, clock)
     assert transport.posts == []
     assert "Road Star" in service.conflicts()
+
+
+def test_start_logs_the_sync_state_for_each_slot(caplog):
+    """The startup dump puts every slot's sync state into the session log, so
+    a tester's shared game.log explains a stalled career even when the
+    session that recorded the conflict has rotated out of the kept logs."""
+    transport = FakeTransport()
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.sync_state.record_synced("Road Star", 41, "hash-a")
+    service.sync_state.record_synced("Night Owl", 3, "hash-b")
+    service.sync_state.record_conflict(
+        "Night Owl",
+        {"latestRevision": 44, "latestCreatedAt": 1_700_000_000_000, "latestSummary": "level 18"},
+    )
+
+    with caplog.at_level(logging.INFO, logger="freight_fate.cloud_saves"):
+        service.start()
+
+    lines = [r.getMessage() for r in caplog.records if "Cloud sync state" in r.getMessage()]
+    healthy = next(line for line in lines if "Road Star" in line)
+    assert "revision 41" in healthy
+    assert "conflict" not in healthy
+    blocked = next(line for line in lines if "Night Owl" in line)
+    assert "revision 3" in blocked
+    assert "conflict" in blocked and "44" in blocked
+
+
+def test_start_with_no_sync_state_says_so(caplog):
+    transport = FakeTransport()
+    clock = Clock()
+    service = make_service(transport, clock)
+
+    with caplog.at_level(logging.INFO, logger="freight_fate.cloud_saves"):
+        service.start()
+
+    assert any(
+        "Cloud sync state" in r.getMessage() and "no careers" in r.getMessage()
+        for r in caplog.records
+    )
 
 
 def test_keep_mine_overwrites_the_cloud_and_clears_the_conflict():

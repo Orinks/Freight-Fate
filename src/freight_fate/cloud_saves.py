@@ -628,10 +628,38 @@ class CloudSaves:
         if not self._enabled or self._started:
             return
         self._started = True
+        self._log_sync_state()
         self._stop.clear()
         if self._threaded:
             self._thread = threading.Thread(target=self._run, name="cloud-saves", daemon=True)
             self._thread.start()
+
+    def _log_sync_state(self) -> None:
+        """One line per known slot at startup: the kept session logs only go
+        back two sessions, so a stall whose conflict was recorded earlier
+        would otherwise leave no trace in the log a tester shares."""
+        slots = self.sync_state.slots()
+        if not slots:
+            log.info("Cloud sync state: no careers have synced from this computer yet")
+            return
+        for name, entry in sorted(slots.items()):
+            revision = entry.get("revision")
+            synced = (
+                f"last synced revision {revision}"
+                if revision is not None
+                else "no revision synced yet"
+            )
+            conflict = entry.get("conflict")
+            if conflict is None:
+                log.info("Cloud sync state for %s: %s", name, synced)
+            else:
+                log.info(
+                    "Cloud sync state for %s: %s; a conflict against cloud "
+                    "revision %s is waiting in the Cloud backup menu",
+                    name,
+                    synced,
+                    conflict.get("latestRevision"),
+                )
 
     def queue_backup(self, profile: Profile) -> None:
         """Snapshot a just-saved profile for upload; returns immediately."""
