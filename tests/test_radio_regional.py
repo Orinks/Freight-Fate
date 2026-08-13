@@ -1,5 +1,6 @@
 """Regional stations, signal falloff, and host breaks on the in-cab radio."""
 
+import math
 from importlib import resources
 
 import pytest
@@ -17,15 +18,31 @@ from freight_fate.music import (
 )
 from freight_fate.radio import (
     DEFAULT_RADIO_CATALOG,
+    EARTH_RADIUS_MI,
+    RADIO_REACH_MULT,
+    SIGNAL_DEEP_FLOOR,
     RadioReception,
     RadioState,
     RadioStation,
+    effective_range_miles,
     estimate_signal,
     signal_volume_factor,
 )
 
 DALLAS = (32.7767, -96.7970)
 CHICAGO = (41.8781, -87.6298)
+
+
+def _north_of(position, miles):
+    """Move due north by `miles` from `position`.
+
+    Exact for a pure meridian offset: the haversine formula collapses to
+    the great-circle arc R * dlat when dlon is 0, so this needs no
+    small-angle approximation.
+    """
+    lat, lon = position
+    return (lat + math.degrees(miles / EARTH_RADIUS_MI), lon)
+
 
 REGIONAL = [s for s in DEFAULT_RADIO_CATALOG if s.source_type == "regional"]
 
@@ -109,17 +126,41 @@ def test_new_afn_globals_are_cataloged_with_checked_sources():
         assert station.always_available
 
 
-def test_signal_volume_factor_fades_with_distance():
-    station = _ranged_fixture()
+def test_effective_range_doubles_the_published_contour():
+    # Compression compensation (owner design 2026-08-13): the truck covers
+    # road miles far faster than a real cab, so the published FM contour is
+    # doubled before any distance math touches it.
+    station = _ranged_fixture(range_miles=40.0)
+    assert effective_range_miles(station, None) == 40.0 * RADIO_REACH_MULT == 80.0
+
+    # Range-less (built-in) stations are untouched: 0 * mult is still 0.
+    builtin = _ranged_fixture(range_miles=0.0)
+    assert effective_range_miles(builtin, None) == 0.0
+
+
+def test_signal_volume_factor_holds_clean_through_most_of_the_contour():
+    # Fixture range_miles=40.0 -> 80 game-miles of reach (RADIO_REACH_MULT).
+    station = _ranged_fixture(range_miles=40.0)
     at_tower = estimate_signal(station, DALLAS)
     assert signal_volume_factor(at_tower) == 1.0
 
-    fringe_position = (DALLAS[0], DALLAS[1] + 1.9)  # ~110 mi east of Dallas
-    fringe = estimate_signal(station, fringe_position)
-    assert 0.0 < fringe.signal < 0.6
-    # deep fringe: the program sinks under the rising static but a trace
-    # survives while the station is technically in range (owner's smear rule)
-    assert 0.1 < signal_volume_factor(fringe) < 0.6
+    # Clean through 80% of the contour (64 of 80 game-miles).
+    clean_position = _north_of(DALLAS, 64.0)
+    clean = estimate_signal(station, clean_position)
+    assert signal_volume_factor(clean) == 1.0
+
+    # Fading past 85% (70 of 80 game-miles): off full quieting, not yet
+    # static.
+    fading_position = _north_of(DALLAS, 70.0)
+    fading = estimate_signal(station, fading_position)
+    assert 0.0 < signal_volume_factor(fading) < 1.0
+
+    # deep fringe (76 of 80 game-miles): the program sinks under the rising
+    # static but a trace survives while the station is technically in range
+    # (owner's smear rule)
+    deep_fringe_position = _north_of(DALLAS, 76.0)
+    deep_fringe = estimate_signal(station, deep_fringe_position)
+    assert 0.1 < signal_volume_factor(deep_fringe) < 0.6
 
     gone = estimate_signal(station, CHICAGO)
     assert gone.signal == 0.0
@@ -129,15 +170,43 @@ def test_signal_volume_factor_fades_with_distance():
     assert signal_volume_factor(always) == 1.0
 
 
+def test_signal_volume_factor_is_continuous_at_the_new_joins():
+    # Hand-pin the curve at the exact join points, bypassing lat/lon
+    # geometry. The owner's smear ruling: static rises TO program level,
+    # never on top of a still-loud one -- these two branches must agree
+    # exactly where they meet.
+    station = _ranged_fixture()
+
+    def _factor(signal):
+        return signal_volume_factor(RadioReception(station, 10.0, signal, "in range"))
+
+    # Full-volume join: right at the threshold is still clean, a hair
+    # below starts fading.
+    assert _factor(0.20) == 1.0
+    assert _factor(0.1999) < 1.0
+
+    # Static join: the fringe formula and the deep-floor formula meet at
+    # the same value -- static rises TO program level, never above it.
+    edge = _factor(0.12)
+    assert edge == pytest.approx(0.72)
+    assert _factor(0.1201) > edge  # just inside the fringe: a hair louder
+    assert _factor(0.1199) < edge  # just past: sinking, never a jump up
+
+    # Deep floor: keeps sinking, never below the floor, never silent while
+    # still technically in range.
+    assert _factor(0.005) == pytest.approx(SIGNAL_DEEP_FLOOR)
+
+
 def test_elevation_extends_fm_range_like_the_rim(  # the owner's ham anchor
 ):
     # From high ground you receive far past the flat contour: line-of-sight
     # FM, 4/3-earth radio horizon. Desert Rock Phoenix (site 1086 ft, range
-    # 125 mi) at ~200 miles: silent on the flats, clear from ~7000 ft.
+    # 125 mi -> 250 game-mi flat reach) at ~300 miles: silent on the flats,
+    # clear from ~7000 ft.
     station = _ranged_fixture(
         "kfix-phoenix", lat=33.4484, lon=-112.074, range_miles=125.0, site_elev_ft=1086.0
     )
-    far_north = (station.lat + 2.9, station.lon)  # ~200 miles out
+    far_north = _north_of((station.lat, station.lon), 300.0)
 
     flat = estimate_signal(station, far_north, elevation_ft=station.site_elev_ft)
     assert flat.signal == 0.0
@@ -217,7 +286,9 @@ def test_terrestrial_category_sorts_strongest_signal_first():
 
 def test_power_on_retunes_a_fringe_memory_to_the_strongest_signal():
     strong = _terrestrial_at("fix-strong", "WZZZ", 0.0)
-    fringe = _terrestrial_at("fix-fringe", "KAAA", 1.8)
+    # ~232 mi east: past the doubled 240 mi reach's clean threshold, still
+    # technically in range.
+    fringe = _terrestrial_at("fix-fringe", "KAAA", 4.0)
     radio = RadioState(catalog=(strong, fringe), station_id="fix-fringe", position=DALLAS)
 
     radio.toggle()  # off
@@ -406,7 +477,9 @@ def test_fringe_signal_thins_radio_volume(denver_driving):
     driving.radio.catalog = driving.radio.catalog + (ranged,)
     driving.radio.select_station("kfix-denver", driving._radio_backend)
 
-    fringe = (39.7392, -104.9903 + 2.1)  # ~110 miles east of the Denver tower
+    # ~228 miles east of the Denver tower: past the doubled 240 mi reach's
+    # clean threshold, still technically in range.
+    fringe = (39.7392, -104.9903 + 4.3)
 
     import freight_fate.states.driving_updates as driving_updates
 

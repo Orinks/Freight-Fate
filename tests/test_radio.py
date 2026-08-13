@@ -190,11 +190,14 @@ def test_ff_music_stations_share_the_ff_dial_group():
 
 
 def test_no_regional_signal_still_has_safe_and_afn_fallback_choices():
-    # Interior Nevada on US-50: real radio darkness even after the
-    # 623-city coverage fill (central South Dakota is SDPB country now).
+    # The doubled radio reach (RADIO_REACH_MULT, 2026-08-13) closed the old
+    # US-50 Nevada dead zone -- Reno and Las Vegas's community stations now
+    # blanket the interior Great Basin. The Denali Highway is still real
+    # radio darkness: no curated local station's doubled contour reaches
+    # interior Alaska.
     radio = RadioState(
         streamer_safe=False,
-        position=(38.9, -116.6),
+        position=(63.2, -147.0),
     )
     stations = radio.available_stations()
 

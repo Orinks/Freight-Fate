@@ -11,7 +11,7 @@ from ..models.enforcement import (
     WEIGH_STATION_BYPASS_FINE,
     WORK_ZONE_BARRELS_FINE,
 )
-from ..radio import truck_elevation_ft
+from ..radio import effective_range_miles, truck_elevation_ft
 from ..speech_pacing import EventSpeechPacer
 from ..speech_text import overspeed_nag, terse_silent
 from .driving_core import *
@@ -2066,12 +2066,15 @@ class DrivingUpdateMixin:
         # A genuine skip: audible past the station's flat contour, which only
         # height can do. Any station merely ridden into its own static must
         # not count -- that is Somewhere in the Static's territory, and this
-        # badge used to pop on every ordinary fade-out drive.
+        # badge used to pop on every ordinary fade-out drive. The flat
+        # contour is effective_range_miles with no elevation term, i.e. the
+        # reach-doubled contour (RADIO_REACH_MULT), not the raw published
+        # range_miles.
         distance = reception.distance_miles
         if (
             distance is not None
             and station.range_miles > 0
-            and distance >= station.range_miles * 1.1
+            and distance >= effective_range_miles(station, None) * 1.1
         ):
             self.ctx.award_achievement("radio_fringe_catch", event=True)
         state = self.trip.state_at()

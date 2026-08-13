@@ -727,12 +727,14 @@ def test_the_radio_badges_follow_the_signal():
 
         # A catch well past the flat contour -- only height does that -- is
         # a skip. Riding a station into its own static near the edge is not.
+        # The flat contour is range_miles * RADIO_REACH_MULT (200 here, not
+        # the raw 100), so the skip threshold sits at 220, not 110.
         awarded.clear()
-        far = SimpleNamespace(station=station, distance_miles=115.0)
+        far = SimpleNamespace(station=station, distance_miles=230.0)
         driving._track_radio_badges(far)
         assert "radio_fringe_catch" in awarded
         awarded.clear()
-        near_edge = SimpleNamespace(station=station, distance_miles=105.0)
+        near_edge = SimpleNamespace(station=station, distance_miles=210.0)
         driving._track_radio_badges(near_edge)
         assert "radio_fringe_catch" not in awarded
     finally:

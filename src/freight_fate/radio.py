@@ -437,12 +437,25 @@ def station_distance_miles(
 # would punish every in-market listener under a mountain site.
 RADIO_HORIZON_MI_PER_SQRT_FT = 1.23
 
+# Compression compensation for ranged stations (owner design 2026-08-13):
+# the truck spends road miles 10-40x faster than a real cab, so a real
+# 40-mile FM contour was two real minutes of program. Doubling the reach
+# keeps radio regional (no station spans three states) while a median
+# station now survives about seven real minutes at Relaxed. Applied in
+# _reach_mi so every consumer -- range check, signal curve, elevation
+# lift -- agrees on one number.
+RADIO_REACH_MULT = 2.0
+
+
+def _reach_mi(station: RadioStation) -> float:
+    return station.range_miles * RADIO_REACH_MULT
+
 
 def effective_range_miles(station: RadioStation, elevation_ft: float | None) -> float:
     if elevation_ft is None or station.site_elev_ft is None or station.range_miles <= 0:
-        return station.range_miles
+        return _reach_mi(station)
     lift = max(0.0, elevation_ft - station.site_elev_ft)
-    return station.range_miles + RADIO_HORIZON_MI_PER_SQRT_FT * math.sqrt(lift)
+    return _reach_mi(station) + RADIO_HORIZON_MI_PER_SQRT_FT * math.sqrt(lift)
 
 
 def estimate_signal(
@@ -472,11 +485,16 @@ def estimate_signal(
 # rises to take its place -- the owner's ruling (2026-07-24): the two smear
 # together, static going TO program level, never bombarding on top of a
 # still-loud program. The deep floor keeps a trace of program in the noise
-# while the station is technically in range.
-SIGNAL_FULL_VOLUME = 0.6
+# while the station is technically in range. Retuned for the doubled reach
+# (2026-08-13): with the contour twice as wide, the old 60%-of-range full-
+# volume cutoff spent most of a station's new reach visibly fading, when
+# the point of RADIO_REACH_MULT was more clean program, not more fringe.
+# Clean program now holds through ~85% of the contour and static is pushed
+# out to the outer edge, where it belongs.
+SIGNAL_FULL_VOLUME = 0.20  # clean program through ~85% of the contour
 SIGNAL_FRINGE_FLOOR = 0.3
 SIGNAL_DEEP_FLOOR = 0.08
-STATIC_SIGNAL_THRESHOLD = 0.35
+STATIC_SIGNAL_THRESHOLD = 0.12  # static smear lives in the outer edge only
 
 
 def signal_volume_factor(reception: RadioReception) -> float:
