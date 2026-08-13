@@ -84,9 +84,9 @@ class DrivingControlsMixin:
             key in (pygame.K_EQUALS, pygame.K_PLUS, pygame.K_KP_PLUS)
             or getattr(event, "unicode", "") == "+"
         ):
-            self._adjust_cruise(CRUISE_STEP_MPH)
+            self._adjust_cruise(1, fine=bool(getattr(event, "mod", 0) & pygame.KMOD_CTRL))
         elif key in (pygame.K_MINUS, pygame.K_KP_MINUS) or getattr(event, "unicode", "") == "-":
-            self._adjust_cruise(-CRUISE_STEP_MPH)
+            self._adjust_cruise(-1, fine=bool(getattr(event, "mod", 0) & pygame.KMOD_CTRL))
         elif key == pygame.K_LEFT and self.ctx.settings.lane_is_automated():
             self._tap_lane_change(1)
         elif key == pygame.K_RIGHT and self.ctx.settings.lane_is_automated():
@@ -277,6 +277,7 @@ class DrivingControlsMixin:
             "Plus and minus, including the keypad keys, raise and lower the "
             "remembered open-road target by five, so you can dial it up to the "
             "speed you want; it will not hold above the posted limit. "
+            "Control with plus or minus moves it by one mile per hour. "
             "Shift K resumes the last cruise speed after braking canceled it, "
             "like a car's resume button. "
             "Parked with the brake set, K latches a high idle instead -- the "
@@ -543,9 +544,9 @@ class DrivingControlsMixin:
         elif button == pygame.CONTROLLER_BUTTON_DPAD_DOWN:
             self._try_rest_stop()
         elif button == pygame.CONTROLLER_BUTTON_DPAD_LEFT:
-            self._adjust_cruise(-CRUISE_STEP_MPH)
+            self._adjust_cruise(-1)
         elif button == pygame.CONTROLLER_BUTTON_DPAD_RIGHT:
-            self._adjust_cruise(CRUISE_STEP_MPH)
+            self._adjust_cruise(1)
         elif button == pygame.CONTROLLER_BUTTON_A:
             self._toggle_engine()
         elif button == pygame.CONTROLLER_BUTTON_B:

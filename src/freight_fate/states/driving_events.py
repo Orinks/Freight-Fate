@@ -2470,15 +2470,17 @@ class DrivingEventMixin:
         else:
             self.ctx.say(message)
 
-    def _adjust_cruise(self, delta_mph: float) -> None:
+    def _adjust_cruise(self, direction: int, *, fine: bool = False) -> None:
         """Raise or lower the cruise set point -- the Accel/Coast (+/-) buttons.
 
-        While the speed keeper is handling a restricted zone, the same buttons
+        Plain taps walk the fives grid (an off-grid captured speed heals on
+        the first press); Ctrl taps move by exactly one mile per hour. While
+        the speed keeper is handling a restricted zone, the same buttons
         adjust the open-road target that adaptive cruise will resume. Parked
         with high idle latched, they step the idle setpoint instead."""
         t = self.truck
         if t.high_idle_rpm is not None and t.high_idle_allowed:
-            step = HIGH_IDLE_STEP_RPM if delta_mph > 0 else -HIGH_IDLE_STEP_RPM
+            step = HIGH_IDLE_STEP_RPM if direction > 0 else -HIGH_IDLE_STEP_RPM
             t.high_idle_rpm = max(HIGH_IDLE_MIN_RPM, min(HIGH_IDLE_MAX_RPM, t.high_idle_rpm + step))
             self.ctx.say(f"High idle {t.high_idle_rpm:.0f} RPM.")
             return
@@ -2489,7 +2491,7 @@ class DrivingEventMixin:
         if base is None:
             limit, _ = self.trip.speed_limit_at(self.trip.position_mi)
             base = max(CRUISE_MIN_MPH, limit)
-        target = max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, base + delta_mph))
+        target = cruise_step_target(base, direction, fine)
         self._speed_control_target_mph = target
         if self._cruise_mph is not None:
             self._cruise_mph = target

@@ -2208,12 +2208,12 @@ def test_destination_exit_keeps_cruise_and_eases_for_ramp(monkeypatch):
         assert "X takes" not in message
         assert "Adaptive cruise easing to 40 miles per hour for the ramp" in message
 
-        driving._adjust_cruise(-5.0)
+        driving._adjust_cruise(-1)
         assert said[-1] == (
             "Open-road cruise target 55 miles per hour. Ramp approach target 40 miles per hour."
         )
         for _tap in range(3):
-            driving._adjust_cruise(-5.0)
+            driving._adjust_cruise(-1)
         assert said[-1] == (
             "Open-road cruise target 40 miles per hour. Ramp approach target 40 miles per hour."
         )

@@ -253,7 +253,7 @@ def test_cruise_does_not_rev_engine_when_clutch_is_depressed(monkeypatch):
 @pytest.mark.smoke
 def test_cruise_set_point_adjusts_with_plus_and_minus():
     from freight_fate.app import App
-    from freight_fate.states.driving import CRUISE_MAX_MPH, CRUISE_STEP_MPH
+    from freight_fate.states.driving import CRUISE_MAX_MPH
 
     app = App()
     try:
@@ -267,14 +267,17 @@ def test_cruise_set_point_adjusts_with_plus_and_minus():
         base = driving._cruise_mph
         assert base == pytest.approx(60.0, abs=1.0)
 
-        driving.handle_event(key_event(pygame.K_EQUALS))  # + raises by a step
-        assert driving._cruise_mph == pytest.approx(base + CRUISE_STEP_MPH)
-        driving.handle_event(key_event(pygame.K_MINUS))  # - lowers it back
-        assert driving._cruise_mph == pytest.approx(base)
+        # base is captured road speed (~59.95, off the fives grid), so a plain
+        # tap snaps outward to the nearest five rather than adding a flat
+        # CRUISE_STEP_MPH -- see cruise_step_target in driving_core.py.
+        driving.handle_event(key_event(pygame.K_EQUALS))  # + snaps up to the next five
+        assert driving._cruise_mph == pytest.approx(60.0)
+        driving.handle_event(key_event(pygame.K_MINUS))  # - steps a full five down
+        assert driving._cruise_mph == pytest.approx(55.0)
         driving.handle_event(key_event(pygame.K_PLUS, "+"))
-        assert driving._cruise_mph == pytest.approx(base + CRUISE_STEP_MPH)
+        assert driving._cruise_mph == pytest.approx(60.0)
         driving.handle_event(key_event(pygame.K_KP_MINUS, "-"))
-        assert driving._cruise_mph == pytest.approx(base)
+        assert driving._cruise_mph == pytest.approx(55.0)
 
         for _ in range(20):  # clamps at the max
             driving.handle_event(key_event(pygame.K_EQUALS))

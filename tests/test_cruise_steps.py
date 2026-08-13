@@ -51,3 +51,128 @@ def test_both_step_kinds_clamp_to_the_bounds():
     assert cruise_step_target(CRUISE_MAX_MPH, 1, True) == pytest.approx(CRUISE_MAX_MPH)
     assert cruise_step_target(CRUISE_MIN_MPH, -1, False) == pytest.approx(CRUISE_MIN_MPH)
     assert cruise_step_target(CRUISE_MIN_MPH, -1, True) == pytest.approx(CRUISE_MIN_MPH)
+
+
+def _cruise_at(driving, mph):
+    driving.truck.engine_on = True
+    driving.truck.velocity_mps = mph / 2.2369362920544
+    driving._engage_cruise(mph)
+
+
+def test_plus_key_snaps_an_off_grid_cruise_target(monkeypatch):
+    import pygame
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+    from speech_capture import speech_stub
+
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        _cruise_at(d, 32.0)
+
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_EQUALS, mod=0, unicode="="))
+        assert d._cruise_mph == pytest.approx(35.0)
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_EQUALS, mod=0, unicode="="))
+        assert d._cruise_mph == pytest.approx(40.0)
+    finally:
+        app.shutdown()
+
+
+def test_ctrl_plus_and_minus_step_by_one(monkeypatch):
+    import pygame
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+    from speech_capture import speech_stub
+
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        _cruise_at(d, 35.0)
+
+        d.handle_event(
+            pygame.event.Event(
+                pygame.KEYDOWN, key=pygame.K_EQUALS, mod=pygame.KMOD_CTRL, unicode=""
+            )
+        )
+        assert d._cruise_mph == pytest.approx(36.0)
+        d.handle_event(
+            pygame.event.Event(pygame.KEYDOWN, key=pygame.K_MINUS, mod=pygame.KMOD_CTRL, unicode="")
+        )
+        assert d._cruise_mph == pytest.approx(35.0)
+    finally:
+        app.shutdown()
+
+
+def test_keeper_zone_adjust_snaps_the_resume_target(monkeypatch):
+    """The speed keeper owns a restricted zone, but +/- still steps the
+    remembered open-road target that adaptive cruise resumes to -- and must
+    not disturb the keeper's own held speed while it does."""
+    import pygame
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+    from speech_capture import speech_stub
+
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import Zone
+
+    app = App()
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        d.truck.engine_on = True
+        start = d.trip.position_mi
+        d.trip.zones.append(Zone(start - 0.1, start + 3.0, 25.0, "school"))
+        d.truck.velocity_mps = 25.0 / 2.2369362920544
+        d._engage_keeper(25.0, "school", target_mph=25.0, announce=False)
+        keeper_before = d._keeper_mph
+        d._speed_control_target_mph = 62.0
+
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_EQUALS, mod=0, unicode="="))
+
+        assert d._speed_control_target_mph == pytest.approx(65.0)
+        assert d._keeper_mph == pytest.approx(keeper_before)
+    finally:
+        app.shutdown()
+
+
+def test_high_idle_still_owns_the_keys_when_parked(monkeypatch):
+    """Parked with a latched high idle, +/- steps the idle RPM, not any
+    cruise or keeper target -- the branch _adjust_cruise checks first."""
+    import pygame
+    from driving_feature_helpers import quiet_trip, start_drive
+    from speech_capture import speech_stub
+
+    from freight_fate.app import App
+    from freight_fate.sim.vehicle import HIGH_IDLE_DEFAULT_RPM, HIGH_IDLE_STEP_RPM
+
+    app = App()
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        t = d.truck
+        t.set_air_ready(parking_brake=True)
+        t.start_engine()
+        t.velocity_mps = 0.0
+        t.high_idle_rpm = HIGH_IDLE_DEFAULT_RPM
+
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_EQUALS, mod=0, unicode="="))
+
+        assert t.high_idle_rpm == pytest.approx(HIGH_IDLE_DEFAULT_RPM + HIGH_IDLE_STEP_RPM)
+        assert d._cruise_mph is None
+        assert d._speed_control_target_mph is None
+    finally:
+        app.shutdown()
