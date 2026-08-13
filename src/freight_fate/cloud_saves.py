@@ -726,12 +726,32 @@ class CloudSaves:
 
     def _upload_slot(self, name: str, snapshot: dict) -> None:
         slot = self.sync_state.slot(name)
-        if "conflict" in slot:
-            # Never retry into a known conflict; the player resolves it from
-            # the Cloud backup menu. Drop the snapshot -- the local file is
-            # still the source of truth for "keep mine".
-            self._done_with(name, snapshot)
-            return
+        conflict = slot.get("conflict")
+        if conflict is not None and conflict.get("latestRevision") is None:
+            # Recorded by an older build against an empty cloud slot (wiped
+            # deployment, or deleted from another machine). No newer save
+            # exists to protect, so start the slot over instead of staying
+            # silent forever.
+            self.sync_state.forget(name)
+            slot = {}
+        elif conflict is not None:
+            # A known conflict names a real cloud revision -- but that copy
+            # may have vanished since it was recorded (deployment reset, or
+            # the slot deleted from another machine), and then there is
+            # nothing left to protect. Re-check before staying silent.
+            if self._cloud_slot_exists(name):
+                # Still there: the player resolves it from the Cloud backup
+                # menu. Drop the snapshot -- the local file is still the
+                # source of truth for "keep mine".
+                self._done_with(name, snapshot)
+                return
+            log.info(
+                "Cloud backup of %s was blocked by a conflict whose cloud "
+                "copy no longer exists; restarting the slot fresh",
+                name,
+            )
+            self.sync_state.forget(name)
+            slot = {}
         _, content_hash = cloud_content(snapshot)
         if slot.get("hash") == content_hash:
             self._done_with(name, snapshot)
@@ -752,6 +772,19 @@ class CloudSaves:
             log.info("Cloud backup of %s uploaded as revision %s", name, result["revision"])
             return
         if result.get("reason") == "conflict":
+            if result.get("latestRevision") is None:
+                # The cloud slot is empty -- the staging deployment was wiped,
+                # or the slot was deleted from another machine -- so there is
+                # no newer save to protect. Drop the stale revision and let the
+                # retry pass re-create the slot from this machine's save.
+                self.sync_state.forget(name)
+                self._retry_at = self._clock() + self._retry
+                log.info(
+                    "Cloud backup of %s named a revision the cloud no longer "
+                    "has; restarting the slot fresh",
+                    name,
+                )
+                return
             self.sync_state.record_conflict(name, result)
             self._done_with(name, snapshot)
             log.warning(
@@ -793,6 +826,21 @@ class CloudSaves:
             return
         # Transient (network, 5xx): keep the snapshot, back off.
         self._retry_at = self._clock() + self._retry
+
+    def _cloud_slot_exists(self, name: str) -> bool:
+        """Whether the cloud still holds any revision of this slot. Errs on
+        the side of True: an unreachable or refusing server must keep the
+        conflict guard in place."""
+        try:
+            reply = list_saves(self._identity, transport=self._transport)
+        except CloudAuthError:
+            return True
+        if reply is None:
+            return True
+        # The reply grew a wrapper dict when the public-career choice landed;
+        # accept both shapes so this survives either side of that change.
+        entries = reply["saves"] if isinstance(reply, dict) else reply
+        return any(entry.get("saveName") == name for entry in entries)
 
     def resolve_keep_mine(self, name: str, profile_dict: dict) -> bool:
         """Conflict choice: overwrite the cloud with this machine's save.
