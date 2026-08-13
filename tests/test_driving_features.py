@@ -975,6 +975,10 @@ def test_terse_air_brake_startup_omits_control_instructions(monkeypatch):
     try:
         app.ctx.settings.speech_verbosity = 0
         driving = start_drive(app)
+        # First-run guidance ignores verbosity (R15), so silence the terse
+        # startup line's neighbors the honest way: this driver has finished
+        # the walkthrough.
+        driving.tutorial = None
         quiet_trip(driving)
         driving.truck.set_cold_air_start()
         events.clear()
@@ -1086,13 +1090,16 @@ def test_air_brake_startup_blocks_movement_until_ready_and_released(monkeypatch)
 def test_terse_hazard_drops_brake_now_instruction(monkeypatch):
     from freight_fate.app import App
     from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.speech_text import hazard_call
 
     app = App()
     events = []
     monkeypatch.setattr(
         app.ctx,
         "say_event",
-        speech_stub(events, with_interrupt=True),
+        # The pair rides the event now (R5); the stub resolves it the way the
+        # delivery layer would for this terse player.
+        speech_stub(events, with_interrupt=True, terse=True),
     )
     try:
         app.ctx.settings.speech_verbosity = 0
@@ -1102,7 +1109,7 @@ def test_terse_hazard_drops_brake_now_instruction(monkeypatch):
         driving._handle_trip_event(
             TripEvent(
                 TripEventKind.HAZARD,
-                "Brake now! Debris on the shoulder.",
+                hazard_call("Brake now!", "Debris on the shoulder."),
                 {"deadline_s": 4.0},
             )
         )
