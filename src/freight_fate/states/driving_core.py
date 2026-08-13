@@ -9,6 +9,7 @@ information keys, and important changes announce themselves.
 from __future__ import annotations
 
 import logging
+import math
 import random
 
 import pygame
@@ -340,6 +341,30 @@ KEEPER_GAP_SECONDS = 3.0  # follow queued traffic at this gap, down to a stop
 CRUISE_MIN_MPH = 20.0  # cruise control needs road speed to hold
 CRUISE_STEP_MPH = 5.0  # set-point change per Accel/Coast (+/-) tap
 CRUISE_MAX_MPH = 85.0  # highest cruise set point (top US posted limits)
+
+
+def cruise_step_target(target_mph: float, direction: int, fine: bool) -> float:
+    """The next cruise set point from a +/- tap.
+
+    Plain taps walk the fives grid the way a real cruise stalk does: an
+    off-grid target (K captures the exact road speed, so 32 happens all
+    the time) snaps outward to the next multiple, healing itself in one
+    press instead of stepping 37, 42 forever (testers Jerry and Sarah,
+    2026-08-13). Ctrl taps move by exactly one for the players who need
+    a precise number and cannot feather K onto it. The epsilon keeps a
+    float a hair off the grid from turning a tap into a no-op snap.
+    """
+    if fine:
+        stepped = target_mph + direction
+    elif direction > 0:
+        notches = math.floor(target_mph / CRUISE_STEP_MPH + 1e-9)
+        stepped = (notches + 1) * CRUISE_STEP_MPH
+    else:
+        notches = math.ceil(target_mph / CRUISE_STEP_MPH - 1e-9)
+        stepped = (notches - 1) * CRUISE_STEP_MPH
+    return max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, stepped))
+
+
 # Speed-hold gains. The feed-forward term (``Truck.hold_throttle``) carries
 # the grade; P and I only trim from there. The old loop was integral-only at
 # 0.08 per mph-second, which needed over ten seconds just to reach full
