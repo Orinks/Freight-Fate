@@ -4,6 +4,23 @@
 
 ### Changed
 
+- **The road talks at a human pace now.** Speed limit changes, traffic
+  calls, and zone chatter used to arrive back to back, because the
+  game's fast clock packs a lot of road into every real minute. Routine
+  announcements now keep a few seconds of breathing room from each
+  other, in every driving mode -- and when several things change close
+  together, you hear the current state of the road, never a stale
+  catch-up. Warnings that need your hands -- hazards, emergency braking,
+  scales, your planned stops -- never wait, and a serious speed limit
+  drop still speaks the moment it happens.
+
+- **Radio stations hold their signal like real ones.** A station used to
+  start crackling barely halfway through its coverage and spend most of
+  its life in static. Stations now play clean through most of their
+  range, reach about twice as far down the road, and only smear into
+  static right at the edge -- so a good station lasts a good while
+  before the dial asks for a retune.
+
 - **Clearance and weight signs now say what they mean.** The route readout
   used to stack sign jargon into lines like "Posted restriction in 13
   miles: low clearance ahead: posted 13 feet 6 inches" -- posted twice,

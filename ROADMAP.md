@@ -451,6 +451,16 @@ onto exit signalling.
       (Ctrl, not Shift -- the main-row plus IS Shift+equals). Pad cruise
       buttons stay coarse. Spec:
       `docs/superpowers/specs/2026-08-13-cruise-step-snapping-design.md`.
+- [x] **Road events breathe; radio contours last -- landed 2026-08-13**
+      (owner: back-to-back events in every mode; most of the 5,700-station
+      dial living in fringe). Kept the clock -- career pacing is balanced
+      on it -- and spaced the three routine talkers (limit arrivals,
+      traffic calls, zone colour) with real-seconds gaps at the source,
+      self-superseding so only current state ever speaks; big unannounced
+      limit drops cut in line. Radio: clean program through ~85% of the
+      contour (was ~52%) and a 2x reach multiplier for compression, smear
+      ruling intact at the true edge. Spec:
+      `docs/superpowers/specs/2026-08-13-event-pacing-radio-reach-design.md`.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides
