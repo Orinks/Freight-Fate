@@ -367,8 +367,31 @@ onto exit signalling.
       on top (menus keep immediate speech). New Settings > Audio option,
       on by default: engine, weather, and the radio duck to half volume
       while the event voice speaks, restored on the pacer's own
-      clear-time projection. Later stages (terse contract, first-run
-      exemption, naming diet, earcon pairs) remain open below.
+      clear-time projection. Later stages (naming diet, earcon pairs)
+      remain open below.
+- [x] **Speech-priority redesign, stage S2 -- landed 2026-08-12** (R4, R5,
+      R8, R15). Verbosity moved into the delivery layer: a message is one
+      SpokenMessage definition carrying normal and terse renderings side
+      by side (`speech_text.py`), and say/say_event pick by the player's
+      speech mode -- terse coverage is now a property of the message, not
+      of 79 hand-built call-site branches. The terse contract's named
+      categories converted under its two bounding rules (compress words,
+      never certainty; fixed slot grammar, recorded in docs/ontology.md):
+      hazard calls, traffic coaching, the curve-plus-cruise composite,
+      stop callouts with all five parking-certainty values distinguishable,
+      achievements to earcon-plus-name, tolls (heads-up drops, charged
+      line always speaks), the speed-limit nag, and dodge confirmations to
+      the hazard-clear earcon alone. The terse hazard synonym is fixed --
+      "Brake or change lanes!" in every mode, pinned against the help by
+      copy tests (tests/test_terse_contract.py) with a src-wide scan so
+      the synonym cannot return. First-run guidance now ignores verbosity
+      until the walkthrough completes (gated on tutorial_done itself).
+      The long tail of messages that read the same in both modes stays
+      normal-only by design.
+- [ ] A dedicated cruise-adjust earcon for terse mode's curve composite
+      (the easing clause currently folds into the pacenote; the curve
+      chime plus audible deceleration carry it), auditioned alongside the
+      other sound-hunt needs and added to the learn-sounds screen.
 - [ ] **Remaining tester findings from the same document.** Merging
       traffic does not yield to a loaded truck. At least one unexplained
       sound (a whoosh on the left). Landed 2026-08-12: work-zone closures

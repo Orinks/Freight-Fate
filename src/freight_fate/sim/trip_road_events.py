@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from ..data.world import get_world
+from ..speech_text import HAZARD_DODGE_CALL, hazard_call, toll_charged
 from .hos import is_night
 from .trip_models import *
 from .trip_route_helpers import *
@@ -109,11 +110,14 @@ class TripRoadEventMixin:
                     continue
                 charge = TollCharge(toll, toll.amount)
                 self.toll_charges.append(charge)
-                estimate = "Estimated " if toll.estimated else ""
                 self._emit(
                     TripEventKind.TOLL_CHARGED,
-                    f"{toll.method_label} toll charged at {toll.name}: "
-                    f"{estimate}{toll.amount:.0f} dollars, billed to carrier settlement.",
+                    toll_charged(
+                        toll.method_label,
+                        toll.name,
+                        f"{toll.amount:.0f}",
+                        toll.estimated,
+                    ),
                     toll=toll,
                     amount=toll.amount,
                 )
@@ -213,10 +217,10 @@ class TripRoadEventMixin:
             # to send it: a road with no open lane beside this one leaves
             # brake alone as the only real answer (playtest report, US-285,
             # 2026-08-12 -- one lane your side, warned to change lanes anyway).
-            call = "Brake or change lanes!" if self.has_open_adjacent_lane_at() else "Brake!"
+            call = HAZARD_DODGE_CALL if self.has_open_adjacent_lane_at() else "Brake!"
             self._emit(
                 TripEventKind.HAZARD,
-                f"{call} {reason.capitalize()} {where}.",
+                hazard_call(call, f"{reason.capitalize()} {where}."),
                 deadline_s=2.5,
                 traffic=context,
                 dodgeable=True,
@@ -239,12 +243,12 @@ class TripRoadEventMixin:
             hazard = self._rng.choices(texts, weights)[0]
             dodgeable = hazard_is_dodgeable(hazard)
             if dodgeable:
-                call = "Brake or change lanes!" if self.has_open_adjacent_lane_at() else "Brake!"
+                call = HAZARD_DODGE_CALL if self.has_open_adjacent_lane_at() else "Brake!"
             else:
                 call = "Brake now!"
             self._emit(
                 TripEventKind.HAZARD,
-                f"{call} {hazard[0].upper()}{hazard[1:]}.",
+                hazard_call(call, f"{hazard[0].upper()}{hazard[1:]}."),
                 deadline_s=(self._rng.uniform(3.0, 4.5) * self._visibility_reaction_factor()),
                 dodgeable=dodgeable,
             )
@@ -296,6 +300,6 @@ class TripRoadEventMixin:
         if self._cond_rng.random() < risk:
             self._emit(
                 TripEventKind.HAZARD,
-                f"Brake now! {self._conditions_incident_text()}",
+                hazard_call("Brake now!", self._conditions_incident_text()),
                 deadline_s=max(1.5, 2.5 * self._visibility_reaction_factor()),
             )

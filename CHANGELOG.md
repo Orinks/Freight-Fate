@@ -4,6 +4,25 @@
 
 ### Changed
 
+- **Terse speech now actually means less speech.** Terse mode's promise is:
+  the truck tells you what to do and what it cost, and nothing else. With
+  terse on, achievements are their sound and their name -- the story waits
+  in the message log and the achievements menu. Traffic coaching shrinks to
+  the facts, in a fixed order you can lean on: "Brake lights, 2 miles, 38."
+  Stop callouts drop the instructions and keep what your plan turns on:
+  "Flying J Travel Center Corfu, exit 48A, 5 miles. Parking confirmed." --
+  and a stop with no verified parking still says so, because shorter never
+  means less certain. A charged toll is "Toll, 15 dollars, carrier", the
+  toll heads-up before it goes quiet, the speed warning is "Limit 65", and
+  dodging a hazard is confirmed by the hazard clear sound alone. Normal
+  mode is unchanged.
+
+- **The dodgeable hazard warning says the same thing in every speech
+  mode.** Terse mode used to shout "Brake or swerve!" where normal mode
+  and the help teach "Brake or change lanes" -- two phrases for the one
+  cue where there is no time to wonder. It is "Brake or change lanes!"
+  everywhere now, and a test keeps it that way.
+
 - **Road announcements stop cutting each other off unless it is a real
   emergency.** Speed zone entries, checkpoint notices, and construction or
   traffic warnings used to interrupt whatever the road voice was saying,

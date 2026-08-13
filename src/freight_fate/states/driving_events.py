@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from ..speech_text import SpokenMessage, cruise_curve_easing
 from .base import TimedMessageState
 from .driving_core import *
 from .driving_menu_states import ArrivalState, FacilityArrivalState
@@ -142,9 +143,16 @@ class DrivingEventMixin:
             # A fresh hazard starts the assist from an open pedal, with nothing
             # measured yet from the last one.
             self._release_hazard_brake()
-            message = terse_hazard_message(event.message) if self._terse_speech() else event.message
+            # The normal/terse pair rides the event from the sim layer; the
+            # delivery layer picks the rendering (R5), so no rewriting here.
+            message = event.message
             if speed_control_was_active:
-                message = f"{message} Automatic speed control canceled."
+                suffix = "Automatic speed control canceled."
+                message = (
+                    message.plus(suffix)
+                    if isinstance(message, SpokenMessage)
+                    else f"{message} {suffix}"
+                )
             self._last_event_message = message
             self.ctx.say_event(message, interrupt=True)
         elif kind == TripEventKind.INSPECTION:
@@ -214,9 +222,11 @@ class DrivingEventMixin:
                 if assisted:
                     self._cruise_curve_mph = float(advisory)
                     self._cruise_curve_end_mi = max(curve.start_mi, curve.end_mi)
+                    # Terse speaks the pacenote alone: its advisory number is
+                    # the number cruise is easing to, and the deceleration
+                    # itself is audible (R4's curve-composite row).
                     self.ctx.say_event(
-                        message + " Adaptive cruise easing to "
-                        f"{self.ctx.settings.speed_text(advisory)} for the bend.",
+                        cruise_curve_easing(message, self.ctx.settings.speed_text(advisory)),
                         interrupt=True,
                     )
                 else:

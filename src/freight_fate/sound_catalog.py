@@ -351,7 +351,9 @@ _HAZARDS = SoundCategory(
         SoundEntry(
             "Hazard clear",
             (Cue("events/hazard_clear", volume=0.75),),
-            "The hazard is behind you. You can go back to normal speed.",
+            "The hazard is behind you. You can go back to normal speed. In "
+            "terse speech this sound is the whole confirmation; a collision "
+            "sounds nothing like it, so the outcome is never ambiguous.",
         ),
         SoundEntry(
             "Construction zone",

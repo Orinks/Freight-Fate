@@ -13,6 +13,7 @@ from ..models.enforcement import (
 )
 from ..radio import truck_elevation_ft
 from ..speech_pacing import EventSpeechPacer
+from ..speech_text import overspeed_nag, terse_silent
 from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
 from .driving_rest_states import (
@@ -1057,7 +1058,10 @@ class DrivingUpdateMixin:
             self._release_hazard_brake()
             self.ctx.audio.play("events/hazard_clear", volume=0.75)
             self.ctx.controller.rumble.alert(intensity=0.4)
-            self.ctx.say_event("You swerve around it. Well done.", interrupt=False)
+            # Terse mode's whole confirmation is the hazard-clear earcon that
+            # just played; failure is the collision sound and its spoken
+            # damage line, so the outcome pair is never ambiguous (R4, R14).
+            self.ctx.say_event(terse_silent("You swerve around it. Well done."), interrupt=False)
             self.ctx.award_achievement("hazard_avoided", event=True)
             return
         if not quiet:
@@ -2502,7 +2506,10 @@ class DrivingUpdateMixin:
             self._hazard_slow_hint_said = False
             self.ctx.audio.play("events/hazard_clear", volume=0.75)
             self.ctx.controller.rumble.alert(intensity=0.4)
-            message = (
+            # In terse the hazard-clear earcon IS the confirmation; the words
+            # are congratulation, and the failure outcome stays distinct as
+            # the collision sound plus its spoken damage line (R4, R14).
+            message = terse_silent(
                 "You slow nearly to a stop and ease around it. Well done."
                 if self._hazard_dodgeable
                 else "Hazard avoided. Well done."
@@ -2850,7 +2857,10 @@ class DrivingUpdateMixin:
             self._overspeed_chime_timer = 0.0
             self.ctx.audio.play("vehicle/overspeed_chime", volume=0.65)
             self.ctx.say_event(
-                f"Watch your speed. The limit is {self.ctx.settings.speed_text(limit)}.",
+                overspeed_nag(
+                    self.ctx.settings.speed_text(limit),
+                    self.ctx.settings.speed_value(limit),
+                ),
                 interrupt=False,
             )
 

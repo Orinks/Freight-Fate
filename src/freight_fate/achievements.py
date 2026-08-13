@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from .speech_text import achievement_unlocked
+
 if TYPE_CHECKING:
     from .models.profile import Profile
 
@@ -1360,8 +1362,11 @@ def award(profile: Profile, achievement_id: str) -> AchievementAward | None:
     if achievement.id in earned_ids(profile):
         return None
     profile.achievements.append(achievement.id)
-    message = f"New achievement! {achievement.name}. {achievement.description}"
-    return AchievementAward(achievement, message)
+    # A normal/terse pair: mid-drive a terse player hears the earcon and the
+    # name alone; the flavor text waits in the log and the achievements menu.
+    return AchievementAward(
+        achievement, achievement_unlocked(achievement.name, achievement.description)
+    )
 
 
 def list_stat(profile: Profile, key: str) -> list[str]:

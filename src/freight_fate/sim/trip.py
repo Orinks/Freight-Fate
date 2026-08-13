@@ -10,6 +10,7 @@ from dataclasses import replace
 from ..data.curves import RouteCurve, route_curves
 from ..data.regions import classify_region
 from ..data.world import Leg, Route, get_world, lane_word
+from ..speech_text import stop_callout, terse_silent
 from ..units import distance_unit, spoken_distance, spoken_gap, to_distance
 from .enforcement_posts import (
     KIND_FIXED_SCALE,
@@ -2590,19 +2591,19 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             ahead = stop.at_mi - self.position_mi
             if 0 < ahead <= STOP_AHEAD_LOOKAHEAD_MI and stop.key not in self._announced_stops:
                 self._announced_stops.add(stop.key)
-                exit_part = f" at {stop.exit_label}" if stop.exit_label else ""
-                parts = [
-                    f"{self.planned_prefix(stop)}{stop.spoken_name}{exit_part} "
-                    f"in {self._distance_text(ahead)}."
-                ]
-                if stop.parking_text:
-                    parts.append(f"{stop.parking_text}.")
-                parts.append("Press X to signal for the exit.")
                 # The plan flag rides the event so the driving layer can rank
                 # the stop the player chose above ambient roadside chatter.
                 self._emit(
                     TripEventKind.STOP_AHEAD,
-                    " ".join(parts),
+                    stop_callout(
+                        planned_prefix=self.planned_prefix(stop),
+                        typed_name=stop.spoken_name,
+                        plain_name=stop.name,
+                        exit_label=stop.exit_label,
+                        distance=self._distance_text(ahead),
+                        parking_normal=stop.parking_text,
+                        parking_certainty=stop.parking,
+                    ),
                     stop=stop,
                     planned=self.is_planned(stop),
                 )
@@ -2657,7 +2658,10 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 advance_key = f"{cue.key}:advance"
                 if 0 < ahead <= 2.0 and advance_key not in self._announced_navigation:
                     self._announced_navigation.add(advance_key)
-                    self._emit(TripEventKind.GPS_CUE, cue.near_text, cue=cue)
+                    # The heads-up is a preview: terse drops it whole, since
+                    # the charged line itself is guaranteed (ROUTE, R1) and
+                    # is what carries the cost.
+                    self._emit(TripEventKind.GPS_CUE, terse_silent(cue.near_text), cue=cue)
                 continue
             advance_key = f"{cue.key}:advance"
             near_key = f"{cue.key}:near"

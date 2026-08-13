@@ -7,6 +7,7 @@ import random
 from dataclasses import dataclass
 
 from ..data.world import Leg, Route
+from ..speech_text import brake_lights_cue, merging_traffic_cue, slow_lead_cue
 from .hos import is_night
 from .trip_models import (
     RUSH_HOUR_WINDOWS,
@@ -351,6 +352,12 @@ class TrafficManager:
             return f"{mph:.0f} miles per hour"
         return f"{mph * 1.609344:.0f} kilometers per hour"
 
+    def _speed_bare(self, mph: float) -> str:
+        """The number alone, for the terse slot grammar's trailing speed."""
+        if self.imperial:
+            return f"{mph:.0f}"
+        return f"{mph * 1.609344:.0f}"
+
     def _vehicle_intent(self, vehicle) -> str:
         intent = getattr(vehicle, "intent", None)
         if intent is not None:
@@ -591,19 +598,17 @@ class TrafficManager:
             return None
         gap = self._gap_text(context.gap_mi)
         speed = self._speed_value(vehicle.speed_mph)
+        bare = self._speed_bare(vehicle.speed_mph)
         intent = self._vehicle_intent(vehicle)
         vehicle_class = self._vehicle_class(vehicle)
         if intent == "merging":
-            message = (
-                f"Merging {vehicle_class} {gap} ahead. Hold your lane, "
-                f"leave a gap, and be ready for {speed}."
-            )
+            message = merging_traffic_cue(vehicle_class, gap, speed, bare)
             kind = "merging"
         elif intent == "braking":
-            message = f"Brake lights {gap} ahead. Ease down and leave room for {speed}."
+            message = brake_lights_cue(gap, speed, bare)
             kind = "braking"
         elif intent == "following":
-            message = f"Slow {vehicle_class} {gap} ahead. Be ready near {speed}."
+            message = slow_lead_cue(vehicle_class, gap, speed, bare)
             kind = "following"
         else:
             return None

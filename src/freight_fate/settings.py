@@ -594,6 +594,12 @@ class Settings:
             return f"{spoken_distance(mph, 'mile')} per hour"
         return f"{spoken_distance(mph * MILES_TO_KM, 'kilometer')} per hour"
 
+    def speed_value(self, mph: float) -> str:
+        """``speed_text``'s bare number, for the terse slot grammar where the
+        frame carries the unit ("Limit 65.")."""
+        value = mph if self.imperial_units else mph * MILES_TO_KM
+        return f"{round(value):.0f}"
+
     def distance_text(self, miles: float, precise: bool = False) -> str:
         """Spoken distance in the player's unit. ``precise`` keeps one
         decimal for short spans ("1.2 miles ahead") where whole numbers

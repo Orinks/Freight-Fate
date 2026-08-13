@@ -438,6 +438,40 @@ outside a CB clause. The check exists because slang leaks: the word is
 evocative, it reads well in a sentence, and one careless line teaches a screen
 reader user a second noun for a thing that already had one.
 
+### Terse speech grammar
+
+Terse mode promises: the truck tells you what to *do* and what it *cost*, and
+nothing else -- every safety call, route instruction, and money consequence
+still speaks, in the shortest form this ontology allows, and everything that
+is color, confirmation, coaching, or congratulation is an earcon or silence.
+Two rules bound every terse rendering, and the pairs themselves live in
+`speech_text.py` (one definition, both forms side by side, pinned by
+`tests/test_terse_contract.py`):
+
+**Compress words, never certainty.** A qualifier that changes a decision
+survives terse. Parking certainty is the worked example: all five values stay
+distinguishable -- "Parking confirmed." / silence (meaning *likely*, exactly
+as in normal mode) / "Parking limited." / "No truck parking." / "Parking not
+verified." (the spoken form of *unknown*; never "unverified", which would be
+a synonym).
+
+**A fixed slot order.** A bare trailing number is only parseable because the
+frame never shuffles, so no terse line may reorder its slots:
+
+| Frame | Slots | Example |
+| --- | --- | --- |
+| Hazard-family cue | thing, distance, target speed | "Brake lights, 2.1 miles, 38." |
+| Stop callout | name, exit, distance, qualifier | "Flying J Travel Center Corfu, exit 48A, 5 miles. Parking confirmed." |
+| Money consequence | what, amount, who pays | "Toll, 15 dollars, carrier." |
+| Speed limit | "Limit", the number | "Limit 65." |
+
+**The dodgeable hazard call is "Brake or change lanes!" in every mode.** The
+same phrase the help teaches, kept in full in terse because it carries what
+the hazard tone cannot: the hazard is dodgeable AND there is an open lane to
+send the dodge. "Brake or swerve!" was a terse-only synonym for the game's
+most safety-critical cue and is exactly what this table exists to prevent;
+the phrase is pinned against the help text by a copy test.
+
 ## Open naming decisions
 
 Recorded rather than silently resolved, because changing any of them changes
