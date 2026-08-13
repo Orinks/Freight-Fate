@@ -341,6 +341,12 @@ class DrivingState(
         # The highest cargo-condition rung already spoken, so each one warns
         # once. Trip-scoped and snapshotted like the damage band.
         self._cargo_cue_at = 0.0
+        # The coaching tail ("brake and corner gently from here") is teaching,
+        # not news: it belongs on the first load-damage report of the episode,
+        # and every escalation after it speaks only the new number and the
+        # consequence (research doc R11). Snapshotted so a resume mid-episode
+        # does not re-teach it.
+        self._cargo_coaching_said = False
         self._signal_timer = 0.0
         self._exit_stop = None  # active route exit
         # Stable proof that the player explicitly selected an optional sleep
@@ -697,6 +703,7 @@ class DrivingState(
             "preventable_damage_pct": self.truck.preventable_damage_pct,
             "cargo_damage_pct": self.truck.cargo_damage_pct,
             "cargo_cue_at": self._cargo_cue_at,
+            "cargo_coaching_said": self._cargo_coaching_said,
             "limp_cap_mph": self._limp_cap_mph,
             "out_of_service_creep_s": self._out_of_service_creep_s,
             "start_wear": {
@@ -812,6 +819,7 @@ class DrivingState(
             state.truck.preventable_damage_pct = float(data.get("preventable_damage_pct", 0.0))
             state.truck.cargo_damage_pct = float(data.get("cargo_damage_pct", 0.0))
             state._cargo_cue_at = float(data.get("cargo_cue_at", 0.0))
+            state._cargo_coaching_said = bool(data.get("cargo_coaching_said", False))
             # Saves from before the wear meters count deltas from the resume
             # point: the truck just loaded the profile's wear, so the run
             # simply reports a little less instead of failing to load.

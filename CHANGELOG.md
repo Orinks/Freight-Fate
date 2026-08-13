@@ -4,6 +4,11 @@
 
 ### Changed
 
+- **A worsening load stops repeating the same advice.** When the freight
+  shifts, the truck tells you to brake and corner gently -- once. If the
+  load keeps taking damage, each later warning speaks only the new figure
+  and what it will cost at the dock, not the coaching line over again.
+
 - **Achievements stay out of your way while you drive.** Earning a badge at
   speed is now its sound and its name -- "New achievement: Night Owl." --
   instead of a paragraph of story read over the road, in normal speech as

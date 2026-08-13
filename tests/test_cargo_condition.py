@@ -288,6 +288,29 @@ def test_each_condition_rung_speaks_once_while_driving(app, monkeypatch):
     assert "refuse" in events[2].lower()
 
 
+def test_the_coaching_tail_speaks_once_per_episode(app, monkeypatch):
+    """R11: "brake and corner gently from here" teaches; once taught, each
+    escalation speaks only the new number and the consequence."""
+    events = []
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+    driving = _driving(app)
+    driving.trip.curve_at = lambda mile: None
+
+    driving.truck.cargo_damage_pct = CARGO_EXCEPTION_PCT + 1.0
+    driving._update_cargo_condition(1 / 60)
+    assert "Brake and corner gently from here." in events[0]
+
+    driving.truck.cargo_damage_pct = CARGO_CLAIM_PCT + 1.0
+    driving._update_cargo_condition(1 / 60)
+    driving.truck.cargo_damage_pct = CARGO_REJECT_PCT + 1.0
+    driving._update_cargo_condition(1 / 60)
+    # The escalations still carry the new number and consequence, but never
+    # the coaching tail again.
+    assert "claim" in events[1].lower()
+    assert "Brake and corner gently" not in events[1]
+    assert "Brake and corner gently" not in events[2]
+
+
 def test_terse_cargo_cues_keep_the_consequence(app, monkeypatch):
     events = []
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))

@@ -198,10 +198,16 @@ class DamageBandMixin:
                     "nothing to deliver and a claim for the whole of it."
                 ),
             }[outcome]
+            # The coaching tail teaches the driver how to save what is left;
+            # once taught it is not news, so it rides the first report of the
+            # episode and every escalation after speaks only the new number
+            # and the consequence (research doc R11).
+            tail = "" if self._cargo_coaching_said else " Brake and corner gently from here."
             message = (
                 f"The load has shifted hard and is {words}, {t.cargo_damage_pct:.0f} "
-                f"percent. {consequence} Brake and corner gently from here."
+                f"percent. {consequence}{tail}"
             )
+        self._cargo_coaching_said = True
         # The load's condition is a state of the trailer, not a moment on the
         # road: it earns the voice when it starts and again when the number it
         # carries has moved. Otherwise the driver hears the same sentence for
