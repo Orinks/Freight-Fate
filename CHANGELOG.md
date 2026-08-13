@@ -228,6 +228,15 @@
 
 ### Fixed
 
+- **"Lane open" now means open long enough to take it.** The clear-of-traffic
+  call and the L lane readout used to describe the lane at the instant you
+  asked, so a car you were catching fast -- slowed traffic ahead, or someone
+  quick coming up behind -- could reach your blind spot in the seconds it
+  takes to hear the answer and drift across, and the lane you were honestly
+  told was open ended in a sideswipe. Both readings now look far enough down
+  the road to cover the whole move, so when the truck says a lane is open, it
+  stays open until you are in it.
+
 - **Resuming cruise to a high speed no longer floors the engine to get
   there.** Bringing automatic speed control back with Shift+K, or setting it
   when your remembered speed was far above the truck's, used to open the

@@ -353,6 +353,122 @@ def test_the_cue_is_the_more_cautious_of_the_two_readings():
         app.shutdown()
 
 
+# -- "open" holds while the driver acts on it -----------------------------------
+#
+# Tester Jerry Jicha, 1.9.0.dev0: "it said the right lane was open, I even
+# double check the right lane... I move over to the left lane, and I hit a
+# vehicle." Traffic moves on compressed game time, so the real seconds
+# between hearing "open" and arriving in the lane are minutes of road to the
+# car being closed on -- the answer must look that far ahead.
+
+
+def test_a_car_being_closed_on_fast_is_not_called_open():
+    """Jerry's collision, in numbers: cruise at 65 closing on slowed traffic
+    at 38, time compression at the full 20x. The car sits beyond the static
+    window, and the truck eats that gap before the drift across finishes."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _rolling(d, 65.0)
+        d.trip.time_scale = 20.0
+        d.lane.lane = 1
+        d.trip.traffic_manager.vehicles = [_npc(d.trip.position_mi + 0.55, lane=0, speed_mph=38.0)]
+
+        assert not d._lane_gap_open(0)
+        assert "Right lane open." not in d._lane_status_text()
+    finally:
+        app.shutdown()
+
+
+def test_a_faster_vehicle_coming_up_behind_holds_the_lane():
+    """The overtaker in the mirror: behind the window now, beside the cab
+    before the change lands."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _rolling(d, 60.0)
+        d.trip.time_scale = 20.0
+        d.lane.lane = 1
+        d.trip.traffic_manager.vehicles = [
+            _npc(d.trip.position_mi - 0.6, lane=0, speed_mph=85.0, vehicle_class="car")
+        ]
+
+        assert not d._lane_gap_open(0)
+    finally:
+        app.shutdown()
+
+
+def test_traffic_holding_your_own_speed_still_opens():
+    """A car well ahead and pacing the truck is not being closed on: the
+    look-ahead must not turn every occupied road into a blocked one."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        _rolling(d, 60.0)
+        d.trip.time_scale = 20.0
+        d.lane.lane = 1
+        d.trip.traffic_manager.vehicles = [_npc(d.trip.position_mi + 0.6, lane=0, speed_mph=60.0)]
+
+        assert d._lane_gap_open(0)
+    finally:
+        app.shutdown()
+
+
+def test_a_lane_called_open_survives_the_move_under_time_compression(monkeypatch):
+    """The end-to-end guarantee: read the lane, spend the real seconds a
+    driver spends hearing the line and drifting across -- with traffic
+    moving on compressed game time the whole while -- then let the
+    collision check judge the arrival. "Open" must never end in contact."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        d.trip.time_scale = 20.0
+        called_open = collided_from_blocked = 0
+        for step in range(-30, 31):
+            gap = step * 0.05
+            _rolling(d, 65.0)
+            d.truck.damage_pct = 0.0
+            # The contact cooldown belongs to the state's update loop, which
+            # this sweep never runs: left set, the first contact swallows
+            # every collision after it and the sweep goes blind.
+            d._sideswipe_cooldown_s = 0.0
+            d.trip.position_mi = 5.0
+            car = _npc(d.trip.position_mi + gap, lane=0, speed_mph=38.0)
+            d.trip.traffic_manager.vehicles = [car]
+            d.lane.lane = 1
+            open_now = d._lane_gap_open(0)
+
+            # Hearing the line, reaching for the wheel, and the timed drift:
+            # about four and a half real seconds, every one of them compressed.
+            game_hr = 4.5 * d.trip.effective_time_scale / 3600.0
+            car.position_mi += car.speed_mph * game_hr
+            d.trip.position_mi += d.truck.speed_mph * game_hr
+
+            d.lane.lane = 0
+            d._finish_lane_change()
+            hit = d.truck.damage_pct > 0.0
+
+            if open_now:
+                called_open += 1
+                assert not hit, f"called open at a gap of {gap:.2f} miles, then sideswiped"
+            elif hit:
+                collided_from_blocked += 1
+        assert called_open  # the sweep really did reach open road
+        assert collided_from_blocked  # and really did reach space being closed on
+    finally:
+        app.shutdown()
+
+
 # -- the on-demand readout ---------------------------------------------------------
 
 

@@ -356,7 +356,22 @@ onto exit signalling.
       a one-lane road a cop still tries to pass, which it cannot do -- the
       overtake logic does not check that a passing lane exists. Owner has
       not decided a disposition; recorded so they are not lost.
-- [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
+- [x] **"Lane open" survives time compression -- landed 2026-08-13**
+      (Jerry: "it said the right lane was open... I move over and I hit a
+      vehicle"). The clearance read behind the lane-open cue and the L
+      readout was a static window around the truck, widened by a 0.12-mile
+      margin meant to buy the driver reaction time -- but traffic moves on
+      compressed game time, so at 20x a cruise at 65 closing on slowed
+      traffic at 38 ate that margin in under one real second and half a
+      mile of gap before the 2.5-second drift landed. His log shows both
+      sideswipes 4.5 real seconds after an honest "Right lane open."
+      `vehicle_in_lane` now sweeps each vehicle's relative motion over the
+      seconds the driver needs (hear the line, react, drift across),
+      converted through `effective_time_scale`, so a lane being closed on
+      -- ahead or from behind -- is never called open. The sweep test in
+      `test_lane_return_gap.py` now advances the world between the readout
+      and the arrival, which is the case the old same-instant test could
+      not see.
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides
       a sideswipe, plus an L readout of every neighbouring lane on demand

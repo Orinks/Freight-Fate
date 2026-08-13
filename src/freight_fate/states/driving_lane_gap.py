@@ -19,8 +19,13 @@ manoeuvre is genuinely open again.
   asks the traffic manager whether the lane it arrived in is occupied. This
   asks the same question of the lane the driver came from, through the same
   ``vehicle_in_lane`` call, over a window a margin WIDER than the collision
-  test uses. Wider only ever errs toward silence, so a lane this calls open
-  cannot be a lane that sideswipes.
+  test uses -- and swept forward over the real seconds a driver spends
+  acting on the answer. A static margin was not enough: traffic moves on
+  compressed game time, so at highway compression a cruise closing on
+  slowed traffic ate half a mile between "Right lane open" and the drift
+  landing, and the lane the cue had honestly called open sideswiped anyway
+  (tester Jerry Jicha, 1.9.0.dev0: "if it says it is open, then it is
+  open"). Open now means open until the driver is across.
 * **Once per vehicle passed.** Latched on the vehicle's key, like the pass-by
   whoosh. A car riding the edge of the window must not chant.
 * **Only while it is still true.** Back in that lane, out of it by a fresh
@@ -35,12 +40,18 @@ from __future__ import annotations
 
 from .driving_core import *
 
-# How much wider than the sideswipe test this cue looks. The collision check
-# runs at the instant the truck arrives in the lane; the cue speaks before the
-# driver has even reached for the wheel, and the traffic keeps moving in
-# between. The margin buys that time, and it buys it in the safe direction:
-# every mile of it makes the cue quieter, never more permissive.
+# How much wider than the sideswipe test this cue looks. Positional slack for
+# what the look-ahead below cannot see -- a vehicle braking harder inside the
+# horizon than its current speed says. Every mile of it makes the cue quieter,
+# never more permissive.
 LANE_GAP_MARGIN_MI = 0.12
+# The real seconds between hearing "open" and the truck being across: the
+# line finishing, the reach for the wheel, and the timed drift over the
+# painted line. The clearance read is swept this far forward through the
+# traffic's own motion -- converted to game time through the trip's effective
+# scale, because that is the clock the traffic actually moves on. Jerry's
+# collisions ran readout-to-contact in about four and a half real seconds.
+LANE_GAP_ACT_REAL_S = 6.0
 # Real seconds between two of these lines. A queue of vehicles clearing one
 # after another is a real sequence of facts, but read out back to back it is
 # a chant over the top of whatever else the road is saying.
@@ -64,8 +75,11 @@ class LaneGapMixin:
         """The vehicle holding ``lane_index`` beside the truck, or None.
 
         The window is the sideswipe test's, widened by ``LANE_GAP_MARGIN_MI``
-        at both ends: whatever this call misses, the collision check misses
-        too, so "open" can never be the more optimistic of the two answers.
+        at both ends and swept ``LANE_GAP_ACT_REAL_S`` real seconds forward
+        through the traffic's relative motion: whatever this call misses, the
+        collision check misses too, so "open" can never be the more
+        optimistic of the two answers -- not now, and not by the time the
+        driver acting on it arrives in the lane.
         """
         manager = getattr(self.trip, "traffic_manager", None)
         if manager is None:
@@ -75,6 +89,8 @@ class LaneGapMixin:
             lane_index,
             ahead_mi=DODGE_CLEARANCE_AHEAD_MI + LANE_GAP_MARGIN_MI,
             behind_mi=DODGE_CLEARANCE_BEHIND_MI + LANE_GAP_MARGIN_MI,
+            horizon_hr=LANE_GAP_ACT_REAL_S * self.trip.effective_time_scale / 3600.0,
+            speed_mph=self.truck.speed_mph,
         )
 
     def _lane_gap_closed_by_zone(self, lane_index: int) -> bool:

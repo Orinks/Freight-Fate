@@ -413,16 +413,26 @@ class TrafficManager:
         *,
         ahead_mi: float = 0.35,
         behind_mi: float = 0.15,
+        horizon_hr: float = 0.0,
+        speed_mph: float = 0.0,
     ) -> TrafficVehicle | None:
         """The nearest vehicle occupying ``lane`` beside or just ahead of the
-        player -- the mirror check before a lane change or a hazard dodge."""
+        player -- the mirror check before a lane change or a hazard dodge.
+
+        With ``horizon_hr`` the check also sweeps each vehicle's relative
+        motion against the player's ``speed_mph`` over that much game time:
+        a vehicle outside the window now but inside it before the horizon
+        runs out holds the lane. This is how a clearance read stays true for
+        the seconds a driver spends acting on it -- traffic keeps moving on
+        compressed game time the whole while."""
         nearest: TrafficVehicle | None = None
         nearest_gap = float("inf")
         for vehicle in self.vehicles:
             if vehicle.lane != lane:
                 continue
             gap = vehicle.position_mi - position_mi
-            if -behind_mi - vehicle.length_mi <= gap <= ahead_mi:
+            later = gap + (vehicle.speed_mph - speed_mph) * horizon_hr
+            if min(gap, later) <= ahead_mi and max(gap, later) >= -behind_mi - vehicle.length_mi:
                 distance = abs(max(0.0, gap))
                 if distance < nearest_gap:
                     nearest, nearest_gap = vehicle, distance
