@@ -265,16 +265,23 @@ def advance_refused_reason(profile) -> str:
 
 # -- paying it down from cash ------------------------------------------------
 
+# A driver paying down debt from their own cash must keep fuel money to move
+# the truck. This is roughly one fuel stop's out-of-pocket cost so the payoff
+# option never strands the truck dry.
 PAYOFF_CASH_CUSHION = 200.0
+# Below this floor, offering payoff options is noise: the menu clutter is worse
+# than the tiny amounts it would move.
 PAYOFF_MIN_CASH = 10.0
 
 
 def out_of_pocket_options(profile) -> list[tuple[str, float]]:
-    """What a driver holding cash may put toward the balance, right now.
+    """Payment options a driver holding cash may put toward the balance right now.
 
-    Kinds: "all" when cash covers the whole balance, "half" for half of it
-    capped at cash, "cushion" for everything above a fuel cushion. Amounts
-    under a dollar or duplicating an earlier option are dropped.
+    A driver paying from cash keeps fuel money so the truck can move. The
+    cushion withholds one stop's cost. "All" is offered when cash covers the
+    whole balance. "Half" is half the balance, capped at cash. "Cushion" is
+    everything above the withheld fuel cushion. Amounts under a dollar or
+    duplicating an earlier option are dropped.
     """
     balance = max(0.0, float(getattr(profile, "fines_owed", 0.0) or 0.0))
     cash = float(getattr(profile, "money", 0.0) or 0.0)
@@ -295,9 +302,11 @@ def out_of_pocket_options(profile) -> list[tuple[str, float]]:
 
 
 def pay_out_of_pocket(profile, amount: float) -> float:
-    """Move cash onto the balance; returns what was actually paid.
+    """Execute an out-of-pocket payment toward the balance; return what was paid.
 
-    Clamped so cash never goes below zero and the balance never below it.
+    Working money must survive the payment: cash never goes below zero and the
+    balance never below the amount paid. The driver keeps every cent to keep
+    moving.
     """
     balance = max(0.0, float(getattr(profile, "fines_owed", 0.0) or 0.0))
     cash = float(getattr(profile, "money", 0.0) or 0.0)
