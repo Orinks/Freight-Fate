@@ -433,6 +433,16 @@ onto exit signalling.
       must rename it to jake_1600_synth.wav (done on the primary
       builder 2026-08-13) or the next pack_sounds.py run drops the
       synth jake cut.
+- [x] **Pedal latch yields to the speed authorities -- landed 2026-08-13**
+      (Brandon latched the throttle for the whole trip expecting the
+      assists to drive; every assist read the latch as a manual override
+      and stood down). A latched throttle is now the lowest-priority
+      speed input: cruise, the speed keeper, and curve assist own the
+      pedal while engaged and the latch ramps back in when they release,
+      with no re-gesture. Hand-held keys keep manual-override meaning;
+      releasing the latch never cancels an assist; the catch line names
+      the authority holding the speed. Spec:
+      `docs/superpowers/specs/2026-08-13-pedal-latch-assists-design.md`.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides

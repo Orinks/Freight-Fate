@@ -4,6 +4,21 @@
 
 ### Changed
 
+- **A latched throttle now gets out of the way of the speed assists, and
+  the Latching pedals setting lets you choose.** A latched accelerator
+  used to read as your hand insisting on speed, so cruise, the speed
+  keeper, and curve assistance all stood down and the truck just kept
+  accelerating. Latching pedals now has three settings. Assists first,
+  the new standard, makes the latch the quietest voice in the cab: any
+  speed assist that is holding or shedding speed drives the pedal, and
+  the latch takes over again the moment it lets go -- no need to redo
+  the latch gesture -- and latching while cruise or the speed keeper is
+  active says who is holding the speed. Latch first keeps the old
+  meaning, where the latch overrides the assists until a safety system
+  steps in. Off keeps the plain pedals for fully manual driving. A key
+  you physically hold down still overrides the assists in every mode,
+  exactly as before.
+
 - **The engine now sounds like you are sitting in the cab, not standing
   beside the truck.** The glass and firewall soften the engine's high end,
   the body carries its low rumble, and the sound sits around you the way a
