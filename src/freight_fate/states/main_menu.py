@@ -1114,6 +1114,8 @@ class SettingsCategoryState(MenuState):
                         + (
                             self._descent_level_label()
                             if field == "descent_speed_control"
+                            else s.pedal_latch
+                            if field == "pedal_latch"
                             else ("on" if getattr(s, field) else "off")
                         )
                     ),
@@ -1625,7 +1627,7 @@ class SettingsCategoryState(MenuState):
             (
                 "pedal_latch",
                 "Latching pedals",
-                "Tap the accelerator or brake, then press again and hold for half a second: a click and a spoken confirmation latch the pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly. Presets never change this.",
+                "Tap the accelerator or brake, then press again and hold for half a second: a click and a spoken confirmation latch the pedal so it stays applied hands-free. Press the same key once to take it back; the opposite pedal or any safety alert releases it instantly. Assists first, the default, lets cruise, the speed keeper, and curve assist manage speed over a latched throttle. Latch first treats the latch as a manual override those assists stand down for, the original behavior. Off turns latching pedals plain. Presets never change this.",
             ),
             (
                 "predictive_cruise",
@@ -1700,8 +1702,16 @@ class SettingsCategoryState(MenuState):
             self.ctx.say(note, interrupt=False)
 
     def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
+        if field == "pedal_latch":
+            modes = ["assists first", "latch first", "off"]
+            try:
+                i = modes.index(self.ctx.settings.pedal_latch)
+            except ValueError:
+                i = 0
+            self.ctx.settings.pedal_latch = modes[(i + _direction) % len(modes)]
+            self._announce()
+            return
         if field in (
-            "pedal_latch",
             "curve_callouts",
             "predictive_cruise",
             "selected_stop_assist",

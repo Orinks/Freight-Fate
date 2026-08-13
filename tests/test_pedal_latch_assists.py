@@ -276,6 +276,39 @@ def test_curve_assist_drains_a_latched_throttle(monkeypatch):
         app.shutdown()
 
 
+def test_latch_first_mode_keeps_the_old_override_meaning(monkeypatch):
+    """Owner revision: "latch first" is the pre-change behavior -- a latched
+    throttle is a manual override and cruise stands down (stays engaged,
+    waiting, while the latch drives the pedal)."""
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    held = set()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        app.ctx.settings.pedal_latch = "latch first"
+        app.ctx.settings.overspeed_warning = "off"
+        d.truck.engine_on = True
+        d.truck.velocity_mps = 60 / 2.2369362920544
+        _latch_throttle(d)
+        d._engage_cruise(55.0)
+
+        _drive_frames(d, 2.0)
+
+        assert d._cruise_mph is not None  # engaged, standing down
+        assert d._throttle_latch.latched
+        assert d.truck.throttle > 0.9  # the latch owns the pedal, old style
+        assert not d._latch_yielding
+    finally:
+        app.shutdown()
+
+
 def test_curve_assist_jake_arrives_once_the_latched_throttle_drains(monkeypatch):
     """On a real downgrade the assist raises the retarder -- but on the
     engage frame a yielded latch is still draining, so the capability

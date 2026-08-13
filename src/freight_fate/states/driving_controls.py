@@ -257,7 +257,7 @@ class DrivingControlsMixin:
             "click and a spoken confirmation mark the catch. Press the same "
             "key once to take the pedal back; the opposite pedal or any "
             "safety alert releases it instantly. "
-            if self.ctx.settings.pedal_latch
+            if self.ctx.settings.pedal_latch != "off"
             else ""
         )
         self.ctx.say(
@@ -1417,7 +1417,7 @@ class DrivingControlsMixin:
         live manual override. The brake latch keeps pre-blending: nothing
         outranks the driver's brake.
         """
-        if not self.ctx.settings.pedal_latch:
+        if self.ctx.settings.pedal_latch == "off":
             if self._throttle_latch.release():
                 self.ctx.say_event("Throttle released.", interrupt=False)
             if self._brake_latch.release():

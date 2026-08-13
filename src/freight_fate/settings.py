@@ -255,7 +255,11 @@ class Settings:
     # same key, the opposite pedal, or any safety override releases it.
     # The same input-accessibility layer as the keeper: presets never
     # touch it. Realism cover: the hand-throttle knob is a real cab control.
-    pedal_latch: bool = True
+    # Modes (owner revision 2026-08-13): "assists first" lets cruise, the
+    # speed keeper, and curve assist outrank a latched throttle; "latch
+    # first" is the original meaning, the latch as a manual override the
+    # assists stand down for; "off" is the plain pedals.
+    pedal_latch: str = "assists first"  # assists first / latch first / off
     # The co-driver reads the road: spoken curve calls from the baked
     # geometry ("Sharp left, quarter mile, advise 35"), only for bends
     # that actually demand slowing at your current speed. The first
@@ -520,6 +524,13 @@ class Settings:
             s.overspeed_warning = "off"
         if s.overspeed_warning not in ("on", "urgent only", "off"):
             s.overspeed_warning = "on"
+        # Latching pedals briefly shipped as a bool; map old saves over.
+        if s.pedal_latch is True:
+            s.pedal_latch = "assists first"
+        elif s.pedal_latch is False:
+            s.pedal_latch = "off"
+        if s.pedal_latch not in ("assists first", "latch first", "off"):
+            s.pedal_latch = "assists first"
         # The chatty level (2) was retired; it never diverged from normal
         # beyond a quicker speed-callout timer. Saved chatty falls to normal.
         if s.speech_verbosity not in (0, 1):

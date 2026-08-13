@@ -216,16 +216,23 @@ class DrivingUpdateMixin:
         hand_up, key_down, throttle_latched = self._update_pedal_latches(
             key_up, key_down, pad_throttle, pad_brake, keys[pygame.K_b], dt
         )
-        # The latch is the LOWEST-priority speed input: while cruise, the
-        # keeper, or curve assist is engaged it contributes nothing, and it
-        # ramps back in when the last of them releases -- no re-gesture
-        # (owner design 2026-08-13). A hand-held key stays a live manual
-        # override, which is why the assists are handed hand_accelerating
-        # below rather than this blended value.
-        self._latch_yielding = throttle_latched and self._speed_authority_engaged()
+        # The latch is the LOWEST-priority speed input in "assists first"
+        # mode: while cruise, the keeper, or curve assist is engaged it
+        # contributes nothing, and it ramps back in when the last of them
+        # releases -- no re-gesture (owner design 2026-08-13). A hand-held
+        # key stays a live manual override, which is why the assists are
+        # handed hand_accelerating below rather than this blended value.
+        # "latch first" is the original meaning: the latch is the driver
+        # insisting on speed, so the assists see it as a hand and stand
+        # down instead.
+        latch_mode = self.ctx.settings.pedal_latch
+        self._latch_yielding = (
+            throttle_latched and latch_mode == "assists first" and self._speed_authority_engaged()
+        )
         key_up = hand_up or (throttle_latched and not self._latch_yielding)
         accelerating = key_up or pad_throttle > 0.05
-        hand_accelerating = hand_up or pad_throttle > 0.05
+        assist_up = hand_up or (throttle_latched and latch_mode == "latch first")
+        hand_accelerating = assist_up or pad_throttle > 0.05
         braking_key = key_down or pad_brake > 0.05
         # The shift gesture keys off a fresh press, so it reads the trigger's
         # instantaneous position rather than the smoothed accelerate/brake

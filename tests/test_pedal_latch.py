@@ -178,7 +178,7 @@ def test_latch_setting_off_keeps_pedals_plain(monkeypatch):
     monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
     monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
     try:
-        app.ctx.settings.pedal_latch = False
+        app.ctx.settings.pedal_latch = "off"
         driving = start_drive(app)
         quiet_trip(driving)
         release_air_brakes(driving)
@@ -203,6 +203,22 @@ def test_settings_menu_offers_latching_pedals():
 
     fields = [field for field, _, _ in SettingsCategoryState._driving_assist_specs()]
     assert "pedal_latch" in fields
+
+
+def test_legacy_bool_settings_migrate_to_modes():
+    """Owner revision 2026-08-13: pedal_latch grew from a bool to a
+    three-way mode. Same coercion path as the overspeed_warning migration
+    (settings.py ~520): True -> "assists first", False -> "off"."""
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.pedal_latch = True
+    settings.save()
+    assert Settings.load().pedal_latch == "assists first"
+
+    settings.pedal_latch = False
+    settings.save()
+    assert Settings.load().pedal_latch == "off"
 
 
 def test_catch_beats_the_direction_change_gesture():
