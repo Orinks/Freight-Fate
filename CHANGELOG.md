@@ -4,6 +4,14 @@
 
 ### Changed
 
+- **The first drive no longer buries you in badges.** Accepting your first
+  dispatch, building air pressure, and loading your first trailer used to
+  each ding their own achievement, stacked right on top of your first
+  delivery -- six or seven dings before you had done anything skillful.
+  Those three now fold into a single "First Day" badge at pickup, and a
+  rookie chain now spreads the early on-time, clean, and speed-legal
+  unlocks across your first several runs instead of all landing on run one.
+
 - **The delivery summary is shorter, and skips the rows that say nothing.**
   When a run added no damage, the truck came in undamaged, and the tank is
   more than a quarter full, the settlement no longer reads those rows out --

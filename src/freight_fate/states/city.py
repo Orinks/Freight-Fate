@@ -1633,7 +1633,9 @@ class JobBoardState(MenuState):
             interrupt=True,
         )
         self.ctx.push_state(driving)
-        self.ctx.award_achievement("first_dispatch")
+        # first_dispatch is retired as an award (folded into "first_day" at
+        # pickup completion, see city_pickup.py); the catalog entry and id
+        # stay so the cloud validator's allow-list never sees a removed id.
 
     def _slip_seat_note(self, job: Job) -> str:
         """Draw the assigned tractor and say why, or nothing if it is not new.
