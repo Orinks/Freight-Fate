@@ -713,7 +713,17 @@ PULL_OVER_CLEAN_STOP_WARN_CHANCE = 0.25  # chance a clean stop downgrades a tick
 
 
 class Tutorial:
-    """First-drive guidance, spoken step by step as the player succeeds."""
+    """First-drive guidance, spoken step by step as the player succeeds.
+
+    Deliberately verbosity-blind (research doc, R15): terse speech is a
+    filter on running commentary, and first-run teaching is not commentary.
+    A brand-new player who picks terse before their first drive -- exactly
+    the player who hates chatty games -- must still be told the status,
+    help, and hazard keys exist, or they can never pull information they
+    were never told about. The gate is ``tutorial_done`` itself: this class
+    is only constructed while the walkthrough is unfinished, and finishing
+    it then flipping terse on resurrects nothing.
+    """
 
     def __init__(self, ctx) -> None:
         self.ctx = ctx
@@ -722,8 +732,6 @@ class Tutorial:
         self._hinted = False
 
     def begin(self) -> None:
-        if self.ctx.settings.speech_verbosity == 0:
-            return
         self.ctx.say(
             "This is your first run, so let's walk through it. First: press "
             f"{self.ctx.control_hint('engine')} to start the engine.",
@@ -735,8 +743,6 @@ class Tutorial:
             self.stage = 1
             self._timer = 0.0
             self._hinted = False
-            if self.ctx.settings.speech_verbosity == 0:
-                return
             if self.ctx.settings.automatic_transmission:
                 self.ctx.say(
                     "Now let air pressure build. When you hear air ready, "
@@ -760,58 +766,47 @@ class Tutorial:
             self.stage = 2
             self._timer = 0.0
             self._hinted = False
-            message = (
-                "Parking brake released."
-                if self.ctx.settings.speech_verbosity == 0
-                else "Parking brake released. Now hold "
-                f"{self.ctx.control_hint('accelerate')} to accelerate."
+            self.ctx.say(
+                "Parking brake released. Now hold "
+                f"{self.ctx.control_hint('accelerate')} to accelerate.",
+                interrupt=False,
             )
-            self.ctx.say(message, interrupt=False)
         elif self.stage == 1:
             self._timer = 0.0
             self._hinted = False
-            message = (
-                "Parking brake released."
-                if self.ctx.settings.speech_verbosity == 0
-                else "Parking brake released. Now shift into first gear."
+            self.ctx.say(
+                "Parking brake released. Now shift into first gear.",
+                interrupt=False,
             )
-            self.ctx.say(message, interrupt=False)
 
     def on_gear_engaged(self) -> None:
         if self.stage == 1:
             self.stage = 2
             self._timer = 0.0
             self._hinted = False
-            message = (
-                "In gear."
-                if self.ctx.settings.speech_verbosity == 0
-                else f"In gear. Now hold {self.ctx.control_hint('accelerate')} to accelerate."
+            self.ctx.say(
+                f"In gear. Now hold {self.ctx.control_hint('accelerate')} to accelerate.",
+                interrupt=False,
             )
-            self.ctx.say(message, interrupt=False)
 
     def update(self, dt: float, truck) -> None:
         self._timer += dt
         if self.stage == 2 and truck.speed_mph > 20:
             self.stage = 3
-            if self.ctx.settings.speech_verbosity == 0:
-                self.ctx.say("Rolling.", interrupt=False)
-            else:
-                self.ctx.say(
-                    "You are rolling. Press "
-                    f"{self.ctx.control_hint('speed')} anytime for your speed, "
-                    f"{self.ctx.control_hint('status_menu')} for a full report, and "
-                    f"{self.ctx.control_hint('help')} to hear all the controls. "
-                    "Watch for hazard warnings, and brake hard when you hear them. "
-                    f"Press {self.ctx.control_hint('emergency_brake')} when you need "
-                    "to stop fast. Safe travels.",
-                    interrupt=False,
-                )
+            self.ctx.say(
+                "You are rolling. Press "
+                f"{self.ctx.control_hint('speed')} anytime for your speed, "
+                f"{self.ctx.control_hint('status_menu')} for a full report, and "
+                f"{self.ctx.control_hint('help')} to hear all the controls. "
+                "Watch for hazard warnings, and brake hard when you hear them. "
+                f"Press {self.ctx.control_hint('emergency_brake')} when you need "
+                "to stop fast. Safe travels.",
+                interrupt=False,
+            )
             self.ctx.profile.tutorial_done = True
             self.ctx.save_profile()
         elif self.stage in (0, 1) and self._timer > 25 and not self._hinted:
             self._hinted = True
-            if self.ctx.settings.speech_verbosity == 0:
-                return
             if self.stage == 0:
                 self.ctx.say(
                     f"Reminder: press {self.ctx.control_hint('engine')} to start the engine.",

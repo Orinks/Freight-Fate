@@ -150,6 +150,14 @@
 
 ### Fixed
 
+- **Terse speech no longer silences your first-drive walkthrough.** If you
+  set speech to terse before your very first run, the game used to skip
+  the walkthrough entirely -- so you were never told about the speed key,
+  the status report, the help key, or what to do when a hazard warning
+  sounds. First-run guidance now speaks in full whatever your speech
+  setting, and terse takes over the moment the walkthrough is done.
+  Finishing it and then switching to terse brings none of it back.
+
 - **What something cost is now always said.** A charged toll, a fine, or a
   citation could be lost without a word if the road was talkative at the
   wrong moment. Money lines now ride the same never-dropped queue as route
