@@ -443,6 +443,11 @@ class _PygameBackend:
     """The original pygame.mixer implementation (engine band crossfade)."""
 
     name = "pygame"
+    # While the event voice speaks, engine/weather/music step down to this
+    # and back (see AudioEngine.set_speech_duck). Not a setting value:
+    # settings own the volumes, this rides on top of them. A class default,
+    # so the bare-__new__ backends tests build carry it too.
+    speech_duck = 1.0
 
     def __init__(self) -> None:
         self.enabled = False
@@ -453,10 +458,6 @@ class _PygameBackend:
         self.engine_volume = 0.55
         self.ui_volume = 0.9
         self.siren_volume = 1.0
-        # While the event voice speaks, engine/weather/music step down to
-        # this and back (see AudioEngine.set_speech_duck). Not a setting
-        # value: settings own the volumes, this rides on top of them.
-        self.speech_duck = 1.0
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
         self._loop_pans: dict[int, float] = {}  # channel -> stereo pan, -1 left .. 1 right
@@ -985,6 +986,11 @@ class _BassBackend:
     """
 
     name = "bass"
+    # While the event voice speaks, engine/weather/music step down to this
+    # and back (see AudioEngine.set_speech_duck). Not a setting value:
+    # settings own the volumes, this rides on top of them. A class default,
+    # so the bare-__new__ backends tests build carry it too.
+    speech_duck = 1.0
 
     def __init__(self) -> None:
         from sound_lib.external.pybass import (
@@ -1027,10 +1033,6 @@ class _BassBackend:
         self.engine_volume = 0.55
         self.ui_volume = 0.9
         self.siren_volume = 1.0
-        # While the event voice speaks, engine/weather/music step down to
-        # this and back (see AudioEngine.set_speech_duck). Not a setting
-        # value: settings own the volumes, this rides on top of them.
-        self.speech_duck = 1.0
         self._loops: dict[int, tuple[str, float, object]] = {}  # slot -> (key, gain, stream)
         self._sustains: dict[int, SustainLoop] = {}  # slot -> active sustain loop
         # slot -> (key, stream) still ringing out its release tail after a
