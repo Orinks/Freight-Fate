@@ -357,6 +357,23 @@ onto exit signalling.
       (Shane's "turns coming up really quickly"). Live weather holds
       last-known conditions through a stale station instead of dropping
       to neutral, without traceback spam in the log.
+- [x] **Resuming cruise to a high target eases up instead of flooring the
+      engine -- landed 2026-08-12** (Shane's redline scream on a 12 percent
+      grade). Adaptive/automatic cruise was pure proportional control: a set
+      speed far above the current one commanded wide-open throttle at once.
+      On the flat the governor capped it; on a downgrade it over-revved past
+      redline during the automatic box's between-shift hold and charged
+      engine wear. Cruise now chases a working setpoint that ramps toward the
+      target at a bounded rate (CRUISE_ACCEL_MPH_PER_S), tapers its throttle
+      to nothing as coupled RPM nears the governor (CRUISE_RPM_CEILING_BAND,
+      so descent control and the retarder own the grade and cruise never
+      feeds an over-rev), and the open-road resume waits for CRUISE_MIN_MPH
+      before engaging -- the same bridge the zone-preceded automatic resume
+      already gave. tests/test_cruise_resume_ramp.py pins the ramp, the RPM
+      ceiling, the engage gate, and the no-redline invariant at road speed.
+      Follow-up (not this fix): coasting an unbraked steep grade up from a
+      near standstill still over-revs on gravity alone through the gears --
+      descent-control territory, tracked separately.
 - [x] **The scale announcement and the T key tell the same story --
       landed 2026-08-12** (Jerry's bypass pull-over). The open-scale
       call taught "press T", but T at speed plans a sleep stop, so the

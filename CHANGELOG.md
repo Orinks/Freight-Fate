@@ -228,6 +228,16 @@
 
 ### Fixed
 
+- **Resuming cruise to a high speed no longer floors the engine to get
+  there.** Bringing automatic speed control back with Shift+K, or setting it
+  when your remembered speed was far above the truck's, used to open the
+  throttle all the way at once to close the gap -- loud on the flat, and on a
+  downgrade it screamed the engine past redline and wore it down. Cruise now
+  eases up to the set speed at a comfortable pace, lifts off the throttle as
+  the engine nears its limit, and waits until you are at road speed before it
+  takes over on the open road. No more redline scream, and no engine wear,
+  from resuming cruise off the line.
+
 - **Terse speech no longer silences your first-drive walkthrough.** If you
   set speech to terse before your very first run, the game used to skip
   the walkthrough entirely -- so you were never told about the speed key,

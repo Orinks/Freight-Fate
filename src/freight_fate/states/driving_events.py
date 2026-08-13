@@ -2438,6 +2438,11 @@ class DrivingEventMixin:
         self._speed_control_paused_at_stop = False
         self._cruise_mph = max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, target_mph))
         self._speed_control_target_mph = self._cruise_mph
+        # Chase a working setpoint that starts at road speed, so a big resume
+        # error eases on rather than landing on the pedal at once. Engaging at
+        # the current speed (a plain K-set) seeds it at the target, so there is
+        # no ramp to feel.
+        self._cruise_working_mph = max(CRUISE_MIN_MPH, min(self._cruise_mph, t.speed_mph))
         self._cruise_throttle = t.throttle
         self._cruise_applied = t.throttle
         # Engaging on a grade starts from the feed-forward, so the trim opens
@@ -2927,6 +2932,10 @@ class DrivingEventMixin:
                 )
                 self._descent_capture_active = True
                 self._cruise_mph = new_target
+                # Capture pins the set speed to what the truck is doing now, so
+                # the working setpoint follows it down rather than easing back
+                # up toward a target the driver just abandoned.
+                self._cruise_working_mph = new_target
                 if should_announce:
                     self.ctx.say_event(
                         f"Descent target changed to {self.ctx.settings.speed_text(self._cruise_mph)}.",
@@ -3018,7 +3027,20 @@ class DrivingEventMixin:
             t.throttle = 0.0
             self._cruise_applied = 0.0
             return
-        target_mph = self._cruise_mph
+        # Ease the working setpoint toward the set speed at a bounded rate, in
+        # both directions, and chase that rather than the set speed itself. A
+        # resume to a far target climbs a couple of mph a second instead of
+        # putting the whole error on the pedal at once; a drop in the set speed
+        # backs off just as gently. Everything below still caps this working
+        # target down for a lead, a ramp, a curve, a limit, or a grade.
+        if self._cruise_working_mph is None:
+            self._cruise_working_mph = max(CRUISE_MIN_MPH, min(self._cruise_mph, t.speed_mph))
+        step = CRUISE_ACCEL_MPH_PER_S * dt
+        if self._cruise_working_mph < self._cruise_mph:
+            self._cruise_working_mph = min(self._cruise_mph, self._cruise_working_mph + step)
+        elif self._cruise_working_mph > self._cruise_mph:
+            self._cruise_working_mph = max(self._cruise_mph, self._cruise_working_mph - step)
+        target_mph = self._cruise_working_mph
         exit_capped = self._cruise_exit_mph is not None and self._cruise_exit_mph < target_mph
         if exit_capped:
             target_mph = self._cruise_exit_mph
@@ -3156,12 +3178,31 @@ class DrivingEventMixin:
             if error <= -CRUISE_COAST_MPH:
                 trim = min(0.0, trim)
         demand = hold + error * CRUISE_P_GAIN + trim
+        # Off the throttle as the engine nears the governor. On a downgrade
+        # gravity does the accelerating, and cruise adding fuel into a coupled
+        # RPM already climbing toward redline is what over-revved the engine
+        # and charged wear during the automatic box's between-shift hold. Taper
+        # demand to nothing across the top of the RPM range so descent control
+        # and the retarder own the grade and cruise simply lifts -- it never
+        # fights the retarder, it just stops feeding the over-rev.
+        ceiling_rpm = self.truck.specs.max_rpm
+        band = ceiling_rpm * CRUISE_RPM_CEILING_BAND
+        ceiling_factor = (
+            1.0 if band <= 0.0 else max(0.0, min(1.0, (ceiling_rpm - t.coupled_rpm()) / band))
+        )
+        demand *= ceiling_factor
         # Anti-windup: a grade the engine cannot pull, or a downgrade gravity
         # owns, pins the pedal at one end for as long as it lasts. Integrating
         # through that buries the trim at its limit, and the truck then sags or
         # overshoots for seconds after the road levels out while it unwinds.
-        # Only take the new trim when it can still move the pedal.
-        saturated = (demand <= 0.0 and error < 0.0) or (demand >= 1.0 and error > 0.0)
+        # Only take the new trim when it can still move the pedal -- and the RPM
+        # ceiling holding the pedal down counts as pinned just as much as the
+        # floor or the roof does.
+        saturated = (
+            (demand <= 0.0 and error < 0.0)
+            or (demand >= 1.0 and error > 0.0)
+            or (ceiling_factor < 1.0 and error > 0.0)
+        )
         if not saturated:
             self._cruise_trim = trim
         self._cruise_throttle = max(0.0, min(1.0, demand))

@@ -1375,7 +1375,10 @@ def test_adaptive_cruise_switches_to_keeper_for_heavy_traffic(monkeypatch):
             "Entering heavy traffic zone. Speed limit 50 now. "
             "Speed keeper holding 50 miles per hour."
         )
-        assert events[-1].startswith("New achievement! Bumper-to-Bumper Blues.")
+        # Live achievement announces are name-only now (R9: the flavor moved to
+        # the log), so the spoken form is "New achievement: <name>." not the
+        # full-record "New achievement! <name>. <flavor>".
+        assert events[-1].startswith("New achievement: Bumper-to-Bumper Blues.")
     finally:
         app.shutdown()
 

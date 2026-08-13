@@ -3,7 +3,12 @@
 
 from __future__ import annotations
 
-from .driving_core import KEEPER_MIN_MPH, MPH_PER_MPS, RESTRICTED_ZONE_REASONS
+from .driving_core import (
+    CRUISE_MIN_MPH,
+    KEEPER_MIN_MPH,
+    MPH_PER_MPS,
+    RESTRICTED_ZONE_REASONS,
+)
 from .driving_turns import TURN_COMMIT_TAIL_MI
 
 # How early the keeper starts shedding speed for something ahead, sized in
@@ -68,6 +73,7 @@ KEEPER_OVERRUN_S = 4.0
 class SpeedControlStateMixin:
     def _clear_cruise(self, *, preserve_exit_cap: bool = False) -> None:
         self._cruise_mph = None
+        self._cruise_working_mph = None
         self._cruise_throttle = 0.0
         self._cruise_applied = 0.0
         self._cruise_trim = 0.0
@@ -202,6 +208,15 @@ class SpeedControlStateMixin:
                 f"{zone_reason} zone.",
                 interrupt=False,
             )
+            return
+        if t.speed_mph < CRUISE_MIN_MPH:
+            # Open road, but not yet at cruise's holding speed. Wait to engage
+            # rather than snapping cruise on at the full remembered error and
+            # flooring the throttle to chase a high target from a crawl. A zone
+            # bridges the low-speed regime with the keeper (above); on the open
+            # road the truck simply has to be at road speed first -- which is
+            # what makes Shift+K behave like the automatic resume the tester
+            # already trusts.
             return
         self._engage_cruise(self._speed_control_target_mph or limit, transition=True)
 

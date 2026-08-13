@@ -1,0 +1,259 @@
+"""Resuming (or setting) cruise to a high target must ease up, not floor it.
+
+The tester report (Shane): Shift+K resumes cruise to a high remembered target
+(85 mph) from low road speed. The old proportional loop saw the whole error at
+once and commanded wide-open throttle. On flat ground the fuel governor caps
+that -- loud, but harmless. On a downgrade cruise adding fuel while gravity is
+already driving the engine toward redline is what fed the over-rev during the
+automatic box's between-shift hold, "the engine is screaming at redline".
+
+The fix has three parts, each covered here:
+
+* a working setpoint that eases from the engage speed up to the target at a
+  bounded rate, so a big resume error never lands on the pedal at once;
+* an RPM ceiling that tapers cruise's throttle to nothing as the engine nears
+  the governor, so cruise never feeds an over-rev -- the descent-control and
+  retarder staging own the grade;
+* an engage gate, so on the open road cruise waits for road speed before it
+  engages, the same bridge the zone-preceded automatic resume already gave the
+  tester a behaviour he trusts.
+
+Note on scope: a truck left to coast an unbraked 12 percent grade up from a
+near standstill over-revs on gravity alone, threading up through the gears --
+that is descent-control territory, not cruise, and it happens whether cruise is
+off the throttle or not. These tests pin what cruise itself does: at a
+realistic rolling resume it never redlines and charges no over-rev wear, and it
+is off the throttle near the governor.
+"""
+
+import pygame
+import pytest
+from driving_feature_helpers import key_event, open_limits, quiet_trip, start_drive
+
+
+class NoKeys:
+    def __getitem__(self, _key):
+        return False
+
+
+def _arm_high_target(
+    app,
+    monkeypatch,
+    *,
+    automatic: bool,
+    grade: float,
+    speed_mph: float,
+    gear: int,
+    cargo_kg: float | None = None,
+):
+    """Arm a session, remember an 85 mph target, and Shift+K resume it.
+
+    Returns the DrivingState rolling at ``speed_mph`` on ``grade`` with the
+    resume just requested, ready for the caller to step frames.
+    """
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+    driving = start_drive(app)
+    quiet_trip(driving)
+    open_limits(driving)
+    driving.trip.zones = []
+    driving.trip.curves = []  # a real bend rightly caps cruise; not under test here
+    driving.trip.traffic_context = lambda: None
+    driving.trip.grade_at = lambda mile, _g=grade: _g
+    driving._destination_exit_taken = True
+    app.ctx.settings.automatic_transmission = automatic
+    app.ctx.settings.descent_speed_control = "balanced"
+    t = driving.truck
+    driving.handle_event(key_event(pygame.K_e))  # engine on
+    t.transmission.automatic = automatic
+    if cargo_kg is not None:
+        t.cargo_kg = cargo_kg
+    t.grade = grade
+    t.transmission.gear = gear
+    t.velocity_mps = speed_mph / 2.23694
+    # A remembered open-road target the way a braked-away cruise leaves it.
+    driving._resume_target_mph = 85.0
+    assert driving._cruise_mph is None and driving._keeper_mph is None
+    shift_k = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_k, mod=pygame.KMOD_LSHIFT)
+    driving.handle_event(shift_k)
+    assert driving._speed_control_armed
+    return driving
+
+
+def test_resume_eases_up_and_reaches_the_target_on_the_flat(monkeypatch):
+    """Flat ground: the working setpoint climbs toward 85 gradually rather than
+    the whole error landing on the loop at once, and given time the truck does
+    reach and hold the number."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = _arm_high_target(
+            app, monkeypatch, automatic=True, grade=0.0, speed_mph=21.0, gear=6, cargo_kg=0.0
+        )
+        t = driving.truck
+        # First frame engages cruise; the working setpoint starts near road
+        # speed, nowhere near the 85 target.
+        driving.update(1 / 30.0)
+        assert driving._cruise_mph == pytest.approx(85.0)
+        assert driving._cruise_working_mph is not None
+        assert driving._cruise_working_mph < 30.0
+        early = driving._cruise_working_mph
+        # It climbs over the next second rather than snapping to the target.
+        for _ in range(30):
+            driving.update(1 / 30.0)
+        assert early < driving._cruise_working_mph < 85.0
+        # And given time, cruise reaches and holds the number, never redlining.
+        reached = False
+        for _ in range(3000):
+            driving.update(1 / 30.0)
+            assert not t.over_revving
+            if t.speed_mph >= 82.0:
+                reached = True
+                break
+        assert reached, f"cruise never climbed to the target (stalled at {t.speed_mph:.1f})"
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.parametrize(
+    ("automatic", "grade", "speed_mph", "gear"),
+    [
+        (True, 0.0, 21.0, 6),  # automatic, flat
+        (True, -0.12, 25.0, 6),  # automatic, steep downgrade, rolling
+        (False, 0.0, 21.0, 6),  # manual, flat (governor-capped)
+        (False, -0.12, 55.0, 10),  # manual, steep downgrade, top gear (85 has headroom)
+    ],
+)
+def test_resume_at_road_speed_never_redlines_or_wears(
+    monkeypatch, automatic, grade, speed_mph, gear
+):
+    """A rolling resume to 85 -- flat and on a -12% grade, automatic and manual
+    -- never crosses the over-rev threshold and charges no over-rev wear."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = _arm_high_target(
+            app, monkeypatch, automatic=automatic, grade=grade, speed_mph=speed_mph, gear=gear
+        )
+        t = driving.truck
+        wear_before = t.engine_wear_pct
+        max_crpm = 0.0
+        ever_over = False
+        for _ in range(600):  # ~20 s of frames
+            driving.update(1 / 30.0)
+            max_crpm = max(max_crpm, t.coupled_rpm())
+            ever_over = ever_over or t.over_revving
+        over_thresh = t.specs.max_rpm * 1.05
+        assert not ever_over, (
+            f"engine over-revved (peak coupled_rpm {max_crpm:.0f} > {over_thresh:.0f})"
+        )
+        # Duty-cycle wear still ticks; the over-rev term (0.8%/s) does not.
+        assert t.engine_wear_pct - wear_before < 0.05, t.engine_wear_pct - wear_before
+    finally:
+        app.shutdown()
+
+
+def test_cruise_backs_off_the_throttle_near_redline(monkeypatch):
+    """The belt-and-suspenders ceiling in isolation: with the same setpoint
+    error, cruise commands full throttle when the engine has RPM headroom and
+    next to nothing when the engine is up against the governor -- so on a
+    downgrade, where gravity does the accelerating, cruise never feeds the
+    over-rev."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        # Manual, flat, a mid gear, rolling. The remembered target is far above,
+        # so cruise wants throttle throughout -- the only thing that changes
+        # between the two probes below is how close coupled RPM sits to redline.
+        driving = _arm_high_target(
+            app, monkeypatch, automatic=False, grade=0.0, speed_mph=50.0, gear=8
+        )
+        t = driving.truck
+        driving.update(1 / 30.0)
+        assert driving._cruise_mph == pytest.approx(85.0)
+
+        # Near the governor: coupled RPM in the top of the range, big error.
+        driving._cruise_working_mph = 70.0
+        t.transmission.gear = 8
+        t.velocity_mps = 52.0 / 2.23694
+        driving.update(1 / 60.0)
+        assert t.coupled_rpm() >= t.specs.max_rpm * 0.95
+        near_redline_throttle = driving._cruise_throttle
+        assert near_redline_throttle < 0.3, near_redline_throttle
+
+        # Same gear, same error, but plenty of RPM headroom: full throttle.
+        driving._cruise_working_mph = 70.0
+        t.transmission.gear = 8
+        t.velocity_mps = 30.0 / 2.23694
+        driving.update(1 / 60.0)
+        assert t.coupled_rpm() < t.specs.max_rpm * 0.7
+        assert driving._cruise_throttle > 0.8, driving._cruise_throttle
+    finally:
+        app.shutdown()
+
+
+def test_open_road_resume_waits_for_road_speed_before_engaging_cruise(monkeypatch):
+    """From a near standstill on the open road, resume arms the session but
+    holds off engaging cruise until the truck is at cruise's holding speed --
+    the old resume snapped cruise on at KEEPER_MIN (2 mph) and floored the
+    throttle to chase the high remembered target."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = _arm_high_target(
+            app, monkeypatch, automatic=True, grade=0.0, speed_mph=6.0, gear=1
+        )
+        t = driving.truck
+        # Well below cruise's floor: armed, but cruise must not engage yet.
+        for _ in range(10):
+            driving.update(1 / 30.0)
+        assert driving._speed_control_armed
+        assert driving._cruise_mph is None
+        # Bring the truck up past the cruise floor by hand; now it engages, and
+        # eased in from road speed rather than floored.
+        t.velocity_mps = 24.0 / 2.23694
+        driving.update(1 / 30.0)
+        assert driving._cruise_mph == pytest.approx(85.0)
+        assert driving._cruise_working_mph is not None
+        assert driving._cruise_working_mph < 40.0
+    finally:
+        app.shutdown()
+
+
+def test_set_at_current_speed_cruise_is_unchanged(monkeypatch):
+    """The K-set-at-current-speed path: engaging at 60 with the target at 60
+    seeds the working setpoint at road speed, so there is no ramp artifact and
+    the hold is exactly as before."""
+    from freight_fate.app import App
+
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: NoKeys())
+    app = App()
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.trip.zones = []
+        driving.trip.traffic_context = lambda: None
+        driving.trip.curves = []
+        driving._destination_exit_taken = True
+        open_limits(driving)
+        t = driving.truck
+        driving.handle_event(key_event(pygame.K_e))
+        t.cargo_kg = 0.0
+        t.grade = 0.0
+        driving.trip.grade_at = lambda mile: 0.0
+        t.transmission.gear = 10
+        t.velocity_mps = 26.8  # ~60 mph
+        t.throttle = 0.35
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving._cruise_mph == pytest.approx(60.0, abs=1.0)
+        assert driving._cruise_working_mph == pytest.approx(t.speed_mph, abs=0.5)
+        for _ in range(60 * 15):
+            driving.update(1 / 60)
+        assert driving._cruise_mph is not None
+        assert abs(t.speed_mph - 60.0) < 5.0
+        assert not t.over_revving
+    finally:
+        app.shutdown()

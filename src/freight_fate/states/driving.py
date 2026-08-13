@@ -415,6 +415,10 @@ class DrivingState(
         # (position when computed, scan result) -- see _destination_exit_details
         self._destination_exit_cache: tuple[float, tuple[float, str, str] | None] | None = None
         self._cruise_mph: float | None = None
+        # The rate-limited speed cruise is actually chasing this frame; it eases
+        # from the engage speed up to _cruise_mph so a big resume error never
+        # lands on the pedal at once. None whenever cruise is off.
+        self._cruise_working_mph: float | None = None
         self._cruise_throttle = 0.0
         self._cruise_applied = 0.0
         self._cruise_trim = 0.0  # integral trim on top of the grade feed-forward

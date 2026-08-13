@@ -350,6 +350,25 @@ CRUISE_MAX_MPH = 85.0  # highest cruise set point (top US posted limits)
 CRUISE_P_GAIN = 0.055  # throttle per mph of error
 CRUISE_I_GAIN = 0.05  # throttle per mph-second of error
 CRUISE_TRIM_LIMIT = 0.4  # how far trim may pull away from the feed-forward
+# How fast the working setpoint eases toward the set speed. The loop is pure
+# proportional above, so a set speed far over the current one (resume to 85
+# from a crawl) used to land the whole error on the pedal at once and command
+# wide-open throttle -- governor-loud on the flat, and on a downgrade an
+# over-rev past redline during the automatic box's between-shift hold, which
+# charged engine wear (tester Shane, ~3 percent on a 12 percent grade). Cruise
+# now chases a working setpoint that ramps from the engage speed at this bounded
+# rate, so the per-frame error stays small and the throttle stays moderate
+# while the box upshifts normally. A loaded rig accelerates in the low single
+# digits of mph per second; 2.5 is brisk enough to feel like a resume yet inside
+# what the truck can comfortably do, so speed keeps up and the error never grows
+# into a governor slam.
+CRUISE_ACCEL_MPH_PER_S = 2.5
+# Belt and suspenders for the downgrade: even where gravity does the
+# accelerating, cruise must not add throttle as the engine nears the governor.
+# Demand tapers to nothing across this fraction of max RPM below the redline, so
+# the descent-control and retarder staging own the grade and cruise is simply
+# off the pedal -- never fighting the retarder, never feeding an over-rev.
+CRUISE_RPM_CEILING_BAND = 0.08
 CRUISE_COAST_MPH = 2.0  # feed-forward eases to nothing across this much overspeed
 # The droop band: how far under its number cruise tolerates before the truck
 # counts as beaten by the hill rather than working through a dip. Fleet cruise
