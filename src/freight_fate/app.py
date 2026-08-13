@@ -185,6 +185,15 @@ class GameContext:
 
     def say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
         transcript.info("%s", text)
+        if interrupt and getattr(self._app.state, "paces_main_speech", False):
+            # At the wheel, the main channel queues instead of cutting: an
+            # achievement or assist notice must not stamp on the line the
+            # player was mid-way through hearing. Menus and readers keep
+            # their default interrupt -- a screen over the drive is the top
+            # state, so navigation there still cancels speech the way every
+            # screen reader does. A queued line also cannot purge a shared
+            # voice, so the rescue below has nothing to hand back.
+            interrupt = False
         cut = None
         if interrupt and self._event_voice_shares_main():
             # In this configuration the main channel is also carrying the

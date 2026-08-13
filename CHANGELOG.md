@@ -15,6 +15,13 @@
   longer burns your braking grace before the announcement has even had
   time to be spoken.
 
+- **While you drive, screen reader speech waits its turn too.** An
+  achievement, an assist notice, or an answer to a status key used to cut
+  off whatever your screen reader was mid-way through saying. At the
+  wheel those lines now queue and speak when the voice is free. Menus are
+  unchanged -- moving through a menu still cancels speech instantly, even
+  when the menu is open over a drive.
+
 - **Out-of-date roadside chatter is dropped instead of barging in.** A
   state line or weather note the voice could not get to in time --
   describing miles already behind you -- used to force its way in by

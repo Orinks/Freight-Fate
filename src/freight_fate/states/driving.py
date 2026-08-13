@@ -49,6 +49,11 @@ class DrivingState(
     LiquidLoadMixin,
     State,
 ):
+    # At the wheel, main-channel lines (achievements, assist notices, info
+    # replies) queue instead of cutting whatever is mid-air -- the event
+    # channel's discipline, extended to the other voice (research doc, R2).
+    paces_main_speech = True
+
     def __init__(
         self,
         ctx,

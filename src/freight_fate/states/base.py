@@ -50,6 +50,15 @@ def spoken_char(ch: str) -> str:
 class State:
     """Base class for all game screens."""
 
+    # While this state is on top of the stack, main-channel speech
+    # (``ctx.say``) queues instead of interrupting. False for menus and
+    # readers -- cancelling on navigation is how screen readers behave --
+    # and True for the driving state, where an achievement or assist
+    # notice landing with interrupt=True would stamp on whatever the
+    # player was being told (speech priority research, R2). A menu pushed
+    # over a drive is the top state, so it keeps immediate speech.
+    paces_main_speech = False
+
     def __init__(self, ctx: GameContext) -> None:
         self.ctx = ctx
 
