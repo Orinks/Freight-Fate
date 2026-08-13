@@ -12,9 +12,11 @@ asked for real-stalk snapping, and the owner wants both.
 - **Plain +/-** snaps the target outward to the next multiple of 5 mph:
   from 32, plus gives 35 then 40; minus gives 30. Already on a multiple,
   it moves a full 5. This heals an off-grid captured speed in one tap.
-- **Shift with +/-** moves the target by exactly 1 mph, no snapping --
+- **Ctrl with +/-** moves the target by exactly 1 mph, no snapping --
   the precise-target path for players who cannot feather K onto an exact
-  speed.
+  speed. Ctrl rather than Shift (the owner offered either): on a US
+  keyboard the main-row plus IS Shift+equals, so a Shift modifier cannot
+  be told apart from the plus key itself.
 - Both clamp to the existing `CRUISE_MIN_MPH`/`CRUISE_MAX_MPH` bounds.
 - Both apply wherever +/- applies today: the open-road cruise target, and
   the resume target while the speed keeper is holding a restricted zone.
