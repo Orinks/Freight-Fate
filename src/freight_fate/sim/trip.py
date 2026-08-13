@@ -182,6 +182,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # instruction has retired (research doc R7). The literal default keeps
         # standalone Trip callers (tests, tools) speaking the keyboard key.
         self.exit_hint = "X"
+        # Facilities named in full already this leg, so a repeat mention within
+        # the leg speaks the proper name alone (research doc R6). Cleared on a
+        # new leg here, and on resume-from-pause by the driving layer; a resume
+        # from a save rebuilds the Trip, so it starts empty there too.
+        self._facilities_named: set[str] = set()
+        self._facility_leg = 0
         # Deliberate waiting: armed when the player sets the parking brake
         # themselves, never by the auto-set at trip start or menu returns.
         self.waiting = False
@@ -2256,6 +2262,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # departure is the big one, where the onramp merge cue and a nearby
         # travel plaza announce together -- the actionable instruction must
         # reach the event voice first.
+        self._check_facility_leg_reset()
         self._check_navigation_cues()
         self._check_npc_traffic_cues()
         self._check_traffic_pressures()
@@ -2575,6 +2582,31 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             f"{_spoken_short_miles(ahead, self.imperial)}.",
         )
 
+    def name_facility(self, plain_name: str, full_name: str) -> str:
+        """Full form on the first mention of a facility this leg, the proper
+        name alone after (research doc R6). Marking is a side effect: the
+        caller is about to speak the returned name."""
+        key = plain_name.strip().lower()
+        if key in self._facilities_named:
+            return plain_name
+        self._facilities_named.add(key)
+        return full_name
+
+    def reset_facility_mentions(self) -> None:
+        """Bring the full form back once -- a resume from a pause, where the
+        player may have lost the thread (research doc R6)."""
+        self._facilities_named.clear()
+
+    def _check_facility_leg_reset(self) -> None:
+        """A new leg brings every facility's full form back once."""
+        leg = 0
+        for i, start in enumerate(self._leg_starts):
+            if self.position_mi >= start:
+                leg = i
+        if leg != self._facility_leg:
+            self._facility_leg = leg
+            self._facilities_named.clear()
+
     def _check_stops(self) -> None:
         if self.planned_stop_key is not None:
             planned = self.planned_stop
@@ -2603,7 +2635,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                     TripEventKind.STOP_AHEAD,
                     stop_callout(
                         planned_prefix=self.planned_prefix(stop),
-                        typed_name=stop.spoken_name,
+                        typed_name=self.name_facility(stop.name, stop.spoken_name),
                         plain_name=stop.name,
                         exit_label=stop.exit_label,
                         distance=self._distance_text(ahead),

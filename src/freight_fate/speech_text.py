@@ -27,6 +27,38 @@ Two rules bound every terse rendering (the research doc's R4):
 
 from __future__ import annotations
 
+import re
+
+_WORD_RE = re.compile(r"[a-z0-9]+")
+
+
+def _words(text: str) -> list[str]:
+    return _WORD_RE.findall(text.lower())
+
+
+def type_prefix_is_redundant(label: str, name: str) -> bool:
+    """Whether a facility's type prefix only repeats words already in its name.
+
+    "cross-dock Chicago Cross-Dock" and "port Port of Indiana-Burns Harbor"
+    say the type twice; dropping the prefix there removes repetition, not
+    vocabulary (research doc R6). Match on whole words so a short label does
+    not fire on a coincidental substring ("port" must not swallow "Newport").
+    A "travel center: Love's" keeps its prefix, because the name does not
+    carry the type.
+    """
+    label_words = _words(label)
+    if not label_words:
+        return False
+    name_words = set(_words(name))
+    return all(word in name_words for word in label_words)
+
+
+def typed_name(label: str, name: str, *, sep: str = " ") -> str:
+    """A facility's name with its type prefix, unless the prefix is redundant."""
+    if type_prefix_is_redundant(label, name):
+        return name
+    return f"{label}{sep}{name}"
+
 
 class SpokenMessage(str):
     """A spoken line carrying both of its renderings.

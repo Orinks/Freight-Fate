@@ -316,6 +316,9 @@ class PauseMenuState(MenuState):
         # Anything that reached the voice while the menu was up describes a
         # road the player was not on. They come back to the road as it is now.
         self.ctx.resume_event_speech()
+        # The player may have lost the thread across the pause: bring each
+        # facility's full name back once (research doc R6).
+        self.driving.trip.reset_facility_mentions()
         self.driving._pending_ambient_event = None
         self.ctx.pop_state()
         self.ctx.say("Resumed.", interrupt=False, review=False)

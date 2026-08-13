@@ -826,10 +826,15 @@ class DrivingEventMixin:
                 if labeled
                 else f"Signal on for the destination exit for {stop.name},"
             )
-        elif stop.exit_label:
-            head = f"Signal on for {stop.exit_label}, {stop.spoken_name},"
         else:
-            head = f"Signal on for the {stop.spoken_name} exit,"
+            # Once the stop-ahead callout has named this facility in full this
+            # leg, the exit signal speaks its proper name alone (research doc
+            # R6).
+            facility = self.trip.name_facility(stop.name, stop.spoken_name)
+            if stop.exit_label:
+                head = f"Signal on for {stop.exit_label}, {facility},"
+            else:
+                head = f"Signal on for the {facility} exit,"
         lane_hint = "" if self.lane.lane == 0 else " Get into the right lane."
         # Name the ramp's ending now, while there is still a mile of
         # mainline to plan the braking on: a stop sign heard only on the

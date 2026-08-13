@@ -825,7 +825,12 @@ class RoadStop:
 
     @property
     def spoken_name(self) -> str:
-        return f"{self.label}: {self.name}"
+        # Drop the type prefix when the proper name already carries it
+        # ("cross-dock: Chicago Cross-Dock" -> "Chicago Cross-Dock"); the
+        # prefix stays where the name does not name its type (research doc R6).
+        from ..speech_text import typed_name
+
+        return typed_name(self.label, self.name, sep=": ")
 
     @property
     def parking_text(self) -> str:

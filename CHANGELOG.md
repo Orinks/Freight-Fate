@@ -4,6 +4,14 @@
 
 ### Changed
 
+- **Facility names are said in full the first time, then kept short.** The
+  first time a stop or facility comes up on a leg you hear its full name;
+  after that, on the same leg, just the proper name -- so a pickup no longer
+  says "cross-dock Chicago Cross-Dock" over and over. The type word is
+  dropped whenever the name already contains it ("port Port of Indiana-Burns
+  Harbor" becomes "Port of Indiana-Burns Harbor"), and the full name comes
+  back once at the start of a new leg or when you resume from a pause.
+
 - **The game stops repeating instructions you have clearly mastered.** After
   you have started the engine, opened the controls help, or signalled for an
   exit a few times, the truck quits telling you which key does it -- "Press E

@@ -192,7 +192,12 @@ def facility_text(location_type: str, location_name: str, city: str, locality: s
     if location_type == "metro_market" or _is_legacy_facility_name(city, location_name):
         return f"the {city} metro freight market"
     place = f" near {locality}" if locality and locality not in location_name else ""
-    return f"{facility_label(location_type)} {location_name}{place} in {city}"
+    # Drop the type prefix when the proper name already carries it, so
+    # "cross-dock Chicago Cross-Dock in Chicago" is not the type twice
+    # (research doc R6).
+    from ..speech_text import typed_name
+
+    return f"{typed_name(facility_label(location_type), location_name)}{place} in {city}"
 
 
 def facility_offer_text(
