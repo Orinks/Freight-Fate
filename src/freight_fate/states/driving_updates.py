@@ -213,10 +213,19 @@ class DrivingUpdateMixin:
         # gesture, cruise cancel, the hazard's brake answer -- sees one
         # truth. Microsleeps stay on the raw keys: only a live reaction
         # proves the driver awake.
-        key_up, key_down = self._update_pedal_latches(
+        hand_up, key_down, throttle_latched = self._update_pedal_latches(
             key_up, key_down, pad_throttle, pad_brake, keys[pygame.K_b], dt
         )
+        # The latch is the LOWEST-priority speed input: while cruise, the
+        # keeper, or curve assist is engaged it contributes nothing, and it
+        # ramps back in when the last of them releases -- no re-gesture
+        # (owner design 2026-08-13). A hand-held key stays a live manual
+        # override, which is why the assists are handed hand_accelerating
+        # below rather than this blended value.
+        self._latch_yielding = throttle_latched and self._speed_authority_engaged()
+        key_up = hand_up or (throttle_latched and not self._latch_yielding)
         accelerating = key_up or pad_throttle > 0.05
+        hand_accelerating = hand_up or pad_throttle > 0.05
         braking_key = key_down or pad_brake > 0.05
         # The shift gesture keys off a fresh press, so it reads the trigger's
         # instantaneous position rather than the smoothed accelerate/brake
@@ -337,8 +346,8 @@ class DrivingUpdateMixin:
         self._update_lane(keys, dt)
         self._update_exit_preparation(keys, dt)
         self._resume_speed_control_if_ready(braking=braking)
-        self._update_cruise(dt, braking, accelerating, clutch_disengaged)
-        self._update_keeper(dt, braking, accelerating, clutch_disengaged)
+        self._update_cruise(dt, braking, hand_accelerating, clutch_disengaged)
+        self._update_keeper(dt, braking, hand_accelerating, clutch_disengaged)
         # The hazard assist's held application belongs here with the other
         # assists' floors, ahead of the physics -- see _apply_hazard_brake.
         # _update_hazard, which decides it, runs at the end of the frame.

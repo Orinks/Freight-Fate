@@ -1398,7 +1398,7 @@ class DrivingControlsMixin:
         pad_brake: float,
         emergency: bool,
         dt: float,
-    ) -> tuple[bool, bool]:
+    ) -> tuple[bool, bool, bool]:
         """Advance both pedal latches and blend them into the pedal state.
 
         Called once per frame from update() with the raw pedal inputs;
@@ -1408,13 +1408,21 @@ class DrivingControlsMixin:
         latch instantly, and safety systems outrank a latched accelerator:
         a live hazard (including automatic emergency braking), the
         emergency brake, and the overspeed alarm all drop it audibly.
+
+        Returns ``(hand_up, key_down, throttle_latched)``: the throttle
+        latch is reported separately rather than blended in, because a
+        latched throttle is the lowest-priority speed input -- update()
+        lets it drive the pedal only when no speed authority (cruise,
+        keeper, curve assist) is engaged, while a hand-held key stays a
+        live manual override. The brake latch keeps pre-blending: nothing
+        outranks the driver's brake.
         """
         if not self.ctx.settings.pedal_latch:
             if self._throttle_latch.release():
                 self.ctx.say_event("Throttle released.", interrupt=False)
             if self._brake_latch.release():
                 self.ctx.say_event("Brake released.", interrupt=False)
-            return key_up, key_down
+            return key_up, key_down, False
         for latch, held, name in (
             (self._throttle_latch, key_up, "Throttle"),
             (self._brake_latch, key_down, "Brake"),
@@ -1444,6 +1452,7 @@ class DrivingControlsMixin:
         if (key_up or pad_throttle > 0.05) and self._brake_latch.release():
             self.ctx.say_event("Brake released.", interrupt=False)
         return (
-            key_up or self._throttle_latch.latched,
+            key_up,
             key_down or self._brake_latch.latched,
+            self._throttle_latch.latched,
         )

@@ -599,6 +599,10 @@ class DrivingState(
         # a latched pedal reads as held everywhere downstream.
         self._throttle_latch = PedalLatch()
         self._brake_latch = PedalLatch()
+        # True while a caught throttle latch is standing down for a speed
+        # authority (see _speed_authority_engaged); the curve block reads
+        # it to retry the jake once the yielded throttle drains.
+        self._latch_yielding = False
         # Curve calls already made this trip (keys are curve entry miles).
         self._pacenote_spoken: set[int] = set()
         self._status_text = f"Press {self.ctx.control_hint('engine')} to start the engine."
