@@ -547,7 +547,11 @@ class PickupFacilityState(MenuState):
         self.loaded = True
         self._just_loaded = True
         self._save_state()
-        self.ctx.award_achievement("first_pickup")
+        # first_pickup is retired as an award; this hook now awards the merged
+        # "first_day" badge (first_dispatch + air_ready + first_pickup). The
+        # three retired ids keep their catalog entries so the cloud
+        # validator's allow-list never sees a removed id.
+        self.ctx.award_achievement("first_day")
         if plan.is_drop_hook:
             self.ctx.award_achievement("first_drop_hook")
             if plan.trailer is not None and plan.trailer.defect:

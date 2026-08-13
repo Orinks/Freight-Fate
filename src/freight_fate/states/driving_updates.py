@@ -590,7 +590,10 @@ class DrivingUpdateMixin:
                 )
             )
             self.ctx.say_event(message, interrupt=False)
-            self.ctx.award_achievement("air_ready", event=True)
+            # air_ready is retired as an award (folded into "first_day" at
+            # pickup completion, see city_pickup.py); the catalog entry and
+            # id stay so the cloud validator's allow-list never sees a
+            # removed id.
         elif t.air_low_warning:
             # Re-arm the ready cue only after a genuine depletion (low-air), not
             # the routine 100-125 psi compressor cycling: the parking-release

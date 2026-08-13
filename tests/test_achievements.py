@@ -293,7 +293,14 @@ def test_category_with_nothing_earned_still_reads_naturally(monkeypatch):
         app.shutdown()
 
 
-def test_delivery_settlement_awards_core_achievements(monkeypatch):
+def test_delivery_settlement_awards_only_first_delivery_on_a_first_run(monkeypatch):
+    """A fresh run one earns first_delivery alone.
+
+    first_on_time, clean_delivery, and speed_limit_saint would all clear on a
+    typical first run too (on time, no damage, no speeding) -- the rookie
+    chain's delivery-count floors are what keep them from piling on top of
+    first_delivery before the player has done more than one run.
+    """
     from freight_fate.app import App
     from freight_fate.models.jobs import JobBoard
     from freight_fate.models.profile import Profile
@@ -323,18 +330,152 @@ def test_delivery_settlement_awards_core_achievements(monkeypatch):
         arrival = ArrivalState(app.ctx, driving)
 
         earned = set(p.achievements)
-        assert {"first_delivery", "first_on_time", "clean_delivery", "speed_limit_saint"}.issubset(
-            earned
-        )
-        # The settlement collapses the run's badges into one row that names
-        # them, not one flavor paragraph each (R9).
-        summary_text = " ".join(arrival.summary_parts)
-        assert "new achievements:" in summary_text
+        # Rookie-chain floors (>=2/3/4) keep these three off a first-ever
+        # delivery even though the run would otherwise qualify; only
+        # first_delivery lands here.
+        assert "first_delivery" in earned
+        assert not {"first_on_time", "clean_delivery", "speed_limit_saint"} & earned
+        # R9: the settlement no longer reads a "New achievement!" flavor
+        # paragraph -- the badge is named, the story stays in the log.
         assert not any(part.startswith("New achievement!") for part in arrival.summary_parts)
         reloaded = Profile.load(p.path)
         assert set(reloaded.achievements) == earned
     finally:
         app.shutdown()
+
+
+def test_rookie_chain_achievements_clear_their_delivery_floors(monkeypatch):
+    """first_on_time/clean_delivery/speed_limit_saint spread across runs 2-4.
+
+    five_deliveries, unaffected by the rookie chain, still lands on run 5.
+    """
+    from freight_fate.app import App
+    from freight_fate.models.jobs import JobBoard
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import ArrivalState, DrivingState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="Rookie Chain")
+        p = app.ctx.profile
+        p.current_city = "Chicago"
+        monkeypatch.setattr(app.ctx, "say", lambda *_args, **_kwargs: None)
+
+        def deliver_one() -> None:
+            job = next(
+                job
+                for job in JobBoard(app.ctx.world).offers(
+                    p.current_city,
+                    p.career.endorsements,
+                    level=p.career.level,
+                    market=p.market,
+                )
+                if not job.locked_reason(p.career.endorsements, p.career.level)
+            )
+            route = app.ctx.world.supported_route_options(job.origin, job.destination)[0]
+            driving = DrivingState(app.ctx, job, route)
+            driving.trip.game_minutes = job.deadline_game_h * 30.0
+            driving.speeding_tickets = 0
+            ArrivalState(app.ctx, driving)
+
+        deliver_one()
+        assert p.career.deliveries == 1
+        assert "first_on_time" not in p.achievements
+        assert "clean_delivery" not in p.achievements
+        assert "speed_limit_saint" not in p.achievements
+
+        deliver_one()
+        assert p.career.deliveries == 2
+        assert "first_on_time" in p.achievements
+        assert "clean_delivery" not in p.achievements
+        assert "speed_limit_saint" not in p.achievements
+
+        deliver_one()
+        assert p.career.deliveries == 3
+        assert "clean_delivery" in p.achievements
+        assert "speed_limit_saint" not in p.achievements
+
+        deliver_one()
+        assert p.career.deliveries == 4
+        assert "speed_limit_saint" in p.achievements
+        assert "five_deliveries" not in p.achievements
+
+        deliver_one()
+        assert p.career.deliveries == 5
+        assert "five_deliveries" in p.achievements
+    finally:
+        app.shutdown()
+
+
+def test_pickup_completion_awards_the_merged_first_day_badge(monkeypatch):
+    """first_dispatch/air_ready/first_pickup are retired in favor of first_day.
+
+    A fresh career's pickup no longer dings first_dispatch, air_ready, and
+    first_pickup in a row -- it dings first_day once instead.
+    """
+    from freight_fate.app import App
+    from freight_fate.models.jobs import JobBoard
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.city_pickup import PickupFacilityState
+    from freight_fate.states.driving import ArrivalState, DrivingState
+
+    app = App()
+    try:
+        app.ctx.profile = Profile(name="First Day Run")
+        p = app.ctx.profile
+        p.current_city = "Chicago"
+        monkeypatch.setattr(app.ctx, "say", lambda *_args, **_kwargs: None)
+
+        job = next(
+            job
+            for job in JobBoard(app.ctx.world).offers(
+                p.current_city,
+                p.career.endorsements,
+                level=p.career.level,
+                market=p.market,
+            )
+            if not job.locked_reason(p.career.endorsements, p.career.level)
+        )
+
+        pickup = PickupFacilityState(app.ctx, job, checked_in=True)
+        app.push_state(pickup, should_enter=False)
+        pickup._finish_load()
+
+        assert "first_day" in p.achievements
+        assert "first_dispatch" not in p.achievements
+        assert "first_pickup" not in p.achievements
+        assert "air_ready" not in p.achievements
+
+        route = app.ctx.world.supported_route_options(job.origin, job.destination)[0]
+        driving = DrivingState(app.ctx, job, route)
+        driving.trip.game_minutes = job.deadline_game_h * 30.0
+        driving.speeding_tickets = 0
+
+        ArrivalState(app.ctx, driving)
+
+        earned = set(p.achievements)
+        assert {"first_day", "first_delivery"} <= earned
+        assert not {"first_dispatch", "first_pickup", "air_ready"} & earned
+        # Delivery-count floors keep the rest of the rookie chain off run one.
+        assert not {"first_on_time", "clean_delivery", "speed_limit_saint"} & earned
+    finally:
+        app.shutdown()
+
+
+def test_retired_first_run_badges_still_export_to_the_cloud_validator():
+    """Deleting an id breaks the allow-list for anyone who already earned it.
+
+    first_dispatch, first_pickup, and air_ready are retired as awards but keep
+    their catalog entries and ids for exactly this reason.
+    """
+    from freight_fate.achievements import ACHIEVEMENT_BY_ID
+    from freight_fate.profile_integrity_invariants import invariant_data
+
+    retired = {"first_dispatch", "first_pickup", "air_ready"}
+    for badge_id in retired:
+        assert badge_id in ACHIEVEMENT_BY_ID
+
+    assert retired <= set(invariant_data()["achievementIds"])
 
 
 def test_eastbound_badge_fires_only_on_an_eastbound_delivery(monkeypatch):

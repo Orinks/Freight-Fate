@@ -2321,6 +2321,18 @@ section below and the Unreleased changelog; the release-line view:
       midnight), clean-record streaks, and a short row of deliberate jokes
       -- eighty-eight miles an hour, sixteen tons in one load, and a solid
       mile held at exactly sixty-nine.
+- [x] **Rookie-arc achievement rework (owner-approved).** A first career run
+      used to fire four unavoidable badges (`first_dispatch`, `air_ready`,
+      `first_pickup`, `first_delivery`) plus up to three likely ones
+      (`first_on_time`, `clean_delivery`, `speed_limit_saint`) before the
+      player had done anything skillful. `first_dispatch`, `air_ready`, and
+      `first_pickup` now fold into one new "First Day" badge awarded on
+      pickup completion; their old ids and catalog entries stay so the cloud
+      validator's allow-list never sees a removed id, they simply no longer
+      trigger. `first_on_time`/`clean_delivery`/`speed_limit_saint` in
+      `_award_arrival_achievements` now gain delivery-count floors
+      (`>= 2`/`>= 3`/`>= 4`) so they spread across the first several runs
+      instead of all landing on run one, just ahead of `five_deliveries`.
 - [x] **Save compatibility.** Careers back through the version-4 schema
       load with sensible defaults, and newer-snapshot saves no longer crash
       older-schema loads.

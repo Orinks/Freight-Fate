@@ -133,6 +133,15 @@ ACHIEVEMENTS: tuple[Achievement, ...] = (
         "Alabama - Roll On (Eighteen Wheeler)",
     ),
     Achievement(
+        "first_day",
+        "First Day",
+        "Dispatch handed you your first load number, the shipper watched you back a "
+        "trailer into the dock, and the air finally built past governor release. "
+        "Your first day is in the books.",
+        "career",
+        "The Franklin County Trucking Company - I'm a Trucker",
+    ),
+    Achievement(
         "first_delivery",
         "Signed, Sealed, Hauled",
         "Your very first load is signed for and gone. No fanfare needed -- the receiver got the freight and the paperwork held up clean.",

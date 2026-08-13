@@ -1518,11 +1518,13 @@ class ArrivalState(MenuState):
             region_count = add_unique_stat(p, "regions_visited", region)
 
         ids = ["first_delivery"]
-        if on_time:
+        # Rookie chain: spread across the first few runs instead of all
+        # landing on delivery one, alongside first_delivery.
+        if on_time and p.career.deliveries >= 2:
             ids.append("first_on_time")
-        if trip_damage <= 1.0:
+        if trip_damage <= 1.0 and p.career.deliveries >= 3:
             ids.append("clean_delivery")
-        if speeding_tickets == 0:
+        if speeding_tickets == 0 and p.career.deliveries >= 4:
             ids.append("speed_limit_saint")
         if toll_expense > 0:
             ids.append("toll_paid")
