@@ -31,6 +31,23 @@ this change only redefines who wins while an assist is engaged.
 - Realistic play is the `pedal_latch` setting turned off; the latch is an
   input-accessibility accommodation and is documented as such.
 
+## Revision 2026-08-13 (owner, mid-implementation): three-way setting
+
+The `pedal_latch` setting becomes a three-way mode instead of a toggle,
+following the `overspeed_warning` bool-to-string precedent:
+
+- **"assists first"** (default; legacy `True` migrates here): everything in
+  this spec -- the latch yields to engaged speed authorities.
+- **"latch first"**: the behavior before this change, kept for players who
+  want the latch to mean "hold this whatever the assists think" -- a
+  latched throttle counts as a manual override and the assists stand down.
+  The hard safety releases apply in both modes, unchanged.
+- **"off"** (legacy `False` migrates here): no latching at all, the plain
+  pedals -- the realistic mode.
+
+The catch line naming the authority speaks only in "assists first" mode;
+in "latch first" the plain "Throttle latched." is the truth.
+
 ## Mechanism
 
 `_update_pedal_latches` returns hand and latch state separately instead of

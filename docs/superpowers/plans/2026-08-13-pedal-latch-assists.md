@@ -531,7 +531,132 @@ git commit -m "feat(driving): curve assist owns the pedal and retries its jake u
 
 ---
 
-### Task 5: The catch line names the authority holding the speed
+### Task 7: The three-way Latching pedals setting (owner revision 2026-08-13 — runs BETWEEN Tasks 4 and 5)
+
+**Files:**
+- Modify: `src/freight_fate/settings.py:253-258` (field) and the legacy-coercion block near `:517` (bool migration)
+- Modify: `src/freight_fate/states/driving_controls.py` (`_update_pedal_latches` off-check, ~1412) 
+- Modify: `src/freight_fate/states/driving_updates.py` (the yield/blend block from Task 2)
+- Modify: `src/freight_fate/states/main_menu.py` (~1626/1704: the settings entry becomes a mode cycler like `_toggle_overspeed_warning`, ~1774)
+- Test: `tests/test_pedal_latch_assists.py`, plus fix any test that sets `pedal_latch = False`/`True` (`tests/test_pedal_latch.py:181`, settings-menu test at `tests/test_pedal_latch.py:201`)
+
+**Interfaces:**
+- Consumes: Task 2's blend block and `_latch_yielding`.
+- Produces: `Settings.pedal_latch: str = "assists first"` with values `"assists first" | "latch first" | "off"`; legacy `True → "assists first"`, `False → "off"` in the load-time coercion block (copy the `overspeed_warning` pattern at `settings.py:517-520`). Task 5 reads the mode for its speech gate.
+
+- [ ] **Step 1: Write the failing tests**
+
+```python
+def test_latch_first_mode_keeps_the_old_override_meaning(monkeypatch):
+    """Owner revision: "latch first" is the pre-change behavior -- a latched
+    throttle is a manual override and cruise stands down (stays engaged,
+    waiting, while the latch drives the pedal)."""
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    held = set()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        app.ctx.settings.pedal_latch = "latch first"
+        app.ctx.settings.overspeed_warning = "off"
+        d.truck.engine_on = True
+        d.truck.velocity_mps = 60 / 2.2369362920544
+        _latch_throttle(d)
+        d._engage_cruise(55.0)
+
+        _drive_frames(d, 2.0)
+
+        assert d._cruise_mph is not None  # engaged, standing down
+        assert d._throttle_latch.latched
+        assert d.truck.throttle > 0.9  # the latch owns the pedal, old style
+        assert not d._latch_yielding
+    finally:
+        app.shutdown()
+
+
+def test_legacy_bool_settings_migrate_to_modes():
+    from freight_fate.settings import Settings
+
+    s = Settings()
+    s.pedal_latch = True
+    s.__class__.__dict__  # no-op; keep ruff quiet if unused
+    # Run the same load-time coercion path the overspeed migration uses;
+    # find the classmethod/function that applies it (settings.py ~517) and
+    # call it the way the loader does.
+    ...
+```
+
+For the migration test, read `settings.py` around line 517 first: write the test the way the existing overspeed bool-migration is tested (grep `tests/` for `overspeed_warning is True` or the loader test) — same mechanism, same test shape, asserting `True → "assists first"` and `False → "off"`. If no such loader test exists, test via the public load path (`Settings.load`/`from_dict`, whatever the loader is named).
+
+- [ ] **Step 2: Run to verify the mode test fails** (env FREIGHT_FATE_NO_SPEECH=1 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy, `uv run pytest tests/test_pedal_latch_assists.py -n 0 -q -p no:cacheprovider`). Expected: FAIL — with a string value the current `if not self.ctx.settings.pedal_latch` check treats every non-empty mode as latch-enabled, but nothing implements "latch first", so `_latch_yielding` goes True and throttle drains.
+
+- [ ] **Step 3: Implement**
+
+`settings.py` field (keep the existing comment, extend it):
+
+```python
+    # Double-tap-and-hold latches the accelerator or brake key so a long
+    # pull or a steady snub needs no sustained hold; a fresh press of the
+    # same key, the opposite pedal, or any safety override releases it.
+    # The same input-accessibility layer as the keeper: presets never
+    # touch it. Realism cover: the hand-throttle knob is a real cab control.
+    # Modes (owner revision 2026-08-13): "assists first" lets cruise, the
+    # speed keeper, and curve assist outrank a latched throttle; "latch
+    # first" is the original meaning, the latch as a manual override the
+    # assists stand down for; "off" is the plain pedals.
+    pedal_latch: str = "assists first"
+```
+
+Legacy coercion beside the overspeed one (settings.py ~517):
+
+```python
+        if s.pedal_latch is True:
+            s.pedal_latch = "assists first"
+        elif s.pedal_latch is False:
+            s.pedal_latch = "off"
+```
+
+`driving_controls.py` off-check: `if not self.ctx.settings.pedal_latch:` becomes `if self.ctx.settings.pedal_latch == "off":`.
+
+`driving_updates.py` blend block — the yield gates on the mode; in "latch first" the latch counts as a hand for the assists:
+
+```python
+        latch_mode = self.ctx.settings.pedal_latch
+        self._latch_yielding = (
+            throttle_latched
+            and latch_mode == "assists first"
+            and self._speed_authority_engaged()
+        )
+        key_up = hand_up or (throttle_latched and not self._latch_yielding)
+        accelerating = key_up or pad_throttle > 0.05
+        # In "latch first" the latch IS the driver insisting on speed, so the
+        # assists see it as a hand and stand down -- the original meaning.
+        assist_up = hand_up or (throttle_latched and latch_mode == "latch first")
+        hand_accelerating = assist_up or pad_throttle > 0.05
+```
+
+`main_menu.py`: turn the pedal-latch entry into a three-mode cycler exactly like `_toggle_overspeed_warning` (`modes = ["assists first", "latch first", "off"]`), spoken as `Latching pedals: {mode}`. Match whatever label text the entry uses today.
+
+Fix the two existing tests that assign bools: `tests/test_pedal_latch.py:181` `pedal_latch = False` → `"off"`. (Direct assignment of `True` elsewhere: change to `"assists first"` if any exists.)
+
+- [ ] **Step 4: Run** `uv run pytest tests/test_pedal_latch_assists.py tests/test_pedal_latch.py tests/test_settings_menu.py -n 0 -q -p no:cacheprovider`. Expected: all pass.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/freight_fate/settings.py src/freight_fate/states/driving_controls.py src/freight_fate/states/driving_updates.py src/freight_fate/states/main_menu.py tests/test_pedal_latch_assists.py tests/test_pedal_latch.py
+git commit -m "feat(driving): Latching pedals grows assists-first / latch-first / off modes [skip changelog]"
+```
+
+---
+
+### Task 5: The catch line names the authority holding the speed (runs AFTER Task 7)
 
 **Files:**
 - Modify: `src/freight_fate/states/driving_controls.py:1423-1432` (the `event == "latched"` branch)
@@ -620,16 +745,26 @@ In `_update_pedal_latches`, replace the catch confirmation:
                 self._direction_hold_s = 0.0
                 self.ctx.audio.play("ui/tick", volume=1.0)
                 line = f"{name} latched."
-                if latch is self._throttle_latch:
+                if (
+                    latch is self._throttle_latch
+                    and self.ctx.settings.pedal_latch == "assists first"
+                ):
                     # A latch caught while something smarter is holding the
                     # speed must say who has the pedal, or the gesture feels
                     # dead -- the latch takes over only when they release.
+                    # In "latch first" mode the plain line is the truth: the
+                    # latch has the pedal and nothing outranks it.
                     if self._cruise_mph is not None:
                         line = "Throttle latched. Adaptive cruise holds the speed."
                     elif self._keeper_mph is not None:
                         line = "Throttle latched. Speed keeper holds the speed."
                 self.ctx.say_event(line, interrupt=False)
 ```
+
+Add a third test beside the two above: same gesture-under-cruise setup as
+`test_the_catch_line_names_the_authority_holding_the_speed` but with
+`app.ctx.settings.pedal_latch = "latch first"`, asserting `"Throttle
+latched."` IS in spoken and the authority line is NOT.
 
 (Curve assist is deliberately omitted: a corner is seconds long and its own cues are already speaking.)
 
@@ -657,17 +792,20 @@ git commit -m "feat(speech): latch catch names the authority holding the speed [
 - [ ] **Step 1: CHANGELOG entry** (spoken by screen readers — player language, no jargon), first bullet under `### Changed`:
 
 ```markdown
-- **A latched throttle now gets out of the way of the speed assists.**
-  With Latching pedals on, a latched accelerator used to read as your
-  hand insisting on speed, so cruise, the speed keeper, and curve
-  assistance all stood down and the truck just kept accelerating. The
-  latch is now the quietest voice in the cab: any speed assist that is
-  holding or shedding speed drives the pedal, and the latch takes over
-  again the moment it lets go -- no need to redo the latch gesture.
-  Latching while cruise or the speed keeper is active now says who is
-  holding the speed. A key you physically hold down still overrides the
-  assists, exactly as before, and turning Latching pedals off keeps the
-  fully manual behavior.
+- **A latched throttle now gets out of the way of the speed assists, and
+  the Latching pedals setting lets you choose.** A latched accelerator
+  used to read as your hand insisting on speed, so cruise, the speed
+  keeper, and curve assistance all stood down and the truck just kept
+  accelerating. Latching pedals now has three settings. Assists first,
+  the new standard, makes the latch the quietest voice in the cab: any
+  speed assist that is holding or shedding speed drives the pedal, and
+  the latch takes over again the moment it lets go -- no need to redo
+  the latch gesture -- and latching while cruise or the speed keeper is
+  active says who is holding the speed. Latch first keeps the old
+  meaning, where the latch overrides the assists until a safety system
+  steps in. Off keeps the plain pedals for fully manual driving. A key
+  you physically hold down still overrides the assists in every mode,
+  exactly as before.
 ```
 
 - [ ] **Step 2: ROADMAP bullet**, beside the other 2026-08-13 entries:
