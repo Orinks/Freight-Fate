@@ -214,8 +214,17 @@ class Rig:
 
     def _recorder(self, prefix: str):
         # **kwargs swallows whatever routing hints say_event grows (priority,
-        # key, force, ...) -- the rig records what was said, not how.
+        # key, force, ...) -- the rig records what was said, not how. A
+        # normal/terse pair resolves against the rig's own verbosity setting,
+        # the same choice the real delivery layer makes, so a scenario run
+        # terse records what a terse player would actually hear.
+        from freight_fate.speech_text import SpokenMessage
+
         def _speak(text: str, interrupt: bool = True, **kwargs: object):
+            if isinstance(text, SpokenMessage):
+                text = text.render(self.ctx.settings.speech_verbosity == 0)
+                if not text:
+                    return
             self.transcript.append(f"{prefix}{text}")
 
         return _speak

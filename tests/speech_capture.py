@@ -31,6 +31,7 @@ def speech_stub(
     with_interrupt: bool = False,
     prefix: str = "",
     record: Callable[[str, bool], None] | None = None,
+    terse: bool = False,
 ) -> Callable[..., None]:
     """A stand-in for ``GameContext.say`` / ``say_event`` that records calls.
 
@@ -48,7 +49,15 @@ def speech_stub(
     ``record`` takes over entirely, for a caller that keeps something richer
     than a list of lines. It still belongs here rather than in a hand-written
     stub, so that ``ctx.say``'s signature has exactly one definition.
+
+    A stub replaces the real ``say``/``say_event``, so the delivery layer's
+    normal/terse resolution never runs; a ``SpokenMessage`` pair is resolved
+    here instead. The default records the normal rendering (what the real
+    method would speak at normal verbosity); a test that sets the player
+    terse passes ``terse=True`` to hear what that player would. A pair whose
+    chosen rendering is empty is dropped, exactly as the real method drops it.
     """
+    from freight_fate.speech_text import SpokenMessage
 
     # ``**_pacing`` swallows say_event's keyword-only pacing arguments
     # (priority, key, force). They steer when and whether a line reaches the
@@ -60,6 +69,10 @@ def speech_stub(
         remember: bool = True,
         **_pacing,
     ) -> None:
+        if isinstance(text, SpokenMessage):
+            text = text.render(terse)
+            if not text:
+                return
         if record is not None:
             record(text, interrupt)
             return

@@ -26,6 +26,7 @@ from .models.profile import Profile
 from .music import music_track_duration_s
 from .settings import Settings
 from .speech import EventPriority, EventSpeechPacer, Speech
+from .speech_text import SpokenMessage
 from .states.base import State
 
 if TYPE_CHECKING:
@@ -187,6 +188,13 @@ class GameContext:
         return self._truck_parking
 
     def say(self, text: str, interrupt: bool = True, review: bool = True) -> None:
+        if isinstance(text, SpokenMessage):
+            # A normal/terse pair resolves here, in the delivery layer, so
+            # coverage never again depends on a call-site branch (research
+            # doc, R5). An empty rendering is a line terse mode drops whole.
+            text = text.render(self.settings.speech_verbosity == 0)
+            if not text:
+                return
         transcript.info("%s", text)
         if interrupt and getattr(self._app.state, "paces_main_speech", False):
             # At the wheel, the main channel queues instead of cutting: an
@@ -287,7 +295,17 @@ class GameContext:
         that interrupts to say it is acting would otherwise land exactly where
         the warning it cut off should be, so the review keys that exist to
         rescue an interrupted line would hand back the interruption instead.
+
+        ``text`` may be a :class:`SpokenMessage` normal/terse pair; the
+        player's speech mode picks the rendering here, so terse coverage is
+        a property of the message definition rather than of the call site.
+        A pair whose terse rendering is empty is dropped whole in terse
+        mode: not spoken, not logged, exactly like a muted chatter line.
         """
+        if isinstance(text, SpokenMessage):
+            text = text.render(self.settings.speech_verbosity == 0)
+            if not text:
+                return
         if self._event_pacer.is_repeat(text, key=key, force=force):
             # Already in the player's ear. Not spoken, not logged, not
             # reviewable: as far as the drive is concerned it never happened
