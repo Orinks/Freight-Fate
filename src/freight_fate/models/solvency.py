@@ -263,6 +263,52 @@ def advance_refused_reason(profile) -> str:
     )
 
 
+# -- paying it down from cash ------------------------------------------------
+
+PAYOFF_CASH_CUSHION = 200.0
+PAYOFF_MIN_CASH = 10.0
+
+
+def out_of_pocket_options(profile) -> list[tuple[str, float]]:
+    """What a driver holding cash may put toward the balance, right now.
+
+    Kinds: "all" when cash covers the whole balance, "half" for half of it
+    capped at cash, "cushion" for everything above a fuel cushion. Amounts
+    under a dollar or duplicating an earlier option are dropped.
+    """
+    balance = max(0.0, float(getattr(profile, "fines_owed", 0.0) or 0.0))
+    cash = float(getattr(profile, "money", 0.0) or 0.0)
+    if balance < 1.0 or cash < PAYOFF_MIN_CASH:
+        return []
+    options: list[tuple[str, float]] = []
+
+    def _offer(kind: str, amount: float) -> None:
+        amount = round(amount, 2)
+        if amount >= 1.0 and all(abs(amount - a) >= 0.01 for _, a in options):
+            options.append((kind, amount))
+
+    if cash >= balance:
+        _offer("all", balance)
+    _offer("half", min(balance / 2.0, cash))
+    _offer("cushion", min(balance, cash - PAYOFF_CASH_CUSHION))
+    return options
+
+
+def pay_out_of_pocket(profile, amount: float) -> float:
+    """Move cash onto the balance; returns what was actually paid.
+
+    Clamped so cash never goes below zero and the balance never below it.
+    """
+    balance = max(0.0, float(getattr(profile, "fines_owed", 0.0) or 0.0))
+    cash = float(getattr(profile, "money", 0.0) or 0.0)
+    paid = round(min(max(0.0, float(amount)), balance, max(0.0, cash)), 2)
+    if paid < 0.01:
+        return 0.0
+    profile.fines_owed = round(balance - paid, 2)
+    profile.money = round(cash - paid, 2)
+    return paid
+
+
 # -- the fleet of last resort cannot let debt run away ----------------------
 
 

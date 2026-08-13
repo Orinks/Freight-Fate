@@ -742,3 +742,58 @@ def test_a_withheld_promotion_does_not_hand_over_a_freshly_serviced_truck():
     text = withheld_promotion_text(p)
     assert "exactly as it stands" in text
     assert "fueled" not in text and "washed" not in text
+
+
+# --- out-of-pocket payoff helpers -------------------------------------------
+
+
+def _payer(money, owed):
+    p = _profile()
+    p.money = money
+    p.fines_owed = owed
+    return p
+
+
+def test_payoff_options_full_coverage():
+    from freight_fate.models.solvency import out_of_pocket_options
+
+    opts = dict(out_of_pocket_options(_payer(money=5_000.0, owed=1_000.0)))
+    assert opts["all"] == 1_000.0
+    assert opts["half"] == 500.0
+    # cushion amount (4800) exceeds the balance, so it clamps to it and
+    # duplicates "all" -- deduplicated away.
+    assert "cushion" not in opts
+
+
+def test_payoff_options_partial_coverage():
+    from freight_fate.models.solvency import out_of_pocket_options
+
+    opts = dict(out_of_pocket_options(_payer(money=800.0, owed=2_000.0)))
+    assert "all" not in opts
+    assert opts["half"] == 800.0  # half the balance is 1000, capped at cash
+    assert opts["cushion"] == 600.0  # cash minus the 200 cushion
+
+
+def test_payoff_options_hidden_when_broke_or_clear():
+    from freight_fate.models.solvency import out_of_pocket_options
+
+    assert out_of_pocket_options(_payer(money=9.0, owed=500.0)) == []
+    assert out_of_pocket_options(_payer(money=500.0, owed=0.5)) == []
+    assert out_of_pocket_options(_payer(money=-50.0, owed=500.0)) == []
+
+
+def test_pay_out_of_pocket_clamps_and_clears():
+    from freight_fate.models.solvency import pay_out_of_pocket
+
+    p = _payer(money=800.0, owed=600.0)
+    assert pay_out_of_pocket(p, 600.0) == 600.0
+    assert p.fines_owed == 0.0
+    assert p.money == 200.0
+
+    p = _payer(money=100.0, owed=600.0)
+    assert pay_out_of_pocket(p, 999.0) == 100.0  # never below zero cash
+    assert p.money == 0.0
+    assert p.fines_owed == 500.0
+
+    p = _payer(money=100.0, owed=600.0)
+    assert pay_out_of_pocket(p, 0.0) == 0.0  # no-op stays a no-op
