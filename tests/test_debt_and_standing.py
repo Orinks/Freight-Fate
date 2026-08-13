@@ -811,3 +811,48 @@ def test_debt_lines_point_at_out_of_pocket_payoff():
     assert POINTER in solvency.debt_warning_line(p)
     assert POINTER not in solvency.debt_warning_line(p, terse=True)
     assert POINTER in solvency.debt_line(p)
+
+
+# --- the terminal menu item and PayDebtState --------------------------------
+
+
+def test_the_terminal_only_offers_payoff_when_something_is_owed(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import CityMenuState
+
+    app = App()
+    try:
+        app.ctx.profile = _payer(money=5_000.0, owed=1_000.0)
+        _quiet(app, monkeypatch)
+        menu = CityMenuState(app.ctx)
+        assert any(
+            item.text == "Pay down what you owe: 1,000 dollars owed" for item in menu.build_items()
+        )
+
+        app.ctx.profile.fines_owed = 0.0
+        assert not any(item.text.startswith("Pay down what you owe") for item in menu.build_items())
+    finally:
+        app.shutdown()
+
+
+def test_paying_it_all_off_clears_the_balance_and_says_so(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models import solvency
+    from freight_fate.states.city import PayDebtState
+
+    app = App()
+    try:
+        app.ctx.profile = _payer(money=5_000.0, owed=1_000.0)
+        p = app.ctx.profile
+        spoken = _quiet(app, monkeypatch)
+        state = PayDebtState(app.ctx)
+        items = state.build_items()
+        pay_it_all = next(item for item in items if item.text.startswith("Pay it all"))
+        pay_it_all.action()
+
+        assert p.fines_owed == 0.0
+        assert solvency.debt_owed(p) == 0.0
+        assert p.money == 4_000.0
+        assert any("your account is clear" in line for line in spoken)
+    finally:
+        app.shutdown()

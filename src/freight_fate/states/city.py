@@ -398,6 +398,17 @@ class CityMenuState(MenuState):
                     "your next delivery settlement.",
                 ),
             )
+        if solvency.out_of_pocket_options(self.ctx.profile):
+            items.insert(  # right behind the garage: the money cluster
+                items.index(next(i for i in items if i.action == self._business_status)),
+                MenuItem(
+                    self._pay_debt_label,
+                    self._pay_debt,
+                    help="Put your own cash toward the balance you owe, instead "
+                    "of waiting for settlement collection. You choose how much; "
+                    "cash never goes below zero.",
+                ),
+            )
         return items
 
     def _show_first_day_briefing(self) -> bool:
@@ -447,6 +458,13 @@ class CityMenuState(MenuState):
 
     def _business_status(self) -> None:
         self.ctx.push_state(BusinessStatusState(self.ctx))
+
+    def _pay_debt_label(self) -> str:
+        owed = solvency.money_text(solvency.debt_owed(self.ctx.profile))
+        return f"Pay down what you owe: {owed} owed"
+
+    def _pay_debt(self) -> None:
+        self.ctx.push_state(PayDebtState(self.ctx))
 
     def _driving_school(self) -> None:
         from .driving_school import DrivingSchoolState
@@ -1049,6 +1067,68 @@ class BobtailDestState(MenuState):
             interrupt=True,
         )
         self.ctx.push_state(driving)
+
+
+class PayDebtState(MenuState):
+    """Pay down what a driver owes with cash, instead of waiting on collection."""
+
+    title = "Pay down what you owe"
+    intro_help = (
+        "Choose how much of your own cash to put toward the balance. "
+        "Escape backs out without paying."
+    )
+
+    _LABELS = {
+        "all": "Pay it all: {amount}",
+        "half": "Pay half: {amount}",
+        "cushion": "Pay what you can, keeping a 200 dollar cushion: {amount}",
+    }
+
+    def announce_entry(self) -> None:
+        p = self.ctx.profile
+        self.ctx.say(
+            f"You owe {solvency.money_text(solvency.debt_owed(p))} and have "
+            f"{solvency.money_text(p.money)}. {self.current_text()}"
+        )
+
+    def build_items(self) -> list[MenuItem]:
+        items = [
+            MenuItem(
+                self._LABELS[kind].format(amount=solvency.money_text(amount)),
+                lambda a=amount: self._pay(a),
+                help="A quarter of every settlement also keeps paying it down.",
+            )
+            for kind, amount in solvency.out_of_pocket_options(self.ctx.profile)
+        ]
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def _pay(self, amount: float) -> None:
+        p = self.ctx.profile
+        paid = solvency.pay_out_of_pocket(p, amount)
+        if paid < 0.01:
+            self.ctx.audio.play("ui/error")
+            self.ctx.say("That amount is no longer payable. Check the options again.")
+            self.refresh()
+            return
+        self.ctx.save_profile()
+        self.ctx.audio.play("ui/notify")
+        if solvency.debt_owed(p) < 1.0:
+            self.ctx.say(
+                f"Paid {solvency.money_text(paid)} and your account is clear. "
+                "Every settlement reaches you in full again. You have "
+                f"{solvency.money_text(p.money)}.",
+                interrupt=True,
+            )
+            self.ctx.pop_state()
+            return
+        self.ctx.say(
+            f"Paid {solvency.money_text(paid)} toward what you owed. You have "
+            f"{solvency.money_text(p.money)}, and "
+            f"{solvency.money_text(solvency.debt_owed(p))} still owed.",
+            interrupt=True,
+        )
+        self.refresh()
 
 
 from .city_business import (  # noqa: E402,F401
