@@ -19,6 +19,10 @@ from .driving_damage import (
 
 DELIVERY_SETTLEMENT_MAX_AVERAGE_MPH = 55.0
 ROAD_GRIME_PER_MILE = 0.004
+# Below this the settlement reports the tank; at or above it a near-full tank
+# is the unremarkable default and the row is dropped (research doc R10). A
+# quarter tank is the point a driver planning the next leg starts to care.
+SETTLEMENT_LOW_FUEL_FRACTION = 0.25
 
 # Plain "deliver into this city" badges (titles claim nothing extra). Mostly
 # cities the jukebox got to first; each badge's song lives in the catalog.
@@ -1268,14 +1272,18 @@ class ArrivalState(MenuState):
             bonus_lines.append(f"Early delivery bonus: {early_bonus:,.0f} dollars.")
         if not bonus_lines:
             bonus_lines.append("No delivery bonus on this run.")
-        cargo_condition = (
-            f"Truck damage added on this run: {trip_damage:.0f} percent"
-            if trip_damage > 1
-            else "No new damage recorded"
-        )
+        # Condition rows carry information only when something happened: a run
+        # that added no damage, a near-full tank, and an undamaged truck are
+        # the unremarkable default, and the review keys still reach the full
+        # state on demand (research doc R10).
+        condition_lines = []
+        if trip_damage > 1:
+            condition_lines.append(f"Truck damage added on this run: {trip_damage:.0f} percent.")
+        if d.truck.fuel_fraction < SETTLEMENT_LOW_FUEL_FRACTION:
+            condition_lines.append(f"Fuel remaining: {d.truck.fuel_fraction * 100:.0f} percent.")
+        if d.truck.damage_pct >= 1.0:
+            condition_lines.append(f"Truck damage now: {d.truck.damage_pct:.0f} percent.")
         career_lines = announcements + self._achievement_messages
-        if not career_lines:
-            career_lines = ["No new career messages."]
         advance_lines = []
         if advance_repaid > 0:
             advance_lines.append(f"Pay advance repaid: {advance_repaid:,.0f} dollars.")
@@ -1316,7 +1324,6 @@ class ArrivalState(MenuState):
             f"Carrier-paid or reimbursed charges: {carrier_charges:,.0f} "
             f"dollars, including tolls {toll_expense:,.0f} and "
             f"accessorials {charge_summary(accessorials)}.",
-            "Carrier charges are not deducted from driver pay.",
             f"Business status: {business.status_label}.",
             *business_cost_lines,
             *charge_lines,
@@ -1326,9 +1333,7 @@ class ArrivalState(MenuState):
             *bonus_lines,
             f"Route: {' to '.join(self.ctx.world.spoken_city(c) for c in d.route.cities)}.",
             f"Distance credited: {self.ctx.settings.distance_text(job.distance_mi)}.",
-            cargo_condition + ".",
-            f"Fuel remaining: {d.truck.fuel_fraction * 100:.0f} percent.",
-            f"Truck damage now: {d.truck.damage_pct:.0f} percent.",
+            *condition_lines,
             *career_lines,
         ]
         self._announcements = announcements

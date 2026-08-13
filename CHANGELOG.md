@@ -4,6 +4,14 @@
 
 ### Changed
 
+- **The delivery summary is shorter, and skips the rows that say nothing.**
+  When a run added no damage, the truck came in undamaged, and the tank is
+  more than a quarter full, the settlement no longer reads those rows out --
+  along with "No new career messages" and the standing note that carrier
+  charges never come out of your pay. They come back the moment they carry
+  news: a run that took damage, a low tank, or a truck now carrying wear all
+  still speak. Fewer keypresses to walk a clean delivery.
+
 - **The settings menus are reorganized so things are easier to find.**
   Gameplay is now a category that opens its own submenu of four shorter
   screens: Driving assistance, Difficulty and hours of service, World and
