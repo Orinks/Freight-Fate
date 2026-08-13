@@ -185,3 +185,40 @@ def test_keeper_holds_a_zone_speed_under_a_latched_throttle(monkeypatch):
         assert d.truck.speed_mph < 33.0  # shedding toward the zone number
     finally:
         app.shutdown()
+
+
+def test_releasing_the_latch_leaves_cruise_holding(monkeypatch):
+    """Owner rule 2026-08-13: unlatching hands the pedal back to the hand;
+    it is not a cruise cancel. The brake stays the cancel, unchanged."""
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    held = set()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        d.truck.engine_on = True  # _update_cruise cancels the session without it
+        app.ctx.settings.overspeed_warning = "off"
+        d.truck.velocity_mps = 60 / 2.2369362920544
+        _latch_throttle(d)
+        d._engage_cruise(55.0)
+        _drive_frames(d, 1.0)
+
+        # A fresh press of the throttle key returns the pedal to the hand...
+        held.add(pygame.K_UP)
+        _drive_frames(d, 0.3)
+        held.discard(pygame.K_UP)
+        _drive_frames(d, 1.0)
+
+        assert not d._throttle_latch.latched
+        assert "Throttle released." in spoken
+        assert d._cruise_mph is not None  # ...and cruise never blinked
+        assert not any("cruise canceled" in s.lower() for s in spoken)
+    finally:
+        app.shutdown()
