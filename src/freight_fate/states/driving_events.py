@@ -2436,7 +2436,12 @@ class DrivingEventMixin:
         t = self.truck
         self._speed_control_armed = True
         self._speed_control_paused_at_stop = False
-        self._cruise_mph = max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, target_mph))
+        # Round to the whole mph the player actually hears (speed_text already
+        # rounds the readout): a plain K-set otherwise captures the truck's
+        # exact float speed (e.g. 59.95), and the first +/- tap would spend
+        # itself just healing that invisible fraction onto the grid instead
+        # of making an audible step.
+        self._cruise_mph = max(CRUISE_MIN_MPH, min(CRUISE_MAX_MPH, round(target_mph)))
         self._speed_control_target_mph = self._cruise_mph
         # Chase a working setpoint that starts at road speed, so a big resume
         # error eases on rather than landing on the pedal at once. Engaging at
@@ -2531,7 +2536,11 @@ class DrivingEventMixin:
             return
         self._speed_control_armed = True
         self._speed_control_paused_at_stop = False
-        self._keeper_mph = min(t.speed_mph if target_mph is None else target_mph, limit_mph)
+        # Same rounding as _engage_cruise: a plain K-set captures the truck's
+        # exact float speed, which the player never hears -- only its rounded
+        # form does.
+        captured_mph = round(t.speed_mph) if target_mph is None else target_mph
+        self._keeper_mph = min(captured_mph, limit_mph)
         self._keeper_zone = zone_reason
         self._keeper_zone_limit = limit_mph
         self._keeper_throttle = t.throttle

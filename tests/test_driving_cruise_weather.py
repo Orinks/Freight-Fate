@@ -253,7 +253,7 @@ def test_cruise_does_not_rev_engine_when_clutch_is_depressed(monkeypatch):
 @pytest.mark.smoke
 def test_cruise_set_point_adjusts_with_plus_and_minus():
     from freight_fate.app import App
-    from freight_fate.states.driving import CRUISE_MAX_MPH
+    from freight_fate.states.driving import CRUISE_MAX_MPH, CRUISE_STEP_MPH
 
     app = App()
     try:
@@ -265,19 +265,19 @@ def test_cruise_set_point_adjusts_with_plus_and_minus():
         driving.truck.velocity_mps = 26.8  # ~60 mph
         driving.handle_event(key_event(pygame.K_k))
         base = driving._cruise_mph
-        assert base == pytest.approx(60.0, abs=1.0)
+        # _engage_cruise rounds the captured road speed (~59.95) to the whole
+        # mph the player actually hears, so base lands exactly on the fives
+        # grid here -- a plain tap steps a full CRUISE_STEP_MPH.
+        assert base == pytest.approx(60.0)
 
-        # base is captured road speed (~59.95, off the fives grid), so a plain
-        # tap snaps outward to the nearest five rather than adding a flat
-        # CRUISE_STEP_MPH -- see cruise_step_target in driving_core.py.
-        driving.handle_event(key_event(pygame.K_EQUALS))  # + snaps up to the next five
-        assert driving._cruise_mph == pytest.approx(60.0)
-        driving.handle_event(key_event(pygame.K_MINUS))  # - steps a full five down
-        assert driving._cruise_mph == pytest.approx(55.0)
+        driving.handle_event(key_event(pygame.K_EQUALS))  # + raises by a step
+        assert driving._cruise_mph == pytest.approx(base + CRUISE_STEP_MPH)
+        driving.handle_event(key_event(pygame.K_MINUS))  # - lowers it back
+        assert driving._cruise_mph == pytest.approx(base)
         driving.handle_event(key_event(pygame.K_PLUS, "+"))
-        assert driving._cruise_mph == pytest.approx(60.0)
+        assert driving._cruise_mph == pytest.approx(base + CRUISE_STEP_MPH)
         driving.handle_event(key_event(pygame.K_KP_MINUS, "-"))
-        assert driving._cruise_mph == pytest.approx(55.0)
+        assert driving._cruise_mph == pytest.approx(base)
 
         for _ in range(20):  # clamps at the max
             driving.handle_event(key_event(pygame.K_EQUALS))

@@ -176,3 +176,37 @@ def test_high_idle_still_owns_the_keys_when_parked(monkeypatch):
         assert d._speed_control_target_mph is None
     finally:
         app.shutdown()
+
+
+def test_engaging_cruise_rounds_to_the_speed_the_player_hears(monkeypatch):
+    """Regression (found in Task 3 verification, 2026-08-13): _engage_cruise
+    used to store the truck's raw unrounded speed (26.8 m/s -> 59.949992
+    mph), a fraction the player never hears -- speed_text already rounds the
+    readout to a clean "sixty". The first plain plus tap then spent itself
+    healing that invisible fraction onto the grid (59.95 -> 60) instead of
+    making an audible step, the exact no-op complaint this feature exists to
+    kill. The captured target must already be the whole number the player
+    heard when it engaged."""
+    import pygame
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+    from speech_capture import speech_stub
+
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        d.truck.engine_on = True
+        d.truck.velocity_mps = 26.8  # -> 59.949992 mph, off the fives grid
+        d._engage_cruise(d.truck.speed_mph)
+        assert d._cruise_mph == pytest.approx(60.0)
+
+        d.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_EQUALS, mod=0, unicode="="))
+
+        assert d._cruise_mph == pytest.approx(65.0)
+    finally:
+        app.shutdown()
