@@ -366,14 +366,23 @@ onto exit signalling.
       for it first and logs an honest fallback, and `*.bak` files no
       longer ride into the pack (the shipped pack carries one beside the
       real 1600 jake).
-- [ ] **Repack sounds.pak so classic ships in frozen builds.** The
-      committed pack predates engine_classic/idle.ogg; source checkouts
-      fall back to the loose file, but release payloads are pak-only, so
-      build_release now refuses a pre-classic pack rather than shipping
-      a Settings option that silently does nothing. Repack with
-      tools/pack_sounds.py on a builder machine whose loose tree has
-      engine_classic (any checkout of this branch), update the
-      length/SHA pins in tests/test_sound_pack.py, and commit via LFS.
+- [x] **Sounds.pak repacked for the classic voice -- 2026-08-13.** 278
+      to 279 entries, rebuilt from the shipped pack's own contents (not
+      a builder tree, so every 2026-08 addition survives): adds
+      engine_classic/idle.ogg, renames the stray
+      jake_1600.synth-original.wav.bak to an honest
+      engine/jake_1600_synth.wav so both 1600 jake cuts ship and a
+      future synth-versus-recorded jake toggle is a pure code change.
+      Length/SHA pins updated. build_release verifies the classic cut
+      is in any staged pack.
+- [ ] **Jake voice A/B pending the owner's ear and provenance.** The
+      1600 zone is the one recorded jake (f737b416, source unknown --
+      owner is chasing where the Dropbox cut came from and under what
+      terms); the other five zones are synth, so listen for a
+      character seam crossing 1600 rpm under engine braking. Both cuts
+      ship in the pack; if the owner wants the option, wire a jake
+      toggle on the engine-voice settings pattern. If provenance
+      fails, jake_1600 reverts to the synth original.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides
