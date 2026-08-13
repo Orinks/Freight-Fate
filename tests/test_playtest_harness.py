@@ -310,7 +310,11 @@ def test_speed_control_follows_job_from_deadhead_to_loaded_trip(monkeypatch):
         assert driving._cruise_mph is None
 
         driving.truck.set_air_ready(parking_brake=False)
-        driving.truck.velocity_mps = 2.0
+        # Open-road resume now waits until the truck is at cruise's holding
+        # speed before engaging, rather than snapping cruise on at a crawl and
+        # flooring the throttle to chase the target (the resume-ramp fix). Roll
+        # at a real cruising speed so the handoff engages.
+        driving.truck.velocity_mps = 25.0 / 2.23694
         driving.update(1 / 60)
 
         assert driving._keeper_mph is not None or driving._cruise_mph is not None

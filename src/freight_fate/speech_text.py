@@ -278,7 +278,7 @@ def achievement_announced(name: str) -> SpokenMessage:
     """The live announce: earcon plus the name, in either speech mode.
 
     The flavor prose never speaks at speed (research doc R9); it waits in the
-    message log and the achievements menu. Normal mode hears "New achievement:
+    message log and the achievements menu. Normal mode hears "New achievement!
     <name>."; terse hears the bare name, the sound having already said "new".
     """
-    return SpokenMessage(f"New achievement: {name}.", f"{name}.")
+    return SpokenMessage(f"New achievement! {name}.", f"{name}.")

@@ -69,6 +69,7 @@ def test_exit_signal_announcement_speaks_kilometers(monkeypatch):
         class _Stop:
             at_mi = driving.trip.position_mi + 1.2
             type = "travel_center"
+            name = "Test Plaza"
             spoken_name = "Test Plaza"
             exit_label = ""
 

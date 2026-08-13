@@ -1495,8 +1495,8 @@ class ArrivalState(MenuState):
         if not names:
             return None
         if len(names) == 1:
-            return f"New achievement: {names[0]}."
-        return f"{len(names)} new achievements: {', '.join(names)}."
+            return f"New achievement! {names[0]}."
+        return f"New achievements! {', '.join(names)}."
 
     def _award_arrival_achievements(
         self,

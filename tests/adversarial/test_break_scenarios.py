@@ -76,14 +76,6 @@ def break_harness():
 # Findings that are real, verified, and not yet fixed. Keyed by scenario name;
 # the value is why it is still open, spoken plainly enough to act on.
 KNOWN_OPEN = {
-    "gate_overshoot_with_assists": (
-        "the facility-gate loop-back charges 20 game minutes but no HOS driving "
-        "time and no fuel, so a scripted reposition is free of both"
-    ),
-    "level_up_at_settlement_boundary": (
-        "record_delivery's level-up line only names the level it lands on, so a "
-        "settlement crossing three thresholds announces one"
-    ),
     "short_hop_streak_xp_farming": (
         "25-mile hops earn 4.6x the XP efficiency of a 500-mile haul, and short "
         "hauls are the faster ones to drive; the streak bonus is now capped at "

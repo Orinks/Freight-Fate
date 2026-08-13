@@ -37,7 +37,9 @@ def test_tier_promotion_speaks_level_up_then_new_tractor(monkeypatch):
     result.assert_ordered(
         "Level up! You are now level 4",
         "Dispatch upgraded your assigned tractor",
-        "New achievement! Newer Iron from the Yard",
+        # Achievement flavor left the live announce (R9); the settlement now
+        # names the run's badges in one batched "N new achievements:" row.
+        "Newer Iron from the Yard",
     )
     result.assert_screen_reader_friendly()
 

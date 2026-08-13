@@ -15,7 +15,7 @@ def test_live_announce_is_name_only_in_both_modes():
     # The stored record keeps the flavor for the log and the menu...
     assert "kept it clean" in pair.normal
     # ...but the live announce never speaks it, in either speech mode.
-    assert live.normal == "New achievement: Night Owl."
+    assert live.normal == "New achievement! Night Owl."
     assert live.render(terse=True) == "Night Owl."
     assert "kept it clean" not in live.normal
 

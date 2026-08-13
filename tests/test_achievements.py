@@ -335,9 +335,13 @@ def test_delivery_settlement_awards_only_first_delivery_on_a_first_run(monkeypat
         # first_delivery lands here.
         assert "first_delivery" in earned
         assert not {"first_on_time", "clean_delivery", "speed_limit_saint"} & earned
-        # R9: the settlement no longer reads a "New achievement!" flavor
-        # paragraph -- the badge is named, the story stays in the log.
-        assert not any(part.startswith("New achievement!") for part in arrival.summary_parts)
+        # R9: the settlement names the run's badges but no longer reads their
+        # flavor paragraphs -- the story stays in the log. The announce keeps
+        # the exclamation style (owner preference), singular or plural.
+        summary_text = " ".join(arrival.summary_parts)
+        assert "Signed, Sealed, Hauled" in summary_text
+        assert "New achievement" in summary_text and "!" in summary_text
+        assert "No fanfare needed" not in summary_text  # flavor stays in the log
         reloaded = Profile.load(p.path)
         assert set(reloaded.achievements) == earned
     finally:
@@ -594,7 +598,7 @@ def test_state_crossing_keeps_gameplay_prompt_before_achievement(monkeypatch):
 
         assert events == ["Crossing into Missouri near St. Louis."]
         # Live, only the name (R9); the flavor waits in the log and menu.
-        assert screen_reader[0] == "New achievement: Kept It Between the Lines."
+        assert screen_reader[0] == "New achievement! Kept It Between the Lines."
     finally:
         app.shutdown()
 

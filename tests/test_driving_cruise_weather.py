@@ -1376,9 +1376,9 @@ def test_adaptive_cruise_switches_to_keeper_for_heavy_traffic(monkeypatch):
             "Speed keeper holding 50 miles per hour."
         )
         # Live achievement announces are name-only now (R9: the flavor moved to
-        # the log), so the spoken form is "New achievement: <name>." not the
-        # full-record "New achievement! <name>. <flavor>".
-        assert events[-1].startswith("New achievement: Bumper-to-Bumper Blues.")
+        # the log). The announce reads exactly "New achievement! <name>." with
+        # no trailing flavor, unlike the full-record log line.
+        assert events[-1] == "New achievement! Bumper-to-Bumper Blues."
     finally:
         app.shutdown()
 
