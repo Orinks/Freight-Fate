@@ -89,11 +89,13 @@
 
 ### Added
 
-- **Game sound steps back while the road talks.** When the road voice
-  speaks, the engine, the weather, and the radio now drop to half volume
-  and come back the moment the line finishes, so a warning survives a loud
-  cab without the voice itself getting louder. It is on by default; turn
-  it off under Settings, Audio, "Game sounds step back for speech."
+- **Game sound can step back while the road talks.** A new option drops
+  the engine, the weather, and the radio to half volume while the road
+  voice speaks, restoring them the moment the line finishes, so a warning
+  survives a loud cab without the voice itself getting louder. It is off
+  by default -- the engine note is how many drivers read their speed, so
+  nothing changes unless you ask. If game sound talks over your speech,
+  turn it on under Settings, Audio, "Game sounds step back for speech."
 
 - **Sixty new billboards along the highways.** Seventeen fresh roadside
   jokes about diesel prices, tiny parking lots, and questionable

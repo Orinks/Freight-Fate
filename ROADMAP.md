@@ -365,8 +365,9 @@ onto exit signalling.
       the message log instead of being promoted to an interrupt. The
       main channel queues instead of cutting while the driving state is
       on top (menus keep immediate speech). New Settings > Audio option,
-      on by default: engine, weather, and the radio duck to half volume
-      while the event voice speaks, restored on the pacer's own
+      off by default (owner call, 2026-08-12: the engine is the
+      instrument panel): engine, weather, and the radio duck to half
+      volume while the event voice speaks, restored on the pacer's own
       clear-time projection. Later stages (naming diet, earcon pairs)
       remain open below.
 - [x] **Speech-priority redesign, stage S2 -- landed 2026-08-12** (R4, R5,

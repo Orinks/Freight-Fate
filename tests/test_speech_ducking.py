@@ -26,6 +26,9 @@ class FakeClock:
 def _rig(app):
     ducks: list[float] = []
     app.ctx.settings.sapi_events = True
+    # Opt in: the duck ships off by default (the engine is the instrument
+    # panel), and these tests exercise what it does once a player enables it.
+    app.ctx.settings.duck_audio_for_speech = True
     app.ctx.speech.say_event = speech_stub()
     app.ctx.audio.set_speech_duck = ducks.append
     clock = FakeClock()
@@ -33,10 +36,13 @@ def _rig(app):
     return ducks, clock
 
 
-def test_ducking_defaults_on() -> None:
+def test_ducking_defaults_off() -> None:
+    """In an audio-first sim the engine is the instrument panel -- a blind
+    driver reads speed off it -- so ducking is opt-in for players who need
+    it, not a default that changes what everyone hears (owner, 2026-08-12)."""
     from freight_fate.settings import Settings
 
-    assert Settings().duck_audio_for_speech is True
+    assert Settings().duck_audio_for_speech is False
 
 
 def test_event_speech_ducks_the_mix_and_the_frame_after_silence_restores_it() -> None:
