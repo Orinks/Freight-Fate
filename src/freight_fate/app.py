@@ -618,7 +618,13 @@ class GameContext:
         if not announce:
             return result
         self.audio.play("ui/level_up", volume=0.8)
-        self.say(result.message, interrupt=interrupt)
+        # Live, an achievement is its earcon and its name; the flavor prose is
+        # never read at speed (research doc R9). The full record still reaches
+        # the review log, and the achievements menu keeps it for good.
+        from .speech_text import achievement_announced
+
+        self.say(achievement_announced(result.achievement.name), interrupt=interrupt, review=False)
+        self.message_log.add(str(result.message), MessageCategory.GENERAL)
         return result
 
 

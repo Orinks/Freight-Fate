@@ -180,8 +180,13 @@ def test_award_achievement_persists_and_deduplicates_notification(monkeypatch):
 
         assert first is not None
         assert second is None
-        assert spoken == [first.message]
+        # Live, the announce is the earcon and the name only (R9); the full
+        # flavor record still rides the award and reaches the review log.
+        from freight_fate.speech_text import achievement_announced
+
+        assert spoken == [achievement_announced(first.achievement.name)]
         assert first.message.startswith("New achievement!")
+        assert str(app.ctx.message_log.messages[-1].text) == str(first.message)
         assert played == ["ui/level_up"]
         reloaded = Profile.load(app.ctx.profile.path)
         assert reloaded.achievements == ["first_delivery"]
@@ -204,7 +209,9 @@ def test_event_achievement_speaks_through_screen_reader(monkeypatch):
         result = app.ctx.award_achievement("first_delivery", event=True)
 
         assert result is not None
-        assert screen_reader == [result.message]
+        from freight_fate.speech_text import achievement_announced
+
+        assert screen_reader == [achievement_announced(result.achievement.name)]
         assert events == []
     finally:
         app.shutdown()
@@ -319,7 +326,11 @@ def test_delivery_settlement_awards_core_achievements(monkeypatch):
         assert {"first_delivery", "first_on_time", "clean_delivery", "speed_limit_saint"}.issubset(
             earned
         )
-        assert any(part.startswith("New achievement!") for part in arrival.summary_parts)
+        # The settlement collapses the run's badges into one row that names
+        # them, not one flavor paragraph each (R9).
+        summary_text = " ".join(arrival.summary_parts)
+        assert "new achievements:" in summary_text
+        assert not any(part.startswith("New achievement!") for part in arrival.summary_parts)
         reloaded = Profile.load(p.path)
         assert set(reloaded.achievements) == earned
     finally:
@@ -441,7 +452,8 @@ def test_state_crossing_keeps_gameplay_prompt_before_achievement(monkeypatch):
         )
 
         assert events == ["Crossing into Missouri near St. Louis."]
-        assert screen_reader[0].startswith("New achievement! Kept It Between the Lines.")
+        # Live, only the name (R9); the flavor waits in the log and menu.
+        assert screen_reader[0] == "New achievement: Kept It Between the Lines."
     finally:
         app.shutdown()
 

@@ -1260,7 +1260,9 @@ class ArrivalState(MenuState):
             speeding_tickets=d.speeding_tickets,
             gross_pay=gross_pay,
         )
-        self.summary_parts.extend(self._achievement_messages)
+        achievement_summary = self._achievement_summary_line()
+        if achievement_summary is not None:
+            self.summary_parts.append(achievement_summary)
         self._queue_notable_share(
             on_time=on_time, previous_level=previous_level, occurred_at_ms=occurred_at_ms
         )
@@ -1283,7 +1285,13 @@ class ArrivalState(MenuState):
             condition_lines.append(f"Fuel remaining: {d.truck.fuel_fraction * 100:.0f} percent.")
         if d.truck.damage_pct >= 1.0:
             condition_lines.append(f"Truck damage now: {d.truck.damage_pct:.0f} percent.")
-        career_lines = announcements + self._achievement_messages
+        # Achievements collapse to one row that names them; the full flavor
+        # for each waits in the achievements menu and the message log, so the
+        # settlement is not six paragraphs of comedy read at a parked truck
+        # (research doc R9).
+        career_lines = list(announcements)
+        if achievement_summary is not None:
+            career_lines.append(achievement_summary)
         advance_lines = []
         if advance_repaid > 0:
             advance_lines.append(f"Pay advance repaid: {advance_repaid:,.0f} dollars.")
@@ -1427,6 +1435,7 @@ class ArrivalState(MenuState):
             result = self.ctx.award_achievement(badge, announce=False)
             if result is not None:
                 self._achievement_messages.append(result.message)
+                self._new_achievement_names.append(result.achievement.name)
         return [fleet_upgrade_announcement(p)]
 
     def _queue_notable_share(
@@ -1474,6 +1483,20 @@ class ArrivalState(MenuState):
         return provider is not None and bool(
             getattr(self.ctx.settings, "live_weather_controls_calendar", False)
         )
+
+    def _achievement_summary_line(self) -> str | None:
+        """One row naming the run's new achievements, not one paragraph each.
+
+        The full flavor for every badge stays in the achievements menu and
+        the message log, so the settlement reports the count and the names and
+        leaves the story for a parked, unhurried read (research doc R9).
+        """
+        names = self._new_achievement_names
+        if not names:
+            return None
+        if len(names) == 1:
+            return f"New achievement: {names[0]}."
+        return f"{len(names)} new achievements: {', '.join(names)}."
 
     def _award_arrival_achievements(
         self,

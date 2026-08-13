@@ -4,6 +4,14 @@
 
 ### Changed
 
+- **Achievements stay out of your way while you drive.** Earning a badge at
+  speed is now its sound and its name -- "New achievement: Night Owl." --
+  instead of a paragraph of story read over the road, in normal speech as
+  well as terse. The full write-up is never lost: it waits in the message
+  log, in the achievements menu, and at the delivery settlement, where a run
+  that earned several badges reads them as one line that names them all
+  rather than one paragraph each.
+
 - **The delivery summary is shorter, and skips the rows that say nothing.**
   When a run added no damage, the truck came in undamaged, and the tank is
   more than a quarter full, the settlement no longer reads those rows out --

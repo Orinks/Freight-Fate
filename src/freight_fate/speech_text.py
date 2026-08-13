@@ -231,6 +231,17 @@ def cruise_curve_easing(pacenote: str, advisory_speed_text: str) -> SpokenMessag
 
 
 def achievement_unlocked(name: str, description: str) -> SpokenMessage:
-    """Mid-drive an achievement is its earcon plus the name; the flavor text
-    waits in the log and the achievements menu for a parked moment."""
+    """The full achievement record: name plus flavor, for the message log,
+    the achievements menu, and a parked settlement readout. This is stored on
+    the award, not spoken live -- the live announce is :func:`achievement_announced`."""
     return SpokenMessage(f"New achievement! {name}. {description}", f"{name}.")
+
+
+def achievement_announced(name: str) -> SpokenMessage:
+    """The live announce: earcon plus the name, in either speech mode.
+
+    The flavor prose never speaks at speed (research doc R9); it waits in the
+    message log and the achievements menu. Normal mode hears "New achievement:
+    <name>."; terse hears the bare name, the sound having already said "new".
+    """
+    return SpokenMessage(f"New achievement: {name}.", f"{name}.")
