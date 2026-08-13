@@ -162,12 +162,29 @@ onto exit signalling.
       median, by far the largest single phase), is a separate, larger
       change and out of scope here -- tracked as its own follow-up, owner
       approved, in the bullet immediately below.
-- [ ] **World load is still the largest single startup phase (~1.17s of
-      the 2.166s headless-measured median).** Out of scope for the
-      four-fix pass above; owner-approved as its own follow-up. Likely
-      needs sharded/streamed loading of `world_data/` rather than one
-      up-front read, mirroring how the sound pack now streams in on a
-      background thread.
+- [x] **World load, the largest single startup phase, cut by ~0.82s via
+      lazy per-leg corridor loading -- SHIPPED 2026-08-12.** `World.load`
+      measured 1.207s median and built every leg's heavy per-mile detail
+      (grades, interchanges, landmarks, state crossings, checkpoints, toll
+      events, speed limits, traffic volumes, restrictions, lane segments,
+      elevation, route points) for all fifty states up front, plus the
+      ~31MB of nationwide local-driving data (facility approaches/endpoints,
+      surface-street geometry, city services) -- almost none of it touched
+      in a session. Legs are now `LazyLeg`: only the fields the route graph
+      and dispatch read stay eager, and dispatch-completeness is baked at
+      load from raw corridor counts (byte-identical to the old
+      `metadata_complete`, since those five fields parse one-for-one) so the
+      route graph never triggers a parse. The heavy tuples build once, via a
+      non-data descriptor, the first time a leg is driven, then cache on the
+      instance for zero per-access cost. The nationwide local data is loaded
+      lazily on first facility/city-service query. Measured on the same
+      phase-timer, 3 runs: `World.load` 1.207s to 0.390s; route-graph
+      dispatch work 0.0014s; first-leg-drive materialization 0.29 ms/leg
+      (imperceptible); first facility-approach local-data hit ~85ms, once
+      per category. The frozen build benefits equally -- the baked path runs
+      the same lazy `World.__init__`. Deferred, not needed: the ~0.30s JSON
+      parse itself is untouched; sharding/streaming that is a separate,
+      larger change if it ever proves worth it.
 - [x] **First round of Dropbox tester findings triaged and fixed --
       SHIPPED 2026-08-11.** Three P0s off the tester living document
       (Shane P). A construction zone could close the only lane on a

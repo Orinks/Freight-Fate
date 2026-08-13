@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405,F821
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass
 
 from .world_constants import *
@@ -628,11 +629,22 @@ class Leg:
     # oneway-pair geometry (Track D2). None where the bake was mixed or
     # thin -- honest absence; the runtime infers from road class instead.
     divided: bool | None = None
+    # Dispatch-completeness precomputed at world load from raw corridor counts
+    # (see world_parsing.raw_metadata_complete). None means "not precomputed"
+    # -- direct-constructed legs (tests, overlays) fall back to computing it
+    # from their own fields, so behavior is unchanged. LazyLeg carries it so
+    # the route graph never has to parse deferred detail just to gate dispatch.
+    meta_complete: bool | None = None
 
     def other(self, city: str) -> str:
         return self.b if city == self.a else self.a
 
     def metadata_complete(self, from_state: str, to_state: str) -> bool:
+        if self.meta_complete is not None:
+            return self.meta_complete
+        return self._metadata_complete_from_fields(from_state, to_state)
+
+    def _metadata_complete_from_fields(self, from_state: str, to_state: str) -> bool:
         """True when a leg has enough real corridor data to be dispatchable.
 
         Dispatch gates on *routing* completeness: route geometry, elevation and
@@ -657,6 +669,188 @@ class Leg:
         if len(self.elevation_samples) < 2 or not self.grade_segments:
             return False
         return from_state == to_state or bool(self.state_crossings)
+
+
+# The heavy per-mile corridor fields LazyLeg parses on first touch. Everything
+# else on a Leg (endpoints, miles, highway, terrain, stops, lanes, the local
+# cue, divided, meta_complete) stays eager because the route graph, dispatch,
+# and route briefings read it.
+_DEFERRED_LEG_FIELDS = (
+    "route_points",
+    "elevation_samples",
+    "grade_segments",
+    "state_crossings",
+    "checkpoints",
+    "state_miles",
+    "toll_events",
+    "interchanges",
+    "speed_limits",
+    "traffic_volumes",
+    "landmarks",
+    "restrictions",
+    "lane_segments",
+)
+
+# One shared lock guards every lazy build. Builds are one-shot per leg and
+# quick, so contention is nil; the startup sound-pack thread (or any future
+# background driver) must never see a half-populated leg.
+_LAZY_LEG_LOCK = threading.RLock()
+
+# Sentinel for "this deferred field was not supplied, parse it on first read".
+_DEFER = object()
+
+
+class _LazyCorridorField:
+    """Non-data descriptor that builds a ``LazyLeg``'s deferred corridor on the
+    first read of any deferred field, caches every field on the instance, then
+    steps aside so later reads hit the plain instance attribute.
+
+    It must be a descriptor rather than ``__getattr__`` because the ``Leg``
+    dataclass stores each deferred field's default (``()`` / ``None``) as a
+    *class* attribute, which normal lookup would find before ``__getattr__``
+    ever fires. Being a non-data descriptor (no ``__set__``) means once the
+    build writes the real value into the instance ``__dict__``, that instance
+    value wins and this descriptor is never consulted again -- so the driving
+    loop pays no per-access cost after the one-time build.
+    """
+
+    def __set_name__(self, owner: type, name: str) -> None:
+        self._name = name
+
+    def __get__(self, obj: object, owner: type | None = None):
+        if obj is None:
+            return self
+        obj._ensure_corridor()
+        return obj.__dict__[self._name]
+
+
+class LazyLeg(Leg):
+    """A ``Leg`` whose heavy corridor detail is parsed the first time it is read.
+
+    ``World.__init__`` used to construct grade segments, interchanges,
+    landmarks, speed limits and the rest for all fifty states at startup --
+    roughly a second of pure latency before the menu, most of it never touched
+    in a session. A ``LazyLeg`` built by the world stores only the eager fields
+    the route graph and dispatch need plus the raw corridor and its parse
+    context; the deferred tuples are parsed once, on the first attribute access
+    (driving a leg), then cached on the instance so later reads are plain
+    attribute lookups with no interception cost.
+
+    The constructor mirrors the full ``Leg`` field signature so
+    ``dataclasses.replace`` keeps working: replace reads every field (forcing a
+    one-time build) and reconstructs with them all materialized, and a leg with
+    every deferred field supplied simply carries no lazy state.
+
+    Equality and hashing are identity-based on purpose: the world owns exactly
+    one object per leg, they are the keys of the routing penalty maps, and the
+    dataclass default would hash over the deferred tuples and force the very
+    parse we are deferring.
+    """
+
+    route_points = _LazyCorridorField()
+    elevation_samples = _LazyCorridorField()
+    grade_segments = _LazyCorridorField()
+    state_crossings = _LazyCorridorField()
+    checkpoints = _LazyCorridorField()
+    state_miles = _LazyCorridorField()
+    toll_events = _LazyCorridorField()
+    interchanges = _LazyCorridorField()
+    speed_limits = _LazyCorridorField()
+    traffic_volumes = _LazyCorridorField()
+    landmarks = _LazyCorridorField()
+    restrictions = _LazyCorridorField()
+    lane_segments = _LazyCorridorField()
+
+    def __init__(
+        self,
+        a: str,
+        b: str,
+        miles: float,
+        highway: str,
+        terrain: str,
+        stops: tuple[Stop, ...],
+        route_points=_DEFER,
+        elevation_samples=_DEFER,
+        grade_segments=_DEFER,
+        state_crossings=_DEFER,
+        checkpoints=_DEFER,
+        state_miles=_DEFER,
+        toll_events=_DEFER,
+        interchanges=_DEFER,
+        speed_limits=_DEFER,
+        traffic_volumes=_DEFER,
+        lanes: int = 0,
+        local_cue: str = "",
+        local_speed_mph: float = 0.0,
+        landmarks=_DEFER,
+        restrictions=_DEFER,
+        lane_segments=_DEFER,
+        divided: bool | None = None,
+        meta_complete: bool | None = None,
+        *,
+        detail_source: tuple | None = None,
+    ) -> None:
+        s = object.__setattr__
+        s(self, "a", a)
+        s(self, "b", b)
+        s(self, "miles", miles)
+        s(self, "highway", highway)
+        s(self, "terrain", terrain)
+        s(self, "stops", stops)
+        s(self, "lanes", lanes)
+        s(self, "local_cue", local_cue)
+        s(self, "local_speed_mph", local_speed_mph)
+        s(self, "divided", divided)
+        s(self, "meta_complete", meta_complete)
+        s(self, "_detail_source", detail_source)
+        # A deferred field left at the sentinel stays absent so __getattr__ can
+        # build it; any supplied value (e.g. from dataclasses.replace) is set
+        # now and short-circuits the lazy path entirely.
+        for name, value in (
+            ("route_points", route_points),
+            ("elevation_samples", elevation_samples),
+            ("grade_segments", grade_segments),
+            ("state_crossings", state_crossings),
+            ("checkpoints", checkpoints),
+            ("state_miles", state_miles),
+            ("toll_events", toll_events),
+            ("interchanges", interchanges),
+            ("speed_limits", speed_limits),
+            ("traffic_volumes", traffic_volumes),
+            ("landmarks", landmarks),
+            ("restrictions", restrictions),
+            ("lane_segments", lane_segments),
+        ):
+            if value is not _DEFER:
+                s(self, name, value)
+
+    def _ensure_corridor(self) -> None:
+        """Parse and cache the deferred corridor detail once, thread-safely.
+
+        A cheap unlocked check keeps the common (already-built) path lock-free;
+        the lock only serializes the first concurrent build."""
+        if self.__dict__.get("_detail_source") is None:
+            return
+        from .world_corridor import build_leg_corridor
+
+        with _LAZY_LEG_LOCK:
+            source = self.__dict__.get("_detail_source")
+            if source is None:
+                return
+            detail = build_leg_corridor(*source)
+            for key, value in detail.items():
+                object.__setattr__(self, key, value)
+            # Drop the raw corridor: the parsed tuples now own the data.
+            object.__setattr__(self, "_detail_source", None)
+
+    def __hash__(self) -> int:
+        return object.__hash__(self)
+
+    def __eq__(self, other: object) -> bool:
+        return self is other
+
+    def __repr__(self) -> str:
+        return f"LazyLeg({self.a!r} -> {self.b!r}, {self.highway!r}, {self.miles} mi)"
 
 
 @dataclass

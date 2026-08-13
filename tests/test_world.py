@@ -434,6 +434,47 @@ def test_explicit_roadside_assistance_service_can_extend_plaza_actions():
     assert "roadside_assistance" in stop.services
 
 
+def test_baked_completeness_flag_matches_field_computed_metadata(world):
+    """The route graph gates dispatch on a completeness flag baked at load from
+    raw corridor counts, so it never parses deferred detail. That flag must
+    agree exactly with computing it from a fully materialized leg -- if the two
+    ever drift, dispatch would offer or hide the wrong routes."""
+    from freight_fate.data.world_models import LazyLeg
+
+    checked = 0
+    for leg in world.legs:
+        assert isinstance(leg, LazyLeg)
+        assert leg.meta_complete is not None
+        from_state = world.cities[leg.a].state
+        to_state = world.cities[leg.b].state
+        # Force a full parse, then recompute from the real fields and compare.
+        field_computed = leg._metadata_complete_from_fields(from_state, to_state)
+        assert leg.meta_complete == field_computed, f"{leg.a}->{leg.b}"
+        checked += 1
+    assert checked > 1000
+
+
+def test_lazy_leg_defers_corridor_until_read(world):
+    """A freshly loaded world leg carries no parsed corridor tuples; the first
+    read builds and caches them, and later reads hit the plain instance
+    attribute."""
+    from freight_fate.data.world import WORLD_DATA_PATH, World
+
+    fresh = World.load(WORLD_DATA_PATH)
+    leg = next(
+        leg for leg in fresh.legs if leg.a == "chicago_il_us" and leg.b == "indianapolis_in_us"
+    )
+    assert "route_points" not in leg.__dict__
+    assert leg.__dict__.get("_detail_source") is not None
+
+    points = leg.route_points
+    assert points  # materialized on first read
+    assert "route_points" in leg.__dict__
+    assert leg.__dict__.get("_detail_source") is None
+    # Idempotent: a second read is the same cached object.
+    assert leg.grade_segments is leg.grade_segments
+
+
 def test_corridor_metadata_supports_offline_itineraries(world):
     route = world.route_from_cities(["Chicago", "Indianapolis"])
     leg = route.legs[0]

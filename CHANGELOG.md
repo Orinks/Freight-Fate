@@ -4,6 +4,13 @@
 
 ### Changed
 
+- **The game starts faster still.** The road detail for every leg in the
+  country -- grades, exits, landmarks, posted limits and the rest -- used to
+  be built the moment the game opened, whether or not you ever drove those
+  roads. Now that work waits until you actually drive a leg, so the world is
+  ready about eight tenths of a second sooner and the wait before the menu is
+  shorter.
+
 - **Facility names are said in full the first time, then kept short.** The
   first time a stop or facility comes up on a leg you hear its full name;
   after that, on the same leg, just the proper name -- so a pickup no longer

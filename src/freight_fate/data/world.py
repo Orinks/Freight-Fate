@@ -10,10 +10,12 @@ from __future__ import annotations
 
 import heapq
 import json
+import threading
 from pathlib import Path
 
 from .legacy_aliases import LEGACY_CITY_SLUGS
 from .world_constants import *
+from .world_corridor import raw_metadata_complete
 from .world_loader import load_world_data
 from .world_local_data import (
     load_city_service_data,
@@ -28,21 +30,8 @@ from .world_parsing import (
     _is_legacy_market_name,
     _market_tags_for_city,
     _merge_overlay,
-    _parse_checkpoint,
-    _parse_elevation_sample,
-    _parse_grade_segment,
-    _parse_interchange,
-    _parse_landmarks,
-    _parse_lane_segments,
     _parse_location,
-    _parse_restrictions,
-    _parse_route_point,
-    _parse_speed_limits,
-    _parse_state_crossing,
-    _parse_state_mileage,
     _parse_stop,
-    _parse_toll_event,
-    _parse_traffic_volumes,
     _service_city_slug,
     _stable_facility_id,
 )
@@ -124,14 +113,18 @@ class World(WorldServiceMixin):
         # and is keyed by old display names and pre-slug facility ids; remap it
         # onto canonical keys once at load so every runtime lookup stays direct.
         self._service_city_keys = _build_service_city_keys(self.cities, self._legacy_names_by_key)
-        self._city_service_data = {
-            self.resolve_city_key(name): services
-            for name, services in load_city_service_data().items()
-        }
-        self._facility_approaches = self._remap_facility_ids(load_facility_approaches())
-        self._facility_endpoints = self._remap_facility_ids(load_facility_endpoints())
-        self._local_approaches = self._remap_local_ids(load_local_approaches())
-        self._local_geometries = self._remap_local_ids(load_local_geometries())
+        # The nationwide local-driving data (city services, facility endpoints
+        # and approaches, surface-street geometry) is ~31 MB of JSON that only
+        # matters once a player is threading into a specific facility or city
+        # service. Loading and remapping it at startup was pure latency; it is
+        # built on first access instead. The remap keys off structures already
+        # built above, so a lazy build is safe.
+        self._local_data_lock = threading.RLock()
+        self._city_service_data_cache: dict | None = None
+        self._facility_approaches_cache: dict | None = None
+        self._facility_endpoints_cache: dict | None = None
+        self._local_approaches_cache: dict | None = None
+        self._local_geometries_cache: dict | None = None
 
         self.legs: list[Leg] = []
         for leg in data["legs"]:
@@ -140,83 +133,31 @@ class World(WorldServiceMixin):
             leg_from = self.resolve_city_key(leg["from"])
             leg_to = self.resolve_city_key(leg["to"])
             miles = float(leg["miles"])
+            highway = leg["highway"]
             stops = tuple(_parse_stop(s, miles, leg_from, leg_to) for s in leg.get("stops", ()))
             corridor = leg.get("corridor", {})
-            route_points = tuple(
-                _parse_route_point(p, miles, leg_from, leg_to)
-                for p in corridor.get("route_points", ())
-            )
-            elevation_samples = tuple(
-                _parse_elevation_sample(s, miles, leg_from, leg_to)
-                for s in corridor.get("elevation_samples", ())
-            )
-            grade_segments = tuple(
-                _parse_grade_segment(s, miles, leg_from, leg_to)
-                for s in corridor.get("grade_segments", ())
-            )
-            lane_segments = _parse_lane_segments(
-                corridor.get("lane_segments", ()), miles, leg_from, leg_to
-            )
-            state_crossings = tuple(
-                _parse_state_crossing(c, miles, leg_from, leg_to, self.cities[leg_from].state)
-                for c in corridor.get("state_crossings", ())
-            )
-            checkpoints = tuple(
-                _parse_checkpoint(c, miles, leg_from, leg_to)
-                for c in corridor.get("checkpoints", ())
-            )
-            state_miles = tuple(
-                _parse_state_mileage(m, leg_from, leg_to) for m in corridor.get("state_miles", ())
-            )
-            toll_events = tuple(
-                _parse_toll_event(e, miles, leg_from, leg_to, leg["highway"])
-                for e in corridor.get("toll_events", ())
-            )
-            interchanges = tuple(
-                _parse_interchange(x, miles, leg_from, leg_to, leg["highway"])
-                for x in corridor.get("interchanges", ())
-            )
-            traffic_volumes = _parse_traffic_volumes(
-                corridor.get("traffic_aadt", ()), miles, leg_from, leg_to
-            )
-            landmarks = _parse_landmarks(corridor.get("landmarks", ()), miles, leg_from, leg_to)
-            # Landmarks first: the dwell filter keeps a short posting that a
-            # place on the road explains, and drops the ones nothing does.
-            speed_limits = _parse_speed_limits(
-                corridor.get("speed_limits", ()),
-                miles,
-                leg_from,
-                leg_to,
-                places=tuple(
-                    lm.at_mi for lm in landmarks if lm.category in LIMIT_EXPLAINING_CATEGORIES
-                ),
-            )
-            restrictions = _parse_restrictions(
-                corridor.get("restrictions", ()), miles, leg_from, leg_to
-            )
+            from_state = self.cities[leg_from].state
+            # Only the eager fields are built now; the heavy per-mile corridor
+            # (grades, interchanges, landmarks, speed limits, ...) is parsed by
+            # LazyLeg the first time a leg is driven. Dispatch completeness is
+            # baked here from raw corridor counts so the route graph never has
+            # to trigger that parse -- the counted fields parse one-for-one, so
+            # this is identical to asking a fully built leg.
+            meta_complete = raw_metadata_complete(corridor, from_state, self.cities[leg_to].state)
             self.legs.append(
-                Leg(
+                LazyLeg(
                     leg_from,
                     leg_to,
                     miles,
-                    leg["highway"],
+                    highway,
                     leg["terrain"],
                     stops,
-                    route_points,
-                    elevation_samples,
-                    grade_segments,
-                    state_crossings,
-                    checkpoints,
-                    state_miles,
-                    toll_events,
-                    interchanges,
-                    speed_limits,
-                    traffic_volumes,
-                    max(0, int(leg.get("lanes", 0))),
-                    landmarks=landmarks,
-                    restrictions=restrictions,
-                    lane_segments=lane_segments,
+                    lanes=max(0, int(leg.get("lanes", 0))),
+                    local_cue="",
+                    local_speed_mph=0.0,
                     divided=leg["divided"] if isinstance(leg.get("divided"), bool) else None,
+                    meta_complete=meta_complete,
+                    detail_source=(corridor, miles, leg_from, leg_to, from_state, highway),
                 )
             )
         self._adjacency: dict[str, list[Leg]] = {name: [] for name in self.cities}
@@ -224,6 +165,53 @@ class World(WorldServiceMixin):
             self._adjacency[leg.a].append(leg)
             self._adjacency[leg.b].append(leg)
         self._supported_route_cache: dict[tuple[str, str], Route | None] = {}
+
+    @property
+    def _city_service_data(self) -> dict:
+        if self._city_service_data_cache is None:
+            with self._local_data_lock:
+                if self._city_service_data_cache is None:
+                    self._city_service_data_cache = {
+                        self.resolve_city_key(name): services
+                        for name, services in load_city_service_data().items()
+                    }
+        return self._city_service_data_cache
+
+    @property
+    def _facility_approaches(self) -> dict:
+        if self._facility_approaches_cache is None:
+            with self._local_data_lock:
+                if self._facility_approaches_cache is None:
+                    self._facility_approaches_cache = self._remap_facility_ids(
+                        load_facility_approaches()
+                    )
+        return self._facility_approaches_cache
+
+    @property
+    def _facility_endpoints(self) -> dict:
+        if self._facility_endpoints_cache is None:
+            with self._local_data_lock:
+                if self._facility_endpoints_cache is None:
+                    self._facility_endpoints_cache = self._remap_facility_ids(
+                        load_facility_endpoints()
+                    )
+        return self._facility_endpoints_cache
+
+    @property
+    def _local_approaches(self) -> dict:
+        if self._local_approaches_cache is None:
+            with self._local_data_lock:
+                if self._local_approaches_cache is None:
+                    self._local_approaches_cache = self._remap_local_ids(load_local_approaches())
+        return self._local_approaches_cache
+
+    @property
+    def _local_geometries(self) -> dict:
+        if self._local_geometries_cache is None:
+            with self._local_data_lock:
+                if self._local_geometries_cache is None:
+                    self._local_geometries_cache = self._remap_local_ids(load_local_geometries())
+        return self._local_geometries_cache
 
     def _remap_facility_ids(self, data: dict) -> dict:
         """Rekey a facility-id-keyed local-data dict onto current ids."""

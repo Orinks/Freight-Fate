@@ -8,8 +8,8 @@ from freight_fate.data.world import (
     Interchange,
     _format_route_ref,
     _join_destinations,
-    _parse_interchange,
 )
+from freight_fate.data.world_parsing import _parse_interchange
 from freight_fate.sim import Trip, TruckState, WeatherSystem
 from freight_fate.sim.trip import _leg_heading, _nearest_exit_label
 
