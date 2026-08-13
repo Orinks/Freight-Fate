@@ -147,6 +147,37 @@ def test_keeper_zone_adjust_snaps_the_resume_target(monkeypatch):
         app.shutdown()
 
 
+def test_keeper_raw_capture_rounds_to_the_whole_mph(monkeypatch):
+    """_engage_keeper's plain K-set branch (no explicit target_mph) rounds the
+    captured speed to the whole mph the player hears, mirroring
+    _engage_cruise's rounding -- otherwise an unrounded 24.95 would spend the
+    first snap tap healing an invisible fraction instead of making an
+    audible step."""
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+    from speech_capture import speech_stub
+
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import Zone
+
+    app = App()
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        monkeypatch.setattr(app.ctx, "say", speech_stub())
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+        d.truck.engine_on = True
+        start = d.trip.position_mi
+        d.trip.zones.append(Zone(start - 0.1, start + 3.0, 30.0, "school"))
+        d.truck.velocity_mps = 24.95 / 2.2369362920544  # off the whole mph
+
+        d._engage_keeper(30.0, "school", announce=False)
+
+        assert d._keeper_mph == pytest.approx(25.0)
+    finally:
+        app.shutdown()
+
+
 def test_high_idle_still_owns_the_keys_when_parked(monkeypatch):
     """Parked with a latched high idle, +/- steps the idle RPM, not any
     cruise or keeper target -- the branch _adjust_cruise checks first."""

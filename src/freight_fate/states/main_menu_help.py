@@ -133,6 +133,7 @@ HELP_PAGES = [
             "It can slow for traffic ahead, but it does not steer for you.",
             "Plus and minus, including the keypad keys, raise and lower the open-road cruise target by five miles per hour,",
             "including while the speed keeper is handling a low-speed zone.",
+            "Control with plus or minus moves it by one mile per hour.",
             "Space includes the active speed-control mode and target in the speed readout.",
             "Cruise looks ahead for sharp posted-limit drops and will not hold more than five over the posted limit.",
             "The speed keeper handles low-speed local roads, like facility access",

@@ -41,7 +41,7 @@ it speaks.
 ## Copy
 
 The F1 driving help's "cruise target by five" sentence gains one clause:
-Shift with the same keys moves it by one mile per hour. Canonical nouns
+Ctrl with the same keys moves it by one mile per hour. Canonical nouns
 per `docs/ontology.md`; no other new speech.
 
 ## Tests
