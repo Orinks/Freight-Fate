@@ -4,6 +4,16 @@
 
 ### Changed
 
+- **Cruise speed now steps onto the fives, with a fine step when you need
+  an exact number.** Setting cruise captures your exact speed, so a
+  target like 32 used to step to 37, then 42 -- never landing on the
+  fives. Plus and minus now snap to the next five first, the way a real
+  cruise stalk does: from 32, plus gives you 35, then 40. And holding
+  Control with plus or minus changes the target by exactly one mile per
+  hour, for picking a precise number without having to catch it on the
+  speedometer. The controller's cruise buttons step by fives the same
+  way.
+
 - **A latched throttle now gets out of the way of the speed assists, and
   the Latching pedals setting lets you choose.** A latched accelerator
   used to read as your hand insisting on speed, so cruise, the speed

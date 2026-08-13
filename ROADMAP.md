@@ -443,6 +443,14 @@ onto exit signalling.
       releasing the latch never cancels an assist; the catch line names
       the authority holding the speed. Spec:
       `docs/superpowers/specs/2026-08-13-pedal-latch-assists-design.md`.
+- [x] **Cruise steps snap to the fives; Ctrl steps by one -- landed
+      2026-08-13** (Jerry's latch-and-race-K workaround for catching an
+      even 35; Sarah's real-stalk snapping). Plain plus/minus walks the
+      fives grid from wherever K captured the target, healing off-grid
+      speeds in one tap; Ctrl with the same keys moves by exactly 1 mph
+      (Ctrl, not Shift -- the main-row plus IS Shift+equals). Pad cruise
+      buttons stay coarse. Spec:
+      `docs/superpowers/specs/2026-08-13-cruise-step-snapping-design.md`.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides
