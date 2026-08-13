@@ -67,12 +67,19 @@ class TripTrafficMixin:
         )
 
     def _check_npc_traffic_cues(self) -> None:
+        # Gate BEFORE next_situation: returning a situation marks its vehicle
+        # announced, so a gated call would burn the announcement without
+        # speaking it and the vehicle would stay silent forever (see
+        # road_event_pacing.py).
+        if not self._event_breather.ready("traffic"):
+            return
         situation = self.traffic_manager.next_situation(
             position_mi=self.position_mi,
             truck_speed_mph=self.truck.speed_mph,
         )
         if situation is None:
             return
+        self._event_breather.spoke("traffic")
         lead = situation.vehicle
         cue = NavigationCue(
             f"npc:{lead.key}", "traffic", lead.position_mi, lead.reason, speed_mph=lead.speed_mph

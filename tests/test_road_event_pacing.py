@@ -18,7 +18,9 @@ from freight_fate.sim.road_event_pacing import (
     ZONE_GAP_REAL_S,
     RoadEventBreather,
 )
+from freight_fate.sim.traffic_manager import TrafficVehicle
 from freight_fate.sim.trip import TripEventKind
+from freight_fate.sim.trip_models import Zone
 
 
 class FakeClock:
@@ -197,3 +199,153 @@ def test_a_big_unannounced_drop_cuts_the_gap(world, monkeypatch):
     assert "reduced to" in urgent[0]
     assert trip._speed_value(45.0) in urgent[0]
     assert trip._announced_speed_limit == 45.0
+
+
+# --- Trip._check_npc_traffic_cues gating (Task 3) ---------------------------
+#
+# The traffic gate has to sit BEFORE ``traffic_manager.next_situation`` is
+# ever called: that call is what marks a vehicle's key announced, so a gated
+# call that still reached it would burn the announcement silently and the
+# vehicle would never be spoken for, gap open or not.
+
+
+def _npc(key: str, position_mi: float, speed_mph: float = 40.0) -> TrafficVehicle:
+    return TrafficVehicle(
+        key=key,
+        position_mi=position_mi,
+        speed_mph=speed_mph,
+        target_speed_mph=speed_mph,
+        relative_lane=0,
+        intent="following",
+        vehicle_class="car",
+        lane=0,
+    )
+
+
+def test_two_traffic_situations_inside_the_gap_speak_once(world, monkeypatch):
+    trip = _make_trip(world)
+    clock = _install_fake_clock(trip, monkeypatch)
+    manager = trip.traffic_manager
+
+    vehicle_a = _npc("npc:a", position_mi=1.0)
+    vehicle_b = _npc("npc:b", position_mi=3.5)
+    manager.vehicles = [vehicle_a, vehicle_b]
+    trip.position_mi = 0.0
+
+    # Vehicle A is the only one in the 2.2-mile announcing window (B is
+    # 3.5 mi out, past TRAFFIC_LOOKAHEAD_MI): the window is open, so it
+    # speaks immediately.
+    trip._events.clear()
+    trip._check_npc_traffic_cues()
+    first = _limit_messages(trip)
+    assert len(first) == 1
+    assert manager.announced_vehicle_keys == {"npc:a"}
+
+    # 3 fake seconds later -- well inside TRAFFIC_GAP_REAL_S -- the truck
+    # has passed vehicle A (now more than its length behind, out of the
+    # lead-vehicle window) and vehicle B has reached the 2.2-mile window.
+    # The gate sits before next_situation is called at all, so the check
+    # must return without touching the manager: vehicle B's key must not
+    # be marked announced by a call that never spoke for it.
+    clock.now += 3.0
+    trip.position_mi = 1.4
+    trip._events.clear()
+    trip._check_npc_traffic_cues()
+    assert _limit_messages(trip) == []
+    assert manager.announced_vehicle_keys == {"npc:a"}
+    assert "npc:b" not in manager.announced_vehicle_keys
+
+    # Once the window reopens, the check announces the CURRENT nearest
+    # situation (vehicle B) directly.
+    clock.now += TRAFFIC_GAP_REAL_S
+    trip._events.clear()
+    trip._check_npc_traffic_cues()
+    reopened = _limit_messages(trip)
+    assert len(reopened) == 1
+    assert manager.announced_vehicle_keys == {"npc:a", "npc:b"}
+
+
+# --- Trip._check_zones ZONE_ENTER gating (Task 3) ----------------------------
+#
+# Only the colour line ("Entering ... zone" / "Work zone active. ...") gates.
+# Zone bookkeeping (``_active_zone``, the construction grace start, the
+# congestion injection) is mechanics, not narration, and stays untouched --
+# only the announcement is held back. The construction-merge warning and the
+# barrel-clock lane-closure system live in the driving state's own work-zone
+# machinery (``driving_updates.DrivingUpdatesMixin._update_merge``) and are
+# never routed through the breather at all.
+
+
+def test_zone_entry_colour_breathes_but_merge_warnings_do_not(world, monkeypatch):
+    trip = _make_trip(world)
+    clock = _install_fake_clock(trip, monkeypatch)
+
+    zone1 = Zone(2.0, 4.0, 45.0, "construction")
+    zone2 = Zone(10.0, 12.0, 45.0, "construction")
+    trip.zones = [zone1, zone2]
+
+    trip.position_mi = 2.0
+    trip._events.clear()
+    trip._check_zones()
+    first = [e for e in trip._events if e.kind == TripEventKind.ZONE_ENTER]
+    assert len(first) == 1
+    assert trip._active_zone is zone1
+
+    # 3 fake seconds later -- well inside ZONE_GAP_REAL_S -- the truck
+    # enters the second zone. The colour line is gated...
+    clock.now += 3.0
+    trip.position_mi = 10.0
+    trip._events.clear()
+    trip._check_zones()
+    assert [e for e in trip._events if e.kind == TripEventKind.ZONE_ENTER] == []
+    # ...but the zone mechanics (which zone governs the posted limit) still
+    # track the truck's real position; only the narration is held back.
+    assert trip._active_zone is zone2
+
+    # The construction-merge warning is a different system entirely, and it
+    # must keep speaking even while this trip's own "zone" window is closed.
+    assert not trip._event_breather.ready("zone")
+
+    from speech_capture import speech_stub
+
+    from freight_fate.app import App
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.models.profile import Profile
+    from freight_fate.states.driving import DrivingState
+
+    app = App()
+    spoken: list[str] = []
+    try:
+        app.ctx.profile = Profile(name="ZonePacing", current_city="Buffalo")
+        route = app.ctx.world.supported_route("Buffalo", "Rochester")
+        job = Job(
+            CARGO_CATALOG["general"],
+            12.0,
+            "Buffalo",
+            "company yard",
+            "Rochester",
+            route.miles,
+            1000.0,
+            12.0,
+            destination_location="Rochester freight market",
+        )
+        d = DrivingState(app.ctx, job, route, phase="delivery")
+        d.trip.traffic_manager.vehicles = []
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+        d.truck.start_engine()
+        d.truck.velocity_mps = 55.0 / 2.2369362920544
+
+        # Close this (separate) trip's own "zone" window with a real-clock
+        # spoke() -- proving the merge warning below never consults it.
+        d.trip._event_breather.spoke("zone")
+        assert not d.trip._event_breather.ready("zone")
+
+        d.trip.position_mi = 4.5
+        d.trip.zones.append(Zone(4.0, 5.0, 55.0, "construction merge", closed_side="left"))
+        d.lane.lane = 1  # riding the lane that closes at the barrels
+        for _ in range(200):
+            d._update_merge(0.1)
+
+        assert spoken and "closes at the work zone ahead" in spoken[0]
+    finally:
+        app.shutdown()

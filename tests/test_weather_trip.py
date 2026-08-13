@@ -7,7 +7,7 @@ import pytest
 
 from freight_fate.data.world_models import Stop
 from freight_fate.sim import Trip, TruckState, WeatherKind, WeatherSystem
-from freight_fate.sim.road_event_pacing import LIMIT_GAP_REAL_S
+from freight_fate.sim.road_event_pacing import LIMIT_GAP_REAL_S, ZONE_GAP_REAL_S
 from freight_fate.sim.trip import (
     CONSTRUCTION_ENFORCEMENT_GRACE_MI,
     CONSTRUCTION_TAPER_LIMIT_MPH,
@@ -18,6 +18,20 @@ from freight_fate.sim.trip import (
 )
 from freight_fate.sim.trip_models import RoadStop
 from freight_fate.sim.weather import EFFECTS, REGION_WEIGHTS
+
+
+class _FakeClock:
+    """A controllable clock for driving trip._event_breather in tests that
+    teleport trip.position_mi across several announceable events with no
+    real time elapsed between them. Shared by every test below that needs
+    one -- see road_event_pacing.py and test_road_event_pacing.py, which
+    define the breather itself and own its pacing behavior."""
+
+    def __init__(self) -> None:
+        self.now = 0.0
+
+    def __call__(self) -> float:
+        return self.now
 
 
 def _gps_events(events):
@@ -578,13 +592,6 @@ def test_speed_limit_cue_names_direction_and_city(world, monkeypatch):
     # gated and silently swallow the "raised to" assertion below. Drive the
     # breather with a fake clock advanced past the gap between the two
     # sub-cases so this test stays about the direction/city wording.
-    class _FakeClock:
-        def __init__(self) -> None:
-            self.now = 0.0
-
-        def __call__(self) -> float:
-            return self.now
-
     clock = _FakeClock()
     monkeypatch.setattr(trip._event_breather, "_clock", clock)
 
@@ -957,13 +964,23 @@ def _closure_part(zone) -> str:
     return f"The {shut} lane is closed; merge {keep} at the taper. "
 
 
-def test_zone_entry_is_worded_apart_from_its_advance_warning(world):
+def test_zone_entry_is_worded_apart_from_its_advance_warning(world, monkeypatch):
     """The heads-up and the change itself must not sound alike. Both used to
     say "<zone> ahead. Speed limit 15.", so a driver heard the gate limit two
     miles out, found the limit unchanged, and reported it as broken."""
     route = world.facility_approach_route("Chicago", world.city("Chicago").locations[0].name)
     trip = Trip(route, TruckState(), WeatherSystem("great_lakes", seed=1), seed=2)
     gate = next(z for z in trip.zones if z.reason == "facility gate")
+
+    # This test teleports across the facility-approach street chain, which
+    # can itself cross a zone boundary (see the comment below) -- so the
+    # zone-entry colour line's real-clock breather (road_event_pacing.py)
+    # can already be closed by the time position reaches the gate, on the
+    # very same real-clock instant. Drive it with a fake clock advanced past
+    # ZONE_GAP_REAL_S between the two teleports: the two miles of road this
+    # test skips over would take far longer than that to actually drive.
+    clock = _FakeClock()
+    monkeypatch.setattr(trip._event_breather, "_clock", clock)
 
     trip.position_mi = gate.start_mi - 2.0
     # The street chain speaks navigation cues too; pick the gate warning out.
@@ -976,6 +993,7 @@ def test_zone_entry_is_worded_apart_from_its_advance_warning(world):
     assert warning == "In 2 miles, facility gate ahead. Speed limit 15."
     assert trip.speed_limit_at(trip.position_mi)[0] != 15.0
 
+    clock.now += ZONE_GAP_REAL_S
     trip.position_mi = gate.start_mi + 0.05
     entry = [e.message for e in trip.update(0.0) if e.kind == TripEventKind.ZONE_ENTER][-1]
     assert entry == "Entering facility gate zone. Speed limit 15 now."

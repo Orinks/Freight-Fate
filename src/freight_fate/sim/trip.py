@@ -2418,12 +2418,18 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                     z.reason == "construction merge" and abs(z.end_mi - zone.start_mi) < 0.01
                     for z in self.zones
                 )
-                self._emit(
-                    TripEventKind.ZONE_ENTER,
-                    self._zone_entry_message(zone),
-                    zone=zone,
-                    suppress_sound=quiet,
-                )
+                # Only the colour line breathes (road_event_pacing.py):
+                # _active_zone below still tracks the truck's real position
+                # every call, so the posted limit and every mechanic that
+                # reads it stay correct even when the narration is held back.
+                if self._event_breather.ready("zone"):
+                    self._event_breather.spoke("zone")
+                    self._emit(
+                        TripEventKind.ZONE_ENTER,
+                        self._zone_entry_message(zone),
+                        zone=zone,
+                        suppress_sound=quiet,
+                    )
                 if zone.reason == "heavy traffic" and zone.aadt is not None:
                     # Fill the jam with slow metal: the existing lead-vehicle,
                     # ACC, and hazard machinery turn it into stop-and-go.
