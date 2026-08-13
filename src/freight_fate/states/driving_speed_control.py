@@ -122,6 +122,22 @@ class SpeedControlStateMixin:
         self._speed_control_paused_at_stop = False
         self._speed_control_target_mph = None
 
+    def _speed_authority_engaged(self) -> bool:
+        """Whether an automatic speed system currently owns the pedal.
+
+        This is the latch's whole priority rule: a LATCHED throttle is the
+        lowest-priority speed input and contributes nothing while any of
+        these is engaged (owner design 2026-08-13, after tester Brandon
+        latched for the whole trip expecting the assists to drive). A
+        hand-held key is a different thing entirely -- live manual
+        override -- and never consults this.
+        """
+        return (
+            self._cruise_mph is not None
+            or self._keeper_mph is not None
+            or self._curve_assist_active
+        )
+
     def _resume_cruise(self) -> None:
         """Shift+K: re-arm the session at the last remembered set speed."""
         if (
