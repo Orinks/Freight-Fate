@@ -292,10 +292,8 @@ def upload_save(
     return {"ok": False, "reason": "error"}
 
 
-def list_saves(identity: OnlineIdentity, *, transport: Transport = _http_json) -> dict | None:
-    """All kept cloud revisions for this driver (``saves``, newest first) plus
-    which career fronts the public profile (``publicSaveName``, None when no
-    career is designated or the server predates the choice) -- or None when
+def list_saves(identity: OnlineIdentity, *, transport: Transport = _http_json) -> list[dict] | None:
+    """All kept cloud revisions for this driver (newest first), or None when
     the site is unreachable. Raises :class:`CloudAuthError` when the server
     answers but refuses the credentials. Called from menu worker threads only."""
     url = f"{_saves_url()}?driverId={identity.driver_id}"
@@ -315,41 +313,7 @@ def list_saves(identity: OnlineIdentity, *, transport: Transport = _http_json) -
         log.debug("Cloud save list failed: %s", e)
         return None
     saves = reply.get("saves")
-    if not isinstance(saves, list):
-        return None
-    public = reply.get("publicSaveName")
-    return {"saves": saves, "publicSaveName": public if isinstance(public, str) else None}
-
-
-def set_public_save(
-    identity: OnlineIdentity,
-    *,
-    save_name: str | None,
-    transport: Transport = _http_json,
-) -> bool:
-    """Choose which career fronts the driver's public profile (None returns
-    to the server's first-uploader rule). True on success, False when the site
-    could not be reached or refused. Raises :class:`CloudAuthError` when the
-    server answers but refuses the credentials. Called from menu worker
-    threads only."""
-    url = f"{_saves_url()}/public-career"
-    payload = {"driverId": identity.driver_id, "saveName": save_name}
-    try:
-        reply = transport(url, payload, _auth_headers(identity))
-    except urllib.error.HTTPError as e:
-        body = _error_body(e)
-        if _auth_refused(e, body):
-            log.warning(
-                "Public career choice refused (HTTP %s): this computer's sign-in is no longer accepted",
-                e.code,
-            )
-            raise CloudAuthError from e
-        log.warning("Public career choice failed: HTTP %s", e.code)
-        return False
-    except Exception as e:
-        log.debug("Public career choice failed: %s", e)
-        return False
-    return bool(reply.get("ok"))
+    return saves if isinstance(saves, list) else None
 
 
 def delete_save(

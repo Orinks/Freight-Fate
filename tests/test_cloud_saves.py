@@ -36,7 +36,6 @@ from freight_fate.cloud_saves import (
     profile_dict_from_content,
     restore_to_disk,
     save_slot_name,
-    set_public_save,
     upload_save,
 )
 from freight_fate.models import profile as profile_module
@@ -704,53 +703,6 @@ def test_list_saves_unknown_driver_raises_cloud_auth_error():
 
 def test_list_saves_network_trouble_stays_none():
     assert list_saves(IDENTITY, transport=FakeTransport(error=OSError("no route"))) is None
-
-
-# -- the public career choice -----------------------------------------------------
-
-
-def test_list_saves_carries_the_public_career_choice():
-    transport = FakeTransport(
-        reply={
-            "ok": True,
-            "saves": [{"saveName": "Road Star", "revision": 1}],
-            "publicSaveName": "Road Star",
-        }
-    )
-    reply = list_saves(IDENTITY, transport=transport)
-    assert reply == {
-        "saves": [{"saveName": "Road Star", "revision": 1}],
-        "publicSaveName": "Road Star",
-    }
-
-
-def test_list_saves_from_a_server_without_the_choice_says_none():
-    # orinks.net builds from before the public-career choice send only the
-    # saves list; the menu must read that as "no career designated".
-    transport = FakeTransport(reply={"ok": True, "saves": []})
-    assert list_saves(IDENTITY, transport=transport) == {"saves": [], "publicSaveName": None}
-
-
-def test_set_public_save_posts_the_choice():
-    transport = FakeTransport(reply={"ok": True, "publicSaveName": "Road Star"})
-    assert set_public_save(IDENTITY, save_name="Road Star", transport=transport)
-    url, payload, headers = transport.requests[0]
-    assert url.endswith("/saves/public-career")
-    assert payload == {"driverId": IDENTITY.driver_id, "saveName": "Road Star"}
-    assert headers["Authorization"] == f"Bearer {IDENTITY.driver_token}"
-
-
-def test_set_public_save_refused_credentials_raise_cloud_auth_error():
-    with pytest.raises(CloudAuthError):
-        set_public_save(
-            IDENTITY, save_name="Road Star", transport=FakeTransport(error=auth_error(401))
-        )
-
-
-def test_set_public_save_network_trouble_stays_false():
-    assert not set_public_save(
-        IDENTITY, save_name="Road Star", transport=FakeTransport(error=OSError("no route"))
-    )
 
 
 def test_download_refused_credentials_raise_cloud_auth_error():

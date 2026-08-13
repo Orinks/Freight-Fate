@@ -43,9 +43,8 @@ DISCLOSURE = (
     "feed. Each post also tells orinks.net which game version you are running, used only "
     "for moderation and troubleshooting and never shown publicly. Freight Fate does not "
     "publish your real name, full save, money, coordinates, active cargo details, or precise "
-    "real-world location. Detailed career statistics come only from your public career's "
-    "latest accepted private backup; you choose your public career on the Cloud backup "
-    "menu. Turning Profile sharing off hides public details but does not turn "
+    "real-world location. Detailed career statistics come only from your latest accepted "
+    "private backup. Turning Profile sharing off hides public details but does not turn "
     "Cloud backup off."
 )
 
