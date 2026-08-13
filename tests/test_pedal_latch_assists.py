@@ -458,3 +458,108 @@ def test_curve_assist_jake_arrives_once_the_latched_throttle_drains(monkeypatch)
         assert d._curve_assist_jake  # engaged after the drain, not never
     finally:
         app.shutdown()
+
+
+def test_the_brake_key_hard_releases_the_latch_and_cancels_cruise(monkeypatch):
+    """Spec: brake tap still hard-releases the latch and cancels cruise --
+    unchanged behavior, but the return-shape refactor rebuilt the code
+    around it, and nothing pinned this before now."""
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    held = set()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        d.truck.engine_on = True  # _update_cruise cancels the session without it
+        app.ctx.settings.overspeed_warning = "off"
+        d.truck.velocity_mps = 60 / 2.2369362920544
+        _latch_throttle(d)
+        d._engage_cruise(55.0)
+        _drive_frames(d, 1.0)
+
+        held.add(pygame.K_DOWN)
+        _drive_frames(d, 0.3)
+        held.discard(pygame.K_DOWN)
+
+        assert not d._throttle_latch.latched
+        assert "Throttle released." in spoken
+        assert d._cruise_mph is None
+    finally:
+        app.shutdown()
+
+
+def test_the_catch_line_names_the_keeper(monkeypatch):
+    """The keeper branch of the catch line (driving_controls.py:1451) has
+    no coverage otherwise -- only the cruise variant was asserted."""
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import Zone
+
+    app = App()
+    spoken = []
+    held = set()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        d.truck.engine_on = True  # _update_keeper cancels the session without it
+        app.ctx.settings.overspeed_warning = "off"
+        start = d.trip.position_mi
+        d.trip.zones.append(Zone(start - 0.1, start + 3.0, 25.0, "school"))
+        d.truck.velocity_mps = 30 / 2.2369362920544
+        d._engage_keeper(25.0, "school", target_mph=25.0, announce=False)
+
+        # The real gesture, so the spoken confirmation path is the one
+        # players hear: tap, release, press and hold through the catch.
+        held.add(pygame.K_UP)
+        _drive_frames(d, 0.2)
+        held.discard(pygame.K_UP)
+        _drive_frames(d, 0.2)
+        held.add(pygame.K_UP)
+        _drive_frames(d, 0.8)
+        held.discard(pygame.K_UP)
+
+        assert "Throttle latched. Speed keeper holds the speed." in spoken
+    finally:
+        app.shutdown()
+
+
+def test_a_hand_held_key_stands_the_keeper_down(monkeypatch):
+    """Spec bullet names the keeper; the existing coverage only engages
+    cruise. Both read the same hand_accelerating argument, but pin it."""
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+    from freight_fate.sim.trip_models import Zone
+
+    app = App()
+    held = {pygame.K_UP}
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        d.truck.engine_on = True  # _update_keeper cancels the session without it
+        app.ctx.settings.overspeed_warning = "off"
+        start = d.trip.position_mi
+        d.trip.zones.append(Zone(start - 0.1, start + 3.0, 25.0, "school"))
+        d.truck.velocity_mps = 30 / 2.2369362920544
+        d._engage_keeper(25.0, "school", target_mph=25.0, announce=False)
+
+        _drive_frames(d, 2.0)
+
+        assert d._keeper_mph is not None  # engaged, waiting for the key to lift
+        assert d.truck.throttle > 0.9  # but the hand owns the pedal
+    finally:
+        app.shutdown()
