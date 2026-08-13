@@ -19,6 +19,7 @@ from .enforcement_posts import (
     EnforcementPostMixin,
 )
 from .hos import clock_text
+from .road_event_pacing import RoadEventBreather
 from .season import is_weekend
 from .timezones import appointment_text, city_zone, zone_for
 from .traffic_manager import TrafficManager
@@ -270,6 +271,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         # line -- so the plain arrival confirmation doesn't repeat the same
         # number a moment (or, under compression, an instant) later.
         self._limit_drop_preannounced: set[float] = set()
+        # Real-seconds breathing gap for routine road talkers (posted-limit
+        # arrivals here; traffic and zone chatter reuse it in later work) --
+        # see road_event_pacing for why the clock stays but the narration
+        # spaces out.
+        self._event_breather = RoadEventBreather()
         self._announced_zone_warnings: set[str] = set()
         self._announced_traffic_pressures: set[str] = set()
         self._announced_npc_traffic: set[str] = set()
@@ -2466,6 +2472,15 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             return
         if limit != self._announced_speed_limit:
             lowered = limit < self._announced_speed_limit
+            # Routine changes breathe (see road_event_pacing); a serious
+            # unannounced drop does not wait -- it is ticket-relevant now.
+            urgent = (
+                lowered
+                and self._announced_speed_limit - limit > 10.0
+                and round(limit, 1) not in self._limit_drop_preannounced
+            )
+            if not urgent and not self._event_breather.ready("limit"):
+                return  # untouched state; the next check self-supersedes
             self._announced_speed_limit = limit
             if lowered:
                 # The advance pacenote or an assist's "easing to X" line may
@@ -2496,6 +2511,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 length = self._limit_zone_length(limit)
                 if length is not None and length <= LIMIT_SHORT_ZONE_MI:
                     span = f" for {_spoken_short_miles(length, self.imperial)}"
+            self._event_breather.spoke("limit")
             self._emit(
                 TripEventKind.GPS_CUE,
                 f"Speed limit {verb} {self._speed_value(limit)}{where}{span}.",

@@ -7,6 +7,7 @@ import pytest
 
 from freight_fate.data.world_models import Stop
 from freight_fate.sim import Trip, TruckState, WeatherKind, WeatherSystem
+from freight_fate.sim.road_event_pacing import LIMIT_GAP_REAL_S
 from freight_fate.sim.trip import (
     CONSTRUCTION_ENFORCEMENT_GRACE_MI,
     CONSTRUCTION_TAPER_LIMIT_MPH,
@@ -570,6 +571,23 @@ def test_speed_limit_cue_names_direction_and_city(world, monkeypatch):
     trip, _ = make_trip(world)  # Chicago -> Indianapolis
     trip._active_zone = None
 
+    # This test crosses two postings back-to-back with no real-clock gap
+    # between them. The posted-limit arrival line now breathes (see
+    # road_event_pacing / test_road_event_pacing.py, which owns the pacing
+    # behavior itself): a second change inside LIMIT_GAP_REAL_S would be
+    # gated and silently swallow the "raised to" assertion below. Drive the
+    # breather with a fake clock advanced past the gap between the two
+    # sub-cases so this test stays about the direction/city wording.
+    class _FakeClock:
+        def __init__(self) -> None:
+            self.now = 0.0
+
+        def __call__(self) -> float:
+            return self.now
+
+    clock = _FakeClock()
+    monkeypatch.setattr(trip._event_breather, "_clock", clock)
+
     # A drop near the origin city names the direction and the city.
     trip.position_mi = 0.0
     trip._announced_speed_limit = 65.0
@@ -578,6 +596,8 @@ def test_speed_limit_cue_names_direction_and_city(world, monkeypatch):
     trip._check_speed_limit()
     lowered = [e.message for e in trip._events]
     assert any("reduced to" in m and "approaching" in m for m in lowered), lowered
+
+    clock.now += LIMIT_GAP_REAL_S
 
     # A rise just states the higher value -- no "approaching" on the way up.
     trip._announced_speed_limit = 45.0
