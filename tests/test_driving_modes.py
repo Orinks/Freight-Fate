@@ -28,7 +28,11 @@ def test_driving_mode_tuning_keeps_standard_baseline_and_softens_only_relaxed():
 def test_pause_settings_mode_change_updates_active_trip_pressure(monkeypatch):
     from freight_fate.app import App
     from freight_fate.states.driving import PauseMenuState
-    from freight_fate.states.main_menu import SettingsCategoryState, SettingsState
+    from freight_fate.states.main_menu import (
+        GameplaySettingsState,
+        SettingsCategoryState,
+        SettingsState,
+    )
 
     app = App()
     monkeypatch.setattr(pygame.key, "get_pressed", HeldKeys)
@@ -49,6 +53,12 @@ def test_pause_settings_mode_change_updates_active_trip_pressure(monkeypatch):
         assert app.state.items[app.state.index].text == "Settings"
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, SettingsState)
+        # Gameplay is the first row and now opens its own submenu; Driving mode
+        # lives under Difficulty and hours of service.
+        app.state.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, GameplaySettingsState)
+        while not app.state.items[app.state.index].text.startswith("Difficulty"):
+            app.state.handle_event(key_event(pygame.K_DOWN))
         app.state.handle_event(key_event(pygame.K_RETURN))
         assert isinstance(app.state, SettingsCategoryState)
         for _ in range(len(app.state.items)):

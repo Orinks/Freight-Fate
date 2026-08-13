@@ -4,6 +4,16 @@
 
 ### Changed
 
+- **The settings menus are reorganized so things are easier to find.**
+  Gameplay is now a category that opens its own submenu of four shorter
+  screens: Driving assistance, Difficulty and hours of service, World and
+  traffic, and Controls. Weather, traffic, and parking sources moved out of
+  Speech and weather -- now just Speech -- and into World and traffic, where
+  they belong. Nothing about your actual settings changed; this only changes
+  where you find them, and the first time you open Gameplay the game tells you
+  so. One confusing leftover is gone too: the speed keeper and the lane
+  keeping control each had a duplicate row, and now each has exactly one.
+
 - **Terse speech now actually means less speech.** Terse mode's promise is:
   the truck tells you what to do and what it cost, and nothing else. With
   terse on, achievements are their sound and their name -- the story waits

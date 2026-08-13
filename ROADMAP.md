@@ -115,6 +115,17 @@ onto exit signalling.
 
 ## 1.9 in flight (`feat/career-1.9`)
 
+- [x] **Settings menu reorganized (Variant B) -- SHIPPED.** Gameplay is now a
+      category that opens its own submenu of four shorter, spoken screens:
+      Driving assistance, Difficulty and hours of service, World and traffic,
+      and Controls. The weather/traffic/parking sources and the live-weather
+      calendar moved out of Speech and weather (now "Speech") into World and
+      traffic; enforcement presence moved to World and traffic too. The dead
+      "Lane keeping" pointer stub in old Gameplay is gone, and the duplicate
+      speed keeper row is collapsed to exactly one (in Controls). A one-shot
+      `settings_version` migration line tells a returning player where things
+      moved the first time they open Gameplay; a fresh install hears nothing.
+      A reachability test guards against orphaning any setting in the split.
 - [x] **Headless-measured startup: four fixes for ~0.46s off the
       launch-to-main-menu path -- SHIPPED 2026-08-12.** A profiling pass
       pinned headless startup at a 2.166s median and isolated four

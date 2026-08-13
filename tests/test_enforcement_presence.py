@@ -998,7 +998,7 @@ def test_changing_enforcement_presence_says_what_it_does_not_change(monkeypatch)
     try:
         spoken = []
         monkeypatch.setattr(app.ctx, "say", lambda text, *a, **k: spoken.append(text))
-        menu = SettingsCategoryState(app.ctx, "gameplay")
+        menu = SettingsCategoryState(app.ctx, "world")
         app.ctx.settings.enforcement_presence = "standard"
         menu._cycle_enforcement_presence(1)
         assert app.ctx.settings.enforcement_presence == "quiet"
@@ -1015,7 +1015,7 @@ def test_the_setting_help_promises_the_same_thing():
 
     app = App()
     try:
-        menu = SettingsCategoryState(app.ctx, "gameplay")
+        menu = SettingsCategoryState(app.ctx, "world")
         item = next(i for i in menu.build_items() if i.text.startswith("Enforcement presence"))
         assert "How much police activity you hear on the road" in item.help
         assert "does not change how likely you are to be pulled over" in item.help

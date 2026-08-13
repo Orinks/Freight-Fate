@@ -324,7 +324,7 @@ def test_menu_dpad_moves_and_adjusts(monkeypatch):
 
     app = App()
     force_controller(app)
-    app.push_state(SettingsCategoryState(app.ctx, "gameplay"))
+    app.push_state(SettingsCategoryState(app.ctx, "controls"))
     state = app.state
     start_index = state.index
     app._dispatch_controller(_button(pygame.CONTROLLER_BUTTON_DPAD_DOWN))

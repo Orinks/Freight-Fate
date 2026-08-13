@@ -7,11 +7,41 @@ def key_event(key, unicode="", mod=0):
     return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode, mod=mod)
 
 
+# Gameplay is now a category with its own submenu; these four screens live one
+# level down from the Settings picker, under the "Gameplay" row.
+GAMEPLAY_SUBCATEGORIES = {
+    "Driving assistance",
+    "Difficulty and hours of service",
+    "World and traffic",
+    "Controls",
+}
+
+
 def open_settings_category(app, label):
-    from freight_fate.states.main_menu import SettingsCategoryState, SettingsState
+    """Open a settings screen by its spoken title.
+
+    Handles both the top-level categories (Audio, Speech, ...) and the four
+    Gameplay subcategories, routing through the Gameplay parent for the latter.
+    """
+    from freight_fate.states.main_menu import (
+        GameplaySettingsState,
+        SettingsCategoryState,
+        SettingsState,
+    )
 
     picker = SettingsState(app.ctx)
     app.push_state(picker)
+    if label in GAMEPLAY_SUBCATEGORIES:
+        while picker.items[picker.index].text != "Gameplay":
+            picker.handle_event(key_event(pygame.K_DOWN))
+        picker.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, GameplaySettingsState)
+        parent = app.state
+        while parent.items[parent.index].text != label:
+            parent.handle_event(key_event(pygame.K_DOWN))
+        parent.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, SettingsCategoryState)
+        return app.state
     while picker.items[picker.index].text != label:
         picker.handle_event(key_event(pygame.K_DOWN))
     picker.handle_event(key_event(pygame.K_RETURN))
@@ -40,7 +70,7 @@ def test_settings_menu_cycles_hours_of_service():
     app = App()
     try:
         assert app.ctx.settings.hos_mode == "realistic"
-        cat = open_settings_category(app, "Gameplay")
+        cat = open_settings_category(app, "Difficulty and hours of service")
         while not cat.items[cat.index].text.startswith("Hours of service"):
             cat.handle_event(key_event(pygame.K_DOWN))
         cat.handle_event(key_event(pygame.K_RETURN))
@@ -135,7 +165,7 @@ def test_an_unreadable_lane_value_is_announced_not_taken_in_silence():
         app.ctx.settings.lane_keeping_unreadable = True
         MainMenuState(app.ctx).announce_entry()
         assert any("lane keeping setting could not be read" in line for line in spoken)
-        assert any("Settings, Driving assistance" in line for line in spoken)
+        assert any("Settings, Gameplay, Driving assistance" in line for line in spoken)
         # Said once, not on every trip back to the main menu.
         spoken.clear()
         MainMenuState(app.ctx).announce_entry()
@@ -160,19 +190,218 @@ def test_the_rename_notice_stops_after_its_budget():
         app.shutdown()
 
 
-def test_gameplay_lane_keeping_row_is_a_pointer_not_a_second_control():
-    """Two live controls for one setting is a navigation hazard in a spoken
-    list: the row that stayed behind must not change anything."""
+# -- the Variant B reorganization: the Gameplay submenu tree --------------------
+
+# The four Gameplay subcategories and the row each must own, by the leading
+# words of the spoken label. This doubles as the membership spec: a setting in
+# the wrong screen, or missing from every screen, fails here.
+GAMEPLAY_SUBCATEGORY_ROWS = {
+    "assistance": [
+        "Driving assistance preset",
+        "Automatic emergency braking",
+        "Lane-departure warning",
+        "Stop-and-go assistance",
+        "Lane centering assistance",
+        "Descent speed control",
+        "Exit speed assistance",
+        "Destination approach assistance",
+        "Planned rest-stop stopping assistance",
+        "Curve speed assistance",
+        "Route-transition assistance",
+        "Latching pedals",
+        "Predictive cruise",
+        "Curve callouts",
+        "Lane keeping",
+        "Lane and edge cue prominence",
+        "Back",
+    ],
+    "difficulty": [
+        "Driving mode",
+        "Hours of service",
+        "Overspeed warning",
+        "Back",
+    ],
+    "world": [
+        "Weather source",
+        "Traffic source",
+        "Parking source",
+        "Live weather controls calendar",
+        "Enforcement presence",
+        "Back",
+    ],
+    "controls": [
+        "Units",
+        "Transmission",
+        "Automatic direction changes",
+        "Controller",
+        "Haptics",
+        "Speed keeper",
+        "Back",
+    ],
+}
+
+
+def _rows_startwith(items):
+    return [item.text for item in items]
+
+
+def test_gameplay_is_a_parent_of_four_subcategories():
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import GameplaySettingsState, SettingsState
+
+    app = App()
+    try:
+        picker = SettingsState(app.ctx)
+        app.push_state(picker)
+        while picker.items[picker.index].text != "Gameplay":
+            picker.handle_event(key_event(pygame.K_DOWN))
+        picker.handle_event(key_event(pygame.K_RETURN))
+        assert isinstance(app.state, GameplaySettingsState)
+        assert _rows_startwith(app.state.items) == [
+            "Driving assistance",
+            "Difficulty and hours of service",
+            "World and traffic",
+            "Controls",
+            "Back",
+        ]
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.parametrize("category", sorted(GAMEPLAY_SUBCATEGORY_ROWS))
+def test_each_gameplay_subcategory_has_exactly_its_rows(category):
+    from freight_fate.app import App
+    from freight_fate.states.main_menu import SettingsCategoryState
+
+    app = App()
+    try:
+        cat = SettingsCategoryState(app.ctx, category)
+        labels = _rows_startwith(cat.build_items())
+        expected = GAMEPLAY_SUBCATEGORY_ROWS[category]
+        assert len(labels) == len(expected)
+        for actual, prefix in zip(labels, expected, strict=True):
+            assert actual.startswith(prefix), (category, actual, prefix)
+        # Every non-Back screen stays short enough to hold in the ear.
+        assert len(labels) <= 12 or category == "assistance"
+    finally:
+        app.shutdown()
+
+
+def _all_settings_rows(app):
+    """Every settings row reachable in the whole Settings tree, as
+    (screen, label, help) triples: the picker, the Gameplay parent, and each
+    category screen. The Online hub is its own menu and out of scope here."""
+    from freight_fate.states.main_menu import (
+        GameplaySettingsState,
+        SettingsCategoryState,
+        SettingsState,
+    )
+
+    rows = []
+    for screen, menu in (
+        ("picker", SettingsState(app.ctx)),
+        ("gameplay", GameplaySettingsState(app.ctx)),
+    ):
+        for item in menu.build_items():
+            rows.append((screen, item.text, item.help))
+    for category in (
+        "assistance",
+        "difficulty",
+        "world",
+        "controls",
+        "audio",
+        "speech",
+        "updates",
+        "reports",
+    ):
+        cat = SettingsCategoryState(app.ctx, category)
+        for item in cat.build_items():
+            rows.append((category, item.text, item.help))
+    return rows
+
+
+def test_exactly_one_speed_keeper_row_in_the_whole_tree():
+    """The speed keeper was a single bool with two live rows (old Gameplay and
+    Driving assistance). Exactly one row may drive it now, and it is in
+    Controls."""
     from freight_fate.app import App
 
     app = App()
     try:
-        cat = open_settings_category(app, "Gameplay")
-        while cat.items[cat.index].text != "Lane keeping":
-            cat.handle_event(key_event(pygame.K_DOWN))
-        cat.handle_event(key_event(pygame.K_RIGHT))
-        assert app.ctx.settings.lane_keeping == "off"  # unchanged: it is a pointer
-        assert "has moved" in cat.items[cat.index].help
+        rows = _all_settings_rows(app)
+        speed_keeper_rows = [
+            (screen, label) for screen, label, _ in rows if label.startswith("Speed keeper")
+        ]
+        assert len(speed_keeper_rows) == 1, speed_keeper_rows
+        assert speed_keeper_rows[0][0] == "controls"
+    finally:
+        app.shutdown()
+
+
+def test_no_dead_pointer_stub_rows_remain():
+    """The old Gameplay carried a Lane keeping row that changed nothing and
+    only said the real control "has moved". No such stub survives the reorg."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        rows = _all_settings_rows(app)
+        # The picker/Gameplay Online pointer is a real navigation row and is
+        # allowed; a "has moved to ... settings" stub standing in for a control
+        # is not.
+        stubs = [
+            (screen, label)
+            for screen, label, help_text in rows
+            if "has moved to" in (help_text or "").lower()
+        ]
+        assert stubs == []
+        # And the specific dead row is gone: no Lane keeping row outside the
+        # Driving assistance screen.
+        lane_rows = [
+            (screen, label) for screen, label, _ in rows if label.startswith("Lane keeping")
+        ]
+        assert lane_rows == [("assistance", lane_rows[0][1])]
+    finally:
+        app.shutdown()
+
+
+def test_every_gameplay_setting_stays_reachable_after_the_split():
+    """The reorg's biggest risk is orphaning a field: a row that used to live
+    in flat Gameplay or in Speech and weather but now belongs to no screen.
+    Each moved setting must be reachable from exactly its new screen."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        rows = _all_settings_rows(app)
+        by_screen = {}
+        for screen, label, _ in rows:
+            by_screen.setdefault(screen, []).append(label)
+
+        def reachable(screen, prefix):
+            return any(label.startswith(prefix) for label in by_screen.get(screen, []))
+
+        # Moved out of flat Gameplay.
+        assert reachable("controls", "Units")
+        assert reachable("controls", "Transmission")
+        assert reachable("controls", "Automatic direction changes")
+        assert reachable("controls", "Controller")
+        assert reachable("controls", "Haptics")
+        assert reachable("controls", "Speed keeper")
+        assert reachable("difficulty", "Driving mode")
+        assert reachable("difficulty", "Hours of service")
+        assert reachable("difficulty", "Overspeed warning")
+        assert reachable("world", "Enforcement presence")
+        # Moved out of Speech and weather.
+        assert reachable("world", "Weather source")
+        assert reachable("world", "Traffic source")
+        assert reachable("world", "Parking source")
+        assert reachable("world", "Live weather controls calendar")
+        # The world-data rows no longer appear in Speech.
+        assert not reachable("speech", "Weather source")
+        assert not reachable("speech", "Traffic source")
+        assert not reachable("speech", "Parking source")
+        assert not reachable("speech", "Live weather controls calendar")
     finally:
         app.shutdown()
 
@@ -184,7 +413,7 @@ def test_settings_menu_toggles_speed_keeper():
     app = App()
     try:
         assert app.ctx.settings.speed_keeper is True
-        cat = open_settings_category(app, "Gameplay")
+        cat = open_settings_category(app, "Controls")
         while not cat.items[cat.index].text.startswith("Speed keeper"):
             cat.handle_event(key_event(pygame.K_DOWN))
         cat.handle_event(key_event(pygame.K_RETURN))
@@ -203,7 +432,7 @@ def test_settings_menu_cycles_automatic_direction_changes():
     app = App()
     try:
         assert app.ctx.settings.automatic_direction_changes == "simple"
-        cat = open_settings_category(app, "Gameplay")
+        cat = open_settings_category(app, "Controls")
         while not cat.items[cat.index].text.startswith("Automatic direction changes"):
             cat.handle_event(key_event(pygame.K_DOWN))
 
@@ -239,7 +468,7 @@ def test_settings_menu_saves_each_change():
 
     app = App()
     try:
-        cat = open_settings_category(app, "Gameplay")
+        cat = open_settings_category(app, "Controls")
         assert app.ctx.settings.imperial_units is True
         while not cat.items[cat.index].text.startswith("Units"):
             cat.handle_event(key_event(pygame.K_DOWN))
@@ -257,7 +486,7 @@ def test_live_weather_calendar_setting_defaults_on_and_persists():
     app = App()
     try:
         assert app.ctx.settings.live_weather_controls_calendar is True
-        cat = open_settings_category(app, "Speech and weather")
+        cat = open_settings_category(app, "World and traffic")
         while not cat.items[cat.index].text.startswith("Live weather controls calendar"):
             cat.handle_event(key_event(pygame.K_DOWN))
         assert "today's real date" in cat.current_help()
@@ -280,7 +509,7 @@ def test_disabling_live_calendar_anchors_established_career_to_today(monkeypatch
     monkeypatch.setattr("freight_fate.sim.season.real_clock_game_hours", lambda: target)
     try:
         original_game_hours = app.ctx.profile.game_hours
-        cat = open_settings_category(app, "Speech and weather")
+        cat = open_settings_category(app, "World and traffic")
         while not cat.items[cat.index].text.startswith("Live weather controls calendar"):
             cat.handle_event(key_event(pygame.K_DOWN))
         cat.handle_event(key_event(pygame.K_RETURN))
@@ -301,7 +530,7 @@ def test_disabling_live_calendar_keeps_new_career_on_march_21(monkeypatch):
     app.ctx.profile = Profile(name="Brand New Driver")
     monkeypatch.setattr("freight_fate.sim.season.real_clock_game_hours", lambda: 200.0 * 24.0)
     try:
-        cat = open_settings_category(app, "Speech and weather")
+        cat = open_settings_category(app, "World and traffic")
         while not cat.items[cat.index].text.startswith("Live weather controls calendar"):
             cat.handle_event(key_event(pygame.K_DOWN))
         cat.handle_event(key_event(pygame.K_RETURN))
@@ -347,18 +576,31 @@ def test_settings_menu_volume_survives_new_app_session():
 
 def test_settings_menu_f1_has_help_for_every_item():
     from freight_fate.app import App
-    from freight_fate.states.main_menu import SettingsCategoryState, SettingsState
+    from freight_fate.states.main_menu import (
+        GameplaySettingsState,
+        SettingsCategoryState,
+        SettingsState,
+    )
 
     app = App()
     try:
-        picker = SettingsState(app.ctx)
-        picker.items = picker.build_items()
-        for i, item in enumerate(picker.items):
-            picker.index = i
-            text = picker.current_help()
-            assert text == (item.help or f"{item.text}.")
-            assert picker.intro_help not in text
-        for category in ("gameplay", "audio", "speech", "updates", "reports"):
+        for menu in (SettingsState(app.ctx), GameplaySettingsState(app.ctx)):
+            menu.items = menu.build_items()
+            for i, item in enumerate(menu.items):
+                menu.index = i
+                text = menu.current_help()
+                assert text == (item.help or f"{item.text}.")
+                assert menu.intro_help not in text
+        for category in (
+            "assistance",
+            "difficulty",
+            "world",
+            "controls",
+            "audio",
+            "speech",
+            "updates",
+            "reports",
+        ):
             cat = SettingsCategoryState(app.ctx, category)
             cat.items = cat.build_items()
             for i, item in enumerate(cat.items):
@@ -377,7 +619,7 @@ def test_haptics_help_explains_road_seam_feedback():
     spoken = []
     app.ctx.say = speech_stub(spoken)
     try:
-        cat = open_settings_category(app, "Gameplay")
+        cat = open_settings_category(app, "Controls")
         while not cat.items[cat.index].text.startswith("Haptics"):
             cat.handle_event(key_event(pygame.K_DOWN))
 
@@ -401,9 +643,8 @@ def test_settings_menu_uses_category_submenus():
         labels = [item.text for item in picker.items]
         assert labels == [
             "Gameplay",
-            "Driving assistance",
             "Audio",
-            "Speech and weather",
+            "Speech",
             "Online",
             "Updates",
             "Problem reports",
@@ -938,3 +1179,94 @@ def test_problem_reports_is_honest_when_no_log_is_being_written():
         assert "Packaged downloads always write one" in said
     finally:
         app.shutdown()
+
+
+# -- the one-shot "where your settings moved" notice ---------------------------
+
+
+def open_gameplay_parent(app):
+    """Open Settings then the Gameplay parent, returning its state."""
+    from freight_fate.states.main_menu import GameplaySettingsState, SettingsState
+
+    picker = SettingsState(app.ctx)
+    app.push_state(picker)
+    while picker.items[picker.index].text != "Gameplay":
+        picker.handle_event(key_event(pygame.K_DOWN))
+    picker.handle_event(key_event(pygame.K_RETURN))
+    assert isinstance(app.state, GameplaySettingsState)
+    return app.state
+
+
+def test_gameplay_reorg_notice_fires_once_for_a_pre_reorg_settings_file():
+    """A returning player cannot see the menu change shape, so the Gameplay
+    submenu says once where their settings moved -- then never again."""
+    import json
+
+    from freight_fate.app import App
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.path.parent.mkdir(parents=True, exist_ok=True)
+    # A settings file from before the reorg carries no settings_version key.
+    settings.path.write_text(json.dumps({"imperial_units": True}), encoding="utf-8")
+
+    app = App()
+    spoken = []
+    app.ctx.say = speech_stub(spoken)
+    try:
+        assert app.ctx.settings.gameplay_reorg_notice_pending is True
+        gameplay = open_gameplay_parent(app)
+        assert any("Gameplay is now a category" in line for line in spoken)
+        assert any("Weather, traffic, and parking sources moved" in line for line in spoken)
+        assert any("Nothing about your settings changed" in line for line in spoken)
+        # Cleared, and persisted so a restart does not replay it.
+        assert app.ctx.settings.gameplay_reorg_notice_pending is False
+        assert Settings.load().gameplay_reorg_notice_pending is False
+
+        spoken.clear()
+        gameplay.enter()  # re-reveal the same screen
+        assert not [line for line in spoken if "Gameplay is now a category" in line]
+    finally:
+        app.shutdown()
+
+
+def test_a_fresh_install_hears_no_gameplay_reorg_notice():
+    """Nothing moved for a brand-new player, so the notice never fires."""
+    from freight_fate.app import App
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    if settings.path.exists():
+        settings.path.unlink()
+
+    app = App()
+    spoken = []
+    app.ctx.say = speech_stub(spoken)
+    try:
+        assert app.ctx.settings.gameplay_reorg_notice_pending is False
+        open_gameplay_parent(app)
+        assert not [line for line in spoken if "Gameplay is now a category" in line]
+    finally:
+        app.shutdown()
+
+
+def test_a_current_version_settings_file_hears_no_notice():
+    import json
+
+    from freight_fate.settings import SETTINGS_VERSION, Settings
+
+    settings = Settings()
+    settings.path.parent.mkdir(parents=True, exist_ok=True)
+    settings.path.write_text(json.dumps({"settings_version": SETTINGS_VERSION}), encoding="utf-8")
+    assert Settings.load().gameplay_reorg_notice_pending is False
+
+
+def test_settings_version_is_written_to_disk():
+    from freight_fate.settings import SETTINGS_VERSION, Settings
+
+    settings = Settings()
+    settings.save()
+    import json
+
+    written = json.loads(settings.path.read_text(encoding="utf-8"))
+    assert written["settings_version"] == SETTINGS_VERSION

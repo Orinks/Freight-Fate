@@ -296,7 +296,7 @@ class MainMenuState(MenuState):
             warning += (
                 "Your lane keeping setting could not be read, so it is set to "
                 "full: the truck holds the lane and takes your exits. Change it "
-                "in Settings, Driving assistance. "
+                "in Settings, Gameplay, Driving assistance. "
             )
         if not _loadable_saves() and _legacy_saves:
             # Every saved career predates 1.9, so there is no Continue item
@@ -944,11 +944,14 @@ class SettingsState(MenuState):
         "its own list of settings."
     )
 
+    # Gameplay is now a category with its own submenu (Driving assistance,
+    # Difficulty and hours of service, World and traffic, and Controls) rather
+    # than a flat list -- it opens GameplaySettingsState. The rest are plain
+    # category lists.
     CATEGORIES = (
         ("Gameplay", "gameplay"),
-        ("Driving assistance", "assistance"),
         ("Audio", "audio"),
-        ("Speech and weather", "speech"),
+        ("Speech", "speech"),
         ("Updates", "updates"),
         ("Problem reports", "reports"),
     )
@@ -959,11 +962,10 @@ class SettingsState(MenuState):
             for label, key in self.CATEGORIES
         ]
         # The Online items moved to the main menu; this stays in the old spot
-        # for a release or two so muscle memory still lands somewhere useful.
-        # This line's old spot was after Speech and weather (dev's index 3
-        # predates the Driving assistance category).
+        # (after Speech) for a release or two so muscle memory still lands
+        # somewhere useful.
         items.insert(
-            4,
+            3,
             MenuItem(
                 "Online",
                 self._open_online_hub,
@@ -975,6 +977,9 @@ class SettingsState(MenuState):
         return items
 
     def _open(self, category: str) -> None:
+        if category == "gameplay":
+            self.ctx.push_state(GameplaySettingsState(self.ctx))
+            return
         self.ctx.push_state(SettingsCategoryState(self.ctx, category))
 
     def _open_online_hub(self) -> None:
@@ -990,6 +995,72 @@ class SettingsState(MenuState):
         # not before it, so it is not the one left cancelled by the other.
         self.ctx.pop_state()
         self.ctx.say("Settings saved.", interrupt=True)
+
+
+# Spoken once to a player whose settings predate this layout, the first time
+# they open the Gameplay submenu. It covers both moves in one breath: the new
+# submenu shape, and the world-data rows leaving Speech and weather. A blind
+# player cannot see a menu change shape, so the words carry the whole change,
+# and the reassurance that nothing about their actual settings moved.
+GAMEPLAY_REORG_NOTICE = (
+    "Gameplay is now a category with its own submenu: Driving assistance, "
+    "Difficulty and hours of service, World and traffic, and Controls. "
+    "Weather, traffic, and parking sources moved into World and traffic, from "
+    "what used to be Speech and weather. Nothing about your settings changed; "
+    "this is just where to find them now."
+)
+
+
+class GameplaySettingsState(MenuState):
+    """The Gameplay parent: a submenu of submenus.
+
+    Gameplay used to be one flat list long enough to lose things in. It is now
+    a category that opens four smaller lists, each its own spoken screen, using
+    the same per-category machinery as every other settings screen.
+    """
+
+    title = "Gameplay"
+    intro_help = (
+        "Gameplay settings are grouped into four screens. Use up and down "
+        "arrows to pick one, Enter to open it, and Escape to go back. Each "
+        "screen opens its own list of settings."
+    )
+
+    SUBCATEGORIES = (
+        ("Driving assistance", "assistance"),
+        ("Difficulty and hours of service", "difficulty"),
+        ("World and traffic", "world"),
+        ("Controls", "controls"),
+    )
+
+    def build_items(self) -> list[MenuItem]:
+        items = [
+            MenuItem(label, lambda key=key: self._open(key), help=f"Open {label.lower()} settings.")
+            for label, key in self.SUBCATEGORIES
+        ]
+        items.append(MenuItem("Back", self.go_back))
+        return items
+
+    def announce_entry(self) -> None:
+        super().announce_entry()
+        s = self.ctx.settings
+        if s.gameplay_reorg_notice_pending:
+            # Said once and only to a player whose settings moved under them.
+            # Queued behind the menu's own entry line rather than interrupting
+            # it, and cleared to disk immediately so a mid-notice quit does not
+            # replay it forever -- but a player who never reaches this screen
+            # keeps the flag, and hears it whenever they first arrive.
+            s.gameplay_reorg_notice_pending = False
+            s.save()
+            self.ctx.say(GAMEPLAY_REORG_NOTICE, interrupt=False, review=False)
+
+    def _open(self, category: str) -> None:
+        self.ctx.push_state(SettingsCategoryState(self.ctx, category))
+
+    def go_back(self) -> None:
+        self.ctx.settings.save()
+        self.ctx.audio.play("ui/menu_back")
+        self.ctx.pop_state()
 
 
 class SettingsCategoryState(MenuState):
@@ -1008,10 +1079,12 @@ class SettingsCategoryState(MenuState):
     )
 
     TITLES = {
-        "gameplay": "Gameplay",
         "assistance": "Driving assistance",
+        "difficulty": "Difficulty and hours of service",
+        "world": "World and traffic",
+        "controls": "Controls",
         "audio": "Audio",
-        "speech": "Speech and weather",
+        "speech": "Speech",
         "updates": "Updates",
         "reports": "Problem reports",
     }
@@ -1070,20 +1143,91 @@ class SettingsCategoryState(MenuState):
             )
             items.append(
                 MenuItem(
-                    lambda: f"Lane and edge cue loudness: {s.lane_cue_loudness}",
+                    lambda: f"Lane and edge cue prominence: {s.lane_cue_loudness}",
                     lambda: self._cycle_cue_loudness(1),
-                    help="How loud the road speaks when you leave your line: "
-                    "the rumble-strip and shoulder textures, the lane "
-                    "locator you turn on with I while driving, and the "
-                    "warning bars before a hairpin all "
-                    "follow this. Subtle keeps them under the engine, "
-                    "standard matches it, prominent cuts through for "
-                    "players who want no doubt. Presets never change it.",
+                    help="How much the road cues stand out when you leave your "
+                    "line: the rumble-strip and shoulder textures, the lane "
+                    "locator you turn on with I while driving, and the warning "
+                    "bars before a hairpin all follow this. It is not a separate "
+                    "volume; it layers on top of the Gameplay cues volume in "
+                    "Audio settings. Subtle keeps these cues under the engine, "
+                    "standard matches it, prominent cuts through for players who "
+                    "want no doubt. Presets never change it.",
                 )
             )
             items.append(MenuItem("Back", self.go_back))
             return items
-        if self.category == "gameplay":
+        if self.category == "difficulty":
+            return [
+                MenuItem(
+                    lambda: f"Driving mode: {self._pace_label()}",
+                    lambda: self._cycle_pace(1),
+                    help="Driving mode controls pacing and pressure. Relaxed "
+                    "gives wider hazard response windows, gentler "
+                    "collision damage and fatigue, calmer speech, and the most "
+                    "real time. Standard keeps balanced pressure. Realistic "
+                    "moves fastest, so decisions arrive sooner.",
+                ),
+                MenuItem(
+                    lambda: f"Hours of service: {self._hos_label()}",
+                    lambda: self._cycle_hos(1),
+                    help="Realistic enforces full hours rules and normal "
+                    "road hazards. Relaxed eases the hours limits and "
+                    "makes road hazards rare, so you can focus on "
+                    "driver responsibility: hours, fueling, and repairs.",
+                ),
+                MenuItem(
+                    lambda: f"Overspeed warning: {s.overspeed_warning}",
+                    lambda: self._toggle_overspeed_warning(1),
+                    help="A dash chime and a spoken heads-up when you run over "
+                    "the posted limit, dinging faster the further over you go, "
+                    "like a carrier-set overspeed alert in a real company "
+                    "truck. Urgent only stays quiet until you are far past "
+                    "the limit, for drivers who speed on purpose but still "
+                    "want the runaway alarm.",
+                ),
+                MenuItem("Back", self.go_back),
+            ]
+        if self.category == "world":
+            return [
+                MenuItem(
+                    lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
+                    lambda: self._toggle_real_weather(1),
+                    help="Real world uses live city conditions when available.",
+                ),
+                MenuItem(
+                    lambda: f"Traffic source: {'real time' if s.real_traffic else 'simulated'}",
+                    lambda: self._toggle_real_traffic(1),
+                    help="Real time uses live traffic incidents from state 511 "
+                    "APIs when available.",
+                ),
+                MenuItem(
+                    lambda: f"Parking source: {'real time' if s.real_parking else 'simulated'}",
+                    lambda: self._toggle_real_parking(1),
+                    help="Real time uses live truck parking availability from "
+                    "TPIMS APIs when available.",
+                ),
+                MenuItem(
+                    lambda: (
+                        "Live weather controls calendar: "
+                        f"{'on' if s.live_weather_controls_calendar else 'off'}"
+                    ),
+                    lambda: self._toggle_live_weather_calendar(1),
+                    help="When on, live weather uses today's real date and "
+                    "season. When off, the career date advances at midnight and "
+                    "seasons pass while weather conditions still come from the "
+                    "real world.",
+                ),
+                MenuItem(
+                    lambda: f"Enforcement presence: {s.enforcement_presence}",
+                    lambda: self._cycle_enforcement_presence(1),
+                    help="How much police activity you hear on the road. It does "
+                    "not change how likely you are to be pulled over. Asking for "
+                    "the road ahead always reports enforcement in full.",
+                ),
+                MenuItem("Back", self.go_back),
+            ]
+        if self.category == "controls":
             return [
                 MenuItem(
                     lambda: (
@@ -1109,61 +1253,6 @@ class SettingsCategoryState(MenuState):
                     "everywhere. This only affects automatic transmission.",
                 ),
                 MenuItem(
-                    lambda: f"Overspeed warning: {s.overspeed_warning}",
-                    lambda: self._toggle_overspeed_warning(1),
-                    help="A dash chime and a spoken heads-up when you run over "
-                    "the posted limit, dinging faster the further over you go, "
-                    "like a carrier-set overspeed alert in a real company "
-                    "truck. Urgent only stays quiet until you are far past "
-                    "the limit, for drivers who speed on purpose but still "
-                    "want the runaway alarm.",
-                ),
-                MenuItem(
-                    lambda: f"Driving mode: {self._pace_label()}",
-                    lambda: self._cycle_pace(1),
-                    help="Driving mode controls pacing and pressure. Relaxed "
-                    "gives wider hazard response windows, gentler "
-                    "collision damage and fatigue, calmer speech, and the most "
-                    "real time. Standard keeps balanced pressure. Realistic "
-                    "moves fastest, so decisions arrive sooner.",
-                ),
-                MenuItem(
-                    lambda: f"Hours of service: {self._hos_label()}",
-                    lambda: self._cycle_hos(1),
-                    help="Realistic enforces full hours rules and normal "
-                    "road hazards. Relaxed eases the hours limits and "
-                    "makes road hazards rare, so you can focus on "
-                    "driver responsibility: hours, fueling, and repairs.",
-                ),
-                # One setting, one live control. This row used to adjust lane
-                # keeping too, under a second and much thinner help text; two
-                # live controls for one setting is a real hazard in a spoken
-                # list. It stays here as a pointer for a release or two so
-                # muscle memory still lands somewhere useful, the same way
-                # the moved Online row does.
-                MenuItem(
-                    lambda: f"Enforcement presence: {s.enforcement_presence}",
-                    lambda: self._cycle_enforcement_presence(1),
-                    help="How much police activity you hear on the road. It does "
-                    "not change how likely you are to be pulled over. Asking for "
-                    "the road ahead always reports enforcement in full.",
-                ),
-                MenuItem(
-                    "Lane keeping",
-                    self._open_assistance_settings,
-                    help="Lane keeping, formerly Lane drift, has moved to "
-                    "driving assistance settings. This opens that menu.",
-                ),
-                MenuItem(
-                    lambda: f"Speed keeper: {'on' if s.speed_keeper else 'off'}",
-                    lambda: self._toggle_speed_keeper(1),
-                    help="In low-speed zones where adaptive cruise is unavailable, "
-                    "such as facility roads, gates, and construction zones, automatic "
-                    "speed control uses the keeper, then switches back to adaptive "
-                    "cruise on open roads. The keeper eases off early for the next "
-                    "turn or the next lower limit. Braking cancels the whole session.",
-                ),
-                MenuItem(
                     lambda: f"Controller: {'enabled' if s.controller_enabled else 'disabled'}",
                     lambda: self._toggle_controller(1),
                     help="Accept game-controller input alongside the keyboard. "
@@ -1176,6 +1265,16 @@ class SettingsCategoryState(MenuState):
                     help="Rumble feedback on the controller for hazards, hard "
                     "braking, the rumble strip, and road seams. Has no effect "
                     "without a controller connected.",
+                ),
+                MenuItem(
+                    lambda: f"Speed keeper: {'on' if s.speed_keeper else 'off'}",
+                    lambda: self._toggle_speed_keeper(1),
+                    help="In low-speed zones where adaptive cruise is unavailable, "
+                    "such as facility roads, gates, and construction zones, pressing "
+                    "K holds your current speed so the accelerator does not need to "
+                    "stay held, then switches back to adaptive cruise on open roads. "
+                    "The keeper eases off early for the next turn or the next lower "
+                    "limit. Braking cancels the whole session.",
                 ),
                 MenuItem("Back", self.go_back),
             ]
@@ -1297,21 +1396,25 @@ class SettingsCategoryState(MenuState):
             actions = [action for _, action, _ in self._speech_control_specs()]
         else:
             actions = {
-                "gameplay": [
+                "difficulty": [
+                    self._cycle_pace,
+                    self._cycle_hos,
+                    self._toggle_overspeed_warning,
+                ],
+                "world": [
+                    self._toggle_real_weather,
+                    self._toggle_real_traffic,
+                    self._toggle_real_parking,
+                    self._toggle_live_weather_calendar,
+                    self._cycle_enforcement_presence,
+                ],
+                "controls": [
                     self._toggle_units,
                     self._toggle_transmission,
                     self._cycle_automatic_direction_changes,
-                    self._toggle_overspeed_warning,
-                    self._cycle_pace,
-                    self._cycle_hos,
-                    self._cycle_enforcement_presence,
-                    # The lane keeping row here is a pointer, not a control:
-                    # left and right must not silently change a setting the
-                    # row cannot read back.
-                    lambda _d: None,
-                    self._toggle_speed_keeper,
                     self._toggle_controller,
                     self._toggle_haptics,
+                    self._toggle_speed_keeper,
                 ],
                 "assistance": [
                     self._cycle_assist_preset,
@@ -1457,39 +1560,9 @@ class SettingsCategoryState(MenuState):
                     "Which installed voice the game speaks with.",
                 )
             )
-        specs.append(
-            (
-                lambda: f"Weather source: {'real world' if s.real_weather else 'simulated'}",
-                self._toggle_real_weather,
-                "Real world uses live city conditions when available.",
-            )
-        )
-        specs.append(
-            (
-                lambda: f"Traffic source: {'real time' if s.real_traffic else 'simulated'}",
-                self._toggle_real_traffic,
-                "Real time uses live traffic incidents from state 511 APIs when available.",
-            )
-        )
-        specs.append(
-            (
-                lambda: f"Parking source: {'real time' if s.real_parking else 'simulated'}",
-                self._toggle_real_parking,
-                "Real time uses live truck parking availability from TPIMS APIs when available.",
-            )
-        )
-        specs.append(
-            (
-                lambda: (
-                    "Live weather controls calendar: "
-                    f"{'on' if s.live_weather_controls_calendar else 'off'}"
-                ),
-                self._toggle_live_weather_calendar,
-                "When on, live weather uses today's real date and season. When off, "
-                "the career date advances at midnight and seasons pass while weather "
-                "conditions still come from the real world.",
-            )
-        )
+        # Weather, traffic, and parking sources, and the live-weather calendar,
+        # used to live here. They are world simulation, not speech, so they
+        # moved to Gameplay, World and traffic.
         return specs
 
     @staticmethod
@@ -1545,11 +1618,10 @@ class SettingsCategoryState(MenuState):
                 "Route-transition assistance",
                 "Helps manage speed and lane workload at confirmed route transitions.",
             ),
-            (
-                "speed_keeper",
-                "Speed keeper",
-                "In low-speed zones where adaptive cruise is unavailable, such as facility roads, gates, and construction zones, pressing K holds your current speed so the accelerator does not need to stay held. It eases off early for the next turn or the next lower limit ahead, and the corner call adds Speed keeper easing when it is taking the turn. Braking cancels. Presets never change this.",
-            ),
+            # The speed keeper is an input-accessibility aid, not a driving
+            # assist -- it lives in Gameplay, Controls, and there is exactly one
+            # row for it. It used to appear here too, a second live control for
+            # the one setting, which is a real hazard in a spoken list.
             (
                 "pedal_latch",
                 "Latching pedals",
@@ -1566,9 +1638,6 @@ class SettingsCategoryState(MenuState):
                 "A co-driver reads the road: bends that demand slowing are called before they arrive, like Sharp left, half a mile, advise 35. Bends you are already slow enough for stay silent. The U readout lists the next few either way. Presets never change this.",
             ),
         )
-
-    def _open_assistance_settings(self) -> None:
-        self.ctx.push_state(SettingsCategoryState(self.ctx, "assistance"))
 
     def speak_current(self) -> None:
         super().speak_current()
@@ -1632,7 +1701,6 @@ class SettingsCategoryState(MenuState):
 
     def _toggle_driving_assist(self, field: str, _direction: int = 1) -> None:
         if field in (
-            "speed_keeper",
             "pedal_latch",
             "curve_callouts",
             "predictive_cruise",
