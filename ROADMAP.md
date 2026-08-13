@@ -417,6 +417,31 @@ onto exit signalling.
       until the walkthrough completes (gated on tutorial_done itself).
       The long tail of messages that read the same in both modes stays
       normal-only by design.
+- [x] **Speech-priority redesign, stage S3 -- landed 2026-08-12** (R6, R7,
+      R9, R10, R11, R12, R14). The naming diet and the noise cuts: facility
+      names speak in full on first mention per leg and short after, with the
+      type prefix dropped when the proper name already carries it (R6);
+      demonstrated instructions retire -- engine start, the controls-help
+      pointer, the exit-signal prompt stop repeating once the player has done
+      them, gated on a persisted counter keyed to control binding and
+      transmission so a remap or a manual gearbox re-teaches (R7); achievement
+      flavor leaves the drive entirely, mid-drive announce is earcon plus name
+      in both modes and the settlement collapses a run's badges to one named
+      row, flavor kept in the log and the achievements menu (R9); the
+      settlement drops the rows that report the unremarkable default -- no new
+      damage, a full tank, an undamaged truck, the empty career-messages
+      placeholder, the standing carrier-charges note (R10); the load-damage
+      coaching tail speaks once per episode, escalations carry only the new
+      number (R11); off-pavement becomes a standing condition -- speech at
+      transitions only (entry, worse, back on), the pre-existing panned
+      edge-rumble ladder carrying position in between (R12); and the dodge
+      outcome pair (hazard-clear and collision) is learnable on both sides in
+      the sounds screen (R14).
+- [ ] R12 follow-up: redline and low-air are still discrete re-speaks rather
+      than the transition-plus-continuous-cue model off-pavement now uses. The
+      transition speech is straightforward; the continuous half wants an
+      engine-strain tone for redline that the pack does not yet carry, so it
+      rides the sound-hunt list with the cruise earcon below.
 - [ ] A dedicated cruise-adjust earcon for terse mode's curve composite
       (the easing clause currently folds into the pacenote; the curve
       chime plus audible deceleration carry it), auditioned alongside the

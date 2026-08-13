@@ -4,6 +4,13 @@
 
 ### Changed
 
+- **Running off the pavement no longer talks in a loop.** Drifting onto the
+  shoulder or into the median now speaks when it happens, again if it gets
+  worse, and once more when you are back on the road -- instead of repeating
+  the same sentence every few seconds. Between those moments the rumble you
+  hear on the side you drifted toward tells you where the truck is, the way it
+  always did.
+
 - **The game starts faster still.** The road detail for every leg in the
   country -- grades, exits, landmarks, posted limits and the rest -- used to
   be built the moment the game opened, whether or not you ever drove those

@@ -563,6 +563,11 @@ class DrivingState(
         self._curve_run: dict | None = None  # the bend underway, and how it is going
         self._cross_repeat_s = 0.0  # rapid re-crossings keep only the quiet thump
         self._sideswipe_cooldown_s = 0.0  # one contact, however many crossings
+        # Off-pavement is a standing condition: the panned edge-rumble loop
+        # carries "where am I right now", and speech fires only at transitions
+        # -- left the pavement, worse, back on it (research doc R12). None means
+        # on the pavement; otherwise the last-spoken severity band.
+        self._road_position_band: int | None = None
         self._reverse_cue_active = False
         self._air_cue_active = False  # compressor fill loop below governor release
         self._jake_cue_key: str | None = None  # jake growl loop currently playing

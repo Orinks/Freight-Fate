@@ -936,23 +936,20 @@ class DrivingUpdateMixin:
             self.ctx.say_event("Route-transition assistance released.", interrupt=False)
         self._transition_assist_active = transition_assisting
         wind = self.weather.effects.wind
-        if self.lane.update(dt, self.truck.velocity_mps, curve=curve, wind=wind, assist=mode):
+        off_road_event = self.lane.update(
+            dt, self.truck.velocity_mps, curve=curve, wind=wind, assist=mode
+        )
+        if off_road_event:
             if not self.ctx.settings.lane_departure_warning:
                 return
             self.ctx.audio.play("vehicle/rumble_strip", volume=1.0, pan=self._lane_pan())
             self.truck.add_damage(1.0)
-            boundary = self._edge_boundary()
-            if boundary == "oncoming":
-                # Past an undivided centerline is not a shoulder: say the
-                # real danger, on the side it lives.
-                message = "Across the centerline, in the oncoming lane!"
-            elif boundary == "median":
-                message = "Off the pavement, into the median on the left!"
-            else:
-                message = self.lane.describe()
-            if not self._terse_speech():
-                message += " Steer back toward the lane center."
-            self.ctx.say_event(message, interrupt=True)
+            self._announce_off_pavement()
+        elif self._road_position_band is not None and not self._off_pavement():
+            # Back on the pavement: the standing condition ended, so its one
+            # transition line speaks and the band resets (research doc R12).
+            self._road_position_band = None
+            self.ctx.say_event("Back on the pavement.", interrupt=False, review=False)
         self._cross_repeat_s = max(0.0, self._cross_repeat_s - dt)
         self._sideswipe_cooldown_s = max(0.0, self._sideswipe_cooldown_s - dt)
         if self.lane.crossed:
@@ -1295,6 +1292,44 @@ class DrivingUpdateMixin:
         drifted toward (negative left, positive right), so the side you hear it
         on is the side to steer away from."""
         return max(-1.0, min(1.0, self.lane.offset))
+
+    def _off_pavement(self) -> bool:
+        from ..sim.lane import OFF_ROAD
+
+        return self.lane.edge_excursion() >= OFF_ROAD
+
+    def _off_pavement_band(self) -> int:
+        """A severity band that rises as the truck goes deeper off and faster,
+        so the transition speech fires again when the condition worsens
+        (research doc R12). Zero to two."""
+        depth = 0 if self.lane.edge_excursion() < 1.4 else 1
+        fast = 1 if self.truck.speed_mph >= 45.0 else 0
+        return depth + fast
+
+    def _announce_off_pavement(self) -> None:
+        """Speak the off-pavement condition at its transitions only: on entry,
+        and again when it worsens. A steady or easing band stays silent -- the
+        panned edge-rumble loop carries where the truck is (research doc R12)."""
+        band = self._off_pavement_band()
+        previous = self._road_position_band
+        if previous is not None and band <= previous:
+            # Still off, no worse: track the band so a later worsening speaks,
+            # but say nothing now.
+            self._road_position_band = band
+            return
+        self._road_position_band = band
+        boundary = self._edge_boundary()
+        if boundary == "oncoming":
+            # Past an undivided centerline is not a shoulder: say the
+            # real danger, on the side it lives.
+            message = "Across the centerline, in the oncoming lane!"
+        elif boundary == "median":
+            message = "Off the pavement, into the median on the left!"
+        else:
+            message = self.lane.describe()
+        if not self._terse_speech():
+            message += " Steer back toward the lane center."
+        self.ctx.say_event(message, interrupt=True)
 
     def _edge_boundary(self) -> str:
         """What lies past the road edge the truck is drifting toward.
