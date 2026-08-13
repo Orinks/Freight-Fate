@@ -797,3 +797,17 @@ def test_pay_out_of_pocket_clamps_and_clears():
 
     p = _payer(money=100.0, owed=600.0)
     assert pay_out_of_pocket(p, 0.0) == 0.0  # no-op stays a no-op
+
+
+# --- debt lines point at cash payoff -------------------------------------------
+
+
+def test_debt_lines_point_at_out_of_pocket_payoff():
+    from freight_fate.models import solvency
+
+    POINTER = "You can also pay it down from cash at any terminal or truck stop."
+
+    p = _payer(money=500.0, owed=1_000.0)  # rung 1 for a fresh company driver
+    assert POINTER in solvency.debt_warning_line(p)
+    assert POINTER not in solvency.debt_warning_line(p, terse=True)
+    assert POINTER in solvency.debt_line(p)

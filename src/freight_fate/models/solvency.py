@@ -566,7 +566,8 @@ def debt_warning_line(profile, terse: bool = False) -> str:
         return (
             f"You owe {owed}. A quarter of every settlement now goes to it, and "
             "three quarters always reaches you, so you will never finish a run "
-            f"with nothing. The ceiling on this is {ceiling}."
+            f"with nothing. The ceiling on this is {ceiling}. "
+            "You can also pay it down from cash at any terminal or truck stop."
         )
     if rung == 2:
         if terse:
@@ -574,7 +575,8 @@ def debt_warning_line(profile, terse: bool = False) -> str:
         return (
             f"You owe {owed}, which is over halfway to a ceiling of {ceiling}. "
             "A quarter of every settlement is paying it down; running clean and "
-            "on time keeps new charges off it."
+            "on time keeps new charges off it. "
+            "You can also pay it down from cash at any terminal or truck stop."
         )
     if terse:
         return f"Owed {owed}. At {ceiling}, {consequence}."
@@ -602,5 +604,6 @@ def debt_line(profile) -> str:
     ceiling = debt_ceiling(profile)
     return (
         f"Owed: {money_text(owed)} of {money_text(ceiling)}. Past that, "
-        f"{ceiling_consequence_text(profile)}."
+        f"{ceiling_consequence_text(profile)}. "
+        "You can also pay it down from cash at any terminal or truck stop."
     )
