@@ -415,6 +415,24 @@ onto exit signalling.
       when the cabin-audio immersion work lands (2.0 line). Adjust the
       sealed parameters from tester feedback -- they are constants in
       cab_filter.py, not baked assets.
+- [ ] **Cab-transfer review follow-ups (merge review, 2026-08-13).** The
+      classic fallback on a pre-classic pack now routes the rebuilt idle
+      through the seal and then pitches it -- a third voice neither
+      setting promises; resolve the classic key once per process instead
+      of re-probing and re-warning every ignition. The seal applies only
+      to bands that resolve as wav, so an ogg band cut silently skips it
+      with no log -- make "sealed" a property of the key, not the file
+      extension. Pre-warm the five band seals during the loading screen
+      (first ignition currently pays ~160 ms of FFT on the game loop).
+      The sealed parameters and biquad math are duplicated between
+      cab_filter.py and sound-test/cab_transfer.py -- the audition
+      script should import them so tester-feedback tweaks cannot desync
+      the lab from the ship. The pygame backend has no classic path, so
+      the Settings toggle no-ops there against the changelog's promise.
+      Builder trees that still hold jake_1600.synth-original.wav.bak
+      must rename it to jake_1600_synth.wav (done on the primary
+      builder 2026-08-13) or the next pack_sounds.py run drops the
+      synth jake cut.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides

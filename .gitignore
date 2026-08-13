@@ -65,9 +65,11 @@ src/freight_fate/assets/sounds/**
 !src/freight_fate/assets/sounds/CREDITS.md
 # The classic engine voice (donated 1.8.x recording) is player-selectable in
 # Settings, not builder-local material, so it ships through the repo where
-# the licensed overlay can never shadow it.
+# the licensed overlay can never shadow it. Only the one shipped file is
+# un-ignored -- anything else dropped in that directory stays uncommittable.
 !src/freight_fate/assets/sounds/engine_classic/
-!src/freight_fate/assets/sounds/engine_classic/**
+src/freight_fate/assets/sounds/engine_classic/**
+!src/freight_fate/assets/sounds/engine_classic/idle.ogg
 
 # Prototype/audition renders (regenerate from sound-test/*.py, all deterministic)
 sound-test/*.wav

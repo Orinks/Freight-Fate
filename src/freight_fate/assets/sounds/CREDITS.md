@@ -36,7 +36,7 @@ current idle, start, and shutdown cues.
 
 | Sound | File | Description |
 | --- | --- | --- |
-| Truck idle, interior | `engine/idle.ogg` | In-cab idle loop, shared by Darren Duff |
+| Truck idle, interior | `engine_classic/idle.ogg` | In-cab idle loop, shared by Darren Duff; ships in-repo as the classic engine voice (was `engine/idle.ogg` until the rebuilt engine landed 2026-07-27) |
 | Truck start, interior | `engine/start.ogg` | In-cab engine-start cue, shared by Darren Duff |
 | Truck shutdown, interior | `engine/shutdown.ogg` | In-cab shutdown cue, shared by Darren Duff |
 | Truck horn, interior | `vehicle/horn.ogg` | In-cab horn cue (trimmed from Take 2), shared by Darren Duff |

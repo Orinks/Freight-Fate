@@ -126,12 +126,19 @@ def seal_wav(data: bytes) -> bytes:
     except (wave.Error, EOFError):
         log.warning("Cab transfer skipped: unreadable WAV", exc_info=True)
         return data
-    x = np.frombuffer(frames, dtype=np.int16).reshape(-1, channels)
-    x = x.astype(np.float64) / 32768.0
-    h = _transfer(float(sr), x.shape[0])
-    y = np.column_stack(
-        [np.fft.irfft(np.fft.rfft(x[:, c]) * h, n=x.shape[0]) for c in range(channels)]
-    )
+    try:
+        x = np.frombuffer(frames, dtype=np.int16).reshape(-1, channels)
+        if not len(x):
+            log.warning("Cab transfer skipped: empty WAV")
+            return data
+        x = x.astype(np.float64) / 32768.0
+        h = _transfer(float(sr), x.shape[0])
+        y = np.column_stack(
+            [np.fft.irfft(np.fft.rfft(x[:, c]) * h, n=x.shape[0]) for c in range(channels)]
+        )
+    except ValueError:
+        log.warning("Cab transfer skipped: malformed frame data", exc_info=True)
+        return data
     rms_in = math.sqrt(float(np.mean(x**2)))
     rms_out = math.sqrt(float(np.mean(y**2)))
     if rms_out > 0:
