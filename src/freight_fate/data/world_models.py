@@ -433,15 +433,22 @@ class RouteRestriction:
 
     @property
     def kind_label(self) -> str:
-        return "low clearance" if self.kind == "low_clearance" else "weight limit"
+        # "Low bridge", not "low clearance": the sign's own jargon read badly
+        # over speech (owner report 2026-08-13, "posted whatever"), and the
+        # thing a driver pictures is the bridge. Canonical noun in ontology.md.
+        return "low bridge" if self.kind == "low_clearance" else "weight limit"
 
     @property
     def spoken_ahead(self) -> str:
-        return f"{self.kind_label} ahead: posted {self.value_text}"
+        # The far call answers the only question a driver has about a sign
+        # they cannot see: does it matter? Routing already refused anything
+        # impassable (see the class docstring), so the honest answer is no,
+        # and saying so is the difference between information and worry.
+        return f"a {self.kind_label}, signed {self.value_text}. Your route clears it"
 
     @property
     def spoken_near(self) -> str:
-        return f"{self.kind_label.capitalize()}: posted {self.value_text}."
+        return f"{self.kind_label.capitalize()}, signed {self.value_text}."
 
 
 @dataclass(frozen=True)

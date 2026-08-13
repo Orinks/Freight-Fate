@@ -4,6 +4,14 @@
 
 ### Changed
 
+- **Clearance and weight signs now say what they mean.** The route readout
+  used to stack sign jargon into lines like "Posted restriction in 13
+  miles: low clearance ahead: posted 13 feet 6 inches" -- posted twice,
+  ahead fighting the distance, and no word on whether you had to care.
+  It now says "In 13 miles, a low bridge, signed 13 feet 6 inches. Your
+  route clears it." -- because your route really does: anything your
+  truck could not pass was routed around before you ever set out.
+
 - **Cruise speed now steps onto the fives, with a fine step when you need
   an exact number.** Setting cruise captures your exact speed, so a
   target like 32 used to step to 37, then 42 -- never landing on the

@@ -103,13 +103,19 @@ def test_parse_restriction_rejects_unknown_kind_and_bad_values():
 
 
 def test_restriction_spoken_text_is_player_language():
+    # Owner report 2026-08-13: "Posted restriction in 13 miles: low clearance
+    # ahead: posted 13 feet 6 inches" read as word salad -- "posted" twice,
+    # "ahead" fighting the distance, and no word on whether it matters. The
+    # cue text now names the thing, quotes the sign, and answers the only
+    # question a driver has: routing already avoided anything impassable.
     clearance = RouteRestriction(12.0, "low_clearance", feet=13.5)
-    assert clearance.spoken_ahead == "low clearance ahead: posted 13 feet 6 inches"
-    assert clearance.spoken_near == "Low clearance: posted 13 feet 6 inches."
+    assert clearance.spoken_ahead == "a low bridge, signed 13 feet 6 inches. Your route clears it"
+    assert clearance.spoken_near == "Low bridge, signed 13 feet 6 inches."
     whole = RouteRestriction(12.0, "low_clearance", feet=14.0)
     assert whole.value_text == "14 feet"
     weight = RouteRestriction(40.0, "weight_limit", tons=30.0)
-    assert weight.spoken_ahead == "weight limit ahead: posted 30 tons"
+    assert weight.spoken_ahead == "a weight limit, signed 30 tons. Your route clears it"
+    assert weight.spoken_near == "Weight limit, signed 30 tons."
     fractional = RouteRestriction(40.0, "weight_limit", tons=27.5)
     assert fractional.value_text == "27.5 tons"
 

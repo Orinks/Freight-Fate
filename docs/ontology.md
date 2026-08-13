@@ -226,6 +226,8 @@ from the words, and synonyms cost them a re-read.
 | When the load is due | deadline | due time, drop time (the appointment is the named hour) | `Job.deadline_game_h` |
 | The retarder | engine brake; "jake" in short control feedback ("Jake on, stage two") | retarder | `TruckState.engine_brake_stage` |
 | A stretch of road where a town bans the engine brake | no engine brake zone | jake brake zone, engine brake restriction, quiet zone | `Trip.engine_brake_ban_at` |
+| A posted height restriction on the corridor | low bridge | low clearance, height limit, clearance restriction | `RouteRestriction.kind_label` |
+| A posted weight restriction on the corridor | weight limit | max weight, tonnage limit, weight restriction | `RouteRestriction.kind_label` |
 | The facility entrance where a drive ends | facility gate; "gate" in short cues | entrance (as the noun for the thing), dock gate | `_handle_arrival_gate` |
 | The highway exit for the delivery | destination exit | final exit, last exit, your exit | `_destination_exit_stop` |
 | A street maneuver the route asks for | turn | corner, junction, intersection, manoeuvre | `_is_judged_turn`, `local_turn` cues |

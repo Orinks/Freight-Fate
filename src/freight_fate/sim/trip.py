@@ -2043,7 +2043,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         if cue.kind == "toll":
             return f"Toll point in {ahead_text}: {cue.text}."
         if cue.kind == "restriction":
-            return f"Posted restriction in {ahead_text}: {cue.text}."
+            # The cue text is a full clause ("a low bridge, signed 13 feet
+            # 6 inches. Your route clears it"), so the wrapper only places
+            # it on the road -- the old "Posted restriction in X: ... posted
+            # Y" double-header read as word salad (owner, 2026-08-13).
+            return f"In {ahead_text}, {cue.text}."
         return f"Next guidance in {ahead_text}: {cue.text}."
 
     def next_navigation_cue(self) -> NavigationCue | None:
