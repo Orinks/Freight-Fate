@@ -38,7 +38,7 @@ from pathlib import Path
 
 import pygame
 
-from . import assets_pack
+from . import assets_pack, cab_filter
 from .audio_fades import Fade, FadeScheduler
 from .audio_loops import SustainLoop, to_seconds
 
@@ -136,6 +136,11 @@ ENGINE_BAND_RATE_MAX = 1.30
 # fallback when the licensed multisample cuts are absent (a clean clone has
 # only the synthesized engine/idle).
 ENGINE_LOOP_KEY = "engine/idle"
+# The classic voice: the 1.8.x recording under its own key, because the
+# licensed overlay owns "engine/idle" -- when the rebuilt cuts are installed
+# the shared key IS the rebuilt idle, and the Settings "classic" promise
+# (the original engine sound) must not quietly follow it.
+ENGINE_CLASSIC_LOOP_KEY = "engine_classic/idle"
 ENGINE_RPM_IDLE = 600.0
 ENGINE_RPM_MAX = 2200.0
 ENGINE_FREQ_MAX_MULT = 1.75
@@ -238,6 +243,7 @@ def register_generated_sound(key: str, data: bytes, ext: str = "wav") -> None:
     """Publish synthesized audio under ``key`` for every backend."""
     _GENERATED[key] = (data, ext)
     _LENGTHS.pop(key, None)  # anything measured before this was measuring nothing
+    _CAB_SEALED.pop(key, None)  # and any sealed render of the old bytes with it
 
 
 def generated_sound_keys() -> tuple[str, ...]:
@@ -275,6 +281,35 @@ def _asset_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | N
         except OSError:
             log.warning("Unreadable sound file: %s", path, exc_info=True)
     return None
+
+
+# Engine band cuts with the sealed-cab transfer applied, by key. The transfer
+# is deterministic and the cuts change only on a repack, so sealing each cut
+# once per process is enough for every engine start after the first.
+_CAB_SEALED: dict[str, tuple[bytes, str]] = {}
+
+
+def _playback_bytes(key: str, extensions: tuple[str, ...]) -> tuple[bytes, str] | None:
+    """Bytes for a sound as the player should HEAR it.
+
+    The engine band cuts pass through the sealed-cab transfer
+    (``cab_filter``, owner's ear 2026-08-13): the recorded voice reads as a
+    truck heard from outside, and the cab between engine and ear is applied
+    here, at load, rather than baked into assets -- feedback rounds are
+    parameter tweaks. The classic voice's ogg keeps its old sound untouched,
+    and non-engine keys pass straight through.
+    """
+    if key not in ENGINE_BAND_KEYS:
+        return _asset_bytes(key, extensions)
+    cached = _CAB_SEALED.get(key)
+    if cached is not None:
+        return cached
+    found = _asset_bytes(key, extensions)
+    if found is not None and found[1] == "wav":
+        found = (cab_filter.seal_wav(found[0]), "wav")
+    if found is not None:
+        _CAB_SEALED[key] = found
+    return found
 
 
 def _wav_seconds(data: bytes) -> float:
@@ -493,7 +528,7 @@ class _PygameBackend:
             return None
         snd = self._cache.get(key)
         if snd is None:
-            found = _asset_bytes(key, ("ogg", "wav"))
+            found = _playback_bytes(key, ("ogg", "wav"))
             if found is None:
                 log.warning("Missing or unreadable sound: %s", key)
                 return None
@@ -1161,7 +1196,7 @@ class _BassBackend:
         return stream
 
     def _sfx_stream(self, key: str, looping: bool = False):
-        found = _asset_bytes(key, ("ogg", "wav"))
+        found = _playback_bytes(key, ("ogg", "wav"))
         if found is None:
             log.warning("Missing sound: %s", key)
             return None
@@ -1427,7 +1462,18 @@ class _BassBackend:
                 with contextlib.suppress(self._BassError):
                     band_stream.stop()
             self._engine_bands = []
-            stream = self._sfx_stream(ENGINE_LOOP_KEY, looping=True)
+            stream = None
+            if self.engine_voice_classic:
+                stream = self._sfx_stream(ENGINE_CLASSIC_LOOP_KEY, looping=True)
+                if stream is None:
+                    log.warning(
+                        "Classic engine cut %s is not in this build; "
+                        "using %s pitched instead",
+                        ENGINE_CLASSIC_LOOP_KEY,
+                        ENGINE_LOOP_KEY,
+                    )
+            if stream is None:
+                stream = self._sfx_stream(ENGINE_LOOP_KEY, looping=True)
             if stream is not None:
                 try:
                     self._engine_base_freq = stream.get_frequency()

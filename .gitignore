@@ -63,9 +63,15 @@ sound-source/
 # so licensing stays reviewable in a clean clone.
 src/freight_fate/assets/sounds/**
 !src/freight_fate/assets/sounds/CREDITS.md
+# The classic engine voice (donated 1.8.x recording) is player-selectable in
+# Settings, not builder-local material, so it ships through the repo where
+# the licensed overlay can never shadow it.
+!src/freight_fate/assets/sounds/engine_classic/
+!src/freight_fate/assets/sounds/engine_classic/**
 
 # Prototype/audition renders (regenerate from sound-test/*.py, all deterministic)
 sound-test/*.wav
+sound-test/render-cab/
 sound-test/__pycache__/
 
 # Portable save data (lives in the game directory)

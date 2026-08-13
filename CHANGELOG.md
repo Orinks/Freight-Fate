@@ -4,6 +4,12 @@
 
 ### Changed
 
+- **The engine now sounds like you are sitting in the cab, not standing
+  beside the truck.** The glass and firewall soften the engine's high end,
+  the body carries its low rumble, and the sound sits around you the way a
+  real cab delivers it. Testers said the engine felt like it was outside
+  the truck -- this is the fix. The classic engine voice is untouched.
+
 - **Running off the pavement no longer talks in a loop.** Drifting onto the
   shoulder or into the median now speaks when it happens, again if it gets
   worse, and once more when you are back on the road -- instead of repeating
@@ -236,6 +242,12 @@
   told was open ended in a sideswipe. Both readings now look far enough down
   the road to cover the whole move, so when the truck says a lane is open, it
   stays open until you are in it.
+
+- **Choosing the classic engine voice brings back the original engine.** The
+  Engine voice setting under Settings, Audio could end up playing the new
+  cab recording stretched the old way instead of the sound it promised.
+  Classic now always means the engine from earlier versions of the game,
+  exactly as it was.
 
 - **Resuming cruise to a high speed no longer floors the engine to get
   there.** Bringing automatic speed control back with Shift+K, or setting it

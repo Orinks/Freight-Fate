@@ -82,6 +82,23 @@ def test_pack_overlay_wins_by_key_across_extensions(tmp_path):
     assert pack.read("ui/menu_select.ogg") is None  # stale-extension twin dropped
 
 
+def test_pack_excludes_editor_backups(tmp_path):
+    # A jake .bak from a builder's loose tree once rode into a released pack;
+    # backups stay out of the payload, from the committed tree and the
+    # licensed overlay both.
+    sounds = _write_fixture_sounds(tmp_path)
+    (sounds / "ui" / "menu_select.ogg.bak").write_bytes(b"stale backup")
+    overlay = tmp_path / "licensed"
+    (overlay / "engine").mkdir(parents=True)
+    (overlay / "engine" / "low.ogg").write_bytes(b"licensed engine low")
+    (overlay / "engine" / "jake.synth-original.wav.bak").write_bytes(b"synth original")
+    out = assets_pack.write_pack(sounds, tmp_path / "sounds.pak", overlay_dir=overlay)
+    names = assets_pack.SoundPack(out).names()
+    assert not [name for name in names if name.endswith(".bak")]
+    assert "engine/low.ogg" in names
+    assert "ui/menu_select.ogg" in names
+
+
 def test_pack_missing_overlay_dir_is_fine(tmp_path):
     sounds = _write_fixture_sounds(tmp_path)
     out = assets_pack.write_pack(
@@ -136,13 +153,13 @@ def test_asset_bytes_reads_loose_files_without_pack():
 def test_committed_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_PACK_PATH.read_bytes()
-    # Repacked 2026-08-11 (f737b416) for the real 1600 rpm engine-brake
-    # recording; that commit shipped the pack and left this pin behind, so the
-    # check had been failing on the committed tree ever since.
-    assert len(pack_bytes) == 225_244_828
+    # Repacked 2026-08-13 for the classic engine voice: 279 entries -- adds
+    # engine_classic/idle.ogg, renames the stray jake_1600 .bak to an honest
+    # engine/jake_1600_synth.wav (the future jake A/B), drops nothing else.
+    assert len(pack_bytes) == 225_274_388
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "7c080075f6c11c04c2901470f7b33f5d7b230a7d28884bba85e524a89c44f9d6"
+        "13f677b18a0162dca5996238b74d252859db49ac805506cb115d46bd80cd9f32"
     )
 
 

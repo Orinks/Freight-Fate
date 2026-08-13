@@ -76,6 +76,10 @@ def add_sound_pack(build_dir: Path, tmp_path: Path) -> None:
     sounds = tmp_path / "pack_sounds_src"
     (sounds / "ui").mkdir(parents=True, exist_ok=True)
     (sounds / "ui" / "menu_select.ogg").write_bytes(b"fake ogg payload")
+    # A valid packaged build carries the classic engine voice (build_release
+    # refuses a pack without it, so the fixture pack must have it too).
+    (sounds / "engine_classic").mkdir(exist_ok=True)
+    (sounds / "engine_classic" / "idle.ogg").write_bytes(b"fake classic idle")
     assets_pack.write_pack(sounds, build_dir / "freight_fate" / "sounds.pak")
     (build_dir / "SOUND_CREDITS.md").write_text("# Credits\n", encoding="utf-8")
 

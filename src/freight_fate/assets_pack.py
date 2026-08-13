@@ -52,18 +52,19 @@ def write_pack(sounds_dir: Path, output: Path, overlay_dir: Path | None = None) 
     wav inside the pack, so a committed ``engine/mid.ogg`` fallback would
     shadow a licensed ``engine/mid.wav`` if both shipped. A build made on a
     machine that owns the licensed libraries ships them; a clean clone packs
-    the synthesized fallbacks alone.
+    the synthesized fallbacks alone. Editor backups (``*.bak``) never ship:
+    one already rode a builder's loose tree into a released pack.
     """
     entries = {
         path.relative_to(sounds_dir).as_posix(): path
         for path in sounds_dir.rglob("*")
-        if path.is_file()
+        if path.is_file() and path.suffix != ".bak"
     }
     if overlay_dir is not None and overlay_dir.is_dir():
         overlay_entries = {
             path.relative_to(overlay_dir).as_posix(): path
             for path in overlay_dir.rglob("*")
-            if path.is_file()
+            if path.is_file() and path.suffix != ".bak"
         }
         overlay_stems = {name.rsplit(".", 1)[0] for name in overlay_entries}
         entries = {

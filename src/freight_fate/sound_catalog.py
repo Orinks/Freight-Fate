@@ -581,6 +581,7 @@ SELF_EXPLANATORY: dict[str, str] = {
     # same folder and IS taught, and a folder glob here would mark it excluded
     # and taught at once.
     "engine/idle": "It is an engine and it sounds like one.",
+    "engine_classic/idle": "The same engine, in its earlier voice.",
     "engine/low": "As the idle loop: an engine at an engine speed.",
     "engine/mid": "As the idle loop.",
     "engine/midhigh": "As the idle loop.",

@@ -372,6 +372,50 @@ onto exit signalling.
       `test_lane_return_gap.py` now advances the world between the readout
       and the arrival, which is the case the old same-instant test could
       not see.
+- [x] **Classic engine voice restored to the original recording --
+      2026-08-13.** The Settings engine-voice "classic" option quietly
+      became the rebuilt idle cut played the old way when the licensed
+      overlay landed 2026-07-27: both voices shared the engine/idle key,
+      and the overlay owns that key. The donated 1.8.x idle now ships
+      in-repo under its own key (engine_classic/idle, gitignore
+      carve-out) that no overlay can shadow, the BASS classic path asks
+      for it first and logs an honest fallback, and `*.bak` files no
+      longer ride into the pack (the shipped pack carries one beside the
+      real 1600 jake).
+- [x] **Sounds.pak repacked for the classic voice -- 2026-08-13.** 278
+      to 279 entries, rebuilt from the shipped pack's own contents (not
+      a builder tree, so every 2026-08 addition survives): adds
+      engine_classic/idle.ogg, renames the stray
+      jake_1600.synth-original.wav.bak to an honest
+      engine/jake_1600_synth.wav so both 1600 jake cuts ship and a
+      future synth-versus-recorded jake toggle is a pure code change.
+      Length/SHA pins updated. build_release verifies the classic cut
+      is in any staged pack.
+- [ ] **Jake voice A/B pending the owner's ear; provenance
+      accepted-on-word.** The 1600 zone is the one recorded jake
+      (f737b416); Josh says someone recorded it -- a donation. OWED: the
+      recordist's name from Josh for a CREDITS.md row (the
+      reviewable-licensing standard). The other five zones are synth,
+      so listen for a character seam crossing 1600 rpm under engine
+      braking. Both cuts ship in the pack; if the owner wants the
+      option, wire a jake toggle on the engine-voice settings pattern.
+      If provenance sours, jake_1600 reverts to the synth original.
+- [x] **Sealed-cab transfer on the engine voice -- 2026-08-13.** The
+      "engine sounds external" complaint was a missing cabin transfer
+      function, not the voice. cab_filter.py applies the owner-approved
+      sealed variant (from the sound-test/cab_transfer.py auditions;
+      runtime output verified byte-identical to the approved render) to
+      the five band cuts at load: -16 dB shelf past 1 kHz, 2.4 kHz
+      lowpass, +5 dB body, 63 Hz boom, 1.7/3.3 ms early reflections,
+      RMS-matched, circular so loops stay seamless. Classic voice and
+      jake deliberately untouched this round.
+- [ ] **Cabin-state intensities for the cab transfer.** The moderate
+      variant from the same auditions is the natural "window cracked"
+      setting; wire intensity selection to the doors/windows mechanic
+      when the cabin-audio immersion work lands (2.0 line). Adjust the
+      sealed parameters from tester feedback -- they are constants in
+      cab_filter.py, not baked assets.
+- [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides
       a sideswipe, plus an L readout of every neighbouring lane on demand
