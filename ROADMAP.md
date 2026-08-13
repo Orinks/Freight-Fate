@@ -429,6 +429,29 @@ onto exit signalling.
       roadside stops, now shared through one `_settle_engine_to_idle`
       helper. Running off the road asleep a third or later time now
       speaks the real count instead of freezing at "twice now".
+- [x] **Billboards, round two, 2026-08-12.** Seventeen new owner-written
+      roadside boards in the rotation (roadfood, trucker-commerce, and
+      fourth-wall genres), plus song tribute boards for the achievement
+      catalog: forty-plus signs on the corridors that raised the music,
+      corridor-keyed (nineteen new shield keys) or riding a low-weight
+      tribute pool that draws about one sign in ten. Titles and artist
+      names only, never lyric quotes.
+- [ ] Billboard tribute copy could use one more polish pass with the
+      owner's own eye -- shipped at "good enough for now" after three
+      revision rounds; the closer style rules are in the module docstring.
+- [ ] Split the first-drive tutorial across multiple runs (owner call,
+      future session). Interacts with the speech redesign's R15 rule:
+      first-run guidance is exempt from verbosity until the walkthrough
+      completes, so a multi-run tutorial changes what "complete" means.
+- [ ] The playtest rig records speech submissions, not deliveries -- it
+      bypasses the real pacer, so transcripts cannot show dropped or
+      cut-off lines. Route the rig through the pacer (or add a
+      pacer-aware mode) so the adversarial battery can catch speech
+      regressions.
+- [ ] The blown ramp terminal and missed street turn loop-backs still
+      charge only clock time -- same free-time defect fixed for the
+      facility gate and destination exit; apply `_charge_scripted_loop`
+      to both.
 - [ ] **The no-engine-brake ban only knows route cities.** It rides
       `URBAN_RADIUS_MI` (6.0) around route nodes, so small towns a leg
       merely passes through are not modelled at all -- in a survey only

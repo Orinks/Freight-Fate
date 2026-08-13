@@ -76,6 +76,15 @@
   cab without the voice itself getting louder. It is on by default; turn
   it off under Settings, Audio, "Game sounds step back for speech."
 
+- **Sixty new billboards along the highways.** Seventeen fresh roadside
+  jokes about diesel prices, tiny parking lots, and questionable
+  steakhouses join the rotation everywhere. And on the corridors that
+  raised the music, tribute signs now mark the territory: Bakersfield
+  Sound country on the way up the valley, Hank Williams's Alabama,
+  Johnny Cash's delta bottomland, and the Franklin County Trucking
+  Company's own home turf on the road through Missouri. Billboards
+  still respect the roadside chatter setting.
+
 - **Learn what every sound means before you meet it at speed.** A new
   Learn game sounds screen on the main menu, and on the pause menu while
   you drive, plays any cue the road uses on demand. Arrow to a sound,
