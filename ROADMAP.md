@@ -343,6 +343,19 @@ onto exit signalling.
       expression that let them drift apart. Testers who already earned a
       date badge out of season keep it -- revoking earned badges would be
       the worse call.
+- [ ] **New Dropbox tester findings, reported 2026-08-13 -- not yet
+      triaged.** (1) Sarah: on a road with more than three lanes the
+      lane-change callout says "middle lane" for both the middle and the
+      left, and there is no way to tell the far-right lane on a five-lane
+      road; she also heard a contradictory "right lane open, left lane
+      open" once (Indio to Riverside) -- the baked lane counts feed speech
+      but the naming does not distinguish beyond left/middle/right.
+      (2) Shane: enforcement and passing-cop sounds cut off the in-cab
+      radio -- a game-SFX-over-radio mix issue, distinct from the
+      speech-over-engine ducking setting shipped this round. (3) Shane: on
+      a one-lane road a cop still tries to pass, which it cannot do -- the
+      overtake logic does not check that a passing lane exists. Owner has
+      not decided a disposition; recorded so they are not lost.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides
