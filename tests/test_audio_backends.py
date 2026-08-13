@@ -493,6 +493,34 @@ def test_engine_voice_setting_switches_models_live(monkeypatch):
     a.shutdown()
 
 
+def test_classic_voice_prefers_the_original_recording(monkeypatch):
+    # Settings "classic" promises the 1.8.x engine. Its cut ships under its
+    # own key (engine_classic/idle) precisely because the licensed overlay
+    # owns engine/idle -- with the rebuilt bank installed the shared key is
+    # the rebuilt cut, and classic must not quietly follow it.
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    assert audio._asset_bytes(audio.ENGINE_CLASSIC_LOOP_KEY, ("ogg", "wav")) is not None
+    a = AudioEngine()
+    if a.backend_name != "bass":
+        pytest.skip("BASS backend unavailable")
+    impl = a._impl
+    requested: list[str] = []
+    real_sfx_stream = impl._sfx_stream
+
+    def spying_sfx_stream(key, **kwargs):
+        requested.append(key)
+        return real_sfx_stream(key, **kwargs)
+
+    monkeypatch.setattr(impl, "_sfx_stream", spying_sfx_stream)
+    a.set_engine_voice(True)  # classic
+    a.engine_start(play_start_sound=False)
+    assert audio.ENGINE_CLASSIC_LOOP_KEY in requested
+    assert impl._engine_bands == []
+    assert impl._engine_stream is not None
+    a.engine_stop()
+    a.shutdown()
+
+
 def test_bass_engine_falls_back_to_pitched_loop_without_cuts(monkeypatch):
     # A clean clone carries only the synthesized engine/idle: the ring cannot
     # form, and the legacy single pitched loop must come up instead.

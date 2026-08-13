@@ -228,6 +228,12 @@
 
 ### Fixed
 
+- **Choosing the classic engine voice brings back the original engine.** The
+  Engine voice setting under Settings, Audio could end up playing the new
+  cab recording stretched the old way instead of the sound it promised.
+  Classic now always means the engine from earlier versions of the game,
+  exactly as it was.
+
 - **Resuming cruise to a high speed no longer floors the engine to get
   there.** Bringing automatic speed control back with Shift+K, or setting it
   when your remembered speed was far above the truck's, used to open the

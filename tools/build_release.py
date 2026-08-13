@@ -560,6 +560,14 @@ def verify_packaged_payload(build_dir: Path) -> None:
     if not any(name.endswith((".ogg", ".wav")) for name in pack_names):
         raise RuntimeError("Packaged sound pack contains no audio files")
 
+    if "engine_classic/idle.ogg" not in pack_names:
+        raise RuntimeError(
+            "Packaged sound pack predates the classic engine voice, so the "
+            "Settings engine-voice option would fall back silently; rebuild "
+            "the committed pack with tools/pack_sounds.py on a builder "
+            "machine and commit it"
+        )
+
     if sys.platform != "win32" and not exe.stat().st_mode & 0o111:
         raise RuntimeError(
             f"Packaged executable is not runnable, so updates cannot restart: "

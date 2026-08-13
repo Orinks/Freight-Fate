@@ -136,6 +136,11 @@ ENGINE_BAND_RATE_MAX = 1.30
 # fallback when the licensed multisample cuts are absent (a clean clone has
 # only the synthesized engine/idle).
 ENGINE_LOOP_KEY = "engine/idle"
+# The classic voice: the 1.8.x recording under its own key, because the
+# licensed overlay owns "engine/idle" -- when the rebuilt cuts are installed
+# the shared key IS the rebuilt idle, and the Settings "classic" promise
+# (the original engine sound) must not quietly follow it.
+ENGINE_CLASSIC_LOOP_KEY = "engine_classic/idle"
 ENGINE_RPM_IDLE = 600.0
 ENGINE_RPM_MAX = 2200.0
 ENGINE_FREQ_MAX_MULT = 1.75
@@ -1427,7 +1432,18 @@ class _BassBackend:
                 with contextlib.suppress(self._BassError):
                     band_stream.stop()
             self._engine_bands = []
-            stream = self._sfx_stream(ENGINE_LOOP_KEY, looping=True)
+            stream = None
+            if self.engine_voice_classic:
+                stream = self._sfx_stream(ENGINE_CLASSIC_LOOP_KEY, looping=True)
+                if stream is None:
+                    log.warning(
+                        "Classic engine cut %s is not in this build; "
+                        "using %s pitched instead",
+                        ENGINE_CLASSIC_LOOP_KEY,
+                        ENGINE_LOOP_KEY,
+                    )
+            if stream is None:
+                stream = self._sfx_stream(ENGINE_LOOP_KEY, looping=True)
             if stream is not None:
                 try:
                     self._engine_base_freq = stream.get_frequency()

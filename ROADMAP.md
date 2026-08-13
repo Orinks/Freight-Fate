@@ -356,6 +356,24 @@ onto exit signalling.
       a one-lane road a cop still tries to pass, which it cannot do -- the
       overtake logic does not check that a passing lane exists. Owner has
       not decided a disposition; recorded so they are not lost.
+- [x] **Classic engine voice restored to the original recording --
+      2026-08-13.** The Settings engine-voice "classic" option quietly
+      became the rebuilt idle cut played the old way when the licensed
+      overlay landed 2026-07-27: both voices shared the engine/idle key,
+      and the overlay owns that key. The donated 1.8.x idle now ships
+      in-repo under its own key (engine_classic/idle, gitignore
+      carve-out) that no overlay can shadow, the BASS classic path asks
+      for it first and logs an honest fallback, and `*.bak` files no
+      longer ride into the pack (the shipped pack carries one beside the
+      real 1600 jake).
+- [ ] **Repack sounds.pak so classic ships in frozen builds.** The
+      committed pack predates engine_classic/idle.ogg; source checkouts
+      fall back to the loose file, but release payloads are pak-only, so
+      build_release now refuses a pre-classic pack rather than shipping
+      a Settings option that silently does nothing. Repack with
+      tools/pack_sounds.py on a builder machine whose loose tree has
+      engine_classic (any checkout of this branch), update the
+      length/SHA pins in tests/test_sound_pack.py, and commit via LFS.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides

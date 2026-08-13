@@ -82,6 +82,23 @@ def test_pack_overlay_wins_by_key_across_extensions(tmp_path):
     assert pack.read("ui/menu_select.ogg") is None  # stale-extension twin dropped
 
 
+def test_pack_excludes_editor_backups(tmp_path):
+    # A jake .bak from a builder's loose tree once rode into a released pack;
+    # backups stay out of the payload, from the committed tree and the
+    # licensed overlay both.
+    sounds = _write_fixture_sounds(tmp_path)
+    (sounds / "ui" / "menu_select.ogg.bak").write_bytes(b"stale backup")
+    overlay = tmp_path / "licensed"
+    (overlay / "engine").mkdir(parents=True)
+    (overlay / "engine" / "low.ogg").write_bytes(b"licensed engine low")
+    (overlay / "engine" / "jake.synth-original.wav.bak").write_bytes(b"synth original")
+    out = assets_pack.write_pack(sounds, tmp_path / "sounds.pak", overlay_dir=overlay)
+    names = assets_pack.SoundPack(out).names()
+    assert not [name for name in names if name.endswith(".bak")]
+    assert "engine/low.ogg" in names
+    assert "ui/menu_select.ogg" in names
+
+
 def test_pack_missing_overlay_dir_is_fine(tmp_path):
     sounds = _write_fixture_sounds(tmp_path)
     out = assets_pack.write_pack(
