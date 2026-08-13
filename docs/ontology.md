@@ -305,6 +305,7 @@ from the words, and synonyms cost them a re-read.
 | The ramp signal going red | Red light | ramp red, stop signal | `events/ramp_light_red` |
 | Something in the truck's path that needs a real reaction now | Hazard warning | obstacle warning, danger cue | `events/hazard_warning` |
 | The hazard now behind the truck | Hazard clear | hazard passed, all clear | `events/hazard_clear` |
+| The truck striking a hazard it did not clear (the failure half of the dodge outcome pair) | Collision | crash, impact, hit | `vehicle/collision` |
 | Roadwork ahead: the posted limit drops and a lane may close | Construction zone | work zone, roadwork cue | `events/construction_zone` |
 | The traffic ahead coming down in speed | Traffic slowing | slowdown cue, brake lights ahead | `events/traffic_slowing` |
 | A street maneuver coming up on a local drive | Turn ahead | maneuver cue, upcoming turn | `events/turn_ahead` |

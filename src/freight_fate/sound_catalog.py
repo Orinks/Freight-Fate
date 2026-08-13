@@ -351,9 +351,19 @@ _HAZARDS = SoundCategory(
         SoundEntry(
             "Hazard clear",
             (Cue("events/hazard_clear", volume=0.75),),
-            "The hazard is behind you. You can go back to normal speed. In "
-            "terse speech this sound is the whole confirmation; a collision "
-            "sounds nothing like it, so the outcome is never ambiguous.",
+            "You got past the hazard. This is the success half of the "
+            "dodge outcome pair: in terse speech it is the whole confirmation "
+            "that you cleared it, and you can go back to normal speed. Its "
+            "opposite is the collision below -- the two sound nothing alike, "
+            "so 'did I make it?' is never in doubt.",
+        ),
+        SoundEntry(
+            "Collision",
+            (Cue("vehicle/collision", volume=0.9),),
+            "You hit it. This is the failure half of the dodge outcome pair: "
+            "where the hazard-clear chime says you got past, this says you did "
+            "not, and a spoken damage figure follows. In terse speech the "
+            "sound is the outcome, so it is worth knowing before you need it.",
         ),
         SoundEntry(
             "Construction zone",
@@ -594,7 +604,6 @@ SELF_EXPLANATORY: dict[str, str] = {
     "vehicle/horn": "The player is holding the horn key.",
     "vehicle/brake_squeal": "It means you braked hard, which you know.",
     "vehicle/brake_hiss_bed": "The air letting off after you released the brake pedal.",
-    "vehicle/collision": "A collision announces itself by having happened.",
     "vehicle/gear_shift": "A gear change in a truck that is changing gear.",
     "vehicle/shift_manual": "Banked gear changes, same reason.",
     "vehicle/shift_auto": "Banked gear changes, same reason.",

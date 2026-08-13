@@ -103,6 +103,22 @@ def test_all_seven_categories_are_present_in_order():
     assert [c.name for c in sound_catalog.CATALOG] == list(EXPECTED_CATEGORIES)
 
 
+def test_the_dodge_outcome_ships_as_a_learnable_success_fail_pair():
+    """R14: an earcon that reports an outcome ships as a distinct success/fail
+    pair, both learnable. Terse mode leans on the hazard-clear chime as the
+    whole 'you cleared it' confirmation, so its opposite -- the collision --
+    must be catalogued alongside it, not left as an implicit sound."""
+    by_key = {}
+    for entry in sound_catalog.catalog_entries():
+        for cue in entry.plays:
+            by_key[cue.key] = entry
+    assert "events/hazard_clear" in by_key
+    assert "vehicle/collision" in by_key
+    # Neither half may quietly fall back to the "self-explanatory" exclusion.
+    assert not sound_catalog.is_excluded("vehicle/collision")
+    assert not sound_catalog.is_excluded("events/hazard_clear")
+
+
 def test_no_entry_name_repeats_across_the_catalog():
     names = [e.name for e in sound_catalog.catalog_entries()]
     assert len(names) == len(set(names)), "two entries share a name"

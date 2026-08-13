@@ -4,6 +4,12 @@
 
 ### Changed
 
+- **The Learn game sounds screen now teaches the collision as well as the
+  all-clear.** Terse speech uses the hazard-clear chime as the whole "you
+  made it" confirmation, so its opposite belongs next to it: the collision
+  is now a labelled entry in the Hazards group, right after Hazard clear, so
+  you can learn both halves of "did I dodge it?" before it matters.
+
 - **A worsening load stops repeating the same advice.** When the freight
   shifts, the truck tells you to brake and corner gently -- once. If the
   load keeps taking damage, each later warning speaks only the new figure
