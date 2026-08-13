@@ -264,6 +264,11 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         self._announced_navigation: set[str] = set()
         self._charged_tolls: set[str] = set()
         self._active_zone: Zone | None = None
+        # Whether the current _active_zone's ZONE_ENTER colour line has been
+        # spoken. A gated entry (see _check_zones) leaves this False so the
+        # next open window speaks for whichever zone is actually current --
+        # a gated entry is held back, never dropped for good.
+        self._zone_entry_spoken: bool = True
         self._announced_speed_limit: float | None = None
         self._warned_limit_drops: set[float] = set()
         # Posted-limit values already spoken for the CURRENT posting -- by the
@@ -2414,22 +2419,37 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
             if zone is not None:
                 if zone.reason == "construction":
                     self._construction_zone_grace_start[_zone_key(zone)] = zone.start_mi
-                quiet = zone.reason == "construction" and any(
-                    z.reason == "construction merge" and abs(z.end_mi - zone.start_mi) < 0.01
-                    for z in self.zones
+                # _active_zone below tracks the truck's real position on
+                # every call regardless of what narrates: the posted limit
+                # and every mechanic that reads it (cruise cancel, the zone
+                # earcon, achievements -- all keyed off the ZONE_ENTER event
+                # itself) stay correct even when the colour line is held
+                # back for pacing.
+                #
+                # But holding it back is only safe when the number is not
+                # changing for the worse. A zone entry that CUTS the limit
+                # currently in force -- most often the merge taper's posted
+                # 55 giving way to the work zone's real 45 -- never waits:
+                # _check_speed_limit stays silent for as long as any zone is
+                # active, so this is the only line that will ever say the
+                # lower number, and the taper already told the driver a
+                # number that is no longer true. A same-or-higher-limit
+                # entry (a second cosmetic zone, a shoulder closure at the
+                # same posted speed) is cosmetic and free to breathe.
+                old_limit = (
+                    self._active_zone.limit_mph
+                    if self._active_zone is not None
+                    else self._announced_speed_limit
                 )
-                # Only the colour line breathes (road_event_pacing.py):
-                # _active_zone below still tracks the truck's real position
-                # every call, so the posted limit and every mechanic that
-                # reads it stay correct even when the narration is held back.
-                if self._event_breather.ready("zone"):
-                    self._event_breather.spoke("zone")
-                    self._emit(
-                        TripEventKind.ZONE_ENTER,
-                        self._zone_entry_message(zone),
-                        zone=zone,
-                        suppress_sound=quiet,
-                    )
+                urgent = old_limit is not None and zone.limit_mph < old_limit
+                if urgent or self._event_breather.ready("zone"):
+                    self._speak_zone_entry(zone)
+                else:
+                    # Gated, not dropped: the next open window speaks for
+                    # whichever zone is actually current (see the
+                    # self-supersede branch below), never a stale catch-up
+                    # for this one specifically.
+                    self._zone_entry_spoken = False
                 if zone.reason == "heavy traffic" and zone.aadt is not None:
                     # Fill the jam with slow metal: the existing lead-vehicle,
                     # ACC, and hazard machinery turn it into stop-and-go.
@@ -2443,7 +2463,31 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                     f"End of {self._active_zone.reason} zone. "
                     f"Speed limit {self._speed_value(resumed)}.",
                 )
+                self._zone_entry_spoken = True
             self._active_zone = zone
+        elif (
+            zone is not None and not self._zone_entry_spoken and self._event_breather.ready("zone")
+        ):
+            # Self-supersede: this zone is still the one actually governing
+            # the truck (nothing newer has taken its place), and its own
+            # entry was gated when it started. The window is open now, so
+            # it is spoken for the CURRENT zone rather than staying silent
+            # forever.
+            self._speak_zone_entry(zone)
+
+    def _speak_zone_entry(self, zone: Zone) -> None:
+        quiet = zone.reason == "construction" and any(
+            z.reason == "construction merge" and abs(z.end_mi - zone.start_mi) < 0.01
+            for z in self.zones
+        )
+        self._event_breather.spoke("zone")
+        self._emit(
+            TripEventKind.ZONE_ENTER,
+            self._zone_entry_message(zone),
+            zone=zone,
+            suppress_sound=quiet,
+        )
+        self._zone_entry_spoken = True
 
     def _check_timezone(self) -> None:
         """Announce a clock change the moment the truck passes a zone boundary.

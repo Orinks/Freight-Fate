@@ -90,17 +90,14 @@ def _make_trip(world, start="Chicago", end="Indianapolis", seed=2):
     return trip
 
 
-def _limit_messages(trip):
+def _gps_cue_messages(trip):
     return [e.message for e in trip._events if e.kind == TripEventKind.GPS_CUE]
 
 
 def _install_fake_clock(trip, monkeypatch):
-    """Wire a FakeClock into trip._event_breather -- a no-op before Task 2's
-    __init__ change lands, so these tests are collectible (and the urgent
-    test can pass "by accident") even against pre-gate code."""
+    """Wire a FakeClock into trip._event_breather."""
     clock = FakeClock()
-    if hasattr(trip, "_event_breather"):
-        monkeypatch.setattr(trip._event_breather, "_clock", clock)
+    monkeypatch.setattr(trip._event_breather, "_clock", clock)
     return clock
 
 
@@ -114,7 +111,7 @@ def test_two_limit_changes_inside_the_gap_speak_once_with_the_newest(world, monk
     monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 60.0)
     trip._events.clear()
     trip._check_speed_limit()
-    first = _limit_messages(trip)
+    first = _gps_cue_messages(trip)
     assert len(first) == 1
     assert "raised to" in first[0]
 
@@ -125,7 +122,7 @@ def test_two_limit_changes_inside_the_gap_speak_once_with_the_newest(world, monk
     monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 65.0)
     trip._events.clear()
     trip._check_speed_limit()
-    assert _limit_messages(trip) == []
+    assert _gps_cue_messages(trip) == []
     assert trip._announced_speed_limit == 60.0
 
     # Once the window reopens, the next check announces the CURRENT posting
@@ -134,7 +131,7 @@ def test_two_limit_changes_inside_the_gap_speak_once_with_the_newest(world, monk
     clock.now += LIMIT_GAP_REAL_S
     trip._events.clear()
     trip._check_speed_limit()
-    reopened = _limit_messages(trip)
+    reopened = _gps_cue_messages(trip)
     assert len(reopened) == 1
     assert "raised to" in reopened[0]
     assert trip._speed_value(65.0) in reopened[0]
@@ -151,7 +148,7 @@ def test_a_limit_bounce_inside_the_gap_never_speaks(world, monkeypatch):
     monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 45.0)
     trip._events.clear()
     trip._check_speed_limit()
-    assert len(_limit_messages(trip)) == 1
+    assert len(_gps_cue_messages(trip)) == 1
 
     # Within the gap the posting bounces straight back up -- the owner's
     # "dropping and coming straight back" complaint. Gated: nothing new
@@ -160,7 +157,7 @@ def test_a_limit_bounce_inside_the_gap_never_speaks(world, monkeypatch):
     monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 55.0)
     trip._events.clear()
     trip._check_speed_limit()
-    assert _limit_messages(trip) == []
+    assert _gps_cue_messages(trip) == []
     assert trip._announced_speed_limit == 45.0
 
     # By the time the window opens, the reading has settled back to exactly
@@ -171,7 +168,7 @@ def test_a_limit_bounce_inside_the_gap_never_speaks(world, monkeypatch):
     monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 45.0)
     trip._events.clear()
     trip._check_speed_limit()
-    assert _limit_messages(trip) == []
+    assert _gps_cue_messages(trip) == []
     assert trip._announced_speed_limit == 45.0
 
 
@@ -185,7 +182,7 @@ def test_a_big_unannounced_drop_cuts_the_gap(world, monkeypatch):
     monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 65.0)
     trip._events.clear()
     trip._check_speed_limit()
-    assert len(_limit_messages(trip)) == 1
+    assert len(_gps_cue_messages(trip)) == 1
 
     # 2 seconds later -- well inside LIMIT_GAP_REAL_S -- a serious,
     # never-preannounced drop (65 -> 45, a 20 mph cut) must cut the line: it
@@ -194,7 +191,7 @@ def test_a_big_unannounced_drop_cuts_the_gap(world, monkeypatch):
     monkeypatch.setattr(trip, "_corridor_limit_at", lambda mile: 45.0)
     trip._events.clear()
     trip._check_speed_limit()
-    urgent = _limit_messages(trip)
+    urgent = _gps_cue_messages(trip)
     assert len(urgent) == 1
     assert "reduced to" in urgent[0]
     assert trip._speed_value(45.0) in urgent[0]
@@ -237,7 +234,7 @@ def test_two_traffic_situations_inside_the_gap_speak_once(world, monkeypatch):
     # speaks immediately.
     trip._events.clear()
     trip._check_npc_traffic_cues()
-    first = _limit_messages(trip)
+    first = _gps_cue_messages(trip)
     assert len(first) == 1
     assert manager.announced_vehicle_keys == {"npc:a"}
 
@@ -251,7 +248,7 @@ def test_two_traffic_situations_inside_the_gap_speak_once(world, monkeypatch):
     trip.position_mi = 1.4
     trip._events.clear()
     trip._check_npc_traffic_cues()
-    assert _limit_messages(trip) == []
+    assert _gps_cue_messages(trip) == []
     assert manager.announced_vehicle_keys == {"npc:a"}
     assert "npc:b" not in manager.announced_vehicle_keys
 
@@ -260,7 +257,7 @@ def test_two_traffic_situations_inside_the_gap_speak_once(world, monkeypatch):
     clock.now += TRAFFIC_GAP_REAL_S
     trip._events.clear()
     trip._check_npc_traffic_cues()
-    reopened = _limit_messages(trip)
+    reopened = _gps_cue_messages(trip)
     assert len(reopened) == 1
     assert manager.announced_vehicle_keys == {"npc:a", "npc:b"}
 
@@ -349,3 +346,83 @@ def test_zone_entry_colour_breathes_but_merge_warnings_do_not(world, monkeypatch
         assert spoken and "closes at the work zone ahead" in spoken[0]
     finally:
         app.shutdown()
+
+
+def test_a_limit_cutting_zone_entry_speaks_immediately_inside_the_gap(world, monkeypatch):
+    """The merge taper posts one number and the work zone right behind it
+    enforces a lower one. _active_zone_at does not filter the taper out, so
+    the taper's own colour line already closed the "zone" window by the time
+    the truck reaches the barrels a few real seconds later under
+    compression. _check_speed_limit stays silent for as long as any zone is
+    active, so if this line waited for the window, the driver would never
+    hear the 45 at all."""
+    trip = _make_trip(world)
+    clock = _install_fake_clock(trip, monkeypatch)
+
+    taper = Zone(2.0, 3.0, 55.0, "construction merge")
+    work = Zone(3.0, 5.0, 45.0, "construction")
+    trip.zones = [taper, work]
+
+    trip.position_mi = 2.0
+    trip._events.clear()
+    trip._check_zones()
+    first = [e for e in trip._events if e.kind == TripEventKind.ZONE_ENTER]
+    assert len(first) == 1
+    assert trip._active_zone is taper
+
+    # A few real seconds later under compression -- well inside
+    # ZONE_GAP_REAL_S -- the truck reaches the work zone proper. The window
+    # is genuinely still shut...
+    clock.now += 3.0
+    assert not trip._event_breather.ready("zone")
+
+    # ...but the entry speaks anyway: the limit dropped (55 -> 45).
+    trip.position_mi = 3.0
+    trip._events.clear()
+    trip._check_zones()
+    urgent = [e for e in trip._events if e.kind == TripEventKind.ZONE_ENTER]
+    assert len(urgent) == 1
+    assert trip._speed_value(45.0) in urgent[0].message
+    assert trip._speed_value(55.0) not in urgent[0].message
+    assert trip._active_zone is work
+
+
+def test_a_same_limit_zone_entry_self_supersedes_once_the_window_reopens(world, monkeypatch):
+    """A gated cosmetic entry (same or higher limit -- nothing ticket-
+    relevant) must not vanish for good. Once the window reopens, the
+    CURRENT zone's own entry is spoken from the regular tick -- current
+    state, not a stale catch-up for whatever was gated."""
+    trip = _make_trip(world)
+    clock = _install_fake_clock(trip, monkeypatch)
+
+    zone1 = Zone(2.0, 4.0, 45.0, "construction")
+    zone2 = Zone(10.0, 12.0, 45.0, "construction")  # same limit: never urgent
+    trip.zones = [zone1, zone2]
+
+    trip.position_mi = 2.0
+    trip._events.clear()
+    trip._check_zones()
+    assert len([e for e in trip._events if e.kind == TripEventKind.ZONE_ENTER]) == 1
+    assert trip._active_zone is zone1
+
+    # 3 fake seconds later -- inside the gap, same limit, not urgent -- the
+    # entry for zone2 is gated, not spoken.
+    clock.now += 3.0
+    trip.position_mi = 10.0
+    trip._events.clear()
+    trip._check_zones()
+    assert [e for e in trip._events if e.kind == TripEventKind.ZONE_ENTER] == []
+    assert trip._active_zone is zone2
+    assert not trip._zone_entry_spoken
+
+    # The window reopens with zone2 still current (nothing newer replaced
+    # it): the very next tick speaks for it, from the regular _check_zones
+    # path -- not a special catch-up queue.
+    clock.now += ZONE_GAP_REAL_S
+    trip._events.clear()
+    trip._check_zones()
+    superseded = [e for e in trip._events if e.kind == TripEventKind.ZONE_ENTER]
+    assert len(superseded) == 1
+    assert superseded[0].data.get("zone") is zone2
+    assert trip._zone_entry_spoken
+    assert trip._active_zone is zone2
