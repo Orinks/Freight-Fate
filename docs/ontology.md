@@ -120,6 +120,7 @@ from the words, and synonyms cost them a re-read.
 | A license add-on | endorsement | certification, licence | `ENDORSEMENT_LEVELS` |
 | The short code a player reads and types into a browser to connect a computer | activation code | user code, device code, pairing code | `Activation.user_code` |
 | The polling secret bound to this device | never spoken -- internal only | activation code | `Activation.device_code` |
+| The one career whose accepted backups front the player's public profile | public career | shared career, featured career, main save | `publicSaveName` |
 
 Notes on the entries that are not simple:
 
