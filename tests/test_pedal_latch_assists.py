@@ -36,6 +36,26 @@ def _latch_throttle(driving):
     driving._throttle_latch._state = "resting"
 
 
+def _fake_curve(monkeypatch, driving, advisory=35.0):
+    """Match the real ``RouteCurve`` constructor -- see ``_AssistRig`` in
+    test_driving_features.py, the source of truth for its fields."""
+    from freight_fate.data.curves import RouteCurve
+
+    start_mi = driving.trip.position_mi - 0.05
+    curve = RouteCurve(
+        start_mi=start_mi,
+        apex_mi=start_mi + 1.0,
+        end_mi=start_mi + 2.05,
+        direction="R",
+        advisory_mph=advisory,
+        min_radius_ft=1500,
+        deflection_deg=60.0,
+        connector=False,
+    )
+    monkeypatch.setattr(driving.trip, "curve_at", lambda _mile: curve)
+    return curve
+
+
 def test_speed_authority_predicate_reads_all_three():
     from driving_feature_helpers import start_drive
 
@@ -220,5 +240,88 @@ def test_releasing_the_latch_leaves_cruise_holding(monkeypatch):
         assert "Throttle released." in spoken
         assert d._cruise_mph is not None  # ...and cruise never blinked
         assert not any("cruise canceled" in s.lower() for s in spoken)
+    finally:
+        app.shutdown()
+
+
+def test_curve_assist_drains_a_latched_throttle(monkeypatch):
+    """The 0.35 service trim must not fight a pedal ramping to full."""
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    held = set()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        d.truck.engine_on = True
+        app.ctx.settings.overspeed_warning = "off"
+        d.ctx.settings.curve_speed_assist = True
+        monkeypatch.setattr(d.trip, "engine_brake_ban_at", lambda _mile: None)
+        _fake_curve(monkeypatch, d, advisory=35.0)
+        d.truck.velocity_mps = 50 / 2.2369362920544
+        _latch_throttle(d)
+
+        _drive_frames(d, 3.0)
+
+        assert d._curve_assist_active
+        assert d._throttle_latch.latched
+        assert d.truck.throttle < 0.05  # yielded and drained
+        assert d.truck.speed_mph < 48.0  # the trim is actually winning now
+    finally:
+        app.shutdown()
+
+
+def test_curve_assist_jake_arrives_once_the_latched_throttle_drains(monkeypatch):
+    """On a real downgrade the assist raises the retarder -- but on the
+    engage frame a yielded latch is still draining, so the capability
+    check must retry while the latch is yielding."""
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    held = set()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub())
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        d.truck.engine_on = True
+        app.ctx.settings.overspeed_warning = "off"
+        d.ctx.settings.curve_speed_assist = True
+        monkeypatch.setattr(d.trip, "engine_brake_ban_at", lambda _mile: None)
+        # A real downgrade under the bend, faked the same way the existing
+        # downgrade jake coverage does it (_AssistRig, test_driving_features.py):
+        # trip.grade_at, not a monkeypatched _on_downgrade.
+        monkeypatch.setattr(d.trip, "grade_at", lambda _mile: -0.06)
+        d.truck.grade = -0.06
+        d.truck.velocity_mps = 50 / 2.2369362920544
+        # jake_capable needs a truck actually in gear -- a freshly departed
+        # drive with velocity set directly (skipping a real launch) is still
+        # in neutral, same reason _AssistRig sets this by hand.
+        d.truck.transmission.automatic = True
+        d.truck.transmission.gear = 9
+        d.truck.rpm = 1500.0
+        d.truck.grip = 1.0
+        _latch_throttle(d)
+
+        # No curve yet: let the latch ramp the pedal all the way up first, so
+        # the corner arrives on a throttle that is genuinely still high --
+        # not one that just happens to read low because it never got the
+        # chance to ramp. That is the whole scenario the retry exists for.
+        _drive_frames(d, 1.5)
+        assert d.truck.throttle > 0.9
+
+        _fake_curve(monkeypatch, d, advisory=30.0)
+        _drive_frames(d, 3.0)
+
+        assert d._curve_assist_active
+        assert d._curve_assist_jake  # engaged after the drain, not never
     finally:
         app.shutdown()

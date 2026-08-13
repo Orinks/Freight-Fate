@@ -853,7 +853,16 @@ class DrivingUpdateMixin:
         # want retarding mid-bend.
         t = self.truck
         tr = t.transmission
-        if curve_assisting and not self._curve_assist_active:
+        if curve_assisting and (
+            not self._curve_assist_active
+            # A yielded latch is still draining on the engage frame, so the
+            # jake_capable check below sees throttle above its threshold and
+            # the corner would never get its grade retarder. Retry while the
+            # latch is the reason -- a HAND on the throttle still means the
+            # driver is overriding, and for them this engages on the
+            # transition frame only, exactly as before.
+            or (self._latch_yielding and not self._curve_assist_jake)
+        ):
             jake_capable = (
                 t.engine_on
                 and t.throttle < 0.05
