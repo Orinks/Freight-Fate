@@ -375,14 +375,30 @@ onto exit signalling.
       future synth-versus-recorded jake toggle is a pure code change.
       Length/SHA pins updated. build_release verifies the classic cut
       is in any staged pack.
-- [ ] **Jake voice A/B pending the owner's ear and provenance.** The
-      1600 zone is the one recorded jake (f737b416, source unknown --
-      owner is chasing where the Dropbox cut came from and under what
-      terms); the other five zones are synth, so listen for a
-      character seam crossing 1600 rpm under engine braking. Both cuts
-      ship in the pack; if the owner wants the option, wire a jake
-      toggle on the engine-voice settings pattern. If provenance
-      fails, jake_1600 reverts to the synth original.
+- [ ] **Jake voice A/B pending the owner's ear; provenance
+      accepted-on-word.** The 1600 zone is the one recorded jake
+      (f737b416); Josh says someone recorded it -- a donation. OWED: the
+      recordist's name from Josh for a CREDITS.md row (the
+      reviewable-licensing standard). The other five zones are synth,
+      so listen for a character seam crossing 1600 rpm under engine
+      braking. Both cuts ship in the pack; if the owner wants the
+      option, wire a jake toggle on the engine-voice settings pattern.
+      If provenance sours, jake_1600 reverts to the synth original.
+- [x] **Sealed-cab transfer on the engine voice -- 2026-08-13.** The
+      "engine sounds external" complaint was a missing cabin transfer
+      function, not the voice. cab_filter.py applies the owner-approved
+      sealed variant (from the sound-test/cab_transfer.py auditions;
+      runtime output verified byte-identical to the approved render) to
+      the five band cuts at load: -16 dB shelf past 1 kHz, 2.4 kHz
+      lowpass, +5 dB body, 63 Hz boom, 1.7/3.3 ms early reflections,
+      RMS-matched, circular so loops stay seamless. Classic voice and
+      jake deliberately untouched this round.
+- [ ] **Cabin-state intensities for the cab transfer.** The moderate
+      variant from the same auditions is the natural "window cracked"
+      setting; wire intensity selection to the doors/windows mechanic
+      when the cabin-audio immersion work lands (2.0 line). Adjust the
+      sealed parameters from tester feedback -- they are constants in
+      cab_filter.py, not baked assets.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides

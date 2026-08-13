@@ -4,6 +4,12 @@
 
 ### Changed
 
+- **The engine now sounds like you are sitting in the cab, not standing
+  beside the truck.** The glass and firewall soften the engine's high end,
+  the body carries its low rumble, and the sound sits around you the way a
+  real cab delivers it. Testers said the engine felt like it was outside
+  the truck -- this is the fix. The classic engine voice is untouched.
+
 - **Running off the pavement no longer talks in a loop.** Drifting onto the
   shoulder or into the median now speaks when it happens, again if it gets
   worse, and once more when you are back on the road -- instead of repeating
