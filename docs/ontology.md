@@ -320,6 +320,7 @@ from the words, and synonyms cost them a re-read.
 | The load hitting the front or back of the tank | Surge strike | liquid hit, fore-aft strike | `vehicle/liquid_hit`, `sim/surge.SloshAxis` |
 | The load hitting the side of the tank -- the one that rolls trucks | Surge strike, sideways | lateral hit, side slosh | `vehicle/liquid_hit_lateral`, `sim/surge.SloshAxis` |
 | The one career whose accepted backups front the player's public profile | public career | shared career, featured career, main save | `publicSaveName` |
+| Game sound lowering itself while the road voice speaks | game sounds step back for speech (the Settings > Audio row) | ducking, audio duck, attenuation | `settings.duck_audio_for_speech`, `AudioEngine.set_speech_duck` |
 
 Notes on the entries that are not simple:
 

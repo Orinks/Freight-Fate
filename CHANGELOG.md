@@ -70,6 +70,12 @@
 
 ### Added
 
+- **Game sound steps back while the road talks.** When the road voice
+  speaks, the engine, the weather, and the radio now drop to half volume
+  and come back the moment the line finishes, so a warning survives a loud
+  cab without the voice itself getting louder. It is on by default; turn
+  it off under Settings, Audio, "Game sounds step back for speech."
+
 - **Learn what every sound means before you meet it at speed.** A new
   Learn game sounds screen on the main menu, and on the pause menu while
   you drive, plays any cue the road uses on demand. Arrow to a sound,

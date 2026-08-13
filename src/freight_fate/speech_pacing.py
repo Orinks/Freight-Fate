@@ -248,6 +248,17 @@ class EventSpeechPacer:
         self._clear_at = 0.0
         return cut
 
+    def busy(self) -> bool:
+        """Whether the projection says the event voice is still speaking.
+
+        The channel cannot be asked directly (nothing in Prism reports queue
+        state), so this is the same estimate the staleness budget runs on.
+        It is what audio ducking restores on: the mix steps back while this
+        is True and comes back the frame it goes False. Purges, pauses, and
+        resets zero the projection, so a silenced channel reads not-busy at
+        once instead of waiting out a stale estimate."""
+        return self._clock() < self._clear_at
+
     def would_start_stale(self, text: str, priority: EventPriority = EventPriority.AMBIENT) -> bool:
         """Whether this queued line would start past its priority's budget.
 

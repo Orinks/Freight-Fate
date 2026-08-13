@@ -267,6 +267,11 @@ class Settings:
     weather_volume: float = 0.65
     engine_volume: float = 0.55
     ui_volume: float = 0.9
+    # Step the game sounds back while the road voice speaks: engine, weather,
+    # and the radio drop to half volume for the length of the line, then come
+    # back. On by default -- a warning must survive a loud cab without the
+    # voice itself getting louder (XAG 105; speech priority research, R13).
+    duck_audio_for_speech: bool = True
     speech_verbosity: int = 1  # 0 terse, 1 normal
     # Roadside chatter: the ambient color spoken between navigation cues.
     # Each category has its own switch so a player can keep the geography
@@ -530,6 +535,8 @@ class Settings:
             s.mastodon_linked_handle = ""
         if not isinstance(s.live_weather_controls_calendar, bool):
             s.live_weather_controls_calendar = True
+        if not isinstance(s.duck_audio_for_speech, bool):
+            s.duck_audio_for_speech = True
         for attr in (
             "master_volume",
             "sfx_volume",

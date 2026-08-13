@@ -16,7 +16,7 @@ import pygame
 from . import __version__
 from .achievements import AchievementAward, award
 from .assets_pack import prefetch_default as prefetch_sound_pack
-from .audio import AudioEngine
+from .audio import SPEECH_DUCK_LEVEL, AudioEngine
 from .controller import ControllerManager
 from .data.world import World, get_world
 from .discord_presence import DiscordPresence
@@ -108,6 +108,9 @@ class GameContext:
         # Anti-backlog projection for the dedicated event voice: queued
         # driving events that would start speaking stale get flushed instead.
         self._event_pacer = EventSpeechPacer()
+        # Whether the game mix is currently stepped down under the event
+        # voice (Settings > Audio; see _engage_speech_duck).
+        self._speech_ducked = False
         # True while a playtest-lever scenario runs unsaved (see
         # playtest_levers.apply_continue_levers); save_profile honors it.
         self.playtest_sandbox = False
@@ -328,10 +331,32 @@ class GameContext:
             else:
                 self._event_pacer.note_queued(text, priority)
             self.speech.say(text, interrupt=False)
+        self._engage_speech_duck()
         if cut is not None:
             self._requeue_cut_event(cut)
         if review:
             self.message_log.add(text, MessageCategory.EVENT)
+
+    def _engage_speech_duck(self) -> None:
+        """Step the game mix back while the event voice speaks (R13).
+
+        XAG 105's guideline made a setting: engine, weather, and the radio
+        drop to half volume so a warning survives a loud cab without the
+        voice itself getting louder. Restoration is edge-driven, not
+        polled: update_speech_duck runs once per frame from the main loop
+        and restores the mix when the pacer's projection -- the same
+        estimate the staleness budget runs on -- says the voice is done.
+        """
+        if not self.settings.duck_audio_for_speech:
+            return
+        self._speech_ducked = True
+        self.audio.set_speech_duck(SPEECH_DUCK_LEVEL)
+
+    def update_speech_duck(self) -> None:
+        """Per-frame: bring the mix back once the event voice falls silent."""
+        if self._speech_ducked and not self._event_pacer.busy():
+            self._speech_ducked = False
+            self.audio.set_speech_duck(1.0)
 
     def reset_event_condition(self, key: str) -> None:
         """A standing condition has cleared; let it announce itself afresh."""
@@ -802,6 +827,7 @@ class App:
                     if self.state is not None:
                         self.state.on_controller_disconnect()
                 self.ctx.audio.update(dt)  # advance time-based audio fades
+                self.ctx.update_speech_duck()  # restore the mix after speech
                 if self.state is not None:
                     self.state.update(dt)
                     self.presence.update(self.state.presence())

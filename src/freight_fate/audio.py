@@ -178,6 +178,12 @@ ENGINE_RESUME_FADE_S = 0.25
 ENGINE_START_SETTLE_S = 0.6  # ease from crank level down to idle load
 ENGINE_START_SETTLE_CURVE = "ease_out"  # key into audio_fades.CURVES
 
+# How far the ducked channels (engine, weather, and the music slot the radio
+# rides) drop while the event voice speaks, when the Settings > Audio option
+# is on: half volume, the modest broadcast-style duck -- the road stays
+# present, the words win (XAG 105; speech priority research, R13).
+SPEECH_DUCK_LEVEL = 0.5
+
 BASS_NO_SOUND_DEVICE = 0
 
 # Radio streaming (BASS only). Opening a URL blocks until the server answers;
@@ -447,6 +453,10 @@ class _PygameBackend:
         self.engine_volume = 0.55
         self.ui_volume = 0.9
         self.siren_volume = 1.0
+        # While the event voice speaks, engine/weather/music step down to
+        # this and back (see AudioEngine.set_speech_duck). Not a setting
+        # value: settings own the volumes, this rides on top of them.
+        self.speech_duck = 1.0
         self._cache: dict[str, pygame.mixer.Sound] = {}
         self._loops: dict[int, tuple[str, float]] = {}  # channel -> (key, base gain)
         self._loop_pans: dict[int, float] = {}  # channel -> stereo pan, -1 left .. 1 right
@@ -867,7 +877,7 @@ class _PygameBackend:
         try:
             buffer = io.BytesIO(data)
             pygame.mixer.music.load(buffer, namehint=ext)
-            pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
+            pygame.mixer.music.set_volume(self.music_volume * self.master_volume * self.speech_duck)
             pygame.mixer.music.play(loops=0, fade_ms=fade_ms)
             self._music_track = track
             self._music_buffer = buffer
@@ -889,7 +899,7 @@ class _PygameBackend:
                 data = f.read()
             buffer = io.BytesIO(data)
             pygame.mixer.music.load(buffer, namehint=path.rsplit(".", 1)[-1])
-            pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
+            pygame.mixer.music.set_volume(self.music_volume * self.master_volume * self.speech_duck)
             pygame.mixer.music.play(loops=0, fade_ms=fade_ms)
         except (OSError, pygame.error) as exc:
             raise RuntimeError(f"could not play {path}") from exc
@@ -908,12 +918,25 @@ class _PygameBackend:
     # -- volume control ---------------------------------------------------------
 
     def _category_volume(self, category: str) -> float:
-        return {
+        volume = {
             "engine": self.engine_volume,
             "weather": self.weather_volume,
             "ui": self.ui_volume,
             "siren": self.siren_volume,
         }.get(category, self.sfx_volume)
+        if category in ("engine", "weather"):
+            volume *= self.speech_duck
+        return volume
+
+    def set_speech_duck(self, duck: float) -> None:
+        """Scale engine, weather, and music under the event voice, live."""
+        duck = max(0.0, min(1.0, duck))
+        if duck == self.speech_duck:
+            return
+        self.speech_duck = duck
+        # Reapply everything the factor touches; set_volumes with no
+        # arguments is exactly that pass.
+        self.set_volumes()
 
     def set_volumes(
         self,
@@ -944,7 +967,7 @@ class _PygameBackend:
         for ch in list(self._loops):
             self._apply_channel_volume(ch)
         if self._music_track is not None:
-            pygame.mixer.music.set_volume(self.music_volume * self.master_volume)
+            pygame.mixer.music.set_volume(self.music_volume * self.master_volume * self.speech_duck)
 
     def shutdown(self) -> None:
         if self.enabled:
@@ -1004,6 +1027,10 @@ class _BassBackend:
         self.engine_volume = 0.55
         self.ui_volume = 0.9
         self.siren_volume = 1.0
+        # While the event voice speaks, engine/weather/music step down to
+        # this and back (see AudioEngine.set_speech_duck). Not a setting
+        # value: settings own the volumes, this rides on top of them.
+        self.speech_duck = 1.0
         self._loops: dict[int, tuple[str, float, object]] = {}  # slot -> (key, gain, stream)
         self._sustains: dict[int, SustainLoop] = {}  # slot -> active sustain loop
         # slot -> (key, stream) still ringing out its release tail after a
@@ -1572,6 +1599,7 @@ class _BassBackend:
                 * load_gain
                 * self._engine_duck
                 * self.engine_volume
+                * self.speech_duck
                 * self.master_volume
                 * self._engine_intro_gain,
             ),
@@ -1671,7 +1699,7 @@ class _BassBackend:
                 self._slide,
                 stream.handle,
                 self._ATTRIB_VOL,
-                max(0.0, min(1.0, self.music_volume * self.master_volume)),
+                max(0.0, min(1.0, self.music_volume * self.master_volume * self.speech_duck)),
                 max(0, int(fade_ms)),
             )
         except self._BassError:
@@ -1763,7 +1791,7 @@ class _BassBackend:
                 self._slide,
                 stream.handle,
                 self._ATTRIB_VOL,
-                max(0.0, min(1.0, self.music_volume * self.master_volume)),
+                max(0.0, min(1.0, self.music_volume * self.master_volume * self.speech_duck)),
                 fade_ms,
             )
         except self._BassError:
@@ -1813,7 +1841,7 @@ class _BassBackend:
                 self._slide,
                 stream.handle,
                 self._ATTRIB_VOL,
-                max(0.0, min(1.0, self.music_volume * self.master_volume)),
+                max(0.0, min(1.0, self.music_volume * self.master_volume * self.speech_duck)),
                 max(0, int(fade_ms)),
             )
         except self._BassError as exc:
@@ -1842,12 +1870,25 @@ class _BassBackend:
     # -- volume control ---------------------------------------------------------
 
     def _category_volume(self, category: str) -> float:
-        return {
+        volume = {
             "engine": self.engine_volume,
             "weather": self.weather_volume,
             "ui": self.ui_volume,
             "siren": self.siren_volume,
         }.get(category, self.sfx_volume)
+        if category in ("engine", "weather"):
+            volume *= self.speech_duck
+        return volume
+
+    def set_speech_duck(self, duck: float) -> None:
+        """Scale engine, weather, and music under the event voice, live."""
+        duck = max(0.0, min(1.0, duck))
+        if duck == self.speech_duck:
+            return
+        self.speech_duck = duck
+        # Reapply everything the factor touches; set_volumes with no
+        # arguments is exactly that pass.
+        self.set_volumes()
 
     def set_volumes(
         self,
@@ -1881,7 +1922,7 @@ class _BassBackend:
         if self._music_stream is not None:
             try:
                 self._music_stream.set_volume(
-                    max(0.0, min(1.0, self.music_volume * self.master_volume))
+                    max(0.0, min(1.0, self.music_volume * self.master_volume * self.speech_duck))
                 )
             except self._BassError:
                 self._music_stream = None
@@ -2061,6 +2102,18 @@ class AudioEngine:
         back as the clutch hooks up.
         """
         impl_fn = getattr(self._impl, "set_engine_duck", None)
+        if impl_fn is not None:
+            impl_fn(duck)
+
+    def set_speech_duck(self, duck: float) -> None:
+        """Step engine, weather, and music (the radio's slot) down under the
+        event voice and back: 1.0 is the normal mix, ``SPEECH_DUCK_LEVEL``
+        while the road is talking. The player's volume settings are never
+        touched -- the factor rides on top of them and every reapplication
+        (a settings change, a new loop) keeps honoring it until the caller
+        restores 1.0.
+        """
+        impl_fn = getattr(self._impl, "set_speech_duck", None)
         if impl_fn is not None:
             impl_fn(duck)
 

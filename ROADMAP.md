@@ -352,6 +352,23 @@ onto exit signalling.
       back and it requeues once, right behind the line that cut it, in
       all three voice configurations; the drowsy warning and non-urgent
       HOS countdowns ride ROUTE so they qualify.
+- [x] **Speech-priority redesign, stage S1 -- landed 2026-08-12** (scoped
+      by docs/speech-priority-research.md; R1, R2, R13). Delivery
+      contracts per priority class: CRITICAL narrows to act-now (the
+      hazard call), zone entries, checkpoints, and zone-ahead/traffic
+      warnings ride ROUTE's never-dropped queue instead of interrupting
+      -- shipped together with the coupled invariant that the
+      accelerator-held grace collapse waits out the announcement's
+      speech latency. Money lines (toll charged, fines, citations, the
+      fuel-rescue bill) ride ROUTE so a busy stretch can never age a
+      cost out of the queue; stale AMBIENT chatter drops silently to
+      the message log instead of being promoted to an interrupt. The
+      main channel queues instead of cutting while the driving state is
+      on top (menus keep immediate speech). New Settings > Audio option,
+      on by default: engine, weather, and the radio duck to half volume
+      while the event voice speaks, restored on the pacer's own
+      clear-time projection. Later stages (terse contract, first-run
+      exemption, naming diet, earcon pairs) remain open below.
 - [ ] **Remaining tester findings from the same document.** Merging
       traffic does not yield to a loaded truck. At least one unexplained
       sound (a whoosh on the left). Landed 2026-08-12: work-zone closures

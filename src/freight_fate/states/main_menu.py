@@ -1229,6 +1229,16 @@ class SettingsCategoryState(MenuState):
                     "keep the radio on built-in safe stations only.",
                 ),
                 MenuItem(
+                    lambda: (
+                        "Game sounds step back for speech: "
+                        f"{'on' if s.duck_audio_for_speech else 'off'}"
+                    ),
+                    lambda: self._toggle_duck_for_speech(1),
+                    help="While the road voice speaks, the engine, weather, and "
+                    "radio drop to half volume, then come back. Warnings stay "
+                    "easy to hear in a loud cab without the voice getting louder.",
+                ),
+                MenuItem(
                     lambda: f"Menu and UI sounds volume: {round(s.ui_volume * 100)} percent",
                     lambda: self._volume("ui_volume", 0.1),
                     help="Menu movement, selection, warning, and cash sounds.",
@@ -1324,6 +1334,7 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("radio_volume", 0.1 * d),
                     self._toggle_radio_streamer_safe,
+                    self._toggle_duck_for_speech,
                     lambda d: self._volume("ui_volume", 0.1 * d),
                 ],
                 "updates": [self._toggle_update_channel],
@@ -1808,6 +1819,15 @@ class SettingsCategoryState(MenuState):
     def _toggle_radio_streamer_safe(self, _d: int) -> None:
         self.ctx.settings.radio_streamer_safe = not self.ctx.settings.radio_streamer_safe
         self.ctx.apply_active_radio_settings()
+        self._announce()
+
+    def _toggle_duck_for_speech(self, _d: int = 1) -> None:
+        s = self.ctx.settings
+        s.duck_audio_for_speech = not s.duck_audio_for_speech
+        s.save()
+        if not s.duck_audio_for_speech:
+            # A duck held at the moment of the flip must not stick.
+            self.ctx.audio.set_speech_duck(1.0)
         self._announce()
 
     def _toggle_controller(self, _d: int) -> None:
