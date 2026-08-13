@@ -13,6 +13,7 @@ because "you got away with it" is a feature and the easiest thing to
 accidentally regress into a tax again.
 """
 
+import pytest
 from enforcement_helpers import always_observing_post
 from speech_capture import speech_stub
 
@@ -154,6 +155,7 @@ def test_a_dropped_limit_still_earns_braking_room(monkeypatch):
 
 def test_staying_on_the_throttle_through_the_drop_collapses_the_grace(monkeypatch):
     from freight_fate.app import App
+    from freight_fate.states.driving_updates import LIMIT_DROP_SPEECH_LATENCY_S
 
     app = App()
     try:
@@ -166,7 +168,53 @@ def test_staying_on_the_throttle_through_the_drop_collapses_the_grace(monkeypatc
         d._enforced_limit_prev = limit + 15.0
         d._update_speeding(0.1, accelerator_held=False)
         assert d._limit_drop_grace_s > 0.0
+        # Past the announcement's speech-latency window, the throttle held
+        # through the drop is disregard and the grace collapses to zero.
+        d._limit_drop_throttle_exempt_s = 0.0
         d._update_speeding(0.1, accelerator_held=True)
+        assert d._limit_drop_grace_s == 0.0
+        # And the exemption is exactly the ROUTE wait budget -- the longest
+        # the demoted zone-entry line can lag its boundary before flushing.
+        from freight_fate.speech import EventPriority, EventSpeechPacer
+
+        assert EventSpeechPacer.WAIT_BUDGET_S[EventPriority.ROUTE] == LIMIT_DROP_SPEECH_LATENCY_S
+    finally:
+        app.shutdown()
+
+
+def test_throttle_held_during_speech_latency_does_not_collapse_the_grace(monkeypatch):
+    """R1's coupled invariant: the zone-entry line now queues at ROUTE and
+    may lag the boundary by its wait budget. Until that window has passed,
+    a held accelerator is a driver who has not been told anything yet --
+    speech latency must never masquerade as disregard and burn the whole
+    braking grace from the zone boundary."""
+    from freight_fate.app import App
+    from freight_fate.states.driving_updates import LIMIT_DROP_SPEECH_LATENCY_S
+
+    app = App()
+    try:
+        d = _driving(app)
+        _capture_events(app, monkeypatch)
+        d.trip.posts = []
+        d.trip.position_mi = d.trip.total_miles / 2.0
+        limit, _ = d.trip.speed_limit_at(d.trip.position_mi)
+        d.truck.velocity_mps = (limit + 20.0) / 2.23694
+        d._enforced_limit_prev = limit + 15.0
+        # The drop lands while the driver is still on the throttle -- the
+        # exact frame the old code zeroed the grace.
+        d._update_speeding(0.1, accelerator_held=True)
+        assert d._limit_drop_grace_s > 0.0
+        # Armed to the full window this frame, already ticking down with it.
+        assert d._limit_drop_throttle_exempt_s == pytest.approx(LIMIT_DROP_SPEECH_LATENCY_S - 0.1)
+        # Throttle held for the whole latency window: the grace survives it.
+        elapsed = 0.0
+        while elapsed + 0.1 < LIMIT_DROP_SPEECH_LATENCY_S:
+            d._update_speeding(0.1, accelerator_held=True)
+            elapsed += 0.1
+            assert d._limit_drop_grace_s > 0.0
+        # Once the line has had time to speak, the same throttle collapses it.
+        d._update_speeding(0.1, accelerator_held=True)  # window reaches zero
+        d._update_speeding(0.1, accelerator_held=True)  # now it is disregard
         assert d._limit_drop_grace_s == 0.0
     finally:
         app.shutdown()

@@ -2454,11 +2454,19 @@ def test_limit_drop_earns_braking_grace(monkeypatch):
         _roll(30)
         assert driving._over_limit_mi > 0.0
 
-        # Second drop, but the driver stays on the throttle: no grace at all.
+        # Second drop with the driver still on the throttle. For the first
+        # ROUTE-budget seconds the zone-entry line may not have spoken yet,
+        # so the held throttle is not yet disregard and the grace holds
+        # (the R1 demotion's coupled invariant)...
         monkeypatch.setattr(driving.trip, "speed_limit_at", lambda mi: (35.0, None))
         t.throttle = 1.0
         driving._over_limit_mi = 0.0
-        _roll(5, accelerator_held=True)
+        _roll(5, accelerator_held=True)  # 0.5 s: inside the speech-latency window
+        assert driving._over_limit_mi == 0.0
+
+        # ...but once the line has had time to speak, staying on the
+        # throttle forfeits the grace and the distance accrues.
+        _roll(10, accelerator_held=True)
         assert driving._over_limit_mi > 0.0
     finally:
         app.shutdown()

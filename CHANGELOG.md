@@ -4,6 +4,23 @@
 
 ### Changed
 
+- **Road announcements stop cutting each other off unless it is a real
+  emergency.** Speed zone entries, checkpoint notices, and construction or
+  traffic warnings used to interrupt whatever the road voice was saying,
+  exactly like a collision warning -- and every cut was a chance to erase a
+  warning you still needed. They now wait their short turn instead: spoken
+  within about a second, and repeated if something urgent talks over them.
+  Only act-now calls, like a hazard in your lane, still interrupt. To keep
+  it fair, staying on the accelerator right after a speed limit drops no
+  longer burns your braking grace before the announcement has even had
+  time to be spoken.
+
+- **Out-of-date roadside chatter is dropped instead of barging in.** A
+  state line or weather note the voice could not get to in time --
+  describing miles already behind you -- used to force its way in by
+  interrupting. It is now quietly dropped, and kept in the message log if
+  you want to read back what you missed.
+
 - **The game starts noticeably faster.** Reaching the main menu is quicker
   on every launch: sound loading now overlaps the rest of startup instead
   of stalling the first sound you hear, the main menu no longer re-reads
@@ -91,6 +108,13 @@
   privately; they just stay off your profile.
 
 ### Fixed
+
+- **What something cost is now always said.** A charged toll, a fine, or a
+  citation could be lost without a word if the road was talkative at the
+  wrong moment. Money lines now ride the same never-dropped queue as route
+  instructions, so what it cost always gets spoken. The "toll point ahead"
+  heads-up stays ordinary chatter -- losing the preview costs nothing once
+  the charge itself is guaranteed.
 
 - **A ten-hour out-of-service order now shuts the engine down.** Every
   other overnight stop -- sleeper berth, lot, shoulder, motel -- killed the

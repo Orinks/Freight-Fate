@@ -229,6 +229,10 @@ class DrivingState(
         # strikes accrue, earned only while actually slowing.
         self._enforced_limit_prev: float | None = None
         self._limit_drop_grace_s = 0.0
+        # The demoted (ROUTE-queued) zone-entry line may lag its boundary;
+        # the throttle-held grace collapse must not arm until it has had
+        # time to actually be spoken (research doc, R1's coupled invariant).
+        self._limit_drop_throttle_exempt_s = 0.0
         # Dash overspeed alert: armed while over the limit, chiming on an
         # interval until the truck settles back under.
         self._overspeed_active = False

@@ -153,7 +153,12 @@ class DrivingEventMixin:
             self._speak_ambient_event(event.message)
             self._record_weather_achievement()
         elif kind == TripEventKind.TOLL_CHARGED:
-            self._speak_ambient_event(event.message, sound or "ui/notify")
+            # Money is a consequence, not chatter: the charged line rides
+            # ROUTE's never-dropped contract instead of the one-deep ambient
+            # slot, where the next hazard or piece of chatter could silently
+            # destroy it. (The toll-ahead heads-up stays ambient.)
+            self.ctx.audio.play(sound or "ui/notify")
+            self.ctx.say_event(event.message, interrupt=False, priority=EventPriority.ROUTE)
             self.ctx.award_achievement("toll_paid", event=True)
         elif kind == TripEventKind.STATE_CROSSING:
             cue = event.data.get("cue")
@@ -245,13 +250,15 @@ class DrivingEventMixin:
         elif self._event_disables_cruise(event):
             self._cancel_cruise_for_restricted_area(event)
         else:
-            critical = self._is_critical_event(event)
-            if critical:
-                self._pending_ambient_event = None
-                if sound is not None and kind != TripEventKind.ZONE_ENTER:
-                    self.ctx.audio.play(sound, pan=_route_event_sound_pan(event))
-                self.ctx.say_event(event.message, interrupt=True)
-            elif self._should_space_ambient_event(event):
+            # Zone entries, checkpoints, and zone-ahead/traffic warnings used
+            # to interrupt here like a collision would. They are act-soon, not
+            # act-now: they ride ROUTE's short patience (queued, stale means
+            # flush, requeued if cut, never dropped) so each one stops being a
+            # chance to erase a warning mid-word (research doc, R1). They
+            # bypass the one-deep ambient slot exactly as they did when they
+            # interrupted; everything else keeps its spacing.
+            priority = self._event_priority(event)
+            if not self._demoted_from_interrupt(event) and self._should_space_ambient_event(event):
                 self._speak_ambient_event(
                     event.message,
                     sound if kind != TripEventKind.ZONE_ENTER else None,
@@ -259,11 +266,7 @@ class DrivingEventMixin:
             else:
                 if sound is not None and kind != TripEventKind.ZONE_ENTER:
                     self.ctx.audio.play(sound, pan=_route_event_sound_pan(event))
-                self.ctx.say_event(
-                    event.message,
-                    interrupt=False,
-                    priority=self._event_priority(event),
-                )
+                self.ctx.say_event(event.message, interrupt=False, priority=priority)
                 # Any spoken route line pushes spaced ambient chatter back, so
                 # an informational notice never lands on top of a navigation
                 # instruction the player needs to act on.
@@ -319,30 +322,53 @@ class DrivingEventMixin:
         stop = self._destination_exit_stop()
         return stop is not None and zone.start_mi >= stop.at_mi
 
-    def _is_critical_event(self, event) -> bool:
-        """Safety announcements that must preempt ambient chatter on the event
-        voice -- zone entries, checkpoints, and zone-ahead/traffic warnings --
-        versus informational cues (weather, tolls, state lines, stops) that
-        should queue and yield rather than bury a warning you need to act on."""
-        if event.kind in (TripEventKind.HAZARD, TripEventKind.ZONE_ENTER, TripEventKind.CHECKPOINT):
+    def _demoted_from_interrupt(self, event) -> bool:
+        """The act-soon kinds R1 moved out of CRITICAL. As interrupts they
+        never went near the one-deep ambient slot, and demotion must not
+        start routing them through it -- a slot overwrite or a hazard would
+        silently destroy them. ROUTE's queue is their delivery."""
+        if event.kind in (TripEventKind.ZONE_ENTER, TripEventKind.CHECKPOINT):
             return True
         if event.kind == TripEventKind.GPS_CUE:
             if event.data.get("zone") is not None:
                 return True
-            cue = event.data.get("cue")
-            if getattr(cue, "kind", "") == "traffic":
+            if getattr(event.data.get("cue"), "kind", "") == "traffic":
                 return True
         return False
+
+    def _is_critical_event(self, event) -> bool:
+        """Act NOW or lose something: the hazard call is the only trip event
+        left in the class. Zone entries, checkpoints, and zone-ahead/traffic
+        warnings are act-soon -- they ride ROUTE's short patience and its
+        never-dropped, requeued-if-cut contract instead of purging the
+        channel, because every interrupt is a chance to erase a warning the
+        player still needed (speech priority research, R1)."""
+        return event.kind == TripEventKind.HAZARD
 
     def _event_priority(self, event):
         """How long this announcement is willing to wait behind other speech.
 
-        Route information -- above all the stop the player planned and the
-        word that they have driven past it -- gives ambient chatter a moment
-        and then goes in front of it. Everything else waits its turn.
+        ROUTE is act-soon plus every consequence that must be heard: the
+        stop the player planned, zone entries and checkpoints, zone-ahead
+        and traffic warnings, and money (a charged toll could otherwise age
+        out silently, making normal mode lossier than terse mode's "what it
+        cost" guarantee -- the toll-ahead heads-up stays AMBIENT, since
+        losing the preview costs nothing once the charge is guaranteed).
+        Everything else waits its turn.
         """
         if self._is_critical_event(event):
             return EventPriority.CRITICAL
+        if event.kind in (
+            TripEventKind.ZONE_ENTER,
+            TripEventKind.CHECKPOINT,
+            TripEventKind.TOLL_CHARGED,
+        ):
+            return EventPriority.ROUTE
+        if event.kind == TripEventKind.GPS_CUE:
+            if event.data.get("zone") is not None:
+                return EventPriority.ROUTE
+            if getattr(event.data.get("cue"), "kind", "") == "traffic":
+                return EventPriority.ROUTE
         if event.kind == TripEventKind.STOP_AHEAD or event.data.get("planned"):
             return EventPriority.ROUTE
         return EventPriority.AMBIENT
@@ -390,15 +416,16 @@ class DrivingEventMixin:
             message = (
                 f"{message} Speed keeper holding {self.ctx.settings.speed_text(self._keeper_mph)}."
             )
-            self.ctx.say_event(message, interrupt=True)
+            self.ctx.say_event(message, interrupt=False, priority=EventPriority.ROUTE)
             return
         self._cancel_cruise()
         self.ctx.audio.play("ui/notify")
-        # A restricted area (construction, heavy traffic) is a safety cue: it
-        # preempts ambient chatter rather than queuing behind it.
+        # A restricted area (construction, heavy traffic) is act-soon: ROUTE
+        # priority gives chatter under a second before going in front of it,
+        # without an interrupt that could cut a real warning mid-word.
         if not self._terse_speech():
             message = f"{message} Adaptive cruise disabled; take manual speed control."
-        self.ctx.say_event(message, interrupt=True)
+        self.ctx.say_event(message, interrupt=False, priority=EventPriority.ROUTE)
 
     def _hooked_trailer_defect(self) -> str | None:
         """What an inspector would write up on the trailer, if anything."""
@@ -472,7 +499,9 @@ class DrivingEventMixin:
             f"{event.message} Evidence: {evidence_text}. "
             f"Fined {fine:,.0f} dollars, and your reputation took a hit."
         )
-        self.ctx.say_event(message, interrupt=True)
+        # A fine is money, not an act-now warning: ROUTE's never-dropped
+        # queue instead of an interrupt that could erase one.
+        self.ctx.say_event(message, interrupt=False, priority=EventPriority.ROUTE)
         _record_inspection(self.ctx, event=True)
 
     def _place_out_of_service(self) -> None:
@@ -3299,12 +3328,16 @@ class DrivingEventMixin:
         self._cancel_cruise()
         self._rescue_offered = False
         self.ctx.audio.play("ui/error")
+        # A repair bill and an instruction, spoken to a truck already coasted
+        # to a stop: nothing act-now left, so it queues on ROUTE's
+        # never-dropped contract instead of purging the channel.
         self.ctx.say_event(
             f"You ran out of fuel. Roadside rescue brought thirty "
             f"gallons {billing}. Press "
             f"{self.ctx.control_hint('engine')} to restart "
             "the engine, and plan your fuel stops.",
-            interrupt=True,
+            interrupt=False,
+            priority=EventPriority.ROUTE,
         )
 
     def _arrive(self) -> None:

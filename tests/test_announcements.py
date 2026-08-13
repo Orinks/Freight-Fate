@@ -28,8 +28,14 @@ def _driving(app):
     return DrivingState(app.ctx, job, route, phase="delivery")
 
 
-def test_safety_cues_are_critical_and_chatter_is_not():
+def test_only_the_hazard_call_stays_critical():
+    """R1 narrows CRITICAL to act-NOW: every interrupt purges the channel,
+    so class membership is itself a safety property. Zone entries,
+    checkpoints, and zone-ahead/traffic warnings are act-soon and ride
+    ROUTE's never-dropped queue instead; money (a charged toll) joins them,
+    because a consequence must always be heard. Chatter stays ambient."""
     from freight_fate.app import App
+    from freight_fate.speech import EventPriority
 
     app = App()
     try:
@@ -39,21 +45,57 @@ def test_safety_cues_are_critical_and_chatter_is_not():
         class _Cue:
             kind = "traffic"
 
-        assert d._is_critical_event(TripEvent(TripEventKind.HAZARD, "Brake now!"))
-        assert d._is_critical_event(TripEvent(TripEventKind.ZONE_ENTER, "zone", {"zone": zone}))
-        assert d._is_critical_event(
-            TripEvent(TripEventKind.GPS_CUE, "construction ahead", {"zone": zone})
+        hazard = TripEvent(TripEventKind.HAZARD, "Brake now!")
+        assert d._is_critical_event(hazard)
+        assert d._event_priority(hazard) is EventPriority.CRITICAL
+
+        act_soon = [
+            TripEvent(TripEventKind.ZONE_ENTER, "zone", {"zone": zone}),
+            TripEvent(TripEventKind.GPS_CUE, "construction ahead", {"zone": zone}),
+            TripEvent(TripEventKind.GPS_CUE, "traffic ahead", {"cue": _Cue()}),
+            TripEvent(TripEventKind.CHECKPOINT, "Passing Grand Island on I-190"),
+            TripEvent(TripEventKind.TOLL_CHARGED, "E-ZPass toll charged: 15 dollars."),
+        ]
+        for event in act_soon:
+            assert not d._is_critical_event(event), event.kind
+            assert d._event_priority(event) is EventPriority.ROUTE, event.kind
+
+        ambient = [
+            TripEvent(TripEventKind.GPS_CUE, "CB radio: patrol ahead", {"cb_patrol": object()}),
+            TripEvent(TripEventKind.WEATHER_CHANGE, "rain"),
+            TripEvent(TripEventKind.GPS_CUE, "exit ahead"),
+        ]
+        for event in ambient:
+            assert not d._is_critical_event(event), event.kind
+            assert d._event_priority(event) is EventPriority.AMBIENT, event.kind
+    finally:
+        app.shutdown()
+
+
+def test_zone_entry_is_delivered_queued_at_route_priority(monkeypatch):
+    """The demoted zone entry goes to the voice queued with ROUTE priority --
+    never an interrupt that could cut a real warning mid-word, never lost
+    behind the one-deep ambient slot either."""
+    from freight_fate.app import App
+    from freight_fate.speech import EventPriority
+
+    app = App()
+    try:
+        d = _driving(app)
+        events = []
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, *a, **k: events.append((text, a, k)))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+        zone = Zone(5.0, 8.0, 45.0, "construction")
+        d._handle_trip_event(
+            TripEvent(
+                TripEventKind.ZONE_ENTER,
+                "Reduced speed zone: construction, 45 miles per hour.",
+                {"zone": zone},
+            )
         )
-        assert d._is_critical_event(
-            TripEvent(TripEventKind.GPS_CUE, "traffic ahead", {"cue": _Cue()})
-        )
-        # Ambient chatter is not critical.
-        assert not d._is_critical_event(
-            TripEvent(TripEventKind.GPS_CUE, "CB radio: patrol ahead", {"cb_patrol": object()})
-        )
-        assert not d._is_critical_event(TripEvent(TripEventKind.WEATHER_CHANGE, "rain"))
-        assert not d._is_critical_event(TripEvent(TripEventKind.TOLL_CHARGED, "toll"))
-        assert not d._is_critical_event(TripEvent(TripEventKind.GPS_CUE, "exit ahead"))
+        text, _, kwargs = next(e for e in events if "Reduced speed zone" in e[0])
+        assert kwargs.get("interrupt") is False
+        assert kwargs.get("priority") is EventPriority.ROUTE
     finally:
         app.shutdown()
 
@@ -136,32 +178,30 @@ def test_horn_loops_while_key_is_held():
         app.shutdown()
 
 
-def test_zone_warning_interrupts_while_weather_chatter_queues(monkeypatch):
+def test_zone_warning_rides_route_while_weather_chatter_stays_ambient(monkeypatch):
+    """The zone-ahead warning is act-soon: it queues at ROUTE (short
+    patience, never dropped, requeued if cut) instead of interrupting, and
+    it bypasses the ambient spacing slot chatter waits in."""
     from freight_fate.app import App
+    from freight_fate.speech import EventPriority
 
     app = App()
     try:
         d = _driving(app)
-        calls = []
-        monkeypatch.setattr(
-            app.ctx,
-            "say_event",
-            speech_stub(calls, with_interrupt=True),
-        )
+        events = []
+        monkeypatch.setattr(app.ctx, "say_event", lambda text, *a, **k: events.append((text, k)))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
         zone = Zone(5.0, 8.0, 45.0, "construction")
 
-        d._handle_trip_event(
-            TripEvent(
-                TripEventKind.GPS_CUE,
-                "Brake now! In 2 miles, construction ahead. Merge left for the "
-                "flagger taper; speed limit 55, then 45 through the work zone.",
-                {"zone": zone},
-            )
+        warning = (
+            "Brake now! In 2 miles, construction ahead. Merge left for the "
+            "flagger taper; speed limit 55, then 45 through the work zone."
         )
-        assert calls[-1][1] is True  # the warning preempts whatever is talking
-
-        d._handle_trip_event(TripEvent(TripEventKind.WEATHER_CHANGE, "Weather: rain."))
-        assert calls[-1][1] is False  # ambient chatter yields and queues
+        d._handle_trip_event(TripEvent(TripEventKind.GPS_CUE, warning, {"zone": zone}))
+        text, kwargs = events[-1]
+        assert text == warning  # spoken at once, never parked in the slot
+        assert kwargs.get("interrupt") is False
+        assert kwargs.get("priority") is EventPriority.ROUTE
     finally:
         app.shutdown()
 
@@ -338,9 +378,12 @@ def test_ambient_chatter_waits_while_hazard_is_active(monkeypatch):
         app.shutdown()
 
 
-def test_critical_zone_clears_pending_ambient_chatter(monkeypatch):
+def test_zone_entry_no_longer_destroys_pending_ambient_chatter(monkeypatch):
+    """A zone entry used to interrupt, and the interrupt threw away whatever
+    chatter was waiting in the ambient slot. Queued at ROUTE it only pushes
+    the chatter back: the zone speaks first, the crossing still speaks."""
     from freight_fate.app import App
-    from freight_fate.states.driving import AMBIENT_EVENT_SPACING_S
+    from freight_fate.sim.driving_modes import tuning_for_time_scale
 
     app = App()
     try:
@@ -361,10 +404,10 @@ def test_critical_zone_clears_pending_ambient_chatter(monkeypatch):
                 {"zone": zone},
             )
         )
-        assert calls[-1] == ("Construction ahead. Speed limit 45.", True)
+        assert calls[-1] == ("Construction ahead. Speed limit 45.", False)
 
-        d._update_ambient_events(AMBIENT_EVENT_SPACING_S)
-        assert calls[-1] == ("Construction ahead. Speed limit 45.", True)
+        d._update_ambient_events(tuning_for_time_scale(d.trip.time_scale).ambient_spacing_s)
+        assert calls[-1] == ("Crossing Ohio.", False)
     finally:
         app.shutdown()
 

@@ -283,6 +283,23 @@ class GameContext:
             return
         if priority is None:
             priority = EventPriority.CRITICAL if interrupt else EventPriority.AMBIENT
+        if (
+            not interrupt
+            and priority == EventPriority.AMBIENT
+            and self.settings.sapi_events
+            and self._event_pacer.would_start_stale(text, priority)
+        ):
+            # Chatter that would start speaking after the moment it described
+            # is dropped, not promoted to an interrupt: losing it costs the
+            # player nothing (the enum's own words), and the old stale-flush
+            # made the least important class the only one guaranteed to
+            # preempt. The review log still keeps the line -- recovery is
+            # exactly what the log is for. Not marked heard: the player
+            # never heard it, so an identical later moment speaks fresh.
+            transcript.info("[pacer] stale ambient dropped: %s", text)
+            if review:
+                self.message_log.add(text, MessageCategory.EVENT)
+            return
         transcript.info("[event] %s", text)
         self._event_pacer.note_spoken(text, key=key)
         cut = None

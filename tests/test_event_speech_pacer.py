@@ -80,9 +80,10 @@ def test_reset_clears_the_projection() -> None:
     assert pacer.should_flush("At the dock.") is False
 
 
-def test_say_event_flushes_a_stale_backlog_end_to_end() -> None:
-    """ctx.say_event: a burst of queued events turns into an interrupting
-    (channel-purging) delivery once the backlog goes stale."""
+def test_say_event_flushes_a_stale_route_backlog_end_to_end() -> None:
+    """ctx.say_event: a burst of queued ROUTE events turns into an
+    interrupting (channel-purging) delivery once the backlog goes stale --
+    the drive is never dropped, staleness only changes its delivery."""
     from freight_fate.app import App
 
     app = App()
@@ -98,17 +99,67 @@ def test_say_event_flushes_a_stale_backlog_end_to_end() -> None:
             "Delivering. The forklift crew is unloading the trailer.",
         ]
         for line in approach:
-            app.ctx.say_event(line, interrupt=False)
+            app.ctx.say_event(line, interrupt=False, priority=EventPriority.ROUTE)
 
         assert all(not interrupt for _, interrupt in calls[:1])
         assert any(interrupt for _, interrupt in calls), (
             "a stale backlog was performed in full -- the pacer never flushed"
         )
-        # Every line still reached the voice in order; staleness changes
-        # delivery, never drops the newest information.
+        # Every line still reached the voice in order; for ROUTE, staleness
+        # changes delivery, never drops the newest information.
         assert [text for text, _ in calls] == approach
     finally:
         app.shutdown()
+
+
+def test_stale_ambient_chatter_is_dropped_not_promoted() -> None:
+    """R1: chatter that would start speaking after the moment it described
+    is discarded silently -- the old stale-flush promoted it to an
+    interrupt, making the least important class the only one guaranteed to
+    preempt. The review log still keeps the dropped line."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        calls: list[tuple[str, bool]] = []
+        app.ctx.settings.sapi_events = True
+        app.ctx.speech.say_event = speech_stub(calls, with_interrupt=True)
+        clock = FakeClock()
+        app.ctx._event_pacer = EventSpeechPacer(clock=clock)
+
+        app.ctx.say_event(LONG_LINE, interrupt=False)  # ~10s of speaking
+        app.ctx.say_event(CHATTER, interrupt=False)  # would start far too late
+
+        assert calls == [(LONG_LINE, False)], "stale chatter reached the voice"
+        # Dropped from the air, kept in the log: recovery is what it is for.
+        assert any(m.text == CHATTER for m in app.ctx.message_log.messages)
+        # Never marked heard either: the player did not hear it, so the same
+        # observation made fresh later speaks normally.
+        clock.now += 30.0
+        app.ctx.say_event(CHATTER, interrupt=False)
+        assert calls[-1] == (CHATTER, False)
+    finally:
+        app.shutdown()
+
+
+def test_would_start_stale_is_a_pure_reading() -> None:
+    pacer, _ = make_pacer()
+    pacer.should_flush(LONG_LINE)
+    assert pacer.would_start_stale(CHATTER) is True
+    # Pure: asking did not extend the projection or consume anything.
+    assert pacer.would_start_stale(CHATTER) is True
+    quiet, _ = make_pacer()
+    assert quiet.would_start_stale(CHATTER) is False
+
+
+def test_the_post_pause_purge_is_not_read_as_staleness() -> None:
+    """The first line back from a pause must purge and speak, never drop."""
+    pacer, clock = make_pacer()
+    pacer.should_flush(LONG_LINE)
+    pacer.pause()
+    clock.now += 45.0
+    assert pacer.would_start_stale(CHATTER) is False
+    assert pacer.should_flush(CHATTER) is True
 
 
 def test_many_short_lines_stay_within_budget_then_flush() -> None:

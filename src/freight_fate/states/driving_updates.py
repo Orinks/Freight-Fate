@@ -12,6 +12,7 @@ from ..models.enforcement import (
     WORK_ZONE_BARRELS_FINE,
 )
 from ..radio import truck_elevation_ft
+from ..speech_pacing import EventSpeechPacer
 from .driving_core import *
 from .driving_pacenotes import PACENOTE_MARGIN_MPH
 from .driving_rest_states import (
@@ -20,6 +21,13 @@ from .driving_rest_states import (
     TrafficStopState,
     _log_enforcement,
 )
+
+# The zone-entry line rides ROUTE now (queued, willing to wait this long
+# behind other speech before flushing). Until the line has had that long to
+# actually be spoken, holding the accelerator is not yet disregard -- nobody
+# has told the driver anything, and speech latency must never masquerade as
+# defiance (the research doc's coupled invariant on the R1 demotion).
+LIMIT_DROP_SPEECH_LATENCY_S = EventSpeechPacer.WAIT_BUDGET_S[EventPriority.ROUTE]
 
 # Re-crossings inside this window are pinballing, not lane changes.
 LANE_CROSS_REPEAT_S = 4.0
@@ -1227,6 +1235,9 @@ class DrivingUpdateMixin:
             f"{fine:,.0f} dollars, and it goes on your safety record. "
             f"You have {p.money:,.0f} dollars." + (f" {ladder}" if ladder else ""),
             interrupt=False,
+            # Money rides ROUTE's never-dropped contract: a busy stretch must
+            # not age a citation out of the queue.
+            priority=EventPriority.ROUTE,
         )
 
     def _keep_right_justified(self) -> bool:
@@ -2774,14 +2785,24 @@ class DrivingUpdateMixin:
         if self._enforced_limit_prev is not None and limit < self._enforced_limit_prev:
             grace = (self.truck.speed_mph - limit) / 2.0
             self._limit_drop_grace_s = max(self._limit_drop_grace_s, min(15.0, grace))
+            # The zone-entry line is queued at ROUTE and may lag its boundary
+            # by the ROUTE wait budget. A driver still on the throttle inside
+            # that window has simply not been told yet, so the throttle
+            # check must not arm until the line has had time to speak.
+            self._limit_drop_throttle_exempt_s = LIMIT_DROP_SPEECH_LATENCY_S
         self._enforced_limit_prev = limit
         if self._limit_drop_grace_s > 0.0:
             self._limit_drop_grace_s = max(0.0, self._limit_drop_grace_s - dt)
             # Staying on the throttle through the drop is disregard, not
             # compliance: the grace collapses. Read the current key/trigger
             # position, not the smoothed truck throttle, which is still
-            # ramping down just after the driver lifts off.
-            if accelerator_held:
+            # ramping down just after the driver lifts off -- and only once
+            # the announcement's speech-latency window above has passed.
+            if self._limit_drop_throttle_exempt_s > 0.0:
+                self._limit_drop_throttle_exempt_s = max(
+                    0.0, self._limit_drop_throttle_exempt_s - dt
+                )
+            elif accelerator_held:
                 self._limit_drop_grace_s = 0.0
 
     def _update_overspeed_warning(self, dt: float, limit: float) -> None:
@@ -3190,11 +3211,15 @@ class DrivingUpdateMixin:
         p.money -= fine
         self.ticket_fines_paid += fine
         self.ctx.audio.play("ui/error")
+        # A citation is money, not an act-now warning: ROUTE's never-dropped
+        # queue instead of an interrupt that could erase one.
         self.ctx.say_event(
             "Chain checkpoint. An officer waves you onto the scale apron and "
             f"writes a chain-law citation: {fine:,.0f} dollars."
             f"{construction_zone_fine_clause(zone)} "
-            f"You have {p.money:,.0f} dollars."
+            f"You have {p.money:,.0f} dollars.",
+            interrupt=False,
+            priority=EventPriority.ROUTE,
         )
 
     def _reset_pull_over_tracker(self) -> None:

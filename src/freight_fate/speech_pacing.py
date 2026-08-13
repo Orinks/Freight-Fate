@@ -248,6 +248,23 @@ class EventSpeechPacer:
         self._clear_at = 0.0
         return cut
 
+    def would_start_stale(self, text: str, priority: EventPriority = EventPriority.AMBIENT) -> bool:
+        """Whether this queued line would start past its priority's budget.
+
+        A pure reading -- the projection is not touched, nothing is tracked.
+        The caller uses it to decide a line's fate BEFORE committing it to
+        the channel: chatter that would start stale is dropped silently
+        (UIA MostRecent semantics -- superseded telemetry is discarded, not
+        read late), where :meth:`should_flush` would instead deliver it
+        interrupting. A purge armed by pause() is not staleness; that path
+        stays with should_flush, whose first line back purges the backlog.
+        """
+        if self._purge_next:
+            return False
+        start = max(self._clock(), self._clear_at)
+        budget = self.WAIT_BUDGET_S.get(EventPriority(priority), self.STALE_WAIT_S)
+        return start - self._clock() > budget
+
     def should_flush(self, text: str, priority: EventPriority = EventPriority.AMBIENT) -> bool:
         """Decide a queued line's fate and update the projection either way.
 
