@@ -1437,7 +1437,21 @@ class DrivingControlsMixin:
                 self._direction_armed = ""
                 self._direction_hold_s = 0.0
                 self.ctx.audio.play("ui/tick", volume=1.0)
-                self.ctx.say_event(f"{name} latched.", interrupt=False)
+                line = f"{name} latched."
+                if (
+                    latch is self._throttle_latch
+                    and self.ctx.settings.pedal_latch == "assists first"
+                ):
+                    # A latch caught while something smarter is holding the
+                    # speed must say who has the pedal, or the gesture feels
+                    # dead -- the latch takes over only when they release.
+                    # In "latch first" mode the plain line is the truth: the
+                    # latch has the pedal and nothing outranks it.
+                    if self._cruise_mph is not None:
+                        line = "Throttle latched. Adaptive cruise holds the speed."
+                    elif self._keeper_mph is not None:
+                        line = "Throttle latched. Speed keeper holds the speed."
+                self.ctx.say_event(line, interrupt=False)
             elif event == "released":
                 self.ctx.say_event(f"{name} released.", interrupt=False)
         throttle_overridden = (

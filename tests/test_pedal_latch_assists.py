@@ -309,6 +309,106 @@ def test_latch_first_mode_keeps_the_old_override_meaning(monkeypatch):
         app.shutdown()
 
 
+def test_the_catch_line_names_the_authority_holding_the_speed(monkeypatch):
+    """Latching while cruise or the keeper drives must not sound dead."""
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    held = set()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        d.truck.engine_on = True
+        app.ctx.settings.overspeed_warning = "off"
+        d.truck.velocity_mps = 60 / 2.2369362920544
+        d._engage_cruise(55.0)
+
+        # The real gesture, so the spoken confirmation path is the one
+        # players hear: tap, release, press and hold through the catch.
+        held.add(pygame.K_UP)
+        _drive_frames(d, 0.2)
+        held.discard(pygame.K_UP)
+        _drive_frames(d, 0.2)
+        held.add(pygame.K_UP)
+        _drive_frames(d, 0.8)
+        held.discard(pygame.K_UP)
+
+        assert "Throttle latched. Adaptive cruise holds the speed." in spoken
+        assert "Throttle latched." not in spoken  # replaced, not doubled
+    finally:
+        app.shutdown()
+
+
+def test_a_plain_catch_keeps_its_plain_line(monkeypatch):
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    held = set()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        held.add(pygame.K_UP)
+        _drive_frames(d, 0.2)
+        held.discard(pygame.K_UP)
+        _drive_frames(d, 0.2)
+        held.add(pygame.K_UP)
+        _drive_frames(d, 0.8)
+        held.discard(pygame.K_UP)
+
+        assert "Throttle latched." in spoken
+    finally:
+        app.shutdown()
+
+
+def test_latch_first_catch_keeps_the_plain_line(monkeypatch):
+    """Owner revision: "latch first" is the pre-change behavior -- the plain
+    line is the truth, since nothing outranks the latch in this mode, so
+    the authority line must not appear even with cruise engaged."""
+    from driving_feature_helpers import quiet_trip, release_air_brakes, start_drive
+
+    from freight_fate.app import App
+
+    app = App()
+    spoken = []
+    held = set()
+    monkeypatch.setattr(pygame.key, "get_pressed", lambda: FakeKeys(held))
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
+    try:
+        d = start_drive(app)
+        quiet_trip(d)
+        release_air_brakes(d)
+        app.ctx.settings.pedal_latch = "latch first"
+        app.ctx.settings.overspeed_warning = "off"
+        d.truck.engine_on = True
+        d.truck.velocity_mps = 60 / 2.2369362920544
+        d._engage_cruise(55.0)
+
+        held.add(pygame.K_UP)
+        _drive_frames(d, 0.2)
+        held.discard(pygame.K_UP)
+        _drive_frames(d, 0.2)
+        held.add(pygame.K_UP)
+        _drive_frames(d, 0.8)
+        held.discard(pygame.K_UP)
+
+        assert "Throttle latched." in spoken
+        assert "Throttle latched. Adaptive cruise holds the speed." not in spoken
+    finally:
+        app.shutdown()
+
+
 def test_curve_assist_jake_arrives_once_the_latched_throttle_drains(monkeypatch):
     """On a real downgrade the assist raises the retarder -- but on the
     engage frame a yielded latch is still draining, so the capability
