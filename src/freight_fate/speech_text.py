@@ -166,20 +166,25 @@ def stop_callout(
     distance: str,
     parking_normal: str,
     parking_certainty: str,
+    exit_hint: str = "X",
 ) -> SpokenMessage:
     """The stop-ahead callout. Terse slots: [name, exit, distance, qualifier].
 
     Terse drops the stop-type prefix (the proper name mostly repeats it),
     the "in"/"at" scaffolding, and the key instruction -- and keeps the
     parking qualifier, because that is the fact the plan turns on.
+
+    ``exit_hint`` names the control that signals for the exit; the driving
+    layer sets it to the device-correct hint, or to "" once the player has
+    demonstrated the exit signal enough times for the instruction to retire
+    (research doc R7). An empty hint drops the sentence entirely.
     """
     exit_part = f" at {exit_label}" if exit_label else ""
     normal_parts = [f"{planned_prefix}{typed_name}{exit_part} in {distance}."]
     if parking_normal:
         normal_parts.append(f"{parking_normal}.")
-    # The literal key is pre-existing spoken text; retiring instructions the
-    # player has demonstrated is the research doc's R7, not this change.
-    normal_parts.append("Press X to signal for the exit.")
+    if exit_hint:
+        normal_parts.append(f"Press {exit_hint} to signal for the exit.")
     slots = [plain_name] + ([exit_label] if exit_label else []) + [distance]
     terse = f"{planned_prefix}{', '.join(slots)}."
     parking_terse = TERSE_PARKING_LABELS.get(parking_certainty, TERSE_PARKING_LABELS["unknown"])

@@ -176,6 +176,12 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         self.position_mi = 0.0
         self.game_minutes = 0.0
         self.finished = False
+        # The control the stop callout names for signalling an exit. The
+        # driving layer overrides it to the device-correct hint, or to "" once
+        # the player has demonstrated the exit signal enough times that the
+        # instruction has retired (research doc R7). The literal default keeps
+        # standalone Trip callers (tests, tools) speaking the keyboard key.
+        self.exit_hint = "X"
         # Deliberate waiting: armed when the player sets the parking brake
         # themselves, never by the auto-set at trip start or menu returns.
         self.waiting = False
@@ -2603,6 +2609,7 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                         distance=self._distance_text(ahead),
                         parking_normal=stop.parking_text,
                         parking_certainty=stop.parking,
+                        exit_hint=self.exit_hint,
                     ),
                     stop=stop,
                     planned=self.is_planned(stop),

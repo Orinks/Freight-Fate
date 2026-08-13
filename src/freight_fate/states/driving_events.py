@@ -805,6 +805,11 @@ class DrivingEventMixin:
         self._exit_signal_on = True
         self._exit_cancel_armed = False
         self._exit_signal_canceled = False
+        # The player just signalled for an exit; count it toward retiring the
+        # "press X to signal" instruction, and update what the stop callout
+        # will say from here (research doc R7).
+        self._note_instruction_demonstrated("take_exit")
+        self._refresh_exit_hint()
         # Re-arming after a cancel starts the distance anchors over; without
         # this the milestones already spoken stay marked and the second
         # approach runs silent.

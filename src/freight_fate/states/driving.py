@@ -925,6 +925,7 @@ class DrivingState(
         if getattr(self, "_entered_once", False):
             return
         self._entered_once = True
+        self._refresh_exit_hint()
         self.ctx.clear_music_rotation()
         self.ctx.audio.stop_music(800)
         self._play_radio_current()
@@ -1014,7 +1015,7 @@ class DrivingState(
                     f"Transmission is {mode}. "
                     f"Weather: {self.weather.report_lead(self.ctx.settings.imperial_units)}. "
                     f"{self._engine_entry_instruction()} "
-                    f"{self.ctx.control_hint('help')} lists the controls.",
+                    f"{self._help_hint_tail()}".rstrip(),
                     interrupt=False,
                 )
         if self.tutorial:
@@ -1027,8 +1028,58 @@ class DrivingState(
     def _engine_entry_instruction(self) -> str:
         if self.truck.engine_on:
             return "Engine idling; build air pressure if needed."
+        # Once the player has started the engine a few times, the key prompt
+        # is noise -- the state alone is enough, and the help key still names
+        # the control on demand (research doc R7). A remapped key or a switch
+        # of transmission re-arms it.
+        if self._instruction_retired("engine"):
+            return "Engine off."
         return (
             f"Press {self.ctx.control_hint('engine')} to start the engine and build air pressure."
+        )
+
+    def _help_hint_tail(self) -> str:
+        """The 'F1 lists the controls' pointer, retired once the player has
+        opened the controls help a few times (research doc R7)."""
+        if self._instruction_retired("help"):
+            return ""
+        return f"{self.ctx.control_hint('help')} lists the controls."
+
+    def _instruction_retired(self, action: str) -> bool:
+        from ..spoken_advice import instruction_retired
+
+        profile = self.ctx.profile
+        if profile is None:
+            return False
+        return instruction_retired(
+            profile,
+            action,
+            binding=self.ctx.control_hint(action),
+            automatic=self.truck.transmission.automatic,
+        )
+
+    def _note_instruction_demonstrated(self, action: str) -> None:
+        """Record that the player performed ``action``, toward retiring its
+        spoken instruction (research doc R7)."""
+        from ..spoken_advice import note_demonstrated
+
+        profile = self.ctx.profile
+        if profile is None:
+            return
+        note_demonstrated(
+            profile,
+            action,
+            binding=self.ctx.control_hint(action),
+            automatic=self.truck.transmission.automatic,
+        )
+
+    def _refresh_exit_hint(self) -> None:
+        """Set the take-exit hint the stop callout speaks: the named control
+        while it is still being taught, and nothing once the player has armed
+        the signal enough times (research doc R7). Named through control_hint
+        so a remapped key or a controller says the right thing, or re-teaches."""
+        self.trip.exit_hint = (
+            "" if self._instruction_retired("take_exit") else self.ctx.control_hint("take_exit")
         )
 
     def _resumed_speed_control_status(self) -> str:

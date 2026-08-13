@@ -4,6 +4,15 @@
 
 ### Changed
 
+- **The game stops repeating instructions you have clearly mastered.** After
+  you have started the engine, opened the controls help, or signalled for an
+  exit a few times, the truck quits telling you which key does it -- "Press E
+  to start the engine", "F1 lists the controls", "Press X to signal for the
+  exit" fall away, and the information is still one help key away when you
+  want it. If you remap a control, switch a controller in, or move to a
+  manual gearbox, the matching prompt comes back until you have shown the new
+  control the same way.
+
 - **The Learn game sounds screen now teaches the collision as well as the
   all-clear.** Terse speech uses the hazard-clear chime as the whole "you
   made it" confirmation, so its opposite belongs next to it: the collision

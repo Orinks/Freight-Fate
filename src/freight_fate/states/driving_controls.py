@@ -227,6 +227,7 @@ class DrivingControlsMixin:
 
     def _speak_driving_help(self) -> None:
         """F1 help: keyboard or controller layout, following the device in use."""
+        self._note_instruction_demonstrated("help")
         if self.ctx.controller.device == "controller":
             self._speak_controller_help()
         else:
@@ -584,6 +585,7 @@ class DrivingControlsMixin:
             self.ctx.say("Engine off.")
         else:
             if t.start_engine():
+                self._note_instruction_demonstrated("engine")
                 self.ctx.audio.engine_start()
                 if t.air_low_warning:
                     # A cold start is low on air by definition, but sounding
