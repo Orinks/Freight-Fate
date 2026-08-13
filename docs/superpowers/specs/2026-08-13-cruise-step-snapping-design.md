@@ -34,7 +34,7 @@ the next target from (current target, direction, fine flag): fine gives
 target±1; coarse gives the next multiple of 5 strictly above/below, i.e.
 `floor(target/5)*5 + 5` upward and the mirror downward, which degenerates
 to ±5 on-grid. The key handler (driving_controls.py:83-89) reads
-`event.mod & pygame.KMOD_SHIFT` the same way the adjacent K binding does.
+`event.mod & pygame.KMOD_CTRL` the way the radio bindings do.
 The existing spoken confirmation line is unchanged apart from the numbers
 it speaks.
 
@@ -49,7 +49,7 @@ per `docs/ontology.md`; no other new speech.
 - Off-grid snap up (32 -> 35) and the following on-grid step (35 -> 40).
 - Off-grid snap down (32 -> 30); on-grid down (30 -> 25).
 - Clamp at both bounds, stepping and snapping.
-- Shift fine steps up and down by 1, including from on-grid targets.
+- Ctrl fine steps up and down by 1, including from on-grid targets.
 - Keeper active in a zone: +/- moves the open-road resume target with the
   same snapping.
 - Parked with high idle latched: the keys still step idle RPM, cruise
