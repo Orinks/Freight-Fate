@@ -36,15 +36,19 @@ LANE_CROSS_REPEAT_S = 4.0
 # the tires cross the line while it is happening.
 SIDESWIPE_REPEAT_S = 3.0
 
-# FM fringe rendering. The bed creeps in below full quieting (signal 0.6,
-# radio.SIGNAL_FULL_VOLUME) and deepens quadratically; pickets begin below
-# the old static threshold. PICKET_DUCK is the program level while a splash
-# owns the channel -- capture lost, near-silent, restored sharply.
-FRINGE_BED_SIGNAL = 0.6
+# FM fringe rendering. The bed creeps in below full quieting
+# (radio.SIGNAL_FULL_VOLUME) and deepens quadratically; pickets begin below
+# the static threshold (radio.STATIC_SIGNAL_THRESHOLD). Both are references
+# to the radio module's own constants, not copies -- a hardcoded copy of
+# each drifted silently out of sync with radio.py's smear ruling once
+# already (2026-08-13), so this system reads the numbers it must agree
+# with instead of remembering them. PICKET_DUCK is the program level while
+# a splash owns the channel -- capture lost, near-silent, restored sharply.
+FRINGE_BED_SIGNAL = SIGNAL_FULL_VOLUME
 # Peak bed level ~= where the program used to sit, never a wall of noise on
 # top of it: the owner's smear ruling -- static takes the program's place.
 FRINGE_BED_MAX_VOLUME = 0.35
-PICKET_SIGNAL = 0.35
+PICKET_SIGNAL = STATIC_SIGNAL_THRESHOLD
 PICKET_DUCK = 0.12
 # Flutter rate bounds: parked multipath barely moves (slow wander floor);
 # the ceiling is perceptual -- past ~9 events a second it just reads as

@@ -60,6 +60,7 @@ from ..music import (
 from ..radio import (
     PERSONAL_PLAYLIST_SOURCE_TYPE,
     SAFE_ROUTE_PLAYLIST,
+    SIGNAL_FULL_VOLUME,
     STATIC_SIGNAL_THRESHOLD,
     RadioPlaybackError,
     RadioState,

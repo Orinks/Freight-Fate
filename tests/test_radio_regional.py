@@ -21,6 +21,8 @@ from freight_fate.radio import (
     EARTH_RADIUS_MI,
     RADIO_REACH_MULT,
     SIGNAL_DEEP_FLOOR,
+    SIGNAL_FULL_VOLUME,
+    STATIC_SIGNAL_THRESHOLD,
     RadioReception,
     RadioState,
     RadioStation,
@@ -539,10 +541,15 @@ def test_dead_stream_reconnects_quietly_and_never_crackles(denver_driving, monke
 def test_live_fringe_stream_gets_hiss_bed_and_pickets(denver_driving, monkeypatch):
     # A thinning but audible station: the reception tick caches the fringe,
     # the per-frame renderer brings in the hiss bed and fires a sharp picket
-    # that ducks the program hard, then releases it.
+    # that ducks the program hard, then releases it. FRINGE_BED_SIGNAL and
+    # PICKET_SIGNAL now reference radio.SIGNAL_FULL_VOLUME (0.20) and
+    # radio.STATIC_SIGNAL_THRESHOLD (0.12) directly, so a signal has to sit
+    # below the lower of the two (STATIC_SIGNAL_THRESHOLD) to prove both
+    # the bed and the pickets in one pass.
     app, driving, _music, played_effects, _events = denver_driving
     station = _fringe_stream_station()
-    reception = RadioReception(station, 90.0, 0.2, "in range")
+    deep_fringe_signal = STATIC_SIGNAL_THRESHOLD - 0.04
+    reception = RadioReception(station, 90.0, deep_fringe_signal, "in range")
     driving.radio.enabled = True
     monkeypatch.setattr(driving.radio, "current_station", lambda: station)
     monkeypatch.setattr(driving.radio, "current_reception", lambda: reception)
@@ -563,7 +570,7 @@ def test_live_fringe_stream_gets_hiss_bed_and_pickets(denver_driving, monkeypatc
     driving._radio_signal_timer = 0.0
     driving._update_radio_reception(1.0)
     assert streams == []  # audible stream is left alone
-    assert driving._radio_fringe_signal == pytest.approx(0.2)
+    assert driving._radio_fringe_signal == pytest.approx(deep_fringe_signal)
 
     driving.truck.velocity_mps = 25.0
     driving._picket_wait_s = 0.0
@@ -578,6 +585,41 @@ def test_live_fringe_stream_gets_hiss_bed_and_pickets(denver_driving, monkeypatc
     driving._picket_wait_s = 10.0
     driving._update_radio_fringe(0.5)
     assert driving._radio_picket_duck == 1.0
+
+
+def test_clean_program_at_the_new_full_volume_join_has_no_fringe(denver_driving, monkeypatch):
+    # The smear ruling (2026-07-24): static never sits on top of a still-
+    # loud program. signal_volume_factor plays clean program at full
+    # volume from SIGNAL_FULL_VOLUME (0.20) up; the fringe renderer must
+    # agree exactly, or the game would lay hiss and pickets over a clean
+    # signal -- audible proof that FRINGE_BED_SIGNAL/PICKET_SIGNAL track
+    # radio.SIGNAL_FULL_VOLUME/STATIC_SIGNAL_THRESHOLD instead of a stale
+    # hardcoded copy.
+    app, driving, _music, played_effects, _events = denver_driving
+    station = _fringe_stream_station()
+    reception = RadioReception(station, 20.0, SIGNAL_FULL_VOLUME, "in range")
+    driving.radio.enabled = True
+    monkeypatch.setattr(driving.radio, "current_station", lambda: station)
+    monkeypatch.setattr(driving.radio, "current_reception", lambda: reception)
+    monkeypatch.setattr(driving.ctx.audio, "music_playing", lambda: True)
+    loops = []
+    monkeypatch.setattr(
+        driving.ctx.audio,
+        "start_loop",
+        lambda ch, key, volume=1.0, fade_ms=300: loops.append((ch, key, volume)),
+    )
+
+    driving._radio_signal_timer = 0.0
+    driving._update_radio_reception(1.0)
+    assert driving._radio_fringe_signal == pytest.approx(SIGNAL_FULL_VOLUME)
+
+    driving.truck.velocity_mps = 25.0
+    driving._picket_wait_s = 0.0
+    driving._update_radio_fringe(0.016)
+
+    assert loops == []  # no hiss bed at full quieting
+    assert not any(key.startswith("radio/picket") for key, _v in played_effects)
+    assert driving._radio_picket_duck == 1.0  # never ducked: nothing to duck for
 
 
 def test_strong_signal_and_dead_stream_render_no_fringe(denver_driving, monkeypatch):
