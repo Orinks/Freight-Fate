@@ -573,8 +573,12 @@ class CloudSlotState(MenuState):
         self.ctx.say("Backing up this computer's save.", interrupt=True)
 
         def worker() -> None:
-            ok = self.ctx.cloud_saves_service().resolve_keep_mine(self.save_name, profile_dict)
-            self._outcome = "kept_mine" if ok else "keep_mine_failed"
+            result = self.ctx.cloud_saves_service().resolve_keep_mine(self.save_name, profile_dict)
+            # "ok" -> kept_mine; otherwise the classified failure family
+            # (network/auth/rejected/conflict) picks which honest line
+            # update() speaks -- never the same "check your connection"
+            # line for every cause (Jessie's report, 2026-08-14).
+            self._outcome = "kept_mine" if result == "ok" else f"keep_mine_failed_{result}"
 
         threading.Thread(target=worker, name="cloud-saves-keep-mine", daemon=True).start()
 
@@ -652,11 +656,33 @@ class CloudSlotState(MenuState):
                 f"{cloud_saves.AUTH_HELP} Your public career is unchanged.",
                 interrupt=True,
             )
-        elif outcome == "keep_mine_failed":
+        elif outcome == "keep_mine_failed_network":
             self._status = "Cloud overwrite failed. Nothing was changed."
             self.ctx.say(
                 "The upload did not go through. Check your connection and "
                 "try again; nothing was changed.",
+                interrupt=True,
+            )
+        elif outcome == "keep_mine_failed_auth":
+            self._status = "Reconnect needed. Nothing was changed."
+            self.ctx.say(
+                f"{cloud_saves.AUTH_HELP} Nothing was changed.",
+                interrupt=True,
+            )
+        elif outcome == "keep_mine_failed_rejected":
+            self._status = "The server did not accept this save. Nothing was changed."
+            self.ctx.say(
+                "The server did not accept this save, so nothing was "
+                "changed. This is not a problem with your connection -- it "
+                "is something for the developers; please report it.",
+                interrupt=True,
+            )
+        elif outcome == "keep_mine_failed_conflict":
+            self._status = "The cloud copy changed again. Nothing was changed."
+            self.ctx.say(
+                "The cloud copy changed again since this conflict was "
+                "recorded. Nothing was changed; open this career again to "
+                "see the current conflict.",
                 interrupt=True,
             )
         elif outcome == "unverified":

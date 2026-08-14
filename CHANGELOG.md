@@ -342,6 +342,15 @@
 
 ### Fixed
 
+- **When a cloud backup is refused by the server, the game now says so
+  instead of blaming your connection.** Retrying "Keep this computer's
+  save and back it up" after the server rejected a save used to say
+  "Check your connection", sending you off to troubleshoot a network
+  that was never the problem. It now tells the real story: a network
+  problem still says check your connection, a sign-in problem tells you
+  to reconnect, and a save the server flatly refuses says so plainly and
+  points you at reporting it, instead of guessing.
+
 - **When two hazards stack, the all-clear now names both.** A deer, then
   slowed traffic right behind it, used to leave you with only one vague
   "Hazard avoided" -- the deer's own outcome never spoken, and the wording

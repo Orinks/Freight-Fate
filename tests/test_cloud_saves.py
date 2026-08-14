@@ -30,6 +30,7 @@ from freight_fate.cloud_saves import (
     CloudSaves,
     SyncState,
     backup_summary,
+    classify_upload_failure,
     cloud_content,
     delete_save,
     download_save,
@@ -94,6 +95,13 @@ def conflict_error(latest_revision: int = 5) -> urllib.error.HTTPError:
         }
     ).encode("utf-8")
     return urllib.error.HTTPError("url", 409, "Conflict", None, io.BytesIO(body))
+
+
+def rejected_error(reason: str = "invalid_achievement", code: int = 400) -> urllib.error.HTTPError:
+    """The server's answer to a save the validator flatly refuses -- not a
+    connection problem, and not transient: the same input will fail again."""
+    body = json.dumps({"error": reason}).encode("utf-8")
+    return urllib.error.HTTPError("url", code, "Bad Request", None, io.BytesIO(body))
 
 
 class Clock:
@@ -498,6 +506,48 @@ def test_keep_mine_overwrites_the_cloud_and_clears_the_conflict():
     assert transport.posts[-1]["parentRevision"] == 5
     assert service.conflicts() == {}
     assert service.sync_state.slot("Road Star")["revision"] == 6
+
+
+# -- upload failure classification (Jessie's report, 2026-08-14: an -------------
+# -- invalid_achievement refusal was told to the player as "check your ---------
+# -- connection") ----------------------------------------------------------------
+
+
+def test_classify_upload_failure_sorts_the_three_honest_families():
+    assert classify_upload_failure("invalid_achievement") == "rejected"
+    assert classify_upload_failure("too_large") == "rejected"
+    assert classify_upload_failure("unauthorized") == "auth"
+    assert classify_upload_failure("driver_not_found") == "auth"
+    assert classify_upload_failure("http_401") == "auth"
+    # A raw network error, a 5xx, or a code this table has not been taught
+    # yet must default to network -- retry is the safe failure mode.
+    assert classify_upload_failure("error") == "network"
+    assert classify_upload_failure("http_500") == "network"
+    assert classify_upload_failure(None) == "network"
+
+
+def test_resolve_keep_mine_reports_network_for_a_transport_error():
+    transport = FakeTransport(error=OSError("network unreachable"))
+    service = make_service(transport, Clock())
+    profile = Profile(name="Road Star")
+
+    assert service.resolve_keep_mine("Road Star", profile.to_dict()) == "network"
+
+
+def test_resolve_keep_mine_reports_auth_for_a_retired_token():
+    transport = FakeTransport(error=auth_error())
+    service = make_service(transport, Clock())
+    profile = Profile(name="Road Star")
+
+    assert service.resolve_keep_mine("Road Star", profile.to_dict()) == "auth"
+
+
+def test_resolve_keep_mine_reports_rejected_for_a_validator_refusal():
+    transport = FakeTransport(error=rejected_error("invalid_achievement"))
+    service = make_service(transport, Clock())
+    profile = Profile(name="Road Star")
+
+    assert service.resolve_keep_mine("Road Star", profile.to_dict()) == "rejected"
 
 
 # -- the save-listener hook -------------------------------------------------------
@@ -995,6 +1045,65 @@ def test_delete_menu_flow_confirms_then_forgets_the_slot(monkeypatch):
         assert any("removed from your orinks.net account" in t for t in spoken)
         # The slot menu no longer offers a delete for backups that are gone.
         assert not any(item.text.startswith("Delete") for item in slot.items)
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.parametrize(
+    ("upload_result", "expected_fragment"),
+    [
+        (
+            {"ok": False, "reason": "error"},
+            "check your connection",
+        ),
+        (
+            {"ok": False, "reason": "http_401"},
+            "no longer accepts this computer's sign-in",
+        ),
+        (
+            {"ok": False, "reason": "invalid_achievement"},
+            "not a problem with your connection",
+        ),
+    ],
+    ids=["network", "auth", "rejected"],
+)
+def test_keep_mine_retry_speaks_the_real_cause(monkeypatch, upload_result, expected_fragment):
+    """Jessie's report, 2026-08-14: the server refused an upload with
+    invalid_achievement, but the game blamed the connection. The "Keep this
+    computer's save and back it up" retry must now speak the real family --
+    network, auth, or a server rejection -- not one line for all three."""
+    import time as time_module
+
+    from freight_fate import cloud_saves as cloud_saves_module
+    from freight_fate.app import App
+    from freight_fate.states.cloud_save_states import CloudSlotState
+
+    IDENTITY.save()
+    app = App()
+    spoken = []
+    app.ctx.say = speech_stub(spoken)
+    try:
+        Profile(name="Road Star").save()
+        monkeypatch.setattr(cloud_saves_module, "upload_save", lambda *a, **k: dict(upload_result))
+
+        slot = CloudSlotState(app.ctx, "Road Star", [])
+        app.push_state(slot)
+        slot.start_keep_mine()
+
+        deadline = time_module.time() + 5.0
+        while slot._outcome is None and time_module.time() < deadline:
+            time_module.sleep(0.01)
+        slot.update(0.0)
+
+        assert any(expected_fragment.lower() in t.lower() for t in spoken), spoken
+        # The message never claims a network problem for a server rejection,
+        # and never claims a server rejection for an actual network problem.
+        if expected_fragment == "not a problem with your connection":
+            assert not any(
+                "check your connection" in t.lower()
+                for t in spoken
+                if "not a problem" not in t.lower()
+            )
     finally:
         app.shutdown()
 

@@ -163,6 +163,63 @@ def _auth_refused(e: urllib.error.HTTPError, body: dict) -> bool:
     return e.code == 401 or body.get("error") in ("unauthorized", "driver_not_found")
 
 
+# -- upload failure classification ---------------------------------------------
+#
+# ``upload_save`` hands back a ``reason`` string that is a network problem, an
+# auth problem, or one of the validator's refusal codes -- three situations a
+# player needs three different honest sentences for (Jessie's report,
+# 2026-08-14: an ``invalid_achievement`` refusal was told to the player as
+# "check your connection", which sent them chasing their network for a
+# problem that was never there). Every caller that turns an upload result
+# into player-facing wording -- the background queue in ``_upload_slot`` and
+# the foreground "keep this computer's save" retry in
+# ``CloudSavesService.resolve_keep_mine`` -- must classify through the one
+# table below, so a new validator code only has to be added in one place.
+
+# The credentials were retired (usually by connecting another computer, or a
+# driver record that no longer exists); every retry fails identically until
+# the player reconnects from the Online menu.
+AUTH_FAILURE_REASONS = frozenset({"unauthorized", "driver_not_found", "http_401"})
+
+# The server read this save and refused it outright. Retrying with the same
+# save can never succeed -- it is not a connection problem, it is something
+# for the developers to fix.
+REJECTED_UPLOAD_REASONS = frozenset(
+    {
+        "too_large",
+        "invalid_schema",
+        "invalid_name",
+        "invalid_city",
+        "invalid_range",
+        "invalid_possession",
+        "invalid_career",
+        "impossible_xp",
+        "impossible_money",
+        "invalid_market",
+        "invalid_hos",
+        "invalid_achievement",
+        "unsupported_version",
+    }
+)
+
+
+def classify_upload_failure(reason: str | None) -> str:
+    """Sort an ``upload_save`` failure ``reason`` into the family its
+    player-facing wording actually differs by.
+
+    Returns ``"auth"``, ``"rejected"``, or ``"network"`` -- the last one is
+    the honest default for anything not recognized (a raw network error, a
+    5xx, or a code the validator has not been taught to this table yet):
+    treating an unknown reason as transient and worth a retry is the safe
+    failure mode, never the other way around.
+    """
+    if reason in AUTH_FAILURE_REASONS:
+        return "auth"
+    if reason in REJECTED_UPLOAD_REASONS:
+        return "rejected"
+    return "network"
+
+
 # -- sync state ----------------------------------------------------------------
 
 
@@ -846,7 +903,8 @@ class CloudSaves:
                 result.get("latestRevision"),
             )
             return
-        if result.get("reason") in ("unauthorized", "driver_not_found", "http_401"):
+        family = classify_upload_failure(result.get("reason"))
+        if family == "auth":
             # The credentials were retired (usually by connecting another
             # computer); every retry would fail identically, and the player
             # can only fix it by reconnecting.
@@ -856,21 +914,7 @@ class CloudSaves:
             )
             self._done_with(name, snapshot)
             return
-        if result.get("reason") in (
-            "too_large",
-            "invalid_schema",
-            "invalid_name",
-            "invalid_city",
-            "invalid_range",
-            "invalid_possession",
-            "invalid_career",
-            "impossible_xp",
-            "impossible_money",
-            "invalid_market",
-            "invalid_hos",
-            "invalid_achievement",
-            "unsupported_version",
-        ):
+        if family == "rejected":
             # Not transient: retrying with the same inputs cannot succeed.
             self._set_status(
                 "Backup not accepted. Your local career is safe. Public details were not updated."
@@ -895,14 +939,20 @@ class CloudSaves:
         entries = reply["saves"] if isinstance(reply, dict) else reply
         return any(entry.get("saveName") == name for entry in entries)
 
-    def resolve_keep_mine(self, name: str, profile_dict: dict) -> bool:
+    def resolve_keep_mine(self, name: str, profile_dict: dict) -> str:
         """Conflict choice: overwrite the cloud with this machine's save.
 
         Called from a menu worker thread. Uploads with the server's latest
-        revision as parent, which the conflict entry recorded.
+        revision as parent, which the conflict entry recorded. Returns
+        ``"ok"`` on success, or the classified failure family the caller
+        needs to speak the real cause instead of always blaming the
+        connection (Jessie's report, 2026-08-14; see
+        ``classify_upload_failure``): ``"auth"``, ``"rejected"``,
+        ``"conflict"`` (the cloud moved again since this conflict was
+        recorded), or ``"network"``.
         """
         if self._identity is None:
-            return False
+            return "network"
         slot = self.sync_state.slot(name)
         conflict = slot.get("conflict") or {}
         parent = conflict.get("latestRevision")
@@ -917,9 +967,12 @@ class CloudSaves:
         if result.get("ok"):
             self.sync_state.record_synced(name, result["revision"], result["contentHash"])
             self.sync_state.clear_conflict(name)
-            return True
+            return "ok"
         if result.get("reason") == "conflict":
             # The cloud moved again since the conflict was recorded; refresh
             # the details so the menu speaks current numbers.
             self.sync_state.record_conflict(name, result)
-        return False
+            return "conflict"
+        reason = result.get("reason")
+        log.warning("Cloud keep-mine upload of %s failed: %s", name, reason)
+        return classify_upload_failure(reason)
