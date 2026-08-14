@@ -3,13 +3,14 @@
 Release builds ship the ``assets/sounds`` tree as two masked pack files
 instead of a browsable folder: ``freight_fate/music.pak`` carries every entry
 under ``music/``, ``freight_fate/sounds.pak`` carries everything else. The
-split keeps the ~15MB of gameplay SFX out of the ~400MB music payload, so an
-LFS pull for a sound-only change does not drag the whole music library with
-it. Each pack is a deflated zip XOR-masked with a fixed key, so renaming one
-does not turn it back into an openable archive; this deters casual editing,
-nothing more. Career 1.9 source checkouts receive the encrypted packs
-through Git LFS. Tests can explicitly disable the default packs and exercise
-the loose-file fallback.
+split keeps the small (tens-of-MB) gameplay SFX library out of the much
+larger (several-hundred-MB) music payload, so an LFS pull for a sound-only
+change does not drag the whole music library with it. Each pack is a
+deflated zip XOR-masked with a fixed key, so renaming one does not turn it
+back into an openable archive; this deters casual editing, nothing more.
+Career 1.9 source checkouts receive the encrypted packs through Git LFS.
+Tests can explicitly disable the default packs and exercise the loose-file
+fallback.
 
 ``tools/pack_sounds.py`` writes both packs; the audio engine reads them
 through ``open_default``, which returns one object that routes a lookup to
@@ -234,12 +235,12 @@ def _load_default_pack_locked() -> None:
 def prefetch_default() -> None:
     """Start loading the shipped packs on a background thread.
 
-    The sound pack is a ~225MB file that gets read fully into memory and XOR
-    unmasked; today that ~0.3s lands synchronously on whichever sound plays
-    first (typically a main-menu sound), stalling it. Called as early as
-    possible in ``App()`` construction, this overlaps that cost (and the
-    music pack's own read) with the rest of startup (world load especially)
-    instead of adding to it.
+    Each pack gets read fully into memory and XOR unmasked; the music pack
+    is the far larger of the two (see the module docstring). Read
+    synchronously, that lands on whichever sound plays first (typically a
+    main-menu sound), stalling it. Called as early as possible in ``App()``
+    construction, this overlaps both packs' reads with the rest of startup
+    (world load especially) instead of adding to it.
 
     Safe to call more than once (a no-op once a load has started or
     finished) and safe even when there is no pack to load. Never blocks: the
