@@ -23,7 +23,6 @@ from typing import Any
 import osmium
 
 from freight_fate.data.world import get_world
-from freight_fate.data.world_services import CITY_SERVICE_APPROACH_MILES
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from enrich_routes_pois import _maxspeed_from_tags  # noqa: E402  (shared OSM maxspeed parser)
@@ -36,6 +35,15 @@ DEFAULT_CACHE_DIR = Path.home() / ".cache" / "freight-fate-osm" / "regions"
 ACCESSED_DATE = "2026-06-27"
 EARTH_RADIUS_MI = 3958.7613
 MAX_CITY_SERVICE_ROUTE_MI = 18.0
+# Build-time fallback approach distance by service role, for services this
+# tool could not fit a real routed geometry to. Gameplay no longer drives to
+# city services (retired: feat(city)! "retire the drive to city services"),
+# so this default lives only here now, not in the runtime world_services API.
+CITY_SERVICE_APPROACH_MILES = {
+    "freight_market": 3.0,
+    "garage": 1.5,
+    "truck_dealer": 2.5,
+}
 TARGET_SNAP_RADIUS_MI = 0.75
 CITY_SNAP_RADIUS_MI = 1.25
 GRAPH_PAD_MI = 1.5

@@ -472,8 +472,6 @@ class DrivingUpdateMixin:
                 self._finish_departure_chain()
             elif self.phase == DRIVE_PHASE_PICKUP:
                 self._handle_pickup_gate()
-            elif self.phase == DRIVE_PHASE_CITY_SERVICE:
-                self._handle_city_service_gate()
             elif self._ramp_mi is not None:
                 return
             elif not self._destination_exit_taken:

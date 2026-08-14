@@ -32,7 +32,6 @@ from ..models.economy import (
     pay_advance_unavailable_reason,
 )
 from ..models.jobs import (
-    CARGO_CATALOG,
     Job,
     JobBoard,
     board_offer_count,
@@ -936,77 +935,6 @@ def _add_forced_board_job(ctx, board: JobBoard, jobs: list[Job]) -> str:
     jobs.append(job)
     jobs.sort(key=lambda j: j.distance_mi)
     return f"Playtest lever: added a load to {spoken} to the board."
-
-
-class CityServiceSelectState(MenuState):
-    title = "City services"
-    intro_help = (
-        "Pick a city service to drive to. The GPS gives local guidance. "
-        "Stop at the destination, then press Enter to go inside."
-    )
-
-    def announce_entry(self) -> None:
-        city = self.ctx.profile.current_city
-        self.ctx.say(f"{city} services. {self.current_text()}")
-
-    def build_items(self) -> list[MenuItem]:
-        items = []
-        for service in self.ctx.world.city_services(self.ctx.profile.current_city):
-            route = self.ctx.world.city_service_route(service.city, service.key)
-            items.append(
-                MenuItem(
-                    f"{service.name}: {self.ctx.settings.distance_text(route.miles, precise=True)}",
-                    lambda key=service.key: self._start(key),
-                    help=(
-                        f"Drive to {service.spoken_name}. "
-                        "The destination opens only after you stop and press Enter."
-                    ),
-                )
-            )
-        items.append(MenuItem("Back to terminal", self.go_back))
-        return items
-
-    def _start(self, service_key: str) -> None:
-        from .driving import DRIVE_PHASE_CITY_SERVICE, DrivingState
-
-        p = self.ctx.profile
-        service = self.ctx.world.city_service(p.current_city, service_key)
-        route = self.ctx.world.city_service_route(p.current_city, service_key)
-        terminal = self.ctx.world.home_terminal(p.current_city)
-        job = Job(
-            CARGO_CATALOG["general"],
-            0.0,
-            p.current_city,
-            terminal.name,
-            p.current_city,
-            route.miles,
-            0.0,
-            24.0,
-            origin_type=terminal.kind,
-            destination_location=service.name,
-            destination_type=service.kind,
-            bobtail=True,
-        )
-        driving = DrivingState(
-            self.ctx,
-            job,
-            route,
-            phase=DRIVE_PHASE_CITY_SERVICE,
-            city_service_key=service.key,
-        )
-        p.active_trip = driving.snapshot()
-        self.ctx.save_profile()
-        self.ctx.say(
-            f"GPS set for {service.spoken_name}, "
-            f"{self.ctx.settings.distance_text(route.miles, precise=True)} on "
-            f"{route.highways[0]}. Stop there, then press Enter to go inside.",
-            interrupt=True,
-        )
-        self.ctx.push_state(driving)
-
-    def go_back(self) -> None:
-        self.ctx.audio.play("ui/menu_back")
-        self.ctx.pop_state()
 
 
 class BobtailDestState(MenuState):

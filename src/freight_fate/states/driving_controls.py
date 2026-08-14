@@ -94,9 +94,7 @@ class DrivingControlsMixin:
         elif key == pygame.K_SPACE:
             self._speak_speed()
         elif key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-            if self.phase == DRIVE_PHASE_CITY_SERVICE:
-                self._enter_city_service()
-            elif self._arrival_full_stop_said and self.truck.speed_mph <= 0.5:
+            if self._arrival_full_stop_said and self.truck.speed_mph <= 0.5:
                 self._open_facility_arrival()
         elif key == pygame.K_TAB:
             self.ctx.push_state(DrivingStatusState(self.ctx, self))
@@ -217,11 +215,6 @@ class DrivingControlsMixin:
                 f"Your current objective is pickup: drive to "
                 f"{self._pickup_facility_text()}, stop at the gate, then "
                 "check in and load. "
-            )
-        if self.phase == DRIVE_PHASE_CITY_SERVICE:
-            return (
-                f"Your current objective is {self._city_service_text()}: "
-                "drive there, stop, then press Enter to go inside. "
             )
         return "Pickup and loading are complete. At your destination, stop, then dock and deliver. "
 

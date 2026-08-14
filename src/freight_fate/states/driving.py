@@ -61,14 +61,12 @@ class DrivingState(
         route: Route,
         trip_seed: int | None = None,
         phase: str = DRIVE_PHASE_DELIVERY,
-        city_service_key: str = "",
         start_hour: float | None = None,
     ) -> None:
         super().__init__(ctx)
         self.job = job
         self.route = route
         self.phase = phase
-        self.city_service_key = city_service_key
         self.trip_seed = trip_seed if trip_seed is not None else random.randrange(2**31)
         self.resumed = False
         profile = ctx.profile
@@ -77,9 +75,9 @@ class DrivingState(
         # empty bobtail repositions run light. Gross weight drives the physics,
         # so a heavy load pulls away gently and lugs on grades.
         self.truck.cargo_kg = job.weight_tons * KG_PER_TON if phase == DRIVE_PHASE_DELIVERY else 0.0
-        # A reposition run and city-service driving are the tractor alone --
-        # nothing on the fifth wheel. Pickup deadheads haul their empty box.
-        self.truck.trailer_attached = not (job.bobtail or phase == DRIVE_PHASE_CITY_SERVICE)
+        # A reposition run is the tractor alone -- nothing on the fifth
+        # wheel. Pickup deadheads haul their empty box.
+        self.truck.trailer_attached = not job.bobtail
         self.truck.transmission.automatic = ctx.settings.automatic_transmission
         # How well this freight survives being thrown about. Fed to the truck
         # because the forces that move a load are the truck's, but what the
@@ -522,7 +520,6 @@ class DrivingState(
         # rebuilt whenever the trip's route changes.
         self._turn_miss_count = 0
         self._reset_turn_state_for_trip()
-        self._city_service_enter_ready = False
         self._air_ready_said = self.truck.air_ready
         self._low_air_said = self.truck.air_low_warning
         self._spring_brake_said = self.truck.spring_brakes_active
@@ -676,25 +673,15 @@ class DrivingState(
     def snapshot(self) -> dict:
         """Everything needed to resume this active drive from a save."""
         job = self.job
-        if self.phase == DRIVE_PHASE_PICKUP:
-            kind = "pickup_drive"
-        elif self.phase == DRIVE_PHASE_CITY_SERVICE:
-            kind = "city_service_drive"
-        else:
-            kind = "delivery"
+        kind = "pickup_drive" if self.phase == DRIVE_PHASE_PICKUP else "delivery"
         return {
             "kind": kind,
             "deadline_model": ACTIVE_TRIP_DEADLINE_MODEL,
             "job": job_payload(job),
             "route_cities": list(self.route.cities),
             "route_kind": (
-                "facility_approach"
-                if self.phase == DRIVE_PHASE_PICKUP
-                else "city_service_approach"
-                if self.phase == DRIVE_PHASE_CITY_SERVICE
-                else "corridor_itinerary"
+                "facility_approach" if self.phase == DRIVE_PHASE_PICKUP else "corridor_itinerary"
             ),
-            "city_service_key": self.city_service_key,
             "navigation_schema": 1,
             "trailer_refused": self.trailer_refused,
             "trip_seed": self.trip_seed,
@@ -769,18 +756,9 @@ class DrivingState(
         try:
             j = data["job"]
             kind = str(data.get("kind", "delivery"))
-            if kind == "pickup_drive":
-                phase = DRIVE_PHASE_PICKUP
-            elif kind == "city_service_drive":
-                phase = DRIVE_PHASE_CITY_SERVICE
-            else:
-                phase = DRIVE_PHASE_DELIVERY
+            phase = DRIVE_PHASE_PICKUP if kind == "pickup_drive" else DRIVE_PHASE_DELIVERY
             if phase == DRIVE_PHASE_PICKUP:
                 route = ctx.world.facility_approach_route(j["origin"], j["origin_location"])
-            elif phase == DRIVE_PHASE_CITY_SERVICE:
-                route = ctx.world.city_service_route(
-                    j["origin"], str(data.get("city_service_key", ""))
-                )
             else:
                 route = ctx.world.route_from_cities(data["route_cities"])
             if route is None:
@@ -815,7 +793,6 @@ class DrivingState(
                 route,
                 trip_seed=int(data["trip_seed"]),
                 phase=phase,
-                city_service_key=str(data.get("city_service_key", "")),
                 start_hour=float(data.get("start_hour", ctx.profile.game_hours % 24.0)),
             )
             state.resumed = True
@@ -951,33 +928,16 @@ class DrivingState(
             if self.phase == DRIVE_PHASE_PICKUP:
                 drive_name = "pickup drive"
                 destination = self._pickup_facility_text()
-            elif self.phase == DRIVE_PHASE_CITY_SERVICE:
-                drive_name = "city service drive"
-                destination = self._city_service_text()
             else:
                 drive_name = "loaded delivery"
                 destination = self.job.spoken_destination
             progress = (
                 self._pickup_progress_summary()
                 if self.phase == DRIVE_PHASE_PICKUP
-                else self._city_service_progress_summary()
-                if self.phase == DRIVE_PHASE_CITY_SERVICE
                 else self.trip.progress_summary(self.ctx.settings.imperial_units)
             )
             speed_control = self._resumed_speed_control_status()
-            if self.phase == DRIVE_PHASE_CITY_SERVICE:
-                self.ctx.say(
-                    f"Resuming your {drive_name} to {destination}. "
-                    f"{progress} "
-                    f"{hours_used:.1f} hours used. It is {now}. "
-                    f"Transmission is {mode}. "
-                    f"Weather: {self.weather.report_lead(self.ctx.settings.imperial_units)}. "
-                    f"You are parked. {speed_control}{self._engine_entry_instruction()} "
-                    "When air pressure is ready, press "
-                    f"{self.ctx.control_hint('parking_brake')} to release the parking brake.",
-                    interrupt=False,
-                )
-            elif self._terse_speech():
+            if self._terse_speech():
                 self.ctx.say(
                     f"Resuming {drive_name}: {destination}. {progress} "
                     f"{hours_used:.1f} of {self.job.deadline_game_h:.0f} hours used. "
@@ -1003,12 +963,6 @@ class DrivingState(
                 objective = (
                     f"Pickup dispatch: deadhead from the terminal to "
                     f"{self._pickup_facility_text()}. "
-                )
-            elif self.phase == DRIVE_PHASE_CITY_SERVICE:
-                objective = (
-                    f"City service drive: follow the GPS to "
-                    f"{self._city_service_text()}. Stop there, then press Enter "
-                    "to go inside. "
                 )
             else:
                 objective = (

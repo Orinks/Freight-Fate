@@ -21,19 +21,6 @@ from .world_models import (
     Route,
 )
 
-CITY_SERVICE_APPROACH_MILES = {
-    "freight_market": 3.0,
-    "garage": 1.5,
-    "truck_dealer": 2.5,
-}
-
-CITY_SERVICE_APPROACH_ROADS = {
-    "freight_market": "local freight office access road",
-    "garage": "terminal service lane",
-    "truck_dealer": "dealer access road",
-}
-
-
 _ROAD_REF_LIST = re.compile(r"\(([^()]*;[^()]*)\)")
 
 
@@ -175,12 +162,6 @@ class WorldServiceMixin:
     def local_geometry(self, target_id: str) -> LocalGeometry | None:
         return self._local_geometries.get(target_id)
 
-    def city_service_approach(self, city: str, key: str) -> LocalApproach | None:
-        return self.local_approach(f"city_service:{self.resolve_city_key(city)}:{key}")
-
-    def city_service_geometry(self, city: str, key: str) -> LocalGeometry | None:
-        return self.local_geometry(f"city_service:{self.resolve_city_key(city)}:{key}")
-
     def facility_approach(self, city: str, location_name: str) -> LocalApproach | None:
         location = self.facility_location(city, location_name)
         return self.local_approach(f"facility:{location.id}")
@@ -196,44 +177,6 @@ class WorldServiceMixin:
     def facility_geometry(self, city: str, location_name: str) -> LocalGeometry | None:
         location = self.facility_location(city, location_name)
         return self.local_geometry(f"facility:{location.id}")
-
-    def city_service_route(self, city: str, key: str) -> Route:
-        """A short, drivable local route from the terminal to a city service."""
-        city = self.resolve_city_key(city)
-        service = self.city_service(city, key)
-        geometry = self.city_service_geometry(city, key)
-        if geometry is not None and geometry.turn_level and geometry.segments:
-            legs = [
-                Leg(
-                    city,
-                    city,
-                    segment.miles,
-                    _spoken_road_text(segment.road),
-                    "flat",
-                    (),
-                    local_cue=_spoken_road_text(segment.cue),
-                    local_speed_mph=segment.speed_mph,
-                )
-                for segment in geometry.segments
-            ]
-            return Route([city] * (len(legs) + 1), legs)
-        approach = self.city_service_approach(city, key)
-        if approach is not None:
-            miles = approach.approach_miles
-            road = approach.road
-        elif service.approach_miles > 0:
-            miles = service.approach_miles
-            road = service.approach_road or CITY_SERVICE_APPROACH_ROADS.get(
-                service.kind, "city service road"
-            )
-        else:
-            base_miles = CITY_SERVICE_APPROACH_MILES.get(service.kind, 3.0)
-            seed = zlib.crc32(f"{city}:service:{service.key}".encode())
-            offset = (seed % 5) * 0.2
-            miles = round(base_miles + offset, 1)
-            road = CITY_SERVICE_APPROACH_ROADS.get(service.kind, "city service road")
-        leg = Leg(city, city, miles, road, "flat", ())
-        return Route([city, city], [leg])
 
     def facility_departure_route(self, city: str, location_name: str) -> Route | None:
         """The facility's street chain driven outbound -- gate toward the

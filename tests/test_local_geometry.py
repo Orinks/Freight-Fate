@@ -3,8 +3,6 @@ import json
 import sys
 from pathlib import Path
 
-import pytest
-
 RAW_MARKERS = ("osm_id", "amenity=", "highway=", "operator=", "node/", "way/", "source_ref")
 ROOT = Path(__file__).resolve().parents[1]
 TOOL_PATH = ROOT / "tools" / "build_local_geometry.py"
@@ -79,17 +77,6 @@ def test_local_geometry_records_are_clean_and_honest(world):
     assert len(retired) <= 8, retired
 
 
-def test_city_service_route_prefers_turn_level_geometry(world):
-    route = world.city_service_route("Chicago", "freight_market")
-    geometry = world.city_service_geometry("Chicago", "freight_market")
-
-    assert geometry is not None
-    assert geometry.turn_level
-    assert len(route.legs) == len(geometry.segments)
-    assert route.miles == pytest.approx(geometry.total_miles)
-    assert route.highways == [segment.road for segment in geometry.segments]
-
-
 def test_facility_geometry_stays_estimated_fallback(world):
     facility = world.city("Chicago").locations[0]
     geometry = world.facility_geometry("Chicago", facility.name)
@@ -102,11 +89,31 @@ def test_facility_geometry_stays_estimated_fallback(world):
 
 
 def test_local_geometry_trip_uses_local_turn_cues(world):
+    from freight_fate.data.world_models import Leg, Route
     from freight_fate.sim.trip import Trip
     from freight_fate.sim.vehicle import TruckState
     from freight_fate.sim.weather import WeatherKind, WeatherSystem
 
-    route = world.city_service_route("Chicago", "freight_market")
+    # city_service_route was retired with the drive-to-city-services feature;
+    # this test only needs a turn-level Route, built straight from the local
+    # geometry data it used to wrap.
+    city = world.resolve_city_key("Chicago")
+    geometry = world.local_geometry(f"city_service:{city}:freight_market")
+    assert geometry is not None and geometry.turn_level
+    legs = [
+        Leg(
+            city,
+            city,
+            segment.miles,
+            segment.road,
+            "flat",
+            (),
+            local_cue=segment.cue,
+            local_speed_mph=segment.speed_mph,
+        )
+        for segment in geometry.segments
+    ]
+    route = Route([city] * (len(legs) + 1), legs)
     weather = WeatherSystem("great_lakes", seed=1)
     weather.current = WeatherKind.CLEAR
     trip = Trip(route, TruckState(), weather, seed=1)

@@ -180,9 +180,7 @@ class DrivingStatusScreenState(MenuState):
             else f"{-deadline:.1f} hours past the deadline"
         )
         load_line = (
-            "Load: no cargo, local city service drive"
-            if d.phase == DRIVE_PHASE_CITY_SERVICE
-            else f"Load: {d.job.weight_tons:.0f} tons of {d.job.cargo.label}, "
+            f"Load: {d.job.weight_tons:.0f} tons of {d.job.cargo.label}, "
             f"gross {d.truck.gross_mass_kg / KG_PER_TON:.0f} tons, "
             # The player cannot see the trailer; the dock's verdict must not
             # be the first they hear of what the freight is in.
@@ -193,11 +191,7 @@ class DrivingStatusScreenState(MenuState):
         # here, on demand, rather than only at pickup. Empty for other freight.
         tank_line = d.liquid_status_clause()
         time_line = (
-            f"Time: {clock_text(d.trip.local_hour)} {d.trip.current_timezone.name}, "
-            f"{hours_used:.1f} hours used"
-            if d.phase == DRIVE_PHASE_CITY_SERVICE
-            else f"Time: {clock_text(d.trip.local_hour)} {d.trip.current_timezone.name}, "
-            f"{deadline_text}"
+            f"Time: {clock_text(d.trip.local_hour)} {d.trip.current_timezone.name}, {deadline_text}"
         )
         band = damage_band_clause(self.ctx.settings, t)
         damage_band_suffix = f", {band}" if band else ""

@@ -3557,8 +3557,6 @@ class DrivingEventMixin:
             return None
         if self.phase == DRIVE_PHASE_PICKUP:
             return f"At {self._pickup_facility_text()}. Stop to check in."
-        if self.phase == DRIVE_PHASE_CITY_SERVICE:
-            return f"At {self._city_service_text()}. Stop, then press Enter to go inside."
         if self._ramp_mi is not None or not self._destination_exit_taken:
             return None
         return f"At {self._destination_facility_text()}. Stop to dock."
@@ -3613,118 +3611,10 @@ class DrivingEventMixin:
     def _destination_facility_text(self) -> str:
         return self.job.destination_facility_text()
 
-    def _city_service_text(self) -> str:
-        try:
-            return self.ctx.world.city_service(self.job.origin, self.city_service_key).spoken_name
-        except KeyError:
-            return self.job.destination_location or "city service"
-
     def _objective_text(self) -> str:
         if self.phase == DRIVE_PHASE_PICKUP:
             return "pickup at " + self._pickup_facility_text()
-        if self.phase == DRIVE_PHASE_CITY_SERVICE:
-            return "city service " + self._city_service_text()
         return "deliver to " + self._destination_facility_text()
-
-    def _city_service_progress_summary(self) -> str:
-        s = self.ctx.settings
-        return (
-            f"{s.distance_text(self.trip.remaining_miles, precise=True)} remaining of "
-            f"{s.distance_text(self.trip.total_miles, precise=True)} to "
-            f"{self._city_service_text()}."
-        )
-
-    def _handle_city_service_gate(self) -> None:
-        if self.truck.speed_mph <= DOCKING_MAX_MPH:
-            first_ready = not self._city_service_enter_ready
-            self._city_service_enter_ready = True
-            if first_ready:
-                p = self.ctx.profile
-                self._cancel_cruise()
-                self.truck.throttle = 0.0
-                self.truck.brake = 1.0
-                self.truck.set_parking_brake()
-                p.store_truck_condition(self.truck)
-                p.active_trip = self.snapshot()
-                self.ctx.save_profile()
-                self._set_status("Parked at city service. Press Enter to go inside.")
-                self.ctx.audio.play("ui/notify", volume=0.7)
-                self.ctx.say_event(
-                    f"Parked at {self._city_service_text()}. Press Enter to go inside.",
-                    interrupt=False,
-                )
-            return
-        if self.truck.speed_mph <= DELIVERY_PARK_MPH:
-            if self._arrival_full_stop_said:
-                return
-            self._arrival_full_stop_said = True
-            self._cancel_cruise()
-            self.ctx.audio.play("ui/notify", volume=0.7)
-            self._set_status("City service ahead: stop, then press Enter.")
-            self.ctx.say_event(
-                f"At {self._city_service_text()}. Stop, then press Enter to go inside.",
-                interrupt=False,
-            )
-            return
-        if self._arrival_stop_said:
-            self._remind_arrival_gate(
-                "City service: stop, then press Enter.",
-                f"Still at {self._city_service_text()}. Slow down and stop, "
-                "then press Enter to go inside.",
-            )
-            return
-        self._arrival_stop_said = True
-        self._gate_reminder_s = GATE_REMINDER_INTERVAL_S
-        self._cancel_cruise()
-        self.ctx.audio.play("ui/warning")
-        self._set_status("City service ahead: slow down and stop.")
-        self.ctx.say_event(
-            f"City service ahead: {self._city_service_text()}. "
-            "Slow down and come to a complete stop.",
-            interrupt=True,
-        )
-
-    def _enter_city_service(self) -> None:
-        if self.phase != DRIVE_PHASE_CITY_SERVICE:
-            return
-        if not self.trip.finished:
-            self.ctx.say(f"Keep following the GPS to {self._city_service_text()}.")
-            return
-        if self.truck.speed_mph > DOCKING_MAX_MPH:
-            self.ctx.audio.play("ui/error")
-            self.ctx.say("Stop before going inside.")
-            return
-        self._open_city_service()
-
-    def _open_city_service(self) -> None:
-        if self._arrival_menu_open:
-            return
-        from .city import CityMenuState, GarageState, TruckShopState, open_freight_market
-
-        p = self.ctx.profile
-        self._arrival_menu_open = True
-        self._cancel_cruise()
-        self.truck.throttle = 0.0
-        self.truck.brake = 1.0
-        self.truck.set_parking_brake()
-        p.store_truck_condition(self.truck)
-        p.game_hours += self.trip.game_minutes / 60.0
-        p.market.advance_to(p.market_day())
-        p.active_trip = None
-        self.ctx.save_profile()
-        service = self.ctx.world.city_service(p.current_city, self.city_service_key)
-        self._set_status(f"Inside {service.name}.")
-        self.ctx.audio.play("vehicle/truck_door")
-        self.ctx.reset_to(CityMenuState(self.ctx))
-        if service.key == "freight_market":
-            open_freight_market(self.ctx)
-        elif service.key == "garage":
-            self.ctx.push_state(GarageState(self.ctx))
-        elif service.key == "truck_dealer":
-            self.ctx.push_state(GarageState(self.ctx))
-            self.ctx.push_state(TruckShopState(self.ctx))
-        else:
-            self.ctx.say(f"Inside {service.spoken_name}.", interrupt=True)
 
     def _set_status(self, text: str) -> None:
         self._status_text = text

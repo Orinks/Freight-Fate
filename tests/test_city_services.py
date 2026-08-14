@@ -1,12 +1,4 @@
-import pygame
-import pytest
 from speech_capture import speech_stub
-
-from freight_fate.data.world_services import _spoken_road_text
-
-
-def key_event(key, unicode=""):
-    return pygame.event.Event(pygame.KEYDOWN, key=key, unicode=unicode)
 
 
 def test_city_services_are_source_backed(world):
@@ -27,16 +19,6 @@ def test_city_services_are_source_backed(world):
         assert "OpenStreetMap" in service.source_note
         assert "node/" not in service.spoken_name.lower()
         assert "way/" not in service.spoken_name.lower()
-        route = world.city_service_route("Indianapolis", service.key)
-        approach = world.city_service_approach("Indianapolis", service.key)
-        geometry = world.city_service_geometry("Indianapolis", service.key)
-        assert approach is not None
-        if geometry is not None and geometry.turn_level:
-            assert route.miles == pytest.approx(geometry.total_miles)
-            assert route.highways == [segment.road for segment in geometry.segments]
-        else:
-            assert route.miles == approach.approach_miles
-            assert route.highways[0] == approach.road
 
 
 def test_city_services_fallback_when_no_source_data(world):
@@ -71,31 +53,6 @@ def test_city_service_data_covers_every_supported_city(world):
             assert service.spoken_name
             assert not any(marker in service.spoken_name.lower() for marker in raw_markers)
             assert service.source_note
-            route = world.city_service_route(city, service.key)
-            assert route.miles > 0
-            assert route.highways[0]
-            approach = world.city_service_approach(city, service.key)
-            geometry = world.city_service_geometry(city, service.key)
-            if approach is None:
-                # A city newer than the last local-road sweep: no approach
-                # record yet, so the deterministic synthetic route keeps it
-                # drivable until the sweep catches up.
-                assert service.fallback
-            elif geometry is not None and geometry.turn_level:
-                assert route.miles == pytest.approx(geometry.total_miles)
-                # Route legs speak the sanitized road name: raw multi-ref
-                # lists are trimmed to the first ref, and Route.highways
-                # collapses the consecutive duplicates that trimming can
-                # create (the street itself did not change).
-                spoken = []
-                for segment in geometry.segments:
-                    road = _spoken_road_text(segment.road)
-                    if not spoken or spoken[-1] != road:
-                        spoken.append(road)
-                assert route.highways == spoken
-            else:
-                assert route.miles == approach.approach_miles
-                assert route.highways[0] == approach.road
             if service.fallback:
                 fallback += 1
                 assert service.source_type == "fallback"
@@ -115,56 +72,26 @@ def test_city_service_data_covers_every_supported_city(world):
     assert fallback == len(world.city_names()) * 3 - source_backed
 
 
-def test_city_service_drive_requires_enter_before_opening(monkeypatch):
+def test_city_service_snapshot_drops_to_terminal(monkeypatch):
+    """A save from before local city-service drives were retired can still
+    carry one mid-trip. There is no route or phase left to resume it with, so
+    loading it should park the driver at the terminal instead of crashing."""
     from freight_fate.app import App
     from freight_fate.models.profile import Profile
-    from freight_fate.states.city import CityMenuState, CityServiceSelectState, GarageState
-    from freight_fate.states.driving import (
-        DRIVE_PHASE_CITY_SERVICE,
-        DrivingState,
-        DrivingStatusScreenState,
-    )
+    from freight_fate.states.city import CityMenuState
+    from freight_fate.states.main_menu import enter_world
 
-    monkeypatch.setenv("FREIGHT_FATE_AUDIO_BACKEND", "pygame")
     app = App()
     try:
         spoken = []
-        monkeypatch.setattr(app.ctx.audio, "play", lambda *args, **kwargs: None)
-        monkeypatch.setattr(app.ctx, "play_music_sequence", lambda *args, **kwargs: None)
-        monkeypatch.setattr(app.ctx.audio, "set_ambient", lambda *args, **kwargs: None)
         monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
-        monkeypatch.setattr(app.ctx, "say_event", speech_stub(spoken))
-        app.ctx.profile = Profile(name="Services", current_city="Chicago")
-        app.push_state(CityMenuState(app.ctx))
+        app.ctx.profile = Profile(name="Retired Drive", current_city="Chicago")
+        app.ctx.profile.active_trip = {"kind": "city_service_drive", "job": {}, "trip_seed": 1}
 
-        while app.state.items[app.state.index].text != "Drive to city services":
-            app.state.handle_event(key_event(pygame.K_DOWN))
-        app.state.handle_event(key_event(pygame.K_RETURN))
-        assert isinstance(app.state, CityServiceSelectState)
+        enter_world(app.ctx)
 
-        garage_name = app.ctx.world.city_service("Chicago", "garage").name
-        while garage_name not in app.state.items[app.state.index].text:
-            app.state.handle_event(key_event(pygame.K_DOWN))
-        app.state.handle_event(key_event(pygame.K_RETURN))
-        assert isinstance(app.state, DrivingState)
-        assert app.state.phase == DRIVE_PHASE_CITY_SERVICE
-        driver_status = DrivingStatusScreenState(app.ctx, app.state, "driver")
-        status_lines = driver_status._driver_lines()
-        assert "Load: no cargo, local city service drive" in status_lines
-        assert any(line.startswith("Time: ") and "hours used" in line for line in status_lines)
-        assert not any("tons of general freight" in line for line in status_lines)
-
-        app.state.trip.position_mi = app.state.trip.total_miles
-        app.state.trip.finished = True
-        app.state.truck.velocity_mps = 0.0
-        app.state.update(1 / 60)
-        assert isinstance(app.state, DrivingState)
-        assert app.ctx.profile.active_trip["kind"] == "city_service_drive"
-        assert app.ctx.profile.active_trip["position_mi"] == app.state.trip.total_miles
-        assert any("Press Enter to go inside" in text for text in spoken)
-
-        app.state.handle_event(key_event(pygame.K_RETURN))
-        assert isinstance(app.state, GarageState)
+        assert isinstance(app.state, CityMenuState)
         assert app.ctx.profile.active_trip is None
+        assert any("retired" in text for text in spoken)
     finally:
         app.shutdown()

@@ -131,6 +131,17 @@ def _world_entry_state(ctx, *, queue_entry_announcement: bool = False) -> State:
 
     p = ctx.profile
     if p.active_trip:
+        # A save from before local city-service drives were retired can still
+        # carry one mid-trip. There is no route or phase left to resume it
+        # with, so it drops the driver at the terminal instead of failing to
+        # load -- this branch reads only that old snapshot shape and stays
+        # even after every other city-service-drive code path is gone.
+        if p.active_trip.get("kind") == "city_service_drive":
+            p.active_trip = None
+            ctx.say(
+                "Local service drives were retired in this update; you are parked at the terminal."
+            )
+            return CityMenuState(ctx, queue_entry_announcement=True)
         if p.active_trip.get("kind") == "pickup":
             state = PickupFacilityState.from_snapshot(ctx, p.active_trip)
         else:

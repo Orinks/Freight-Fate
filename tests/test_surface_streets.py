@@ -3,6 +3,7 @@ per-street speed zones, per docs/surface-roads-plan.md Phase 2."""
 
 import pytest
 
+from freight_fate.data.world_models import Leg, Route
 from freight_fate.sim.trip import Trip
 from freight_fate.sim.trip_models import FACILITY_GATE_LIMIT_MPH
 from freight_fate.sim.vehicle import TruckState
@@ -10,12 +11,32 @@ from freight_fate.sim.weather import WeatherSystem
 
 
 def _turn_level_route(world):
-    """Any city-service route built from tier-1 turn-level segments."""
+    """Any tier-1 turn-level baked local geometry, built into a drivable
+    Route directly from the retained ``local_geometry`` data.
+
+    The drive-to-city-services feature (and its ``city_service_route``/
+    ``city_service_geometry`` convenience wrappers) was retired, but the
+    turn-level street-chain bake it used to source test data from is still
+    shipped, so this rebuilds the same Route the wrapper used to hand back.
+    """
     for city in sorted(world.cities):
         for service in world.city_services(city):
-            geometry = world.city_service_geometry(city, service.key)
+            geometry = world.local_geometry(f"city_service:{city}:{service.key}")
             if geometry is not None and geometry.turn_level and len(geometry.segments) >= 3:
-                return world.city_service_route(city, service.key), geometry
+                legs = [
+                    Leg(
+                        city,
+                        city,
+                        segment.miles,
+                        segment.road,
+                        "flat",
+                        (),
+                        local_cue=segment.cue,
+                        local_speed_mph=segment.speed_mph,
+                    )
+                    for segment in geometry.segments
+                ]
+                return Route([city] * (len(legs) + 1), legs), geometry
     pytest.skip("no turn-level city service geometry in the shipped data")
 
 
