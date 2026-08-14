@@ -7,6 +7,7 @@ contract or the player-facing register.
 """
 
 import sys
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -73,10 +74,42 @@ def test_station_casting_is_one_to_one():
         assert plan.voice not in plan.voice_fallbacks, key
         # A fallback firing must not collapse two stations onto one voice.
         assert not set(plan.voice_fallbacks) & set(voices), key
-    # Nor may two stations share a fallback: if a shared name fired for
-    # both, the dial would carry one voice under two call signs.
+    # The plan is cast against the owner's real ElevenLabs roster, which
+    # is finite: 19 primaries and 6 ad voices leave 13 names for 38
+    # fallback slots, so fallbacks may be shared across stations. They
+    # still never shadow a primary or ad voice, and no single name backs
+    # more than three stations (a cap of two tops out at 26 slots).
+    from tools.radio_content_plan import AD_PLAN as _ads
+
+    ad_voices = {ad.voice for ad in _ads}
     fallbacks = [name for plan in STATIONS.values() for name in plan.voice_fallbacks]
-    assert len(fallbacks) == len(set(fallbacks))
+    assert not set(fallbacks) & (set(voices) | ad_voices)
+    stations_per_name = Counter(fallbacks)
+    assert max(stations_per_name.values()) <= 3, stations_per_name
+
+
+# The owner's real ElevenLabs account roster (dry-run 2026-08-13; match by
+# the name before " - ") plus the five proven library-addable names. Every
+# cast name must come from this set -- inventing a name means the
+# generation pass silently falls back to an arbitrary voice.
+ACCOUNT_VOICES = {
+    "Adam", "Alexandra", "Alice", "Archer", "Bella", "Bill", "Brian",
+    "Callum", "Charlie", "Chris", "Claudia", "Clyde", "Daniel", "Eric",
+    "Ethan", "George", "Grandpa Spuds Oxley", "Harry", "Jade", "Jamie",
+    "Janet", "Jessica", "Josha", "Laura", "Liam", "Lily", "Mark",
+    "Matilda", "River", "Roger", "Sarah", "Wade", "Will",
+}  # fmt: skip
+LIBRARY_ADDS = {"Thomas", "Patrick", "Rachel", "Michael", "Amelia"}
+
+
+def test_every_cast_name_is_on_the_real_roster():
+    roster = ACCOUNT_VOICES | LIBRARY_ADDS
+    for key, plan in STATIONS.items():
+        assert plan.voice in roster, (key, plan.voice)
+        for name in plan.voice_fallbacks:
+            assert name in roster, (key, name)
+    for ad in AD_PLAN:
+        assert ad.voice in roster, (ad.key, ad.voice)
 
 
 def test_ad_voices_never_collide_with_station_casting():

@@ -10,8 +10,9 @@ Rules baked into this pool:
   electronics spot), per owner ruling: modern trucks, modern gear.
 - Ad voices never overlap station casting, primary or fallback, so a
   station host is never heard reading a commercial. The ad bench is a
-  small cast of ElevenLabs library voices reused across spots, the way
-  real regional radio reuses a handful of VO artists.
+  small cast of voices from the owner's real ElevenLabs account roster,
+  reused across spots the way real regional radio reuses a handful of
+  VO artists.
 - Scripts run 55-75 words (about twenty to thirty seconds read), each
   with a concrete benefit, and ``formats`` lists the STATION_PLAYLISTS
   pools the spot may air on (never "route": the Roadhouse draws no ads).
@@ -35,7 +36,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_red_hawk_travel_centers",
         business="Red Hawk Travel Centers",
-        voice="Austin",
+        voice="Roger",
         script=(
             "Red Hawk Travel Centers, the big red wing on the big blue "
             "sign. Hot showers that stay hot, parking that's actually "
@@ -51,7 +52,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_dellas_blue_plate",
         business="Della's Blue Plate Diner",
-        voice="Hope",
+        voice="Alexandra",
         script=(
             "Della's Blue Plate Diner says a driver ate here before you "
             "were born, and the meatloaf hasn't changed since. Chicken "
@@ -66,7 +67,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_ironline_tire",
         business="Ironline Tire and Retread",
-        voice="Bradford",
+        voice="Archer",
         script=(
             "A blowout doesn't check your schedule first. Ironline Tire "
             "and Retread runs round-the-clock roadside service, steer to "
@@ -81,7 +82,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_bearclaw_diesel",
         business="Bearclaw Diesel Treatment",
-        voice="Austin",
+        voice="Roger",
         script=(
             "Cold mornings, long grades, cheap fuel from that one card "
             "stop you regret. Your injectors forgive nothing. One bottle "
@@ -96,7 +97,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_meridian_freight_hiring",
         business="Meridian Freight Lines",
-        voice="Cassidy",
+        voice="Janet",
         script=(
             "Meridian Freight Lines is hiring company drivers and owner "
             "operators. Late-model equipment, no forced dispatch, and "
@@ -111,7 +112,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_wagon_wheel_inn",
         business="Wagon Wheel Motor Inn",
-        voice="Amelia",
+        voice="Claudia",
         script=(
             "When the sleeper's too small and the night's too long, the "
             "Wagon Wheel Motor Inn keeps truck parking out back, a real "
@@ -126,7 +127,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_loadlasso_app",
         business="LoadLasso",
-        voice="Natasha",
+        voice="Jade",
         script=(
             "Deadhead miles pay nobody. LoadLasso puts live freight on "
             "your phone, rates up front, brokers scored by drivers like "
@@ -140,7 +141,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_black_kettle_coffee",
         business="Black Kettle Coffee",
-        voice="Amelia",
+        voice="Claudia",
         script=(
             "Black Kettle Coffee is roasted for the long haul. Dark, "
             "smooth, and strong enough to introduce itself. It's a slow "
@@ -154,7 +155,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_granite_shield_insurance",
         business="Granite Shield Insurance",
-        voice="Bradford",
+        voice="Archer",
         script=(
             "Your authority, your truck, your name on the door. Granite "
             "Shield Insurance covers owner operators with plain-language "
@@ -169,7 +170,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_silver_spray_wash",
         business="Silver Spray Truck Wash",
-        voice="Hope",
+        voice="Alexandra",
         script=(
             "Bugs on the bumper, salt on the frame, shame on the mud "
             "flaps. Silver Spray Truck Wash runs brushless bays big "
@@ -184,7 +185,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_silver_stack_electronics",
         business="Silver Stack Chrome and Electronics",
-        voice="Austin",
+        voice="Roger",
         script=(
             "Silver Stack Chrome and Electronics stocks the whole modern "
             "cab: dash cams, electronic logs, GPS units, and yes, CB "
@@ -199,7 +200,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_weighahead_app",
         business="WeighAhead",
-        voice="Cassidy",
+        voice="Janet",
         script=(
             "Rolling the dice at the scale house costs hours you don't "
             "have. WeighAhead reads your axle weights from certified "
@@ -213,7 +214,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_roadforge_boots",
         business="Roadforge Boots",
-        voice="Bradford",
+        voice="Archer",
         script=(
             "Fourteen hours on your feet deserves better than cardboard "
             "soles. Roadforge Boots are stitched, not glued, oil-proof "
@@ -227,7 +228,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_skyline_relay",
         business="Skyline Relay",
-        voice="Cassidy",
+        voice="Janet",
         script=(
             "Out past the last cell bar, Skyline Relay keeps you "
             "reachable. Satellite messaging that rides your dash, "
@@ -241,7 +242,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_milepost_ministries",
         business="Milepost Ministries",
-        voice="Amelia",
+        voice="Claudia",
         script=(
             "Some loads weigh more than freight. Milepost Ministries "
             "keeps chapel doors open at truck stops across the country, "
@@ -256,7 +257,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_quietcab_headsets",
         business="QuietCab Headsets",
-        voice="Natasha",
+        voice="Jade",
         script=(
             "Eleven hours of engine drone is a tax on your ears. "
             "QuietCab headsets cancel the roar, keep the road sounds you "
@@ -270,7 +271,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_truelane_navigation",
         business="TrueLane Navigation",
-        voice="Natasha",
+        voice="Jade",
         script=(
             "A car app doesn't know what thirteen foot six means until "
             "it's too late. TrueLane Navigation routes by your height, "
@@ -285,7 +286,7 @@ AD_PLAN: tuple[AdPlan, ...] = (
     AdPlan(
         key="ad_smokestack_jerky",
         business="Smokestack Jerky Company",
-        voice="Austin",
+        voice="Roger",
         script=(
             "Smokestack Jerky is smoked slow over real hickory, cut "
             "thick, and sealed the same week. Peppered, teriyaki, or hot "

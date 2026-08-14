@@ -9,12 +9,16 @@ Conventions (the asset contract):
 - ``STATIONS`` is keyed by content key -- the value the catalog's ``host``
   field will carry. Host clips become ``host_<key>_NN.ogg``, produced
   jingles ``id_<key>_01/02``, and the spoken legal ID ``id_<key>_03``.
-- Voice names are ElevenLabs premade/library display names. Casting is
-  one to one: no two stations share a primary voice, no fallback is
-  another station's primary, and no fallback name appears in two
-  stations' lists, so any fallback firing still never merges two hosts.
-  Ad voices are disjoint from ALL station casting (primary and
-  fallback): a station host never reads a commercial on the dial.
+- Voice names are cast against the owner's REAL ElevenLabs roster (33
+  on-account voices plus five proven library adds: Thomas, Patrick,
+  Rachel, Michael, Amelia) -- never invent a name outside that set.
+  Casting is one to one: no two stations share a primary voice and no
+  fallback is a primary or ad voice. The roster is finite, so fallback
+  names may back more than one station, capped at three (19 primaries +
+  6 ad voices leave 13 names for 38 fallback slots; a cap of two tops
+  out at 26 slots, so three is the tightest cap that fits). Ad voices
+  are disjoint from ALL station casting (primary and fallback): a
+  station host never reads a commercial on the dial.
 - Ad keys are ``ad_<slug>``; ``formats`` lists the STATION_PLAYLISTS pools
   the spot may air on (never "route": the Roadhouse draws no ads).
 - Song keys follow the shipped catalog: ``radio_<pool>_<slug>``, with the
@@ -69,7 +73,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="route_playlist",
         name="Freight Fate Roadhouse",
         voice="Clyde",
-        voice_fallbacks=("Brian", "Drew"),
+        voice_fallbacks=("George", "Chris"),
         persona="Warm gravelly daytime trucker DJ, big grin, coast-to-coast friend",
         playlist="route",
         host_lines=(
@@ -109,8 +113,8 @@ STATIONS: dict[str, StationPlan] = {
     "nightline": StationPlan(
         station_id="ff-night-line",
         name="Freight Fate Night Line",
-        voice="Serena",
-        voice_fallbacks=("Charlotte", "Matilda"),
+        voice="Sarah",
+        voice_fallbacks=("Matilda", "Alice"),
         persona=(
             "Smoky, low, intimate late-night confidante; unhurried, confessional, "
             "adult in tone and always clean"
@@ -153,8 +157,8 @@ STATIONS: dict[str, StationPlan] = {
     "rawhide": StationPlan(
         station_id="krwl-dallas",
         name="The Rawhide 98.1",
-        voice="Josh",
-        voice_fallbacks=("Ethan", "Ryan"),
+        voice="Wade",
+        voice_fallbacks=("Ethan", "Daniel"),
         persona="Big Texas swagger, young gun country DJ, boots-and-chrome bravado",
         playlist="country",
         host_lines=(
@@ -191,8 +195,8 @@ STATIONS: dict[str, StationPlan] = {
     "bigwheel": StationPlan(
         station_id="whwy-nashville",
         name="Big Wheel Country 104.5",
-        voice="Grace",
-        voice_fallbacks=("Emily", "Sarah"),
+        voice="Laura",
+        voice_fallbacks=("Bella", "Alice"),
         persona="Warm Nashville sweetheart, easy southern charm, big-hearted",
         playlist="country",
         host_lines=(
@@ -229,8 +233,8 @@ STATIONS: dict[str, StationPlan] = {
     "prairieline": StationPlan(
         station_id="kpln-kansas-city",
         name="Prairie Line 95.7",
-        voice="Paul",
-        voice_fallbacks=("Daniel", "Dave"),
+        voice="Brian",
+        voice_fallbacks=("Daniel", "Thomas"),
         persona="Steady heartland anchor, plainspoken, dry warmth, no rush",
         playlist="country",
         host_lines=(
@@ -267,8 +271,8 @@ STATIONS: dict[str, StationPlan] = {
     "bigsky": StationPlan(
         station_id="kbsk-billings",
         name="Big Sky Country 99.3",
-        voice="Thomas",
-        voice_fallbacks=("James", "Fin"),
+        voice="Bill",
+        voice_fallbacks=("Thomas", "George"),
         persona="Calm weathered mountain-west voice, unhurried, quietly proud",
         playlist="country",
         host_lines=(
@@ -305,8 +309,8 @@ STATIONS: dict[str, StationPlan] = {
     "grind": StationPlan(
         station_id="wgrx-chicago",
         name="The Grind 97.9",
-        voice="Arnold",
-        voice_fallbacks=("Harry", "Sam"),
+        voice="Harry",
+        voice_fallbacks=("Patrick", "Will"),
         persona="Gravel-voiced Chicago rock jock, blue-collar pride, zero polish",
         playlist="classic_rock",
         host_lines=(
@@ -341,7 +345,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="kdrt-phoenix",
         name="Desert Rock 101.5",
         voice="Callum",
-        voice_fallbacks=("Liam", "Jeremy"),
+        voice_fallbacks=("Josha", "Ethan"),
         persona="Raspy sun-baked rock voice, laid-back menace, desert cool",
         playlist="classic_rock",
         host_lines=(
@@ -377,8 +381,8 @@ STATIONS: dict[str, StationPlan] = {
     "chrome": StationPlan(
         station_id="kchm-los-angeles",
         name="Chrome 106.3",
-        voice="Domi",
-        voice_fallbacks=("Gigi", "Jessica"),
+        voice="Jessica",
+        voice_fallbacks=("Bella", "Matilda"),
         persona="Confident LA rock queen, glossy attitude, fast smile",
         playlist="classic_rock",
         host_lines=(
@@ -411,8 +415,8 @@ STATIONS: dict[str, StationPlan] = {
     "ridge": StationPlan(
         station_id="krdg-denver",
         name="The Ridge 103.7",
-        voice="Patrick",
-        voice_fallbacks=("Will", "Chris"),
+        voice="Liam",
+        voice_fallbacks=("Patrick", "Chris"),
         persona="Mile-high rock voice, energetic but grounded, loves the grades",
         playlist="classic_rock",
         host_lines=(
@@ -448,7 +452,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="ksnd-seattle",
         name="The Sound 102.1",
         voice="River",
-        voice_fallbacks=("Aria", "Alice"),
+        voice_fallbacks=("Jamie", "Will"),
         persona="Laid-back Pacific Northwest voice, wry, unbothered, coffee-warm",
         playlist="classic_rock",
         host_lines=(
@@ -481,8 +485,8 @@ STATIONS: dict[str, StationPlan] = {
     "delta": StationPlan(
         station_id="wdlt-memphis",
         name="The Delta 94.3",
-        voice="Bill",
-        voice_fallbacks=("Joseph", "George"),
+        voice="Grandpa Spuds Oxley",
+        voice_fallbacks=("Josha", "George"),
         persona="Old Memphis bluesman, slow molasses drawl, seen everything twice",
         playlist="blues",
         host_lines=(
@@ -516,8 +520,8 @@ STATIONS: dict[str, StationPlan] = {
     "bayou": StationPlan(
         station_id="wbyu-new-orleans",
         name="Bayou Soul 100.9",
-        voice="Jessie",
-        voice_fallbacks=("Charlie", "Glinda"),
+        voice="Mark",
+        voice_fallbacks=("Jamie", "Ethan"),
         persona="Raspy New Orleans charmer, simmering and playful, calls everyone cher",
         playlist="blues",
         host_lines=(
@@ -552,7 +556,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="wsol-atlanta",
         name="Southern Soul 96.5",
         voice="Rachel",
-        voice_fallbacks=("Lily", "Laura"),
+        voice_fallbacks=("Amelia", "Bella"),
         persona="Warm Atlanta soul queen, honeyed and maternal, easy laugh",
         playlist="blues",
         host_lines=(
@@ -588,7 +592,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="wnah-nashville",
         name="Nashville After Hours 92.9",
         voice="Michael",
-        voice_fallbacks=("Valentino", "Archer"),
+        voice_fallbacks=("Daniel", "Thomas"),
         persona="Cool late-night jazz voice, dry wit, never above a murmur",
         playlist="jazz",
         host_lines=(
@@ -622,7 +626,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="kgol-oklahoma-city",
         name="Cruisin' Gold 105.9",
         voice="Eric",
-        voice_fallbacks=("Roger", "Mimi"),
+        voice_fallbacks=("Chris", "Will"),
         persona="Bright AM-gold showman, fast patter, grin you can hear",
         playlist="oldies",
         host_lines=(
@@ -660,7 +664,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="wglr-birmingham",
         name="Glory Road 91.5",
         voice="Adam",
-        voice_fallbacks=("Mark", "Dorothy"),
+        voice_fallbacks=("Patrick", "Josha"),
         persona="Warm Birmingham preacher cadence, uplifting Sunday-morning glow",
         playlist="gospel",
         host_lines=(
@@ -693,8 +697,12 @@ STATIONS: dict[str, StationPlan] = {
     "purotejano": StationPlan(
         station_id="ktjo-san-antonio",
         name="Puro Tejano 107.1",
-        voice="Mateo",
-        voice_fallbacks=("Antoni", "Giovanni"),
+        # No Spanish-capable voice is proven on the account roster yet, so
+        # a warm clear male carries the bilingual scripts (they gloss every
+        # Spanish phrase by design). Recasting the primary to a dedicated
+        # Spanish-capable voice is a follow-up once one is added.
+        voice="Charlie",
+        voice_fallbacks=("Jamie", "Amelia"),
         persona=(
             "Bilingual San Antonio firecracker: Spanish colour with enough "
             "English that every sentence lands for an English-only listener"
@@ -733,8 +741,8 @@ STATIONS: dict[str, StationPlan] = {
     "neondrive": StationPlan(
         station_id="kndr-las-vegas",
         name="Neon Drive 88.5",
-        voice="Nicole",
-        voice_fallbacks=("Freya", "Elli"),
+        voice="Lily",
+        voice_fallbacks=("Amelia", "Matilda"),
         persona="Hushed close-mic night voice, cool and dreamlike, barely above the synths",
         playlist="synthwave",
         host_lines=(
