@@ -402,6 +402,16 @@
   to reconnect, and a save the server flatly refuses says so plainly and
   points you at reporting it, instead of guessing.
 
+- **A refused cloud backup now names the career and the reason.** The
+  automatic backup status used to say only "Backup not accepted" no
+  matter which career it was or why, so with more than one career backed
+  up you could not tell which one had failed. It now names the career
+  every time, and tells a different story depending on the cause: your
+  game and the server disagreeing about a save's shape usually just means
+  a build mismatch, while a save whose numbers do not add up says plainly
+  that it was flagged for review, and that you can say so if you think
+  that is wrong.
+
 - **When two hazards stack, the all-clear now names both.** A deer, then
   slowed traffic right behind it, used to leave you with only one vague
   "Hazard avoided" -- the deer's own outcome never spoken, and the wording

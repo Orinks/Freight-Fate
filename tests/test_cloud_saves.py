@@ -876,6 +876,86 @@ def test_upload_with_retired_token_pauses_backups_with_reconnect_status():
     assert len(transport.posts) == 1
 
 
+# -- rejected-upload status split (Shane's report, 2026-08-14: with more than -----
+# -- one career backed up he could not tell which one was refused, or why) --------
+
+
+def test_upload_rejected_for_impossible_money_names_the_career_and_offers_appeal():
+    transport = FakeTransport(error=rejected_error("impossible_money"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+
+    status = service.status
+    assert status.startswith("Road Star: backup not accepted.")
+    assert "flagged it for review" in status
+    assert "tester document" in status
+
+
+def test_upload_rejected_for_impossible_xp_speaks_the_same_arithmetic_story():
+    transport = FakeTransport(error=rejected_error("impossible_xp"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.queue_backup(Profile(name="Night Owl"))
+    drain(service, clock)
+
+    status = service.status
+    assert status.startswith("Night Owl: backup not accepted.")
+    assert "flagged it for review" in status
+
+
+def test_upload_rejected_for_invalid_schema_blames_the_build_not_the_player():
+    transport = FakeTransport(error=rejected_error("invalid_schema"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+
+    status = service.status
+    assert status.startswith("Road Star: backup not accepted.")
+    assert "build mismatch" in status
+    assert "flagged" not in status
+
+
+def test_upload_rejected_for_unsupported_version_speaks_the_same_schema_story():
+    transport = FakeTransport(error=rejected_error("unsupported_version"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+
+    assert "build mismatch" in service.status
+
+
+def test_upload_rejected_for_an_unrecognized_code_falls_back_safely_with_the_name():
+    transport = FakeTransport(error=rejected_error("invalid_market"))
+    clock = Clock()
+    service = make_service(transport, clock)
+    service.queue_backup(Profile(name="Road Star"))
+    drain(service, clock)
+
+    assert service.status == (
+        "Road Star: backup not accepted. Your local career is safe. "
+        "Public details were not updated."
+    )
+
+
+def test_upload_rejected_logs_the_raw_reason_but_never_speaks_it(caplog):
+    transport = FakeTransport(error=rejected_error("impossible_money"))
+    clock = Clock()
+    service = make_service(transport, clock)
+
+    with caplog.at_level(logging.WARNING, logger="freight_fate.cloud_saves"):
+        service.queue_backup(Profile(name="Road Star"))
+        drain(service, clock)
+
+    lines = [r.getMessage() for r in caplog.records if "was rejected" in r.getMessage()]
+    assert any("Road Star" in line and "impossible_money" in line for line in lines)
+    # The raw code is logged for review; the spoken status never says it.
+    assert "impossible_money" not in service.status
+
+
 # -- cross-language canonicalization (the byte form both sides sign) -------------
 
 

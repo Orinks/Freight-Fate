@@ -220,6 +220,47 @@ def classify_upload_failure(reason: str | None) -> str:
     return "network"
 
 
+# Within "rejected", the two arithmetic cross-checks -- recomputed XP ceiling,
+# recomputed money ceiling -- earn a different story than every other refusal:
+# only a real cross-check failure means the numbers themselves do not add up,
+# so only this pair says "flagged for review" and offers the appeal. A false
+# flag hit a real career on this exact wording (2026-08-14), so the appeal
+# sentence stays attached to it on purpose.
+ARITHMETIC_REJECTION_REASONS = frozenset({"impossible_xp", "impossible_money"})
+
+# Schema and version refusals mean this build and the server disagree about
+# what a save even looks like -- almost always a build gap, not something the
+# player did to the save.
+SCHEMA_REJECTION_REASONS = frozenset({"invalid_schema", "unsupported_version"})
+
+
+def _rejection_status(name: str, reason: str | None) -> str:
+    """The player-facing status line for a server-refused upload.
+
+    Always names the career (Shane's report, 2026-08-14: with more than one
+    career backed up he could not tell which one had been refused, or why),
+    then splits the "rejected" family by what the reason code actually means
+    to a player instead of one line for every cause.
+    """
+    if reason in ARITHMETIC_REJECTION_REASONS:
+        return (
+            f"{name}: backup not accepted. The numbers in this save do not "
+            "look like possible play, so the server declined it and flagged "
+            "it for review. Your local career is safe and nothing public "
+            "changed. If you think this is wrong, say so in the tester "
+            "document."
+        )
+    if reason in SCHEMA_REJECTION_REASONS:
+        return (
+            f"{name}: backup not accepted. Your game and the server "
+            "disagree about this save's shape -- usually a build mismatch, "
+            "not something you did. Your local career is safe."
+        )
+    return (
+        f"{name}: backup not accepted. Your local career is safe. Public details were not updated."
+    )
+
+
 # -- sync state ----------------------------------------------------------------
 
 
@@ -916,9 +957,11 @@ class CloudSaves:
             return
         if family == "rejected":
             # Not transient: retrying with the same inputs cannot succeed.
-            self._set_status(
-                "Backup not accepted. Your local career is safe. Public details were not updated."
-            )
+            # The raw reason code is logged for review but never spoken --
+            # only the honest, career-named story below is.
+            reason = result.get("reason")
+            log.warning("Cloud backup of %s was rejected: %s", name, reason)
+            self._set_status(_rejection_status(name, reason))
             self._done_with(name, snapshot)
             return
         # Transient (network, 5xx): keep the snapshot, back off.
