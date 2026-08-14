@@ -115,3 +115,6 @@ nul
 .claude/worktrees/
 # Cached source dumps for tools/import_radio_catalog.py
 data/radio-cache/
+
+# ElevenLabs voice-provisioning cache (name -> voice_id on the owner's account)
+tools/.radio_voices.json

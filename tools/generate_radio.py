@@ -13,6 +13,8 @@ Usage:
     uv run python tools/generate_radio.py --music        # music only
     uv run python tools/generate_radio.py --static       # static burst only
     uv run python tools/generate_radio.py radio_country_backroads
+    uv run python tools/generate_radio.py --voices --dry-run  # show what would be added
+    uv run python tools/generate_radio.py --voices             # add missing cast voices
 """
 
 from __future__ import annotations
@@ -23,6 +25,7 @@ import subprocess
 import sys
 import tempfile
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -32,6 +35,9 @@ from generate_sounds import ASSETS, _api_key  # noqa: E402
 MUSIC_API = "https://api.elevenlabs.io/v1/music?output_format=mp3_44100_128"
 TTS_API = "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}?output_format=mp3_44100_128"
 VOICES_API = "https://api.elevenlabs.io/v1/voices"
+LIBRARY_SEARCH_API = "https://api.elevenlabs.io/v1/shared-voices?search={query}&page_size=5"
+ADD_VOICE_API = "https://api.elevenlabs.io/v1/voices/add/{public_user_id}/{voice_id}"
+VOICE_CACHE = Path(__file__).resolve().parent / ".radio_voices.json"
 
 # key -> (prompt, length_ms, force_instrumental)
 MUSIC_SPECS: dict[str, tuple[str, int, bool]] = {
@@ -193,6 +199,94 @@ def _pick_voice(key: str, station: str) -> tuple[str, str]:
     raise SystemExit("No ElevenLabs voices available on this account")
 
 
+def _search_library(key: str, name: str) -> list[dict]:
+    req = urllib.request.Request(
+        LIBRARY_SEARCH_API.format(query=urllib.parse.quote(name)),
+        headers={"xi-api-key": key},
+    )
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        return json.load(resp).get("voices", [])
+
+
+def _find_in_library(key: str, name: str) -> dict | None:
+    for hit in _search_library(key, name):
+        if hit.get("name", "").lower() == name.lower():
+            return hit
+    return None
+
+
+def _add_from_library(key: str, name: str) -> str:
+    hit = _find_in_library(key, name)
+    if not hit:
+        print(f"  library search found nothing usable for '{name}'", flush=True)
+        return ""
+    owner_id = hit.get("public_owner_id", "")
+    body = {"new_name": name}
+    add = urllib.request.Request(
+        ADD_VOICE_API.format(public_user_id=owner_id, voice_id=hit["voice_id"]),
+        data=json.dumps(body).encode(),
+        headers={"xi-api-key": key, "Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(add, timeout=60) as resp:
+        return json.load(resp).get("voice_id", "")
+
+
+def provision_voices(key: str, *, dry_run: bool = False) -> dict[str, str]:
+    """Ensure every cast voice exists on the account; add from the shared
+    library when missing. Returns name -> voice_id.
+
+    In dry-run mode, the account voice list and the library search are both
+    read-only GETs; the add-voice endpoint is never called and nothing is
+    cached, so it is safe to run against the owner's real ElevenLabs account
+    at any time.
+    """
+    from radio_content_plan import AD_PLAN, STATIONS
+
+    wanted: dict[str, tuple[str, ...]] = {}
+    for plan in STATIONS.values():
+        wanted[plan.voice] = plan.voice_fallbacks
+    for ad in AD_PLAN:
+        wanted.setdefault(ad.voice, ())
+
+    req = urllib.request.Request(VOICES_API, headers={"xi-api-key": key})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        have = {v["name"]: v["voice_id"] for v in json.load(resp).get("voices", [])}
+
+    resolved: dict[str, str] = {}
+    for name, fallbacks in wanted.items():
+        match = next(((c, have[c]) for c in (name, *fallbacks) if c in have), None)
+        if match:
+            candidate, voice_id = match
+            resolved[name] = voice_id
+            tag = "" if candidate == name else f" (resolved via fallback {candidate})"
+            print(f"  {name} -> {voice_id}{tag}", flush=True)
+            continue
+        if dry_run:
+            hit = _find_in_library(key, name)
+            if hit:
+                print(
+                    f"  {name} -> WOULD ADD from library "
+                    f"(match: {hit.get('name')}, category: {hit.get('category', 'unknown')})",
+                    flush=True,
+                )
+            else:
+                print(f"  {name} -> NOT FOUND anywhere", flush=True)
+            continue
+        added = _add_from_library(key, name)
+        if added:
+            resolved[name] = added
+            print(f"  {name} -> {added} (added from library)", flush=True)
+        else:
+            raise SystemExit(f"No voice found for cast '{name}' -- adjust the plan")
+
+    if not dry_run:
+        VOICE_CACHE.write_text(
+            json.dumps(resolved, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        print(f"  cached voice map to {VOICE_CACHE}", flush=True)
+    return resolved
+
+
 def generate_music(key: str, wanted: list[str]) -> None:
     for spec_key in wanted:
         prompt, length_ms, instrumental = MUSIC_SPECS[spec_key]
@@ -345,6 +439,15 @@ def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     flags = {arg for arg in argv if arg.startswith("--")}
     keys = [arg for arg in argv if not arg.startswith("--")]
+    if "--voices" in flags:
+        dry_run = "--dry-run" in flags
+        key = _api_key()
+        if dry_run:
+            print("Dry run: read-only account + library lookups, nothing added.", flush=True)
+        resolved = provision_voices(key, dry_run=dry_run)
+        if not dry_run:
+            print(f"\n{len(resolved)} voice(s) resolved and cached.", flush=True)
+        return 0
     do_all = not flags and not keys
     if keys:
         unknown = [k for k in keys if k not in MUSIC_SPECS]
