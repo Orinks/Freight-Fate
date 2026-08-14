@@ -98,6 +98,32 @@ POST_KINDS = (
 # inspection. A trooper on a median crossover writes tickets.
 INSPECTING_KINDS = frozenset({KIND_CMV, KIND_FIXED_SCALE})
 
+# -- tableau: a post already working somebody else ---------------------------
+
+# Only a patrol kind ever runs a tableau: a trooper on a crossover, a roving
+# unit, or a city unit can be caught with a customer already pulled over. A
+# work zone detail, a scale, a CMV unit and a chain checkpoint work from a
+# fixed spot with no roving "somebody else" to be caught with.
+TABLEAU_KINDS = frozenset({KIND_MEDIAN, KIND_ROVING, KIND_URBAN})
+
+# Chance a staffed patrol-kind post is already working a stop, independent of
+# whether the driver ever speeds near it. Loosely calibrated against how many
+# patrol-kind posts a route already carries (BASE_STAFFED x the spacing
+# tables): converting roughly half of them keeps a tableau to about one every
+# hour or so of driving on a patrol-covered interstate -- rare enough to stay
+# an event, not wallpaper.
+TABLEAU_CHANCE = 0.55
+
+# How far before the post the siren becomes audible, and how far this post's
+# own catches start being suppressed. The same distance on purpose: the
+# player is told the trooper is occupied at exactly the point it stops being
+# able to catch them.
+TABLEAU_SIREN_LEAD_MI = 1.5
+# How far past the post the trooper stays occupied with their stop. A real
+# traffic stop runs several minutes, which is more road than it looks like at
+# highway speed.
+TABLEAU_BUSY_PAST_MI = 2.0
+
 METHOD_BY_KIND = {
     KIND_MEDIAN: METHOD_RADAR,
     KIND_ROVING: METHOD_PACING,
@@ -288,6 +314,9 @@ class EnforcementPost:
     announced: bool = field(default=False, compare=False)
     # A post that has already looked at you and let it go does not re-decide.
     declined: bool = field(default=False, compare=False)
+    # Whether this staffed patrol post already has somebody stopped. Settled
+    # once at trip build, from the trip seed, the same way ``staffed`` is.
+    tableau: bool = field(default=False, compare=False)
 
     @property
     def id(self) -> str:
@@ -332,6 +361,18 @@ class EnforcementPost:
         """Miles from ``mile`` up to the post; negative once it is behind you."""
         return self.at_mi - mile
 
+    def tableau_busy_at(self, mile: float) -> bool:
+        """Whether this post's trooper is occupied with somebody else here.
+
+        From the siren lead to a couple of miles past the stop: a bear with a
+        customer is off the hunt, real CB wisdom, now mechanically true. Only
+        this post's own catches are affected -- every other post on the
+        route keeps watching normally.
+        """
+        if not self.tableau:
+            return False
+        return self.at_mi - TABLEAU_SIREN_LEAD_MI <= mile <= self.at_mi + TABLEAU_BUSY_PAST_MI
+
 
 def build_post(
     *,
@@ -371,6 +412,19 @@ def build_post(
     else:
         post.staffed = bool(staffed)
     return post
+
+
+def assign_tableau(post: EnforcementPost, trip_seed: int | None) -> bool:
+    """Whether ``post`` already has somebody stopped, on this trip's seed.
+
+    Only a staffed patrol-kind post is ever eligible: a post nobody is
+    sitting in has nothing to be busy with, and a fixed spot (a scale, a work
+    zone, a CMV unit, a chain control) has no roving "somebody else" to catch.
+    """
+    if post.kind not in TABLEAU_KINDS or not post.staffed:
+        return False
+    roll = random.Random(post_seed(trip_seed, post.id, "tableau")).random()
+    return roll < TABLEAU_CHANCE
 
 
 class EnforcementPostMixin:
@@ -472,6 +526,8 @@ class EnforcementPostMixin:
         posts.extend(self._urban_posts())
         posts.extend(self._chain_posts())
         posts.sort(key=lambda p: p.at_mi)
+        for post in posts:
+            post.tableau = assign_tableau(post, self._seed)
         return posts
 
     def _work_zone_posts(self) -> list[EnforcementPost]:
@@ -590,7 +646,15 @@ class EnforcementPostMixin:
         return max(watching, key=lambda p: (p.notice * p.density, BASE_NOTICE.get(p.kind, 0.0)))
 
     def posts_watching(self, mile: float) -> list[EnforcementPost]:
-        return [p for p in self.posts if p.staffed and p.covers(mile)]
+        """Staffed posts that could still catch a driver at this mile.
+
+        A post running a tableau is dropped for the duration of its busy
+        window -- its trooper is occupied with somebody else, so it makes no
+        catch contribution here. Every other post is unaffected.
+        """
+        return [
+            p for p in self.posts if p.staffed and p.covers(mile) and not p.tableau_busy_at(mile)
+        ]
 
     def next_post_within(self, within_mi: float) -> EnforcementPost | None:
         """Nearest post at or ahead of the truck inside the lookahead."""
@@ -642,6 +706,11 @@ __all__ = [
     "POST_KINDS",
     "REASON_BY_KIND",
     "SPACING_MI",
+    "TABLEAU_BUSY_PAST_MI",
+    "TABLEAU_CHANCE",
+    "TABLEAU_KINDS",
+    "TABLEAU_SIREN_LEAD_MI",
+    "assign_tableau",
     "build_post",
     "hour_multiplier",
     "post_seed",

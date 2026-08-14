@@ -190,6 +190,30 @@ class TripTrafficMixin:
             return f"CB chatter, {distance}: a driver reports a bear {side}."
         return f"CB chatter: somebody called a bear {side} a while back."
 
+    def cb_tableau_message(self, post: EnforcementPost, ahead_mi: float) -> str:
+        """CB chatter for a bear who already has somebody else stopped.
+
+        Same confidence framing and distance/side slots as
+        ``cb_patrol_message`` -- only the fact reported differs. Real CB
+        wisdom, now mechanically true: see
+        ``EnforcementPost.tableau_busy_at``, which stops this post's own
+        catches for as long as the trooper is busy with the stop this line
+        reports.
+        """
+        distance = self._distance_text(max(0.0, ahead_mi))
+        confidence = self._cb_confidence(post)
+        side = self._cb_side(post)
+        if confidence == "strong":
+            return (
+                f"CB chatter, {distance}: two drivers say a bear already has "
+                f"somebody stopped {side}."
+            )
+        if confidence == "ordinary":
+            return (
+                f"CB chatter, {distance}: a driver says a bear already has somebody stopped {side}."
+            )
+        return f"CB chatter: somebody said a bear had somebody stopped {side} a while back."
+
     def cb_patrol_status(self, post: EnforcementPost, ahead_mi: float) -> str:
         """The on-demand road-ahead readout's enforcement clause.
 

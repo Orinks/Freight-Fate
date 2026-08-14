@@ -28,6 +28,7 @@ from freight_fate.sim.enforcement_posts import (
     KIND_CMV,
     KIND_FIXED_SCALE,
     KIND_MEDIAN,
+    KIND_ROVING,
     KIND_SCALE_APRON,
     KIND_WORK_ZONE,
     hour_multiplier,
@@ -119,6 +120,94 @@ def test_a_reload_does_not_re_roll_the_road():
     before = [(p.id, p.staffed) for p in trip.posts]
     trip.restore(trip.total_miles / 3.0, 0.0)
     assert [(p.id, p.staffed) for p in trip.posts] == before
+
+
+# --- the tableau: a post already working somebody else ----------------------
+
+
+def test_a_tableau_schedules_on_a_patrol_stretch_and_never_on_a_post_free_stretch():
+    from freight_fate.sim.enforcement_posts import TABLEAU_KINDS, assign_tableau
+
+    assert {KIND_MEDIAN, KIND_ROVING, "urban_unit"} == TABLEAU_KINDS
+
+    # A staffed patrol-kind post: some seed schedules a tableau on it.
+    staffed = always_observing_post(at_mi=10.0, kind=KIND_MEDIAN)
+    assert any(assign_tableau(staffed, seed) for seed in range(50))
+
+    # An empty post (nobody sitting there) never runs a tableau, whatever the
+    # seed -- there is no trooper to be busy.
+    empty = always_observing_post(at_mi=10.0, kind=KIND_MEDIAN)
+    empty.staffed = False
+    assert not any(assign_tableau(empty, seed) for seed in range(50))
+
+    # A fixed-spot kind never runs a tableau either, even staffed: a scale,
+    # a work zone, a CMV unit and a chain control have no roving "somebody
+    # else" to be caught with.
+    fixed = always_observing_post(at_mi=10.0, kind=KIND_FIXED_SCALE)
+    assert not any(assign_tableau(fixed, seed) for seed in range(50))
+
+    # A route that carries no enforcement posts at all schedules nothing --
+    # there is nothing to schedule a tableau ON.
+    trip = _trip()
+    trip.posts = []
+    assert not any(p.tableau for p in trip.posts)
+
+
+def test_a_tableau_is_deterministic_from_the_seed():
+    from freight_fate.sim.enforcement_posts import assign_tableau
+
+    post = always_observing_post(at_mi=10.0, kind=KIND_MEDIAN)
+    assert assign_tableau(post, 42) == assign_tableau(post, 42)
+
+
+def test_the_tableau_busy_window_suppresses_only_that_posts_catches():
+    trip = _trip()
+    busy = always_observing_post(at_mi=10.0, kind=KIND_MEDIAN, reach_mi=5.0)
+    busy.tableau = True
+    other = always_observing_post(at_mi=10.0, kind=KIND_ROVING, reach_mi=5.0)
+    trip.posts = [busy, other]
+
+    mile_in_window = 9.5
+    assert busy.tableau_busy_at(mile_in_window)
+    watching = trip.posts_watching(mile_in_window)
+    assert busy not in watching
+    assert other in watching  # only the busy post's catches are suppressed
+
+    mile_outside = 6.0  # still covered by reach_mi, but well clear of the window
+    assert not busy.tableau_busy_at(mile_outside)
+    watching_outside = trip.posts_watching(mile_outside)
+    assert busy in watching_outside
+    assert other in watching_outside
+
+
+def test_the_tableau_cues_play_once_each(monkeypatch):
+    """The siren leads the spot; the stopped pair plays as you pass it."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        played = _capture_audio(app, monkeypatch)
+        post = always_observing_post(at_mi=6.0, kind=KIND_MEDIAN)
+        post.tableau = True
+        d.trip.posts = [post]
+
+        from freight_fate.sim.enforcement_posts import TABLEAU_SIREN_LEAD_MI
+
+        d._enforcement_prev_mi = 6.0 - TABLEAU_SIREN_LEAD_MI - 0.1
+        d.trip.position_mi = 6.0 - TABLEAU_SIREN_LEAD_MI + 0.1
+        d._update_enforcement_watch(0.1)
+        d._service_pending_sounds(1.0)
+        assert "events/police_siren" in played
+        assert "traffic/trooper_pass" not in played
+
+        d._enforcement_prev_mi = 5.9
+        d.trip.position_mi = 6.1
+        d._update_enforcement_watch(0.1)
+        assert "traffic/trooper_pass" in played
+        assert "traffic/car_pass" in played
+    finally:
+        app.shutdown()
 
 
 # --- presence targets -------------------------------------------------------
@@ -401,6 +490,22 @@ def test_cb_chatter_varies_by_what_the_post_actually_is():
     # back) is shared across every kind.
     for line in (patrol_line, work_zone_line, apron_line, scale_line, cmv_line, chain_line):
         assert any(marker in line for marker in ("two drivers", "a driver", "somebody"))
+
+
+def test_cb_tableau_line_reports_a_bear_with_a_customer():
+    """The new line kind: a bear who already has somebody stopped.
+
+    Same confidence framing and distance/side slots as ``cb_patrol_message``;
+    only the fact differs, and it stays CB-attributed slang.
+    """
+    trip = _trip()
+    post = always_observing_post(at_mi=20.0, kind=KIND_MEDIAN)
+    line = trip.cb_tableau_message(post, 3.0)
+    assert "bear" in line.lower()
+    assert "CB chatter" in line
+    assert "somebody stopped" in line.lower()
+    assert trip._cb_side(post) in line
+    assert "3.0" in line or "miles" in line
 
 
 def test_spoken_cb_lines_are_capped_for_a_whole_run():

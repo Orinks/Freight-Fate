@@ -2888,9 +2888,17 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         if urgency <= 0.0:
             return
         self._cb_calls_made += 1
+        # A post already working a tableau gets its own line -- a bear with a
+        # customer, not a bear on the hunt -- but rides the same rationed
+        # budget and urgency selection as every other heads-up.
+        message = (
+            self.cb_tableau_message(post, ahead)
+            if post.tableau
+            else self.cb_patrol_message(post, ahead)
+        )
         self._emit(
             TripEventKind.GPS_CUE,
-            self.cb_patrol_message(post, ahead),
+            message,
             cb_patrol=post,
         )
 

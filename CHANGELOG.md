@@ -4,6 +4,10 @@
 
 ### Added
 
+- **You will sometimes hear a trooper run somebody else down.** A siren past
+  you, the stop on the shoulder as you pass, maybe the CB calling it -- and a
+  bear who has somebody stopped is not watching you.
+
 - **You can now pay down what you owe from your own cash.** Whenever you
   carry a balance and have money in hand, the terminal and every truck stop
   offer to pay it all, half, or everything above a 200 dollar fuel cushion.

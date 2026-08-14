@@ -68,6 +68,7 @@ from ..sim.enforcement_observe import (
 from ..sim.enforcement_posts import (
     KIND_FIXED_SCALE,
     KIND_SCALE_APRON,
+    TABLEAU_SIREN_LEAD_MI,
     post_seed,
 )
 from ..sim.trip_models import ENFORCEMENT_WARNING_MAX_MI, SCALE_WARNING_REAL_S
@@ -119,6 +120,15 @@ RADIO_CUE_DUCK_S = 1.1
 # How far past a post the truck has to be before its pass earcon has fired.
 PASS_TRIGGER_MI = 0.05
 
+# The tableau: a staffed patrol post that already has somebody stopped. Both
+# cues are pure flavor -- the mechanical truth is the catch suppression in
+# ``EnforcementPost.tableau_busy_at`` -- so neither is gated on the
+# enforcement-presence ambience scale, the same way a staffed post's ordinary
+# marked-unit pass never is.
+TABLEAU_SHOULDER_PAN = 0.85  # hard right: US traffic keeps the shoulder there
+TABLEAU_SIREN_VOLUME = 0.7
+TABLEAU_PASS_VOLUME = 0.7
+
 # One short reminder this close to an announced open scale, if the truck is
 # still over the bypass speed with no scale exit armed. The full notice can
 # land miles out; nothing else spoke between it and the bypass point, and a
@@ -159,6 +169,10 @@ class EnforcementWatchMixin:
         self._enforcement_prev_mi = 0.0
         self._passed_post_ids: set[str] = set()
         self._marked_post_ids: set[str] = set()
+        # A tableau's two cues, each fired once: the siren some seconds
+        # before the spot, and the stopped pair as you go by it.
+        self._tableau_siren_ids: set[str] = set()
+        self._tableau_pass_ids: set[str] = set()
         self._scale_bed_key = ""
         self._scale_bed_volume = 0.0
         self._radio_cue_duck = 1.0
@@ -303,6 +317,11 @@ class EnforcementWatchMixin:
             if not (previous_mi < trigger <= position):
                 continue
             self._passed_post_ids.add(post.id)
+            if post.tableau:
+                # The tableau already gets its own richer pass -- the siren
+                # lead and the stopped pair hard on the shoulder -- so the
+                # anonymous marked-unit pass would only double it up.
+                continue
             if not post.staffed:
                 # An empty crossover is silent unless the presence setting is
                 # buying atmosphere: this is the one cue the slider governs,
@@ -314,6 +333,49 @@ class EnforcementWatchMixin:
             if post.is_scale:
                 continue  # the scale bed already covers the approach
             self._play_marked_unit_pass(post)
+
+    # -- the tableau -----------------------------------------------------
+
+    def _play_tableau_siren_pass(self, post) -> None:
+        """The siren of a trooper working somebody else, heard before you reach them.
+
+        Same two-element shape as the marked-unit pass -- the marker leads,
+        then the vehicle -- with the siren asset standing in for the whoosh.
+        This is the one enforcement sound that means "not about you": a
+        trooper who already has a customer is off the hunt.
+        """
+        self._play_enforcement_marker(volume=TABLEAU_SIREN_VOLUME, pan=TABLEAU_SHOULDER_PAN)
+        self._schedule_sound(
+            PASS_MARKER_LEAD_S, "events/police_siren", TABLEAU_SIREN_VOLUME, TABLEAU_SHOULDER_PAN
+        )
+
+    def _play_tableau_pass(self, post) -> None:
+        """The stopped pair, panned hard to the shoulder as you go by.
+
+        Reuses the pass-by vocabulary already used for a marked unit and for
+        ordinary traffic: a cruiser and the car it stopped, both parked hard
+        right, gone in a moment because that is exactly how long you are
+        alongside a parked pair at highway speed. No marker, no radio duck --
+        it is news, not a warning.
+        """
+        volume = min(1.0, TABLEAU_PASS_VOLUME * min(1.4, self._ambience_scale()))
+        self.ctx.audio.play("traffic/trooper_pass", volume=volume, pan=TABLEAU_SHOULDER_PAN)
+        self.ctx.audio.play("traffic/car_pass", volume=volume * 0.85, pan=TABLEAU_SHOULDER_PAN)
+
+    def _update_tableaus(self, previous_mi: float) -> None:
+        """Fire the siren lead and the shoulder pass for every tableau post."""
+        position = self.trip.position_mi
+        for post in self.trip.posts:
+            if not post.tableau:
+                continue
+            siren_trigger = post.at_mi - TABLEAU_SIREN_LEAD_MI
+            if post.id not in self._tableau_siren_ids and previous_mi < siren_trigger <= position:
+                self._tableau_siren_ids.add(post.id)
+                self._play_tableau_siren_pass(post)
+            pass_trigger = post.at_mi + PASS_TRIGGER_MI
+            if post.id not in self._tableau_pass_ids and previous_mi < pass_trigger <= position:
+                self._tableau_pass_ids.add(post.id)
+                self._play_tableau_pass(post)
 
     def _update_scale_bed(self) -> None:
         """The weigh-station approach bed, swelling on the real clock.
@@ -629,6 +691,7 @@ class EnforcementWatchMixin:
         self._update_scale_bed()
         if self._ramp_mi is None:
             self._update_marked_unit_passes(previous_mi)
+            self._update_tableaus(previous_mi)
         for post in self.trip.posts:
             if post.staffed and position >= post.watch_start_mi - POST_MARKER_LEAD_MI:
                 self._mark_post_audible(post)
@@ -825,6 +888,9 @@ __all__ = [
     "RADIO_CUE_DUCK",
     "SCALE_BED_START_MI",
     "SCALE_NOTICE_SAMPLE",
+    "TABLEAU_PASS_VOLUME",
+    "TABLEAU_SHOULDER_PAN",
+    "TABLEAU_SIREN_VOLUME",
     "WEIGH_STATION_REMINDER_MI",
     "EnforcementWatchMixin",
 ]
