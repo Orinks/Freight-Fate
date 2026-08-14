@@ -344,15 +344,25 @@ class TruckShopState(MenuState):
         "drive. Company drivers use carrier-assigned equipment."
     )
 
+    def __init__(self, ctx, *, at_dealer: bool = False) -> None:
+        super().__init__(ctx)
+        # The dealer-name prefix is only true when the player actually
+        # opened this from the terminal's "Truck dealer" row -- reaching it
+        # from the garage's "Trucks" row would name a location the player
+        # never went to, which is a contradicted navigation cue for a blind
+        # or low-vision player.
+        self.at_dealer = at_dealer
+
     def announce_entry(self) -> None:
         p = self.ctx.profile
         dealer = ""
-        try:
-            service = self.ctx.world.city_service(p.current_city, "truck_dealer")
-            if not service.fallback:
-                dealer = f"Inside {service.name}. "
-        except KeyError:
-            pass
+        if self.at_dealer:
+            try:
+                service = self.ctx.world.city_service(p.current_city, "truck_dealer")
+                if not service.fallback:
+                    dealer = f"Inside {service.name}. "
+            except KeyError:
+                pass
         self.ctx.say(f"{dealer}Trucks. You have {p.money:,.0f} dollars. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:

@@ -87,11 +87,22 @@ def test_city_service_snapshot_drops_to_terminal(monkeypatch):
         monkeypatch.setattr(app.ctx, "say", speech_stub(spoken))
         app.ctx.profile = Profile(name="Retired Drive", current_city="Chicago")
         app.ctx.profile.active_trip = {"kind": "city_service_drive", "job": {}, "trip_seed": 1}
+        app.ctx.profile.money = 4_321.0
+        app.ctx.profile.game_hours = 88.0
 
         enter_world(app.ctx)
 
         assert isinstance(app.state, CityMenuState)
         assert app.ctx.profile.active_trip is None
-        assert any("retired" in text for text in spoken)
+        assert app.ctx.profile.money == 4_321.0
+        assert app.ctx.profile.game_hours == 88.0
+        assert (
+            "Local service drives were retired in this update; you are parked at the terminal."
+        ) in spoken
+
+        # The clear must reach disk, not just the in-memory profile, so the
+        # notice does not replay on every future load of this save.
+        reloaded = Profile.load(app.ctx.profile.path)
+        assert reloaded.active_trip is None
     finally:
         app.shutdown()

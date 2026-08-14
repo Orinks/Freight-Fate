@@ -138,6 +138,7 @@ def _world_entry_state(ctx, *, queue_entry_announcement: bool = False) -> State:
         # even after every other city-service-drive code path is gone.
         if p.active_trip.get("kind") == "city_service_drive":
             p.active_trip = None
+            ctx.save_profile()
             ctx.say(
                 "Local service drives were retired in this update; you are parked at the terminal."
             )

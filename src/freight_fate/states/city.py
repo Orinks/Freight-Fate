@@ -425,7 +425,7 @@ class CityMenuState(MenuState):
         self.ctx.say(career_objective(self.ctx.profile).spoken_summary, interrupt=True)
 
     def _truck_dealer(self) -> None:
-        self.ctx.push_state(TruckShopState(self.ctx))
+        self.ctx.push_state(TruckShopState(self.ctx, at_dealer=True))
 
     def _job_board(self) -> None:
         open_freight_market(self.ctx)
@@ -1042,13 +1042,17 @@ class PayDebtState(MenuState):
         self.ctx.save_profile()
         self.ctx.audio.play("ui/notify")
         if solvency.debt_owed(p) < 1.0:
+            # Pop first, then speak: the parent's own announce_entry also
+            # interrupts, and would otherwise purge this confirmation off
+            # the queue mid-sentence. Same pattern as the motel flow in
+            # driving_rest_states.py.
+            self.ctx.pop_state()
             self.ctx.say(
                 f"Paid {solvency.money_text(paid)} and your account is clear. "
                 "Every settlement reaches you in full again. You have "
                 f"{solvency.money_text(p.money)}.",
                 interrupt=True,
             )
-            self.ctx.pop_state()
             return
         self.ctx.say(
             f"Paid {solvency.money_text(paid)} toward what you owed. You have "

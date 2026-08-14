@@ -556,7 +556,8 @@ def debt_warning_line(profile, terse: bool = False) -> str:
         return (
             f"You owe {owed}. Your carrier holds it there and writes off anything "
             "past it, so it cannot grow. A quarter of each settlement goes to it "
-            "and three quarters always reaches you."
+            "and three quarters always reaches you. "
+            "You can also pay it down from cash at any terminal or truck stop."
         )
     ceiling = money_text(debt_ceiling(profile))
     consequence = ceiling_consequence_text(profile)
@@ -599,7 +600,8 @@ def debt_line(profile) -> str:
     if hard_capped(profile):
         return (
             f"Owed: {money_text(owed)}. Your carrier holds it there and writes "
-            "off anything past it. Part of every settlement pays it down."
+            "off anything past it. Part of every settlement pays it down. "
+            "You can also pay it down from cash at any terminal or truck stop."
         )
     ceiling = debt_ceiling(profile)
     return (

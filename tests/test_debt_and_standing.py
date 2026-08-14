@@ -813,6 +813,22 @@ def test_debt_lines_point_at_out_of_pocket_payoff():
     assert POINTER in solvency.debt_line(p)
 
 
+def test_debt_lines_point_at_out_of_pocket_payoff_when_hard_capped():
+    """A hard-capped driver has nowhere further down to fall, but the cash
+    payoff pointer is still true for them and must still be spoken."""
+    from freight_fate.models import enforcement, solvency
+
+    POINTER = "You can also pay it down from cash at any terminal or truck stop."
+
+    p = _payer(money=500.0, owed=40_000.0)
+    p.carrier_key = enforcement.LAST_CHANCE_CARRIER_KEY
+    assert solvency.hard_capped(p)
+
+    assert POINTER in solvency.debt_warning_line(p)
+    assert POINTER not in solvency.debt_warning_line(p, terse=True)
+    assert POINTER in solvency.debt_line(p)
+
+
 # --- the terminal menu item and PayDebtState --------------------------------
 
 
@@ -854,6 +870,37 @@ def test_paying_it_all_off_clears_the_balance_and_says_so(monkeypatch):
         assert solvency.debt_owed(p) == 0.0
         assert p.money == 4_000.0
         assert any("your account is clear" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+def test_paying_it_all_off_speaks_the_clear_confirmation_last(monkeypatch):
+    """Popping back to the terminal fires the parent menu's own interrupt=True
+    entry announcement. The clear confirmation must be spoken after that pop,
+    so it survives as the last thing heard instead of being cut off by it."""
+    from freight_fate.app import App
+    from freight_fate.states.city import CityMenuState, PayDebtState
+
+    app = App()
+    try:
+        app.ctx.profile = _payer(money=5_000.0, owed=1_000.0)
+        events: list[tuple[str, bool]] = []
+        monkeypatch.setattr(app.ctx, "say", speech_stub(events, with_interrupt=True))
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events, with_interrupt=True))
+        monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+
+        app.push_state(CityMenuState(app.ctx))
+        state = PayDebtState(app.ctx)
+        app.push_state(state)
+        events.clear()  # only the pay-it-all action's own speech matters here
+        items = state.build_items()
+        pay_it_all = next(item for item in items if item.text.startswith("Pay it all"))
+        pay_it_all.action()
+
+        assert events, "expected the clear confirmation to be spoken"
+        last_text, last_interrupt = events[-1]
+        assert "your account is clear" in last_text
+        assert last_interrupt is True
     finally:
         app.shutdown()
 
