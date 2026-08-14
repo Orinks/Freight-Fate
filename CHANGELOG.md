@@ -298,6 +298,13 @@
   attached. Brake lights and slow traffic ahead still tell you the speed
   to be ready for, because those do ask you to change yours.
 
+- **No merge situation hands you a speed anymore.** The earlier fix only
+  covered a single merging vehicle; the same rule now covers traffic
+  merging onto your highway and traffic squeezing at a construction
+  taper -- both now say to hold your lane and leave a gap, with no target
+  speed. Exit traffic ahead is unchanged, since that one really is you
+  slowing for your own ramp.
+
 - **CB chatter talks about more than bears again.** Work zones and the
   scale now get their own reports on the radio instead of every post
   sounding like a bear sighting: drivers talk about troopers working a

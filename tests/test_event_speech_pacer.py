@@ -799,7 +799,7 @@ def test_the_pause_menu_drops_what_the_road_was_about_to_say() -> None:
 
 LANE_CLOSURE_LINE = (
     "Traffic squeezing at the construction taper in a quarter mile. "
-    "Merge left early, leave a gap, and be ready for 35 miles per hour."
+    "Merge left early and leave a gap."
 )
 
 

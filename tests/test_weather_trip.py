@@ -1262,6 +1262,38 @@ def test_traffic_pressure_marks_exit_and_construction_context(world):
         )
 
 
+def test_merge_traffic_pressures_drop_the_speed_advisory(world):
+    """route_merge and construction_merge are MERGE situations: the truck
+    holds its lane and leaves a gap, it never has a target speed to be
+    ready for. Exit traffic keeps its speed -- that one is the truck
+    itself slowing for a ramp, not reacting to someone else's merge."""
+    from freight_fate.sim.trip_models import TrafficPressure
+
+    trip, _ = make_trip(world)
+
+    route_merge = TrafficPressure(0.0, 1.0, "route_merge", "right", 0.8, 35.0, "probe")
+    construction_merge = TrafficPressure(0.0, 1.0, "construction_merge", "left", 0.8, 35.0, "probe")
+    exit_pressure = TrafficPressure(0.0, 1.0, "exit", "right", 0.8, 35.0, "probe")
+
+    route_merge_msg = trip._traffic_pressure_message(route_merge, 1.0)
+    construction_merge_msg = trip._traffic_pressure_message(construction_merge, 1.0)
+    exit_msg = trip._traffic_pressure_message(exit_pressure, 1.0)
+    distance = trip._distance_text(1.0)
+
+    assert route_merge_msg == f"Merging traffic in {distance}. Keep right and leave a gap."
+    assert construction_merge_msg == (
+        f"Traffic squeezing at the construction taper in {distance}. "
+        "Merge left early and leave a gap."
+    )
+    assert "35" not in route_merge_msg
+    assert "35" not in construction_merge_msg
+    assert "be ready" not in route_merge_msg
+    assert "be ready" not in construction_merge_msg
+    # Exit traffic is not a merge situation -- the truck is slowing for its
+    # own ramp, so it keeps the speed to be ready for.
+    assert "35" in exit_msg
+
+
 def test_traffic_pressure_gps_cue_deduplicates(world):
     from freight_fate.sim.trip_models import TRAFFIC_PRESSURE_LOOKAHEAD_MI
 

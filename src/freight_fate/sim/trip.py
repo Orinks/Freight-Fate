@@ -2867,16 +2867,16 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
                 f"{pressure.direction} exit lane, and be ready to slow near {speed}."
             )
         if pressure.kind == "construction_merge":
+            # No target speed: the taper's actual posted limit is spoken
+            # separately by the zone warning/entry lines (a real sign, not a
+            # traffic-behavior guess). This advisory is merge-only, same
+            # rule as merging_traffic_cue below -- see docs/ontology.md.
             return (
                 f"Traffic squeezing at the construction taper in {distance}. "
-                f"Merge {pressure.direction} early, leave a gap, and be ready "
-                f"for {speed}."
+                f"Merge {pressure.direction} early and leave a gap."
             )
         if pressure.kind == "route_merge":
-            return (
-                f"Merging traffic in {distance}. Keep {pressure.direction}, "
-                f"leave a gap, and be ready to adjust toward {speed}."
-            )
+            return f"Merging traffic in {distance}. Keep {pressure.direction} and leave a gap."
         return f"Traffic pack in {distance}. Leave extra following room and be ready for {speed}."
 
     def _check_traffic_pressures(self) -> None:
