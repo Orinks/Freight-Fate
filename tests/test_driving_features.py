@@ -201,6 +201,227 @@ def test_passing_hazard_plays_clear_sound(monkeypatch):
         app.shutdown()
 
 
+def test_single_hazard_is_named_in_its_resolution_line(monkeypatch):
+    """Fix B, the simple case: naming the hazard is the same plumbing as the
+    stacked case, so a lone hazard gets it too instead of a generic "it"."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_SAFE_MPH
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events, with_interrupt=True))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = (HAZARD_SAFE_MPH + 10.0) / 2.2369362920544
+
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake now! A deer crossing the road.",
+                {"deadline_s": 4.0, "dodgeable": False, "name": "the deer"},
+            )
+        )
+        events.clear()
+        driving.truck.velocity_mps = (HAZARD_SAFE_MPH - 1.0) / 2.2369362920544
+        driving._update_hazard(1 / 60)
+
+        assert driving._hazard_deadline is None
+        assert events == [("Past the deer. Well done.", False)]
+    finally:
+        app.shutdown()
+
+
+def test_two_stacked_hazards_are_each_named_once(monkeypatch):
+    """Shane's deer: a second hazard arming while one is still pending used
+    to silently overwrite it, so the deer's outcome never got spoken. Both
+    must now clear together, named, in one resolution line."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_SAFE_MPH
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events, with_interrupt=True))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        fast = (HAZARD_SAFE_MPH + 10.0) / 2.2369362920544
+        driving.truck.velocity_mps = fast
+
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake now! A deer crossing the road.",
+                {"deadline_s": 4.0, "dodgeable": False, "name": "the deer"},
+            )
+        )
+        # Still moving too fast to have cleared the deer -- the second
+        # hazard must fold in beside it, not clobber it.
+        driving.truck.velocity_mps = fast
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake! Slowed traffic ahead.",
+                {"deadline_s": 2.5, "dodgeable": False, "name": "the slowed traffic"},
+            )
+        )
+        assert driving._hazard_names == ["the deer", "the slowed traffic"]
+
+        events.clear()
+        driving.truck.velocity_mps = (HAZARD_SAFE_MPH - 1.0) / 2.2369362920544
+        driving._update_hazard(1 / 60)
+
+        assert driving._hazard_deadline is None
+        assert events == [("Past the deer and the slowed traffic. Well done.", False)]
+    finally:
+        app.shutdown()
+
+
+def test_stacked_hazard_wording_follows_the_strictest_dodgeability(monkeypatch):
+    """A non-dodgeable hazard folded in with a dodgeable one means "ease
+    around" is the wrong promise for the group: the non-dodgeable one wins
+    the wording. An all-dodgeable stack keeps the ease-around family and
+    still names what was cleared."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_CREEP_MPH, HAZARD_SAFE_MPH
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events, with_interrupt=True))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        fast = (HAZARD_SAFE_MPH + 10.0) / 2.2369362920544
+        driving.truck.velocity_mps = fast
+
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake or change lanes! Debris on the road.",
+                {"deadline_s": 4.0, "dodgeable": True, "name": "the debris"},
+            )
+        )
+        driving.truck.velocity_mps = fast
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake or change lanes! Retread debris from a blown tire.",
+                {"deadline_s": 4.0, "dodgeable": True, "name": "the tire debris"},
+            )
+        )
+        assert driving._hazard_dodgeable is True
+
+        events.clear()
+        driving.truck.velocity_mps = (HAZARD_CREEP_MPH - 1.0) / 2.2369362920544
+        driving._update_hazard(1 / 60)
+
+        assert events == [
+            (
+                "You slow nearly to a stop and ease around the debris and the tire debris. "
+                "Well done.",
+                False,
+            )
+        ]
+    finally:
+        app.shutdown()
+
+
+def test_a_hazard_already_outrun_gets_its_own_line_before_the_next_arms(monkeypatch):
+    """The first hazard's condition is already met when the second arms: it
+    earns its own clean resolution line instead of being folded in or
+    silently dropped."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_SAFE_MPH
+
+    app = App()
+    events = []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", speech_stub(events, with_interrupt=True))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        driving.truck.velocity_mps = (HAZARD_SAFE_MPH + 10.0) / 2.2369362920544
+
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake now! A deer crossing the road.",
+                {"deadline_s": 4.0, "dodgeable": False, "name": "the deer"},
+            )
+        )
+        # Slowed below the deer's own safe speed before the next hazard hits.
+        driving.truck.velocity_mps = (HAZARD_SAFE_MPH - 1.0) / 2.2369362920544
+        events.clear()
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake! Slowed traffic ahead.",
+                {"deadline_s": 2.5, "dodgeable": False, "name": "the slowed traffic"},
+            )
+        )
+
+        assert ("Past the deer. Well done.", False) in events
+        assert driving._hazard_names == ["the slowed traffic"]
+        assert driving._hazard_deadline is not None
+    finally:
+        app.shutdown()
+
+
+def test_terse_hazard_resolution_stays_silent_words(monkeypatch):
+    """R4/R14: the hazard-clear earcon IS the terse confirmation. Stacking
+    hazards must not grow the resolution into terse words -- the message
+    handed to say_event must still render empty in terse, however many
+    hazards it names in normal speech."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+    from freight_fate.states.driving_core import HAZARD_SAFE_MPH
+
+    app = App()
+    captured = []
+    monkeypatch.setattr(app.ctx.audio, "play", lambda *a, **k: None)
+    monkeypatch.setattr(app.ctx, "say_event", lambda text, *a, **k: captured.append(text))
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        fast = (HAZARD_SAFE_MPH + 10.0) / 2.2369362920544
+        driving.truck.velocity_mps = fast
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake now! A deer crossing the road.",
+                {"deadline_s": 4.0, "dodgeable": False, "name": "the deer"},
+            )
+        )
+        driving.truck.velocity_mps = fast
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake! Slowed traffic ahead.",
+                {"deadline_s": 2.5, "dodgeable": False, "name": "the slowed traffic"},
+            )
+        )
+
+        captured.clear()
+        driving.truck.velocity_mps = (HAZARD_SAFE_MPH - 1.0) / 2.2369362920544
+        driving._update_hazard(1 / 60)
+
+        assert len(captured) == 1
+        resolution = captured[0]
+        assert resolution.render(terse=False) == (
+            "Past the deer and the slowed traffic. Well done."
+        )
+        assert resolution.render(terse=True) == ""
+    finally:
+        app.shutdown()
+
+
 def test_assist_releases_its_own_emergency_application(monkeypatch):
     """The AEB escalation sets truck.emergency_brake; the assist must release
     it when the hazard resolves. In real play the input pass stomps the flag

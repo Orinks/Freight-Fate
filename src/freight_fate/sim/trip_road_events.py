@@ -224,6 +224,7 @@ class TripRoadEventMixin:
                 deadline_s=2.5,
                 traffic=context,
                 dodgeable=True,
+                name=f"the {reason}",
             )
             return
         self._hazard_check_mi -= moved_mi
@@ -251,6 +252,7 @@ class TripRoadEventMixin:
                 hazard_call(call, f"{hazard[0].upper()}{hazard[1:]}."),
                 deadline_s=(self._rng.uniform(3.0, 4.5) * self._visibility_reaction_factor()),
                 dodgeable=dodgeable,
+                name=hazard_name(hazard),
             )
 
     def _visibility_reaction_factor(self) -> float:
@@ -272,6 +274,23 @@ class TripRoadEventMixin:
         if kind in (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN, WeatherKind.THUNDERSTORM):
             return "Hydroplaning on the wet road, too fast for the conditions."
         return "Losing traction, too fast for the conditions."
+
+    def _conditions_incident_name(self) -> str:
+        """The short noun phrase a resolution line names this incident by.
+
+        Same branches as ``_conditions_incident_text``, so the two never
+        drift apart on what actually happened.
+        """
+        kind = self.weather.current
+        if self.truck.hydroplaning:
+            return "the hydroplaning"
+        if kind == WeatherKind.ICE:
+            return "the ice"
+        if kind == WeatherKind.SNOW:
+            return "the snow"
+        if kind in (WeatherKind.RAIN, WeatherKind.HEAVY_RAIN, WeatherKind.THUNDERSTORM):
+            return "the hydroplaning"
+        return "the loss of traction"
 
     def _check_conditions_speed(self, moved_mi: float) -> None:
         """Risk a traction-loss incident when driving too fast for slick roads.
@@ -302,4 +321,5 @@ class TripRoadEventMixin:
                 TripEventKind.HAZARD,
                 hazard_call("Brake now!", self._conditions_incident_text()),
                 deadline_s=max(1.5, 2.5 * self._visibility_reaction_factor()),
+                name=self._conditions_incident_name(),
             )

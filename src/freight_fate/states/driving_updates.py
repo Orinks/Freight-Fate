@@ -1079,17 +1079,14 @@ class DrivingUpdateMixin:
             and self._hazard_dodgeable
             and lane.lane != self._hazard_lane
         ):
-            self._hazard_deadline = None
             # The swerve answered it, so the assist's application comes off
-            # with the hazard rather than being left on a truck now clear of it.
-            self._release_hazard_brake()
-            self.ctx.audio.play("events/hazard_clear", volume=0.75)
-            self.ctx.controller.rumble.alert(intensity=0.4)
-            # Terse mode's whole confirmation is the hazard-clear earcon that
-            # just played; failure is the collision sound and its spoken
-            # damage line, so the outcome pair is never ambiguous (R4, R14).
-            self.ctx.say_event(terse_silent("You swerve around it. Well done."), interrupt=False)
-            self.ctx.award_achievement("hazard_avoided", event=True)
+            # with the hazard rather than being left on a truck now clear of
+            # it. Terse mode's whole confirmation is the hazard-clear earcon
+            # that just played; failure is the collision sound and its
+            # spoken damage line, so the outcome pair is never ambiguous
+            # (R4, R14).
+            names = self._hazard_names_text()
+            self._finish_hazard_clear(f"You swerve around {names}. Well done.")
             return
         if not quiet:
             self.ctx.say_event(f"In the {lane.lane_name} lane.", interrupt=False)
@@ -2346,7 +2343,7 @@ class DrivingUpdateMixin:
         """
         return self._brake_budget_s(target_mph) * AEB_BUDGET_MARGIN + AEB_LEAD_S
 
-    def _hazard_deadline_for(self, window_s: float) -> float:
+    def _hazard_deadline_for(self, window_s: float, dodgeable: bool | None = None) -> float:
         """Time-to-hazard that leaves the driver ``window_s`` of their own.
 
         Built forward from the moment the assist must act rather than back
@@ -2356,12 +2353,19 @@ class DrivingUpdateMixin:
         out of the driver's time instead of the truck's. At 65 mph on a
         traffic warning that remainder was half a second, and on hot brakes
         it was already spent when the words started (Munchkinbear, 2026-08-11).
+
+        ``dodgeable`` defaults to the currently pending hazard's own flag, but
+        a hazard arming while another is still live needs its OWN budget
+        computed on ITS OWN dodgeable-ness -- before ``_hazard_dodgeable`` is
+        folded with the pending one -- so the caller can pass it explicitly.
         """
+        if dodgeable is None:
+            dodgeable = self._hazard_dodgeable
         window = max(window_s, HAZARD_MIN_REACTION_S)
-        if self._hazard_dodgeable:
+        if dodgeable:
             # The warning offers a lane change; leave room to actually make one.
             window += LANE_TAP_CHANGE_S
-        return self._aeb_engage_s(self._hazard_target_mph()) + window
+        return self._aeb_engage_s(self._hazard_target_mph(dodgeable)) + window
 
     def _dodge_still_beats_the_hazard(self) -> bool:
         """Whether a lane change already in progress will land in time.
@@ -2467,13 +2471,17 @@ class DrivingUpdateMixin:
         self._aeb_losing_s += dt
         return self._aeb_losing_s >= AEB_ESCALATE_CONFIRM_S
 
-    def _hazard_target_mph(self) -> float:
+    def _hazard_target_mph(self, dodgeable: bool | None = None) -> float:
         """The speed that resolves the active hazard by brake alone.
 
         A fixed object in your lane (dodgeable) cannot be rolled over at the
         moving-hazard safe speed: it takes nearly a stop, then easing around.
+        Defaults to the currently pending hazard's own flag; see
+        ``_hazard_deadline_for`` for why a caller would pass one explicitly.
         """
-        return HAZARD_CREEP_MPH if self._hazard_dodgeable else HAZARD_SAFE_MPH
+        if dodgeable is None:
+            dodgeable = self._hazard_dodgeable
+        return HAZARD_CREEP_MPH if dodgeable else HAZARD_SAFE_MPH
 
     # -- grades ---------------------------------------------------------------------
 
@@ -2578,27 +2586,65 @@ class DrivingUpdateMixin:
             interrupt=False,
         )
 
+    def _hazard_names_text(self) -> str:
+        """The pending hazard(s), joined for a resolution line.
+
+        Falls back to "it" when nothing was recorded -- a hazard armed by
+        test or tool code that pokes ``_hazard_deadline`` directly rather
+        than going through ``_handle_trip_event`` -- so the old generic
+        wording still comes out rather than an empty name.
+        """
+        names = self._hazard_names
+        if not names:
+            return "it"
+        if len(names) == 1:
+            return names[0]
+        if len(names) == 2:
+            return f"{names[0]} and {names[1]}"
+        return ", ".join(names[:-1]) + f", and {names[-1]}"
+
+    def _hazard_resolution_text(self) -> str:
+        names = self._hazard_names_text()
+        if self._hazard_dodgeable:
+            return f"You slow nearly to a stop and ease around {names}. Well done."
+        if names == "it":
+            return "Hazard avoided. Well done."
+        return f"Past {names}. Well done."
+
+    def _finish_hazard_clear(self, message_text: str) -> None:
+        """Common tail of every way a pending hazard can resolve: brake,
+        swerve, or an earlier hazard outrun before a new one armed."""
+        self._hazard_deadline = None
+        self._release_hazard_brake()
+        self._hazard_slow_hint_said = False
+        self.ctx.audio.play("events/hazard_clear", volume=0.75)
+        self.ctx.controller.rumble.alert(intensity=0.4)
+        message = terse_silent(message_text)
+        self._last_event_message = message
+        self.ctx.say_event(message, interrupt=False)
+        self.ctx.award_achievement("hazard_avoided", event=True)
+        self._hazard_names = []
+
+    def _clear_hazard(self) -> None:
+        """Speak and reset the pending hazard(s) as cleared by braking.
+
+        Shared by the per-frame resolution below and an early resolution
+        triggered from ``_handle_trip_event`` when a fresh hazard arms
+        while an earlier one was already outrun -- either way the driver
+        gets exactly one clean "you made it" line naming what it was for.
+
+        In terse the hazard-clear earcon IS the confirmation; the words are
+        congratulation, and the failure outcome stays distinct as the
+        collision sound plus its spoken damage line (R4, R14).
+        """
+        self._finish_hazard_clear(self._hazard_resolution_text())
+
     def _update_hazard(self, dt: float) -> None:
         if self._hazard_deadline is None:
             return
         target = self._hazard_target_mph()
         if self.truck.speed_mph <= target:
-            self._hazard_deadline = None
-            self._release_hazard_brake()
-            self._hazard_slow_hint_said = False
-            self.ctx.audio.play("events/hazard_clear", volume=0.75)
-            self.ctx.controller.rumble.alert(intensity=0.4)
-            # In terse the hazard-clear earcon IS the confirmation; the words
-            # are congratulation, and the failure outcome stays distinct as
-            # the collision sound plus its spoken damage line (R4, R14).
-            message = terse_silent(
-                "You slow nearly to a stop and ease around it. Well done."
-                if self._hazard_dodgeable
-                else "Hazard avoided. Well done."
-            )
-            self._last_event_message = message
-            self.ctx.say_event(message, interrupt=False)
-            self.ctx.award_achievement("hazard_avoided", event=True)
+            self._clear_hazard()
             return
         # Old instinct says 25 clears everything; for a fixed object it no
         # longer does. Braking past the moving-hazard speed with the object

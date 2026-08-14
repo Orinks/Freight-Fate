@@ -210,6 +210,11 @@ class DrivingState(
         self._microsleep_cooldown_gm = 0.0
         self._microsleep_misses = 0  # consecutive nods drifted off the road
         self._hazard_deadline: float | None = None
+        # What is actually pending, in the order it armed. A second hazard
+        # arming while one is still live folds its name in here instead of
+        # clobbering the first (see _handle_trip_event's HAZARD branch), so
+        # the resolution line can name everything that just cleared.
+        self._hazard_names: list[str] = []
         self._hazard_slow_hint_said = False
         self._automatic_braking_announced = False
         self._automatic_braking_escalated = False

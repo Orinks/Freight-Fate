@@ -155,7 +155,11 @@ def test_pausing_mid_run_leaves_no_trace_in_the_history():
             driving._handle_trip_event(
                 TripEvent(TripEventKind.HAZARD, f"Announcement {index}.", {"deadline_s": 9.0})
             )
-            driving._hazard_active = False
+            # Each announcement stands alone: clear the hazard state a real
+            # resolution or collision would have cleared, so the next one
+            # arms fresh instead of folding into (and resolving) this one.
+            driving._hazard_deadline = None
+            driving._hazard_names = []
             app.dispatch_to_state(key_event(pygame.K_ESCAPE))  # open the pause menu
             app.dispatch_to_state(key_event(pygame.K_RETURN))  # resume
 

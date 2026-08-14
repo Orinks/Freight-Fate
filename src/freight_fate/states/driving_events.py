@@ -132,17 +132,46 @@ class DrivingEventMixin:
             # in any other lane before the deadline clears it, if that lane
             # is actually open (see _finish_lane_change). By brake alone it
             # takes nearly a stop, so its deadline budgets the longer stop.
-            self._hazard_dodgeable = bool(event.data.get("dodgeable", False))
-            self._hazard_lane = self.lane.lane
-            self._hazard_slow_hint_said = False
+            name = event.data.get("name") or "it"
+            dodgeable = bool(event.data.get("dodgeable", False))
             slack = event.data.get("deadline_s", 4.0)
             reaction = tuning_for_time_scale(self.trip.time_scale).reaction_window
-            self._hazard_deadline = self._hazard_deadline_for(
-                slack * reaction * hos.reaction_window_mult(self.ctx.profile.fatigue)
+            # Computed on THIS hazard's own dodgeable-ness, before it is
+            # folded with whatever else may be pending -- its budget (the
+            # lane-tap allowance included) is a property of itself, not of
+            # the combined wording the fold branch below settles on.
+            new_deadline = self._hazard_deadline_for(
+                slack * reaction * hos.reaction_window_mult(self.ctx.profile.fatigue),
+                dodgeable=dodgeable,
             )
-            # A fresh hazard starts the assist from an open pedal, with nothing
-            # measured yet from the last one.
-            self._release_hazard_brake()
+            if self._hazard_deadline is None:
+                # A fresh hazard starts the assist from an open pedal, with
+                # nothing measured yet from the last one.
+                self._hazard_names = [name]
+                self._hazard_dodgeable = dodgeable
+                self._hazard_deadline = new_deadline
+                self._release_hazard_brake()
+            elif self.truck.speed_mph <= self._hazard_target_mph():
+                # A hazard is already pending, but the driver has already
+                # outrun it -- it earns its own clean resolution line before
+                # this one starts, instead of being silently dropped by the
+                # overwrite this used to be (Shane's deer, 2026-08-14).
+                self._clear_hazard()
+                self._hazard_names = [name]
+                self._hazard_dodgeable = dodgeable
+                self._hazard_deadline = new_deadline
+                self._release_hazard_brake()
+            else:
+                # Still live: fold the new one in rather than clobber it.
+                # Any non-dodgeable hazard in the mix means "ease around" is
+                # the wrong promise for the group, so it always wins the
+                # wording; the shorter deadline is the one still governing
+                # how much time is actually left.
+                self._hazard_names.append(name)
+                self._hazard_dodgeable = self._hazard_dodgeable and dodgeable
+                self._hazard_deadline = min(self._hazard_deadline, new_deadline)
+            self._hazard_lane = self.lane.lane
+            self._hazard_slow_hint_said = False
             # The normal/terse pair rides the event from the sim layer; the
             # delivery layer picks the rendering (R5), so no rewriting here.
             message = event.message

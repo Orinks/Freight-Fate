@@ -342,6 +342,13 @@
 
 ### Fixed
 
+- **When two hazards stack, the all-clear now names both.** A deer, then
+  slowed traffic right behind it, used to leave you with only one vague
+  "Hazard avoided" -- the deer's own outcome never spoken, and the wording
+  fit only the second hazard. Every hazard you clear is named now, alone
+  or stacked: "Past the deer and the slowed traffic. Well done." No more
+  wondering whether you missed the deer.
+
 - **"Lane open" now means open long enough to take it.** The clear-of-traffic
   call and the L lane readout used to describe the lane at the instant you
   asked, so a car you were catching fast -- slowed traffic ahead, or someone

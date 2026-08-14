@@ -509,6 +509,10 @@ class HazardDef:
     ``dodgeable`` marks hazards a quick lane change clears: something fixed in
     one lane (debris, a stopped or slow vehicle). Anything moving across the
     road, sweeping every lane, or degrading the whole surface is brake-only.
+
+    ``name`` is the short noun phrase a resolution line names this hazard
+    by ("the deer"), so a driver who cleared it, or two of them stacked back
+    to back, hears exactly what was cleared instead of a generic "it".
     """
 
     text: str
@@ -518,17 +522,18 @@ class HazardDef:
     terrain: tuple[str, ...] | None = None
     animal: bool = False
     dodgeable: bool = False
+    name: str = ""
 
 
 HAZARDS: tuple[HazardDef, ...] = (
     # Nationwide staples: plausible on any interstate, in any conditions.
-    HazardDef("debris on the road", 1.2, dodgeable=True),
-    HazardDef("retread debris from a blown tire", 1.0, dodgeable=True),
+    HazardDef("debris on the road", 1.2, dodgeable=True, name="the debris"),
+    HazardDef("retread debris from a blown tire", 1.0, dodgeable=True, name="the tire debris"),
     # The move-over law in action: shift a lane away from the shoulder.
-    HazardDef("a vehicle stopped on the shoulder", 1.0, dodgeable=True),
-    HazardDef("a slow vehicle ahead", 0.9, dodgeable=True),
-    HazardDef("a sudden lane closure ahead", 0.8, dodgeable=True),
-    HazardDef("stopped traffic around a fender bender", 0.9),
+    HazardDef("a vehicle stopped on the shoulder", 1.0, dodgeable=True, name="the stopped vehicle"),
+    HazardDef("a slow vehicle ahead", 0.9, dodgeable=True, name="the slow vehicle"),
+    HazardDef("a sudden lane closure ahead", 0.8, dodgeable=True, name="the lane closure"),
+    HazardDef("stopped traffic around a fender bender", 0.9, name="the stopped traffic"),
     # Wildlife: dawn/dusk/night, regional species.
     HazardDef(
         "a deer crossing the road",
@@ -548,17 +553,30 @@ HAZARDS: tuple[HazardDef, ...] = (
             "florida",
             "california",
         ),
+        name="the deer",
     ),
     HazardDef(
         "an elk crossing the road",
         1.1,
         animal=True,
         regions=("rockies", "great_basin", "pacific_northwest"),
+        name="the elk",
     ),
-    HazardDef("an animal on the road", 0.7, animal=True),  # generic fallback
+    HazardDef("an animal on the road", 0.7, animal=True, name="the animal"),  # generic fallback
     # Wet weather only.
-    HazardDef("standing water flooding the lane", 1.1, weather=_WET, dodgeable=True),
-    HazardDef("the trailer hydroplaning on standing water", 1.0, weather=_HEAVY_WET),
+    HazardDef(
+        "standing water flooding the lane",
+        1.1,
+        weather=_WET,
+        dodgeable=True,
+        name="the standing water",
+    ),
+    HazardDef(
+        "the trailer hydroplaning on standing water",
+        1.0,
+        weather=_HEAVY_WET,
+        name="the hydroplaning",
+    ),
     HazardDef(
         "hail hammering the windshield",
         0.7,
@@ -571,38 +589,60 @@ HAZARDS: tuple[HazardDef, ...] = (
             "rockies",
             "great_lakes",
         ),
+        name="the hail",
     ),
     # Snow and ice only.
-    HazardDef("a snow squall whiting out the lane", 1.0, weather=(WeatherKind.SNOW,)),
-    HazardDef("ice on the bridge deck", 1.0, weather=(WeatherKind.SNOW, WeatherKind.ICE)),
+    HazardDef(
+        "a snow squall whiting out the lane",
+        1.0,
+        weather=(WeatherKind.SNOW,),
+        name="the snow squall",
+    ),
+    HazardDef(
+        "ice on the bridge deck", 1.0, weather=(WeatherKind.SNOW, WeatherKind.ICE), name="the ice"
+    ),
     HazardDef(
         "black ice on the shaded grade",
         1.1,
         weather=(WeatherKind.SNOW, WeatherKind.ICE),
         terrain=("mountain", "hills"),
+        name="the black ice",
     ),
     # Freezing rain only: the whole road is finding out at the same time.
-    HazardDef("glaze ice sheeting the whole lane", 1.3, weather=(WeatherKind.ICE,)),
+    HazardDef(
+        "glaze ice sheeting the whole lane",
+        1.3,
+        weather=(WeatherKind.ICE,),
+        name="the glaze ice",
+    ),
     HazardDef(
         "a car spun out on the glaze ahead",
         1.1,
         weather=(WeatherKind.ICE,),
         dodgeable=True,
+        name="the spun-out car",
     ),
     # Dense fog only.
-    HazardDef("brake lights looming in dense fog", 1.2, weather=(WeatherKind.FOG,)),
+    HazardDef(
+        "brake lights looming in dense fog",
+        1.2,
+        weather=(WeatherKind.FOG,),
+        name="the brake lights",
+    ),
     # High wind: crosswind shove and blowing debris in open country.
     HazardDef(
         "a crosswind gust shoving the trailer",
         1.2,
         weather=(WeatherKind.WIND,),
         regions=_CROSSWIND_REGIONS,
+        name="the crosswind gust",
     ),
     HazardDef(
         "a dust storm dropping visibility",
         0.9,
         weather=(WeatherKind.WIND,),
         regions=("desert_southwest", "southern_plains", "great_basin"),
+        name="the dust storm",
     ),
     HazardDef(
         "tumbleweeds piling in your lane",
@@ -610,6 +650,7 @@ HAZARDS: tuple[HazardDef, ...] = (
         weather=(WeatherKind.WIND,),
         regions=("desert_southwest", "great_basin", "southern_plains"),
         dodgeable=True,
+        name="the tumbleweeds",
     ),
     # Mountain terrain only.
     HazardDef(
@@ -618,18 +659,36 @@ HAZARDS: tuple[HazardDef, ...] = (
         terrain=("mountain",),
         regions=("rockies", "appalachia", "great_basin", "pacific_northwest", "california"),
         dodgeable=True,
+        name="the rockfall",
     ),
-    HazardDef("a runaway truck on the grade ahead", 0.8, terrain=("mountain",)),
+    HazardDef(
+        "a runaway truck on the grade ahead",
+        0.8,
+        terrain=("mountain",),
+        name="the runaway truck",
+    ),
 )
 
 
-# Text-keyed lookup so hazard consumers can stay on the (text, weight) shape
-# of ``eligible_hazards`` and still learn whether a lane change clears it.
+# Text-keyed lookups so hazard consumers can stay on the (text, weight) shape
+# of ``eligible_hazards`` and still learn whether a lane change clears a
+# hazard, and what short noun phrase names it once it does.
 DODGEABLE_HAZARD_TEXTS = frozenset(h.text for h in HAZARDS if h.dodgeable)
+HAZARD_NAMES: dict[str, str] = {h.text: h.name for h in HAZARDS}
 
 
 def hazard_is_dodgeable(text: str) -> bool:
     return text in DODGEABLE_HAZARD_TEXTS
+
+
+def hazard_name(text: str) -> str:
+    """The short noun phrase a resolution line names this hazard by.
+
+    Falls back to "it" for a hazard text that somehow is not in the table
+    (should not happen -- every ``HAZARDS`` entry carries one) rather than
+    ever raising mid-drive.
+    """
+    return HAZARD_NAMES.get(text, "it")
 
 
 def eligible_hazards(
