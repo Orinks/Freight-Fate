@@ -856,3 +856,103 @@ def test_paying_it_all_off_clears_the_balance_and_says_so(monkeypatch):
         assert any("your account is clear" in line for line in spoken)
     finally:
         app.shutdown()
+
+
+def test_paying_half_leaves_the_rest_owed_and_says_the_remainder(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.models import solvency
+    from freight_fate.states.city import PayDebtState
+
+    app = App()
+    try:
+        app.ctx.profile = _payer(money=5_000.0, owed=1_000.0)
+        p = app.ctx.profile
+        spoken = _quiet(app, monkeypatch)
+        state = PayDebtState(app.ctx)
+        items = state.build_items()
+        pay_half = next(item for item in items if item.text.startswith("Pay half"))
+        pay_half.action()
+
+        assert p.fines_owed == 500.0
+        assert solvency.debt_owed(p) == 500.0
+        assert p.money == 4_500.0
+        assert any("500" in line and "still owed" in line for line in spoken)
+    finally:
+        app.shutdown()
+
+
+# --- the same payoff item at truck stops -------------------------------------
+
+
+def _rest_driving(app, money, owed):
+    from freight_fate.models.business import LEASED_OWNER_OPERATOR
+    from freight_fate.models.jobs import CARGO_CATALOG, Job
+    from freight_fate.states.driving import DrivingState
+
+    app.ctx.profile = _payer(money=money, owed=owed)
+    app.ctx.profile.current_city = "Denver"
+    app.ctx.profile.business_status = LEASED_OWNER_OPERATOR
+    app.ctx.profile.owned_trucks = ["rig"]
+    job = Job(
+        CARGO_CATALOG["general"], 12.0, "Denver", "yard", "Salt Lake City", 200.0, 900.0, 12.0
+    )
+    route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
+    driving = DrivingState(app.ctx, job, route, trip_seed=99, start_hour=10.0)
+    app.push_state(driving)
+    return driving
+
+
+def _rest_stop(driving, name="Pilot Travel Center"):
+    from types import SimpleNamespace
+
+    return SimpleNamespace(
+        name=name,
+        at_mi=driving.trip.position_mi,
+        type="travel_center",
+        actions=("fuel", "break"),
+        services=(),
+        parking="limited",
+        exit_label="",
+        spoken_name=name,
+        parking_text="limited truck parking",
+    )
+
+
+def test_the_rest_stop_only_offers_payoff_when_something_is_owed(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    try:
+        _quiet(app, monkeypatch)
+        driving = _rest_driving(app, money=5_000.0, owed=1_000.0)
+        state = RestStopState(app.ctx, driving, _rest_stop(driving))
+        assert any(
+            item.text == "Pay down what you owe: 1,000 dollars owed" for item in state.build_items()
+        )
+
+        app.ctx.profile.fines_owed = 0.0
+        assert not any(
+            item.text.startswith("Pay down what you owe") for item in state.build_items()
+        )
+    finally:
+        app.shutdown()
+
+
+def test_the_rest_stop_payoff_item_pushes_pay_debt_state(monkeypatch):
+    from freight_fate.app import App
+    from freight_fate.states.city import PayDebtState
+    from freight_fate.states.driving import RestStopState
+
+    app = App()
+    try:
+        _quiet(app, monkeypatch)
+        driving = _rest_driving(app, money=5_000.0, owed=1_000.0)
+        state = RestStopState(app.ctx, driving, _rest_stop(driving))
+        item = next(i for i in state.build_items() if i.text.startswith("Pay down what you owe"))
+        item.action()
+
+        assert type(app.state).__name__ == "PayDebtState"
+        assert isinstance(app.state, PayDebtState)
+    finally:
+        app.shutdown()

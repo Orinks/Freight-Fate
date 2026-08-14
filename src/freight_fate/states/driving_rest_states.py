@@ -1,7 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
-from ..models import enforcement
+from ..models import enforcement, solvency
 from .driving_core import *
 
 
@@ -910,6 +910,15 @@ class RestStopState(_FuelPumpMixin, MenuState):
                     help="Pay the shop to repair truck damage before returning to the road.",
                 )
             )
+        if solvency.out_of_pocket_options(self.ctx.profile):
+            owed = solvency.money_text(solvency.debt_owed(self.ctx.profile))
+            items.append(
+                MenuItem(
+                    f"Pay down what you owe: {owed} owed",
+                    self._pay_debt,
+                    help="Put your own cash toward the balance you owe, right from this stop.",
+                )
+            )
         brand = classify_brand(self.stop.name)
         if brand is not None and brand.tier == "travel_center":
             if "tires" in brand.signature:
@@ -1248,6 +1257,11 @@ class RestStopState(_FuelPumpMixin, MenuState):
         self.ctx.award_achievement("garage_repair")
         if damage >= 75.0:
             self.ctx.award_achievement("deep_repair")
+
+    def _pay_debt(self) -> None:
+        from .city import PayDebtState
+
+        self.ctx.push_state(PayDebtState(self.ctx))
 
     def _roadside_assistance(self) -> None:
         d = self.driving
