@@ -7,6 +7,12 @@ and Night Line hosts with the TTS API, and writes the project's Ogg Vorbis
 convention with ffmpeg. The static burst is procedural (numpy) and costs no
 credits. Never run at runtime; the key is never bundled.
 
+Imaging (station-ID SFX beds) generates via the Sound Effects API, gated
+behind --sfx since it spends credits; the post-production chain applied to
+station-ID voice reads and ad reads (imaging_process / broadcast_compress /
+mix_id_bed) is pure numpy and costs nothing -- see
+tests/test_radio_imaging_chain.py for its numeric contract.
+
 Usage:
     uv run python tools/generate_radio.py                # everything
     uv run python tools/generate_radio.py --hosts        # host lines only
@@ -15,6 +21,7 @@ Usage:
     uv run python tools/generate_radio.py radio_country_backroads
     uv run python tools/generate_radio.py --voices --dry-run  # show what would be added
     uv run python tools/generate_radio.py --voices             # add missing cast voices
+    uv run python tools/generate_radio.py --sfx                # imaging SFX beds (spends credits)
 """
 
 from __future__ import annotations
@@ -37,6 +44,7 @@ TTS_API = "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}?output_format=
 VOICES_API = "https://api.elevenlabs.io/v1/voices"
 LIBRARY_SEARCH_API = "https://api.elevenlabs.io/v1/shared-voices?search={query}&page_size=5"
 ADD_VOICE_API = "https://api.elevenlabs.io/v1/voices/add/{public_user_id}/{voice_id}"
+SFX_API = "https://api.elevenlabs.io/v1/sound-generation"
 VOICE_CACHE = Path(__file__).resolve().parent / ".radio_voices.json"
 
 # key -> (prompt, length_ms, force_instrumental)
@@ -462,6 +470,305 @@ def generate_fringe() -> None:
         _write_asset(splash, rate, f"radio/picket_{i:02d}.ogg")
 
 
+# --- Imaging post-production chain -----------------------------------------
+#
+# Loudness-match contract: imaging elements (station-ID voice reads, ad
+# reads, and the SFX beds mixed under them) all normalize to the same RMS
+# target so they sit level against the baked music beds without a runtime
+# ducking surprise. If the station music generation path (generate_music)
+# ever grows its own loudness pass, target this same -16 dBFS RMS so music
+# and imaging share one loudness floor.
+TARGET_RMS_DBFS = -16.0
+
+# Per-key SFX duration in seconds, matched loosely to what each prompt in
+# radio_content_plan.SFX_PROMPTS asks for ("about half a second", "about
+# two seconds", ...) but clamped into the API's practical 2-4s range for a
+# usable imaging element. Unlisted keys fall back to 3.0s.
+SFX_DURATIONS: dict[str, float] = {
+    "radio_imaging_whoosh_short": 2.0,
+    "radio_imaging_whoosh_long": 3.0,
+    "radio_imaging_impact": 2.0,
+    "radio_imaging_riser": 2.5,
+    "radio_imaging_stinger": 3.0,
+    "radio_imaging_shimmer": 4.0,
+}
+
+
+def _rms_dbfs(samples) -> float:
+    if samples.size == 0:
+        return -120.0
+    import numpy as np
+
+    rms = float(np.sqrt(np.mean(np.square(samples))))
+    return 20.0 * np.log10(rms) if rms > 0.0 else -120.0
+
+
+def _normalize_to_target(samples, target_dbfs: float = TARGET_RMS_DBFS, peak_cap: float = 0.95):
+    """RMS-target normalize, then cap true peak at ``peak_cap``.
+
+    RMS normalization first (matches perceived loudness across elements
+    with very different crest factors -- a reverb tail vs. a dry read),
+    then a peak cap so an occasional transient never clips.
+    """
+    import numpy as np
+
+    if samples.size == 0:
+        return samples
+    current = _rms_dbfs(samples)
+    gain = 10.0 ** ((target_dbfs - current) / 20.0)
+    out = samples * gain
+    peak = float(np.max(np.abs(out))) if out.size else 0.0
+    if peak > peak_cap:
+        out = out * (peak_cap / peak)
+    return out
+
+
+def _biquad(samples, b0: float, b1: float, b2: float, a0: float, a1: float, a2: float):
+    """Direct Form I biquad, sample-by-sample like the file's other
+    hand-rolled filters (_fm_hiss). Cheap enough at imaging-element
+    lengths (a few seconds); not meant for long-form audio.
+    """
+    import numpy as np
+
+    b0, b1, b2, a1, a2 = b0 / a0, b1 / a0, b2 / a0, a1 / a0, a2 / a0
+    out = np.empty_like(samples)
+    x1 = x2 = y1 = y2 = 0.0
+    for i, x in enumerate(samples):
+        y = b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2
+        out[i] = y
+        x2, x1 = x1, x
+        y2, y1 = y1, y
+    return out
+
+
+def _highpass_biquad(samples, rate: int, freq: float, q: float = 0.707):
+    """RBJ audio-EQ-cookbook high-pass; used at ~120 Hz to clear rumble."""
+    import numpy as np
+
+    w0 = 2.0 * np.pi * freq / rate
+    alpha = np.sin(w0) / (2.0 * q)
+    cosw0 = np.cos(w0)
+    b0 = (1.0 + cosw0) / 2.0
+    b1 = -(1.0 + cosw0)
+    b2 = (1.0 + cosw0) / 2.0
+    a0 = 1.0 + alpha
+    a1 = -2.0 * cosw0
+    a2 = 1.0 - alpha
+    return _biquad(samples, b0, b1, b2, a0, a1, a2)
+
+
+def _peaking_biquad(samples, rate: int, freq: float, gain_db: float, q: float = 1.0):
+    """RBJ audio-EQ-cookbook peaking filter; used as a ~3 kHz presence lift."""
+    import numpy as np
+
+    a = 10.0 ** (gain_db / 40.0)
+    w0 = 2.0 * np.pi * freq / rate
+    alpha = np.sin(w0) / (2.0 * q)
+    cosw0 = np.cos(w0)
+    b0 = 1.0 + alpha * a
+    b1 = -2.0 * cosw0
+    b2 = 1.0 - alpha * a
+    a0 = 1.0 + alpha / a
+    a1 = -2.0 * cosw0
+    a2 = 1.0 - alpha / a
+    return _biquad(samples, b0, b1, b2, a0, a1, a2)
+
+
+def _soft_knee_compress(
+    samples,
+    rate: int,
+    *,
+    threshold_db: float = -18.0,
+    ratio: float = 3.0,
+    knee_db: float = 6.0,
+    attack_s: float = 0.005,
+    release_s: float = 0.08,
+    makeup_db: float = 6.0,
+):
+    """Feed-forward soft-knee compressor: an attack/release-smoothed level
+    envelope drives a soft-knee gain curve (Giannoulis et al. digital
+    dynamic-range-compressor formula), applied back onto the signal.
+    """
+    import numpy as np
+
+    eps = 1e-9
+    level_db = 20.0 * np.log10(np.abs(samples) + eps)
+    attack = np.exp(-1.0 / (rate * attack_s))
+    release = np.exp(-1.0 / (rate * release_s))
+    env_db = np.empty_like(level_db)
+    prev = float(level_db[0]) if level_db.size else -120.0
+    for i, x in enumerate(level_db):
+        coeff = attack if x > prev else release
+        prev = coeff * prev + (1.0 - coeff) * x
+        env_db[i] = prev
+
+    over2 = 2.0 * (env_db - threshold_db)
+    knee_out = env_db + (1.0 / ratio - 1.0) * np.square(env_db - threshold_db + knee_db / 2.0) / (
+        2.0 * knee_db
+    )
+    above_out = threshold_db + (env_db - threshold_db) / ratio
+    compressed_db = np.where(
+        over2 < -knee_db, env_db, np.where(over2 <= knee_db, knee_out, above_out)
+    )
+    gain_db = (compressed_db - env_db) + makeup_db
+    return samples * (10.0 ** (gain_db / 20.0))
+
+
+def _detuned_double(
+    samples, rate: int, seed: int, *, delay_s: float = 0.015, level_db: float = -6.0
+):
+    """A 15 ms detuned copy at -6 dB under the dry signal (a classic
+    broadcast-imaging "double" for a fuller, wider voice read). Detune
+    direction/amount is seeded so it is deterministic per station ID.
+    """
+    import numpy as np
+
+    rng = np.random.default_rng(seed)
+    cents = float(rng.uniform(8.0, 15.0)) * (1.0 if rng.integers(0, 2) else -1.0)
+    ratio = 2.0 ** (cents / 1200.0)
+    n = samples.size
+    src_idx = np.clip(np.arange(n) * ratio, 0, n - 1)
+    detuned = np.interp(src_idx, np.arange(n), samples) * (10.0 ** (level_db / 20.0))
+
+    delay_n = int(delay_s * rate)
+    total = n + delay_n
+    out = np.zeros(total, dtype=np.float64)
+    out[:n] += samples
+    out[delay_n : delay_n + n] += detuned
+    return out
+
+
+def _fft_convolve(a, b):
+    """Full linear convolution via FFT -- same result as np.convolve(mode=
+    "full") but fast enough for a ~0.25 s reverb tail against several
+    seconds of dry signal.
+    """
+    import numpy as np
+
+    n = a.size + b.size - 1
+    size = 1
+    while size < n:
+        size *= 2
+    fa = np.fft.rfft(a, size)
+    fb = np.fft.rfft(b, size)
+    return np.fft.irfft(fa * fb, size)[:n]
+
+
+def _short_reverb(samples, rate: int, seed: int, *, tail_s: float = 0.25, wet: float = 0.18):
+    """Short, bright seeded reverb: convolve the dry signal with an
+    exponentially-decaying noise impulse response. Not a physical room
+    model -- a cheap, deterministic "imaging sheen" tail.
+    """
+    import numpy as np
+
+    rng = np.random.default_rng(seed + 1)
+    n = max(1, int(rate * tail_s))
+    t = np.arange(n) / rate
+    ir = rng.normal(0.0, 1.0, n) * np.exp(-t / (tail_s / 5.0))
+    ir = ir / (np.sqrt(np.sum(np.square(ir))) + 1e-9)
+
+    wet_signal = _fft_convolve(samples, ir)
+    out = np.zeros(max(samples.size, wet_signal.size), dtype=np.float64)
+    out[: samples.size] += samples
+    out[: wet_signal.size] += wet * wet_signal
+    return out
+
+
+def imaging_process(samples, rate: int, seed: int, *, doubled: bool = True):
+    """Broadcast-style post-production chain for station-ID voice reads.
+
+    High-pass at ~120 Hz clears rumble, a ~3 kHz presence peak keeps the
+    read cutting over a music bed, soft-knee compression evens out the
+    delivery, an optional 15 ms detuned double widens it, and a short
+    seeded reverb tail adds sheen -- then the whole thing is RMS-targeted
+    to TARGET_RMS_DBFS with a 0.95 peak cap (see the loudness-match
+    contract above). Deterministic: the same seed on the same input
+    always produces byte-identical output, so a rebuild without a plan
+    change reproduces the exact same asset.
+    """
+    import numpy as np
+
+    samples = np.asarray(samples, dtype=np.float64)
+    out = _highpass_biquad(samples, rate, 120.0)
+    out = _peaking_biquad(out, rate, 3000.0, gain_db=4.0, q=1.0)
+    out = _soft_knee_compress(out, rate)
+    if doubled:
+        out = _detuned_double(out, rate, seed)
+    out = _short_reverb(out, rate, seed)
+    out = _normalize_to_target(out)
+    return out.astype(np.float32)
+
+
+def broadcast_compress(samples, rate: int):
+    """Light broadcast chain for ad reads: gentle soft-knee compression
+    only (no EQ, no doubling, no reverb -- ad copy needs to read clean,
+    not sound like a station ID), RMS-targeted to the same TARGET_RMS_DBFS
+    as imaging_process (the loudness-match contract above) so ads sit
+    level with station IDs and the music beds around them.
+    """
+    import numpy as np
+
+    samples = np.asarray(samples, dtype=np.float64)
+    out = _soft_knee_compress(
+        samples, rate, threshold_db=-20.0, ratio=2.0, knee_db=6.0, makeup_db=4.0
+    )
+    out = _normalize_to_target(out)
+    return out.astype(np.float32)
+
+
+def mix_id_bed(voice, sfx_layers: dict, rate: int):
+    """Mix a station-ID voice read (already run through imaging_process)
+    against optional SFX layers: a "whoosh" laid under the voice head
+    (starting at time 0) and a "riser" timed to land into the voice's
+    tail. Missing keys are simply skipped. Final mix is peak-normalized
+    to 0.9, leaving headroom for whatever plays next in the rotation.
+    """
+    import numpy as np
+
+    voice = np.asarray(voice, dtype=np.float64)
+    whoosh = sfx_layers.get("whoosh")
+    riser = sfx_layers.get("riser")
+
+    total = voice.size
+    if whoosh is not None:
+        total = max(total, whoosh.size)
+    riser_start = max(0, voice.size - riser.size) if riser is not None else 0
+    if riser is not None:
+        total = max(total, riser_start + riser.size)
+
+    mix = np.zeros(total, dtype=np.float64)
+    mix[: voice.size] += voice
+    if whoosh is not None:
+        mix[: whoosh.size] += np.asarray(whoosh, dtype=np.float64) * 0.5
+    if riser is not None:
+        mix[riser_start : riser_start + riser.size] += np.asarray(riser, dtype=np.float64) * 0.5
+
+    peak = float(np.max(np.abs(mix))) if mix.size else 0.0
+    if peak > 0.0:
+        mix = mix * (0.9 / peak)
+    return mix.astype(np.float32)
+
+
+def generate_sfx(key: str, prompts: dict[str, str]) -> None:
+    """POST each radio_content_plan.SFX_PROMPTS entry to the ElevenLabs
+    Sound Effects API and write assets/radio/imaging/<key>.ogg via the
+    project's shared ogg convention (_write_ogg -> ffmpeg). Spends
+    credits -- only ever invoked behind the --sfx CLI flag, never as part
+    of the default "everything" run.
+    """
+    for spec_key, prompt in prompts.items():
+        duration = SFX_DURATIONS.get(spec_key, 3.0)
+        print(f"  requesting sfx {spec_key} ({duration:.1f}s)...", flush=True)
+        body = {"text": prompt, "duration_seconds": duration}
+        try:
+            mp3 = _post_bytes(SFX_API, key, body, timeout=120)
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", "ignore")[:300]
+            print(f"    FAILED {spec_key}: HTTP {exc.code} {detail}", flush=True)
+            continue
+        _write_ogg(mp3, ASSETS / "radio" / "imaging" / f"{spec_key}.ogg")
+
+
 def report_durations() -> None:
     import soundfile as sf
 
@@ -485,6 +792,12 @@ def main(argv: list[str] | None = None) -> int:
         resolved = provision_voices(key, dry_run=dry_run)
         if not dry_run:
             print(f"\n{len(resolved)} voice(s) resolved and cached.", flush=True)
+        return 0
+    if "--sfx" in flags:
+        from radio_content_plan import SFX_PROMPTS
+
+        key = _api_key()
+        generate_sfx(key, SFX_PROMPTS)
         return 0
     do_all = not flags and not keys
     if keys:
