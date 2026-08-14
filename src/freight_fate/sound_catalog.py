@@ -274,19 +274,21 @@ _ENGINE_BRAKE = SoundCategory(
             "Engine brake, stage one",
             (Cue("engine/jake_1600", volume=0.19, hold_s=2.5),),
             "Two cylinders of retard: the lightest setting. Enough to hold "
-            "speed on a gentle grade without touching the brakes.",
+            "speed on a gentle grade without touching the brakes. Drivers "
+            "call this the jake.",
         ),
         SoundEntry(
             "Engine brake, stage two",
             (Cue("engine/jake_1600", volume=0.49, hold_s=2.5),),
-            "Four cylinders of retard. The usual working setting on a long descent.",
+            "Four cylinders of retard. The usual working setting on a long "
+            "descent. Drivers call this the jake.",
         ),
         SoundEntry(
             "Engine brake, stage three",
             (Cue("engine/jake_1600", volume=0.76, hold_s=2.5),),
             "Six cylinders: everything the engine brake has. Loud enough "
             "that towns ban it, which is what a no engine brake zone is "
-            "about.",
+            "about. Drivers call this the jake.",
         ),
         SoundEntry(
             "Overspeed chime",
@@ -590,7 +592,7 @@ SELF_EXPLANATORY: dict[str, str] = {
     "engine/shutdown": "An engine stopping, immediately after you stopped it.",
     "engine/jake_1600_synth": (
         "The classic jake voice: the same three staged entries play it when "
-        "Settings, Audio has Jake brake voice set to classic, through the "
+        "Settings, Audio has Engine brake voice set to classic, through the "
         "same key-resolution routing the drive uses. Not a second cue."
     ),
     "weather/*": "Rain, wind, snow and thunder name themselves.",

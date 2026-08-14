@@ -470,19 +470,19 @@ def test_settings_menu_toggles_jake_voice_and_persists():
     try:
         assert app.ctx.settings.jake_voice == "real"
         cat = open_settings_category(app, "Audio")
-        while not cat.items[cat.index].text.startswith("Jake brake voice"):
+        while not cat.items[cat.index].text.startswith("Engine brake voice"):
             cat.handle_event(key_event(pygame.K_DOWN))
 
-        assert cat.items[cat.index].text == "Jake brake voice: recorded"
-        assert cat.current_help().startswith("Recorded is the real 1600 jake")
+        assert cat.items[cat.index].text == "Engine brake voice: recorded"
+        assert cat.current_help().startswith("Recorded is the real engine brake growl")
         cat.handle_event(key_event(pygame.K_RETURN))
         assert app.ctx.settings.jake_voice == "classic"
         assert Settings.load().jake_voice == "classic"
-        assert cat.items[cat.index].text == "Jake brake voice: classic"
+        assert cat.items[cat.index].text == "Engine brake voice: classic"
 
         cat.handle_event(key_event(pygame.K_LEFT))
         assert app.ctx.settings.jake_voice == "real"
-        assert cat.items[cat.index].text == "Jake brake voice: recorded"
+        assert cat.items[cat.index].text == "Engine brake voice: recorded"
     finally:
         app.shutdown()
 

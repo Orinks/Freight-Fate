@@ -402,8 +402,8 @@ onto exit signalling.
       future synth-versus-recorded jake toggle is a pure code change.
       Length/SHA pins updated. build_release verifies the classic cut
       is in any staged pack.
-- [x] **Jake voice A/B -- 2026-08-14.** Settings, Audio now carries a
-      Jake brake voice row (recorded/classic) right after Engine voice,
+- [x] **Jake voice A/B -- 2026-08-14.** Settings, Audio now carries an
+      Engine brake voice row (recorded/classic) right after Engine voice,
       same live-flip pattern, default recorded. The routing lives at
       key resolution in `audio.py` (`AudioEngine._voice_key`), so both
       the drive and Learn game sounds demo whichever voice is chosen

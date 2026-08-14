@@ -1326,14 +1326,14 @@ class SettingsCategoryState(MenuState):
                 ),
                 MenuItem(
                     lambda: (
-                        f"Jake brake voice: {'recorded' if s.jake_voice == 'real' else 'classic'}"
+                        f"Engine brake voice: {'recorded' if s.jake_voice == 'real' else 'classic'}"
                     ),
                     lambda: self._toggle_jake_voice(1),
                     help=(
-                        "Recorded is the real 1600 jake, the engine brake growl "
-                        "the road plays today. Classic is the synthesized growl "
-                        "from earlier versions. Changes apply immediately, even "
-                        "while driving."
+                        "Recorded is the real engine brake growl the road plays "
+                        "today -- drivers call it the jake. Classic is the "
+                        "synthesized growl from earlier versions. Changes apply "
+                        "immediately, even while driving."
                     ),
                 ),
                 MenuItem(
