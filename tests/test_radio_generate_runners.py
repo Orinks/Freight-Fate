@@ -255,6 +255,62 @@ def test_plan_songs_unknown_pool_raises(money_path):
     assert money_path.post_calls == []
 
 
+def _fake_song_pool(n: int) -> tuple:
+    return tuple(
+        SongPlan(
+            key=f"radio_oldies_limit_song_{i}",
+            title=f"Limit Song {i}",
+            description="fake song for limit tests",
+            prompt="A fake test song prompt, doo-wop style",
+            length_ms=5_000,
+            instrumental=False,
+        )
+        for i in range(n)
+    )
+
+
+def test_plan_songs_limit_stops_after_n_fresh_generations(money_path, monkeypatch, capsys):
+    songs = _fake_song_pool(4)
+    monkeypatch.setattr(radio_content_plan, "SONG_PLAN", {"oldies": songs})
+
+    rgc.run_plan_songs("fake-key", "oldies", limit=2)
+
+    assert (money_path.music_dir / f"{songs[0].key}.ogg").exists()
+    assert (money_path.music_dir / f"{songs[1].key}.ogg").exists()
+    assert not (money_path.music_dir / f"{songs[2].key}.ogg").exists()
+    assert not (money_path.music_dir / f"{songs[3].key}.ogg").exists()
+    assert len(money_path.post_calls) == 2
+
+    out = capsys.readouterr().out
+    assert "limit 2 reached, 2 of 4 pool songs remain ungenerated" in out
+
+
+def test_plan_songs_limit_ignores_already_on_disk(money_path, monkeypatch):
+    songs = _fake_song_pool(4)
+    monkeypatch.setattr(radio_content_plan, "SONG_PLAN", {"oldies": songs})
+    # Pre-existing file: must not count against the limit.
+    (money_path.music_dir / f"{songs[0].key}.ogg").write_bytes(b"already-here")
+
+    rgc.run_plan_songs("fake-key", "oldies", limit=2)
+
+    assert (money_path.music_dir / f"{songs[0].key}.ogg").read_bytes() == b"already-here"
+    assert (money_path.music_dir / f"{songs[1].key}.ogg").exists()  # fresh #1
+    assert (money_path.music_dir / f"{songs[2].key}.ogg").exists()  # fresh #2
+    assert not (money_path.music_dir / f"{songs[3].key}.ogg").exists()
+    assert len(money_path.post_calls) == 2  # only the two fresh generations spend
+
+
+def test_plan_songs_no_limit_is_byte_identical_to_before(money_path, monkeypatch):
+    songs = _fake_song_pool(3)
+    monkeypatch.setattr(radio_content_plan, "SONG_PLAN", {"oldies": songs})
+
+    rgc.run_plan_songs("fake-key", "oldies")
+
+    for song in songs:
+        assert (money_path.music_dir / f"{song.key}.ogg").exists()
+    assert len(money_path.post_calls) == 3
+
+
 # --- --probe ----------------------------------------------------------------
 
 
@@ -326,3 +382,56 @@ def test_cli_probe_forwards_force(monkeypatch):
 
     generate_radio.main(["--probe", "--force"])
     assert calls == [("probe", True)]
+
+
+# --- --limit N (only meaningful with --plan-songs) ---------------------------
+
+
+def test_cli_limit_forwards_to_run_plan_songs(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        rgc,
+        "run_plan_songs",
+        lambda key, pool, force=False, limit=None: calls.append((pool, force, limit)),
+    )
+    monkeypatch.setattr(generate_radio, "_api_key", lambda: "fake-key")
+    monkeypatch.setattr(generate_radio, "report_durations", lambda: None)
+
+    generate_radio.main(["--plan-songs", "oldies", "--limit", "3"])
+    assert calls == [("oldies", False, 3)]
+
+
+def test_cli_plan_songs_without_limit_passes_limit_none(monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        rgc,
+        "run_plan_songs",
+        lambda key, pool, force=False, limit=None: calls.append((pool, force, limit)),
+    )
+    monkeypatch.setattr(generate_radio, "_api_key", lambda: "fake-key")
+    monkeypatch.setattr(generate_radio, "report_durations", lambda: None)
+
+    generate_radio.main(["--plan-songs", "oldies"])
+    assert calls == [("oldies", False, None)]
+
+
+def test_cli_limit_without_plan_songs_exits(monkeypatch):
+    monkeypatch.setattr(generate_radio, "_api_key", lambda: "fake-key")
+
+    with pytest.raises(SystemExit, match="--limit is only meaningful together with --plan-songs"):
+        generate_radio.main(["--limit", "3"])
+
+
+def test_cli_limit_zero_exits(monkeypatch):
+    with pytest.raises(SystemExit, match="positive integer"):
+        generate_radio.main(["--plan-songs", "oldies", "--limit", "0"])
+
+
+def test_cli_limit_non_integer_exits(monkeypatch):
+    with pytest.raises(SystemExit, match="positive integer"):
+        generate_radio.main(["--plan-songs", "oldies", "--limit", "abc"])
+
+
+def test_cli_limit_missing_value_exits(monkeypatch):
+    with pytest.raises(SystemExit, match="--limit requires a value"):
+        generate_radio.main(["--plan-songs", "oldies", "--limit"])

@@ -31,6 +31,7 @@ tools/radio_content_plan.py -- STATIONS, AD_PLAN, SONG_PLAN):
     uv run python tools/generate_radio.py --plan-ids roadhouse    # one station's ID + jingles
     uv run python tools/generate_radio.py --plan-ads                # the shared ad rotation
     uv run python tools/generate_radio.py --plan-songs oldies       # one song pool
+    uv run python tools/generate_radio.py --plan-songs oldies --limit 3  # cap fresh spend, resume later
     uv run python tools/generate_radio.py --plan-hosts --force      # regenerate even if the file exists
     uv run python tools/generate_radio.py --probe                   # measure real per-song credit cost
 """
@@ -900,6 +901,19 @@ def main(argv: list[str] | None = None) -> int:
     plan_songs, plan_songs_pool = _take_flag_arg(argv, "--plan-songs")
     probe = _take_flag(argv, "--probe")
     force = _take_flag(argv, "--force")
+    has_limit, limit_str = _take_flag_arg(argv, "--limit")
+    limit: int | None = None
+    if has_limit:
+        if not plan_songs:
+            raise SystemExit("--limit is only meaningful together with --plan-songs")
+        if limit_str is None:
+            raise SystemExit("--limit requires a value, e.g. --limit 3")
+        try:
+            limit = int(limit_str)
+        except ValueError:
+            raise SystemExit(f"--limit requires a positive integer, got {limit_str!r}") from None
+        if limit <= 0:
+            raise SystemExit(f"--limit requires a positive integer, got {limit_str!r}")
 
     if plan_hosts or plan_ids or plan_ads or plan_songs or probe:
         if plan_songs and not plan_songs_pool:
@@ -924,7 +938,7 @@ def main(argv: list[str] | None = None) -> int:
         if plan_ads:
             run_plan_ads(key, force=force)
         if plan_songs:
-            run_plan_songs(key, plan_songs_pool, force=force)
+            run_plan_songs(key, plan_songs_pool, force=force, limit=limit)
         if probe:
             run_probe(key, force=force)
         report_durations()
