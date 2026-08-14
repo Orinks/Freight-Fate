@@ -480,17 +480,19 @@ def generate_fringe() -> None:
 # and imaging share one loudness floor.
 TARGET_RMS_DBFS = -16.0
 
-# Per-key SFX duration in seconds, matched loosely to what each prompt in
-# radio_content_plan.SFX_PROMPTS asks for ("about half a second", "about
-# two seconds", ...) but clamped into the API's practical 2-4s range for a
-# usable imaging element. Unlisted keys fall back to 3.0s.
+# Per-key SFX duration in seconds, matched to what each prompt in
+# radio_content_plan.SFX_PROMPTS actually states: "about half a second"
+# means 0.6s, not a rounded-up 2s. The API accepts duration_seconds from
+# 0.5 to 22; prompts with no explicit length ("very short decay", "short
+# rock stinger", "fading out") get a duration sized to their described
+# character instead of a placeholder. Unlisted keys fall back to 1.5s.
 SFX_DURATIONS: dict[str, float] = {
-    "radio_imaging_whoosh_short": 2.0,
-    "radio_imaging_whoosh_long": 3.0,
-    "radio_imaging_impact": 2.0,
-    "radio_imaging_riser": 2.5,
-    "radio_imaging_stinger": 3.0,
-    "radio_imaging_shimmer": 4.0,
+    "radio_imaging_whoosh_short": 0.6,  # "about half a second"
+    "radio_imaging_whoosh_long": 2.0,  # "about two seconds"
+    "radio_imaging_impact": 0.6,  # "very short decay"
+    "radio_imaging_riser": 1.2,  # "One second riser" + a beat to cut clean
+    "radio_imaging_stinger": 1.5,  # "short" chord + "a quick reverb tail"
+    "radio_imaging_shimmer": 2.5,  # bell tones "fading out", the longest of the set
 }
 
 
@@ -509,18 +511,48 @@ def _normalize_to_target(samples, target_dbfs: float = TARGET_RMS_DBFS, peak_cap
     RMS normalization first (matches perceived loudness across elements
     with very different crest factors -- a reverb tail vs. a dry read),
     then a peak cap so an occasional transient never clips.
+
+    Returns ``(samples, peak_limited)``. A high-crest-factor input (sparse
+    loud peaks over a quiet floor) can ask for more gain than the peak cap
+    allows, landing the achieved RMS below ``target_dbfs`` -- that's what
+    ``peak_limited`` flags, so a caller with an asset label can report it
+    instead of it going unnoticed until a listen-check.
     """
     import numpy as np
 
     if samples.size == 0:
-        return samples
+        return samples, False
     current = _rms_dbfs(samples)
     gain = 10.0 ** ((target_dbfs - current) / 20.0)
     out = samples * gain
     peak = float(np.max(np.abs(out))) if out.size else 0.0
-    if peak > peak_cap:
+    peak_limited = peak > peak_cap
+    if peak_limited:
         out = out * (peak_cap / peak)
-    return out
+    return out, peak_limited
+
+
+def _edge_fade(samples, rate: int, *, attack_s: float = 0.003, release_s: float = 0.012):
+    """Short attack/release taper at both edges of the final output.
+
+    Same convention as generate_fringe's picket splashes: 3 ms attack,
+    12 ms release -- anything softer smears the edge, anything shorter
+    clicks. Applied last, before loudness normalization, exactly like the
+    fringe splashes fade then peak-normalize.
+    """
+    import numpy as np
+
+    n = samples.size
+    if n < 2:
+        return samples
+    attack = min(int(attack_s * rate), n // 2)
+    release = min(int(release_s * rate), n - attack)
+    env = np.ones(n, dtype=np.float64)
+    if attack > 0:
+        env[:attack] = np.linspace(0.0, 1.0, attack)
+    if release > 0:
+        env[-release:] = np.linspace(1.0, 0.0, release)
+    return samples * env
 
 
 def _biquad(samples, b0: float, b1: float, b2: float, a0: float, a1: float, a2: float):
@@ -674,17 +706,25 @@ def _short_reverb(samples, rate: int, seed: int, *, tail_s: float = 0.25, wet: f
     return out
 
 
-def imaging_process(samples, rate: int, seed: int, *, doubled: bool = True):
+def imaging_process(
+    samples, rate: int, seed: int, *, doubled: bool = True, label: str | None = None
+):
     """Broadcast-style post-production chain for station-ID voice reads.
 
     High-pass at ~120 Hz clears rumble, a ~3 kHz presence peak keeps the
     read cutting over a music bed, soft-knee compression evens out the
     delivery, an optional 15 ms detuned double widens it, and a short
-    seeded reverb tail adds sheen -- then the whole thing is RMS-targeted
-    to TARGET_RMS_DBFS with a 0.95 peak cap (see the loudness-match
-    contract above). Deterministic: the same seed on the same input
-    always produces byte-identical output, so a rebuild without a plan
-    change reproduces the exact same asset.
+    seeded reverb tail adds sheen -- then a 3 ms/12 ms edge fade (the
+    generate_fringe convention) and an RMS-target normalize to
+    TARGET_RMS_DBFS with a 0.95 peak cap (see the loudness-match contract
+    above). Deterministic: the same seed on the same input always
+    produces byte-identical output, so a rebuild without a plan change
+    reproduces the exact same asset.
+
+    If ``label`` is given, prints the achieved RMS dBFS for that asset
+    (flagging "(peak-limited)" when the peak cap kept it under target) --
+    a one-line note runners can surface so a quiet spot is caught at
+    generation time instead of only at a Task 5 listen-check.
     """
     import numpy as np
 
@@ -695,16 +735,26 @@ def imaging_process(samples, rate: int, seed: int, *, doubled: bool = True):
     if doubled:
         out = _detuned_double(out, rate, seed)
     out = _short_reverb(out, rate, seed)
-    out = _normalize_to_target(out)
+    out = _edge_fade(out, rate)
+    out, peak_limited = _normalize_to_target(out)
+    if label is not None:
+        note = " (peak-limited)" if peak_limited else ""
+        print(f"    {label}: RMS {_rms_dbfs(out):.1f} dBFS{note}", flush=True)
     return out.astype(np.float32)
 
 
-def broadcast_compress(samples, rate: int):
+def broadcast_compress(samples, rate: int, *, label: str | None = None):
     """Light broadcast chain for ad reads: gentle soft-knee compression
     only (no EQ, no doubling, no reverb -- ad copy needs to read clean,
-    not sound like a station ID), RMS-targeted to the same TARGET_RMS_DBFS
-    as imaging_process (the loudness-match contract above) so ads sit
-    level with station IDs and the music beds around them.
+    not sound like a station ID), a 3 ms/12 ms edge fade, then an
+    RMS-target normalize to the same TARGET_RMS_DBFS as imaging_process
+    (the loudness-match contract above) so ads sit level with station IDs
+    and the music beds around them.
+
+    ``label``, if given, prints the achieved RMS dBFS the same way as
+    imaging_process -- real speech can have enough crest factor that the
+    peak cap holds the result under target; the print makes that visible
+    per asset instead of silent.
     """
     import numpy as np
 
@@ -712,7 +762,11 @@ def broadcast_compress(samples, rate: int):
     out = _soft_knee_compress(
         samples, rate, threshold_db=-20.0, ratio=2.0, knee_db=6.0, makeup_db=4.0
     )
-    out = _normalize_to_target(out)
+    out = _edge_fade(out, rate)
+    out, peak_limited = _normalize_to_target(out)
+    if label is not None:
+        note = " (peak-limited)" if peak_limited else ""
+        print(f"    {label}: RMS {_rms_dbfs(out):.1f} dBFS{note}", flush=True)
     return out.astype(np.float32)
 
 
@@ -720,8 +774,10 @@ def mix_id_bed(voice, sfx_layers: dict, rate: int):
     """Mix a station-ID voice read (already run through imaging_process)
     against optional SFX layers: a "whoosh" laid under the voice head
     (starting at time 0) and a "riser" timed to land into the voice's
-    tail. Missing keys are simply skipped. Final mix is peak-normalized
-    to 0.9, leaving headroom for whatever plays next in the rotation.
+    tail. Missing keys are simply skipped. A 3 ms/12 ms edge fade (the
+    generate_fringe convention) runs before the final mix is
+    peak-normalized to 0.9, leaving headroom for whatever plays next in
+    the rotation.
     """
     import numpy as np
 
@@ -743,6 +799,7 @@ def mix_id_bed(voice, sfx_layers: dict, rate: int):
     if riser is not None:
         mix[riser_start : riser_start + riser.size] += np.asarray(riser, dtype=np.float64) * 0.5
 
+    mix = _edge_fade(mix, rate)
     peak = float(np.max(np.abs(mix))) if mix.size else 0.0
     if peak > 0.0:
         mix = mix * (0.9 / peak)
@@ -757,7 +814,7 @@ def generate_sfx(key: str, prompts: dict[str, str]) -> None:
     of the default "everything" run.
     """
     for spec_key, prompt in prompts.items():
-        duration = SFX_DURATIONS.get(spec_key, 3.0)
+        duration = SFX_DURATIONS.get(spec_key, 1.5)
         print(f"  requesting sfx {spec_key} ({duration:.1f}s)...", flush=True)
         body = {"text": prompt, "duration_seconds": duration}
         try:

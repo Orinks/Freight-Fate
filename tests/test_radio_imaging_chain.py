@@ -40,6 +40,21 @@ def _rms_dbfs(samples: np.ndarray) -> float:
     return 20.0 * np.log10(rms) if rms > 0.0 else -120.0
 
 
+def _high_crest_signal(seconds: float = 1.0, rate: int = RATE, seed: int = 123) -> np.ndarray:
+    """Sparse loud impulses over a quiet noise floor -- a stand-in for real
+    speech's crest factor, which a steady sine can't exercise. Five 5 ms
+    bursts at 0.9 amplitude, ~200 ms apart, over noise at 0.01 amplitude.
+    """
+    rng = np.random.default_rng(seed)
+    n = int(rate * seconds)
+    sig = rng.normal(0.0, 0.01, n)
+    burst_len = int(0.005 * rate)
+    for start in range(0, n, int(0.2 * rate)):
+        end = min(n, start + burst_len)
+        sig[start:end] += 0.9 * np.sin(np.linspace(0.0, np.pi, end - start))
+    return sig
+
+
 def test_imaging_process_length_within_ping_tail_allowance():
     sine = _sine(1.0)
     out = imaging_process(sine, RATE, seed=7)
@@ -122,6 +137,24 @@ def test_broadcast_compress_handles_silence():
     assert out.shape == silence.shape
     assert np.max(np.abs(out)) <= 1.0 + 1e-6
     assert np.all(np.isfinite(out))
+
+
+def test_broadcast_compress_high_crest_signal_within_6db_of_target():
+    # A light compressor won't fully tame sparse loud peaks over a quiet
+    # floor; the peak cap can hold the achieved RMS under target. That's
+    # allowed (see _normalize_to_target's peak_limited flag) but it must
+    # not go silently far off -- pin a loose but real ceiling on how far.
+    sig = _high_crest_signal()
+    out = broadcast_compress(sig, RATE)
+    assert abs(_rms_dbfs(out) - TARGET_RMS_DBFS) <= 6.0
+
+
+def test_broadcast_compress_label_reports_peak_limited(capsys):
+    sig = _high_crest_signal()
+    broadcast_compress(sig, RATE, label="test_ad")
+    out = capsys.readouterr().out
+    assert "test_ad" in out
+    assert "peak-limited" in out
 
 
 def test_mix_id_bed_peak_normalized_to_point_nine():
