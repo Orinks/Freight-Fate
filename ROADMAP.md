@@ -472,6 +472,13 @@ onto exit signalling.
       contour (was ~52%) and a 2x reach multiplier for compression, smear
       ruling intact at the true edge. Spec:
       `docs/superpowers/specs/2026-08-13-event-pacing-radio-reach-design.md`.
+- [ ] **Station identity machinery landed (break slots for hosts, IDs, and
+      ads) -- content generation to follow.** Fictional stations now weave
+      host chatter, station IDs, and format-tagged ad reads into scheduled
+      breaks between songs, with fade timing tuned per slot and a graceful
+      fallback to plain host breaks when a pool is empty. The host/ID/ad
+      tables themselves are still empty; the next pass fills them with real
+      generated content per the asset contract.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides

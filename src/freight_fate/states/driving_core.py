@@ -51,7 +51,6 @@ from ..models.settlement import (
 )
 from ..music import (
     RADIO_TRACKS_PER_HOST_BREAK,
-    music_track_duration_s,
     select_drive_music_sequence,
     select_menu_music_sequence,
     select_station_playlist,

@@ -88,7 +88,9 @@ def break_driving(monkeypatch):
     app = App()
     played = []
     monkeypatch.setattr(
-        app.ctx.audio, "play_music", lambda track, fade_ms=1500: played.append(track)
+        app.ctx.audio,
+        "play_music",
+        lambda track, fade_ms=1500: played.append((track, fade_ms)),
     )
     app.ctx.profile = Profile(name="Break Slots", current_city="Denver")
     route = app.ctx.world.route_from_cities(["Denver", "Salt Lake City"])
@@ -101,7 +103,7 @@ def break_driving(monkeypatch):
 
 
 def _play_next(driving, played):
-    dt = radio_content.content_duration_s(played[-1]) + 0.1
+    dt = radio_content.content_duration_s(played[-1][0]) + 0.1
     driving._update_radio_playback(False, dt)
 
 
@@ -119,33 +121,42 @@ def test_break_queue_delivers_host_id_ad_slots_in_order(break_driving, monkeypat
     )
     driving.radio.catalog = driving.radio.catalog + (station,)
     driving.radio.select_station("brk-fixture", driving._radio_backend)
-    assert played[-1].startswith("radio_country_")
+    assert played[-1][0].startswith("radio_country_")
 
     _play_next(driving, played)  # song 2
-    assert played[-1].startswith("radio_country_")
+    assert played[-1][0].startswith("radio_country_")
     _play_next(driving, played)  # after 2 songs: a host break
-    assert played[-1].startswith("host_x_")
+    assert played[-1][0].startswith("host_x_")
+    assert played[-1][1] == 600  # fade into a break
 
     _play_next(driving, played)  # break ends, music resumes (song 3)
-    assert played[-1].startswith("radio_country_")
+    assert played[-1][0].startswith("radio_country_")
+    assert played[-1][1] == 1200  # fade back to music
     _play_next(driving, played)  # song 4
-    assert played[-1].startswith("radio_country_")
+    assert played[-1][0].startswith("radio_country_")
     _play_next(driving, played)  # after 4 songs: an id break
-    assert played[-1].startswith("id_x_")
+    assert played[-1][0].startswith("id_x_")
+    assert played[-1][1] == 600  # fade into a break
 
     _play_next(driving, played)  # resumes (song 5)
+    assert played[-1][1] == 1200  # fade back to music
     _play_next(driving, played)  # song 6
     _play_next(driving, played)  # after 6 songs: host again (pattern cycles)
-    assert played[-1].startswith("host_x_")
+    assert played[-1][0].startswith("host_x_")
+    assert played[-1][1] == 600  # fade into a break
 
     _play_next(driving, played)  # resumes (song 7)
+    assert played[-1][1] == 1200  # fade back to music
     _play_next(driving, played)  # song 8
     _play_next(driving, played)  # after 8 songs: an ad plays
-    assert played[-1].startswith("ad_y_")
+    assert played[-1][0].startswith("ad_y_")
+    assert played[-1][1] == 600  # fade into a break
     _play_next(driving, played)  # ...followed by an id
-    assert played[-1].startswith("id_x_")
+    assert played[-1][0].startswith("id_x_")
+    assert played[-1][1] == 300  # fade between break elements
     _play_next(driving, played)  # then music resumes
-    assert played[-1].startswith("radio_country_")
+    assert played[-1][0].startswith("radio_country_")
+    assert played[-1][1] == 1200  # fade back to music
 
 
 def test_no_host_station_chains_songs_without_break(break_driving):
@@ -155,9 +166,33 @@ def test_no_host_station_chains_songs_without_break(break_driving):
     )
     driving.radio.catalog = driving.radio.catalog + (station,)
     driving.radio.select_station("brk-nohost", driving._radio_backend)
-    assert played[-1].startswith("radio_country_")
+    assert played[-1][0].startswith("radio_country_")
 
     for _ in range(6):
         _play_next(driving, played)
-        assert played[-1].startswith("radio_country_")
+        assert played[-1][0].startswith("radio_country_")
     assert driving._radio_break_queue == ()
+
+
+def test_station_content_tables_resolve():
+    import json
+    from pathlib import Path
+
+    from freight_fate import radio_content
+    from freight_fate.music import STATION_HOST_SEGMENTS, STATION_PLAYLISTS
+
+    catalog = json.loads(
+        Path("src/freight_fate/data/radio_catalog.json").read_text(encoding="utf-8")
+    )
+    for row in catalog["stations"]:
+        if row.get("playlist"):
+            assert row["playlist"] in ("route",) or row["playlist"] in STATION_PLAYLISTS
+        if row.get("host"):
+            assert row["host"] in STATION_HOST_SEGMENTS, row["id"]
+    keys = [t.key for pool in radio_content.STATION_IDS.values() for t in pool]
+    keys += [t.key for t in radio_content.AD_SPOTS]
+    assert len(keys) == len(set(keys))
+    assert all(radio_content.content_duration_s(k) > 0 for k in keys)
+    assert set(radio_content.AD_FORMAT_TAGS) <= {t.key for t in radio_content.AD_SPOTS}
+    for tags in radio_content.AD_FORMAT_TAGS.values():
+        assert all(tag in STATION_PLAYLISTS for tag in tags)
