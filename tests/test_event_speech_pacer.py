@@ -792,3 +792,325 @@ def test_the_pause_menu_drops_what_the_road_was_about_to_say() -> None:
         assert driving._pending_ambient_event is None
     finally:
         app.shutdown()
+
+
+# -- a chimed line is never silently lost (tester Sarah, US-12 East, 2026-08-14)
+
+
+LANE_CLOSURE_LINE = (
+    "Traffic squeezing at the construction taper in a quarter mile. "
+    "Merge left early, leave a gap, and be ready for 35 miles per hour."
+)
+
+
+def test_a_hazard_wiping_the_ambient_slot_still_leaves_the_line_in_review() -> None:
+    """Reproduces Sarah's report against the pre-fix mechanics directly: the
+    HAZARD branch always rings its own earcon and, separately, always
+    empties ``_pending_ambient_event`` outright -- no attempt to speak or
+    log whatever was waiting there first. That is the ding without words:
+    the hazard's own chime rings, the queued line never reaches the voice,
+    and -- before the fix -- it never reached the review buffer either.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    app = App()
+    try:
+        driving = _driving(app)
+        played: list[tuple] = []
+        events: list[tuple[str, bool]] = []
+        driving.ctx.audio.play = lambda *a, **k: played.append(a)
+        driving.ctx.say_event = speech_stub(events, with_interrupt=True)
+        driving.ctx.controller.rumble.hazard = lambda: None
+
+        # A lane-closure line already deferred into the one-deep ambient
+        # slot -- queued (and, per the fix, logged) behind chatter whose
+        # spacing had not cleared yet.
+        driving._ambient_event_cooldown_s = 5.0
+        driving._speak_ambient_event(LANE_CLOSURE_LINE, "events/traffic_slowing")
+        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing")
+        played.clear()
+
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake now! Stopped traffic ahead.",
+                {"deadline_s": 4.0, "dodgeable": False, "name": "the stopped traffic"},
+            )
+        )
+
+        # The hazard's own ding rang.
+        assert any(call and call[0] == "events/hazard_warning" for call in played)
+        # The wipe is still real: the slot emptied and the line never spoke.
+        assert driving._pending_ambient_event is None
+        assert all(text != LANE_CLOSURE_LINE for text, _ in events)
+        # But it did not vanish: the review buffer has it, because it was
+        # logged the moment it queued, not the moment (that never came) it
+        # would have spoken.
+        assert LANE_CLOSURE_LINE in [m.text for m in app.ctx.message_log.messages]
+    finally:
+        app.shutdown()
+
+
+def test_an_overwritten_ambient_line_still_reaches_review() -> None:
+    """The other half of the single-slot bug: no hazard involved, just a
+    second piece of ambient colour landing on top of the first before the
+    cooldown that is holding both of them open clears. The first line is
+    still overwritten and never spoken -- that part is by design (AMBIENT:
+    missing it costs nothing) -- but it must not come up empty on review.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = _driving(app)
+        driving.ctx.audio.play = lambda *a, **k: None
+        driving.ctx.say_event = lambda *a, **k: None
+        driving._ambient_event_cooldown_s = 5.0  # still busy: both lines defer
+
+        driving._speak_ambient_event("Rain easing off, roads still wet.", None)
+        driving._speak_ambient_event("Passing the fuel island.", "ui/notify")
+
+        # Only the newer line is actually waiting to speak...
+        assert driving._pending_ambient_event == ("Passing the fuel island.", "ui/notify")
+        # ...but both reached the review buffer when they queued.
+        logged = [m.text for m in app.ctx.message_log.messages]
+        assert "Rain easing off, roads still wet." in logged
+        assert "Passing the fuel island." in logged
+    finally:
+        app.shutdown()
+
+
+def test_speaking_a_drained_ambient_line_does_not_log_it_twice() -> None:
+    """The line that does make it to speech was already logged when it
+    queued; the drain call must not add it to review a second time."""
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        driving = _driving(app)
+        driving.ctx.audio.play = lambda *a, **k: None
+        driving.ctx.say_event = lambda *a, **k: None
+        driving._ambient_event_cooldown_s = 5.0
+
+        driving._speak_ambient_event("Rain easing off, roads still wet.", None)
+        driving._ambient_event_cooldown_s = 0.0
+        driving._hazard_deadline = None
+        driving._update_ambient_events(0.0)
+
+        logged = [m.text for m in app.ctx.message_log.messages]
+        assert logged.count("Rain easing off, roads still wet.") == 1
+    finally:
+        app.shutdown()
+
+
+def _lane_closure_event():
+    from types import SimpleNamespace
+
+    from freight_fate.sim.trip import TripEventKind
+
+    pressure = SimpleNamespace(kind="construction_merge", direction="left")
+    return SimpleNamespace(
+        kind=TripEventKind.GPS_CUE,
+        message=LANE_CLOSURE_LINE,
+        data={"traffic_pressure": pressure},
+    )
+
+
+def test_a_lane_closure_merge_call_is_demoted_out_of_the_ambient_slot() -> None:
+    """A construction-taper merge call is act-soon, same family as a zone
+    entry or a checkpoint: it must never reach the one-deep ambient slot,
+    where a hazard or the next piece of colour can erase it."""
+    router = _router()
+    event = _lane_closure_event()
+    assert router._demoted_from_interrupt(event) is True
+    assert router._event_priority(event) is EventPriority.ROUTE
+
+
+def test_ordinary_traffic_pack_pressure_stays_ambient() -> None:
+    """Only the construction-taper merge call is promoted; routine traffic
+    colour (a pack, an exit building) still rides the ambient channel."""
+    from types import SimpleNamespace
+
+    from freight_fate.sim.trip import TripEventKind
+
+    router = _router()
+    pressure = SimpleNamespace(kind="route_merge", direction="right")
+    event = SimpleNamespace(
+        kind=TripEventKind.GPS_CUE,
+        message="Merging traffic in a quarter mile. Keep right, leave a gap.",
+        data={"traffic_pressure": pressure},
+    )
+    assert router._demoted_from_interrupt(event) is False
+    assert router._event_priority(event) is EventPriority.AMBIENT
+
+
+def test_a_lane_closure_merge_call_never_enters_the_pending_slot() -> None:
+    """End to end: even while a hazard has the ambient channel busy, the
+    lane-closure merge call bypasses ``_pending_ambient_event`` altogether
+    and rides ROUTE's never-dropped queue instead."""
+    from types import SimpleNamespace
+
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    app = App()
+    try:
+        driving = _driving(app)
+        events: list[tuple[str, dict]] = []
+        driving.ctx.audio.play = lambda *a, **k: None
+        driving.ctx.say_event = lambda text, *a, **k: events.append((text, k))
+        driving._hazard_deadline = 2.0  # the channel is currently busy
+
+        pressure = SimpleNamespace(kind="construction_merge", direction="left")
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.GPS_CUE,
+                LANE_CLOSURE_LINE,
+                {"traffic_pressure": pressure},
+            )
+        )
+
+        assert driving._pending_ambient_event is None
+        text, kwargs = events[0]
+        assert text == LANE_CLOSURE_LINE
+        assert kwargs.get("priority") is EventPriority.ROUTE
+        assert kwargs.get("interrupt") is False
+    finally:
+        app.shutdown()
+
+
+# -- terse speech: the same loss, and the review record it must not lose -------
+#
+# Sarah runs terse verbosity. Zone, warning, and closure lines are plain
+# strings (never a SpokenMessage pair), so terse mode cannot shorten or
+# silence them the way it can a hazard call or a stop callout -- there is no
+# terse rendering for them to collapse into. That makes the following pin
+# down two different things: the ambient-slot loss above reproduces
+# identically under terse (it never depended on verbosity), and separately,
+# ``_speak_ambient_event`` -- the mechanism the fix lives in -- still honors
+# a genuinely terse-silenced line (an earcon-only preview, ``terse=""``)
+# rather than starting to log lines the player's speech mode says were never
+# said at all.
+
+
+def test_the_hazard_wipe_reproduces_identically_under_terse_speech() -> None:
+    """Same bug, same fix, independent of verbosity: the closure line was
+    never a SpokenMessage, so terse never touched whether it spoke or
+    logged -- confirming the loss (and the fix) is not verbosity-specific."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    app = App()
+    try:
+        driving = _driving(app)
+        app.ctx.settings.speech_verbosity = 0  # terse
+        events: list[tuple[str, bool]] = []
+        driving.ctx.audio.play = lambda *a, **k: None
+        driving.ctx.say_event = speech_stub(events, with_interrupt=True)
+        driving.ctx.controller.rumble.hazard = lambda: None
+        driving._ambient_event_cooldown_s = 5.0
+        driving._speak_ambient_event(LANE_CLOSURE_LINE, "events/traffic_slowing")
+        assert driving._pending_ambient_event == (LANE_CLOSURE_LINE, "events/traffic_slowing")
+
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.HAZARD,
+                "Brake now! Stopped traffic ahead.",
+                {"deadline_s": 4.0, "dodgeable": False, "name": "the stopped traffic"},
+            )
+        )
+
+        assert driving._pending_ambient_event is None
+        assert all(text != LANE_CLOSURE_LINE for text, _ in events)
+        # The full text -- there is only one rendering -- is in review.
+        assert LANE_CLOSURE_LINE in [m.text for m in app.ctx.message_log.messages]
+    finally:
+        app.shutdown()
+
+
+def test_a_lane_closure_merge_call_reaches_review_in_full_under_terse() -> None:
+    """End to end under terse speech: the promoted ROUTE priority still
+    delivers the closure call, in full, with nothing shortened away."""
+    from types import SimpleNamespace
+
+    from freight_fate.app import App
+    from freight_fate.sim.trip import TripEvent, TripEventKind
+
+    app = App()
+    try:
+        driving = _driving(app)
+        app.ctx.settings.speech_verbosity = 0  # terse
+        events: list[tuple[str, dict]] = []
+        driving.ctx.audio.play = lambda *a, **k: None
+        driving.ctx.say_event = lambda text, *a, **k: events.append((text, k))
+        driving._hazard_deadline = 2.0  # the channel is currently busy
+
+        pressure = SimpleNamespace(kind="construction_merge", direction="left")
+        driving._handle_trip_event(
+            TripEvent(
+                TripEventKind.GPS_CUE,
+                LANE_CLOSURE_LINE,
+                {"traffic_pressure": pressure},
+            )
+        )
+
+        assert driving._pending_ambient_event is None
+        text, kwargs = events[0]
+        assert text == LANE_CLOSURE_LINE  # full text; nothing to shorten it into
+        assert kwargs.get("priority") is EventPriority.ROUTE
+    finally:
+        app.shutdown()
+
+
+def test_speak_ambient_event_still_honors_a_true_terse_mute_for_logging() -> None:
+    """The fix logs at queue time, but it must not start logging lines the
+    player's own speech mode says were never said at all -- an earcon-only
+    preview (``terse=""``) stays out of review under terse, exactly as it
+    already was before a hazard or overwrite ever entered the picture."""
+    from freight_fate.app import App
+    from freight_fate.speech_text import terse_silent
+
+    app = App()
+    try:
+        driving = _driving(app)
+        app.ctx.settings.speech_verbosity = 0  # terse
+        driving.ctx.audio.play = lambda *a, **k: None
+        driving.ctx.say_event = lambda *a, **k: None
+        before = len(app.ctx.message_log.messages)
+
+        driving._speak_ambient_event(
+            terse_silent("Toll ahead in two miles."), "events/toll_charged"
+        )
+
+        assert len(app.ctx.message_log.messages) == before
+    finally:
+        app.shutdown()
+
+
+def test_speak_ambient_event_logs_the_full_text_not_the_terse_text() -> None:
+    """A line terse only shortens (never silences) still reaches review in
+    its full, normal wording -- review answers "what did I miss", not
+    "what did terse mode just say"."""
+    from freight_fate.app import App
+    from freight_fate.speech_text import SpokenMessage
+
+    app = App()
+    try:
+        driving = _driving(app)
+        app.ctx.settings.speech_verbosity = 0  # terse
+        driving.ctx.audio.play = lambda *a, **k: None
+        driving.ctx.say_event = lambda *a, **k: None
+        pair = SpokenMessage(
+            "Planned stop, Iowa 80 Truckstop at Exit 284 in five miles. "
+            "Parking confirmed. Press X to signal for the exit.",
+            "Iowa 80 Truckstop, Exit 284, five miles. Parking confirmed.",
+        )
+
+        driving._speak_ambient_event(pair, "ui/notify")
+
+        logged = [m.text for m in app.ctx.message_log.messages]
+        assert pair.normal in logged
+        assert pair.terse not in logged
+    finally:
+        app.shutdown()

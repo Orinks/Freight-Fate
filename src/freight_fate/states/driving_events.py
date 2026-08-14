@@ -1,6 +1,7 @@
 # ruff: noqa: F403,F405
 from __future__ import annotations
 
+from ..message_log import MessageCategory
 from ..speech_text import SpokenMessage, cruise_curve_easing
 from .base import TimedMessageState
 from .driving_core import *
@@ -25,13 +26,42 @@ from .driving_stops import (
 
 
 class DrivingEventMixin:
-    def _speak_ambient_event(self, message: str, sound: str | None = None) -> None:
+    def _log_ambient_event(self, message: str) -> None:
+        """Log an ambient line the moment it queues, not when it is spoken.
+
+        The one-deep slot below can still let a hazard wipe this line
+        outright, or a later ambient line overwrite it, before it is ever
+        spoken. Either way the review buffer already has it -- a chimed
+        line must never come up empty there (tester Sarah, US-12 East,
+        2026-08-14: a lane closure dinged and vanished, spoken nowhere and
+        reviewable nowhere; she runs terse speech, which makes this the
+        ONLY record of what the earcon was for). A line this speech mode
+        drops whole -- an empty terse rendering, an earcon or silence
+        carrying it instead -- keeps SpokenMessage's own contract and stays
+        out of review too, same as it always has. Anything that does get
+        logged is the full, normal wording regardless of speech mode: a
+        driver who opens review after hearing the terse form is asking for
+        the detail terse left out, not a repeat of the short version.
+        """
+        if not message:
+            return
+        if isinstance(message, SpokenMessage) and not message.render(self._terse_speech()):
+            return
+        self.ctx.message_log.add(message, MessageCategory.EVENT)
+
+    def _speak_ambient_event(
+        self, message: str, sound: str | None = None, *, log: bool = True
+    ) -> None:
+        if log:
+            # The drain call below passes log=False so a line that does
+            # make it to speech is not entered into review twice.
+            self._log_ambient_event(message)
         if self._hazard_deadline is not None or self._ambient_event_cooldown_s > 0.0:
             self._pending_ambient_event = (message, sound)
             return
         if sound is not None:
             self.ctx.audio.play(sound)
-        self.ctx.say_event(message, interrupt=False)
+        self.ctx.say_event(message, interrupt=False, review=False)
         self._ambient_event_cooldown_s = tuning_for_time_scale(
             self.trip.time_scale
         ).ambient_spacing_s
@@ -45,7 +75,9 @@ class DrivingEventMixin:
             return
         message, sound = self._pending_ambient_event
         self._pending_ambient_event = None
-        self._speak_ambient_event(message, sound)
+        # Already logged the moment it queued; speaking it now must not log
+        # it a second time.
+        self._speak_ambient_event(message, sound, log=False)
 
     def _should_space_ambient_event(self, event) -> bool:
         if event.kind == TripEventKind.WEATHER_CHANGE:
@@ -361,6 +393,16 @@ class DrivingEventMixin:
         stop = self._destination_exit_stop()
         return stop is not None and zone.start_mi >= stop.at_mi
 
+    @staticmethod
+    def _is_lane_closure_pressure(event) -> bool:
+        """A construction-taper merge call: the lane it warns about really is
+        closing, not routine traffic colour. It used to ride the same
+        one-deep ambient slot as roadside chatter, where a hazard or the
+        next piece of colour could erase it before it ever spoke (tester
+        Sarah, US-12 East, 2026-08-14)."""
+        pressure = event.data.get("traffic_pressure")
+        return pressure is not None and getattr(pressure, "kind", "") == "construction_merge"
+
     def _demoted_from_interrupt(self, event) -> bool:
         """The act-soon kinds R1 moved out of CRITICAL. As interrupts they
         never went near the one-deep ambient slot, and demotion must not
@@ -372,6 +414,8 @@ class DrivingEventMixin:
             if event.data.get("zone") is not None:
                 return True
             if getattr(event.data.get("cue"), "kind", "") == "traffic":
+                return True
+            if self._is_lane_closure_pressure(event):
                 return True
         return False
 
@@ -389,11 +433,12 @@ class DrivingEventMixin:
 
         ROUTE is act-soon plus every consequence that must be heard: the
         stop the player planned, zone entries and checkpoints, zone-ahead
-        and traffic warnings, and money (a charged toll could otherwise age
-        out silently, making normal mode lossier than terse mode's "what it
-        cost" guarantee -- the toll-ahead heads-up stays AMBIENT, since
-        losing the preview costs nothing once the charge is guaranteed).
-        Everything else waits its turn.
+        and traffic warnings, a construction taper's lane-closure merge
+        call, and money (a charged toll could otherwise age out silently,
+        making normal mode lossier than terse mode's "what it cost"
+        guarantee -- the toll-ahead heads-up stays AMBIENT, since losing the
+        preview costs nothing once the charge is guaranteed). Everything
+        else waits its turn.
         """
         if self._is_critical_event(event):
             return EventPriority.CRITICAL
@@ -407,6 +452,8 @@ class DrivingEventMixin:
             if event.data.get("zone") is not None:
                 return EventPriority.ROUTE
             if getattr(event.data.get("cue"), "kind", "") == "traffic":
+                return EventPriority.ROUTE
+            if self._is_lane_closure_pressure(event):
                 return EventPriority.ROUTE
         if event.kind == TripEventKind.STOP_AHEAD or event.data.get("planned"):
             return EventPriority.ROUTE

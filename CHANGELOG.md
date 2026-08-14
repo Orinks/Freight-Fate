@@ -358,6 +358,18 @@
 
 ### Fixed
 
+- **A road message that rings its chime now always reaches you -- spoken,
+  or at worst waiting for you in message review.** A lane closure, a
+  construction taper's merge call, or other roadside colour could ding and
+  then say nothing: the words were waiting behind other speech when a
+  hazard or a newer notice cleared them out, so the chime played but
+  nothing was ever spoken and nothing was there when you checked message
+  review afterward. Every line that rings a chime is now recorded the
+  moment it is queued, not the moment it is spoken, so it is never lost
+  from review even when speech is. Lane closures and work-zone entries and
+  warnings also stopped being droppable outright: they now wait in line
+  like a planned stop instead of being thrown away.
+
 - **Changing lanes no longer makes cruise slow down for the car you are
   leaving behind.** With adaptive cruise or the follow cue on, passing used
   to have the truck ease off mid-maneuver for slower traffic in the lane you
