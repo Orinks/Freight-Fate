@@ -121,10 +121,11 @@ RADIO_CUE_DUCK_S = 1.1
 PASS_TRIGGER_MI = 0.05
 
 # The tableau: a staffed patrol post that already has somebody stopped. Both
-# cues are pure flavor -- the mechanical truth is the catch suppression in
-# ``EnforcementPost.tableau_busy_at`` -- so neither is gated on the
-# enforcement-presence ambience scale, the same way a staffed post's ordinary
-# marked-unit pass never is.
+# cues scale with the enforcement-presence ambience exactly the way the
+# ordinary marked-unit pass does (``_play_marked_unit_pass``) -- presence is
+# ambience only, never whether a cue plays at all. The mechanical truth is
+# the catch suppression in ``EnforcementPost.tableau_busy_at``, which
+# neither cue's volume touches.
 TABLEAU_SHOULDER_PAN = 0.85  # hard right: US traffic keeps the shoulder there
 TABLEAU_SIREN_VOLUME = 0.7
 TABLEAU_PASS_VOLUME = 0.7
@@ -344,9 +345,10 @@ class EnforcementWatchMixin:
         This is the one enforcement sound that means "not about you": a
         trooper who already has a customer is off the hunt.
         """
-        self._play_enforcement_marker(volume=TABLEAU_SIREN_VOLUME, pan=TABLEAU_SHOULDER_PAN)
+        volume = min(1.0, TABLEAU_SIREN_VOLUME * min(1.4, self._ambience_scale()))
+        self._play_enforcement_marker(volume=volume, pan=TABLEAU_SHOULDER_PAN)
         self._schedule_sound(
-            PASS_MARKER_LEAD_S, "events/police_siren", TABLEAU_SIREN_VOLUME, TABLEAU_SHOULDER_PAN
+            PASS_MARKER_LEAD_S, "events/police_siren", volume, TABLEAU_SHOULDER_PAN
         )
 
     def _play_tableau_pass(self, post) -> None:
@@ -363,10 +365,24 @@ class EnforcementWatchMixin:
         self.ctx.audio.play("traffic/car_pass", volume=volume * 0.85, pan=TABLEAU_SHOULDER_PAN)
 
     def _update_tableaus(self, previous_mi: float) -> None:
-        """Fire the siren lead and the shoulder pass for every tableau post."""
+        """Fire the siren lead and the shoulder pass for every tableau post.
+
+        Deferred, then dropped for the trip, never layered on top of the
+        player's own encounter. While the cab already has a demand on the
+        driver -- their own pull-over, a hazard, a ramp, a microsleep, the
+        arrival menu -- this is skipped outright: a trigger mile crossed
+        during a busy frame is simply never revisited once the cab is quiet
+        again, so the cue is lost rather than replayed out of place. A
+        post that has already had its own look at the player (``declined``,
+        set whether it let them go or wrote them up) never runs its tableau
+        cue either: the story is already about the player, not "somebody
+        else."
+        """
+        if self._enforcement_busy():
+            return
         position = self.trip.position_mi
         for post in self.trip.posts:
-            if not post.tableau:
+            if not post.tableau or post.declined:
                 continue
             siren_trigger = post.at_mi - TABLEAU_SIREN_LEAD_MI
             if post.id not in self._tableau_siren_ids and previous_mi < siren_trigger <= position:

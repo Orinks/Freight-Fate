@@ -107,11 +107,13 @@ INSPECTING_KINDS = frozenset({KIND_CMV, KIND_FIXED_SCALE})
 TABLEAU_KINDS = frozenset({KIND_MEDIAN, KIND_ROVING, KIND_URBAN})
 
 # Chance a staffed patrol-kind post is already working a stop, independent of
-# whether the driver ever speeds near it. Loosely calibrated against how many
-# patrol-kind posts a route already carries (BASE_STAFFED x the spacing
-# tables): converting roughly half of them keeps a tableau to about one every
-# hour or so of driving on a patrol-covered interstate -- rare enough to stay
-# an event, not wallpaper.
+# whether the driver ever speeds near it. Converting roughly half of the
+# eligible posts lands well inside the brief's actual bar -- "rare enough to
+# stay an event, not wallpaper" -- without hitting a literal once an hour:
+# measured over seeded long interstate runs (Chicago-Denver, Dallas-Houston)
+# it comes out closer to one tableau every two to three hours, and closer to
+# one an hour on a short, post-dense route. "Hour-ish" was a loose gesture in
+# the brief, not a target this pins.
 TABLEAU_CHANCE = 0.55
 
 # How far before the post the siren becomes audible, and how far this post's

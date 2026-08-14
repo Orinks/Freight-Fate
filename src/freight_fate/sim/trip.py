@@ -2887,6 +2887,14 @@ class Trip(TripRoadEventMixin, TripTrafficMixin, EnforcementPostMixin):
         ahead, post, urgency = max(candidates, key=lambda c: (c[2], -c[0]))
         if urgency <= 0.0:
             return
+        if post.tableau and (self.pull_over_active or post.declined):
+            # The tableau line waits its turn: not while the player's own
+            # stop is running (their own trooper owns the CB right now), and
+            # not for a post that already had its own look at the player --
+            # "a bear has somebody stopped" makes no sense from the trooper
+            # who just personally wrote them up. Dropped, not spoken later:
+            # this candidate already consumed its slot in ``_heads_up_seen``.
+            return
         self._cb_calls_made += 1
         # A post already working a tableau gets its own line -- a bear with a
         # customer, not a bear on the hunt -- but rides the same rationed

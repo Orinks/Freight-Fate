@@ -210,6 +210,97 @@ def test_the_tableau_cues_play_once_each(monkeypatch):
         app.shutdown()
 
 
+def test_tableau_audio_defers_while_the_players_own_stop_is_active(monkeypatch):
+    """Never layered on the player's own siren: the tableau waits its turn.
+
+    A tableau siren and the player's own pull-over siren share the same
+    ``events/police_siren`` asset, so playing the tableau's while the player
+    is mid-stop would sound like a second trooper on top of their own. The
+    missed cue is dropped for good rather than replayed once the stop
+    clears -- the shoulder pass still fires normally afterward, proving the
+    whole tableau was not disabled, only the one cue that fell inside the
+    busy window.
+    """
+    from freight_fate.app import App
+    from freight_fate.sim.enforcement_posts import TABLEAU_SIREN_LEAD_MI
+
+    app = App()
+    try:
+        d = _driving(app)
+        played = _capture_audio(app, monkeypatch)
+        post = always_observing_post(at_mi=6.0, kind=KIND_MEDIAN)
+        post.tableau = True
+        d.trip.posts = [post]
+
+        d.trip.position_mi = 6.0 - TABLEAU_SIREN_LEAD_MI - 0.1
+        d._enforcement_prev_mi = d.trip.position_mi
+        d._pull_over = "lights"  # the player's own stop is running
+        d.trip.position_mi = 6.0 - TABLEAU_SIREN_LEAD_MI + 0.1
+        d._update_enforcement_watch(0.1)
+        d._service_pending_sounds(1.0)
+        assert "events/police_siren" not in played
+
+        d._pull_over = None
+        d.trip.position_mi = 6.1
+        d._update_enforcement_watch(0.1)
+        d._service_pending_sounds(1.0)
+        assert "events/police_siren" not in played  # dropped, not replayed late
+        assert "traffic/trooper_pass" in played
+        assert "traffic/car_pass" in played
+    finally:
+        app.shutdown()
+
+
+def test_a_post_that_already_caught_the_player_never_also_runs_its_tableau(monkeypatch):
+    """The trooper who just wrote the player up is not also busy with somebody else.
+
+    A tableau post can still independently observe and stop the player
+    before its own busy window is reached (or after it ends); ``declined``
+    is set either way, whether the post let the player go or pulled them
+    over. Once that has happened this post's own tableau story -- "a bear
+    has somebody stopped" -- no longer makes sense, so neither cue fires.
+    """
+    from freight_fate.app import App
+
+    app = App()
+    try:
+        d = _driving(app)
+        played = _capture_audio(app, monkeypatch)
+        post = always_observing_post(at_mi=6.0, kind=KIND_MEDIAN)
+        post.tableau = True
+        post.declined = True  # this post already had its own look at the player
+        d.trip.posts = [post]
+
+        d.trip.position_mi = 4.0
+        d._enforcement_prev_mi = 4.0
+        d.trip.position_mi = 6.1  # cross both trigger miles in one frame
+        d._update_enforcement_watch(0.1)
+        d._service_pending_sounds(1.0)
+        assert "events/police_siren" not in played
+        assert "traffic/trooper_pass" not in played
+        assert "traffic/car_pass" not in played
+    finally:
+        app.shutdown()
+
+
+def test_the_tableau_cb_line_waits_for_the_players_own_stop_and_a_declined_post():
+    """The CB speech-side twin of the audio deferral above."""
+    trip = _trip()
+    post = always_observing_post(at_mi=trip.position_mi + 2.0, kind=KIND_MEDIAN)
+    post.tableau = True
+    trip.posts = [post]
+
+    trip.pull_over_active = True
+    trip._check_enforcement_heads_up()
+    assert not any("somebody stopped" in e.message for e in trip._events)
+
+    trip.pull_over_active = False
+    trip._heads_up_seen.discard(post.id)
+    post.declined = True
+    trip._check_enforcement_heads_up()
+    assert not any("somebody stopped" in e.message for e in trip._events)
+
+
 # --- presence targets -------------------------------------------------------
 
 
