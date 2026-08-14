@@ -229,12 +229,38 @@ not distributed in this repository.
 | Grits and Gasoline | `music/radio_blues_grits_and_gasoline.ogg` | Suno-composed greasy roadside blues rocker for the in-game radio (2026-07 Zero batch) |
 | Paycheck Friday | `music/radio_blues_paycheck_friday.ogg` | Suno-composed swinging horn-section jump blues for the in-game radio (2026-07 Zero batch) |
 | Levee Moon | `music/radio_blues_levee_moon.ogg` | Suno-composed smoky riverside delta soul for the in-game radio (2026-07 Zero batch) |
+| Jukebox in the Corner | `music/radio_oldies_jukebox_in_the_corner.opus` | ElevenLabs Eleven Music-composed bright doo-wop number about a truck-stop jukebox for the in-game radio (2026-08-14 station-identity batch) |
+| Milkshake Moon | `music/radio_oldies_milkshake_moon.opus` | ElevenLabs Eleven Music-composed slow-dance doo-wop ballad for the in-game radio (2026-08-14 station-identity batch) |
+| Chrome Fins | `music/radio_oldies_chrome_fins.opus` | ElevenLabs Eleven Music-composed surf-rock instrumental about chrome tailfins for the in-game radio (2026-08-14 station-identity batch) |
+| Hop in the Hardtop | `music/radio_oldies_hop_in_the_hardtop.opus` | ElevenLabs Eleven Music-composed jump-blues rock and roll dance number for the in-game radio (2026-08-14 station-identity batch) |
+| Soda Shop Sweetheart | `music/radio_oldies_soda_shop_sweetheart.opus` | ElevenLabs Eleven Music-composed girl-group pop song with wall-of-sound sparkle for the in-game radio (2026-08-14 station-identity batch) |
+| Drive-In Picture Show | `music/radio_oldies_drive_in_picture_show.opus` | ElevenLabs Eleven Music-composed twist-beat rocker about drive-in movie nights for the in-game radio (2026-08-14 station-identity batch) |
+| Transistor Summer | `music/radio_oldies_transistor_summer.opus` | ElevenLabs Eleven Music-composed sunny beach-pop tune about a pocket radio for the in-game radio (2026-08-14 station-identity batch) |
+| Sock Hop Saturday | `music/radio_oldies_sock_hop_saturday.opus` | ElevenLabs Eleven Music-composed piano-pounding rock and roll dance-floor filler for the in-game radio (2026-08-14 station-identity batch) |
+| Wide Is the River | `music/radio_gospel_wide_is_the_river.opus` | ElevenLabs Eleven Music-composed full-choir southern gospel song about crossing over for the in-game radio (2026-08-14 station-identity batch) |
+| Set My Burden Down | `music/radio_gospel_set_my_burden_down.opus` | ElevenLabs Eleven Music-composed slow-building spiritual of release and rest for the in-game radio (2026-08-14 station-identity batch) |
+| Morning Will Come | `music/radio_gospel_morning_will_come.opus` | ElevenLabs Eleven Music-composed gentle piano gospel ballad of hope before dawn for the in-game radio (2026-08-14 station-identity batch) |
+| Camino de Flores | `music/radio_tejano_camino_de_flores.opus` | ElevenLabs Eleven Music-composed flower-strewn Tejano cumbia for the road home, sung in Spanish, for the in-game radio (2026-08-14 station-identity batch) |
+| Mi Troquita | `music/radio_tejano_mi_troquita.opus` | ElevenLabs Eleven Music-composed affectionate Tejano conjunto polka about a beloved truck, sung in Spanish, for the in-game radio (2026-08-14 station-identity batch) |
+| Luna de Laredo | `music/radio_tejano_luna_de_laredo.opus` | ElevenLabs Eleven Music-composed romantic border-moon Tejano ranchera ballad, sung in Spanish, for the in-game radio (2026-08-14 station-identity batch) |
+| Afterglow Avenue | `music/radio_synthwave_afterglow_avenue.opus` | ElevenLabs Eleven Music-composed dreamwave song with soft vocals about the last mile home for the in-game radio (2026-08-14 station-identity batch) |
 
 ## Radio Hosts And Static
 
+The 2026-08-14 station-identity batch gave all 19 in-game stations a real
+host, three station IDs (two sung jingles and a spoken legal ID), and a
+shared pool of fictional ads. Every host line, ad read, and legal-ID script
+is original writing for Freight Fate; no real station, host, or business is
+represented.
+
 | Sound | File | Source |
 | --- | --- | --- |
-| Roadhouse host breaks | `music/host_roadhouse_01.ogg` … `music/host_roadhouse_06.ogg` | ElevenLabs TTS host segments for the Freight Fate Roadhouse |
-| Night Line host breaks | `music/host_nightline_01.ogg` … `music/host_nightline_06.ogg` | ElevenLabs TTS host segments for the Freight Fate Night Line |
+| Roadhouse host breaks | `music/host_roadhouse_01.opus` … `music/host_roadhouse_08.opus` | ElevenLabs TTS host segments for the Freight Fate Roadhouse; regenerated 2026-08-14 with a new host voice |
+| Night Line host breaks | `music/host_nightline_01.opus` … `music/host_nightline_08.opus` | ElevenLabs TTS host segments for the Freight Fate Night Line; regenerated 2026-08-14 |
+| Host breaks, other 17 stations (The Rawhide, Big Wheel Country, Prairie Line, Big Sky Country, The Grind, Desert Rock, Chrome, The Ridge, The Sound, The Delta, Bayou Soul, Southern Soul, Nashville After Hours, Cruisin' Gold, Glory Road, Puro Tejano, Neon Drive) | `music/host_<station>_01.opus` … `music/host_<station>_08.opus` | ElevenLabs TTS host segments, eight per station, 2026-08-14 station-identity batch |
+| Station jingles, all 19 stations | `music/id_<station>_01.opus`, `music/id_<station>_02.opus` | ElevenLabs Eleven Music sung station jingles, two per station, 2026-08-14 station-identity batch |
+| Station legal IDs, all 19 stations | `music/id_<station>_03.opus` | ElevenLabs TTS spoken legal ID, run through the in-repo imaging chain (tools/radio_generate_content.py) and mixed with the imaging beds below, 2026-08-14 station-identity batch |
+| Radio ad reads (18 fictional ads: travel centers, a diner, tire and truck-wash shops, insurance, boots, headsets, and more) | `music/ad_*.opus` | ElevenLabs TTS ad reads for the shared radio ad rotation, 2026-08-14 station-identity batch |
+| Radio imaging beds | `radio/imaging/radio_imaging_impact.ogg`, `radio_imaging_riser.ogg`, `radio_imaging_shimmer.ogg`, `radio_imaging_stinger.ogg`, `radio_imaging_whoosh_long.ogg`, `radio_imaging_whoosh_short.ogg` | ElevenLabs Sound Effects API beds, mixed under the spoken station legal IDs by the in-repo imaging chain, 2026-08-14 station-identity batch |
 | Radio static burst | `radio/static_burst.ogg` | Procedurally generated band-limited noise (tools/generate_radio.py) |
 | Overspeed dash chime | `vehicle/overspeed_chime.ogg` | Procedurally synthesized two-partial bell strike (deterministic numpy/soundfile recipe, 2026-07-14) |

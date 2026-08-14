@@ -481,8 +481,9 @@ onto exit signalling.
       Cruisin' Gold 105.9 Oklahoma City (oldies), WGLR Glory Road 91.5
       Birmingham (gospel), KTJO Puro Tejano 107.1 San Antonio (tejano), and
       KNDR Neon Drive 88.5 Las Vegas (synthwave). The sound pack split: the
-      music/ subtree moved into its own `music.pak`, and `sounds.pak` now
-      carries the shorter station-identity and imaging clips. Song pools
+      music/ subtree, including all the new host clips, station IDs, and
+      ads, moved into its own `music.pak`; `sounds.pak` picked up only the
+      six new radio imaging beds. Song pools
       are partial by owner decision (ElevenLabs quota exhausted until
       2026-09-06): oldies is a full 8, gospel and tejano have 3 of 8, and
       synthwave has 1 of 8 -- see the follow-up bullets below.
@@ -1258,9 +1259,11 @@ onto exit signalling.
 - [x] **Country-originals music batch (2026-08-08).** Thirty-one tracks
       from the owner's originals zip: five day beds, eight night beds, ten
       country-station songs, the seven-track Nashville After Hours jazz
-      station, and a seventh menu milestone bed at level 21. The repo now
-      ships `sounds.pak` only (LFS); the loose `assets/sounds` tree stays
-      builder-local and tests fall back to the pack on clean clones.
+      station, and a seventh menu milestone bed at level 21. At the time the
+      repo shipped `sounds.pak` only (LFS); the loose `assets/sounds` tree
+      stayed builder-local and tests fell back to the pack on clean clones.
+      The music/ subtree later split into its own `music.pak` with the
+      2026-08-14 station-identity batch.
 - [x] **Freight Fate stations play everywhere (2026-08-08).** The twelve
       fictional stations plus Nashville After Hours are always available --
       no transmitter bubbles, every mode -- grouped with Roadhouse and

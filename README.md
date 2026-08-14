@@ -447,8 +447,9 @@ when every commit in the change set is non-user-facing.
 
 ### Sound pack for source builds
 
-Career 1.9 stores its approved encrypted sound pack at
-`src/freight_fate/sounds.pak` using Git Large File Storage (Git LFS).
+Career 1.9 stores its approved encrypted sound and music packs at
+`src/freight_fate/sounds.pak` and `src/freight_fate/music.pak` using Git
+Large File Storage (Git LFS).
 
 On Windows, install Git LFS from PowerShell with Winget:
 
@@ -468,12 +469,13 @@ On macOS or Linux, follow the
 run `git lfs install` once for your user account before cloning or updating the
 project.
 
-A plain `git fetch` updates Git references and the small LFS pointer, but does
-not update the working tree or download the pack. With Git LFS installed, a
-normal `git pull` or checkout downloads the pack automatically; a separate
-`git lfs pull` is not normally needed. If `sounds.pak` contains text beginning
-with `version https://git-lfs.github.com/spec/v1` instead of binary pack data,
-run `git lfs install` followed by `git lfs pull` from the repository root.
+A plain `git fetch` updates Git references and the small LFS pointers, but
+does not update the working tree or download the packs. With Git LFS
+installed, a normal `git pull` or checkout downloads both packs
+automatically; a separate `git lfs pull` is not normally needed. If
+`sounds.pak` or `music.pak` contains text beginning with
+`version https://git-lfs.github.com/spec/v1` instead of binary pack data, run
+`git lfs install` followed by `git lfs pull` from the repository root.
 
 GitHub Actions uses an LFS-enabled checkout for jobs that test or package the
 project. Loose fallback cues remain under `src/freight_fate/assets/sounds/`. See
