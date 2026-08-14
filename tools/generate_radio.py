@@ -199,6 +199,24 @@ def _pick_voice(key: str, station: str) -> tuple[str, str]:
     raise SystemExit("No ElevenLabs voices available on this account")
 
 
+def _match_account_voice(candidate: str, voices: list[dict]) -> str | None:
+    """Case-insensitive match against an account voice list.
+
+    Account voices carry descriptive display names ("Clyde - Radio
+    Announcer"), so the primary match is on the name prefix before a
+    " - " separator; an exact full-name match is the fallback tier.
+    """
+    target = candidate.strip().casefold()
+    for v in voices:
+        prefix = v.get("name", "").split(" - ", 1)[0].strip()
+        if prefix.casefold() == target:
+            return v.get("voice_id", "")
+    for v in voices:
+        if v.get("name", "").strip().casefold() == target:
+            return v.get("voice_id", "")
+    return None
+
+
 def _search_library(key: str, name: str) -> list[dict]:
     req = urllib.request.Request(
         LIBRARY_SEARCH_API.format(query=urllib.parse.quote(name)),
@@ -250,11 +268,16 @@ def provision_voices(key: str, *, dry_run: bool = False) -> dict[str, str]:
 
     req = urllib.request.Request(VOICES_API, headers={"xi-api-key": key})
     with urllib.request.urlopen(req, timeout=60) as resp:
-        have = {v["name"]: v["voice_id"] for v in json.load(resp).get("voices", [])}
+        voices = json.load(resp).get("voices", [])
 
     resolved: dict[str, str] = {}
     for name, fallbacks in wanted.items():
-        match = next(((c, have[c]) for c in (name, *fallbacks) if c in have), None)
+        match = None
+        for candidate in (name, *fallbacks):
+            voice_id = _match_account_voice(candidate, voices)
+            if voice_id:
+                match = (candidate, voice_id)
+                break
         if match:
             candidate, voice_id = match
             resolved[name] = voice_id
