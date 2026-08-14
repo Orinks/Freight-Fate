@@ -27,6 +27,11 @@
   instantly, even mid descent, and Learn game sounds plays back whichever
   one you picked.
 
+- **Radio volume now changes from the wheel.** Hold Shift with Page Up or
+  Page Down (or Shift with semicolon or apostrophe) to raise or lower the
+  in-cab radio volume in ten percent steps, spoken as it moves, without
+  leaving the driving seat.
+
 ### Changed
 
 - **Pressing Escape now acts instead of explaining.** At the terminal,

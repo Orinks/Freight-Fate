@@ -1296,6 +1296,7 @@ Use these keys when you need status without leaving the road:
 | Page Down / Page Up | Tune the radio to the next or previous station. |
 | ; / ' | The same, on keyboards where the Page keys are awkward: semicolon tunes to the previous station and apostrophe to the next. |
 | Ctrl with any tune key | Jump to the previous or next dial category: route playlist, Freight Fate stations, your playlists, favorites, terrestrial, AFN, satellite, international, fallback, web radio, and other stations. |
+| Shift with any tune key | Change the in-cab radio volume in 10 percent steps: up on Page Up or Shift+semicolon, down on Page Down or Shift+apostrophe. Works whether the radio is on or off, and speaks the new level. |
 | O | Save or unsave the current station as a favorite. Favorites become their own early dial category. |
 | Y | Speak radio station, source, signal or fallback state, volume, and streamer-safe status. |
 | Tab | Grouped driving status screens. |
@@ -1567,7 +1568,9 @@ fallback, web radio, and other stations -- and Ctrl with any of the tune keys
 jumps between them, so twenty-five AFN stations never again stand between you
 and the local dial. The tune keys are Page Down and Page Up, with semicolon
 and apostrophe as a second pair for keyboards where the Page keys are
-awkward. The bracket keys are message review, not the radio.
+awkward. Shift with any of those four keys changes the radio volume instead
+of tuning, in 10 percent steps, spoken as it moves, and works whether the
+radio is on or off. The bracket keys are message review, not the radio.
 
 The real side of the dial is large: hundreds of public stations across the
 lower forty-eight, international public broadcasters that are always in

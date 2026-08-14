@@ -50,6 +50,12 @@ FRINGE_BED_SIGNAL = SIGNAL_FULL_VOLUME
 FRINGE_BED_MAX_VOLUME = 0.35
 PICKET_SIGNAL = STATIC_SIGNAL_THRESHOLD
 PICKET_DUCK = 0.12
+
+# Shift plus the dial keys steps radio_volume by this much -- the same
+# 10-percent grid the Settings > Audio "In-cab radio volume" row uses
+# (main_menu.py's _volume helper), so the wheel and the menu can never
+# disagree about a reachable value.
+RADIO_VOLUME_STEP = 0.1
 # Flutter rate bounds: parked multipath barely moves (slow wander floor);
 # the ceiling is perceptual -- past ~9 events a second it just reads as
 # noise, and the one-shot mixer would thrash.
@@ -2272,6 +2278,26 @@ class DrivingUpdateMixin:
             self.ctx.profile.radio_favorites = sorted(self.radio.favorite_ids)
             self.ctx.save_profile()
         self.ctx.say(message)
+
+    def _adjust_radio_volume(self, direction: int) -> None:
+        """Shift with the dial keys: 10-percent steps on the same grid and
+        rounding as the Settings > Audio "In-cab radio volume" row, so the
+        two controls never disagree about a reachable value. Unlike the
+        plain tune and Ctrl category-jump keys, this works whether the
+        radio is on or off and whether the engine is running: the setting
+        is what it is regardless of power state."""
+        s = self.ctx.settings
+        value = max(0.0, min(1.0, round(s.radio_volume + RADIO_VOLUME_STEP * direction, 2)))
+        s.radio_volume = value
+        s.save()
+        self._apply_radio_volume()
+        pct = round(value * 100)
+        if pct <= 0:
+            self.ctx.say("Radio volume muted.")
+        elif pct >= 100:
+            self.ctx.say("Radio volume all the way up.")
+        else:
+            self.ctx.say(f"Radio volume {pct} percent.")
 
     def _sync_weather_source(self) -> None:
         real = self.ctx.settings.real_weather

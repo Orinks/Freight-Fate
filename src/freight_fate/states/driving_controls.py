@@ -144,14 +144,21 @@ class DrivingControlsMixin:
             # secondary dial keys: Page keys are Fn chords on many laptops and
             # missing on 60 percent keyboards, and there is no key remapping.
             # The dial originally lived on the brackets, which message review
-            # now uses to switch categories.
+            # now uses to switch categories. Shift raises or lowers the radio
+            # volume instead of tuning (Jerry's request) -- checked only when
+            # Ctrl is absent, so Ctrl+Shift still falls through to Ctrl's own
+            # category jump exactly as it did before Shift existed.
             if event.mod & pygame.KMOD_CTRL:
                 self._jump_radio_category(-1)
+            elif event.mod & pygame.KMOD_SHIFT:
+                self._adjust_radio_volume(1)
             else:
                 self._tune_radio(-1)
         elif key in (pygame.K_PAGEDOWN, pygame.K_QUOTE):
             if event.mod & pygame.KMOD_CTRL:
                 self._jump_radio_category(1)
+            elif event.mod & pygame.KMOD_SHIFT:
+                self._adjust_radio_volume(-1)
             else:
                 self._tune_radio(1)
         elif key == pygame.K_y:
@@ -292,7 +299,11 @@ class DrivingControlsMixin:
             "M toggles the in-cab radio. Page Down tunes to the next station "
             "and Page Up to the previous; the semicolon and apostrophe keys "
             "still work. "
-            "With Control the tuning keys jump a whole category, O saves or unsaves the "
+            "With Control the tuning keys jump a whole category. With Shift "
+            "they change the radio volume instead, in 10 percent steps, up "
+            "on Page Up or Shift semicolon and down on Page Down or Shift "
+            "apostrophe, whether the radio is on or off. "
+            "O saves or unsaves the "
             "current station as a favorite, "
             "and Y speaks radio station, volume, and streamer-safe status. "
             "The Tab status menu includes a radio screen with the currently "

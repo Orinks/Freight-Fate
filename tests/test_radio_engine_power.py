@@ -85,3 +85,149 @@ def test_radio_keys_speak_the_no_power_line_with_the_engine_off(denver_driving):
     driving._speak_radio_status()
     assert spoken[-1].startswith("Radio on.")
     assert spoken[-1].endswith("The engine is off, so the radio has no power right now.")
+
+
+def _shift_key_event(key, unicode_=""):
+    import pygame
+
+    return pygame.event.Event(pygame.KEYDOWN, key=key, mod=pygame.KMOD_SHIFT, unicode=unicode_)
+
+
+def test_shift_page_up_raises_radio_volume_ten_percent(denver_driving):
+    app, driving, _played_music, _stopped, spoken = denver_driving
+    import pygame
+
+    app.ctx.settings.radio_volume = 0.25
+
+    driving.handle_event(_shift_key_event(pygame.K_PAGEUP))
+
+    assert app.ctx.settings.radio_volume == pytest.approx(0.35)
+    assert spoken[-1] == "Radio volume 35 percent."
+
+
+def test_shift_page_down_lowers_radio_volume_ten_percent(denver_driving):
+    app, driving, _played_music, _stopped, spoken = denver_driving
+    import pygame
+
+    app.ctx.settings.radio_volume = 0.35
+
+    driving.handle_event(_shift_key_event(pygame.K_PAGEDOWN))
+
+    assert app.ctx.settings.radio_volume == pytest.approx(0.25)
+    assert spoken[-1] == "Radio volume 25 percent."
+
+
+def test_shift_semicolon_and_quote_mirror_the_page_keys(denver_driving):
+    app, driving, _played_music, _stopped, spoken = denver_driving
+    import pygame
+
+    app.ctx.settings.radio_volume = 0.25
+
+    driving.handle_event(_shift_key_event(pygame.K_SEMICOLON, ";"))
+    assert app.ctx.settings.radio_volume == pytest.approx(0.35)
+    assert spoken[-1] == "Radio volume 35 percent."
+
+    driving.handle_event(_shift_key_event(pygame.K_QUOTE, "'"))
+    assert app.ctx.settings.radio_volume == pytest.approx(0.25)
+    assert spoken[-1] == "Radio volume 25 percent."
+
+
+def test_shift_page_down_clamps_at_muted(denver_driving):
+    app, driving, _played_music, _stopped, spoken = denver_driving
+    import pygame
+
+    app.ctx.settings.radio_volume = 0.05
+
+    driving.handle_event(_shift_key_event(pygame.K_PAGEDOWN))
+
+    assert app.ctx.settings.radio_volume == pytest.approx(0.0)
+    assert spoken[-1] == "Radio volume muted."
+
+    # A second press at the floor stays put, not negative.
+    driving.handle_event(_shift_key_event(pygame.K_PAGEDOWN))
+    assert app.ctx.settings.radio_volume == pytest.approx(0.0)
+    assert spoken[-1] == "Radio volume muted."
+
+
+def test_shift_page_up_clamps_at_all_the_way_up(denver_driving):
+    app, driving, _played_music, _stopped, spoken = denver_driving
+    import pygame
+
+    app.ctx.settings.radio_volume = 0.95
+
+    driving.handle_event(_shift_key_event(pygame.K_PAGEUP))
+
+    assert app.ctx.settings.radio_volume == pytest.approx(1.0)
+    assert spoken[-1] == "Radio volume all the way up."
+
+    # A second press at the ceiling stays put, not over 100.
+    driving.handle_event(_shift_key_event(pygame.K_PAGEUP))
+    assert app.ctx.settings.radio_volume == pytest.approx(1.0)
+    assert spoken[-1] == "Radio volume all the way up."
+
+
+def test_shift_volume_works_with_the_engine_off_and_radio_off(denver_driving):
+    """The setting is what it is regardless of power state: no "engine is
+    off" line, unlike the plain tune and category keys."""
+    app, driving, _played_music, _stopped, spoken = denver_driving
+    import pygame
+
+    assert driving.truck.engine_on is False
+    driving.radio.enabled = False
+    app.ctx.settings.radio_volume = 0.25
+
+    driving.handle_event(_shift_key_event(pygame.K_PAGEUP))
+
+    assert app.ctx.settings.radio_volume == pytest.approx(0.35)
+    assert spoken[-1] == "Radio volume 35 percent."
+    assert "no power" not in spoken[-1].lower()
+
+
+def test_shift_volume_applies_live_while_the_radio_plays(denver_driving):
+    app, driving, played_music, _stopped, _spoken = denver_driving
+    import pygame
+
+    driving.truck.start_engine()
+    driving._update_audio(0.0)
+    assert played_music
+    app.ctx.settings.radio_volume = 0.25
+
+    driving.handle_event(_shift_key_event(pygame.K_PAGEUP))
+
+    assert app.ctx.audio.music_volume == pytest.approx(0.35)
+
+
+def test_plain_and_ctrl_tune_behavior_unchanged_by_shift(denver_driving):
+    """Adding the Shift branch must not disturb the existing plain tune or
+    Ctrl category-jump behavior, and Ctrl+Shift still leaves the volume
+    alone -- Ctrl wins, exactly like before Shift existed."""
+    import pygame
+
+    app, driving, _played_music, _stopped, spoken = denver_driving
+    driving.truck.start_engine()
+    driving._update_audio(0.0)
+    before_volume = app.ctx.settings.radio_volume
+    before_station = driving.radio.station_id
+
+    driving.handle_event(
+        pygame.event.Event(pygame.KEYDOWN, key=pygame.K_PAGEDOWN, mod=0, unicode="")
+    )
+    assert driving.radio.station_id != before_station
+    assert app.ctx.settings.radio_volume == pytest.approx(before_volume)
+
+    driving.handle_event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_PAGEUP, mod=0, unicode=""))
+    assert driving.radio.station_id == before_station
+    assert app.ctx.settings.radio_volume == pytest.approx(before_volume)
+
+    category_before = driving.radio.station_id
+    driving.handle_event(
+        pygame.event.Event(
+            pygame.KEYDOWN,
+            key=pygame.K_PAGEDOWN,
+            mod=pygame.KMOD_CTRL | pygame.KMOD_SHIFT,
+            unicode="",
+        )
+    )
+    assert app.ctx.settings.radio_volume == pytest.approx(before_volume)
+    assert "Radio volume" not in spoken[-1]
+    assert driving.radio.station_id != category_before

@@ -328,8 +328,10 @@ class DrivingStatusScreenState(MenuState):
             ),
             "Page Down tunes to the next station and Page Up to the previous; "
             "the semicolon and apostrophe keys still work. Jump categories "
-            "with Control held, and press O to save the current station as a "
-            "favorite. Press M to toggle radio from the cab.",
+            "with Control held, or change the radio volume in 10 percent "
+            "steps with Shift held, whether the radio is on or off. Press O "
+            "to save the current station as a favorite. Press M to toggle "
+            "radio from the cab.",
         ]
         if d.radio.favorite_ids:
             lines.append(f"Favorites saved: {len(d.radio.favorite_ids)}.")
