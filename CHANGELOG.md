@@ -490,6 +490,11 @@
   ahead again. Cruise also stays out of it from the moment you take the
   destination exit until you have actually stopped.
 
+- **The cloud backup list now tells you how to fix a conflict.** A career
+  whose backups stopped because another computer changed the cloud copy now
+  says, in the list and inside the career, that opening it lets you choose
+  which copy to keep.
+
 - **Cloud backup no longer goes quiet after the cloud copy of a career
   disappears.** If your account's cloud storage was reset, or you deleted a
   career's cloud backup from another computer, this computer still remembered

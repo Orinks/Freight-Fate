@@ -199,6 +199,7 @@ class CloudBackupState(MenuState):
                     bits.append("from an earlier version of Freight Fate")
                 if name in conflicts:
                     bits.append("needs attention: this computer has a different copy")
+                    bits.append("Open this career to choose which copy to keep")
                 items.append(
                     MenuItem(
                         ". ".join(bits),
@@ -406,7 +407,10 @@ class CloudSlotState(MenuState):
     def _conflict_label(self, conflict: dict) -> str:
         summary = conflict.get("latestSummary")
         detail = f" The cloud copy is {summary}." if summary else ""
-        return f"This career needs attention: the cloud copy changed on another computer.{detail}"
+        return (
+            f"This career needs attention: the cloud copy changed on another computer."
+            f"{detail} The choices below pick which copy to keep."
+        )
 
     # -- actions ----------------------------------------------------------------
 
