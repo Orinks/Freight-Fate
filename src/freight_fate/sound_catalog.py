@@ -588,6 +588,11 @@ SELF_EXPLANATORY: dict[str, str] = {
     "engine/high": "As the idle loop.",
     "engine/start": "An engine starting, immediately after you started it.",
     "engine/shutdown": "An engine stopping, immediately after you stopped it.",
+    "engine/jake_1600_synth": (
+        "The classic jake voice: the same three staged entries play it when "
+        "Settings, Audio has Jake brake voice set to classic, through the "
+        "same key-resolution routing the drive uses. Not a second cue."
+    ),
     "weather/*": "Rain, wind, snow and thunder name themselves.",
     "ambient/*": "Scene, not a cue: no decision attached.",
     "music/*": "Songs.",

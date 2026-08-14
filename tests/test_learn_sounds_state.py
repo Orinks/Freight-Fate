@@ -1,5 +1,7 @@
 """Learn game sounds: the demo sequencer and the screen that drives it."""
 
+import pytest
+
 from freight_fate.sound_catalog import Cue, SoundEntry
 
 
@@ -595,6 +597,43 @@ def test_engine_brake_stages_are_learnable_and_named_by_stage():
     ]
     for entry in category.entries[:3]:
         assert entry.plays[0].key == "engine/jake_1600"
+
+
+def test_jake_stage_demo_resolves_through_the_jake_voice_setting():
+    """The screen must demonstrate whichever jake the player chose in
+    Settings, through the real audio engine's key routing -- not a fake, and
+    not assumed just because the setting flips live during a drive."""
+    from freight_fate import audio as audio_module
+    from freight_fate.sound_catalog import CATALOG
+    from freight_fate.states.learn_sounds import LearnSoundCategoryState
+
+    app = _app()
+    try:
+        if app.ctx.audio.backend_name == "none":
+            pytest.skip("no audio backend available")
+        category = next(c for c in CATALOG if c.name == "Engine brake, speed and shifting")
+        state = LearnSoundCategoryState(app.ctx, category)
+        state.enter()
+        state.index = next(
+            i for i, e in enumerate(category.entries) if e.name == "Engine brake, stage one"
+        )
+
+        app.ctx.settings.jake_voice = "real"
+        app.ctx.apply_volumes()
+        state.activate()
+        loop = app.ctx.audio._impl._loops.get(audio_module.CH_ALERT)
+        assert loop is not None
+        assert loop[0] == audio_module.JAKE_RECORDED_KEY
+
+        app.ctx.settings.jake_voice = "classic"
+        app.ctx.apply_volumes()
+        state.demo.stop()
+        state.activate()
+        loop = app.ctx.audio._impl._loops.get(audio_module.CH_ALERT)
+        assert loop is not None
+        assert loop[0] == audio_module.JAKE_CLASSIC_KEY
+    finally:
+        app.shutdown()
 
 
 def test_both_entry_points_push_the_same_screen(monkeypatch):

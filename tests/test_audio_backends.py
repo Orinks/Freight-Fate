@@ -493,6 +493,62 @@ def test_engine_voice_setting_switches_models_live(monkeypatch):
     a.shutdown()
 
 
+def test_both_1600_jake_cuts_ship():
+    """The future jake A/B needs both cuts in the loose tree and the pack --
+    the routing has nothing to route to otherwise."""
+    from pathlib import Path
+
+    from asset_helpers import asset_exists
+
+    sounds_root = Path(__file__).parents[1] / "src" / "freight_fate" / "assets" / "sounds"
+    assert asset_exists(sounds_root, audio.JAKE_RECORDED_KEY)
+    assert asset_exists(sounds_root, audio.JAKE_CLASSIC_KEY)
+
+
+def test_jake_voice_setting_routes_the_synth_key_and_applies_live(monkeypatch):
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    try:
+        # has_asset resolves the key the player-facing catalog and the real
+        # drive both use -- the routing must be invisible to callers.
+        assert a.has_asset(audio.JAKE_RECORDED_KEY)
+        a.set_jake_voice(True)  # classic, before anything is sounding
+        assert a.has_asset(audio.JAKE_RECORDED_KEY)
+
+        a.set_jake_voice(False)  # real again
+        a.start_loop(audio.CH_JAKE, audio.JAKE_RECORDED_KEY, volume=0.5)
+        loop = a._impl._loops[audio.CH_JAKE]
+        assert loop[0] == audio.JAKE_RECORDED_KEY
+
+        a.set_jake_voice(True)  # classic, live, mid-growl
+        loop = a._impl._loops[audio.CH_JAKE]
+        assert loop[0] == audio.JAKE_CLASSIC_KEY
+        assert loop[1] == 0.5  # the level carries across the re-voice
+
+        a.set_jake_voice(False)  # back to real, live
+        loop = a._impl._loops[audio.CH_JAKE]
+        assert loop[0] == audio.JAKE_RECORDED_KEY
+
+        a.stop_loop(audio.CH_JAKE)
+    finally:
+        a.shutdown()
+
+
+def test_jake_voice_leaves_other_engine_bands_alone(monkeypatch):
+    """Only the 1600 band has a classic alternative; any other key on the
+    jake channel (a different rpm band) must not be touched by the toggle."""
+    monkeypatch.delenv("FREIGHT_FATE_AUDIO_BACKEND", raising=False)
+    a = AudioEngine()
+    try:
+        a.start_loop(audio.CH_JAKE, "engine/jake_1800", volume=0.4)
+        a.set_jake_voice(True)
+        loop = a._impl._loops[audio.CH_JAKE]
+        assert loop[0] == "engine/jake_1800"
+        a.stop_loop(audio.CH_JAKE)
+    finally:
+        a.shutdown()
+
+
 def test_classic_voice_prefers_the_original_recording(monkeypatch):
     # Settings "classic" promises the 1.8.x engine. Its cut ships under its
     # own key (engine_classic/idle) precisely because the licensed overlay
@@ -793,6 +849,7 @@ def _bank_facade(monkeypatch, present: set[str]):
     a._bank_order = {}
     a._last_bank_key = {}
     a._asset_known = {}
+    a._jake_voice_classic = False
     monkeypatch.setattr(
         audio, "_asset_bytes", lambda key, exts: (b"d", "ogg") if key in present else None
     )

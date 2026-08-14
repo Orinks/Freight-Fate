@@ -118,6 +118,12 @@ ENGINE_BANDS = (
     ("engine/high", 1900.0),
 )
 ENGINE_BAND_KEYS = frozenset(key for key, _native in ENGINE_BANDS)
+
+# The jake voice A/B: only the 1600 rpm band has a classic alternative -- it
+# is the one representative cut kept from the original synthesized jake, not
+# a full second ring -- so this is a single key swap, not a per-band table.
+JAKE_RECORDED_KEY = "engine/jake_1600"
+JAKE_CLASSIC_KEY = "engine/jake_1600_synth"
 # Crossfades live in a narrow window around each adjacent pair's GEOMETRIC
 # midpoint (log-space), this fraction of the gap wide. Two things follow:
 # a cut never plays far from its recorded speed (rate excursions stay under
@@ -1467,8 +1473,7 @@ class _BassBackend:
                 stream = self._sfx_stream(ENGINE_CLASSIC_LOOP_KEY, looping=True)
                 if stream is None:
                     log.warning(
-                        "Classic engine cut %s is not in this build; "
-                        "using %s pitched instead",
+                        "Classic engine cut %s is not in this build; using %s pitched instead",
                         ENGINE_CLASSIC_LOOP_KEY,
                         ENGINE_LOOP_KEY,
                     )
@@ -2087,6 +2092,7 @@ class AudioEngine:
         self._logged_volumes: tuple[float | None, ...] | None = None
         self._alert_hold_key = ""  # continuous alert tone being re-asserted
         self._alert_hold_s = 0.0  # time left before the hold lapses
+        self._jake_voice_classic = False  # Settings: real (recorded) or classic (synth)
         log.info("Audio backend: %s", self._impl.name)
 
     @staticmethod
@@ -2138,9 +2144,21 @@ class AudioEngine:
 
     # -- one-shots and loops ------------------------------------------------------
 
+    def _voice_key(self, key: str) -> str:
+        """Route a sound key through the player's chosen jake voice.
+
+        Every caller -- the real drive and the Learn game sounds demo alike --
+        asks for ``engine/jake_1600`` by name; this is the one place that
+        swaps it for the classic synth cut when the setting calls for it, so
+        neither call site needs to know the A/B exists.
+        """
+        if self._jake_voice_classic and key == JAKE_RECORDED_KEY:
+            return JAKE_CLASSIC_KEY
+        return key
+
     def play(self, key: str, volume: float = 1.0, pan: float = 0.0) -> None:
         """Play a one-shot. ``pan`` -1.0 = full left, 0 = center, 1.0 = right."""
-        self._impl.play(key, volume, pan)
+        self._impl.play(self._voice_key(key), volume, pan)
 
     def set_engine_duck(self, duck: float) -> None:
         """Shift-gap disengage: scale the engine bed below the load floor.
@@ -2186,6 +2204,24 @@ class AudioEngine:
             impl.engine_start(play_start_sound=False)
             impl.set_engine_rpm(rpm, throttle)
 
+    def set_jake_voice(self, classic: bool) -> None:
+        """Pick the jake voice: the recorded 1600 jake or the classic synth.
+
+        Applies live -- a jake growl already sounding on the descent restarts
+        on the new cut in place, the same instant A/B the engine voice
+        setting gives.
+        """
+        if self._jake_voice_classic == classic:
+            return
+        self._jake_voice_classic = classic
+        loop = getattr(self._impl, "_loops", {}).get(CH_JAKE)
+        if loop is None:
+            return
+        key, volume = loop[0], loop[1]
+        if key not in (JAKE_RECORDED_KEY, JAKE_CLASSIC_KEY):
+            return  # some other band's cut: no classic alternative to swap to
+        self.start_loop(CH_JAKE, JAKE_RECORDED_KEY, volume=volume, fade_ms=120)
+
     def has_asset(self, key: str) -> bool:
         """Whether a sound key resolves (pack, licensed overlay, or loose).
 
@@ -2193,6 +2229,7 @@ class AudioEngine:
         the committed one -- or to stay silent where silence was the old
         behavior -- on a clean clone.
         """
+        key = self._voice_key(key)
         if key in _GENERATED:
             # Synthesized cues are published after this engine was built, so a
             # miss cached before registration must never be the final answer.
@@ -2242,7 +2279,7 @@ class AudioEngine:
         self.play(key, volume * random.uniform(0.85, 1.17), pan)
 
     def start_loop(self, channel: int, key: str, volume: float = 1.0, fade_ms: int = 300) -> None:
-        self._impl.start_loop(channel, key, volume, fade_ms)
+        self._impl.start_loop(channel, self._voice_key(key), volume, fade_ms)
 
     def set_loop_volume(self, channel: int, volume: float) -> None:
         self._impl.set_loop_volume(channel, volume)

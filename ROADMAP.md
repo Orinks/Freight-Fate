@@ -402,15 +402,15 @@ onto exit signalling.
       future synth-versus-recorded jake toggle is a pure code change.
       Length/SHA pins updated. build_release verifies the classic cut
       is in any staged pack.
-- [ ] **Jake voice A/B pending the owner's ear; provenance
-      accepted-on-word.** The 1600 zone is the one recorded jake
-      (f737b416); Josh says someone recorded it -- a donation. OWED: the
-      recordist's name from Josh for a CREDITS.md row (the
-      reviewable-licensing standard). The other five zones are synth,
-      so listen for a character seam crossing 1600 rpm under engine
-      braking. Both cuts ship in the pack; if the owner wants the
-      option, wire a jake toggle on the engine-voice settings pattern.
-      If provenance sours, jake_1600 reverts to the synth original.
+- [x] **Jake voice A/B -- 2026-08-14.** Settings, Audio now carries a
+      Jake brake voice row (recorded/classic) right after Engine voice,
+      same live-flip pattern, default recorded. The routing lives at
+      key resolution in `audio.py` (`AudioEngine._voice_key`), so both
+      the drive and Learn game sounds demo whichever voice is chosen
+      without either call site knowing the A/B exists. Provenance on
+      the recorded 1600 (f737b416) is still accepted-on-word; OWED: the
+      recordist's name from Josh for a CREDITS.md row. If provenance
+      sours, the classic option is already wired as the fallback.
 - [x] **Sealed-cab transfer on the engine voice -- 2026-08-13.** The
       "engine sounds external" complaint was a missing cabin transfer
       function, not the voice. cab_filter.py applies the owner-approved

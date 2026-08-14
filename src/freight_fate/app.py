@@ -460,6 +460,7 @@ class GameContext:
             ui=self.settings.ui_volume,
         )
         self.audio.set_engine_voice(self.settings.engine_voice == "classic")
+        self.audio.set_jake_voice(self.settings.jake_voice == "classic")
 
     def apply_presence(self) -> None:
         """Reflect the Discord presence setting (e.g. after a settings change)."""

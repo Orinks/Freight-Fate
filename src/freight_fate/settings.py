@@ -158,6 +158,10 @@ class Settings:
     # (release builds carry the licensed cuts); "classic" keeps the original
     # single pitched loop for players who prefer the familiar sound.
     engine_voice: str = "real"  # real / classic
+    # The jake brake voice: "real" plays the recorded 1600 jake (the engine
+    # brake growl players hear today); "classic" swaps in the synthesized
+    # growl the game shipped before it, kept as the future jake A/B.
+    jake_voice: str = "real"  # real / classic
     automatic_transmission: bool = True  # friendlier default for new players
     # Simple keeps the familiar hold-through-stop behavior. Deliberate requires
     # a release and second press before an automatic changes direction.
@@ -517,6 +521,8 @@ class Settings:
             s.refresh_driving_assistance_preset()
         if s.automatic_direction_changes not in ("simple", "deliberate"):
             s.automatic_direction_changes = "simple"
+        if s.jake_voice not in ("real", "classic"):
+            s.jake_voice = "real"
         # The overspeed alert briefly shipped as a bool; map old saves over.
         if s.overspeed_warning is True:
             s.overspeed_warning = "on"

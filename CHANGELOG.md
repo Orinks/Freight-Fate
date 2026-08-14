@@ -21,6 +21,11 @@
   of Las Vegas. The new stations start with a handful of songs each and
   their playlists will keep growing in the next builds.
 
+- **The jake brake sound is now choosable.** Settings, Audio has a new Jake
+  brake voice row: recorded, the real jake growl, or classic, the
+  synthesized growl from earlier versions. It switches instantly, even mid
+  descent, and Learn game sounds plays back whichever one you picked.
+
 ### Changed
 
 - **The truck dealer is now one menu choice away.** The drive to city

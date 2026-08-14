@@ -462,6 +462,43 @@ def test_invalid_automatic_direction_setting_falls_back_to_simple():
     assert Settings.load().automatic_direction_changes == "simple"
 
 
+def test_settings_menu_toggles_jake_voice_and_persists():
+    from freight_fate.app import App
+    from freight_fate.settings import Settings
+
+    app = App()
+    try:
+        assert app.ctx.settings.jake_voice == "real"
+        cat = open_settings_category(app, "Audio")
+        while not cat.items[cat.index].text.startswith("Jake brake voice"):
+            cat.handle_event(key_event(pygame.K_DOWN))
+
+        assert cat.items[cat.index].text == "Jake brake voice: recorded"
+        assert cat.current_help().startswith("Recorded is the real 1600 jake")
+        cat.handle_event(key_event(pygame.K_RETURN))
+        assert app.ctx.settings.jake_voice == "classic"
+        assert Settings.load().jake_voice == "classic"
+        assert cat.items[cat.index].text == "Jake brake voice: classic"
+
+        cat.handle_event(key_event(pygame.K_LEFT))
+        assert app.ctx.settings.jake_voice == "real"
+        assert cat.items[cat.index].text == "Jake brake voice: recorded"
+    finally:
+        app.shutdown()
+
+
+def test_invalid_jake_voice_setting_falls_back_to_real():
+    import json
+
+    from freight_fate.settings import Settings
+
+    settings = Settings()
+    settings.path.parent.mkdir(parents=True, exist_ok=True)
+    settings.path.write_text(json.dumps({"jake_voice": "mystery"}), encoding="utf-8")
+
+    assert Settings.load().jake_voice == "real"
+
+
 def test_settings_menu_saves_each_change():
     from freight_fate.app import App
     from freight_fate.settings import Settings

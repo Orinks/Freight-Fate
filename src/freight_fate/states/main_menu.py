@@ -1325,6 +1325,18 @@ class SettingsCategoryState(MenuState):
                     ),
                 ),
                 MenuItem(
+                    lambda: (
+                        f"Jake brake voice: {'recorded' if s.jake_voice == 'real' else 'classic'}"
+                    ),
+                    lambda: self._toggle_jake_voice(1),
+                    help=(
+                        "Recorded is the real 1600 jake, the engine brake growl "
+                        "the road plays today. Classic is the synthesized growl "
+                        "from earlier versions. Changes apply immediately, even "
+                        "while driving."
+                    ),
+                ),
+                MenuItem(
                     lambda: f"Music volume: {round(s.music_volume * 100)} percent",
                     lambda: self._volume("music_volume", 0.1),
                     help="Menu and facility background music volume.",
@@ -1448,6 +1460,7 @@ class SettingsCategoryState(MenuState):
                     lambda d: self._volume("weather_volume", 0.1 * d),
                     lambda d: self._volume("engine_volume", 0.1 * d),
                     self._toggle_engine_voice,
+                    self._toggle_jake_voice,
                     lambda d: self._volume("music_volume", 0.1 * d),
                     lambda d: self._volume("radio_volume", 0.1 * d),
                     self._toggle_radio_streamer_safe,
@@ -1904,6 +1917,13 @@ class SettingsCategoryState(MenuState):
         s = self.ctx.settings
         s.engine_voice = "classic" if s.engine_voice == "real" else "real"
         self.ctx.apply_volumes()  # re-voices a running engine in place
+        self._announce()
+
+    def _toggle_jake_voice(self, _d: int = 1) -> None:
+        """Flip between the recorded jake and the classic synth, live."""
+        s = self.ctx.settings
+        s.jake_voice = "classic" if s.jake_voice == "real" else "real"
+        self.ctx.apply_volumes()  # re-voices a sounding jake growl in place
         self._announce()
 
     def _toggle_radio_streamer_safe(self, _d: int) -> None:
