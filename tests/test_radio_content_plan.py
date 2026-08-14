@@ -192,13 +192,26 @@ def test_song_plan_keys_lengths_and_prompts_are_sound():
 
 
 def test_song_plan_never_collides_with_the_shipped_catalog():
+    """A plan entry may only match the catalog by being generation's own work.
+
+    Once tools/generate_radio.py --plan-songs writes a pool song and a later
+    task wires its key into music.py, the plan entry and the catalog track
+    are the same song by design -- key and title both match on purpose, and
+    that song stays in SONG_PLAN so a re-run of the generation pass still
+    resumes cleanly (it skips anything already on disk). What this guards
+    against is a *different* key or title accidentally landing on something
+    already shipped, which the generation pass would silently overwrite or
+    the catalog would silently duplicate.
+    """
     from freight_fate.music import ALL_MUSIC_TRACKS
 
-    shipped_keys = {track.key for track in ALL_MUSIC_TRACKS}
-    shipped_titles = {track.title for track in ALL_MUSIC_TRACKS}
+    shipped_title_by_key = {track.key: track.title for track in ALL_MUSIC_TRACKS}
+    shipped_titles = set(shipped_title_by_key.values())
     for songs in SONG_PLAN.values():
         for song in songs:
-            assert song.key not in shipped_keys, song.key
+            if song.key in shipped_title_by_key:
+                assert shipped_title_by_key[song.key] == song.title, song.key
+                continue
             assert song.title not in shipped_titles, song.title
 
 

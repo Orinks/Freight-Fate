@@ -101,7 +101,7 @@ def test_regional_playlists_have_generated_music_on_disk():
 
 def test_host_segments_have_generated_voice_clips_on_disk():
     sounds = resources.files("freight_fate.assets") / "sounds" / "music"
-    assert len(ALL_HOST_SEGMENTS) == 12
+    assert len(ALL_HOST_SEGMENTS) == 152
     for segment in ALL_HOST_SEGMENTS:
         assert asset_exists(sounds, segment.key), segment.key
     static = resources.files("freight_fate.assets") / "sounds" / "radio"

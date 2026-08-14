@@ -184,7 +184,7 @@ def test_ff_music_stations_share_the_ff_dial_group():
         for station in DEFAULT_RADIO_CATALOG
         if station.playlist and not station.real_stream and station.id != SAFE_ROUTE_PLAYLIST
     ]
-    assert len(playlist_backed) == 14
+    assert len(playlist_backed) == 18
     assert {_dial_group(station) for station in playlist_backed} == {1}
     assert all(station.always_available for station in playlist_backed)
 

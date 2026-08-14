@@ -527,7 +527,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "country",
-      "always_available": true
+      "always_available": true,
+      "host": "rawhide"
     },
     {
       "id": "whwy-nashville",
@@ -545,7 +546,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "country",
-      "always_available": true
+      "always_available": true,
+      "host": "bigwheel"
     },
     {
       "id": "kpln-kansas-city",
@@ -563,7 +565,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "country",
-      "always_available": true
+      "always_available": true,
+      "host": "prairieline"
     },
     {
       "id": "kbsk-billings",
@@ -581,7 +584,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "country",
-      "always_available": true
+      "always_available": true,
+      "host": "bigsky"
     },
     {
       "id": "wgrx-chicago",
@@ -599,7 +603,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "classic_rock",
-      "always_available": true
+      "always_available": true,
+      "host": "grind"
     },
     {
       "id": "kdrt-phoenix",
@@ -617,7 +622,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "classic_rock",
-      "always_available": true
+      "always_available": true,
+      "host": "desertrock"
     },
     {
       "id": "kchm-los-angeles",
@@ -635,7 +641,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "classic_rock",
-      "always_available": true
+      "always_available": true,
+      "host": "chrome"
     },
     {
       "id": "krdg-denver",
@@ -653,7 +660,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "classic_rock",
-      "always_available": true
+      "always_available": true,
+      "host": "ridge"
     },
     {
       "id": "ksnd-seattle",
@@ -671,7 +679,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "classic_rock",
-      "always_available": true
+      "always_available": true,
+      "host": "sound"
     },
     {
       "id": "wdlt-memphis",
@@ -689,7 +698,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "blues",
-      "always_available": true
+      "always_available": true,
+      "host": "delta"
     },
     {
       "id": "wbyu-new-orleans",
@@ -707,7 +717,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "blues",
-      "always_available": true
+      "always_available": true,
+      "host": "bayou"
     },
     {
       "id": "wsol-atlanta",
@@ -725,7 +736,8 @@
       "real_stream": false,
       "supported": true,
       "playlist": "blues",
-      "always_available": true
+      "always_available": true,
+      "host": "southernsoul"
     },
     {
       "id": "wnah-nashville",
@@ -735,7 +747,8 @@
       "source": "Freight Fate original station; Suno-composed Nashville jazz-crossover instrumentals (2026-08 originals batch)",
       "source_type": "regional",
       "always_available": true,
-      "playlist": "jazz"
+      "playlist": "jazz",
+      "host": "afterhours"
     },
     {
       "id": "afn-global-fans",
@@ -16193,6 +16206,82 @@
       "real_stream": true,
       "supported": true,
       "notes": "Clemson University student freeform. Mount on station's own wsbf.net domain (HTTP 200 audio/mpeg). Coords = Clemson SC. Non-NPR community radio. BASS live 2/3 (serial retry) 2026-07-27."
+    },
+    {
+      "id": "kgol-oklahoma-city",
+      "call_sign": "KGOL",
+      "name": "Cruisin' Gold 105.9",
+      "format": "oldies",
+      "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
+      "source_type": "regional",
+      "station_type": "regional",
+      "market": "Oklahoma City",
+      "region": "south_central",
+      "frequency_mhz": 105.9,
+      "site_elev_ft": 1200,
+      "safe_for_streaming": true,
+      "real_stream": false,
+      "supported": true,
+      "playlist": "oldies",
+      "always_available": true,
+      "host": "cruisingold"
+    },
+    {
+      "id": "wglr-birmingham",
+      "call_sign": "WGLR",
+      "name": "Glory Road 91.5",
+      "format": "gospel",
+      "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
+      "source_type": "regional",
+      "station_type": "regional",
+      "market": "Birmingham",
+      "region": "southeast",
+      "frequency_mhz": 91.5,
+      "site_elev_ft": 660,
+      "safe_for_streaming": true,
+      "real_stream": false,
+      "supported": true,
+      "playlist": "gospel",
+      "always_available": true,
+      "host": "gloryroad"
+    },
+    {
+      "id": "ktjo-san-antonio",
+      "call_sign": "KTJO",
+      "name": "Puro Tejano 107.1",
+      "format": "tejano",
+      "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
+      "source_type": "regional",
+      "station_type": "regional",
+      "market": "San Antonio",
+      "region": "texas",
+      "frequency_mhz": 107.1,
+      "site_elev_ft": 800,
+      "safe_for_streaming": true,
+      "real_stream": false,
+      "supported": true,
+      "playlist": "tejano",
+      "always_available": true,
+      "host": "purotejano"
+    },
+    {
+      "id": "kndr-las-vegas",
+      "call_sign": "KNDR",
+      "name": "Neon Drive 88.5",
+      "format": "synthwave",
+      "source": "fictional Freight Fate regional station, ElevenLabs-composed music",
+      "source_type": "regional",
+      "station_type": "regional",
+      "market": "Las Vegas",
+      "region": "desert_southwest",
+      "frequency_mhz": 88.5,
+      "site_elev_ft": 2030,
+      "safe_for_streaming": true,
+      "real_stream": false,
+      "supported": true,
+      "playlist": "synthwave",
+      "always_available": true,
+      "host": "neondrive"
     }
   ]
 }
