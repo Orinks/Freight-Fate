@@ -153,13 +153,28 @@ def test_asset_bytes_reads_loose_files_without_pack():
 def test_committed_pack_has_freight_fate_header():
     assert assets_pack.DEFAULT_PACK_PATH.exists()
     pack_bytes = assets_pack.DEFAULT_PACK_PATH.read_bytes()
-    # Repacked 2026-08-13 for the classic engine voice: 279 entries -- adds
-    # engine_classic/idle.ogg, renames the stray jake_1600 .bak to an honest
-    # engine/jake_1600_synth.wav (the future jake A/B), drops nothing else.
-    assert len(pack_bytes) == 225_274_388
+    # Repacked 2026-08-14: split the music/ subtree out into its own
+    # music.pak (see test_committed_music_pack_has_freight_fate_header) and
+    # added the radio station-identity content -- hosts, station IDs, ads,
+    # imaging SFX, 15 new songs. sounds.pak now holds everything else: 159
+    # entries, all 153 pre-split non-music entries preserved.
+    assert len(pack_bytes) == 7_775_520
     assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
     assert hashlib.sha256(pack_bytes).hexdigest() == (
-        "13f677b18a0162dca5996238b74d252859db49ac805506cb115d46bd80cd9f32"
+        "ac097bf70fb6c9c29861076eb754095a0a2636cf02d22a147275dae267a27ab1"
+    )
+
+
+def test_committed_music_pack_has_freight_fate_header():
+    assert assets_pack.DEFAULT_MUSIC_PACK_PATH.exists()
+    pack_bytes = assets_pack.DEFAULT_MUSIC_PACK_PATH.read_bytes()
+    # Split out of sounds.pak on 2026-08-14 alongside the radio
+    # station-identity batch: 356 entries, the music/ subtree plus the new
+    # station jingles and songs.
+    assert len(pack_bytes) == 261_358_688
+    assert pack_bytes.startswith(assets_pack.PACK_MAGIC)
+    assert hashlib.sha256(pack_bytes).hexdigest() == (
+        "3471842988e2bc01c259395d0b4d885b4c85a3a2d628efddf7a73006fd471c0a"
     )
 
 

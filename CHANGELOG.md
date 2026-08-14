@@ -9,6 +9,18 @@
   offer to pay it all, half, or everything above a 200 dollar fuel cushion.
   Clearing the balance stops settlement collection on the spot.
 
+- **Every Freight Fate station now sounds like a real station.** All the
+  regional stations have their own host between songs, sung station jingles,
+  spoken station IDs, and fictional commercials for the road: travel
+  centers, diners, tire shops, and more. The Roadhouse has a new voice, and
+  the Night Line host settles in even closer after dark.
+
+- **Four new stations join the dial.** Cruisin' Gold plays oldies out of
+  Oklahoma City, Glory Road brings southern gospel from Birmingham, Puro
+  Tejano runs Tejano out of San Antonio, and Neon Drive hums synthwave out
+  of Las Vegas. The new stations start with a handful of songs each and
+  their playlists will keep growing in the next builds.
+
 ### Changed
 
 - **The truck dealer is now one menu choice away.** The drive to city

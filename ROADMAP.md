@@ -472,18 +472,31 @@ onto exit signalling.
       contour (was ~52%) and a 2x reach multiplier for compression, smear
       ruling intact at the true edge. Spec:
       `docs/superpowers/specs/2026-08-13-event-pacing-radio-reach-design.md`.
-- [ ] **Station identity machinery landed (break slots for hosts, IDs, and
-      ads) -- content generation to follow.** Fictional stations now weave
-      host chatter, station IDs, and format-tagged ad reads into scheduled
-      breaks between songs, with fade timing tuned per slot and a graceful
-      fallback to plain host breaks when a pool is empty. The host/ID/ad
-      tables themselves are still empty; the next pass fills them with real
-      generated content per the asset contract. The content plan is now
-      authored (`tools/radio_content_plan.py` + `radio_content_pools.py`):
-      full casting with fallbacks for all 19 stations, 8 host lines and 3
-      IDs each, an 18-spot ad rotation, song batches for four new formats
-      plus top-ups, and imaging SFX prompts -- generation and catalog
-      wiring still to come.
+- [x] **Station identity content generated and wired in -- landed
+      2026-08-14.** All 19 stations now have a real host (8 clips each), 3
+      station IDs (2 sung jingles and a spoken legal ID), and a shared pool
+      of 18 fictional ads for the road: travel centers, diners, tire shops,
+      and more. The Roadhouse got a new host voice, and Night Line's host
+      clips were regenerated. Four new stations joined dial group 1: KGOL
+      Cruisin' Gold 105.9 Oklahoma City (oldies), WGLR Glory Road 91.5
+      Birmingham (gospel), KTJO Puro Tejano 107.1 San Antonio (tejano), and
+      KNDR Neon Drive 88.5 Las Vegas (synthwave). The sound pack split: the
+      music/ subtree moved into its own `music.pak`, and `sounds.pak` now
+      carries the shorter station-identity and imaging clips. Song pools
+      are partial by owner decision (ElevenLabs quota exhausted until
+      2026-09-06): oldies is a full 8, gospel and tejano have 3 of 8, and
+      synthwave has 1 of 8 -- see the follow-up bullets below.
+- [ ] **Finish the station song batch after the ElevenLabs quota resets
+      (2026-09-06).** Gospel +5, tejano +5, synthwave +7, plus top-ups
+      (8-10 each) for country, classic rock, blues, and jazz, and 2-3 new
+      Night Line ballads. `tools/generate_radio.py --plan-songs` supports
+      capped waves via `--limit`.
+- [ ] **Ad music beds.** Light instrumental beds mixed under the ad reads,
+      with a ducking pass in the imaging chain; the ad scripts only need a
+      cheap re-TTS pass to carry them.
+- [ ] **Owner listening pass over the generated station content.** Only
+      programmatic QC has run so far; ear-check the hosts, IDs, ads, and
+      new songs and regenerate any misfires by key.
 - [x] **Second round of Dropbox tester findings -- landed 2026-08-12.**
       Passing now has a way back: a one-shot "Clear of the box truck.
       Right lane open." spoken from the same occupancy check that decides
