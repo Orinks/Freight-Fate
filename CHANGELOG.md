@@ -347,6 +347,12 @@
 
 ### Fixed
 
+- **Changing lanes no longer makes cruise slow down for the car you are
+  leaving behind.** With adaptive cruise or the follow cue on, passing used
+  to have the truck ease off mid-maneuver for slower traffic in the lane you
+  were pulling out of. Now, for as long as the lane change is underway, the
+  truck drives toward the lane you are entering instead.
+
 - **When a cloud backup is refused by the server, the game now says so
   instead of blaming your connection.** Retrying "Keep this computer's
   save and back it up" after the server rejected a save used to say

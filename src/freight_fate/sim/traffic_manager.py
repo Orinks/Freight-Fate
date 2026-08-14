@@ -169,6 +169,12 @@ class TrafficManager:
         # The driving state mirrors the player's discrete lane here each
         # frame so same-lane checks and spoken relative lanes stay honest.
         self.player_lane = 0
+        # Mirrored alongside player_lane: the lane a tap-change is moving
+        # INTO, or None the rest of the time. Lead selection reads this while
+        # it is set -- mid-change, the origin lane is the one being left, and
+        # cruise/the follow cue matching its slow lead is what used to make
+        # the truck ease off for traffic it was passing.
+        self.player_lane_target: int | None = None
 
     def _seed_key(self) -> str:
         route_key = "|".join(
@@ -324,9 +330,14 @@ class TrafficManager:
     def lead_vehicle(self, position_mi: float, truck_speed_mph: float) -> TrafficContext | None:
         # TrafficVehicle intentionally matches the NPCVehicle runtime surface
         # used by TrafficContext while the traffic bubble is split out.
+        # Mid-change, reason about the lane being entered, not the one being
+        # left -- otherwise a lead in the origin lane keeps capping the
+        # target for the whole maneuver, exactly when the driver wants to
+        # accelerate into the open lane.
+        lane = self.player_lane if self.player_lane_target is None else self.player_lane_target
         nearest: tuple[float, TrafficVehicle] | None = None
         for vehicle in self.vehicles:
-            if vehicle.lane != self.player_lane:
+            if vehicle.lane != lane:
                 continue
             gap_mi = vehicle.position_mi - position_mi
             if gap_mi < -vehicle.length_mi or gap_mi > TRAFFIC_LOOKAHEAD_MI:

@@ -120,6 +120,57 @@ def test_lead_vehicle_follows_the_player_into_the_left_lane():
     assert context.lead.key == "left"
 
 
+def test_lead_vehicle_ignores_the_origin_lane_mid_change():
+    """A lane change underway (``player_lane_target`` set) reasons about the
+    lane being entered, not the one being left -- otherwise a lead in the
+    origin lane keeps capping cruise for the whole maneuver."""
+    manager = _manager()
+    manager.vehicles = [
+        TrafficVehicle("origin", 5.3, 42.0, 42.0, 0, "braking", "car"),
+    ]
+
+    manager.player_lane = 0
+    manager.player_lane_target = 1  # changing into the left lane
+    context = manager.lead_vehicle(position_mi=5.0, truck_speed_mph=60.0)
+
+    assert context is None
+
+
+def test_lead_vehicle_finds_a_lead_already_in_the_destination_lane():
+    manager = _manager()
+    manager.vehicles = [
+        TrafficVehicle("origin", 5.3, 42.0, 42.0, 0, "braking", "car"),
+        TrafficVehicle("dest", 5.4, 40.0, 40.0, -1, "braking", "car", lane=1),
+    ]
+
+    manager.player_lane = 0
+    manager.player_lane_target = 1
+    context = manager.lead_vehicle(position_mi=5.0, truck_speed_mph=60.0)
+
+    assert context is not None
+    assert context.lead.key == "dest"
+
+
+def test_lead_vehicle_reverts_to_origin_lane_once_the_change_target_clears():
+    """No latching: once the lane layer stops reporting a change (an abort,
+    or completion handled by ``player_lane`` itself), lead selection is back
+    to the origin lane immediately."""
+    manager = _manager()
+    manager.vehicles = [
+        TrafficVehicle("origin", 5.3, 42.0, 42.0, 0, "braking", "car"),
+    ]
+
+    manager.player_lane = 0
+    manager.player_lane_target = 1
+    assert manager.lead_vehicle(position_mi=5.0, truck_speed_mph=60.0) is None
+
+    manager.player_lane_target = None  # aborted
+    context = manager.lead_vehicle(position_mi=5.0, truck_speed_mph=60.0)
+
+    assert context is not None
+    assert context.lead.key == "origin"
+
+
 def test_lead_vehicle_keeps_overlapping_vehicle_in_player_lane():
     manager = _manager()
     manager.vehicles = [

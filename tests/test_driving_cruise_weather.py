@@ -1002,6 +1002,131 @@ def test_adaptive_cruise_follows_npc_traffic(monkeypatch):
 
 
 @pytest.mark.smoke
+def test_adaptive_cruise_ignores_the_lane_being_left_mid_change(monkeypatch):
+    """Tester report: with an automated lane change underway, cruise kept
+    following the slow lead in the lane being LEFT for the whole maneuver --
+    "I'm changing lanes, fucking drive." Mid-change, lead selection follows
+    the destination lane, so a lead still sitting in the origin lane no
+    longer caps the target."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import NPCVehicle
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        open_limits(driving)
+        driving.trip.traffic_manager.vehicles = [
+            NPCVehicle(
+                "npc:origin", driving.trip.position_mi + 0.08, 44.0, 44.0, 0, "braking_traffic"
+            )
+        ]
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 29.0  # ~65 mph
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving.lane.lane == 0
+        driving._tap_lane_change(1)  # start the pass into the left lane
+        assert driving._lane_change_target == 1
+
+        for _ in range(10):
+            driving.update(1 / 60)
+
+        assert driving._lane_change_target == 1  # the change is still underway
+        assert not driving._acc_following
+        assert driving.truck.brake == 0.0
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_adaptive_cruise_follows_the_lane_being_entered_mid_change(monkeypatch):
+    """The other half of the fix: a slow lead already sitting in the
+    DESTINATION lane must still cap the target mid-change. Lead selection
+    follows the lane being entered -- it does not simply stop following."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import NPCVehicle
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        open_limits(driving)
+        driving.trip.traffic_manager.vehicles = [
+            NPCVehicle(
+                "npc:dest",
+                driving.trip.position_mi + 0.08,
+                44.0,
+                44.0,
+                -1,
+                "braking_traffic",
+                lane=1,
+            )
+        ]
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 29.0
+        driving.handle_event(key_event(pygame.K_k))
+        assert driving.lane.lane == 0
+        driving._tap_lane_change(1)
+        assert driving._lane_change_target == 1
+
+        for _ in range(10):
+            driving.update(1 / 60)
+
+        assert driving._lane_change_target == 1  # the change is still underway
+        assert driving._acc_following
+        assert "Traffic ahead, adaptive cruise reducing speed." in events
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
+def test_adaptive_cruise_reverts_to_origin_lane_when_a_change_is_aborted(monkeypatch):
+    """No latching: drifting back out of a change must hand lead selection
+    back to the origin lane the instant the lane layer stops reporting a
+    change, restoring the origin-lane lead's cap."""
+    from freight_fate.app import App
+    from freight_fate.sim.trip import NPCVehicle
+
+    app = App()
+    events = []
+    try:
+        driving = start_drive(app)
+        quiet_trip(driving)
+        monkeypatch.setattr(app.ctx, "say_event", speech_stub(events))
+        open_limits(driving)
+        driving.trip.traffic_manager.vehicles = [
+            NPCVehicle(
+                "npc:origin", driving.trip.position_mi + 0.08, 44.0, 44.0, 0, "braking_traffic"
+            )
+        ]
+        driving.handle_event(key_event(pygame.K_e))
+        driving.truck.transmission.gear = 10
+        driving.truck.velocity_mps = 29.0
+        driving.handle_event(key_event(pygame.K_k))
+        driving._tap_lane_change(1)
+
+        for _ in range(10):
+            driving.update(1 / 60)
+        assert not driving._acc_following  # destination lane is clear mid-change
+
+        driving._lane_change_target = None  # the driver drifted back -- aborted
+        for _ in range(10):
+            driving.update(1 / 60)
+
+        assert driving.lane.lane == 0  # still in the origin lane
+        assert driving._acc_following  # following the origin-lane lead again
+        assert "Traffic ahead, adaptive cruise reducing speed." in events
+    finally:
+        app.shutdown()
+
+
+@pytest.mark.smoke
 def test_adaptive_cruise_ignores_distant_slower_traffic(monkeypatch):
     """A slower vehicle far out in the traffic bubble must not drag cruise down:
     matching a distant lead's speed parked the truck at the bubble edge, where

@@ -401,6 +401,9 @@ class DrivingUpdateMixin:
         # Same-lane traffic checks and spoken relative lanes follow the
         # player's discrete lane, so mirror it before the trip advances.
         self.trip.traffic_manager.player_lane = self.lane.lane
+        # And while a tap-change is underway, lead selection follows the
+        # lane it is moving into instead -- see TrafficManager.lead_vehicle.
+        self.trip.traffic_manager.player_lane_target = self._lane_change_target
         # Tell the trip model which stop's exit is signaled or on the ramp so its
         # plan-cancelled warning can tell a driver who is taking the exit from one
         # who blew past it. Set before trip.update (which runs _check_stops) and
