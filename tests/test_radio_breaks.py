@@ -27,28 +27,53 @@ def test_station_ads_filters_by_format_tag(monkeypatch):
     assert radio_content.station_ads("jazz") == ()
 
 
+STATION = "brk-fixture"
+HOST_COUNT = 8
+ID_COUNT = 3
+AD_COUNT = 4
+
+
 def _patched_pools(monkeypatch):
-    hosts = tuple(MusicTrack(f"host_x_{i:02d}", f"h{i}", "", 5.0) for i in range(1, 9))
-    ids = tuple(MusicTrack(f"id_x_{i:02d}", f"i{i}", "", 10.0) for i in range(1, 4))
-    ads = tuple(MusicTrack(f"ad_y_{i:02d}", f"a{i}", "", 25.0) for i in range(1, 5))
+    hosts = tuple(MusicTrack(f"host_x_{i:02d}", f"h{i}", "", 5.0) for i in range(1, HOST_COUNT + 1))
+    ids = tuple(MusicTrack(f"id_x_{i:02d}", f"i{i}", "", 10.0) for i in range(1, ID_COUNT + 1))
+    ads = tuple(MusicTrack(f"ad_y_{i:02d}", f"a{i}", "", 25.0) for i in range(1, AD_COUNT + 1))
     monkeypatch.setattr("freight_fate.music.STATION_HOST_SEGMENTS", {"x": hosts}, raising=False)
-    monkeypatch.setattr(radio_content, "STATION_IDS", {"x": ids})
+    monkeypatch.setattr(radio_content, "STATION_IDS", {STATION: ids})
     monkeypatch.setattr(radio_content, "AD_SPOTS", ads)
     monkeypatch.setattr(radio_content, "AD_FORMAT_TAGS", {t.key: ("country",) for t in ads})
 
 
+def _breaks(count, station=STATION, host="x"):
+    return [radio_content.plan_break(station, host, "country", "seed", i) for i in range(count)]
+
+
 def test_break_pattern_cycles_and_is_deterministic(monkeypatch):
     _patched_pools(monkeypatch)
-    kinds = []
-    for i in range(8):
-        first = radio_content.plan_break("x", "country", "seed", i)
-        assert first == radio_content.plan_break("x", "country", "seed", i)
-        kinds.append(first)
+    kinds = _breaks(8)
+    for i, planned in enumerate(kinds):
+        assert planned == radio_content.plan_break(STATION, "x", "country", "seed", i)
     # pattern: host, id, host, ad_id, repeated
-    assert kinds[0][0].startswith("host_")
-    assert kinds[1][0].startswith("id_")
-    assert kinds[3][0].startswith("ad_") and kinds[3][1].startswith("id_")
-    assert kinds[4] == kinds[0] or kinds[4][0].startswith("host_")
+    for pos in (0, 2, 4, 6):
+        assert kinds[pos][0].startswith("host_"), pos
+    for pos in (1, 5):
+        assert kinds[pos][0].startswith("id_"), pos
+    for pos in (3, 7):
+        assert kinds[pos][0].startswith("ad_") and kinds[pos][1].startswith("id_"), pos
+
+
+def test_every_pool_entry_is_reachable_across_breaks(monkeypatch):
+    """No segment is stranded: each pool advances on its own count.
+
+    Host slots land twice per four-break cycle, ID slots up to twice (own
+    slot plus the tag chasing an ad), ads once -- so four cycles is enough
+    for the 8/3/4 fixture pools to be heard out in full.
+    """
+    _patched_pools(monkeypatch)
+    planned = _breaks(4 * len(radio_content.BREAK_PATTERN))
+    keys = [key for elems in planned for key in elems]
+    assert len({k for k in keys if k.startswith("host_")}) == HOST_COUNT
+    assert len({k for k in keys if k.startswith("id_")}) == ID_COUNT
+    assert len({k for k in keys if k.startswith("ad_")}) == AD_COUNT
 
 
 def test_break_slots_degrade_when_pools_missing(monkeypatch):
@@ -57,11 +82,25 @@ def test_break_slots_degrade_when_pools_missing(monkeypatch):
     monkeypatch.setattr(radio_content, "AD_SPOTS", ())
     # id and ad slots fall back to a host break; still never empty for a
     # station that has a host
-    for i in range(4):
-        elems = radio_content.plan_break("x", "country", "seed", i)
-        assert elems and elems[0].startswith("host_")
+    planned = _breaks(4 * len(radio_content.BREAK_PATTERN))
+    assert all(len(elems) == 1 and elems[0].startswith("host_") for elems in planned)
+    # a degraded station still cycles its whole host pool
+    assert len({elems[0] for elems in planned}) == HOST_COUNT
     # and a station with no host at all gets no break
-    assert radio_content.plan_break("", "country", "seed", 0) == ()
+    assert radio_content.plan_break(STATION, "", "country", "seed", 0) == ()
+
+
+def test_ids_are_keyed_by_station_not_host(monkeypatch):
+    """Two stations sharing a host still speak their own call signs."""
+    _patched_pools(monkeypatch)
+    other = (MusicTrack("id_other_01", "o1", "", 10.0),)
+    monkeypatch.setattr(
+        radio_content,
+        "STATION_IDS",
+        dict(radio_content.STATION_IDS) | {"brk-other": other},
+    )
+    assert radio_content.plan_break("brk-other", "x", "country", "seed", 1) == ("id_other_01",)
+    assert radio_content.plan_break("nope", "x", "country", "seed", 1)[0].startswith("host_")
 
 
 def _drive_job():
@@ -176,7 +215,10 @@ def test_no_host_station_chains_songs_without_break(break_driving):
 
 def test_station_content_tables_resolve():
     import json
+    from importlib import resources
     from pathlib import Path
+
+    from asset_helpers import asset_exists
 
     from freight_fate import radio_content
     from freight_fate.music import STATION_HOST_SEGMENTS, STATION_PLAYLISTS
@@ -196,3 +238,29 @@ def test_station_content_tables_resolve():
     assert set(radio_content.AD_FORMAT_TAGS) <= {t.key for t in radio_content.AD_SPOTS}
     for tags in radio_content.AD_FORMAT_TAGS.values():
         assert all(tag in STATION_PLAYLISTS for tag in tags)
+
+    # IDs are keyed by catalog station id, and every clip has to be on disk
+    # (or in the shipped pack) or the break plays silence.
+    station_ids = {row["id"] for row in catalog["stations"]}
+    assert set(radio_content.STATION_IDS) <= station_ids
+    sounds = resources.files("freight_fate.assets") / "sounds" / "music"
+    for key in keys:
+        assert asset_exists(sounds, key), key
+
+    # An ad only ever runs with an ID chasing it back into music, so a
+    # station whose playlist has tagged ads needs IDs of its own -- without
+    # them the ad slot silently degrades to a host break and the ad never
+    # plays anywhere.
+    for row in catalog["stations"]:
+        if not row.get("host") or not row.get("playlist"):
+            continue
+        if radio_content.station_ads(row["playlist"]):
+            assert radio_content.STATION_IDS.get(row["id"]), row["id"]
+
+    # Every registered host segment must resolve to its own duration; a pool
+    # listed in STATION_HOST_SEGMENTS but missing from ALL_HOST_SEGMENTS
+    # would fall through to the 60-second unknown-key guess, which the
+    # playback loop hears as dead air.
+    for pool in STATION_HOST_SEGMENTS.values():
+        for segment in pool:
+            assert radio_content.content_duration_s(segment.key) == segment.duration_s, segment.key

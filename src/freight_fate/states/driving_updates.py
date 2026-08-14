@@ -1995,6 +1995,7 @@ class DrivingUpdateMixin:
         self._radio_tracks_since_break += 1
         if self._radio_tracks_since_break >= RADIO_TRACKS_PER_HOST_BREAK:
             queue = plan_break(
+                station.id,
                 station.host,
                 station.playlist,
                 f"{self.trip_seed}|{station.id}",
