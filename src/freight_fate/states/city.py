@@ -268,11 +268,11 @@ class CityMenuState(MenuState):
                 "choice from the board opens with seniority.",
             ),
             MenuItem(
-                "Drive to city services",
-                self._city_services,
-                help="Drive through the local service area to the garage, "
-                "truck dealer, or freight market office. Stop at the "
-                "destination, then press Enter to go inside.",
+                "Truck dealer",
+                self._truck_dealer,
+                help="Browse tractors at the local dealer. Owner-operators buy "
+                "and switch here; company drivers can look at what the fleet "
+                "may assign next.",
             ),
             MenuItem(
                 "Bobtail to a nearby city",
@@ -425,8 +425,8 @@ class CityMenuState(MenuState):
     def _career_plan(self) -> None:
         self.ctx.say(career_objective(self.ctx.profile).spoken_summary, interrupt=True)
 
-    def _city_services(self) -> None:
-        self.ctx.push_state(CityServiceSelectState(self.ctx))
+    def _truck_dealer(self) -> None:
+        self.ctx.push_state(TruckShopState(self.ctx))
 
     def _job_board(self) -> None:
         open_freight_market(self.ctx)

@@ -341,13 +341,19 @@ class TruckShopState(MenuState):
     intro_help = (
         "Owner-operators can buy tractors or switch among tractors "
         "they own. Your fleet upgrades apply to whichever tractor you "
-        "drive. Company drivers use carrier-assigned equipment. "
-        "Escape returns to the garage."
+        "drive. Company drivers use carrier-assigned equipment."
     )
 
     def announce_entry(self) -> None:
         p = self.ctx.profile
-        self.ctx.say(f"Trucks. You have {p.money:,.0f} dollars. {self.current_text()}")
+        dealer = ""
+        try:
+            service = self.ctx.world.city_service(p.current_city, "truck_dealer")
+            if not service.fallback:
+                dealer = f"Inside {service.name}. "
+        except KeyError:
+            pass
+        self.ctx.say(f"{dealer}Trucks. You have {p.money:,.0f} dollars. {self.current_text()}")
 
     def build_items(self) -> list[MenuItem]:
         if not is_owner_operator(self.ctx.profile.business_status):
