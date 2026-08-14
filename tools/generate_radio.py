@@ -421,7 +421,26 @@ def _write_asset(sample, rate: int, relpath: str) -> None:
 
     out = ASSETS / relpath
     out.parent.mkdir(parents=True, exist_ok=True)
-    sf.write(str(out), sample.astype("float32"), rate, format="OGG", subtype="VORBIS")
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        tmp_path = tmp.name
+    try:
+        sf.write(tmp_path, sample.astype("float32"), rate, format="WAV")
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-loglevel",
+                "error",
+                "-i",
+                tmp_path,
+                "-c:a",
+                "libvorbis",
+                str(out),
+            ],
+            check=True,
+        )
+    finally:
+        os.unlink(tmp_path)
     print(f"    wrote {out} ({out.stat().st_size:,} bytes)", flush=True)
 
 
