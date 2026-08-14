@@ -73,6 +73,20 @@ def test_station_casting_is_one_to_one():
         assert plan.voice not in plan.voice_fallbacks, key
         # A fallback firing must not collapse two stations onto one voice.
         assert not set(plan.voice_fallbacks) & set(voices), key
+    # Nor may two stations share a fallback: if a shared name fired for
+    # both, the dial would carry one voice under two call signs.
+    fallbacks = [name for plan in STATIONS.values() for name in plan.voice_fallbacks]
+    assert len(fallbacks) == len(set(fallbacks))
+
+
+def test_ad_voices_never_collide_with_station_casting():
+    # A station host must never be heard reading a commercial, even
+    # after a casting fallback fires.
+    primaries = {plan.voice for plan in STATIONS.values()}
+    fallbacks = {name for plan in STATIONS.values() for name in plan.voice_fallbacks}
+    for ad in AD_PLAN:
+        assert ad.voice not in primaries, (ad.key, ad.voice)
+        assert ad.voice not in fallbacks, (ad.key, ad.voice)
 
 
 def test_host_sets_name_the_station_and_stay_in_register():
@@ -108,9 +122,16 @@ def test_ad_pool_is_modern_and_tagged():
         assert ad.key.startswith("ad_"), ad.key
         assert ad.voice, ad.key
         assert ad.business, ad.key
+        # 20-30 second reads: enough words for a real spot, not a promo tag.
+        assert 55 <= len(ad.script.split()) <= 80, (ad.key, len(ad.script.split()))
         lowered = ad.script.lower()
         for banned in BANNED_SPOKEN:
             assert banned not in lowered, (ad.key, banned)
+    # Every ad-drawing pool needs enough spots that its stations don't
+    # alternate the same two reads forever.
+    for pool in AD_POOLS:
+        tagged = sum(pool in ad.formats for ad in AD_PLAN)
+        assert tagged >= 5, (pool, tagged)
 
 
 def test_song_plan_matches_batch_size():

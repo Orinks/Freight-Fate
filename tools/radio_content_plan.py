@@ -10,8 +10,11 @@ Conventions (the asset contract):
   field will carry. Host clips become ``host_<key>_NN.ogg``, produced
   jingles ``id_<key>_01/02``, and the spoken legal ID ``id_<key>_03``.
 - Voice names are ElevenLabs premade/library display names. Casting is
-  one to one: no two stations share a primary voice, and no fallback is
-  another station's primary, so a fallback firing never merges two hosts.
+  one to one: no two stations share a primary voice, no fallback is
+  another station's primary, and no fallback name appears in two
+  stations' lists, so any fallback firing still never merges two hosts.
+  Ad voices are disjoint from ALL station casting (primary and
+  fallback): a station host never reads a commercial on the dial.
 - Ad keys are ``ad_<slug>``; ``formats`` lists the STATION_PLAYLISTS pools
   the spot may air on (never "route": the Roadhouse draws no ads).
 - Song keys follow the shipped catalog: ``radio_<pool>_<slug>``, with the
@@ -43,15 +46,12 @@ class StationPlan:
     jingle_prompts: tuple[tuple[str, str], ...]  # (asset_key, Eleven Music prompt)
 
 
-# The ad rotation and song batches live in radio_content_pools.py (split
-# to honor the 1000-line file cap); this module stays the import surface.
+# The ad rotation and song batches live in radio_content_ads.py and
+# radio_content_pools.py (split to honor the 1000-line file cap); this
+# module stays the import surface.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from radio_content_pools import (  # noqa: E402
-    AD_PLAN,
-    SONG_PLAN,
-    AdPlan,
-    SongPlan,
-)
+from radio_content_ads import AD_PLAN, AdPlan  # noqa: E402
+from radio_content_pools import SONG_PLAN, SongPlan  # noqa: E402
 
 __all__ = [
     "AD_PLAN",
@@ -69,7 +69,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="route_playlist",
         name="Freight Fate Roadhouse",
         voice="Clyde",
-        voice_fallbacks=("Brian", "George"),
+        voice_fallbacks=("Brian", "Drew"),
         persona="Warm gravelly daytime trucker DJ, big grin, coast-to-coast friend",
         playlist="route",
         host_lines=(
@@ -154,7 +154,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="krwl-dallas",
         name="The Rawhide 98.1",
         voice="Josh",
-        voice_fallbacks=("Ethan", "Daniel"),
+        voice_fallbacks=("Ethan", "Ryan"),
         persona="Big Texas swagger, young gun country DJ, boots-and-chrome bravado",
         playlist="country",
         host_lines=(
@@ -163,8 +163,10 @@ STATIONS: dict[str, StationPlan] = {
             "That's how we do it on The Rawhide. Boots dusty, chrome shiny, radio loud.",
             "If your trailer's heavy and your coffee's light, we'll even out "
             "the difference right here.",
-            "Rawhide radio, where every song's got dirt on its boots and diesel in its veins.",
-            "From the stockyards to the state line, this is Dallas country done right.",
+            "This one goes out to the flatbed crowd tarping in the wind. "
+            "The Rawhide's buying the next three minutes.",
+            "A reefer driver called from the fuel island asking for more "
+            "fiddle. Say less, partner.",
             "Turn it up, cowboy. There ain't a mile between here and the "
             "horizon this station can't shorten.",
             "The Rawhide 98.1, kicking dust on the competition. More country coming at you.",
@@ -201,7 +203,8 @@ STATIONS: dict[str, StationPlan] = {
             "You keep those eighteen wheels turning, sugar, and I'll keep "
             "the fiddle and steel coming.",
             "Music City's got a soft spot for drivers, and so do I. Stay with us.",
-            "From the honky-tonks to the highway, Big Wheel Country has the long haul covered.",
+            "It's supper time somewhere on your route, darlin'. Here's one "
+            "to go with whatever the special is.",
             "Somebody in Nashville wrote a song about a night just like this "
             "one. Let's go find it.",
             "You haul the freight, honey. We'll haul the feelings.",
@@ -227,7 +230,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="kpln-kansas-city",
         name="Prairie Line 95.7",
         voice="Paul",
-        voice_fallbacks=("Daniel", "Brian"),
+        voice_fallbacks=("Daniel", "Dave"),
         persona="Steady heartland anchor, plainspoken, dry warmth, no rush",
         playlist="country",
         host_lines=(
@@ -237,7 +240,8 @@ STATIONS: dict[str, StationPlan] = {
             "songs go all the way out to meet it.",
             "Wheat on one side, beans on the other, and blacktop straight "
             "up the middle. Perfect radio country.",
-            "From the river bottoms to the high plains, the Prairie Line rides along.",
+            "This next singer grew up two gravel roads off the state "
+            "highway, and you can hear it in every note.",
             "Steady hands, steady miles. We'll handle the soundtrack.",
             "There's no prettier sight than an open lane and a full tank. Here's a song for both.",
             "Kansas City barbecue and country gold, friend. One of those we "
@@ -264,7 +268,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="kbsk-billings",
         name="Big Sky Country 99.3",
         voice="Thomas",
-        voice_fallbacks=("James", "George"),
+        voice_fallbacks=("James", "Fin"),
         persona="Calm weathered mountain-west voice, unhurried, quietly proud",
         playlist="country",
         host_lines=(
@@ -274,7 +278,8 @@ STATIONS: dict[str, StationPlan] = {
             "are small, and the songs mean it.",
             "Watch your grades and your gauges through the high country, "
             "driver. We'll be here the whole way down.",
-            "From the river valley to the pass and back, Big Sky Country rides with the freight.",
+            "Here's one for the driver chaining up alone at the top of the "
+            "pass. Big Sky Country salutes you.",
             "Some stretches out here go an hour between mailboxes. That's "
             "not lonely, that's elbow room.",
             "Give the air horn a pull for the kids at the fence line. That never gets old.",
@@ -308,7 +313,8 @@ STATIONS: dict[str, StationPlan] = {
             "The Grind, ninety-seven nine, Chicago. Rock and roll for people who actually work.",
             "You're on The Grind. The shift's long and the riffs are longer.",
             "Steel, freight, and guitars. That's the whole format, and it ain't broke.",
-            "From the rail yards to the expressway, The Grind keeps the hammer down.",
+            "Third shift, first shift, whatever shift this is for you, The "
+            "Grind clocks in when you do.",
             "This town was built by people hauling heavy things. Here's your theme music.",
             "Coffee black, amps up. Back to work.",
             "Somebody's got to move eighty thousand pounds through this "
@@ -344,10 +350,12 @@ STATIONS: dict[str, StationPlan] = {
             "and the solos stretch for miles.",
             "Saguaro on the shoulder, semis in the mirror, and a riff that "
             "won't quit. That's the Valley.",
-            "Desert Rock radio. We turn it up when the road goes straight.",
+            "This next band cut everything live with the studio doors "
+            "open. You can hear the desert leaking in.",
             "Mind the long grades and the runaway ramps out there, friend. The music will keep.",
             "Every mile of this state sounds better with drums behind it.",
-            "From the Valley floor to the high passes, we've got rock stacked like switchbacks.",
+            "A driver called from a gravel turnout outside Tucson and "
+            "asked us to play it louder. Done and done.",
             "Stay sharp, stay loud. Desert Rock's got the rest.",
         ),
         id_lines=("K-D-R-Z, Desert Rock 101.5, Phoenix.",),
@@ -377,7 +385,8 @@ STATIONS: dict[str, StationPlan] = {
             "Chrome, one oh six three, Los Angeles. Polished loud and driven hard.",
             "This is Chrome. If it's got wheels and a heartbeat, we've got its soundtrack.",
             "Ten lanes wide and every one of them listening. Stay in yours, though.",
-            "Chrome radio, wall to wall guitars from the port to the pass.",
+            "This one's for the night crew at the produce docks. Chrome "
+            "doesn't forget who unloads this town.",
             "Nobody in this town eats until a truck shows up. Take a bow, driver.",
             "Legends cut these songs a few blocks from where you're rolling right now.",
             "Sunset in the mirrors, drums in the doors. That's the Chrome way.",
@@ -410,8 +419,10 @@ STATIONS: dict[str, StationPlan] = {
             "The Ridge, one oh three seven, Denver. Rock that starts a mile up and climbs.",
             "You're on The Ridge. Big air, big amps, and a grade ahead. "
             "Check your brakes and crank it.",
-            "From the flats to the foothills, this is where the front range turns the volume up.",
-            "The Ridge radio. Thin air, thick guitars.",
+            "The morning push is over and the mountain's all yours, "
+            "driver. Let's go make some altitude.",
+            "Somebody called from the brake-check pullout just to say "
+            "thanks for the drum solo. Anytime, friend.",
             "Take the mountain steady, driver. Gear down early and let the song do the racing.",
             "Every switchback deserves a drum fill. We time them the best we can.",
             "You haul it up, gravity hauls it down, and The Ridge plays through both.",
@@ -437,14 +448,15 @@ STATIONS: dict[str, StationPlan] = {
         station_id="ksnd-seattle",
         name="The Sound 102.1",
         voice="River",
-        voice_fallbacks=("Chris", "Will"),
+        voice_fallbacks=("Aria", "Alice"),
         persona="Laid-back Pacific Northwest voice, wry, unbothered, coffee-warm",
         playlist="classic_rock",
         host_lines=(
             "The Sound, one oh two one, Seattle. Rock that rolled in off the water and never left.",
             "You're tuned to The Sound. Ferries out there, freight out here, guitars everywhere.",
             "Evergreens, espresso, and power chords. We stack them in that order.",
-            "The Sound radio, from the docks to the summit.",
+            "A local band cut this next one in a basement that flooded "
+            "twice. The song survived. It shows.",
             "Somewhere between the port and the pass, this next one's going to land just right.",
             "Keep your following distance friendly out there. There's plenty of song to go around.",
             "This city put a lot of loud, beautiful noise into the world. We're still spending it.",
@@ -477,9 +489,11 @@ STATIONS: dict[str, StationPlan] = {
             "The Delta, ninety-four three, Memphis. Blues thick as river mud and twice as deep.",
             "You're on The Delta, where every twelve bars tells the truth.",
             "This music came up the river on barges and boxcars. Now it rides with you.",
-            "The Delta radio. Slide guitar, slow smoke, and the long way home.",
+            "For the driver counting dock doors in the dark right now, The "
+            "Delta's got your next verse ready.",
             "If the road's wearing on you, friend, let somebody sing about it a while.",
-            "From the riverfront to the state line, the blues rolls with the freight.",
+            "It's past quitting time for everybody but us, friend. Good. "
+            "The blues sounds better on overtime.",
             "Every mile you pull is a verse, driver. We just supply the chorus.",
             "Stay low, stay steady. The Delta's got you clear through the dark.",
         ),
@@ -503,14 +517,15 @@ STATIONS: dict[str, StationPlan] = {
         station_id="wbyu-new-orleans",
         name="Bayou Soul 100.9",
         voice="Jessie",
-        voice_fallbacks=("Harry", "Sam"),
+        voice_fallbacks=("Charlie", "Glinda"),
         persona="Raspy New Orleans charmer, simmering and playful, calls everyone cher",
         playlist="blues",
         host_lines=(
             "Bayou Soul, one hundred point nine, New Orleans. Simmered slow and served warm.",
             "You found Bayou Soul, cher. Horns, gravy, and groove, all night long.",
             "This here music's got roux in it. Don't rush it and don't skim it.",
-            "Bayou Soul radio, from the river bend to wherever that big wheel takes you.",
+            "This next horn line simmered about forty years before "
+            "anybody wrote it down. Taste and see.",
             "Mind them causeways and keep her easy, cher. The band will wait on you.",
             "The trumpet says what words can't. We let it talk plenty.",
             "Somewhere down the road there's a plate with your name on it. "
@@ -537,14 +552,16 @@ STATIONS: dict[str, StationPlan] = {
         station_id="wsol-atlanta",
         name="Southern Soul 96.5",
         voice="Rachel",
-        voice_fallbacks=("Lily", "Emily"),
+        voice_fallbacks=("Lily", "Laura"),
         persona="Warm Atlanta soul queen, honeyed and maternal, easy laugh",
         playlist="blues",
         host_lines=(
             "Southern Soul, ninety-six five, Atlanta. Sweet tea for your ears, sugar.",
             "This is Southern Soul, where the horns are warm and the welcome's warmer.",
             "You've been carrying that load all day, baby. Let the music carry you a while.",
-            "Southern Soul radio, from the perimeter to the pines.",
+            "A driver called from a rest area and said this station "
+            "sounds like her grandmother's kitchen. Sugar, that's the "
+            "whole idea.",
             "Every one of these songs was somebody's whole heart. We handle them gently.",
             "Atlanta traffic will test your patience, honey. Breathe easy, "
             "we've got groove for the slow lanes too.",
@@ -571,7 +588,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="wnah-nashville",
         name="Nashville After Hours 92.9",
         voice="Michael",
-        voice_fallbacks=("James", "Joseph"),
+        voice_fallbacks=("Valentino", "Archer"),
         persona="Cool late-night jazz voice, dry wit, never above a murmur",
         playlist="jazz",
         host_lines=(
@@ -579,7 +596,7 @@ STATIONS: dict[str, StationPlan] = {
             "This is Nashville After Hours. When the honky-tonks empty "
             "out, the real players stay and play.",
             "Brushed drums, upright bass, and a town that finally stopped talking. Perfect.",
-            "Nashville After Hours radio. Cool records for the quiet end of the day.",
+            "Half past late, friend. From here on the coffee's optional. The music isn't.",
             "Somewhere a session man is still holding one last chord. We found the tape.",
             "Ease off the throttle a notch, friend. This next one deserves the scenic tempo.",
             "Late shift on the dial. Nashville After Hours keeps it smooth clear through.",
@@ -605,7 +622,7 @@ STATIONS: dict[str, StationPlan] = {
         station_id="kgol-oklahoma-city",
         name="Cruisin' Gold 105.9",
         voice="Eric",
-        voice_fallbacks=("Chris", "Brian"),
+        voice_fallbacks=("Roger", "Mimi"),
         persona="Bright AM-gold showman, fast patter, grin you can hear",
         playlist="oldies",
         host_lines=(
@@ -614,10 +631,12 @@ STATIONS: dict[str, StationPlan] = {
             "Hey hey, you're rolling with Cruisin' Gold, where every "
             "record's a keeper and every mile's a memory.",
             "Whitewalls, jukeboxes, and chrome for days. Climb aboard, "
-            "good buddy, the oldies are rolling.",
-            "Cruisin' Gold radio! Songs your steering wheel already knows by heart.",
+            "good neighbor, the oldies are rolling.",
+            "Here's to the driver who just let that little four-wheeler "
+            "merge like a perfect gentleman. Cruisin' Gold saw that.",
             "That big rig of yours has a dance partner, friend. It's called the radio.",
-            "From the stockyards to the suburbs, the gold keeps spinning.",
+            "We got a request for the one that goes doo-wop, doo-wop. "
+            "Narrowed it down to forty records. Playing them all.",
             "Don't touch that dial, it's a classic too. More greats on the way.",
             "Cruisin' Gold, Oklahoma City, where the hits ride shotgun.",
         ),
@@ -641,14 +660,15 @@ STATIONS: dict[str, StationPlan] = {
         station_id="wglr-birmingham",
         name="Glory Road 91.5",
         voice="Adam",
-        voice_fallbacks=("George", "Daniel"),
+        voice_fallbacks=("Mark", "Dorothy"),
         persona="Warm Birmingham preacher cadence, uplifting Sunday-morning glow",
         playlist="gospel",
         host_lines=(
             "Glory Road, ninety-one five, Birmingham. Lifting spirits and lightening loads.",
             "This is Glory Road radio, friend. Whatever you're hauling, you don't haul it alone.",
             "A little singing helps the miles pass and the heart mend. We keep both coming.",
-            "Glory Road 91.5, from the church house to the truck stop, everybody's welcome here.",
+            "This one goes out to the choir of one singing behind a "
+            "windshield somewhere eastbound. Glory Road hears you.",
             "Grace rides in the passenger seat, driver. The music just reminds you.",
             "Tired hands, take heart. There's a song up next that knows your name.",
             "Every sunrise is a fresh start and a full tank. Let's roll on gratitude today.",
@@ -673,8 +693,8 @@ STATIONS: dict[str, StationPlan] = {
     "purotejano": StationPlan(
         station_id="ktjo-san-antonio",
         name="Puro Tejano 107.1",
-        voice="Antoni",
-        voice_fallbacks=("Giovanni", "Mimi"),
+        voice="Mateo",
+        voice_fallbacks=("Antoni", "Giovanni"),
         persona=(
             "Bilingual San Antonio firecracker: Spanish colour with enough "
             "English that every sentence lands for an English-only listener"
@@ -685,12 +705,13 @@ STATIONS: dict[str, StationPlan] = {
             "Ajúa! You're riding with Puro Tejano, where the accordion never takes a day off.",
             "Órale, driver, that eighteen-wheeler of yours has got rhythm. "
             "Let the cumbia prove it.",
-            "Puro Tejano radio, de San Antonio para todo el camino, from "
-            "San Antonio for the whole road ahead.",
+            "Ya mero es hora de cenar, almost supper time somewhere down "
+            "the road. Puro Tejano rides with you till the next good plate.",
             "Mi gente, keep those wheels rolling easy. The conjunto will "
             "carry you all the way to the dock.",
             "This next one is pura medicina, pure medicine for a long shift. Súbele, turn it up!",
-            "From the missions to the mile markers, Tejano country is wherever you're driving.",
+            "A driver called in from Laredo just to say súbele. You heard "
+            "him. We're turning it up.",
             "Gracias for riding with us, amigo. Puro Tejano, siempre contigo, always with you.",
         ),
         id_lines=("K-T-J-O, Puro Tejano 107.1, San Antonio.",),
@@ -713,14 +734,15 @@ STATIONS: dict[str, StationPlan] = {
         station_id="kndr-las-vegas",
         name="Neon Drive 88.5",
         voice="Nicole",
-        voice_fallbacks=("Charlotte", "Freya"),
+        voice_fallbacks=("Freya", "Elli"),
         persona="Hushed close-mic night voice, cool and dreamlike, barely above the synths",
         playlist="synthwave",
         host_lines=(
             "Neon Drive, eighty-eight five, Las Vegas. Synthesizers on, city lights low.",
             "This is Neon Drive. Close your door, roll the volume up soft, and glide.",
             "The desert at night is one long runway, driver. Consider this your approach lighting.",
-            "Neon Drive radio. Analog warmth for a digital night.",
+            "This next track was built from one tape loop and a lot of "
+            "patience. Let it wash over the lane lines.",
             "Every arpeggio out here is a mile marker. Count them slow.",
             "The strip glows behind you and the dark opens ahead. We score both sides.",
             "Ease into the lane and let it breathe. The bass line knows the way.",
