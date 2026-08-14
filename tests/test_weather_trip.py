@@ -1325,6 +1325,9 @@ def test_npc_traffic_cue_and_status_are_reviewable(world):
 
 
 def test_metric_toggle_updates_npc_traffic_cue_units(world):
+    """The merging cue carries no speed clause, so this only has distance to
+    convert; the speed-unit conversion is covered separately below by a
+    brake-lights cue, which still carries one."""
     trip, truck = make_trip(world)
     truck.velocity_mps = 29.0
     trip.position_mi = 10.0
@@ -1343,6 +1346,27 @@ def test_metric_toggle_updates_npc_traffic_cue_units(world):
         and event.data.get("npc_vehicle") is trip.npc_vehicles[0]
     )
     assert "1.3 kilometers ahead" in npc_cue.message
+    assert "miles" not in npc_cue.message
+
+
+def test_metric_toggle_updates_npc_traffic_cue_speed_units(world):
+    trip, truck = make_trip(world)
+    truck.velocity_mps = 29.0
+    trip.position_mi = 10.0
+    trip.imperial = False
+    trip.traffic_manager.rolling_bubble = False
+    trip.traffic_manager.vehicles = [
+        NPCVehicle("npc:metric-brake", 10.8, 42.0, 42.0, 0, "braking_traffic")
+    ]
+
+    events = trip.update(0.0)
+
+    npc_cue = next(
+        event
+        for event in events
+        if event.kind == TripEventKind.GPS_CUE
+        and event.data.get("npc_vehicle") is trip.npc_vehicles[0]
+    )
     assert "68 kilometers per hour" in npc_cue.message
     assert "miles" not in npc_cue.message
 

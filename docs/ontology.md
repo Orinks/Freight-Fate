@@ -464,10 +464,15 @@ frame never shuffles, so no terse line may reorder its slots:
 
 | Frame | Slots | Example |
 | --- | --- | --- |
-| Hazard-family cue | thing, distance, target speed | "Brake lights, 2.1 miles, 38." |
+| Hazard-family cue (brake lights, slow traffic) | thing, distance, target speed | "Brake lights, 2.1 miles, 38." |
+| Merging traffic cue | thing, distance | "Merging box truck, 0.4 miles." |
 | Stop callout | name, exit, distance, qualifier | "Flying J Travel Center Corfu, exit 48A, 5 miles. Parking confirmed." |
 | Money consequence | what, amount, who pays | "Toll, 15 dollars, carrier." |
 | Speed limit | "Limit", the number | "Limit 65." |
+
+A merging vehicle carries no target speed: it merges behind or passes on
+its own, and naming a speed to "be ready for" read as an instruction to
+slow down that the situation never asked for.
 
 **The dodgeable hazard call is "Brake or change lanes!" in every mode.** The
 same phrase the help teaches, kept in full in terse because it carries what

@@ -89,10 +89,6 @@ def test_hazard_family_cues_speak_thing_distance_target_speed() -> None:
         == "Brake lights, 2.1 miles, 38."
     )
     assert (
-        merging_traffic_cue("box truck", "0.4 miles", "45 miles per hour", "45").terse
-        == "Merging box truck, 0.4 miles, 45."
-    )
-    assert (
         slow_lead_cue("car", "1.2 miles", "40 miles per hour", "40").terse
         == "Slow car, 1.2 miles, 40."
     )
@@ -104,14 +100,20 @@ def test_hazard_family_cues_keep_their_normal_coaching() -> None:
         == "Brake lights 2.1 miles ahead. Ease down and leave room for 38 miles per hour."
     )
     assert (
-        merging_traffic_cue("box truck", "0.4 miles", "45 miles per hour", "45").normal
-        == "Merging box truck 0.4 miles ahead. Hold your lane, leave a gap, "
-        "and be ready for 45 miles per hour."
-    )
-    assert (
         slow_lead_cue("car", "1.2 miles", "40 miles per hour", "40").normal
         == "Slow car 1.2 miles ahead. Be ready near 40 miles per hour."
     )
+
+
+def test_merging_cue_drops_the_speed_advisory() -> None:
+    """A merging vehicle merges behind or passes on its own -- no target
+    speed for the truck to be ready for, so the frame is [thing, distance]
+    rather than the full hazard-family [thing, distance, target speed]."""
+    pair = merging_traffic_cue("box truck", "0.4 miles")
+    assert pair.terse == "Merging box truck, 0.4 miles."
+    assert pair.normal == "Merging box truck 0.4 miles ahead. Hold your lane and leave a gap."
+    assert "be ready for" not in pair.normal
+    assert "be ready for" not in pair.terse
 
 
 def test_stop_callout_speaks_name_exit_distance_qualifier() -> None:

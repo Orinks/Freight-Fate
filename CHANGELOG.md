@@ -243,6 +243,12 @@
   radio status key and the Tab radio screen explain the silence the
   same way.
 
+- **Merging traffic is now announced without a speed to slow to.** A
+  vehicle merging into your lane merges behind you or passes on its own,
+  so the call is now "Hold your lane and leave a gap" -- no target speed
+  attached. Brake lights and slow traffic ahead still tell you the speed
+  to be ready for, because those do ask you to change yours.
+
 ### Added
 
 - **Game sound can step back while the road talks.** A new option drops

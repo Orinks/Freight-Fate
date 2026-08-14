@@ -146,15 +146,18 @@ def hazard_call(call: str, body: str) -> SpokenMessage:
 # Terse slot grammar for hazard-family cues: [thing, distance, target speed].
 # The trailing bare number is only parseable because the frame never
 # shuffles; see the terse grammar table in docs/ontology.md.
+#
+# merging_traffic_cue is the one exception, at [thing, distance] -- a
+# merging vehicle merges behind or passes on its own; the truck never has to
+# change speed for it, so there is no target speed to append. Naming one in
+# the old line ("be ready for 41 miles per hour") read as an instruction to
+# slow down that nothing in the situation asked for.
 
 
-def merging_traffic_cue(
-    vehicle_class: str, gap: str, speed_text: str, speed_value: str
-) -> SpokenMessage:
+def merging_traffic_cue(vehicle_class: str, gap: str) -> SpokenMessage:
     return SpokenMessage(
-        f"Merging {vehicle_class} {gap} ahead. Hold your lane, "
-        f"leave a gap, and be ready for {speed_text}.",
-        f"Merging {vehicle_class}, {gap}, {speed_value}.",
+        f"Merging {vehicle_class} {gap} ahead. Hold your lane and leave a gap.",
+        f"Merging {vehicle_class}, {gap}.",
     )
 
 

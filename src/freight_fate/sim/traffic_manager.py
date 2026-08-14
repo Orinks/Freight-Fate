@@ -612,7 +612,7 @@ class TrafficManager:
         intent = self._vehicle_intent(vehicle)
         vehicle_class = self._vehicle_class(vehicle)
         if intent == "merging":
-            message = merging_traffic_cue(vehicle_class, gap, speed, bare)
+            message = merging_traffic_cue(vehicle_class, gap)
             kind = "merging"
         elif intent == "braking":
             message = brake_lights_cue(gap, speed, bare)
